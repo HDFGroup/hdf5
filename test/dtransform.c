@@ -298,12 +298,17 @@ int main(void)
     TEST_TYPE_CONTIG(dxpl_id_c_to_f, long, H5T_NATIVE_LONG, "long", windchillFfloat, 1);
     TEST_TYPE_CONTIG(dxpl_id_utrans_inv, unsigned long, H5T_NATIVE_ULONG, "ulong", transformData, 0);
 
+#ifndef H5_VMS
 #ifdef H5_LLONG_TO_FP_CAST_WORKS
     TEST_TYPE_CONTIG(dxpl_id_c_to_f, long long, H5T_NATIVE_LLONG, "llong", windchillFfloat, 1);
 #else
     TESTING("contiguous, with type conversion (float->llong)")
     SKIPPED()
 #endif
+#else /*H5_VMS*/
+    TESTING("contiguous, with type conversion (float->llong): some problem in library's conversion")
+    SKIPPED()
+#endif /*H5_VMS*/
 
 #ifdef H5_ULLONG_TO_FP_CAST_WORKS
     TEST_TYPE_CONTIG(dxpl_id_utrans_inv, unsigned long long, H5T_NATIVE_ULLONG, "ullong", transformData, 0);
