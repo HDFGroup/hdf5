@@ -259,6 +259,7 @@ H5_DLL herr_t H5VL_iod_request_wait_all(H5VL_iod_file_t *file);
 H5_DLL herr_t H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object);
 H5_DLL herr_t H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req);
 H5_DLL herr_t H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req);
+H5_DLL herr_t H5VL_iod_request_decr_rc(H5VL_iod_request_t *request);
 
 H5_DLL herr_t H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
                                        const char *name, /*OUT*/iod_obj_id_t *iod_id, 
@@ -272,17 +273,6 @@ H5_DLL herr_t H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
                                            H5VL_iod_object_t *request_obj, htri_t track,
                                            size_t num_parents, H5VL_iod_request_t **parent_reqs,
                                            void *input, void *output, void *data, void **req);
-/* 
-H5_DLL herr_t H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type, 
-                                           H5VL_iod_object_t *request_obj, htri_t track,
-                                           void *input, void *output, void *data, void **req);
-H5_DLL herr_t H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
-                                       const char *name, iod_obj_id_t *iod_id, iod_handle_t *iod_oh, 
-                                       uint64_t *axe_id, char **new_name, 
-                                       H5VL_iod_object_t **last_obj);
-H5_DLL herr_t H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, size_t *count, 
-                                       uint64_t *parents);
-*/
 
 H5_DLL herr_t H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index, 
                                   iod_obj_type_t type, uint64_t *id);

@@ -60,6 +60,21 @@ static herr_t H5VL__iod_pre_write_cb(void UNUSED *elem, hid_t type_id, unsigned 
 static herr_t H5VL__iod_vl_read_finalize(size_t buf_size, void *read_buf, void *user_buf, 
                                          H5S_t *mem_space, hid_t mem_type_id, hid_t dset_type_id);
 
+herr_t 
+H5VL_iod_request_decr_rc(H5VL_iod_request_t *request)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    request->rc --;
+
+    if(0 == request->rc) {
+        request->parent_reqs = (H5VL_iod_request_t **)H5MM_xfree(request->parent_reqs);
+        request = (H5VL_iod_request_t *)H5MM_xfree(request);
+    }
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_iod_request_add
@@ -119,13 +134,8 @@ H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 
     /* decrement ref count on parent requests */
     for(u=0 ; u<request->num_parents ; u++) {
-        request->parent_reqs[u]->rc --;
-        if(0 == request->parent_reqs[u]->rc) {
-            request->parent_reqs[u]->parent_reqs = (H5VL_iod_request_t **)
-                H5MM_xfree(request->parent_reqs[u]->parent_reqs);
-            request->parent_reqs[u] = (H5VL_iod_request_t *)
-                H5MM_xfree(request->parent_reqs[u]);
-        }
+        /* Decrement ref count on request */
+        H5VL_iod_request_decr_rc(request->parent_reqs[u]);
     }
 
     prev = request->prev;

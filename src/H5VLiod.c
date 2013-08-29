@@ -363,12 +363,7 @@ H5VL__iod_request_remove_from_axe_list(H5VL_iod_request_t *request)
     request->global_prev = NULL;
     request->global_next = NULL;
 
-    request->rc --;
-
-    if(0 == request->rc) {
-        request->parent_reqs = (H5VL_iod_request_t **)H5MM_xfree(request->parent_reqs);
-        request = (H5VL_iod_request_t *)H5MM_xfree(request);
-    }
+    H5VL_iod_request_decr_rc(request);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__iod_request_remove_from_axe_list() */
@@ -513,7 +508,7 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
         if(H5VL_iod_request_wait(request_obj->file, request) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't wait on HG request");
 
-        request->rc --;
+        H5VL_iod_request_decr_rc(request);
 
         request->req = H5MM_xfree(request->req);
         HDassert(1 == request->rc);
@@ -6213,19 +6208,13 @@ H5VL_iod_cancel(void **req, H5_status_t *status)
         if(H5VL_iod_request_complete(request->obj->file, request) < 0)
             fprintf(stderr, "Operation Failed!\n");
 
-        /* decrement the ref count on the actual request */
-        request->rc --;
-
         *status = request->status;
 
         /* free the mercury request */
         request->req = H5MM_xfree(request->req);
 
-        /* free the actual request if the ref count reached 0 */
-        if(0 == request->rc) {
-            request->parent_reqs = (H5VL_iod_request_t **)H5MM_xfree(request->parent_reqs);
-            request = (H5VL_iod_request_t *)H5MM_xfree(request);
-        }
+        /* Decrement ref count on request */
+        H5VL_iod_request_decr_rc(request);
     }
 
     /* forward the cancel call to the IONs */
@@ -6249,19 +6238,13 @@ H5VL_iod_cancel(void **req, H5_status_t *status)
                         HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request");
                 }
 
-                /* decrement the ref count on the actual request */
-                request->rc --;
-
                 *status = request->status;
 
                 /* free the mercury request */
                 request->req = H5MM_xfree(request->req);
 
-                /* free the actual request if the ref count reached 0 */
-                if(0 == request->rc) {
-                    request->parent_reqs = (H5VL_iod_request_t **)H5MM_xfree(request->parent_reqs);
-                    request = (H5VL_iod_request_t *)H5MM_xfree(request);
-                }
+                /* Decrement ref count on request */
+                H5VL_iod_request_decr_rc(request);
             }
 
             /* if the status returned is cancelled, then cancel it
@@ -6272,19 +6255,13 @@ H5VL_iod_cancel(void **req, H5_status_t *status)
                 if(H5VL_iod_request_cancel(request->obj->file, request) < 0)
                     fprintf(stderr, "Operation Failed!\n");
 
-                /* decrement the ref count on the actual request */
-                request->rc --;
-
                 *status = request->status;
 
                 /* free the mercury request */
                 request->req = H5MM_xfree(request->req);
 
-                /* free the actual request if the ref count reached 0 */
-                if(0 == request->rc) {
-                    request->parent_reqs = (H5VL_iod_request_t **)H5MM_xfree(request->parent_reqs);
-                    request = (H5VL_iod_request_t *)H5MM_xfree(request);
-                }
+                /* Decrement ref count on request */
+                H5VL_iod_request_decr_rc(request);
             }
         }
         else
@@ -6327,17 +6304,11 @@ H5VL_iod_test(void **req, H5_status_t *status)
         /* remove the request from the file linked list */
         H5VL_iod_request_delete(request->obj->file, request);
 
-        /* decrement the ref count on the actual request */
-        request->rc --;
-
         /* free the mercury request */
         request->req = H5MM_xfree(request->req);
 
-        /* free the actual request if the ref count reached 0 */
-        if(0 == request->rc) {
-            request->parent_reqs = (H5VL_iod_request_t **)H5MM_xfree(request->parent_reqs);
-            request = (H5VL_iod_request_t *)H5MM_xfree(request);
-        }
+        /* Decrement ref count on request */
+        H5VL_iod_request_decr_rc(request);
     }
     else {
         if(hg_status) {
@@ -6348,19 +6319,13 @@ H5VL_iod_test(void **req, H5_status_t *status)
             if(H5VL_iod_request_complete(request->obj->file, request) < 0)
                 fprintf(stderr, "Operation Failed!\n");
 
-            /* decrement the ref count on the actual request */
-            request->rc --;
-
             *status = request->status;
 
             /* free the mercury request */
             request->req = H5MM_xfree(request->req);
 
-            /* free the actual request if the ref count reached 0 */
-            if(0 == request->rc) {
-                request->parent_reqs = (H5VL_iod_request_t **)H5MM_xfree(request->parent_reqs);
-                request = (H5VL_iod_request_t *)H5MM_xfree(request);
-            }
+            /* Decrement ref count on request */
+            H5VL_iod_request_decr_rc(request);
         }
         /* request has not finished, set return status appropriately */
         else
@@ -6398,19 +6363,13 @@ H5VL_iod_wait(void **req, H5_status_t *status)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
     }
 
-    /* decrement the ref count on the actual request */
-    request->rc --;
-
     *status = request->status;
 
     /* free the mercury request */
     request->req = H5MM_xfree(request->req);
 
-    /* free the actual request if the ref count reached 0 */
-    if(0 == request->rc) {
-        request->parent_reqs = (H5VL_iod_request_t **)H5MM_xfree(request->parent_reqs);
-        request = (H5VL_iod_request_t *)H5MM_xfree(request);
-    }
+    /* Decrement ref count on request */
+    H5VL_iod_request_decr_rc(request);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
