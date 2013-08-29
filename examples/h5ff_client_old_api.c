@@ -235,12 +235,12 @@ int main(int argc, char **argv) {
         char *comment = NULL;
 
         ret_size = H5Oget_comment(gid1, NULL, 0);
-        fprintf(stderr, "size of comment is %d\n", ret_size);
+        fprintf(stderr, "size of comment is %zd\n", ret_size);
 
-        comment = malloc((size_t)ret_size + 1);
+        comment = (char *)malloc(sizeof(char *) * (ret_size + 1));
 
-        H5Oget_comment(gid1, comment, (size_t)ret_size + 1);
-        fprintf(stderr, "size of comment is %d Comment is %s\n", ret_size, comment);
+        ret_size = H5Oget_comment(gid1, comment, (size_t)ret_size + 1);
+        fprintf(stderr, "size of comment is %zd Comment is %s\n", ret_size, comment);
         free(comment);
     }
     int_id = H5Topen2(file_id, "int", H5P_DEFAULT);

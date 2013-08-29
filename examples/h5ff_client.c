@@ -378,6 +378,15 @@ int main(int argc, char **argv) {
     else
         assert(H5AO_SUCCEEDED == status1);
 
+    /* If the read request did no complete earlier when we tested it, Wait on it now.
+       We have to do this since we popped it earlier from the event queue */
+    if(H5AO_PENDING == status1) {
+        assert(H5AOwait(req1, &status1) == 0);
+        assert (status1);
+    }
+    else
+        assert(H5AO_SUCCEEDED == status1);
+
     fprintf(stderr, "\n*****************************************************************************************************************\n");
     fprintf(stderr, "Test Links\n");
     fprintf(stderr, "*****************************************************************************************************************\n");

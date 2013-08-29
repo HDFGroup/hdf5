@@ -197,7 +197,7 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
 
 static herr_t
 H5VL__iod_server_finish_axe_tasks(AXE_engine_t axe_engine, AXE_task_t start_range, 
-                                  uint64_t count)
+                                  size_t count)
 {
     AXE_task_t u;
     herr_t ret_value = SUCCEED;
@@ -591,17 +591,10 @@ H5VL_iod_server_attr_create(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_attr_create_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_attr_create_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_attr_create_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -652,17 +645,10 @@ H5VL_iod_server_attr_open(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_attr_open_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_attr_open_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_attr_open_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -713,17 +699,10 @@ H5VL_iod_server_attr_read(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_attr_read_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_attr_read_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_attr_read_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -774,17 +753,10 @@ H5VL_iod_server_attr_write(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_attr_write_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_attr_write_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_attr_write_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -835,17 +807,10 @@ H5VL_iod_server_attr_exists(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_attr_exists_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_attr_exists_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_attr_exists_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -896,17 +861,10 @@ H5VL_iod_server_attr_rename(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_attr_rename_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_attr_rename_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_attr_rename_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -957,17 +915,10 @@ H5VL_iod_server_attr_remove(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_attr_remove_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_attr_remove_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_attr_remove_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1018,18 +969,10 @@ H5VL_iod_server_attr_close(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_ids.count) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          input->parent_axe_ids.count, input->parent_axe_ids.ids, 
-                                          0, NULL, 
-                                          H5VL_iod_server_attr_close_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_attr_close_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_attr_close_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1079,17 +1022,10 @@ H5VL_iod_server_group_create(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_group_create_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_group_create_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_group_create_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1139,17 +1075,10 @@ H5VL_iod_server_group_open(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_group_open_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_group_open_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_group_open_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1199,19 +1128,10 @@ H5VL_iod_server_group_close(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_ids.count) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          input->parent_axe_ids.count, input->parent_axe_ids.ids, 
-                                          0, NULL, 
-                                          H5VL_iod_server_group_close_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_group_close_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_group_close_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_group_close() */
@@ -1261,17 +1181,10 @@ H5VL_iod_server_dset_create(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_dset_create_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_dset_create_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_dset_create_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1322,17 +1235,10 @@ H5VL_iod_server_dset_open(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_dset_open_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_dset_open_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_dset_open_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1383,17 +1289,10 @@ H5VL_iod_server_dset_read(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_dset_read_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_dset_read_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_dset_read_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1444,17 +1343,10 @@ H5VL_iod_server_dset_get_vl_size(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_dset_get_vl_size_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_dset_get_vl_size_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_dset_get_vl_size_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1505,17 +1397,10 @@ H5VL_iod_server_dset_write(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_dset_write_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_dset_write_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_dset_write_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1566,18 +1451,10 @@ H5VL_iod_server_dset_set_extent(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_ids.count) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          input->parent_axe_ids.count, input->parent_axe_ids.ids, 
-                                          0, NULL, 
-                                          H5VL_iod_server_dset_set_extent_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_dset_set_extent_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_dset_set_extent_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1628,18 +1505,10 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_ids.count) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          input->parent_axe_ids.count, input->parent_axe_ids.ids, 
-                                          0, NULL, 
-                                          H5VL_iod_server_dset_close_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_dset_close_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_dset_close_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1690,17 +1559,10 @@ H5VL_iod_server_dtype_commit(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_dtype_commit_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_dtype_commit_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_dtype_commit_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1751,17 +1613,10 @@ H5VL_iod_server_dtype_open(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_dtype_open_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_dtype_open_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_dtype_open_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1812,17 +1667,10 @@ H5VL_iod_server_dtype_close(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_dtype_close_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_dtype_close_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_dtype_close_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1873,31 +1721,10 @@ H5VL_iod_server_link_create(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id && input->target_parent_axe_id) {
-        AXE_task_t tasks[2] = {input->parent_axe_id, input->target_parent_axe_id};
-
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          2, tasks, 0, NULL, 
-                                          H5VL_iod_server_link_create_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else if(input->parent_axe_id){
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_link_create_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else if(input->target_parent_axe_id){
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->target_parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_link_create_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_link_create_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_link_create_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1948,31 +1775,10 @@ H5VL_iod_server_link_move(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->src_parent_axe_id && input->dst_parent_axe_id) {
-        AXE_task_t tasks[2] = {input->src_parent_axe_id, input->dst_parent_axe_id};
-
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          2, tasks, 0, NULL, 
-                                          H5VL_iod_server_link_move_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else if(input->src_parent_axe_id){
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->src_parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_link_move_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else if(input->dst_parent_axe_id){
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->dst_parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_link_move_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_link_move_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_link_move_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2073,17 +1879,10 @@ H5VL_iod_server_link_exists(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id){
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_link_exists_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_link_exists_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_link_exists_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2134,17 +1933,10 @@ H5VL_iod_server_link_get_info(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id){
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_link_get_info_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_link_get_info_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_link_get_info_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2195,17 +1987,10 @@ H5VL_iod_server_link_get_val(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id){
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_link_get_val_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_link_get_val_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_link_get_val_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2256,17 +2041,10 @@ H5VL_iod_server_link_remove(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id){
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_link_remove_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_link_remove_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_link_remove_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2317,17 +2095,10 @@ H5VL_iod_server_object_open(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id){
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_object_open_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_object_open_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_object_open_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2378,31 +2149,10 @@ H5VL_iod_server_object_copy(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->src_parent_axe_id && input->dst_parent_axe_id) {
-        AXE_task_t tasks[2] = {input->src_parent_axe_id, input->dst_parent_axe_id};
-
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          2, tasks, 0, NULL, 
-                                          H5VL_iod_server_object_copy_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else if(input->src_parent_axe_id){
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->src_parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_object_copy_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else if(input->dst_parent_axe_id){
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->dst_parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_object_copy_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_object_copy_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_object_copy_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2480,17 +2230,10 @@ H5VL_iod_server_object_exists(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id){
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_object_exists_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_object_exists_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_object_exists_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2541,17 +2284,10 @@ H5VL_iod_server_object_set_comment(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id){
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_object_set_comment_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_object_set_comment_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_object_set_comment_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2602,17 +2338,10 @@ H5VL_iod_server_object_get_comment(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id){
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_object_get_comment_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_object_get_comment_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_object_get_comment_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2663,17 +2392,10 @@ H5VL_iod_server_object_get_info(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_object_get_info_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_object_get_info_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_object_get_info_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2723,17 +2445,10 @@ H5VL_iod_server_map_create(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_map_create_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_map_create_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_map_create_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2783,17 +2498,10 @@ H5VL_iod_server_map_open(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_map_open_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_map_open_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_map_open_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2843,17 +2551,10 @@ H5VL_iod_server_map_set(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_map_set_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_map_set_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_map_set_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2903,17 +2604,10 @@ H5VL_iod_server_map_get(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_map_get_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_map_get_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_map_get_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2963,17 +2657,10 @@ H5VL_iod_server_map_get_count(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_map_get_count_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_map_get_count_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_map_get_count_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3023,17 +2710,10 @@ H5VL_iod_server_map_exists(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_map_exists_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_map_exists_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_map_exists_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3083,17 +2763,10 @@ H5VL_iod_server_map_delete(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
-                                          H5VL_iod_server_map_delete_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_map_delete_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_map_delete_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3143,18 +2816,10 @@ H5VL_iod_server_map_close(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_ids.count) {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          input->parent_axe_ids.count, input->parent_axe_ids.ids, 
-                                          0, NULL, 
-                                          H5VL_iod_server_map_close_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
-                                          H5VL_iod_server_map_close_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_map_close_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

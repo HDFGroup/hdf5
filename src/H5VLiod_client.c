@@ -90,6 +90,8 @@ H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
     }
     request->next = NULL;
 
+    file->num_req ++;
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
@@ -109,10 +111,22 @@ H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 {
     H5VL_iod_request_t *prev;
     H5VL_iod_request_t *next;
+    unsigned u;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(request);
+
+    /* decrement ref count on parent requests */
+    for(u=0 ; u<request->num_parents ; u++) {
+        request->parent_reqs[u]->rc --;
+        if(0 == request->parent_reqs[u]->rc) {
+            request->parent_reqs[u]->parent_reqs = (H5VL_iod_request_t **)
+                H5MM_xfree(request->parent_reqs[u]->parent_reqs);
+            request->parent_reqs[u] = (H5VL_iod_request_t *)
+                H5MM_xfree(request->parent_reqs[u]);
+        }
+    }
 
     prev = request->prev;
     next = request->next;
@@ -141,6 +155,8 @@ H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
         request->obj->request = NULL;
     request->prev = NULL;
     request->next = NULL;
+
+    file->num_req --;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
@@ -554,7 +570,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 input.mem_type_id = info->mem_type_id;
                 input.dset_type_id = dset->remote_dset.type_id;
                 input.axe_info.axe_id = info->axe_id;
-                input.parent_axe_id = 0;
+                input.axe_info.num_parents = 0;
+                input.axe_info.parent_axe_ids = NULL;
 
                 input.axe_info.start_range = 0;
                 input.axe_info.count = 0;
@@ -1410,7 +1427,8 @@ done:
  */
 herr_t
 H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, /*IN/OUT*/ size_t *count, 
-                         /*OUT*/ uint64_t *parents)
+                         /*OUT*/ AXE_task_t *parent_axe_ids, 
+                         /*OUT*/ H5VL_iod_request_t **parent_reqs)
 {
     H5VL_iod_file_t *file = obj->file;
     H5VL_iod_request_t *cur_req = file->request_list_head;
@@ -1422,10 +1440,12 @@ H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, /*IN/OUT*/ size_t *count,
         /* If the request is pending on the object we want, add its axe_id */
         if(cur_req->obj == obj) {
             if(cur_req->status == H5AO_PENDING) {
-                if(NULL != parents) {
-                    parents[size] = cur_req->axe_id;
-                    //parents_array[size] = cur_req;
-                    //cur_req->rc ++;
+                if(NULL != parent_axe_ids) {
+                    parent_axe_ids[size] = cur_req->axe_id;
+                }
+                if(NULL != parent_reqs) {
+                    parent_reqs[size] = cur_req;
+                    cur_req->rc ++;
                 }
                 size ++;
             }
@@ -1458,15 +1478,15 @@ H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, /*IN/OUT*/ size_t *count,
 herr_t
 H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
                          const char *name, /*OUT*/iod_obj_id_t *iod_id, 
-                         /*OUT*/iod_handle_t *iod_oh, /*OUT*/uint64_t *axe_id, 
+                         /*OUT*/iod_handle_t *iod_oh, /*OUT*/H5VL_iod_request_t **parent_req, 
                          /*OUT*/char **new_name, /*OUT*/H5VL_iod_object_t **last_obj)
 {
     iod_obj_id_t cur_id;
     iod_handle_t cur_oh;
     size_t cur_size; /* current size of the path traversed so far */
     char *cur_name;  /* full path to object that is currently being looked for */
-    const H5VL_iod_object_t *cur_obj = obj;   /* current object in the traversal loop */
-    const H5VL_iod_object_t *next_obj = NULL; /* the next object to traverse */
+    H5VL_iod_object_t *cur_obj = obj;   /* current object in the traversal loop */
+    H5VL_iod_object_t *next_obj = NULL; /* the next object to traverse */
     const char *path;        /* specified path for the object to traverse to */
     H5WB_t *wb = NULL;       /* Wrapped buffer for temporary buffer */
     char comp_buf[1024];     /* Temporary buffer for path components */
@@ -1533,7 +1553,9 @@ H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params,
                 if(NULL == (next_obj = (const H5VL_iod_object_t *)H5I_search_name
                             (file, cur_name, H5I_DATASET))
                    && NULL == (next_obj = (H5VL_iod_object_t *)H5I_search_name
-                               (file, cur_name, H5I_DATATYPE)))
+                               (file, cur_name, H5I_DATATYPE))
+                   && NULL == (next_obj = (H5VL_iod_object_t *)H5I_search_name
+                               (file, cur_name, H5I_MAP)))
                     break;
             }
             else {
@@ -1569,16 +1591,20 @@ H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params,
             cur_oh = ((const H5VL_iod_dtype_t *)cur_obj)->remote_dtype.iod_oh;
             cur_id = ((const H5VL_iod_dtype_t *)cur_obj)->remote_dtype.iod_id;
             break;
+        case H5I_MAP:
+            cur_oh = ((const H5VL_iod_map_t *)cur_obj)->remote_map.iod_oh;
+            cur_id = ((const H5VL_iod_map_t *)cur_obj)->remote_map.iod_id;
+            break;
         default:
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad location object");
     }
 
     if(cur_obj->request && cur_obj->request->status == H5AO_PENDING) {
-        *axe_id = cur_obj->request->axe_id;
-        //cur_obj->request->rc ++;
+        *parent_req = cur_obj->request;
+        cur_obj->request->rc ++;
     }
     else {
-        *axe_id = 0;
+        *parent_req = NULL;
         HDassert(cur_oh.cookie != IOD_OH_UNDEFINED);
     }
 

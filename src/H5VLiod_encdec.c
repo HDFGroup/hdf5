@@ -58,6 +58,8 @@ int hg_proc_ret_t(hg_proc_t proc, void *data)
 int hg_proc_axe_t(hg_proc_t proc, void *data)
 {
     int ret = HG_SUCCESS;
+    size_t u;
+    hg_proc_op_t op;
     axe_t *struct_data = (axe_t *) data;
 
     ret = hg_proc_uint64_t(proc, &struct_data->axe_id);
@@ -72,11 +74,53 @@ int hg_proc_axe_t(hg_proc_t proc, void *data)
         ret = HG_FAIL;
         return ret;
     }
-    ret = hg_proc_uint64_t(proc, &struct_data->count);
+    ret = hg_proc_size_t(proc, &struct_data->count);
     if (ret != HG_SUCCESS) {
         HG_ERROR_DEFAULT("Proc error");
         ret = HG_FAIL;
         return ret;
+    }
+
+    ret = hg_proc_size_t(proc, &struct_data->num_parents);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    op = hg_proc_get_op(proc);
+
+    switch(op) {
+    case HG_ENCODE:
+        for(u=0 ; u<struct_data->num_parents ; u++) {
+            ret = hg_proc_uint64_t(proc, &struct_data->parent_axe_ids[u]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_DECODE:
+        if(struct_data->num_parents)
+            struct_data->parent_axe_ids = (uint64_t *)malloc (sizeof(hsize_t) * 
+                                                              struct_data->num_parents);
+
+        for(u=0 ; u<struct_data->num_parents ; u++) {
+            ret = hg_proc_uint64_t(proc, &struct_data->parent_axe_ids[u]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_FREE:
+        if(struct_data->num_parents)
+            free(struct_data->parent_axe_ids);
+        break;
+    default:
+        return HG_FAIL;
     }
 
     return ret;
@@ -137,57 +181,6 @@ int hg_proc_iod_obj_id_t(hg_proc_t proc, void *data)
         ret = HG_FAIL;
         return ret;
     }
-    return ret;
-}
-
-int hg_proc_axe_ids_t(hg_proc_t proc, void *data)
-{
-    int ret = HG_SUCCESS;
-    size_t i;
-    hg_proc_op_t op;
-    axe_ids_t *struct_data = (axe_ids_t *) data;
-
-    ret = hg_proc_uint64_t(proc, &struct_data->count);
-    if (ret != HG_SUCCESS) {
-        HG_ERROR_DEFAULT("Proc error");
-        ret = HG_FAIL;
-        return ret;
-    }
-
-    op = hg_proc_get_op(proc);
-
-    switch(op) {
-    case HG_ENCODE:
-        for(i=0 ; i<struct_data->count ; i++) {
-            ret = hg_proc_uint64_t(proc, &struct_data->ids[i]);
-            if (ret != HG_SUCCESS) {
-                HG_ERROR_DEFAULT("Proc error");
-                ret = HG_FAIL;
-                return ret;
-            }
-        }
-        break;
-    case HG_DECODE:
-        if(struct_data->count)
-            struct_data->ids = (uint64_t *)malloc (sizeof(hsize_t) * struct_data->count);
-
-        for(i=0 ; i<struct_data->count ; i++) {
-            ret = hg_proc_uint64_t(proc, &struct_data->ids[i]);
-            if (ret != HG_SUCCESS) {
-                HG_ERROR_DEFAULT("Proc error");
-                ret = HG_FAIL;
-                return ret;
-            }
-        }
-        break;
-    case HG_FREE:
-        if(struct_data->count)
-            free(struct_data->ids);
-        break;
-    default:
-        return HG_FAIL;
-    }
-
     return ret;
 }
 

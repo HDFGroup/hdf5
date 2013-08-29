@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
        LE integers */
     map1 = H5Mcreate_ff(file_id, "MAP_1", H5T_STD_I32LE, H5T_STD_I32LE, 
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, (uint64_t)0, event_q);
-    map2 = H5Mcreate_ff(gid1, "MAP_2", H5T_STD_I32LE, H5T_STD_I32LE, 
+    map2 = H5Mcreate_ff(file_id, "G1/MAP_2", H5T_STD_I32LE, H5T_STD_I32LE, 
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, (uint64_t)0, event_q);
     map3 = H5Mcreate_ff(file_id, "G1/G2/MAP_3", H5T_STD_I32LE, H5T_STD_I32LE, 
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, (uint64_t)0, event_q);
