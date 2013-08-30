@@ -122,7 +122,10 @@ hid_t H5P_CLS_ATTRIBUTE_CREATE_g    = FAIL;
 hid_t H5P_CLS_OBJECT_COPY_g         = FAIL;
 hid_t H5P_CLS_LINK_CREATE_g         = FAIL;
 hid_t H5P_CLS_LINK_ACCESS_g         = FAIL;
-hid_t H5P_CLS_STRING_CREATE_g         = FAIL;
+hid_t H5P_CLS_STRING_CREATE_g       = FAIL;
+hid_t H5P_CLS_READ_CONTEXT_ACQUIRE_g = FAIL;
+hid_t H5P_CLS_TRANSACTION_START_g   = FAIL;
+hid_t H5P_CLS_TRANSACTION_FINISH_g  = FAIL;
 
 /*
  * Predefined property lists for each predefined class. These are initialized
@@ -142,6 +145,9 @@ hid_t H5P_LST_ATTRIBUTE_CREATE_g    = FAIL;
 hid_t H5P_LST_OBJECT_COPY_g         = FAIL;
 hid_t H5P_LST_LINK_CREATE_g         = FAIL;
 hid_t H5P_LST_LINK_ACCESS_g         = FAIL;
+hid_t H5P_LST_READ_CONTEXT_ACQUIRE_g = FAIL;
+hid_t H5P_LST_TRANSACTION_START_g   = FAIL;
+hid_t H5P_LST_TRANSACTION_FINISH_g  = FAIL;
 
 /* Root property list class library initialization object */
 const H5P_libclass_t H5P_CLS_ROOT[1] = {{
@@ -210,6 +216,22 @@ const H5P_libclass_t H5P_CLS_TACC[1] = {{
     NULL 		        /* Class close callback info    */
 }};
 
+/* Transaction finish property list class library initialization object */
+/* (move to proper source code file when used for real) */
+const H5P_libclass_t H5P_CLS_TRFCC[1] = {{
+    "transaction finish",	/* Class name for debugging     */
+    H5P_TYPE_TRANSACTION_FINISH,         /* Class type                   */
+    &H5P_CLS_ROOT_g,            	/* Parent class ID              */
+    &H5P_CLS_TRANSACTION_FINISH_g,	/* Pointer to class ID          */
+    &H5P_LST_TRANSACTION_FINISH_g,	/* Pointer to default property list ID */
+    NULL,			/* Default property registration routine */
+    NULL,		        /* Class creation callback      */
+    NULL,		        /* Class creation callback info */
+    NULL,			/* Class copy callback          */
+    NULL,		        /* Class copy callback info     */
+    NULL,			/* Class close callback         */
+    NULL 		        /* Class close callback info    */
+}};
 
 /* Library property list classes defined in other code modules */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_OCRT[1];         /* Object creation */
@@ -225,7 +247,9 @@ H5_DLLVAR const H5P_libclass_t H5P_CLS_DXFR[1];         /* Data transfer */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FMNT[1];         /* File mount */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_ACRT[1];         /* Attribute creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_LCRT[1];         /* Link creation */
-
+H5_DLLVAR const H5P_libclass_t H5P_CLS_RCACC[1];        /* Read Context acquire */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_TRSCC[1];        /* Transaction start */
+//H5_DLLVAR const H5P_libclass_t H5P_CLS_TRFCC[1];        /* Transaction finish */
 
 /*****************************/
 /* Library Private Variables */
@@ -261,6 +285,9 @@ static H5P_libclass_t const * const init_class[] = {
     H5P_CLS_TCRT,       /* Datatype creation */
     H5P_CLS_TACC,       /* Datatype access */
     H5P_CLS_ACRT,       /* Attribute creation */
+    H5P_CLS_RCACC,      /* Read Context acquire */
+    H5P_CLS_TRSCC,      /* Transaction start */
+    H5P_CLS_TRFCC,      /* Transaction finish */
     H5P_CLS_LCRT        /* Link creation */
 };
 
@@ -582,6 +609,9 @@ H5P_term_interface(void)
                         H5P_LST_OBJECT_COPY_g =
                         H5P_LST_LINK_CREATE_g =
                         H5P_LST_LINK_ACCESS_g =
+                        H5P_LST_READ_CONTEXT_ACQUIRE_g =
+                        H5P_LST_TRANSACTION_START_g =
+                        H5P_LST_TRANSACTION_FINISH_g =
                         H5P_LST_FILE_MOUNT_g = (-1);
                 } /* end if */
             } /* end if */
@@ -608,6 +638,9 @@ H5P_term_interface(void)
                         H5P_CLS_OBJECT_COPY_g =
                         H5P_CLS_LINK_CREATE_g =
                         H5P_CLS_LINK_ACCESS_g =
+                        H5P_CLS_READ_CONTEXT_ACQUIRE_g = 
+                        H5P_CLS_TRANSACTION_START_g =
+                        H5P_CLS_TRANSACTION_FINISH_g = 
                         H5P_CLS_FILE_MOUNT_g = (-1);
                 } /* end if */
             } /* end if */
@@ -5133,6 +5166,18 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
 
         case H5P_TYPE_LINK_ACCESS:
             class_id = H5P_CLS_LINK_ACCESS_g;
+            break;
+
+        case H5P_TYPE_READ_CONTEXT_ACQUIRE:
+            class_id = H5P_CLS_READ_CONTEXT_ACQUIRE_g;
+            break;
+
+        case H5P_TYPE_TRANSACTION_START:
+            class_id = H5P_CLS_TRANSACTION_START_g;
+            break;
+
+        case H5P_TYPE_TRANSACTION_FINISH:
+            class_id = H5P_CLS_TRANSACTION_FINISH_g;
             break;
 
         case H5P_TYPE_USER:     /* shut compiler warnings up */
