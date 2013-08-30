@@ -42,7 +42,7 @@
 #include "H5FSprivate.h"	/* File free space                      */
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5Oprivate.h"         /* Object header messages               */
-#include "H5RCprivate.h"	/* Reference counted object functions	*/
+#include "H5UCprivate.h"	/* Reference counted object functions	*/
 
 
 /*
@@ -236,7 +236,7 @@ struct H5F_file_t {
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
     struct H5G_t *root_grp;	/* Open root group			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
-    H5RC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
+    H5UC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
 
     /* File space allocation information */
     H5F_file_space_type_t fs_strategy;	/* File space handling strategy		*/

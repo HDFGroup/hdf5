@@ -160,7 +160,7 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5Pdapl.lo H5Pdcpl.lo H5Pdeprec.lo H5Pdxpl.lo H5Pencdec.lo \
 	H5Pfapl.lo H5Pfcpl.lo H5Pfmpl.lo H5Pgcpl.lo H5Pint.lo \
 	H5Plapl.lo H5Plcpl.lo H5Pocpl.lo H5Pocpypl.lo H5Pstrcpl.lo \
-	H5Ptest.lo H5PL.lo H5R.lo H5Rdeprec.lo H5RC.lo H5RS.lo H5S.lo \
+	H5Ptest.lo H5PL.lo H5R.lo H5Rdeprec.lo H5UC.lo H5RS.lo H5S.lo \
 	H5Sall.lo H5Sdbg.lo H5Shyper.lo H5Smpio.lo H5Snone.lo \
 	H5Spoint.lo H5Sselect.lo H5Stest.lo H5SL.lo H5SM.lo \
 	H5SMbtree2.lo H5SMcache.lo H5SMmessage.lo H5SMtest.lo H5ST.lo \
@@ -589,7 +589,7 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c \
         H5PL.c \
         H5R.c H5Rdeprec.c \
-        H5RC.c \
+        H5UC.c \
         H5RS.c \
         H5S.c H5Sall.c H5Sdbg.c H5Shyper.c H5Smpio.c H5Snone.c H5Spoint.c \
         H5Sselect.c H5Stest.c \
@@ -957,7 +957,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pstrcpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ptest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5R.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5RC.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5RS.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Rdeprec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5S.Plo@am__quote@
@@ -1001,6 +1000,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Tstrpad.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Tvisit.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Tvlen.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5UC.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5V.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5WB.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Z.Plo@am__quote@

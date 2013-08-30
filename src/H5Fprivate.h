@@ -549,7 +549,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 
 /* Forward declarations for prototype arguments */
 struct H5B_class_t;
-struct H5RC_t;
+struct H5UC_t;
 struct H5O_loc_t;
 struct H5HG_heap_t;
 
@@ -599,8 +599,8 @@ H5_DLL unsigned H5F_gc_ref(const H5F_t *f);
 H5_DLL hbool_t H5F_use_latest_format(const H5F_t *f);
 H5_DLL hbool_t H5F_store_msg_crt_idx(const H5F_t *f);
 H5_DLL herr_t H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag);
-H5_DLL struct H5RC_t *H5F_grp_btree_shared(const H5F_t *f);
-H5_DLL herr_t H5F_set_grp_btree_shared(H5F_t *f, struct H5RC_t *rc);
+H5_DLL struct H5UC_t *H5F_grp_btree_shared(const H5F_t *f);
+H5_DLL herr_t H5F_set_grp_btree_shared(H5F_t *f, struct H5UC_t *rc);
 H5_DLL hbool_t H5F_use_tmp_space(const H5F_t *f);
 H5_DLL hbool_t H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
 

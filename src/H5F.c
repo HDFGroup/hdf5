@@ -3200,7 +3200,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_set_grp_btree_shared(H5F_t *f, H5RC_t *rc)
+H5F_set_grp_btree_shared(H5F_t *f, H5UC_t *rc)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
