@@ -52,6 +52,8 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tbigdims.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tboot1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tboot2.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tboot2A.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tboot2B.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tchar1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tchunked.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcmpdattrintsize.ddl
@@ -797,6 +799,10 @@
           tboot1.out.err
           tboot2.out
           tboot2.out.err
+          tboot2A.out
+          tboot2A.out.err
+          tboot2B.out
+          tboot2B.out.err
           tchar1.out
           tchar1.out.err
           tchunked.out
@@ -1202,6 +1208,8 @@
   # tests for super block
   ADD_H5_TEST (tboot1 0 --enable-error-stack -H -B -d dset tfcontents1.h5)
   ADD_H5_TEST (tboot2 0 --enable-error-stack -B tfcontents2.h5)
+  ADD_H5_TEST (tboot2A 0 --enable-error-stack --boot-block tfcontents2.h5)
+  ADD_H5_TEST (tboot2B 0 --enable-error-stack --superblock tfcontents2.h5)
   ADD_H5_TEST (file_space 0 --enable-error-stack -B file_space.h5)
 
   # test -p with a non existing dataset

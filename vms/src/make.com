@@ -59,7 +59,7 @@ $ cobj1= "H5MFaggr, H5MF, H5MFdbg, H5MFsection, H5MM,"+-
         "H5Orefcount, H5Osdspace, H5Oshared, H5Oshmesg, H5Ostab, H5Otest, H5Ounknown,"+-
         "H5Pacpl, H5P, H5Pdapl, H5Pdcpl, H5Pdeprec, H5Pdxpl, H5Pencdec, H5Pfapl, H5Pfcpl, H5Pfmpl, H5Pgcpl, H5Pint,"+-
         "H5Plapl, H5Plcpl, H5Pocpl, H5Pocpypl, H5Pstrcpl, H5Ptest,"+-
-        "H5R, H5RC, H5Rdeprec, H5RS, H5Sall, H5S, H5Sdbg, H5Shyper, H5SL, H5SMbtree2, H5SM, H5SMcache,"+-
+        "H5R, H5UC, H5Rdeprec, H5RS, H5Sall, H5S, H5Sdbg, H5Shyper, H5SL, H5SMbtree2, H5SM, H5SMcache,"+-
         "H5SMmessage, H5Smpio, H5SMtest, H5Snone, H5Spoint, H5Sselect, H5ST, H5Stest,"+-
         "H5Tarray, H5Tbit, H5T, H5Tcommit, H5Tcompound, H5Tconv, H5Tcset, H5Tdbg, H5Tdeprec, H5Tenum,"+-
         "H5Tfields, H5Tfixed, H5Tfloat, H5Tinit, H5Tnative, H5Toffset, H5Toh, H5Topaque, H5Torder,"+-

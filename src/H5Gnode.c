@@ -77,7 +77,7 @@ typedef struct H5G_node_key_t {
 /********************/
 
 /* B-tree callbacks */
-static H5RC_t *H5G_node_get_shared(const H5F_t *f, const void *_udata);
+static H5UC_t *H5G_node_get_shared(const H5F_t *f, const void *_udata);
 static herr_t H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t op, void *_lt_key,
 			      void *_udata, void *_rt_key,
 			      haddr_t *addr_p/*out*/);
@@ -156,7 +156,7 @@ H5FL_SEQ_DEFINE(H5G_entry_t);
  *
  *-------------------------------------------------------------------------
  */
-static H5RC_t *
+static H5UC_t *
 H5G_node_get_shared(const H5F_t *f, const void UNUSED *_udata)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1189,7 +1189,7 @@ H5G__node_init(H5F_t *f)
         /* <none> */
 
     /* Make shared B-tree info reference counted */
-    if(H5F_SET_GRP_BTREE_SHARED(f, H5RC_create(shared, H5B_shared_free)) < 0)
+    if(H5F_SET_GRP_BTREE_SHARED(f, H5UC_create(shared, H5B_shared_free)) < 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
 
 done:
@@ -1222,7 +1222,7 @@ H5G_node_close(const H5F_t *f)
 
     /* Free the raw B-tree node buffer */
     if(H5F_GRP_BTREE_SHARED(f))
-        H5RC_DEC(H5F_GRP_BTREE_SHARED(f));
+        H5UC_DEC(H5F_GRP_BTREE_SHARED(f));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_node_close */

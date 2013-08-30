@@ -499,12 +499,12 @@ SET (H5R_HDRS
 IDE_GENERATED_PROPERTIES ("H5R" "${H5R_HDRS}" "${H5R_SRCS}" )
 
 
-SET (H5RC_SRCS
-    ${HDF5_SRC_DIR}/H5RC.c
+SET (H5UC_SRCS
+    ${HDF5_SRC_DIR}/H5UC.c
 )
-SET (H5RC_HDRS
+SET (H5UC_HDRS
 )
-IDE_GENERATED_PROPERTIES ("H5RC" "${H5RC_HDRS}" "${H5RC_SRCS}" )
+IDE_GENERATED_PROPERTIES ("H5UC" "${H5UC_HDRS}" "${H5UC_SRCS}" )
 
 
 SET (H5RS_SRCS
@@ -685,7 +685,7 @@ SET (common_SRCS
     ${H5P_SRCS}
     ${H5PL_SRCS}
     ${H5R_SRCS}
-    ${H5RC_SRCS}
+    ${H5UC_SRCS}
     ${H5RS_SRCS}
     ${H5S_SRCS}
     ${H5SL_SRCS}
@@ -765,7 +765,7 @@ SET (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5Oprivate.h
     ${HDF5_SRC_DIR}/H5Pprivate.h
     ${HDF5_SRC_DIR}/H5PLprivate.h
-    ${HDF5_SRC_DIR}/H5RCprivate.h
+    ${HDF5_SRC_DIR}/H5UCprivate.h
     ${HDF5_SRC_DIR}/H5Rprivate.h
     ${HDF5_SRC_DIR}/H5RSprivate.h
     ${HDF5_SRC_DIR}/H5SLprivate.h
@@ -788,8 +788,13 @@ INCLUDE_DIRECTORIES (${CMAKE_BINARY_DIR})
 # Setup the H5Detect utility which generates H5Tinit with platform
 # specific type checks inside
 #-----------------------------------------------------------------------------
+IF (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+  SET (LOCAL_OPT_FLAG "-O0")
+ELSE (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+  SET (LOCAL_OPT_FLAG " ")
+ENDIF (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 ADD_EXECUTABLE (H5detect ${HDF5_SRC_DIR}/H5detect.c)
-TARGET_C_PROPERTIES (H5detect " " " ")
+TARGET_C_PROPERTIES (H5detect ${LOCAL_OPT_FLAG} " ")
 IF (MSVC)
   TARGET_LINK_LIBRARIES (H5detect "ws2_32.lib")
 ENDIF (MSVC)
