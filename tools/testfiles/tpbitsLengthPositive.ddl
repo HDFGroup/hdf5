@@ -59,7 +59,7 @@ usage: h5dump [OPTIONS] files
 
 --------------- Subsetting Options ---------------
  Subsetting is available by using the following options with a dataset
- attribute. Subsetting is done by selecting a hyperslab from the data.
+ option. Subsetting is done by selecting a hyperslab from the data.
  Thus, the options mirror those for performing a hyperslab selection.
  One of the START, COUNT, STRIDE, or BLOCK parameters are mandatory if you do subsetting.
  The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in

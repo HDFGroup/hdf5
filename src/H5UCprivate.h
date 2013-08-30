@@ -14,16 +14,19 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * This file contains private information about the H5RC module
+ * This file contains private information about the H5UC module
+ * The module used to be H5RC, but changed to H5UC because of 
+ * conflicting requirement for the use of H5RC.
  */
-#ifndef _H5RCprivate_H
-#define _H5RCprivate_H
+
+#ifndef _H5UCprivate_H
+#define _H5UCprivate_H
 
 /**************************************/
 /* Public headers needed by this file */
 /**************************************/
 #ifdef LATER
-#include "H5RCpublic.h"
+#include "H5UCpublic.h"
 #endif /* LATER */
 
 /***************************************/
@@ -36,27 +39,27 @@
 /************/
 
 /* Typedef for function to release object when reference count drops to zero */
-typedef herr_t (*H5RC_free_func_t)(void *o);
+typedef herr_t (*H5UC_free_func_t)(void *o);
 
 /* Typedef for reference counted objects */
-typedef struct H5RC_t {
+typedef struct H5UC_t {
     void *o;            /* Object to be reference counted */
     size_t n;           /* Reference count of number of pointers sharing object */
-    H5RC_free_func_t free_func; /* Function to free object */
-} H5RC_t;
+    H5UC_free_func_t free_func; /* Function to free object */
+} H5UC_t;
 
 /**********/
 /* Macros */
 /**********/
-#define H5RC_INC(rc)            ((rc)->n++)
-#define H5RC_DEC(rc)            (H5RC_decr(rc))
-#define H5RC_GET_OBJ(rc)        ((rc)->o)
+#define H5UC_INC(rc)            ((rc)->n++)
+#define H5UC_DEC(rc)            (H5UC_decr(rc))
+#define H5UC_GET_OBJ(rc)        ((rc)->o)
 
 /********************/
 /* Private routines */
 /********************/
-H5_DLL H5RC_t *H5RC_create(void *s, H5RC_free_func_t free_func);
-H5_DLL herr_t H5RC_decr(H5RC_t *rc);
+H5_DLL H5UC_t *H5UC_create(void *s, H5UC_free_func_t free_func);
+H5_DLL herr_t H5UC_decr(H5UC_t *rc);
 
 #endif /* _H5RSprivate_H */
 

@@ -703,7 +703,7 @@ H5F_get_base_addr(const H5F_t *f)
  *
  *-------------------------------------------------------------------------
  */
-H5RC_t *
+H5UC_t *
 H5F_grp_btree_shared(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */

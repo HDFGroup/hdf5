@@ -121,10 +121,10 @@ H5B__load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Set & increment the ref-counted "shared" B-tree information for the node */
     bt->rc_shared = udata->rc_shared;
-    H5RC_INC(bt->rc_shared);
+    H5UC_INC(bt->rc_shared);
 
     /* Get a pointer to the shared info, for convenience */
-    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
+    shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
 
     /* Allocate space for the native keys and child addresses */
@@ -217,7 +217,7 @@ H5B__flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt, un
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(bt);
-    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
+    shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
     HDassert(shared->type);
     HDassert(shared->type->encode);
@@ -318,7 +318,7 @@ H5B__dest(H5F_t *f, H5B_t *bt)
         H5B_shared_t *shared;               /* Pointer to shared B-tree info */
 
         /* Get the pointer to the shared B-tree info */
-        shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
+        shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
         HDassert(shared);
 
         /* Release the space on disk */
@@ -398,7 +398,7 @@ H5B__compute_size(const H5F_t UNUSED *f, const H5B_t *bt, size_t *size_ptr)
     HDassert(f);
     HDassert(bt);
     HDassert(bt->rc_shared);
-    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
+    shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
     HDassert(shared->type);
     HDassert(size_ptr);
