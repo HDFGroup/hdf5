@@ -69,7 +69,7 @@
 /* Local Variables */
 /*******************/
 
-/* Declare a free list to manage the H5S_t struct */
+/* Declare a free list to manage the H5EQ_t struct */
 H5FL_DEFINE(H5EQ_t);
 
 /* Dataspace ID class */
