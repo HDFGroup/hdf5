@@ -238,6 +238,7 @@ precision (detected_t *d)
    unsigned char *_x;							      \
                                                                               \
    HDmemset(&INFO, 0, sizeof(INFO));					      \
+   HDmemset(INFO.perm, 0, sizeof(INFO.perm));                                 \
    INFO.varname = #VAR;							      \
    INFO.size = sizeof(TYPE);						      \
                                                                               \
@@ -297,6 +298,7 @@ precision (detected_t *d)
    char *_mesg;								      \
 									      \
    HDmemset(&INFO, 0, sizeof(INFO));					      \
+   HDmemset(INFO.perm, 0, sizeof(INFO.perm));                                 \
    INFO.varname = #VAR;							      \
    INFO.size = sizeof(TYPE);						      \
 									      \
