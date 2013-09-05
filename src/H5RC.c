@@ -39,7 +39,9 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
+#include "H5VLiod_client.h"	/* IOD VOL plugin			*/
 
+#ifdef H5_HAVE_EFF
 
 /****************/
 /* Local Macros */
@@ -79,8 +81,8 @@ static const H5I_class_t H5I_RC_CLS[1] = {{
     0,				/* Class flags */
     64,				/* Minimum hash size for class */
     2,				/* # of reserved IDs for class */
-    NULL,                   	/* Callback routine for closing objects of this class */
-    (H5I_free2_t)H5RC_close     /* Callback routine for closing auxilary objects of this class */
+    (H5I_free_t)H5RC_close,   	/* Callback routine for closing objects of this class */
+    NULL                        /* Callback routine for closing auxilary objects of this class */
 }};
 
 
@@ -204,7 +206,7 @@ H5Pset_rcapl_version_request(hid_t rcapl_id, H5RC_request_t acquire_req)
 
     FUNC_ENTER_API(FAIL)
 
-    if(H5RC_EXACT > acquire_req || H5RC_LAST < acquire_req)
+    if(H5RC_LAST < acquire_req)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "Acquire request can be either H5RC_EXACT, H5RC_NEXT, or H5RC_LAST");
 
     /* Get the plist structure */
@@ -214,6 +216,41 @@ H5Pset_rcapl_version_request(hid_t rcapl_id, H5RC_request_t acquire_req)
     /* Set property */
     if(H5P_set(plist, H5RC_ACQUIRE_CV_REQUEST_NAME, &acquire_req) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set acquire request");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_rcapl_version_request() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_rcapl_version_request
+ *
+ * Purpose:	Get the request type for acquring the container version, 
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_rcapl_version_request(hid_t rcapl_id, H5RC_request_t *acquire_req)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(rcapl_id, H5P_RC_ACQUIRE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    if(acquire_req) {
+        /* Get property */
+        if(H5P_get(plist, H5RC_ACQUIRE_CV_REQUEST_NAME, acquire_req) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get acquire request");
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -281,8 +318,6 @@ done:
 H5RC_t *
 H5RC_create(void *file, uint64_t c_version)
 {
-    void *file = NULL;
-    H5VL_t *vol_plugin = NULL;
     H5RC_t *rc = NULL;
     H5RC_t *ret_value = NULL;          /* Return value */
 
@@ -292,7 +327,7 @@ H5RC_create(void *file, uint64_t c_version)
     if(NULL == (rc = H5FL_CALLOC(H5RC_t)))
 	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate top read context structure")
 
-    rc->file = file;
+    rc->file = (H5VL_iod_file_t *)file;
     rc->c_version = c_version;
 
     /* set return value */
@@ -302,9 +337,26 @@ done:
     if(!ret_value && rc)
 	rc = H5FL_FREE(H5RC_t, rc);
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RC_create() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5RCacquire
+ *
+ * Purpose:	Acquires a read context from a container for a container
+ *              version c_version. The user can specify options to 
+ *              what container version to get if the one being asked for
+ *              is not available.
+ *
+ * Return:	Success:	RC ID
+ *		Failure:	NULL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		August 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 hid_t
 H5RCacquire(hid_t file_id, /*IN/OUT*/ uint64_t *c_version, 
             hid_t rcapl_id, hid_t eq_id)
@@ -313,8 +365,8 @@ H5RCacquire(hid_t file_id, /*IN/OUT*/ uint64_t *c_version,
     H5VL_t *vol_plugin = NULL;
     H5RC_t *rc = NULL;
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void               **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    hid_t ret_value;
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
 
@@ -351,7 +403,7 @@ H5RCacquire(hid_t file_id, /*IN/OUT*/ uint64_t *c_version,
         request->vol_plugin = vol_plugin;
     }
 
-    if(H5VL_iod_rc_acquire(file, rc, req) < 0)
+    if(H5VL_iod_rc_acquire((H5VL_iod_file_t *)file, rc, c_version, rcapl_id, req) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a read context on container");
 
     if(request && *req) {
@@ -361,15 +413,31 @@ H5RCacquire(hid_t file_id, /*IN/OUT*/ uint64_t *c_version,
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5RCacquire() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5RCrelease
+ *
+ * Purpose:	Releases a previously acquired container version. Does not
+ *              close the RC object (i.e. user has to call H5RCclose()).
+ *
+ * Return:	Success:	Non-Negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		August 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5RCrelease(hid_t rc_id , hid_t eq_id)
 {
     H5RC_t *rc = NULL;
+    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void               **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    herr_t ret_value;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ii", rc_id, eq_id);
@@ -377,6 +445,10 @@ H5RCrelease(hid_t rc_id , hid_t eq_id)
     /* get the RC object */
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rc_id, H5I_RC)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Read Context ID")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     if(eq_id != H5_EVENT_QUEUE_NULL) {
         /* create the private request */
@@ -398,7 +470,123 @@ H5RCrelease(hid_t rc_id , hid_t eq_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5RCrelease() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5RCpersist
+ *
+ * Purpose:	Persists a previously acquired container version.
+ *
+ * Return:	Success:	Non-Negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		August 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5RCpersist(hid_t rc_id , hid_t eq_id)
+{
+    H5RC_t *rc = NULL;
+    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", rc_id, eq_id);
+
+    /* get the RC object */
+    if(NULL == (rc = (H5RC_t *)H5I_object_verify(rc_id, H5I_RC)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Read Context ID")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
+    if(H5VL_iod_rc_persist(rc, req) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a persist on a read context on container");
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5RCpersist() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5RCsnapshot
+ *
+ * Purpose:	Creates a permanently visible snapshot of a container state.
+ *
+ * Return:	Success:	Non-Negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		August 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5RCsnapshot(hid_t rc_id , const char *snapshot_name, hid_t eq_id)
+{
+    H5RC_t *rc = NULL;
+    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*si", rc_id, snapshot_name, eq_id);
+
+    /* Check arguments */
+    if(!snapshot_name || !*snapshot_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid snapshot name")
+
+    /* get the RC object */
+    if(NULL == (rc = (H5RC_t *)H5I_object_verify(rc_id, H5I_RC)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Read Context ID")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
+    if(H5VL_iod_rc_snapshot(rc, snapshot_name, req) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a snapshot on a read context on container");
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5RCsnapshot() */
 
 
 /*-------------------------------------------------------------------------
@@ -450,13 +638,11 @@ done:
 herr_t
 H5RC_close(H5RC_t *rc)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     rc = H5FL_FREE(H5RC_t, rc);
 
-done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5RC_close() */
 
+#endif /* H5_HAVE_EFF */

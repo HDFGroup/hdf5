@@ -22,22 +22,24 @@
 #include "H5TRpublic.h"
 
 /* Private headers needed by this file */
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Pprivate.h"		/* Property lists			*/
-#include "H5VLprivate.h"	/* VOL plugins				*/
+#include "H5RCprivate.h"	/* Read Contexts			*/
+
+#ifdef H5_HAVE_EFF
 
 /**************************/
 /* Library Private Macros */
 /**************************/
+#define H5TR_FINISH_ACQUIRE_NAME "acquire_after_finishing"
 
 /****************************/
 /* Library Private Typedefs */
 /****************************/
 /* the transaction struct */
 typedef struct H5TR_t {
-    void *file;
+    struct H5VL_iod_file_t *file;
     uint64_t c_version;
     uint64_t trans_num;
+    struct H5VL_iod_request_t *request;
 } H5TR_t;
 
 /*****************************/
@@ -47,17 +49,10 @@ typedef struct H5TR_t {
 /******************************/
 /* Library Private Prototypes */
 /******************************/
-#if 0
 herr_t H5TR_init(void);
 
-/* API wrappers */
 H5_DLL H5TR_t *H5TR_create(void *file, H5RC_t *rc, uint64_t trans_num);
 H5_DLL herr_t H5TR_close(H5TR_t *tr);
 
-
-H5_DLL herr_t H5VL_iod_tr_start(H5TR_t *tr, hid_t trspl_id, void **req);
-H5_DLL herr_t H5VL_iod_tr_finish(H5TR_t *tr, hid_t trfpl_id, void **req);
-H5_DLL herr_t H5VL_iod_tr_set_dependency(H5TR_t *tr, uint64_t trans_num, void **req);
-H5_DLL herr_t H5VL_iod_tr_abort(H5TR_t *tr, void **req);
-#endif
+#endif /* H5_HAVE_EFF */
 #endif /* _H5TRprivate_H */

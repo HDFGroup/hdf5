@@ -65,9 +65,9 @@ H5VL_iod_request_decr_rc(H5VL_iod_request_t *request)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    request->rc --;
+    request->ref_count --;
 
-    if(0 == request->rc) {
+    if(0 == request->ref_count) {
         request->parent_reqs = (H5VL_iod_request_t **)H5MM_xfree(request->parent_reqs);
         request = (H5VL_iod_request_t *)H5MM_xfree(request);
     }
@@ -1102,8 +1102,62 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
             break;
         }
+    case HG_RC_ACQUIRE:
+        {
+            H5VL_iod_rc_info_t *rc_info = (H5VL_iod_rc_info_t *)req->data;
+
+            if(SUCCEED != rc_info->result.ret) {
+                fprintf(stderr, "Failed to Acquire Read Context %llu\n", *(rc_info->c_version_ptr));
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+
+            rc_info->read_cxt->c_version = rc_info->result.c_version;
+            *rc_info->c_version_ptr = rc_info->result.c_version;
+            rc_info = (H5VL_iod_rc_info_t *)H5MM_xfree(rc_info);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_RC_RELEASE:
+    case HG_RC_PERSIST:
+    case HG_RC_SNAPSHOT:
+        {
+            int *status = (int *)req->data;
+
+            if(SUCCEED != *status) {
+                fprintf(stderr, "Failed to Read Context OP\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+
+            free(status);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_TR_START:
+    case HG_TR_FINISH:
+    case HG_TR_SET_DEPEND:
+    case HG_TR_SKIP:
+    case HG_TR_ABORT:
+        {
+            int *status = (int *)req->data;
+
+            if(SUCCEED != *status) {
+                fprintf(stderr, "Failed transaction OP\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+
+            free(status);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
     case HG_LINK_ITERATE:
     case HG_OBJECT_VISIT:
+    case HG_MAP_ITERATE:
     default:
         req->status = H5AO_FAILED;
         req->state = H5VL_IOD_COMPLETED;
@@ -1140,6 +1194,7 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     case HG_DSET_READ:
     case HG_ATTR_WRITE:
     case HG_ATTR_READ:
+    case HG_DSET_GET_VL_SIZE:
         {
             H5VL_iod_io_info_t *info = (H5VL_iod_io_info_t *)req->data;
 
@@ -1410,11 +1465,46 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             break;
         }
     case HG_OBJECT_OPEN:
+    case HG_LINK_GET_INFO:
+    case HG_OBJECT_GET_INFO:
         req->data = NULL;
         H5VL_iod_request_delete(file, req);
         break;
+    case HG_LINK_GET_VAL:
+        {
+            link_get_val_out_t *result = (link_get_val_out_t *)req->data;
+
+            free(result);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_RC_ACQUIRE:
+        {
+            H5VL_iod_rc_info_t *rc_info = (H5VL_iod_rc_info_t *)req->data;
+
+            rc_info = (H5VL_iod_rc_info_t *)H5MM_xfree(rc_info);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_RC_RELEASE:
+    case HG_TR_START:
+    case HG_TR_FINISH:
+    case HG_TR_SET_DEPEND:
+    case HG_TR_SKIP:
+    case HG_TR_ABORT:
+        {
+            int *status = (int *)req->data;
+
+            free(status);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
     case HG_LINK_ITERATE:
     case HG_OBJECT_VISIT:
+    case HG_MAP_ITERATE:
     default:
         H5VL_iod_request_delete(file, req);
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Request Type not supported");
@@ -1455,7 +1545,7 @@ H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, /*IN/OUT*/ size_t *count,
                 }
                 if(NULL != parent_reqs) {
                     parent_reqs[size] = cur_req;
-                    cur_req->rc ++;
+                    cur_req->ref_count ++;
                 }
                 size ++;
             }
@@ -1611,7 +1701,7 @@ H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params,
 
     if(cur_obj->request && cur_obj->request->status == H5AO_PENDING) {
         *parent_req = cur_obj->request;
-        cur_obj->request->rc ++;
+        cur_obj->request->ref_count ++;
     }
     else {
         *parent_req = NULL;

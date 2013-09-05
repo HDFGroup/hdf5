@@ -25,6 +25,8 @@
 #include "H5public.h"
 #include "H5Ipublic.h"
 
+#ifdef H5_HAVE_EFF
+
 /*****************/
 /* Public Macros */
 /*****************/
@@ -56,18 +58,15 @@ extern "C" {
 H5_DLL hid_t H5RCcreate(hid_t file_id, uint64_t container_version);
 H5_DLL hid_t H5RCacquire(hid_t file_id, /*IN/OUT*/ uint64_t *container_version, 
                          hid_t rcapl_id, hid_t eq_id);
-H5_DLL herr_t H5RCrelease(hid_t rc_id , hid_t eq_id);
-H5_DLL herr_t H5RCclose(hid_t rc_id);
+H5_DLL herr_t H5RCrelease(hid_t rcxt_id , hid_t eq_id);
+H5_DLL herr_t H5RCpersist(hid_t rcxt_id, hid_t eq_id);
+H5_DLL herr_t H5RCsnapshot(hid_t rcxt_id, const char *snapshot_name, hid_t eq_id);
+H5_DLL herr_t H5RCclose(hid_t rcxt_id);
 
 H5_DLL herr_t H5Pset_rcapl_version_request(hid_t rcapl_id, H5RC_request_t acquire_req);
+H5_DLL herr_t H5Pget_rcapl_version_request(hid_t rcapl_id, H5RC_request_t *acquire_req);
 
-#if 0
-/* Those are not set for now */
-H5_DLL herr_t H5Fskip_trans(hid_t file_id, uint64_t start_trans_num, uint64_t count, hid_t eq_id);
-H5_DLL herr_t H5Fpersist(hid_t file_id, uint64_t rc_num, hid_t eq_id);
-H5_DLL herr_t H5Fsnapshot(hid_t file_id, uint64_t container_version, 
-                          const char* snapshot_name, hid_t eq_id);
-#endif
+#endif /* H5_HAVE_EFF */
 
 #ifdef __cplusplus
 }

@@ -51,21 +51,21 @@ typedef herr_t (*H5M_iterate_func_t)(const void *key, const void *value, void *c
 
 /* API wrappers */
 H5_DLL hid_t H5Mcreate_ff(hid_t loc_id, const char *name, hid_t keytype, hid_t valtype, hid_t lcpl_id, 
-                          hid_t mcpl_id, hid_t mapl_id, uint64_t trans, hid_t eq_id);
-H5_DLL hid_t H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, uint64_t trans, hid_t eq_id);
+                          hid_t mcpl_id, hid_t mapl_id, hid_t trans_id, hid_t eq_id);
+H5_DLL hid_t H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, hid_t rcxt_id, hid_t eq_id);
 H5_DLL herr_t H5Mset_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, 
-                        const void *value, hid_t dxpl_id, uint64_t trans, hid_t eq_id);
+                        const void *value, hid_t dxpl_id, hid_t trans_id, hid_t eq_id);
 H5_DLL herr_t H5Mget_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, 
-                        void *value, hid_t dxpl_id, uint64_t trans, hid_t eq_id);
+                        void *value, hid_t dxpl_id, hid_t rcxt_id, hid_t eq_id);
 H5_DLL herr_t H5Mget_types_ff(hid_t map_id, hid_t *key_type_id, hid_t *val_type_id, 
-                              uint64_t trans, hid_t eq_id);
-H5_DLL herr_t H5Mget_count_ff(hid_t map_id, hsize_t *count, uint64_t trans, hid_t eq_id);
+                              hid_t rcxt_id, hid_t eq_id);
+H5_DLL herr_t H5Mget_count_ff(hid_t map_id, hsize_t *count, hid_t rcxt_id, hid_t eq_id);
 H5_DLL herr_t H5Mexists_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, 
-                           htri_t *exists, uint64_t trans, hid_t eq_id);
+                           htri_t *exists, hid_t rcxt_id, hid_t eq_id);
 H5_DLL herr_t H5Miterate(hid_t map_id, hid_t key_mem_type_id, hid_t value_mem_type_id, 
                          H5M_iterate_func_t callback_func, void *context);
 H5_DLL herr_t H5Mdelete_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, 
-                           uint64_t trans, hid_t eq_id);
+                           hid_t trans_id, hid_t eq_id);
 H5_DLL herr_t H5Mclose_ff(hid_t map_id, hid_t eq_id);
 
 #ifdef __cplusplus

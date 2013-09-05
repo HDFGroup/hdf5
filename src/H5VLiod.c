@@ -89,7 +89,17 @@ static hg_id_t H5VL_OBJECT_VISIT_ID;
 static hg_id_t H5VL_OBJECT_SET_COMMENT_ID;
 static hg_id_t H5VL_OBJECT_GET_COMMENT_ID;
 static hg_id_t H5VL_OBJECT_GET_INFO_ID;
+static hg_id_t H5VL_RC_ACQUIRE_ID;
+static hg_id_t H5VL_RC_RELEASE_ID;
+static hg_id_t H5VL_RC_PERSIST_ID;
+static hg_id_t H5VL_RC_SNAPSHOT_ID;
+static hg_id_t H5VL_TR_START_ID;
+static hg_id_t H5VL_TR_FINISH_ID;
+static hg_id_t H5VL_TR_SET_DEPEND_ID;
+static hg_id_t H5VL_TR_SKIP_ID;
+static hg_id_t H5VL_TR_ABORT_ID;
 static hg_id_t H5VL_CANCEL_OP_ID;
+
 
 /* global AXE list struct */
 typedef struct H5VL_iod_axe_list_t {
@@ -405,11 +415,11 @@ H5VL__iod_request_add_to_axe_list(H5VL_iod_request_t *request)
     }
 
     request->global_next = NULL;
-    request->rc ++;
+    request->ref_count ++;
 
     /* process axe_list */
     while(axe_list.head && /* If there is a head request */
-          (axe_list.head->rc == 1 || (axe_list.head->rc == 2 && request->req != NULL)) &&
+          (axe_list.head->ref_count == 1 || (axe_list.head->ref_count == 2 && request->req != NULL)) &&
           H5VL_IOD_COMPLETED == axe_list.head->state) {
 
         axe_list.last_released_task = axe_list.head->axe_id;
@@ -463,7 +473,7 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
     request->type = op_type;
     request->data = data;
     request->req = hg_req;
-    request->rc = 1;
+    request->ref_count = 1;
     request->obj = request_obj;
     request->axe_id = axe_info->axe_id;
     request->next = request->prev = NULL;
@@ -511,7 +521,7 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
         H5VL_iod_request_decr_rc(request);
 
         request->req = H5MM_xfree(request->req);
-        HDassert(1 == request->rc);
+        HDassert(1 == request->ref_count);
     } /* end else */
 
 done:
@@ -639,6 +649,18 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     H5VL_OBJECT_GET_COMMENT_ID = MERCURY_REGISTER("get_comment", object_get_comment_in_t, 
                                                   object_get_comment_out_t);
     H5VL_OBJECT_GET_INFO_ID = MERCURY_REGISTER("object_get_info", object_op_in_t, oinfo_t);
+
+    H5VL_RC_ACQUIRE_ID      = MERCURY_REGISTER("read_context_acquire", 
+                                               rc_acquire_in_t, rc_acquire_out_t);
+    H5VL_RC_RELEASE_ID      = MERCURY_REGISTER("read_context_release", rc_release_in_t, ret_t);
+    H5VL_RC_PERSIST_ID      = MERCURY_REGISTER("read_context_persist", rc_persist_in_t, ret_t);
+    H5VL_RC_SNAPSHOT_ID     = MERCURY_REGISTER("read_context_snapshot", rc_snapshot_in_t, ret_t);
+
+    H5VL_TR_START_ID        = MERCURY_REGISTER("transaction_start", tr_start_in_t, ret_t);
+    H5VL_TR_FINISH_ID       = MERCURY_REGISTER("transaction_finish", tr_finish_in_t, ret_t);
+    H5VL_TR_SET_DEPEND_ID   = MERCURY_REGISTER("transaction_set_depend",tr_set_depend_in_t, ret_t);
+    H5VL_TR_SKIP_ID         = MERCURY_REGISTER("transaction_skip", tr_skip_in_t, ret_t);
+    H5VL_TR_ABORT_ID        = MERCURY_REGISTER("transaction_abort",tr_abort_in_t, ret_t);
 
     H5VL_CANCEL_OP_ID = MERCURY_REGISTER("cancel_op", uint64_t, uint8_t);
 
@@ -1591,7 +1613,7 @@ H5VL_iod_file_close(void *_file, hid_t dxpl_id, void **req)
         while(cur_req) {
             if(cur_req->state == H5VL_IOD_PENDING) {
                 parent_reqs[num_parents] = cur_req;
-                cur_req->rc ++;
+                cur_req->ref_count ++;
                 num_parents ++;
             }
             cur_req = cur_req->next;
@@ -2296,10 +2318,10 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         input.dset_type_id = dset->remote_dset.type_id;
         input.mem_type_id = mem_type_id;
         input.axe_info.axe_id = g_axe_id ++;
-        if(NULL != dset->common.request) {
+        if(NULL != dset->common.request && dset->common.request->state != H5VL_IOD_COMPLETED) {
             input.axe_info.num_parents = 1;
             input.axe_info.parent_axe_ids = &dset->common.request->axe_id;
-            dset->common.request->rc ++;
+            dset->common.request->ref_count ++;
             *parent_req = dset->common.request;
         }
         else {
@@ -2317,10 +2339,10 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         input_vl.space_id = file_space_id;
         input_vl.mem_type_id = mem_type_id;
         input_vl.axe_info.axe_id = g_axe_id ++;
-        if(NULL != dset->common.request) {
+        if(NULL != dset->common.request && dset->common.request->state != H5VL_IOD_COMPLETED) {
             input_vl.axe_info.num_parents = 1;
             input_vl.axe_info.parent_axe_ids = &dset->common.request->axe_id;
-            dset->common.request->rc ++;
+            dset->common.request->ref_count ++;
             *parent_req = dset->common.request;
         }
         else {
@@ -2512,10 +2534,10 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     input.dset_type_id = dset->remote_dset.type_id;
     input.mem_type_id = mem_type_id;
     input.axe_info.axe_id = g_axe_id ++;
-    if(NULL != dset->common.request) {
+    if(NULL != dset->common.request && dset->common.request->state != H5VL_IOD_COMPLETED) {
         input.axe_info.num_parents = 1;
         input.axe_info.parent_axe_ids = &dset->common.request->axe_id;
-        dset->common.request->rc ++;
+        dset->common.request->ref_count ++;
         *parent_req = dset->common.request;
     }
     else {
@@ -3496,10 +3518,10 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
     input.bulk_handle = *bulk_handle;
     input.type_id = type_id;
     input.axe_info.axe_id = g_axe_id ++;
-    if(NULL != attr->common.request) {
+    if(NULL != attr->common.request && attr->common.request->state != H5VL_IOD_COMPLETED) {
         input.axe_info.num_parents = 1;
         input.axe_info.parent_axe_ids = &attr->common.request->axe_id;
-        attr->common.request->rc ++;
+        attr->common.request->ref_count ++;
         *parent_req = attr->common.request;
     }
     else {
@@ -3592,10 +3614,10 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     input.bulk_handle = *bulk_handle;
     input.type_id = type_id;
     input.axe_info.axe_id = g_axe_id ++;
-    if(NULL != attr->common.request) {
+    if(NULL != attr->common.request && attr->common.request->state != H5VL_IOD_COMPLETED) {
         input.axe_info.num_parents = 1;
         input.axe_info.parent_axe_ids = &attr->common.request->axe_id;
-        attr->common.request->rc ++;
+        attr->common.request->ref_count ++;
         *parent_req = attr->common.request;
     }
     else {
@@ -5543,7 +5565,7 @@ done:
 void *
 H5VL_iod_map_create(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
                     hid_t keytype, hid_t valtype, hid_t lcpl_id, hid_t mcpl_id, 
-                    hid_t mapl_id, uint64_t trans, void **req)
+                    hid_t mapl_id, hid_t trans_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the group */
     H5VL_iod_map_t *map = NULL; /* the map object that is created and passed to the user */
@@ -5650,7 +5672,7 @@ done:
 
 void *
 H5VL_iod_map_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t mapl_id, 
-                  uint64_t trans, void **req)
+                  hid_t rcxt_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the group */
     H5VL_iod_map_t *map = NULL; /* the map object that is created and passed to the user */
@@ -5738,7 +5760,7 @@ done:
 herr_t 
 H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key, 
                  hid_t val_mem_type_id, const void *value, hid_t dxpl_id, 
-                 uint64_t trans, void **req)
+                 hid_t trans_id, void **req)
 {
     H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
     map_set_in_t input;
@@ -5790,10 +5812,10 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
     input.val.buf_size = val_size;
     input.val.buf = value;
     input.axe_info.axe_id = g_axe_id ++;
-    if(NULL != map->common.request) {
+    if(NULL != map->common.request && map->common.request->state != H5VL_IOD_COMPLETED) {
         input.axe_info.num_parents = 1;
         input.axe_info.parent_axe_ids = &map->common.request->axe_id;
-        map->common.request->rc ++;
+        map->common.request->ref_count ++;
         *parent_req = map->common.request;
     }
     else {
@@ -5822,7 +5844,7 @@ done:
 herr_t 
 H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key, 
                  hid_t val_mem_type_id, void *value, hid_t dxpl_id, 
-                 uint64_t trans, void **req)
+                 hid_t rcxt_id, void **req)
 {
     H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
     map_get_in_t input;
@@ -5872,10 +5894,10 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
     input.key.buf = key;
     input.val_memtype_id = val_mem_type_id;
     input.axe_info.axe_id = g_axe_id ++;
-    if(NULL != map->common.request) {
+    if(NULL != map->common.request && map->common.request->state != H5VL_IOD_COMPLETED) {
         input.axe_info.num_parents = 1;
         input.axe_info.parent_axe_ids = &map->common.request->axe_id;
-        map->common.request->rc ++;
+        map->common.request->ref_count ++;
         *parent_req = map->common.request;
     }
     else {
@@ -5890,7 +5912,7 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
 #endif
 
     if(NULL == (output = (map_get_out_t *)H5MM_calloc(sizeof(map_get_out_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate a request");
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate map get output struct");
 
     output->val.val = value;
     output->val.val_size = val_size;
@@ -5907,7 +5929,7 @@ done:
 
 herr_t 
 H5VL_iod_map_get_types(void *_map, hid_t *key_type_id, hid_t *val_type_id, 
-                       uint64_t trans, void **req)
+                       hid_t rcxt_id, void **req)
 {
     H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
     herr_t ret_value = SUCCEED;
@@ -5934,7 +5956,7 @@ done:
 } /* end H5VL_iod_map_get_types() */
 
 herr_t 
-H5VL_iod_map_get_count(void *_map, hsize_t *count, uint64_t trans, void **req)
+H5VL_iod_map_get_count(void *_map, hsize_t *count, hid_t rcxt_id, void **req)
 {
     H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
     map_get_count_in_t input;
@@ -5951,10 +5973,10 @@ H5VL_iod_map_get_count(void *_map, hsize_t *count, uint64_t trans, void **req)
     input.iod_oh = map->remote_map.iod_oh;
     input.iod_id = map->remote_map.iod_id;
     input.axe_info.axe_id = g_axe_id ++;
-    if(NULL != map->common.request) {
+    if(NULL != map->common.request && map->common.request->state != H5VL_IOD_COMPLETED) {
         input.axe_info.num_parents = 1;
         input.axe_info.parent_axe_ids = &map->common.request->axe_id;
-        map->common.request->rc ++;
+        map->common.request->ref_count ++;
         *parent_req = map->common.request;
     }
     else {
@@ -5980,7 +6002,7 @@ done:
 
 herr_t 
 H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key, 
-                    htri_t *exists, uint64_t trans, void **req)
+                    htri_t *exists, hid_t rcxt_id, void **req)
 {
     H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
     map_op_in_t input;
@@ -6011,10 +6033,10 @@ H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key,
     input.key.buf_size = key_size;
     input.key.buf = key;
     input.axe_info.axe_id = g_axe_id ++;
-    if(NULL != map->common.request) {
+    if(NULL != map->common.request && map->common.request->state != H5VL_IOD_COMPLETED) {
         input.axe_info.num_parents = 1;
         input.axe_info.parent_axe_ids = &map->common.request->axe_id;
-        map->common.request->rc ++;
+        map->common.request->ref_count ++;
         *parent_req = map->common.request;
     }
     else {
@@ -6052,7 +6074,7 @@ done:
 
 herr_t 
 H5VL_iod_map_delete(void *_map, hid_t key_mem_type_id, const void *key, 
-                    uint64_t trans, void **req)
+                    hid_t trans_id, void **req)
 {
     H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
     map_op_in_t input;
@@ -6084,10 +6106,10 @@ H5VL_iod_map_delete(void *_map, hid_t key_mem_type_id, const void *key,
     input.key.buf_size = key_size;
     input.key.buf = key;
     input.axe_info.axe_id = g_axe_id ++;
-    if(NULL != map->common.request) {
+    if(NULL != map->common.request && map->common.request->state != H5VL_IOD_COMPLETED) {
         input.axe_info.num_parents = 1;
         input.axe_info.parent_axe_ids = &map->common.request->axe_id;
-        map->common.request->rc ++;
+        map->common.request->ref_count ++;
         *parent_req = map->common.request;
     }
     else {
@@ -6374,5 +6396,509 @@ H5VL_iod_wait(void **req, H5_status_t *status)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_wait() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_rc_acquire
+ *
+ * Purpose:	Forwards an acquire for a read context to IOD.
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_rc_acquire(H5VL_iod_file_t *file, H5RC_t *rc, uint64_t *c_version,
+                    hid_t rcapl_id, void **req)
+{
+    rc_acquire_in_t input;
+    H5VL_iod_rc_info_t *rc_info = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* set the input structure for the HG encode routine */
+    input.coh = file->remote_file.coh;
+    input.c_version = *c_version;
+    input.rcapl_id = rcapl_id;
+    input.axe_info.axe_id = g_axe_id ++;
+    input.axe_info.num_parents = 0;
+    input.axe_info.parent_axe_ids = NULL;
+
+    /* setup the info structure for updating the RC on completion */
+    if(NULL == (rc_info = (H5VL_iod_rc_info_t *)H5MM_calloc(sizeof(H5VL_iod_rc_info_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate RC info struct");
+
+    rc_info->read_cxt = rc;
+    rc_info->c_version_ptr = c_version;
+
+#if H5VL_IOD_DEBUG
+    printf("Read Context Acquire, version %llu, axe id %llu\n", 
+           input.c_version, input.axe_info.axe_id);
+#endif
+
+    if(H5VL__iod_create_and_forward(H5VL_RC_ACQUIRE_ID, HG_RC_ACQUIRE, 
+                                    (H5VL_iod_object_t *)file, 0, 0, NULL,
+                                    &input, &rc_info->result, rc_info, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship VOL op");
+
+#if 0
+    /* MSC - this is not needed because the user is repsonsible to wait on the acquire */
+    if(NULL != req) {
+        H5VL_iod_request_t *request = (H5VL_iod_request_t *)(*req);
+
+        rc->request = request;
+        request->ref_count ++;
+    }
+#endif
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_rc_acquire() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_rc_release
+ *
+ * Purpose:	Forwards an release on an acquired read context to IOD
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_rc_release(H5RC_t *rc, void **req)
+{
+    rc_release_in_t input;
+    int *status = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* set the input structure for the HG encode routine */
+    input.coh = rc->file->remote_file.coh;
+    input.c_version = rc->c_version;
+    input.axe_info.axe_id = g_axe_id ++;
+    input.axe_info.num_parents = 0;
+    input.axe_info.parent_axe_ids = NULL;
+
+    status = (int *)malloc(sizeof(int));
+
+#if H5VL_IOD_DEBUG
+    printf("Read Context Release, version %llu, axe id %llu\n", 
+           input.c_version, input.axe_info.axe_id);
+#endif
+
+    if(H5VL__iod_create_and_forward(H5VL_RC_RELEASE_ID, HG_RC_RELEASE, 
+                                    (H5VL_iod_object_t *)rc->file, 0, 0, NULL,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship VOL op");
+
+#if 0
+    /* MSC - this is not needed because the user is repsonsible to wait on the acquire */
+    if(NULL != rc->request) {
+        H5VL_iod_request_decr_rc(rc->request);
+    }
+#endif
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_rc_release() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_rc_persist
+ *
+ * Purpose:	Forwards an persist on an acquired read context to IOD
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_rc_persist(H5RC_t *rc, void **req)
+{
+    rc_persist_in_t input;
+    int *status = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* set the input structure for the HG encode routine */
+    input.coh = rc->file->remote_file.coh;
+    input.c_version = rc->c_version;
+    input.axe_info.axe_id = g_axe_id ++;
+    input.axe_info.num_parents = 0;
+    input.axe_info.parent_axe_ids = NULL;
+
+    status = (int *)malloc(sizeof(int));
+
+#if H5VL_IOD_DEBUG
+    printf("Read Context Persist, version %llu, axe id %llu\n", 
+           input.c_version, input.axe_info.axe_id);
+#endif
+
+    if(H5VL__iod_create_and_forward(H5VL_RC_PERSIST_ID, HG_RC_PERSIST, 
+                                    (H5VL_iod_object_t *)rc->file, 0, 0, NULL,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship VOL op");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_rc_persist() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_rc_snapshot
+ *
+ * Purpose:	Forwards an snapshot on an acquired read context to IOD
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_rc_snapshot(H5RC_t *rc, const char *snapshot_name, void **req)
+{
+    rc_snapshot_in_t input;
+    int *status = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* set the input structure for the HG encode routine */
+    input.coh = rc->file->remote_file.coh;
+    input.c_version = rc->c_version;
+    input.snapshot_name = snapshot_name;
+    input.axe_info.axe_id = g_axe_id ++;
+    input.axe_info.num_parents = 0;
+    input.axe_info.parent_axe_ids = NULL;
+
+    status = (int *)malloc(sizeof(int));
+
+#if H5VL_IOD_DEBUG
+    printf("Read Context Snapshot, version %llu, axe id %llu\n", 
+           input.c_version, input.axe_info.axe_id);
+#endif
+
+    if(H5VL__iod_create_and_forward(H5VL_RC_SNAPSHOT_ID, HG_RC_SNAPSHOT, 
+                                    (H5VL_iod_object_t *)rc->file, 0, 0, NULL,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship VOL op");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_rc_snapshot() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_tr_start
+ *
+ * Purpose:	Forwards a transaction start call to IOD
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_tr_start(H5TR_t *tr, hid_t trspl_id, void **req)
+{
+    tr_start_in_t input;
+    int *status = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* set the input structure for the HG encode routine */
+    input.coh = tr->file->remote_file.coh;
+    input.trans_num = tr->trans_num;
+    input.trspl_id = trspl_id;
+    input.axe_info.axe_id = g_axe_id ++;
+    input.axe_info.num_parents = 0;
+    input.axe_info.parent_axe_ids = NULL;
+
+    status = (int *)malloc(sizeof(int));
+
+#if H5VL_IOD_DEBUG
+    printf("Transaction start, number %llu, axe id %llu\n", 
+           input.trans_num, input.axe_info.axe_id);
+#endif
+
+    if(H5VL__iod_create_and_forward(H5VL_TR_START_ID, HG_TR_START, 
+                                    (H5VL_iod_object_t *)tr->file, 0, 0, NULL,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship VOL op");
+
+    if(NULL != req) {
+        H5VL_iod_request_t *request = (H5VL_iod_request_t *)(*req);
+
+        tr->request = request;
+        request->ref_count ++;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_tr_start() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_tr_finish
+ *
+ * Purpose:	Forwards a transaction finish call to IOD.
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_tr_finish(H5TR_t *tr, hbool_t acquire, hid_t trfpl_id, void **req)
+{
+    tr_finish_in_t input;
+    int *status = NULL;
+    H5VL_iod_request_t **parent_req = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (parent_req = (H5VL_iod_request_t **)H5MM_malloc(sizeof(H5VL_iod_request_t *))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+    /* set the input structure for the HG encode routine */
+    input.coh = tr->file->remote_file.coh;
+    input.trans_num = tr->trans_num;
+    input.trfpl_id = trfpl_id;
+    input.acquire = acquire;
+    input.axe_info.axe_id = g_axe_id ++;
+    input.axe_info.num_parents = 0;
+    input.axe_info.parent_axe_ids = NULL;
+
+    if(NULL != tr->request && tr->request->state != H5VL_IOD_COMPLETED) {
+        input.axe_info.num_parents = 1;
+        input.axe_info.parent_axe_ids = &tr->request->axe_id;
+        tr->request->ref_count ++;
+        *parent_req = tr->request;
+    }
+    else {
+        input.axe_info.num_parents = 0;
+        input.axe_info.parent_axe_ids = NULL;
+        *parent_req = NULL;
+    }
+
+    status = (int *)malloc(sizeof(int));
+
+#if H5VL_IOD_DEBUG
+    printf("Transaction Finish, %llu, axe id %llu, Parent %llu\n", 
+           input.trans_num, input.axe_info.axe_id,
+           ((input.axe_info.parent_axe_ids!=NULL) ? input.axe_info.parent_axe_ids[0] : 0));
+#endif
+
+    if(H5VL__iod_create_and_forward(H5VL_TR_FINISH_ID, HG_TR_FINISH, 
+                                    (H5VL_iod_object_t *)tr->file, 0, 
+                                    input.axe_info.num_parents, parent_req,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship VOL op");
+
+    if(NULL != tr->request) {
+        H5VL_iod_request_decr_rc(tr->request);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_tr_finish() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_tr_set_dependency
+ *
+ * Purpose:	Forwards a transaction set dependency to IOD
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_tr_set_dependency(H5TR_t *tr, uint64_t trans_num, void **req)
+{
+    tr_set_depend_in_t input;
+    int *status = NULL;
+    H5VL_iod_request_t **parent_req = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (parent_req = (H5VL_iod_request_t **)H5MM_malloc(sizeof(H5VL_iod_request_t *))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+    /* set the input structure for the HG encode routine */
+    input.coh = tr->file->remote_file.coh;
+    input.child_trans_num = tr->trans_num;
+    input.parent_trans_num = trans_num;
+    input.axe_info.axe_id = g_axe_id ++;
+
+    if(NULL != tr->request && tr->request->state != H5VL_IOD_COMPLETED) {
+        input.axe_info.num_parents = 1;
+        input.axe_info.parent_axe_ids = &tr->request->axe_id;
+        tr->request->ref_count ++;
+        *parent_req = tr->request;
+    }
+    else {
+        input.axe_info.num_parents = 0;
+        input.axe_info.parent_axe_ids = NULL;
+        *parent_req = NULL;
+    }
+
+#if H5VL_IOD_DEBUG
+    printf("Transaction Set Dependency, %llu on %llu axe id %llu, Parent %llu\n", 
+           input.child_trans_num, input.parent_trans_num, input.axe_info.axe_id,
+           ((input.axe_info.parent_axe_ids!=NULL) ? input.axe_info.parent_axe_ids[0] : 0));
+#endif
+
+    status = (int *)malloc(sizeof(int));
+
+    if(H5VL__iod_create_and_forward(H5VL_TR_SET_DEPEND_ID, HG_TR_SET_DEPEND, 
+                                    (H5VL_iod_object_t *)tr->file, 0, 
+                                    input.axe_info.num_parents, parent_req,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship VOL op");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_tr_set_dependency() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_tr_skip
+ *
+ * Purpose:	Forwards a transaction skip to IOD
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_tr_skip(H5VL_iod_file_t *file, uint64_t start_trans_num, uint64_t count, void **req)
+{
+    tr_skip_in_t input;
+    int *status = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* set the input structure for the HG encode routine */
+    input.coh = file->remote_file.coh;
+    input.start_trans_num = start_trans_num;
+    input.count = count;
+    input.axe_info.axe_id = g_axe_id ++;
+    input.axe_info.num_parents = 0;
+    input.axe_info.parent_axe_ids = NULL;
+
+#if H5VL_IOD_DEBUG
+    printf("Transaction Skip, tr %llu count %llu,, axe id %llu\n", 
+           input.start_trans_num, input.count, input.axe_info.axe_id);
+#endif
+
+    status = (int *)malloc(sizeof(int));
+
+    if(H5VL__iod_create_and_forward(H5VL_TR_SKIP_ID, HG_TR_SKIP, 
+                                    (H5VL_iod_object_t *)file, 0, 0, NULL,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship VOL op");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_tr_skip() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_tr_abort
+ *
+ * Purpose:	Forwards a transaction abort to IOD
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_tr_abort(H5TR_t *tr, void **req)
+{
+    tr_abort_in_t input;
+    int *status = NULL;
+    H5VL_iod_request_t **parent_req = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (parent_req = (H5VL_iod_request_t **)H5MM_malloc(sizeof(H5VL_iod_request_t *))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+    /* set the input structure for the HG encode routine */
+    input.coh = tr->file->remote_file.coh;
+    input.trans_num = tr->trans_num;
+    input.axe_info.axe_id = g_axe_id ++;
+    if(NULL != tr->request && tr->request->state != H5VL_IOD_COMPLETED) {
+        input.axe_info.num_parents = 1;
+        input.axe_info.parent_axe_ids = &tr->request->axe_id;
+        tr->request->ref_count ++;
+        *parent_req = tr->request;
+    }
+    else {
+        input.axe_info.num_parents = 0;
+        input.axe_info.parent_axe_ids = NULL;
+        *parent_req = NULL;
+    }
+
+    status = (int *)malloc(sizeof(int));
+
+#if H5VL_IOD_DEBUG
+    printf("Transaction Abort, tr %llu, axe id %llu, Parent %llu\n", 
+           input.trans_num, input.axe_info.axe_id,
+           ((input.axe_info.parent_axe_ids!=NULL) ? input.axe_info.parent_axe_ids[0] : 0));
+#endif
+
+    if(H5VL__iod_create_and_forward(H5VL_TR_ABORT_ID, HG_TR_ABORT, 
+                                    (H5VL_iod_object_t *)tr->file, 0, 
+                                    input.axe_info.num_parents, parent_req,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship VOL op");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_tr_abort() */
 
 #endif /* H5_HAVE_EFF */

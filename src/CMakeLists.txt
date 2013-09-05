@@ -469,6 +469,9 @@ SET (H5P_SRCS
     ${HDF5_SRC_DIR}/H5Pocpl.c
     ${HDF5_SRC_DIR}/H5Pocpypl.c
     ${HDF5_SRC_DIR}/H5Pstrcpl.c
+    ${HDF5_SRC_DIR}/H5Prcapl.c
+    ${HDF5_SRC_DIR}/H5Ptrspl.c
+    ${HDF5_SRC_DIR}/H5Ptrfpl.c
     ${HDF5_SRC_DIR}/H5Ptest.c
 )
 
@@ -629,11 +632,15 @@ IF (HDF5_ENABLE_EFF)
         ${HDF5_SRC_DIR}/H5FF.c
         ${HDF5_SRC_DIR}/H5M.c
         ${HDF5_SRC_DIR}/H5EQ.c
+        ${HDF5_SRC_DIR}/H5RC.c
+        ${HDF5_SRC_DIR}/H5TR.c
     )
     SET (H5FF_HDRS
         ${HDF5_SRC_DIR}/H5FFpublic.h
         ${HDF5_SRC_DIR}/H5Mpublic.h
         ${HDF5_SRC_DIR}/H5EQpublic.h
+        ${HDF5_SRC_DIR}/H5RCpublic.h
+        ${HDF5_SRC_DIR}/H5TRpublic.h
     )
     IDE_GENERATED_PROPERTIES ("H5FF" "${H5FF_HDRS}" "${H5FF_SRCS}" )
     SET (H5VL_SRCS
@@ -650,6 +657,7 @@ IF (HDF5_ENABLE_EFF)
         ${HDF5_SRC_DIR}/H5VLiod_link.c
         ${HDF5_SRC_DIR}/H5VLiod_obj.c
         ${HDF5_SRC_DIR}/H5VLiod_map.c
+        ${HDF5_SRC_DIR}/H5VLiod_trans.c
         ${HDF5_SRC_DIR}/H5VLiod_encdec.c
     )
     SET (H5VL_HDRS

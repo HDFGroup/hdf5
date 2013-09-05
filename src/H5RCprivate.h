@@ -27,6 +27,8 @@
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 
+#ifdef H5_HAVE_EFF
+
 /**************************/
 /* Library Private Macros */
 /**************************/
@@ -36,7 +38,7 @@
 /****************************/
 /* the client Read Context struct */
 typedef struct H5RC_t {
-    void *file;
+    struct H5VL_iod_file_t *file;
     uint64_t c_version;
 } H5RC_t;
 
@@ -47,15 +49,11 @@ typedef struct H5RC_t {
 /******************************/
 /* Library Private Prototypes */
 /******************************/
-#if 0
 herr_t H5RC_init(void);
 
-/* API wrappers */
 H5_DLL H5RC_t *H5RC_create(void *file, uint64_t c_version);
-H5_DLL herr_t H5RC_close(H5RC_t *rc);
+H5_DLL herr_t H5RC_close(H5RC_t *rcxt);
 
-H5_DLL herr_t H5VL_iod_rc_acquire(H5VL_iod_file_t *file, H5RC_t *rc, void **req);
-H5_DLL herr_t H5VL_iod_rc_release(H5RC_t *rc, void **req);
-#endif
+#endif /* H5_HAVE_EFF */
  
 #endif /* _H5RCprivate_H */

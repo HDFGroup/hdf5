@@ -31,7 +31,7 @@ if BUILD_EFF_CONDITIONAL
   INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test
   LDADD = $(LIBH5TEST) $(LIBHDF5)  $(MYAXE_LIBS) $(MYIOD_LIBS)
   EXAMPLE_PROG_EFF = h5ff_server h5ff_client h5ff_client_map h5ff_client_do \
-                h5ff_client_old_api h5ff_client_multiple_cont
+                h5ff_client_old_api h5ff_client_multiple_cont h5ff_client_trans
 endif
 
 # Example programs.

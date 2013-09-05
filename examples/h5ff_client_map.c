@@ -68,47 +68,47 @@ int main(int argc, char **argv) {
     assert(file_id);
 
     /* create two groups */
-    gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, (uint64_t)0, event_q);
-    gid2 = H5Gcreate_ff(file_id, "G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, (uint64_t)0, event_q);
+    gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
+    gid2 = H5Gcreate_ff(file_id, "G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
 
     /* Create Map objects with the key type and val type being 32 bit
        LE integers */
     map1 = H5Mcreate_ff(file_id, "MAP_1", H5T_STD_I32LE, H5T_STD_I32LE, 
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, (uint64_t)0, event_q);
+                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
     map2 = H5Mcreate_ff(file_id, "G1/MAP_2", H5T_STD_I32LE, H5T_STD_I32LE, 
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, (uint64_t)0, event_q);
+                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
     map3 = H5Mcreate_ff(file_id, "G1/G2/MAP_3", H5T_STD_I32LE, H5T_STD_I32LE, 
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, (uint64_t)0, event_q);
+                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
 
     {
         key = 1;
         value = 1000;
         ret = H5Mset_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, (uint64_t)0, event_q);
+                        H5P_DEFAULT, 0, event_q);
         assert(ret == 0);
 
         key = 2;
         value = 2000;
         ret = H5Mset_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, (uint64_t)0, event_q);
+                        H5P_DEFAULT, 0, event_q);
         assert(ret == 0);
 
         key = 3;
         value = 3000;
         ret = H5Mset_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, (uint64_t)0, event_q);
+                        H5P_DEFAULT, 0, event_q);
         assert(ret == 0);
     }
 
-    ret = H5Mget_count_ff(map3, &count, (uint64_t)0, event_q);
+    ret = H5Mget_count_ff(map3, &count, 0, event_q);
     assert(ret == 0);
 
     key = 1;
-    ret = H5Mexists_ff(map3, H5T_STD_I32LE, &key, &exists, (uint64_t)0, event_q);
+    ret = H5Mexists_ff(map3, H5T_STD_I32LE, &key, &exists, 0, event_q);
     assert(ret == 0);
 
     key = 1;
-    ret = H5Mdelete_ff(map3, H5T_STD_I32LE, &key, (uint64_t)0, event_q);
+    ret = H5Mdelete_ff(map3, H5T_STD_I32LE, &key, 0, event_q);
     assert(ret == 0);
 
     assert(H5Gclose_ff(gid1, event_q) == 0);
@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
     assert(H5Mclose_ff(map2, event_q) == 0);
     assert(H5Mclose_ff(map3, event_q) == 0);
 
-    map3 = H5Mopen_ff(file_id, "G1/G2/MAP_3", H5P_DEFAULT, (uint64_t)0, event_q);
+    map3 = H5Mopen_ff(file_id, "G1/G2/MAP_3", H5P_DEFAULT, 0, event_q);
 
     {
         int key, value;
@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
         key = 1;
         value = -1;
         ret = H5Mget_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, (uint64_t)0, event_q);
+                        H5P_DEFAULT, 0, event_q);
 
         if(H5EQpop(event_q, &req1) < 0)
             exit(1);
@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
         key = 1;
         value = -1;
         ret = H5Mget_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, (uint64_t)0, event_q);
+                        H5P_DEFAULT, 0, event_q);
 
         if(H5EQpop(event_q, &req1) < 0)
             exit(1);

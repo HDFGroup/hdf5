@@ -195,7 +195,7 @@ H5M_term_interface(void)
  */
 hid_t
 H5Mcreate_ff(hid_t loc_id, const char *name, hid_t keytype, hid_t valtype, 
-             hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, uint64_t trans, hid_t eq_id)
+             hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, hid_t trans_id, hid_t eq_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -206,6 +206,8 @@ H5Mcreate_ff(hid_t loc_id, const char *name, hid_t keytype, hid_t valtype,
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE9("i", "i*siiiiiii", loc_id, name, keytype, valtype, lcpl_id, mcpl_id,
+             mapl_id, trans_id, eq_id);
 
     /* Check arguments */
     if(!name || !*name)
@@ -257,11 +259,12 @@ H5Mcreate_ff(hid_t loc_id, const char *name, hid_t keytype, hid_t valtype,
 
     /* call the IOD specific private routine to create a map object */
     if(NULL == (map = H5VL_iod_map_create(obj, loc_params, name, keytype, valtype, 
-                                          lcpl_id, mcpl_id, mapl_id, trans, req)))
+                                          lcpl_id, mcpl_id, mapl_id, trans_id, req)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create map")
 
     /* increment the ref count on the VOL plugin */
     vol_plugin->nrefs ++;
+
     if(request && *req) {
         H5EQ_t *eq = NULL;                    /* event queue token */
 
@@ -304,7 +307,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, uint64_t trans, hid_t eq_id)
+H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, hid_t rcxt_id, hid_t eq_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -315,6 +318,7 @@ H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, uint64_t trans, hid_t 
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE5("i", "i*siii", loc_id, name, mapl_id, rcxt_id, eq_id);
 
     /* Check arguments */
     if(!name || !*name)
@@ -351,7 +355,7 @@ H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, uint64_t trans, hid_t 
     }
 
     /* call the IOD specific private routine to create a map object */
-    if(NULL == (map = H5VL_iod_map_open(obj, loc_params, name, mapl_id, trans, req)))
+    if(NULL == (map = H5VL_iod_map_open(obj, loc_params, name, mapl_id, rcxt_id, req)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create map")
 
     /* increment the ref count on the VOL plugin */
@@ -395,7 +399,7 @@ done:
  */
 herr_t
 H5Mset_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, 
-          const void *value, hid_t dxpl_id, uint64_t trans, hid_t eq_id)
+          const void *value, hid_t dxpl_id, hid_t trans_id, hid_t eq_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -404,6 +408,8 @@ H5Mset_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE8("e", "ii*xi*xiii", map_id, key_mem_type_id, key, val_mem_type_id,
+             value, dxpl_id, trans_id, eq_id);
 
     /* check arguments */
     if(!map_id)
@@ -435,7 +441,7 @@ H5Mset_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
 
     /* Set the data through the IOD VOL */
     if((ret_value = H5VL_iod_map_set(map, key_mem_type_id, key, val_mem_type_id, value, 
-                                     dxpl_id, trans, req)) < 0)
+                                     dxpl_id, trans_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set map KV pair")
 
     if(request && *req) {
@@ -470,7 +476,7 @@ done:
  */
 herr_t
 H5Mget_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, 
-          void *value, hid_t dxpl_id, uint64_t trans, hid_t eq_id)
+          void *value, hid_t dxpl_id, hid_t rcxt_id, hid_t eq_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -479,6 +485,8 @@ H5Mget_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE8("e", "ii*xi*xiii", map_id, key_mem_type_id, key, val_mem_type_id,
+             value, dxpl_id, rcxt_id, eq_id);
 
     /* check arguments */
     if(!map_id)
@@ -510,7 +518,7 @@ H5Mget_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
 
     /* Get the data through the IOD VOL */
     if((ret_value = H5VL_iod_map_get(map, key_mem_type_id, key, val_mem_type_id, value, 
-                                     dxpl_id, trans, req)) < 0)
+                                     dxpl_id, rcxt_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {
@@ -546,7 +554,7 @@ done:
  */
 herr_t
 H5Mget_types_ff(hid_t map_id, hid_t *key_type_id, hid_t *val_type_id, 
-                uint64_t trans, hid_t eq_id)
+                hid_t rcxt_id, hid_t eq_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -555,6 +563,7 @@ H5Mget_types_ff(hid_t map_id, hid_t *key_type_id, hid_t *val_type_id,
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "i*i*iii", map_id, key_type_id, val_type_id, rcxt_id, eq_id);
 
     /* check arguments */
     if(!map_id)
@@ -578,7 +587,7 @@ H5Mget_types_ff(hid_t map_id, hid_t *key_type_id, hid_t *val_type_id,
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_map_get_types(map, key_type_id, val_type_id, trans, req)) < 0)
+    if((ret_value = H5VL_iod_map_get_types(map, key_type_id, val_type_id, rcxt_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {
@@ -609,7 +618,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Mget_count_ff(hid_t map_id, hsize_t *count, uint64_t trans, hid_t eq_id)
+H5Mget_count_ff(hid_t map_id, hsize_t *count, hid_t rcxt_id, hid_t eq_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -618,6 +627,7 @@ H5Mget_count_ff(hid_t map_id, hsize_t *count, uint64_t trans, hid_t eq_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "i*hii", map_id, count, rcxt_id, eq_id);
 
     /* check arguments */
     if(!map_id)
@@ -641,7 +651,7 @@ H5Mget_count_ff(hid_t map_id, hsize_t *count, uint64_t trans, hid_t eq_id)
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_map_get_count(map, count, trans, req)) < 0)
+    if((ret_value = H5VL_iod_map_get_count(map, count, rcxt_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {
@@ -675,7 +685,7 @@ done:
  */
 herr_t
 H5Mexists_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, 
-             htri_t *exists, uint64_t trans, hid_t eq_id)
+             htri_t *exists, hid_t rcxt_id, hid_t eq_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -684,6 +694,7 @@ H5Mexists_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "ii*x*tii", map_id, key_mem_type_id, key, exists, rcxt_id, eq_id);
 
     /* check arguments */
     if(!map_id)
@@ -707,7 +718,7 @@ H5Mexists_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_map_exists(map, key_mem_type_id, key, exists, trans, req)) < 0)
+    if((ret_value = H5VL_iod_map_exists(map, key_mem_type_id, key, exists, rcxt_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {
@@ -784,7 +795,7 @@ done:
  */
 herr_t
 H5Mdelete_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, 
-             uint64_t trans, hid_t eq_id)
+             hid_t trans_id, hid_t eq_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -793,6 +804,7 @@ H5Mdelete_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "ii*xii", map_id, key_mem_type_id, key, trans_id, eq_id);
 
     /* check arguments */
     if(!map_id)
@@ -816,7 +828,7 @@ H5Mdelete_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
     }
 
     /* delete the key pair through the IOD VOL */
-    if((ret_value = H5VL_iod_map_delete(map, key_mem_type_id, key, trans, req)) < 0)
+    if((ret_value = H5VL_iod_map_delete(map, key_mem_type_id, key, trans_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {

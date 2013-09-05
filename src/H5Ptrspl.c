@@ -37,7 +37,7 @@
 #include "H5Eprivate.h"		/* Error handling */
 #include "H5Iprivate.h"		/* IDs */
 #include "H5Ppkg.h"		/* Property lists */
-#include "H5TRprivate.h"	/* Read Context */
+#include "H5TRprivate.h"	/* Transactions */
 
 /****************/
 /* Local Macros */

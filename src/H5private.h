@@ -2365,6 +2365,8 @@ H5_DLL int H5AC_term_interface(void);
 H5_DLL int H5D_term_interface(void);
 H5_DLL int H5E_term_interface(void);
 H5_DLL int H5EQ_term_interface(void);
+H5_DLL int H5RC_term_interface(void);
+H5_DLL int H5TR_term_interface(void);
 H5_DLL int H5F_term_interface(void);
 H5_DLL int H5FS_term_interface(void);
 H5_DLL int H5G_term_interface(void);

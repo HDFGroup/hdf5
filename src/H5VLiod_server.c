@@ -158,6 +158,26 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     MERCURY_HANDLER_REGISTER("object_get_info", H5VL_iod_server_object_get_info,
                              object_op_in_t, oinfo_t);
 
+    MERCURY_HANDLER_REGISTER("read_context_acquire", H5VL_iod_server_rcxt_acquire, 
+                             rc_acquire_in_t, rc_acquire_out_t);
+    MERCURY_HANDLER_REGISTER("read_context_release", H5VL_iod_server_rcxt_release, 
+                             rc_release_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("read_context_persist", H5VL_iod_server_rcxt_persist, 
+                             rc_persist_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("read_context_snapshot", H5VL_iod_server_rcxt_snapshot, 
+                             rc_snapshot_in_t, ret_t);
+
+    MERCURY_HANDLER_REGISTER("transaction_start", H5VL_iod_server_trans_start, 
+                             tr_start_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("transaction_finish", H5VL_iod_server_trans_finish, 
+                             tr_finish_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("transaction_set_depend", H5VL_iod_server_trans_set_dependency, 
+                             tr_set_depend_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("transaction_skip", H5VL_iod_server_trans_skip, 
+                             tr_skip_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("transaction_abort", H5VL_iod_server_trans_abort, 
+                             tr_abort_in_t, ret_t);
+
     MERCURY_HANDLER_REGISTER("cancel_op", H5VL_iod_server_cancel_op, uint64_t, uint8_t);
 
     /* Initialize engine attribute */
@@ -2824,5 +2844,482 @@ H5VL_iod_server_map_close(hg_handle_t handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_map_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_rcxt_acquire
+ *
+ * Purpose:	Function shipper registered call for Read Context Acquire.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int 
+H5VL_iod_server_rcxt_acquire(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    rc_acquire_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (rc_acquire_in_t *)H5MM_malloc(sizeof(rc_acquire_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_rcxt_acquire_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_rcxt_acquire() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_rcxt_release
+ *
+ * Purpose:	Function shipper registered call for read context release.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int 
+H5VL_iod_server_rcxt_release(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    rc_release_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (rc_release_in_t *)H5MM_malloc(sizeof(rc_release_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_rcxt_release_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_rcxt_release() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_rcxt_persist
+ *
+ * Purpose:	Function shipper registered call for read context persist.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int 
+H5VL_iod_server_rcxt_persist(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    rc_persist_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (rc_persist_in_t *)H5MM_malloc(sizeof(rc_persist_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_rcxt_persist_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_rcxt_persist() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_rcxt_snapshot
+ *
+ * Purpose:	Function shipper registered call for read context snapshot.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int 
+H5VL_iod_server_rcxt_snapshot(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    rc_snapshot_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (rc_snapshot_in_t *)H5MM_malloc(sizeof(rc_snapshot_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_rcxt_snapshot_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_rcxt_snapshot() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_trans_start
+ *
+ * Purpose:	Function shipper registered call for transaction start.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int 
+H5VL_iod_server_trans_start(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    tr_start_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (tr_start_in_t *)H5MM_malloc(sizeof(tr_start_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_trans_start_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_trans_start() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_trans_finish
+ *
+ * Purpose:	Function shipper registered call for transaction finish.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int 
+H5VL_iod_server_trans_finish(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    tr_finish_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (tr_finish_in_t *)H5MM_malloc(sizeof(tr_finish_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_trans_finish_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_trans_finish() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_trans_set_dependency
+ *
+ * Purpose:	Function shipper registered call for transaction set_dependency. 
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int 
+H5VL_iod_server_trans_set_dependency(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    tr_set_depend_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (tr_set_depend_in_t *)H5MM_malloc(sizeof(tr_set_depend_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_trans_set_dependency_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_trans_set_dependency() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_trans_skip
+ *
+ * Purpose:	Function shipper registered call for transaction skip.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int 
+H5VL_iod_server_trans_skip(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    tr_skip_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (tr_skip_in_t *)H5MM_malloc(sizeof(tr_skip_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_trans_skip_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_trans_skip() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_trans_abort
+ *
+ * Purpose:	Function shipper registered call for transaction abort.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int 
+H5VL_iod_server_trans_abort(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    tr_abort_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (tr_abort_in_t *)H5MM_malloc(sizeof(tr_abort_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_trans_abort_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_trans_abort() */
 
 #endif /* H5_HAVE_EFF */

@@ -34,11 +34,15 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5TRprivate.h"        /* Transactions                         */
+#include "H5EQprivate.h"        /* Event Queues                         */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5RCprivate.h"	/* Read Contexts			*/
+#include "H5TRprivate.h"        /* Transactions                         */
 #include "H5VLprivate.h"	/* VOL plugins				*/
+#include "H5VLiod_client.h"	/* IOD VOL plugin			*/
 
+#ifdef H5_HAVE_EFF
 
 /****************/
 /* Local Macros */
@@ -78,8 +82,8 @@ static const H5I_class_t H5I_TR_CLS[1] = {{
     0,				/* Class flags */
     64,				/* Minimum hash size for class */
     2,				/* # of reserved IDs for class */
-    NULL,                   	/* Callback routine for closing objects of this class */
-    (H5I_free2_t)H5TR_close     /* Callback routine for closing auxilary objects of this class */
+    (H5I_free_t)H5TR_close,   	/* Callback routine for closing objects of this class */
+    NULL                        /* Callback routine for closing auxilary objects of this class */
 }};
 
 
@@ -233,6 +237,41 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Pget_trspl_num_peers
+ *
+ * Purpose:     Get the number of peers that will call H5TRstart for a
+ *              transaction.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_trspl_num_peers(hid_t trspl_id, unsigned *num_peers)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Iu", trspl_id, num_peers);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(trspl_id, H5P_TR_START)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set property */
+    if(H5P_get(plist, H5TR_START_NUM_PEERS_NAME, num_peers) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get num peers in transaction");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_trspl_num_peers() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5TRcreate
  *
  * Purpose:	Wraps an hid_t around a transaction number, a file ID, 
@@ -253,6 +292,7 @@ H5TRcreate(hid_t file_id, hid_t rc_id, uint64_t trans_num)
     void *file = NULL;
     H5VL_t *vol_plugin = NULL;
     H5TR_t *tr = NULL;
+    H5RC_t *rc = NULL;
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -296,8 +336,6 @@ done:
 H5TR_t *
 H5TR_create(void *file, H5RC_t *rc, uint64_t trans_num)
 {
-    void *file = NULL;
-    H5VL_t *vol_plugin = NULL;
     H5TR_t *tr = NULL;
     H5TR_t *ret_value = NULL;          /* Return value */
 
@@ -307,7 +345,7 @@ H5TR_create(void *file, H5RC_t *rc, uint64_t trans_num)
     if(NULL == (tr = H5FL_CALLOC(H5TR_t)))
 	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate top transaction structure")
 
-    tr->file = file;
+    tr->file = (H5VL_iod_file_t *)file;
     tr->c_version = rc->c_version;
     tr->trans_num = trans_num;
 
@@ -315,10 +353,7 @@ H5TR_create(void *file, H5RC_t *rc, uint64_t trans_num)
     ret_value = tr;
 
 done:
-    if(!ret_value && tr)
-	tr = H5FL_FREE(H5TR_t, tr);
-
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5TR_create() */
 
 
@@ -326,6 +361,8 @@ done:
  * Function:	H5TRstart
  *
  * Purpose:     Starts a transaction that has been created with H5TRcreate.
+ *              If the operation fails, the user is still reponsible to call
+ *              H5TRclose() on the returned value to free resources.
  *
  * Return:	Success:	Non-Negative.
  *		Failure:	Negative
@@ -339,9 +376,10 @@ herr_t
 H5TRstart(hid_t tr_id, hid_t trspl_id, hid_t eq_id)
 {
     H5TR_t *tr = NULL;
+    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    herr_t ret_value;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iii", tr_id, trspl_id, eq_id);
@@ -356,6 +394,10 @@ H5TRstart(hid_t tr_id, hid_t trspl_id, hid_t eq_id)
     else
         if(TRUE != H5P_isa_class(trspl_id, H5P_TR_START))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not transaction start property list")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     if(eq_id != H5_EVENT_QUEUE_NULL) {
         /* create the private request */
@@ -383,7 +425,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5TRfinish
  *
- * Purpose:     Finishes/Commits a transaction.
+ * Purpose:     Finishes/Commits a transaction. If rcxt_id is not NULL,
+ *              create a read context from the finished transaction number.
+ *              If the finish fails, the user is still reponsible to call
+ *              H5RCclose() on the rcxt_id and H5TRclose() on the tr_id 
+ *              to free resources.
  *
  * Return:	Success:	Non-Negative.
  *		Failure:	Negative
@@ -394,15 +440,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TRfinish(hid_t trans_id, hid_t trfpl_id, hid_t eq_id)
+H5TRfinish(hid_t tr_id, hid_t trfpl_id, hid_t *rcxt_id, hid_t eq_id)
 {
     H5TR_t *tr = NULL;
+    H5RC_t *rc = NULL;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    hbool_t acquire = FALSE;
+    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    herr_t ret_value;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iii", trans_id, trfpl_id, eq_id);
+    H5TRACE4("e", "ii*ii", tr_id, trfpl_id, rcxt_id, eq_id);
 
     /* get the TR object */
     if(NULL == (tr = (H5TR_t *)H5I_object_verify(tr_id, H5I_TR)))
@@ -415,6 +465,22 @@ H5TRfinish(hid_t trans_id, hid_t trfpl_id, hid_t eq_id)
         if(TRUE != H5P_isa_class(trfpl_id, H5P_TR_FINISH))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not transaction finish property list")
 
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+
+    /* create a new read context object (if user requested it) with
+       the provided transaction number to finish */
+    if(rcxt_id) {
+        acquire = TRUE;
+
+        if(NULL == (rc = H5RC_create(tr->file, tr->trans_num)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create read context");
+        /* Get an atom for the event queue with the VOL information as the auxilary struct */
+        if((*rcxt_id = H5I_register2(H5I_RC, rc, vol_plugin, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize read context handle");
+    }
+
     if(eq_id != H5_EVENT_QUEUE_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
@@ -425,7 +491,7 @@ H5TRfinish(hid_t trans_id, hid_t trfpl_id, hid_t eq_id)
         request->vol_plugin = vol_plugin;
     }
 
-    if(H5VL_iod_tr_finish(tr, trfpl_id, req) < 0)
+    if(H5VL_iod_tr_finish(tr, acquire, trfpl_id, req) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a transaction finish");
 
     if(request && *req) {
@@ -439,12 +505,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5TRfinish
+ * Function:	H5TRset_dependency
  *
  * Purpose:     Set a depedency between two transactions. Transaction
- *              associated with trans_id is declaring a dependency on transaction
+ *              associated with tr_id is declaring a dependency on transaction
  *              numbered trans_num.  trans_num must be < the transaction number
- *              trans_id is associated with.
+ *              tr_id is associated with.
  *
  * Return:	Success:	Non-Negative.
  *		Failure:	Negative
@@ -455,12 +521,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TRset_dependency(hid_t trans_id, uint64_t trans_num, hid_t eq_id)
+H5TRset_dependency(hid_t tr_id, uint64_t trans_num, hid_t eq_id)
 {
     H5TR_t *tr = NULL;
+    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    herr_t ret_value;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
@@ -470,6 +537,10 @@ H5TRset_dependency(hid_t trans_id, uint64_t trans_num, hid_t eq_id)
 
     if(tr->trans_num <= trans_num)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "The dependent transaction must be higher than the one it depends on")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     if(eq_id != H5_EVENT_QUEUE_NULL) {
         /* create the private request */
@@ -495,6 +566,61 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5TRskip
+ *
+ * Purpose:     Skip a sequence of transaction numbers from the container.
+ *
+ * Return:	Success:	Non-Negative.
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		August 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TRskip(hid_t file_id, uint64_t start_trans_num, uint64_t count, hid_t eq_id)
+{
+    void *file = NULL;
+    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* get the file object */
+    if(NULL == (file = (void *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
+    if(H5VL_iod_tr_skip(file, start_trans_num, count, req) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a transaction skip");
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5TRskip()*/
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5TRabort
  *
  * Purpose:     Aborts a transaction
@@ -508,15 +634,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TRabort(hid_t trans_id, hid_t eq_id)
+H5TRabort(hid_t tr_id, hid_t eq_id)
 {
     H5TR_t *tr = NULL;
+    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    herr_t ret_value;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", trans_id, eq_id);
+    H5TRACE2("e", "ii", tr_id, eq_id);
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     /* get the TR object */
     if(NULL == (tr = (H5TR_t *)H5I_object_verify(tr_id, H5I_TR)))
@@ -567,7 +698,7 @@ H5TRclose(hid_t tr_id)
     H5TRACE1("e", "i", tr_id);
 
     /* Check args */
-    if(NULL == H5I_object_verify(tr_id,H5I_TR))
+    if(NULL == H5I_object_verify(tr_id, H5I_TR))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an transaction ID")
 
     if(H5I_dec_app_ref(tr_id) < 0)
@@ -581,8 +712,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5TR_close
  *
- * Purpose:	Closes the specified transaction ID.  The ID will no longer be
- *		valid for accessing the transaction.
+ * Purpose:	Frees the transaction struct.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -594,13 +724,11 @@ done:
 herr_t
 H5TR_close(H5TR_t *tr)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     tr = H5FL_FREE(H5TR_t, tr);
 
-done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5TR_close() */
 
+#endif /* H5_HAVE_EFF */

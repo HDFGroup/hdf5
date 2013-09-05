@@ -21,6 +21,8 @@
 
 #include "H5FFprivate.h"     /* FastForward wrappers            */
 #include "H5Mpublic.h"
+#include "H5RCprivate.h"     /* Read contexts */
+#include "H5TRprivate.h"     /* Transactions */
 #include "H5VLiod_common.h"
 
 #ifdef H5_HAVE_EFF
@@ -78,7 +80,16 @@ typedef enum H5RQ_type_t {
     HG_OBJECT_EXISTS,
     HG_OBJECT_SET_COMMENT,
     HG_OBJECT_GET_COMMENT,
-    HG_OBJECT_GET_INFO
+    HG_OBJECT_GET_INFO,
+    HG_RC_ACQUIRE,
+    HG_RC_RELEASE,
+    HG_RC_PERSIST,
+    HG_RC_SNAPSHOT,
+    HG_TR_START,
+    HG_TR_FINISH,
+    HG_TR_SET_DEPEND,
+    HG_TR_SKIP,
+    HG_TR_ABORT
 } H5RQ_type_t;
 
 /* the client IOD VOL request struct */
@@ -96,7 +107,7 @@ typedef struct H5VL_iod_request_t {
     struct H5VL_iod_request_t *next;
     struct H5VL_iod_request_t *global_prev;
     struct H5VL_iod_request_t *global_next;
-    unsigned rc;
+    unsigned ref_count;
 } H5VL_iod_request_t;
 
 /* struct that contains the information about the IOD container */
@@ -252,6 +263,13 @@ typedef struct H5VL_iod_io_info_t {
 
 } H5VL_iod_io_info_t;
 
+/* information about a read context acquire request*/
+typedef struct H5VL_iod_rc_info_t {
+    rc_acquire_out_t result;
+    H5RC_t *read_cxt;
+    uint64_t *c_version_ptr;
+} H5VL_iod_rc_info_t;
+
 H5_DLL herr_t H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
@@ -287,25 +305,40 @@ H5_DLL herr_t H5VL_iod_pre_read(hid_t type_id, hid_t space_id, const void *buf,
 H5_DLL herr_t H5M_init(void);
 H5_DLL void *H5VL_iod_map_create(void *obj, H5VL_loc_params_t loc_params, const char *name, 
                                  hid_t keytype, hid_t valtype, hid_t lcpl_id, hid_t mcpl_id, 
-                                 hid_t mapl_id, uint64_t trans, void **req);
+                                 hid_t mapl_id, hid_t trans_id, void **req);
 H5_DLL void *H5VL_iod_map_open(void *obj, H5VL_loc_params_t loc_params,
-                               const char *name, hid_t mapl_id, uint64_t trans, void **req);
+                               const char *name, hid_t mapl_id, hid_t rcxt_id, void **req);
 H5_DLL herr_t H5VL_iod_map_set(void *map, hid_t key_mem_type_id, const void *key, 
                                hid_t val_mem_type_id, const void *value, hid_t dxpl_id, 
-                               uint64_t trans, void **req);
+                               hid_t trans_id, void **req);
 H5_DLL herr_t H5VL_iod_map_get(void *map, hid_t key_mem_type_id, const void *key, 
                                hid_t val_mem_type_id, void *value, hid_t dxpl_id, 
-                               uint64_t trans, void **req);
+                               hid_t rcxt_id, void **req);
 H5_DLL herr_t H5VL_iod_map_get_types(void *map, hid_t *key_type_id, hid_t *val_type_id, 
-                                     uint64_t trans, void **req);
-H5_DLL herr_t H5VL_iod_map_get_count(void *map, hsize_t *count, uint64_t trans, void **req);
+                                     hid_t rcxt_id, void **req);
+H5_DLL herr_t H5VL_iod_map_get_count(void *map, hsize_t *count, hid_t rcxt_id, void **req);
 H5_DLL herr_t H5VL_iod_map_exists(void *map, hid_t key_mem_type_id, const void *key, 
-                                  htri_t *exists, uint64_t trans, void **req);
+                                  htri_t *exists, hid_t rcxt_id, void **req);
 H5_DLL herr_t H5VL_iod_map_iterate(void *map, hid_t key_mem_type_id, hid_t value_mem_type_id, 
                                    H5M_iterate_func_t callback_func, void *context);
 H5_DLL herr_t H5VL_iod_map_delete(void *map, hid_t key_mem_type_id, const void *key, 
-                                  uint64_t trans, void **req);
+                                  hid_t trans_id, void **req);
 H5_DLL herr_t H5VL_iod_map_close(void *map, void **req);
+
+/* private routines for RC */
+H5_DLL herr_t H5VL_iod_rc_acquire(H5VL_iod_file_t *file, H5RC_t *rc, 
+                                  uint64_t *c_version, hid_t rcapl_id, void **req);
+H5_DLL herr_t H5VL_iod_rc_release(H5RC_t *rc, void **req);
+H5_DLL herr_t H5VL_iod_rc_persist(H5RC_t *rc, void **req);
+H5_DLL herr_t H5VL_iod_rc_snapshot(H5RC_t *rc, const char *snapshot_name, void **req);
+
+/* private routines for TR */
+H5_DLL herr_t H5VL_iod_tr_start(H5TR_t *tr, hid_t trspl_id, void **req);
+H5_DLL herr_t H5VL_iod_tr_finish(H5TR_t *tr, hbool_t acquire, hid_t trfpl_id, void **req);
+H5_DLL herr_t H5VL_iod_tr_set_dependency(H5TR_t *tr, uint64_t trans_num, void **req);
+H5_DLL herr_t H5VL_iod_tr_skip(H5VL_iod_file_t *file, uint64_t start_trans_num, 
+                               uint64_t count, void **req);
+H5_DLL herr_t H5VL_iod_tr_abort(H5TR_t *tr, void **req);
 
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_client_H */

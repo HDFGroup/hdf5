@@ -50,9 +50,9 @@
 #ifdef H5_HAVE_EFF
 
 #define H5D_XFER_INJECT_CORRUPTION_SIZE		sizeof(hbool_t)
-#define H5D_XFER_INJECT_CORRUPTION_DEF    		FALSE
-#define H5D_XFER_INJECT_CORRUPTION_ENC                H5P__encode_hbool_t
-#define H5D_XFER_INJECT_CORRUPTION_DEC                H5P__decode_hbool_t
+#define H5D_XFER_INJECT_CORRUPTION_DEF  	FALSE
+#define H5D_XFER_INJECT_CORRUPTION_ENC          H5P__encode_hbool_t
+#define H5D_XFER_INJECT_CORRUPTION_DEC           H5P__decode_hbool_t
 
 #define H5D_XFER_CHECKSUM_SIZE		sizeof(unsigned)
 #define H5D_XFER_CHECKSUM_DEF  		0

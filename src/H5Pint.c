@@ -216,23 +216,6 @@ const H5P_libclass_t H5P_CLS_TACC[1] = {{
     NULL 		        /* Class close callback info    */
 }};
 
-/* Transaction finish property list class library initialization object */
-/* (move to proper source code file when used for real) */
-const H5P_libclass_t H5P_CLS_TRFCC[1] = {{
-    "transaction finish",	/* Class name for debugging     */
-    H5P_TYPE_TRANSACTION_FINISH,         /* Class type                   */
-    &H5P_CLS_ROOT_g,            	/* Parent class ID              */
-    &H5P_CLS_TRANSACTION_FINISH_g,	/* Pointer to class ID          */
-    &H5P_LST_TRANSACTION_FINISH_g,	/* Pointer to default property list ID */
-    NULL,			/* Default property registration routine */
-    NULL,		        /* Class creation callback      */
-    NULL,		        /* Class creation callback info */
-    NULL,			/* Class copy callback          */
-    NULL,		        /* Class copy callback info     */
-    NULL,			/* Class close callback         */
-    NULL 		        /* Class close callback info    */
-}};
-
 /* Library property list classes defined in other code modules */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_OCRT[1];         /* Object creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_STRCRT[1];       /* String create */
@@ -249,7 +232,7 @@ H5_DLLVAR const H5P_libclass_t H5P_CLS_ACRT[1];         /* Attribute creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_LCRT[1];         /* Link creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_RCACC[1];        /* Read Context acquire */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_TRSCC[1];        /* Transaction start */
-//H5_DLLVAR const H5P_libclass_t H5P_CLS_TRFCC[1];        /* Transaction finish */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_TRFCC[1];        /* Transaction finish */
 
 /*****************************/
 /* Library Private Variables */

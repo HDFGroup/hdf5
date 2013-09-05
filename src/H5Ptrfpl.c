@@ -15,11 +15,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Prcapl.c
+ * Created:		H5Ptrspl.c
  *			August 2013
  *			Mohamad Chaarawi <chaarawi@hdfgroup.org>
  *
- * Purpose:		Read Context Acquire property list class routines
+ * Purpose:		Transaction Finish property list class routines
  *
  *-------------------------------------------------------------------------
  */
@@ -37,18 +37,18 @@
 #include "H5Eprivate.h"		/* Error handling */
 #include "H5Iprivate.h"		/* IDs */
 #include "H5Ppkg.h"		/* Property lists */
-#include "H5RCprivate.h"	/* Read Context */
+#include "H5TRprivate.h"	/* Transactions */
 
 /****************/
 /* Local Macros */
 /****************/
 
 /* ========= Read Context properties ============ */
-/* Definitions for Container Version being Acquired  */
-#define H5RC_ACQUIRE_CV_REQUEST_SIZE      sizeof(H5RC_request_t)
-#define H5RC_ACQUIRE_CV_REQUEST_DEF       H5RC_EXACT
-#define H5RC_ACQUIRE_CV_REQUEST_ENC       H5P__encode_uint8_t
-#define H5RC_ACQUIRE_CV_REQUEST_DEC       H5P__decode_uint8_t
+/* Definitions for Transaction being finished  */
+#define H5TR_FINISH_ACQUIRE_SIZE        sizeof(hbool_t)
+#define H5TR_FINISH_ACQUIRE_DEF         FALSE
+#define H5TR_FINISH_ACQUIRE_ENC         H5P__encode_hbool_t
+#define H5TR_FINISH_ACQUIRE_DEC         H5P__decode_hbool_t
 
 /******************/
 /* Local Typedefs */
@@ -65,21 +65,21 @@
 /********************/
 
 /* Property class callbacks */
-static herr_t H5P__rcacc_reg_prop(H5P_genclass_t *pclass);
+static herr_t H5P__trfcc_reg_prop(H5P_genclass_t *pclass);
 
 
 /*********************/
 /* Package Variables */
 /*********************/
 
-/* Read Context acquire property list class library initialization object */
-const H5P_libclass_t H5P_CLS_RCACC[1] = {{
-    "read context acquire",	        /* Class name for debugging     */
-    H5P_TYPE_READ_CONTEXT_ACQUIRE,       /* Class type                   */
+/* Transaction finish property list class library initialization object */
+const H5P_libclass_t H5P_CLS_TRFCC[1] = {{
+    "transaction finish",	        /* Class name for debugging     */
+    H5P_TYPE_TRANSACTION_FINISH,         /* Class type                   */
     &H5P_CLS_ROOT_g,            	/* Parent class ID              */
-    &H5P_CLS_READ_CONTEXT_ACQUIRE_g,	/* Pointer to class ID          */
-    &H5P_LST_READ_CONTEXT_ACQUIRE_g,	/* Pointer to default property list ID */
-    H5P__rcacc_reg_prop,		/* Default property registration routine */
+    &H5P_CLS_TRANSACTION_FINISH_g,	/* Pointer to class ID          */
+    &H5P_LST_TRANSACTION_FINISH_g,	/* Pointer to default property list ID */
+    H5P__trfcc_reg_prop,		/* Default property registration routine */
     NULL,		                /* Class creation callback      */
     NULL,		                /* Class creation callback info */
     NULL,		                /* Class copy callback          */
@@ -101,9 +101,9 @@ const H5P_libclass_t H5P_CLS_RCACC[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P__rcacc_reg_prop
+ * Function:    H5P__trfcc_reg_prop
  *
- * Purpose:     Register the read context acquire property list class's
+ * Purpose:     Register the transaction finish property list class's
  *              properties
  *
  * Return:      Non-negative on success/Negative on failure
@@ -113,19 +113,19 @@ const H5P_libclass_t H5P_CLS_RCACC[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__rcacc_reg_prop(H5P_genclass_t *pclass)
+H5P__trfcc_reg_prop(H5P_genclass_t *pclass)
 {
-    H5RC_request_t acquire_req = H5RC_ACQUIRE_CV_REQUEST_DEF;
+    hbool_t acquire = H5TR_FINISH_ACQUIRE_DEF;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Register the size of raw data chunk cache (elements) */
-    if(H5P_register_real(pclass, H5RC_ACQUIRE_CV_REQUEST_NAME, H5RC_ACQUIRE_CV_REQUEST_SIZE, &acquire_req, 
-                         NULL, NULL, NULL, H5RC_ACQUIRE_CV_REQUEST_ENC, H5RC_ACQUIRE_CV_REQUEST_DEC, 
+    if(H5P_register_real(pclass, H5TR_FINISH_ACQUIRE_NAME, H5TR_FINISH_ACQUIRE_SIZE, &acquire, 
+                         NULL, NULL, NULL, H5TR_FINISH_ACQUIRE_ENC, H5TR_FINISH_ACQUIRE_DEC, 
                          NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P__rcacc_reg_prop() */
+} /* end H5P__trfcc_reg_prop() */
