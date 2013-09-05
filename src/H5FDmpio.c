@@ -1999,8 +1999,23 @@ H5FD_mpio_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset")
 
         /* Extend the file's size */
+        #ifndef JK_FCLOSE_PATCH  // from Quincey to make Fclose faster
+        // Suren's modifications to disable truncate
+    	// Original code: commented out the following 2 lines
+        // if(MPI_SUCCESS != (mpi_code = MPI_File_set_size(file->f, mpi_off)))
+        //    HMPI_GOTO_ERROR(FAIL, "MPI_File_set_size failed", mpi_code)
+    	// Modified code: The following 6 lines
+    	if (getenv("HDF5_TRUNCATE")) {
+    	    if(0 == file->mpi_rank) 
+    		printf("I: HDF5: MPI-IO VFD: MPI_File_set_size()");
+                if(MPI_SUCCESS != (mpi_code = MPI_File_set_size(file->f, mpi_off)))
+                	HMPI_GOTO_ERROR(FAIL, "MPI_File_set_size failed", mpi_code)
+    	}
+    	// End of modified code
+        #else // ORI
         if(MPI_SUCCESS != (mpi_code = MPI_File_set_size(file->f, mpi_off)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_size failed", mpi_code)
+        #endif
 #else /* H5_MPI_FILE_SET_SIZE_BIG */
 	/* Wait until all processes are here before reading/writing the byte at
          * process 0's end of address space.  The window for corruption is

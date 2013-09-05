@@ -1380,8 +1380,22 @@ H5FD_mpiposix_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closi
             if(-1 == HDlseek(file->fd, (HDoff_t)0, SEEK_SET))
                 HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
 #endif /* H5_VMS */
+            #ifndef JK_FCLOSE_PATCH  // from Quincey to make Fclose faster
+            // Suren modification to disable file_truncate
+    	    // Original code: two lines commented out
+                // if(-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
+                //     HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+    	    // Modified code: The following 5 lines
+    	    if (getenv("HDF5_TRUNCATE")) {
+        		printf("I: HDF5: MPI-POSIX VFD: ftruncate()\n");
+                if(-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
+                    HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+    	    }
+    	    // End modified code
+            #else // ORI
             if(-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
                 HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+            #endif
 #endif /* H5_HAVE_WIN32_API */
         } /* end if */
 

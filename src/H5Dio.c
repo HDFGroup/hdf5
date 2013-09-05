@@ -369,7 +369,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifdef JK_ORI
+#ifndef JK_ORI
 herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
