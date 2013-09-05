@@ -2354,6 +2354,30 @@ func_init_failed:                    \
   #define HDcompile_assert(e)     do { typedef struct { unsigned int b: (e); } x; } while(0)
 */
 
+/* Macros for enabling/disabling particular GCC warnings */
+/* (see the following web-sites for more info:
+ *      http://www.dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
+ *      http://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
+ */
+/* These pragmas are only implemented in gcc 4.2+ */
+#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 402
+    #define GCC_DIAG_STR(s) #s
+    #define GCC_DIAG_JOINSTR(x,y) GCC_DIAG_STR(x ## y)
+    #define GCC_DIAG_DO_PRAGMA(x) _Pragma (#x)
+    #define GCC_DIAG_PRAGMA(x) GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
+    /* These pragmas are only implemented in gcc 4.6+ */
+    #if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406
+        #define GCC_DIAG_OFF(x) GCC_DIAG_PRAGMA(push) GCC_DIAG_PRAGMA(ignored GCC_DIAG_JOINSTR(-W,x))
+        #define GCC_DIAG_ON(x) GCC_DIAG_PRAGMA(pop)
+    #else
+        #define GCC_DIAG_OFF(x) GCC_DIAG_PRAGMA(ignored GCC_DIAG_JOINSTR(-W,x))
+        #define GCC_DIAG_ON(x) GCC_DIAG_PRAGMA(warning GCC_DIAG_JOINSTR(-W,x))
+    #endif
+#else
+    #define GCC_DIAG_OFF(x)
+    #define GCC_DIAG_ON(x)
+#endif
+
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);
 H5_DLL void H5_term_library(void);

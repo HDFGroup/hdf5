@@ -109,7 +109,7 @@ static hbool_t not_comparable;
     if(0 == (A) && 0 == (B))                         \
         both_zero = TRUE;                            \
     if(0 != (A))                                     \
-        per = (double)ABS((double)(B - A) / (double)A); \
+        per = (double)ABS((double)((B) - (A)) / (double)(A)); \
     else                                             \
         not_comparable = TRUE;                       \
 }
@@ -119,16 +119,16 @@ static hbool_t not_comparable;
     per = -1;                                        \
     not_comparable = FALSE;                          \
     both_zero = FALSE;                               \
-    if(A == 0 && B == 0)                             \
+    if((A) == 0 && (B) == 0)                         \
         both_zero = TRUE;                            \
-    if(A != 0)                                       \
-        per = ABS((double)((TYPE)(B - A)) / (double)A) ;   \
+    if((A) != 0)                                     \
+        per = ABS((double)((TYPE)((B) - (A))) / (double)(A)) ; \
     else                                             \
         not_comparable = TRUE;                       \
 }
 
 
-#   define PDIFF(a,b)    ( (b>a) ? (b-a) : (a-b))
+#define PDIFF(a,b)    (((b) > (a)) ? ((b) - (a)) : ((a) -(b)))
 
 typedef struct mcomp_t
 {
@@ -890,9 +890,8 @@ static hsize_t diff_datum(void       *_mem1,
             /* calculate the number of array elements */
             for (u = 0, nelmts = 1; u < (unsigned)ndims; u++)
                 nelmts *= adims[u];
-            for (u = 0; u < nelmts; u++)
-            {
-               nfound+=diff_datum(
+            for (u = 0; u < nelmts; u++) {
+               nfound += diff_datum(
                    mem1 + u * size,
                    mem2 + u * size, /* offset */
                    memb_type,
@@ -907,7 +906,7 @@ static hsize_t diff_datum(void       *_mem1,
                    container1_id,
                    container2_id,
                    ph, members);
-           }
+            }
             H5Tclose(memb_type);
         }
         break;
