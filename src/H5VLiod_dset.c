@@ -1225,7 +1225,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	buf = (void *)list[request_counter].mem_buf;
 
 #if H5_DO_NATIVE	
-	native_dims[0] = (hsize_t)(size/src_size); 
+	native_dims[0] = (size_t)H5Sget_select_npoints(space_id);
 	write_buf = (char *)buf;
 #endif
 	buf_ptr = (uint8_t *)buf;
@@ -1237,7 +1237,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	for (hi = 0; hi < list[request_counter].num_mblocks; hi++){
 	  total_length += list[request_counter].mblocks[hi].len;
 	}
-	native_dims[0] = (hsize_t)(total_length/src_size); 
+	native_dims[0] = (size_t)H5Sget_select_npoints(space_id);
 #endif
 
 
