@@ -41,7 +41,7 @@ New Features
 
     Configuration:
     -------------
-    - CMake minimum is now 2.8.10. (ADB 2013/1/14)
+    - CMake minimum is now 2.8.10. (ADB 2013/01/14)
     - A new tool, cmakehdf5, which is a build command script similar to
       buildhdf5 is added and is available in the bin directory.
       (AKC - 2012/12/12)
@@ -279,6 +279,7 @@ New Features
 
     Tools:
     ------
+     - h5repack: Added ability to use plugin filters. HDFFV-8345 (ADB - 2013/09/04).
      - h5dump: Added option -N --any_path, which searches the file for paths that
                match the search path. HDFFV-7989 (ADB - 2013/08/12).
      - h5dump: Added optional arg 0 to -A, which excludes attributes from display.

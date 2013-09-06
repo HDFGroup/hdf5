@@ -31,6 +31,7 @@
 # HDF5 Library Makefile(.in)
 #
 
+
 VPATH = @srcdir@
 am__make_dryrun = \
   { \
@@ -68,11 +69,12 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/h5repack.sh.in $(top_srcdir)/bin/depcomp \
-	$(top_srcdir)/bin/mkinstalldirs \
+	$(srcdir)/h5repack.sh.in $(srcdir)/h5repack_plugin.sh.in \
+	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/mkinstalldirs \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 noinst_PROGRAMS = testh5repack_detect_szip$(EXEEXT)
+@HAVE_SHARED_CONDITIONAL_TRUE@am__append_1 = h5repack_plugin.sh
 check_PROGRAMS = $(am__EXEEXT_1)
 bin_PROGRAMS = h5repack$(EXEEXT)
 TESTS = $(am__EXEEXT_1) $(TEST_SCRIPT)
@@ -83,9 +85,47 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = h5repack.sh
+CONFIG_CLEAN_FILES = h5repack.sh h5repack_plugin.sh
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)"
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"
+LTLIBRARIES = $(lib_LTLIBRARIES)
+libdynlibadd_la_LIBADD =
+am__libdynlibadd_la_SOURCES_DIST = $(top_srcdir)/test/dynlib1.c
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibadd_la_OBJECTS = dynlib1.lo
+libdynlibadd_la_OBJECTS = $(am_libdynlibadd_la_OBJECTS)
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibadd_la_rpath = -rpath \
+@HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
 am__EXEEXT_1 = h5repacktst$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am__objects_1 = h5repack.$(OBJEXT) h5repack_copy.$(OBJEXT) \
@@ -96,10 +136,6 @@ am_h5repack_OBJECTS = $(am__objects_1) h5repack_main.$(OBJEXT)
 h5repack_OBJECTS = $(am_h5repack_OBJECTS)
 h5repack_LDADD = $(LDADD)
 h5repack_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
-AM_V_lt = $(am__v_lt_@AM_V@)
-am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
-am__v_lt_0 = --silent
-am__v_lt_1 = 
 h5repack_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h5repack_LDFLAGS) $(LDFLAGS) -o $@
@@ -148,10 +184,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(h5repack_SOURCES) $(h5repacktst_SOURCES) \
-	$(testh5repack_detect_szip_SOURCES)
-DIST_SOURCES = $(h5repack_SOURCES) $(h5repacktst_SOURCES) \
-	$(testh5repack_detect_szip_SOURCES)
+SOURCES = $(libdynlibadd_la_SOURCES) $(h5repack_SOURCES) \
+	$(h5repacktst_SOURCES) $(testh5repack_detect_szip_SOURCES)
+DIST_SOURCES = $(am__libdynlibadd_la_SOURCES_DIST) $(h5repack_SOURCES) \
+	$(h5repacktst_SOURCES) $(testh5repack_detect_szip_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -450,10 +486,10 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 *.bin
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
-TEST_SCRIPT = h5repack.sh
+TEST_SCRIPT = h5repack.sh $(am__append_1)
 TEST_PROG = h5repacktst
-check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5repack$(EXEEXT)
+check_SCRIPTS = $(TEST_SCRIPT)
 
 # Add h5repack specific linker flags here
 h5repack_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
@@ -469,6 +505,8 @@ COMMON_SOURCES = h5repack.c h5repack_copy.c h5repack_filters.c \
 h5repack_SOURCES = $(COMMON_SOURCES) h5repack_main.c
 h5repacktst_SOURCES = $(COMMON_SOURCES) h5repacktst.c 
 testh5repack_detect_szip_SOURCES = testh5repack_detect_szip.c
+@HAVE_SHARED_CONDITIONAL_TRUE@lib_LTLIBRARIES = libdynlibadd.la
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibadd_la_SOURCES = $(top_srcdir)/test/dynlib1.c
 DISTCLEANFILES = h5repack.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
@@ -527,6 +565,44 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 $(am__aclocal_m4_deps):
 h5repack.sh: $(top_builddir)/config.status $(srcdir)/h5repack.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+h5repack_plugin.sh: $(top_builddir)/config.status $(srcdir)/h5repack_plugin.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(libdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(libdir)" || exit 1; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(libdir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(libdir)"; \
+	}
+
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$f"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; \
+	locs=`for p in $$list; do echo $$p; done | \
+	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
+	      sort -u`; \
+	test -z "$$locs" || { \
+	  echo rm -f $${locs}; \
+	  rm -f $${locs}; \
+	}
+libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EXTRA_libdynlibadd_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -607,6 +683,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynlib1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_filters.Po@am__quote@
@@ -638,6 +715,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+dynlib1.lo: $(top_srcdir)/test/dynlib1.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dynlib1.lo -MD -MP -MF $(DEPDIR)/dynlib1.Tpo -c -o dynlib1.lo `test -f '$(top_srcdir)/test/dynlib1.c' || echo '$(srcdir)/'`$(top_srcdir)/test/dynlib1.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/dynlib1.Tpo $(DEPDIR)/dynlib1.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(top_srcdir)/test/dynlib1.c' object='dynlib1.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dynlib1.lo `test -f '$(top_srcdir)/test/dynlib1.c' || echo '$(srcdir)/'`$(top_srcdir)/test/dynlib1.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -745,9 +829,11 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(PROGRAMS) all-local
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) all-local
+install-binPROGRAMS: install-libLTLIBRARIES
+
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -781,10 +867,12 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+@HAVE_SHARED_CONDITIONAL_FALSE@install-exec-hook:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libtool clean-noinstPROGRAMS mostlyclean-am
+	clean-libLTLIBRARIES clean-libtool clean-noinstPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -810,8 +898,9 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS
-
+install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 install-html: install-html-am
 
 install-html-am:
@@ -850,25 +939,26 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
-.MAKE: check-am install-am install-strip
+.MAKE: check-am install-am install-exec-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am all-local check check-TESTS check-am \
 	clean clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libtool clean-noinstPROGRAMS cscopelist ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-binPROGRAMS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
+	clean-libLTLIBRARIES clean-libtool clean-noinstPROGRAMS \
+	cscopelist ctags distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-exec-hook install-html \
+	install-html-am install-info install-info-am \
+	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
 	install-ps install-ps-am install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
 	pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-binPROGRAMS
+	uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 
 # List all build rules defined by HDF5 Makefiles as "PHONY" targets here.
@@ -884,6 +974,11 @@ help:
 
 # The h5repack.sh script needs h5repacktst to run first.
 h5repack.sh.chkexe_: h5repacktst.chkexe_
+
+@HAVE_SHARED_CONDITIONAL_TRUE@  # Build it as shared library if configure is enabled for shared library.
+
+@HAVE_SHARED_CONDITIONAL_TRUE@install-exec-hook:
+@HAVE_SHARED_CONDITIONAL_TRUE@	$(RM) $(DESTDIR)$(libdir)/*dynlib*
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

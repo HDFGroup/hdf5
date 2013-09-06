@@ -1273,7 +1273,6 @@ int do_copy_objects(hid_t fidin,
                         */
                         if (copy_attr(dset_in, dset_out, &named_dt_head, travt, options) < 0)
                             goto error;
-
                         /*close */
                         if (H5Dclose(dset_out) < 0)
                             goto error;
@@ -1355,7 +1354,6 @@ int do_copy_objects(hid_t fidin,
 
 
             } /* end do we have request for filter/chunking */
-
 
             break;
 
@@ -1504,7 +1502,9 @@ static void print_dataset_info(hid_t dcpl_id,
             cd_values, sizeof(f_objname), f_objname, NULL);
 
         switch(filtn) {
-        default:
+
+        case H5Z_FILTER_NONE:
+            HDstrcat(strfilter,"NONE ");
             break;
 
         case H5Z_FILTER_DEFLATE:
@@ -1553,6 +1553,10 @@ static void print_dataset_info(hid_t dcpl_id,
 
         case H5Z_FILTER_SCALEOFFSET:
             HDstrcat(strfilter,"SCALEOFFSET ");
+            break;
+
+        default:
+            HDstrcat(strfilter,"UD ");
             break;
         } /* switch */
     }/*i*/

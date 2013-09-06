@@ -722,6 +722,7 @@ static int check_options(pack_opt_t *options)
                         options->filter_g[k].cd_values[0]);
                     break;
                 default:
+                    printf(" User Defined %d\n", filtn);
                     break;
                 } /* k */
             };
@@ -1006,9 +1007,7 @@ static const char* get_sfilter(H5Z_filter_t filtn)
         return "NBIT";
     else if (filtn==H5Z_FILTER_SCALEOFFSET)
         return "SOFF";
-    else {
-        error_msg("input error in filter type\n");
-        HDexit(EXIT_FAILURE);
-    }
+    else
+        return "UD";
 }
 

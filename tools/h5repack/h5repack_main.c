@@ -219,6 +219,7 @@ static void usage(const char *prog)
  printf("        FLET, to apply the HDF5 checksum filter\n");
  printf("        NBIT, to apply the HDF5 NBIT filter (NBIT compression)\n");
  printf("        SOFF, to apply the HDF5 Scale/Offset filter\n");
+ printf("        UD,   to apply a user defined filter\n");
  printf("        NONE, to remove all filters\n");
  printf("      <filter parameters> is optional filter parameter information\n");
  printf("        GZIP=<deflation level> from 1-9\n");
@@ -229,6 +230,9 @@ static void usage(const char *prog)
  printf("        NBIT (no parameter)\n");
  printf("        SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type\n");
  printf("            is either IN or DS\n");
+ printf("        UD=<filter_number,cd_value_count,value_1[,value_2,...,value_N]>\n");
+ printf("            required values for filter_number,cd_value_count,value_1\n");
+ printf("            optional values for value_2 to value_N\n");
  printf("        NONE (no parameter)\n");
  printf("\n");
  printf("    LAYT - is a string with the format:\n");
@@ -270,6 +274,10 @@ static void usage(const char *prog)
  printf("5) h5repack -f SHUF -f GZIP=1 file1 file2 \n");
  printf("\n");
  printf("   Add both filters SHUF and GZIP in this order to all datasets\n");
+ printf("\n");
+ printf("6) h5repack -f UD=307,1,9 file1 file2 \n");
+ printf("\n");
+ printf("   Add bzip2 filter to all datasets\n");
  printf("\n");
 }
 

@@ -601,6 +601,9 @@ int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
         switch (filtn)
         {
 
+        case H5Z_FILTER_NONE:
+        	break;
+
         case H5Z_FILTER_SHUFFLE:
 
             /* 1 private client value is returned by DCPL */
@@ -677,7 +680,17 @@ int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
             break;
 
         default:
-            /* filter has no local values */
+			if ( cd_nelmts != filter[i].cd_nelmts)
+				return 0;
+
+			for( j = 0; j < cd_nelmts; j++)
+			{
+				if (cd_values[j] != filter[i].cd_values[j])
+				{
+					return 0;
+				}
+
+			}
             break;
 
         } /* switch */
