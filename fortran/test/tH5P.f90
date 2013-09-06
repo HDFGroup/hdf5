@@ -34,7 +34,6 @@ SUBROUTINE external_test(cleanup, total_error)
 !   h5pget_external_f
 
   USE HDF5 ! This module contains all necessary modules
-  USE H5FORT_TESTS ! This module contains all test routines
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -151,7 +150,6 @@ END SUBROUTINE external_test
 
 SUBROUTINE multi_file_test(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules
-  USE H5FORT_TESTS ! This module contains all test routines
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN) :: cleanup
@@ -421,7 +419,6 @@ END SUBROUTINE multi_file_test
 SUBROUTINE test_chunk_cache(cleanup, total_error) 
 
   USE HDF5 ! This module contains all necessary modules 
-  USE H5FORT_TESTS ! This module contains all test routines
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup

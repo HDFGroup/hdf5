@@ -31,8 +31,7 @@
 
 !   This subroutine tests following functionalities: h5zfilter_avail_f, h5zunregister_f
 
-     USE HDF5 ! This module contains all necessary modules
-     USE H5FORT_TESTS ! This module contains all test routines
+   USE HDF5 ! This module contains all necessary modules
 
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
@@ -166,7 +165,6 @@
 
         SUBROUTINE szip_test(szip_flag, cleanup, total_error)
         USE HDF5 ! This module contains all necessary modules
-        USE H5FORT_TESTS ! This module contains all test routines
 
           IMPLICIT NONE
           LOGICAL, INTENT(OUT) :: szip_flag

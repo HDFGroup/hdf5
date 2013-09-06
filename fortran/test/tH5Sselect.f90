@@ -40,7 +40,6 @@
   SUBROUTINE test_select_hyperslab(cleanup, total_error)
 
     USE HDF5 ! This module contains all necessary modules
-    USE H5FORT_TESTS ! This module contains all test routines
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN) :: cleanup
@@ -320,7 +319,6 @@
   SUBROUTINE test_select_element(cleanup, total_error)
 
     USE HDF5 ! This module contains all necessary modules
-    USE H5FORT_TESTS ! This module contains all test routines
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
@@ -697,7 +695,6 @@
 
   SUBROUTINE test_basic_select(cleanup, total_error)
     USE HDF5 ! This module contains all necessary modules
-    USE H5FORT_TESTS ! This module contains all test routines
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
@@ -1036,7 +1033,6 @@
 
 SUBROUTINE test_select_point(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules 
-  USE H5FORT_TESTS ! This module contains all test routines
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -1363,7 +1359,6 @@ END SUBROUTINE test_select_point
 
 SUBROUTINE test_select_combine(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules 
-  USE H5FORT_TESTS ! This module contains all test routines
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -1786,7 +1781,6 @@ END SUBROUTINE test_select_combine
 
 SUBROUTINE test_select_bounds(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules 
-  USE H5FORT_TESTS ! This module contains all test routines
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup

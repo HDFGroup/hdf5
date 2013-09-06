@@ -29,7 +29,6 @@
 
 SUBROUTINE test_h5o(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -55,7 +54,6 @@ END SUBROUTINE test_h5o
 SUBROUTINE test_h5o_link(total_error)
 
   USE HDF5 ! This module contains all necessary modules
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: total_error
@@ -578,7 +576,6 @@ END SUBROUTINE test_h5o_link
 SUBROUTINE test_h5o_plist(total_error)
 
   USE HDF5 ! This module contains all necessary modules
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: total_error

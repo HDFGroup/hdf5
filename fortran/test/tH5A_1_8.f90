@@ -40,7 +40,6 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
 !
 
   USE HDF5 ! This module contains all necessary modules
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -214,7 +213,6 @@ SUBROUTINE test_attr_corder_create_compact(fcpl,fapl, total_error)
 ! Needed for get_info_by_name
 
   USE HDF5 ! This module contains all necessary modules
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
 ! - - - arg types - - -
@@ -403,7 +401,6 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
 !**
 !****************************************************************/
   USE HDF5
-  USE H5FORT_TESTS ! This module contains all test routines
   IMPLICIT NONE
 
   INTEGER(HID_T), INTENT(IN) :: fcpl
@@ -535,7 +532,6 @@ SUBROUTINE test_attr_create_by_name(new_format,fcpl,fapl, total_error)
 !****************************************************************/
 
   USE HDF5
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
 
@@ -750,7 +746,6 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
 !****************************************************************/
 
   USE HDF5
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
 
@@ -956,7 +951,6 @@ END SUBROUTINE test_attr_info_by_idx
 SUBROUTINE attr_info_by_idx_check(obj_id, attrname, n, use_index, total_error )
 
   USE HDF5
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
 
@@ -1097,7 +1091,6 @@ SUBROUTINE test_attr_shared_rename( fcpl, fapl, total_error)
 !****************************************************************/
 
   USE HDF5
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
 
@@ -1419,7 +1412,6 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
 !****************************************************************/
 
   USE HDF5
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
 
@@ -1781,7 +1773,6 @@ SUBROUTINE test_attr_shared_delete(fcpl, fapl, total_error)
 !****************************************************************/
 
   USE HDF5
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
 
@@ -2065,7 +2056,6 @@ SUBROUTINE test_attr_dense_open( fcpl, fapl, total_error)
 !****************************************************************/
 
   USE HDF5
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
 
@@ -2217,7 +2207,6 @@ END SUBROUTINE test_attr_dense_open
 SUBROUTINE test_attr_dense_verify(loc_id, max_attr, total_error)
 
   USE HDF5
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
 
@@ -2313,7 +2302,6 @@ END SUBROUTINE test_attr_dense_verify
 SUBROUTINE test_attr_corder_create_basic( fcpl, fapl, total_error )
 
   USE HDF5
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
 
@@ -2436,7 +2424,6 @@ END SUBROUTINE test_attr_corder_create_basic
 SUBROUTINE test_attr_basic_write(fapl, total_error)
 
   USE HDF5
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
 
@@ -2636,7 +2623,6 @@ END SUBROUTINE test_attr_basic_write
 SUBROUTINE test_attr_many(new_format, fcpl, fapl, total_error)
 
   USE HDF5
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
 
@@ -2754,7 +2740,6 @@ END SUBROUTINE test_attr_many
 SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
 
   USE HDF5
-  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: fid
