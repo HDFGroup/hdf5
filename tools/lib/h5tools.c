@@ -1443,8 +1443,10 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                         offset = H5Tget_member_offset(tid, j);
                         memb   = H5Tget_member_type(tid, j);
 
-                        if (render_bin_output(stream, container, memb, mem + offset, 1) < 0)
-                            return FAIL;
+                        if (render_bin_output(stream, container, memb, mem + offset, 1) < 0) {
+                            H5Tclose(memb);
+                            H5E_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output of compound member failed");
+                        }
 
                         H5Tclose(memb);
                     }
@@ -1473,8 +1475,10 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
                     mem = ((unsigned char*)_mem) + block_index * size;
                     /* dump the array element */
-                    if (render_bin_output(stream, container, memb, mem, nelmts) < 0)
+                    if (render_bin_output(stream, container, memb, mem, nelmts) < 0) {
+                        H5Tclose(memb);
                         H5E_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output failed");
+                    }
                 }
                 H5Tclose(memb);
             }
@@ -1493,8 +1497,10 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                     nelmts = ((hvl_t *) mem)->len;
 
                     /* dump the array element */
-                    if (render_bin_output(stream, container, memb, ((char *) (((hvl_t *) mem)->p)), nelmts) < 0)
+                    if (render_bin_output(stream, container, memb, ((char *) (((hvl_t *) mem)->p)), nelmts) < 0) {
+                        H5Tclose(memb);
                         H5E_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output failed");
+                    }
                 }
                 H5Tclose(memb);
             }
@@ -1615,15 +1621,16 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
         }
 
         if(H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
-            HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sselect_hyperslab failed");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sselect_hyperslab failed");
 
         if(H5Dread(region_id, type_id, mem_space, sid1, H5P_DEFAULT, region_buf) < 0)
-            HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Dread failed");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
 
         if(H5Sget_simple_extent_dims(mem_space, total_size, NULL) < 0)
-            HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
 
-        render_bin_output(stream, container, type_id, (char*)region_buf, numelem);
+        if(render_bin_output(stream, container, type_id, (char*)region_buf, numelem) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "render_bin_output of data region failed");
         /* Render the region data element end */
     } /* end for (blkndx = 0; blkndx < nblocks; blkndx++) */
 
@@ -1753,9 +1760,10 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
     if(H5Dread(region_id, type_id, mem_space, region_space, H5P_DEFAULT, region_buf) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
     if(H5Sget_simple_extent_dims(region_space, dims1, NULL) < 0)
-        HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
 
-    render_bin_output(stream, container, type_id, (char*)region_buf, npoints);
+    if(render_bin_output(stream, container, type_id, (char*)region_buf, npoints) < 0)
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "render_bin_output of data points failed");
 
  done:
     HDfree(region_buf);

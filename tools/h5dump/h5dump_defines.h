@@ -25,7 +25,7 @@
 /* Macros for displaying objects */
 #define begin_obj(obj,name,begin)                               \
     do {              \
-        if (name)                                               \
+        if ((name))                                             \
             PRINTSTREAM(rawoutstream, "%s \"%s\" %s", (obj), (name), (begin));   \
         else                                                    \
             PRINTSTREAM(rawoutstream, "%s %s", (obj), (begin));      \
