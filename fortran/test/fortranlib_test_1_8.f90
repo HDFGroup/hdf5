@@ -27,6 +27,7 @@
 PROGRAM fortranlibtest
 
   USE HDF5
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   INTEGER :: total_error = 0
@@ -116,6 +117,7 @@ END PROGRAM fortranlibtest
 
 SUBROUTINE dtransform(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -180,6 +182,7 @@ END SUBROUTINE dtransform
 SUBROUTINE test_genprop_basic_class(cleanup, total_error)
 
   USE HDF5 ! This module contains all necessary modules
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -275,6 +278,7 @@ SUBROUTINE test_h5s_encode(cleanup, total_error)
 !****************************************************************/
 
   USE HDF5 ! This module contains all necessary modules
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -424,6 +428,7 @@ END SUBROUTINE test_h5s_encode
 SUBROUTINE test_scaleoffset(cleanup, total_error )
 
   USE HDF5
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup

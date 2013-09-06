@@ -28,6 +28,10 @@
 !
 !*****
 
+MODULE H5FORT_TESTS
+
+CONTAINS
+
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: verify_real_kind_7
@@ -356,4 +360,6 @@ SUBROUTINE h5_env_nocleanup_f(HDF5_NOCLEANUP)
   ENDIF
 
 END SUBROUTINE h5_env_nocleanup_f
+
+END MODULE H5FORT_TESTS
 

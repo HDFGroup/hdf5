@@ -33,6 +33,7 @@
 !
 SUBROUTINE refobjtest(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules
+  USE H5FORT_TESTS ! This module contains all test routines
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(OUT) :: total_error
@@ -241,6 +242,7 @@ END SUBROUTINE refobjtest
 !
 SUBROUTINE refregtest(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules
+  USE H5FORT_TESTS ! This module contains all test routines
 !  use iso_c_binding  ! NOTE: if this is uncommented, then need to move subroutine into another file.
 
   IMPLICIT NONE

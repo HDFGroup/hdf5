@@ -30,6 +30,7 @@
 !*****
 SUBROUTINE group_test(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -134,6 +135,7 @@ END SUBROUTINE group_test
 SUBROUTINE group_info(cleanup, fapl, total_error)
 
   USE HDF5 ! This module contains all necessary modules
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: total_error
@@ -450,6 +452,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
    SUBROUTINE timestamps(cleanup, fapl, total_error)
 
      USE HDF5 ! This module contains all necessary modules
+     USE H5FORT_TESTS ! This module contains all test routines
 
      IMPLICIT NONE
      INTEGER, INTENT(OUT) :: total_error
@@ -646,6 +649,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
    SUBROUTINE mklinks(fapl, total_error)
 
      USE HDF5 ! This module contains all necessary modules
+     USE H5FORT_TESTS ! This module contains all test routines
 
      IMPLICIT NONE
      INTEGER, INTENT(OUT) :: total_error
@@ -741,6 +745,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
   SUBROUTINE test_move_preserves(fapl_id, total_error)
 
     USE HDF5 ! This module contains all necessary modules
+    USE H5FORT_TESTS ! This module contains all test routines
 
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: total_error
@@ -948,6 +953,7 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 
 
   USE HDF5 ! This module contains all necessary modules
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: total_error
@@ -1096,6 +1102,7 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 
 !    USE ISO_C_BINDING
   USE HDF5 ! This module contains all necessary modules
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: total_error
@@ -1165,6 +1172,7 @@ END SUBROUTINE cklinks
 SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
 
   USE HDF5 ! This module contains all necessary modules
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: total_error
@@ -1406,6 +1414,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
     hard_link, use_index, total_error)
 
   USE HDF5 ! This module contains all necessary modules
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
@@ -1509,6 +1518,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   SUBROUTINE test_lcpl(cleanup, fapl, total_error)
 
   USE HDF5 ! This module contains all necessary modules
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
@@ -1822,6 +1832,7 @@ END SUBROUTINE test_lcpl
 SUBROUTINE objcopy(fapl, total_error)
 
   USE HDF5 ! This module contains all necessary modules
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
@@ -1885,6 +1896,7 @@ END SUBROUTINE objcopy
 SUBROUTINE lapl_nlinks( fapl, total_error)
 
   USE HDF5
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: fapl

@@ -45,6 +45,7 @@
 
 
      USE HDF5 ! This module contains all necessary modules
+     USE H5FORT_TESTS ! This module contains all test routines
 
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
@@ -642,6 +643,7 @@
 !   H5tset_cset_f, H5tget_strpad_f, H5tset_strpad_f
 
      USE HDF5 ! This module contains all necessary modules
+     USE H5FORT_TESTS ! This module contains all test routines
 
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
@@ -859,6 +861,7 @@
     SUBROUTINE enumtest(cleanup, total_error)
 
     USE HDF5
+    USE H5FORT_TESTS ! This module contains all test routines
     IMPLICIT NONE
 
     LOGICAL, INTENT(IN)  :: cleanup
@@ -999,6 +1002,7 @@
 SUBROUTINE test_derived_flt(cleanup, total_error)
 
   USE HDF5 ! This module contains all necessary modules
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup

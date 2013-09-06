@@ -27,6 +27,7 @@
 PROGRAM fortranlibtest
 
   USE HDF5
+  USE H5FORT_TESTS ! This module contains all test routines
 
   IMPLICIT NONE
   INTEGER :: total_error = 0

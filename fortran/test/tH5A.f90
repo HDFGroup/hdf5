@@ -36,6 +36,7 @@
 !
 
      USE HDF5 ! This module contains all necessary modules
+     USE H5FORT_TESTS ! This module contains all test routines
 
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup

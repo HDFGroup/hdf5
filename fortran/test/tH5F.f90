@@ -33,6 +33,8 @@
 !  in the first file. 
         SUBROUTINE mountingtest(cleanup, total_error)
         USE HDF5  ! This module contains all necessary modules
+        USE H5FORT_TESTS ! This module contains all test routines
+
           IMPLICIT NONE
           LOGICAL, INTENT(IN)  :: cleanup
           INTEGER, INTENT(OUT) :: total_error
@@ -289,6 +291,7 @@
 
         SUBROUTINE reopentest(cleanup, total_error)
         USE HDF5  ! This module contains all necessary modules
+        USE H5FORT_TESTS ! This module contains all test routines
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup
           INTEGER, INTENT(OUT) :: total_error
@@ -474,7 +477,8 @@
 !    created using the got property lists
 
         SUBROUTINE plisttest(cleanup, total_error)
-         USE HDF5  ! This module contains all necessary modules
+        USE HDF5  ! This module contains all necessary modules
+        USE H5FORT_TESTS ! This module contains all test routines
           IMPLICIT NONE
           LOGICAL, INTENT(IN)  :: cleanup
           INTEGER, INTENT(OUT) :: total_error
@@ -574,6 +578,7 @@
 
         SUBROUTINE file_close(cleanup, total_error)
         USE HDF5  ! This module contains all necessary modules
+        USE H5FORT_TESTS ! This module contains all test routines
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup
           INTEGER, INTENT(OUT) :: total_error
@@ -702,6 +707,7 @@
 
         SUBROUTINE file_space(filename, cleanup, total_error)
         USE HDF5  ! This module contains all necessary modules
+        USE H5FORT_TESTS ! This module contains all test routines
           IMPLICIT NONE
           CHARACTER(*), INTENT(IN) :: filename
           LOGICAL, INTENT(IN) :: cleanup
