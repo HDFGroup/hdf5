@@ -519,7 +519,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 LT_VERS_INTERFACE = 8
 LT_VERS_REVISION = 1
 LT_VERS_AGE = 0
-H5detect_CFLAGS = -g $(AM_CFLAGS)
+H5detect_CFLAGS = $(AM_CFLAGS) -g -O0
 
 # Our main target, the HDF5 library
 lib_LTLIBRARIES = libhdf5.la

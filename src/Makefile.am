@@ -27,7 +27,7 @@ include $(top_srcdir)/config/lt_vers.am
 # a long time to compile it with any optimization on.  H5detect is used
 # to generate H5Tinit.c once. So, optimization is not critical.
 noinst_PROGRAMS = H5detect H5make_libsettings
-H5detect_CFLAGS = -g $(AM_CFLAGS)
+H5detect_CFLAGS = $(AM_CFLAGS) -g -O0
 
 # Our main target, the HDF5 library
 lib_LTLIBRARIES=libhdf5.la

@@ -156,21 +156,17 @@ static void usage(const char *prog)
  printf("   -v, --verbose           Verbose mode, print object information\n");
  printf("   -V, --version           Print version number and exit\n");
  printf("   -n, --native            Use a native HDF5 type when repacking\n");
-
  printf("   -L, --latest            Use latest version of file format\n");
  printf("   -c L1, --compact=L1     Maximum number of links in header messages\n");
  printf("   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
  printf("   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
-
  printf("   -m M, --minimum=M       Do not apply the filter to datasets smaller than M\n");
  printf("   -e E, --file=E          Name of file E with the -f and -l options\n");
-
  printf("   -u U, --ublock=U        Name of file U with user block data to be added\n");
  printf("   -b B, --block=B         Size of user block to be added\n");
  printf("   -M A, --metadata_block_size=A  Metadata block size for H5Pset_meta_block_size\n");
  printf("   -t T, --threshold=T     Threshold value for H5Pset_alignment\n");
  printf("   -a A, --alignment=A     Alignment value for H5Pset_alignment\n");
-
  printf("   -f FILT, --filter=FILT  Filter type\n");
  printf("   -l LAYT, --layout=LAYT  Layout type\n");
 
@@ -186,7 +182,6 @@ static void usage(const char *prog)
  printf("        a power of 2 (1024 default)\n");
  printf("    F - is the shared object header message type, any of <dspace|dtype|fill|\n");
  printf("        pline|attr>. If F is not specified, S applies to all messages\n");
-
  printf("\n");
 
  printf("    FILT - is a string with the format:\n");
