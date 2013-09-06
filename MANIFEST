@@ -2137,7 +2137,7 @@
 ./tools/h5repack/testfiles/h5repack_szip.h5
 ./tools/h5repack/testfiles/ublock.bin
 ./tools/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
-./tools/h5repack/testfiles/plugin_test.h5repack_layout.h5.ddl
+./tools/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst
 ./tools/h5repack/testfiles/h5repack-help.txt
 ./tools/h5repack/testfiles/h5repack_filters.h5.tst
 ./tools/h5repack/testfiles/h5repack_layout.h5.ddl
