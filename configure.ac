@@ -1046,12 +1046,15 @@ if test "X$STATIC_EXEC" = "Xyes"; then
   ## Issue a warning if -static flag is not supported.
   if test "X$lt_cv_prog_compiler_static_works" = "Xno"; then
       echo "    warning: -static flag not supported on this system; executable won't statically link shared system libraries."
+      LT_STATIC_EXEC=""
+  else
+    LT_STATIC_EXEC="-all-static"
   fi
-  LT_STATIC_EXEC="-all-static"
 else
   echo "no"
   LT_STATIC_EXEC=""
 fi
+AM_CONDITIONAL([USE_PLUGINS_CONDITIONAL], [test "X$LT_STATIC_EXEC" = X])
 
 AC_SUBST([LT_STATIC_EXEC])
 

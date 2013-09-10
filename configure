@@ -691,6 +691,8 @@ USE_FILTER_SZIP
 USE_FILTER_DEFLATE
 AM_MAKEFLAGS
 LT_STATIC_EXEC
+USE_PLUGINS_CONDITIONAL_FALSE
+USE_PLUGINS_CONDITIONAL_TRUE
 CPP
 OTOOL64
 OTOOL
@@ -3235,7 +3237,7 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 
 ## AM_INIT_AUTOMAKE takes a list of options that should be applied to
 ## every Makefile.am when automake is run.
-am__api_version='1.13'
+am__api_version='1.12'
 
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
@@ -3419,8 +3421,8 @@ if test x"${MISSING+set}" != xset; then
   esac
 fi
 # Use eval to expand $SHELL
-if eval "$MISSING --is-lightweight"; then
-  am_missing_run="$MISSING "
+if eval "$MISSING --run true"; then
+  am_missing_run="$MISSING --run "
 else
   am_missing_run=
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: 'missing' script is too old or missing" >&5
@@ -3660,45 +3662,6 @@ else
 fi
 rmdir .tst 2>/dev/null
 
-# Check whether --enable-silent-rules was given.
-if test "${enable_silent_rules+set}" = set; then :
-  enableval=$enable_silent_rules;
-fi
-
-case $enable_silent_rules in # (((
-  yes) AM_DEFAULT_VERBOSITY=0;;
-   no) AM_DEFAULT_VERBOSITY=1;;
-    *) AM_DEFAULT_VERBOSITY=1;;
-esac
-am_make=${MAKE-make}
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $am_make supports nested variables" >&5
-$as_echo_n "checking whether $am_make supports nested variables... " >&6; }
-if ${am_cv_make_support_nested_variables+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if $as_echo 'TRUE=$(BAR$(V))
-BAR0=false
-BAR1=true
-V=1
-am__doit:
-	@$(TRUE)
-.PHONY: am__doit' | $am_make -f - >/dev/null 2>&1; then
-  am_cv_make_support_nested_variables=yes
-else
-  am_cv_make_support_nested_variables=no
-fi
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_make_support_nested_variables" >&5
-$as_echo "$am_cv_make_support_nested_variables" >&6; }
-if test $am_cv_make_support_nested_variables = yes; then
-    AM_V='$(V)'
-  AM_DEFAULT_V='$(AM_DEFAULT_VERBOSITY)'
-else
-  AM_V=$AM_DEFAULT_VERBOSITY
-  AM_DEFAULT_V=$AM_DEFAULT_VERBOSITY
-fi
-AM_BACKSLASH='\'
-
 if test "`cd $srcdir && pwd`" != "`pwd`"; then
   # Use -I$(srcdir) only when $(srcdir) != ., so that make's output
   # is not polluted with repeated "-I."
@@ -3761,12 +3724,7 @@ mkdir_p='$(MKDIR_P)'
 # in the wild :-(  We should find a proper way to deprecate it ...
 AMTAR='$${TAR-tar}'
 
-
-# We'll loop over all known methods to create a tar archive until one works.
-_am_tools='gnutar  pax cpio none'
-
 am__tar='$${TAR-tar} chof - "$$tardir"' am__untar='$${TAR-tar} xf -'
-
 
 
 
@@ -12381,10 +12339,6 @@ _lt_linker_boilerplate=`cat conftest.err`
 $RM -r conftest*
 
 
-## CAVEAT EMPTOR:
-## There is no encapsulation within the following macros, do not change
-## the running order or otherwise move them around unless you know exactly
-## what you are doing...
 if test -n "$compiler"; then
 
 lt_prog_compiler_no_builtin_flag=
@@ -14963,14 +14917,10 @@ fi
   # before this can be enabled.
   hardcode_into_libs=yes
 
-  # Add ABI-specific directories to the system library path.
-  sys_lib_dlsearch_path_spec="/lib64 /usr/lib64 /lib /usr/lib"
-
   # Append ld.so.conf contents to the search path
   if test -f /etc/ld.so.conf; then
     lt_ld_extra=`awk '/^include / { system(sprintf("cd /etc; cat %s 2>/dev/null", \$2)); skip = 1; } { if (!skip) print \$0; skip = 0; }' < /etc/ld.so.conf | $SED -e 's/#.*//;/^[	 ]*hwcap[	 ]/d;s/[:,	]/ /g;s/=[^=]*$//;s/=[^= ]* / /g;s/"//g;/^$/d' | tr '\n' ' '`
-    sys_lib_dlsearch_path_spec="$sys_lib_dlsearch_path_spec $lt_ld_extra"
-
+    sys_lib_dlsearch_path_spec="/lib /usr/lib $lt_ld_extra"
   fi
 
   # We used to test for /lib/ld.so.1 and disable shared libraries on
@@ -18862,14 +18812,10 @@ fi
   # before this can be enabled.
   hardcode_into_libs=yes
 
-  # Add ABI-specific directories to the system library path.
-  sys_lib_dlsearch_path_spec="/lib64 /usr/lib64 /lib /usr/lib"
-
   # Append ld.so.conf contents to the search path
   if test -f /etc/ld.so.conf; then
     lt_ld_extra=`awk '/^include / { system(sprintf("cd /etc; cat %s 2>/dev/null", \$2)); skip = 1; } { if (!skip) print \$0; skip = 0; }' < /etc/ld.so.conf | $SED -e 's/#.*//;/^[	 ]*hwcap[	 ]/d;s/[:,	]/ /g;s/=[^=]*$//;s/=[^= ]* / /g;s/"//g;/^$/d' | tr '\n' ' '`
-    sys_lib_dlsearch_path_spec="$sys_lib_dlsearch_path_spec $lt_ld_extra"
-
+    sys_lib_dlsearch_path_spec="/lib /usr/lib $lt_ld_extra"
   fi
 
   # We used to test for /lib/ld.so.1 and disable shared libraries on
@@ -21742,14 +21688,10 @@ fi
   # before this can be enabled.
   hardcode_into_libs=yes
 
-  # Add ABI-specific directories to the system library path.
-  sys_lib_dlsearch_path_spec="/lib64 /usr/lib64 /lib /usr/lib"
-
   # Append ld.so.conf contents to the search path
   if test -f /etc/ld.so.conf; then
     lt_ld_extra=`awk '/^include / { system(sprintf("cd /etc; cat %s 2>/dev/null", \$2)); skip = 1; } { if (!skip) print \$0; skip = 0; }' < /etc/ld.so.conf | $SED -e 's/#.*//;/^[	 ]*hwcap[	 ]/d;s/[:,	]/ /g;s/=[^=]*$//;s/=[^= ]* / /g;s/"//g;/^$/d' | tr '\n' ' '`
-    sys_lib_dlsearch_path_spec="$sys_lib_dlsearch_path_spec $lt_ld_extra"
-
+    sys_lib_dlsearch_path_spec="/lib /usr/lib $lt_ld_extra"
   fi
 
   # We used to test for /lib/ld.so.1 and disable shared libraries on
@@ -22096,12 +22038,22 @@ if test "X$STATIC_EXEC" = "Xyes"; then
   ## Issue a warning if -static flag is not supported.
   if test "X$lt_cv_prog_compiler_static_works" = "Xno"; then
       echo "    warning: -static flag not supported on this system; executable won't statically link shared system libraries."
+      LT_STATIC_EXEC=""
+  else
+    LT_STATIC_EXEC="-all-static"
   fi
-  LT_STATIC_EXEC="-all-static"
 else
   echo "no"
   LT_STATIC_EXEC=""
 fi
+ if test "X$LT_STATIC_EXEC" = X; then
+  USE_PLUGINS_CONDITIONAL_TRUE=
+  USE_PLUGINS_CONDITIONAL_FALSE='#'
+else
+  USE_PLUGINS_CONDITIONAL_TRUE='#'
+  USE_PLUGINS_CONDITIONAL_FALSE=
+fi
+
 
 
 
@@ -33407,6 +33359,10 @@ if test -z "${CXX_SHARED_CONDITIONAL_TRUE}" && test -z "${CXX_SHARED_CONDITIONAL
   as_fn_error $? "conditional \"CXX_SHARED_CONDITIONAL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+if test -z "${USE_PLUGINS_CONDITIONAL_TRUE}" && test -z "${USE_PLUGINS_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"USE_PLUGINS_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 
 if test -z "${BUILD_SHARED_SZIP_CONDITIONAL_TRUE}" && test -z "${BUILD_SHARED_SZIP_CONDITIONAL_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_SHARED_SZIP_CONDITIONAL\" was never defined.
@@ -35190,7 +35146,7 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
   rm -f libhdf5.settings.TMP
  ;;
     "depfiles":C) test x"$AMDEP_TRUE" != x"" || {
-  # Older Autoconf quotes --file arguments for eval, but not when files
+  # Autoconf 2.62 quotes --file arguments for eval, but not when files
   # are listed without --file.  Let's play safe and only enable the eval
   # if we detect the quoting.
   case $CONFIG_FILES in
@@ -35241,7 +35197,7 @@ $as_echo X"$mf" |
     DEPDIR=`sed -n 's/^DEPDIR = //p' < "$mf"`
     test -z "$DEPDIR" && continue
     am__include=`sed -n 's/^am__include = //p' < "$mf"`
-    test -z "$am__include" && continue
+    test -z "am__include" && continue
     am__quote=`sed -n 's/^am__quote = //p' < "$mf"`
     # Find all dependency output files, they are included files with
     # $(DEPDIR) in their names.  We invoke sed twice because it is the

@@ -74,7 +74,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 noinst_PROGRAMS = testh5repack_detect_szip$(EXEEXT)
-@HAVE_SHARED_CONDITIONAL_TRUE@am__append_1 = h5repack_plugin.sh
+@HAVE_SHARED_CONDITIONAL_TRUE@@USE_PLUGINS_CONDITIONAL_TRUE@am__append_1 = h5repack_plugin.sh
 check_PROGRAMS = $(am__EXEEXT_1)
 bin_PROGRAMS = h5repack$(EXEEXT)
 TESTS = $(am__EXEEXT_1) $(TEST_SCRIPT)
@@ -507,7 +507,7 @@ h5repacktst_SOURCES = $(COMMON_SOURCES) h5repacktst.c
 testh5repack_detect_szip_SOURCES = testh5repack_detect_szip.c
 @HAVE_SHARED_CONDITIONAL_TRUE@lib_LTLIBRARIES = libdynlibadd.la
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlibadd_la_SOURCES = $(top_srcdir)/test/dynlib1.c
-DISTCLEANFILES = h5repack.sh
+DISTCLEANFILES = h5repack.sh h5repack_plugin.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

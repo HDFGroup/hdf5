@@ -30,7 +30,9 @@ noinst_PROGRAMS=testh5repack_detect_szip
 
 SCRIPT_DEPEND=h5repack$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
-  TEST_SCRIPT += h5repack_plugin.sh
+if USE_PLUGINS_CONDITIONAL
+   TEST_SCRIPT += h5repack_plugin.sh
+endif
 endif
 
 check_SCRIPTS=$(TEST_SCRIPT)
