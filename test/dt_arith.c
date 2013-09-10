@@ -4489,6 +4489,27 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
 #endif
 #endif /*end H5_ULLONG_TO_LDOUBLE_PRECISION*/
 
+
+#ifdef H5_VMS
+        /* OpenVMS converts the value of zero in char or short to negative zero in 
+         * long double.  Make it warning instead of failure. SLU - 2013/9/10
+         */
+	if(dst_type == FLT_LDOUBLE) {
+            long double *ld= buf + j*dst_size;
+	    if(src_type == INT_SCHAR) {
+                char *c = saved + j*src_size;
+                if(*c == 0 && *ld == -0)
+		    H5_WARNING();
+                    goto printing;
+            } else if(src_type == INT_SHORT) {
+                short *s = saved + j*src_size;
+                if(*s == 0 && *ld == -0)
+		    H5_WARNING();
+                    goto printing;
+            }
+        }
+#endif /*H5_VMS*/
+
         /* Print errors */
         if (0==fails_this_test++) {
             if(run_test==TEST_NORMAL) {
@@ -4497,6 +4518,8 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 H5_WARNING();
             }
         }
+
+ printing:
         printf("    elmt %u: \n", (unsigned)j);
 
         printf("        src = ");
