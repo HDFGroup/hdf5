@@ -69,7 +69,6 @@ H5_DLL hid_t H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl,
                           hid_t fapl, hid_t eq_id);
 H5_DLL hid_t H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id,
                         hid_t eq_id);
-H5_DLL herr_t H5Fflush_ff(hid_t object_id, H5F_scope_t scope, hid_t eq_id);
 H5_DLL herr_t H5Fclose_ff(hid_t file_id, hid_t eq_id);
 
 H5_DLL hid_t H5Gcreate_ff(hid_t loc_id, const char *name, hid_t lcpl_id,

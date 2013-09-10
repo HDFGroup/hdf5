@@ -34,12 +34,13 @@
 /****************************/
 /* Library Private Typedefs */
 /****************************/
+
 /* the transaction struct */
 typedef struct H5TR_t {
+    H5VL_iod_req_info_t req_info; /* must be first */
     struct H5VL_iod_file_t *file;
     uint64_t c_version;
     uint64_t trans_num;
-    struct H5VL_iod_request_t *request;
 } H5TR_t;
 
 /*****************************/

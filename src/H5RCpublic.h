@@ -37,6 +37,7 @@
 /*******************/
 typedef enum H5RC_request_t{
     H5RC_EXACT, /* default */
+    H5RC_PREV,
     H5RC_NEXT,
     H5RC_LAST
 } H5RC_request_t;

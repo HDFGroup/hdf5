@@ -48,6 +48,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     object_op_in_t *input = (object_op_in_t *)op_data->input;
     object_open_out_t output;
     iod_handle_t coh = input->coh; /* the container handle */
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t obj_oh; /* The handle for object */
     iod_obj_id_t obj_id; /* The ID of the object */
     iod_handle_t mdkv_oh;
@@ -244,6 +245,8 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     object_copy_in_t *input = (object_copy_in_t *)op_data->input;
     iod_handle_t coh = input->coh; /* the container handle */
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t dst_oh; /* The handle for the dst object where link is created*/
     iod_obj_id_t dst_id; /* The ID of the dst object where link is created*/
     iod_obj_id_t obj_id; /* The ID of the object to be moved/copied */
@@ -419,6 +422,7 @@ H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh;
     iod_handle_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t obj_oh;
     iod_obj_id_t obj_id;
     const char *loc_name = input->loc_name;
@@ -488,6 +492,7 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh;
     iod_handle_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t obj_oh, mdkv_oh, attrkv_oh;
     iod_obj_id_t obj_id;
     scratch_pad_t sp;
@@ -613,6 +618,8 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh;
     iod_handle_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t obj_oh, mdkv_oh;
     iod_obj_id_t obj_id;
     const char *loc_name = input->path;
@@ -703,6 +710,7 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
     size_t length = input->length;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t obj_oh, mdkv_oh;
     iod_obj_id_t obj_id;
     const char *loc_name = input->path;

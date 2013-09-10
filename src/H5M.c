@@ -361,7 +361,13 @@ H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, hid_t rcxt_id, hid_t e
     /* increment the ref count on the VOL plugin */
     vol_plugin->nrefs ++;
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue")
     }
 
@@ -445,7 +451,13 @@ H5Mset_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
 	HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set map KV pair")
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
@@ -522,7 +534,13 @@ H5Mget_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
@@ -591,7 +609,13 @@ H5Mget_types_ff(hid_t map_id, hid_t *key_type_id, hid_t *val_type_id,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
@@ -655,7 +679,13 @@ H5Mget_count_ff(hid_t map_id, hsize_t *count, hid_t rcxt_id, hid_t eq_id)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
@@ -722,7 +752,13 @@ H5Mexists_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
@@ -832,7 +868,13 @@ H5Mdelete_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 done:

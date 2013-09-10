@@ -28,7 +28,8 @@
 /**************************/
 /* Library Private Macros */
 /**************************/
-
+#define H5VL_TRANS_ID        "transaction_id"
+#define H5VL_CONTEXT_ID      "read_context_id"
 
 /****************************/
 /* Library Private Typedefs */

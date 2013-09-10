@@ -349,6 +349,11 @@ H5TR_create(void *file, H5RC_t *rc, uint64_t trans_num)
     tr->c_version = rc->c_version;
     tr->trans_num = trans_num;
 
+    tr->req_info.request = NULL;
+    tr->req_info.head = NULL;
+    tr->req_info.tail = NULL;
+    tr->req_info.num_req = 0;
+
     /* set return value */
     ret_value = tr;
 
@@ -396,7 +401,7 @@ H5TRstart(hid_t tr_id, hid_t trspl_id, hid_t eq_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not transaction start property list")
 
     /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(tr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     if(eq_id != H5_EVENT_QUEUE_NULL) {
@@ -413,7 +418,13 @@ H5TRstart(hid_t tr_id, hid_t trspl_id, hid_t eq_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a transaction start");
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
@@ -466,7 +477,7 @@ H5TRfinish(hid_t tr_id, hid_t trfpl_id, hid_t *rcxt_id, hid_t eq_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not transaction finish property list")
 
     /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(tr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     /* create a new read context object (if user requested it) with
@@ -495,7 +506,13 @@ H5TRfinish(hid_t tr_id, hid_t trfpl_id, hid_t *rcxt_id, hid_t eq_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a transaction finish");
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
@@ -539,7 +556,7 @@ H5TRset_dependency(hid_t tr_id, uint64_t trans_num, hid_t eq_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "The dependent transaction must be higher than the one it depends on")
 
     /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(tr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     if(eq_id != H5_EVENT_QUEUE_NULL) {
@@ -556,7 +573,13 @@ H5TRset_dependency(hid_t tr_id, uint64_t trans_num, hid_t eq_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a transaction set_dependency");
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
@@ -611,7 +634,13 @@ H5TRskip(hid_t file_id, uint64_t start_trans_num, uint64_t count, hid_t eq_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a transaction skip");
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
@@ -646,7 +675,7 @@ H5TRabort(hid_t tr_id, hid_t eq_id)
     H5TRACE2("e", "ii", tr_id, eq_id);
 
     /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(tr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     /* get the TR object */
@@ -667,7 +696,13 @@ H5TRabort(hid_t tr_id, hid_t eq_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a transaction abort");
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
@@ -724,7 +759,51 @@ done:
 herr_t
 H5TR_close(H5TR_t *tr)
 {
+
     FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(tr->req_info.num_req) {
+        H5VL_iod_request_t *cur_req = tr->req_info.head;
+        H5VL_iod_request_t *next_req = NULL;
+        H5VL_iod_request_t *prev;
+        H5VL_iod_request_t *next;
+
+        while(cur_req) {
+            next_req = cur_req->trans_next;
+
+            /* remove the current request from the linked list */
+            prev = cur_req->trans_prev;
+            next = cur_req->trans_next;
+            if (prev) {
+                if (next) {
+                    prev->trans_next = next;
+                    next->trans_prev = prev;
+                }
+                else {
+                    prev->trans_next = NULL;
+                    tr->req_info.tail = prev;
+                }
+            }
+            else {
+                if (next) {
+                    next->trans_prev = NULL;
+                    tr->req_info.head = next;
+                }
+                else {
+                    tr->req_info.head = NULL;
+                    tr->req_info.tail = NULL;
+                }
+            }
+
+            cur_req->trans_prev = NULL;
+            cur_req->trans_next = NULL;
+
+            tr->req_info.num_req --;
+
+            cur_req = next_req;
+        }
+        HDassert(0 == tr->req_info.num_req);
+    }
 
     tr = H5FL_FREE(H5TR_t, tr);
 

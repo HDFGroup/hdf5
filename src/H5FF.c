@@ -229,56 +229,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fflush_ff
- *
- * Purpose:	FF version of H5Fflush()
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *              April 2013
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Fflush_ff(hid_t object_id, H5F_scope_t scope, hid_t eq_id)
-{
-    H5VL_t     *vol_plugin;
-    void       *obj;
-    H5I_type_t obj_type;
-    H5VL_loc_params_t loc_params;
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iFsi", object_id, scope, eq_id);
-
-    obj_type = H5I_get_type(object_id);
-    if(H5I_FILE != obj_type && H5I_GROUP != obj_type && H5I_DATATYPE != obj_type &&
-       H5I_DATASET != obj_type && H5I_ATTR != obj_type) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-    }
-
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(object_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
-    /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(object_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-
-    loc_params.type = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = obj_type;
-
-    if((ret_value = H5VL_file_flush(obj, loc_params, vol_plugin, scope, 
-                                    H5AC_dxpl_id, eq_id)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Fflush_ff() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5Fclose_ff
  *
  * Purpose:	This function closes the file specified by FILE_ID by
@@ -345,9 +295,10 @@ hid_t
 H5Gcreate_ff(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,
              hid_t trans_id, hid_t eq_id)
 {
-    void    *grp = NULL;       /* dset token from VOL plugin */
+    void    *grp = NULL;        /* dset token from VOL plugin */
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5VL_loc_params_t loc_params;
     H5P_genplist_t  *plist;            /* Property list pointer */
     hid_t       ret_value;              /* Return value */
@@ -388,6 +339,12 @@ H5Gcreate_ff(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t
     if(H5P_set(plist, H5VL_GRP_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
@@ -400,7 +357,7 @@ H5Gcreate_ff(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t
 
     /* Create the group through the VOL */
     if(NULL == (grp = H5VL_group_create(obj, loc_params, vol_plugin, name, gcpl_id, gapl_id, 
-                                        H5AC_dxpl_id, eq_id)))
+                                        dxpl_id, eq_id)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
     /* Get an atom for the group */
@@ -439,6 +396,8 @@ H5Gopen_ff(hid_t loc_id, const char *name, hid_t gapl_id,
     void    *grp = NULL;       /* dset token from VOL plugin */
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params;
     hid_t       ret_value;              /* Return value */
 
@@ -462,14 +421,19 @@ H5Gopen_ff(hid_t loc_id, const char *name, hid_t gapl_id,
     /* get the file object */
     if(NULL == (obj = (void *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     /* Create the group through the VOL */
     if(NULL == (grp = H5VL_group_open(obj, loc_params, vol_plugin, name, gapl_id, 
-                                      H5AC_dxpl_id, eq_id)))
+                                      dxpl_id, eq_id)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
     /* Get an atom for the group */
@@ -549,6 +513,7 @@ H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     void    *dset = NULL;       /* dset token from VOL plugin */
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5VL_loc_params_t loc_params;
     H5P_genplist_t  *plist;     /* Property list pointer */
     hid_t       ret_value;              /* Return value */
@@ -596,6 +561,12 @@ H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* get the file object */
     if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
@@ -605,7 +576,7 @@ H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 
     /* Create the dataset through the VOL */
     if(NULL == (dset = H5VL_dataset_create(obj, loc_params, vol_plugin, name, dcpl_id, dapl_id, 
-                                           H5AC_dxpl_id, eq_id)))
+                                           dxpl_id, eq_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     /* Get an atom for the dataset */
@@ -643,6 +614,8 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
     void    *dset = NULL;       /* dset token from VOL plugin */
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params;
     hid_t       ret_value;              /* Return value */
 
@@ -673,8 +646,14 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
 
     /* Create the dataset through the VOL */
     if(NULL == (dset = H5VL_dataset_open(obj, loc_params, vol_plugin, name, dapl_id, 
-                                         H5AC_dxpl_id, eq_id)))
+                                         dxpl_id, eq_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
     /* Get an atom for the dataset */
     if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
@@ -709,6 +688,7 @@ H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 {
     H5VL_t     *vol_plugin;
     void       *dset;
+    H5P_genplist_t *plist ;     /* Property list pointer */
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -725,6 +705,12 @@ H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
@@ -763,6 +749,7 @@ H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 {
     H5VL_t     *vol_plugin;
     void       *dset;
+    H5P_genplist_t *plist ;     /* Property list pointer */
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -785,6 +772,12 @@ H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     /* get the dataset object */
     if(NULL == (dset = (void *)H5I_object(dset_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
     /* Read the data through the VOL */
     if((ret_value = H5VL_dataset_read(dset, vol_plugin, mem_type_id, mem_space_id, 
@@ -814,6 +807,8 @@ H5Dset_extent_ff(hid_t dset_id, const hsize_t size[], hid_t trans_id, hid_t eq_i
 {
     H5VL_t *vol_plugin;
     void   *dset;
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -821,6 +816,12 @@ H5Dset_extent_ff(hid_t dset_id, const hsize_t size[], hid_t trans_id, hid_t eq_i
 
     if(!size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
@@ -830,7 +831,7 @@ H5Dset_extent_ff(hid_t dset_id, const hsize_t size[], hid_t trans_id, hid_t eq_i
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
     /* set the extent through the VOL */
-    if((ret_value = H5VL_dataset_set_extent(dset, vol_plugin, size, H5AC_dxpl_id, eq_id)) < 0)
+    if((ret_value = H5VL_dataset_set_extent(dset, vol_plugin, size, dxpl_id, eq_id)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extent of dataset")
 
 done:
@@ -909,6 +910,8 @@ H5Tcommit_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     H5T_t   *type = NULL;
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -949,6 +952,12 @@ H5Tcommit_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* get the object from the loc_id */
     if(NULL == (obj = (void *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
@@ -958,7 +967,7 @@ H5Tcommit_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
 
     /* commit the datatype through the VOL */
     if (NULL == (dt = H5VL_datatype_commit(obj, loc_params, vol_plugin, name, type_id, lcpl_id, 
-                                           tcpl_id, tapl_id, H5AC_dxpl_id, eq_id)))
+                                           tcpl_id, tapl_id, dxpl_id, eq_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     /* attach the vol object created using the commit call to the 
@@ -995,6 +1004,8 @@ H5Topen_ff(hid_t loc_id, const char *name, hid_t tapl_id, hid_t rcxt_id, hid_t e
     void    *vol_dt = NULL;       /* datatype token from VOL plugin */
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5T_t   *dt = NULL;
     H5VL_loc_params_t loc_params;
     hid_t     ret_value = FAIL;      /* Return value */
@@ -1023,9 +1034,15 @@ H5Topen_ff(hid_t loc_id, const char *name, hid_t tapl_id, hid_t rcxt_id, hid_t e
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     /* Create the datatype through the VOL */
     if(NULL == (vol_dt = H5VL_datatype_open(obj, loc_params, vol_plugin, name, tapl_id, 
-                                        H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
+                                        dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open datatype");
 
     /* Get an atom for the datatype */
@@ -1103,6 +1120,7 @@ H5Acreate_ff(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     void    *attr = NULL;       /* attr token from VOL plugin */
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5P_genplist_t      *plist;            /* Property list pointer */
     H5VL_loc_params_t   loc_params;
     hid_t		ret_value;              /* Return value */
@@ -1134,6 +1152,12 @@ H5Acreate_ff(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* get the file object */
     if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid identifier")
@@ -1143,7 +1167,7 @@ H5Acreate_ff(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
 
     /* Create the attribute through the VOL */
     if(NULL == (attr = H5VL_attr_create(obj, loc_params, vol_plugin, attr_name, acpl_id, aapl_id, 
-                                        H5AC_dxpl_id, eq_id)))
+                                        dxpl_id, eq_id)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
 
     /* Get an atom for the attribute */
@@ -1174,6 +1198,7 @@ H5Acreate_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     void    *attr = NULL;       /* attr token from VOL plugin */
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5P_genplist_t      *plist;            /* Property list pointer */
     H5VL_loc_params_t    loc_params;
     hid_t		 ret_value;        /* Return value */
@@ -1209,6 +1234,12 @@ H5Acreate_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     loc_params.loc_data.loc_by_name.name = obj_name;
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* get the file object */
     if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
@@ -1219,7 +1250,7 @@ H5Acreate_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     /* Create the attribute through the VOL */
     if(NULL == (attr = H5VL_attr_create(obj, loc_params, vol_plugin, attr_name, acpl_id, 
-                                        aapl_id, H5AC_dxpl_id, eq_id)))
+                                        aapl_id, dxpl_id, eq_id)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
 
     /* Get an atom for the attribute */
@@ -1249,6 +1280,8 @@ H5Aopen_ff(hid_t loc_id, const char *attr_name, hid_t aapl_id,
     void    *attr = NULL;       /* attr token from VOL plugin */
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params; 
     hid_t		ret_value;
 
@@ -1272,8 +1305,14 @@ H5Aopen_ff(hid_t loc_id, const char *attr_name, hid_t aapl_id,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     /* Create the attribute through the VOL */
-    if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, attr_name, aapl_id, H5AC_dxpl_id, eq_id)))
+    if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, attr_name, aapl_id, dxpl_id, eq_id)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open attribute")
 
     /* Get an atom for the attribute */
@@ -1303,6 +1342,8 @@ H5Aopen_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     void    *attr = NULL;       /* attr token from VOL plugin */
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t   loc_params;
     hid_t		ret_value;
 
@@ -1331,13 +1372,18 @@ H5Aopen_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     /* get the file object */
     if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     /* Create the attribute through the VOL */
-    if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, attr_name, aapl_id, H5AC_dxpl_id, eq_id)))
+    if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, attr_name, aapl_id, dxpl_id, eq_id)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open attribute")
 
     /* Get an atom for the attribute */
@@ -1365,6 +1411,8 @@ H5Awrite_ff(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t trans_id, hid_
 {
     H5VL_t     *vol_plugin;
     void       *attr;
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1374,6 +1422,12 @@ H5Awrite_ff(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t trans_id, hid_
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
@@ -1382,7 +1436,7 @@ H5Awrite_ff(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t trans_id, hid_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
 
     /* write the data through the VOL */
-    if((ret_value = H5VL_attr_write(attr, vol_plugin, dtype_id, buf, H5AC_dxpl_id, eq_id)) < 0)
+    if((ret_value = H5VL_attr_write(attr, vol_plugin, dtype_id, buf, dxpl_id, eq_id)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read data")
 
 done:
@@ -1403,6 +1457,8 @@ H5Aread_ff(hid_t attr_id, hid_t dtype_id, void *buf, hid_t rcxt_id, hid_t eq_id)
 {
     H5VL_t     *vol_plugin;
     void       *attr;
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1412,6 +1468,12 @@ H5Aread_ff(hid_t attr_id, hid_t dtype_id, void *buf, hid_t rcxt_id, hid_t eq_id)
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
@@ -1420,7 +1482,7 @@ H5Aread_ff(hid_t attr_id, hid_t dtype_id, void *buf, hid_t rcxt_id, hid_t eq_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
 
     /* Read the data through the VOL */
-    if((ret_value = H5VL_attr_read(attr, vol_plugin, dtype_id, buf, H5AC_dxpl_id, eq_id)) < 0)
+    if((ret_value = H5VL_attr_read(attr, vol_plugin, dtype_id, buf, dxpl_id, eq_id)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read data")
 
 done:
@@ -1460,10 +1522,18 @@ H5Arename_ff(hid_t loc_id, const char *old_name, const char *new_name,
     if(HDstrcmp(old_name, new_name)) {
         H5VL_t     *vol_plugin;
         void       *obj;
+        hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
         H5VL_loc_params_t loc_params;
 
         loc_params.type = H5VL_OBJECT_BY_SELF;
         loc_params.obj_type = H5I_get_type(loc_id);
+
+        /* store the transaction ID in the dxpl */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
         /* get the file object */
         if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
@@ -1473,7 +1543,7 @@ H5Arename_ff(hid_t loc_id, const char *old_name, const char *new_name,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
         /* rename the attribute info through the VOL */
-        if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_ATTR_RENAME, H5AC_dxpl_id, 
+        if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_ATTR_RENAME, dxpl_id, 
                             eq_id, old_name, new_name) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
     }
@@ -1524,12 +1594,20 @@ H5Arename_by_name_ff(hid_t loc_id, const char *obj_name, const char *old_attr_na
     if(HDstrcmp(old_attr_name, new_attr_name)) {
         H5VL_t     *vol_plugin;
         void       *obj;
+        hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
         H5VL_loc_params_t loc_params;
 
         loc_params.type = H5VL_OBJECT_BY_NAME;
         loc_params.loc_data.loc_by_name.name = obj_name;
         loc_params.loc_data.loc_by_name.plist_id = lapl_id;
         loc_params.obj_type = H5I_get_type(loc_id);
+
+        /* store the transaction ID in the dxpl */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
         /* get the file object */
         if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
@@ -1539,7 +1617,7 @@ H5Arename_by_name_ff(hid_t loc_id, const char *obj_name, const char *old_attr_na
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
         /* rename the attribute info through the VOL */
-        if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_ATTR_RENAME, H5AC_dxpl_id, 
+        if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_ATTR_RENAME, dxpl_id, 
                             eq_id, old_attr_name, new_attr_name) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
     } /* end if */
@@ -1563,6 +1641,8 @@ H5Adelete_ff(hid_t loc_id, const char *name, hid_t trans_id, hid_t eq_id)
     H5VL_t     *vol_plugin;
     void       *obj;
     H5VL_loc_params_t loc_params;
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1577,6 +1657,12 @@ H5Adelete_ff(hid_t loc_id, const char *name, hid_t trans_id, hid_t eq_id)
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
@@ -1585,7 +1671,7 @@ H5Adelete_ff(hid_t loc_id, const char *name, hid_t trans_id, hid_t eq_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Open the attribute through the VOL */
-    if(H5VL_attr_remove(obj, loc_params, vol_plugin, name, H5AC_dxpl_id, eq_id) < 0)
+    if(H5VL_attr_remove(obj, loc_params, vol_plugin, name, dxpl_id, eq_id) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
 done:
@@ -1610,6 +1696,8 @@ H5Adelete_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     H5VL_t     *vol_plugin;
     void       *obj;
     H5VL_loc_params_t loc_params;
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1633,6 +1721,12 @@ H5Adelete_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
@@ -1641,7 +1735,7 @@ H5Adelete_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Open the attribute through the VOL */
-    if(H5VL_attr_remove(obj, loc_params, vol_plugin, attr_name, H5AC_dxpl_id, eq_id) < 0)
+    if(H5VL_attr_remove(obj, loc_params, vol_plugin, attr_name, dxpl_id, eq_id) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
 done:
@@ -1669,6 +1763,8 @@ H5Aexists_ff(hid_t obj_id, const char *attr_name, htri_t *ret, hid_t rcxt_id, hi
     H5VL_t     *vol_plugin;
     void       *obj;
     H5VL_loc_params_t loc_params;
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     herr_t	ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1690,8 +1786,14 @@ H5Aexists_ff(hid_t obj_id, const char *attr_name, htri_t *ret, hid_t rcxt_id, hi
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(obj_id);
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     /* get the attribute info through the VOL */
-    if(H5VL_attr_get(obj, vol_plugin, H5VL_ATTR_EXISTS, H5AC_dxpl_id, eq_id, 
+    if(H5VL_attr_get(obj, vol_plugin, H5VL_ATTR_EXISTS, dxpl_id, eq_id, 
                      loc_params, attr_name, ret) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
 
@@ -1720,6 +1822,8 @@ H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     H5VL_t     *vol_plugin;
     void       *obj;
     H5VL_loc_params_t loc_params;
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     herr_t	ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1751,8 +1855,14 @@ H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     /* get the attribute info through the VOL */
-    if(H5VL_attr_get(obj, vol_plugin, H5VL_ATTR_EXISTS, H5AC_dxpl_id, eq_id, 
+    if(H5VL_attr_get(obj, vol_plugin, H5VL_ATTR_EXISTS, dxpl_id, eq_id, 
                      loc_params, attr_name, ret) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
 
@@ -1829,6 +1939,8 @@ H5Lmove_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     void    *obj2 = NULL;        /* object token of dst_id */
     H5VL_t  *vol_plugin2;        /* VOL plugin information */
     H5VL_loc_params_t loc_params2;
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     herr_t      ret_value=SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1885,10 +1997,16 @@ H5Lmove_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
     }
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* Move the link through the VOL */
     if((ret_value = H5VL_link_move(obj1, loc_params1, obj2, loc_params2, 
                                    (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2), 
-                                   FALSE, lcpl_id, lapl_id, H5AC_dxpl_id, eq_id)) < 0)
+                                   FALSE, lcpl_id, lapl_id, dxpl_id, eq_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -1920,6 +2038,8 @@ H5Lcopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     void    *obj2 = NULL;        /* object token of dst_id */
     H5VL_t  *vol_plugin2;        /* VOL plugin information */
     H5VL_loc_params_t loc_params2;
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     herr_t      ret_value=SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1976,10 +2096,16 @@ H5Lcopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
     }
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* Move the link through the VOL */
     if((ret_value = H5VL_link_move(obj1, loc_params1, obj2, loc_params2, 
                                    (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2), 
-                                   TRUE, lcpl_id, lapl_id, H5AC_dxpl_id, eq_id)) < 0)
+                                   TRUE, lcpl_id, lapl_id, dxpl_id, eq_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2010,6 +2136,7 @@ H5Lcreate_soft_ff(const char *link_target, hid_t link_loc_id, const char *link_n
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5VL_loc_params_t loc_params;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -2040,6 +2167,12 @@ H5Lcreate_soft_ff(const char *link_target, hid_t link_loc_id, const char *link_n
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
     loc_params.obj_type = H5I_get_type(link_loc_id);
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* get the file object */
     if(NULL == (obj = (void *)H5I_object(link_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
@@ -2057,7 +2190,7 @@ H5Lcreate_soft_ff(const char *link_target, hid_t link_loc_id, const char *link_n
 
     /* Create the link through the VOL */
     if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, obj, loc_params, vol_plugin,
-                                     lcpl_id, lapl_id, H5AC_dxpl_id, eq_id)) < 0)
+                                     lcpl_id, lapl_id, dxpl_id, eq_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -2093,6 +2226,7 @@ H5Lcreate_hard_ff(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
     H5VL_loc_params_t loc_params1;
     H5VL_loc_params_t loc_params2;
     H5P_genplist_t *plist;      /* Property list pointer */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     herr_t   ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2158,10 +2292,16 @@ H5Lcreate_hard_ff(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
     if(H5P_set(plist, H5VL_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* Create the link through the VOL */
     if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, obj2, loc_params2, 
                                      (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2),
-                                     lcpl_id, lapl_id, H5AC_dxpl_id, eq_id)) < 0)
+                                     lcpl_id, lapl_id, dxpl_id, eq_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -2191,6 +2331,8 @@ H5Ldelete_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t trans_id, hid_
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -2206,6 +2348,12 @@ H5Ldelete_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t trans_id, hid_
     loc_params.loc_data.loc_by_name.name = name;
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* get the file object */
     if(NULL == (obj = (void *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
@@ -2214,7 +2362,7 @@ H5Ldelete_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t trans_id, hid_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Delete the link through the VOL */
-    if((ret_value = H5VL_link_remove(obj, loc_params, vol_plugin, H5AC_dxpl_id, 
+    if((ret_value = H5VL_link_remove(obj, loc_params, vol_plugin, dxpl_id, 
                                      eq_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
@@ -2242,6 +2390,8 @@ H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, htri_t *ret,
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;
 
@@ -2269,9 +2419,15 @@ H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, htri_t *ret,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     /* check link existence through the VOL */
     if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_EXISTS, 
-                     H5AC_dxpl_id, eq_id, ret) < 0)
+                     dxpl_id, eq_id, ret) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -2298,6 +2454,8 @@ H5Lget_info_ff(hid_t loc_id, const char *name, H5L_ff_info_t *linfo /*out*/,
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;
 
@@ -2324,9 +2482,15 @@ H5Lget_info_ff(hid_t loc_id, const char *name, H5L_ff_info_t *linfo /*out*/,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     /* Get the link info through the VOL */
     if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_INFO, 
-                                  H5AC_dxpl_id, eq_id, linfo)) < 0)
+                                  dxpl_id, eq_id, linfo)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -2359,6 +2523,8 @@ H5Lget_val_ff(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -2386,9 +2552,15 @@ H5Lget_val_ff(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     /* Get the link info through the VOL */
     if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_VAL, 
-                                  H5AC_dxpl_id, eq_id, buf, size)) < 0)
+                                  dxpl_id, eq_id, buf, size)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
 
 done:
@@ -2424,6 +2596,8 @@ H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id, hid_t e
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5I_type_t  opened_type;
     void       *opened_obj = NULL;
     H5VL_loc_params_t loc_params;
@@ -2447,9 +2621,15 @@ H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id, hid_t e
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     /* Open the object through the VOL */
     if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, 
-                                              H5AC_dxpl_id, eq_id)))
+                                              dxpl_id, eq_id)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
     if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
@@ -2484,6 +2664,8 @@ H5Oopen_by_addr_ff(hid_t loc_id, haddr_ff_t addr, H5O_type_t type,
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5I_type_t  opened_type;
     void       *opened_obj = NULL;
     H5VL_loc_params_t loc_params;
@@ -2504,16 +2686,22 @@ H5Oopen_by_addr_ff(hid_t loc_id, haddr_ff_t addr, H5O_type_t type,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     if(H5O_TYPE_NAMED_DATATYPE == type) {
         /* Open the object through the VOL */
         if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, 
-                                                  H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
+                                                  dxpl_id, H5_EVENT_QUEUE_NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
     }
     else {
         /* Open the object through the VOL */
         if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, 
-                                                  H5AC_dxpl_id, eq_id)))
+                                                  dxpl_id, eq_id)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
     }
     if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
@@ -2556,6 +2744,7 @@ H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     H5VL_loc_params_t loc_params1;
     H5VL_loc_params_t loc_params2;
     H5P_genplist_t *plist;      /* Property list pointer */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     herr_t         ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2619,10 +2808,16 @@ H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     if(H5P_set(plist, H5VL_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* Create the link through the VOL */
     if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, obj2, loc_params2, 
                                      (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2),
-                                     lcpl_id, lapl_id, H5AC_dxpl_id, eq_id)) < 0)
+                                     lcpl_id, lapl_id, dxpl_id, eq_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -2649,6 +2844,8 @@ H5Oexists_by_name_ff(hid_t loc_id, const char *name, htri_t *ret, hid_t lapl_id,
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params;
     herr_t  ret_value = SUCCEED;       /* Return value */
 
@@ -2676,9 +2873,15 @@ H5Oexists_by_name_ff(hid_t loc_id, const char *name, htri_t *ret, hid_t lapl_id,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     /* change the ref count through the VOL */
     if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_EXISTS, 
-                       H5AC_dxpl_id, eq_id, ret) < 0)
+                       dxpl_id, eq_id, ret) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
 
 done:
@@ -2708,6 +2911,8 @@ H5Oset_comment_ff(hid_t obj_id, const char *comment, hid_t trans_id, hid_t eq_id
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -2724,9 +2929,15 @@ H5Oset_comment_ff(hid_t obj_id, const char *comment, hid_t trans_id, hid_t eq_id
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* set comment on object through the VOL */
     if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_SET_COMMENT, 
-                        H5AC_dxpl_id, eq_id, comment) < 0)
+                        dxpl_id, eq_id, comment) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
 
 done:
@@ -2757,6 +2968,8 @@ H5Oset_comment_by_name_ff(hid_t loc_id, const char *name, const char *comment,
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -2784,9 +2997,15 @@ H5Oset_comment_by_name_ff(hid_t loc_id, const char *name, const char *comment,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* set comment on object through the VOL */
     if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_SET_COMMENT, 
-                        H5AC_dxpl_id, eq_id, comment) < 0)
+                        dxpl_id, eq_id, comment) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
 
 done:
@@ -2812,6 +3031,8 @@ H5Oget_comment_ff(hid_t loc_id, char *comment, size_t bufsize, ssize_t *ret,
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;              /* Return value */
 
@@ -2828,8 +3049,14 @@ H5Oget_comment_ff(hid_t loc_id, char *comment, size_t bufsize, ssize_t *ret,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_COMMENT, 
-                       H5AC_dxpl_id, eq_id, comment, bufsize, ret) < 0)
+                       dxpl_id, eq_id, comment, bufsize, ret) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object comment")
 
 done:
@@ -2855,6 +3082,8 @@ H5Oget_comment_by_name_ff(hid_t loc_id, const char *name, char *comment, size_t 
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;              /* Return value */
 
@@ -2883,8 +3112,14 @@ H5Oget_comment_by_name_ff(hid_t loc_id, const char *name, char *comment, size_t 
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_COMMENT, 
-                       H5AC_dxpl_id, eq_id, comment, bufsize, ret) < 0)
+                       dxpl_id, eq_id, comment, bufsize, ret) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object info")
 
 done:
@@ -2919,6 +3154,8 @@ H5Ocopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     void    *obj2 = NULL;        /* object token of dst_id */
     H5VL_t  *vol_plugin2;        /* VOL plugin information */
     H5VL_loc_params_t loc_params2;
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2957,10 +3194,16 @@ H5Ocopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     loc_params2.type = H5VL_OBJECT_BY_SELF;
     loc_params2.obj_type = H5I_get_type(dst_loc_id);
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
     /* Open the object through the VOL */
     if((ret_value = H5VL_object_copy(obj1, loc_params1, vol_plugin1, src_name, 
                                      obj2, loc_params2, vol_plugin2, dst_name, 
-                                     ocpypl_id, lcpl_id, H5AC_dxpl_id, eq_id)) < 0)
+                                     ocpypl_id, lcpl_id, dxpl_id, eq_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2985,6 +3228,8 @@ H5Oget_info_ff(hid_t loc_id, H5O_ff_info_t *oinfo, hid_t rcxt_id, hid_t eq_id)
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -3005,9 +3250,15 @@ H5Oget_info_ff(hid_t loc_id, H5O_ff_info_t *oinfo, hid_t rcxt_id, hid_t eq_id)
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     /* Get the group info through the VOL using the location token */
     if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_INFO, 
-                                    H5AC_dxpl_id, eq_id, oinfo)) < 0)
+                                    dxpl_id, eq_id, oinfo)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -3034,6 +3285,8 @@ H5Oget_info_by_name_ff(hid_t loc_id, const char *name, H5O_ff_info_t *oinfo,
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist ;     /* Property list pointer */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -3059,14 +3312,19 @@ H5Oget_info_by_name_ff(hid_t loc_id, const char *name, H5O_ff_info_t *oinfo,
     /* get the file object */
     if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
     /* Get the group info through the VOL using the location token */
     if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_INFO, 
-                                    H5AC_dxpl_id, eq_id, oinfo)) < 0)
+                                    dxpl_id, eq_id, oinfo)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -3436,6 +3694,7 @@ herr_t H5DOappend_ff(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extensi
     hid_t    new_space_id = FAIL; /* new file space (after extension) */
     hid_t    mem_space_id = FAIL; /* memory space for data buffer */
     hsize_t nelmts; /* number of elements in selection */
+    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -3450,6 +3709,12 @@ herr_t H5DOappend_ff(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extensi
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
     /* get the dataspace of the dataset */
     if(FAIL == (space_id = H5Dget_space(dset_id)))
@@ -3533,6 +3798,7 @@ H5DOsequence_ff(hid_t dset_id, hid_t dxpl_id, unsigned axis, hsize_t start_off,
     hid_t    space_id = FAIL; /* old File space */
     hid_t    mem_space_id = FAIL; /* memory space for data buffer */
     hsize_t nelmts; /* number of elements in selection */
+    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -3549,6 +3815,12 @@ H5DOsequence_ff(hid_t dset_id, hid_t dxpl_id, unsigned axis, hsize_t start_off,
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
     /* get the dataspace of the dataset */
     if(FAIL == (space_id = H5Dget_space(dset_id)))
@@ -3606,6 +3878,7 @@ herr_t H5DOset_ff(hid_t dset_id, hid_t dxpl_id, const hsize_t coord[],
     hid_t    space_id = FAIL; /* old File space */
     hid_t    mem_space_id = FAIL; /* memory space for data buffer */
     hsize_t  nelmts = 1;
+    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -3620,6 +3893,12 @@ herr_t H5DOset_ff(hid_t dset_id, hid_t dxpl_id, const hsize_t coord[],
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
     /* get the dataspace of the dataset */
     if(FAIL == (space_id = H5Dget_space(dset_id)))
@@ -3653,6 +3932,7 @@ herr_t H5DOget_ff(hid_t dset_id, hid_t dxpl_id, const hsize_t coord[],
     hid_t    space_id = FAIL; /* old File space */
     hid_t    mem_space_id = FAIL; /* memory space for data buffer */
     hsize_t  nelmts = 1;
+    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -3667,6 +3947,12 @@ herr_t H5DOget_ff(hid_t dset_id, hid_t dxpl_id, const hsize_t coord[],
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
     /* get the dataspace of the dataset */
     if(FAIL == (space_id = H5Dget_space(dset_id)))

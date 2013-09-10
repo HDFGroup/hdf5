@@ -109,6 +109,40 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
             }
             break;
         }
+    case H5RC_PREV:
+        {
+            iod_container_tids_t tids;
+            uint64_t u;
+
+#if H5VL_IOD_DEBUG
+            fprintf(stderr, "Next Acquire Read Context %llu\n", input->c_version);
+#endif
+            if(iod_container_query_tids(coh, &tids, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
+
+            if(c_version >= tids.latest_rdable) {
+                acquired_version = tids.latest_rdable;
+                if(iod_trans_start(coh, &acquired_version, NULL, 0, IOD_TRANS_RD, NULL) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't acquire read context");
+                break;
+            }
+
+            acquired_version = IOD_TID_UNKNOWN;
+            u=c_version;
+
+            for(u=c_version; u>=0; u--) {
+                if(iod_trans_start(coh, &u, NULL, 0, IOD_TRANS_RD, NULL) < 0)
+                    continue;
+                acquired_version = u;
+                break;
+            }
+
+            if(IOD_TID_UNKNOWN == acquired_version) {
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, 
+                            "can't get a read version before %llu\n", c_version);
+            }
+            break;
+        }
     default:
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "invalid acquire request");
     }

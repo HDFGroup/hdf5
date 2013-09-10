@@ -55,6 +55,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
     iod_obj_id_t mdkv_id, attr_id; /* metadata and attribute KV IDs for the file */
     iod_ret_t ret;
+    iod_trans_id_t first_tid = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -73,7 +74,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create container");
 
     /* create the root group */
-    ret = iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, NULL, NULL, 
+    ret = iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, NULL, NULL, 
                          &input->root_id, NULL);
     if(0 == ret || EEXISTS == ret) {
         /* root group has been created, open it */
@@ -94,12 +95,12 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         hid_t fcpl_id;
 
         /* create the metadata KV object for the root group */
-        if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
+        if(iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &mdkv_id, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
         /* create the attribute KV object for the root group */
-        if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
+        if(iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &attr_id, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
@@ -110,7 +111,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         sp.filler2_id = IOD_ID_UNDEFINED;
 
         /* set scratch pad in root group */
-        if (iod_obj_set_scratch(root_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        if (iod_obj_set_scratch(root_oh, first_tid, &sp, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
 
         /* Store Metadata in scratch pad */
@@ -125,7 +126,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         fcpl_id = input->fcpl_id;
 
         /* insert plist metadata */
-        if(H5VL_iod_insert_plist(mdkv_oh, IOD_TID_UNKNOWN, fcpl_id, 
+        if(H5VL_iod_insert_plist(mdkv_oh, first_tid, fcpl_id, 
                                  NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert link count KV value");
 
@@ -137,21 +138,21 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 
         key = strdup(H5VL_IOD_KEY_KV_IDS_INDEX);
         kv.key = (char *)key;
-        if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+        if (iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
         free(key); 
         key = NULL;
 
         key = strdup(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
         kv.key = (char *)key;
-        if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+        if (iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
         free(key); 
         key = NULL;
 
         key = strdup(H5VL_IOD_KEY_BLOB_IDS_INDEX);
         kv.key = (char *)key;
-        if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+        if (iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
         free(key); 
         key = NULL;
@@ -317,50 +318,6 @@ done:
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_file_open_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_iod_server_file_flush_cb
- *
- * Purpose:	Flushs iod HDF5 file.
- *
- * Return:	Success:	SUCCEED 
- *		Failure:	Negative
- *
- * Programmer:  Mohamad Chaarawi
- *              January, 2013
- *
- *-------------------------------------------------------------------------
- */
-void
-H5VL_iod_server_file_flush_cb(AXE_engine_t UNUSED axe_engine, 
-                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
-                              void *_op_data)
-{
-    op_data_t *op_data = (op_data_t *)_op_data;
-    file_flush_in_t *input = (file_flush_in_t *)op_data->input;
-    iod_handle_t coh = input->coh;
-    H5F_scope_t scope = input->scope;
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* MSC - TODO */
-
-#if H5_DO_NATIVE
-    ret_value = H5Fflush(coh.cookie, scope);
-#endif
-
-done:
-    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
-        HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't send result of file flush to client");
-
-    input = (file_flush_in_t *)H5MM_xfree(input);
-    op_data = (op_data_t *)H5MM_xfree(op_data);
-
-    FUNC_LEAVE_NOAPI_VOID
-} /* end H5VL_iod_server_file_flush_cb() */
 
 
 /*-------------------------------------------------------------------------

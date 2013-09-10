@@ -29,13 +29,13 @@
 
 /* forward declaration of file struct */
 struct H5VL_iod_file_t;
+/* forward declaration of object struct */
 struct H5VL_iod_object_t;
 
-/* types for requests */
+/* enum for types of requests */
 typedef enum H5RQ_type_t {
     HG_FILE_CREATE,
     HG_FILE_OPEN,
-    HG_FILE_FLUSH,
     HG_FILE_CLOSE,
     HG_ATTR_CREATE,
     HG_ATTR_OPEN,
@@ -94,20 +94,30 @@ typedef enum H5RQ_type_t {
 
 /* the client IOD VOL request struct */
 typedef struct H5VL_iod_request_t {
-    H5RQ_type_t type;
-    void *data;
-    void *req;
-    struct H5VL_iod_object_t *obj;
-    H5VL_iod_state_t state;
-    H5_status_t status;
-    uint64_t axe_id;
-    size_t num_parents;
-    struct H5VL_iod_request_t **parent_reqs;
-    struct H5VL_iod_request_t *prev;
-    struct H5VL_iod_request_t *next;
+    H5RQ_type_t type; /* The operation type of this request */
+    void *data; /* data associated with request (usually used at completion time) */
+    void *req; /* the request pointer correponding to the Mercury request */
+    struct H5VL_iod_object_t *obj; /* The object pointer that this request is associated with */
+    H5VL_iod_state_t state; /* current internal state of the request */
+    H5_status_t status; /* external status given to use of request */
+    uint64_t axe_id; /* The AXE ID this request was assigned */
+    unsigned ref_count; /* reference count to know when this request can be freed. */
+    H5VL_iod_req_info_t *trans_info; /* pointer to transaction or read context struct for this request */
+
+    size_t num_parents; /* Number of parents this request has (in AXE) */
+    struct H5VL_iod_request_t **parent_reqs; /* an array of the parent request pointers */
+
+    /* Linked list pointers for the container this request was generated. */
+    struct H5VL_iod_request_t *file_prev; 
+    struct H5VL_iod_request_t *file_next;
+
+    /* Linked list pointers for all IOD VOL requests in the library */
     struct H5VL_iod_request_t *global_prev;
     struct H5VL_iod_request_t *global_next;
-    unsigned ref_count;
+
+    /* Linked list pointers for the transaction this request belong to */
+    struct H5VL_iod_request_t *trans_prev;
+    struct H5VL_iod_request_t *trans_next;
 } H5VL_iod_request_t;
 
 /* struct that contains the information about the IOD container */
@@ -279,17 +289,16 @@ H5_DLL herr_t H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_
 H5_DLL herr_t H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req);
 H5_DLL herr_t H5VL_iod_request_decr_rc(H5VL_iod_request_t *request);
 
-H5_DLL herr_t H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
-                                       const char *name, /*OUT*/iod_obj_id_t *iod_id, 
-                                       /*OUT*/iod_handle_t *iod_oh, 
-                                       /*OUT*/H5VL_iod_request_t **parent_req, 
-                                       /*OUT*/char **new_name, /*OUT*/H5VL_iod_object_t **last_obj);
-H5_DLL herr_t H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, /*IN/OUT*/ size_t *count, 
-                                       /*OUT*/ AXE_task_t *parent_axe_ids, 
-                                       /*OUT*/ H5VL_iod_request_t **parent_reqs);
+H5_DLL herr_t H5VL_iod_get_parent_requests(H5VL_iod_object_t *obj, H5VL_iod_req_info_t *req_info, 
+                                           H5VL_iod_request_t **parent_reqs, size_t *num_parents);
+H5_DLL  herr_t H5VL_iod_get_loc_info(H5VL_iod_object_t *obj, iod_obj_id_t *iod_id, 
+                                     iod_handle_t *iod_oh);
+H5_DLL herr_t H5VL_iod_get_obj_requests(H5VL_iod_object_t *obj, /*IN/OUT*/ size_t *count, 
+                                        /*OUT*/ H5VL_iod_request_t **parent_reqs);
 H5_DLL herr_t H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type, 
                                            H5VL_iod_object_t *request_obj, htri_t track,
                                            size_t num_parents, H5VL_iod_request_t **parent_reqs,
+                                           H5VL_iod_req_info_t *req_info,
                                            void *input, void *output, void *data, void **req);
 
 H5_DLL herr_t H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index, 

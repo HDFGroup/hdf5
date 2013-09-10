@@ -36,8 +36,19 @@
 /****************************/
 /* Library Private Typedefs */
 /****************************/
+
+/* Request and Linked list info used in transactions and read contexts
+   to track dependencies. */
+typedef struct H5VL_iod_req_info_t {
+    struct H5VL_iod_request_t *request;
+    struct H5VL_iod_request_t *head;
+    struct H5VL_iod_request_t *tail;
+    size_t num_req;
+} H5VL_iod_req_info_t;
+
 /* the client Read Context struct */
 typedef struct H5RC_t {
+    H5VL_iod_req_info_t req_info; /* must be first */
     struct H5VL_iod_file_t *file;
     uint64_t c_version;
 } H5RC_t;

@@ -56,6 +56,8 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     const char *name = input->name; /* path relative to loc_id and loc_oh  */
     hid_t keytype = input->keytype_id;
     hid_t valtype = input->valtype_id;
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t map_oh, cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, mdkv_id, attr_id;
     char *last_comp; /* the name of the group obtained from traversal function */
@@ -205,6 +207,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_handle = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
     const char *name = input->name;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_obj_id_t map_id; /* The ID of the map that needs to be opened */
     iod_handle_t map_oh, mdkv_oh;
     scratch_pad_t sp;
@@ -311,6 +314,8 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     binary_buf_t key = input->key;
     binary_buf_t val = input->val;
     hid_t dxpl_id = input->dxpl_id;
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_size_t key_size, val_size;
     size_t src_size, dst_size;
     void *key_buf = NULL, *val_buf = NULL;
@@ -432,6 +437,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
     hid_t val_maptype_id = input->val_maptype_id;
     binary_buf_t key = input->key;
     hid_t dxpl_id = input->dxpl_id;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_size_t key_size, val_size;
     size_t src_size, dst_size;
     void *key_buf = NULL, *val_buf = NULL;
@@ -557,7 +563,8 @@ H5VL_iod_server_map_get_count_cb(AXE_engine_t UNUSED axe_engine,
     map_get_count_in_t *input = (map_get_count_in_t *)op_data->input;
     iod_handle_t coh = input->coh;
     iod_handle_t iod_oh = input->iod_oh;
-    iod_obj_id_t iod_id = input->iod_id; 
+    iod_obj_id_t iod_id = input->iod_id;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_size_t num;
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
@@ -636,6 +643,7 @@ H5VL_iod_server_map_exists_cb(AXE_engine_t UNUSED axe_engine,
     hid_t key_memtype_id = input->key_memtype_id;
     hid_t key_maptype_id = input->key_maptype_id;
     binary_buf_t key = input->key;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_size_t key_size, val_size;
     size_t src_size, dst_size;
     void *key_buf = NULL;
@@ -738,6 +746,8 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
     hid_t key_memtype_id = input->key_memtype_id;
     hid_t key_maptype_id = input->key_maptype_id;
     binary_buf_t key = input->key;
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_size_t key_size;
     size_t src_size, dst_size;
     void *key_buf = NULL;

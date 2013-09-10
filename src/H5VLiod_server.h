@@ -81,7 +81,6 @@ H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_eff_finalize(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_file_create(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_file_open(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_file_flush(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_file_close(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_attr_create(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_attr_open(hg_handle_t handle);
@@ -146,10 +145,6 @@ H5_DLL void H5VL_iod_server_file_open_cb(AXE_engine_t axe_engine,
                                          size_t num_s_parents, AXE_task_t s_parents[], 
                                          void *op_data);
 H5_DLL void H5VL_iod_server_file_close_cb(AXE_engine_t axe_engine,  
-                                          size_t num_n_parents, AXE_task_t n_parents[], 
-                                          size_t num_s_parents, AXE_task_t s_parents[], 
-                                          void *op_data);
-H5_DLL void H5VL_iod_server_file_flush_cb(AXE_engine_t axe_engine,  
                                           size_t num_n_parents, AXE_task_t n_parents[], 
                                           size_t num_s_parents, AXE_task_t s_parents[], 
                                           void *op_data);

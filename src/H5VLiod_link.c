@@ -48,6 +48,8 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
     link_create_in_t *input = (link_create_in_t *)op_data->input;
     H5VL_link_create_type_t create_type = input->create_type;
     iod_handle_t coh = input->coh; /* the container handle */
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t src_oh; /* The handle for creation src object */
     iod_obj_id_t src_id; /* The ID of the creation src object */
     iod_handle_t target_oh;
@@ -191,6 +193,8 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
     link_move_in_t *input = (link_move_in_t *)op_data->input;
     hbool_t copy_flag = input->copy_flag;
     iod_handle_t coh = input->coh; /* the container handle */
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t src_oh; /* The handle for src object group */
     iod_obj_id_t src_id; /* The ID of the src object */
     iod_handle_t dst_oh; /* The handle for the dst object where link is created*/
@@ -366,6 +370,7 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t cur_oh;
     iod_obj_id_t cur_id;
     const char *loc_name = input->path;
+    iod_trans_id_t rtid = input->rcxt_num;
     char *last_comp = NULL;
     htri_t ret = -1;
     iod_size_t kv_size = 0;
@@ -450,6 +455,7 @@ H5VL_iod_server_link_get_info_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t cur_oh;
     iod_obj_id_t cur_id;
     const char *loc_name = input->path;
+    iod_trans_id_t rtid = input->rcxt_num;
     char *last_comp = NULL;
     H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
@@ -549,6 +555,7 @@ H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
     size_t length = input->length;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t cur_oh;
     iod_obj_id_t cur_id;
     const char *loc_name = input->path;
@@ -646,6 +653,8 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh;
     iod_handle_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t cur_oh;
     iod_obj_id_t cur_id;
     const char *loc_name = input->path;

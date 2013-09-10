@@ -51,6 +51,8 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t attr_id = input->attr_id; /* The ID of the attribute that needs to be created */
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t attr_oh, attr_kv_oh, obj_oh, mdkv_oh; /* object handles */
     iod_obj_id_t obj_id, mdkv_id;
     const char *loc_name = input->path; /* path to start hierarchy traversal */
@@ -220,6 +222,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* container handle */
     iod_handle_t loc_handle = input->loc_oh; /* location handle to start traversal */
     iod_obj_id_t loc_id = input->loc_id; /* location ID */
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t attr_kv_oh, attr_oh, obj_oh, mdkv_oh;
     iod_obj_id_t obj_id;
     iod_obj_id_t attr_id;
@@ -372,6 +375,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t iod_id = input->iod_id; /* attribute's ID */
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
     hid_t type_id = input->type_id; /* datatype ID of data */
+    iod_trans_id_t rtid = input->rcxt_num;
     hg_bulk_block_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     iod_mem_desc_t mem_desc; /* memory descriptor used for reading array */
@@ -520,6 +524,8 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t iod_id = input->iod_id; /* attribute's ID */
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
     hid_t type_id = input->type_id; /* datatype ID of data */
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     hg_bulk_block_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     iod_mem_desc_t mem_desc; /* memory descriptor used for writing array */
@@ -667,6 +673,7 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* container handle */
     iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t obj_oh; /* current object handle accessed */
     iod_handle_t attr_kv_oh; /* KV handle holding attributes for object */
     iod_obj_id_t obj_id;
@@ -772,6 +779,8 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
     const char *loc_name = input->path; /* path to start hierarchy traversal */
     const char *old_name = input->old_attr_name;
     const char *new_name = input->new_attr_name;
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_kv_params_t kvs; /* KV lists for objects - used to unlink attribute object */
     iod_kv_t kv; /* KV entry */
     H5VL_iod_link_t iod_link;
@@ -880,6 +889,8 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t obj_id, attr_id;
     const char *loc_name = input->path; /* path to start hierarchy traversal */
     const char *attr_name = input->attr_name; /* attribute's name */
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_kv_params_t kvs;
     iod_kv_t kv;
     H5VL_iod_link_t iod_link;

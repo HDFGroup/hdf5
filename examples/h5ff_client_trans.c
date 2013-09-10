@@ -64,26 +64,29 @@ int main(int argc, char **argv) {
 
     version = 0;
     /* acquire container version 0 - EXACT */
-    rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, event_q);
-
-    /* Need to wait for acquire before using it */
-    if(H5EQpop(event_q, &req1) < 0)
-        exit(1);
-    assert(H5AOwait(req1, &status1) == 0);
-    assert (status1);
+    rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
 
     /* create 2 transactions objects (does not start transactions). Local call. */
     tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
     assert(tid1);
-
     tid2 = H5TRcreate(file_id, rid1, (uint64_t)555);
     assert(tid2);
 
     /* start transaction 1 with default num_peers (= 0). 
        This is asynchronous. */
     if(my_rank == 0) {
+        hid_t gid1, gid2;
+
         ret = H5TRstart(tid1, H5P_DEFAULT, event_q);
         assert(0 == ret);
+
+        gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+        assert(gid1);
+        gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+        assert(gid2);
+
+        assert(H5Gclose_ff(gid1, event_q) == 0);
+        assert(H5Gclose_ff(gid2, event_q) == 0);
     }
 
     /* skip transactions 2 till 554. This is asynchronous. */

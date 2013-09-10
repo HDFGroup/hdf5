@@ -37,6 +37,7 @@
 #include "H5ACprivate.h"    /* Cache */
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FFprivate.h"	/* Fast Forward routines	  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
@@ -308,6 +309,8 @@ static const size_t H5D_def_direct_chunk_datasize_g = H5D_XFER_DIRECT_CHUNK_WRIT
 static herr_t
 H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
 {
+    hid_t trans_id = FAIL;
+    hid_t context_id = FAIL;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -506,6 +509,16 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_SIZE, &H5D_def_direct_chunk_datasize_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the transaction ID property*/
+    if(H5P_register_real(pclass, H5VL_TRANS_ID, sizeof(hid_t), &trans_id, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the context ID property*/
+    if(H5P_register_real(pclass, H5VL_CONTEXT_ID, sizeof(hid_t), &context_id, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:

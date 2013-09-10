@@ -54,6 +54,8 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t grp_id = input->grp_id; /* The ID of the group that needs to be created */
     const char *name = input->name; /* path relative to loc_id and loc_oh  */
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t grp_oh, cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, mdkv_id, attr_id;
     char *last_comp = NULL; /* the name of the group obtained from traversal function */
@@ -207,6 +209,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     const char *name = input->name; /* group name including path to open */
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_obj_id_t grp_id; /* The ID of the group that needs to be opened */
     iod_handle_t grp_oh, mdkv_oh; /* The group handle and its metadata KV handle */
     scratch_pad_t sp;

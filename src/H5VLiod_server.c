@@ -60,8 +60,6 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
                              file_create_in_t, file_create_out_t);
     MERCURY_HANDLER_REGISTER("file_open", H5VL_iod_server_file_open, 
                              file_open_in_t, file_open_out_t);
-    MERCURY_HANDLER_REGISTER("file_flush", H5VL_iod_server_file_flush, 
-                             file_flush_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("file_close", H5VL_iod_server_file_close, 
                              file_close_in_t, ret_t);
 
@@ -460,58 +458,6 @@ H5VL_iod_server_file_open(hg_handle_t handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_file_open() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_iod_server_file_flush
- *
- * Purpose:	Function shipper registered call for File Flush.
- *              Inserts the real worker routine into the Async Engine.
- *
- * Return:	Success:	HG_SUCCESS 
- *		Failure:	Negative
- *
- * Programmer:  Mohamad Chaarawi
- *              January, 2013
- *
- *-------------------------------------------------------------------------
- */
-int
-H5VL_iod_server_file_flush(hg_handle_t handle)
-{
-    op_data_t *op_data = NULL;
-    file_flush_in_t *input = NULL;
-    int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
-
-    if(NULL == (input = (file_flush_in_t *) H5MM_malloc(sizeof(file_flush_in_t))))
-	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
-
-    if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
-
-    if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
-
-    if(input->axe_info.count && 
-       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
-                                         input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
-
-    op_data->hg_handle = handle;
-    op_data->input = (void *)input;
-
-    if (AXE_SUCCEED != AXEcreate_barrier_task(engine, input->axe_info.axe_id,
-                                              H5VL_iod_server_file_flush_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_server_file_flush() */
 
 
 /*-------------------------------------------------------------------------

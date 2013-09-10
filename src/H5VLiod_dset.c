@@ -90,6 +90,8 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t dset_id = input->dset_id; /* The ID of the dataset that needs to be created */
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t dset_oh, cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, mdkv_id, attr_id;
     const char *name = input->name; /* name of dset including path to create */
@@ -282,6 +284,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* container handle */
     iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_obj_id_t dset_id; /* ID of the dataset to open */
     iod_handle_t dset_oh, mdkv_oh;
     const char *name = input->name; /* name of dset including path to open */
@@ -432,6 +435,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     hid_t dxpl_id = input->dxpl_id; /* transfer property list */
     hid_t src_id = input->dset_type_id; /* the datatype of the dataset's element */
     hid_t dst_id = input->mem_type_id; /* the memory type of the elements */
+    iod_trans_id_t rtid = input->rcxt_num;
     hg_bulk_block_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     size_t size, buf_size;
@@ -646,6 +650,7 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t iod_id = input->iod_id; /* dset ID */
     hid_t space_id = input->space_id; /* file space selection */
     hid_t dxpl_id = input->dxpl_id; /* transfer property list */
+    iod_trans_id_t rtid = input->rcxt_num;
     size_t buf_size;
     void *buf = NULL; /* buffer to hold blob IDs */
     size_t nelmts; /* number of elements selected to read */
@@ -854,6 +859,8 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     uint32_t cs = input->checksum; /* checksum recieved for data */
     hid_t src_id = input->mem_type_id; /* the memory type of the elements */
     hid_t dst_id = input->dset_type_id; /* the datatype of the dataset's element */
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     hg_bulk_block_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     size_t size, buf_size;
@@ -1031,6 +1038,8 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh;
     iod_handle_t iod_oh = input->iod_oh;
     iod_obj_id_t iod_id = input->iod_id; 
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     /* int rank = input->dims.rank;  rank of dataset */
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;

@@ -325,10 +325,15 @@ H5RC_create(void *file, uint64_t c_version)
 
     /* allocate read context struct */
     if(NULL == (rc = H5FL_CALLOC(H5RC_t)))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate top read context structure")
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate read context structure")
 
     rc->file = (H5VL_iod_file_t *)file;
     rc->c_version = c_version;
+
+    rc->req_info.request = NULL;
+    rc->req_info.head = NULL;
+    rc->req_info.tail = NULL;
+    rc->req_info.num_req = 0;
 
     /* set return value */
     ret_value = rc;
@@ -407,8 +412,14 @@ H5RCacquire(hid_t file_id, /*IN/OUT*/ uint64_t *c_version,
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a read context on container");
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue")
     }
 
 done:
@@ -447,7 +458,7 @@ H5RCrelease(hid_t rc_id , hid_t eq_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Read Context ID")
 
     /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(rc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     if(eq_id != H5_EVENT_QUEUE_NULL) {
@@ -464,7 +475,13 @@ H5RCrelease(hid_t rc_id , hid_t eq_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a release on a read context on container");
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
@@ -503,7 +520,7 @@ H5RCpersist(hid_t rc_id , hid_t eq_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Read Context ID")
 
     /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(rc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     if(eq_id != H5_EVENT_QUEUE_NULL) {
@@ -520,7 +537,13 @@ H5RCpersist(hid_t rc_id , hid_t eq_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a persist on a read context on container");
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
@@ -563,7 +586,7 @@ H5RCsnapshot(hid_t rc_id , const char *snapshot_name, hid_t eq_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Read Context ID")
 
     /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(rc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     if(eq_id != H5_EVENT_QUEUE_NULL) {
@@ -580,7 +603,13 @@ H5RCsnapshot(hid_t rc_id , const char *snapshot_name, hid_t eq_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a snapshot on a read context on container");
 
     if(request && *req) {
-        if(H5EQinsert(eq_id, request) < 0)
+        H5EQ_t *eq = NULL;                    /* event queue token */
+
+        /* get the eq object */
+        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
+
+        if(H5EQ_insert(eq, request) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
@@ -639,6 +668,49 @@ herr_t
 H5RC_close(H5RC_t *rc)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(rc->req_info.num_req) {
+        H5VL_iod_request_t *cur_req = rc->req_info.head;
+        H5VL_iod_request_t *next_req = NULL;
+        H5VL_iod_request_t *prev;
+        H5VL_iod_request_t *next;
+
+        while(cur_req) {
+            next_req = cur_req->trans_next;
+
+            /* remove the current request from the linked list */
+            prev = cur_req->trans_prev;
+            next = cur_req->trans_next;
+            if (prev) {
+                if (next) {
+                    prev->trans_next = next;
+                    next->trans_prev = prev;
+                }
+                else {
+                    prev->trans_next = NULL;
+                    rc->req_info.tail = prev;
+                }
+            }
+            else {
+                if (next) {
+                    next->trans_prev = NULL;
+                    rc->req_info.head = next;
+                }
+                else {
+                    rc->req_info.head = NULL;
+                    rc->req_info.tail = NULL;
+                }
+            }
+
+            cur_req->trans_prev = NULL;
+            cur_req->trans_next = NULL;
+
+            rc->req_info.num_req --;
+
+            cur_req = next_req;
+        }
+        HDassert(0 == rc->req_info.num_req);
+    }
 
     rc = H5FL_FREE(H5RC_t, rc);
 

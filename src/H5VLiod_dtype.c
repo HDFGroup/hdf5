@@ -51,6 +51,8 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t dtype_id = input->dtype_id; /* The ID of the datatype that needs to be created */
+    iod_trans_id_t wtid = input->trans_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     iod_handle_t dtype_oh, cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, mdkv_id, attr_id;
     const char *name = input->name; /* name of dtype including path to commit */
@@ -256,6 +258,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t dtype_id; /* ID of datatype to open */
     iod_handle_t dtype_oh, mdkv_oh;
     const char *name = input->name; /* name of dtype including path to open */
+    iod_trans_id_t rtid = input->rcxt_num;
     size_t buf_size; /* size of serialized datatype */
     void *buf = NULL;
     iod_mem_desc_t *mem_desc = NULL; /* memory descriptor used for reading */
