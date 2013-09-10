@@ -35,6 +35,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     h5test-clear-error_test-objects
     h5test-clear-links_env-objects
     PERFORM_h5perform-clear-objects
+    HL_TOOLS-clear-objects
     hl_test-clear-objects
     hl_fortran_test-clear-objects
     ######### tools/h5copy #########
@@ -202,6 +203,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5REPACK_VERIFY_LAYOUT-contig_small_fixed_compa     #uses grepTest.cmake
     H5REPACK_VERIFY_LAYOUT_ALL-layout_long_switches     #uses grepTest.cmake
     H5REPACK_VERIFY_LAYOUT_ALL-layout_short_switches    #uses grepTest.cmake
+    H5REPACK-plugin
     ######### tools/h5stat #########
     H5STAT-clearall-objects
     ######### tools/misc #########
