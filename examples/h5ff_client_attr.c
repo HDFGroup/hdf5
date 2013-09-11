@@ -15,8 +15,8 @@ int main(int argc, char **argv) {
     hid_t file_id;
     hid_t gid1;
     hid_t sid, dtid;
-    hid_t did1;
-    hid_t aid1, aid2, aid3, aid4;
+    hid_t did1, map;
+    hid_t aid1, aid2, aid3, aid4, aid5;
     hid_t tid1, tid2, rid1, rid2;
     hid_t fapl_id, trspl_id;
     hid_t event_q;
@@ -122,6 +122,10 @@ int main(int argc, char **argv) {
     ret = H5Tcommit_ff(file_id, "DT1", dtid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
                        tid1, event_q);
     assert(ret == 0);
+
+    map = H5Mcreate_ff(file_id, "MAP1", H5T_STD_I32LE, H5T_STD_I32LE, 
+                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
+    assert(map > 0);
 
     /* create an attribute on root group */
     aid1 = H5Acreate_ff(file_id, "ROOT_ATTR", dtid, sid, 
@@ -234,6 +238,11 @@ int main(int argc, char **argv) {
                         H5P_DEFAULT, H5P_DEFAULT, tid2, event_q);
     assert(aid2);
 
+    /* create an attribute on dataset */
+    aid5 = H5Acreate_ff(map, "MAP_ATTR", dtid, sid, 
+                        H5P_DEFAULT, H5P_DEFAULT, tid2, event_q);
+    assert(aid1);
+
     /* finish transaction 2 */
     ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, event_q);
     assert(0 == ret);
@@ -247,7 +256,11 @@ int main(int argc, char **argv) {
     assert(ret == 0);
     ret = H5Aclose_ff(aid4, event_q);
     assert(ret == 0);
+    ret = H5Aclose_ff(aid5, event_q);
+    assert(ret == 0);
     ret = H5Dclose_ff(did1, event_q);
+    assert(ret == 0);
+    ret = H5Mclose_ff(map, event_q);
     assert(ret == 0);
     ret = H5Gclose_ff(gid1, event_q);
     assert(ret == 0);

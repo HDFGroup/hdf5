@@ -31,6 +31,7 @@
 #include "mercury_handler.h"
 #include "mercury_macros.h"
 #include "mercury_proc.h"
+#include "mercury_proc_string.h"
 #include "mercury_error.h"
 #include "mercury_bulk.h"
 #include "mercury_config.h"

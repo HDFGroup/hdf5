@@ -800,6 +800,8 @@ H5TR_close(H5TR_t *tr)
 
             tr->req_info.num_req --;
 
+            H5VL_iod_request_decr_rc(cur_req);
+
             cur_req = next_req;
         }
         HDassert(0 == tr->req_info.num_req);

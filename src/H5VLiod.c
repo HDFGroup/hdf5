@@ -6595,6 +6595,8 @@ H5VL_iod_rc_release(H5RC_t *rc, void **req)
 
             rc->req_info.num_req --;
 
+            H5VL_iod_request_decr_rc(cur_req);
+
             cur_req = next_req;
         }
         HDassert(0 == rc->req_info.num_req);
@@ -6839,6 +6841,8 @@ H5VL_iod_tr_finish(H5TR_t *tr, hbool_t acquire, hid_t trfpl_id, void **req)
 
             tr->req_info.num_req --;
 
+            H5VL_iod_request_decr_rc(cur_req);
+
             cur_req = next_req;
         }
         HDassert(0 == tr->req_info.num_req);
@@ -7044,6 +7048,8 @@ H5VL_iod_tr_abort(H5TR_t *tr, void **req)
             cur_req->trans_next = NULL;
 
             tr->req_info.num_req --;
+
+            H5VL_iod_request_decr_rc(cur_req);
 
             cur_req = next_req;
         }

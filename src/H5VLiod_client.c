@@ -121,6 +121,8 @@ H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
         }
         request->trans_next = NULL;
         req_info->num_req ++;
+
+        request->ref_count ++;
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
