@@ -76,12 +76,12 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the datatype needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, FALSE, 
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, rtid, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* create the datatype */
-    ret = iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_BLOB, NULL, NULL,
+    ret = iod_obj_create(coh, wtid, NULL/*hints*/, IOD_OBJ_BLOB, NULL, NULL,
                          &dtype_id, NULL /*event*/);
     if(collective && (0 == ret || EEXISTS == ret)) {
         /* Datatype has been created by another process, open it */
@@ -96,12 +96,12 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
        the parent KV, create scratch pad */
     if(0 == ret) {
         /* create the metadata KV object for the datatype */
-        if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
+        if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &mdkv_id, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
         /* create the attribute KV object for the datatype */
-        if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
+        if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &attr_id, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
@@ -112,7 +112,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         sp.filler2_id = IOD_ID_UNDEFINED;
 
         /* set scratch pad in datatype */
-        if (iod_obj_set_scratch(dtype_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        if (iod_obj_set_scratch(dtype_oh, wtid, &sp, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
 
         /* Store Metadata in scratch pad */
@@ -142,7 +142,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         file_desc->frag[0].len = (iod_size_t)buf_size;
 
         /* write the serialized type value to the BLOB object */
-        if(iod_blob_write(dtype_oh, IOD_TID_UNKNOWN, NULL, mem_desc, file_desc, NULL, NULL) < 0)
+        if(iod_blob_write(dtype_oh, wtid, NULL, mem_desc, file_desc, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
 
         free(mem_desc);
@@ -153,17 +153,17 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         tcpl_id = input->tcpl_id;
 
         /* insert plist metadata */
-        if(H5VL_iod_insert_plist(mdkv_oh, IOD_TID_UNKNOWN, tcpl_id, 
+        if(H5VL_iod_insert_plist(mdkv_oh, wtid, tcpl_id, 
                                  NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* insert link count metadata */
-        if(H5VL_iod_insert_link_count(mdkv_oh, IOD_TID_UNKNOWN, (uint64_t)1, 
+        if(H5VL_iod_insert_link_count(mdkv_oh, wtid, (uint64_t)1, 
                                       NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* insert object type metadata */
-        if(H5VL_iod_insert_object_type(mdkv_oh, IOD_TID_UNKNOWN, H5I_DATATYPE, 
+        if(H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_DATATYPE, 
                                        NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
@@ -177,7 +177,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
             kv.value_len = sizeof(iod_size_t);
             kv.value = &buf_size;
 
-            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+            if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, NULL, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
             free(key);
@@ -188,7 +188,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* add link in parent group to current object */
-        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, 
+        if(H5VL_iod_insert_new_link(cur_oh, wtid, last_comp, 
                                     H5L_TYPE_HARD, &dtype_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     }
@@ -274,11 +274,11 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* Traverse Path and open dtype */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, &dtype_id, &dtype_oh) < 0)
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, &dtype_id, &dtype_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* get scratch pad of the datatype */
-    if(iod_obj_get_scratch(dtype_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(dtype_oh, rtid, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* open the metadata scratch pad */
@@ -287,11 +287,11 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* MSC  -  NEED IOD */
 #if 0
-    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
                              NULL, NULL, &output.tcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve tcpl");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, 
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
                              H5VL_IOD_KEY_OBJ_LINK_COUNT,
                              NULL, NULL, &output.link_count) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
@@ -299,7 +299,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     kv_size = sizeof(iod_size_t);
 
     /* retrieve blob size metadata from scratch pad */
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_KEY_DTYPE_SIZE, &buf_size, 
+    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, &buf_size, 
                         &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "datatype size lookup failed");
 
@@ -324,7 +324,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     file_desc->frag[0].len = (iod_size_t)buf_size;
 
     /* read the serialized type value from the BLOB object */
-    if(iod_blob_read(dtype_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
+    if(iod_blob_read(dtype_oh, rtid, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
 
     free(mem_desc);

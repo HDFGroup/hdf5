@@ -71,7 +71,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* Open the object where the attribute needs to be created. */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, &obj_id, &obj_oh) < 0)
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* Set the IOD array creation parameters */
@@ -88,7 +88,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     array.dims_seq = NULL;
 
     /* create the attribute */
-    ret = iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_ARRAY, NULL, &array,
+    ret = iod_obj_create(coh, wtid, NULL/*hints*/, IOD_OBJ_ARRAY, NULL, &array,
                          &attr_id, NULL /*event*/);
     if(collective && (0 == ret || EEXISTS == ret)) {
         /* Attribute has been created by another process, open it */
@@ -103,7 +103,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
        the parent scratch pad, create attribute scratch pad */
     if(0 == ret) {
         /* create the metadata KV object for the attribute */
-        if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
+        if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &mdkv_id, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
@@ -114,7 +114,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         sp.filler2_id = IOD_ID_UNDEFINED;
 
         /* set scratch pad in attribute */
-        if (iod_obj_set_scratch(attr_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        if (iod_obj_set_scratch(attr_oh, wtid, &sp, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
 
         /* Open Metadata KV object for write */
@@ -122,19 +122,19 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
         /* insert object type metadata */
-        if(H5VL_iod_insert_object_type(mdkv_oh, IOD_TID_UNKNOWN, H5I_ATTR, 
+        if(H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_ATTR, 
                                        NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* MSC - need to check size of datatype if it fits in
            entry otherwise create a BLOB*/
         /* insert datatype metadata */
-        if(H5VL_iod_insert_datatype(mdkv_oh, IOD_TID_UNKNOWN, input->type_id, 
+        if(H5VL_iod_insert_datatype(mdkv_oh, wtid, input->type_id, 
                                     NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* insert dataspace metadata */
-        if(H5VL_iod_insert_dataspace(mdkv_oh, IOD_TID_UNKNOWN, input->space_id, 
+        if(H5VL_iod_insert_dataspace(mdkv_oh, wtid, input->space_id, 
                                      NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
@@ -143,7 +143,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* get scratch pad of the parent */
-        if(iod_obj_get_scratch(obj_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        if(iod_obj_get_scratch(obj_oh, rtid, &sp, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         /* open the attribute KV in scratch pad */
@@ -151,7 +151,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
             
         /* insert new attribute in scratch pad of current object */
-        if(H5VL_iod_insert_new_link(attr_kv_oh, IOD_TID_UNKNOWN, attr_name, 
+        if(H5VL_iod_insert_new_link(attr_kv_oh, wtid, attr_name, 
                                     H5L_TYPE_HARD, &attr_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
@@ -239,11 +239,12 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* Open the object where the attribute needs to be opened. */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, &obj_id, &obj_oh) < 0)
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, 
+                                 rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* get scratch pad of the object */
-    if(iod_obj_get_scratch(obj_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(obj_oh, rtid, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* MSC - Dont do this check until we have a real IOD */
@@ -258,7 +259,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* get attribute ID */
-    if(H5VL_iod_get_metadata(attr_kv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK, 
+    if(H5VL_iod_get_metadata(attr_kv_oh, rtid, H5VL_IOD_LINK, 
                              attr_name, NULL, NULL, &iod_link) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Attribute ID from parent KV store");
 
@@ -278,7 +279,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
     /* get scratch pad of the attribute */
-    if(iod_obj_get_scratch(attr_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(attr_oh, rtid, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* open the metadata scratch pad of the attribute */
@@ -286,11 +287,11 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
 #if 0
-    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_DATATYPE, H5VL_IOD_KEY_OBJ_DATATYPE,
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, H5VL_IOD_KEY_OBJ_DATATYPE,
                              NULL, NULL, &output.type_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve datatype");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
                              NULL, NULL, &output.space_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 #endif
@@ -375,17 +376,18 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t iod_id = input->iod_id; /* attribute's ID */
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
     hid_t type_id = input->type_id; /* datatype ID of data */
+    hid_t space_id = input->space_id; /* dataspace of attribute */
     iod_trans_id_t rtid = input->rcxt_num;
     hg_bulk_block_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
-    iod_mem_desc_t mem_desc; /* memory descriptor used for reading array */
+    iod_mem_desc_t *mem_desc = NULL; /* memory descriptor used for reading array */
     iod_array_iodesc_t file_desc; /* file descriptor used to read array */
     iod_hyperslab_t hslabs; /* IOD hyperslab generated from HDF5 filespace */
     size_t size; /* size of outgoing bulk data */
     void *buf; /* buffer to hold outgoing data */
-    hid_t space_id; /* dataspace ID of attribute */
     iod_handle_t mdkv_oh; /* metadata KV handle of attribute */
     scratch_pad_t sp;
+    int ndims; /* dataset's rank/number of dimensions */
     hssize_t num_descriptors = 0; /* number of IOD file descriptors needed to describe filespace selection */
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the attribute here or if it was already open */
@@ -405,28 +407,30 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     if(NULL == (buf = malloc(size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
 
-    /* MSC - NEED IOD */
+    /* MSC - Not needed if dataspace is available */
 #if 0
     /* get scratch pad of the attribute */
-    if(iod_obj_get_scratch(iod_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(iod_oh, rtid, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* open the metadata scratch pad of the attribute */
     if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
                              NULL, NULL, &space_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+#endif
 
-    /* create memory descriptor for reading */
-    mem_desc.nfrag = 1;
-    mem_desc.frag->addr = buf;
-    mem_desc.frag->len = (iod_size_t)size;
+    /* set the memory descriptor */
+    mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
+    mem_desc->nfrag = 1;
+    mem_desc->frag[0].addr = buf;
+    mem_desc->frag[0].len = (iod_size_t)size;
 
     num_descriptors = 1;
 
@@ -440,15 +444,14 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     hslabs.count = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
 
     /* generate the descriptor */
-    if(H5VL_iod_get_file_desc(space_id, &num_descriptors, hslabs) < 0)
+    if(H5VL_iod_get_file_desc(space_id, &num_descriptors, &hslabs) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
 
     /* set the file descriptor */
     file_desc = hslabs;
-#endif
 
     /* read from array object */
-    if(iod_array_read(iod_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
+    if(iod_array_read(iod_oh, rtid, NULL, mem_desc, &file_desc, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
     
     {
@@ -486,7 +489,16 @@ done:
 
     input = (attr_io_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
+
     free(buf);
+
+    /* free allocated descriptors */
+    free(hslabs.start);
+    free(hslabs.stride);
+    free(hslabs.block);
+    free(hslabs.count);
+    if(mem_desc)
+        free(mem_desc);
 
     /* close the attribute if we opened it in this routine */
     if(opened_locally) {
@@ -524,16 +536,17 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t iod_id = input->iod_id; /* attribute's ID */
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
     hid_t type_id = input->type_id; /* datatype ID of data */
+    hid_t space_id = input->space_id; /* dataspace of attribute */
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
     hg_bulk_block_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
-    iod_mem_desc_t mem_desc; /* memory descriptor used for writing array */
+    iod_mem_desc_t *mem_desc; /* memory descriptor used for writing array */
     iod_array_iodesc_t file_desc; /* file descriptor used to write array */
     iod_hyperslab_t hslabs; /* IOD hyperslab generated from HDF5 filespace */
     size_t size; /* size of outgoing bulk data */
     void *buf; /* buffer to hold outgoing data */
-    hid_t space_id; /* dataspace ID of attribute */
+    int ndims; /* dataset's rank/number of dimensions */
     scratch_pad_t sp;
     iod_handle_t mdkv_oh; /* metadata KV handle of attribute */
     hssize_t num_descriptors = 0; /* number of IOD file descriptors needed to describe filespace selection*/
@@ -579,27 +592,30 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     }
 #endif
 
-    /* MSC - NEED IOD */
+    /* MSC - Not needed if dataspace is available */
 #if 0
     /* get scratch pad of the attribute */
-    if(iod_obj_get_scratch(iod_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(iod_oh, rtid, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* open the metadata scratch pad of the attribute */
     if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
                              NULL, NULL, &space_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+#endif
 
-    mem_desc.nfrag = 1;
-    mem_desc.frag->addr = buf;
-    mem_desc.frag->len = (iod_size_t)size;
+    /* set the memory descriptor */
+    mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
+    mem_desc->nfrag = 1;
+    mem_desc->frag[0].addr = buf;
+    mem_desc->frag[0].len = (iod_size_t)size;
 
     num_descriptors = 1;
 
@@ -613,15 +629,14 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     hslabs.count = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
 
     /* generate the descriptor */
-    if(H5VL_iod_get_file_desc(space_id, &num_descriptors, hslabs) < 0)
+    if(H5VL_iod_get_file_desc(space_id, &num_descriptors, &hslabs) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
 
     /* set the file descriptor */
     file_desc = hslabs;
-#endif
 
     /* write from array object */
-    if(iod_array_write(iod_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
+    if(iod_array_write(iod_oh, wtid, NULL, mem_desc, &file_desc, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
 
 #if H5_DO_NATIVE
@@ -638,7 +653,16 @@ done:
 
     input = (attr_io_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
+
     free(buf);
+
+    /* free allocated descriptors */
+    free(hslabs.start);
+    free(hslabs.stride);
+    free(hslabs.block);
+    free(hslabs.count);
+    if(mem_desc)
+        free(mem_desc);
 
     /* close the attribute if we opened it in this routine */
     if(opened_locally) {
@@ -691,11 +715,11 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* Open the object where the attribute needs to be checked. */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, &obj_id, &obj_oh) < 0)
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* get scratch pad of the parent */
-    if(iod_obj_get_scratch(obj_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(obj_oh, rtid, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* close parent group if it is not the location we started the
@@ -718,7 +742,7 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* get attribute ID */
-    if(iod_kv_get_value(attr_kv_oh, IOD_TID_UNKNOWN, attr_name, NULL, 
+    if(iod_kv_get_value(attr_kv_oh, rtid, attr_name, NULL, 
                         &kv_size, NULL, NULL) < 0) {
         ret = FALSE;
     }
@@ -794,11 +818,11 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* Open the object where the attribute needs to be checked. */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, &obj_id, &obj_oh) < 0)
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* get scratch pad of the parent */
-    if(iod_obj_get_scratch(obj_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(obj_oh, rtid, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* close parent group if it is not the location we started the
@@ -819,7 +843,7 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* get attribute ID */
-    if(H5VL_iod_get_metadata(attr_kv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK, 
+    if(H5VL_iod_get_metadata(attr_kv_oh, rtid, H5VL_IOD_LINK, 
                              old_name, NULL, NULL, &iod_link) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Attribute ID from parent KV store");
 
@@ -829,11 +853,11 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
     /* remove attribute with old name */
     kv.key = old_name;
     kvs.kv = &kv;
-    if(iod_kv_unlink_keys(attr_kv_oh, IOD_TID_UNKNOWN, NULL, (iod_size_t)1, &kvs, NULL) < 0)
+    if(iod_kv_unlink_keys(attr_kv_oh, wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
 
     /* insert attribute with new name */
-    if(H5VL_iod_insert_new_link(attr_kv_oh, IOD_TID_UNKNOWN, new_name, 
+    if(H5VL_iod_insert_new_link(attr_kv_oh, wtid, new_name, 
                                 H5L_TYPE_HARD, &attr_id, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
@@ -904,11 +928,11 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* Open the object where the attribute needs to be checked. */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, &obj_id, &obj_oh) < 0)
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* get scratch pad of the parent */
-    if(iod_obj_get_scratch(obj_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(obj_oh, rtid, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* close parent group if it is not the location we started the
@@ -930,7 +954,7 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
 
     /* get attribute ID */
     /* get attribute ID */
-    if(H5VL_iod_get_metadata(attr_kv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK, 
+    if(H5VL_iod_get_metadata(attr_kv_oh, rtid, H5VL_IOD_LINK, 
                              attr_name, NULL, NULL, &iod_link) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Attribute ID from parent KV store");
 
@@ -940,9 +964,9 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     /* remove attribute */
     kv.key = attr_name;
     kvs.kv = &kv;
-    if(iod_kv_unlink_keys(attr_kv_oh,IOD_TID_UNKNOWN, NULL, (iod_size_t)1, &kvs, NULL) < 0)
+    if(iod_kv_unlink_keys(attr_kv_oh,wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
-    if(iod_obj_unlink(coh, attr_id, IOD_TID_UNKNOWN, NULL) < 0)
+    if(iod_obj_unlink(coh, attr_id, wtid, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
 
 #if H5_DO_NATIVE

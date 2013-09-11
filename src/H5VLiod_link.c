@@ -66,8 +66,8 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the link needs
        to be created from. The traversal will fail if an intermediate group
        does not exist. */
-    if(H5VL_iod_server_traverse(coh, input->loc_id, input->loc_oh, input->loc_name, FALSE, 
-                                &src_last_comp, &src_id, &src_oh) < 0)
+    if(H5VL_iod_server_traverse(coh, input->loc_id, input->loc_oh, input->loc_name, 
+                                rtid, FALSE, &src_last_comp, &src_id, &src_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
 #if H5VL_IOD_DEBUG
@@ -81,23 +81,24 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 
         /* Traverse Path and open the target object */
         if(H5VL_iod_server_open_path(coh, input->target_loc_id, input->target_loc_oh, 
-                                     input->target_name, &target_id, &target_oh) < 0)
+                                     input->target_name, rtid, &target_id, &target_oh) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
         /* add link in parent group to current object */
-        if(H5VL_iod_insert_new_link(src_oh, IOD_TID_UNKNOWN, src_last_comp, 
+        if(H5VL_iod_insert_new_link(src_oh, wtid, src_last_comp, 
                                     H5L_TYPE_HARD, &target_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
+        /* MSC - must get mdkvID from client, not get here. */
         /* get scratch pad */
-        if(iod_obj_get_scratch(target_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        if(iod_obj_get_scratch(target_oh, rtid, &sp, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         /* open the metadata scratch pad */
         if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-        if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, 
+        if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
                                  H5VL_IOD_KEY_OBJ_LINK_COUNT,
                                  NULL, NULL, &link_count) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
@@ -105,7 +106,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
         link_count ++;
 
         /* insert link count metadata */
-        if(H5VL_iod_insert_link_count(mdkv_oh, IOD_TID_UNKNOWN, link_count, 
+        if(H5VL_iod_insert_link_count(mdkv_oh, wtid, link_count, 
                                       NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
@@ -121,7 +122,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
     }
     else if(H5VL_LINK_CREATE_SOFT == create_type) {
         /* add link in parent group to the source location */
-        if(H5VL_iod_insert_new_link(src_oh, IOD_TID_UNKNOWN, src_last_comp, 
+        if(H5VL_iod_insert_new_link(src_oh, wtid, src_last_comp, 
                                     H5L_TYPE_SOFT, input->link_value, 
                                     NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
@@ -214,30 +215,30 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
        to be moved/copied from. The traversal will fail if an intermediate group
        does not exist. */
     if(H5VL_iod_server_traverse(coh, input->src_loc_id, input->src_loc_oh, input->src_loc_name, 
-                                FALSE, &src_last_comp, &src_id, &src_oh) < 0)
+                                rtid, FALSE, &src_last_comp, &src_id, &src_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* the traversal will retrieve the location where the link needs
        to be moved/copied to. The traversal will fail if an intermediate group
        does not exist. */
     if(H5VL_iod_server_traverse(coh, input->dst_loc_id, input->dst_loc_oh, input->dst_loc_name, 
-                                FALSE, &dst_last_comp, &dst_id, &dst_oh) < 0)
+                                rtid, FALSE, &dst_last_comp, &dst_id, &dst_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* get the link value */
-    if(H5VL_iod_get_metadata(src_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK, 
+    if(H5VL_iod_get_metadata(src_oh, rtid, H5VL_IOD_LINK, 
                              src_last_comp, NULL, NULL, &iod_link) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
     /* Insert object in the destination path */
     if(H5L_TYPE_HARD == iod_link.link_type) {
-        if(H5VL_iod_insert_new_link(dst_oh, IOD_TID_UNKNOWN, dst_last_comp, 
+        if(H5VL_iod_insert_new_link(dst_oh, wtid, dst_last_comp, 
                                     iod_link.link_type, &iod_link.u.iod_id, 
                                     NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     }
     else if(H5L_TYPE_SOFT == iod_link.link_type) {
-        if(H5VL_iod_insert_new_link(dst_oh, IOD_TID_UNKNOWN, dst_last_comp, 
+        if(H5VL_iod_insert_new_link(dst_oh, wtid, dst_last_comp, 
                                     iod_link.link_type, &iod_link.u.symbolic_name, 
                                     NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
@@ -251,7 +252,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
         kvs.kv = &kv;
 
         /* remove link from source object */
-        if(iod_kv_unlink_keys(src_oh, IOD_TID_UNKNOWN, NULL, (iod_size_t)1, &kvs, NULL) < 0)
+        if(iod_kv_unlink_keys(src_oh, wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
     }
 
@@ -267,14 +268,14 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
         /* get scratch pad */
-        if(iod_obj_get_scratch(target_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        if(iod_obj_get_scratch(target_oh, rtid, &sp, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         /* open the metadata scratch pad */
         if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-        if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, 
+        if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
                                  H5VL_IOD_KEY_OBJ_LINK_COUNT,
                                  NULL, NULL, &link_count) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
@@ -282,7 +283,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
         link_count ++;
 
         /* insert link count metadata */
-        if(H5VL_iod_insert_link_count(mdkv_oh, IOD_TID_UNKNOWN, link_count, 
+        if(H5VL_iod_insert_link_count(mdkv_oh, wtid, link_count, 
                                       NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
@@ -384,14 +385,14 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     /* the traversal will retrieve the location where the link needs
        to be checked */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, FALSE, 
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, rtid, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0) {
         ret = FALSE;
         HGOTO_DONE(SUCCEED);
     }
 
     /* check the last component */
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, 
+    if(iod_kv_get_value(cur_oh, rtid, last_comp, 
                         NULL, &kv_size, NULL, NULL) < 0) {
         ret = FALSE;
     } /* end if */
@@ -466,7 +467,7 @@ H5VL_iod_server_link_get_info_cb(AXE_engine_t UNUSED axe_engine,
 
     /* the traversal will retrieve the location where the link needs
        to be checked */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, FALSE, 
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, rtid, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
@@ -475,7 +476,7 @@ H5VL_iod_server_link_get_info_cb(AXE_engine_t UNUSED axe_engine,
 #endif
     
     /* lookup link information in the current location */
-    if(H5VL_iod_get_metadata(cur_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK, 
+    if(H5VL_iod_get_metadata(cur_oh, rtid, H5VL_IOD_LINK, 
                              last_comp, NULL, NULL, &iod_link) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
@@ -568,7 +569,7 @@ H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine,
 
     /* the traversal will retrieve the location where the link needs
        to be checked */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, FALSE, 
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, rtid, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
@@ -577,7 +578,7 @@ H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine,
 #endif
     
     /* lookup link information in the current location */
-    if(H5VL_iod_get_metadata(cur_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK, 
+    if(H5VL_iod_get_metadata(cur_oh, rtid, H5VL_IOD_LINK, 
                              last_comp, NULL, NULL, &iod_link) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
@@ -673,19 +674,19 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the link needs
        to be removed. The traversal will fail if an intermediate group
        does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, 
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, rtid, 
                                 FALSE, &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* lookup object ID in the current location */
-    if(H5VL_iod_get_metadata(cur_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK, 
+    if(H5VL_iod_get_metadata(cur_oh, rtid, H5VL_IOD_LINK, 
                              last_comp, NULL, NULL, &iod_link) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
     /* unlink object from conainer */
     kv.key = last_comp;
     kvs.kv = &kv;
-    if(iod_kv_unlink_keys(cur_oh, IOD_TID_UNKNOWN, NULL, (iod_size_t)1, &kvs, NULL) < 0)
+    if(iod_kv_unlink_keys(cur_oh, wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
 
     /* MSC - NEED IOD */
@@ -705,14 +706,14 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
         /* get scratch pad */
-        if(iod_obj_get_scratch(obj_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        if(iod_obj_get_scratch(obj_oh, rtid, &sp, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         /* open the metadata scratch pad */
         if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-        if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, 
+        if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
                                  H5VL_IOD_KEY_OBJ_LINK_COUNT,
                                  NULL, NULL, &link_count) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
@@ -722,7 +723,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
         /* if this is not the only link to the object, update the link count */
         if(0 != link_count) {
             /* insert link count metadata */
-            if(H5VL_iod_insert_link_count(mdkv_oh, IOD_TID_UNKNOWN, link_count, 
+            if(H5VL_iod_insert_link_count(mdkv_oh, wtid, link_count, 
                                           NULL, NULL, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
         }
@@ -735,11 +736,11 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
 
         /* If this was the only link to the object, remove the object */
         if(0 == link_count) {
-            if(iod_obj_unlink(coh, obj_id, IOD_TID_UNKNOWN, NULL) < 0)
+            if(iod_obj_unlink(coh, obj_id, wtid, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
-            if(iod_obj_unlink(coh, sp.mdkv_id, IOD_TID_UNKNOWN, NULL) < 0)
+            if(iod_obj_unlink(coh, sp.mdkv_id, wtid, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
-            if(iod_obj_unlink(coh, sp.attrkv_id, IOD_TID_UNKNOWN, NULL) < 0)
+            if(iod_obj_unlink(coh, sp.attrkv_id, wtid, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
         }
     }

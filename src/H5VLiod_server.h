@@ -353,12 +353,12 @@ H5_DLL void H5VL_iod_server_trans_abort_cb(AXE_engine_t axe_engine,
 
 /* Helper routines used several times in different places */
 H5_DLL herr_t H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc_handle, 
-                                       const char *path, hbool_t create_interm_grps,
+                                       const char *path, iod_trans_id_t tid, hbool_t create_interm_grps,
                                        char **last_comp, iod_obj_id_t *iod_id, iod_handle_t *iod_oh);
 H5_DLL herr_t H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, 
-                                                iod_handle_t loc_handle, const char *path, 
-                                                /*out*/iod_obj_id_t *iod_id, 
-                                                /*out*/iod_handle_t *iod_oh);
+                                        iod_handle_t loc_handle, const char *path, 
+                                        iod_trans_id_t tid, /*out*/iod_obj_id_t *iod_id, 
+                                        /*out*/iod_handle_t *iod_oh);
 H5_DLL herr_t H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs);
 H5_DLL herr_t H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
                                     iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);

@@ -76,12 +76,12 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the map needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, FALSE, 
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, rtid, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* create the map */
-    ret = iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
+    ret = iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
                          NULL, NULL, &map_id, NULL);
     if(collective && (0 == ret || EEXISTS == ret)) {
         /* map has been created by another process, open it */
@@ -96,12 +96,12 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
        the scratch pad for it too */
     if(0 == ret) {
         /* create the metadata KV object for the map */
-        if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
+        if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &mdkv_id, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
         /* create the attribute KV object for the root group */
-        if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
+        if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &attr_id, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
@@ -112,7 +112,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
         sp.filler2_id = IOD_ID_UNDEFINED;
 
         /* set scratch pad in map */
-        if (iod_obj_set_scratch(map_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        if (iod_obj_set_scratch(map_oh, wtid, &sp, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
 
         /* Open Metadata KV object for write */
@@ -124,17 +124,17 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
         mcpl_id = input->mcpl_id;
 
         /* insert plist metadata */
-        if(H5VL_iod_insert_plist(mdkv_oh, IOD_TID_UNKNOWN, mcpl_id, 
+        if(H5VL_iod_insert_plist(mdkv_oh, wtid, mcpl_id, 
                                  NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* insert link count metadata */
-        if(H5VL_iod_insert_link_count(mdkv_oh, IOD_TID_UNKNOWN, (uint64_t)1, 
+        if(H5VL_iod_insert_link_count(mdkv_oh, wtid, (uint64_t)1, 
                                       NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* insert object type metadata */
-        if(H5VL_iod_insert_object_type(mdkv_oh, IOD_TID_UNKNOWN, H5I_MAP, 
+        if(H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_MAP, 
                                        NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
@@ -146,7 +146,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* add link in parent group to current object */
-        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, 
+        if(H5VL_iod_insert_new_link(cur_oh, wtid, last_comp, 
                                     H5L_TYPE_HARD, &map_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     } /* end if */
@@ -223,11 +223,11 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     output.valtype_id = -1;
 
     /* Traverse Path and open map */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, &map_id, &map_oh) < 0)
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, &map_id, &map_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* get scratch pad of map */
-    if(iod_obj_get_scratch(map_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(map_oh, rtid, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* open the metadata scratch pad */
@@ -236,11 +236,11 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* MSC - retrieve metadata - need IOD*/
 #if 0
-    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, 
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, 
                              H5VL_IOD_KEY_OBJ_CPL, NULL, NULL, &output.mcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve gcpl");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, 
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
                              H5VL_IOD_KEY_OBJ_LINK_COUNT,
                              NULL, NULL, &output.link_count) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
@@ -376,7 +376,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     kv.value = val_buf;
     kv.value_len = (iod_size_t)val_size;
     /* insert kv pair into scratch pad */
-    if (iod_kv_set(iod_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+    if (iod_kv_set(iod_oh, wtid, NULL, &kv, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
 done:
@@ -491,7 +491,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
     if(NULL == (val_buf = malloc((size_t)val_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
 
-    if(iod_kv_get_value(iod_oh, IOD_TID_UNKNOWN, key_buf, val_buf, 
+    if(iod_kv_get_value(iod_oh, rtid, key_buf, val_buf, 
                         &src_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
 
@@ -582,7 +582,7 @@ H5VL_iod_server_map_get_count_cb(AXE_engine_t UNUSED axe_engine,
         opened_locally = TRUE;
     }
 
-    if(iod_kv_get_num(iod_oh, IOD_TID_UNKNOWN, &num, NULL) < 0)
+    if(iod_kv_get_num(iod_oh, rtid, &num, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Number of KV pairs in MAP");
 
     /* MSC - fake something for now */
@@ -684,7 +684,7 @@ H5VL_iod_server_map_exists_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
 
     /* determine if the Key exists by querying its value size */
-    if(iod_kv_get_value(iod_oh, IOD_TID_UNKNOWN, key_buf, NULL, 
+    if(iod_kv_get_value(iod_oh, rtid, key_buf, NULL, 
                         &val_size, NULL, NULL) < 0)
         exists = FALSE;
     else
@@ -791,7 +791,7 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
     kv.key = key_buf;
     kvs.kv = &kv;
 
-    if(iod_kv_unlink_keys(iod_oh,IOD_TID_UNKNOWN, NULL, (iod_size_t)1, &kvs, NULL) < 0)
+    if(iod_kv_unlink_keys(iod_oh, wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
 
 done:

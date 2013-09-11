@@ -3577,6 +3577,7 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
     input.iod_id = attr->remote_attr.iod_id;
     input.bulk_handle = *bulk_handle;
     input.type_id = type_id;
+    input.space_id = attr->remote_attr.space_id;
     input.rcxt_num  = rc->c_version;
 
     /* allocate structure to receive status of read operation (contains return value and checksum */
@@ -3588,6 +3589,11 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
 	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "can't allocate a request");
     info->status = status;
     info->bulk_handle = bulk_handle;
+
+#if H5VL_IOD_DEBUG
+    printf("Attribute Read IOD ID %llu, axe id %llu\n", 
+           input.iod_id, g_axe_id);
+#endif
 
     if(H5VL__iod_create_and_forward(H5VL_ATTR_READ_ID, HG_ATTR_READ, 
                                     (H5VL_iod_object_t *)attr, 0,
@@ -3681,6 +3687,7 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     input.iod_id = attr->remote_attr.iod_id;
     input.bulk_handle = *bulk_handle;
     input.type_id = type_id;
+    input.space_id = attr->remote_attr.space_id;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
 
@@ -3692,6 +3699,11 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
 	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "can't allocate a request");
     info->status = status;
     info->bulk_handle = bulk_handle;
+
+#if H5VL_IOD_DEBUG
+    printf("Attribute Write IOD ID %llu, axe id %llu\n", 
+           input.iod_id, g_axe_id);
+#endif
 
     if(H5VL__iod_create_and_forward(H5VL_ATTR_WRITE_ID, HG_ATTR_WRITE, 
                                     (H5VL_iod_object_t *)attr, 0,
@@ -3774,6 +3786,11 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
     input.rcxt_num  = tr->c_version;
 
     status = (int *)malloc(sizeof(int));
+
+#if H5VL_IOD_DEBUG
+    printf("Attribute Remove loc %s name %s, axe id %llu\n", 
+           loc_name, attr_name, g_axe_id);
+#endif
 
     if(H5VL__iod_create_and_forward(H5VL_ATTR_REMOVE_ID, HG_ATTR_REMOVE, 
                                     (H5VL_iod_object_t *)obj, 1, 
@@ -3947,6 +3964,11 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 input.attr_name = attr_name;
                 input.path = loc_name;
                 input.rcxt_num  = rc->c_version;
+
+#if H5VL_IOD_DEBUG
+                printf("Attribute Exists loc %s name %s, axe id %llu\n", 
+                       loc_name, attr_name, g_axe_id);
+#endif
 
                 if(H5VL__iod_create_and_forward(H5VL_ATTR_EXISTS_ID, HG_ATTR_EXISTS, 
                                                 obj, 1, num_parents, parent_reqs,
