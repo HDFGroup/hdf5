@@ -61,81 +61,55 @@ static void usage(const char *prog) {
 	printf("  file2                    Output HDF5 File\n");
 	printf("  OPTIONS\n");
 	printf("   -h, --help              Print a usage message and exit\n");
-	printf(
-			"   -v, --verbose           Verbose mode, print object information\n");
+	printf("   -v, --verbose           Verbose mode, print object information\n");
 	printf("   -V, --version           Print version number and exit\n");
-	printf(
-			"   -n, --native            Use a native HDF5 type when repacking\n");
+	printf("   -n, --native            Use a native HDF5 type when repacking\n");
 	printf("   -L, --latest            Use latest version of file format\n");
-	printf(
-			"   -c L1, --compact=L1     Maximum number of links in header messages\n");
-	printf(
-			"   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
-	printf(
-			"   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
-	printf(
-			"   -m M, --minimum=M       Do not apply the filter to datasets smaller than M\n");
-	printf(
-			"   -e E, --file=E          Name of file E with the -f and -l options\n");
-	printf(
-			"   -u U, --ublock=U        Name of file U with user block data to be added\n");
+	printf("   -c L1, --compact=L1     Maximum number of links in header messages\n");
+	printf("   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
+	printf("   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
+	printf("   -m M, --minimum=M       Do not apply the filter to datasets smaller than M\n");
+	printf("   -e E, --file=E          Name of file E with the -f and -l options\n");
+	printf("   -u U, --ublock=U        Name of file U with user block data to be added\n");
 	printf("   -b B, --block=B         Size of user block to be added\n");
-	printf(
-			"   -M A, --metadata_block_size=A  Metadata block size for H5Pset_meta_block_size\n");
+	printf("   -M A, --metadata_block_size=A  Metadata block size for H5Pset_meta_block_size\n");
 	printf("   -t T, --threshold=T     Threshold value for H5Pset_alignment\n");
 	printf("   -a A, --alignment=A     Alignment value for H5Pset_alignment\n");
 	printf("   -f FILT, --filter=FILT  Filter type\n");
 	printf("   -l LAYT, --layout=LAYT  Layout type\n");
-	printf(
-			"   -S FS_STRGY, --fs_strategy=FS_STRGY  File space management strategy\n");
-	printf(
-			"   -T FS_THRD, --fs_threshold=FS_THRD   Free-space section threshold\n");
-
+	printf("   -S FS_STRGY, --fs_strategy=FS_STRGY  File space management strategy\n");
+	printf("   -T FS_THRD, --fs_threshold=FS_THRD   Free-space section threshold\n");
 	printf("\n");
-
-	printf(
-			"    M - is an integer greater than 1, size of dataset in bytes (default is 0) \n");
+	printf("    M - is an integer greater than 1, size of dataset in bytes (default is 0) \n");
 	printf("    E - is a filename.\n");
 	printf("    S - is an integer\n");
 	printf("    U - is a filename.\n");
 	printf("    T - is an integer\n");
 	printf("    A - is an integer greater than zero\n");
-	printf(
-			"    B - is the user block size, any value that is 512 or greater and is\n");
+	printf("    B - is the user block size, any value that is 512 or greater and is\n");
 	printf("        a power of 2 (1024 default)\n");
-	printf(
-			"    F - is the shared object header message type, any of <dspace|dtype|fill|\n");
-	printf(
-			"        pline|attr>. If F is not specified, S applies to all messages\n");
+	printf("    F - is the shared object header message type, any of <dspace|dtype|fill|\n");
+	printf("        pline|attr>. If F is not specified, S applies to all messages\n");
 	printf("\n");
-	printf(
-			"    FS_STRGY is the file space management strategy to use for the output file.\n");
+	printf("    FS_STRGY is the file space management strategy to use for the output file.\n");
 	printf("             It is a string as listed below:\n");
-	printf(
-			"        ALL_PERSIST - Use persistent free-space managers, aggregators and virtual file driver\n");
+	printf("        ALL_PERSIST - Use persistent free-space managers, aggregators and virtual file driver\n");
 	printf("                      for file space allocation\n");
-	printf(
-			"        ALL - Use non-persistent free-space managers, aggregators and virtual file driver\n");
+	printf("        ALL - Use non-persistent free-space managers, aggregators and virtual file driver\n");
 	printf("              for file space allocation\n");
-	printf(
-			"        AGGR_VFD - Use aggregators and virtual file driver for file space allocation\n");
+	printf("        AGGR_VFD - Use aggregators and virtual file driver for file space allocation\n");
 	printf("        VFD - Use virtual file driver for file space allocation\n");
 	printf("\n");
-	printf(
-			"    FS_THRD is the free-space section threshold to use for the output file.\n");
-	printf(
-			"            It is the minimum size (in bytes) of free-space sections to be tracked\n");
+	printf("    FS_THRD is the free-space section threshold to use for the output file.\n");
+	printf("            It is the minimum size (in bytes) of free-space sections to be tracked\n");
 	printf("            by the the library's free-space managers.\n");
 	printf("\n");
-
 	printf("    FILT - is a string with the format:\n");
 	printf("\n");
 	printf("      <list of objects>:<name of filter>=<filter parameters>\n");
 	printf("\n");
-	printf(
-			"      <list of objects> is a comma separated list of object names, meaning apply\n");
-	printf(
-			"        compression only to those objects. If no names are specified, the filter\n");
+	printf("      <list of objects> is a comma separated list of object names, meaning apply\n");
+	printf("        compression only to those objects. If no names are specified, the filter\n");
 	printf("        is applied to all objects\n");
 	printf("      <name of filter> can be:\n");
 	printf("        GZIP, to apply the HDF5 GZIP filter (GZIP compression)\n");
@@ -146,22 +120,17 @@ static void usage(const char *prog) {
 	printf("        SOFF, to apply the HDF5 Scale/Offset filter\n");
 	printf("        UD,   to apply a user defined filter\n");
 	printf("        NONE, to remove all filters\n");
-	printf(
-			"      <filter parameters> is optional filter parameter information\n");
+	printf("      <filter parameters> is optional filter parameter information\n");
 	printf("        GZIP=<deflation level> from 1-9\n");
-	printf(
-			"        SZIP=<pixels per block,coding> pixels per block is a even number in\n");
+	printf("        SZIP=<pixels per block,coding> pixels per block is a even number in\n");
 	printf("            2-32 and coding method is either EC or NN\n");
 	printf("        SHUF (no parameter)\n");
 	printf("        FLET (no parameter)\n");
 	printf("        NBIT (no parameter)\n");
-	printf(
-			"        SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type\n");
+	printf("        SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type\n");
 	printf("            is either IN or DS\n");
-	printf(
-			"        UD=<filter_number,cd_value_count,value_1[,value_2,...,value_N]>\n");
-	printf(
-			"            required values for filter_number,cd_value_count,value_1\n");
+	printf("        UD=<filter_number,cd_value_count,value_1[,value_2,...,value_N]>\n");
+	printf("            required values for filter_number,cd_value_count,value_1\n");
 	printf("            optional values for value_2 to value_N\n");
 	printf("        NONE (no parameter)\n");
 	printf("\n");
@@ -169,18 +138,15 @@ static void usage(const char *prog) {
 	printf("\n");
 	printf("      <list of objects>:<layout type>=<layout parameters>\n");
 	printf("\n");
-	printf(
-			"      <list of objects> is a comma separated list of object names, meaning that\n");
-	printf(
-			"        layout information is supplied for those objects. If no names are\n");
+	printf("      <list of objects> is a comma separated list of object names, meaning that\n");
+	printf("        layout information is supplied for those objects. If no names are\n");
 	printf("        specified, the layout type is applied to all objects\n");
 	printf("      <layout type> can be:\n");
 	printf("        CHUNK, to apply chunking layout\n");
 	printf("        COMPA, to apply compact layout\n");
 	printf("        CONTI, to apply contiguous layout\n");
 	printf("      <layout parameters> is optional layout information\n");
-	printf(
-			"        CHUNK=DIM[xDIM...xDIM], the chunk size of each dimension\n");
+	printf("        CHUNK=DIM[xDIM...xDIM], the chunk size of each dimension\n");
 	printf("        COMPA (no parameter)\n");
 	printf("        CONTI (no parameter)\n");
 	printf("\n");
@@ -190,21 +156,18 @@ static void usage(const char *prog) {
 	printf("\n");
 	printf("   GZIP compression with level 1 to all objects\n");
 	printf("\n");
-	printf("2) h5repack -v -f A:SZIP=8,NN file1 file2\n");
+	printf("2) h5repack -v -f dset1:SZIP=8,NN file1 file2\n");
 	printf("\n");
-	printf(
-			"   SZIP compression with 8 pixels per block and NN coding method to object A\n");
+	printf("   SZIP compression with 8 pixels per block and NN coding method to object dset1\n");
 	printf("\n");
-	printf("3) h5repack -v -l A,B:CHUNK=20x10 -f C,D,F:NONE file1 file2\n");
+	printf("3) h5repack -v -l dset1,dset2:CHUNK=20x10 -f dset3,dset4,dset5:NONE file1 file2\n");
 	printf("\n");
-	printf(
-			"   Chunked layout, with a layout size of 20x10, to objects A and B\n");
-	printf("   and remove filters to objects C, D, F\n");
+	printf("   Chunked layout, with a layout size of 20x10, to objects dset1 and dset2\n");
+	printf("   and remove filters to objects dset3, dset4, dset5\n");
 	printf("\n");
 	printf("4) h5repack -L -c 10 -s 20:dtype file1 file2 \n");
 	printf("\n");
-	printf(
-			"   Using latest file format with maximum compact group size of 10 and\n");
+	printf("   Using latest file format with maximum compact group size of 10 and\n");
 	printf("   and minimum shared datatype size of 20\n");
 	printf("\n");
 	printf("5) h5repack -f SHUF -f GZIP=1 file1 file2 \n");
