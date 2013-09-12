@@ -102,7 +102,7 @@ II. Preconditions
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
             ZLIB_TGZ_NAME:STRING="zlib_src.ext"
             SZIP_TGZ_NAME:STRING="szip_src.ext"
-            TGZ_PATH:STRING="some_location"
+            TGZPATH:STRING="some_location"
          where "some_location" is the URL or full path to the compressed 
          file and ext is the type of compression file.
                                     
@@ -327,7 +327,7 @@ These five steps are described in detail below.
            file) are:
                ZLIB_TGZ_NAME:STRING="zlib_src.ext"
                SZIP_TGZ_NAME:STRING="szip_src.ext"
-               TGZ_PATH:STRING="some_location"
+               TGZPATH:STRING="some_location"
             where "some_location/xxxx_src.ext" is the URL or full path to 
             the compressed file and where ext is the type of the compression 
             file such as .bz2, .tar, .tar.gz, .tgz, or .zip.
