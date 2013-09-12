@@ -12,11 +12,15 @@
 int main(int argc, char **argv) {
     const char file_name[]="map_file.h5";
     hid_t file_id;
-    hid_t gid1, gid2;
-    hid_t map1, map2, map3;
+    hid_t gid1, gid2, gid3, gid4, gid5;
+    hid_t did1, did2, did3;
+    hid_t sid, dtid;
     hid_t tid1, tid2, rid1, rid2, rid3;
     hid_t fapl_id, dxpl_id, trspl_id;
     hid_t event_q;
+
+    const unsigned int nelem=60;
+    hsize_t dims[1];
 
     uint64_t version;
     uint64_t trans_num;
@@ -28,12 +32,6 @@ int main(int argc, char **argv) {
     H5_status_t *status = NULL;
     int num_requests = 0, i;
     herr_t ret;
-
-    hsize_t count = -1;
-    int key, value;
-    hbool_t exists = -1;
-    H5_request_t req1;
-    H5_status_t status1;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {
@@ -75,6 +73,11 @@ int main(int argc, char **argv) {
     file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     assert(file_id);
 
+    /* create 1-D dataspace with 60 elements */
+    dims [0] = nelem;
+    sid = H5Screate_simple(1, dims, NULL);
+    dtid = H5Tcopy(H5T_STD_I32LE);
+
     /* acquire container version 0 - EXACT */
     version = 0;
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
@@ -99,38 +102,21 @@ int main(int argc, char **argv) {
     if(0 != my_rank)
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
 
-    /* create two groups */
+    /* create objects */
     gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
     gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+    gid3 = H5Gcreate_ff(gid2, "G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+    did1 = H5Dcreate_ff(gid3, "D1", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+    did2 = H5Dcreate_ff(gid3, "D2", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+    did3 = H5Dcreate_ff(gid3, "D3", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
 
-    /* Create Map objects with the key type and val type being 32 bit
-       LE integers */
-    map1 = H5Mcreate_ff(file_id, "MAP_1", H5T_STD_I32LE, H5T_STD_I32LE, 
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
-    map2 = H5Mcreate_ff(gid1, "MAP_2", H5T_STD_I32LE, H5T_STD_I32LE, 
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
-    map3 = H5Mcreate_ff(gid2, "MAP_3", H5T_STD_I32LE, H5T_STD_I32LE, 
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
+    gid4 = H5Gcreate_ff(file_id, "G4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+    gid5 = H5Gcreate_ff(gid4, "G5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
 
-    {
-        key = 1;
-        value = 1000;
-        ret = H5Mset_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, tid1, event_q);
-        assert(ret == 0);
-
-        key = 2;
-        value = 2000;
-        ret = H5Mset_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, tid1, event_q);
-        assert(ret == 0);
-
-        key = 3;
-        value = 3000;
-        ret = H5Mset_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, tid1, event_q);
-        assert(ret == 0);
-    }
+    /* create a hard link to D1 (created previosuly) so that it can be
+       accessed from G5/newD1. */
+    ret = H5Lcreate_hard_ff(did1, ".", gid5, "newD1", H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+    assert(ret == 0);
 
     /* none leader procs have to complete operations before notifying the leader */
     if(0 != my_rank) {
@@ -164,6 +150,8 @@ int main(int argc, char **argv) {
     ret = H5RCrelease(rid1, event_q);
     assert(0 == ret);
 
+    assert(H5Dclose_ff(did2, event_q) == 0);
+
     H5EQwait(event_q, &num_requests, &status);
     printf("%d requests in event queue. Completions: ", num_requests);
     for(i=0 ; i<num_requests; i++)
@@ -182,12 +170,9 @@ int main(int argc, char **argv) {
         assert(rid2 > 0);
     }
 
-    ret = H5Mget_count_ff(map3, &count, rid2, event_q);
-    assert(ret == 0);
-
-    key = 1;
-    ret = H5Mexists_ff(map3, H5T_STD_I32LE, &key, &exists, rid2, event_q);
-    assert(ret == 0);
+    /* Try and open the dataset. This is asynchronous. */
+    did2 = H5Dopen_ff(file_id,"G4/G5/newD1", H5P_DEFAULT, rid2, event_q);
+    assert(did2);
 
     /* create & start transaction 2 with num_peers = n */
     tid2 = H5TRcreate(file_id, rid2, (uint64_t)2);
@@ -200,8 +185,15 @@ int main(int argc, char **argv) {
     ret = H5Pclose(trspl_id);
     assert(0 == ret);
 
-    key = 1;
-    ret = H5Mdelete_ff(map3, H5T_STD_I32LE, &key, tid2, event_q);
+    ret = H5Lcreate_soft_ff("/G1/G2/G3/D4", gid4, "G5/newD2", 
+                            H5P_DEFAULT, H5P_DEFAULT, tid2, event_q);
+    assert(ret == 0);
+
+    ret = H5Lmove_ff(gid3, "D3", file_id, "/G4/G5/D3moved", 
+                     H5P_DEFAULT, H5P_DEFAULT, tid2, event_q);
+    assert(ret == 0);
+
+    ret = H5Ldelete_ff(file_id, "/G1/G2/G3/D2", H5P_DEFAULT, tid2, event_q);
     assert(ret == 0);
 
     /* finish transaction 2 */
@@ -214,9 +206,12 @@ int main(int argc, char **argv) {
 
     assert(H5Gclose_ff(gid1, event_q) == 0);
     assert(H5Gclose_ff(gid2, event_q) == 0);
-    assert(H5Mclose_ff(map1, event_q) == 0);
-    assert(H5Mclose_ff(map2, event_q) == 0);
-    assert(H5Mclose_ff(map3, event_q) == 0);
+    assert(H5Gclose_ff(gid3, event_q) == 0);
+    assert(H5Gclose_ff(gid5, event_q) == 0);
+
+    assert(H5Dclose_ff(did1, event_q) == 0);
+    assert(H5Dclose_ff(did2, event_q) == 0);
+    assert(H5Dclose_ff(did3, event_q) == 0);
 
     H5EQwait(event_q, &num_requests, &status);
     printf("%d requests in event queue. Completions: ", num_requests);
@@ -232,57 +227,49 @@ int main(int argc, char **argv) {
     ret = H5TRclose(tid2);
     assert(0 == ret);
 
-    /* acquire container version 0 - EXACT */
+    /* acquire container version 2 - EXACT */
     version = 2;
     rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
     assert(2 == version);
 
-    map3 = H5Mopen_ff(file_id, "G1/G2/MAP_3", H5P_DEFAULT, rid3, event_q);
-
     {
-        int key, value;
+        H5L_ff_info_t linfo;
+        char *link_buf;
 
-        key = 1;
-        value = -1;
-        ret = H5Mget_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, rid3, event_q);
+        ret = H5Lget_info_ff(gid4, "G5/newD2", &linfo, H5P_DEFAULT, rid3, H5_EVENT_QUEUE_NULL);
+        assert(ret == 0);
 
-        if(H5EQpop(event_q, &req1) < 0)
+        switch(linfo.type) {
+        case H5L_TYPE_SOFT:
+            fprintf(stderr, 
+                    "LINK GET INFO return a SOFT LINK with value size: %zu\n", 
+                    linfo.u.val_size);
+            break;
+        default:
+            fprintf(stderr, "Unexpected result from lget_info\n");
             exit(1);
-        assert(H5AOwait(req1, &status1) == 0);
-        assert (status1);
+        }
 
-        printf("Value recieved == %d\n", value);
-        /* this is the fake value we sent from the server */
-        assert(value == 1024);
+        link_buf = malloc(linfo.u.val_size);
 
-        key = 1;
-        value = -1;
-        ret = H5Mget_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, rid3, event_q);
+        ret = H5Lget_val_ff(gid4, "G5/newD2", link_buf, linfo.u.val_size, 
+                            H5P_DEFAULT, rid3, H5_EVENT_QUEUE_NULL);
+        assert(ret == 0);
 
-        if(H5EQpop(event_q, &req1) < 0)
-            exit(1);
-        assert(H5AOwait(req1, &status1) == 0);
-        assert (status1);
+        fprintf(stderr, "Link value = %s\n", link_buf);
 
-        /* this is the fake value we sent from the server */
-        assert(value == 1024);
+        free(link_buf);
     }
 
     /* release container version 1. This is async. */
     ret = H5RCrelease(rid3, event_q);
     assert(0 == ret);
 
-    assert(H5Mclose_ff(map3, event_q) == 0);
+    assert(H5Gclose_ff(gid4, event_q) == 0);
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
     assert(H5Fclose_ff(file_id, event_q) == 0);
-
-    fprintf(stderr, "\n*****************************************************************************************************************\n");
-    fprintf(stderr, "Wait on everything in EQ and check Results of operations in EQ\n");
-    fprintf(stderr, "*****************************************************************************************************************\n");
 
     /* wait on all requests and print completion status */
     H5EQwait(event_q, &num_requests, &status);
@@ -295,15 +282,10 @@ int main(int argc, char **argv) {
     ret = H5RCclose(rid3);
     assert(0 == ret);
 
-    assert (count == 3);
-    assert (exists > 0);
-
-    fprintf(stderr, "\n*****************************************************************************************************************\n");
-    fprintf(stderr, "Finalize EFF stack\n");
-    fprintf(stderr, "*****************************************************************************************************************\n");
-
-    H5EQclose(event_q);
+    H5Sclose(sid);
+    H5Tclose(dtid);
     H5Pclose(fapl_id);
+    H5EQclose(event_q);
 
     /* This finalizes the EFF stack. ships a terminate and IOD finalize to the server 
        and shutsdown the FS server (when all clients send the terminate request) 

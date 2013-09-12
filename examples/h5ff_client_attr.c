@@ -143,6 +143,16 @@ int main(int argc, char **argv) {
     ret = H5Awrite_ff(aid2, dtid, wdata2, tid1, event_q);
     assert(ret == 0);
 
+    /* none leader procs have to complete operations before notifying the leader */
+    if(0 != my_rank) {
+        H5EQwait(event_q, &num_requests, &status);
+        printf("%d requests in event queue. Completions: ", num_requests);
+        for(i=0 ; i<num_requests; i++)
+            fprintf(stderr, "%d ",status[i]);
+        fprintf(stderr, "\n");
+        free(status);
+    }
+
     /* Barrier to make sure all processes are done writing so Process
        0 can finish transaction 1 and acquire a read context on it. */
     MPI_Barrier(MPI_COMM_WORLD);

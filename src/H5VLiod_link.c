@@ -157,7 +157,8 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Done with link create, sending response %d to client\n", ret_value);
+    fprintf(stderr, "Done with link create, sending response %d to client\n", 
+            ret_value);
 #endif
 
     HG_Handler_start_output(op_data->hg_handle, &ret_value);

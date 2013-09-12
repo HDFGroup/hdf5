@@ -486,7 +486,9 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
     request->axe_id = axe_info->axe_id;
     request->file_next = request->file_prev = NULL;
     request->global_next = request->global_prev = NULL;
-    request->trans_info = req_info;
+
+    if(do_async)
+        request->trans_info = req_info;
 
     /* add request to container's linked list */
     H5VL_iod_request_add(request_obj->file, request);
@@ -1565,7 +1567,7 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED dxpl_id, void **req)
 {
     H5VL_iod_file_t *file = (H5VL_iod_file_t *)_file;
     file_close_in_t input;
-    int *status;
+    int *status = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
     size_t num_parents = 0;
     herr_t ret_value = SUCCEED;                 /* Return value */
@@ -1644,7 +1646,7 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
     H5VL_iod_request_t **parent_reqs = NULL;
     size_t num_parents = 0;
     hid_t trans_id;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     H5P_genplist_t *plist = NULL;
     void *ret_value = NULL;
 
@@ -1773,7 +1775,7 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
     iod_handle_t iod_oh;
     H5P_genplist_t *plist = NULL;
     hid_t rcxt_id;
-    H5RC_t *rc;
+    H5RC_t *rc = NULL;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     void *ret_value = NULL;
@@ -1922,7 +1924,7 @@ H5VL_iod_group_close(void *_grp, hid_t UNUSED dxpl_id, void **req)
 {
     H5VL_iod_group_t *grp = (H5VL_iod_group_t *)_grp;
     group_close_in_t input;
-    int *status;
+    int *status = NULL;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;                 /* Return value */
@@ -1997,7 +1999,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t UNUSED loc_params,
     H5P_genplist_t *plist = NULL;
     size_t num_parents = 0;
     hid_t trans_id;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     hid_t type_id, space_id, lcpl_id;
     void *ret_value = NULL;
 
@@ -2138,7 +2140,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
     iod_handle_t iod_oh;
     H5P_genplist_t *plist = NULL;
     hid_t rcxt_id;
-    H5RC_t *rc;
+    H5RC_t *rc = NULL;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     void *ret_value = NULL;
@@ -2149,7 +2151,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
     if(H5P_get(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for trans_id");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for rcxt_id");
 
     /* get the RC object */
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
@@ -2257,7 +2259,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     H5VL_iod_io_info_t *info = NULL;
     hbool_t is_vl_data = FALSE;
     hid_t rcxt_id;
-    H5RC_t *rc;
+    H5RC_t *rc = NULL;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
@@ -2463,7 +2465,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     H5VL_iod_request_t **parent_reqs = NULL;
     size_t num_parents = 0;
     hid_t trans_id;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2605,7 +2607,7 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[],
     int *status = NULL;
     size_t num_parents = 0;
     hid_t trans_id;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     H5P_genplist_t *plist = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -2790,7 +2792,7 @@ H5VL_iod_dataset_close(void *_dset, hid_t UNUSED dxpl_id, void **req)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
     dset_close_in_t input;
-    int *status;
+    int *status = NULL;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;  /* Return value */
@@ -2872,7 +2874,7 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t UNUSED loc_params, const 
     H5P_genplist_t *plist = NULL;
     size_t num_parents = 0;
     hid_t trans_id;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
     void *ret_value = NULL;
 
@@ -2997,7 +2999,7 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const ch
     iod_handle_t iod_oh;
     H5P_genplist_t *plist = NULL;
     hid_t rcxt_id;
-    H5RC_t *rc;
+    H5RC_t *rc = NULL;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     void *ret_value = NULL;
@@ -3173,7 +3175,7 @@ H5VL_iod_datatype_close(void *obj, hid_t UNUSED dxpl_id, void **req)
     dtype_close_in_t input;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
-    int *status;
+    int *status = NULL;
     herr_t ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3246,7 +3248,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     H5VL_iod_request_t **parent_reqs = NULL;
     size_t num_parents = 0;
     hid_t trans_id;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3400,7 +3402,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     iod_handle_t iod_oh;
     H5P_genplist_t *plist = NULL;
     hid_t rcxt_id;
-    H5RC_t *rc;
+    H5RC_t *rc = NULL;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     void *ret_value = NULL;
@@ -3525,7 +3527,7 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
     size_t size;
     H5VL_iod_io_info_t *info = NULL;
     hid_t rcxt_id;
-    H5RC_t *rc;
+    H5RC_t *rc = NULL;
     size_t num_parents = 0;
     H5P_genplist_t *plist = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
@@ -3632,7 +3634,7 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     uint32_t cs;
     size_t num_parents = 0;
     hid_t trans_id;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
 
@@ -3739,7 +3741,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
     iod_handle_t iod_oh;
     size_t num_parents = 0;
     hid_t trans_id;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     H5P_genplist_t *plist = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
     int *status = NULL;
@@ -3828,7 +3830,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
     iod_handle_t iod_oh;
     H5P_genplist_t *plist = NULL;
     hid_t rcxt_id;
-    H5RC_t *rc;
+    H5RC_t *rc = NULL;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     char *loc_name = NULL;
@@ -4034,7 +4036,7 @@ H5VL_iod_attribute_close(void *_attr, hid_t UNUSED dxpl_id, void **req)
 {
     H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)_attr;
     attr_close_in_t input;
-    int *status;
+    int *status = NULL;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;  /* Return value */
@@ -4109,13 +4111,14 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object */
     link_create_in_t input;
-    int *status;
+    int *status = NULL;
     H5P_genplist_t *plist = NULL;                      /* Property list pointer */
     char *link_value = NULL; /* Value of soft link */
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     hid_t trans_id;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
+    char *loc_name = NULL, *target_name = NULL;
     herr_t ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -4139,12 +4142,13 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 H5MM_malloc(sizeof(H5VL_iod_request_t *) * 3)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
 
+    status = (int *)malloc(sizeof(int));
+
     switch (create_type) {
         case H5VL_LINK_CREATE_HARD:
             {
                 H5VL_iod_object_t *target_obj = NULL;
                 H5VL_loc_params_t target_params;
-                char *loc_name = NULL, *target_name = NULL;
 
                 if(H5P_get(plist, H5VL_LINK_TARGET, &target_obj) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current location");
@@ -4206,16 +4210,10 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 link_value = strdup("\0");
                 input.link_value = link_value;
 
-                if(loc_name) 
-                    HDfree(loc_name);
-                if(target_name) 
-                    HDfree(target_name);
-
                 break;
             }
         case H5VL_LINK_CREATE_SOFT:
             {
-                char *target_name = NULL, *loc_name = NULL;
                 H5VL_iod_object_t *target_obj = NULL;
                 H5VL_loc_params_t target_params;
 
@@ -4271,9 +4269,6 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 input.lapl_id = lapl_id;
                 input.link_value = link_value;
 
-                if(loc_name) 
-                    HDfree(loc_name);
-
                 break;
             }
         /* MSC - not supported now */
@@ -4306,6 +4301,10 @@ done:
 
     if(link_value) 
         HDfree(link_value);
+    if(loc_name) 
+        HDfree(loc_name);
+    if(H5VL_LINK_CREATE_HARD == create_type && target_name) 
+        HDfree(target_name);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_link_create() */
@@ -4336,14 +4335,13 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
 {
     H5VL_iod_object_t *src_obj = (H5VL_iod_object_t *)_src_obj;
     H5VL_iod_object_t *dst_obj = (H5VL_iod_object_t *)_dst_obj;
-    H5VL_iod_object_t *cur_obj;
     link_move_in_t input;
-    int *status;
+    int *status = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
     H5P_genplist_t *plist = NULL;
     size_t num_parents = 0;
     hid_t trans_id;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     char *src_name = NULL, *dst_name = NULL;
     herr_t ret_value = SUCCEED;        /* Return value */
 
@@ -4420,9 +4418,10 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
 
     status = (herr_t *)malloc(sizeof(herr_t));
 
-    if(H5VL__iod_create_and_forward(H5VL_LINK_MOVE_ID, HG_LINK_MOVE, cur_obj, 1,
+    if(H5VL__iod_create_and_forward(H5VL_LINK_MOVE_ID, HG_LINK_MOVE, dst_obj, 1,
                                     num_parents, parent_reqs,
-                                    (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
+                                    (H5VL_iod_req_info_t *)tr, &input, 
+                                    status, status, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link move");
 
 done:
@@ -4484,7 +4483,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
     H5VL_iod_request_t **parent_reqs = NULL;
     size_t num_parents = 0;
     hid_t rcxt_id;
-    H5RC_t *rc;
+    H5RC_t *rc = NULL;
     H5P_genplist_t *plist = NULL;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
@@ -4658,14 +4657,13 @@ herr_t
 H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
-    H5VL_iod_object_t *cur_obj;
     link_op_in_t input;
     H5VL_iod_request_t **parent_reqs = NULL;
     size_t num_parents = 0;
     hid_t trans_id;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     H5P_genplist_t *plist = NULL;
-    int *status;
+    int *status = NULL;
     char *loc_name = NULL;
     herr_t ret_value = SUCCEED;
 
@@ -4712,7 +4710,7 @@ H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, vo
 
     status = (int *)malloc(sizeof(int));
 
-    if(H5VL__iod_create_and_forward(H5VL_LINK_REMOVE_ID, HG_LINK_REMOVE, cur_obj, 1, 
+    if(H5VL__iod_create_and_forward(H5VL_LINK_REMOVE_ID, HG_LINK_REMOVE, obj, 1, 
                                     num_parents, parent_reqs,
                                     (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link remove");
@@ -4744,7 +4742,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to open the group */
     H5P_genplist_t *plist = NULL;
     hid_t rcxt_id;
-    H5RC_t *rc;
+    H5RC_t *rc = NULL;
     size_t num_parents = 0;
     char *loc_name = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
@@ -4952,9 +4950,11 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
         input.loc_name = loc_name;
         input.rcxt_num  = rc->c_version;
 
+        /* H5Oopen has to be synchronous */
         if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_ID, HG_OBJECT_OPEN, 
                                         obj, 1, num_parents, parent_reqs,
-                                        (H5VL_iod_req_info_t *)rc, &input, &remote_obj, &remote_obj, req) < 0)
+                                        (H5VL_iod_req_info_t *)rc, &input, 
+                                        &remote_obj, &remote_obj, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship object open");
 
         *opened_type = remote_obj.obj_type;
@@ -5172,14 +5172,13 @@ H5VL_iod_object_copy(void *_src_obj, H5VL_loc_params_t UNUSED loc_params1, const
 {
     H5VL_iod_object_t *src_obj = (H5VL_iod_object_t *)_src_obj;
     H5VL_iod_object_t *dst_obj = (H5VL_iod_object_t *)_dst_obj;
-    H5VL_iod_object_t *cur_obj;
     object_copy_in_t input;
-    int *status;
+    int *status = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
     H5P_genplist_t *plist = NULL;
     size_t num_parents = 0;
     hid_t trans_id;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     herr_t ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -5225,7 +5224,7 @@ H5VL_iod_object_copy(void *_src_obj, H5VL_loc_params_t UNUSED loc_params1, const
     status = (herr_t *)malloc(sizeof(herr_t));
 
     if(H5VL__iod_create_and_forward(H5VL_OBJECT_COPY_ID, HG_OBJECT_COPY, 
-                                    (H5VL_iod_object_t *)cur_obj, 1,
+                                    (H5VL_iod_object_t *)dst_obj, 1,
                                     num_parents, parent_reqs,
                                     (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship object copy");
@@ -5286,7 +5285,7 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
     int *status = NULL;
     size_t num_parents = 0;
     hid_t trans_id;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     H5P_genplist_t *plist = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
     char *loc_name = NULL;
@@ -5441,7 +5440,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     size_t num_parents = 0;
     hid_t rcxt_id;
-    H5RC_t *rc;
+    H5RC_t *rc = NULL;
     H5P_genplist_t *plist = NULL;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
@@ -5648,7 +5647,7 @@ H5VL_iod_map_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
     iod_handle_t iod_oh;
     H5VL_iod_request_t **parent_reqs = NULL;
     size_t num_parents = 0;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -5755,7 +5754,7 @@ H5VL_iod_map_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char *n
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     H5VL_iod_request_t **parent_reqs = NULL;
-    H5RC_t *rc;
+    H5RC_t *rc = NULL;
     size_t num_parents = 0;
     void *ret_value = NULL;
 
@@ -5843,7 +5842,7 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
     size_t key_size, val_size;
     int *status = NULL;
     size_t num_parents = 0;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
 
@@ -5927,7 +5926,7 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
     map_get_in_t input;
     map_get_out_t *output;
     size_t key_size, val_size;
-    H5RC_t *rc;
+    H5RC_t *rc = NULL;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
@@ -6037,7 +6036,7 @@ H5VL_iod_map_get_count(void *_map, hsize_t *count, hid_t rcxt_id, void **req)
 {
     H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
     map_get_count_in_t input;
-    H5RC_t *rc;
+    H5RC_t *rc = NULL;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
@@ -6084,7 +6083,7 @@ H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key,
     H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
     map_op_in_t input;
     size_t key_size;
-    H5RC_t *rc;
+    H5RC_t *rc = NULL;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
@@ -6158,7 +6157,7 @@ H5VL_iod_map_delete(void *_map, hid_t key_mem_type_id, const void *key,
     size_t key_size;
     int *status = NULL;
     size_t num_parents = 0;
-    H5TR_t *tr;
+    H5TR_t *tr = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
 
@@ -6217,7 +6216,7 @@ herr_t H5VL_iod_map_close(void *_map, void **req)
 {
     H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
     map_close_in_t input;
-    int *status;
+    int *status = NULL;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;

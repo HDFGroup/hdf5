@@ -639,21 +639,20 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
     /* get the file object */
     if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
-    /* Create the dataset through the VOL */
-    if(NULL == (dset = H5VL_dataset_open(obj, loc_params, vol_plugin, name, dapl_id, 
-                                         dxpl_id, eq_id)))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
+    /* Create the dataset through the VOL */
+    if(NULL == (dset = H5VL_dataset_open(obj, loc_params, vol_plugin, name, 
+                                         dapl_id, dxpl_id, eq_id)))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     /* Get an atom for the dataset */
     if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
@@ -2567,7 +2566,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lget_val_ff() */
 
-#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5Oopen_ff
@@ -2608,6 +2606,8 @@ H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id, hid_t e
 
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if(H5_EVENT_QUEUE_NULL != eq_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5Oopen_ff has to be synchronous, pass H5_EVENT_QUEUE_NULL for the event queue")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
@@ -2638,7 +2638,6 @@ H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id, hid_t e
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_ff() */
-#endif
 
 
 /*-------------------------------------------------------------------------
