@@ -33,7 +33,7 @@ if BUILD_EFF_CONDITIONAL
   EXAMPLE_PROG_EFF = h5ff_server h5ff_client h5ff_client_map h5ff_client_do \
                 h5ff_client_old_api h5ff_client_multiple_cont h5ff_client_trans \
                 h5ff_client_dset h5ff_client_attr h5ff_client_links \
-                h5ff_client_obj
+                h5ff_client_obj h5ff_client_paths
 endif
 
 # Example programs.

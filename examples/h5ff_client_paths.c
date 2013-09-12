@@ -1,5 +1,6 @@
 /* 
- * test_client_obj.c: Client side of H5O routines
+ * test_client_path.c: This example demonstrates what can and can't be
+ * done with access through Paths in the IOD plugin.
  */
 
 #include <stdio.h>
@@ -12,16 +13,11 @@
 int main(int argc, char **argv) {
     const char file_name[]="map_file.h5";
     hid_t file_id;
-    hid_t gid;
-    hid_t did, map;
-    hid_t sid, dtid;
-    hid_t tid1, rid1, rid2;
-    hid_t fapl_id, dxpl_id;
+    hid_t gid1, gid2, gid3;
+    hid_t map;
+    hid_t tid1, tid2, rid1, rid2;
+    hid_t fapl_id, dxpl_id, trspl_id;
     hid_t event_q;
-    hbool_t exists;
-
-    const unsigned int nelem=60;
-    hsize_t dims[1];
 
     uint64_t version;
     uint64_t trans_num;
@@ -33,6 +29,12 @@ int main(int argc, char **argv) {
     H5_status_t *status = NULL;
     int num_requests = 0, i;
     herr_t ret;
+
+    hsize_t count = -1;
+    int key, value;
+    hbool_t exists = -1;
+    H5_request_t req1;
+    H5_status_t status1;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {
@@ -74,16 +76,12 @@ int main(int argc, char **argv) {
     file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     assert(file_id);
 
-    /* create 1-D dataspace with 60 elements */
-    dims [0] = nelem;
-    sid = H5Screate_simple(1, dims, NULL);
-    dtid = H5Tcopy(H5T_STD_I32LE);
-
     /* acquire container version 0 - EXACT */
     version = 0;
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
     assert(0 == version);
 
+    /******************************** Transaction 1 ****************************************/
     /* create transaction object */
     tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
     assert(tid1);
@@ -103,20 +101,25 @@ int main(int argc, char **argv) {
     if(0 != my_rank)
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
 
-    /* create objects */
-    gid = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
-    ret = H5Oset_comment_ff(gid, "Testing Object Comment", tid1, event_q);
-    assert(ret == 0);
-    did = H5Dcreate_ff(gid, "D1", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
-    ret = H5Tcommit_ff(file_id, "DT1", dtid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
-    assert(ret == 0);
-    map = H5Mcreate_ff(file_id, "MAP1", H5T_STD_I32LE, H5T_STD_I32LE, 
-                       H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
-    assert(map > 0);
+    /* create a group G1 on the root group */
+    gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
 
-    ret = H5Ocopy_ff(gid, ".", file_id, "G1_COPY", 
-                     H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
-    assert(ret == 0);
+    /* to be able to create G2 on G1, we have to use G1's ID as the starting location */
+    gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+
+    /* If we happen to do something like this :
+
+       gid2 = H5Gcreate_ff(file_id, "G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+
+       We will get a failure when the operation completes, because the
+       path G1/G2 indicates that we have to read G1 from IOD in read
+       context 0. Since G1 is created in transaction 1, it is still
+       not yet visible so we can not read from it. We can only write
+       to it, which makes the earlier create directly on G1
+       possible. This operation will succeed in a subsequent
+       transaction that has a read context 1. 
+    */
+
 
     /* none leader procs have to complete operations before notifying the leader */
     if(0 != my_rank) {
@@ -146,14 +149,11 @@ int main(int argc, char **argv) {
     ret = H5TRclose(tid1);
     assert(0 == ret);
 
+    /******************************** END Transaction 1 ****************************************/
+
     /* release container version 0. This is async. */
     ret = H5RCrelease(rid1, event_q);
     assert(0 == ret);
-
-    assert(H5Gclose_ff(gid, event_q) == 0);
-    assert(H5Dclose_ff(did, event_q) == 0);
-    assert(H5Tclose_ff(dtid, event_q) == 0);
-    assert(H5Mclose_ff(map, event_q) == 0);
 
     H5EQwait(event_q, &num_requests, &status);
     printf("%d requests in event queue. Completions: ", num_requests);
@@ -173,63 +173,55 @@ int main(int argc, char **argv) {
         assert(rid2 > 0);
     }
 
-    gid = H5Oopen_ff(file_id, "G1", H5P_DEFAULT, rid2, H5_EVENT_QUEUE_NULL);
-    assert(gid);
-    dtid = H5Oopen_ff(file_id, "DT1", H5P_DEFAULT, rid2, H5_EVENT_QUEUE_NULL);
-    assert(dtid);
-    did = H5Oopen_ff(gid,"D1", H5P_DEFAULT, rid2, H5_EVENT_QUEUE_NULL);
-    assert(did);
-    map = H5Oopen_ff(file_id,"MAP1", H5P_DEFAULT, rid2, H5_EVENT_QUEUE_NULL);
-    assert(did);
 
-    {
-        ssize_t ret_size = 0;
-        char *comment = NULL;
-        H5O_ff_info_t oinfo;
+    /******************************** Transaction 2 ****************************************/
 
-        ret = H5Oget_comment_ff(gid, NULL, 0, &ret_size, rid2, H5_EVENT_QUEUE_NULL);
-        assert(ret == 0);
+    /* create & start transaction 2 with num_peers = n */
+    tid2 = H5TRcreate(file_id, rid2, (uint64_t)2);
+    assert(tid2);
+    trspl_id = H5Pcreate (H5P_TR_START);
+    ret = H5Pset_trspl_num_peers(trspl_id, my_size);
+    assert(0 == ret);
+    ret = H5TRstart(tid2, trspl_id, event_q);
+    assert(0 == ret);
+    ret = H5Pclose(trspl_id);
+    assert(0 == ret);
 
-        fprintf(stderr, "size of comment is %d\n", ret_size);
+    /* create G3 under /G1/G2. This can be done by either providing
+       the file_id as the starting location, and the entire path to
+       where G3 needs to be created (G1/G2/G3), since the intermediate
+       groups G1 and G2 are readable, or gid2 as the starting
+       location. The latter would be more performant, since we already
+       have G2 open, so it will avoid extra access to get to G2 as
+       would be in the former case. */
+    gid3 = H5Gcreate_ff(gid2, "G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, event_q);
+    /* This will work too:
+       gid3 = H5Gcreate_ff(file_id, "G1/G2/G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, event_q);
+    */
 
-        comment = malloc((size_t)ret_size + 1);
+    /* create a Map object under G3. Since G3 is created in the same
+       transaction as the map create will occur, the direct location
+       for G3 is needed for the create to succeed. */
+    map = H5Mcreate_ff(gid3, "MAP", H5T_STD_I32LE, H5T_STD_I32LE, 
+                       H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid2, event_q);
 
-        ret = H5Oget_comment_ff(gid, comment, (size_t)ret_size + 1, 
-                                &ret_size, rid2, H5_EVENT_QUEUE_NULL);
-        assert(ret == 0);
+    /* finish transaction 2 */
+    ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, event_q);
+    assert(0 == ret);
 
-        fprintf(stderr, "size of comment is %d Comment is %s\n", ret_size, comment);
-        free(comment);
+    ret = H5TRclose(tid2);
+    assert(0 == ret);
 
-        ret = H5Oget_info_ff(gid, &oinfo, rid2, H5_EVENT_QUEUE_NULL);
-        assert(ret == 0);
-
-        switch(oinfo.type) {
-        case H5O_TYPE_GROUP:
-            fprintf(stderr, 
-                    "OBJECT GET INFO return a GROUP TYPE with IOD ID: %llu, num attrs = %llu, reference count = %d\n", 
-                    oinfo.addr, oinfo.num_attrs, oinfo.rc);
-            break;
-        default:
-            fprintf(stderr, "Unexpected result from oget_info\n");
-            exit(1);
-        }
-    }
-
-    /* check if an object exists. This is asynchronous, so checking
-       the value should be done after the wait */
-    ret = H5Oexists_by_name_ff(file_id, "G1_COPY", &exists, 
-                               H5P_DEFAULT, rid2, event_q);
-    assert(ret == 0);
+    /******************************** END Transaction 2 ****************************************/
 
     /* release container version 1. This is async. */
     ret = H5RCrelease(rid2, event_q);
     assert(0 == ret);
 
-    assert(H5Oclose_ff(gid, event_q) == 0);
-    assert(H5Oclose_ff(did, event_q) == 0);
-    assert(H5Oclose_ff(dtid, event_q) == 0);
-    assert(H5Oclose_ff(map, event_q) == 0);
+    assert(H5Gclose_ff(gid1, event_q) == 0);
+    assert(H5Gclose_ff(gid2, event_q) == 0);
+    assert(H5Gclose_ff(gid3, event_q) == 0);
+    assert(H5Mclose_ff(map, event_q) == 0);
 
     ret = H5RCclose(rid1);
     assert(0 == ret);
@@ -248,9 +240,8 @@ int main(int argc, char **argv) {
     fprintf(stderr, "\n");
     free(status);
 
-    H5Sclose(sid);
-    H5Pclose(fapl_id);
     H5EQclose(event_q);
+    H5Pclose(fapl_id);
 
     /* This finalizes the EFF stack. ships a terminate and IOD finalize to the server 
        and shutsdown the FS server (when all clients send the terminate request) 
