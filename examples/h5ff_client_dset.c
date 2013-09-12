@@ -17,14 +17,16 @@ int main(int argc, char **argv) {
     hid_t sid, dtid;
     hid_t did1, did2, did3;
     hid_t tid1, tid2, rid1, rid2;
-    hid_t fapl_id, trspl_id;
+    hid_t fapl_id, trspl_id, dxpl_id;
     hid_t event_q;
 
     uint64_t version;
     uint64_t trans_num;
 
-    int *wdata1 = NULL, *wdata2 = NULL, *wdata3 = NULL;
-    int *rdata1 = NULL, *rdata2 = NULL, *rdata3 = NULL;
+    int *wdata1 = NULL, *wdata2 = NULL;
+    int16_t *wdata3 = NULL;
+    int *rdata1 = NULL, *rdata2 = NULL;
+    int16_t *rdata3 = NULL;
     const unsigned int nelem=60;
     hsize_t dims[1];
     hsize_t extent;
@@ -35,9 +37,8 @@ int main(int argc, char **argv) {
 
     H5_status_t *status = NULL;
     int num_requests = 0;
-    H5_request_t req1;
-    H5_status_t status1;
     unsigned int i = 0;
+    uint32_t cs = 0,read1_cs = 0, read2_cs = 0;
     herr_t ret;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
@@ -60,17 +61,17 @@ int main(int argc, char **argv) {
     /* allocate and initialize arrays for dataset I/O */
     wdata1 = malloc (sizeof(int32_t)*nelem);
     wdata2 = malloc (sizeof(int32_t)*nelem);
-    wdata3 = malloc (sizeof(int32_t)*nelem);
+    wdata3 = malloc (sizeof(int16_t)*nelem);
     rdata1 = malloc (sizeof(int32_t)*nelem);
     rdata2 = malloc (sizeof(int32_t)*nelem);
-    rdata3 = malloc (sizeof(int32_t)*nelem);
+    rdata3 = malloc (sizeof(int16_t)*nelem);
     for(i=0;i<nelem;++i) {
         rdata1[i] = 0;
         rdata2[i] = 0;
         rdata3[i] = 0;
         wdata1[i]=i;
-        wdata2[i]=i*2;
-        wdata3[i]=i*10;
+        wdata2[i]=i;
+        wdata3[i]=i;
     }
 
     /* create an event Queue for managing asynchronous requests. */
@@ -128,12 +129,32 @@ int main(int argc, char **argv) {
     assert(did3 > 0);
 
     /* write data to datasets */
-    ret = H5Dwrite_ff(did1, dtid, sid, sid, H5P_DEFAULT, wdata1, tid1, event_q);
+
+    /* Attach a checksum to the dxpl which is verified all the way
+       down at the server */
+    dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+    cs = H5checksum(wdata1, sizeof(int) * nelem, NULL);
+    H5Pset_dxpl_checksum(dxpl_id, cs);
+    ret = H5Dwrite_ff(did1, dtid, sid, sid, dxpl_id, wdata1, tid1, event_q);
     assert(ret == 0);
-    ret = H5Dwrite_ff(did2, dtid, sid, sid, H5P_DEFAULT, wdata2, tid1, event_q);
+
+    /* Raw data write on D2. same as previous, but here we indicate
+       through the property list that we want to inject a
+       corruption. */
+    cs = H5checksum(wdata2, sizeof(int) * nelem, NULL);
+    H5Pset_dxpl_checksum(dxpl_id, cs);
+    H5Pset_dxpl_inject_corruption(dxpl_id, 1);
+    ret = H5Dwrite_ff(did2, dtid, sid, sid, dxpl_id, wdata2, tid1, event_q);
     assert(ret == 0);
-    ret = H5Dwrite_ff(did3, dtid, sid, sid, H5P_DEFAULT, wdata3, tid1, event_q);
+
+    /* Raw data write on D3. Same as previous; however we specify that
+       the data in the buffer is in BE byte order. Type conversion will
+       happen at the server when we detect that the dataset type is of
+       LE order and the datatype here is in BE order. */
+    ret = H5Dwrite_ff(did3, H5T_STD_I16BE, sid, sid, H5P_DEFAULT, wdata3, tid1, event_q);
     assert(ret == 0);
+
+    H5Pclose(dxpl_id);
 
     /* none leader procs have to complete operations before notifying the leader */
     if(0 != my_rank) {
@@ -197,12 +218,75 @@ int main(int argc, char **argv) {
     did1 = H5Dopen_ff(file_id, "G1/D1", H5P_DEFAULT, rid2, event_q);
 
     /* read data from datasets with read version 1. */
-    ret = H5Dread_ff(did1, dtid, sid, sid, H5P_DEFAULT, rdata1, rid2, event_q);
+
+    dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+    /* Give a location to the DXPL to store the checksum once the read has completed */
+    H5Pset_dxpl_checksum_ptr(dxpl_id, &read1_cs);
+    ret = H5Dread_ff(did1, dtid, sid, sid, dxpl_id, rdata1, rid2, event_q);
     assert(ret == 0);
-    ret = H5Dread_ff(did2, dtid, sid, sid, H5P_DEFAULT, rdata2, rid2, event_q);
+    H5Pclose(dxpl_id);
+
+    /* Here we demo that we can pass hints down to the IOD server. 
+       We create a new property, for demo purposes, to tell the server to inject 
+       corrupted data into the received array, and hence an incorrect checksum. 
+       This also detects that we are passing checksum values in both directions for 
+       raw data to ensure data integrity. The read should fail when we wait on it in
+       the H5Dclose(D2) later, but for the demo purposes we are not actually going to 
+       fail the close, but just print a Fatal error. */
+    dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+    H5Pset_dxpl_inject_corruption(dxpl_id, 1);
+    /* Give a location to the DXPL to store the checksum once the read has completed */
+    H5Pset_dxpl_checksum_ptr(dxpl_id, &read2_cs);
+    ret = H5Dread_ff(did2, dtid, sid, sid, dxpl_id, rdata2, rid2, event_q);
     assert(ret == 0);
-    ret = H5Dread_ff(did3, dtid, sid, sid, H5P_DEFAULT, rdata3, rid2, event_q);
+    H5Pclose(dxpl_id);
+
+    /* Raw data read on D3. This is asynchronous.  Note that the type
+       is different than the dataset type. */
+    ret = H5Dread_ff(did3, H5T_STD_I16BE, sid, sid, H5P_DEFAULT, rdata3, rid2, event_q);
     assert(ret == 0);
+
+
+
+    /* Raw data read on D1. This is asynchronous.  The read is done into a 
+       noncontiguous memory dataspace selection */
+    {
+        hid_t mem_space;
+        hsize_t start = 0;
+        hsize_t stride = 2;
+        hsize_t count = nelem;
+        hsize_t block = 1;
+        H5_request_t req1;
+        H5_status_t status1;
+        int *buf = NULL;
+
+        buf = calloc (nelem*2, sizeof(int));
+
+        /* create a dataspace. This is a local Bookeeping operation that 
+           does not touch the file */
+        dims [0] = nelem*2;
+        mem_space = H5Screate_simple(1, dims, NULL);
+        H5Sselect_hyperslab(mem_space, H5S_SELECT_SET, &start,&stride,&count,&block);
+
+        ret = H5Dread_ff(did1, H5T_STD_I32LE, mem_space, sid, H5P_DEFAULT, buf, 
+                         rid2, event_q);
+        assert(ret == 0);
+        H5Sclose(mem_space);
+
+        if(H5EQpop(event_q, &req1) < 0)
+            exit(1);
+        /* wait synchronously on the operation */
+        assert(H5AOwait(req1, &status1) == 0);
+        assert (status1);
+
+        fprintf(stderr, "Printing all Dataset values. We should have a 0 after each element: ");
+        for(i=0;i<120;++i)
+            fprintf(stderr, "%d ", buf[i]);
+        fprintf(stderr, "\n");
+
+        free(buf);
+    }
+
 
     /* create & start transaction 2 with num_peers = n */
     tid2 = H5TRcreate(file_id, rid2, (uint64_t)2);
@@ -276,13 +360,22 @@ int main(int argc, char **argv) {
     for(i=0;i<nelem;++i)
         fprintf(stderr, "%d ",rdata1[i]);
     fprintf(stderr, "\n");
+    fprintf(stderr, 
+            "Checksum Receieved = %u  Checksum Computed = %u (Should be Equal)\n", 
+            read1_cs, cs);
 
-    fprintf(stderr, "Read Data2: ");
+    fprintf(stderr, "Read Data2 (corrupted): ");
     for(i=0;i<nelem;++i)
         fprintf(stderr, "%d ",rdata2[i]);
     fprintf(stderr, "\n");
+    fprintf(stderr, 
+            "Checksum Receieved = %u  Checksum Computed = %u (Should NOT be Equal)\n", 
+            read2_cs, cs);
 
-    fprintf(stderr, "Read Data3: ");
+    assert(read1_cs == cs);
+    assert(read2_cs != cs);
+
+    fprintf(stderr, "Read Data3 (32 LE converted to 16 bit BE order): ");
     for(i=0;i<nelem;++i)
         fprintf(stderr, "%d ",rdata3[i]);
     fprintf(stderr, "\n");
