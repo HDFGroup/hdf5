@@ -68,7 +68,7 @@ typedef struct H5O_ff_info_t {
 H5_DLL hid_t H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl,
                           hid_t fapl, hid_t eq_id);
 H5_DLL hid_t H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id,
-                        hid_t eq_id);
+                        hid_t eq_id, hid_t *rcxt_id);
 H5_DLL herr_t H5Fclose_ff(hid_t file_id, hid_t eq_id);
 
 H5_DLL hid_t H5Gcreate_ff(hid_t loc_id, const char *name, hid_t lcpl_id,
@@ -145,8 +145,8 @@ H5_DLL herr_t H5Lget_val_ff(hid_t link_loc_id, const char *link_name, void *link
 
 H5_DLL hid_t H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id,
                         hid_t rcxt_id, hid_t eq_id);
-H5_DLL hid_t H5Oopen_by_addr_ff(hid_t loc_id, haddr_ff_t addr, H5O_type_t type, 
-                                hid_t rcxt_id, hid_t eq_id);
+//H5_DLL hid_t H5Oopen_by_addr_ff(hid_t loc_id, haddr_ff_t addr, H5O_type_t type, 
+//hid_t rcxt_id, hid_t eq_id);
 H5_DLL herr_t H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
                          hid_t lapl_id, hid_t trans_id, hid_t eq_id);
 H5_DLL herr_t H5Oexists_by_name_ff(hid_t loc_id, const char *name, htri_t *ret, 

@@ -129,6 +129,7 @@ typedef struct H5VL_iod_remote_file_t {
     uint64_t array_oid_index;
     uint64_t blob_oid_index;
     iod_obj_id_t root_id;
+    uint64_t c_version;
     hid_t fcpl_id;
 } H5VL_iod_remote_file_t;
 

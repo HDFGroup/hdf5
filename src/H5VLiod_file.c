@@ -49,6 +49,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     file_create_in_t *input = (file_create_in_t *)op_data->input;
     file_create_out_t output;
+    unsigned num_peers = input->num_peers; /* the number of peers participating in creation */
     unsigned int mode; /* create mode */
     iod_handle_t coh; /* container handle */
     iod_handle_t root_oh; /* root object handle */
@@ -61,7 +62,8 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start file create %s %d %d\n", input->name, input->fapl_id, input->fcpl_id);
+    fprintf(stderr, "Start file create %s %d %d\n", 
+            input->name, input->fapl_id, input->fcpl_id);
 #endif
 
     /* convert HDF5 flags to IOD flags */
@@ -72,6 +74,9 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     /* Create the Container */
     if(iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create container");
+
+    if(iod_trans_start(coh, &first_tid, NULL, num_peers, IOD_TRANS_WR, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
     /* create the root group */
     ret = iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, NULL, NULL, 
@@ -164,6 +169,10 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
     }
 
+    /* Finish  the transaction */
+    if(iod_trans_finish(coh, first_tid, NULL, 0, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction 0");
+
 #if H5_DO_NATIVE
     coh.cookie = H5Fcreate(input->name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     HDassert(coh.cookie);
@@ -223,10 +232,13 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     file_open_in_t *input = (file_open_in_t *)op_data->input;
     file_open_out_t output;
     unsigned int mode = input->flags; /* File Open mode */
+    hbool_t acquire = input->acquire;
     iod_handle_t coh; /* container handle */
     iod_handle_t root_oh; /* root object handle */
     iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
     scratch_pad_t sp;
+    iod_container_tids_t tids;
+    iod_trans_id_t rtid;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -239,12 +251,23 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
+    if(iod_container_query_tids(coh, &tids, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
+
+    rtid = tids.latest_rdable;
+
+    /* MSC - fake something for now */
+    rtid = 1024;
+
+    if(iod_trans_start(coh, &rtid, NULL, 0, IOD_TRANS_RD, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
+
     /* open the root group */
     if (iod_obj_open_write(coh, ROOT_ID, NULL /*hints*/, &root_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object");
 
     /* get scratch pad of root group */
-    if(iod_obj_get_scratch(root_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(root_oh, rtid, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
 
     /* open the metadata scratch pad */
@@ -256,23 +279,24 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     output.kv_oid_index = 1;
     output.array_oid_index = 1;
     output.blob_oid_index = 1;
+    output.c_version = rtid;
     output.fcpl_id = H5P_FILE_CREATE_DEFAULT;
 
     /* MSC - NEED IOD */
 #if 0
-    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
                              NULL, NULL, &output.fcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve fcpl");
 
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_KEY_KV_IDS_INDEX, &output.kv_oid_index, 
+    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_KV_IDS_INDEX, &output.kv_oid_index, 
                         sizeof(uint64_t), NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "KV index lookup failed");
 
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_KEY_ARRAY_IDS_INDEX, &output.array_oid_index, 
+    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_ARRAY_IDS_INDEX, &output.array_oid_index, 
                         sizeof(uint64_t), NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Array index lookup failed");
 
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_KEY_BLOB_IDS_INDEX, &output.blob_oid_index, 
+    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_BLOB_IDS_INDEX, &output.blob_oid_index, 
                         sizeof(uint64_t), NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "BLOB index lookup failed");
 #endif
@@ -280,6 +304,17 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+
+    output.coh = coh;
+    output.root_id = ROOT_ID;
+    output.root_oh = root_oh;
+
+    /* If the user did not ask to acquire the latest readable version, finish it here */
+    if(TRUE != acquire) {
+        output.c_version = IOD_TID_UNKNOWN;
+        if(iod_trans_finish(coh, rtid, NULL, 0, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction 0");
+    }
 
 #if H5_DO_NATIVE
     {
@@ -290,10 +325,6 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
         fprintf(stderr, "Opened Native file %s with ID %d\n", input->name, root_oh.cookie);
     }
 #endif
-
-    output.coh = coh;
-    output.root_id = ROOT_ID;
-    output.root_oh = root_oh;
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with file open, sending response to client\n");
@@ -310,6 +341,7 @@ done:
         output.kv_oid_index = 0;
         output.array_oid_index = 0;
         output.blob_oid_index = 0;
+        output.c_version = IOD_TID_UNKNOWN;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 

@@ -1223,6 +1223,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD file struct");
     file->remote_file.root_oh.cookie = IOD_OH_UNDEFINED;
     file->remote_file.root_id = IOD_ID_UNDEFINED;
+    file->remote_file.c_version = 0;
     MPI_Comm_rank(fa->comm, &file->my_rank);
     MPI_Comm_size(fa->comm, &file->num_procs);
 
@@ -1232,6 +1233,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
 
     /* set the input structure for the HG encode routine */
     input.name = name;
+    input.num_peers = file->num_procs;
     input.flags = flags;
     input.fcpl_id = fcpl_id;
     input.fapl_id = fapl_id;
@@ -1294,6 +1296,7 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
     H5VL_iod_file_t *file = NULL;
     file_open_in_t input;
+    hid_t rcxt_id;
     void  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1304,6 +1307,18 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
     if(NULL == (fa = (H5VL_iod_fapl_t *)H5P_get_vol_info(plist)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get IOD info struct")
 
+    /* determine if we want to acquire the latest readable version
+       when the file is opened */
+    if(H5P_get(plist, H5VL_ACQUIRE_RC_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't set property value for rxct id")
+
+    if(FAIL != rcxt_id) {
+        input.acquire = TRUE;
+    }
+    else {
+        input.acquire = FALSE;
+    }
+
     /* allocate the file object that is returned to the user */
     if(NULL == (file = H5FL_CALLOC(H5VL_iod_file_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD file struct");
@@ -1312,6 +1327,7 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
     file->remote_file.root_oh.cookie = IOD_OH_UNDEFINED;
     file->remote_file.root_id = IOD_ID_UNDEFINED;
     file->remote_file.fcpl_id = -1;
+    file->remote_file.c_version = IOD_TID_UNKNOWN;
 
     /* set input paramters in struct to give to the function shipper */
     input.name = name;
@@ -6648,6 +6664,9 @@ H5VL_iod_rc_persist(H5RC_t *rc, void **req)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    if(rc->file->flags & H5F_ACC_RDONLY)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Can't persist a container opened for Read only");
 
     /* set the input structure for the HG encode routine */
     input.coh = rc->file->remote_file.coh;

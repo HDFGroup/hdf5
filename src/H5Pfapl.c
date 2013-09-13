@@ -36,7 +36,8 @@
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* Files		  	*/
+#include "H5Fprivate.h"		/* Files        		  	*/
+#include "H5FFprivate.h"	/* FFwd wrappers		  	*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -277,6 +278,7 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
     H5VL_class_t *vol_cls = H5F_ACS_VOL_DEF;                    /* Default VOL plugin */
     void *vol_info = H5F_ACS_VOL_INFO_DEF;                      /* Default VOL plugin information*/
     const hid_t def_driver_id = H5F_ACS_FILE_DRV_ID_DEF;        /* Default VFL driver ID (initialized from a variable) */
+    hid_t rcxt_id = FAIL;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -419,6 +421,10 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
             H5F_ACS_FILE_IMAGE_INFO_DEL, H5F_ACS_FILE_IMAGE_INFO_COPY, NULL, H5F_ACS_FILE_IMAGE_INFO_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+    /* Register the read context ID property*/
+    if(H5P_register_real(pclass, H5VL_ACQUIRE_RC_ID, sizeof(hid_t), &rcxt_id, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_facc_reg_prop() */

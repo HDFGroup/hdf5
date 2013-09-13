@@ -401,7 +401,9 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
 
     /* if the flag is true, acquire a read context on the finished transaction */
     if(TRUE == acquire) {
+#if H5VL_IOD_DEBUG
         fprintf(stderr, "Transaction Acquire after Finish %llu\n", trans_num);
+#endif
 
         if(iod_trans_start(coh, &trans_num, NULL, 0, IOD_TRANS_RD, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't acquire read context");

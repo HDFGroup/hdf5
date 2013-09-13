@@ -62,8 +62,8 @@ H5_DLL herr_t H5Mget_types_ff(hid_t map_id, hid_t *key_type_id, hid_t *val_type_
 H5_DLL herr_t H5Mget_count_ff(hid_t map_id, hsize_t *count, hid_t rcxt_id, hid_t eq_id);
 H5_DLL herr_t H5Mexists_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, 
                            htri_t *exists, hid_t rcxt_id, hid_t eq_id);
-H5_DLL herr_t H5Miterate(hid_t map_id, hid_t key_mem_type_id, hid_t value_mem_type_id, 
-                         H5M_iterate_func_t callback_func, void *context);
+H5_DLL herr_t H5Miterate_ff(hid_t map_id, hid_t key_mem_type_id, hid_t value_mem_type_id, 
+                            H5M_iterate_func_t callback_func, void *context, hid_t rcxt_id);
 H5_DLL herr_t H5Mdelete_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, 
                            hid_t trans_id, hid_t eq_id);
 H5_DLL herr_t H5Mclose_ff(hid_t map_id, hid_t eq_id);

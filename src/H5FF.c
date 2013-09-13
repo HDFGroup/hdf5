@@ -105,6 +105,9 @@ H5FF__init_interface(void)
     if(H5M_init() < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init map interface")
 
+    if(H5RC_init() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init map interface")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FF__init_interface() */
 
@@ -192,7 +195,8 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id, hid_t eq_id)
+H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id, 
+           hid_t eq_id, /*OUT*/hid_t *rcxt_id)
 {
     void    *file = NULL;            /* file token from VOL plugin */
     H5VL_t  *vol_plugin;             /* VOL plugin information */
@@ -214,10 +218,36 @@ H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id, hid_t eq_id)
         if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
+    /* determine if we want to acquire the latest readable version
+       when the file is opened */
+    if(rcxt_id) {
+        H5P_genplist_t  *plist = NULL;            /* Property list pointer */
+        H5RC_t *rc = NULL;
+
+        /* create a new read context object (if user requested it) */
+        if(NULL == (rc = H5RC_create(file, IOD_TID_UNKNOWN)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create read context");
+        /* Get an atom for the event queue with the VOL information as the auxilary struct */
+        if((*rcxt_id = H5I_register(H5I_RC, rc, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize read context handle");
+
+        /* Get the plist structure */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        if(H5P_set(plist, H5VL_ACQUIRE_RC_ID, rcxt_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rxct id")
+    }
+
     /* Open the file through the VOL layer */
     if(NULL == (file = H5VL_file_open(&vol_plugin, filename, flags, fapl_id, 
                                       H5AC_dxpl_id, eq_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
+
+    if(rcxt_id) {
+        /* attach VOL information to the ID */
+        if (H5I_register_aux(*rcxt_id, vol_plugin) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+    }
 
     /* Get an atom for the file with the VOL information as the auxilary struct*/
     if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
@@ -2639,6 +2669,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_ff() */
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5Oopen_by_addr_ff
@@ -2709,6 +2740,7 @@ H5Oopen_by_addr_ff(hid_t loc_id, haddr_ff_t addr, H5O_type_t type,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_addr_ff() */
+#endif
 
 
 /*-------------------------------------------------------------------------

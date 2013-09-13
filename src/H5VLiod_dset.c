@@ -235,7 +235,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     assert(cur_oh.cookie);
 #endif
 
-    output.iod_oh = cur_oh;
+    output.iod_oh = dset_oh;
 
 #if H5VL_IOD_DEBUG 
     fprintf(stderr, "Done with dset create, sending response to client\n");
@@ -246,6 +246,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 done:
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
+        fprintf(stderr, "failed to create/open Dataset\n");
         output.iod_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }

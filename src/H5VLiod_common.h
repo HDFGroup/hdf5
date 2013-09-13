@@ -27,9 +27,9 @@
 #ifdef H5_HAVE_EFF
 
 #define NA_UNDEFINED NULL
-#define IOD_OH_UNDEFINED (pow(2.0,64.0) - 1)
-#define IOD_ID_UNDEFINED (pow(2.0,64.0) - 1)
-#define IOD_COUNT_UNDEFINED (pow(2.0,64.0) - 1)
+#define IOD_OH_UNDEFINED ((int)(-128))//(pow(2.0,64.0) - 1)
+#define IOD_ID_UNDEFINED ((uint64_t)(-1))//(pow(2.0,64.0) - 1)
+#define IOD_COUNT_UNDEFINED ((uint64_t)(-1))//(pow(2.0,64.0) - 1)
 #define H5VL_IOD_DEBUG 1
 
 typedef enum H5VL_iod_state_t {
@@ -93,18 +93,19 @@ MERCURY_GEN_PROC(eff_init_in_t, ((uint32_t)(proc_num)))
 
 MERCURY_GEN_PROC(file_create_in_t, ((axe_t)(axe_info)) 
                  ((hg_const_string_t)(name)) ((uint32_t)(flags)) 
-                 ((iod_obj_id_t)(root_id))
+                 ((iod_obj_id_t)(root_id)) ((uint32_t)(num_peers))
                  ((hid_t)(fapl_id)) ((hid_t)(fcpl_id)))
 MERCURY_GEN_PROC(file_create_out_t, ((iod_handle_t)(coh)) ((iod_handle_t)(root_oh))
                  ((uint64_t)(kv_oid_index)) ((uint64_t)(array_oid_index)) 
                  ((uint64_t)(blob_oid_index)))
 MERCURY_GEN_PROC(file_open_in_t, ((axe_t)(axe_info)) 
                  ((hg_const_string_t)(name)) ((uint32_t)(flags)) 
-                 ((hid_t)(fapl_id)))
+                 ((hbool_t)(acquire)) ((hid_t)(fapl_id)))
 MERCURY_GEN_PROC(file_open_out_t, ((iod_handle_t)(coh)) ((iod_handle_t)(root_oh))
                  ((uint64_t)(kv_oid_index)) ((uint64_t)(array_oid_index)) 
                  ((uint64_t)(blob_oid_index))
-                 ((iod_obj_id_t)(root_id)) ((hid_t)(fcpl_id)))
+                 ((iod_obj_id_t)(root_id)) ((uint64_t)(c_version))
+                 ((hid_t)(fcpl_id)))
 MERCURY_GEN_PROC(file_close_in_t, ((axe_t)(axe_info)) 
                  ((iod_handle_t)(coh)) ((iod_handle_t)(root_oh))
                  ((iod_obj_id_t)(root_id)))

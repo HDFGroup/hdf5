@@ -424,11 +424,41 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
     switch(req->type) {
     case HG_FILE_CREATE:
+        if(IOD_OH_UNDEFINED == req->obj->file->remote_file.coh.cookie) {
+            fprintf(stderr, "failed to create/open file\n");
+            req->status = H5AO_FAILED;
+            req->state = H5VL_IOD_COMPLETED;
+        }
+
+        H5VL_iod_request_delete(file, req);
+        break;
     case HG_FILE_OPEN:
         if(IOD_OH_UNDEFINED == req->obj->file->remote_file.coh.cookie) {
             fprintf(stderr, "failed to create/open file\n");
             req->status = H5AO_FAILED;
             req->state = H5VL_IOD_COMPLETED;
+        }
+        else {
+            H5P_genplist_t *plist = NULL;      /* Property list pointer */
+            hid_t rcxt_id;
+
+            if(NULL == (plist = H5P_object_verify(file->fapl_id, H5P_FILE_ACCESS)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+
+            /* determine if we want to update the latest readable version
+               when the file is opened */
+            if(H5P_get(plist, H5VL_ACQUIRE_RC_ID, &rcxt_id) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rxct id");
+
+            if(FAIL != rcxt_id) {
+                H5RC_t *rc = NULL;
+                /* get the RC object */
+                if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a READ CONTEXT ID");
+
+                rc->c_version = file->remote_file.c_version;
+                rc->file = file;
+            }
         }
 
         H5VL_iod_request_delete(file, req);

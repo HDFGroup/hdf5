@@ -401,10 +401,10 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog $(EXTLINK_DIRS) *.h5
 @BUILD_EFF_CONDITIONAL_TRUE@LDADD = $(LIBH5TEST) $(LIBHDF5)  $(MYAXE_LIBS) $(MYIOD_LIBS)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@LDADD = $(LIBH5TEST) $(LIBHDF5)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@EXAMPLE_PROG_PARA = ph5example
-@BUILD_EFF_CONDITIONAL_TRUE@EXAMPLE_PROG_EFF = h5ff_server h5ff_client h5ff_client_map h5ff_client_do \
+@BUILD_EFF_CONDITIONAL_TRUE@EXAMPLE_PROG_EFF = h5ff_server h5ff_client_map h5ff_client_do \
 @BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_old_api h5ff_client_multiple_cont h5ff_client_trans \
 @BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_dset h5ff_client_attr h5ff_client_links \
-@BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_obj h5ff_client_paths
+@BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_obj h5ff_client_paths h5ff_client_open
 
 
 # Example programs.

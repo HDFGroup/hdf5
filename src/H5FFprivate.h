@@ -28,8 +28,16 @@
 /**************************/
 /* Library Private Macros */
 /**************************/
+
+/* DXPL property to store the transaction ID from the FF wrappers */
 #define H5VL_TRANS_ID        "transaction_id"
+
+/* DXPL property to store the read context ID from the FF wrappers */
 #define H5VL_CONTEXT_ID      "read_context_id"
+
+/* property to tell the VOL plugin to acquire a read context on the
+   container when the file is opened */
+#define H5VL_ACQUIRE_RC_ID   "acquire_version"
 
 /****************************/
 /* Library Private Typedefs */
