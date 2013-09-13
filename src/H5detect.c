@@ -200,14 +200,16 @@ precision (detected_t *d)
     }
 }
 
-
 
 /*-------------------------------------------------------------------------
- * Function:	DETECT_I
+ * Function:	DETECT_I/DETECT_BYTE
  *
- * Purpose:	This macro takes a type like `int' and a base name like
+ * Purpose:	These macro takes a type like `int' and a base name like
  *		`nati' and detects the byte order.  The VAR is used to
  *		construct the names of the C variables defined.
+ *
+ *              DETECT_I is used for types that are larger than one byte,
+ *              DETECT_BYTE is used for types that are exactly one byte.
  *
  * Return:	void
  *
@@ -229,46 +231,52 @@ precision (detected_t *d)
  *	Robb Matzke, 5 Nov 1996
  *	Removed HFILE and CFILE arguments.
  *
+ *      Neil Fortner, 6 Sep 2013
+ *      Split macro into DETECT_I and DETECT_BYTE macros, extracted
+ *      common cod einto DETECT_I_BYTE_CORE.  This was done to remove
+ *      "will never be executed" warnings.
+ *
  *-------------------------------------------------------------------------
  */
-#define DETECT_I(TYPE,VAR,INFO) {					      \
-   TYPE _v;								      \
-   int _int_v;                                                                \
-   int _i, _j;								      \
-   unsigned char *_x;							      \
+#define DETECT_I_BYTE_CORE(TYPE,VAR,INFO,DETECT_TYPE) {                       \
+    DETECT_TYPE _v;                                                           \
+    int _i, _j;                                                               \
+    unsigned char *_x;                                                        \
                                                                               \
-   HDmemset(&INFO, 0, sizeof(INFO));					      \
-   INFO.varname = #VAR;							      \
-   INFO.size = sizeof(TYPE);						      \
+    HDmemset(&INFO, 0, sizeof(INFO));                                         \
+    INFO.varname = #VAR;                                                      \
+    INFO.size = sizeof(TYPE);                                                 \
                                                                               \
-   if(sizeof(TYPE) != 1) {                                                    \
-       for(_i = sizeof(TYPE), _v = 0; _i > 0; --_i)			      \
-           _v = (_v << 8) + _i;						      \
-       for(_i = 0, _x = (unsigned char *)&_v; _i < (signed)sizeof(TYPE); _i++) { \
-          _j = (*_x++) - 1;						      \
-          HDassert(_j < (signed)sizeof(TYPE));				      \
-          INFO.perm[_i] = _j;						      \
-       } /* end for */							      \
-   } else { /*Not able to detect order if type size is 1 byte. Use native int \
-             *instead. No effect on data, just make it look correct. */       \
-       for(_i = sizeof(int), _int_v = 0; _i > 0; --_i)			      \
-           _int_v = (_int_v << 8) + _i;					      \
-       for(_i = 0, _x = (unsigned char *)&_int_v; _i < (signed)sizeof(int); _i++) { \
-          _j = (*_x++)-1;						      \
-          HDassert(_j < (signed)sizeof(int));				      \
-          INFO.perm[_i] = _j;						      \
-       } /* end for */							      \
-   } /* end else */                                                           \
+    for(_i = sizeof(DETECT_TYPE), _v = 0; _i > 0; --_i)                       \
+        _v = (_v << 8) + _i;                                                  \
+    for(_i = 0, _x = (unsigned char *)&_v; _i < (signed)sizeof(DETECT_TYPE); _i++) { \
+        _j = (*_x++) - 1;                                                     \
+        HDassert(_j < (signed)sizeof(DETECT_TYPE));                           \
+        INFO.perm[_i] = _j;                                                   \
+    } /* end for */                                                           \
                                                                               \
-   INFO.sign = ('U' != *(#VAR));					      \
-   precision (&(INFO));							      \
-   ALIGNMENT(TYPE, INFO);						      \
-   if(!HDstrcmp(INFO.varname, "SCHAR")  || !HDstrcmp(INFO.varname, "SHORT") || \
-      !HDstrcmp(INFO.varname, "INT")   || !HDstrcmp(INFO.varname, "LONG")  ||  \
-      !HDstrcmp(INFO.varname, "LLONG")) {                                     \
-      COMP_ALIGNMENT(TYPE, INFO.comp_align);                                  \
-   }                                                                          \
+    INFO.sign = ('U' != *(#VAR));                                             \
+    precision (&(INFO));                                                      \
+    ALIGNMENT(TYPE, INFO);                                                    \
+    if(!HDstrcmp(INFO.varname, "SCHAR")  || !HDstrcmp(INFO.varname, "SHORT") || \
+        !HDstrcmp(INFO.varname, "INT")   || !HDstrcmp(INFO.varname, "LONG")  || \
+        !HDstrcmp(INFO.varname, "LLONG")) {                                   \
+        COMP_ALIGNMENT(TYPE, INFO.comp_align);                                \
+    }                                                                         \
 }
+
+#define DETECT_BYTE(TYPE,VAR,INFO) {                                          \
+    HDcompile_assert(sizeof(TYPE) == 1);                                      \
+                                                                              \
+    DETECT_I_BYTE_CORE(TYPE,VAR,INFO,int)                                     \
+}
+
+#define DETECT_I(TYPE,VAR,INFO) {					      \
+    HDcompile_assert(sizeof(TYPE) > 1);                                       \
+                                                                              \
+    DETECT_I_BYTE_CORE(TYPE,VAR,INFO,TYPE)                                    \
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	DETECT_F
@@ -939,7 +947,7 @@ bit_cmp(int nbytes, int *perm, volatile void *_a, volatile void *_b)
 	    for (j = 0; j < 8; j++, aa >>= 1, bb >>= 1) {
 		if ((aa & 1) != (bb & 1)) return i * 8 + j;
 	    }
-	    HDassert("INTERNAL ERROR" && 0);
+	    fprintf(stderr, "INTERNAL ERROR");
 	    HDabort();
 	}
     }
@@ -1279,8 +1287,8 @@ bit.\n";
 static void
 detect_C89_integers(void)
 {
-    DETECT_I(signed char,	  SCHAR,        d_g[nd_g]); nd_g++;
-    DETECT_I(unsigned char,	  UCHAR,        d_g[nd_g]); nd_g++;
+    DETECT_BYTE(signed char,	  SCHAR,        d_g[nd_g]); nd_g++;
+    DETECT_BYTE(unsigned char,	  UCHAR,        d_g[nd_g]); nd_g++;
     DETECT_I(short,		  SHORT,        d_g[nd_g]); nd_g++;
     DETECT_I(unsigned short,	  USHORT,       d_g[nd_g]); nd_g++;
     DETECT_I(int,		  INT,	        d_g[nd_g]); nd_g++;
@@ -1330,22 +1338,46 @@ static void
 detect_C99_integers8(void)
 {
 #if H5_SIZEOF_INT8_T>0
+  #if H5_SIZEOF_INT8_T==1
+    DETECT_BYTE(int8_t,           INT8,         d_g[nd_g]); nd_g++;
+  #else
     DETECT_I(int8_t, 		  INT8,         d_g[nd_g]); nd_g++;
+  #endif
 #endif
 #if H5_SIZEOF_UINT8_T>0
-    DETECT_I(uint8_t, 		  UINT8,        d_g[nd_g]); nd_g++;
+  #if H5_SIZEOF_UINT8_T==1
+    DETECT_BYTE(uint8_t, 	  UINT8,        d_g[nd_g]); nd_g++;
+  #else
+    DETECT_I(uint8_t,             UINT8,        d_g[nd_g]); nd_g++;
+  #endif
 #endif
 #if H5_SIZEOF_INT_LEAST8_T>0
+  #if H5_SIZEOF_INT_LEAST8_T==1
+    DETECT_BYTE(int_least8_t,     INT_LEAST8,   d_g[nd_g]); nd_g++;
+  #else
     DETECT_I(int_least8_t, 	  INT_LEAST8,   d_g[nd_g]); nd_g++;
+  #endif
 #endif
 #if H5_SIZEOF_UINT_LEAST8_T>0
+  #if H5_SIZEOF_UINT_LEAST8_T==1
+    DETECT_BYTE(uint_least8_t,    UINT_LEAST8,  d_g[nd_g]); nd_g++;
+  #else
     DETECT_I(uint_least8_t, 	  UINT_LEAST8,  d_g[nd_g]); nd_g++;
+  #endif
 #endif
 #if H5_SIZEOF_INT_FAST8_T>0
+  #if H5_SIZEOF_INT_FAST8_T==1
+    DETECT_BYTE(int_fast8_t,      INT_FAST8,    d_g[nd_g]); nd_g++;
+  #else
     DETECT_I(int_fast8_t, 	  INT_FAST8,    d_g[nd_g]); nd_g++;
+  #endif
 #endif
 #if H5_SIZEOF_UINT_FAST8_T>0
-    DETECT_I(uint_fast8_t, 	  UINT_FAST8,   d_g[nd_g]); nd_g++;
+  #if H5_SIZEOF_UINT_FAST8_T==1
+    DETECT_BYTE(uint_fast8_t, 	  UINT_FAST8,   d_g[nd_g]); nd_g++;
+  #else
+    DETECT_I(uint_fast8_t,     UINT_FAST8,   d_g[nd_g]); nd_g++;
+  #endif
 #endif
 }
 
