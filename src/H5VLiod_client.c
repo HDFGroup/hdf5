@@ -2041,7 +2041,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_iod_pre_write
+ * Function:    H5VL_iod_pre_read
  *
  * Depending on the type, this routine generates all the necessary
  * parameters for forwarding a write call to IOD. It sets up the
@@ -2258,6 +2258,92 @@ done:
         HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "can't close super type")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__iod_vl_read_finalize */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_map_get_size
+ *
+ * Purpose:     Retrieves the size of a Key or Value binary 
+ *              buffer given its datatype.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              August, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_map_get_size(hid_t type_id, const void *buf, 
+                      /*out*/uint32_t *checksum, 
+                      /*out*/size_t *size)
+{
+    size_t buf_size = 0;
+    H5T_t *dt = NULL;
+    H5T_class_t class;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
+
+    class = H5T_get_class(dt, FALSE);
+
+    switch(class) {
+        case H5T_STRING:
+            /* If this is a variable length string, get the size using strlen(). */
+            if(H5T_is_variable_str(dt)) {
+                buf_size = HDstrlen((const char*)buf);
+                break;
+            }
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_ENUM:
+        case H5T_ARRAY:
+        case H5T_NO_CLASS:
+        case H5T_REFERENCE:
+        case H5T_NCLASSES:
+        case H5T_COMPOUND:
+            /* Data is not variable length, so use H5Tget_size() */
+            /* MSC - This is not correct. Compound/Array can contian
+               VL datatypes, but for now we don't support that. Need
+               to check for that too */
+            buf_size = H5T_get_size(dt);
+            break;
+
+            /* If this is a variable length datatype, iterate over it */
+        case H5T_VLEN:
+            {
+                H5T_t *super = NULL;
+                size_t elmt_size;
+                const hvl_t *vl;
+
+                vl = (const hvl_t *)buf;
+
+                if(NULL == (super = H5T_get_super(dt)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid super type of VL type");
+
+                buf_size = H5T_get_size(super) * vl->len;
+
+                H5T_close(super);
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "unsupported datatype");
+    }
+
+    /* compute checksum */
+    *checksum = H5_checksum_lookup4(buf, buf_size, NULL);
+    *size = buf_size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_map_get_size */
 
 #if 0
 static herr_t

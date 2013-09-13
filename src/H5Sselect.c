@@ -2200,7 +2200,7 @@ H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, const H5S_t *spac
         nseq = 0;
 
         cs.a = cs.b = cs.c = cs.state = 0;
-        cs.total_length = elmt_size * nelmts;
+        //cs.total_length = elmt_size * nelmts;
 
         /* Loop, until all bytes are processed */
         while(nelmts > 0) {

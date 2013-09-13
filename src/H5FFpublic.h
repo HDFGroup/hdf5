@@ -144,7 +144,7 @@ H5_DLL herr_t H5Lget_val_ff(hid_t link_loc_id, const char *link_name, void *link
                             size_t size, hid_t lapl_id, hid_t rcxt_id, hid_t eq_id);
 
 H5_DLL hid_t H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id,
-                        hid_t rcxt_id, hid_t eq_id);
+                        hid_t rcxt_id);
 //H5_DLL hid_t H5Oopen_by_addr_ff(hid_t loc_id, haddr_ff_t addr, H5O_type_t type, 
 //hid_t rcxt_id, hid_t eq_id);
 H5_DLL herr_t H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,

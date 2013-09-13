@@ -302,6 +302,9 @@ H5_DLL herr_t H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
                                            H5VL_iod_req_info_t *req_info,
                                            void *input, void *output, void *data, void **req);
 
+H5_DLL herr_t H5VL_iod_map_get_size(hid_t type_id, const void *buf, 
+                                    /*out*/uint32_t *checksum, 
+                                    /*out*/size_t *size);
 H5_DLL herr_t H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index, 
                                   iod_obj_type_t type, uint64_t *id);
 H5_DLL herr_t H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf, 

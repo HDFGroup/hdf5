@@ -892,4 +892,131 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_server_adjust_buffer
+ *
+ * Checks datatypes to see if type conversion is required, if
+ * yes, the buffer is resized accordingly.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              August, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL__iod_server_adjust_buffer(hid_t mem_type_id, hid_t dset_type_id, size_t nelmts, 
+                               hid_t dxpl_id, size_t size, void **buf, 
+                               hbool_t *is_vl_data, size_t *_buf_size)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch(H5Tget_class(dset_type_id)) {
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_ENUM:
+        case H5T_ARRAY:
+        case H5T_NO_CLASS:
+        case H5T_STRING:
+            if(H5Tis_variable_str(dset_type_id)) {
+                *is_vl_data = TRUE;
+                *_buf_size = size;
+                break;
+            }
+        case H5T_REFERENCE:
+        case H5T_NCLASSES:
+        case H5T_COMPOUND:
+            {
+                hsize_t buf_size = 0;
+                size_t mem_type_size, dset_type_size;
+
+                *is_vl_data = FALSE;
+
+                /* retrieve source and destination datatype sizes for data conversion */
+                mem_type_size = H5Tget_size(mem_type_id);
+                dset_type_size = H5Tget_size(dset_type_id);
+
+                /* adjust buffer size for data conversion */
+                if(mem_type_size < dset_type_size) {
+                    buf_size = dset_type_size * nelmts;
+
+                    if(NULL == (*buf = realloc(*buf, (size_t)buf_size)))
+                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "Can't adjust buffer for DT conversion");
+#if H5VL_IOD_DEBUG
+                    fprintf(stderr, "Adjusted Buffer size for dt conversion from %zu to %lld\n", 
+                            size, buf_size);
+#endif
+                }
+                else {
+                    buf_size = mem_type_size * nelmts;
+                    if(buf_size != size)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Incoming data size is not equal to expected size");
+                }
+
+                *_buf_size = buf_size;
+
+                break;
+            }
+        case H5T_VLEN:
+            *is_vl_data = TRUE;
+            *_buf_size = size;
+            break;
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "unsupported datatype");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_server_adjust_buffer */
+
+#if 0
+herr_t
+H5VL_iod_map_type_convert(hid_t src_id, hid_t dst_id, void *buf, size_t buf_size)
+{
+    H5T_class_t class;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    class = H5Tget_class(src_id);
+    if(H5T_VLEN == class || (H5T_STRING == class && H5Tis_variable_str(src_id)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Can't convert VL or string types");
+
+    class = H5Tget_class(dset_id);
+    if(H5T_VLEN == class || (H5T_STRING == class && H5Tis_variable_str(dst_id)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Can't convert VL or string types");
+
+    /* Check (and do) Type conversion on the Key */
+    src_size = H5Tget_size(src_id);
+    dst_size = H5Tget_size(dst_id);
+
+    /* adjust buffer size for datatype conversion */
+    if(src_size < dst_size) {
+        new_size = dst_size;
+        if(NULL == (*buf = realloc(*buf, new_size)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "Can't adjust buffer for DT conversion");
+    }
+    else {
+        new_size = src_size;
+    }
+
+    if(NULL == (key_buf = malloc((size_t)key_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+    memcpy(key_buf, key.buf, src_size);
+
+    if(H5Tconvert(src_id, dst_id, 1, key_buf, NULL, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+#endif
 #endif /* H5_HAVE_EFF */

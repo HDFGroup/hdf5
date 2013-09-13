@@ -173,13 +173,13 @@ int main(int argc, char **argv) {
         assert(rid2 > 0);
     }
 
-    gid = H5Oopen_ff(file_id, "G1", H5P_DEFAULT, rid2, H5_EVENT_QUEUE_NULL);
+    gid = H5Oopen_ff(file_id, "G1", H5P_DEFAULT, rid2);
     assert(gid);
-    dtid = H5Oopen_ff(file_id, "DT1", H5P_DEFAULT, rid2, H5_EVENT_QUEUE_NULL);
+    dtid = H5Oopen_ff(file_id, "DT1", H5P_DEFAULT, rid2);
     assert(dtid);
-    did = H5Oopen_ff(gid,"D1", H5P_DEFAULT, rid2, H5_EVENT_QUEUE_NULL);
+    did = H5Oopen_ff(gid,"D1", H5P_DEFAULT, rid2);
     assert(did);
-    map = H5Oopen_ff(file_id,"MAP1", H5P_DEFAULT, rid2, H5_EVENT_QUEUE_NULL);
+    map = H5Oopen_ff(file_id,"MAP1", H5P_DEFAULT, rid2);
     assert(did);
 
     {

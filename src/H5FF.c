@@ -2620,7 +2620,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id, hid_t eq_id)
+H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id)
 {
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
@@ -2632,12 +2632,9 @@ H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id, hid_t e
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("i", "i*siii", loc_id, name, lapl_id, rcxt_id, eq_id);
 
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-    if(H5_EVENT_QUEUE_NULL != eq_id)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5Oopen_ff has to be synchronous, pass H5_EVENT_QUEUE_NULL for the event queue")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
@@ -2659,7 +2656,7 @@ H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id, hid_t e
 
     /* Open the object through the VOL */
     if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, 
-                                              dxpl_id, eq_id)))
+                                              dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
     if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)

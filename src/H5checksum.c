@@ -448,7 +448,7 @@ H5_checksum_lookup4(const void *key, size_t length, H5_checksum_seed_t *cs)
     /* Set up the internal state */
     if(cs) {
         if(!cs->a && !cs->b && !cs->c) {
-            a = b = c = 0xdeadbeef + ((uint32_t)cs->total_length);
+            a = b = c = 0xdeadbeef;// + ((uint32_t)cs->total_length);
             /* Compute new State */
             cs->state = 12 - (length % 12);
         }
@@ -548,7 +548,7 @@ H5_checksum_lookup4(const void *key, size_t length, H5_checksum_seed_t *cs)
         }
     }
     else
-        a = b = c = 0xdeadbeef + ((uint32_t)length);
+        a = b = c = 0xdeadbeef; //+ ((uint32_t)length);
 
     /*--------------- all but the last block: affect some 32 bits of (a,b,c) */
     while (length > 12)

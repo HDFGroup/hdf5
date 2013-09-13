@@ -5859,6 +5859,7 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
     int *status = NULL;
     size_t num_parents = 0;
     H5TR_t *tr = NULL;
+    uint32_t key_cs, value_cs;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
 
@@ -5873,20 +5874,10 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
         map->common.request = NULL;
     }
 
-    /* get the Key and Value size */
-    {
-        H5T_t *dt = NULL;
-
-        if(NULL == (dt = (H5T_t *)H5I_object_verify(key_mem_type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
-        key_size = H5T_GET_SIZE(dt);
-
-        dt = NULL;
-
-        if(NULL == (dt = (H5T_t *)H5I_object_verify(val_mem_type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
-        val_size = H5T_GET_SIZE(dt);
-    }
+    if(H5VL_iod_map_get_size(key_mem_type_id, key, &key_cs, &key_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get key size");
+    if(H5VL_iod_map_get_size(val_mem_type_id, value, &value_cs, &val_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get value size");
 
     /* get the TR object */
     if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
@@ -5941,7 +5932,8 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
     H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
     map_get_in_t input;
     map_get_out_t *output;
-    size_t key_size, val_size;
+    size_t key_size;
+    uint32_t key_cs = 0;
     H5RC_t *rc = NULL;
     size_t num_parents = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
@@ -5958,20 +5950,8 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
         map->common.request = NULL;
     }
 
-    /* get the Key and Value size */
-    {
-        H5T_t *dt = NULL;
-
-        if(NULL == (dt = (H5T_t *)H5I_object_verify(key_mem_type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
-        key_size = H5T_GET_SIZE(dt);
-
-        dt = NULL;
-
-        if(NULL == (dt = (H5T_t *)H5I_object_verify(val_mem_type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
-        val_size = H5T_GET_SIZE(dt);
-    }
+    if(H5VL_iod_map_get_size(key_mem_type_id, key, &key_cs, &key_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get key size");
 
     /* get the RC object */
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
@@ -6007,7 +5987,7 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
 	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate map get output struct");
 
     output->val.val = value;
-    output->val.val_size = val_size;
+    output->val.val_size = 0;
 
     if(H5VL__iod_create_and_forward(H5VL_MAP_GET_ID, HG_MAP_GET, 
                                     (H5VL_iod_object_t *)map, 0,
@@ -6101,19 +6081,14 @@ H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key,
     size_t key_size;
     H5RC_t *rc = NULL;
     size_t num_parents = 0;
+    uint32_t key_cs = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* get the Key and Value size */
-    {
-        H5T_t *dt = NULL;
-
-        if(NULL == (dt = (H5T_t *)H5I_object_verify(key_mem_type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
-        key_size = H5T_GET_SIZE(dt);
-    }
+    if(H5VL_iod_map_get_size(key_mem_type_id, key, &key_cs, &key_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get key size");
 
     /* get the RC object */
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
@@ -6174,19 +6149,14 @@ H5VL_iod_map_delete(void *_map, hid_t key_mem_type_id, const void *key,
     int *status = NULL;
     size_t num_parents = 0;
     H5TR_t *tr = NULL;
+    uint32_t key_cs = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* get the Key and Value size */
-    {
-        H5T_t *dt = NULL;
-
-        if(NULL == (dt = (H5T_t *)H5I_object_verify(key_mem_type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
-        key_size = H5T_GET_SIZE(dt);
-    }
+    if(H5VL_iod_map_get_size(key_mem_type_id, key, &key_cs, &key_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get key size");
 
     /* get the TR object */
     if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))

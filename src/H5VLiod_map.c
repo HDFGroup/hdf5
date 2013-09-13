@@ -316,11 +316,10 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     hid_t dxpl_id = input->dxpl_id;
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
-    iod_size_t key_size, val_size;
-    size_t src_size, dst_size;
-    void *key_buf = NULL, *val_buf = NULL;
+    size_t key_size, val_size;
     iod_kv_t kv;
     hbool_t opened_locally = FALSE;
+    hbool_t is_vl_data = FALSE;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -336,44 +335,17 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
         opened_locally = TRUE;
     }
 
-    /* Check (and do) Type conversion on the Key */
-    src_size = H5Tget_size(key_memtype_id);
-    dst_size = H5Tget_size(key_maptype_id);
-
-    /* adjust buffer size for datatype conversion */
-    if(src_size < dst_size) {
-        key_size = dst_size;
-    }
-    else {
-        key_size = src_size;
-    }
-
-    if(NULL == (key_buf = malloc((size_t)key_size)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
-    memcpy(key_buf, key.buf, src_size);
-
-    if(H5Tconvert(key_memtype_id, key_maptype_id, 1, key_buf, NULL, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
-
-    /* Check (and do) Type conversion on the Value */
-    src_size = H5Tget_size(val_memtype_id);
-    dst_size = H5Tget_size(val_maptype_id);
-
-    /* adjust buffer size for datatype conversion */
-    if(src_size < dst_size) {
-        val_size = dst_size;
-    }
-    else {
-        val_size = src_size;
-    }
-    if(NULL == (val_buf = malloc((size_t)val_size)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
-    memcpy(val_buf, val.buf, src_size);
-    if(H5Tconvert(val_memtype_id, val_maptype_id, 1, val_buf, NULL, dxpl_id) < 0)
+    /* adjust buffers for datatype conversion */
+    if(H5VL__iod_server_adjust_buffer(key_memtype_id, key_maptype_id, 1, dxpl_id, 
+                                      key.buf_size, &key.buf, &is_vl_data, &key_size) < 0) 
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
-    kv.key = key_buf;
-    kv.value = val_buf;
+    if(H5VL__iod_server_adjust_buffer(val_memtype_id, val_maptype_id, 1, dxpl_id, 
+                                      val.buf_size, &val.buf, &is_vl_data, &val_size) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
+
+    kv.key = key.buf;
+    kv.value = val.buf;
     kv.value_len = (iod_size_t)val_size;
     /* insert kv pair into scratch pad */
     if (iod_kv_set(iod_oh, wtid, NULL, &kv, NULL, NULL) < 0)
@@ -383,11 +355,6 @@ done:
 
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
-
-    if(key_buf)
-        free(key_buf);
-    if(val_buf)
-        free(val_buf);
 
     input = (map_set_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -438,9 +405,10 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
     binary_buf_t key = input->key;
     hid_t dxpl_id = input->dxpl_id;
     iod_trans_id_t rtid = input->rcxt_num;
-    iod_size_t key_size, val_size;
-    size_t src_size, dst_size;
-    void *key_buf = NULL, *val_buf = NULL;
+    hbool_t is_vl_data = FALSE;
+    size_t key_size, val_size;
+    iod_size_t src_size;
+    void *val_buf = NULL;
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
 
@@ -457,49 +425,31 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
         opened_locally = TRUE;
     }
 
-    /* Check (and do) Type conversion on the Key */
-    src_size = H5Tget_size(key_memtype_id);
-    dst_size = H5Tget_size(key_maptype_id);
+    /* adjust buffers for datatype conversion */
+    if(H5VL__iod_server_adjust_buffer(key_memtype_id, key_maptype_id, 1, dxpl_id, 
+                                      key.buf_size, &key.buf, &is_vl_data, &key_size) < 0) 
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
-    /* adjust buffer size for datatype conversion */
-    if(src_size < dst_size) {
-        key_size = dst_size;
-    }
-    else {
-        key_size = src_size;
-    }
-
-    if(NULL == (key_buf = malloc((size_t)key_size)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
-    memcpy(key_buf, key.buf, src_size);
-
-    if(H5Tconvert(key_memtype_id, key_maptype_id, 1, key_buf, NULL, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
-
-    /* Check (and do) Type conversion on the Value */
-    src_size = H5Tget_size(val_maptype_id);
-    dst_size = H5Tget_size(val_memtype_id);
-
-    /* adjust buffer size for datatype conversion */
-    if(src_size > dst_size) {
-        val_size = src_size;
-    }
-    else {
-        val_size = dst_size;
-    }
-
-    if(NULL == (val_buf = malloc((size_t)val_size)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
-
-    if(iod_kv_get_value(iod_oh, rtid, key_buf, val_buf, 
+    if(iod_kv_get_value(iod_oh, rtid, key.buf, NULL, 
                         &src_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
 
-    /* MSC - Fake something for now */
-    *((int *)val_buf) = 1024;
+    /* MSC - fake something */
+    src_size = 4;
+    if(NULL == (val_buf = malloc((size_t)src_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
 
-    if(H5Tconvert(val_maptype_id, val_memtype_id, 1, val_buf, NULL, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
+    if(iod_kv_get_value(iod_oh, rtid, key.buf, val_buf, 
+                        &src_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
+
+    /* adjust buffers for datatype conversion */
+    if(H5VL__iod_server_adjust_buffer(val_memtype_id, val_maptype_id, 1, dxpl_id, 
+                                      (size_t)src_size, &val_buf, &is_vl_data, &val_size) < 0) 
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
+
+    /* MSC - fake something */
+    *((int *)val_buf) = 1024;
 
     output.val.val_size = val_size;
     output.val.val = val_buf;
@@ -524,8 +474,6 @@ done:
 
     if(val_buf) 
         free(val_buf);
-    if(key_buf)
-        free(key_buf);
 
     input = (map_get_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -644,11 +592,11 @@ H5VL_iod_server_map_exists_cb(AXE_engine_t UNUSED axe_engine,
     hid_t key_maptype_id = input->key_maptype_id;
     binary_buf_t key = input->key;
     iod_trans_id_t rtid = input->rcxt_num;
-    iod_size_t key_size, val_size;
-    size_t src_size, dst_size;
-    void *key_buf = NULL;
+    size_t key_size;
+    iod_size_t val_size;
     hbool_t opened_locally = FALSE;
     htri_t exists;
+    hbool_t is_vl_data = FALSE;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -664,27 +612,13 @@ H5VL_iod_server_map_exists_cb(AXE_engine_t UNUSED axe_engine,
         opened_locally = TRUE;
     }
 
-    /* Check (and do) Type conversion on the Key */
-    src_size = H5Tget_size(key_memtype_id);
-    dst_size = H5Tget_size(key_maptype_id);
-
-    /* adjust buffer size for datatype conversion */
-    if(src_size < dst_size) {
-        key_size = dst_size;
-    }
-    else {
-        key_size = src_size;
-    }
-
-    if(NULL == (key_buf = malloc((size_t)key_size)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
-    memcpy(key_buf, key.buf, src_size);
-
-    if(H5Tconvert(key_memtype_id, key_maptype_id, 1, key_buf, NULL, H5P_DEFAULT) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
+    /* adjust buffers for datatype conversion */
+    if(H5VL__iod_server_adjust_buffer(key_memtype_id, key_maptype_id, 1, H5P_DEFAULT, 
+                                      key.buf_size, &key.buf, &is_vl_data, &key_size) < 0) 
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
     /* determine if the Key exists by querying its value size */
-    if(iod_kv_get_value(iod_oh, rtid, key_buf, NULL, 
+    if(iod_kv_get_value(iod_oh, rtid, key.buf, NULL, 
                         &val_size, NULL, NULL) < 0)
         exists = FALSE;
     else
@@ -705,9 +639,6 @@ done:
         if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &exists))
             HDONE_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't send result of map exists");
     }
-
-    if(key_buf)
-        free(key_buf);
 
     input = (map_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -748,12 +679,11 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
     binary_buf_t key = input->key;
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
-    iod_size_t key_size;
-    size_t src_size, dst_size;
-    void *key_buf = NULL;
+    size_t key_size;
     iod_kv_t kv;
     iod_kv_params_t kvs;
     hbool_t opened_locally = FALSE;
+    hbool_t is_vl_data = FALSE;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -769,26 +699,12 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
         opened_locally = TRUE;
     }
 
-    /* Check (and do) Type conversion on the Key */
-    src_size = H5Tget_size(key_memtype_id);
-    dst_size = H5Tget_size(key_maptype_id);
+    /* adjust buffers for datatype conversion */
+    if(H5VL__iod_server_adjust_buffer(key_memtype_id, key_maptype_id, 1, H5P_DEFAULT, 
+                                      key.buf_size, &key.buf, &is_vl_data, &key_size) < 0) 
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
-    /* adjust buffer size for datatype conversion */
-    if(src_size < dst_size) {
-        key_size = dst_size;
-    }
-    else {
-        key_size = src_size;
-    }
-
-    if(NULL == (key_buf = malloc((size_t)key_size)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
-    memcpy(key_buf, key.buf, src_size);
-
-    if(H5Tconvert(key_memtype_id, key_maptype_id, 1, key_buf, NULL, H5P_DEFAULT) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
-
-    kv.key = key_buf;
+    kv.key = key.buf;
     kvs.kv = &kv;
 
     if(iod_kv_unlink_keys(iod_oh, wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
@@ -802,9 +718,6 @@ done:
 
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't send result of map delete");
-
-    if(key_buf)
-        free(key_buf);
 
     input = (map_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
