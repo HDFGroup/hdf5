@@ -283,13 +283,13 @@ test_simple_io( H5File& file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_datasize()
+test_datasize(FileAccPropList &fapl)
 {
     SUBTEST("DataSet::getInMemDataSize()");
     try
     {
 	// Open FILE1.
-	H5File file(FILE1, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, FileAccPropList::DEFAULT);
+	H5File file(FILE1, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
 
 	// Open dataset DSET_SIMPLE_IO_NAME.
 	DataSet dset = file.openDataSet (DSET_SIMPLE_IO_NAME);
@@ -1067,9 +1067,12 @@ void test_dset()
 	nerrors += test_multiopen (file)<0	?1:0;
 	nerrors += test_types(file)<0       ?1:0;
 
+	// Close group "emit diagnostics".
+	grp.close();
+
 	// Close the file before testing data size.
 	file.close();
-	nerrors += test_datasize() <0 ? 1:0;
+	nerrors += test_datasize(fapl) <0 ? 1:0;
     }
     catch (Exception E)
     {
