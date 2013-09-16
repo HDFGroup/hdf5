@@ -149,7 +149,8 @@ Group::Group(Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Object()
 
 //--------------------------------------------------------------------------
 // Function:    Group::getId
-// Purpose:     Get the id of this attribute
+///\brief	Get the id of this group
+///\return	Group identifier
 // Modification:
 //      May 2008 - BMR
 //		Class hierarchy is revised to address bugzilla 1068.  Class
@@ -163,6 +164,7 @@ hid_t Group::getId() const
    return(id);
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    Group::p_setId
 ///\brief       Sets the identifier of this object to a new value.
@@ -187,6 +189,7 @@ void Group::p_setId(const hid_t new_id)
    // reset object's id to the given id
    id = new_id;
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	Group::close

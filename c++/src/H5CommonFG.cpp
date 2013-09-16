@@ -1138,6 +1138,7 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, H5std_string& type_name) const
 }
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:	CommonFG default constructor
 ///\brief	Default constructor.
@@ -1151,6 +1152,7 @@ CommonFG::CommonFG() {}
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 CommonFG::~CommonFG() {}
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef H5_NO_NAMESPACE
 }

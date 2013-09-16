@@ -110,10 +110,12 @@ class H5_DLLCPP PropList : public IdComponent {
 	virtual ~PropList();
 
    protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	hid_t id;	// HDF5 property list id
 
 	// Sets the property list id.
 	virtual void p_setId(const hid_t new_id);
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 };
 
 #ifndef H5_NO_NAMESPACE

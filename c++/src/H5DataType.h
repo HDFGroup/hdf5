@@ -120,10 +120,12 @@ class H5_DLLCPP DataType : public H5Object {
 	virtual ~DataType();
 
    protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	hid_t id;	// HDF5 datatype id
 
 	// Sets the datatype id.
 	virtual void p_setId(const hid_t new_id);
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
    private:
 	void p_commit(hid_t loc_id, const char* name);

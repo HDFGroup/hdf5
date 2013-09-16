@@ -122,8 +122,11 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	hid_t id;       // HDF5 dataspace id
 
    protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Sets the dataspace id.
 	virtual void p_setId(const hid_t new_id);
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
 };
 #ifndef H5_NO_NAMESPACE
 }

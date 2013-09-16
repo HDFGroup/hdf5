@@ -40,6 +40,7 @@ namespace H5 {
 
 class H5_DLLCPP H5Object : public H5Location {
    public:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Copy constructor: makes copy of an H5Object object.
 	H5Object(const H5Object& original);
 
@@ -47,7 +48,6 @@ class H5_DLLCPP H5Object : public H5Location {
 	virtual ~H5Object();
 
    protected:
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Default constructor
 	H5Object();
 

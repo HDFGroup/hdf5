@@ -32,7 +32,9 @@ namespace H5 {
    before the other PredType objects are created.  At exit, when this special
    PredType object is to be destructed, no HDF5 library function will be called
    and the library will be terminated.  -BMR, Mar 30, 2012 */
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 #define H5CPP_EXITED	-3  // -3 is less likely to be used elsewhere
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 class H5_DLLCPP PredType : public AtomType {
    public:

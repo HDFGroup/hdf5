@@ -430,7 +430,7 @@ void DataSet::read( void* buf, const DataType& mem_type, const DataSpace& mem_sp
 // Function:	DataSet::read
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It takes a reference to a \c H5std_string for the buffer.
-///\param	buf - IN: Buffer for read data
+///\param	strg - IN: Buffer for read data string
 ///\param	mem_type - IN: Memory datatype
 ///\param	mem_space - IN: Memory dataspace
 ///\param	file_space - IN: Dataset's dataspace in the file
@@ -647,6 +647,7 @@ void DataSet::fillMemBuf(void *buf, DataType& buf_type, DataSpace& space)
 //--------------------------------------------------------------------------
 // Function:    DataSet::getId
 ///\brief	Get the id of this dataset.
+///\return	DataSet identifier
 // Description:
 //              Class hierarchy is revised to address bugzilla 1068.  Class
 //              AbstractDs and Attribute are moved out of H5Object.  In
@@ -726,8 +727,9 @@ void DataSet::p_read_variable_len(const hid_t mem_type_id, const hid_t mem_space
     HDfree(strg_C);
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
-// Function:    DataSet::p_setId (private)
+// Function:    DataSet::p_setId (protected)
 ///\brief       Sets the identifier of this dataset to a new value.
 ///
 ///\exception   H5::IdComponentException when the attempt to close the HDF5
@@ -753,6 +755,7 @@ void DataSet::p_setId(const hid_t new_id)
    // increment the reference counter of the new id
    //incRefCount();
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	DataSet::close

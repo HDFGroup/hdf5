@@ -152,7 +152,6 @@ class H5_DLLCPP CommonFG {
 	/// object id, i.e. file or group id.
 	virtual hid_t getLocId() const = 0;
 
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	/// For subclasses, H5File and Group, to throw appropriate exception.
 	virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const = 0;
@@ -162,6 +161,7 @@ class H5_DLLCPP CommonFG {
 
 	// Noop destructor.
 	virtual ~CommonFG();
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; // end of CommonFG declaration
 

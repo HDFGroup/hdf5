@@ -681,7 +681,8 @@ bool DataType::isVariableStr() const
 
 //--------------------------------------------------------------------------
 // Function:    DataType::getId
-// Purpose:     Get the id of this attribute
+///\brief       Get the id of this datatype
+///\return      Datatype identifier
 // Modification:
 //      May 2008 - BMR
 //              Class hierarchy is revised to address bugzilla 1068.  Class
@@ -695,6 +696,7 @@ hid_t DataType::getId() const
    return(id);
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    DataType::p_setId
 ///\brief       Sets the identifier of this object to a new value.
@@ -719,6 +721,7 @@ void DataType::p_setId(const hid_t new_id)
    // reset object's id to the given id
    id = new_id;
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	DataType::close

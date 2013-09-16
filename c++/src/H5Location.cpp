@@ -69,8 +69,6 @@ H5Location::H5Location() : IdComponent(0) {}
 //--------------------------------------------------------------------------
 H5Location::H5Location(const hid_t object_id) : IdComponent(object_id) {}
 
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-
 //--------------------------------------------------------------------------
 // Function:	H5Location copy constructor
 ///\brief	Copy constructor: makes a copy of the original H5Location
@@ -79,6 +77,8 @@ H5Location::H5Location(const hid_t object_id) : IdComponent(object_id) {}
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Location::H5Location( const H5Location& original ) : IdComponent( original ) {}
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	H5Location::createAttribute
@@ -376,6 +376,8 @@ H5std_string H5Location::getFileName() const
    }
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
 //--------------------------------------------------------------------------
 // Function:    H5Location::p_reference (protected)
 // Purpose      Creates a reference to an HDF5 object or a dataset region.
@@ -394,6 +396,8 @@ void H5Location::p_reference(void* ref, const char* name, hid_t space_id, H5R_ty
       throw ReferenceException("", "H5Rcreate failed");
    }
 }
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::reference
@@ -456,6 +460,7 @@ void H5Location::reference(void* ref, const H5std_string& name) const
    reference(ref, name.c_str());
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:	H5Location::p_dereference (protected)
 // Purpose	Dereference a ref into an hdf5 object.
@@ -482,6 +487,7 @@ hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_ty
    // No failure, set id to the object
    return(temp_id);
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	H5Location::dereference
@@ -560,16 +566,16 @@ void H5Location::dereference(Attribute& attr, const void* ref, H5R_type_t ref_ty
 // Function:	H5Location::getObjType
 ///\brief	Retrieves the type of object that an object reference points to.
 ///\param	ref_type - IN: Type of reference to query, valid values are:
-///		\li \c H5R_OBJECT \tReference is an object reference.
-///		\li \c H5R_DATASET_REGION \tReference is a dataset region reference.
+///		\li \c H5R_OBJECT - Reference is an object reference.
+///		\li \c H5R_DATASET_REGION - Reference is a dataset region reference.
 ///\param	ref      - IN: Reference to query
 ///\return	An object type, which can be one of the following:
-///		\li \c H5G_UNKNOWN \tA failure occurs. (-1)
-///		\li \c H5G_GROUP \tObject is a group.
-///		\li \c H5G_DATASET \tObject is a dataset.
-///		\li \c H5G_TYPE Object \tis a named datatype
-///		\li \c H5G_LINK \tObject is a symbolic link.
-///		\li \c H5G_UDLINK \tObject is a user-defined link.
+///		\li \c H5G_UNKNOWN  - A failure occurs. (-1)
+///		\li \c H5G_GROUP  - Object is a group.
+///		\li \c H5G_DATASET - Object is a dataset.
+///		\li \c H5G_TYPE Object - is a named datatype
+///		\li \c H5G_LINK  - Object is a symbolic link.
+///		\li \c H5G_UDLINK  - Object is a user-defined link.
 ///\exception	H5::ReferenceException
 // Programmer	Binh-Minh Ribler - May, 2004
 // Modification
@@ -585,6 +591,7 @@ H5G_obj_t H5Location::getObjType(void *ref, H5R_type_t ref_type) const
    }
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    H5Location::p_get_obj_type (protected)
 // Purpose      Retrieves the type of object that an object reference points to.
@@ -611,8 +618,8 @@ H5G_obj_t H5Location::p_get_obj_type(void *ref, H5R_type_t ref_type) const
    }
    return(obj_type);
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::getRefObjType
@@ -640,6 +647,7 @@ H5O_type_t H5Location::getRefObjType(void *ref, H5R_type_t ref_type) const
    }
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    H5Location::p_get_ref_obj_type (protected)
 // Purpose      Retrieves the type of object that an object reference points to.
@@ -696,6 +704,8 @@ hid_t H5Location::p_get_region(void *ref, H5R_type_t ref_type) const
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Location::~H5Location() {}
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef H5_NO_NAMESPACE
 } // end namespace

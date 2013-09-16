@@ -105,7 +105,6 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
    private:
 	hid_t id;       // HDF5 dataset id
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
         // This function contains the common code that is used by
         // getTypeClass and various API functions getXxxType
         // defined in AbstractDs for generic datatype and specific
@@ -117,6 +116,7 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
 	void p_read_variable_len(const hid_t mem_type_id, const hid_t mem_space_id, const hid_t file_space_id, const hid_t xfer_plist_id, H5std_string& strg) const;
 
    protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
         // Sets the dataset id.
         virtual void p_setId(const hid_t new_id);
 #endif // DOXYGEN_SHOULD_SKIP_THIS

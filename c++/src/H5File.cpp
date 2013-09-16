@@ -116,6 +116,7 @@ H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPro
     }
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // This function is private and contains common code between the
 // constructors taking a string or a char*
@@ -146,6 +147,7 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 	}
     }
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	H5File copy constructor
@@ -518,7 +520,8 @@ hid_t H5File::getLocId() const
 
 //--------------------------------------------------------------------------
 // Function:    H5File::getId
-// Purpose:     Get the id of this attribute
+///\brief	Get the id of this file
+///\return	File identifier
 // Modification:
 //      May 2008 - BMR
 //              Class hierarchy is revised to address bugzilla 1068.  Class
@@ -532,8 +535,9 @@ hid_t H5File::getId() const
    return(id);
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
-// Function:    H5File::p_setId
+// Function:    H5File::p_setId (protected)
 ///\brief       Sets the identifier of this object to a new value.
 ///
 ///\exception   H5::IdComponentException when the attempt to close the HDF5
@@ -556,6 +560,7 @@ void H5File::p_setId(const hid_t new_id)
    // reset object's id to the given id
    id = new_id;
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	H5File::close

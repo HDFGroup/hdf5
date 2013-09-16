@@ -106,7 +106,7 @@ class H5_DLLCPP H5Location : public IdComponent {
 	void dereference(H5Object& obj, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
 	void dereference(Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
 
-        // For subclasses.
+        ///\brief Returns an identifier. (pure virtual)
         virtual hid_t getId() const = 0;
 
    protected:

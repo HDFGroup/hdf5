@@ -321,6 +321,14 @@ bool IdComponent::p_valid_id(const hid_t obj_id)
 	return true;
 }
 
+// Notes about IdComponent::id
+//      May 2008 - BMR
+//              Class hierarchy is revised to address bugzilla 1068...
+//              ...member IdComponent::id is moved into subclasses, and
+//              IdComponent::getId now becomes pure virtual function.
+//              (reasons: 1. encountered problems when adding H5Location;
+//                        2. Scott Meyers, item 33)
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef H5_NO_NAMESPACE

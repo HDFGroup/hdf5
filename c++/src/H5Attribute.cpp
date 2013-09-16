@@ -411,7 +411,8 @@ void Attribute::flush(H5F_scope_t scope) const
 
 //--------------------------------------------------------------------------
 // Function:    Attribute::getId
-// Purpose:     Get the id of this attribute
+///\brief	Get the id of this attribute
+///\return	Attribute identifier
 // Description:
 //		Class hierarchy is revised to address bugzilla 1068.  Class
 //		AbstractDS and Attribute are moved out of H5Object.  In

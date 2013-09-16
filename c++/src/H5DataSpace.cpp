@@ -556,7 +556,8 @@ void DataSpace::selectHyperslab( H5S_seloper_t op, const hsize_t *count, const h
 
 //--------------------------------------------------------------------------
 // Function:    DataSpace::getId
-// Purpose:     Get the id of this attribute
+///\brief	Get the id of this dataspace
+///\return	Dataspace identifier
 // Modification:
 //	May 2008 - BMR
 //              Class hierarchy is revised to address bugzilla 1068.  Class
@@ -570,6 +571,7 @@ hid_t DataSpace::getId() const
    return(id);
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    DataSpace::p_setId
 ///\brief       Sets the identifier of this object to a new value.
@@ -594,6 +596,7 @@ void DataSpace::p_setId(const hid_t new_id)
    // reset object's id to the given id
    id = new_id;
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace::close
