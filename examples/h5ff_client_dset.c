@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
     H5_status_t *status = NULL;
     int num_requests = 0;
     unsigned int i = 0;
-    uint32_t cs = 0,read1_cs = 0, read2_cs = 0;
+    hcs_t cs = 0,read1_cs = 0, read2_cs = 0;
     herr_t ret;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);

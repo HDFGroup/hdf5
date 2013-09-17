@@ -62,10 +62,10 @@ H5_DLL herr_t H5VLiod_start_handler(MPI_Comm comm, MPI_Info info);
 H5_DLL herr_t EFF_init(MPI_Comm comm, MPI_Info info);
 H5_DLL herr_t EFF_finalize(void);
 
-H5_DLL herr_t H5Pset_dxpl_checksum(hid_t dxpl_id, uint32_t value);
-H5_DLL herr_t H5Pget_dxpl_checksum(hid_t dxpl_id, uint32_t *value);
-H5_DLL herr_t H5Pset_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t *value);
-H5_DLL herr_t H5Pget_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t **value);
+H5_DLL herr_t H5Pset_dxpl_checksum(hid_t dxpl_id, hcs_t value);
+H5_DLL herr_t H5Pget_dxpl_checksum(hid_t dxpl_id, hcs_t *value);
+H5_DLL herr_t H5Pset_dxpl_checksum_ptr(hid_t dxpl_id, hcs_t *value);
+H5_DLL herr_t H5Pget_dxpl_checksum_ptr(hid_t dxpl_id, hcs_t **value);
 H5_DLL herr_t H5Pset_dxpl_inject_corruption(hid_t dxpl_id, hbool_t flag);
 H5_DLL herr_t H5Pget_dxpl_inject_corruption(hid_t dxpl_id, hbool_t *flag);
 H5_DLL herr_t H5Pset_dcpl_append_only(hid_t dcpl_id, hbool_t flag);

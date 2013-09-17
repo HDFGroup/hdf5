@@ -40,7 +40,7 @@ typedef enum H5VL_iod_state_t {
 
 typedef struct H5VL_iod_read_status_t {
     int ret;
-    uint32_t cs;
+    hcs_t cs;
     size_t buf_size;
 } H5VL_iod_read_status_t;
 

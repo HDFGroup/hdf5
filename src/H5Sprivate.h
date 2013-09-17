@@ -272,7 +272,7 @@ H5_DLL H5S_t *H5S_decode(const unsigned char *buf);
 
 H5_DLL herr_t H5S_get_offsets(const H5S_t *space, size_t elmt_size, size_t nelmts, 
                               hsize_t **_off, size_t **_len, size_t *_num_entries);
-H5_DLL uint32_t H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, 
+H5_DLL hcs_t H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, 
                              const H5S_t *space);
 
 #ifdef H5_HAVE_PARALLEL

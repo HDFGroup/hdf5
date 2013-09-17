@@ -2160,7 +2160,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-uint32_t
+hcs_t
 H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, const H5S_t *space)
 {
     hsize_t _off[H5D_IO_VECTOR_SIZE];      /* Array to store sequence offsets in memory */
@@ -2170,7 +2170,7 @@ H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, const H5S_t *spac
     H5S_sel_iter_t iter;    /* Memory selection iteration info */
     hbool_t iter_init = 0;  /* Memory selection iteration info has been initialized */
     size_t nseq;            /* Number of sequences generated */
-    uint32_t ret_value = 0;
+    hcs_t ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT
 

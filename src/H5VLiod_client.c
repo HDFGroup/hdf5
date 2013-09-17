@@ -47,7 +47,7 @@ H5FL_EXTERN(H5VL_iod_dtype_t);
 typedef struct {
     size_t buf_size;
     uint8_t *buf_ptr;
-    uint32_t checksum;
+    hcs_t checksum;
     uint8_t **off;
     size_t *len;
     hsize_t curr_seq;
@@ -561,7 +561,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                     req->state = H5VL_IOD_COMPLETED;
                 }
                 else {
-                    uint32_t internal_cs = 0;
+                    hcs_t internal_cs = 0;
 
                     /* calculate a checksum for the data recieved */
                     internal_cs = H5S_checksum(info->buf_ptr, info->type_size, 
@@ -609,7 +609,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 dset_io_in_t input;
                 void *read_buf;
                 H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
-                uint32_t internal_cs = 0;
+                hcs_t internal_cs = 0;
                 size_t buf_size = status->buf_size;
                 hid_t rcxt_id;
                 H5RC_t *rc;
@@ -1912,12 +1912,12 @@ done:
  */
 herr_t
 H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf, 
-                   /*out*/uint32_t *_checksum, 
+                   /*out*/hcs_t *_checksum, 
                    /*out*/hg_bulk_t *bulk_handle,
                    /*out*/size_t **vl_str_len)
 {
     hsize_t buf_size = 0;
-    uint32_t checksum = 0;
+    hcs_t checksum = 0;
     H5S_t *space = NULL;
     H5T_t *dt = NULL;
     size_t nelmts;
@@ -2449,7 +2449,7 @@ done:
  */
 herr_t
 H5VL_iod_map_get_size(hid_t type_id, const void *buf, 
-                      /*out*/uint32_t *checksum, 
+                      /*out*/hcs_t *checksum, 
                       /*out*/size_t *size, /*out*/H5T_class_t *dt_class)
 {
     size_t buf_size = 0;

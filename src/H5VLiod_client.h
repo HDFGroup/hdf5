@@ -264,7 +264,7 @@ typedef struct H5VL_iod_io_info_t {
     size_t nelmts;
     size_t type_size;
     struct H5S_t *space;
-    uint32_t *cs_ptr;
+    hcs_t *cs_ptr;
     hid_t file_space_id;
     hid_t mem_type_id;
     hid_t dxpl_id;
@@ -280,7 +280,7 @@ typedef struct H5VL_iod_map_io_info_t {
     map_get_out_t *output; /* this must be first */
     void *val_ptr;
     size_t val_size;
-    uint32_t *val_cs_ptr;
+    hcs_t *val_cs_ptr;
     hid_t val_mem_type_id;
     hid_t key_mem_type_id;
     hid_t dxpl_id;
@@ -321,12 +321,12 @@ H5_DLL herr_t H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
 
 H5_DLL herr_t H5VL_iod_map_dtype_info(hid_t type_id, /*out*/ hbool_t *is_vl, /*out*/size_t *size);
 H5_DLL herr_t H5VL_iod_map_get_size(hid_t type_id, const void *buf, 
-                                    /*out*/uint32_t *checksum, 
+                                    /*out*/hcs_t *checksum, 
                                     /*out*/size_t *size, /*out*/H5T_class_t *dt_class);
 H5_DLL herr_t H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index, 
                                   iod_obj_type_t type, uint64_t *id);
 H5_DLL herr_t H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf, 
-                                 /*out*/uint32_t *_checksum, 
+                                 /*out*/hcs_t *_checksum, 
                                  /*out*/hg_bulk_t *bulk_handle,
                                  /*out*/size_t **vl_str_len);
 H5_DLL herr_t H5VL_iod_pre_read(hid_t type_id, hid_t space_id, const void *buf, 

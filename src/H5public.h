@@ -106,6 +106,8 @@ extern "C" {
  */
 typedef int herr_t;
 
+/* Define checksum type */
+typedef uint32_t hcs_t;
 
 /*
  * Boolean type.  Successful return values are zero (false) or positive
@@ -322,7 +324,7 @@ H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum,
 				unsigned *relnum);
 H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
 			       unsigned relnum);
-H5_DLL uint32_t H5checksum(const void *key, size_t length, H5_checksum_seed_t *cs);
+H5_DLL hcs_t H5checksum(const void *key, size_t length, H5_checksum_seed_t *cs);
 
 #ifdef __cplusplus
 }

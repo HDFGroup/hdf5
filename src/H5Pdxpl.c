@@ -55,12 +55,12 @@
 #define H5D_XFER_INJECT_CORRUPTION_ENC          H5P__encode_hbool_t
 #define H5D_XFER_INJECT_CORRUPTION_DEC           H5P__decode_hbool_t
 
-#define H5D_XFER_CHECKSUM_SIZE		sizeof(unsigned)
+#define H5D_XFER_CHECKSUM_SIZE		sizeof(hcs_t)
 #define H5D_XFER_CHECKSUM_DEF  		0
 #define H5D_XFER_CHECKSUM_ENC           H5P__encode_unsigned
 #define H5D_XFER_CHECKSUM_DEC           H5P__decode_unsigned
 
-#define H5D_XFER_CHECKSUM_PTR_SIZE      sizeof(uint32_t *)
+#define H5D_XFER_CHECKSUM_PTR_SIZE      sizeof(hcs_t *)
 #define H5D_XFER_CHECKSUM_PTR_DEF       NULL
 
 #endif /* H5_HAVE_EFF */
@@ -257,8 +257,8 @@ const H5P_libclass_t H5P_CLS_DXFR[1] = {{
 
 #ifdef H5_HAVE_EFF
 static const hbool_t H5D_def_inject_corruption_g = H5D_XFER_INJECT_CORRUPTION_DEF;
-static const uint32_t H5D_def_checksum_g = H5D_XFER_CHECKSUM_DEF;
-static const uint32_t *H5D_def_checksum_ptr_g = H5D_XFER_CHECKSUM_PTR_DEF;
+static const hcs_t H5D_def_checksum_g = H5D_XFER_CHECKSUM_DEF;
+static const hcs_t *H5D_def_checksum_ptr_g = H5D_XFER_CHECKSUM_PTR_DEF;
 #endif /* H5_HAVE_EFF */
 
 /* Property value defaults */
