@@ -24,7 +24,17 @@ $ cxxobj= "chunks.cxx, compound.cxx, create.cxx, extend_ds.cxx, h5group.cxx, "+-
           "readdata.cxx, writedata.cxx"
 $! 
 $!                              
-$ ccc 'cxxobj
+$! ccc 'cxxobj
+$! Somehow, the C++ compiler doesn't like the list of source files.
+$!
+$ ccc chunks.cxx
+$ ccc compound.cxx
+$ ccc create.cxx
+$ ccc extend_ds.cxx
+$ ccc h5group.cxx
+$ ccc readdata.cxx
+$ ccc writedata.cxx
+$!         
 $ type sys$input
 
        Creating chunks 
