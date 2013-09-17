@@ -102,6 +102,8 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     /* for the process that succeeded in creating the attribute, update
        the parent scratch pad, create attribute scratch pad */
     if(0 == ret) {
+        uint32_t sp_cs;
+
         /* create the metadata KV object for the attribute */
         if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &mdkv_id, NULL) < 0)
@@ -112,9 +114,10 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         sp[1] = IOD_ID_UNDEFINED;
         sp[2] = IOD_ID_UNDEFINED;
         sp[3] = IOD_ID_UNDEFINED;
+        sp_cs = H5checksum(&sp, sizeof(sp), NULL);
 
         /* set scratch pad in attribute */
-        if (iod_obj_set_scratch(attr_oh, wtid, &sp, NULL, NULL) < 0)
+        if (iod_obj_set_scratch(attr_oh, wtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
 
         /* Open Metadata KV object for write */

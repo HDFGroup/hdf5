@@ -151,6 +151,8 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     /* for the process that succeeded in creating the dataset, update
        the parent KV, create scratch pad */
     if(0 == ret) {
+        uint32_t sp_cs;
+
         /* create the attribute KV object for the dataset */
         if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &attr_id, NULL) < 0)
@@ -167,8 +169,10 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
         sp[2] = IOD_ID_UNDEFINED;
         sp[3] = IOD_ID_UNDEFINED;
 
+        sp_cs = H5checksum(&sp, sizeof(sp), NULL);
+
         /* set scratch pad in dataset */
-        if (iod_obj_set_scratch(dset_oh, wtid, &sp, NULL, NULL) < 0)
+        if (iod_obj_set_scratch(dset_oh, wtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
 
         /* Open Metadata KV object for write */
@@ -437,7 +441,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     hg_bulk_request_t bulk_request; /* HG request */
     size_t size, buf_size;
     void *buf = NULL; /* buffer to hold outgoing data */
-    hcs_t cs = 0; /* checksum value */
+    uint32_t cs = 0; /* checksum value */
     hbool_t is_vl_data;
     size_t nelmts; /* number of elements selected to read */
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
@@ -854,7 +858,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
     hid_t space_id = input->space_id; /* file space selection */
     hid_t dxpl_id = input->dxpl_id; /* transfer property list */
-    hcs_t cs = input->checksum; /* checksum recieved for data */
+    uint32_t cs = input->checksum; /* checksum recieved for data */
     hid_t src_id = input->mem_type_id; /* the memory type of the elements */
     hid_t dst_id = input->dset_type_id; /* the datatype of the dataset's element */
     iod_trans_id_t wtid = input->trans_num;
@@ -863,7 +867,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     hg_bulk_request_t bulk_request; /* HG request */
     size_t size, buf_size;
     hbool_t is_vl_data;
-    hcs_t data_cs = 0;
+    uint32_t data_cs = 0;
     unsigned u;
     void *buf = NULL;
     size_t nelmts; /* number of elements selected to read */
@@ -1330,7 +1334,7 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
     if(!write_op) {
         hsize_t num_bytes = 0;
         hsize_t num_elems = 1;
-        hcs_t checksum;
+        uint32_t checksum;
         H5_checksum_seed_t cs;
 
         buf_ptr = (uint8_t *)buf;

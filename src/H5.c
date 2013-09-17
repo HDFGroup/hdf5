@@ -830,9 +830,9 @@ H5close(void)
  *
  *-------------------------------------------------------------------------
  */
-hcs_t H5checksum(const void *key, size_t length, H5_checksum_seed_t *cs) 
+uint32_t H5checksum(const void *key, size_t length, H5_checksum_seed_t *cs) 
 {
-    hcs_t ret_value;
+    uint32_t ret_value;
 
     FUNC_ENTER_API(0)
 

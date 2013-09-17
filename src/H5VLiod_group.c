@@ -93,6 +93,8 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     /* for the process that succeeded in creating the group, create
        the scratch pad for it too */
     if(0 == ret) {
+        uint32_t sp_cs;
+
         /* create the metadata KV object for the group */
         if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &mdkv_id, NULL) < 0)
@@ -109,8 +111,10 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
         sp[2] = IOD_ID_UNDEFINED;
         sp[3] = IOD_ID_UNDEFINED;
 
+        sp_cs = H5checksum(&sp, sizeof(sp), NULL);
+
         /* set scratch pad in group */
-        if (iod_obj_set_scratch(grp_oh, wtid, &sp, NULL, NULL) < 0)
+        if (iod_obj_set_scratch(grp_oh, wtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
 
         /* store metadata */

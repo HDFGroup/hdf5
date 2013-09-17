@@ -897,7 +897,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_dxpl_checksum(hid_t dxpl_id, hcs_t cs)
+H5Pset_dxpl_checksum(hid_t dxpl_id, uint32_t cs)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -935,7 +935,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_dxpl_checksum(hid_t dxpl_id, hcs_t *cs/*out*/)
+H5Pget_dxpl_checksum(hid_t dxpl_id, uint32_t *cs/*out*/)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -971,7 +971,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_dxpl_checksum_ptr(hid_t dxpl_id, hcs_t *cs)
+H5Pset_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t *cs)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1009,7 +1009,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_dxpl_checksum_ptr(hid_t dxpl_id, hcs_t **cs/*out*/)
+H5Pget_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t **cs/*out*/)
 {
     H5P_genplist_t *plist = NULL;              /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -2477,7 +2477,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     char fake_char;
     int *status = NULL;
     H5VL_iod_io_info_t *info; /* info struct used to manage I/O parameters once the operation completes*/
-    hcs_t internal_cs; /* internal checksum calculated in this function */
+    uint32_t internal_cs; /* internal checksum calculated in this function */
     size_t *vl_string_len = NULL; /* array that will contain lengths of strings if the datatype is a VL string type */
     H5VL_iod_request_t **parent_reqs = NULL;
     size_t num_parents = 0;
@@ -2542,7 +2542,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     /* Verify the checksum value if the dxpl contains a user defined checksum */
     if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
-        hcs_t user_cs;
+        uint32_t user_cs;
 
         if(H5P_get(plist, H5D_XFER_CHECKSUM_NAME, &user_cs) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum value");
@@ -3649,7 +3649,7 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     int *status = NULL;
     size_t size;
     H5VL_iod_io_info_t *info;
-    hcs_t cs;
+    uint32_t cs;
     size_t num_parents = 0;
     hid_t trans_id;
     H5TR_t *tr = NULL;
@@ -5864,7 +5864,7 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
     int *status = NULL;
     size_t num_parents = 0;
     H5TR_t *tr = NULL;
-    hcs_t key_cs, value_cs;
+    uint32_t key_cs, value_cs;
     H5VL_iod_request_t **parent_reqs = NULL;
     H5T_class_t val_type_class;
     herr_t ret_value = SUCCEED;
@@ -5951,7 +5951,7 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
     map_get_out_t *output = NULL;
     H5VL_iod_map_io_info_t *info = NULL;
     size_t key_size, val_size;
-    hcs_t key_cs = 0;
+    uint32_t key_cs = 0;
     H5RC_t *rc = NULL;
     size_t num_parents = 0;
     hbool_t val_is_vl;
@@ -6144,7 +6144,7 @@ H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key,
     size_t key_size;
     H5RC_t *rc = NULL;
     size_t num_parents = 0;
-    hcs_t key_cs = 0;
+    uint32_t key_cs = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
 
@@ -6213,7 +6213,7 @@ H5VL_iod_map_delete(void *_map, hid_t key_mem_type_id, const void *key,
     int *status = NULL;
     size_t num_parents = 0;
     H5TR_t *tr = NULL;
-    hcs_t key_cs = 0;
+    uint32_t key_cs = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
 

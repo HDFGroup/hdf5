@@ -98,7 +98,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         void *key = NULL;
         void *value = NULL;
         hid_t fcpl_id;
-        hcs_t sp_cs;
+        uint32_t sp_cs;
 
         /* create the metadata KV object for the root group */
         if(iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, 
