@@ -26,6 +26,9 @@
 
 #define EEXISTS 1
 
+/* temp debug value for faking vl data */
+int g_debug_counter = 0;
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_map_create_cb
@@ -344,6 +347,26 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
                                       val.buf_size, &val.buf, &is_vl_data, &val_size) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
+    /* MSC - fake debugging */
+    if(is_vl_data) {
+        H5T_class_t class;
+        size_t seq_len = val_size, u;
+        uint8_t *buf_ptr = (uint8_t *)val.buf;
+
+        class = H5Tget_class(val_memtype_id);
+
+        if(H5T_STRING == class)
+            fprintf(stderr, "String Length %zu: %s\n", seq_len, (char *)buf_ptr);
+        else if(H5T_VLEN == class) {
+            int *ptr = (int *)buf_ptr;
+
+            fprintf(stderr, "Sequence Count %zu: ", seq_len);
+            for(u=0 ; u<seq_len/sizeof(int) ; ++u)
+                fprintf(stderr, "%d ", ptr[u]);
+            fprintf(stderr, "\n");
+        }
+    }
+
     kv.key = key.buf;
     kv.value = val.buf;
     kv.value_len = (iod_size_t)val_size;
@@ -405,7 +428,9 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
     binary_buf_t key = input->key;
     hid_t dxpl_id = input->dxpl_id;
     iod_trans_id_t rtid = input->rcxt_num;
-    hbool_t is_vl_data = FALSE;
+    hbool_t val_is_vl = input->val_is_vl;
+    size_t client_val_buf_size = input->val_size;
+    hbool_t key_is_vl = FALSE;
     size_t key_size, val_size;
     iod_size_t src_size;
     void *val_buf = NULL;
@@ -427,33 +452,118 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
 
     /* adjust buffers for datatype conversion */
     if(H5VL__iod_server_adjust_buffer(key_memtype_id, key_maptype_id, 1, dxpl_id, 
-                                      key.buf_size, &key.buf, &is_vl_data, &key_size) < 0) 
+                                      key.buf_size, &key.buf, &key_is_vl, &key_size) < 0) 
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
     if(iod_kv_get_value(iod_oh, rtid, key.buf, NULL, 
                         &src_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
 
-    /* MSC - fake something */
-    src_size = 4;
-    if(NULL == (val_buf = malloc((size_t)src_size)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+    if(val_is_vl) {
+        H5T_class_t class;
 
-    if(iod_kv_get_value(iod_oh, rtid, key.buf, val_buf, 
-                        &src_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
+        if(iod_kv_get_value(iod_oh, rtid, key.buf, val_buf, 
+                            &src_size, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
+        class = H5Tget_class(val_memtype_id);
 
-    /* adjust buffers for datatype conversion */
-    if(H5VL__iod_server_adjust_buffer(val_memtype_id, val_maptype_id, 1, dxpl_id, 
-                                      (size_t)src_size, &val_buf, &is_vl_data, &val_size) < 0) 
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
+        /* MSC - fake something */
+        val_buf = NULL;
+        if(!client_val_buf_size) {
+            g_debug_counter ++;
+            if(g_debug_counter == 6) g_debug_counter=1;
+        }
 
-    /* MSC - fake something */
-    *((int *)val_buf) = 1024;
+        if(H5T_VLEN == class) {
+            int n=0, k=0, j=0, increment=4;
+            int *ptr;
 
-    output.val.val_size = val_size;
-    output.val.val = val_buf;
-    output.ret = ret_value;
+            src_size = g_debug_counter*increment*sizeof(int);
+
+            if(NULL == (val_buf = malloc((size_t)src_size)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+
+            ptr = (int *)val_buf;
+
+            for(j = 0; j < g_debug_counter*increment; j++)
+                ptr[k++] = n ++;
+        }
+        else if (H5T_STRING == class) {
+            uint8_t *ptr;
+            size_t temp_size;
+
+            temp_size = 94;
+            if(NULL == (val_buf = malloc(temp_size)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+
+            ptr = (uint8_t *)val_buf;
+
+            switch(g_debug_counter) {
+            case 1:
+                src_size = 93;
+                strcpy((char *)ptr, "Four score and seven years ago our forefathers brought forth on this continent a new nation,");
+                ptr += src_size;
+                break;
+            case 2:
+                src_size = 86;
+                strcpy((char *)ptr, "conceived in liberty and dedicated to the proposition that all men are created equal.");
+                ptr += src_size;
+                break;
+            case 3:
+                src_size = 41;
+                strcpy((char *)ptr, "Now we are engaged in a great civil war,");
+                ptr += src_size;
+                break;
+            case 4:
+                src_size = 89;
+                strcpy((char *)ptr, "testing whether that nation or any nation so conceived and so dedicated can long endure.");
+                ptr += src_size;
+                break;
+            case 5:
+                src_size = 26;
+                strcpy((char *)ptr, "President Abraham Lincoln");
+                ptr += src_size;
+                break;
+            default:
+                HDassert(0 && "should not be here!!!");
+            }
+        }
+
+        output.ret = ret_value;
+        output.val_size = src_size;
+        if(client_val_buf_size) {
+            output.val.val_size = src_size;
+            output.val.val = val_buf;
+        }
+        else {
+            output.val.val_size = 0;
+            output.val.val = NULL;
+        }
+    }
+    else {
+        /* MSC - fake something */
+        src_size = 4;
+
+        if(NULL == (val_buf = malloc((size_t)src_size)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+
+        if(iod_kv_get_value(iod_oh, rtid, key.buf, val_buf, 
+                            &src_size, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
+
+        /* adjust buffers for datatype conversion */
+        if(H5VL__iod_server_adjust_buffer(val_memtype_id, val_maptype_id, 1, dxpl_id, 
+                                          (size_t)src_size, &val_buf, &val_is_vl, &val_size) < 0) 
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
+
+        /* MSC - fake something */
+        *((int *)val_buf) = 1024;
+
+        output.val_size = src_size;
+        output.val.val_size = val_size;
+        output.val.val = val_buf;
+        output.ret = ret_value;
+    }
 
 #if H5VL_IOD_DEBUG 
     fprintf(stderr, "Done with map get, sending %d response to client\n", ret_value);

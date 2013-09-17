@@ -12,11 +12,23 @@
 int main(int argc, char **argv) {
     const char file_name[]="map_file.h5";
     hid_t file_id;
-    hid_t gid1, gid2;
+    hid_t gid1, gid2, dtid1, dtid2;
     hid_t map1, map2, map3;
     hid_t tid1, tid2, rid1, rid2, rid3;
     hid_t fapl_id, dxpl_id, trspl_id;
     hid_t event_q;
+
+    const char *str_wdata[5]= {
+        "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
+        "conceived in liberty and dedicated to the proposition that all men are created equal.",
+        "Now we are engaged in a great civil war,",
+        "testing whether that nation or any nation so conceived and so dedicated can long endure.",
+        "President Abraham Lincoln"
+    };   /* Information to write */
+    char *str_rdata[5];   /* Information read in */
+    hvl_t wdata[5];   /* Information to write */
+    hvl_t rdata[5];   /* Information to write */
+    int i;
 
     uint64_t version;
     uint64_t trans_num;
@@ -26,7 +38,7 @@ int main(int argc, char **argv) {
     MPI_Request mpi_req;
 
     H5_status_t *status = NULL;
-    int num_requests = 0, i;
+    int num_requests = 0;
     herr_t ret;
 
     hsize_t count = -1;
@@ -103,33 +115,67 @@ int main(int argc, char **argv) {
     gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
     gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
 
-    /* Create Map objects with the key type and val type being 32 bit
-       LE integers */
+    /* Create Map objects with the key type being 32 bit LE integer */
+    /* Val type, 32 bit LE integer */
     map1 = H5Mcreate_ff(file_id, "MAP_1", H5T_STD_I32LE, H5T_STD_I32LE, 
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
-    map2 = H5Mcreate_ff(gid1, "MAP_2", H5T_STD_I32LE, H5T_STD_I32LE, 
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
-    map3 = H5Mcreate_ff(gid2, "MAP_3", H5T_STD_I32LE, H5T_STD_I32LE, 
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
+
+    /* Val type: VL datatype */
+    {
+        int increment, j, n;
+
+        n = 0;
+        increment = 4;
+        /* Allocate and initialize VL data to write */
+        for(i = 0; i < 5; i++) {
+            int temp = i*increment + increment;
+
+            wdata[i].p = malloc(temp * sizeof(unsigned int));
+            wdata[i].len = temp;
+            for(j = 0; j < temp; j++)
+                ((unsigned int *)wdata[i].p)[j] = n ++;
+        } /* end for */
+
+        /* Create a datatype to refer to */
+        dtid1 = H5Tvlen_create (H5T_NATIVE_UINT);
+
+        map2 = H5Mcreate_ff(gid1, "MAP_2", H5T_STD_I32LE, dtid1, 
+                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
+    }
+
+    /* Val type: VL string */
+    {
+        hid_t dtid;
+
+        /* Create a datatype to refer to */
+        dtid2 = H5Tcopy(H5T_C_S1);
+        H5Tset_size(dtid2,H5T_VARIABLE);
+
+        /* Val type, VL string */
+        map3 = H5Mcreate_ff(gid2, "MAP_3", H5T_STD_I32LE, dtid1, 
+                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
+    }
 
     {
         key = 1;
         value = 1000;
-        ret = H5Mset_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
+        ret = H5Mset_ff(map1, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
                         H5P_DEFAULT, tid1, event_q);
         assert(ret == 0);
 
-        key = 2;
-        value = 2000;
-        ret = H5Mset_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, tid1, event_q);
-        assert(ret == 0);
+        for(i=0 ; i<5 ; i++) {
+            key = i;
+            ret = H5Mset_ff(map2, H5T_STD_I32LE, &key, dtid1, &wdata[i],
+                            H5P_DEFAULT, tid1, event_q);
+            assert(ret == 0);
+        }
 
-        key = 3;
-        value = 3000;
-        ret = H5Mset_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, tid1, event_q);
-        assert(ret == 0);
+        for(i=0 ; i<5 ; i++) {
+            key = i;
+            ret = H5Mset_ff(map3, H5T_STD_I32LE, &key, dtid2, str_wdata[i],
+                            H5P_DEFAULT, tid1, event_q);
+            assert(ret == 0);
+        }
     }
 
     /* none leader procs have to complete operations before notifying the leader */
@@ -237,14 +283,17 @@ int main(int argc, char **argv) {
     rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
     assert(2 == version);
 
+    map1 = H5Mopen_ff(file_id, "MAP_1", H5P_DEFAULT, rid3, event_q);
+    map2 = H5Mopen_ff(file_id, "G1/MAP_2", H5P_DEFAULT, rid3, event_q);
     map3 = H5Mopen_ff(file_id, "G1/G2/MAP_3", H5P_DEFAULT, rid3, event_q);
 
     {
         int key, value;
+        int increment=4, j=0;
 
         key = 1;
         value = -1;
-        ret = H5Mget_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
+        ret = H5Mget_ff(map1, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
                         H5P_DEFAULT, rid3, event_q);
 
         if(H5EQpop(event_q, &req1) < 0)
@@ -254,27 +303,52 @@ int main(int argc, char **argv) {
 
         printf("Value recieved = %d\n", value);
         /* this is the fake value we sent from the server */
-        //assert(value == 1024);
+        assert(value == 1024);
 
-        key = 1;
-        value = -1;
-        ret = H5Mget_ff(map3, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, rid3, event_q);
+        if(my_size == 1) {
+            for(i=0 ; i<5 ; i++) {
+                key = i;
+                ret = H5Mget_ff(map2, H5T_STD_I32LE, &key, dtid1, &rdata[i],
+                                H5P_DEFAULT, rid3, H5_EVENT_QUEUE_NULL);
+                assert(ret == 0);
+            }
 
-        if(H5EQpop(event_q, &req1) < 0)
-            exit(1);
-        assert(H5AOwait(req1, &status1) == 0);
-        assert (status1);
+            /* Print VL DATA */
+            fprintf(stderr, "Reading VL Data: \n");
+            for(i = 0; i < 5; i++) {
+                int temp = i*increment + increment;
 
-        /* this is the fake value we sent from the server */
-        //assert(value == 1024);
+                fprintf(stderr, "Key %d  size %zu: ", i, rdata[i].len);
+                for(j = 0; j < temp; j++)
+                    fprintf(stderr, "%d ",((unsigned int *)rdata[i].p)[j]);
+                fprintf(stderr, "\n");
+            } /* end for */
+
+            for(i=0 ; i<5 ; i++) {
+                key = i;
+                ret = H5Mget_ff(map3, H5T_STD_I32LE, &key, dtid2, &str_rdata[i],
+                                H5P_DEFAULT, rid3, H5_EVENT_QUEUE_NULL);
+                assert(ret == 0);
+            }
+
+            fprintf(stderr, "Reading VL Strings: \n");
+            for(i=0 ; i<5 ; i++) {
+                fprintf(stderr, "Key %d:  %s\n", i, str_rdata[i]);
+                free(str_rdata[i]);
+            }
+        }
     }
 
     /* release container version 1. This is async. */
     ret = H5RCrelease(rid3, event_q);
     assert(0 == ret);
 
+    assert(H5Mclose_ff(map1, event_q) == 0);
+    assert(H5Mclose_ff(map2, event_q) == 0);
     assert(H5Mclose_ff(map3, event_q) == 0);
+
+    H5Tclose(dtid1);
+    H5Tclose(dtid2);
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
@@ -304,6 +378,12 @@ int main(int argc, char **argv) {
 
     H5EQclose(event_q);
     H5Pclose(fapl_id);
+
+    for(i=0 ; i<5 ; i++) {
+        free(wdata[i].p);
+        if(my_size == 1)
+            free(rdata[i].p);
+    }
 
     /* This finalizes the EFF stack. ships a terminate and IOD finalize to the server 
        and shutsdown the FS server (when all clients send the terminate request) 

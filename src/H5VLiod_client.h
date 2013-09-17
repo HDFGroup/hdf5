@@ -274,6 +274,23 @@ typedef struct H5VL_iod_io_info_t {
 
 } H5VL_iod_io_info_t;
 
+/* information about a map get request */
+typedef struct H5VL_iod_map_io_info_t {
+    /* read & write params */
+    map_get_out_t *output; /* this must be first */
+    void *val_ptr;
+    size_t val_size;
+    uint32_t *val_cs_ptr;
+    hid_t val_mem_type_id;
+    hid_t key_mem_type_id;
+    hid_t dxpl_id;
+    hbool_t val_is_vl;
+    hid_t rcxt_id;
+    binary_buf_t key;
+    na_addr_t peer;
+    hg_id_t map_get_id;
+} H5VL_iod_map_io_info_t;
+
 /* information about a read context acquire request*/
 typedef struct H5VL_iod_rc_info_t {
     rc_acquire_out_t result;
@@ -302,9 +319,10 @@ H5_DLL herr_t H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
                                            H5VL_iod_req_info_t *req_info,
                                            void *input, void *output, void *data, void **req);
 
+H5_DLL herr_t H5VL_iod_map_dtype_info(hid_t type_id, /*out*/ hbool_t *is_vl, /*out*/size_t *size);
 H5_DLL herr_t H5VL_iod_map_get_size(hid_t type_id, const void *buf, 
                                     /*out*/uint32_t *checksum, 
-                                    /*out*/size_t *size);
+                                    /*out*/size_t *size, /*out*/H5T_class_t *dt_class);
 H5_DLL herr_t H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index, 
                                   iod_obj_type_t type, uint64_t *id);
 H5_DLL herr_t H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf, 

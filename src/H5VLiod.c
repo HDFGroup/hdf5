@@ -2369,6 +2369,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         input.dset_type_id = dset->remote_dset.type_id;
         input.mem_type_id = mem_type_id;
         input.rcxt_num  = rc->c_version;
+        input.trans_num = 0;
     }
     else {
         /* Fill input structure for retrieving the buffer size needed to read */
@@ -3597,6 +3598,7 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
     input.type_id = type_id;
     input.space_id = attr->remote_attr.space_id;
     input.rcxt_num  = rc->c_version;
+    input.trans_num = 0;
 
     /* allocate structure to receive status of read operation (contains return value and checksum */
     status = (H5VL_iod_read_status_t *)malloc(sizeof(H5VL_iod_read_status_t));
@@ -3982,6 +3984,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 input.attr_name = attr_name;
                 input.path = loc_name;
                 input.rcxt_num  = rc->c_version;
+                input.trans_num  = 0;
 
 #if H5VL_IOD_DEBUG
                 printf("Attribute Exists loc %s name %s, axe id %llu\n", 
@@ -4548,6 +4551,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 input.loc_id = iod_id;
                 input.loc_oh = iod_oh;
                 input.rcxt_num  = rc->c_version;
+                input.trans_num  = 0;
                 input.path = loc_name;
 
 #if H5VL_IOD_DEBUG
@@ -4580,6 +4584,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 input.loc_id = iod_id;
                 input.loc_oh = iod_oh;
                 input.rcxt_num  = rc->c_version;
+                input.trans_num  = 0;
                 input.path = loc_name;
 
 #if H5VL_IOD_DEBUG
@@ -5861,6 +5866,7 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
     H5TR_t *tr = NULL;
     uint32_t key_cs, value_cs;
     H5VL_iod_request_t **parent_reqs = NULL;
+    H5T_class_t val_type_class;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -5874,9 +5880,13 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
         map->common.request = NULL;
     }
 
-    if(H5VL_iod_map_get_size(key_mem_type_id, key, &key_cs, &key_size) < 0)
+    /* get the key size and checksum from the provided key datatype & buffer */
+    if(H5VL_iod_map_get_size(key_mem_type_id, key, &key_cs, &key_size, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get key size");
-    if(H5VL_iod_map_get_size(val_mem_type_id, value, &value_cs, &val_size) < 0)
+
+    /* get the value size and checksum from the provided value datatype & buffer */
+    if(H5VL_iod_map_get_size(val_mem_type_id, value, &value_cs, 
+                             &val_size, &val_type_class) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get value size");
 
     /* get the TR object */
@@ -5904,14 +5914,21 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
     input.val_maptype_id = map->remote_map.valtype_id;
     input.val_memtype_id = val_mem_type_id;
     input.val.buf_size = val_size;
-    input.val.buf = value;
+    /* set the value buf */
+    if(H5T_VLEN == val_type_class) {
+        /* if this is a VL type buffer, set the buffer pointer to the
+           actual data (the p pointer) */
+        input.val.buf = ((const hvl_t *)value)->p;
+    }
+    else
+        input.val.buf = value;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
 
     status = (int *)malloc(sizeof(int));
 
 #if H5VL_IOD_DEBUG
-    printf("MAP set, axe id %llu\n", g_axe_id);
+    printf("MAP set, value size %zu, axe id %llu\n", val_size, g_axe_id);
 #endif
 
     if(H5VL__iod_create_and_forward(H5VL_MAP_SET_ID, HG_MAP_SET, 
@@ -5926,16 +5943,19 @@ done:
 
 herr_t 
 H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key, 
-                 hid_t val_mem_type_id, void *value, hid_t dxpl_id, 
-                 hid_t rcxt_id, void **req)
+                 hid_t val_mem_type_id, void *value, 
+                 hid_t dxpl_id, hid_t rcxt_id, void **req)
 {
     H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
     map_get_in_t input;
-    map_get_out_t *output;
-    size_t key_size;
+    map_get_out_t *output = NULL;
+    H5VL_iod_map_io_info_t *info = NULL;
+    size_t key_size, val_size;
     uint32_t key_cs = 0;
     H5RC_t *rc = NULL;
     size_t num_parents = 0;
+    hbool_t val_is_vl;
+    H5P_genplist_t *plist = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
 
@@ -5944,18 +5964,24 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
     /* If there is information needed about the map that is not present locally, wait */
     if(-1 == map->remote_map.keytype_id ||
        -1 == map->remote_map.valtype_id) {
-        /* Synchronously wait on the request attached to the dataset */
+        /* Synchronously wait on the request attached to the map */
         if(H5VL_iod_request_wait(map->common.file, map->common.request) < 0)
             HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on HG request");
         map->common.request = NULL;
     }
 
-    if(H5VL_iod_map_get_size(key_mem_type_id, key, &key_cs, &key_size) < 0)
+    /* get the key size and checksum from the provided key datatype & buffer */
+    if(H5VL_iod_map_get_size(key_mem_type_id, key, &key_cs, &key_size, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get key size");
+
+    /* get information about the datatype of the value. Get the values
+       size if it is not VL. val_size will be 0 if it is VL */
+    if(H5VL_iod_map_dtype_info(val_mem_type_id, &val_is_vl, &val_size) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get key size");
 
     /* get the RC object */
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID");
 
     if(NULL == (parent_reqs = (H5VL_iod_request_t **)
                 H5MM_malloc(sizeof(H5VL_iod_request_t *))))
@@ -5971,13 +5997,15 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
     input.iod_oh = map->remote_map.iod_oh;
     input.iod_id = map->remote_map.iod_id;
     input.dxpl_id = dxpl_id;
-    input.key_maptype_id = map->remote_map.keytype_id;
-    input.val_maptype_id = map->remote_map.valtype_id;
     input.key_memtype_id = key_mem_type_id;
+    input.key_maptype_id = map->remote_map.keytype_id;
+    input.val_memtype_id = val_mem_type_id;
+    input.val_maptype_id = map->remote_map.valtype_id;
     input.key.buf_size = key_size;
     input.key.buf = key;
-    input.val_memtype_id = val_mem_type_id;
-    input.rcxt_num  = rc->c_version;
+    input.val_is_vl = val_is_vl;
+    input.val_size = val_size;
+    input.rcxt_num = rc->c_version;
 
 #if H5VL_IOD_DEBUG
     printf("MAP Get, axe id %llu\n", g_axe_id);
@@ -5986,13 +6014,44 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
     if(NULL == (output = (map_get_out_t *)H5MM_calloc(sizeof(map_get_out_t))))
 	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate map get output struct");
 
-    output->val.val = value;
-    output->val.val_size = 0;
+    /* setup info struct for I/O request. 
+       This is to manage the I/O operation once the wait is called. */
+    if(NULL == (info = (H5VL_iod_map_io_info_t *)H5MM_calloc(sizeof(H5VL_iod_map_io_info_t))))
+        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
+
+    /* capture the parameters required to submit a get request again
+       if the value type is VL, since the first Get is to retrieve the
+       value size */
+    info->val_ptr = value;
+    info->val_cs_ptr = NULL;
+    info->val_is_vl = val_is_vl;
+    info->val_size = val_size;
+    info->rcxt_id  = rcxt_id;
+    info->key.buf_size = key_size;
+    info->key.buf = key;
+    info->output = output;
+    if(val_is_vl) {
+        if((info->val_mem_type_id = H5Tcopy(val_mem_type_id)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype");
+        if((info->key_mem_type_id = H5Tcopy(key_mem_type_id)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype");
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+        if((info->dxpl_id = H5P_copy_plist((H5P_genplist_t *)plist, TRUE)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy dxpl");
+
+        info->peer = PEER;
+        info->map_get_id = H5VL_MAP_GET_ID;
+        output->val.val = NULL;
+    }
+    else {
+        output->val.val = value;
+    }
 
     if(H5VL__iod_create_and_forward(H5VL_MAP_GET_ID, HG_MAP_GET, 
                                     (H5VL_iod_object_t *)map, 0,
-                                    num_parents, parent_reqs,
-                                    (H5VL_iod_req_info_t *)rc, &input, output, output, req) < 0)
+                                    num_parents, parent_reqs, (H5VL_iod_req_info_t *)rc, 
+                                    &input, output, info, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship map get");
 
 done:
@@ -6087,7 +6146,7 @@ H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5VL_iod_map_get_size(key_mem_type_id, key, &key_cs, &key_size) < 0)
+    if(H5VL_iod_map_get_size(key_mem_type_id, key, &key_cs, &key_size, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get key size");
 
     /* get the RC object */
@@ -6112,6 +6171,7 @@ H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key,
     input.key.buf_size = key_size;
     input.key.buf = key;
     input.rcxt_num  = rc->c_version;
+    input.trans_num  = 0;
 
 #if H5VL_IOD_DEBUG
     printf("MAP EXISTS, axe id %llu\n", g_axe_id);
@@ -6155,7 +6215,7 @@ H5VL_iod_map_delete(void *_map, hid_t key_mem_type_id, const void *key,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5VL_iod_map_get_size(key_mem_type_id, key, &key_cs, &key_size) < 0)
+    if(H5VL_iod_map_get_size(key_mem_type_id, key, &key_cs, &key_size, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get key size");
 
     /* get the TR object */

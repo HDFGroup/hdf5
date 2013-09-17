@@ -60,6 +60,9 @@ static herr_t H5VL__iod_pre_write_cb(void UNUSED *elem, hid_t type_id, unsigned 
 static herr_t H5VL__iod_vl_read_finalize(size_t buf_size, void *read_buf, void *user_buf, 
                                          H5S_t *mem_space, hid_t mem_type_id, hid_t dset_type_id);
 
+static herr_t H5VL__iod_vl_map_get_finalize(size_t buf_size, void *read_buf, void *user_buf, 
+                                            hid_t mem_type_id);
+
 herr_t 
 H5VL_iod_request_decr_rc(H5VL_iod_request_t *request)
 {
@@ -759,18 +762,113 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         }
     case HG_MAP_GET:
         {
-            map_get_out_t *output = (map_get_out_t *)req->data;
+            H5VL_iod_map_io_info_t *info = (H5VL_iod_map_io_info_t *)req->data;
+            map_get_out_t *output = info->output;
 
             if(SUCCEED != output->ret) {
                 fprintf(stderr, "MAP get failed at the server\n");
                 req->status = H5AO_FAILED;
                 req->state = H5VL_IOD_COMPLETED;
             }
+            else {
+                /* If the data is not VL, then just free resources and remove the request */
+                if(!info->val_is_vl) {
+                    free(info->output);
+                    info->output = NULL;
+                    info = (H5VL_iod_map_io_info_t *)H5MM_xfree(info);
+                    req->data = NULL;
+                    H5VL_iod_request_delete(file, req);
+                    break;
+                }
+                else {
+                    /* in case of a pre-allocated buffer, value was sent already */
+                    if(output->val.val_size != 0) {
+                        HDassert(output->val.val_size == output->val_size);
 
-            free(output);
-            req->data = NULL;
-            H5VL_iod_request_delete(file, req);
-            break;
+                        /* scatter the data into the user's buffer */
+                        if(H5VL__iod_vl_map_get_finalize(output->val_size, output->val.val, 
+                                                         (void *)info->val_ptr, 
+                                                         info->val_mem_type_id) < 0)
+                            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to store VL data in user buffer");
+
+                        req->data = NULL;
+                        H5VL_iod_request_delete(file, req);
+                        break;
+                    }
+                    /* if the data is VL, then we need to submit another
+                       get operation this time to get the actual data */
+                    else {
+                        void *value_buf = NULL;
+                        H5VL_iod_map_t *map = (H5VL_iod_map_t *)req->obj;
+                        map_get_in_t input;
+                        H5RC_t *rc = NULL;
+                        H5P_genplist_t *plist = NULL;
+                        H5VL_iod_map_io_info_t vl_read_info;
+
+                        /* get the RC object */
+                        if(NULL == (rc = (H5RC_t *)H5I_object_verify(info->rcxt_id, H5I_RC)))
+                            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID");
+
+                        /* Fill input structure */
+                        input.coh = file->remote_file.coh;
+                        input.iod_oh = map->remote_map.iod_oh;
+                        input.iod_id = map->remote_map.iod_id;
+                        input.dxpl_id = info->dxpl_id;
+                        input.key_memtype_id = info->key_mem_type_id;
+                        input.key_maptype_id = map->remote_map.keytype_id;
+                        input.val_memtype_id = info->val_mem_type_id;
+                        input.val_maptype_id = map->remote_map.valtype_id;
+                        input.key.buf_size = info->key.buf_size;
+                        input.key.buf = info->key.buf;
+                        input.val_is_vl = TRUE;
+                        input.val_size = output->val_size;
+                        input.rcxt_num = rc->c_version;
+
+                        if(NULL == (value_buf = (void *)HDmalloc(output->val_size)))
+                            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate VL recieve buffer");
+
+                        output->val.val = value_buf;
+
+                        vl_read_info.output = output;
+                        vl_read_info.val_is_vl = TRUE;
+                        vl_read_info.val_ptr = info->val_ptr;
+                        vl_read_info.val_mem_type_id = info->val_mem_type_id;
+
+                        /* remove request from file list */
+                        H5VL_iod_request_delete(file, req);
+
+                        if(H5VL__iod_create_and_forward(info->map_get_id, HG_MAP_GET, 
+                                                        (H5VL_iod_object_t *)map, 0,
+                                                        0, NULL, (H5VL_iod_req_info_t *)rc, 
+                                                        &input, output, &vl_read_info, NULL) < 0)
+                            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship map get");
+
+#if 0
+                        /* scatter the data into the user's buffer */
+                        if(H5VL__iod_vl_map_get_finalize(input.val_size, value_buf, 
+                                                         (void *)info->val_ptr, 
+                                                         info->val_mem_type_id) < 0)
+                            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to store VL data in user buffer");
+
+                        HDfree(value_buf);
+#endif
+
+                        /* free stuff associated with request */
+                        HDfree(value_buf);
+                        if(H5Tclose(info->val_mem_type_id) < 0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release datatype");
+                        if(H5Tclose(info->key_mem_type_id) < 0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release datatype");
+                        if(H5Pclose(info->dxpl_id) < 0)
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to release plist");
+                        free(info->output);
+                        info->output = NULL;
+                        info = (H5VL_iod_map_io_info_t *)H5MM_xfree(info);
+                        req->data = NULL;
+                        break;
+                    }
+                }
+            }
         }
     case HG_MAP_GET_COUNT:
         {
@@ -2261,10 +2359,85 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_vl_map_get_finalize
+ *
+ * Finalize the data read by deserializing it into the user's buffer.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              August, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__iod_vl_map_get_finalize(size_t buf_size, void *read_buf, void *user_buf, 
+                              hid_t mem_type_id)
+{
+    H5T_t *mem_dt = NULL;
+    H5T_t *super = NULL;
+    size_t super_size;
+    H5T_class_t class;
+    uint8_t *buf_ptr = (uint8_t *)read_buf;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (mem_dt = (H5T_t *)H5I_object_verify(mem_type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
+    if(NULL == (super = H5T_get_super(mem_dt)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid super type of VL type");
+    
+    super_size = H5T_get_size(super);
+    class = H5T_get_class(mem_dt, FALSE);
+
+#if 0
+    {
+        size_t seq_len = buf_size, u;
+
+        if(H5T_STRING == class)
+            fprintf(stderr, "String Length %zu: %s\n", buf_size, (char *)read_buf);
+        else if(H5T_VLEN == class) {
+            int *ptr = (int *)buf_ptr;
+            fprintf(stderr, "Sequence Count %zu: ", buf_size/sizeof(int));
+            for(u=0 ; u<buf_size/sizeof(int) ; ++u)
+                fprintf(stderr, "%d ", ptr[u]);
+            fprintf(stderr, "\n");
+        }
+    }
+#endif
+
+    if(H5T_VLEN == class) {
+        hvl_t *vl = (hvl_t *)user_buf;
+
+        vl->len = buf_size/super_size;
+        vl->p = malloc(buf_size);
+        HDmemcpy(vl->p, buf_ptr, buf_size);
+        buf_ptr += buf_size;
+    }
+    else if(H5T_STRING == class) {
+        char **buf = (char **)user_buf;
+
+        //elmt_size = *((size_t *)buf_ptr);
+        //buf_ptr += sizeof(size_t);
+
+        *buf = HDstrdup((char *)buf_ptr);
+        //buf_ptr += elmt_size;
+    }
+
+done:
+    if(super && H5T_close(super) < 0)
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "can't close super type")
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_vl_map_get_finalize */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_iod_map_get_size
  *
  * Purpose:     Retrieves the size of a Key or Value binary 
- *              buffer given its datatype.
+ *              buffer given its datatype and buffer contents.
  *
  * Return:	Success:	SUCCEED 
  *		Failure:	Negative
@@ -2277,7 +2450,7 @@ done:
 herr_t
 H5VL_iod_map_get_size(hid_t type_id, const void *buf, 
                       /*out*/uint32_t *checksum, 
-                      /*out*/size_t *size)
+                      /*out*/size_t *size, /*out*/H5T_class_t *dt_class)
 {
     size_t buf_size = 0;
     H5T_t *dt = NULL;
@@ -2295,7 +2468,7 @@ H5VL_iod_map_get_size(hid_t type_id, const void *buf,
         case H5T_STRING:
             /* If this is a variable length string, get the size using strlen(). */
             if(H5T_is_variable_str(dt)) {
-                buf_size = HDstrlen((const char*)buf);
+                buf_size = HDstrlen((const char*)buf) + 1;
                 break;
             }
         case H5T_INTEGER:
@@ -2320,7 +2493,6 @@ H5VL_iod_map_get_size(hid_t type_id, const void *buf,
         case H5T_VLEN:
             {
                 H5T_t *super = NULL;
-                size_t elmt_size;
                 const hvl_t *vl;
 
                 vl = (const hvl_t *)buf;
@@ -2340,6 +2512,80 @@ H5VL_iod_map_get_size(hid_t type_id, const void *buf,
     /* compute checksum */
     *checksum = H5_checksum_lookup4(buf, buf_size, NULL);
     *size = buf_size;
+    if(dt_class)
+        *dt_class = class;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_map_get_size */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_map_dtype_info
+ *
+ * Purpose:     Retrieves information about the datatype of Map Key or
+ *              value datatype, whether it's VL or not. If it is not VL
+ *              return the size.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              August, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_map_dtype_info(hid_t type_id, /*out*/ hbool_t *is_vl, /*out*/size_t *size)
+{
+    size_t buf_size = 0;
+    H5T_t *dt = NULL;
+    H5T_class_t class;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
+
+    class = H5T_get_class(dt, FALSE);
+
+    switch(class) {
+        case H5T_STRING:
+            /* If this is a variable length string, get the size using strlen(). */
+            if(H5T_is_variable_str(dt)) {
+                *is_vl = TRUE;
+                break;
+            }
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_ENUM:
+        case H5T_ARRAY:
+        case H5T_NO_CLASS:
+        case H5T_REFERENCE:
+        case H5T_NCLASSES:
+        case H5T_COMPOUND:
+            /* Data is not variable length, so use H5Tget_size() */
+            /* MSC - This is not correct. Compound/Array can contian
+               VL datatypes, but for now we don't support that. Need
+               to check for that too */
+            buf_size = H5T_get_size(dt);
+            *is_vl = FALSE;
+            break;
+
+            /* If this is a variable length datatype, iterate over it */
+        case H5T_VLEN:
+            *is_vl = TRUE;
+            break;
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "unsupported datatype");
+    }
+
+    if(size)
+        *size = buf_size;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
