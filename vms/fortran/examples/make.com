@@ -23,59 +23,66 @@ $
 $ type sys$input
 	Compiling HDF5 Fortran examples
 $!
-$ ffiles="dsetexample.f90, fileexample.f90, rwdsetexample.f90, "+-
-         "attrexample.f90, groupexample.f90, grpsexample.f90, "+-
-         "grpdsetexample.f90, hyperslab.f90, selectele.f90, grpit.f90,"+-
+$ ffiles="h5_rdwt.f90, h5_subset.f90, hyperslab.f90, "+-
+         "h5_crtatt.f90, h5_crtgrp.f90, h5_crtgrpar.f90, h5_cmprss,"+-
+         "h5_crtgrpd.f90, h5_crtdat.f90, selectele.f90, h5_extend.f90,"+-
          "refobjexample.f90, refregexample.f90, mountexample.f90,"+-
          "compound.f90"
 $!
 $ fff 'ffiles
 $ type sys$input
 
-        Creating dsetexample 
-$ link       dsetexample,-
+        Creating h5_crtdat
+$ link       h5_crtdat ,-
              [-.-.lib]hdf5_fortran.olb/lib,-
              [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
-        Creating fileexample
-$ link       fileexample,-
+        Creating h5_rdwt 
+$ link       h5_rdwt,-
              [-.-.lib]hdf5_fortran.olb/lib,-
              [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
-        Creating rwdsetexample
-$ link       rwdsetexample,-
-             [-.-.lib]hdf5_fortran.olb/lib,-
-             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
-$ type sys$input
-
-        Creating attrexample
-$ link       attrexample,-
-             [-.-.lib]hdf5_fortran.olb/lib,-
-             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
-$ type sys$input
-
-        Creating groupexample
-$ link       groupexample,-
-             [-.-.lib]hdf5_fortran.olb/lib,-
-             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
-$ type sys$input
-
-        Creating grpsexample
-$ link       grpsexample,-
-             [-.-.lib]hdf5_fortran.olb/lib,-
-             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
-$ type sys$input
-
-        Creating grpdsetexample
-$ link       grpdsetexample,-
+        Creating h5_subset
+$ link       h5_subset,-
              [-.-.lib]hdf5_fortran.olb/lib,-
              [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
         Creating hyperslab
-$ link       hyperslab ,-
+$ link       hyperslab,-
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$ type sys$input
+
+        Creating h5_cmprss
+$ link       h5_cmprss,-
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$ type sys$input
+
+
+        Creating h5_crtatt
+$ link       h5_crtatt,-
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$ type sys$input
+
+        Creating h5_crtgrp
+$ link       h5_crtgrp,-
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$ type sys$input
+
+        Creating h5_crtgrpar
+$ link       h5_crtgrpar,-
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$ type sys$input
+
+        Creating h5_crtgrpd
+$ link       h5_crtgrpd,-
              [-.-.lib]hdf5_fortran.olb/lib,-
              [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
@@ -86,8 +93,8 @@ $ link       selectele,-
              [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
-        Creating grpit
-$ link       grpit,-
+        Creating h5_extend
+$ link       h5_extend,-
              [-.-.lib]hdf5_fortran.olb/lib,-
              [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input

@@ -24,38 +24,18 @@ $ type sys$input
 
 $ type sys$input
 
-	Running dsetexample 
-$ run dsetexample
+	Running h5_crtdat
+$ run h5_crtdat
+$
+$ type sys$input
+
+	Running h5_rdwt 
+$ run h5_rdwt
 $
 $ type sys$input 
 
-	Running fileexample
-$ run fileexample
-$
-$ type sys$input
-
-	Running rwdsetexample
-$ run rwdsetexample
-$
-$ type sys$input
-
-	Running attrexample
-$ run attrexample
-$
-$ type sys$input
-
-	Running groupexample
-$ run groupexample
-$
-$ type sys$input
-
-	Running grpsexample
-$ run grpsexample
-$
-$ type sys$input
-
-	Running grpdsetexample
-$ run grpdsetexample
+	Running h5_subset
+$ run h5_subset
 $
 $ type sys$input
 
@@ -64,13 +44,38 @@ $ run hyperslab
 $
 $ type sys$input
 
+	Running h5_cmprss
+$ run h5_cmprss
+$
+$ type sys$input
+
+	Running h5_crtatt
+$ run h5_crtatt
+$
+$ type sys$input
+
+	Running h5_crtgrp
+$ run h5_crtgrp
+$
+$ type sys$input
+
+	Running h5_crtgrpar
+$ run h5_crtgrpar
+$
+$ type sys$input
+
+	Running h5_crtgrpd
+$ run h5_crtgrpd
+$
+$ type sys$input
+
 	Running selectele
 $ run selectele
 $
 $ type sys$input
 
-	Running grpit
-$ run grpit
+	Running h5_extend
+$ run h5_extend
 $
 $ type sys$input
 
