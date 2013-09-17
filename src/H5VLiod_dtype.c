@@ -62,7 +62,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     void *buf;
     iod_mem_desc_t *mem_desc = NULL; /* memory descriptor used for writing */
     iod_blob_iodesc_t *file_desc = NULL; /* file descriptor used to write */
-    scratch_pad_t sp;
+    scratch_pad sp;
     iod_ret_t ret;
     hbool_t collective = FALSE; /* flag to indicate whether we opened the attribute here or if it was already open */
     herr_t ret_value = SUCCEED;
@@ -106,10 +106,10 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
         /* set values for the scratch pad object */
-        sp.mdkv_id = mdkv_id;
-        sp.attr_id = attr_id;
-        sp.filler1_id = IOD_ID_UNDEFINED;
-        sp.filler2_id = IOD_ID_UNDEFINED;
+        sp[0] = mdkv_id;
+        sp[1] = attr_id;
+        sp[2] = IOD_ID_UNDEFINED;
+        sp[3] = IOD_ID_UNDEFINED;
 
         /* set scratch pad in datatype */
         if (iod_obj_set_scratch(dtype_oh, wtid, &sp, NULL, NULL) < 0)
@@ -263,7 +263,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     void *buf = NULL;
     iod_mem_desc_t *mem_desc = NULL; /* memory descriptor used for reading */
     iod_blob_iodesc_t *file_desc = NULL; /* file descriptor used to write */
-    scratch_pad_t sp;
+    scratch_pad sp;
     iod_size_t kv_size;
     herr_t ret_value = SUCCEED;
 
@@ -282,7 +282,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* MSC  -  NEED IOD */

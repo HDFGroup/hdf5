@@ -6025,7 +6025,11 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
     info->val_ptr = value;
     info->val_cs_ptr = NULL;
     info->val_is_vl = val_is_vl;
+
+    /* The value size expected to be received. If VL data, this will
+       be 0, because the first call would be to get the value size */
     info->val_size = val_size;
+
     info->rcxt_id  = rcxt_id;
     info->key.buf_size = key_size;
     info->key.buf = key;

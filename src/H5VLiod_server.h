@@ -60,12 +60,7 @@ typedef struct op_data_t {
 } op_data_t;
 
 /* the IOD scratch pad type */
-typedef struct scratch_pad_t {
-    iod_obj_id_t mdkv_id;      /* IOD ID of the KV store holding the metadata about an object */
-    iod_obj_id_t attr_id;      /* IOD ID of the KV store holding the attribute ID attached to object */
-    iod_obj_id_t filler1_id;   /* filler value - not used */
-    iod_obj_id_t filler2_id;   /* filler value - not used */
-} scratch_pad_t;
+typedef iod_obj_id_t scratch_pad[4];
 
 /* the link value stored in KV stores */
 typedef struct H5VL_iod_link_t {

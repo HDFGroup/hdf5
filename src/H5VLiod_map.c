@@ -65,7 +65,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t cur_id, mdkv_id, attr_id;
     char *last_comp; /* the name of the group obtained from traversal function */
     hid_t mcpl_id;
-    scratch_pad_t sp;
+    scratch_pad sp;
     iod_ret_t ret;
     hbool_t collective = FALSE; /* MSC - change when we allow for collective */
     herr_t ret_value = SUCCEED;
@@ -109,10 +109,10 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
         /* set values for the scratch pad object */
-        sp.mdkv_id = mdkv_id;
-        sp.attr_id = attr_id;
-        sp.filler1_id = IOD_ID_UNDEFINED;
-        sp.filler2_id = IOD_ID_UNDEFINED;
+        sp[0] = mdkv_id;
+        sp[1] = attr_id;
+        sp[2] = IOD_ID_UNDEFINED;
+        sp[3] = IOD_ID_UNDEFINED;
 
         /* set scratch pad in map */
         if (iod_obj_set_scratch(map_oh, wtid, &sp, NULL, NULL) < 0)
@@ -213,7 +213,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t rtid = input->rcxt_num;
     iod_obj_id_t map_id; /* The ID of the map that needs to be opened */
     iod_handle_t map_oh, mdkv_oh;
-    scratch_pad_t sp;
+    scratch_pad sp;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -234,7 +234,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* MSC - retrieve metadata - need IOD*/

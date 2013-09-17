@@ -477,7 +477,7 @@ H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
     kv.key = (char *)key;
     kv.value = value;
     kv.value_len = (iod_size_t)buf_size;
-    /* insert kv pair into scratch pad */
+    /* insert kv pair into KV object */
     if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
@@ -611,7 +611,7 @@ H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
     kv.key = (char *)key;
     kv.value = value;
     kv.value_len = (iod_size_t)buf_size;
-    /* insert kv pair into scratch pad */
+    /* insert kv pair into KV */
     if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
@@ -667,7 +667,7 @@ H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
     kv.key = (char *)key;
     kv.value = value;
     kv.value_len = (iod_size_t)buf_size;
-    /* insert kv pair into scratch pad */
+    /* insert kv pair into KV */
     if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 

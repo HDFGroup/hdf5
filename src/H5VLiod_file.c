@@ -93,7 +93,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     /* for the process that succeeded in creating the group, create
        the scratch pad for it too */
     if(0 == ret) {
-        scratch_pad_t sp;
+        scratch_pad sp;
         iod_kv_t kv;
         void *key = NULL;
         void *value = NULL;
@@ -110,10 +110,10 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
         /* set values for the scratch pad object */
-        sp.mdkv_id = mdkv_id;
-        sp.attr_id = attr_id;
-        sp.filler1_id = IOD_ID_UNDEFINED;
-        sp.filler2_id = IOD_ID_UNDEFINED;
+        sp[0] = mdkv_id;
+        sp[1] = attr_id;
+        sp[2] = IOD_ID_UNDEFINED;
+        sp[3] = IOD_ID_UNDEFINED;
 
         /* set scratch pad in root group */
         if (iod_obj_set_scratch(root_oh, first_tid, &sp, NULL, NULL) < 0)
@@ -236,7 +236,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh; /* container handle */
     iod_handle_t root_oh; /* root object handle */
     iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
-    scratch_pad_t sp;
+    scratch_pad sp;
     iod_container_tids_t tids;
     iod_trans_id_t rtid;
     herr_t ret_value = SUCCEED;
@@ -271,7 +271,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* retrieve all metadata from scratch pad */

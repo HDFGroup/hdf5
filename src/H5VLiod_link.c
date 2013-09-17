@@ -75,7 +75,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     if(H5VL_LINK_CREATE_HARD == create_type) {
-        scratch_pad_t sp;
+        scratch_pad sp;
         iod_handle_t mdkv_oh;
         uint64_t link_count = 0;
 
@@ -95,7 +95,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         /* open the metadata scratch pad */
-        if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
@@ -261,7 +261,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
     {
         iod_handle_t target_oh;
         iod_handle_t mdkv_oh;
-        scratch_pad_t sp;
+        scratch_pad sp;
         uint64_t link_count = 0;
 
         /* open the current group */
@@ -273,7 +273,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         /* open the metadata scratch pad */
-        if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
@@ -697,7 +697,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_link.link_type == H5L_TYPE_HARD) {
         iod_handle_t obj_oh;
         iod_handle_t mdkv_oh;
-        scratch_pad_t sp;
+        scratch_pad sp;
         uint64_t link_count = 0;
 
         obj_id = iod_link.u.iod_id;
@@ -711,7 +711,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         /* open the metadata scratch pad */
-        if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
@@ -739,9 +739,9 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
         if(0 == link_count) {
             if(iod_obj_unlink(coh, obj_id, wtid, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
-            if(iod_obj_unlink(coh, sp.mdkv_id, wtid, NULL) < 0)
+            if(iod_obj_unlink(coh, sp[0], wtid, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
-            if(iod_obj_unlink(coh, sp.attrkv_id, wtid, NULL) < 0)
+            if(iod_obj_unlink(coh, sp[1], wtid, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
         }
     }
