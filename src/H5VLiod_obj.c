@@ -53,6 +53,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t obj_id; /* The ID of the object */
     iod_handle_t mdkv_oh;
     scratch_pad sp;
+    uint32_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -67,8 +68,14 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* get scratch pad of the object */
-    if(iod_obj_get_scratch(obj_oh, rtid, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+    if(sp_cs) {
+        /* verify scratch pad integrity */
+        if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+    }
 
     /* open the metadata scratch pad */
     if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
@@ -257,6 +264,8 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
     iod_kv_t kv;
     iod_size_t kv_size = sizeof(H5VL_iod_link_t);
     H5VL_iod_link_t iod_link;
+    scratch_pad sp;
+    uint32_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -281,8 +290,14 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - NEED IOD & a lot more work*/
 #if 0
     /* get scratch pad of the object */
-    if(iod_obj_get_scratch(obj_oh, rtid, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+    if(sp_cs) {
+        /* verify scratch pad integrity */
+        if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+    }
 
     /* open the metadata scratch pad */
     if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
@@ -496,6 +511,7 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t obj_oh, mdkv_oh, attrkv_oh;
     iod_obj_id_t obj_id;
     scratch_pad sp;
+    uint32_t sp_cs = 0;
     H5I_type_t obj_type;
     iod_size_t num_attrs = 0;
     const char *loc_name = input->loc_name;
@@ -510,8 +526,14 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
     oinfo.addr = obj_id;
 
     /* get scratch pad of the object */
-    if(iod_obj_get_scratch(obj_oh, rtid, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+    if(sp_cs) {
+        /* verify scratch pad integrity */
+        if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+    }
 
     /* open the metadata scratch pad */
     if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
@@ -624,6 +646,7 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     const char *loc_name = input->path;
     const char *comment = input->comment;
     scratch_pad sp;
+    uint32_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -633,8 +656,14 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* get scratch pad of the object */
-    if(iod_obj_get_scratch(obj_oh, rtid, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+    if(sp_cs) {
+        /* verify scratch pad integrity */
+        if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+    }
 
     /* open the metadata scratch pad */
     if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
@@ -714,6 +743,7 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t obj_id;
     const char *loc_name = input->path;
     scratch_pad sp;
+    uint32_t sp_cs = 0;
     ssize_t size = 0;
     herr_t ret_value = SUCCEED;
 
@@ -724,8 +754,14 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* get scratch pad of the object */
-    if(iod_obj_get_scratch(obj_oh, rtid, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+    if(sp_cs) {
+        /* verify scratch pad integrity */
+        if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+    }
 
     /* open the metadata scratch pad */
     if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)

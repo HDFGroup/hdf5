@@ -977,6 +977,41 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__iod_server_adjust_buffer */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_verify_scratch_pad
+ *
+ * Purpose:     Function to insert the link count in an 
+ *              IOD KV object.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_verify_scratch_pad(scratch_pad sp, uint32_t iod_cs)
+{
+    uint32_t computed_cs = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* MSC - Need IOD */
+#if 0
+    computed_cs = H5checksum(&sp, sizeof(sp), NULL);
+
+    if(computed_cs != iod_cs) {
+        fprintf(stderr, "Scratch pad integrity check failed. IOD cs = %u, Computed cs = %u",
+                iod_cs, computed_cs);
+        ret_value = FAIL;
+    }
+#endif
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_verify_scratch_pad() */
+
 #if 0
 herr_t
 H5VL_iod_map_type_convert(hid_t src_id, hid_t dst_id, void *buf, size_t buf_size)

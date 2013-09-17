@@ -240,6 +240,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t root_oh; /* root object handle */
     iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
     scratch_pad sp;
+    uint32_t sp_cs = 0;
     iod_container_tids_t tids;
     iod_trans_id_t rtid;
     herr_t ret_value = SUCCEED;
@@ -270,8 +271,14 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object");
 
     /* get scratch pad of root group */
-    if(iod_obj_get_scratch(root_oh, rtid, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(root_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
+
+    if(sp_cs) {
+        /* verify scratch pad integrity */
+        if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+    }
 
     /* open the metadata scratch pad */
     if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)

@@ -217,6 +217,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t map_id; /* The ID of the map that needs to be opened */
     iod_handle_t map_oh, mdkv_oh;
     scratch_pad sp;
+    uint32_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -233,8 +234,14 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* get scratch pad of map */
-    if(iod_obj_get_scratch(map_oh, rtid, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(map_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+    if(sp_cs) {
+        /* verify scratch pad integrity */
+        if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+    }
 
     /* open the metadata scratch pad */
     if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)

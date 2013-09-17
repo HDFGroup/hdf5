@@ -76,6 +76,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 
     if(H5VL_LINK_CREATE_HARD == create_type) {
         scratch_pad sp;
+        uint32_t sp_cs = 0;
         iod_handle_t mdkv_oh;
         uint64_t link_count = 0;
 
@@ -91,8 +92,14 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 
         /* MSC - must get mdkvID from client, not get here. */
         /* get scratch pad */
-        if(iod_obj_get_scratch(target_oh, rtid, &sp, NULL, NULL) < 0)
+        if(iod_obj_get_scratch(target_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+        if(sp_cs) {
+            /* verify scratch pad integrity */
+            if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+        }
 
         /* open the metadata scratch pad */
         if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
@@ -262,6 +269,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
         iod_handle_t target_oh;
         iod_handle_t mdkv_oh;
         scratch_pad sp;
+        uint32_t sp_cs = 0;
         uint64_t link_count = 0;
 
         /* open the current group */
@@ -269,8 +277,13 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
         /* get scratch pad */
-        if(iod_obj_get_scratch(target_oh, rtid, &sp, NULL, NULL) < 0)
+        if(iod_obj_get_scratch(target_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+        if(sp_cs) {
+            /* verify scratch pad integrity */
+            if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+        }
 
         /* open the metadata scratch pad */
         if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
@@ -698,6 +711,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
         iod_handle_t obj_oh;
         iod_handle_t mdkv_oh;
         scratch_pad sp;
+        uint32_t sp_cs = 0;
         uint64_t link_count = 0;
 
         obj_id = iod_link.u.iod_id;
@@ -707,8 +721,14 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
         /* get scratch pad */
-        if(iod_obj_get_scratch(obj_oh, rtid, &sp, NULL, NULL) < 0)
+        if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+        if(sp_cs) {
+            /* verify scratch pad integrity */
+            if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+        }
 
         /* open the metadata scratch pad */
         if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
