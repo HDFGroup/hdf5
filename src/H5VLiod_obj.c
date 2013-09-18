@@ -121,6 +121,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
             void *buf = NULL;
             iod_mem_desc_t mem_desc; /* memory descriptor used for reading */
             iod_blob_iodesc_t file_desc; /* file descriptor used to write */
+            iod_checksum_t dt_cs = 0, iod_cs = 0;
 
             /* retrieve blob size metadata from scratch pad */
             if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, &buf_size, 
@@ -141,8 +142,17 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
             file_desc.frag->len = (iod_size_t)buf_size;
 
             /* read the serialized type value from the BLOB object */
-            if(iod_blob_read(obj_oh, rtid, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
+            if(iod_blob_read(obj_oh, rtid, NULL, &mem_desc, &file_desc, &iod_cs, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
+            /* MSC - NEED IOD */
+#if 0
+            /* calculate a checksum for the datatype */
+            dt_cs = H5checksum(buf, buf_size, NULL);
+
+            /* Verifty checksum against one given by IOD */
+            if(iod_cs != dt_cs)
+                HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
+#endif
 
             /* decode the datatype */
             if((output.type_id = H5Tdecode(buf)) < 0)
@@ -334,6 +344,7 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
             void *buf = NULL;
             iod_mem_desc_t mem_desc; /* memory descriptor used for reading */
             iod_blob_iodesc_t file_desc; /* file descriptor used to write */
+            iod_checksum_t dt_cs = 0, iod_cs = 0;
 
             /* retrieve blob size metadata from scratch pad */
             if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, &buf_size, 
@@ -354,8 +365,18 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
             file_desc.frag->len = (iod_size_t)buf_size;
 
             /* read the serialized type value from the BLOB object */
-            if(iod_blob_read(obj_oh, rtid, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
+            if(iod_blob_read(obj_oh, rtid, NULL, &mem_desc, &file_desc, &iod_cs, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
+
+            /* MSC - NEED IOD */
+#if 0
+            /* calculate a checksum for the datatype */
+            dt_cs = H5checksum(buf, buf_size, NULL);
+
+            /* Verifty checksum against one given by IOD */
+            if(iod_cs != dt_cs)
+                HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
+#endif
 
             /* decode the datatype */
             if((output.type_id = H5Tdecode(buf)) < 0)

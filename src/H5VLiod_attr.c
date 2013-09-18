@@ -410,7 +410,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     void *buf; /* buffer to hold outgoing data */
     iod_handle_t mdkv_oh; /* metadata KV handle of attribute */
     scratch_pad sp;
-    iod_checksum_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0, iod_cs = 0, attr_cs = 0;
     int ndims; /* dataset's rank/number of dimensions */
     hssize_t num_descriptors = 0; /* number of IOD file descriptors needed to describe filespace selection */
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
@@ -481,9 +481,16 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     file_desc = hslabs;
 
     /* read from array object */
-    if(iod_array_read(iod_oh, rtid, NULL, mem_desc, &file_desc, NULL, NULL) < 0)
+    if(iod_array_read(iod_oh, rtid, NULL, mem_desc, &file_desc, &iod_cs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
-    
+
+    /* MSC - NEED IOD */
+#if 0
+    attr_cs = H5checksum(buf, size, NULL);
+    if(attr_cs != iod_cs)
+        HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data corruption detected when reading attribute");
+#endif
+
     {
         int i;
         hbool_t flag;
@@ -578,7 +585,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     void *buf; /* buffer to hold outgoing data */
     int ndims; /* dataset's rank/number of dimensions */
     scratch_pad sp;
-    iod_checksum_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0, attr_cs = 0;
     iod_handle_t mdkv_oh; /* metadata KV handle of attribute */
     hssize_t num_descriptors = 0; /* number of IOD file descriptors needed to describe filespace selection*/
     na_addr_t source = HG_Handler_get_addr(op_data->hg_handle); /* source address to pull data from */
@@ -672,8 +679,10 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     /* set the file descriptor */
     file_desc = hslabs;
 
+    attr_cs = H5checksum(buf, size, NULL);
+
     /* write from array object */
-    if(iod_array_write(iod_oh, wtid, NULL, mem_desc, &file_desc, NULL, NULL) < 0)
+    if(iod_array_write(iod_oh, wtid, NULL, mem_desc, &file_desc, &attr_cs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
 
 #if H5_DO_NATIVE
