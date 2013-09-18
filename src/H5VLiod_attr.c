@@ -184,6 +184,9 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
 
     output.iod_oh = obj_oh;
 
+    /* MSC - fake so not to fail */
+    output.iod_oh.cookie = 10;
+
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with attr create, sending response to client\n");
 #endif
@@ -194,6 +197,7 @@ done:
 
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
+        fprintf(stderr, "Failed Attribute Create\n");
         output.iod_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }

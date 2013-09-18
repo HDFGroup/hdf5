@@ -356,7 +356,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
         /* fake a dataspace, type, and dcpl */
         dims [0] = 60;
         output.space_id = H5Screate_simple(1, dims, NULL);
-        output.type_id = H5Tcopy(H5T_NATIVE_INT);
+        output.type_id = H5Tcopy(H5T_STD_I32LE);
         output.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
         dset_oh.cookie = 1;
 #endif
@@ -496,7 +496,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
 
         {
             hbool_t flag = FALSE;
-            int *ptr = (int *)buf;
+            int32_t *ptr = (int32_t *)buf;
             int i;
 
 #if H5_DO_NATIVE
@@ -620,8 +620,10 @@ done:
     input = (dset_io_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    if(buf)
+    if(buf) {
         free(buf);
+        buf=NULL;
+    }
 
     /* close the dataset if we opened it in this routine */
     if(opened_locally) {
@@ -975,7 +977,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
         { 
             int *ptr = (int *)buf;
  
-           fprintf(stderr, "DWRITE Received a buffer of size %d with values: ", size);
+           fprintf(stderr, "DWRITE Received a buffer of size %zu with values: ", size);
             for(u=0 ; u<size/sizeof(int) ; ++u)
                 fprintf(stderr, "%d ", ptr[u]);
             fprintf(stderr, "\n");

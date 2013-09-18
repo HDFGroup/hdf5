@@ -23,9 +23,9 @@ int main(int argc, char **argv) {
     uint64_t version;
     uint64_t trans_num;
 
-    int *wdata1 = NULL, *wdata2 = NULL;
+    int32_t *wdata1 = NULL, *wdata2 = NULL;
     int16_t *wdata3 = NULL;
-    int *rdata1 = NULL, *rdata2 = NULL;
+    int32_t *rdata1 = NULL, *rdata2 = NULL;
     int16_t *rdata3 = NULL;
     const unsigned int nelem=60;
     hsize_t dims[1];
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
     /* Attach a checksum to the dxpl which is verified all the way
        down at the server */
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-    cs = H5checksum(wdata1, sizeof(int) * nelem, NULL);
+    cs = H5checksum(wdata1, sizeof(int32_t) * nelem, NULL);
     H5Pset_dxpl_checksum(dxpl_id, cs);
     ret = H5Dwrite_ff(did1, dtid, sid, sid, dxpl_id, wdata1, tid1, event_q);
     assert(ret == 0);
@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
     /* Raw data write on D2. same as previous, but here we indicate
        through the property list that we want to inject a
        corruption. */
-    cs = H5checksum(wdata2, sizeof(int) * nelem, NULL);
+    cs = H5checksum(wdata2, sizeof(int32_t) * nelem, NULL);
     H5Pset_dxpl_checksum(dxpl_id, cs);
     H5Pset_dxpl_inject_corruption(dxpl_id, 1);
     ret = H5Dwrite_ff(did2, dtid, sid, sid, dxpl_id, wdata2, tid1, event_q);
