@@ -41,11 +41,12 @@ $ CALL TOOLTEST tnoddl.ddl "--ddl -y packedbits.h5"
 $ CALL TOOLTEST tnodata.ddl "--output packedbits.h5"
 $ CALL TOOLTEST tnoattrddl.ddl "-"""O""" -y tattr.h5"
 $ CALL TOOLTEST tnoattrdata.ddl "-"""A""" -o tattr.h5"
-$! These 4 cases need new function to handle them
-$! CALL TOOLTEST2 trawdatafile.exp "-y -o trawdatafile.txt packedbits.h5"
-$! CALL TOOLTEST2 tnoddlfile.exp "-"""O""" -y -o tnoddlfile.txt packedbits.h5"
+$! These 4 cases need new function to handle them.  I run them temporarily
+$! with TOOLTEST to check the metadata part and left out the data part.
+$ CALL TOOLTEST trawdatafile.ddl "-y -o trawdatafile.txt packedbits.h5"
+$ CALL TOOLTEST tnoddlfile.ddl "-"""O""" -y -o tnoddlfile.txt packedbits.h5"
 $! CALL TOOLTEST2A twithddlfile.exp twithddl.exp "--ddl=twithddl.txt -y -o twithddlfile.txt packedbits.h5"
-$! CALL TOOLTEST2 trawssetfile.exp "-d "/dset1[1,1;;;]" -y -o trawssetfile.txt tdset.h5"
+$ CALL TOOLTEST trawssetfile.ddl "-d "/dset1[1,1;;;]" -y -o trawssetfile.txt tdset.h5"
 $
 $ ! Test for maximum display datasets
 $ CALL TOOLTEST twidedisplay.ddl "-w0 packedbits.h5"
