@@ -76,7 +76,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 
     if(H5VL_LINK_CREATE_HARD == create_type) {
         scratch_pad sp;
-        uint32_t sp_cs = 0;
+        iod_checksum_t sp_cs = 0;
         iod_handle_t mdkv_oh;
         uint64_t link_count = 0;
 
@@ -269,7 +269,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
         iod_handle_t target_oh;
         iod_handle_t mdkv_oh;
         scratch_pad sp;
-        uint32_t sp_cs = 0;
+        iod_checksum_t sp_cs = 0;
         uint64_t link_count = 0;
 
         /* open the current group */
@@ -711,7 +711,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
         iod_handle_t obj_oh;
         iod_handle_t mdkv_oh;
         scratch_pad sp;
-        uint32_t sp_cs = 0;
+        iod_checksum_t sp_cs = 0;
         uint64_t link_count = 0;
 
         obj_id = iod_link.u.iod_id;

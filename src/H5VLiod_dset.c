@@ -151,7 +151,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     /* for the process that succeeded in creating the dataset, update
        the parent KV, create scratch pad */
     if(0 == ret) {
-        uint32_t sp_cs;
+        iod_checksum_t sp_cs;
 
         /* create the attribute KV object for the dataset */
         if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
@@ -290,7 +290,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t dset_id; /* ID of the dataset to open */
     iod_handle_t dset_oh, mdkv_oh;
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -771,9 +771,20 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
 
     /* verify return values */
     for(n=0 ; n<num_descriptors ; n++) {
+        iod_checksum_t entry_cs = 0;
+
         if(ret_list[n] < 0)
             HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
+        /* MSC - NEED IOD */
+#if 0
+        /* Verify checksum for that entry */
+        buf_ptr = (uint8_t *)buf;
+        entry_cs = H5checksum(buf_ptr, sizeof(iod_size_t) + sizeof(iod_obj_id_t), NULL);
+        if(entry_cs != io_array[n].cs)
+            HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading");
+        buf_ptr += sizeof(iod_size_t) + sizeof(iod_obj_id_t);
+#endif
         free(io_array[n].mem_desc);
     }
 
@@ -1077,7 +1088,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
         int rank;
         hid_t space_id;
         scratch_pad sp;
-        uint32_t sp_cs = 0;
+        iod_checksum_t sp_cs = 0;
         iod_handle_t mdkv_oh;
 
         /* get scratch pad of the dataset */
@@ -1498,6 +1509,8 @@ H5VL__iod_server_vl_data_io_cb(void UNUSED *elem, hid_t type_id, unsigned ndims,
     iod_blob_iodesc_t *blob_desc; /* blob descriptor */
     size_t old_seq_len = 0;
     unsigned u;
+    iod_checksum_t entry_cs = 0, read_cs = 0;
+    H5_checksum_seed_t cs;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1526,8 +1539,20 @@ H5VL__iod_server_vl_data_io_cb(void UNUSED *elem, hid_t type_id, unsigned ndims,
     file_desc = hslab;
 
     if(iod_array_read(udata->iod_oh, tid, NULL, 
-                      mem_desc, &file_desc, NULL, NULL) < 0)
+                      mem_desc, &file_desc, &read_cs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+
+    /* MSC - NEED IOD */
+#if 0
+    /* compute checksum of blob ID and sequence length */
+    cs.a = cs.b = cs.c = cs.state = 0;
+    cs.total_length = sizeof(iod_obj_id_t) + sizeof(iod_size_t);
+    entry_cs = H5checksum(&blob_id, sizeof(iod_obj_id_t), &cs);
+    entry_cs = H5checksum(&seq_len, sizeof(iod_size_t), &cs);
+
+    if(entry_cs != read_cs)
+        HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading");
+#endif
 
     free(mem_desc);
 
@@ -1604,9 +1629,15 @@ H5VL__iod_server_vl_data_io_cb(void UNUSED *elem, hid_t type_id, unsigned ndims,
         mem_desc->frag[1].addr = &seq_len;
         mem_desc->frag[1].len = sizeof(iod_size_t);
 
+        /* compute checksum of blob ID and sequence length */
+        cs.a = cs.b = cs.c = cs.state = 0;
+        cs.total_length = sizeof(iod_obj_id_t) + sizeof(iod_size_t);
+        entry_cs = H5checksum(&blob_id, sizeof(iod_obj_id_t), &cs);
+        entry_cs = H5checksum(&seq_len, sizeof(iod_size_t), &cs);
+
         /* write the blob ID & size to the array element */
         if(iod_array_write(udata->iod_oh, tid, NULL, 
-                           mem_desc, &file_desc, NULL, NULL) < 0)
+                           mem_desc, &file_desc, &entry_cs, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
         free(mem_desc);

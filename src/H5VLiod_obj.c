@@ -53,7 +53,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t obj_id; /* The ID of the object */
     iod_handle_t mdkv_oh;
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -265,7 +265,7 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
     iod_size_t kv_size = sizeof(H5VL_iod_link_t);
     H5VL_iod_link_t iod_link;
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -511,7 +511,7 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t obj_oh, mdkv_oh, attrkv_oh;
     iod_obj_id_t obj_id;
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     H5I_type_t obj_type;
     iod_size_t num_attrs = 0;
     const char *loc_name = input->loc_name;
@@ -646,7 +646,7 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     const char *loc_name = input->path;
     const char *comment = input->comment;
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -743,7 +743,7 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t obj_id;
     const char *loc_name = input->path;
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     ssize_t size = 0;
     herr_t ret_value = SUCCEED;
 

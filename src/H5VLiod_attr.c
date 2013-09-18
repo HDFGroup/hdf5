@@ -60,7 +60,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_array_struct_t array; /* IOD array structure for attribute's creation */
     iod_size_t *max_dims; /* MAX dims for IOD */
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     iod_ret_t ret;
     hbool_t collective = FALSE; /* MSC - change when we allow for collective */
     herr_t ret_value = SUCCEED;
@@ -103,7 +103,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     /* for the process that succeeded in creating the attribute, update
        the parent scratch pad, create attribute scratch pad */
     if(0 == ret) {
-        uint32_t sp_cs;
+        iod_checksum_t sp_cs;
 
         /* create the metadata KV object for the attribute */
         if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
@@ -239,7 +239,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     const char *loc_name = input->path; /* current  path to start traversal */
     const char *attr_name = input->attr_name; /* attribute's name to open */
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
@@ -410,7 +410,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     void *buf; /* buffer to hold outgoing data */
     iod_handle_t mdkv_oh; /* metadata KV handle of attribute */
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     int ndims; /* dataset's rank/number of dimensions */
     hssize_t num_descriptors = 0; /* number of IOD file descriptors needed to describe filespace selection */
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
@@ -578,7 +578,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     void *buf; /* buffer to hold outgoing data */
     int ndims; /* dataset's rank/number of dimensions */
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     iod_handle_t mdkv_oh; /* metadata KV handle of attribute */
     hssize_t num_descriptors = 0; /* number of IOD file descriptors needed to describe filespace selection*/
     na_addr_t source = HG_Handler_get_addr(op_data->hg_handle); /* source address to pull data from */
@@ -741,7 +741,7 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
     const char *loc_name = input->path; /* path to start hierarchy traversal */
     const char *attr_name = input->attr_name; /* attribute's name */
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     iod_size_t kv_size = 0;
     htri_t ret = -1;
     herr_t ret_value = SUCCEED;
@@ -853,7 +853,7 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
     iod_kv_t kv; /* KV entry */
     H5VL_iod_link_t iod_link;
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -970,7 +970,7 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     iod_kv_t kv;
     H5VL_iod_link_t iod_link;
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT

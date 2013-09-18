@@ -98,7 +98,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         void *key = NULL;
         void *value = NULL;
         hid_t fcpl_id;
-        uint32_t sp_cs;
+        iod_checksum_t sp_cs;
 
         /* create the metadata KV object for the root group */
         if(iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, 
@@ -240,7 +240,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t root_oh; /* root object handle */
     iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     iod_container_tids_t tids;
     iod_trans_id_t rtid;
     herr_t ret_value = SUCCEED;

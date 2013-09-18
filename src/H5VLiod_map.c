@@ -98,7 +98,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     /* for the process that succeeded in creating the map, create
        the scratch pad for it too */
     if(0 == ret) {
-        uint32_t sp_cs;
+        iod_checksum_t sp_cs;
 
         /* create the metadata KV object for the map */
         if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
@@ -217,7 +217,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t map_id; /* The ID of the map that needs to be opened */
     iod_handle_t map_oh, mdkv_oh;
     scratch_pad sp;
-    uint32_t sp_cs = 0;
+    iod_checksum_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
