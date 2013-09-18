@@ -1662,7 +1662,6 @@ H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     htri_t              prop_exists = FALSE;    /* Whether the multi VFD DXPL property already exists */
     H5FD_mem_t		mt, mmt, hi = H5FD_MEM_DEFAULT;
     haddr_t		start_addr = 0;
-    static const char  *func = "H5FD_multi_read";  /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -1714,7 +1713,6 @@ H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     htri_t              prop_exists = FALSE;    /* Whether the multi VFD DXPL property already exists */
     H5FD_mem_t		mt, mmt, hi = H5FD_MEM_DEFAULT;
     haddr_t		start_addr = 0;
-    static const char  *func = "H5FD_multi_read";  /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);

@@ -69,21 +69,21 @@
 /********************/
 
 /* Metadata cache callbacks */
-static H5B2_hdr_t *H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_hdr_t *hdr, unsigned UNUSED * flags_ptr);
-static herr_t H5B2_cache_hdr_dest(H5F_t *f, H5B2_hdr_t *hdr);
-static herr_t H5B2_cache_hdr_clear(H5F_t *f, H5B2_hdr_t *hdr, hbool_t destroy);
-static herr_t H5B2_cache_hdr_size(const H5F_t *f, const H5B2_hdr_t *hdr, size_t *size_ptr);
-static H5B2_internal_t *H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_internal_t *i, unsigned UNUSED * flags_ptr);
-static herr_t H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *internal);
-static herr_t H5B2_cache_internal_clear(H5F_t *f, H5B2_internal_t *i, hbool_t destroy);
-static herr_t H5B2_cache_internal_size(const H5F_t *f, const H5B2_internal_t *i, size_t *size_ptr);
-static H5B2_leaf_t *H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *l, unsigned UNUSED * flags_ptr);
-static herr_t H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *leaf);
-static herr_t H5B2_cache_leaf_clear(H5F_t *f, H5B2_leaf_t *l, hbool_t destroy);
-static herr_t H5B2_cache_leaf_size(const H5F_t *f, const H5B2_leaf_t *l, size_t *size_ptr);
+static H5B2_hdr_t *H5B2__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+static herr_t H5B2__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_hdr_t *hdr, unsigned UNUSED * flags_ptr);
+static herr_t H5B2__cache_hdr_dest(H5F_t *f, H5B2_hdr_t *hdr);
+static herr_t H5B2__cache_hdr_clear(H5F_t *f, H5B2_hdr_t *hdr, hbool_t destroy);
+static herr_t H5B2__cache_hdr_size(const H5F_t *f, const H5B2_hdr_t *hdr, size_t *size_ptr);
+static H5B2_internal_t *H5B2__cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+static herr_t H5B2__cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_internal_t *i, unsigned UNUSED * flags_ptr);
+static herr_t H5B2__cache_internal_dest(H5F_t *f, H5B2_internal_t *internal);
+static herr_t H5B2__cache_internal_clear(H5F_t *f, H5B2_internal_t *i, hbool_t destroy);
+static herr_t H5B2__cache_internal_size(const H5F_t *f, const H5B2_internal_t *i, size_t *size_ptr);
+static H5B2_leaf_t *H5B2__cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+static herr_t H5B2__cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *l, unsigned UNUSED * flags_ptr);
+static herr_t H5B2__cache_leaf_dest(H5F_t *f, H5B2_leaf_t *leaf);
+static herr_t H5B2__cache_leaf_clear(H5F_t *f, H5B2_leaf_t *l, hbool_t destroy);
+static herr_t H5B2__cache_leaf_size(const H5F_t *f, const H5B2_leaf_t *l, size_t *size_ptr);
 
 
 /*********************/
@@ -93,31 +93,31 @@ static herr_t H5B2_cache_leaf_size(const H5F_t *f, const H5B2_leaf_t *l, size_t 
 /* H5B2 inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_BT2_HDR[1] = {{
     H5AC_BT2_HDR_ID,
-    (H5AC_load_func_t)H5B2_cache_hdr_load,
-    (H5AC_flush_func_t)H5B2_cache_hdr_flush,
-    (H5AC_dest_func_t)H5B2_cache_hdr_dest,
-    (H5AC_clear_func_t)H5B2_cache_hdr_clear,
-    (H5AC_size_func_t)H5B2_cache_hdr_size,
+    (H5AC_load_func_t)H5B2__cache_hdr_load,
+    (H5AC_flush_func_t)H5B2__cache_hdr_flush,
+    (H5AC_dest_func_t)H5B2__cache_hdr_dest,
+    (H5AC_clear_func_t)H5B2__cache_hdr_clear,
+    (H5AC_size_func_t)H5B2__cache_hdr_size,
 }};
 
 /* H5B2 inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_BT2_INT[1] = {{
     H5AC_BT2_INT_ID,
-    (H5AC_load_func_t)H5B2_cache_internal_load,
-    (H5AC_flush_func_t)H5B2_cache_internal_flush,
-    (H5AC_dest_func_t)H5B2_cache_internal_dest,
-    (H5AC_clear_func_t)H5B2_cache_internal_clear,
-    (H5AC_size_func_t)H5B2_cache_internal_size,
+    (H5AC_load_func_t)H5B2__cache_internal_load,
+    (H5AC_flush_func_t)H5B2__cache_internal_flush,
+    (H5AC_dest_func_t)H5B2__cache_internal_dest,
+    (H5AC_clear_func_t)H5B2__cache_internal_clear,
+    (H5AC_size_func_t)H5B2__cache_internal_size,
 }};
 
 /* H5B2 inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_BT2_LEAF[1] = {{
     H5AC_BT2_LEAF_ID,
-    (H5AC_load_func_t)H5B2_cache_leaf_load,
-    (H5AC_flush_func_t)H5B2_cache_leaf_flush,
-    (H5AC_dest_func_t)H5B2_cache_leaf_dest,
-    (H5AC_clear_func_t)H5B2_cache_leaf_clear,
-    (H5AC_size_func_t)H5B2_cache_leaf_size,
+    (H5AC_load_func_t)H5B2__cache_leaf_load,
+    (H5AC_flush_func_t)H5B2__cache_leaf_flush,
+    (H5AC_dest_func_t)H5B2__cache_leaf_dest,
+    (H5AC_clear_func_t)H5B2__cache_leaf_clear,
+    (H5AC_size_func_t)H5B2__cache_leaf_size,
 }};
 
 
@@ -133,7 +133,7 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_hdr_load
+ * Function:	H5B2__cache_hdr_load
  *
  * Purpose:	Loads a B-tree header from the disk.
  *
@@ -147,7 +147,7 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5B2_hdr_t *
-H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
+H5B2__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
     H5B2_hdr_t		*hdr = NULL;    /* B-tree header */
     H5B2_hdr_cache_ud_t *udata = (H5B2_hdr_cache_ud_t *)_udata;
@@ -162,7 +162,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     const uint8_t	*p;             /* Pointer into raw data buffer */
     H5B2_hdr_t		*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(f);
@@ -253,11 +253,11 @@ done:
             HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, NULL, "can't release v2 B-tree header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_cache_hdr_load() */ /*lint !e818 Can't make udata a pointer to const */
+} /* end H5B2__cache_hdr_load() */ /*lint !e818 Can't make udata a pointer to const */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_hdr_flush
+ * Function:	H5B2__cache_hdr_flush
  *
  * Purpose:	Flushes a dirty B-tree header to disk.
  *
@@ -270,14 +270,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
+H5B2__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
     H5B2_hdr_t *hdr, unsigned UNUSED * flags_ptr)
 {
     H5WB_t      *wb = NULL;             /* Wrapped buffer for header data */
     uint8_t     hdr_buf[H5B2_HDR_BUF_SIZE]; /* Buffer for header */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(f);
@@ -348,7 +348,7 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
     } /* end if */
 
     if(destroy)
-        if(H5B2_cache_hdr_dest(f, hdr) < 0)
+        if(H5B2__cache_hdr_dest(f, hdr) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree header")
 
 done:
@@ -357,11 +357,11 @@ done:
         HDONE_ERROR(H5E_BTREE, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_cache_hdr_flush() */
+} /* H5B2__cache_hdr_flush() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_hdr_dest
+ * Function:	H5B2__cache_hdr_dest
  *
  * Purpose:	Destroys a B-tree header in memory.
  *
@@ -374,11 +374,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_hdr_dest(H5F_t *f, H5B2_hdr_t *hdr)
+H5B2__cache_hdr_dest(H5F_t *f, H5B2_hdr_t *hdr)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(hdr);
@@ -401,11 +401,11 @@ H5B2_cache_hdr_dest(H5F_t *f, H5B2_hdr_t *hdr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_cache_hdr_dest() */
+} /* end H5B2__cache_hdr_dest() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_hdr_clear
+ * Function:	H5B2__cache_hdr_clear
  *
  * Purpose:	Mark a B-tree header in memory as non-dirty.
  *
@@ -418,11 +418,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_hdr_clear(H5F_t *f, H5B2_hdr_t *hdr, hbool_t destroy)
+H5B2__cache_hdr_clear(H5F_t *f, H5B2_hdr_t *hdr, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -433,16 +433,16 @@ H5B2_cache_hdr_clear(H5F_t *f, H5B2_hdr_t *hdr, hbool_t destroy)
     hdr->cache_info.is_dirty = FALSE;
 
     if(destroy)
-        if(H5B2_cache_hdr_dest(f, hdr) < 0)
+        if(H5B2__cache_hdr_dest(f, hdr) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree header")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_cache_hdr_clear() */
+} /* end H5B2__cache_hdr_clear() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_hdr_size
+ * Function:	H5B2__cache_hdr_size
  *
  * Purpose:	Compute the size in bytes of a B-tree header
  *		on disk, and return it in *size_ptr.  On failure,
@@ -457,9 +457,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_hdr_size(const H5F_t UNUSED *f, const H5B2_hdr_t *hdr, size_t *size_ptr)
+H5B2__cache_hdr_size(const H5F_t UNUSED *f, const H5B2_hdr_t *hdr, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC_NOERR
 
     /* check arguments */
     HDassert(f);
@@ -469,11 +469,11 @@ H5B2_cache_hdr_size(const H5F_t UNUSED *f, const H5B2_hdr_t *hdr, size_t *size_p
     *size_ptr = hdr->hdr_size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5B2_cache_hdr_size() */
+} /* H5B2__cache_hdr_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_internal_load
+ * Function:	H5B2__cache_internal_load
  *
  * Purpose:	Loads a B-tree internal node from the disk.
  *
@@ -487,7 +487,7 @@ H5B2_cache_hdr_size(const H5F_t UNUSED *f, const H5B2_hdr_t *hdr, size_t *size_p
  *-------------------------------------------------------------------------
  */
 static H5B2_internal_t *
-H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
+H5B2__cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
     H5B2_internal_cache_ud_t *udata = (H5B2_internal_cache_ud_t *)_udata;     /* Pointer to user data */
     H5B2_internal_t	*internal = NULL;       /* Internal node read */
@@ -499,7 +499,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     unsigned		u;              /* Local index variable */
     H5B2_internal_t	*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(f);
@@ -601,11 +601,11 @@ done:
             HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree internal node")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_cache_internal_load() */ /*lint !e818 Can't make udata a pointer to const */
+} /* H5B2__cache_internal_load() */ /*lint !e818 Can't make udata a pointer to const */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_internal_flush
+ * Function:	H5B2__cache_internal_flush
  *
  * Purpose:	Flushes a dirty B-tree internal node to disk.
  *
@@ -618,11 +618,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_internal_t *internal, unsigned UNUSED * flags_ptr)
+H5B2__cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_internal_t *internal, unsigned UNUSED * flags_ptr)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(f);
@@ -693,16 +693,16 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
     } /* end if */
 
     if(destroy)
-        if(H5B2_cache_internal_dest(f, internal) < 0)
+        if(H5B2__cache_internal_dest(f, internal) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree internal node")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_cache_internal_flush() */
+} /* H5B2__cache_internal_flush() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_internal_dest
+ * Function:	H5B2__cache_internal_dest
  *
  * Purpose:	Destroys a B-tree internal node in memory.
  *
@@ -715,11 +715,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *internal)
+H5B2__cache_internal_dest(H5F_t *f, H5B2_internal_t *internal)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(f);
@@ -743,11 +743,11 @@ H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *internal)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_cache_internal_dest() */
+} /* end H5B2__cache_internal_dest() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_internal_clear
+ * Function:	H5B2__cache_internal_clear
  *
  * Purpose:	Mark a B-tree internal node in memory as non-dirty.
  *
@@ -760,11 +760,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_internal_clear(H5F_t *f, H5B2_internal_t *internal, hbool_t destroy)
+H5B2__cache_internal_clear(H5F_t *f, H5B2_internal_t *internal, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -775,16 +775,16 @@ H5B2_cache_internal_clear(H5F_t *f, H5B2_internal_t *internal, hbool_t destroy)
     internal->cache_info.is_dirty = FALSE;
 
     if(destroy)
-        if(H5B2_cache_internal_dest(f, internal) < 0)
+        if(H5B2__cache_internal_dest(f, internal) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree internal node")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_cache_internal_clear() */
+} /* end H5B2__cache_internal_clear() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_internal_size
+ * Function:	H5B2__cache_internal_size
  *
  * Purpose:	Compute the size in bytes of a B-tree internal node
  *		on disk, and return it in *size_ptr.  On failure,
@@ -799,9 +799,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_internal_size(const H5F_t UNUSED *f, const H5B2_internal_t *internal, size_t *size_ptr)
+H5B2__cache_internal_size(const H5F_t UNUSED *f, const H5B2_internal_t *internal, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check arguments */
     HDassert(internal);
@@ -812,11 +812,11 @@ H5B2_cache_internal_size(const H5F_t UNUSED *f, const H5B2_internal_t *internal,
     *size_ptr = internal->hdr->node_size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5B2_cache_internal_size() */
+} /* H5B2__cache_internal_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_leaf_load
+ * Function:	H5B2__cache_leaf_load
  *
  * Purpose:	Loads a B-tree leaf from the disk.
  *
@@ -830,7 +830,7 @@ H5B2_cache_internal_size(const H5F_t UNUSED *f, const H5B2_internal_t *internal,
  *-------------------------------------------------------------------------
  */
 static H5B2_leaf_t *
-H5B2_cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata)
+H5B2__cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
     H5B2_leaf_cache_ud_t *udata = (H5B2_leaf_cache_ud_t *)_udata;
     H5B2_leaf_t		*leaf = NULL;   /* Pointer to lead node loaded */
@@ -841,7 +841,7 @@ H5B2_cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     unsigned		u;              /* Local index variable */
     H5B2_leaf_t		*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(f);
@@ -923,11 +923,11 @@ done:
             HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree leaf node")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_cache_leaf_load() */ /*lint !e818 Can't make udata a pointer to const */
+} /* H5B2__cache_leaf_load() */ /*lint !e818 Can't make udata a pointer to const */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_leaf_flush
+ * Function:	H5B2__cache_leaf_flush
  *
  * Purpose:	Flushes a dirty B-tree leaf node to disk.
  *
@@ -940,11 +940,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *leaf, unsigned UNUSED * flags_ptr)
+H5B2__cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *leaf, unsigned UNUSED * flags_ptr)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(f);
@@ -1001,16 +1001,16 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
     } /* end if */
 
     if(destroy)
-        if(H5B2_cache_leaf_dest(f, leaf) < 0)
+        if(H5B2__cache_leaf_dest(f, leaf) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree leaf node")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_cache_leaf_flush() */
+} /* H5B2__cache_leaf_flush() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_leaf_dest
+ * Function:	H5B2__cache_leaf_dest
  *
  * Purpose:	Destroys a B-tree leaf node in memory.
  *
@@ -1023,11 +1023,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *leaf)
+H5B2__cache_leaf_dest(H5F_t *f, H5B2_leaf_t *leaf)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(f);
@@ -1051,11 +1051,11 @@ H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *leaf)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_cache_leaf_dest() */
+} /* end H5B2__cache_leaf_dest() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_leaf_clear
+ * Function:	H5B2__cache_leaf_clear
  *
  * Purpose:	Mark a B-tree leaf node in memory as non-dirty.
  *
@@ -1068,11 +1068,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_leaf_clear(H5F_t *f, H5B2_leaf_t *leaf, hbool_t destroy)
+H5B2__cache_leaf_clear(H5F_t *f, H5B2_leaf_t *leaf, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -1083,16 +1083,16 @@ H5B2_cache_leaf_clear(H5F_t *f, H5B2_leaf_t *leaf, hbool_t destroy)
     leaf->cache_info.is_dirty = FALSE;
 
     if(destroy)
-        if(H5B2_cache_leaf_dest(f, leaf) < 0)
+        if(H5B2__cache_leaf_dest(f, leaf) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree leaf node")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_cache_leaf_clear() */
+} /* end H5B2__cache_leaf_clear() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_leaf_size
+ * Function:	H5B2__cache_leaf_size
  *
  * Purpose:	Compute the size in bytes of a B-tree leaf node
  *		on disk, and return it in *size_ptr.  On failure,
@@ -1107,9 +1107,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_leaf_size(const H5F_t UNUSED *f, const H5B2_leaf_t *leaf, size_t *size_ptr)
+H5B2__cache_leaf_size(const H5F_t UNUSED *f, const H5B2_leaf_t *leaf, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check arguments */
     HDassert(leaf);
@@ -1120,5 +1120,5 @@ H5B2_cache_leaf_size(const H5F_t UNUSED *f, const H5B2_leaf_t *leaf, size_t *siz
     *size_ptr = leaf->hdr->node_size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5B2_cache_leaf_size() */
+} /* H5B2__cache_leaf_size() */
 
