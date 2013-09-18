@@ -1787,7 +1787,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Aexists_ff(hid_t obj_id, const char *attr_name, htri_t *ret, hid_t rcxt_id, hid_t eq_id)
+H5Aexists_ff(hid_t obj_id, const char *attr_name, hbool_t *ret, hid_t rcxt_id, hid_t eq_id)
 {
     H5VL_t     *vol_plugin;
     void       *obj;
@@ -1823,7 +1823,7 @@ H5Aexists_ff(hid_t obj_id, const char *attr_name, htri_t *ret, hid_t rcxt_id, hi
 
     /* get the attribute info through the VOL */
     if(H5VL_attr_get(obj, vol_plugin, H5VL_ATTR_EXISTS, dxpl_id, eq_id, 
-                     loc_params, attr_name, ret) < 0)
+                     loc_params, attr_name, (htri_t *)ret) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
@@ -1846,7 +1846,7 @@ done:
  */
 herr_t
 H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
-                     hid_t lapl_id, htri_t *ret, hid_t rcxt_id, hid_t eq_id)
+                     hid_t lapl_id, hbool_t *ret, hid_t rcxt_id, hid_t eq_id)
 {
     H5VL_t     *vol_plugin;
     void       *obj;
@@ -1892,7 +1892,7 @@ H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     /* get the attribute info through the VOL */
     if(H5VL_attr_get(obj, vol_plugin, H5VL_ATTR_EXISTS, dxpl_id, eq_id, 
-                     loc_params, attr_name, ret) < 0)
+                     loc_params, attr_name, (htri_t *)ret) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
@@ -2414,7 +2414,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, htri_t *ret, 
+H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, hbool_t *ret, 
              hid_t rcxt_id, hid_t eq_id)
 {
     void    *obj = NULL;        /* object token of loc_id */
@@ -2456,7 +2456,7 @@ H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, htri_t *ret,
 
     /* check link existence through the VOL */
     if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_EXISTS, 
-                     dxpl_id, eq_id, ret) < 0)
+                     dxpl_id, eq_id, (htri_t *)ret) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -2868,7 +2868,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Oexists_by_name_ff(hid_t loc_id, const char *name, htri_t *ret, hid_t lapl_id,
+H5Oexists_by_name_ff(hid_t loc_id, const char *name, hbool_t *ret, hid_t lapl_id,
                      hid_t rcxt_id, hid_t eq_id)
 {
     void    *obj = NULL;        /* object token of loc_id */
@@ -2910,7 +2910,7 @@ H5Oexists_by_name_ff(hid_t loc_id, const char *name, htri_t *ret, hid_t lapl_id,
 
     /* change the ref count through the VOL */
     if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_EXISTS, 
-                       dxpl_id, eq_id, ret) < 0)
+                       dxpl_id, eq_id, (htri_t *)ret) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
 
 done:

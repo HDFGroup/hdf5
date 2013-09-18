@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
 
     hsize_t count = -1;
     int key, value;
-    hbool_t exists = -1;
+    hbool_t exists;
     H5_request_t req1;
     H5_status_t status1;
 

@@ -298,6 +298,12 @@ typedef struct H5VL_iod_rc_info_t {
     uint64_t *c_version_ptr;
 } H5VL_iod_rc_info_t;
 
+/* information about an exists request*/
+typedef struct H5VL_iod_exists_info_t {
+    hbool_t *user_bool; /* pointer to the user provided hbool_t */
+    htri_t server_ret; /* the return value from the server */
+} H5VL_iod_exists_info_t;
+
 H5_DLL herr_t H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
@@ -349,7 +355,7 @@ H5_DLL herr_t H5VL_iod_map_get_types(void *map, hid_t *key_type_id, hid_t *val_t
                                      hid_t rcxt_id, void **req);
 H5_DLL herr_t H5VL_iod_map_get_count(void *map, hsize_t *count, hid_t rcxt_id, void **req);
 H5_DLL herr_t H5VL_iod_map_exists(void *map, hid_t key_mem_type_id, const void *key, 
-                                  htri_t *exists, hid_t rcxt_id, void **req);
+                                  hbool_t *exists, hid_t rcxt_id, void **req);
 H5_DLL herr_t H5VL_iod_map_iterate(void *map, hid_t key_mem_type_id, hid_t value_mem_type_id, 
                                    H5M_iterate_func_t callback_func, void *context);
 H5_DLL herr_t H5VL_iod_map_delete(void *map, hid_t key_mem_type_id, const void *key, 

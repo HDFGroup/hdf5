@@ -886,15 +886,22 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         }
     case HG_MAP_EXISTS:
         {
-            htri_t *exists = (htri_t *)req->data;
+            H5VL_iod_exists_info_t *info = (H5VL_iod_exists_info_t *)req->data;
+            H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
 
-            if(*exists < 0) {
+            if(info->server_ret < 0) {
                 fprintf(stderr, "MAP exists failed at the server\n");
                 req->status = H5AO_FAILED;
                 req->state = H5VL_IOD_COMPLETED;
             }
+            else if (0 == info->server_ret)
+                *info->user_bool = FALSE;
+            else
+                *info->user_bool = TRUE;
 
             req->data = NULL;
+            obj->request = NULL;
+            info = (H5VL_iod_exists_info_t *)H5MM_xfree(info);
             H5VL_iod_request_delete(file, req);
             break;
         }
@@ -1378,11 +1385,21 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
             break;
         }
+    case HG_MAP_EXISTS:
+        {
+            H5VL_iod_exists_info_t *info = (H5VL_iod_exists_info_t *)req->data;
+            H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
+
+            req->data = NULL;
+            obj->request = NULL;
+            info = (H5VL_iod_exists_info_t *)H5MM_xfree(info);
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
     case HG_ATTR_EXISTS:
     case HG_LINK_EXISTS:
     case HG_OBJECT_EXISTS:
     case HG_MAP_GET_COUNT:
-    case HG_MAP_EXISTS:
         {
             H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
 

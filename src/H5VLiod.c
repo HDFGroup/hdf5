@@ -3993,7 +3993,8 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
 
                 if(H5VL__iod_create_and_forward(H5VL_ATTR_EXISTS_ID, HG_ATTR_EXISTS, 
                                                 obj, 1, num_parents, parent_reqs,
-                                                (H5VL_iod_req_info_t *)rc, &input, ret, ret, req) < 0)
+                                                (H5VL_iod_req_info_t *)rc, &input, 
+                                                ret, ret, req) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship attribute exists");
 
                 if(loc_name) 
@@ -6137,7 +6138,7 @@ done:
 
 herr_t 
 H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key, 
-                    htri_t *exists, hid_t rcxt_id, void **req)
+                    hbool_t *exists, hid_t rcxt_id, void **req)
 {
     H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
     map_op_in_t input;
@@ -6146,6 +6147,7 @@ H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key,
     size_t num_parents = 0;
     uint32_t key_cs = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
+    H5VL_iod_exists_info_t *info = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -6181,10 +6183,18 @@ H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key,
     printf("MAP EXISTS, axe id %llu\n", g_axe_id);
 #endif
 
+    /* setup info struct for exists request. 
+       This is to manage the exists operation once the wait is called. */
+    if(NULL == (info = (H5VL_iod_exists_info_t *)H5MM_calloc(sizeof(H5VL_iod_exists_info_t))))
+        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
+
+    info->user_bool = exists;
+
     if(H5VL__iod_create_and_forward(H5VL_MAP_EXISTS_ID, HG_MAP_EXISTS, 
                                     (H5VL_iod_object_t *)map, 0,
                                     num_parents, parent_reqs,
-                                    (H5VL_iod_req_info_t *)rc, &input, exists, exists, req) < 0)
+                                    (H5VL_iod_req_info_t *)rc, &input, 
+                                    &info->server_ret, info, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship map exists");
 
 done:

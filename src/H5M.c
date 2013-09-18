@@ -715,7 +715,7 @@ done:
  */
 herr_t
 H5Mexists_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, 
-             htri_t *exists, hid_t rcxt_id, hid_t eq_id)
+             hbool_t *exists, hid_t rcxt_id, hid_t eq_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */

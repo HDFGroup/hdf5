@@ -746,7 +746,7 @@ H5P__decode(const void *buf)
 
     /* Get the type of the property list */
     type = (H5P_plist_type_t)*p++;
-    if(type <= H5P_TYPE_USER || type > H5P_TYPE_LINK_ACCESS)
+    if(type <= H5P_TYPE_USER || type > H5P_TYPE_TRANSACTION_FINISH)
         HGOTO_ERROR(H5E_PLIST, H5E_BADRANGE, FAIL, "bad type of encoded information: %u", (unsigned)type)
 
     /* Create new property list of the specified type */

@@ -5076,8 +5076,8 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDcompile_assert(H5P_TYPE_LINK_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
-    HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_LINK_ACCESS);
+    HDcompile_assert(H5P_TYPE_TRANSACTION_FINISH == (H5P_TYPE_MAX_TYPE - 1));
+    HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_TRANSACTION_FINISH);
 
     /* Check arguments */
     if(type == H5P_TYPE_USER)
