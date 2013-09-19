@@ -3055,27 +3055,6 @@ if test "X$default_vfd" = "Xyes"; then
 fi
 
 ## ----------------------------------------------------------------------
-## Enable custom plugin default path for library.  It requires SHARED support.
-##
-AC_MSG_CHECKING([for Custom Plugin Default Path definition])
-AC_ARG_WITH([default-plugin],
-            [AS_HELP_STRING([--with-default-plugin=location],
-                            [Specify default location for plugins
-                            [default="/usr/local/hdf5/lib/plugin"]])],,
-            withval="/usr/local/hdf5/lib/plugin")
-
-if test "X$withval" = "X"; then
-    AC_MSG_RESULT([default])
-    default_plugin="/usr/local/hdf5/lib/plugin"
-else
-    AC_MSG_RESULT([$withval])
-    default_plugin=$withval
-fi
-
-AC_DEFINE_UNQUOTED([DEFAULT_PLUGIN], ["$default_plugin"],
-            [Define the default plugins path to compile])
-
-## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
 
@@ -3116,6 +3095,27 @@ else
 fi
 
 AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])
+
+## ----------------------------------------------------------------------
+## Enable custom plugin default path for library.  It requires SHARED support.
+##
+AC_MSG_CHECKING([for custom plugin default path definition])
+AC_ARG_WITH([default-plugindir],
+            [AS_HELP_STRING([--with-default-plugindir=location],
+                            [Specify default location for plugins
+                            [default="/usr/local/hdf5/lib/plugin"]])],,
+            withval="/usr/local/hdf5/lib/plugin")
+
+if test "X$withval" = "X"; then
+    AC_MSG_RESULT([default])
+    default_plugindir="/usr/local/hdf5/lib/plugin"
+else
+    AC_MSG_RESULT([$withval])
+    default_plugindir=$withval
+fi
+
+AC_DEFINE_UNQUOTED([DEFAULT_PLUGINDIR], ["$default_plugindir"],
+            [Define the default plugins path to compile])
 
 ## ----------------------------------------------------------------------
 ## Decide whether the presence of user's exception handling functions is

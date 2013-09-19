@@ -8,7 +8,8 @@ Section I:   Quick Step Building HDF5 Libraries with CMake
 Section II:  Preconditions
 Section III: Building HDF5 C/C++ Libraries with CMake
 Section IV:  All Options for HDF5 C/C++ Libraries with CMake
-Section V:   APPENDIX
+Section V:   User Defined Options for HDF5 Libraries with CMake
+Section VI:  APPENDIX
 
 ************************************************************************
 
@@ -445,11 +446,29 @@ HDF5_USE_FILTER_SCALEOFFSET "Use the SCALEOFFSET Filter"             ON
 HDF5_USE_FILTER_SHUFFLE     "Use the SHUFFLE Filter"                 ON
 IF (HDF5_ENABLE_SZIP_SUPPORT) 
     HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"      OFF
+IF (WINDOWS)
+    H5_DEFAULT_PLUGINDIR    "%ALLUSERSPROFILE%/hdf5/lib/plugin"
+ELSE (WINDOWS)
+    H5_DEFAULT_PLUGINDIR    "/usr/local/hdf5/lib/plugin"
+ENDIF (WINDOWS)
 
 
 
 ========================================================================
-V. APPENDIX
+V. User Defined Options for HDF5 Libraries with CMake
+========================================================================
+
+Support for User Defined macros and options has been added. The file
+UserMacros.cmake has an example of the technique. In the folder,
+config/cmake/UserMacros, is an implementation for Windows Visual Studio
+users for linking libraries to the static CRT - Windows_MT.cmake. 
+
+Copy the contents of the file, both macro and option, into the 
+UserMacros.cmake file. Then enable the option to the CMake configuration,
+build and test process.
+
+========================================================================
+VI. APPENDIX
 ========================================================================
 
 Below are examples of the ctest scripts used by The HDF Group.

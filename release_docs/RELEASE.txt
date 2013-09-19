@@ -43,7 +43,7 @@ New Features
     -------------
     - New configuration option added to change the default plugin path.
       configure option is --with-default-plugin=location
-      cmake option is -DH5_DEFAULT_PLUGIN:PATH=location
+      cmake option is -DH5_DEFAULT_PLUGINDIR:PATH=location
       HDFFV-8513.  (ADB 2013/09/04)
     - CMake minimum is now 2.8.10. (ADB 2013/01/14)
     - A new tool, cmakehdf5, which is a build command script similar to
@@ -1218,7 +1218,7 @@ Platform                              C         F90/   F90      C++  zlib  SZIP
 Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/n    n        y    y     y
 Windows 7                               y        y/y    n        y    y     y
-Windows 7     x64                       y        y/y    n        y    y     y
+Windows 7 x64                           y        y/y    n        y    y     y
 Windows 7 Cygwin                        n        y/n    n        y    y     y
 Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 8                               y        y/y    n        y    y     y
@@ -1298,14 +1298,14 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (GCC) 4.8.1 20130603 (Red Hat 4.8.1-1)
                                   (cmake and autotools)
 
-    SUSE 12.3 3.4.6-2.10-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
-                                  gcc (SUSE Linux) 4.7.1
-                                  GNU Fortran (SUSE Linux) 4.7.1
+    SUSE 12.3 3.7.10-1.1-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
+                                  gcc (SUSE Linux) 4.7.2
+                                  GNU Fortran (SUSE Linux) 4.7.2
                                   (cmake and autotools)
 
-    SUSE 12.3 3.4.6-2.10-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
-                                  gcc (SUSE Linux) 4.7.1
-                                  GNU Fortran (SUSE Linux) 4.7.1 
+    SUSE 12.3 3.7.10-1.1-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (SUSE Linux) 4.7.2
+                                  GNU Fortran (SUSE Linux) 4.7.2 
                                   (cmake and autotools)
 
     Ubuntu 13.04 3.8.0-26-generic #38-Ubuntu SMP i686 GNU/Linux

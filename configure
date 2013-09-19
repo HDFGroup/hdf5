@@ -923,8 +923,8 @@ with_mpe
 enable_mpi_size
 enable_filters
 with_default_vfd
-with_default_plugin
 enable_direct_vfd
+with_default_plugindir
 enable_dconv_exception
 enable_dconv_accuracy
 enable_hl
@@ -1670,7 +1670,7 @@ Optional Packages:
   --with-mpe=DIR          Use MPE instrumentation [default=no]
   --with-default-vfd=driver
                           Specify default file driver [default=sec2]
-  --with-default-plugin=location
+  --with-default-plugindir=location
                           Specify default location for plugins
                           [default="/usr/local/hdf5/lib/plugin"]
   --with-default-api-version=(v16|v18|v110)
@@ -29287,36 +29287,6 @@ _ACEOF
 fi
 
 ## ----------------------------------------------------------------------
-## Enable custom plugin default path for library.  It requires SHARED support.
-##
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Custom Plugin Default Path definition" >&5
-$as_echo_n "checking for Custom Plugin Default Path definition... " >&6; }
-
-# Check whether --with-default-plugin was given.
-if test "${with_default_plugin+set}" = set; then :
-  withval=$with_default_plugin;
-else
-  withval="/usr/local/hdf5/lib/plugin"
-fi
-
-
-if test "X$withval" = "X"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: default" >&5
-$as_echo "default" >&6; }
-    default_plugin="/usr/local/hdf5/lib/plugin"
-else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $withval" >&5
-$as_echo "$withval" >&6; }
-    default_plugin=$withval
-fi
-
-
-cat >>confdefs.h <<_ACEOF
-#define DEFAULT_PLUGIN "$default_plugin"
-_ACEOF
-
-
-## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
 
@@ -29417,6 +29387,36 @@ else
   DIRECT_VFD_CONDITIONAL_TRUE='#'
   DIRECT_VFD_CONDITIONAL_FALSE=
 fi
+
+
+## ----------------------------------------------------------------------
+## Enable custom plugin default path for library.  It requires SHARED support.
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for custom plugin default path definition" >&5
+$as_echo_n "checking for custom plugin default path definition... " >&6; }
+
+# Check whether --with-default-plugindir was given.
+if test "${with_default_plugindir+set}" = set; then :
+  withval=$with_default_plugindir;
+else
+  withval="/usr/local/hdf5/lib/plugin"
+fi
+
+
+if test "X$withval" = "X"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: default" >&5
+$as_echo "default" >&6; }
+    default_plugindir="/usr/local/hdf5/lib/plugin"
+else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $withval" >&5
+$as_echo "$withval" >&6; }
+    default_plugindir=$withval
+fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_PLUGINDIR "$default_plugindir"
+_ACEOF
 
 
 ## ----------------------------------------------------------------------
