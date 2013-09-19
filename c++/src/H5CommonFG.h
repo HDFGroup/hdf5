@@ -49,18 +49,6 @@ class H5_DLLCPP CommonFG {
 	DataSet openDataSet(const char* name) const;
 	DataSet openDataSet(const H5std_string& name) const;
 
-	// Retrieves comment for the HDF5 object specified by its name.
-	H5std_string getComment(const char* name, size_t bufsize=256) const;
-	H5std_string getComment(const H5std_string& name, size_t bufsize=256) const;
-
-	// Removes the comment for the HDF5 object specified by its name.
-	void removeComment(const char* name) const;
-	void removeComment(const H5std_string& name) const;
-
-	// Sets the comment for an HDF5 object specified by its name.
-	void setComment(const char* name, const char* comment) const;
-	void setComment(const H5std_string& name, const H5std_string& comment) const;
-
 	// Returns the value of a symbolic link.
 	H5std_string getLinkval(const char* link_name, size_t size=0) const;
 	H5std_string getLinkval(const H5std_string& link_name, size_t size=0) const;

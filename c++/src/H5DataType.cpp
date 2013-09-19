@@ -100,7 +100,7 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object()
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataType::DataType(H5Object& obj, const void* ref, H5R_type_t ref_type) : H5Object()
+ /* DataType::DataType(H5Object& obj, const void* ref, H5R_type_t ref_type) : H5Object()
 {
     try {
 	id = p_dereference(obj.getId(), ref, ref_type);
@@ -109,6 +109,7 @@ DataType::DataType(H5Object& obj, const void* ref, H5R_type_t ref_type) : H5Obje
 		deref_error.getDetailMsg());
     }
 }
+ */ 
 
 //--------------------------------------------------------------------------
 // Function:	DataType overload constructor - dereference
@@ -123,14 +124,16 @@ DataType::DataType(H5Object& obj, const void* ref, H5R_type_t ref_type) : H5Obje
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataType::DataType(H5File& h5file, const void* ref, H5R_type_t ref_type) : H5Object()
+DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object()
 {
-    try {
+    H5Location::dereference(loc, ref, ref_type, plist);
+     /* try {
 	id = p_dereference(h5file.getId(), ref, ref_type);
     } catch (ReferenceException deref_error) {
 	throw ReferenceException("DataType constructor - located by an H5File",
 		deref_error.getDetailMsg());
     }
+ */ 
 }
 
 //--------------------------------------------------------------------------
@@ -146,10 +149,10 @@ DataType::DataType(H5File& h5file, const void* ref, H5R_type_t ref_type) : H5Obj
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataType::DataType(Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Object()
+DataType::DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object()
 {
     try {
-	id = p_dereference(attr.getId(), ref, ref_type);
+	id = p_dereference(attr.getId(), ref, ref_type, plist);
     } catch (ReferenceException deref_error) {
 	throw ReferenceException("DataType constructor - located by an Attribute",
 		deref_error.getDetailMsg());
