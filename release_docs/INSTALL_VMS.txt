@@ -1,6 +1,6 @@
 		Building and installation instructions for Alpha Open VMS
-                              HDF5 1.8.6 release
-                                  18 February 2011
+                              HDF5 1.8.12 release
+                               18 September 2013
    
 
 
@@ -23,6 +23,9 @@
            IMPORTANT: This version REQUIRES GNU ZLIB library to be installed
                       on a system. You may download the source code from
                       http://www.zlib.net/
+
+                      The newest ZLIB 1.2.8 doesn't work properly on OpenVMS.
+                      But ZLIB 1.2.5 works fine.
 
 	 -  Use tar command to untar HDF5 source ball
 
@@ -70,8 +73,10 @@
 	4. Known problems
 
            - There is no support for szip compression filter.
-	   - Fortran multifile driver test fails; similar C test passes.
-
+           - Two soft conversion functions (H5T__conv_i_f and H5T__conv_f_i)
+             have bugs.  They convert data between floating-point numbers and 
+             integers.  But the library's default is hard conversion.  The user 
+             should avoid explicitly enabling soft conversion between floating-point 
+             numbers and integers. 
 
 	For help contact help@hdfgroup.org
-

@@ -226,6 +226,9 @@ They are built with the configure process unless specified otherwise.
     64-bit    			  gfortran GNU Fortran (GCC) 4.6.2
     (wren)                        Intel icc/icpc/ifort version 13.0.1.119
 
+    OpenVMS  IA64 V8.4            HP C V7.3-018         
+    (Boeing)                      HP Fortran V8.2-104939-50H96
+                                  HP C++ V7.4-004 
 
 Tested Configuration Features Summary
 =====================================
@@ -263,7 +266,7 @@ CentOS 5.9 Linux 2.6.18 x86_64 PGI      n        y/y    n        y    y     y
 CentOS 6.4 Linux 2.6.32 x86_64 GNU      n        y/n    n        y    y     y
 CentOS 6.4 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
 Linux 2.6.32-358.2.1.el6.ppc64          n        y/n    n        y    y     y
-
+OpenVMS IA64 V8.4                       n        y/n    n        y    y     n
 
 Platform                                 Shared  Shared    Shared    Thread-  
                                          C libs  F90 libs  C++ libs  safe     
@@ -288,6 +291,7 @@ CentOS 5.9 Linux 2.6.18 x86_64 PGI         y       y         y         n
 CentOS 6.4 Linux 2.6.32 x86_64 GNU         y       y         y         n
 CentOS 6.4 Linux 2.6.32 x86_64 Intel       y       y         y         n
 Linux 2.6.32-358.2.1.el6.ppc64             y       y         y         n 
+OpenVMS IA64 V8.4                          n       n         n         n
 
 Compiler versions for each platform are listed in the preceding
 "Supported Platforms" table.
@@ -343,6 +347,16 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* On OpenVMS, two soft conversion functions (H5T__conv_i_f and H5T__conv_f_i)
+  have bugs.  They convert data between floating-point numbers and integers.
+  But the library's default is hard conversion.  The user should avoid
+  explicitly enabling soft conversion between floating-point numbers and
+  integers. (Issue VMS-8; SLU - 2013/09/19)
+
+* On OpenVMS, ZLIB 1.2.8 library doesn't work properly.  ZLIB 1.2.5 works
+  fine.  So please use ZLIB 1.2.5 to build HDF5 library. (Issue VMS-5;
+  SLU 2013/09/19)  
+
 * When building using the Cray compilers on Cray machines, HDF5
   configure mistakenly thinks the compiler is an intel compiler and
   sets the -std=c99 flag which breaks configure on Cray. To build HDF5
