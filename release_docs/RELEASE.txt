@@ -677,6 +677,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - Modified H5detect.c to scan floating point types for padding bits before
+      analyzing the type further.  This should fix problems with gcc 4.8
+      (NAF - 2013/09/19 - HDFFV-8523/HDFFV-8500)
     - Fixed Makefile issue in which "-Wl," was not properly specified
       prior to -rpath when building parallel fortran libraries with
       an Intel compiler. (MAM - 2012/03/26)
