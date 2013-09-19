@@ -49,6 +49,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     object_open_out_t output;
     iod_handle_t coh = input->coh; /* the container handle */
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_handle_t obj_oh; /* The handle for object */
     iod_obj_id_t obj_id; /* The ID of the object */
     iod_handle_t mdkv_oh;
@@ -71,7 +72,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-    if(sp_cs) {
+    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
         if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
@@ -264,6 +265,7 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* the container handle */
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_handle_t dst_oh; /* The handle for the dst object where link is created*/
     iod_obj_id_t dst_id; /* The ID of the dst object where link is created*/
     iod_obj_id_t obj_id; /* The ID of the object to be moved/copied */
@@ -303,7 +305,7 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-    if(sp_cs) {
+    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
         if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
@@ -459,6 +461,7 @@ H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_handle_t obj_oh;
     iod_obj_id_t obj_id;
     const char *loc_name = input->loc_name;
@@ -529,6 +532,7 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_handle_t obj_oh, mdkv_oh, attrkv_oh;
     iod_obj_id_t obj_id;
     scratch_pad sp;
@@ -550,7 +554,7 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-    if(sp_cs) {
+    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
         if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
@@ -662,6 +666,7 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t loc_id = input->loc_id;
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_handle_t obj_oh, mdkv_oh;
     iod_obj_id_t obj_id;
     const char *loc_name = input->path;
@@ -680,7 +685,7 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-    if(sp_cs) {
+    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
         if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
@@ -760,6 +765,7 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t loc_id = input->loc_id;
     size_t length = input->length;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_handle_t obj_oh, mdkv_oh;
     iod_obj_id_t obj_id;
     const char *loc_name = input->path;
@@ -778,7 +784,7 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-    if(sp_cs) {
+    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
         if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");

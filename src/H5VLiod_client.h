@@ -206,6 +206,7 @@ typedef struct H5VL_iod_file_t {
     H5VL_iod_remote_file_t remote_file;
     char *file_name;
     unsigned flags;
+    uint32_t md_integrity_scope;
     hid_t fapl_id;
     int my_rank;
     int num_procs;
@@ -265,6 +266,7 @@ typedef struct H5VL_iod_io_info_t {
     size_t type_size;
     struct H5S_t *space;
     uint32_t *cs_ptr;
+    uint32_t raw_cs_scope;
     hid_t file_space_id;
     hid_t mem_type_id;
     hid_t dxpl_id;

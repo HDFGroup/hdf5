@@ -50,6 +50,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* the container handle */
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_handle_t src_oh; /* The handle for creation src object */
     iod_obj_id_t src_id; /* The ID of the creation src object */
     iod_handle_t target_oh;
@@ -95,7 +96,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
         if(iod_obj_get_scratch(target_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-        if(sp_cs) {
+        if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
             /* verify scratch pad integrity */
             if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
@@ -204,6 +205,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* the container handle */
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_handle_t src_oh; /* The handle for src object group */
     iod_obj_id_t src_id; /* The ID of the src object */
     iod_handle_t dst_oh; /* The handle for the dst object where link is created*/
@@ -279,7 +281,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
         /* get scratch pad */
         if(iod_obj_get_scratch(target_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
-        if(sp_cs) {
+        if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
             /* verify scratch pad integrity */
             if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
@@ -386,6 +388,7 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t cur_id;
     const char *loc_name = input->path;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     char *last_comp = NULL;
     htri_t ret = -1;
     iod_size_t kv_size = 0;
@@ -471,6 +474,7 @@ H5VL_iod_server_link_get_info_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t cur_id;
     const char *loc_name = input->path;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     char *last_comp = NULL;
     H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
@@ -571,6 +575,7 @@ H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t loc_id = input->loc_id;
     size_t length = input->length;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_handle_t cur_oh;
     iod_obj_id_t cur_id;
     const char *loc_name = input->path;
@@ -619,7 +624,8 @@ H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Done with get link_val, sending (%s) response to client\n", output.value.val);
+    fprintf(stderr, "Done with get link_val, sending (%s) response to client\n", 
+            (char *)output.value.val);
 #endif
     if(ret_value < 0) {
         output.ret = ret_value;
@@ -670,6 +676,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t loc_id = input->loc_id;
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_handle_t cur_oh;
     iod_obj_id_t cur_id;
     const char *loc_name = input->path;
@@ -724,7 +731,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
         if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-        if(sp_cs) {
+        if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
             /* verify scratch pad integrity */
             if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");

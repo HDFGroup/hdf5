@@ -48,7 +48,8 @@ typedef struct {
 static herr_t 
 H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id, 
                           hid_t type_id, hbool_t write_op, void *buf,
-                          size_t buf_size, iod_trans_id_t tid);
+                          size_t buf_size, uint32_t cs, uint32_t cs_scope,
+                          iod_trans_id_t tid);
 
 static herr_t 
 H5VL__iod_server_vl_data_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id, 
@@ -88,6 +89,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t dset_id = input->dset_id; /* The ID of the dataset that needs to be created */
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_handle_t dset_oh, cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, mdkv_id, attr_id;
     const char *name = input->name; /* name of dset including path to create */
@@ -151,8 +153,6 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     /* for the process that succeeded in creating the dataset, update
        the parent KV, create scratch pad */
     if(0 == ret) {
-        iod_checksum_t sp_cs;
-
         /* create the attribute KV object for the dataset */
         if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &attr_id, NULL) < 0)
@@ -169,11 +169,18 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
         sp[2] = IOD_ID_UNDEFINED;
         sp[3] = IOD_ID_UNDEFINED;
 
-        sp_cs = H5checksum(&sp, sizeof(sp), NULL);
-
         /* set scratch pad in dataset */
-        if (iod_obj_set_scratch(dset_oh, wtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t sp_cs;
+
+            sp_cs = H5checksum(&sp, sizeof(sp), NULL);
+            if (iod_obj_set_scratch(dset_oh, wtid, &sp, &sp_cs, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        }
+        else {
+            if (iod_obj_set_scratch(dset_oh, wtid, &sp, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        }
 
         /* Open Metadata KV object for write */
         if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
@@ -286,6 +293,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     const char *name = input->name; /* name of dset including path to open */
     iod_obj_id_t dset_id; /* ID of the dataset to open */
     iod_handle_t dset_oh, mdkv_oh;
@@ -307,7 +315,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_get_scratch(dset_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-    if(sp_cs) {
+    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
         if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
@@ -440,15 +448,17 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t iod_id = input->iod_id; /* dset ID */
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
     hid_t space_id = input->space_id; /* file space selection */
-    hid_t dxpl_id = input->dxpl_id; /* transfer property list */
+    hid_t dxpl_id;
     hid_t src_id = input->dset_type_id; /* the datatype of the dataset's element */
     hid_t dst_id = input->mem_type_id; /* the memory type of the elements */
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     hg_bulk_block_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     size_t size, buf_size;
     void *buf = NULL; /* buffer to hold outgoing data */
     uint32_t cs = 0; /* checksum value */
+    uint32_t raw_cs_scope;
     hbool_t is_vl_data;
     size_t nelmts; /* number of elements selected to read */
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
@@ -463,6 +473,14 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
         opened_locally = TRUE;
     }
+
+    if(H5P_DEFAULT == input->dxpl_id)
+        input->dxpl_id = H5Pcopy(H5P_DATASET_XFER_DEFAULT);
+    dxpl_id = input->dxpl_id;
+
+    /* get the scope for data integrity checks for raw data */
+    if(H5Pget_rawdata_integrity_scope(dxpl_id, &raw_cs_scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 
     /* retrieve size of bulk data asked for to be read */
     size = HG_Bulk_handle_get_size(bulk_handle);
@@ -488,7 +506,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     if(!is_vl_data) {
         /* If the data is not VL, we can read the data from the array the normal way */
         if(H5VL__iod_server_final_io(coh, iod_oh, space_id, src_id, 
-                                     FALSE, buf, buf_size, rtid) < 0) {
+                                     FALSE, buf, buf_size, 0, raw_cs_scope, rtid) < 0) {
             fprintf(stderr, "can't read from array object\n");
             ret_value = FAIL;
             goto done;
@@ -518,11 +536,17 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
             if(H5Tconvert(src_id, dst_id, nelmts, buf, NULL, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
-            /* calculate a checksum for the data to be sent */
-            cs = H5checksum(buf, size, NULL);
-
+            if(!(raw_cs_scope & H5_CHECKSUM_NONE)) {
+                /* calculate a checksum for the data to be sent */
+                cs = H5checksum(buf, size, NULL);
+            }
+#if H5VL_IOD_DEBUG
+            else {
+                fprintf(stderr, "NO TRANSFER DATA INTEGRITY CHECKS ON RAW DATA\n");
+            }
+#endif
             /* MSC - check if client requested to corrupt data */
-            if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_inject_corruption(dxpl_id, &flag) < 0)
+            if(H5Pget_dxpl_inject_corruption(dxpl_id, &flag) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
             if(flag) {
                 fprintf(stderr, "Injecting a bad data value to cause corruption \n");
@@ -587,8 +611,10 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
                 }
             }
 #endif
-            /* calculate a checksum for the data to be sent */
-            cs = H5checksum(buf, buf_size, NULL);
+            if(!(raw_cs_scope & H5_CHECKSUM_NONE)) {
+                /* calculate a checksum for the data to be sent */
+                cs = H5checksum(buf, buf_size, NULL);
+            }
     }
 
     /* Create a new block handle to write the data */
@@ -662,6 +688,7 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
     hid_t space_id = input->space_id; /* file space selection */
     hid_t dxpl_id = input->dxpl_id; /* transfer property list */
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     size_t buf_size;
     void *buf = NULL; /* buffer to hold blob IDs */
     size_t nelmts; /* number of elements selected to read */
@@ -877,17 +904,19 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t iod_id = input->iod_id; /* dset ID */
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
     hid_t space_id = input->space_id; /* file space selection */
-    hid_t dxpl_id = input->dxpl_id; /* transfer property list */
     uint32_t cs = input->checksum; /* checksum recieved for data */
     hid_t src_id = input->mem_type_id; /* the memory type of the elements */
     hid_t dst_id = input->dset_type_id; /* the datatype of the dataset's element */
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
+    hid_t dxpl_id;
     hg_bulk_block_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     size_t size, buf_size;
     hbool_t is_vl_data;
     uint32_t data_cs = 0;
+    uint32_t raw_cs_scope;
     unsigned u;
     void *buf = NULL;
     size_t nelmts; /* number of elements selected to read */
@@ -908,6 +937,10 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
         opened_locally = TRUE;
     }
+
+    if(H5P_DEFAULT == input->dxpl_id)
+        input->dxpl_id = H5Pcopy(H5P_DATASET_XFER_DEFAULT);
+    dxpl_id = input->dxpl_id;
 
     /* retrieve size of incoming bulk data */
     size = HG_Bulk_handle_get_size(bulk_handle);
@@ -931,24 +964,31 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     /* MSC - check if client requested to corrupt data */
-    if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_inject_corruption(dxpl_id, &flag) < 0)
+    if(H5Pget_dxpl_inject_corruption(dxpl_id, &flag) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
     if(flag) {
         ((int *)buf)[0] = 10;
     }
 
-    /* If client specified a checksum, verify it */
-    if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_checksum(dxpl_id, &data_cs) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
-    if(data_cs != 0) {
-        cs = H5checksum(buf, size, NULL);
+    /* get the scope for data integrity checks for raw data */
+    if(H5Pget_rawdata_integrity_scope(dxpl_id, &raw_cs_scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+
+    /* verify data if transfer flag is set */
+    if(raw_cs_scope & H5_CHECKSUM_TRANSFER) {
+        data_cs = H5checksum(buf, size, NULL);
         if(cs != data_cs) {
             fprintf(stderr, "Errrr.. Network transfer Data corruption. expecting %u, got %u\n",
-                    data_cs, cs);
+                    cs, data_cs);
             ret_value = FAIL;
             goto done;
         }
     }
+#if H5VL_IOD_DEBUG
+    else {
+        fprintf(stderr, "NO TRANSFER DATA INTEGRITY CHECKS ON RAW DATA\n");
+    }
+#endif
 
     nelmts = (size_t)H5Sget_select_npoints(space_id);
     buf_size = 0;
@@ -970,7 +1010,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
 
         if(H5VL__iod_server_final_io(coh, iod_oh, space_id, dst_id, 
-                                     TRUE, buf, buf_size, wtid) < 0)
+                                     TRUE, buf, buf_size, cs, raw_cs_scope, wtid) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
 #if H5VL_IOD_DEBUG 
@@ -1063,6 +1103,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t iod_id = input->iod_id; 
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     /* int rank = input->dims.rank;  rank of dataset */
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
@@ -1097,7 +1138,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
         if(iod_obj_get_scratch(iod_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-        if(sp_cs) {
+        if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
             /* verify scratch pad integrity */
             if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
@@ -1231,7 +1272,8 @@ done:
 static herr_t 
 H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id, 
                           hid_t type_id, hbool_t write_op, void *buf, 
-                          size_t buf_size, iod_trans_id_t tid)
+                          size_t buf_size, uint32_t cs, uint32_t cs_scope, 
+                          iod_trans_id_t tid)
 {
     int ndims, i; /* dataset's rank/number of dimensions */
     hssize_t num_descriptors = 0, n; /* number of IOD file descriptors needed to describe filespace selection */
@@ -1281,10 +1323,17 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
                 (sizeof(iod_array_io_t) * (size_t)num_descriptors)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate iod array");
 
-    /* allocate cs array */
-    if(NULL == (cs_list = (iod_checksum_t *)calloc
-                (sizeof(iod_checksum_t), (size_t)num_descriptors)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate checksum array");
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        /* allocate cs array */
+        if(NULL == (cs_list = (iod_checksum_t *)calloc
+                    (sizeof(iod_checksum_t), (size_t)num_descriptors)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate checksum array");
+    }
+#if H5VL_IOD_DEBUG
+    else {
+        fprintf(stderr, "NO IOD DATA INTEGRITY CHECKS ON RAW DATA\n");
+    }
+#endif
 
     /* allocate return array */
     if(NULL == (ret_list = (iod_ret_t *)calloc
@@ -1308,7 +1357,7 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
         mem_desc->frag[0].len = (iod_size_t)num_bytes;
 
         /* If this is a write op, compute the checksum for each memory fragment */
-        if(write_op)
+        if(write_op && (cs_scope & H5_CHECKSUM_IOD))
             cs_list[n] = H5checksum(buf_ptr, (size_t)num_bytes, NULL);
 
         buf_ptr += num_bytes;
@@ -1329,7 +1378,10 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
         io_array[n].hints = NULL;
         io_array[n].mem_desc = mem_desc;
         io_array[n].io_desc = &file_desc;
-        io_array[n].cs = &cs_list[n];
+        if(cs_scope & H5_CHECKSUM_IOD)
+            io_array[n].cs = &cs_list[n];
+        else
+            io_array[n].cs = NULL;
         io_array[n].ret = &ret_list[n];
     }
 
@@ -1358,15 +1410,12 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
 #if 0
     /* If this is a read operation, compute checksum for each IOD
        read, and compare it against checksum returned from IOD */
-    if(!write_op) {
+    if(!write_op && (cs_scope & H5_CHECKSUM_IOD)) {
         hsize_t num_bytes = 0;
         hsize_t num_elems = 1;
         uint32_t checksum;
-        H5_checksum_seed_t cs;
 
         buf_ptr = (uint8_t *)buf;
-        cs.a = cs.b = cs.c = cs.state = 0;
-        cs.total_length = buf_size;
 
         for(n=0 ; n<num_descriptors ; n++) {
             /* determine how many bytes the current descriptor holds */
@@ -1374,7 +1423,7 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
                 num_elems *= (hslabs[n].count[i] * hslabs[n].block[i]);
             num_bytes = num_elems * elmt_size;
 
-            checksum = H5checksum(buf_ptr, (size_t)num_bytes, &cs);
+            checksum = H5checksum(buf_ptr, (size_t)num_bytes, NULL);
 
             if(checksum != cs_list[n]) {
                 fprintf(stderr, "Data Corruption detected when reading\n");

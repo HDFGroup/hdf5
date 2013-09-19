@@ -62,7 +62,7 @@
 
 /* definitions for checksum scope in FF stack */
 #define H5D_XFER_CHECKSUM_SCOPE_SIZE	sizeof(uint32_t)
-#define H5D_XFER_CHECKSUM_SCOPE_DEF	0
+#define H5D_XFER_CHECKSUM_SCOPE_DEF	7
 #define H5D_XFER_CHECKSUM_SCOPE_ENC     H5P__encode_unsigned
 #define H5D_XFER_CHECKSUM_SCOPE_DEC     H5P__decode_unsigned
 

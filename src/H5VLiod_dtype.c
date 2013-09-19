@@ -53,6 +53,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t dtype_id = input->dtype_id; /* The ID of the datatype that needs to be created */
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_handle_t dtype_oh, cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, mdkv_id, attr_id;
     const char *name = input->name; /* name of dtype including path to commit */
@@ -114,11 +115,18 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         sp[2] = IOD_ID_UNDEFINED;
         sp[3] = IOD_ID_UNDEFINED;
 
-        sp_cs = H5checksum(&sp, sizeof(sp), NULL);
-
         /* set scratch pad in datatype */
-        if (iod_obj_set_scratch(dtype_oh, wtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t sp_cs;
+
+            sp_cs = H5checksum(&sp, sizeof(sp), NULL);
+            if (iod_obj_set_scratch(dtype_oh, wtid, &sp, &sp_cs, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        }
+        else {
+            if (iod_obj_set_scratch(dtype_oh, wtid, &sp, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        }
 
         /* Store Metadata in scratch pad */
         if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
@@ -267,6 +275,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t dtype_oh, mdkv_oh;
     const char *name = input->name; /* name of dtype including path to open */
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     size_t buf_size; /* size of serialized datatype */
     void *buf = NULL;
     iod_mem_desc_t *mem_desc = NULL; /* memory descriptor used for reading */
@@ -291,7 +300,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_get_scratch(dtype_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-    if(sp_cs) {
+    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
         if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");

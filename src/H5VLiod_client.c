@@ -562,18 +562,25 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 }
                 else {
                     uint32_t internal_cs = 0;
+                    uint32_t raw_cs_scope = info->raw_cs_scope;
 
                     /* calculate a checksum for the data recieved */
                     internal_cs = H5S_checksum(info->buf_ptr, info->type_size, 
                                                info->nelmts, info->space);
 
                     /* verify data integrity */
-                    if(internal_cs != read_status->cs) {
+                    if((raw_cs_scope & H5_CHECKSUM_TRANSFER) &&
+                       internal_cs != read_status->cs) {
                         fprintf(stderr, "Errrrr!  Dataset Read integrity failure (expecting %u got %u).\n",
                                 read_status->cs, internal_cs);
                         req->status = H5AO_FAILED;
                         req->state = H5VL_IOD_COMPLETED;
                     }
+#if H5VL_IOD_DEBUG
+                    if(!raw_cs_scope & H5_CHECKSUM_TRANSFER) {
+                        printf("NO TRANSFER DATA INTEGRITY CHECKS ON RAW DATA READ\n");
+                    }
+#endif
                     if(info->space && H5S_close(info->space) < 0)
                         HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
 
@@ -1998,11 +2005,13 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
                 free(bulk_segments);
                 bulk_segments = NULL;
 
-                /* compute checksum of length array and the actual stings array */
-                cs.a = cs.b = cs.c = cs.state = 0;
-                cs.total_length = buf_size;
-                for(u = 0; u < udata.curr_seq ; u++) {
-                    checksum = H5_checksum_lookup4(udata.off[u], udata.len[u], &cs);
+                if(_checksum) {
+                    /* compute checksum of length array and the actual stings array */
+                    cs.a = cs.b = cs.c = cs.state = 0;
+                    cs.total_length = buf_size;
+                    for(u = 0; u < udata.curr_seq ; u++) {
+                        checksum = H5_checksum_lookup4(udata.off[u], udata.len[u], &cs);
+                    }
                 }
 
                 /* cleanup */
@@ -2039,7 +2048,10 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
                 type_size = H5T_get_size(dt);
 
                 buf_size = type_size * nelmts;
-                checksum = H5S_checksum(buf, type_size, nelmts, space);
+
+                if(_checksum) {
+                    checksum = H5S_checksum(buf, type_size, nelmts, space);
+                }
 
                 /* If the memory selection is contiguous, create simple HG Bulk Handle */
                 if(H5S_select_is_contiguous(space)) {
@@ -2130,8 +2142,10 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
                 cs.a = cs.b = cs.c = cs.state = 0;
                 cs.total_length = buf_size;
 
-                for(u = 0; u < udata.curr_seq ; u++) {
-                    checksum = H5_checksum_lookup4(udata.off[u], udata.len[u], &cs);
+                if(_checksum) {
+                    for(u = 0; u < udata.curr_seq ; u++) {
+                        checksum = H5_checksum_lookup4(udata.off[u], udata.len[u], &cs);
+                    }
                 }
 
                 /* cleanup */
@@ -2148,8 +2162,9 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
             HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "unsupported datatype");
     }
 
-    *_checksum = checksum;
-
+    if(_checksum) {
+        *_checksum = checksum;
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_pre_write */

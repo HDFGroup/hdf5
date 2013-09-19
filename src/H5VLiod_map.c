@@ -61,6 +61,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     hid_t valtype = input->valtype_id;
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_handle_t map_oh, cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, mdkv_id, attr_id;
     char *last_comp; /* the name of the group obtained from traversal function */
@@ -115,11 +116,19 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
         sp[1] = attr_id;
         sp[2] = IOD_ID_UNDEFINED;
         sp[3] = IOD_ID_UNDEFINED;
-        sp_cs = H5checksum(&sp, sizeof(sp), NULL);
 
         /* set scratch pad in map */
-        if (iod_obj_set_scratch(map_oh, wtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t sp_cs;
+
+            sp_cs = H5checksum(&sp, sizeof(sp), NULL);
+            if (iod_obj_set_scratch(map_oh, wtid, &sp, &sp_cs, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        }
+        else {
+            if (iod_obj_set_scratch(map_oh, wtid, &sp, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        }
 
         /* Open Metadata KV object for write */
         if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
@@ -214,6 +223,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t loc_id = input->loc_id;
     const char *name = input->name;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_obj_id_t map_id; /* The ID of the map that needs to be opened */
     iod_handle_t map_oh, mdkv_oh;
     scratch_pad sp;
@@ -237,7 +247,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_get_scratch(map_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-    if(sp_cs) {
+    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
         if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
@@ -329,6 +339,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     hid_t dxpl_id = input->dxpl_id;
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     size_t key_size, val_size;
     iod_kv_t kv;
     hbool_t opened_locally = FALSE;
@@ -438,6 +449,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
     binary_buf_t key = input->key;
     hid_t dxpl_id = input->dxpl_id;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     hbool_t val_is_vl = input->val_is_vl;
     size_t client_val_buf_size = input->val_size;
     hbool_t key_is_vl = FALSE;
@@ -633,6 +645,7 @@ H5VL_iod_server_map_get_count_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t iod_oh = input->iod_oh;
     iod_obj_id_t iod_id = input->iod_id;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_size_t num;
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
@@ -712,6 +725,7 @@ H5VL_iod_server_map_exists_cb(AXE_engine_t UNUSED axe_engine,
     hid_t key_maptype_id = input->key_maptype_id;
     binary_buf_t key = input->key;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     size_t key_size;
     iod_size_t val_size;
     hbool_t opened_locally = FALSE;
@@ -799,6 +813,7 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
     binary_buf_t key = input->key;
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     size_t key_size;
     iod_kv_t kv;
     iod_kv_params_t kvs;

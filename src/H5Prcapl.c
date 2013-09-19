@@ -47,8 +47,8 @@
 /* Definitions for Container Version being Acquired  */
 #define H5RC_ACQUIRE_CV_REQUEST_SIZE      sizeof(H5RC_request_t)
 #define H5RC_ACQUIRE_CV_REQUEST_DEF       H5RC_EXACT
-#define H5RC_ACQUIRE_CV_REQUEST_ENC       H5P__encode_uint8_t
-#define H5RC_ACQUIRE_CV_REQUEST_DEC       H5P__decode_uint8_t
+#define H5RC_ACQUIRE_CV_REQUEST_ENC       H5P__encode_unsigned
+#define H5RC_ACQUIRE_CV_REQUEST_DEC       H5P__decode_unsigned
 
 /******************/
 /* Local Typedefs */

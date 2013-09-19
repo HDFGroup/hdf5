@@ -72,11 +72,6 @@ typedef enum H5FF_checksum_bitflag_t {
 /*********************/
 /* Public Prototypes */
 /*********************/
-H5_DLL herr_t H5Pset_metadata_integrity_scope(hid_t fapl_id, uint32_t scope);
-H5_DLL herr_t H5Pget_metadata_integrity_scope(hid_t fapl_id, uint32_t *scope);
-
-H5_DLL herr_t H5Pset_rawdata_integrity_scope(hid_t dxpl_id, uint32_t scope);
-H5_DLL herr_t H5Pget_rawdata_integrity_scope(hid_t dxpl_id, uint32_t *scope);
 
 /* API wrappers */
 H5_DLL hid_t H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl,

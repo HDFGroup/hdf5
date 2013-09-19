@@ -39,6 +39,7 @@ int main(int argc, char **argv) {
     int num_requests = 0;
     unsigned int i = 0;
     uint32_t cs = 0,read1_cs = 0, read2_cs = 0;
+    uint32_t cs_scope = 0;
     herr_t ret;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
@@ -77,6 +78,11 @@ int main(int argc, char **argv) {
     /* create an event Queue for managing asynchronous requests. */
     event_q = H5EQcreate(fapl_id);
     assert(event_q);
+
+    /* set the metada data integrity checks to happend at transfer through mercury */
+    cs_scope |= H5_CHECKSUM_TRANSFER;
+    ret = H5Pset_metadata_integrity_scope(fapl_id, cs_scope);
+    assert(ret == 0);
 
     /* create the file. */
     file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
@@ -135,6 +141,12 @@ int main(int argc, char **argv) {
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
     cs = H5checksum(wdata1, sizeof(int32_t) * nelem, NULL);
     H5Pset_dxpl_checksum(dxpl_id, cs);
+
+    /* tell HDF5 to disable all data integrity checks for this write */
+    cs_scope = 0;
+    ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
+    assert(ret == 0);
+
     ret = H5Dwrite_ff(did1, dtid, sid, sid, dxpl_id, wdata1, tid1, event_q);
     assert(ret == 0);
 
@@ -144,6 +156,13 @@ int main(int argc, char **argv) {
     cs = H5checksum(wdata2, sizeof(int32_t) * nelem, NULL);
     H5Pset_dxpl_checksum(dxpl_id, cs);
     H5Pset_dxpl_inject_corruption(dxpl_id, 1);
+
+    /* tell HDF5 to disable data integrity checks stored at IOD for this write;
+       The transfer checksum will still capture the corruption. */
+    cs_scope |= H5_CHECKSUM_IOD;
+    ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
+    assert(ret == 0);
+
     ret = H5Dwrite_ff(did2, dtid, sid, sid, dxpl_id, wdata2, tid1, event_q);
     assert(ret == 0);
 
@@ -237,6 +256,7 @@ int main(int argc, char **argv) {
     H5Pset_dxpl_inject_corruption(dxpl_id, 1);
     /* Give a location to the DXPL to store the checksum once the read has completed */
     H5Pset_dxpl_checksum_ptr(dxpl_id, &read2_cs);
+
     ret = H5Dread_ff(did2, dtid, sid, sid, dxpl_id, rdata2, rid2, event_q);
     assert(ret == 0);
     H5Pclose(dxpl_id);

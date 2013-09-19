@@ -441,6 +441,7 @@ static int hg_proc_plist_t(hg_proc_t proc, hid_t *data)
 
     case HG_ENCODE:
         plist_id = *data;
+        /*
         if(H5P_FILE_CREATE_DEFAULT != plist_id && H5P_GROUP_CREATE_DEFAULT != plist_id &&
            H5P_LINK_CREATE_DEFAULT != plist_id && H5P_DATASET_CREATE_DEFAULT != plist_id &&
            H5P_FILE_ACCESS_DEFAULT != plist_id && H5P_GROUP_ACCESS_DEFAULT != plist_id &&
@@ -448,7 +449,8 @@ static int hg_proc_plist_t(hg_proc_t proc, hid_t *data)
            H5P_DATASET_ACCESS_DEFAULT != plist_id && H5P_DATASET_XFER_DEFAULT != plist_id &&
            H5P_DATATYPE_CREATE_DEFAULT != plist_id && H5P_DATATYPE_ACCESS_DEFAULT != plist_id &&
            H5P_LINK_ACCESS_DEFAULT != plist_id && H5P_RC_ACQUIRE_DEFAULT != plist_id &&
-           H5P_TR_START_DEFAULT != plist_id && H5P_TR_FINISH_DEFAULT != plist_id) {
+           H5P_TR_START_DEFAULT != plist_id && H5P_TR_FINISH_DEFAULT != plist_id) */
+        if(H5P_OBJECT_COPY_DEFAULT != plist_id) {
             if(H5Pencode(plist_id, NULL, &plist_size) < 0) {
                 HG_ERROR_DEFAULT("PLIST encode Proc error");
                 return HG_FAIL;

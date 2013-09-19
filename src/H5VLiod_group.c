@@ -56,6 +56,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     const char *name = input->name; /* path relative to loc_id and loc_oh  */
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_handle_t grp_oh, cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, mdkv_id, attr_id;
     char *last_comp = NULL; /* the name of the group obtained from traversal function */
@@ -93,8 +94,6 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     /* for the process that succeeded in creating the group, create
        the scratch pad for it too */
     if(0 == ret) {
-        iod_checksum_t sp_cs;
-
         /* create the metadata KV object for the group */
         if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &mdkv_id, NULL) < 0)
@@ -111,11 +110,18 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
         sp[2] = IOD_ID_UNDEFINED;
         sp[3] = IOD_ID_UNDEFINED;
 
-        sp_cs = H5checksum(&sp, sizeof(sp), NULL);
-
         /* set scratch pad in group */
-        if (iod_obj_set_scratch(grp_oh, wtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t sp_cs;
+
+            sp_cs = H5checksum(&sp, sizeof(sp), NULL);
+            if (iod_obj_set_scratch(grp_oh, wtid, &sp, &sp_cs, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        }
+        else {
+            if (iod_obj_set_scratch(grp_oh, wtid, &sp, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        }
 
         /* store metadata */
         /* Open Metadata KV object for write */
@@ -214,6 +220,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     const char *name = input->name; /* group name including path to open */
     iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
     iod_obj_id_t grp_id; /* The ID of the group that needs to be opened */
     iod_handle_t grp_oh, mdkv_oh; /* The group handle and its metadata KV handle */
     scratch_pad sp;
@@ -234,7 +241,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_get_scratch(grp_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-    if(sp_cs) {
+    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
         if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");

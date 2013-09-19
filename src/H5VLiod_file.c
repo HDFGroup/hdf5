@@ -57,19 +57,22 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t mdkv_id, attr_id; /* metadata and attribute KV IDs for the file */
     iod_ret_t ret;
     iod_trans_id_t first_tid = 0;
+    uint32_t cs_scope = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start file create %s %d %d\n", 
-            input->name, input->fapl_id, input->fcpl_id);
+    fprintf(stderr, "Start file create %s\n", input->name);
 #endif
 
     /* convert HDF5 flags to IOD flags */
     mode = (input->flags&H5F_ACC_RDWR) ? IOD_CONT_RW : IOD_CONT_RO;
     if (input->flags&H5F_ACC_CREAT) 
         mode |= IOD_CONT_CREATE;
+
+    if(H5Pget_metadata_integrity_scope(input->fapl_id, &cs_scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 
     /* Create the Container */
     if(iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/) < 0)
@@ -98,7 +101,6 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         void *key = NULL;
         void *value = NULL;
         hid_t fcpl_id;
-        iod_checksum_t sp_cs;
 
         /* create the metadata KV object for the root group */
         if(iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, 
@@ -116,11 +118,21 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         sp[2] = IOD_ID_UNDEFINED;
         sp[3] = IOD_ID_UNDEFINED;
 
-        sp_cs = H5checksum(&sp, sizeof(sp), NULL);
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t sp_cs;
 
-        /* set scratch pad in root group */
-        if (iod_obj_set_scratch(root_oh, first_tid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+            sp_cs = H5checksum(&sp, sizeof(sp), NULL);
+            /* set scratch pad in root group */
+            if (iod_obj_set_scratch(root_oh, first_tid, &sp, &sp_cs, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        }
+        else {
+#if H5VL_IOD_DEBUG
+            fprintf(stderr, "METADATA INTEGRITY DISABLED\n");
+#endif
+            if (iod_obj_set_scratch(root_oh, first_tid, &sp, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        }
 
         /* Store Metadata in scratch pad */
         if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
@@ -128,11 +140,9 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 
         /* store metadata */
 
-
         if(H5P_DEFAULT == input->fcpl_id)
             input->fcpl_id = H5Pcopy(H5P_FILE_CREATE_DEFAULT);
         fcpl_id = input->fcpl_id;
-
         /* insert plist metadata */
         if(H5VL_iod_insert_plist(mdkv_oh, first_tid, fcpl_id, 
                                  NULL, NULL, NULL) < 0)
@@ -243,6 +253,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_checksum_t sp_cs = 0;
     iod_container_tids_t tids;
     iod_trans_id_t rtid;
+    uint32_t cs_scope = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -250,6 +261,9 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start file open %s %d %d\n", input->name, input->flags, input->fapl_id);
 #endif
+
+    if(H5Pget_metadata_integrity_scope(input->fapl_id, &cs_scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 
     /* open the container */
     if(iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/))
@@ -274,7 +288,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_get_scratch(root_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
 
-    if(sp_cs) {
+    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
         if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");

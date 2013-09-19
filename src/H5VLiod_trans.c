@@ -62,8 +62,9 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
         input->rcapl_id = H5Pcopy(H5P_RC_ACQUIRE_DEFAULT);
     rcapl_id = input->rcapl_id;
 
-    if(H5Pget_rcapl_version_request(rcapl_id, &acquire_req) < 0)
+    if(H5Pget_rcapl_version_request(rcapl_id, &acquire_req) < 0) {
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't get acquire request property");
+    }
 
     switch(acquire_req) {
     case H5RC_EXACT:

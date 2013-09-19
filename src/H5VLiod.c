@@ -1031,6 +1031,150 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Pset_metadata_integrity_scope
+ *
+ * Purpose:	Set the scope of checksum generation and verification 
+ *              in the FF stack.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_metadata_integrity_scope(hid_t fapl_id, uint32_t scope)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(scope > H5_CHECKSUM_ALL)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid scope for Data Integrity");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set property */
+    if(H5P_set(plist, H5VL_CS_BITFLAG_NAME, &scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data integrity scope");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_metadata_integrity_scope() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_metadata_integrity_scope
+ *
+ * Purpose:	Get the current bit flag indicating the data integrity scope.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_metadata_integrity_scope(hid_t fapl_id, uint32_t *scope)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    if(scope) {
+        /* Get property */
+        if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, scope) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_metadata_integrity_scope() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_rawdata_integrity_scope
+ *
+ * Purpose:	Set the scope of checksum generation and verification 
+ *              in the FF stack.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_rawdata_integrity_scope(hid_t dxpl_id, uint32_t scope)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(scope > H5_CHECKSUM_ALL)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid scope for Data Integrity");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set property */
+    if(H5P_set(plist, H5VL_CS_BITFLAG_NAME, &scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data integrity scope");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_rawdata_integrity_scope() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_rawdata_integrity_scope
+ *
+ * Purpose:	Get the current bit flag indicating the data integrity scope.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_rawdata_integrity_scope(hid_t dxpl_id, uint32_t *scope)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    if(scope) {
+        /* Get property */
+        if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, scope) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_rawdata_integrity_scope() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_dxpl_inject_corruption
  *
  * Purpose:     Temporary routine to set a boolean flag that tells the 
@@ -1199,6 +1343,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
     H5VL_iod_file_t *file = NULL;
     file_create_in_t input;
+    uint32_t cs_scope;
     void  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1217,6 +1362,9 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
     if(NULL == (fa = (H5VL_iod_fapl_t *)H5P_get_vol_info(plist)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get IOD info struct")
+
+    if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, &cs_scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get scope for data integrity checks");
 
     /* allocate the file object that is returned to the user */
     if(NULL == (file = H5FL_CALLOC(H5VL_iod_file_t)))
@@ -1241,6 +1389,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     /* create the file object that is passed to the API layer */
     file->file_name = HDstrdup(name);
     file->flags = flags;
+    file->md_integrity_scope = cs_scope;
     if((file->remote_file.fcpl_id = H5Pcopy(fcpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy fcpl");
     if((file->fapl_id = H5Pcopy(fapl_id)) < 0)
@@ -1297,6 +1446,7 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
     H5VL_iod_file_t *file = NULL;
     file_open_in_t input;
     hid_t rcxt_id;
+    uint32_t cs_scope;
     void  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1311,6 +1461,9 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
        when the file is opened */
     if(H5P_get(plist, H5VL_ACQUIRE_RC_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't set property value for rxct id")
+
+    if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, &cs_scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get scope for data integrity checks");
 
     if(FAIL != rcxt_id) {
         input.acquire = TRUE;
@@ -1339,6 +1492,7 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
     MPI_Comm_size(fa->comm, &file->num_procs);
     file->file_name = HDstrdup(name);
     file->flags = flags;
+    file->md_integrity_scope = cs_scope;
     if((file->fapl_id = H5Pcopy(fapl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy fapl");
     file->nopen_objs = 1;
@@ -1603,6 +1757,7 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED dxpl_id, void **req)
     input.coh = file->remote_file.coh;
     input.root_oh = file->remote_file.root_oh;
     input.root_id = file->remote_file.root_id;
+    input.cs_scope = file->md_integrity_scope;
 
     if(file->num_req) {
         H5VL_iod_request_t *cur_req = file->request_list_head;
@@ -1725,6 +1880,7 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
     input.lcpl_id = lcpl_id;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
     /* setup the local group struct */
     /* store the entire path of the group locally */
@@ -1835,6 +1991,7 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
     input.name = name;
     input.gapl_id = gapl_id;
     input.rcxt_num  = rc->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
     printf("Group Open %s LOC ID %llu, axe id %llu\n", 
@@ -2085,6 +2242,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t UNUSED loc_params,
     input.space_id = space_id;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
     /* setup the local dataset struct */
     /* store the entire path of the dataset locally */
@@ -2204,6 +2362,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
     input.name = name;
     input.dapl_id = dapl_id;
     input.rcxt_num  = rc->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
     /* setup the local dataset struct */
     /* store the entire path of the dataset locally */
@@ -2369,6 +2528,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         input.dset_type_id = dset->remote_dset.type_id;
         input.mem_type_id = mem_type_id;
         input.rcxt_num  = rc->c_version;
+        input.cs_scope = dset->common.file->md_integrity_scope;
         input.trans_num = 0;
     }
     else {
@@ -2380,6 +2540,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         input_vl.space_id = file_space_id;
         input_vl.mem_type_id = mem_type_id;
         input_vl.rcxt_num  = rc->c_version;
+        input_vl.cs_scope = dset->common.file->md_integrity_scope;
     }
 
     /* allocate structure to receive status of read operation
@@ -2406,6 +2567,9 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
     /* store the pointer to the buffer where the checksum needs to be placed */
     if(H5P_get(plist, H5D_XFER_CHECKSUM_PTR_NAME, &info->cs_ptr) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum pointer value");
+    /* store the raw data integrity scope */
+    if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, &info->raw_cs_scope) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum pointer value");
 
     /* If the read is of VL data, then we need the read parameters to
@@ -2483,6 +2647,8 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     size_t num_parents = 0;
     hid_t trans_id;
     H5TR_t *tr = NULL;
+    uint32_t user_cs;
+    uint32_t raw_cs_scope = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2521,37 +2687,50 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if(!buf)
         buf = &fake_char;
 
+    /* get the plist pointer */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* get the TR object */
+    if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
+    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
+
+    /* get the data integrity scope */
+    if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, &raw_cs_scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get scope for data integrity checks");
+
     /* allocate a bulk data transfer handle */
     if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
         HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
 
-    /* compute checksum and create bulk handle */
-    if(H5VL_iod_pre_write(mem_type_id, mem_space_id, buf, 
-                          &internal_cs, bulk_handle, &vl_string_len) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't generate write parameters");
-
-    /* get the transaction ID */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-    if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
-
-    /* get the TR object */
-    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
+    if(raw_cs_scope) {
+        /* compute checksum and create bulk handle */
+        if(H5VL_iod_pre_write(mem_type_id, mem_space_id, buf, 
+                              &internal_cs, bulk_handle, &vl_string_len) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't generate write parameters");
+    }
+    else {
+#if H5VL_IOD_DEBUG        
+        printf("NO DATA INTEGRITY CHECKS ON RAW DATA WRITTEN\n");
+#endif
+        /* compute checksum and create bulk handle */
+        if(H5VL_iod_pre_write(mem_type_id, mem_space_id, buf, 
+                              NULL, bulk_handle, &vl_string_len) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't generate write parameters");
+        internal_cs = 0;
+    }
 
     /* Verify the checksum value if the dxpl contains a user defined checksum */
-    if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
-        uint32_t user_cs;
+    if(H5P_get(plist, H5D_XFER_CHECKSUM_NAME, &user_cs) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum value");
 
-        if(H5P_get(plist, H5D_XFER_CHECKSUM_NAME, &user_cs) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum value");
-
-        if(user_cs != internal_cs) {
-            fprintf(stderr, "Errrr.. In memory Data corruption. expecting %u, got %u\n",
-                    user_cs, internal_cs);
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "Checksum verification failed");
-        }
+    if((raw_cs_scope & H5_CHECKSUM_MEMORY) && user_cs && 
+       user_cs != internal_cs) {
+        fprintf(stderr, "Errrr.. In memory Data corruption. expecting %u, got %u\n",
+                user_cs, internal_cs);
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "Checksum verification failed");
     }
 
     if(NULL == (parent_reqs = (H5VL_iod_request_t **)
@@ -2575,6 +2754,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     input.mem_type_id = mem_type_id;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = dset->common.file->md_integrity_scope;
 
     status = (int *)malloc(sizeof(int));
 
@@ -2669,6 +2849,7 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[],
     input.dims.size = size;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = dset->common.file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
     printf("Dataset Set Extent, axe id %llu\n", g_axe_id);
@@ -2947,6 +3128,7 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t UNUSED loc_params, const 
     input.type_id = type_id;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
     printf("Datatype Commit %s IOD ID %llu, axe id %llu\n", 
@@ -3062,6 +3244,7 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const ch
     input.name = name;
     input.tapl_id = tapl_id;
     input.rcxt_num  = rc->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
     printf("Datatype Open %s LOC ID %llu, axe id %llu\n", 
@@ -3335,6 +3518,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     input.space_id = space_id;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
     /* setup the local attribute struct */
     /* store the entire path of the attribute locally */
@@ -3471,6 +3655,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     input.path = loc_name;
     input.attr_name = attr_name;
     input.rcxt_num  = rc->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
     printf("Attribute Open %s LOC ID %llu, axe id %llu\n", 
@@ -3598,6 +3783,7 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
     input.type_id = type_id;
     input.space_id = attr->remote_attr.space_id;
     input.rcxt_num  = rc->c_version;
+    input.cs_scope = attr->common.file->md_integrity_scope;
     input.trans_num = 0;
 
     /* allocate structure to receive status of read operation (contains return value and checksum */
@@ -3710,6 +3896,7 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     input.space_id = attr->remote_attr.space_id;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = attr->common.file->md_integrity_scope;
 
     status = (int *)malloc(sizeof(int));
 
@@ -3804,6 +3991,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
     input.attr_name = attr_name;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
     status = (int *)malloc(sizeof(int));
 
@@ -3984,6 +4172,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 input.attr_name = attr_name;
                 input.path = loc_name;
                 input.rcxt_num  = rc->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
                 input.trans_num  = 0;
 
 #if H5VL_IOD_DEBUG
@@ -4311,6 +4500,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
 
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
     if(H5VL__iod_create_and_forward(H5VL_LINK_CREATE_ID, HG_LINK_CREATE, 
                                     obj, 1, num_parents, parent_reqs,
@@ -4435,6 +4625,7 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
     input.lapl_id = lapl_id;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = src_obj->file->md_integrity_scope;
 
     status = (herr_t *)malloc(sizeof(herr_t));
 
@@ -4552,6 +4743,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 input.loc_id = iod_id;
                 input.loc_oh = iod_oh;
                 input.rcxt_num  = rc->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
                 input.trans_num  = 0;
                 input.path = loc_name;
 
@@ -4585,6 +4777,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 input.loc_id = iod_id;
                 input.loc_oh = iod_oh;
                 input.rcxt_num  = rc->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
                 input.trans_num  = 0;
                 input.path = loc_name;
 
@@ -4622,6 +4815,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 input.loc_id = iod_id;
                 input.loc_oh = iod_oh;
                 input.rcxt_num  = rc->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
                 input.path = loc_name;
 
                 if(NULL == (result = (link_get_val_out_t *)malloc
@@ -4724,6 +4918,7 @@ H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, vo
     input.path = loc_name;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
     printf("Link Remove axe %llu: %s ID %llu\n", 
@@ -4805,6 +5000,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
                 input.name = ".";
                 input.dapl_id = H5P_DATASET_ACCESS_DEFAULT;
                 input.rcxt_num  = rc->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
 
                 dset->dapl_id = H5P_DATASET_ACCESS_DEFAULT;
 
@@ -4844,6 +5040,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
                 input.name = ".";
                 input.tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
                 input.rcxt_num  = rc->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
 
                 dtype->tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
 
@@ -4882,6 +5079,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
                 input.name = ".";
                 input.gapl_id = H5P_GROUP_ACCESS_DEFAULT;
                 input.rcxt_num  = rc->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
 
                 grp->gapl_id = H5P_GROUP_ACCESS_DEFAULT;
 
@@ -4922,6 +5120,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
                 input.name = ".";
                 input.mapl_id = H5P_GROUP_ACCESS_DEFAULT;
                 input.rcxt_num  = rc->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
 
                 map->mapl_id = H5P_GROUP_ACCESS_DEFAULT;
 
@@ -4971,6 +5170,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
         input.coh = obj->file->remote_file.coh;
         input.loc_name = loc_name;
         input.rcxt_num  = rc->c_version;
+        input.cs_scope = obj->file->md_integrity_scope;
 
         /* H5Oopen has to be synchronous */
         if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_ID, HG_OBJECT_OPEN, 
@@ -5242,6 +5442,7 @@ H5VL_iod_object_copy(void *_src_obj, H5VL_loc_params_t UNUSED loc_params1, const
     input.ocpypl_id = ocpypl_id;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = src_obj->file->md_integrity_scope;
 
     status = (herr_t *)malloc(sizeof(herr_t));
 
@@ -5360,6 +5561,7 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
                 input.path = loc_name;
                 input.trans_num = tr->trans_num;
                 input.rcxt_num  = tr->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
                 printf("Attribute Rename %s to %s LOC ID %llu, axe id %llu\n", 
@@ -5397,6 +5599,7 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
                 input.path = loc_name;
                 input.trans_num = tr->trans_num;
                 input.rcxt_num  = tr->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
 
                 status = (herr_t *)malloc(sizeof(herr_t));
 
@@ -5512,6 +5715,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 input.loc_id = iod_id;
                 input.loc_oh = iod_oh;
                 input.rcxt_num  = rc->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
                 input.loc_name = loc_name;
 
 #if H5VL_IOD_DEBUG
@@ -5565,6 +5769,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 input.loc_id = iod_id;
                 input.loc_oh = iod_oh;
                 input.rcxt_num  = rc->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
                 input.path = loc_name;
                 if(comment)
                     input.length = size;
@@ -5610,6 +5815,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 input.loc_id = iod_id;
                 input.loc_oh = iod_oh;
                 input.rcxt_num  = rc->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
                 input.loc_name = loc_name;
 
 #if H5VL_IOD_DEBUG
@@ -5720,6 +5926,7 @@ H5VL_iod_map_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
     input.lcpl_id = lcpl_id;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
     printf("Map Create %s, IOD ID %llu, axe id %llu\n", 
@@ -5815,6 +6022,7 @@ H5VL_iod_map_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char *n
     input.name = name;
     input.mapl_id = mapl_id;
     input.rcxt_num  = rc->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
     printf("Map Open %s LOC ID %llu, axe id %llu\n", 
@@ -5925,6 +6133,7 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
         input.val.buf = value;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = map->common.file->md_integrity_scope;
 
     status = (int *)malloc(sizeof(int));
 
@@ -6007,6 +6216,7 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
     input.val_is_vl = val_is_vl;
     input.val_size = val_size;
     input.rcxt_num = rc->c_version;
+    input.cs_scope = map->common.file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
     printf("MAP Get, axe id %llu\n", g_axe_id);
@@ -6121,6 +6331,7 @@ H5VL_iod_map_get_count(void *_map, hsize_t *count, hid_t rcxt_id, void **req)
     input.iod_oh = map->remote_map.iod_oh;
     input.iod_id = map->remote_map.iod_id;
     input.rcxt_num  = rc->c_version;
+    input.cs_scope = map->common.file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
     printf("MAP Get count, axe id %llu\n", g_axe_id);
@@ -6177,6 +6388,7 @@ H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key,
     input.key.buf_size = key_size;
     input.key.buf = key;
     input.rcxt_num  = rc->c_version;
+    input.cs_scope = map->common.file->md_integrity_scope;
     input.trans_num  = 0;
 
 #if H5VL_IOD_DEBUG
@@ -6255,6 +6467,7 @@ H5VL_iod_map_delete(void *_map, hid_t key_mem_type_id, const void *key,
     input.key.buf = key;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.cs_scope = map->common.file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
     printf("MAP DELETE, axe id %llu\n", g_axe_id);
