@@ -76,16 +76,12 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
 	// Iterates the selected elements in the specified dataspace - not implemented in C++ style yet
         int iterateElems( void* buf, const DataType& type, const DataSpace& space, H5D_operator_t op, void* op_data = NULL );
 
-	// Retrieves a dataspace with the region pointed to selected.
-	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
-
 	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("DataSet"); }
 
 	// Creates a dataset by way of dereference.
-	DataSet(H5Object& obj, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
-	DataSet(H5File& h5file, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
-	DataSet(Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+	DataSet(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 
 	// Default constructor.
 	DataSet();

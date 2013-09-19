@@ -44,6 +44,7 @@ namespace H5 {
 #endif  // H5_NO_STD
 #endif
 
+class H5_DLLCPP H5Object;  // forward declaration for UserData4Aiterate
 //--------------------------------------------------------------------------
 // Function:	Attribute default constructor
 ///\brief	Default constructor: Creates a stub attribute

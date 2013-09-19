@@ -39,7 +39,7 @@ namespace H5 {
 //--------------------------------------------------------------------------
 ///\brief	Constant for default property.
 //--------------------------------------------------------------------------
-const PropList PropList::DEFAULT( H5P_DEFAULT );
+const PropList PropList::DEFAULT;
 
 //--------------------------------------------------------------------------
 // Function	Default constructor
@@ -644,6 +644,9 @@ void PropList::removeProp(const H5std_string& name) const
 //--------------------------------------------------------------------------
 bool PropList::operator==(const PropList& rhs) const
 {
+ fprintf(stderr, "operator==\n");
+H5Eprint2(H5E_DEFAULT, stderr);
+
    htri_t ret_value = H5Pequal(id, rhs.getId());
    if( ret_value > 0 )
       return true;

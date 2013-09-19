@@ -30,9 +30,8 @@ class H5_DLLCPP DataType : public H5Object {
 	DataType( const DataType& original );
 
 	// Creates a datatype by way of dereference.
-	DataType(H5Object& obj, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
-	DataType(H5File& h5file, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
-	DataType(Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+	DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 
 	// Closes this datatype.
 	virtual void close();
@@ -100,9 +99,6 @@ class H5_DLLCPP DataType : public H5Object {
 
 	// Checks whether this datatype is a variable-length string.
 	bool isVariableStr() const;
-
-	// Retrieves a dataspace with the region pointed to selected.
-	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
 	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("DataType"); }

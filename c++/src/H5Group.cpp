@@ -99,14 +99,18 @@ Group::Group(const hid_t existing_id) : H5Object()
 ///		is a datatype that has been named by DataType::commit.
 // Programmer	Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
-Group::Group(H5Object& obj, const void* ref, H5R_type_t ref_type) : H5Object()
+ /* Group::Group(H5Object& obj, const void* ref, H5R_type_t ref_type) : H5Object()
+ */ 
+Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object()
 {
-    try {
-	id = p_dereference(obj.getId(), ref, ref_type);
+    H5Location::dereference(loc, ref, ref_type, plist);
+     /* try {
+	id = p_dereference(loc.getId(), ref, ref_type);
     } catch (ReferenceException deref_error) {
 	throw ReferenceException("Group constructor - located by an H5Object",
 		deref_error.getDetailMsg());
     }
+ */ 
 }
 
 //--------------------------------------------------------------------------
@@ -118,7 +122,7 @@ Group::Group(H5Object& obj, const void* ref, H5R_type_t ref_type) : H5Object()
 ///\exception	H5::ReferenceException
 // Programmer	Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
-Group::Group(H5File& h5file, const void* ref, H5R_type_t ref_type) : H5Object()
+ /* Group::Group(H5File& h5file, const void* ref, H5R_type_t ref_type) : H5Object()
 {
     try {
 	id = p_dereference(h5file.getId(), ref, ref_type);
@@ -127,6 +131,7 @@ Group::Group(H5File& h5file, const void* ref, H5R_type_t ref_type) : H5Object()
 		deref_error.getDetailMsg());
     }
 }
+ */ 
 
 //--------------------------------------------------------------------------
 // Function:	Group overload constructor - dereference
@@ -137,10 +142,10 @@ Group::Group(H5File& h5file, const void* ref, H5R_type_t ref_type) : H5Object()
 ///\exception	H5::ReferenceException
 // Programmer	Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
-Group::Group(Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Object()
+Group::Group(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object()
 {
     try {
-	id = p_dereference(attr.getId(), ref, ref_type);
+	id = p_dereference(attr.getId(), ref, ref_type, plist);
     } catch (ReferenceException deref_error) {
 	throw ReferenceException("Group constructor - located by an Attribute",
 		deref_error.getDetailMsg());
