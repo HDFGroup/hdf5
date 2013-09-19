@@ -254,7 +254,7 @@ H5Pget_rcapl_version_request(hid_t rcapl_id, H5RC_request_t *acquire_req)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_rcapl_version_request() */
+} /* end H5Pget_rcapl_version_request() */
 
 
 /*-------------------------------------------------------------------------

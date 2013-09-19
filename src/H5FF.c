@@ -113,6 +113,150 @@ H5FF__init_interface(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Pset_metadata_integrity_scope
+ *
+ * Purpose:	Set the scope of checksum generation and verification 
+ *              in the FF stack.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_metadata_integrity_scope(hid_t fapl_id, uint32_t scope)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(H5_CHECKSUM_NONE > scope || scope > H5_CHECKSUM_ALL)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid scope for Data Integrity");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set property */
+    if(H5P_set(plist, H5VL_CS_BITFLAG_NAME, &scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data integrity scope");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_metadata_integrity_scope() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_metadata_integrity_scope
+ *
+ * Purpose:	Get the current bit flag indicating the data integrity scope.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_metadata_integrity_scope(hid_t fapl_id, uint32_t *scope)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    if(scope) {
+        /* Get property */
+        if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, scope) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_metadata_integrity_scope() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_rawdata_integrity_scope
+ *
+ * Purpose:	Set the scope of checksum generation and verification 
+ *              in the FF stack.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_rawdata_integrity_scope(hid_t dxpl_id, uint32_t scope)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(H5_CHECKSUM_NONE > scope || scope > H5_CHECKSUM_ALL)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid scope for Data Integrity");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set property */
+    if(H5P_set(plist, H5VL_CS_BITFLAG_NAME, &scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data integrity scope");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_rawdata_integrity_scope() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_rawdata_integrity_scope
+ *
+ * Purpose:	Get the current bit flag indicating the data integrity scope.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_rawdata_integrity_scope(hid_t dxpl_id, uint32_t *scope)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    if(scope) {
+        /* Get property */
+        if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, scope) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_rawdata_integrity_scope() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Fcreate_ff
  *
  * Purpose:	Asynchronous wrapper around H5Fcreate().
@@ -196,7 +340,7 @@ done:
  */
 hid_t
 H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id, 
-           hid_t eq_id, /*OUT*/hid_t *rcxt_id)
+           /*OUT*/hid_t *rcxt_id, hid_t eq_id)
 {
     void    *file = NULL;            /* file token from VOL plugin */
     H5VL_t  *vol_plugin;             /* VOL plugin information */

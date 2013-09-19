@@ -39,6 +39,9 @@
    container when the file is opened */
 #define H5VL_ACQUIRE_RC_ID   "acquire_version"
 
+/* property to determine the scope of data integrity checks in the FF stack */
+#define H5VL_CS_BITFLAG_NAME "checksum_bitflag"
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/

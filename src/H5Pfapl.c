@@ -59,6 +59,16 @@
 /* Local Macros */
 /****************/
 
+#ifdef H5_HAVE_EFF
+
+/* definitions for checksum scope in FF stack */
+#define H5F_ACS_CHECKSUM_SCOPE_SIZE	sizeof(uint32_t)
+#define H5F_ACS_CHECKSUM_SCOPE_DEF	0
+#define H5F_ACS_CHECKSUM_SCOPE_ENC     H5P__encode_unsigned
+#define H5F_ACS_CHECKSUM_SCOPE_DEC     H5P__decode_unsigned
+
+#endif /* H5_HAVE_EFF */
+
 /* ========= File Access properties ============ */
 /* Definitions for the initial metadata cache resize configuration */
 #define H5F_ACS_META_CACHE_INIT_CONFIG_SIZE	sizeof(H5AC_cache_config_t)
@@ -259,6 +269,9 @@ static const hbool_t H5F_def_want_posix_fd_g = H5F_ACS_WANT_POSIX_FD_DEF;       
 static const unsigned H5F_def_efc_size_g = H5F_ACS_EFC_SIZE_DEF;                   /* Default external file cache size */
 static const H5FD_file_image_info_t H5F_def_file_image_info_g = H5F_ACS_FILE_IMAGE_INFO_DEF;  /* Default file image info and callbacks */
 
+#ifdef H5_HAVE_EFF
+static const uint32_t H5F_def_checksum_scope_g = H5F_ACS_CHECKSUM_SCOPE_DEF;
+#endif /* H5_HAVE_EFF */
 
 
 /*-------------------------------------------------------------------------
@@ -425,6 +438,15 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5VL_ACQUIRE_RC_ID, sizeof(hid_t), &rcxt_id, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+#ifdef H5_HAVE_EFF
+    if(H5P_register_real(pclass, H5VL_CS_BITFLAG_NAME, H5F_ACS_CHECKSUM_SCOPE_SIZE, 
+                         &H5F_def_checksum_scope_g,
+                         NULL, NULL, NULL, H5F_ACS_CHECKSUM_SCOPE_ENC, H5F_ACS_CHECKSUM_SCOPE_DEC, 
+                         NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+#endif /* H5_HAVE_EFF */
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_facc_reg_prop() */

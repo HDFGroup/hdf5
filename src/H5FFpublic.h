@@ -56,6 +56,15 @@ typedef struct H5O_ff_info_t {
     hsize_t             num_attrs;  /* # of attributes attached to object   */
 } H5O_ff_info_t;
 
+/* Bitflag values to enable/disable checksuming in different layers */
+typedef enum H5FF_checksum_bitflag_t {
+    H5_CHECKSUM_NONE      = 0x00,
+    H5_CHECKSUM_TRANSFER  = 0x01,
+    H5_CHECKSUM_IOD       = 0x02,
+    H5_CHECKSUM_MEMORY    = 0x04,
+    H5_CHECKSUM_ALL       = 0x07
+} H5FF_checksum_bitflag_t;
+
 /********************/
 /* Public Variables */
 /********************/
@@ -63,12 +72,17 @@ typedef struct H5O_ff_info_t {
 /*********************/
 /* Public Prototypes */
 /*********************/
+H5_DLL herr_t H5Pset_metadata_integrity_scope(hid_t fapl_id, uint32_t scope);
+H5_DLL herr_t H5Pget_metadata_integrity_scope(hid_t fapl_id, uint32_t *scope);
+
+H5_DLL herr_t H5Pset_rawdata_integrity_scope(hid_t dxpl_id, uint32_t scope);
+H5_DLL herr_t H5Pget_rawdata_integrity_scope(hid_t dxpl_id, uint32_t *scope);
 
 /* API wrappers */
 H5_DLL hid_t H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl,
                           hid_t fapl, hid_t eq_id);
 H5_DLL hid_t H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id,
-                        hid_t eq_id, hid_t *rcxt_id);
+                        hid_t *rcxt_id, hid_t eq_id);
 H5_DLL herr_t H5Fclose_ff(hid_t file_id, hid_t eq_id);
 
 H5_DLL hid_t H5Gcreate_ff(hid_t loc_id, const char *name, hid_t lcpl_id,

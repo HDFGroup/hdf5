@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     assert(event_q);
 
     /* Open the file and ask to acquire the latest readable version */
-    file_id = H5Fopen_ff(file_name, H5F_ACC_RDONLY, fapl_id, H5_EVENT_QUEUE_NULL, &rid1);
+    file_id = H5Fopen_ff(file_name, H5F_ACC_RDONLY, fapl_id, &rid1, H5_EVENT_QUEUE_NULL);
     assert(file_id);
 
     /* query the latest readable version number */
