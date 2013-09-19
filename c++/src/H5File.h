@@ -61,6 +61,9 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 	// and datatypes) in the same file.
 	void getObjIDs(unsigned types, size_t max_objs, hid_t *oid_list) const;
 
+	// Retrieves a dataspace with the region pointed to selected.
+	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+
 	// Returns the pointer to the file handle of the low-level file driver.
 	void getVFDHandle(FileAccPropList& fapl, void **file_handle) const;
 	void getVFDHandle(void **file_handle) const;
