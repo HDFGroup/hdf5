@@ -208,6 +208,8 @@ typedef struct H5VL_iod_file_t {
     unsigned flags;
     uint32_t md_integrity_scope;
     hid_t fapl_id;
+    MPI_Comm comm;
+    MPI_Info info;
     int my_rank;
     int num_procs;
     size_t num_req;

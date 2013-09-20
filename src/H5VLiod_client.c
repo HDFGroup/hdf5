@@ -930,6 +930,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             /* free everything */
             free(file->file_name);
             free(file->common.obj_name);
+            if(H5FD_mpi_comm_info_free(&file->comm, &file->info) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "Communicator/Info free failed");
             if(file->common.comment)
                 HDfree(file->common.comment);
             if(file->fapl_id != H5P_FILE_ACCESS_DEFAULT && H5Pclose(file->fapl_id) < 0)
@@ -1369,6 +1371,8 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             /* free everything */
             free(file->file_name);
             free(file->common.obj_name);
+            if(H5FD_mpi_comm_info_free(&file->comm, &file->info) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "Communicator/Info free failed");
             if(file->common.comment)
                 HDfree(file->common.comment);
             if(file->fapl_id != H5P_FILE_ACCESS_DEFAULT && H5Pclose(file->fapl_id) < 0)

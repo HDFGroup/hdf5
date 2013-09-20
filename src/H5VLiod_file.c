@@ -98,8 +98,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     if(0 == ret) {
         scratch_pad sp;
         iod_kv_t kv;
-        void *key = NULL;
-        void *value = NULL;
+        uint64_t value = 1;
         hid_t fcpl_id;
 
         /* create the metadata KV object for the root group */
@@ -148,35 +147,20 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
                                  NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert link count KV value");
 
-        /* insert initial indexes for IOD IDs */
-        if(NULL == (value = malloc (sizeof(uint64_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
-        *((uint64_t *)value) = 1;
+        kv.value = &value;
         kv.value_len = sizeof(uint64_t);
 
-        key = strdup(H5VL_IOD_KEY_KV_IDS_INDEX);
-        kv.key = (char *)key;
+        kv.key = H5VL_IOD_KEY_KV_IDS_INDEX;
         if (iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        free(key); 
-        key = NULL;
 
-        key = strdup(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
-        kv.key = (char *)key;
+        kv.key = H5VL_IOD_KEY_ARRAY_IDS_INDEX;
         if (iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        free(key); 
-        key = NULL;
 
-        key = strdup(H5VL_IOD_KEY_BLOB_IDS_INDEX);
-        kv.key = (char *)key;
+        kv.key = H5VL_IOD_KEY_BLOB_IDS_INDEX;
         if (iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        free(key); 
-        key = NULL;
-
-        free(value); 
-        value = NULL;
 
         if(iod_obj_close(mdkv_oh, NULL, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
@@ -410,6 +394,65 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
 #if H5_DO_NATIVE
     H5Fclose(coh.cookie);
 #endif
+
+    /* The root client request will create a transaction and store the
+       final indexes for used up IDs */
+    if(input->max_kv_index && input->max_array_index && input->max_blob_index) {
+        iod_container_tids_t tids;
+        iod_trans_id_t trans_num, rtid;
+        scratch_pad sp;
+        iod_checksum_t sp_cs = 0;
+        iod_kv_t kv;
+        iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
+        uint32_t cs_scope = input->cs_scope;
+
+        if(iod_container_query_tids(coh, &tids, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
+
+        trans_num = tids.latest_wrting + 1;
+        rtid = tids.latest_rdable;
+
+        if(iod_trans_start(coh, &trans_num, NULL, 0, IOD_TRANS_WR, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
+
+        /* get scratch pad of root group */
+        if(iod_obj_get_scratch(root_oh, rtid, &sp, &sp_cs, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
+
+        if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+            /* verify scratch pad integrity */
+            if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+        }
+
+        /* open the metadata scratch pad */
+        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+
+        /* insert current indexes in the metadata KV object */
+        kv.value = &input->max_kv_index;
+        kv.value_len = sizeof(uint64_t);
+        kv.key = H5VL_IOD_KEY_KV_IDS_INDEX;
+        if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        kv.value = &input->max_array_index;
+        kv.value_len = sizeof(uint64_t);
+        kv.key = H5VL_IOD_KEY_ARRAY_IDS_INDEX;
+        if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        kv.value = &input->max_blob_index;
+        kv.value_len = sizeof(uint64_t);
+        kv.key = H5VL_IOD_KEY_BLOB_IDS_INDEX;
+        if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+        if(iod_obj_close(mdkv_oh, NULL, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+
+        /* finish the transaction */
+        if(iod_trans_finish(coh, trans_num, NULL, 0, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction");
+    }
 
     /* close the root group */
     if(iod_obj_close(root_oh, NULL, NULL) < 0)

@@ -1378,6 +1378,9 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     file->remote_file.c_version = 0;
     MPI_Comm_rank(fa->comm, &file->my_rank);
     MPI_Comm_size(fa->comm, &file->num_procs);
+    /* Duplicate communicator and Info object. */
+    if(FAIL == H5FD_mpi_comm_info_dup(fa->comm, fa->info, &file->comm, &file->info))
+	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed");
 
     /* Generate an IOD ID for the root group to be created */
     H5VL_iod_gen_obj_id(file->my_rank, file->num_procs, (uint64_t)0, IOD_OBJ_KV, &input.root_id);
@@ -1494,6 +1497,10 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
     /* create the file object that is passed to the API layer */
     MPI_Comm_rank(fa->comm, &file->my_rank);
     MPI_Comm_size(fa->comm, &file->num_procs);
+    /* Duplicate communicator and Info object. */
+    if(FAIL == H5FD_mpi_comm_info_dup(fa->comm, fa->info, &file->comm, &file->info))
+	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed");
+
     file->file_name = HDstrdup(name);
     file->flags = flags;
     file->md_integrity_scope = cs_scope;
@@ -1757,6 +1764,33 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED dxpl_id, void **req)
 
     /* allocate an integer to receive the return value if the file close succeeded or not */
     status = (int *)malloc(sizeof(int));
+
+    /* determine the max indexes for the KV, Array, and BLOB IDs used
+       up by all the processes */
+    {
+        uint64_t input_indexes[3] = {file->remote_file.kv_oid_index, 
+                                      file->remote_file.array_oid_index, 
+                                      file->remote_file.blob_oid_index};
+        uint64_t object_indexes[3];
+
+        if(MPI_SUCCESS != MPI_Reduce(input_indexes, object_indexes, 3, 
+                                     MPI_UINT64_T, MPI_MAX, 0, file->comm))
+            HGOTO_ERROR(H5E_FILE,  H5E_CANTGET, FAIL, "can't determine max value of object indexes for ID generation");
+
+        if(0 == file->my_rank) {
+            input.max_kv_index = object_indexes[0];
+            input.max_array_index = object_indexes[1];
+            input.max_blob_index = object_indexes[2];
+
+            printf("File Close MAXs: %llu %llu %llu\n", 
+                   input.max_kv_index, input.max_array_index, input.max_blob_index);
+        }
+        else {
+            input.max_kv_index = 0;
+            input.max_array_index = 0;
+            input.max_blob_index = 0;
+        }
+    }
 
     input.coh = file->remote_file.coh;
     input.root_oh = file->remote_file.root_oh;
@@ -2703,7 +2737,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     /* get the data integrity scope */
     if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, &raw_cs_scope) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get scope for data integrity checks");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 
     /* allocate a bulk data transfer handle */
     if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
