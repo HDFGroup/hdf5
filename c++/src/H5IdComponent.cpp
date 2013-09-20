@@ -269,7 +269,7 @@ IdComponent::IdComponent() {}
 // Description:
 // 		This function is protected so that the user applications can
 // 		only have access to its code via allowable classes, namely,
-// 		Attribute and H5Location subclasses.
+// 		H5File and H5Object subclasses.
 // Programmer	Binh-Minh Ribler - Jul, 2004
 //--------------------------------------------------------------------------
 H5std_string IdComponent::p_get_file_name() const

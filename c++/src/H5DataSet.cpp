@@ -79,29 +79,57 @@ DataSet::DataSet(const DataSet& original) : AbstractDs(original), H5Object(origi
 
 //--------------------------------------------------------------------------
 // Function:	DataSet overload constructor - dereference
-///\brief	Given a reference, ref, to an hdf5 location, creates a
+///\brief	Given a reference, ref, to an hdf5 dataset, creates a
 ///		DataSet object
-///\param	loc - IN: Dataset reference object is in or location of
+///\param	obj - IN: Dataset reference object is in or location of
 ///			  object that the dataset is located within.
 ///\param	ref - IN: Reference pointer
 ///\param	ref_type - IN: Reference type - default to H5R_OBJECT
 ///\exception	H5::DataSetIException
 ///\par Description
-///		\c loc can be DataSet, Group, H5File, or named DataType, that
+///		\c obj can be DataSet, Group, H5File, or named DataType, that
 ///		is a datatype that has been named by DataType::commit.
 // Programmer	Binh-Minh Ribler - Oct, 2006
 // Modification
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : AbstractDs(), H5Object()
+DataSet::DataSet(H5Object& obj, const void* ref, H5R_type_t ref_type) : AbstractDs(), H5Object()
 {
-    H5Location::dereference(loc, ref, ref_type, plist);
+    try {
+	id = p_dereference(obj.getId(), ref, ref_type);
+    } catch (ReferenceException deref_error) {
+	throw ReferenceException("DataSet constructor - located by object",
+		deref_error.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
 // Function:	DataSet overload constructor - dereference
-///\brief	Given a reference, ref, to an hdf5 attribute, creates a
+///\brief	Given a reference, ref, to an hdf5 dataset, creates a
+///		DataSet object
+///\param	h5file - IN: Location referenced object is in
+///\param	ref - IN: Reference pointer
+///\param	ref_type - IN: Reference type - default to H5R_OBJECT
+///\exception	H5::DataSetIException
+// Programmer	Binh-Minh Ribler - Oct, 2006
+// Modification
+//	Jul, 2008
+//		Added for application convenience.
+//--------------------------------------------------------------------------
+DataSet::DataSet(H5File& h5file, const void* ref, H5R_type_t ref_type) : AbstractDs(), H5Object()
+{
+    try {
+	id = p_dereference(h5file.getId(), ref, ref_type);
+    } catch (ReferenceException deref_error) {
+	throw ReferenceException("DataSet constructor - located by HDF5 file",
+		deref_error.getDetailMsg());
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataSet overload constructor - dereference
+///\brief	Given a reference, ref, to an hdf5 dataset, creates a
 ///		DataSet object
 ///\param	attr - IN: Specifying location where the referenced object is in
 ///\param	ref - IN: Reference pointer
@@ -112,12 +140,12 @@ DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, co
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataSet::DataSet(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : AbstractDs(), H5Object()
+DataSet::DataSet(Attribute& attr, const void* ref, H5R_type_t ref_type) : AbstractDs(), H5Object()
 {
-      try {
-	id = p_dereference(attr.getId(), ref, ref_type, plist);
+    try {
+	id = p_dereference(attr.getId(), ref, ref_type);
     } catch (ReferenceException deref_error) {
-	throw ReferenceException("DataSet constructor - by dereferenced",
+	throw ReferenceException("DataSet constructor - located by attribute",
 		deref_error.getDetailMsg());
     }
 }

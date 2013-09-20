@@ -446,7 +446,7 @@ void DataSpace::getSelectBounds ( hsize_t* start, hsize_t* end ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	DataSpace::selectElements
+// Function:	DataSpace::H5Sselect_elements
 ///\brief	Selects array elements to be included in the selection for
 ///		this dataspace.
 ///\param	op  - IN: Operator specifying how the new selection is to be

@@ -36,12 +36,12 @@ typedef void (*attr_operator_t)( H5Location& loc/*in*/,
 
 class UserData4Aiterate { // user data for attribute iteration
    public:
-	attr_operator_t op;
-	void* opData;
-	H5Location* location;
+        attr_operator_t op;
+        void* opData;
+        H5Location* location;
 };
 
-// An H5Location can be a file, group, dataset, or committed datatype.
+// An H5Location can be a file, group, dataset, named datatype, or attribute.
 
 class H5_DLLCPP H5Location : public IdComponent {
    public:
@@ -85,47 +85,29 @@ class H5_DLLCPP H5Location : public IdComponent {
 	bool attrExists(const char* name) const;
 	bool attrExists(const H5std_string& name) const;
 
-	// Renames the named attribute to a new name.
-	void renameAttr(const char* oldname, const char* newname) const;
-	void renameAttr(const H5std_string& oldname, const H5std_string& newname) const;
-
 	// Removes the named attribute from this location.
 	void removeAttr(const char* name) const;
 	void removeAttr(const H5std_string& name) const;
 
-	// Sets the comment for an HDF5 object specified by its name.
-	void setComment(const char* name, const char* comment) const;
-	void setComment(const H5std_string& name, const H5std_string& comment) const;
-
-	// Retrieves comment for the HDF5 object specified by its name.
-	H5std_string getComment(const char* name, size_t bufsize=256) const;
-	H5std_string getComment(const H5std_string& name, size_t bufsize=256) const;
-
-	// Removes the comment for the HDF5 object specified by its name.
-	void removeComment(const char* name) const;
-	void removeComment(const H5std_string& name) const;
+	// Renames the named attribute to a new name.
+	void renameAttr(const char* oldname, const char* newname) const;
+	void renameAttr(const H5std_string& oldname, const H5std_string& newname) const;
 
 	// Creates a reference to a named object or to a dataset region
 	// in this object.
-	void reference(void* ref, const char* name, 
-			H5R_type_t ref_type = H5R_OBJECT) const;
-	void reference(void* ref, const H5std_string& name,
-			H5R_type_t ref_type = H5R_DATASET_REGION) const;
 	void reference(void* ref, const char* name, const DataSpace& dataspace,
 			H5R_type_t ref_type = H5R_DATASET_REGION) const;
-	void reference(void* ref, const H5std_string& name, const DataSpace& dataspace,
-			H5R_type_t ref_type = H5R_DATASET_REGION) const;
+	void reference(void* ref, const char* name) const;
+	void reference(void* ref, const H5std_string& name) const;
 
 	// Open a referenced object whose location is specified by either
 	// a file, an HDF5 object, or an attribute.
-	void dereference(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
-	void dereference(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+	void dereference(H5File& h5file, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	void dereference(H5Object& obj, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	void dereference(Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
 
-	// Retrieves a dataspace with the region pointed to selected.
-	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
-
-	///\brief Returns an identifier. (pure virtual)
-	virtual hid_t getId() const = 0;
+        ///\brief Returns an identifier. (pure virtual)
+        virtual hid_t getId() const = 0;
 
    protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -142,7 +124,7 @@ class H5_DLLCPP H5Location : public IdComponent {
 	void p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const;
 
 	// Dereferences a ref into an HDF5 id.
-	hid_t p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_type, const PropList& plist);
+	hid_t p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_type);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Retrieves the type of object that an object reference points to.
@@ -151,6 +133,9 @@ class H5_DLLCPP H5Location : public IdComponent {
 
 	// Retrieves the type of object that an object reference points to.
 	H5O_type_t p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const;
+
+	// Retrieves a dataspace with the region pointed to selected.
+	hid_t p_get_region(void *ref, H5R_type_t ref_type) const;
 
 	// Noop destructor.
 	virtual ~H5Location();
