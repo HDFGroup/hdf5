@@ -57,6 +57,7 @@ New Features
 
     Configuration
     -------------
+    - Rename FFLAGS to FCFLAGS in configure (ADB 2013/08/13)
     - CMake can now package a compressed examples file, the default for 
       Windows binaries from HDF Group.  (ADB  - 2013/07/22)
     
