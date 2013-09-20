@@ -45,6 +45,7 @@ New Features
       configure option is --with-default-plugin=location
       cmake option is -DH5_DEFAULT_PLUGINDIR:PATH=location
       HDFFV-8513.  (ADB 2013/09/04)
+    - Rename FFLAGS to FCFLAGS in configure (ADB 2013/08/13)
     - CMake minimum is now 2.8.10. (ADB 2013/01/14)
     - A new tool, cmakehdf5, which is a build command script similar to
       buildhdf5 is added and is available in the bin directory.
