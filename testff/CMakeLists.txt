@@ -64,7 +64,15 @@ ENDMACRO (ADD_H5FF_DRIVER_TEST)
 #-----------------------------------------------------------------------------
 
 ADD_H5FF_DRIVER_TEST(hello hello_server hello_client)
-ADD_H5FF_DRIVER_TEST(client_server h5ff_test_server h5ff_test_client)
+ADD_H5FF_DRIVER_TEST(client_server h5ff_server h5ff_client_attr)
+ADD_H5FF_DRIVER_TEST(client_server h5ff_server h5ff_client_dset)
+ADD_H5FF_DRIVER_TEST(client_server h5ff_server h5ff_client_links)
+ADD_H5FF_DRIVER_TEST(client_server h5ff_server h5ff_client_map)
+ADD_H5FF_DRIVER_TEST(client_server h5ff_server h5ff_client_multiple_cont)
+ADD_H5FF_DRIVER_TEST(client_server h5ff_server h5ff_client_obj)
+ADD_H5FF_DRIVER_TEST(client_server h5ff_server h5ff_client_open)
+ADD_H5FF_DRIVER_TEST(client_server h5ff_server h5ff_client_paths)
+ADD_H5FF_DRIVER_TEST(client_server h5ff_server h5ff_client_trans)
 #SET (H5FF_TESTS
 #    t_mpi
 #    ...

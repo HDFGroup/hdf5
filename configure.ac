@@ -4718,6 +4718,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5stat/Makefile
                  examples/Makefile
                  examples/run-c-ex.sh
+                 examples/run_ff_tests.sh
                  examples/testh5cc.sh
                  c++/Makefile
                  c++/src/Makefile

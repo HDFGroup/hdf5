@@ -724,7 +724,7 @@ H5Mexists_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "ii*x*tii", map_id, key_mem_type_id, key, exists, rcxt_id, eq_id);
+    H5TRACE6("e", "ii*x*bii", map_id, key_mem_type_id, key, exists, rcxt_id, eq_id);
 
     /* check arguments */
     if(!map_id)

@@ -1,0 +1,304 @@
+/* 
+ * test_client.c: Client side of Milestone 4.2 Asynchronous I/O and initial
+ * IOD VOL plugin demonstration.  This is, in effect, the application program that 
+ * would run on one or more compute nodes and make calls to the HDF5 API.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
+#include "mpi.h"
+#include "hdf5.h"
+
+int main(int argc, char **argv) {
+    const char file_name1[]="eff_file_1.h5";
+    const char file_name2[]="eff_file_2.h5";
+    hid_t fid1, fid2;
+    hid_t gid1, gid2, gid3, gid4;
+    hid_t sid;
+    hid_t did1, did2;
+    hid_t dtid1, dtid2;
+
+    hid_t tid1, tid2, rid1, rid2, rid3, rid4;
+    hid_t fapl_id, trspl_id;
+    hid_t event_q;
+
+    uint64_t version;
+    uint64_t trans_num;
+
+    const unsigned int nelem=60;
+    int *wdata1 = NULL, *wdata2 = NULL;
+    int *rdata1 = NULL, *rdata2 = NULL;
+    unsigned int i = 0;
+    hsize_t dims[1];
+    int my_rank, my_size;
+    int provided;
+    MPI_Request mpi_req;
+
+    H5_status_t *status = NULL;
+    int num_requests = 0;
+    herr_t ret;
+
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+    if(MPI_THREAD_MULTIPLE != provided) {
+        fprintf(stderr, "MPI does not have MPI_THREAD_MULTIPLE support\n");
+        exit(1);
+    }
+
+    /* Call EFF_init to initialize the EFF stack.  
+       As a result of this call, the Function Shipper client is started, 
+       and HDF5 VOL calls are registered with the function shipper.
+       An "IOD init" call is forwarded from the FS client to the FS server 
+       which should already be running. */
+    EFF_init(MPI_COMM_WORLD, MPI_INFO_NULL);
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &my_size);
+    fprintf(stderr, "APP processes = %d, my rank is %d\n", my_size, my_rank);
+
+    fprintf(stderr, "Create the FAPL to set the IOD VOL plugin and create the file\n");
+    /* Choose the IOD VOL plugin to use with this file. 
+       First we create a file access property list. Then we call a new routine to set
+       the IOD plugin to use with this fapl */
+    fapl_id = H5Pcreate (H5P_FILE_ACCESS);
+    H5Pset_fapl_iod(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);
+
+    /* allocate and initialize arrays for dataset & attribute writes and reads. 
+       The write arrays are intialized to contain 60 integers (0-59). 
+       The read arrays are intialized to contain 60 integers all 0s. */
+    wdata1 = malloc (sizeof(int)*nelem);
+    wdata2 = malloc (sizeof(int)*nelem);
+    rdata1 = malloc (sizeof(int)*nelem);
+    rdata2 = malloc (sizeof(int)*nelem);
+    for(i=0;i<nelem;++i) {
+        rdata1[i] = 0;
+        wdata1[i]=i;
+        rdata2[i] = 0;
+        wdata2[i]=i;
+    }
+
+    /* create an event Queue for managing asynchronous requests.
+
+       Event Queues will releive the use from managing and completing
+       individual requests for every operation. Instead of passing a
+       request for every operation, the event queue is passed and
+       internally the HDF5 library creates a request and adds it to
+       the event queue.
+
+       Multiple Event queue can be created used by the application. */
+    event_q = H5EQcreate(fapl_id);
+    assert(event_q);
+
+    /* create the file. */
+    fid1 = H5Fcreate(file_name1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    assert(fid1);
+    /* create second file */
+    fid2 = H5Fcreate(file_name2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    assert(fid1);
+
+    /* acquire container version 0 on both containers - EXACT */
+    version = 0;
+    rid1 = H5RCacquire(fid1, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
+    assert(0 == version);
+    rid2 = H5RCacquire(fid2, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
+    assert(0 == version);
+
+    /* create transaction objects */
+    tid1 = H5TRcreate(fid1, rid1, (uint64_t)1);
+    assert(tid1);
+    tid2 = H5TRcreate(fid2, rid2, (uint64_t)1);
+    assert(tid1);
+
+    /* start transaction 1 with default num_peers (= 0). */
+    if(0 == my_rank) {
+        ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
+        assert(0 == ret);
+        ret = H5TRstart(tid2, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
+        assert(0 == ret);
+    }
+
+    /* Tell other procs that transaction 1 is started */
+    trans_num = 1;
+    MPI_Ibcast(&trans_num, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD, &mpi_req);
+
+    /* Process 0 can continue writing to transaction 1, 
+       while others wait for the bcast to complete */
+    if(0 != my_rank)
+        MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
+
+    /* create groups */
+    gid1 = H5Gcreate_ff(fid1, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+    gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+
+    gid3 = H5Gcreate_ff(fid2, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, event_q);
+    gid4 = H5Gcreate_ff(gid3, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, event_q);
+
+    /* create a 32 bit integer LE datatype. This is a local operation
+       that does not touch the file */
+    dtid1 = H5Tcopy(H5T_STD_I32LE);
+    dtid2 = H5Tcopy(H5T_STD_I32LE);
+
+    /* Commit the datatype to the file. This is asynchronous & immediate. 
+     * Other Local H5T type operations can be issued before completing this call
+     * because they do not depend on the committed state of the datatype.
+     */
+     H5Tcommit_ff(fid1, "int", dtid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
+                  tid1, event_q);
+     H5Tcommit_ff(fid2, "int", dtid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
+                  tid2, event_q);
+
+    /* create a dataspace. This is a local Bookeeping operation that 
+       does not touch the file */
+    dims [0] = 60;
+    sid = H5Screate_simple(1, dims, NULL);
+
+    /* create Datasets */
+    did1 = H5Dcreate_ff(gid2,"D1",dtid1,sid,
+                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
+    did2 = H5Dcreate_ff(gid4,"D1",dtid2,sid,
+                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid2, event_q);
+
+    /* Raw data write on D1. */
+    H5Dwrite_ff(did1, dtid1, sid, sid, H5P_DEFAULT, wdata1, tid1, event_q);
+    H5Dwrite_ff(did2, dtid2, sid, sid, H5P_DEFAULT, wdata2, tid2, event_q);
+
+    /* none leader procs have to complete operations before notifying the leader */
+    if(0 != my_rank) {
+        H5EQwait(event_q, &num_requests, &status);
+        printf("%d requests in event queue. Completions: ", num_requests);
+        for(i=0 ; i<num_requests; i++)
+            fprintf(stderr, "%d ",status[i]);
+        fprintf(stderr, "\n");
+        free(status);
+    }
+
+    /* Barrier to make sure all processes are done writing so Process
+       0 can finish transaction 1 and acquire a read context on it. */
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if(0 == my_rank) {
+        MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
+
+        /* make this synchronous so we know the container version has been acquired */
+        ret = H5TRfinish(tid1, H5P_DEFAULT, &rid3, H5_EVENT_QUEUE_NULL);
+        assert(0 == ret);
+        /* make this synchronous so we know the container version has been acquired */
+        ret = H5TRfinish(tid2, H5P_DEFAULT, &rid4, H5_EVENT_QUEUE_NULL);
+        assert(0 == ret);
+    }
+
+    /* another barrier so other processes know that container version is acquried */
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    /* Local op */
+    ret = H5TRclose(tid1);
+    assert(0 == ret);
+    /* Local op */
+    ret = H5TRclose(tid2);
+    assert(0 == ret);
+
+    /* release container version 0. This is async. */
+    ret = H5RCrelease(rid1, event_q);
+    assert(0 == ret);
+    ret = H5RCrelease(rid2, event_q);
+    assert(0 == ret);
+
+    /* other processes just create a read context object; no need to
+       acquire it */
+    if(0 != my_rank) {
+        rid3 = H5RCcreate(fid1, version);
+        assert(rid3 > 0);
+        rid4 = H5RCcreate(fid2, version);
+        assert(rid4 > 0);
+    }
+
+    /* read data from datasets with read version 1. */
+    ret = H5Dread_ff(did1, dtid1, sid, sid, H5P_DEFAULT, rdata1, rid3, event_q);
+    assert(ret == 0);
+    ret = H5Dread_ff(did2, dtid2, sid, sid, H5P_DEFAULT, rdata2, rid4, event_q);
+    assert(ret == 0);
+
+    fprintf(stderr, "\n*****************************************************************************************************************\n");
+    fprintf(stderr, "Close Objects\n");
+    fprintf(stderr, "*****************************************************************************************************************\n");
+
+    /* closing did1 acts as a barrier task at the server for all
+       operations dependeing on the dataset. This is asynchronous. */
+    assert(H5Dclose_ff(did1, event_q) == 0);
+    assert(H5Dclose_ff(did2, event_q) == 0);
+
+    assert(H5Tclose_ff(dtid1, event_q) == 0);
+    assert(H5Tclose_ff(dtid2, event_q) == 0);
+
+    assert(H5Gclose_ff(gid1, event_q) == 0);
+    assert(H5Gclose_ff(gid2, event_q) == 0);
+    assert(H5Gclose_ff(gid3, event_q) == 0);
+    assert(H5Gclose_ff(gid4, event_q) == 0);
+
+    /* none leader procs have to complete operations before notifying the leader */
+    if(0 != my_rank) {
+        H5EQwait(event_q, &num_requests, &status);
+        printf("%d requests in event queue. Completions: ", num_requests);
+        for(i=0 ; i<num_requests; i++)
+            fprintf(stderr, "%d ",status[i]);
+        fprintf(stderr, "\n");
+        free(status);
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    /* release container version 1. This is async. */
+    if(0 == my_rank) {
+        ret = H5RCrelease(rid3, event_q);
+        assert(0 == ret);
+        ret = H5RCrelease(rid4, event_q);
+        assert(0 == ret);
+    }
+
+    ret = H5RCclose(rid3);
+    assert(0 == ret);
+    ret = H5RCclose(rid4);
+    assert(0 == ret);
+
+    assert(H5Fclose_ff(fid1, event_q) == 0);
+    assert(H5Fclose_ff(fid2, event_q) == 0);
+
+    /* wait on all requests and print completion status */
+    H5EQwait(event_q, &num_requests, &status);
+    fprintf(stderr, "%d requests in event queue. Completions: ", num_requests);
+    for(i=0 ; i<num_requests; i++)
+        fprintf(stderr, "%d ",status[i]);
+    fprintf(stderr, "\n");
+    free(status);
+
+    fprintf(stderr, "Printing After Waiting for data in first file");
+    for(i=0;i<nelem;++i)
+        fprintf(stderr, "%d ",rdata1[i]);
+    fprintf(stderr, "\n");
+
+    fprintf(stderr, "Printing After Waiting for data in second file");
+    for(i=0;i<nelem;++i)
+        fprintf(stderr, "%d ",rdata2[i]);
+    fprintf(stderr, "\n");
+
+    H5EQclose(event_q);
+    H5Pclose(fapl_id);
+
+    free(wdata1);
+    free(rdata1);
+    free(wdata2);
+    free(rdata2);
+
+    fprintf(stderr, "\n*****************************************************************************************************************\n");
+    fprintf(stderr, "Finalize EFF stack\n");
+    fprintf(stderr, "*****************************************************************************************************************\n");
+
+    /* This finalizes the EFF stack. ships a terminate and IOD finalize to the server 
+       and shutsdown the FS server (when all clients send the terminate request) 
+       and client */
+    EFF_finalize();
+
+    MPI_Finalize();
+    return 0;
+}

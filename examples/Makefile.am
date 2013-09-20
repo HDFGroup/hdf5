@@ -58,7 +58,7 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_ref2reg.c h5_shared_mesg.c ph5example.c \
           h5_external_log_native_vol.c
 
-INSTALL_SCRIPT_FILES = run-c-ex.sh
+INSTALL_SCRIPT_FILES = run-c-ex.sh run_ff_tests.sh
 
 INSTALL_TOP_SCRIPT_FILES = run-all-ex.sh
 INSTALL_TOP_FILES = README

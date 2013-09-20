@@ -2458,6 +2458,7 @@
 ./examples/CMakeTests.cmake
 ./examples/run-all-ex.sh
 ./examples/run-c-ex.sh.in
+./examples/run_ff_tests.sh
 ./fortran/CMakeLists.txt
 ./fortran/examples/CMakeLists.txt
 ./fortran/examples/CMakeTests.cmake

@@ -71,8 +71,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/run-c-ex.sh.in $(srcdir)/testh5cc.sh.in \
-	$(top_srcdir)/bin/mkinstalldirs \
+	$(srcdir)/run-c-ex.sh.in $(srcdir)/run_ff_tests.sh.in \
+	$(srcdir)/testh5cc.sh.in $(top_srcdir)/bin/mkinstalldirs \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am \
 	$(top_srcdir)/config/examples.am
@@ -84,7 +84,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = run-c-ex.sh testh5cc.sh
+CONFIG_CLEAN_FILES = run-c-ex.sh run_ff_tests.sh testh5cc.sh
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -430,7 +430,7 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_ref2reg.c h5_shared_mesg.c ph5example.c \
           h5_external_log_native_vol.c
 
-INSTALL_SCRIPT_FILES = run-c-ex.sh
+INSTALL_SCRIPT_FILES = run-c-ex.sh run_ff_tests.sh
 INSTALL_TOP_SCRIPT_FILES = run-all-ex.sh
 INSTALL_TOP_FILES = README
 
@@ -506,6 +506,8 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 run-c-ex.sh: $(top_builddir)/config.status $(srcdir)/run-c-ex.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+run_ff_tests.sh: $(top_builddir)/config.status $(srcdir)/run_ff_tests.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testh5cc.sh: $(top_builddir)/config.status $(srcdir)/testh5cc.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@

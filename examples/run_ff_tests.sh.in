@@ -1,0 +1,78 @@
+#!/bin/bash
+
+mkdir ff_output
+
+echo "Starting attribute (H5A) test-----------------------------------------"
+mpiexec -np 1 ./h5ff_server &> ff_output/server_attr &
+sleep 2 &&
+mpiexec -np $1 ./h5ff_client_attr
+RETVAL=$?
+echo "Finished attribute test-----------------------------------------"
+[ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
+sleep 2
+
+echo "Starting dataset (H5D) test-------------------------------------------"
+mpiexec -np 1 ./h5ff_server &> ff_output/server_dset &
+sleep 2 &&
+mpiexec -np $1 ./h5ff_client_dset
+RETVAL=$?
+echo "Finished dataset test-------------------------------------------"
+[ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
+sleep 2
+
+echo "Starting links (H5L) test-----------------------------------------------"
+mpiexec -np 1 ./h5ff_server &> ff_output/server_links &
+sleep 2 &&
+mpiexec -np $1 ./h5ff_client_links
+RETVAL=$?
+echo "Finished links test-----------------------------------------------"
+[ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
+sleep 2
+
+echo "Starting map (H5M) test-----------------------------------------------"
+mpiexec -np 1 ./h5ff_server &> ff_output/server_map &
+sleep 2 &&
+mpiexec -np $1 ./h5ff_client_map
+RETVAL=$?
+echo "Finished map test-----------------------------------------------"
+[ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
+sleep 2
+
+echo "Starting multiple container test-----------------------------------------------"
+mpiexec -np 1 ./h5ff_server &> ff_output/server_multiple_cont &
+sleep 2 &&
+mpiexec -np $1 ./h5ff_client_multiple_cont
+RETVAL=$?
+echo "Finished multiple container test-----------------------------------------------"
+[ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
+sleep 2
+
+echo "Starting object (H5O) test-----------------------------------------------"
+mpiexec -np 1 ./h5ff_server &> ff_output/server_obj &
+sleep 2 &&
+mpiexec -np $1 ./h5ff_client_obj
+RETVAL=$?
+echo "Finished object test-----------------------------------------------"
+[ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
+sleep 2
+
+echo "Starting open/read test-----------------------------------------------"
+mpiexec -np 1 ./h5ff_server &> ff_output/server_open &
+sleep 2 &&
+mpiexec -np $1 ./h5ff_client_open
+RETVAL=$?
+echo "Finished open/read test-----------------------------------------------"
+[ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
+sleep 2
+
+echo "Starting paths test-----------------------------------------------"
+mpiexec -np 1 ./h5ff_server &> ff_output/server_paths &
+sleep 2 &&
+mpiexec -np $1 ./h5ff_client_paths
+RETVAL=$?
+echo "Finished paths test-----------------------------------------------"
+[ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
+sleep 2
+
+echo "FF tests DONE ---------------------------------------------------"
+exit

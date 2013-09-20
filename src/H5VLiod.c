@@ -1050,6 +1050,7 @@ H5Pset_metadata_integrity_scope(hid_t fapl_id, uint32_t scope)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iIu", fapl_id, scope);
 
     if(scope > H5_CHECKSUM_ALL)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid scope for Data Integrity");
@@ -1086,6 +1087,7 @@ H5Pget_metadata_integrity_scope(hid_t fapl_id, uint32_t *scope)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Iu", fapl_id, scope);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -1122,6 +1124,7 @@ H5Pset_rawdata_integrity_scope(hid_t dxpl_id, uint32_t scope)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iIu", dxpl_id, scope);
 
     if(scope > H5_CHECKSUM_ALL)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid scope for Data Integrity");
@@ -1158,6 +1161,7 @@ H5Pget_rawdata_integrity_scope(hid_t dxpl_id, uint32_t *scope)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Iu", dxpl_id, scope);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
