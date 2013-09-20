@@ -96,9 +96,6 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     /* for the process that succeeded in creating the datatype, update
        the parent KV, create scratch pad */
     if(0 == ret) {
-        iod_checksum_t sp_cs;
-        iod_checksum_t dt_cs;
-
         /* create the metadata KV object for the datatype */
         if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &mdkv_id, NULL) < 0)
@@ -154,12 +151,22 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         file_desc->frag[0].offset = 0;
         file_desc->frag[0].len = (iod_size_t)buf_size;
 
-        /* calculate a checksum for the datatype */
-        dt_cs = H5checksum(buf, buf_size, NULL);
+        /* set scratch pad in datatype */
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t dt_cs;
 
-        /* write the serialized type value to the BLOB object */
-        if(iod_blob_write(dtype_oh, wtid, NULL, mem_desc, file_desc, &dt_cs, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
+            /* calculate a checksum for the datatype */
+            dt_cs = H5checksum(buf, buf_size, NULL);
+
+            /* write the serialized type value to the BLOB object */
+            if(iod_blob_write(dtype_oh, wtid, NULL, mem_desc, file_desc, &dt_cs, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
+        }
+        else {
+            /* write the serialized type value to the BLOB object */
+            if(iod_blob_write(dtype_oh, wtid, NULL, mem_desc, file_desc, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
+        }
 
         free(mem_desc);
         free(file_desc);
@@ -354,12 +361,14 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* MSC - NEED IOD */
 #if 0
-    /* calculate a checksum for the datatype */
-    dt_cs = H5checksum(buf, buf_size, NULL);
+    if(iod_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+        /* calculate a checksum for the datatype */
+        dt_cs = H5checksum(buf, buf_size, NULL);
 
-    /* Verifty checksum against one given by IOD */
-    if(iod_cs != dt_cs)
-        HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
+        /* Verifty checksum against one given by IOD */
+        if(iod_cs != dt_cs)
+            HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
+    }
 #endif
 
     free(mem_desc);
