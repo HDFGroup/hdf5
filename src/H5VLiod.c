@@ -2669,9 +2669,6 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     /* store a copy of the dataspace selection to be able to calculate the checksum later */
     if(NULL == (info->space = H5S_copy(mem_space, FALSE, TRUE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace");
-    /* Get the dxpl plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
     /* store the pointer to the buffer where the checksum needs to be placed */
     if(H5P_get(plist, H5D_XFER_CHECKSUM_PTR_NAME, &info->cs_ptr) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum pointer value");
@@ -6234,11 +6231,15 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
     map_set_in_t input;
     size_t key_size, val_size;
     int *status = NULL;
+    H5P_genplist_t *plist = NULL;
     size_t num_parents = 0;
     H5TR_t *tr = NULL;
-    uint32_t key_cs, value_cs;
+    hg_bulk_t *value_handle = NULL;
+    uint32_t key_cs, value_cs, user_cs;
+    uint32_t raw_cs_scope;
     H5VL_iod_request_t **parent_reqs = NULL;
     H5T_class_t val_type_class;
+    H5VL_iod_map_set_info_t *info = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -6256,11 +6257,57 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
     if(H5VL_iod_map_get_size(key_mem_type_id, key, &key_cs, &key_size, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get key size");
 
-    /* get the value size and checksum from the provided value datatype & buffer */
-    if(H5VL_iod_map_get_size(val_mem_type_id, value, &value_cs, 
-                             &val_size, &val_type_class) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get value size");
+    /* get the plist pointer */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
+    /* get the data integrity scope */
+    if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, &raw_cs_scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+
+    if(raw_cs_scope) {
+        /* get the value size and checksum from the provided value datatype & buffer */
+        if(H5VL_iod_map_get_size(val_mem_type_id, value, &value_cs, 
+                                 &val_size, &val_type_class) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get value size");
+    }
+    else {
+#if H5VL_IOD_DEBUG        
+        printf("NO DATA INTEGRITY CHECKS ON RAW DATA WRITTEN\n");
+#endif
+        /* get the value size and checksum from the provided value datatype & buffer */
+        if(H5VL_iod_map_get_size(val_mem_type_id, value, NULL, 
+                                 &val_size, &val_type_class) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get value size");
+    }
+
+    /* Verify the checksum value if the dxpl contains a user defined checksum */
+    if(H5P_get(plist, H5D_XFER_CHECKSUM_NAME, &user_cs) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum value");
+
+    if((raw_cs_scope & H5_CHECKSUM_MEMORY) && user_cs && 
+       user_cs != value_cs) {
+        fprintf(stderr, "Errrr.. In memory Data corruption. expecting %u, got %u\n",
+                user_cs, value_cs);
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "Checksum verification failed");
+    }
+
+    /* allocate a bulk data transfer handle */
+    if(NULL == (value_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
+        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a bulk data transfer handle");
+
+    /* Register memory */
+    if(H5T_VLEN == val_type_class) {
+        /* if this is a VL type buffer, set the buffer pointer to the
+           actual data (the p pointer) */
+        if(HG_SUCCESS != HG_Bulk_handle_create(((const hvl_t *)value)->p, val_size, 
+                                               HG_BULK_READ_ONLY, value_handle))
+            HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't create Bulk Data Handle");
+    }
+    else {
+        if(HG_SUCCESS != HG_Bulk_handle_create(value, val_size, HG_BULK_READ_ONLY, value_handle))
+            HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't create Bulk Data Handle");
+    }
     /* get the TR object */
     if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
@@ -6285,15 +6332,8 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
     input.key.buf = key;
     input.val_maptype_id = map->remote_map.valtype_id;
     input.val_memtype_id = val_mem_type_id;
-    input.val.buf_size = val_size;
-    /* set the value buf */
-    if(H5T_VLEN == val_type_class) {
-        /* if this is a VL type buffer, set the buffer pointer to the
-           actual data (the p pointer) */
-        input.val.buf = ((const hvl_t *)value)->p;
-    }
-    else
-        input.val.buf = value;
+    input.val_handle = *value_handle;
+    input.val_checksum = value_cs;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
     input.cs_scope = map->common.file->md_integrity_scope;
@@ -6304,10 +6344,18 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
     printf("MAP set, value size %zu, axe id %llu\n", val_size, g_axe_id);
 #endif
 
+    /* setup info struct for I/O request 
+       This is to manage the I/O operation once the wait is called. */
+    if(NULL == (info = (H5VL_iod_map_set_info_t *)H5MM_calloc(sizeof(H5VL_iod_map_set_info_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate a request");
+
+    info->status = status;
+    info->value_handle = value_handle;
+
     if(H5VL__iod_create_and_forward(H5VL_MAP_SET_ID, HG_MAP_SET, 
                                     (H5VL_iod_object_t *)map, 0,
                                     num_parents, parent_reqs,
-                                    (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
+                                    (H5VL_iod_req_info_t *)tr, &input, status, info, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship map set");
 
 done:
@@ -6321,14 +6369,16 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
 {
     H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
     map_get_in_t input;
+    H5P_genplist_t *plist = NULL;
     map_get_out_t *output = NULL;
     H5VL_iod_map_io_info_t *info = NULL;
     size_t key_size, val_size;
+    hg_bulk_t *value_handle = NULL;
+    hg_bulk_t dummy_handle;
     uint32_t key_cs = 0;
     H5RC_t *rc = NULL;
     size_t num_parents = 0;
     hbool_t val_is_vl;
-    H5P_genplist_t *plist = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
 
@@ -6351,6 +6401,25 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
        size if it is not VL. val_size will be 0 if it is VL */
     if(H5VL_iod_map_dtype_info(val_mem_type_id, &val_is_vl, &val_size) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get key size");
+
+    /* allocate a bulk data transfer handle */
+    if(NULL == (value_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
+
+    /* If the val type is not VL, then we know the size and we can
+       create the bulk handle */
+    if(!val_is_vl) {
+        /* Register memory with bulk_handle */
+        if(HG_SUCCESS != HG_Bulk_handle_create(value, val_size, 
+                                               HG_BULK_READWRITE, value_handle))
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+    }
+    else {
+        /* Register memory with bulk_handle */
+        if(HG_SUCCESS != HG_Bulk_handle_create(value, (size_t)1, 
+                                               HG_BULK_READWRITE, &dummy_handle))
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+    }
 
     /* get the RC object */
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
@@ -6379,11 +6448,20 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
     input.val_is_vl = val_is_vl;
     input.val_size = val_size;
     input.rcxt_num = rc->c_version;
+    if(!val_is_vl)
+        input.val_handle = *value_handle;
+    else {
+        input.val_handle = dummy_handle;
+    }
     input.cs_scope = map->common.file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
     printf("MAP Get, axe id %llu\n", g_axe_id);
 #endif
+
+    /* get the plist pointer */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     if(NULL == (output = (map_get_out_t *)H5MM_calloc(sizeof(map_get_out_t))))
 	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate map get output struct");
@@ -6397,13 +6475,21 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
        if the value type is VL, since the first Get is to retrieve the
        value size */
     info->val_ptr = value;
-    info->val_cs_ptr = NULL;
+    info->read_buf = NULL;
+    info->value_handle = value_handle;
+
     info->val_is_vl = val_is_vl;
+
+    /* store the pointer to the buffer where the checksum needs to be placed */
+    if(H5P_get(plist, H5D_XFER_CHECKSUM_PTR_NAME, &info->val_cs_ptr) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum pointer value");
+    /* store the raw data integrity scope */
+    if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, &info->raw_cs_scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum pointer value");
 
     /* The value size expected to be received. If VL data, this will
        be 0, because the first call would be to get the value size */
     info->val_size = val_size;
-
     info->rcxt_id  = rcxt_id;
     info->key.buf_size = key_size;
     info->key.buf = key;
@@ -6413,17 +6499,11 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype");
         if((info->key_mem_type_id = H5Tcopy(key_mem_type_id)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype");
-        if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
         if((info->dxpl_id = H5P_copy_plist((H5P_genplist_t *)plist, TRUE)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy dxpl");
 
         info->peer = PEER;
         info->map_get_id = H5VL_MAP_GET_ID;
-        output->val.val = NULL;
-    }
-    else {
-        output->val.val = value;
     }
 
     if(H5VL__iod_create_and_forward(H5VL_MAP_GET_ID, HG_MAP_GET, 
@@ -6432,6 +6512,9 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
                                     &input, output, info, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship map get");
 
+    if(val_is_vl && (HG_SUCCESS != HG_Bulk_handle_free(dummy_handle))) {
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "failed to free dummy handle created");
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_map_get() */

@@ -291,12 +291,20 @@ typedef struct H5VL_iod_io_info_t {
 
 } H5VL_iod_io_info_t;
 
+typedef struct H5VL_iod_map_set_info_t {
+    void *status;
+    hg_bulk_t *value_handle;
+} H5VL_iod_map_set_info_t;
+
 /* information about a map get request */
 typedef struct H5VL_iod_map_io_info_t {
     /* read & write params */
     map_get_out_t *output; /* this must be first */
     void *val_ptr;
+    void *read_buf;
+    hg_bulk_t *value_handle;
     size_t val_size;
+    uint32_t raw_cs_scope;
     uint32_t *val_cs_ptr;
     hid_t val_mem_type_id;
     hid_t key_mem_type_id;

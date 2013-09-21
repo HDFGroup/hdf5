@@ -739,15 +739,25 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         }
     case HG_MAP_SET:
         {
-            int *status = (int *)req->data;
+            H5VL_iod_map_set_info_t *info = (H5VL_iod_map_set_info_t *)req->data;
 
-            if(SUCCEED != *status) {
-                fprintf(stderr, "MAP set failed at the server\n");
+            /* Free memory handle */
+            if(HG_SUCCESS != HG_Bulk_handle_free(*info->value_handle)) {
+                fprintf(stderr, "failed to free Map Value bulk handle\n");
                 req->status = H5AO_FAILED;
                 req->state = H5VL_IOD_COMPLETED;
             }
 
-            free(status);
+            if(SUCCEED != *((int *)info->status)) {
+                fprintf(stderr, "Errrr! MAP set Failure Reported from Server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+
+            free(info->status);
+            info->status = NULL;
+            info->value_handle = (hg_bulk_t *)H5MM_xfree(info->value_handle);
+            info = (H5VL_iod_map_set_info_t *)H5MM_xfree(info);
             req->data = NULL;
             H5VL_iod_request_delete(file, req);
             break;
@@ -780,20 +790,53 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             else {
                 /* If the data is not VL, then just free resources and remove the request */
                 if(!info->val_is_vl) {
+                    /* Free memory handle */
+                    if(HG_SUCCESS != HG_Bulk_handle_free(*info->value_handle)) {
+                        fprintf(stderr, "failed to free value bulk handle\n");
+                        req->status = H5AO_FAILED;
+                        req->state = H5VL_IOD_COMPLETED;
+                    }
+                    else {
+                        uint32_t internal_cs = 0;
+                        uint32_t raw_cs_scope = info->raw_cs_scope;
+
+                        /* calculate a checksum for the data recieved */
+                        internal_cs = H5_checksum_lookup4(info->val_ptr, info->val_size, NULL);
+
+                        /* verify data integrity */
+                        if((raw_cs_scope & H5_CHECKSUM_TRANSFER) &&
+                           internal_cs != output->val_cs) {
+                            fprintf(stderr, "Errrrr!  MAP Get integrity failure (expecting %u got %u).\n",
+                                    output->val_cs, internal_cs);
+                            req->status = H5AO_FAILED;
+                            req->state = H5VL_IOD_COMPLETED;
+                        }
+#if H5VL_IOD_DEBUG
+                        if(!raw_cs_scope & H5_CHECKSUM_TRANSFER) {
+                            printf("NO TRANSFER DATA INTEGRITY CHECKS ON RAW DATA READ\n");
+                        }
+#endif
+                        /* If the app gave us a buffer to store the checksum, then put it there */
+                        if(info->val_cs_ptr)
+                            *info->val_cs_ptr = internal_cs;
+                    }
                     free(info->output);
                     info->output = NULL;
+                    info->value_handle = (hg_bulk_t *)H5MM_xfree(info->value_handle);
                     info = (H5VL_iod_map_io_info_t *)H5MM_xfree(info);
                     req->data = NULL;
                     H5VL_iod_request_delete(file, req);
                     break;
                 }
                 else {
-                    /* in case of a pre-allocated buffer, value was sent already */
-                    if(output->val.val_size != 0) {
-                        HDassert(output->val.val_size == output->val_size);
+                    /* If this is the second roundtrip with the VL
+                       data, scatter it in the user buffer */
+                    if(info->val_size && output->val_size) {
+                        HDassert(info->val_size == output->val_size);
 
                         /* scatter the data into the user's buffer */
-                        if(H5VL__iod_vl_map_get_finalize(output->val_size, output->val.val, 
+                        if(H5VL__iod_vl_map_get_finalize(output->val_size, 
+                                                         info->read_buf, 
                                                          (void *)info->val_ptr, 
                                                          info->val_mem_type_id) < 0)
                             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to store VL data in user buffer");
@@ -815,6 +858,14 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                         if(NULL == (rc = (H5RC_t *)H5I_object_verify(info->rcxt_id, H5I_RC)))
                             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID");
 
+                        if(NULL == (value_buf = (void *)HDmalloc(output->val_size)))
+                            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate VL recieve buffer");
+
+                        /* Register memory with bulk_handle */
+                        if(HG_SUCCESS != HG_Bulk_handle_create(value_buf, output->val_size, 
+                                                               HG_BULK_READWRITE, info->value_handle))
+                            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+
                         /* Fill input structure */
                         input.coh = file->remote_file.coh;
                         input.iod_oh = map->remote_map.iod_oh;
@@ -828,17 +879,16 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                         input.key.buf = info->key.buf;
                         input.val_is_vl = TRUE;
                         input.val_size = output->val_size;
+                        input.val_handle = *info->value_handle;
                         input.rcxt_num = rc->c_version;
 
-                        if(NULL == (value_buf = (void *)HDmalloc(output->val_size)))
-                            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate VL recieve buffer");
-
-                        output->val.val = value_buf;
-
                         vl_read_info.output = output;
+                        vl_read_info.value_handle = info->value_handle;
                         vl_read_info.val_is_vl = TRUE;
                         vl_read_info.val_ptr = info->val_ptr;
                         vl_read_info.val_mem_type_id = info->val_mem_type_id;
+                        vl_read_info.val_size = input.val_size;
+                        vl_read_info.read_buf = value_buf;
 
                         /* remove request from file list */
                         H5VL_iod_request_delete(file, req);
@@ -849,15 +899,12 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                                                         &input, output, &vl_read_info, NULL) < 0)
                             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship map get");
 
-#if 0
-                        /* scatter the data into the user's buffer */
-                        if(H5VL__iod_vl_map_get_finalize(input.val_size, value_buf, 
-                                                         (void *)info->val_ptr, 
-                                                         info->val_mem_type_id) < 0)
-                            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to store VL data in user buffer");
-
-                        HDfree(value_buf);
-#endif
+                        /* Free memory handle */
+                        if(HG_SUCCESS != HG_Bulk_handle_free(*info->value_handle)) {
+                            fprintf(stderr, "failed to free value bulk handle\n");
+                            req->status = H5AO_FAILED;
+                            req->state = H5VL_IOD_COMPLETED;
+                        }
 
                         /* free stuff associated with request */
                         HDfree(value_buf);
@@ -1587,6 +1634,17 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             break;
         }
     case HG_MAP_SET:
+        {
+            H5VL_iod_map_set_info_t *info = (H5VL_iod_map_set_info_t *)req->data;
+
+            free(info->status);
+            info->status = NULL;
+            info->value_handle = (hg_bulk_t *)H5MM_xfree(info->value_handle);
+            info = (H5VL_iod_map_set_info_t *)H5MM_xfree(info);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
     case HG_MAP_DELETE:
     case HG_LINK_CREATE:
     case HG_LINK_MOVE:
@@ -2423,8 +2481,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__iod_vl_map_get_finalize(size_t buf_size, void *read_buf, void *user_buf, 
-                              hid_t mem_type_id)
+H5VL__iod_vl_map_get_finalize(size_t buf_size, void *read_buf,
+                              void *user_buf, hid_t mem_type_id)
 {
     H5T_t *mem_dt = NULL;
     H5T_t *super = NULL;
@@ -2520,6 +2578,9 @@ H5VL_iod_map_get_size(hid_t type_id, const void *buf,
             /* If this is a variable length string, get the size using strlen(). */
             if(H5T_is_variable_str(dt)) {
                 buf_size = HDstrlen((const char*)buf) + 1;
+
+                /* compute checksum */
+                *checksum = H5_checksum_lookup4(buf, buf_size, NULL);
                 break;
             }
         case H5T_INTEGER:
@@ -2538,6 +2599,9 @@ H5VL_iod_map_get_size(hid_t type_id, const void *buf,
                VL datatypes, but for now we don't support that. Need
                to check for that too */
             buf_size = H5T_get_size(dt);
+
+            /* compute checksum */
+            *checksum = H5_checksum_lookup4(buf, buf_size, NULL);
             break;
 
             /* If this is a variable length datatype, iterate over it */
@@ -2553,15 +2617,14 @@ H5VL_iod_map_get_size(hid_t type_id, const void *buf,
 
                 buf_size = H5T_get_size(super) * vl->len;
 
+                /* compute checksum */
+                *checksum = H5_checksum_lookup4(vl->p, buf_size, NULL);
                 H5T_close(super);
                 break;
             }
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "unsupported datatype");
     }
-
-    /* compute checksum */
-    *checksum = H5_checksum_lookup4(buf, buf_size, NULL);
     *size = buf_size;
     if(dt_class)
         *dt_class = class;
