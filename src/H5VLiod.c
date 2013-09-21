@@ -1033,10 +1033,26 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_metadata_integrity_scope
  *
- * Purpose:	Set the scope of checksum generation and verification 
- *              in the FF stack.
+ * Purpose: Set the scope of checksum generation and verification for
+ * metadata in the FF stack. This is a file access property so the
+ * property is set on a particular container. Changing the property
+ * would require closing the file and reopening it. Possible values
+ * for this property are:
+ * H5_CHECKSUM_NONE      = No metadata checksuming and verification 
+                           is done at any part of the stack.
+ * H5_CHECKSUM_TRANSFER  = Metadata is verified after being transfered 
+                           through Mercury.
+ * H5_CHECKSUM_IOD       = Metadata is checksumed and the checksum is 
+                           given to IOD when written, and verified when read.
+ * H5_CHECKSUM_MEMORY    = Metadata is verified when moved in memory 
+                           (Not currently supported).
+ * H5_CHECKSUM_ALL       = Metadata is checksumed and verified on all levels.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Note that the property value is a bitflag so any combination can be
+ * set for individual values using OR operation.  
+ *
+ * Return: Non-negative
+ * on success/Negative on failure
  *
  * Programmer:  Mohamad Chaarawi
  *              September 2013
@@ -1107,8 +1123,21 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_rawdata_integrity_scope
  *
- * Purpose:	Set the scope of checksum generation and verification 
- *              in the FF stack.
+ * Purpose: Set the scope of checksum generation and verification for
+ * rawdata in the FF stack. This is a data transfer property so the
+ * property is set on a particular I/O operation (H5Dread/write, 
+ * H5Mset/get, etc ...). Possible values for this property are:
+ * H5_CHECKSUM_NONE      = No checksuming and verification 
+                           is done at any part of the stack.
+ * H5_CHECKSUM_TRANSFER  = Data is verified after being transfered 
+                           through Mercury.
+ * H5_CHECKSUM_IOD       = Data is checksumed and the checksum is 
+                           given to IOD when written, and verified when read.
+ * H5_CHECKSUM_MEMORY    = Data is verified when moved in memory 
+ * H5_CHECKSUM_ALL       = Data is checksumed and verified on all levels.
+ *
+ * Note that the property value is a bitflag so any combination can be
+ * set for individual values using OR operation. 
  *
  * Return:	Non-negative on success/Negative on failure
  *
