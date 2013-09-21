@@ -457,7 +457,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 H5RC_t *rc = NULL;
                 /* get the RC object */
                 if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a READ CONTEXT ID");
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID");
 
                 rc->c_version = file->remote_file.c_version;
                 rc->file = file;
@@ -809,7 +809,6 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                         H5VL_iod_map_t *map = (H5VL_iod_map_t *)req->obj;
                         map_get_in_t input;
                         H5RC_t *rc = NULL;
-                        H5P_genplist_t *plist = NULL;
                         H5VL_iod_map_io_info_t vl_read_info;
 
                         /* get the RC object */
@@ -1705,9 +1704,10 @@ H5VL_iod_get_obj_requests(H5VL_iod_object_t *obj, /*IN/OUT*/ size_t *count,
 
 herr_t
 H5VL_iod_get_loc_info(H5VL_iod_object_t *obj, iod_obj_id_t *iod_id, 
-                      iod_handle_t *iod_oh)
+                      iod_handle_t *iod_oh, iod_obj_id_t *mdkv_oh, 
+                      iod_obj_id_t *attrkv_oh)
 {
-    iod_obj_id_t id;
+    iod_obj_id_t id, md, at;
     iod_handle_t oh;
     herr_t ret_value = SUCCEED;
 
@@ -1717,30 +1717,45 @@ H5VL_iod_get_loc_info(H5VL_iod_object_t *obj, iod_obj_id_t *iod_id,
         case H5I_FILE:
             oh = obj->file->remote_file.root_oh;
             id = obj->file->remote_file.root_id;
+            md = obj->file->remote_file.mdkv_id;
+            at = obj->file->remote_file.attrkv_id;
             break;
         case H5I_GROUP:
             oh = ((const H5VL_iod_group_t *)obj)->remote_group.iod_oh;
             id = ((const H5VL_iod_group_t *)obj)->remote_group.iod_id;
+            md = ((const H5VL_iod_group_t *)obj)->remote_group.mdkv_id;
+            at = ((const H5VL_iod_group_t *)obj)->remote_group.attrkv_id;
             break;
         case H5I_DATASET:
             oh = ((const H5VL_iod_dset_t *)obj)->remote_dset.iod_oh;
             id = ((const H5VL_iod_dset_t *)obj)->remote_dset.iod_id;
+            md = ((const H5VL_iod_dset_t *)obj)->remote_dset.mdkv_id;
+            at = ((const H5VL_iod_dset_t *)obj)->remote_dset.attrkv_id;
             break;
         case H5I_DATATYPE:
             oh = ((const H5VL_iod_dtype_t *)obj)->remote_dtype.iod_oh;
             id = ((const H5VL_iod_dtype_t *)obj)->remote_dtype.iod_id;
+            md = ((const H5VL_iod_dtype_t *)obj)->remote_dtype.mdkv_id;
+            at = ((const H5VL_iod_dtype_t *)obj)->remote_dtype.attrkv_id;
             break;
         case H5I_MAP:
             oh = ((const H5VL_iod_map_t *)obj)->remote_map.iod_oh;
             id = ((const H5VL_iod_map_t *)obj)->remote_map.iod_id;
+            md = ((const H5VL_iod_map_t *)obj)->remote_map.mdkv_id;
+            at = ((const H5VL_iod_map_t *)obj)->remote_map.attrkv_id;
             break;
         default:
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad location object");
     }
 
-    *iod_id = id;
-    *iod_oh = oh;
-
+    if(iod_id)
+        *iod_id = id;
+    if(iod_oh)
+        *iod_oh = oh;
+    if(mdkv_oh)
+        *mdkv_oh = md;
+    if(attrkv_oh)
+        *attrkv_oh = at;
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_get_loc_info() */

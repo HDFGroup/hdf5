@@ -68,20 +68,26 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
                                  rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
-    /* get scratch pad of the object */
-    if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+    if(obj_id != input->loc_id) {
+        /* get scratch pad of the object */
+        if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
-        /* verify scratch pad integrity */
-        if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+        if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+            /* verify scratch pad integrity */
+            if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+        }
+
+        /* open the metadata KV */
+        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
-
-    /* open the metadata scratch pad */
-    if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
-
+    else {
+        /* open the metadata KV */
+        if (iod_obj_open_write(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    }
     /* MSC - NEED IOD */
 #if 0
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, H5VL_IOD_KEY_OBJ_TYPE,
@@ -203,6 +209,8 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     output.iod_id = obj_id;
+    output.mdkv_id = sp[0];
+    output.attrkv_id = sp[1];
     output.iod_oh = obj_oh;
 
 #if H5VL_IOD_DEBUG
@@ -550,19 +558,26 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
 
     oinfo.addr = obj_id;
 
-    /* get scratch pad of the object */
-    if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+    if(obj_id != loc_id) {
+        /* get scratch pad of the object */
+        if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
-        /* verify scratch pad integrity */
-        if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+        if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+            /* verify scratch pad integrity */
+            if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+        }
+
+        /* open the metadata KV */
+        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
-
-    /* open the metadata scratch pad */
-    if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    else {
+        /* open the metadata KV */
+        if (iod_obj_open_write(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    }
 
     /* open the attribute scratch pad */
     if (iod_obj_open_write(coh, sp[1], NULL /*hints*/, &attrkv_oh, NULL) < 0)
@@ -681,19 +696,26 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     if(H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
-    /* get scratch pad of the object */
-    if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+    if(loc_id != obj_id) {
+        /* get scratch pad of the object */
+        if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
-        /* verify scratch pad integrity */
-        if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+        if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+            /* verify scratch pad integrity */
+            if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+        }
+
+        /* open the metadata scratch pad */
+        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
-
-    /* open the metadata scratch pad */
-    if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    else {
+        /* open the metadata KV */
+        if (iod_obj_open_write(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    }
 
     {
         iod_kv_t kv;
@@ -780,19 +802,26 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     if(H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
-    /* get scratch pad of the object */
-    if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+    if(loc_id != obj_id) {
+        /* get scratch pad of the object */
+        if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
-        /* verify scratch pad integrity */
-        if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+        if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+            /* verify scratch pad integrity */
+            if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+        }
+
+        /* open the metadata KV */
+        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
-
-    /* open the metadata scratch pad */
-    if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    else {
+        /* open the metadata KV */
+        if (iod_obj_open_write(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    }
 
     comment.value_size = (ssize_t *)malloc(sizeof(ssize_t));
     comment.value = NULL;

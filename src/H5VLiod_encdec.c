@@ -119,6 +119,7 @@ int hg_proc_axe_t(hg_proc_t proc, void *data)
         if(struct_data->num_parents)
             free(struct_data->parent_axe_ids);
         break;
+    case HG_INVALID:
     default:
         return HG_FAIL;
     }
@@ -228,6 +229,7 @@ int hg_proc_dims_t(hg_proc_t proc, void *data)
         if(struct_data->rank)
             free(struct_data->size);
         break;
+    case HG_INVALID:
     default:
         return HG_FAIL;
     }
@@ -271,7 +273,6 @@ int hg_proc_name_t(hg_proc_t proc, void *data)
 int hg_proc_binary_buf_t(hg_proc_t proc, void *data)
 {
     int ret = HG_SUCCESS;
-    size_t size;
     hg_proc_op_t op;
     binary_buf_t *struct_data = (binary_buf_t *) data;
 
@@ -311,6 +312,7 @@ int hg_proc_binary_buf_t(hg_proc_t proc, void *data)
             free(struct_data->buf);
         }
         break;
+    case HG_INVALID:
     default:
         return HG_FAIL;
     }
@@ -320,7 +322,6 @@ int hg_proc_binary_buf_t(hg_proc_t proc, void *data)
 int hg_proc_value_t(hg_proc_t proc, void *data)
 {
     int ret = HG_SUCCESS;
-    size_t size;
     value_t *struct_data = (value_t *) data;
 
     ret = hg_proc_raw(proc, &struct_data->val_size, sizeof(size_t));
@@ -465,7 +466,7 @@ static int hg_proc_plist_t(hg_proc_t proc, hid_t *data)
             }
         }
 
-        ret = hg_proc_uint64_t(proc, &plist_size);
+        ret = hg_proc_size_t(proc, &plist_size);
         if (ret != HG_SUCCESS) {
             HG_ERROR_DEFAULT("Proc error");
             ret = HG_FAIL;
@@ -482,7 +483,7 @@ static int hg_proc_plist_t(hg_proc_t proc, hid_t *data)
         }
         break;
     case HG_DECODE:
-        ret = hg_proc_uint64_t(proc, &plist_size);
+        ret = hg_proc_size_t(proc, &plist_size);
         if (ret != HG_SUCCESS) {
             HG_ERROR_DEFAULT("Proc error");
             ret = HG_FAIL;
@@ -516,6 +517,7 @@ static int hg_proc_plist_t(hg_proc_t proc, hid_t *data)
             }
         }
         break;
+    case HG_INVALID:
     default:
         HG_ERROR_DEFAULT("PLIST unsupported op Proc error");
     }
@@ -549,7 +551,7 @@ static int hg_proc_dtype_t(hg_proc_t proc, hid_t *data)
             }
         }
 
-        ret = hg_proc_uint64_t(proc, &dtype_size);
+        ret = hg_proc_size_t(proc, &dtype_size);
         if (ret != HG_SUCCESS) {
             HG_ERROR_DEFAULT("Proc error");
             ret = HG_FAIL;
@@ -566,7 +568,7 @@ static int hg_proc_dtype_t(hg_proc_t proc, hid_t *data)
         }
         break;
     case HG_DECODE:
-        ret = hg_proc_uint64_t(proc, &dtype_size);
+        ret = hg_proc_size_t(proc, &dtype_size);
         if (ret != HG_SUCCESS) {
             HG_ERROR_DEFAULT("Proc error");
             ret = HG_FAIL;
@@ -594,6 +596,7 @@ static int hg_proc_dtype_t(hg_proc_t proc, hid_t *data)
             return HG_FAIL;
         }
         break;
+    case HG_INVALID:
     default:
         HG_ERROR_DEFAULT("DTYPE unsupported op Proc error");
     }
@@ -628,7 +631,7 @@ static int hg_proc_dspace_t(hg_proc_t proc, hid_t *data)
             }
         }
 
-        ret = hg_proc_uint64_t(proc, &dspace_size);
+        ret = hg_proc_size_t(proc, &dspace_size);
         if (ret != HG_SUCCESS) {
             HG_ERROR_DEFAULT("Proc error");
             ret = HG_FAIL;
@@ -645,7 +648,7 @@ static int hg_proc_dspace_t(hg_proc_t proc, hid_t *data)
         }
         break;
     case HG_DECODE:
-        ret = hg_proc_uint64_t(proc, &dspace_size);
+        ret = hg_proc_size_t(proc, &dspace_size);
         if (ret != HG_SUCCESS) {
             HG_ERROR_DEFAULT("Proc error");
             ret = HG_FAIL;
@@ -673,6 +676,7 @@ static int hg_proc_dspace_t(hg_proc_t proc, hid_t *data)
             return HG_FAIL;
         }
         break;
+    case HG_INVALID:
     default:
         HG_ERROR_DEFAULT("DSPACE unsupported op Proc error");
     }

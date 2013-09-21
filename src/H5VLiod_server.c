@@ -26,7 +26,6 @@
 
 static AXE_engine_t engine;
 static MPI_Comm iod_comm;
-static iod_obj_id_t ROOT_ID;
 static int num_peers = 0;
 static int terminate_requests = 0;
 static hbool_t shutdown = FALSE;

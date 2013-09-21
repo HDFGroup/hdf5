@@ -159,7 +159,7 @@ int main(int argc, char **argv) {
 
     /* tell HDF5 to disable data integrity checks stored at IOD for this write;
        The transfer checksum will still capture the corruption. */
-    cs_scope |= H5_CHECKSUM_IOD;
+    cs_scope |= H5_CHECKSUM_TRANSFER;
     ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
     assert(ret == 0);
 

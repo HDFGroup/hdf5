@@ -53,12 +53,14 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_handle = input->loc_oh; /* The handle for current object - could be undefined */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t grp_id = input->grp_id; /* The ID of the group that needs to be created */
+    iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV to be created */
+    iod_obj_id_t attr_id = input->attrkv_id; /* The ID of the attirbute KV to be created */
     const char *name = input->name; /* path relative to loc_id and loc_oh  */
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
     iod_handle_t grp_oh, cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id, mdkv_id, attr_id;
+    iod_obj_id_t cur_id;
     char *last_comp = NULL; /* the name of the group obtained from traversal function */
     hid_t gcpl_id;
     scratch_pad sp;
@@ -274,6 +276,8 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
 
     output.iod_id = grp_id;
     output.iod_oh = grp_oh;
+    output.mdkv_id = sp[0];
+    output.attrkv_id = sp[1];
     output.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
 
 #if H5VL_IOD_DEBUG

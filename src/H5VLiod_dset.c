@@ -87,11 +87,13 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t dset_id = input->dset_id; /* The ID of the dataset that needs to be created */
+    iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV to be created */
+    iod_obj_id_t attr_id = input->attrkv_id; /* The ID of the attirbute KV to be created */
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
     iod_handle_t dset_oh, cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id, mdkv_id, attr_id;
+    iod_obj_id_t cur_id;
     const char *name = input->name; /* name of dset including path to create */
     char *last_comp; /* the name of the dataset obtained from the last component in the path */
     hid_t dcpl_id;
@@ -396,6 +398,8 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
 
     dset_id = 1;
     output.iod_id = dset_id;
+    output.mdkv_id = sp[0];
+    output.attrkv_id = sp[1];
     output.iod_oh.cookie = dset_oh.cookie;
 
 #if H5VL_IOD_DEBUG 
@@ -536,7 +540,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
             if(H5Tconvert(src_id, dst_id, nelmts, buf, NULL, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
-            if(!(raw_cs_scope & H5_CHECKSUM_NONE)) {
+            if(raw_cs_scope) {
                 /* calculate a checksum for the data to be sent */
                 cs = H5checksum(buf, size, NULL);
             }
@@ -1104,6 +1108,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
+    iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV object */
     /* int rank = input->dims.rank;  rank of dataset */
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
@@ -1130,22 +1135,10 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     {
         int rank;
         hid_t space_id;
-        scratch_pad sp;
-        iod_checksum_t sp_cs = 0;
         iod_handle_t mdkv_oh;
 
-        /* get scratch pad of the dataset */
-        if(iod_obj_get_scratch(iod_oh, rtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
-
-        if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
-            /* verify scratch pad integrity */
-            if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
-        }
-
         /* open the metadata scratch pad */
-        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
         /* get the stored dataset dataspace */

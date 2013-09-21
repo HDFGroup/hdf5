@@ -51,11 +51,13 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t dtype_id = input->dtype_id; /* The ID of the datatype that needs to be created */
+    iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV to be created */
+    iod_obj_id_t attr_id = input->attrkv_id; /* The ID of the attirbute KV to be created */
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
     iod_handle_t dtype_oh, cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id, mdkv_id, attr_id;
+    iod_obj_id_t cur_id;
     const char *name = input->name; /* name of dtype including path to commit */
     hid_t tcpl_id;
     char *last_comp; /* the name of the datatype obtained from the last component in the path */
@@ -394,6 +396,8 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     output.iod_id = dtype_id;
+    output.mdkv_id = sp[0];
+    output.attrkv_id = sp[1];
     output.iod_oh = dtype_oh;
 
 #if H5VL_IOD_DEBUG

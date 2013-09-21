@@ -129,6 +129,8 @@ typedef struct H5VL_iod_remote_file_t {
     uint64_t array_oid_index;
     uint64_t blob_oid_index;
     iod_obj_id_t root_id;
+    iod_obj_id_t mdkv_id;
+    iod_obj_id_t attrkv_id;
     uint64_t c_version;
     hid_t fcpl_id;
 } H5VL_iod_remote_file_t;
@@ -138,6 +140,7 @@ typedef struct H5VL_iod_remote_attr_t {
     /* Do NOT change the order of the parameters */
     iod_handle_t iod_oh;
     iod_obj_id_t iod_id;
+    iod_obj_id_t mdkv_id;
     hid_t acpl_id;
     hid_t type_id;
     hid_t space_id;
@@ -148,6 +151,8 @@ typedef struct H5VL_iod_remote_group_t {
     /* Do NOT change the order of the parameters */
     iod_handle_t iod_oh;
     iod_obj_id_t iod_id;
+    iod_obj_id_t mdkv_id;
+    iod_obj_id_t attrkv_id;
     hid_t gcpl_id;
 } H5VL_iod_remote_group_t;
 
@@ -156,6 +161,8 @@ typedef struct H5VL_iod_remote_map_t {
     /* Do NOT change the order of the parameters */
     iod_handle_t iod_oh;
     iod_obj_id_t iod_id;
+    iod_obj_id_t mdkv_id;
+    iod_obj_id_t attrkv_id;
     hid_t keytype_id;
     hid_t valtype_id;
     hid_t mcpl_id;
@@ -166,6 +173,8 @@ typedef struct H5VL_iod_remote_dset_t {
     /* Do NOT change the order of the parameters */
     iod_handle_t iod_oh;
     iod_obj_id_t iod_id;
+    iod_obj_id_t mdkv_id;
+    iod_obj_id_t attrkv_id;
     hid_t dcpl_id;
     hid_t type_id;
     hid_t space_id;
@@ -176,6 +185,8 @@ typedef struct H5VL_iod_remote_dtype_t {
     /* Do NOT change the order of the parameters */
     iod_handle_t iod_oh;
     iod_obj_id_t iod_id;
+    iod_obj_id_t mdkv_id;
+    iod_obj_id_t attrkv_id;
     hid_t tcpl_id;
     hid_t type_id;
 } H5VL_iod_remote_dtype_t;
@@ -186,6 +197,8 @@ typedef struct H5VL_iod_remote_object_t {
     H5I_type_t obj_type;
     iod_handle_t iod_oh;
     iod_obj_id_t iod_id;
+    iod_obj_id_t mdkv_id;
+    iod_obj_id_t attrkv_id;
     hid_t cpl_id;
     hid_t type_id;
     hid_t space_id;
@@ -320,7 +333,8 @@ H5_DLL herr_t H5VL_iod_request_decr_rc(H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL_iod_get_parent_requests(H5VL_iod_object_t *obj, H5VL_iod_req_info_t *req_info, 
                                            H5VL_iod_request_t **parent_reqs, size_t *num_parents);
 H5_DLL  herr_t H5VL_iod_get_loc_info(H5VL_iod_object_t *obj, iod_obj_id_t *iod_id, 
-                                     iod_handle_t *iod_oh);
+                                     iod_handle_t *iod_oh, iod_obj_id_t *mdkv_oh, 
+                                     iod_obj_id_t *attrkv_oh);
 H5_DLL herr_t H5VL_iod_get_obj_requests(H5VL_iod_object_t *obj, /*IN/OUT*/ size_t *count, 
                                         /*OUT*/ H5VL_iod_request_t **parent_reqs);
 H5_DLL herr_t H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type, 

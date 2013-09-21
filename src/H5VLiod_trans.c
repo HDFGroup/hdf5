@@ -131,7 +131,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
             acquired_version = IOD_TID_UNKNOWN;
             u=c_version;
 
-            for(u=c_version; u>=0; u--) {
+            for(u=c_version; u>0; u--) {
                 if(iod_trans_start(coh, &u, NULL, 0, IOD_TRANS_RD, NULL) < 0)
                     continue;
                 acquired_version = u;

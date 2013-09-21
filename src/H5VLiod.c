@@ -1386,6 +1386,14 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     H5VL_iod_gen_obj_id(file->my_rank, file->num_procs, (uint64_t)0, IOD_OBJ_KV, &input.root_id);
     file->remote_file.root_id = input.root_id;
 
+    /* Generate an IOD ID for the root group MDKV to be created */
+    H5VL_iod_gen_obj_id(file->my_rank, file->num_procs, (uint64_t)1, IOD_OBJ_KV, &input.mdkv_id);
+    file->remote_file.mdkv_id = input.mdkv_id;
+
+    /* Generate an IOD ID for the root group ATTR KV to be created */
+    H5VL_iod_gen_obj_id(file->my_rank, file->num_procs, (uint64_t)2, IOD_OBJ_KV, &input.attrkv_id);
+    file->remote_file.attrkv_id = input.attrkv_id;
+
     /* set the input structure for the HG encode routine */
     input.name = name;
     input.num_peers = file->num_procs;
@@ -1486,6 +1494,8 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
     file->remote_file.coh.cookie = IOD_OH_UNDEFINED;
     file->remote_file.root_oh.cookie = IOD_OH_UNDEFINED;
     file->remote_file.root_id = IOD_ID_UNDEFINED;
+    file->remote_file.mdkv_id = IOD_ID_UNDEFINED;
+    file->remote_file.attrkv_id = IOD_ID_UNDEFINED;
     file->remote_file.fcpl_id = -1;
     file->remote_file.c_version = IOD_TID_UNKNOWN;
 
@@ -1888,7 +1898,7 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
     /* allocate the group object that is returned to the user */
@@ -1896,15 +1906,26 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
     grp->remote_group.iod_oh.cookie = IOD_OH_UNDEFINED;
-    grp->remote_group.iod_id = IOD_ID_UNDEFINED;
-    grp->remote_group.gcpl_id = -1;
 
-    /* Generate an IOD ID for the group to be created */
+    /* Generate IOD IDs for the group to be created */
     H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
                         obj->file->remote_file.kv_oid_index, 
                         IOD_OBJ_KV, &input.grp_id);
     grp->remote_group.iod_id = input.grp_id;
+    /* increment the index of KV objects created on the container */
+    obj->file->remote_file.kv_oid_index ++;
 
+    H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
+                        obj->file->remote_file.kv_oid_index, 
+                        IOD_OBJ_KV, &input.mdkv_id);
+    grp->remote_group.mdkv_id = input.mdkv_id;
+    /* increment the index of KV objects created on the container */
+    obj->file->remote_file.kv_oid_index ++;
+
+    H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
+                        obj->file->remote_file.kv_oid_index, 
+                        IOD_OBJ_KV, &input.attrkv_id);
+    grp->remote_group.attrkv_id = input.attrkv_id;
     /* increment the index of KV objects created on the container */
     obj->file->remote_file.kv_oid_index ++;
 
@@ -2012,7 +2033,7 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
     /* allocate the group object that is returned to the user */
@@ -2021,6 +2042,8 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
 
     grp->remote_group.iod_oh.cookie = IOD_OH_UNDEFINED;
     grp->remote_group.iod_id = IOD_ID_UNDEFINED;
+    grp->remote_group.mdkv_id = IOD_ID_UNDEFINED;
+    grp->remote_group.attrkv_id = IOD_ID_UNDEFINED;
 
     /* set the input structure for the HG encode routine */
     input.coh = obj->file->remote_file.coh;
@@ -2249,7 +2272,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t UNUSED loc_params,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
     /* allocate the dataset object that is returned to the user */
@@ -2259,14 +2282,27 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t UNUSED loc_params,
     dset->remote_dset.iod_oh.cookie = IOD_OH_UNDEFINED;
     dset->remote_dset.iod_id = IOD_ID_UNDEFINED;
 
-    /* Generate an IOD ID for the dset to be created */
+    /* Generate IOD IDs for the dset to be created */
     H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
                         obj->file->remote_file.array_oid_index, 
                         IOD_OBJ_ARRAY, &input.dset_id);
     dset->remote_dset.iod_id = input.dset_id;
-
     /* increment the index of ARRAY objects created on the container */
     obj->file->remote_file.array_oid_index ++;
+
+    H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
+                        obj->file->remote_file.kv_oid_index, 
+                        IOD_OBJ_KV, &input.mdkv_id);
+    dset->remote_dset.mdkv_id = input.mdkv_id;
+    /* increment the index of KV objects created on the container */
+    obj->file->remote_file.kv_oid_index ++;
+
+    H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
+                        obj->file->remote_file.kv_oid_index, 
+                        IOD_OBJ_KV, &input.attrkv_id);
+    dset->remote_dset.attrkv_id = input.attrkv_id;
+    /* increment the index of KV objects created on the container */
+    obj->file->remote_file.kv_oid_index ++;
 
     /* set the input structure for the HG encode routine */
     input.coh = obj->file->remote_file.coh;
@@ -2380,7 +2416,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
     /* allocate the dataset object that is returned to the user */
@@ -2389,6 +2425,8 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
 
     dset->remote_dset.iod_oh.cookie = IOD_OH_UNDEFINED;
     dset->remote_dset.iod_id = IOD_ID_UNDEFINED;
+    dset->remote_dset.mdkv_id = IOD_ID_UNDEFINED;
+    dset->remote_dset.attrkv_id = IOD_ID_UNDEFINED;
     dset->remote_dset.dcpl_id = -1;
     dset->remote_dset.type_id = -1;
     dset->remote_dset.space_id = -1;
@@ -2559,6 +2597,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         input.coh = dset->common.file->remote_file.coh;
         input.iod_oh = dset->remote_dset.iod_oh;
         input.iod_id = dset->remote_dset.iod_id;
+        input.mdkv_id = dset->remote_dset.mdkv_id;
         input.bulk_handle = *bulk_handle;
         input.checksum = 0;
         input.dxpl_id = dxpl_id;
@@ -2574,6 +2613,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         input_vl.coh = dset->common.file->remote_file.coh;
         input_vl.iod_oh = dset->remote_dset.iod_oh;
         input_vl.iod_id = dset->remote_dset.iod_id;
+        input_vl.mdkv_id = dset->remote_dset.mdkv_id;
         input_vl.dxpl_id = dxpl_id;
         input_vl.space_id = file_space_id;
         input_vl.mem_type_id = mem_type_id;
@@ -2784,6 +2824,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     input.coh = dset->common.file->remote_file.coh;
     input.iod_oh = dset->remote_dset.iod_oh;
     input.iod_id = dset->remote_dset.iod_id;
+    input.mdkv_id = dset->remote_dset.mdkv_id;
     input.bulk_handle = *bulk_handle;
     input.checksum = internal_cs;
     input.dxpl_id = dxpl_id;
@@ -2883,6 +2924,7 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[],
     input.coh = dset->common.file->remote_file.coh;
     input.iod_oh = dset->remote_dset.iod_oh;
     input.iod_id = dset->remote_dset.iod_id;
+    input.mdkv_id = dset->remote_dset.mdkv_id;
     input.dims.rank = H5Sget_simple_extent_ndims(dset->remote_dset.space_id);
     input.dims.size = size;
     input.trans_num = tr->trans_num;
@@ -3136,7 +3178,7 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t UNUSED loc_params, const 
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
     /* allocate the datatype object that is returned to the user */
@@ -3146,14 +3188,27 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t UNUSED loc_params, const 
     dtype->remote_dtype.iod_oh.cookie = IOD_OH_UNDEFINED;
     dtype->remote_dtype.iod_id = IOD_ID_UNDEFINED;
 
-    /* Generate an IOD ID for the group to be created */
+    /* Generate IOD IDs for the group to be created */
     H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
                         obj->file->remote_file.blob_oid_index, 
                         IOD_OBJ_BLOB, &input.dtype_id);
     dtype->remote_dtype.iod_id = input.dtype_id;
-
-    /* increment the index of KV objects created on the container */
+    /* increment the index of BLOB objects created on the container */
     obj->file->remote_file.blob_oid_index ++;
+
+    H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
+                        obj->file->remote_file.kv_oid_index, 
+                        IOD_OBJ_KV, &input.mdkv_id);
+    dtype->remote_dtype.mdkv_id = input.mdkv_id;
+    /* increment the index of KV objects created on the container */
+    obj->file->remote_file.kv_oid_index ++;
+
+    H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
+                        obj->file->remote_file.kv_oid_index, 
+                        IOD_OBJ_KV, &input.attrkv_id);
+    dtype->remote_dtype.attrkv_id = input.attrkv_id;
+    /* increment the index of KV objects created on the container */
+    obj->file->remote_file.kv_oid_index ++;
 
     /* set the input structure for the HG encode routine */
     input.coh = obj->file->remote_file.coh;
@@ -3263,7 +3318,7 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const ch
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
     /* allocate the datatype object that is returned to the user */
@@ -3272,6 +3327,8 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const ch
 
     dtype->remote_dtype.iod_oh.cookie = IOD_OH_UNDEFINED;
     dtype->remote_dtype.iod_id = IOD_ID_UNDEFINED;
+    dtype->remote_dtype.mdkv_id = IOD_ID_UNDEFINED;
+    dtype->remote_dtype.attrkv_id = IOD_ID_UNDEFINED;
     dtype->remote_dtype.tcpl_id = -1;
     dtype->remote_dtype.type_id = -1;
 
@@ -3478,7 +3535,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     H5VL_iod_attr_t *attr = NULL; /* the attribute object that is created and passed to the user */
     attr_create_in_t input;
     H5P_genplist_t *plist = NULL;
-    iod_obj_id_t iod_id;
+    iod_obj_id_t iod_id, attrkv_id;
     iod_handle_t iod_oh;
     const char *path; /* path on where the traversal starts relative to the location object specified */
     char *loc_name = NULL;
@@ -3521,7 +3578,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
     /* allocate the attribute object that is returned to the user */
@@ -3529,16 +3586,21 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
     attr->remote_attr.iod_oh.cookie = IOD_OH_UNDEFINED;
-    attr->remote_attr.iod_id = IOD_ID_UNDEFINED;
 
-    /* Generate an IOD ID for the attr to be created */
+    /* Generate IOD IDs for the attr to be created */
     H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
                         obj->file->remote_file.array_oid_index, 
                         IOD_OBJ_ARRAY, &input.attr_id);
     attr->remote_attr.iod_id = input.attr_id;
-
     /* increment the index of ARRAY objects created on the container */
     obj->file->remote_file.array_oid_index ++;
+
+    H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
+                        obj->file->remote_file.kv_oid_index, 
+                        IOD_OBJ_KV, &input.mdkv_id);
+    attr->remote_attr.mdkv_id = input.mdkv_id;
+    /* increment the index of KV objects created on the container */
+    obj->file->remote_file.kv_oid_index ++;
 
     if(H5VL_OBJECT_BY_SELF == loc_params.type)
         loc_name = strdup(".");
@@ -3548,6 +3610,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     /* set the input structure for the HG encode routine */
     input.coh = obj->file->remote_file.coh;
     input.loc_id = iod_id;
+    input.loc_attrkv_id = attrkv_id;
     input.loc_oh = iod_oh;
     input.path = loc_name;
     input.attr_name = attr_name;
@@ -3637,7 +3700,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     attr_open_in_t input;
     const char *path; /* path on where the traversal starts relative to the location object specified */
     char *loc_name = NULL;
-    iod_obj_id_t iod_id;
+    iod_obj_id_t iod_id, attrkv_id;
     iod_handle_t iod_oh;
     H5P_genplist_t *plist = NULL;
     hid_t rcxt_id;
@@ -3668,7 +3731,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
     /* allocate the attribute object that is returned to the user */
@@ -3677,6 +3740,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
 
     attr->remote_attr.iod_oh.cookie = IOD_OH_UNDEFINED;
     attr->remote_attr.iod_id = IOD_ID_UNDEFINED;
+    attr->remote_attr.mdkv_id = IOD_ID_UNDEFINED;
     attr->remote_attr.acpl_id = -1;
     attr->remote_attr.type_id = -1;
     attr->remote_attr.space_id = -1;
@@ -3689,6 +3753,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     /* set the input structure for the HG encode routine */
     input.coh = obj->file->remote_file.coh;
     input.loc_id = iod_id;
+    input.loc_attrkv_id = attrkv_id;
     input.loc_oh = iod_oh;
     input.path = loc_name;
     input.attr_name = attr_name;
@@ -3817,6 +3882,7 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
     input.coh = attr->common.file->remote_file.coh;
     input.iod_oh = attr->remote_attr.iod_oh;
     input.iod_id = attr->remote_attr.iod_id;
+    input.mdkv_id = attr->remote_attr.mdkv_id;
     input.bulk_handle = *bulk_handle;
     input.type_id = type_id;
     input.space_id = attr->remote_attr.space_id;
@@ -3929,6 +3995,7 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     input.coh = attr->common.file->remote_file.coh;
     input.iod_oh = attr->remote_attr.iod_oh;
     input.iod_id = attr->remote_attr.iod_id;
+    input.mdkv_id = attr->remote_attr.mdkv_id;
     input.bulk_handle = *bulk_handle;
     input.type_id = type_id;
     input.space_id = attr->remote_attr.space_id;
@@ -3980,7 +4047,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the attribute */
     attr_op_in_t input;
-    iod_obj_id_t iod_id;
+    iod_obj_id_t iod_id, attrkv_id;
     iod_handle_t iod_oh;
     size_t num_parents = 0;
     hid_t trans_id;
@@ -4013,7 +4080,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
     if(H5VL_OBJECT_BY_SELF == loc_params.type)
@@ -4024,6 +4091,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
     /* set the input structure for the HG encode routine */
     input.coh = obj->file->remote_file.coh;
     input.loc_id = iod_id;
+    input.loc_attrkv_id = attrkv_id;
     input.loc_oh = iod_oh;
     input.path = loc_name;
     input.attr_name = attr_name;
@@ -4195,7 +4263,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
 
                 /* retrieve IOD info of location object */
-                if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+                if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &input.loc_attrkv_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
                 if(H5VL_OBJECT_BY_SELF == loc_params.type)
@@ -4412,7 +4480,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
 
                 /* retrieve IOD info of location object */
-                if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh) < 0)
+                if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
                 if(H5VL_OBJECT_BY_SELF == loc_params.type)
@@ -4435,7 +4503,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
 
                 /* retrieve IOD info of location object */
                 if(H5VL_iod_get_loc_info(target_obj, &input.target_loc_id, 
-                                         &input.target_loc_oh) < 0)
+                                         &input.target_loc_oh, &input.target_mdkv_id, NULL) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
                 if(H5VL_OBJECT_BY_SELF == target_params.type)
@@ -4489,7 +4557,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
 
                 /* retrieve IOD info of location object */
-                if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh) < 0)
+                if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
                 if(H5VL_OBJECT_BY_SELF == loc_params.type)
@@ -4504,7 +4572,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
 
                 /* retrieve IOD info of location object */
                 if(H5VL_iod_get_loc_info(target_obj, &input.target_loc_id, 
-                                         &input.target_loc_oh) < 0)
+                                         &input.target_loc_oh, &input.target_mdkv_id, NULL) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
                 /* set the input structure for the HG encode routine */
@@ -4614,7 +4682,7 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
     if(H5VL_iod_get_parent_requests(src_obj, (H5VL_iod_req_info_t *)tr, parent_reqs, &num_parents) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(src_obj, &input.src_loc_id, &input.src_loc_oh) < 0)
+    if(H5VL_iod_get_loc_info(src_obj, &input.src_loc_id, &input.src_loc_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
     if(H5VL_OBJECT_BY_SELF == loc_params1.type)
@@ -4626,7 +4694,7 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
     if(H5VL_iod_get_parent_requests(dst_obj, NULL, parent_reqs, &num_parents) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(dst_obj, &input.dst_loc_id, &input.dst_loc_oh) < 0)
+    if(H5VL_iod_get_loc_info(dst_obj, &input.dst_loc_id, &input.dst_loc_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
     if(H5VL_OBJECT_BY_SELF == loc_params2.type)
@@ -4761,7 +4829,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
     switch (get_type) {
@@ -4943,7 +5011,7 @@ H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, vo
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
     if(H5VL_OBJECT_BY_SELF == loc_params.type)
@@ -5196,7 +5264,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to retrieve parent requests");
 
         /* retrieve IOD info of location object */
-        if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh) < 0)
+        if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, &input.loc_mdkv_id, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
         if(H5VL_OBJECT_BY_SELF == loc_params.type)
@@ -5233,6 +5301,8 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
                 dset->remote_dset.iod_oh.cookie = remote_obj.iod_oh.cookie;
                 dset->remote_dset.iod_id = remote_obj.iod_id;
+                dset->remote_dset.mdkv_id = remote_obj.mdkv_id;
+                dset->remote_dset.attrkv_id = remote_obj.attrkv_id;
                 dset->remote_dset.dcpl_id = remote_obj.cpl_id;
                 dset->remote_dset.type_id = remote_obj.type_id;
                 dset->remote_dset.space_id = remote_obj.space_id;
@@ -5280,6 +5350,8 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
                 dtype->remote_dtype.iod_oh.cookie = remote_obj.iod_oh.cookie;
                 dtype->remote_dtype.iod_id = remote_obj.iod_id;
+                dtype->remote_dtype.mdkv_id = remote_obj.mdkv_id;
+                dtype->remote_dtype.attrkv_id = remote_obj.attrkv_id;
                 dtype->remote_dtype.tcpl_id = remote_obj.cpl_id;
                 dtype->remote_dtype.type_id = remote_obj.type_id;
 
@@ -5326,6 +5398,8 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
                 grp->remote_group.iod_oh.cookie = remote_obj.iod_oh.cookie;
                 grp->remote_group.iod_id = remote_obj.iod_id;
+                grp->remote_group.mdkv_id = remote_obj.mdkv_id;
+                grp->remote_group.attrkv_id = remote_obj.attrkv_id;
                 grp->remote_group.gcpl_id = remote_obj.cpl_id;
 
                 if(grp->remote_group.gcpl_id == H5P_DEFAULT){
@@ -5369,6 +5443,8 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
                 map->remote_map.iod_oh.cookie = remote_obj.iod_oh.cookie;
                 map->remote_map.iod_id = remote_obj.iod_id;
+                map->remote_map.mdkv_id = remote_obj.mdkv_id;
+                map->remote_map.attrkv_id = remote_obj.attrkv_id;
                 map->remote_map.mcpl_id = remote_obj.cpl_id;
 
                 if(map->remote_map.mcpl_id == H5P_DEFAULT){
@@ -5462,14 +5538,14 @@ H5VL_iod_object_copy(void *_src_obj, H5VL_loc_params_t UNUSED loc_params1, const
     if(H5VL_iod_get_parent_requests(src_obj, (H5VL_iod_req_info_t *)tr, parent_reqs, &num_parents) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(src_obj, &input.src_loc_id, &input.src_loc_oh) < 0)
+    if(H5VL_iod_get_loc_info(src_obj, &input.src_loc_id, &input.src_loc_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
     /* retrieve parent requests */
     if(H5VL_iod_get_parent_requests(dst_obj, NULL, parent_reqs, &num_parents) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(dst_obj, &input.dst_loc_id, &input.dst_loc_oh) < 0)
+    if(H5VL_iod_get_loc_info(dst_obj, &input.dst_loc_id, &input.dst_loc_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
     /* set the input structure for the HG encode routine */
@@ -5541,7 +5617,7 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
                      hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
-    iod_obj_id_t iod_id;
+    iod_obj_id_t iod_id, mdkv_id, attrkv_id;
     iod_handle_t iod_oh;
     int *status = NULL;
     size_t num_parents = 0;
@@ -5574,7 +5650,7 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
     switch (misc_type) {
@@ -5595,6 +5671,7 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
                 input.old_attr_name = old_name;
                 input.new_attr_name = new_name;
                 input.loc_id = iod_id;
+                input.loc_attrkv_id = attrkv_id;
                 input.loc_oh = iod_oh;
                 input.path = loc_name;
                 input.trans_num = tr->trans_num;
@@ -5633,6 +5710,7 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
                 input.coh = obj->file->remote_file.coh;
                 input.comment = comment;
                 input.loc_id = iod_id;
+                input.loc_mdkv_id = mdkv_id;
                 input.loc_oh = iod_oh;
                 input.path = loc_name;
                 input.trans_num = tr->trans_num;
@@ -5705,7 +5783,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
     hid_t rcxt_id;
     H5RC_t *rc = NULL;
     H5P_genplist_t *plist = NULL;
-    iod_obj_id_t iod_id;
+    iod_obj_id_t iod_id, mdkv_id;
     iod_handle_t iod_oh;
     H5VL_iod_request_t **parent_reqs = NULL;
     char *loc_name = NULL;
@@ -5733,7 +5811,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
     switch (get_type) {
@@ -5751,6 +5829,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 /* set the input structure for the HG encode routine */
                 input.coh = obj->file->remote_file.coh;
                 input.loc_id = iod_id;
+                input.loc_mdkv_id = mdkv_id;
                 input.loc_oh = iod_oh;
                 input.rcxt_num  = rc->c_version;
                 input.cs_scope = obj->file->md_integrity_scope;
@@ -5806,6 +5885,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 input.coh = obj->file->remote_file.coh;
                 input.loc_id = iod_id;
                 input.loc_oh = iod_oh;
+                input.loc_mdkv_id = mdkv_id;
                 input.rcxt_num  = rc->c_version;
                 input.cs_scope = obj->file->md_integrity_scope;
                 input.path = loc_name;
@@ -5852,6 +5932,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 input.coh = obj->file->remote_file.coh;
                 input.loc_id = iod_id;
                 input.loc_oh = iod_oh;
+                input.loc_mdkv_id = mdkv_id;
                 input.rcxt_num  = rc->c_version;
                 input.cs_scope = obj->file->md_integrity_scope;
                 input.loc_name = loc_name;
@@ -5932,7 +6013,7 @@ H5VL_iod_map_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
     /* allocate the map object that is returned to the user */
@@ -5943,12 +6024,25 @@ H5VL_iod_map_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
     map->remote_map.iod_id = IOD_ID_UNDEFINED;
     map->remote_map.mcpl_id = -1;
 
-    /* Generate an IOD ID for the group to be created */
+    /* Generate IOD IDs for the map to be created */
     H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
                         obj->file->remote_file.kv_oid_index, 
                         IOD_OBJ_KV, &input.map_id);
     map->remote_map.iod_id = input.map_id;
+    /* increment the index of KV objects created on the container */
+    obj->file->remote_file.kv_oid_index ++;
 
+    H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
+                        obj->file->remote_file.kv_oid_index, 
+                        IOD_OBJ_KV, &input.mdkv_id);
+    map->remote_map.mdkv_id = input.mdkv_id;
+    /* increment the index of KV objects created on the container */
+    obj->file->remote_file.kv_oid_index ++;
+
+    H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
+                        obj->file->remote_file.kv_oid_index, 
+                        IOD_OBJ_KV, &input.attrkv_id);
+    map->remote_map.attrkv_id = input.attrkv_id;
     /* increment the index of KV objects created on the container */
     obj->file->remote_file.kv_oid_index ++;
 
@@ -6041,7 +6135,7 @@ H5VL_iod_map_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char *n
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
     /* allocate the map object that is returned to the user */
@@ -6050,6 +6144,8 @@ H5VL_iod_map_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char *n
 
     map->remote_map.iod_oh.cookie = IOD_OH_UNDEFINED;
     map->remote_map.iod_id = IOD_ID_UNDEFINED;
+    map->remote_map.mdkv_id = IOD_ID_UNDEFINED;
+    map->remote_map.attrkv_id = IOD_ID_UNDEFINED;
     map->remote_map.keytype_id = -1;
     map->remote_map.valtype_id = -1;
 
@@ -6960,8 +7056,8 @@ H5VL_iod_rc_persist(H5RC_t *rc, void **req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(rc->file->flags & H5F_ACC_RDONLY)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Can't persist a container opened for Read only");
+    if(!(rc->file->flags & H5F_ACC_RDWR))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Can't persist a container opened for Read only")
 
     /* set the input structure for the HG encode routine */
     input.coh = rc->file->remote_file.coh;

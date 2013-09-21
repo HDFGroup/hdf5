@@ -91,20 +91,26 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
                                     H5L_TYPE_HARD, &target_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
-        /* MSC - must get mdkvID from client, not get here. */
-        /* get scratch pad */
-        if(iod_obj_get_scratch(target_oh, rtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+        if(input->target_loc_id != target_id) {
+            /* get scratch pad */
+            if(iod_obj_get_scratch(target_oh, rtid, &sp, &sp_cs, NULL) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-        if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
-            /* verify scratch pad integrity */
-            if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+            if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+                /* verify scratch pad integrity */
+                if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+            }
+
+            /* open the metadata KV */
+            if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
         }
-
-        /* open the metadata scratch pad */
-        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+        else {
+            /* open the metadata KV */
+            if (iod_obj_open_write(coh, input->target_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+        }
 
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
                                  H5VL_IOD_KEY_OBJ_LINK_COUNT,

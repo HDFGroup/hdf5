@@ -56,6 +56,8 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_handle = input->loc_oh; /* The handle for current object - could be undefined */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t map_id = input->map_id; /* The ID of the map that needs to be created */
+    iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV to be created */
+    iod_obj_id_t attr_id = input->attrkv_id; /* The ID of the attirbute KV to be created */
     const char *name = input->name; /* path relative to loc_id and loc_oh  */
     hid_t keytype = input->keytype_id;
     hid_t valtype = input->valtype_id;
@@ -63,7 +65,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
     iod_handle_t map_oh, cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id, mdkv_id, attr_id;
+    iod_obj_id_t cur_id;
     char *last_comp; /* the name of the group obtained from traversal function */
     hid_t mcpl_id;
     scratch_pad sp;
@@ -99,8 +101,6 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     /* for the process that succeeded in creating the map, create
        the scratch pad for it too */
     if(0 == ret) {
-        iod_checksum_t sp_cs;
-
         /* create the metadata KV object for the map */
         if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &mdkv_id, NULL) < 0)
@@ -274,6 +274,8 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close meta data KV handle");
 
     output.iod_id = map_id;
+    output.mdkv_id = sp[0];
+    output.attrkv_id = sp[1];
     output.iod_oh = map_oh;
 
     /* MSC - fake datatypes for now*/
@@ -391,7 +393,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     kv.key = key.buf;
     kv.value = val.buf;
     kv.value_len = (iod_size_t)val_size;
-    /* insert kv pair into scratch pad */
+    /* insert kv pair into MAP */
     if (iod_kv_set(iod_oh, wtid, NULL, &kv, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 

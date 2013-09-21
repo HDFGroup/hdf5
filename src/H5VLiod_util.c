@@ -908,7 +908,7 @@ done:
  */
 herr_t
 H5VL__iod_server_adjust_buffer(hid_t mem_type_id, hid_t dset_type_id, size_t nelmts, 
-                               hid_t dxpl_id, size_t size, void **buf, 
+                               hid_t UNUSED dxpl_id, size_t size, void **buf, 
                                hbool_t *is_vl_data, size_t *_buf_size)
 {
     herr_t ret_value = SUCCEED;
