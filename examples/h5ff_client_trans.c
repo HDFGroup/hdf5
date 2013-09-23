@@ -66,17 +66,19 @@ int main(int argc, char **argv) {
     /* acquire container version 0 - EXACT */
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
 
-    /* create 2 transactions objects (does not start transactions). Local call. */
-    tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
-    assert(tid1);
+    /* create transactions object (does not start transactions). Local call. */
     tid2 = H5TRcreate(file_id, rid1, (uint64_t)555);
     assert(tid2);
 
-    /* start transaction 1 with default num_peers (= 0). 
-       This is asynchronous. */
     if(my_rank == 0) {
         hid_t gid1, gid2;
 
+        /* create transactions object (does not start transactions). Local call. */
+        tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
+        assert(tid1);
+
+        /* start transaction 1 with default Leader/Delegate model. Leader
+           which is rank 0 here starts the transaction. */
         ret = H5TRstart(tid1, H5P_DEFAULT, event_q);
         assert(0 == ret);
 
@@ -87,13 +89,22 @@ int main(int argc, char **argv) {
 
         assert(H5Gclose_ff(gid1, event_q) == 0);
         assert(H5Gclose_ff(gid2, event_q) == 0);
+
+        /* finish transaction 1. 
+           This is asynchronous, but has a dependency on H5TRstart() of tid1. */
+        ret = H5TRfinish(tid1, H5P_DEFAULT, NULL, event_q);
+        assert(0 == ret);
+
+        /* Local op */
+        ret = H5TRclose(tid1);
+        assert(0 == ret);
     }
 
     /* skip transactions 2 till 554. This is asynchronous. */
     ret = H5TRskip(file_id, (uint64_t)2, (uint64_t)553, event_q);
     assert(0 == ret);
 
-    /* start transaction 555 with num_peers = n */
+    /* Start transaction 555 with Multiple Leader - No Delegate Model. */
     trspl_id = H5Pcreate (H5P_TR_START);
     ret = H5Pset_trspl_num_peers(trspl_id, my_size);
     assert(0 == ret);
@@ -102,20 +113,9 @@ int main(int argc, char **argv) {
     ret = H5Pclose(trspl_id);
     assert(0 == ret);
 
-    /* set dependency from transaction 555 on 2. 
+    /* set dependency from transaction 555 on 1. 
        This is asynchronous but has a dependency on H5TRstart() of tid2. */
     ret = H5TRset_dependency(tid2, (uint64_t)1, event_q);
-    assert(0 == ret);
-
-    /* finish transaction 1. 
-       This is asynchronous, but has a dependency on H5TRstart() of tid1. */
-    if(my_rank == 0) {
-        ret = H5TRfinish(tid1, H5P_DEFAULT, NULL, event_q);
-        assert(0 == ret);
-    }
-
-    /* Local op */
-    ret = H5TRclose(tid1);
     assert(0 == ret);
 
     /* finish transaction 555 and acquire a read context for it */

@@ -94,7 +94,9 @@ int main(int argc, char **argv) {
 
     dtid = H5Tcopy(H5T_STD_I32LE);
 
-    /* acquire container version 0 - EXACT */
+    /* acquire container version 0 - EXACT.  
+       This can be asynchronous, but here we need the acquired ID 
+       right after the call to start the transaction so we make synchronous. */
     version = 0;
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
     assert(0 == version);
@@ -103,22 +105,39 @@ int main(int argc, char **argv) {
     tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
     assert(tid1);
 
-    /* start transaction 1 with default num_peers (= 0). */
+    /* start transaction 1 with default Leader/Delegate model. Leader
+       which is rank 0 here starts the transaction. It can be
+       asynchronous, but we make it synchronous here so that the
+       Leader can tell its delegates that the transaction is
+       started. */
     if(0 == my_rank) {
         ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
         assert(0 == ret);
     }
 
-    /* Tell other procs that transaction 1 is started */
+    /* Tell Delegates that transaction 1 is started */
     trans_num = 1;
     MPI_Ibcast(&trans_num, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD, &mpi_req);
 
-    /* Process 0 can continue writing to transaction 1, 
-       while others wait for the bcast to complete */
+    /* Leader can continue writing to transaction 1, 
+       while others wait for the ibcast to complete */
     if(0 != my_rank)
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
 
-    /* create group hierarchy /G1/G2/G3 */
+    /* 
+       Assume the following object create calls are collective.
+
+       In a real world scenario, the following create calls are
+       independent by default; i.e. only 1 process, typically a leader
+       process, calls them. The user does the local-to-global,
+       global-to-local thing to get the objects accessible to all delegates. 
+
+       This will not fail here because IOD used for now is skeletal,
+       so it does not matter if the calls are collective or
+       independent.
+    */
+
+  /* create group hierarchy /G1/G2/G3 */
     gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
     assert(gid1 > 0);
     gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
@@ -196,9 +215,6 @@ int main(int argc, char **argv) {
         ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, H5_EVENT_QUEUE_NULL);
         assert(0 == ret);
     }
-
-    /* another barrier so other processes know that container version is acquried */
-    MPI_Barrier(MPI_COMM_WORLD);
 
     /* Local op */
     ret = H5TRclose(tid1);

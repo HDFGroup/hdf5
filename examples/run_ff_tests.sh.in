@@ -1,6 +1,8 @@
 #!/bin/bash
 
-mkdir ff_output
+if [ ! -d "ff_output" ]; then
+    mkdir ff_output
+fi
 
 echo "Starting attribute (H5A) test-----------------------------------------"
 mpiexec -np 1 ./h5ff_server &> ff_output/server_attr &

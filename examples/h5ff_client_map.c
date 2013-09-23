@@ -83,11 +83,13 @@ int main(int argc, char **argv) {
     event_q = H5EQcreate(fapl_id);
     assert(event_q);
 
-    /* create the file. This is asynchronous, but the file_id can be used. */
+    /* create the file. */
     file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     assert(file_id);
 
-    /* acquire container version 0 - EXACT */
+    /* acquire container version 0 - EXACT.  
+       This can be asynchronous, but here we need the acquired ID 
+       right after the call to start the transaction so we make synchronous. */
     version = 0;
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
     assert(0 == version);
@@ -96,31 +98,49 @@ int main(int argc, char **argv) {
     tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
     assert(tid1);
 
-    /* start transaction 1 with default num_peers (= 0). */
+    /* start transaction 1 with default Leader/Delegate model. Leader
+       which is rank 0 here starts the transaction. It can be
+       asynchronous, but we make it synchronous here so that the
+       Leader can tell its delegates that the transaction is
+       started. */
     if(0 == my_rank) {
         ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
         assert(0 == ret);
     }
 
-    /* Tell other procs that transaction 1 is started */
+    /* Tell Delegates that transaction 1 is started */
     trans_num = 1;
     MPI_Ibcast(&trans_num, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD, &mpi_req);
 
-    /* Process 0 can continue writing to transaction 1, 
-       while others wait for the bcast to complete */
+    /* Leader can continue writing to transaction 1, 
+       while others wait for the ibcast to complete */
     if(0 != my_rank)
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
+
+    /* 
+       Assume the following object create calls are collective.
+
+       In a real world scenario, the following create calls are
+       independent by default; i.e. only 1 process, typically a leader
+       process, calls them. The user does the local-to-global,
+       global-to-local thing to get the objects accessible to all delegates. 
+
+       This will not fail here because IOD used for now is skeletal,
+       so it does not matter if the calls are collective or
+       independent.
+    */
 
     /* create two groups */
     gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
     gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
 
-    /* Create Map objects with the key type being 32 bit LE integer */
-    /* Val type, 32 bit LE integer */
+    /* Create 3 Map objects with the key type being 32 bit LE integer */
+
+    /* First Map object with a Value type a 32 bit LE integer */
     map1 = H5Mcreate_ff(file_id, "MAP_1", H5T_STD_I32LE, H5T_STD_I32LE, 
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
 
-    /* Val type: VL datatype */
+    /* Second Map object with a Value type being an HDF5 VL datatype */
     {
         int increment, j, n;
 
@@ -143,7 +163,7 @@ int main(int argc, char **argv) {
                             H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
     }
 
-    /* Val type: VL string */
+    /* Third Map object with a Value type being an HDF5 VL string */
     {
         hid_t dtid;
 
@@ -152,10 +172,11 @@ int main(int argc, char **argv) {
         H5Tset_size(dtid2,H5T_VARIABLE);
 
         /* Val type, VL string */
-        map3 = H5Mcreate_ff(gid2, "MAP_3", H5T_STD_I32LE, dtid1, 
+        map3 = H5Mcreate_ff(gid2, "MAP_3", H5T_STD_I32LE, dtid2, 
                             H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
     }
 
+    /* write some KV pairs to each map object. */
     {
         key = 1;
         value = 1000;
@@ -192,6 +213,8 @@ int main(int argc, char **argv) {
        0 can finish transaction 1 and acquire a read context on it. */
     MPI_Barrier(MPI_COMM_WORLD);
 
+    /* Leader process finishes/commits the transaction and acquires a
+       read context on it */
     if(0 == my_rank) {
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
 
@@ -202,7 +225,7 @@ int main(int argc, char **argv) {
     /* another barrier so other processes know that container version is acquried */
     MPI_Barrier(MPI_COMM_WORLD);
 
-    /* Close transaction object. Local op */
+    /* Close the first transaction object. Local op */
     ret = H5TRclose(tid1);
     assert(0 == ret);
 
@@ -217,16 +240,18 @@ int main(int argc, char **argv) {
     fprintf(stderr, "\n");
     free(status);
 
-    /* Process 0 tells other procs that container version 1 is acquired */
+    /* Leader process tells delegates that container version 1 is acquired */
     version = 1;
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
 
-    /* other processes just create a read context object; no need to
-       acquire it */
+    /* delegates just create a read context object; no need to acquire
+       it, since it has been acquired by the leader. */
     if(0 != my_rank) {
         rid2 = H5RCcreate(file_id, version);
         assert(rid2 > 0);
     }
+
+    /* issue some read operations using the read context acquired */
 
     ret = H5Mget_count_ff(map3, &count, rid2, event_q);
     assert(ret == 0);
@@ -235,7 +260,7 @@ int main(int argc, char **argv) {
     ret = H5Mexists_ff(map3, H5T_STD_I32LE, &key, &exists, rid2, event_q);
     assert(ret == 0);
 
-    /* create & start transaction 2 with num_peers = n */
+    /* create & start transaction 2 with Multiple Leader - No Delegate Model. */
     tid2 = H5TRcreate(file_id, rid2, (uint64_t)2);
     assert(tid2);
     trspl_id = H5Pcreate (H5P_TR_START);
@@ -246,6 +271,7 @@ int main(int argc, char **argv) {
     ret = H5Pclose(trspl_id);
     assert(0 == ret);
 
+    /* modify container contents using transaction started. */
     key = 1;
     ret = H5Mdelete_ff(map3, H5T_STD_I32LE, &key, tid2, event_q);
     assert(ret == 0);
@@ -278,10 +304,12 @@ int main(int argc, char **argv) {
     ret = H5TRclose(tid2);
     assert(0 == ret);
 
-    /* acquire container version 0 - EXACT */
+    /* acquire container version 2 - EXACT */
     version = 2;
     rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
     assert(2 == version);
+
+    /* Now read some data from the container */
 
     map1 = H5Mopen_ff(file_id, "MAP_1", H5P_DEFAULT, rid3, event_q);
     map2 = H5Mopen_ff(file_id, "G1/MAP_2", H5P_DEFAULT, rid3, event_q);

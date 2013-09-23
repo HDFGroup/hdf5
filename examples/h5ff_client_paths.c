@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
     event_q = H5EQcreate(fapl_id);
     assert(event_q);
 
-    /* create the file. This is asynchronous, but the file_id can be used. */
+    /* create the file. */
     file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     assert(file_id);
 
