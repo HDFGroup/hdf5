@@ -39,7 +39,7 @@ namespace H5 {
 //--------------------------------------------------------------------------
 ///\brief	Constant for default property.
 //--------------------------------------------------------------------------
-const PropList PropList::DEFAULT( H5P_DEFAULT );
+const PropList PropList::DEFAULT;
 
 //--------------------------------------------------------------------------
 // Function	Default constructor
@@ -74,6 +74,9 @@ PropList::PropList(const PropList& original) : IdComponent(original)
 //--------------------------------------------------------------------------
 PropList::PropList( const hid_t plist_id ) : IdComponent()
 {
+    if (plist_id == 0)
+	id = H5P_DEFAULT;
+
     H5I_type_t id_type = H5Iget_type(plist_id);
     switch (id_type) {
 	case H5I_GENPROP_CLS:

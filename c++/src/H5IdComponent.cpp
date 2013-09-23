@@ -144,6 +144,8 @@ int IdComponent::getCounter() const
 //--------------------------------------------------------------------------
 H5I_type_t IdComponent::getHDFObjType(const hid_t obj_id)
 {
+    if (obj_id == 0)
+	return H5I_BADID; // invalid
     H5I_type_t id_type = H5Iget_type(obj_id);
     if (id_type <= H5I_BADID || id_type >= H5I_NTYPES)
 	return H5I_BADID; // invalid
@@ -269,7 +271,7 @@ IdComponent::IdComponent() {}
 // Description:
 // 		This function is protected so that the user applications can
 // 		only have access to its code via allowable classes, namely,
-// 		H5File and H5Object subclasses.
+// 		Attribute and H5Location subclasses.
 // Programmer	Binh-Minh Ribler - Jul, 2004
 //--------------------------------------------------------------------------
 H5std_string IdComponent::p_get_file_name() const
@@ -314,6 +316,9 @@ H5std_string IdComponent::p_get_file_name() const
 //--------------------------------------------------------------------------
 bool IdComponent::p_valid_id(const hid_t obj_id)
 {
+    if (obj_id == 0)
+	return false;
+
     H5I_type_t id_type = H5Iget_type(obj_id);
     if (id_type <= H5I_BADID || id_type >= H5I_NTYPES)
 	return false;

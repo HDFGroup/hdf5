@@ -1058,7 +1058,7 @@ void test_dset()
 
 	// Cause the library to emit initial messages
 	Group grp = file.createGroup( "emit diagnostics", 0);
-	grp.setComment( ".", "Causes diagnostic messages to be emitted");
+	grp.setComment("Causes diagnostic messages to be emitted");
 
 	nerrors += test_create(file)<0 	?1:0;
 	nerrors += test_simple_io(file)<0	?1:0;

@@ -107,6 +107,30 @@ void issue_fail_msg(const char* where, int line, const char* file_name,
 }
 
 /*-------------------------------------------------------------------------
+ * Function:	issue_fail_msg
+ *
+ * Purpose:	Displays that a function has failed with its location.
+ *
+ * Return:	None
+ *
+ * Programmer:	Binh-Minh Ribler (copied and modified macro CHECK from C)
+ *		Monday, December 20, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+void issue_fail_msg(const char* where, int line, const char* file_name,
+		    const char* func_name, const char* message)
+{
+    //if (GetTestVerbosity()>=VERBO_HI)
+    {
+	cerr << endl;
+        cerr << ">>> FAILED in " << where << ": " << func_name << endl <<
+		"    at line " << line << " in " << file_name << endl <<
+		"    C library detail: " << message << endl << endl;
+    }
+}
+
+/*-------------------------------------------------------------------------
  * Function:	check_values
  *
  * Purpose:	Checks a read value against the written value.  If they are
