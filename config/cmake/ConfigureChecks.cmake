@@ -1071,7 +1071,11 @@ H5ConversionTests (H5_ULONG_TO_FLOAT_ACCURATE "Checking IF accurately converting
 # 64-bit machines, where the short program below tests if round-up is
 # correctly handled.
 #
-H5ConversionTests (H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE "Checking IF accurately converting unsigned long long to floating-point values")
+IF (CMAKE_SYSTEM MATCHES "solaris2.*")
+  H5ConversionTests (H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE "Checking IF accurately converting unsigned long long to floating-point values")
+ELSE (CMAKE_SYSTEM MATCHES "solaris2.*")
+  SET(H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE 1)
+ENDIF (CMAKE_SYSTEM MATCHES "solaris2.*")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
 # 'float' or 'double' to 'unsigned long long' values.
