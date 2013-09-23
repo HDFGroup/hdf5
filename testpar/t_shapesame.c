@@ -1517,7 +1517,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                      * need for another inner loop.
                      */
 
-                     #ifndef JK_TEST_MAN_ORI
+                    #ifndef JK_TEST_MAN_ORI
                     /* zero out this rank's slice of the on disk small data set */
                     ret = H5Dwrite(tv_ptr->small_dataset,
                                    H5T_NATIVE_UINT32,
@@ -2221,7 +2221,7 @@ contig_hs_dr_pio_test__run_test(const int test_num,
      * the memory and file selections.
      */
 
-#ifndef JK_TEST_SKIP_ISSUE1
+#ifndef JK_TEST_SKIP_ISSUE1 // OK now
 #if CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG 
     if ( MAINPROCESS ) {
         HDfprintf(stdout, "test %d: running contig_hs_dr_pio_test__m2d_l2s.\n", test_num);
@@ -4512,7 +4512,7 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num,
      * in memory small small cube
      */
 
-#ifndef JK_TEST_OK
+#ifndef JK_TEST_SKIP_OK
     ckrbrd_hs_dr_pio_test__d2m_l2s(tv_ptr);
 
 
@@ -4536,7 +4536,7 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num,
      * the memory and file selections.
      */
 
-#ifndef JK_TEST_ISSUE1
+#ifndef JK_TEST_ISSUE1 // OK now
     ckrbrd_hs_dr_pio_test__m2d_l2s(tv_ptr);
 #endif
 
@@ -4549,7 +4549,7 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num,
      * and file selections.
      */
 
-#ifndef JK_TEST_OK2
+#ifndef JK_TEST_SKIP_OK2
     ckrbrd_hs_dr_pio_test__m2d_s2l(tv_ptr);
 #endif
 

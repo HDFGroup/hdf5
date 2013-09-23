@@ -438,7 +438,7 @@ int main(int argc, char **argv)
     AddTest((mpi_size <3)? "-cchunk5":"cchunk5" ,
         coll_chunk5,NULL,
 	"linked chunk collective IO without optimization",PARATESTFILE);
- #ifdef JK_TODO_TESTP_SKIP
+ #ifdef JK_MCHUNK_OPT_REMOVE
     AddTest((mpi_size < 3)? "-cchunk6" : "cchunk6",
 	coll_chunk6,NULL,
 	"multi-chunk collective IO with direct request",PARATESTFILE);
@@ -454,7 +454,7 @@ int main(int argc, char **argv)
     AddTest((mpi_size < 3)? "-cchunk10" : "cchunk10",
 	coll_chunk10,NULL,
 	"multiple chunk collective IO transferring to independent IO",PARATESTFILE);
- #endif // JK_
+ #endif // JK_MCHUNK_OPT_REMOVE
 
 
 
@@ -504,12 +504,10 @@ int main(int argc, char **argv)
             "test mpi derived type management", 
             PARATESTFILE);
 
- #ifdef JK_TODO_TESTP_SKIP
     AddTest("actualio", actual_io_mode_tests, NULL,
             "test actual io mode proprerty",
             PARATESTFILE);
 
- #endif // JK_
     AddTest("nocolcause", no_collective_cause_tests, NULL,
             "test cause for broken collective io",
             PARATESTFILE);

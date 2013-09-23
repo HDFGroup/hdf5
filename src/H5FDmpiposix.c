@@ -1380,7 +1380,7 @@ H5FD_mpiposix_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closi
             if(-1 == HDlseek(file->fd, (HDoff_t)0, SEEK_SET))
                 HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
 #endif /* H5_VMS */
-            #ifndef JK_FCLOSE_PATCH  // from Quincey to make Fclose faster
+            #ifdef JK_FCLOSE_PATCH  // from Quincey to make Fclose faster
             // Suren modification to disable file_truncate
     	    // Original code: two lines commented out
                 // if(-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))

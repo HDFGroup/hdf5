@@ -20,10 +20,13 @@
 
 #include "testpar.h"
 
+#ifdef JK_MCHUNK_OPT_REMOVE
 enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
 	                    API_MULTI_HARD,API_LINK_TRUE,API_LINK_FALSE,
                             API_MULTI_COLL,API_MULTI_IND};
-
+#else // NEW                            
+enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD, API_IND_HARD};
+#endif
 #ifndef FALSE
 #define FALSE   0
 #endif
@@ -165,14 +168,16 @@ enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
 /* Definitions of the selection mode for the test_actual_io_function. */
 #define TEST_ACTUAL_IO_NO_COLLECTIVE                    0
 #define TEST_ACTUAL_IO_RESET                            1
+#ifdef JK_MCHUNK_OPT_REMOVE
 #define TEST_ACTUAL_IO_MULTI_CHUNK_IND                  2
 #define TEST_ACTUAL_IO_MULTI_CHUNK_COL                  3
 #define TEST_ACTUAL_IO_MULTI_CHUNK_MIX                  4
 #define TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE         5
 #define TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND           6
 #define TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL           7
-#define TEST_ACTUAL_IO_LINK_CHUNK                       8
-#define TEST_ACTUAL_IO_CONTIGUOUS                       9
+#endif // JK_MCHUNK_OPT_REMOVE
+#define TEST_ACTUAL_IO_LINK_CHUNK                       2
+#define TEST_ACTUAL_IO_CONTIGUOUS                       3
 
 /* Definitions of the selection mode for the no_collective_cause_tests function. */
 #define TEST_COLLECTIVE                                 0x001
@@ -290,6 +295,9 @@ void file_image_daisy_chain_test(void);
 void compress_readAll(void);
 #endif /* H5_HAVE_FILTER_DEFLATE */
 void test_dense_attr(void);
+#ifdef JK_PETER_FIX // REMOVE
+void test_zero_size_contiguous(void);
+#endif
 
 /* commonly used prototypes */
 hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type, hbool_t use_gpfs);

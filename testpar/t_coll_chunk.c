@@ -292,7 +292,7 @@ coll_chunk5(void)
  *
  * ------------------------------------------------------------------------
  */
-
+#ifdef JK_MCHUNK_OPT_REMOVE
 void
 coll_chunk6(void)
 {
@@ -300,6 +300,7 @@ coll_chunk6(void)
 
     coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_MULTI_HARD);
 }
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:	coll_chunk7
@@ -337,6 +338,7 @@ coll_chunk6(void)
  * ------------------------------------------------------------------------
  */
 
+#ifdef JK_MCHUNK_OPT_REMOVE
 void
 coll_chunk7(void)
 {
@@ -344,6 +346,7 @@ coll_chunk7(void)
 
     coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_LINK_TRUE);
 }
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:	coll_chunk8
@@ -381,6 +384,7 @@ coll_chunk7(void)
  * ------------------------------------------------------------------------
  */
 
+#ifdef JK_MCHUNK_OPT_REMOVE
 void
 coll_chunk8(void)
 {
@@ -388,6 +392,7 @@ coll_chunk8(void)
 
     coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_LINK_FALSE);
 }
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:	coll_chunk9
@@ -424,7 +429,7 @@ coll_chunk8(void)
  *
  * ------------------------------------------------------------------------
  */
-
+#ifdef JK_MCHUNK_OPT_REMOVE
 void
 coll_chunk9(void)
 {
@@ -432,6 +437,7 @@ coll_chunk9(void)
 
   coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_MULTI_COLL);
 }
+#endif 
 
 /*-------------------------------------------------------------------------
  * Function:	coll_chunk10
@@ -469,6 +475,7 @@ coll_chunk9(void)
  * ------------------------------------------------------------------------
  */
 
+#ifdef JK_MCHUNK_OPT_REMOVE
 void
 coll_chunk10(void)
 {
@@ -476,7 +483,7 @@ coll_chunk10(void)
 
   coll_chunktest(filename, 4, BYROW_SELECTINCHUNK, API_MULTI_IND);
 }
-
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:	coll_chunktest
@@ -605,6 +612,7 @@ coll_chunktest(const char* filename,
 	   status = H5Pset_dxpl_mpio_chunk_opt(xfer_plist,H5FD_MPIO_CHUNK_ONE_IO);
            VRFY((status>= 0),"collective chunk optimization succeeded");
 	break;
+#ifdef JK_MCHUNK_OPT_REMOVE
 	case API_MULTI_HARD:
 	   status = H5Pset_dxpl_mpio_chunk_opt(xfer_plist,H5FD_MPIO_CHUNK_MULTI_IO);
 	   VRFY((status>= 0),"collective chunk optimization succeeded ");
@@ -629,6 +637,7 @@ coll_chunktest(const char* filename,
 	   status = H5Pset_dxpl_mpio_chunk_opt_ratio(xfer_plist,100);
            VRFY((status>= 0),"collective chunk optimization set chunk ratio succeeded");
 	break;
+#endif
 	default:
 	;
    }
@@ -644,6 +653,7 @@ coll_chunktest(const char* filename,
 
             break;
 
+#ifdef JK_MCHUNK_OPT_REMOVE
             case API_MULTI_HARD:
                prop_value = H5D_XFER_COLL_CHUNK_DEF;
                status = H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, H5D_XFER_COLL_CHUNK_SIZE, &prop_value,
@@ -679,6 +689,7 @@ coll_chunktest(const char* filename,
                            NULL, NULL, NULL, NULL, NULL, NULL);
                VRFY((status >= 0),"testing property list inserted succeeded");
             break;
+#endif  // JK_MCHUNK_OPT_REMOVE
 
             default:
                 ;
@@ -699,6 +710,7 @@ coll_chunktest(const char* filename,
                VRFY((status >= 0),"testing property list get succeeded");
                VRFY((prop_value == 0),"API to set LINK COLLECTIVE IO directly succeeded");
             break;
+#ifdef JK_MCHUNK_OPT_REMOVE
             case API_MULTI_HARD:
                status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME,&prop_value);
                VRFY((status >= 0),"testing property list get succeeded");
@@ -724,6 +736,7 @@ coll_chunktest(const char* filename,
                VRFY((status >= 0),"testing property list get succeeded");
                VRFY((prop_value == 0),"API to set MULTI-CHUNK IO transferring to independent IO  succeeded");
             break;
+#endif  // JK_MCHUNK_OPT_REMOVE
             default:
             ;
        }

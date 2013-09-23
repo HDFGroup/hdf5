@@ -130,8 +130,12 @@ typedef enum H5D_mpio_actual_chunk_opt_mode_t {
      * I/O and contiguous collective I/O.
      */
     H5D_MPIO_NO_CHUNK_OPTIMIZATION = 0,
+   #ifdef JK_MCHUNK_OPT_REMOVE
     H5D_MPIO_LINK_CHUNK,
     H5D_MPIO_MULTI_CHUNK
+   #else
+    H5D_MPIO_LINK_CHUNK
+   #endif
 }  H5D_mpio_actual_chunk_opt_mode_t;
 
 typedef enum H5D_mpio_actual_io_mode_t {

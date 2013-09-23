@@ -475,7 +475,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
 
     /* (Account for the stored EOA being absolute offset -QAK) */
     if((eof + sblock->base_addr) < stored_eoa)
-        #ifndef JK_FCLOSE_PATCH  // from Quincey to make Fclose faster
+        #ifdef JK_FCLOSE_PATCH  // from Quincey to make Fclose faster
         if((shared->flags & H5F_ACC_RDWR) || getenv("HDF5_TRUNCATE")) {
             HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, NULL, "truncated file: eof = %llu, sblock->base_addr = %llu, stored_eoa = %llu", (unsigned long long)eof, (unsigned long long)sblock->base_addr, (unsigned long long)stored_eoa)
         }

@@ -53,12 +53,15 @@
 
 /* Macros to represent different IO options */
 #define H5D_ONE_LINK_CHUNK_IO          0
+#ifdef JK_MCHUNK_OPT_REMOVE // ---I
 #define H5D_MULTI_CHUNK_IO             1
 #define H5D_ONE_LINK_CHUNK_IO_MORE_OPT 2
 #define H5D_MULTI_CHUNK_IO_MORE_OPT    3
-#ifndef JK_WORK
-#define H5D_ALL_CHUNK_IND_IO           4
-#endif
+#endif // JK_MCHUNK_OPT_REMOVE ---O
+/* TODO: add this as part of HDFFV-8244 work for collectively 
+ * independent IO feature 
+ * #define H5D_ALL_PIECE_IND_IO           1 
+ */
 
 /***** Macros for One linked collective IO case. *****/
 /* The default value to do one linked collective IO for all chunks.
@@ -80,9 +83,11 @@
    collective IO is done for this chunk.
 */
 
+#ifdef JK_MCHUNK_OPT_REMOVE
 /* Macros to represent different IO modes(NONE, Independent or collective)for multiple chunk IO case */
 #define H5D_CHUNK_IO_MODE_IND         0
 #define H5D_CHUNK_IO_MODE_COL         1
+#endif 
 
 /* Macros to represent the regularity of the selection for multiple chunk IO case. */
 #define H5D_CHUNK_SELECT_REG          1
@@ -113,9 +118,11 @@ static herr_t H5D__chunk_collective_io(H5D_io_info_t *io_info,
 static herr_t H5D__piece_mdset_io(const hid_t file_id, const size_t count, 
     H5D_io_info_md_t *io_info_md);
 #endif
+#ifdef JK_MCHUNK_OPT_REMOVE
 static herr_t H5D__multi_chunk_collective_io(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, H5D_chunk_map_t *fm,
     H5P_genplist_t *dx_plist);
+#endif    
 static herr_t H5D__link_chunk_collective_io(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, H5D_chunk_map_t *fm, int sum_chunk,
     H5P_genplist_t *dx_plist);
@@ -139,8 +146,10 @@ static herr_t H5D__sort_chunk(H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
 static herr_t H5D__sort_piece(H5D_io_info_md_t *io_info_md, 
     H5D_chunk_addr_info_t chunk_addr_info_array[], int sum_chunk);
 #endif
+#ifdef JK_MCHUNK_OPT_REMOVE
 static herr_t H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_chunk_map_t *fm,
     H5P_genplist_t *dx_plist, uint8_t assign_io_mode[], haddr_t chunk_addr[]);
+#endif    
 static herr_t H5D__ioinfo_xfer_mode(H5D_io_info_t *io_info, H5P_genplist_t *dx_plist,
     H5FD_mpio_xfer_t xfer_mode);
 static herr_t H5D__ioinfo_coll_opt_mode(H5D_io_info_t *io_info, H5P_genplist_t *dx_plist,
@@ -1010,11 +1019,17 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
 {
     H5P_genplist_t *dx_plist;           /* Pointer to DXPL */
     H5FD_mpio_chunk_opt_t chunk_opt_mode;
+    #ifdef JK_MCHUNK_OPT_REMOVE
     int         io_option = H5D_MULTI_CHUNK_IO_MORE_OPT;
+    #else // NEW
+    int         io_option = H5D_ONE_LINK_CHUNK_IO;
+    #endif
     int         sum_chunk = -1;
+#ifdef JK_MCHUNK_OPT_REMOVE
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     htri_t      temp_not_link_io = FALSE;
 #endif
+#endif // JK_MCHUNK_OPT_REMOVE
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -1034,6 +1049,7 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     if(H5FD_MPIO_CHUNK_ONE_IO == chunk_opt_mode)
         io_option = H5D_ONE_LINK_CHUNK_IO;      /*no opt*/
     /* direct request to multi-chunk-io */
+#ifdef JK_MCHUNK_OPT_REMOVE
     else if(H5FD_MPIO_CHUNK_MULTI_IO == chunk_opt_mode)
         io_option = H5D_MULTI_CHUNK_IO;         
     /* via default path. branch by num threshold */
@@ -1057,6 +1073,7 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
             temp_not_link_io = TRUE;
 #endif
     } /* end else */
+#endif // JK_MCHUNK_OPT_REMOVE
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
 {
@@ -1077,6 +1094,7 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                 HGOTO_ERROR(H5E_IO, H5E_CANTSET, FAIL, "unable to set property value")
         } /* end if */
     } /* end if */
+#ifdef JK_MCHUNK_OPT_REMOVE
     check_prop = H5P_exist_plist(plist, H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME);
     if(check_prop > 0) {
         if(H5D_MULTI_CHUNK_IO == io_option) {
@@ -1101,14 +1119,20 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                 HGOTO_ERROR(H5E_IO, H5E_CANTSET, FAIL, "unable to set property value")
         } /* end if */
     } /* end if */
+#endif   // JK_MCHUNK_OPT_REMOVE 
 }
 #endif
 
     /* step 2:  Go ahead to do IO.*/
-    if(H5D_ONE_LINK_CHUNK_IO == io_option || H5D_ONE_LINK_CHUNK_IO_MORE_OPT == io_option) {
+    if(H5D_ONE_LINK_CHUNK_IO == io_option 
+       #ifdef JK_MCHUNK_OPT_REMOVE
+       || H5D_ONE_LINK_CHUNK_IO_MORE_OPT == io_option
+       #endif
+       ) {
         if(H5D__link_chunk_collective_io(io_info, type_info, fm, sum_chunk, dx_plist) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish linked chunk MPI-IO")
     } /* end if */
+    #ifdef JK_MCHUNK_OPT_REMOVE
     /* direct request to multi-chunk-io */
     else if(H5D_MULTI_CHUNK_IO == io_option) {
         if(H5D__multi_chunk_collective_io(io_info, type_info, fm, dx_plist) < 0)
@@ -1118,6 +1142,7 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         if(H5D__multi_chunk_collective_io(io_info, type_info, fm, dx_plist) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish optimized multiple chunk MPI-IO")
     } /* end else */
+    #endif // JK_MCHUNK_OPT_REMOVE
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1130,9 +1155,9 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
 {
     H5P_genplist_t *dx_plist;           /* Pointer to DXPL */
     H5FD_mpio_chunk_opt_t chunk_opt_mode;
-    #ifdef JK_ORI
+    #ifdef JK_MCHUNK_OPT_REMOVE
     int         io_option = H5D_MULTI_CHUNK_IO_MORE_OPT;
-    #else
+    #else // NEW
     int         io_option = H5D_ONE_LINK_CHUNK_IO;
     #endif
     int         sum_chunk = -1;
@@ -1157,8 +1182,13 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
     chunk_opt_mode = (H5FD_mpio_chunk_opt_t)H5P_peek_unsigned(dx_plist, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME);
     if(H5FD_MPIO_CHUNK_ONE_IO == chunk_opt_mode)
         io_option = H5D_ONE_LINK_CHUNK_IO;      /*no opt*/
+    /* TODO: add this as part of HDFFV-8244 work for collectively 
+     * independent IO feature */
+    /* else if (H5FD_MPIO_ALL_PIECE_IND_IO == chunk_opt_mode)
+       io_option = H5D_ALL_PIECE_IND_IO;
+    */
+    #ifdef JK_MCHUNK_OPT_REMOVE
     /* direct request to multi-chunk-io */
-    #ifdef JK_TODO_LATER_ORI_REMOVE // 
     else if(H5FD_MPIO_CHUNK_MULTI_IO == chunk_opt_mode)
         io_option = H5D_MULTI_CHUNK_IO;         
     /* via default path. branch by num threshold */
@@ -1182,11 +1212,7 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
             temp_not_link_io = TRUE;
 #endif
     } /* end else */
-    #else
-    // JK_TODO add this as part of HDFFV-8244 work
-    // else if (H5FD_MPIO_ALL_CHUNK_IND_IO == chunk_opt_mode)
-    //   io_option = H5D_ALL_CHUNK_IND_IO;
-    #endif // JK_TODO_LATER_ORI_REMOVE
+    #endif // JK_MCHUNK_OPT_REMOVE
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     htri_t            check_prop;
@@ -1201,6 +1227,7 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
                 HGOTO_ERROR(H5E_IO, H5E_CANTSET, FAIL, "unable to set property value")
         } /* end if */
     } /* end if */
+#ifdef JK_MCHUNK_OPT_REMOVE
     check_prop = H5Pexist(io_info_md->dxpl_id, H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME);
     if(check_prop > 0) {
         if(H5D_MULTI_CHUNK_IO == io_option) {
@@ -1225,10 +1252,15 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
                 HGOTO_ERROR(H5E_IO, H5E_CANTSET, FAIL, "unable to set property value")
         } /* end if */
     } /* end if */
+#endif   // JK_MCHUNK_OPT_REMOVE 
 #endif
 
     /* step 2:  Go ahead to do IO.*/
-    if(H5D_ONE_LINK_CHUNK_IO == io_option || H5D_ONE_LINK_CHUNK_IO_MORE_OPT == io_option) {
+    if(H5D_ONE_LINK_CHUNK_IO == io_option 
+       #ifdef JK_MCHUNK_OPT_REMOVE
+       || H5D_ONE_LINK_CHUNK_IO_MORE_OPT == io_option
+       #endif
+      ) {
        #ifdef JK_ORI
         if(H5D__link_chunk_collective_io(io_info, type_info, fm, sum_chunk, dx_plist) < 0)
        #else
@@ -1236,7 +1268,7 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
        #endif
             HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish linked chunk MPI-IO")
     } /* end if */
- #ifdef JK_SKIP1 //------------------------I
+ #ifdef JK_MCHUNK_OPT_REMOVE
     /* direct request to multi-chunk-io */
     else if(H5D_MULTI_CHUNK_IO == io_option) {
         if(H5D__multi_chunk_collective_io(io_info, type_info, fm, dx_plist) < 0)
@@ -1247,7 +1279,7 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
             HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish optimized multiple chunk MPI-IO")
     } /* end else */
 
-  #endif // JK_SKIP
+  #endif // JK_MCHUNK_OPT_REMOVE
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__piece_mdset_io */
@@ -1693,8 +1725,14 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
         #ifndef JK_ACTUALIO_MDSET
         if (io_info_md->dsets_info[i].layout->type == H5D_CHUNKED)
             actual_io_mode |= H5D_MPIO_CHUNK_COLLECTIVE;
-        else if (io_info_md->dsets_info[i].layout->type == H5D_CONTIGUOUS)
+        else if (io_info_md->dsets_info[i].layout->type == H5D_CONTIGUOUS) {
             actual_io_mode |= H5D_MPIO_CONTIGUOUS_COLLECTIVE;
+            #ifndef JK_TODO_MCHUNK_OPT
+            /* if only single-dset */
+            if (1 == count)
+                actual_chunk_opt_mode = H5D_MPIO_NO_CHUNK_OPTIMIZATION; 
+            #endif
+        }
         else
             HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
         #endif
@@ -2125,6 +2163,7 @@ if(H5DEBUG(D))
  *
  *-------------------------------------------------------------------------
  */
+#ifdef JK_MCHUNK_OPT_REMOVE
 static herr_t
 H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     H5D_chunk_map_t *fm, H5P_genplist_t *dx_plist)
@@ -2314,6 +2353,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__multi_chunk_collective_io */
+#endif // JK_MCHUNK_OPT_REMOVE
 
 
 
@@ -2821,6 +2861,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#ifdef JK_MCHUNK_OPT_REMOVE
 static herr_t
 H5D__obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
     H5P_genplist_t *dx_plist, uint8_t assign_io_mode[], haddr_t chunk_addr[])
@@ -2990,4 +3031,5 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__obtain_mpio_mode() */
 #endif  /* H5_HAVE_PARALLEL */
+#endif // JK_MCHUNK_OPT_REMOVE
 

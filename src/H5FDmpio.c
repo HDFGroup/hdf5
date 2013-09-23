@@ -632,6 +632,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* TODO: This can be removed as we decided to remove multi-chunk-opt feature.
+ * For now, leave it here to make 'enc_dec_plist_with_endianess' test pass. 
+ * This can be removed after HDFFV-8281 done */
 herr_t
 H5Pset_dxpl_mpio_chunk_opt_num(hid_t dxpl_id, unsigned num_chunk_per_proc)
 {
@@ -677,6 +680,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* TODO: This can be removed as we decided to remove multi-chunk-opt feature.
+ * For now, leave it here to make 'enc_dec_plist_with_endianess' test pass. 
+ * This can be removed after HDFFV-8281 done */
 herr_t
 H5Pset_dxpl_mpio_chunk_opt_ratio(hid_t dxpl_id, unsigned percent_num_proc_per_chunk)
 {
@@ -1999,7 +2005,7 @@ H5FD_mpio_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset")
 
         /* Extend the file's size */
-        #ifndef JK_FCLOSE_PATCH  // from Quincey to make Fclose faster
+        #ifdef JK_FCLOSE_PATCH  // from Quincey to make Fclose faster
         // Suren's modifications to disable truncate
     	// Original code: commented out the following 2 lines
         // if(MPI_SUCCESS != (mpi_code = MPI_File_set_size(file->f, mpi_off)))
