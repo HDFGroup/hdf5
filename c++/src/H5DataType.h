@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5DataType_H
-#define _H5DataType_H
+#ifndef __H5DataType_H
+#define __H5DataType_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -129,4 +129,4 @@ class H5_DLLCPP DataType : public H5Object {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5DataType_H

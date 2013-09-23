@@ -19,8 +19,8 @@
 // Attribute and DataSet.  It also inherits from H5Object and passes down
 // the services that H5Object provides.
 
-#ifndef _AbstractDs_H
-#define _AbstractDs_H
+#ifndef __AbstractDs_H
+#define __AbstractDs_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -87,4 +87,4 @@ class H5_DLLCPP AbstractDs {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif // _AbstractDs_H
+#endif // __AbstractDs_H

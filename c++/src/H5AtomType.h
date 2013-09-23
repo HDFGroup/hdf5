@@ -19,8 +19,8 @@
 // subclasses.  It also inherits from DataType and passes down the
 // services that are common to all the datatypes.
 
-#ifndef _H5AtomType_H
-#define _H5AtomType_H
+#ifndef __H5AtomType_H
+#define __H5AtomType_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -80,4 +80,4 @@ class H5_DLLCPP AtomType : public DataType {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5AtomType_H

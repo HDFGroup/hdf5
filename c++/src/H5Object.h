@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5Object_H
-#define _H5Object_H
+#ifndef __H5Object_H
+#define __H5Object_H
 
 #include "H5Location.h"
 #include "H5Classes.h"		// constains forward class declarations
@@ -61,4 +61,4 @@ class H5_DLLCPP H5Object : public H5Location {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5Object_H

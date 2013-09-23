@@ -19,8 +19,8 @@
 // closed by H5Tclose.  They are treated as constants.
 /////////////////////////////////////////////////////////////////////
 
-#ifndef _H5PredType_H
-#define _H5PredType_H
+#ifndef __H5PredType_H
+#define __H5PredType_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -258,4 +258,4 @@ class H5_DLLCPP PredType : public AtomType {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5PredType_H

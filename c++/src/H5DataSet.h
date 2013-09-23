@@ -16,8 +16,8 @@
 
 // Class DataSet inherits from AbstractDs and provides accesses to a dataset.
 
-#ifndef _H5DataSet_H
-#define _H5DataSet_H
+#ifndef __H5DataSet_H
+#define __H5DataSet_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -120,4 +120,4 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5DataSet_H

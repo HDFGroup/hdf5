@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5File_H
-#define _H5File_H
+#ifndef __H5File_H
+#define __H5File_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -112,4 +112,4 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5File_H

@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5Location_H
-#define _H5Location_H
+#ifndef __H5Location_H
+#define __H5Location_H
 
 #include "H5Classes.h"		// constains forward class declarations
 
@@ -164,4 +164,4 @@ class H5_DLLCPP H5Location : public IdComponent {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5Location_H

@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5PropList_H
-#define _H5PropList_H
+#ifndef __H5PropList_H
+#define __H5PropList_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -121,4 +121,4 @@ class H5_DLLCPP PropList : public IdComponent {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif  // _H5PropList_H
+#endif  // __H5PropList_H

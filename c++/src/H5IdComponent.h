@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _IdComponent_H
-#define _IdComponent_H
+#ifndef __IdComponent_H
+#define __IdComponent_H
 
 // IdComponent represents an HDF5 object that has an identifier.
 
@@ -98,4 +98,4 @@ class H5_DLLCPP IdComponent {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __IdComponent_H

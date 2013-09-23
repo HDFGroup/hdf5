@@ -18,8 +18,8 @@
 // common services that are provided by H5File and Group.  The file or
 // group in the context of this class is referred to as 'location'.
 
-#ifndef _CommonFG_H
-#define _CommonFG_H
+#ifndef __CommonFG_H
+#define __CommonFG_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -156,5 +156,5 @@ class H5_DLLCPP CommonFG {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __CommonFG_H
 
