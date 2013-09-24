@@ -214,9 +214,11 @@ int main(int argc, char **argv) {
 
     /******************************** END Transaction 2 ****************************************/
 
-    /* release container version 1. This is async. */
-    ret = H5RCrelease(rid2, event_q);
-    assert(0 == ret);
+    if(my_rank == 0) {
+        /* release container version 1. This is async. */
+        ret = H5RCrelease(rid2, event_q);
+        assert(0 == ret);
+    }
 
     assert(H5Gclose_ff(gid1, event_q) == 0);
     assert(H5Gclose_ff(gid2, event_q) == 0);

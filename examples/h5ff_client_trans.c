@@ -90,8 +90,9 @@ int main(int argc, char **argv) {
         assert(H5Gclose_ff(gid1, event_q) == 0);
         assert(H5Gclose_ff(gid2, event_q) == 0);
 
-        /* finish transaction 1. 
-           This is asynchronous, but has a dependency on H5TRstart() of tid1. */
+        /* finish transaction 1.  This is asynchronous, but has a
+           dependency on H5TRstart() of tid1, and the operations
+           pending on it. */
         ret = H5TRfinish(tid1, H5P_DEFAULT, NULL, event_q);
         assert(0 == ret);
 

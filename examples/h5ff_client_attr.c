@@ -257,9 +257,11 @@ int main(int argc, char **argv) {
     ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, event_q);
     assert(0 == ret);
 
-    /* release container version 1. This is async. */
-    ret = H5RCrelease(rid2, event_q);
-    assert(0 == ret);
+    if(my_rank == 0) {
+        /* release container version 1. This is async. */
+        ret = H5RCrelease(rid2, event_q);
+        assert(0 == ret);
+    }
 
     /* close objects */
     ret = H5Aclose_ff(aid3, event_q);
