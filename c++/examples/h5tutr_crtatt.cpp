@@ -42,32 +42,25 @@ int main (void)
    // Try block to detect exceptions raised by any of the calls inside it
    try
    {
-	
 	// Turn off the auto-printing when failure occurs so that we can
 	// handle the errors appropriately
-	 
 	Exception::dontPrint();
 
 	// Open an existing file and dataset.
-
 	H5File file( FILE_NAME, H5F_ACC_RDWR );
 	DataSet dataset = file.openDataSet( DATASET_NAME );
 
 	// Create the data space for the attribute.
-
 	DataSpace attr_dataspace = DataSpace (1, dims );
 
 	// Create a dataset attribute. 
-
 	Attribute attribute = dataset.createAttribute( ATTR_NAME, PredType::STD_I32BE, 
 	                                          attr_dataspace);
      
 	// Write the attribute data. 
-
 	attribute.write( PredType::NATIVE_INT, attr_data);
 
    }  // end of try block
-
 
    // catch failure caused by the H5File operations
    catch( DataSpaceIException error )
@@ -76,14 +69,12 @@ int main (void)
 	return -1;
    }
 
-   
    // catch failure caused by the H5File operations
    catch( AttributeIException error )
    {
 	error.printError();
 	return -1;
    }
-
 
    // catch failure caused by the H5File operations
    catch( FileIException error )

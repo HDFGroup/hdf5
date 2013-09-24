@@ -47,20 +47,16 @@ int main (void)
     // Try block to detect exceptions raised by any of the calls inside it
     try
     {
-	
 	// Turn off the auto-printing when failure occurs so that we can
 	// handle the errors appropriately
-	 
 	Exception::dontPrint();
 
 	// Open an existing file and dataset.
-
 	H5File file( FILE_NAME, H5F_ACC_RDWR );
 	DataSet dataset = file.openDataSet( DATASET_NAME );
 
 	// Write the data to the dataset using default memory space, file
 	// space, and transfer properties.
-
 	dataset.write( data, PredType::NATIVE_INT );
 
     }  // end of try block
@@ -81,4 +77,3 @@ int main (void)
 
     return 0;  // successfully terminated
 }
-

@@ -330,7 +330,9 @@ FileIException::FileIException():Exception(){}
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-FileIException::FileIException(const H5std_string& func_name, const H5std_string& message) : Exception(func_name, message) {}
+FileIException::FileIException(const H5std_string& func_name, const H5std_string& message) : Exception(func_name, message) {
+ fprintf(stderr, "FileIException::FileIException is thrown, <%s> <%s>\n", func_name.c_str(), message.c_str());
+ }
 //--------------------------------------------------------------------------
 // Function:	FileIException destructor
 ///\brief	Noop destructor.

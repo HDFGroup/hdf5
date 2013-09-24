@@ -36,21 +36,19 @@ const H5std_string	DATASETNAME("ExtendibleArray");
 
 int main (void)
 {
-
-     hsize_t 	dims[2] = {3,3};	        // dataset dimensions at creation
-     hsize_t 	maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; 
-     hsize_t     chunk_dims[2] ={2, 5};
-
+     hsize_t dims[2] = {3,3};	        // dataset dimensions at creation
+     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; 
+     hsize_t chunk_dims[2] ={2, 5};
      int	   data[3][3] = { {1, 1, 1},    // data to write 
 	                          {1, 1, 1},
 	                          {1, 1, 1} };
 
      // Variables used in extending and writing to the extended portion of dataset 
 
-     hsize_t	size[2];
-     hsize_t	offset[2];
-     hsize_t	dimsext[2] = {7, 3};         // extend dimensions 
-     int	    dataext[7][3] = { {2, 3, 4},
+     hsize_t size[2];
+     hsize_t offset[2];
+     hsize_t dimsext[2] = {7, 3};         // extend dimensions 
+     int     dataext[7][3] = { {2, 3, 4},
 	                              {2, 3, 4},
 	                              {2, 3, 4},
 	                              {2, 3, 4},
@@ -118,13 +116,15 @@ int main (void)
 	int        i,j, rank, rank_chunk;
 	hsize_t    chunk_dimsr[2], dimsr[2];
 
+	// Open the file and dataset.
 	file.openFile(FILE_NAME, H5F_ACC_RDONLY);
-
 	dataset = new DataSet(file.openDataSet( DATASETNAME)); 
-      
-	filespace = new DataSpace(dataset->getSpace());
 
+	// Get the dataset's dataspace and creation property list.
+	filespace = new DataSpace(dataset->getSpace());
 	prop = dataset->getCreatePlist();
+
+	// Get information to obtain memory dataspace.
 	rank = filespace->getSimpleExtentNdims();
 	herr_t status_n = filespace->getSimpleExtentDims(dimsr);
 

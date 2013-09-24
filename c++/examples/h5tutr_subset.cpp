@@ -48,10 +48,8 @@ int main (void)
     // Try block to detect exceptions raised by any of the calls inside it
     try
     {
-	
 	// Turn off the auto-printing when failure occurs so that we can
 	// handle the errors appropriately
-	
 	Exception::dontPrint();
 
 	// ---------------------------------------------------

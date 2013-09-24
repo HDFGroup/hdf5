@@ -35,32 +35,23 @@ const int	 RANK = 2;
 
 int main (void)
 {
-
     // Try block to detect exceptions raised by any of the calls inside it
     try
     {
-	
 	// Turn off the auto-printing when failure occurs so that we can
 	// handle the errors appropriately
-	
 	Exception::dontPrint();
 
 	// Create a new file using the default property lists. 
-      
 	H5File file(FILE_NAME, H5F_ACC_TRUNC);
 
 	// Create the data space for the dataset.
-	 
 	hsize_t dims[2];               // dataset dimensions
 	dims[0] = NX;
 	dims[1] = NY;
 	DataSpace dataspace(RANK, dims);
 
-	// Define the datatype to be used
-	//IntType datatype(PredType::STD_I32BE);
-
 	// Create the dataset.      
-  
 	DataSet dataset = file.createDataSet(DATASET_NAME, PredType::STD_I32BE, dataspace);
 
     }  // end of try block
