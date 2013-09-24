@@ -690,6 +690,9 @@ LL_PATH
 USE_FILTER_SZIP
 USE_FILTER_DEFLATE
 AM_MAKEFLAGS
+LT_ADD_LIBHDF5_DEPENDENCY
+LT_ADD_LIBHDF5_DEPENDENCY_FALSE
+LT_ADD_LIBHDF5_DEPENDENCY_TRUE
 LT_STATIC_EXEC
 USE_PLUGINS_CONDITIONAL_FALSE
 USE_PLUGINS_CONDITIONAL_TRUE
@@ -22096,6 +22099,20 @@ $as_echo "error" >&6; }
     as_fn_error $? "\'$enableval\' is not a valid rpath type" "$LINENO" 5
     ;;
 esac
+## ----------------------------------------------------------------------
+## When sharedlib-rpath is disabled, setting runpath_var to "" above, don't
+## add libhdf5 as a dependency for the other hdf5 libs, either.  This keeps
+## the rpath to libhdf5 out of the lib files as well as the executables.
+ if test "X$runpath_var" != X; then
+  LT_ADD_LIBHDF5_DEPENDENCY_TRUE=
+  LT_ADD_LIBHDF5_DEPENDENCY_FALSE='#'
+else
+  LT_ADD_LIBHDF5_DEPENDENCY_TRUE='#'
+  LT_ADD_LIBHDF5_DEPENDENCY_FALSE=
+fi
+
+
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking make" >&5
 $as_echo_n "checking make... " >&6; }
@@ -33361,6 +33378,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_PLUGINS_CONDITIONAL_TRUE}" && test -z "${USE_PLUGINS_CONDITIONAL_FALSE}"; then
   as_fn_error $? "conditional \"USE_PLUGINS_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${LT_ADD_LIBHDF5_DEPENDENCY_TRUE}" && test -z "${LT_ADD_LIBHDF5_DEPENDENCY_FALSE}"; then
+  as_fn_error $? "conditional \"LT_ADD_LIBHDF5_DEPENDENCY\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

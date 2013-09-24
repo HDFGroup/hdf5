@@ -116,7 +116,8 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libhdf5hl_fortran_la_DEPENDENCIES = $(LIBH5_HL) $(LIBH5F)
+@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@libhdf5hl_fortran_la_DEPENDENCIES =  \
+@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@	$(LIBH5_HL) $(LIBH5F)
 am_libhdf5hl_fortran_la_OBJECTS = H5DSfc.lo H5LTfc.lo H5IMfc.lo \
 	H5IMcc.lo H5TBfc.lo H5DSff.lo H5LTff.lo H5IMff.lo H5TBff.lo
 libhdf5hl_fortran_la_OBJECTS = $(am_libhdf5hl_fortran_la_OBJECTS)
@@ -304,6 +305,7 @@ LIPO = @LIPO@
 LL_PATH = @LL_PATH@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+LT_ADD_LIBHDF5_DEPENDENCY = @LT_ADD_LIBHDF5_DEPENDENCY@
 LT_STATIC_EXEC = @LT_STATIC_EXEC@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
@@ -496,8 +498,9 @@ libhdf5hl_fortran_la_SOURCES = H5DSfc.c H5LTfc.c  H5IMfc.c H5IMcc.c H5TBfc.c \
 	H5DSff.f90 H5LTff.f90 H5IMff.f90 H5TBff.f90
 
 
-# HDF5 HL Fortran library depends on HDF5 HL Library and HDF5 Fortran Library.
-libhdf5hl_fortran_la_LIBADD = $(LIBH5_HL) $(LIBH5F)
+# HDF5 HL Fortran library depends on HDF5 Library.  However, only add the dependency
+# if --enable-sharedlib-rpath is yes.
+@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@libhdf5hl_fortran_la_LIBADD = $(LIBH5_HL) $(LIBH5F)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

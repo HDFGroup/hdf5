@@ -113,7 +113,8 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libhdf5_hl_la_DEPENDENCIES = $(LIBHDF5)
+@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@libhdf5_hl_la_DEPENDENCIES =  \
+@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@	$(LIBHDF5)
 am_libhdf5_hl_la_OBJECTS = H5DO.lo H5DS.lo H5IM.lo H5LT.lo \
 	H5LTanalyze.lo H5LTparse.lo H5PT.lo H5TB.lo
 libhdf5_hl_la_OBJECTS = $(am_libhdf5_hl_la_OBJECTS)
@@ -287,6 +288,7 @@ LIPO = @LIPO@
 LL_PATH = @LL_PATH@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+LT_ADD_LIBHDF5_DEPENDENCY = @LT_ADD_LIBHDF5_DEPENDENCY@
 LT_STATIC_EXEC = @LT_STATIC_EXEC@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
@@ -469,8 +471,9 @@ libhdf5_hl_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$
 # List sources to include in the HDF5 HL Library.
 libhdf5_hl_la_SOURCES = H5DO.c H5DS.c H5IM.c H5LT.c H5LTanalyze.c H5LTparse.c H5PT.c H5TB.c
 
-# HDF5 HL library depends on HDF5 Library.
-libhdf5_hl_la_LIBADD = $(LIBHDF5)
+# HDF5 HL library depends on HDF5 Library.  However, only add the dependency
+# if --enable-sharedlib-rpath is yes.
+@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@libhdf5_hl_la_LIBADD = $(LIBHDF5)
 
 # Public header files (to be installed)
 include_HEADERS = hdf5_hl.h H5DOpublic.h H5IMpublic.h H5LTpublic.h H5TBpublic.h H5DSpublic.h H5PTpublic.h

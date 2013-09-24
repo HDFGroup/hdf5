@@ -120,7 +120,8 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libhdf5_fortran_la_DEPENDENCIES = $(LIBHDF5)
+@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@libhdf5_fortran_la_DEPENDENCIES =  \
+@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@	$(LIBHDF5)
 am__libhdf5_fortran_la_SOURCES_DIST = H5f90global.f90 \
 	H5fortran_types.f90 H5_ff$(F_STATUS).f90 H5_ff.f90 H5Aff.f90 \
 	H5Dff.f90 H5Eff.f90 H5Fff.f90 H5Gff.f90 H5Iff.f90 H5Lff.f90 \
@@ -348,6 +349,7 @@ LIPO = @LIPO@
 LL_PATH = @LL_PATH@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+LT_ADD_LIBHDF5_DEPENDENCY = @LT_ADD_LIBHDF5_DEPENDENCY@
 LT_STATIC_EXEC = @LT_STATIC_EXEC@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
@@ -561,8 +563,9 @@ libhdf5_fortran_la_SOURCES = H5f90global.f90 \
 	  H5Off$(F_STATUS).f90 H5Pff$(F_STATUS).f90 H5Rff$(F_STATUS).f90 H5Tff$(F_STATUS).f90 $(PARALLEL_COND_SRC)
 
 
-# HDF5 Fortran library depends on HDF5 Library.
-libhdf5_fortran_la_LIBADD = $(LIBHDF5)
+# HDF5 Fortran library depends on HDF5 Library.  However, only add the dependency
+# if --enable-sharedlib-rpath is yes.
+@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@libhdf5_fortran_la_LIBADD = $(LIBHDF5)
 
 # h5fc is generated during configure.
 # Remove it only when distclean.
