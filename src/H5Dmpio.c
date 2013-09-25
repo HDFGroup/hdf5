@@ -53,7 +53,7 @@
 
 /* Macros to represent different IO options */
 #define H5D_ONE_LINK_CHUNK_IO          0
-#ifdef JK_MCHUNK_OPT_REMOVE // ---I
+#if 0 // JK_MCHUNK_OPT_REMOVE // ---I
 #define H5D_MULTI_CHUNK_IO             1
 #define H5D_ONE_LINK_CHUNK_IO_MORE_OPT 2
 #define H5D_MULTI_CHUNK_IO_MORE_OPT    3
@@ -83,7 +83,7 @@
    collective IO is done for this chunk.
 */
 
-#ifdef JK_MCHUNK_OPT_REMOVE
+#if 0 // JK_MCHUNK_OPT_REMOVE
 /* Macros to represent different IO modes(NONE, Independent or collective)for multiple chunk IO case */
 #define H5D_CHUNK_IO_MODE_IND         0
 #define H5D_CHUNK_IO_MODE_COL         1
@@ -118,7 +118,7 @@ static herr_t H5D__chunk_collective_io(H5D_io_info_t *io_info,
 static herr_t H5D__piece_mdset_io(const hid_t file_id, const size_t count, 
     H5D_io_info_md_t *io_info_md);
 #endif
-#ifdef JK_MCHUNK_OPT_REMOVE
+#if 0 // JK_MCHUNK_OPT_REMOVE
 static herr_t H5D__multi_chunk_collective_io(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, H5D_chunk_map_t *fm,
     H5P_genplist_t *dx_plist);
@@ -142,11 +142,11 @@ static herr_t H5D__final_collective_io_mdset(H5D_io_info_md_t *io_info_md,
 #endif
 static herr_t H5D__sort_chunk(H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
     H5D_chunk_addr_info_t chunk_addr_info_array[], int many_chunk_opt);
-#ifdef JK_WORK_TEST
+#if 0 // JK_WORK_REMOVE
 static herr_t H5D__sort_piece(H5D_io_info_md_t *io_info_md, 
     H5D_chunk_addr_info_t chunk_addr_info_array[], int sum_chunk);
 #endif
-#ifdef JK_MCHUNK_OPT_REMOVE
+#if 0 // JK_MCHUNK_OPT_REMOVE
 static herr_t H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_chunk_map_t *fm,
     H5P_genplist_t *dx_plist, uint8_t assign_io_mode[], haddr_t chunk_addr[]);
 #endif    
@@ -415,7 +415,7 @@ done:
 } /* H5D__mpio_opt_possible() */
 #endif
 
-#ifdef JK_WORK_OK8_OLD_REMOVE
+#if 0 // JK_WORK_OK8_OLD_REMOVE
 htri_t
 H5D__mpio_opt_possible_mdset_OK8_OLD(const H5D_io_info_md_t *io_info_md, 
     const H5S_t *file_space, const H5S_t *mem_space, 
@@ -880,7 +880,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_collective_write() */
 
-#ifdef JK_TODO_NOCOLLCAUSE_REMOVE
+#if 0 // JK_TODO_NOCOLLCAUSE_REMOVE
 // Seperate layout.ops is not necessary yet.
 /*-------------------------------------------------------------------------
  * Function:    H5D__contig_collective_read_mdsets
@@ -974,7 +974,7 @@ H5D__mdset_collective_write1(H5D_io_info_md_t *io_info_md, const H5D_type_info_t
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_collective_write_mdsets() */
-#endif
+#endif // JK_TODO_NOCOLLCAUSE_REMOVE
 
 
 /*-------------------------------------------------------------------------
@@ -1019,13 +1019,13 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
 {
     H5P_genplist_t *dx_plist;           /* Pointer to DXPL */
     H5FD_mpio_chunk_opt_t chunk_opt_mode;
-    #ifdef JK_MCHUNK_OPT_REMOVE
+    #if 0 // JK_MCHUNK_OPT_REMOVE
     int         io_option = H5D_MULTI_CHUNK_IO_MORE_OPT;
     #else // NEW
     int         io_option = H5D_ONE_LINK_CHUNK_IO;
     #endif
     int         sum_chunk = -1;
-#ifdef JK_MCHUNK_OPT_REMOVE
+#if 0 // JK_MCHUNK_OPT_REMOVE
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     htri_t      temp_not_link_io = FALSE;
 #endif
@@ -1049,7 +1049,7 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     if(H5FD_MPIO_CHUNK_ONE_IO == chunk_opt_mode)
         io_option = H5D_ONE_LINK_CHUNK_IO;      /*no opt*/
     /* direct request to multi-chunk-io */
-#ifdef JK_MCHUNK_OPT_REMOVE
+#if 0 // JK_MCHUNK_OPT_REMOVE
     else if(H5FD_MPIO_CHUNK_MULTI_IO == chunk_opt_mode)
         io_option = H5D_MULTI_CHUNK_IO;         
     /* via default path. branch by num threshold */
@@ -1094,7 +1094,7 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                 HGOTO_ERROR(H5E_IO, H5E_CANTSET, FAIL, "unable to set property value")
         } /* end if */
     } /* end if */
-#ifdef JK_MCHUNK_OPT_REMOVE
+#if 0 // JK_MCHUNK_OPT_REMOVE
     check_prop = H5P_exist_plist(plist, H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME);
     if(check_prop > 0) {
         if(H5D_MULTI_CHUNK_IO == io_option) {
@@ -1125,14 +1125,14 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
 
     /* step 2:  Go ahead to do IO.*/
     if(H5D_ONE_LINK_CHUNK_IO == io_option 
-       #ifdef JK_MCHUNK_OPT_REMOVE
+       #if 0 // JK_MCHUNK_OPT_REMOVE
        || H5D_ONE_LINK_CHUNK_IO_MORE_OPT == io_option
        #endif
        ) {
         if(H5D__link_chunk_collective_io(io_info, type_info, fm, sum_chunk, dx_plist) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish linked chunk MPI-IO")
     } /* end if */
-    #ifdef JK_MCHUNK_OPT_REMOVE
+    #if 0 // JK_MCHUNK_OPT_REMOVE
     /* direct request to multi-chunk-io */
     else if(H5D_MULTI_CHUNK_IO == io_option) {
         if(H5D__multi_chunk_collective_io(io_info, type_info, fm, dx_plist) < 0)
@@ -1155,7 +1155,7 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
 {
     H5P_genplist_t *dx_plist;           /* Pointer to DXPL */
     H5FD_mpio_chunk_opt_t chunk_opt_mode;
-    #ifdef JK_MCHUNK_OPT_REMOVE
+    #if 0 // JK_MCHUNK_OPT_REMOVE
     int         io_option = H5D_MULTI_CHUNK_IO_MORE_OPT;
     #else // NEW
     int         io_option = H5D_ONE_LINK_CHUNK_IO;
@@ -1187,7 +1187,7 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
     /* else if (H5FD_MPIO_ALL_PIECE_IND_IO == chunk_opt_mode)
        io_option = H5D_ALL_PIECE_IND_IO;
     */
-    #ifdef JK_MCHUNK_OPT_REMOVE
+    #if 0 // JK_MCHUNK_OPT_REMOVE
     /* direct request to multi-chunk-io */
     else if(H5FD_MPIO_CHUNK_MULTI_IO == chunk_opt_mode)
         io_option = H5D_MULTI_CHUNK_IO;         
@@ -1227,7 +1227,7 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
                 HGOTO_ERROR(H5E_IO, H5E_CANTSET, FAIL, "unable to set property value")
         } /* end if */
     } /* end if */
-#ifdef JK_MCHUNK_OPT_REMOVE
+#if 0 // JK_MCHUNK_OPT_REMOVE
     check_prop = H5Pexist(io_info_md->dxpl_id, H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME);
     if(check_prop > 0) {
         if(H5D_MULTI_CHUNK_IO == io_option) {
@@ -1257,7 +1257,7 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
 
     /* step 2:  Go ahead to do IO.*/
     if(H5D_ONE_LINK_CHUNK_IO == io_option 
-       #ifdef JK_MCHUNK_OPT_REMOVE
+       #if 0 // JK_MCHUNK_OPT_REMOVE
        || H5D_ONE_LINK_CHUNK_IO_MORE_OPT == io_option
        #endif
       ) {
@@ -1268,7 +1268,7 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
        #endif
             HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish linked chunk MPI-IO")
     } /* end if */
- #ifdef JK_MCHUNK_OPT_REMOVE
+ #if 0 // JK_MCHUNK_OPT_REMOVE
     /* direct request to multi-chunk-io */
     else if(H5D_MULTI_CHUNK_IO == io_option) {
         if(H5D__multi_chunk_collective_io(io_info, type_info, fm, dx_plist) < 0)
@@ -1315,7 +1315,6 @@ H5D__chunk_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_i
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_collective_read() */
-
 
 
 /*-------------------------------------------------------------------------
@@ -1691,10 +1690,10 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
     #ifndef JK_WORK_NEW
     size_t              sum_chunk_allproc=0; /* sum of selected chunk from all process */
     size_t              i;
-    hsize_t             total_chunk_mdset=0;
     #endif
+    #if 0 // JK_ORI_REMOVE
+    hsize_t             total_chunk_mdset=0;
     size_t              total_chunks;
-    #ifdef JK_ORI_REMOVE
     haddr_t            *total_chunk_addr_array = NULL;
     #endif
     MPI_Datatype       *chunk_mtype = NULL;
@@ -1764,6 +1763,13 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
         printf("JKDBG %s|%d P%d> sum_chunk_allproc: %d\n", __FILE__, __LINE__, mpi_rank, sum_chunk_allproc);
         #endif
 
+    #if 0 // JK_TOTAL_NOT_NECESSARY_REMOVE
+    /* JK_REMOVE: THIS is not necessary any more, since  ‘H5D__sort_piece()’ 
+     * method  which iterate through total_chunks is removed. No more expensive OP 
+     * as before. Just directly pull the single piece_node from skiplist and 
+     * pretty much to do the same as the  (total_chunks===1) case code.  The old code
+     * now just created more code maintenance
+     */
     /* Retrieve total # of chunks in datasets */
     #ifndef JK_ALSO_CONTIG1
     for (i=0; i < count; i++) {
@@ -1783,13 +1789,6 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
     printf("JKDBG %s|%d P%d> : total_chunks:%d \n", __FILE__, __LINE__, mpi_rank,total_chunks);
     #endif
 
-    #ifdef JK_TODO_NOT_NECESSARY_REMOVE
-    /* JK_REMOVE: THIS is not necessary any more, since  ‘H5D__sort_piece()’ 
-     * method  which iterate through total_chunks is removed. No more expensive OP 
-     * as before. Just directly pull the single piece_node from skiplist and 
-     * pretty much to do the same as the  (total_chunks===1) case code.  The old code
-     * now just created more code maintenance
-     */
     /* Handle special case when dataspace dimensions only allow one chunk in
      *  the dataset.  [This sometimes is used by developers who want the
      *  equivalent of compressed contiguous datasets - QAK]
@@ -1849,7 +1848,7 @@ if(H5DEBUG(D))
       #endif // JK_TODO_LATER
     } /* end if */
     // else {
-    #endif // JK_TODO_NOT_NECESSARY_REMOVE
+    #endif // JK_TOTAL_NOT_NECESSARY_REMOVE
     {
         hsize_t mpi_buf_count;  /* Number of MPI types */
         size_t num_chunk;       /* Number of chunks for this process */
@@ -1873,9 +1872,11 @@ if(H5DEBUG(D))
         printf("JKDBG %s|%d P%d> num_chunk (this proc skiplist): %d\n", __FILE__, __LINE__, mpi_rank, num_chunk);
         #endif
 
+#if 0 // JK_ORI_REMOVE
 #ifdef H5D_DEBUG
 if(H5DEBUG(D))
     HDfprintf(H5DEBUG(D),"total_chunks = %Zu, num_chunk = %Zu\n", total_chunks, num_chunk);
+#endif
 #endif
 
         /* Set up MPI datatype for chunks selected */
@@ -1931,11 +1932,12 @@ if(H5DEBUG(D))
         }
         #endif // JK_DBG
 
+#if 0 // JK_ORI_REMOVE
 #ifdef H5D_DEBUG
 if(H5DEBUG(D))
     HDfprintf(H5DEBUG(D),"before sorting the chunk address \n");
 #endif
-            /* Sort the chunk address */
+#endif
            #ifndef JK_SL_P_FADDR
             if(NULL == (piece_node = H5SL_first(io_info_md->sel_pieces)))
                 HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get piece node from skipped list")
@@ -1946,7 +1948,8 @@ if(H5DEBUG(D))
             #ifndef JK_MEM_MPITYPE
             base_wbuf_addr = piece_info->dset_info->u.wbuf;
             #endif
-           #else
+           #else // REMOVE
+            /* Sort the chunk address */
             if(H5D__sort_piece(io_info_md, chunk_addr_info_array, sum_chunk) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSWAP, FAIL, "unable to sort chunk address")
             /* save lowest address */
@@ -1955,7 +1958,7 @@ if(H5DEBUG(D))
 
 #ifdef H5D_DEBUG
 if(H5DEBUG(D))
-    HDfprintf(H5DEBUG(D),"after sorting the chunk address \n");
+    HDfprintf(H5DEBUG(D),"before iterate over selected pieces\n");
 #endif
 
             /* Obtain MPI derived datatype from all individual chunks */
@@ -2035,7 +2038,7 @@ if(H5DEBUG(D))
             printf("JKDBG %s:%d P%d> NO Selection for this process\n", __FILE__, __LINE__, mpi_rank);
             #endif
 
-           #ifdef JK_ORI_REMOVE
+           #if 0 // JK_ORI_REMOVE
             /* Allocate chunking information */
             if(NULL == (total_chunk_addr_array = (haddr_t *)H5MM_malloc(sizeof(haddr_t) * total_chunks)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate total chunk address arraybuffer")
@@ -2108,7 +2111,7 @@ if(H5DEBUG(D))
     HDfprintf(H5DEBUG(D),"before freeing memory inside H5D_link_collective_io ret_value = %d\n", ret_value);
 #endif
     /* Release resources */
-    #ifdef JK_ORI_REMOVE
+    #if 0 // JK_ORI_REMOVE
     if(total_chunk_addr_array)
         H5MM_xfree(total_chunk_addr_array);
     #endif
@@ -2163,7 +2166,7 @@ if(H5DEBUG(D))
  *
  *-------------------------------------------------------------------------
  */
-#ifdef JK_MCHUNK_OPT_REMOVE
+#if 0 // JK_MCHUNK_OPT_REMOVE
 static herr_t
 H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     H5D_chunk_map_t *fm, H5P_genplist_t *dx_plist)
@@ -2671,7 +2674,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__sort_chunk() */
 
-#ifdef JK_WORK_REMOVE
+#if 0 // JK_WORK_REMOVE
 static herr_t
 H5D__sort_piece(H5D_io_info_md_t *io_info_md, 
     H5D_chunk_addr_info_t chunk_addr_info_array[], int sum_chunk)
@@ -2861,7 +2864,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifdef JK_MCHUNK_OPT_REMOVE
+#if 0 // JK_MCHUNK_OPT_REMOVE
 static herr_t
 H5D__obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
     H5P_genplist_t *dx_plist, uint8_t assign_io_mode[], haddr_t chunk_addr[])

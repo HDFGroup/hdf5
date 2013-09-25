@@ -96,7 +96,7 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
     #endif
     H5D__contig_read,
     H5D__contig_write,
-    #ifdef JK_TODO_NOCOLLCAUSE_REMOVE
+    #if 0 // JK_TODO_NOCOLLCAUSE_REMOVE
     // NULL,
     //NULL,
     #endif

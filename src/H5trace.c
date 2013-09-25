@@ -608,7 +608,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     fprintf(out, "H5D_MPIO_LINK_CHUNK");
                                     break;
 
-                            #ifdef JK_MCHUNK_OPT_REMOVE
+                            #if 0 // JK_MCHUNK_OPT_REMOVE
                                 case H5D_MPIO_MULTI_CHUNK:
                                     fprintf(out, "H5D_MPIO_MULTI_CHUNK");
                                     break;

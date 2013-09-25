@@ -189,13 +189,13 @@ static herr_t H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *typ
 static herr_t H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *fm);
-#ifdef JK_TODO_NOCOLLCAUSE_REMOVE
+#if 0 // JK_TODO_NOCOLLCAUSE_REMOVE
 static herr_t H5D__chunk_write_mdset(const hid_t file_id, const size_t count, H5D_io_info_md_t *io_info_md);
 #endif
 static herr_t H5D__chunk_flush(H5D_t *dset, hid_t dxpl_id);
 static herr_t H5D__chunk_io_term(const H5D_chunk_map_t *fm);
-#ifdef JK_SLCLOSE_ISSUE_REMOVE // also use in H5Dcontig.c
-//static herr_t H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md);
+#if 0 // JK_SLCLOSE_ISSUE_REMOVE // also use in H5Dcontig.c
+static herr_t H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md);
 #endif
 static herr_t H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
 
@@ -279,7 +279,7 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
     #endif    
     H5D__chunk_read,
     H5D__chunk_write,
-    #ifdef JK_TODO_NOCOLLCAUSE_REMOVE
+    #if 0 // JK_TODO_NOCOLLCAUSE_REMOVE
     // H5D__chunk_read_mdset,
     //H5D__chunk_write_mdset,
     #endif
@@ -317,7 +317,7 @@ const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {{
     #endif      
     NULL,
     NULL,
-    #ifdef JK_TODO_NOCOLLCAUSE_REMOVE
+    #if 0 // JK_TODO_NOCOLLCAUSE_REMOVE
     // NULL, 
     //NULL,
     #endif
@@ -1090,7 +1090,7 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
         dinfo->chunk_dim[u] = dinfo->layout->u.chunk.dim[u];
     } /* end for */
 
-#ifdef JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE ---I
+#if 0 // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE ---I
 #ifdef H5_HAVE_PARALLEL
     /* Calculate total chunk in file map*/
     #ifdef JK_ORI
@@ -1462,7 +1462,7 @@ done:
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping")
     } /* end if */
 
-    #ifdef JK_ORI_REMOVE // JK_COUNT0 work
+    #if 0 // JK_ORI_REMOVE // JK_COUNT0 work
     /* Reset the global dataspace info */
     dinfo->file_space = NULL;
     dinfo->mem_space = NULL;
@@ -1748,7 +1748,7 @@ H5D__create_piece_map_single(H5D_dset_info_t *di, const H5D_io_info_md_t
     hsize_t     sel_start[H5O_LAYOUT_NDIMS]; /* Offset of low bound of file selection */
     hsize_t     sel_end[H5O_LAYOUT_NDIMS];  /* Offset of high bound of file selection */
     unsigned    u;                          /* Local index variable */
-    #ifndef JK_SL_P_FADDR_NOTNEED_REMOVE
+    #if 0 // JK_SL_P_FADDR_NOTNEED_REMOVE
     //haddr_t prev_tag = HADDR_UNDEF;
     #endif
     #ifndef JK_SL_P_FADDR
@@ -1797,7 +1797,7 @@ H5D__create_piece_map_single(H5D_dset_info_t *di, const H5D_io_info_md_t
     if(H5S_SELECT_ADJUST_U(di->single_space, piece_info->coords) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
 
-#ifdef JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
+#if 0 // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
 #ifdef H5_HAVE_PARALLEL
     /* store chunk selection information */
     if(io_info_md->using_mpi_vfd)
@@ -1826,7 +1826,7 @@ H5D__create_piece_map_single(H5D_dset_info_t *di, const H5D_io_info_md_t
     /* make connection to related dset info from this piece_info */
     piece_info->dset_info = di;
     #endif
-    #ifdef JK_SL_P_FADDR_NOTNEED_REMOVE
+    #if 0 // JK_SL_P_FADDR_NOTNEED_REMOVE
     /* set metadata tagging with dset oheader addr for H5D__chunk_lookup */
     if(H5AC_tag(io_info_md->dxpl_id, piece_info->dset_info->dset->oloc.addr, &prev_tag) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
@@ -1838,7 +1838,7 @@ H5D__create_piece_map_single(H5D_dset_info_t *di, const H5D_io_info_md_t
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
     piece_info->faddr = udata.addr;
     #endif
-    #ifdef JK_SL_P_FADDR_NOTNEED_REMOVE
+    #if 0 // JK_SL_P_FADDR_NOTNEED_REMOVE
     /* Reset metadata tagging */
     if(H5AC_tag(io_info_md->dxpl_id, prev_tag, NULL) < 0)
         HDONE_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
@@ -2090,7 +2090,7 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
 
     /* Iterate through each chunk in the dataset */
     while(sel_points) {
-        #ifndef JK_SL_P_FADDR_NOTNEED_REMOVE
+        #if 0 // JK_SL_P_FADDR_NOTNEED_REMOVE
         //haddr_t prev_tag = HADDR_UNDEF;
         #endif
         #ifndef JK_SL_P_FADDR
@@ -2144,7 +2144,7 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
             /* Set the chunk index */
             new_piece_info->index=chunk_index;
 
-#ifdef JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
+#if 0 // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
 #ifdef H5_HAVE_PARALLEL
             /* store chunk selection information */
             if(io_info_md->using_mpi_vfd)
@@ -2174,7 +2174,7 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
             new_piece_info->dset_info = dinfo;
             #endif
 
-            #ifdef JK_SL_P_FADDR_NOTNEED_REMOVE
+            #if 0 // JK_SL_P_FADDR_NOTNEED_REMOVE
             /* set metadata tagging with dset oheader addr for H5D__chunk_lookup */
             //if(H5AC_tag(io_info_md->dxpl_id, new_piece_info->dset_info->dset->oloc.addr, &prev_tag) < 0)
             //    HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
@@ -2197,7 +2197,7 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
             new_piece_info->faddr = 0xaa2 + (k*8);
             k++;
             #endif // JK_SL_P_FADDR
-            #ifdef JK_SL_P_FADDR_NOTNEED_REMOVE
+            #if 0 // JK_SL_P_FADDR_NOTNEED_REMOVE
             /* Reset metadata tagging */
             //if(H5AC_tag(io_info_md->dxpl_id, prev_tag, NULL) < 0)
             //    HDONE_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
@@ -3324,7 +3324,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__chunk_write() */
 
-#ifdef JK_TODO_NOCOLLCAUSE_REMOVE
+#if 0 // JK_TODO_NOCOLLCAUSE_REMOVE
 static herr_t 
 H5D__chunk_write_mdset(const hid_t file_id, const size_t count, H5D_io_info_md_t *io_info_md)
 {
@@ -3486,7 +3486,7 @@ H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md
     if(di->mchunk_tmpl)
         if(H5S_close(di->mchunk_tmpl) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory piece dataspace template")
-#ifdef JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
+#if 0 // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
 #ifdef H5_HAVE_PARALLEL
     if(io_info_md->select_piece)
     {

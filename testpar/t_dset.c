@@ -2556,7 +2556,7 @@ test_actual_io_mode(int selection_mode) {
     H5D_mpio_actual_io_mode_t   actual_io_mode_expected = -1;
     const char  * filename;
     const char  * test_name;
-    #ifdef JK_MCHUNK_OPT_REMOVE
+    #if 0 // JK_MCHUNK_OPT_REMOVE
     hbool_t     direct_multi_chunk_io;
     hbool_t     multi_chunk_io;
     #endif
@@ -2589,7 +2589,7 @@ test_actual_io_mode(int selection_mode) {
     char message[256];
     herr_t      ret;
    
-    #ifdef JK_MCHUNK_OPT_REMOVE
+    #if 0 // JK_MCHUNK_OPT_REMOVE
     /* Set up some flags to make some future if statements slightly more readable */
     direct_multi_chunk_io = (
         selection_mode == TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND ||
@@ -2666,7 +2666,7 @@ test_actual_io_mode(int selection_mode) {
      * and also set up some selection-dependeent test info. */
     switch(selection_mode) {
         
-       #ifdef JK_MCHUNK_OPT_REMOVE
+       #if 0 // JK_MCHUNK_OPT_REMOVE
         /* Independent I/O with optimization */
         case TEST_ACTUAL_IO_MULTI_CHUNK_IND:
         case TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND:
@@ -2870,7 +2870,7 @@ test_actual_io_mode(int selection_mode) {
         ret = H5Pset_dxpl_mpio(dxpl_write, H5FD_MPIO_COLLECTIVE);
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
         
-        #ifdef JK_MCHUNK_OPT_REMOVE
+        #if 0 // JK_MCHUNK_OPT_REMOVE
         /* Set the threshold number of processes per chunk to twice mpi_size. 
          * This will prevent the threshold from ever being met, thus forcing 
          * multi chunk io instead of link chunk io.
@@ -3024,26 +3024,26 @@ actual_io_mode_tests(void) {
     
     test_actual_io_mode(TEST_ACTUAL_IO_NO_COLLECTIVE);
     
-  #ifdef JK_MCHUNK_OPT_REMOVE  
+  #if 0 // JK_MCHUNK_OPT_REMOVE  
     /* 
      * Test multi-chunk-io via proc_num threshold
      */
-    //test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_IND); // FAIL
-    //test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_COL); // FAIL
+    test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_IND);
+    test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_COL);
     
     /* The Multi Chunk Mixed test requires atleast three processes. */
-    //if (mpi_size > 2)
-    //    test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX); // FAIL
-    //else
-    //    HDfprintf(stdout, "Multi Chunk Mixed test requires 3 proceses minimum\n");
+    if (mpi_size > 2)
+        test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX);
+    else
+        HDfprintf(stdout, "Multi Chunk Mixed test requires 3 proceses minimum\n");
     
-    //test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE); // FAIL
+    test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE);
 
     /* 
      * Test multi-chunk-io via setting direct property
      */
-    //test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND); // FAIL
-    //test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL); // FAIL
+    test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND);
+    test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL);
   #endif // JK_MCHUNK_OPT_REMOVE
 
     test_actual_io_mode(TEST_ACTUAL_IO_LINK_CHUNK);

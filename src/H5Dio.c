@@ -585,7 +585,7 @@ done:
 } /* end H5D__pre_write() */
 
 
-#ifdef JK_TODO_NOT_NEED_REMOVE
+#if 0 // JK_TODO_NOT_NEED_REMOVE
 /* this is without Direct_write feature */
 herr_t
 H5Dwrite_multi_JK_NODIRECTW(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id)
@@ -1699,7 +1699,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
     const void ** info_wbuf_ori;
     #endif
 
-    #ifdef JK_TEST_ADDR_TAG_OLD_REMOVE
+    #if 0 // JK_TEST_ADDR_TAG_OLD_REMOVE
     //haddr_t prev_tag = HADDR_UNDEF;
     dataset = (H5D_t *)H5I_object_verify(info[1].dset_id, H5I_DATASET);
     FUNC_ENTER_STATIC_TAG(dxpl_id, dataset->oloc.addr, FAIL)
@@ -1708,7 +1708,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
     #endif
 
    #ifndef JK_MULTI_DSET
-    #ifdef JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
+    #if 0 // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
     #ifdef H5_HAVE_PARALLEL
     io_info_md.select_piece = NULL;
     #endif
@@ -1780,7 +1780,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
     printf ("JKDBG p:%d %s:%d> dataset%d->oloc.addr: %llu\n", getpid(), __FILE__, __LINE__,i, dataset->oloc.addr);
     #endif
 
-    #ifdef JK_TEST_ADDR_TAG_OLD_REMOVE
+    #if 0 // JK_TEST_ADDR_TAG_OLD_REMOVE
     if(H5AC_tag(dxpl_id, dataset->oloc.addr, &prev_tag) < 0)                                     HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
     #endif
 
@@ -1998,7 +1998,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
 
 
     /* Set up I/O operation */
-    #ifdef JK_ORI_REMOVE
+    #if 0 // JK_ORI_REMOVE
     io_info.op_type = H5D_IO_OP_WRITE;
     io_info.u.wbuf = buf;
     #else
@@ -2010,7 +2010,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
     dset_info_array[i].index = i;
     #endif
 
-    #ifdef JK_ORI_REMOVE
+    #if 0 // JK_ORI_REMOVE
     if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
     #else
@@ -2024,7 +2024,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
 
     /* Call storage method's I/O initialization routine */
     // JK This is filling fm , io_info_md.dset_info[] is same here to be filled and generate piece_infos in skip list
-    #ifdef JK_ORI_REMOVE
+    #if 0 // JK_ORI_REMOVE
     HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
     if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
@@ -2042,7 +2042,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
-    #ifdef JK_ORI_REMOVE
+    #if 0 // JK_ORI_REMOVE
     if(H5D__ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, &fm) < 0)
     #else
     if(H5D__ioinfo_adjust_mdset(count, &io_info_md, dxpl_id) < 0)
@@ -2167,7 +2167,7 @@ done:
     if(store)
         H5MM_xfree(store);
 
-    #ifdef JK_TEST_ADDR_TAG_OLD_REMOVE
+    #if 0 // JK_TEST_ADDR_TAG_OLD_REMOVE
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
     #else
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2282,7 +2282,7 @@ H5D__ioinfo_init_mdset(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dx
     /* Set the "high-level" I/O operations for the dataset */
     io_info_md->io_ops.multi_read = dset->shared->layout.ops->ser_read;
     io_info_md->io_ops.multi_write = dset->shared->layout.ops->ser_write;
-    #ifdef JK_TODO_NOCOLLCAUSE_REMOVE // not need any more, worked by other nocaolcause code
+    #if 0 // JK_TODO_NOCOLLCAUSE_REMOVE // not need any more, worked by other nocaolcause code
     // JK_POINT - point selection is not supported for collective IO
     //   so H5D__mpio_opt_possible_mdset() detect and return FALSE. 
     //   in ori code, just serial write is set, but here func interface is different
@@ -2602,7 +2602,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__ioinfo_adjust() */
 
-#ifdef JK_WORK_OLD_REMOVE
+#if 0 // JK_WORK_OLD_REMOVE
 // JK_TODO_LATER - make this call only once, so can make H5D__mpio_opt_possible_mdset() to check mdset at once
 static herr_t
 H5D__ioinfo_adjust_mdset_OLD(H5D_io_info_md_t *io_info_md, 

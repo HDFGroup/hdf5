@@ -1486,7 +1486,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
             k = 0;
         }
 
-        #ifdef JK_TEST_MAN_REMOVE
+        #if 0 // JK_TEST_MAN_REMOVE
         k = 1;          
         {
         #else
@@ -1670,7 +1670,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                       ( (tv_ptr->small_rank - 1) <= 1 ) &&
                       ( l < tv_ptr->edge_size ) );
             k++;
-        #ifdef JK_TEST_MAN_REMOVE
+        #if 0 // JK_TEST_MAN_REMOVE
         }
         #else
         } while ( ( tv_ptr->large_rank > 3 ) &&
@@ -1834,7 +1834,7 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
             k = 0;
         }
 
-        #ifdef JK_TEST_MAN_REMOVE
+        #if 0 // JK_TEST_MAN_REMOVE
         k=1;
         {
         #else
@@ -2028,7 +2028,7 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
                       ( (tv_ptr->small_rank - 1) <= 1 ) &&
                       ( l < tv_ptr->edge_size ) );
             k++;
-        #ifdef JK_TEST_MAN_REMOVE
+        #if 0 // JK_TEST_MAN_REMOVE
         }
         #else
         } while ( ( tv_ptr->large_rank > 3 ) &&
@@ -2361,7 +2361,7 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* contiguous data set, independent I/O */
                     chunk_edge_size = 0;
 
-                    #ifdef JK_TEST_REMOVE
+                    #if 0 // JK_TEST_REMOVE
                     if (test_num==1)
                     #endif
                     contig_hs_dr_pio_test__run_test(test_num,
@@ -2385,7 +2385,7 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* contiguous data set, collective I/O */
                     chunk_edge_size = 0;
 
-                    #ifdef JK_TEST_REMOVE
+                    #if 0 // JK_TEST_REMOVE
                     // 1,3,4 failed 
                     if (test_num==1)
                     #endif
@@ -2410,7 +2410,7 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* chunked data set, independent I/O */
                     chunk_edge_size = 5;
 
-                    #ifdef JK_TEST_REMOVE
+                    #if 0 // JK_TEST_REMOVE
                     if (test_num==1)
                     #endif
                     contig_hs_dr_pio_test__run_test(test_num,
@@ -2434,7 +2434,7 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* chunked data set, collective I/O */
                     chunk_edge_size = 5;
 
-                    #ifdef JK_TEST_REMOVE
+                    #if 0 // JK_TEST_REMOVE
                     printf ("JKDBG %s:%d p:%d> express_test:%d, test_num:%d\n", __FUNCTION__,__LINE__, getpid(), express_test, test_num );
                     fflush(stdout);
                     //express_test = 3;

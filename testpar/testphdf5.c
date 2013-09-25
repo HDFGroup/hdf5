@@ -438,7 +438,7 @@ int main(int argc, char **argv)
     AddTest((mpi_size <3)? "-cchunk5":"cchunk5" ,
         coll_chunk5,NULL,
 	"linked chunk collective IO without optimization",PARATESTFILE);
- #ifdef JK_MCHUNK_OPT_REMOVE
+ #if 0 // JK_MCHUNK_OPT_REMOVE
     AddTest((mpi_size < 3)? "-cchunk6" : "cchunk6",
 	coll_chunk6,NULL,
 	"multi-chunk collective IO with direct request",PARATESTFILE);
