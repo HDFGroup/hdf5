@@ -57,6 +57,10 @@ New Features
 
     Configuration
     -------------
+    - New configuration option added to change the default plugin path.
+      configure option is --with-default-plugin=location
+      cmake option is -DH5_DEFAULT_PLUGINDIR:PATH=location
+      HDFFV-8513.  (ADB 2013/09/04)
     - Rename FFLAGS to FCFLAGS in configure (ADB 2013/08/13)
     - CMake can now package a compressed examples file, the default for 
       Windows binaries from HDF Group.  (ADB  - 2013/07/22)
@@ -118,11 +122,13 @@ Bug Fixes since HDF5-1.8.11
 
     Tools
     -----
+    - h5repack: Added ability to use plugin filters. HDFFV-8345 (ADB - 2013/09/04).
+    - h5dump: Added option -N --any_path, which searches the file for paths that
+              match the search path. HDFFV-7989 (ADB - 2013/08/12).
+    - h5dump: Added optional arg 0 to -A, which excludes attributes from display.
+              HDFFV-8134 (ADB - 2013/08/01).
     - h5dump correctly exports subsetted data to a file, using the --output
       option.  (ADB  - 2013/06/07 HDFFV-8447)
-
-    - h5dump adds optional argument of '0' to the -A option. This argument
-      excludes all attributes from the dump. (ADB  - 2013/07/15 HDFFV-8134)
 
     F90 API
     -------

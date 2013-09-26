@@ -48,20 +48,20 @@ static int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *fil
  *-------------------------------------------------------------------------
  */
 
-int h5repack_verify(const char *fname,
-                    pack_opt_t *options)
+int
+h5repack_verify(const char *out_fname, pack_opt_t *options)
 {
-    hid_t        fid;  /* file ID */
-    hid_t        did;  /* dataset ID */
-    hid_t        pid;  /* dataset creation property list ID */
-    hid_t        sid;  /* space ID */
-    hid_t        tid;  /* type ID */
+    hid_t        fidout; /* file ID for output file*/
+    hid_t        did;    /* dataset ID */
+    hid_t        pid;    /* dataset creation property list ID */
+    hid_t        sid;    /* space ID */
+    hid_t        tid;    /* type ID */
     unsigned int i;
     trav_table_t *travt = NULL;
     int          ok = 1;
 
-    /* open the file */
-    if((fid = H5Fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0 )
+    /* open the output file */
+    if((fidout = H5Fopen(out_fname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0 )
         return -1;
 
     for(i = 0; i < options->op_tbl->nelems; i++)
@@ -73,7 +73,7 @@ int h5repack_verify(const char *fname,
         * open
         *-------------------------------------------------------------------------
         */
-        if((did = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
+        if((did = H5Dopen2(fidout, name, H5P_DEFAULT)) < 0)
             goto error;
         if((sid = H5Dget_space(did)) < 0)
             goto error;
@@ -125,7 +125,7 @@ int h5repack_verify(const char *fname,
         trav_table_init(&travt);
 
         /* get the list of objects in the file */
-        if(h5trav_gettable(fid, travt) < 0)
+        if(h5trav_gettable(fidout, travt) < 0)
             goto error;
 
         for(i = 0; i < travt->nobjs; i++)
@@ -139,7 +139,7 @@ int h5repack_verify(const char *fname,
                 * open
                 *-------------------------------------------------------------------------
                 */
-                if((did = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
+                if((did = H5Dopen2(fidout, name, H5P_DEFAULT)) < 0)
                     goto error;
                 if((sid = H5Dget_space(did)) < 0)
                     goto error;
@@ -199,8 +199,8 @@ int h5repack_verify(const char *fname,
     *-------------------------------------------------------------------------
     */
 
-    if (H5Fclose(fid) < 0)
-        return -1;
+    if (H5Fclose(fidout) < 0)
+	goto error;
 
     return ok;
 
@@ -209,7 +209,7 @@ error:
         H5Pclose(pid);
         H5Sclose(sid);
         H5Dclose(did);
-        H5Fclose(fid);
+        H5Fclose(fidout);
         if (travt)
             trav_table_free(travt);
     } H5E_END_TRY;
@@ -522,6 +522,9 @@ int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
         switch (filtn)
         {
 
+        case H5Z_FILTER_NONE:
+        	break;
+
         case H5Z_FILTER_SHUFFLE:
 
             /* 1 private client value is returned by DCPL */
@@ -598,7 +601,17 @@ int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
             break;
 
         default:
-            /* filter has no local values */
+			if ( cd_nelmts != filter[i].cd_nelmts)
+				return 0;
+
+			for( j = 0; j < cd_nelmts; j++)
+			{
+				if (cd_values[j] != filter[i].cd_values[j])
+				{
+					return 0;
+				}
+
+			}
             break;
 
         } /* switch */

@@ -1105,6 +1105,7 @@
 ./tools/h5repack/Makefile.am
 ./tools/h5repack/Makefile.in
 ./tools/h5repack/h5repack.sh.in
+./tools/h5repack/h5repack_plugin.sh.in
 ./tools/h5repack/h5repack.c
 ./tools/h5repack/h5repack.h
 ./tools/h5repack/h5repack_copy.c
@@ -1986,9 +1987,11 @@
 ./tools/h5repack/testfiles/h5repack_szip.h5
 ./tools/h5repack/testfiles/ublock.bin
 ./tools/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
+./tools/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst
 ./tools/h5repack/testfiles/h5repack-help.txt
 ./tools/h5repack/testfiles/h5repack_filters.h5.tst
 ./tools/h5repack/testfiles/h5repack_layout.h5.ddl
+./tools/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
 
 # jam utility and tests
 ./tools/h5jam/h5jam.c

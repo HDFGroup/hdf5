@@ -62,7 +62,7 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
  /* check availability of filters */
  for(i = 0; i < nfilters; i++)
  {
-  if((filtn = H5Pget_filter2(dcpl_id, (unsigned)i, 0, 0, 0, 0, 0, NULL)) < 0)
+  if((filtn = H5Pget_filter2(dcpl_id, (unsigned)i, 0, 0, 0, (size_t)0, 0, NULL)) < 0)
    return -1;
 
   switch(filtn)

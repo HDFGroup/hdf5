@@ -43,7 +43,6 @@
 /* Windows support */
 #ifdef H5_HAVE_WIN32_API
 
-#define H5PL_DEFAULT_PATH       "%ALLUSERSPROFILE%/hdf5/lib/plugin"
 #define H5PL_PATH_SEPARATOR     ";"
 
 /* Handle for dynamic library */
@@ -66,7 +65,6 @@ typedef const void *(__cdecl *H5PL_get_plugin_info_t)(void);
 /* Unix support */
 #else /* H5_HAVE_WIN32_API */
 
-#define H5PL_DEFAULT_PATH       "/usr/local/hdf5/lib/plugin"
 #define H5PL_PATH_SEPARATOR     ":"
 
 /* Handle for dynamic library */
@@ -86,6 +84,8 @@ typedef const void *(__cdecl *H5PL_get_plugin_info_t)(void);
 
 typedef const void *(*H5PL_get_plugin_info_t)(void);
 #endif /* H5_HAVE_WIN32_API */
+
+#define H5PL_DEFAULT_PATH       H5_DEFAULT_PLUGINDIR
 
 /* Special symbol to indicate no plugin loading */
 #define H5PL_NO_PLUGIN          "::"
@@ -273,6 +273,10 @@ H5PL_load(H5PL_type_t type, int id)
 
     FUNC_ENTER_NOAPI(NULL)
 
+    /* Check for "no plugins" indicated" */
+    if(H5PL_no_plugin_g)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "required dynamically loaded plugin filter '%d' is not available", id)
+
     /* Initialize the location paths for dynamic libraries, if they aren't
      * already set up.
      */
@@ -456,7 +460,7 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
     FUNC_ENTER_STATIC
 
     /* Specify a file mask. *.* = We want everything! */
-    sprintf(service, "%s\/*.dll", dir);
+    sprintf(service, "%s\\*.dll", dir);
     if((hFind = FindFirstFile(service, &fdFile)) == INVALID_HANDLE_VALUE)
         HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory")
 

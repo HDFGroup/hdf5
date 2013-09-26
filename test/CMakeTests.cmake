@@ -139,16 +139,6 @@ ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 ##############################################################################
 ##############################################################################
 
-MACRO (ADD_H5_TEST file)
-  ADD_EXECUTABLE (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
-  TARGET_NAMING (${file} ${LIB_TYPE})
-  TARGET_C_PROPERTIES (${file} " " " ")
-  TARGET_LINK_LIBRARIES (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
-  SET_TARGET_PROPERTIES (${file} PROPERTIES FOLDER test)
-
-  ADD_TEST (NAME ${file} COMMAND $<TARGET_FILE:${file}>)
-ENDMACRO (ADD_H5_TEST file)
-
 # Remove any output file left over from previous test run
 ADD_TEST (
     NAME h5test-clear-objects
@@ -213,61 +203,8 @@ ADD_TEST (
         unregister_filter_2.h5
 )
 
-SET (H5_TESTS
-    accum
-    lheap
-    ohdr
-    stab
-    gheap
-    #cache
-    #cache_api
-    pool
-    hyperslab
-    istore
-    bittests
-    dt_arith
-    dtypes
-    dsets
-    cmpd_dset
-    filter_fail
-    extend
-    external
-    efc
-    objcopy
-    links
-    unlink
-    big
-    mtime
-    fillval
-    mount
-    flush1
-    flush2
-    app_ref
-    enum
-    set_extent
-    #ttsafe
-    getname
-    vfd
-    ntypes
-    dangle
-    dtransform
-    reserved
-    cross_read
-    freespace
-    mf
-    btree2
-    fheap
-    #error_test
-    #err_compat
-    tcheck_version
-    testmeta
-    #links_env
-    file_image
-    unregister
-)
-
 FOREACH (test ${H5_TESTS})
-  ADD_H5_TEST(${test})
+  ADD_TEST (NAME ${test} COMMAND $<TARGET_FILE:${test}>)
   SET_TESTS_PROPERTIES(${test} PROPERTIES DEPENDS h5test-clear-objects)
 ENDFOREACH (test ${H5_TESTS})
 

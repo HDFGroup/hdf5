@@ -124,6 +124,8 @@ $SRC_H5REPACK_TESTFILES/h5repack.info
 $SRC_H5REPACK_TESTFILES/deflate_limit.h5repack_layout.h5.ddl
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5.ddl
 $SRC_H5REPACK_TESTFILES/h5repack_filters.h5.tst
+$SRC_H5REPACK_TESTFILES/h5repack_layout.h5-plugin_test.ddl
+$SRC_H5REPACK_TESTFILES/plugin_test.h5repack_layout.h5.tst
 "
 
 #

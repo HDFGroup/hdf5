@@ -65,7 +65,7 @@ IF (BUILD_SHARED_LIBS)
     INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
 
     ADD_LIBRARY (${HDF5_TEST_PLUGIN_LIB_TARGET} ${LIB_TYPE} ${HDF5_TEST_SOURCE_DIR}/${test_lib}.c)
-   TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} " " " ")
+    TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} " " " ")
     TARGET_LINK_LIBRARIES (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
     H5_SET_LIB_OPTIONS (
         ${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME}
@@ -155,6 +155,71 @@ TARGET_C_PROPERTIES (testhdf5 " " " ")
 TARGET_LINK_LIBRARIES (testhdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 SET_TARGET_PROPERTIES (testhdf5 PROPERTIES FOLDER test)
 
+MACRO (ADD_H5_EXE file)
+  ADD_EXECUTABLE (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
+  TARGET_NAMING (${file} ${LIB_TYPE})
+  TARGET_C_PROPERTIES (${file} " " " ")
+  TARGET_LINK_LIBRARIES (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+  SET_TARGET_PROPERTIES (${file} PROPERTIES FOLDER test)
+ENDMACRO (ADD_H5_EXE file)
+
+SET (H5_TESTS
+    accum
+    lheap
+    ohdr
+    stab
+    gheap
+    #cache
+    #cache_api
+    pool
+    hyperslab
+    istore
+    bittests
+    dt_arith
+    dtypes
+    dsets
+    cmpd_dset
+    filter_fail
+    extend
+    external
+    efc
+    objcopy
+    links
+    unlink
+    big
+    mtime
+    fillval
+    mount
+    flush1
+    flush2
+    app_ref
+    enum
+    set_extent
+    #ttsafe
+    getname
+    vfd
+    ntypes
+    dangle
+    dtransform
+    reserved
+    cross_read
+    freespace
+    mf
+    btree2
+    fheap
+    #error_test
+    #err_compat
+    tcheck_version
+    testmeta
+    #links_env
+    file_image
+    unregister
+)
+
+FOREACH (test ${H5_TESTS})
+  ADD_H5_EXE(${test})
+ENDFOREACH (test ${H5_TESTS})
+
 ##############################################################################
 ##############################################################################
 ###           A D D I T I O N A L   T E S T S                              ###
@@ -233,6 +298,5 @@ IF (BUILD_SHARED_LIBS)
   TARGET_LINK_LIBRARIES (plugin ${HDF5_TEST_PLUGIN_LIB_TARGET})
   SET_TARGET_PROPERTIES (plugin PROPERTIES FOLDER test)
 ENDIF (BUILD_SHARED_LIBS)
-
 
 INCLUDE (CMakeTests.cmake)

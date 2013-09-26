@@ -691,6 +691,8 @@ USE_FILTER_SZIP
 USE_FILTER_DEFLATE
 AM_MAKEFLAGS
 LT_STATIC_EXEC
+USE_PLUGINS_CONDITIONAL_FALSE
+USE_PLUGINS_CONDITIONAL_TRUE
 CPP
 OTOOL64
 OTOOL
@@ -923,6 +925,7 @@ enable_mpi_size
 enable_filters
 with_default_vfd
 enable_direct_vfd
+with_default_plugindir
 enable_dconv_exception
 enable_dconv_accuracy
 enable_hl
@@ -1671,6 +1674,9 @@ Optional Packages:
   --with-mpe=DIR          Use MPE instrumentation [default=no]
   --with-default-vfd=driver
                           Specify default file driver [default=sec2]
+  --with-default-plugindir=location
+                          Specify default location for plugins
+                          [default="/usr/local/hdf5/lib/plugin"]
   --with-default-api-version=(v16|v18|v110)
                           Specify default release version of public symbols
                           [default=v18]
@@ -22050,12 +22056,22 @@ if test "X$STATIC_EXEC" = "Xyes"; then
   ## Issue a warning if -static flag is not supported.
   if test "X$lt_cv_prog_compiler_static_works" = "Xno"; then
       echo "    warning: -static flag not supported on this system; executable won't statically link shared system libraries."
+      LT_STATIC_EXEC=""
+  else
+    LT_STATIC_EXEC="-all-static"
   fi
-  LT_STATIC_EXEC="-all-static"
 else
   echo "no"
   LT_STATIC_EXEC=""
 fi
+ if test "X$LT_STATIC_EXEC" = X; then
+  USE_PLUGINS_CONDITIONAL_TRUE=
+  USE_PLUGINS_CONDITIONAL_FALSE='#'
+else
+  USE_PLUGINS_CONDITIONAL_TRUE='#'
+  USE_PLUGINS_CONDITIONAL_FALSE=
+fi
+
 
 
 
@@ -29411,6 +29427,36 @@ fi
 
 
 ## ----------------------------------------------------------------------
+## Enable custom plugin default path for library.  It requires SHARED support.
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for custom plugin default path definition" >&5
+$as_echo_n "checking for custom plugin default path definition... " >&6; }
+
+# Check whether --with-default-plugindir was given.
+if test "${with_default_plugindir+set}" = set; then :
+  withval=$with_default_plugindir;
+else
+  withval="/usr/local/hdf5/lib/plugin"
+fi
+
+
+if test "X$withval" = "X"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: default" >&5
+$as_echo "default" >&6; }
+    default_plugindir="/usr/local/hdf5/lib/plugin"
+else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $withval" >&5
+$as_echo "$withval" >&6; }
+    default_plugindir=$withval
+fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_PLUGINDIR "$default_plugindir"
+_ACEOF
+
+
+## ----------------------------------------------------------------------
 ## Decide whether the presence of user's exception handling functions is
 ## checked and data conversion exceptions are returned.  This is mainly
 ## for the speed optimization of hard conversions.  Soft conversions can
@@ -33182,7 +33228,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
+ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5repack/h5repack_plugin.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
 
 
 cat >confcache <<\_ACEOF
@@ -33344,6 +33390,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CXX_SHARED_CONDITIONAL_TRUE}" && test -z "${CXX_SHARED_CONDITIONAL_FALSE}"; then
   as_fn_error $? "conditional \"CXX_SHARED_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${USE_PLUGINS_CONDITIONAL_TRUE}" && test -z "${USE_PLUGINS_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"USE_PLUGINS_CONDITIONAL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -34467,6 +34517,7 @@ do
     "tools/h5jam/testh5jam.sh") CONFIG_FILES="$CONFIG_FILES tools/h5jam/testh5jam.sh" ;;
     "tools/h5repack/Makefile") CONFIG_FILES="$CONFIG_FILES tools/h5repack/Makefile" ;;
     "tools/h5repack/h5repack.sh") CONFIG_FILES="$CONFIG_FILES tools/h5repack/h5repack.sh" ;;
+    "tools/h5repack/h5repack_plugin.sh") CONFIG_FILES="$CONFIG_FILES tools/h5repack/h5repack_plugin.sh" ;;
     "tools/h5ls/Makefile") CONFIG_FILES="$CONFIG_FILES tools/h5ls/Makefile" ;;
     "tools/h5copy/Makefile") CONFIG_FILES="$CONFIG_FILES tools/h5copy/Makefile" ;;
     "tools/h5copy/testh5copy.sh") CONFIG_FILES="$CONFIG_FILES tools/h5copy/testh5copy.sh" ;;
