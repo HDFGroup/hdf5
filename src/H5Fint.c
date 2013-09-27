@@ -588,6 +588,7 @@ htri_t
 H5F_is_hdf5(const char *name)
 {
     H5FD_t	*file = NULL;           /* Low-level file struct */
+    haddr_t     sig_addr;               /* Addess of hdf5 file signature */
     htri_t	ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -597,7 +598,9 @@ H5F_is_hdf5(const char *name)
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
-    ret_value = (HADDR_UNDEF != H5F_locate_signature(file, H5AC_ind_dxpl_id));
+    if(H5F_locate_signature(file, H5AC_ind_dxpl_id, &sig_addr) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
+    ret_value = (HADDR_UNDEF != sig_addr);
 
 done:
     /* Close the file */

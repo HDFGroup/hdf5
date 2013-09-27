@@ -1326,9 +1326,6 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
                 hbool_t issue_error = FALSE;
 
                 /* Check for "no plugins" indicated" */
-	        if(H5PL_no_plugin())
-                    issue_error = TRUE;
-                else {
                     const H5Z_class2_t    *filter_info;
 
                     /* Try loading the filter */
@@ -1343,7 +1340,6 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
                     } /* end if */
                     else
                         issue_error = TRUE;
-                } /* end else */
 
                 /* Check for error */
                 if(issue_error) {

@@ -839,10 +839,10 @@ hsize_t h5diff(const char *fname1,
     {
         h5difftrace("h5diff no object specified\n");
         /* set root group */
-        obj1fullname = (char*)HDcalloc(2, sizeof(char));
+        obj1fullname = (char*)HDcalloc((size_t)2, sizeof(char));
         HDstrcat(obj1fullname, "/");
         obj1type = H5TRAV_TYPE_GROUP;
-        obj2fullname = (char*)HDcalloc(2, sizeof(char));
+        obj2fullname = (char*)HDcalloc((size_t)2, sizeof(char));
         HDstrcat(obj2fullname, "/");
         obj2type = H5TRAV_TYPE_GROUP;
     }
@@ -1554,9 +1554,9 @@ hsize_t diff(hid_t file1_id,
     hid_t   grp1_id = (-1);
     hid_t   grp2_id = (-1);
     int     ret;
-    int     is_dangle_link1 = 0;
-    int     is_dangle_link2 = 0;
-    int     is_hard_link = 0;
+    hbool_t     is_dangle_link1 = FALSE;
+    hbool_t     is_dangle_link2 = FALSE;
+    hbool_t     is_hard_link = FALSE;
     hsize_t nfound = 0;
     h5trav_type_t object_type;
 
@@ -1598,7 +1598,7 @@ hsize_t diff(hid_t file1_id,
                 goto out;
             }
             else
-                is_dangle_link1 = 1;
+                is_dangle_link1 = TRUE;
         }
         else if (ret < 0)
             goto out;
@@ -1616,7 +1616,7 @@ hsize_t diff(hid_t file1_id,
                 goto out;
             }
             else
-                is_dangle_link2 = 1;
+                is_dangle_link2 = TRUE;
         }
         else if (ret < 0)
             goto out;

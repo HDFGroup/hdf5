@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5Library_H
-#define _H5Library_H
+#ifndef __H5Library_H
+#define __H5Library_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -67,4 +67,4 @@ class H5_DLLCPP H5Library {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5Library_H

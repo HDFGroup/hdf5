@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5File_H
-#define _H5File_H
+#ifndef __H5File_H
+#define __H5File_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -61,9 +61,6 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 	// and datatypes) in the same file.
 	void getObjIDs(unsigned types, size_t max_objs, hid_t *oid_list) const;
 
-	// Retrieves a dataspace with the region pointed to selected.
-	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
-
 	// Returns the pointer to the file handle of the low-level file driver.
 	void getVFDHandle(FileAccPropList& fapl, void **file_handle) const;
 	void getVFDHandle(void **file_handle) const;
@@ -102,13 +99,12 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
    private:
 	hid_t id;	// HDF5 file id
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
 	// This function is private and contains common code between the
 	// constructors taking a string or a char*
 	void p_get_file( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist );
 
    protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Sets the HDF5 file id.
 	virtual void p_setId(const hid_t new_id);
 
@@ -118,4 +114,4 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5File_H

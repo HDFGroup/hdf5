@@ -1023,10 +1023,10 @@ test_conv_buffer(hid_t fid)
 		cf->a[j][k][l] = 10*(j+1) + l + k;
 
     for(j = 0; j < DIM2; j++)
-	cf->b[j] = (float)(100.*(j+1) + 0.01*j);
+	cf->b[j] = (float)(100.0f*(j+1) + 0.01f*j);
 
     for(j = 0; j < DIM3; j++)
-	cf->c[j] = 100.*(j+1) + 0.02*j;
+	cf->c[j] = 100.0f*(j+1) + 0.02f*j;
 
 
   /* Create data space */
@@ -2770,7 +2770,7 @@ test_nbit_int(hid_t file)
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++) {
         orig_data[i][j] = (int)(((long long)HDrandom() %
-                           (long long)HDpow(2.0, (double)(precision - 1))) << offset);
+                           (long long)HDpow(2.0f, (double)(precision - 1))) << offset);
 
         /* even-numbered values are negtive */
         if((i*size[1]+j+1)%2 == 0)
@@ -2872,8 +2872,8 @@ test_nbit_float(hid_t file)
     /* orig_data[] are initialized to be within the range that can be represented by
      * dataset datatype (no precision loss during datatype conversion)
      */
-    float               orig_data[2][5] = {{(float)188384.00, (float)19.103516, (float)-1.0831790e9, (float)-84.242188,
-    (float)5.2045898}, {(float)-49140.000, (float)2350.2500, (float)-3.2110596e-1, (float)6.4998865e-5, (float)-0.0000000}};
+    float               orig_data[2][5] = {{(float)188384.00f, (float)19.103516f, (float)-1.0831790e9f, (float)-84.242188f,
+    (float)5.2045898f}, {(float)-49140.000f, (float)2350.2500f, (float)-3.2110596e-1f, (float)6.4998865e-5f, (float)-0.0000000f}};
     float               new_data[2][5];
     size_t              precision, offset;
     size_t             i, j;

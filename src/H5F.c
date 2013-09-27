@@ -453,7 +453,7 @@ H5Fis_accessible(const char *name, hid_t fapl_id)
 
     /* Check args */
     if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
     /* Check the file access property list */
     if(H5P_DEFAULT == fapl_id)

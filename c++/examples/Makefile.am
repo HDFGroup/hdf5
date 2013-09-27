@@ -23,12 +23,18 @@ include $(top_srcdir)/config/commence.am
 
 # These are the programs that 'make all' or 'make prog' will build and
 # which 'make check' will run.  List them in the order they should be run.
-EXAMPLE_PROG=create readdata writedata compound extend_ds chunks h5group
+EXAMPLE_PROG=create readdata writedata compound extend_ds chunks h5group \
+	     h5tutr_cmprss h5tutr_crtatt h5tutr_crtdat h5tutr_crtgrpar \
+	     h5tutr_crtgrp h5tutr_crtgrpd h5tutr_extend h5tutr_rdwt \
+	     h5tutr_subset
 TEST_SCRIPT=testh5c++.sh
 
 # These are the example files to be installed
 INSTALL_FILES=create.cpp readdata.cpp writedata.cpp compound.cpp \
-              extend_ds.cpp chunks.cpp h5group.cpp
+              extend_ds.cpp chunks.cpp h5group.cpp \
+	      h5tutr_cmprss.cpp h5tutr_crtatt.cpp h5tutr_crtdat.cpp \
+	      h5tutr_crtgrpar.cpp h5tutr_crtgrp.cpp h5tutr_crtgrpd.cpp \
+	      h5tutr_extend.cpp h5tutr_rdwt.cpp h5tutr_subset.cpp
 INSTALL_SCRIPT_FILES = run-c++-ex.sh
 
 # Some of the examples depend on files created by running other examples
@@ -57,6 +63,16 @@ compound: $(srcdir)/compound.cpp
 extend_ds: $(srcdir)/extend_ds.cpp
 chunks: $(srcdir)/chunks.cpp
 h5group: $(srcdir)/h5group.cpp
+
+h5tutr_cmprss: $(srcdir)/h5tutr_cmprss.cpp
+h5tutr_crtatt: $(srcdir)/h5tutr_crtatt.cpp
+h5tutr_crtdat: $(srcdir)/h5tutr_crtdat.cpp
+h5tutr_crtgrpar: $(srcdir)/h5tutr_crtgrpar.cpp
+h5tutr_crtgrp: $(srcdir)/h5tutr_crtgrp.cpp
+h5tutr_crtgrpd: $(srcdir)/h5tutr_crtgrpd.cpp
+h5tutr_extend: $(srcdir)/h5tutr_extend.cpp
+h5tutr_rdwt: $(srcdir)/h5tutr_rdwt.cpp
+h5tutr_subset: $(srcdir)/h5tutr_subset.cpp
 
 include $(top_srcdir)/config/examples.am
 include $(top_srcdir)/config/conclude.am
