@@ -102,7 +102,9 @@ Bug Fixes since HDF5-1.8.11
 
     Configuration
     -------------
-    - None
+    - Modified H5detect.c to scan floating point types for padding bits before
+      analyzing the type further.  This should fix problems with gcc 4.8
+      (NAF - 2013/09/19 - HDFFV-8523/HDFFV-8500)
 
     Library
     -------
