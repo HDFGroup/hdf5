@@ -667,6 +667,13 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
     HDassert(obj_ptr);
     HDassert(olist);
 
+    /* Check if we've filled up the array.  Return TRUE only if
+     * we have filled up the array. Otherwise return FALSE(RET_VALUE is
+     * preset to FALSE) because H5I_iterate needs the return value of 
+     * FALSE to continue the iteration. */
+    if(olist->max_index>0 && olist->list_index>=olist->max_index)
+        HGOTO_DONE(TRUE)  /* Indicate that the iterator should stop */
+
     /* Count file IDs */
     if(olist->obj_type == H5I_FILE) {
         if((olist->file_info.local &&
@@ -682,13 +689,6 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             /* Increment the number of open objects */
 	    if(olist->obj_id_count)
 	    	(*olist->obj_id_count)++;
-
-            /* Check if we've filled up the array.  Return TRUE only if
-             * we have filled up the array. Otherwise return FALSE(RET_VALUE is
-             * preset to FALSE) because H5I_iterate needs the return value of 
- 	     * FALSE to continue the iteration. */
-            if(olist->max_index>0 && olist->list_index>=olist->max_index)
-                HGOTO_DONE(TRUE)  /* Indicate that the iterator should stop */
 	}
     } /* end if */
     else { /* either count opened object IDs or put the IDs on the list */
@@ -747,13 +747,6 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             /* Increment the number of open objects */
 	    if(olist->obj_id_count)
             	(*olist->obj_id_count)++;
-
-            /* Check if we've filled up the array.  Return TRUE only if
-             * we have filled up the array. Otherwise return FALSE(RET_VALUE is
-             * preset to FALSE) because H5I_iterate needs the return value of 
-	     * FALSE to continue iterating. */
-            if(olist->max_index>0 && olist->list_index>=olist->max_index)
-                HGOTO_DONE(TRUE)  /* Indicate that the iterator should stop */
     	} /* end if */
     } /* end else */
 
