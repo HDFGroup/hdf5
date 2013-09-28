@@ -180,9 +180,9 @@ static herr_t H5VL_iod_object_visit(void *obj, H5VL_loc_params_t loc_params, H5_
 static herr_t H5VL_iod_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_iod_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments);
 
-static herr_t H5VL_iod_cancel(void **req, H5_status_t *status);
-static herr_t H5VL_iod_test(void **req, H5_status_t *status);
-static herr_t H5VL_iod_wait(void **req, H5_status_t *status);
+static herr_t H5VL_iod_cancel(void **req, H5ES_status_t *status);
+static herr_t H5VL_iod_test(void **req, H5ES_status_t *status);
+static herr_t H5VL_iod_wait(void **req, H5ES_status_t *status);
 
 /* IOD-specific file access properties */
 typedef struct H5VL_iod_fapl_t {
@@ -546,10 +546,8 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
         if(H5VL_iod_request_wait(request_obj->file, request) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't wait on HG request");
 
-        H5VL_iod_request_decr_rc(request);
-
         request->req = H5MM_xfree(request->req);
-        HDassert(1 == request->ref_count);
+        H5VL_iod_request_decr_rc(request);
     } /* end else */
 
 done:
@@ -727,8 +725,8 @@ EFF_finalize(void)
 
         next_req = cur_req->global_next;
 
-        HDassert(cur_req->ref_count == 1);
         HDassert(H5VL_IOD_COMPLETED == cur_req->state);
+        HDassert(cur_req->ref_count == 1);
 
         /* add the axe IDs to the ones to free. */
         axe_list.last_released_task = cur_req->axe_id;
@@ -6795,7 +6793,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_cancel(void **req, H5_status_t *status)
+H5VL_iod_cancel(void **req, H5ES_status_t *status)
 {
     H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
     hg_status_t hg_status;
@@ -6854,7 +6852,7 @@ H5VL_iod_cancel(void **req, H5_status_t *status)
             /* if the status returned is cancelled, then cancel it
                locally too */
             else if (state == H5VL_IOD_CANCELLED) {
-                request->status = H5AO_CANCELLED;
+                request->status = H5ES_STATUS_CANCEL;
                 request->state = H5VL_IOD_CANCELLED;
                 if(H5VL_iod_request_cancel(request->obj->file, request) < 0)
                     fprintf(stderr, "Operation Failed!\n");
@@ -6891,7 +6889,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_test(void **req, H5_status_t *status)
+H5VL_iod_test(void **req, H5ES_status_t *status)
 {
     H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
     hg_status_t hg_status;
@@ -6899,31 +6897,16 @@ H5VL_iod_test(void **req, H5_status_t *status)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    ret = HG_Wait(*((hg_request_t *)request->req), 0, &hg_status);
-    if(HG_FAIL == ret) {
-        fprintf(stderr, "failed to wait on request\n");
-        request->status = H5AO_FAILED;
-        request->state = H5VL_IOD_COMPLETED;
-
-        /* remove the request from the file linked list */
-        H5VL_iod_request_delete(request->obj->file, request);
-
-        /* free the mercury request */
-        request->req = H5MM_xfree(request->req);
-
-        /* Decrement ref count on request */
-        H5VL_iod_request_decr_rc(request);
-    }
-    else {
-        if(hg_status) {
-            request->status = H5AO_SUCCEEDED;
+    /* Test completion of the request if is still pending */
+    if(H5VL_IOD_PENDING == request->state) {
+        ret = HG_Wait(*((hg_request_t *)request->req), 0, &hg_status);
+        if(HG_FAIL == ret) {
+            fprintf(stderr, "failed to wait on request\n");
+            request->status = H5ES_STATUS_FAIL;
             request->state = H5VL_IOD_COMPLETED;
 
-            /* Call the completion function to check return values and free resources */
-            if(H5VL_iod_request_complete(request->obj->file, request) < 0)
-                fprintf(stderr, "Operation Failed!\n");
-
-            *status = request->status;
+            /* remove the request from the file linked list */
+            H5VL_iod_request_delete(request->obj->file, request);
 
             /* free the mercury request */
             request->req = H5MM_xfree(request->req);
@@ -6931,9 +6914,35 @@ H5VL_iod_test(void **req, H5_status_t *status)
             /* Decrement ref count on request */
             H5VL_iod_request_decr_rc(request);
         }
-        /* request has not finished, set return status appropriately */
-        else
-            *status = request->status;
+        else {
+            if(hg_status) {
+                request->status = H5ES_STATUS_SUCCEED;
+                request->state = H5VL_IOD_COMPLETED;
+
+                /* Call the completion function to check return values and free resources */
+                if(H5VL_iod_request_complete(request->obj->file, request) < 0)
+                    fprintf(stderr, "Operation Failed!\n");
+
+                *status = request->status;
+
+                /* free the mercury request */
+                request->req = H5MM_xfree(request->req);
+
+                /* Decrement ref count on request */
+                H5VL_iod_request_decr_rc(request);
+            }
+            /* request has not finished, set return status appropriately */
+            else
+                *status = request->status;
+        }
+    }
+    else {
+        *status = request->status;
+        /* free the mercury request */
+        request->req = H5MM_xfree(request->req);
+
+        /* Decrement ref count on request */
+        H5VL_iod_request_decr_rc(request);
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -6954,7 +6963,7 @@ H5VL_iod_test(void **req, H5_status_t *status)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_wait(void **req, H5_status_t *status)
+H5VL_iod_wait(void **req, H5ES_status_t *status)
 {
     H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
     herr_t ret_value = SUCCEED;

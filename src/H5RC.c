@@ -34,7 +34,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5EQprivate.h"        /* Event Queues                         */
+#include "H5ESprivate.h"        /* Event Queues                         */
 #include "H5RCprivate.h"        /* Read Contexts                         */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -382,7 +382,7 @@ done:
  */
 hid_t
 H5RCacquire(hid_t file_id, /*IN/OUT*/ uint64_t *c_version, 
-            hid_t rcapl_id, hid_t eq_id)
+            hid_t rcapl_id, hid_t estack_id)
 {
     void *file = NULL;
     H5VL_t *vol_plugin = NULL;
@@ -416,7 +416,7 @@ H5RCacquire(hid_t file_id, /*IN/OUT*/ uint64_t *c_version,
     if((ret_value = H5I_register2(H5I_RC, rc, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize read context handle")
 
-    if(eq_id != H5_EVENT_QUEUE_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -424,20 +424,15 @@ H5RCacquire(hid_t file_id, /*IN/OUT*/ uint64_t *c_version,
         req = &request->req;
         request->next = NULL;
         request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
     }
 
     if(H5VL_iod_rc_acquire((H5VL_iod_file_t *)file, rc, c_version, rcapl_id, req) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a read context on container");
 
     if(request && *req) {
-        H5EQ_t *eq = NULL;                    /* event queue token */
-
-        /* get the eq object */
-        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
-
-        if(H5EQ_insert(eq, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue")
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
     }
 
 done:
@@ -460,7 +455,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5RCrelease(hid_t rc_id , hid_t eq_id)
+H5RCrelease(hid_t rc_id , hid_t estack_id)
 {
     H5RC_t *rc = NULL;
     H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
@@ -469,7 +464,7 @@ H5RCrelease(hid_t rc_id , hid_t eq_id)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", rc_id, eq_id);
+    H5TRACE2("e", "ii", rc_id, estack_id);
 
     /* get the RC object */
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rc_id, H5I_RC)))
@@ -479,7 +474,7 @@ H5RCrelease(hid_t rc_id , hid_t eq_id)
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(rc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
-    if(eq_id != H5_EVENT_QUEUE_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -487,20 +482,15 @@ H5RCrelease(hid_t rc_id , hid_t eq_id)
         req = &request->req;
         request->next = NULL;
         request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
     }
 
     if(H5VL_iod_rc_release(rc, req) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a release on a read context on container");
 
     if(request && *req) {
-        H5EQ_t *eq = NULL;                    /* event queue token */
-
-        /* get the eq object */
-        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
-
-        if(H5EQ_insert(eq, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
     }
 
 done:
@@ -522,7 +512,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5RCpersist(hid_t rc_id , hid_t eq_id)
+H5RCpersist(hid_t rc_id , hid_t estack_id)
 {
     H5RC_t *rc = NULL;
     H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
@@ -531,7 +521,7 @@ H5RCpersist(hid_t rc_id , hid_t eq_id)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", rc_id, eq_id);
+    H5TRACE2("e", "ii", rc_id, estack_id);
 
     /* get the RC object */
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rc_id, H5I_RC)))
@@ -541,7 +531,7 @@ H5RCpersist(hid_t rc_id , hid_t eq_id)
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(rc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
-    if(eq_id != H5_EVENT_QUEUE_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -549,20 +539,15 @@ H5RCpersist(hid_t rc_id , hid_t eq_id)
         req = &request->req;
         request->next = NULL;
         request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
     }
 
     if(H5VL_iod_rc_persist(rc, req) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a persist on a read context on container");
 
     if(request && *req) {
-        H5EQ_t *eq = NULL;                    /* event queue token */
-
-        /* get the eq object */
-        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
-
-        if(H5EQ_insert(eq, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
     }
 
 done:
@@ -584,7 +569,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5RCsnapshot(hid_t rc_id , const char *snapshot_name, hid_t eq_id)
+H5RCsnapshot(hid_t rc_id , const char *snapshot_name, hid_t estack_id)
 {
     H5RC_t *rc = NULL;
     H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
@@ -593,7 +578,7 @@ H5RCsnapshot(hid_t rc_id , const char *snapshot_name, hid_t eq_id)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*si", rc_id, snapshot_name, eq_id);
+    H5TRACE3("e", "i*si", rc_id, snapshot_name, estack_id);
 
     /* Check arguments */
     if(!snapshot_name || !*snapshot_name)
@@ -607,7 +592,7 @@ H5RCsnapshot(hid_t rc_id , const char *snapshot_name, hid_t eq_id)
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(rc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
-    if(eq_id != H5_EVENT_QUEUE_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -615,20 +600,15 @@ H5RCsnapshot(hid_t rc_id , const char *snapshot_name, hid_t eq_id)
         req = &request->req;
         request->next = NULL;
         request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
     }
 
     if(H5VL_iod_rc_snapshot(rc, snapshot_name, req) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a snapshot on a read context on container");
 
     if(request && *req) {
-        H5EQ_t *eq = NULL;                    /* event queue token */
-
-        /* get the eq object */
-        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
-
-        if(H5EQ_insert(eq, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
     }
 
 done:

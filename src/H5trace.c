@@ -1254,7 +1254,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "%ld (file VOL plugin)", (long)obj);
                                 break;
 
-                            case H5I_EQ:
+                            case H5I_ES:
                                 fprintf(out, "%ld (event queue)", (long)obj);
                                 break;
 
@@ -1443,8 +1443,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     fprintf(out, "H5I_VOL");
                                     break;
 
-                                case H5I_EQ:
-                                    fprintf(out, "H5I_EQ");
+                                case H5I_ES:
+                                    fprintf(out, "H5I_ES");
                                     break;
 
                                 case H5I_GENPROP_CLS:

@@ -20,12 +20,12 @@ int main(int argc, char **argv) {
     int my_rank, my_size;
     int provided;
     hid_t int_id;
-    H5_status_t *status = NULL;
-    int num_requests = 0;
+    H5ES_status_t *status = NULL;
+    size_t num_events = 0;
     hsize_t extent = 20;
     hbool_t exists;
     H5_request_t req1;
-    H5_status_t status1;
+    H5ES_status_t status;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {

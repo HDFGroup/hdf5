@@ -14,10 +14,10 @@
 
 /*
  * This file contains function prototypes for each exported function in the
- * H5EQ module.
+ * H5ES module.
  */
-#ifndef _H5EQpublic_H
-#define _H5EQpublic_H
+#ifndef _H5ESpublic_H
+#define _H5ESpublic_H
 
 /* System headers needed by this file */
 
@@ -33,23 +33,21 @@
 /* Public Typedefs */
 /*******************/
 
-/* An asynchronous request object */
-typedef void * H5_request_t;
+/* Asynchronous operation status */
+typedef enum H5ES_status_t {
+    H5ES_STATUS_IN_PROGRESS,   /* Operation has not yet completed */
+    H5ES_STATUS_SUCCEED,       /* Operation has completed, successfully */
+    H5ES_STATUS_FAIL,          /* Operation has completed, but failed */
+    H5ES_STATUS_CANCEL         /* Operation has not completed and has been cancelled */
+} H5ES_status_t;
 
 /********************/
 /* Public Variables */
 /********************/
 
-/* Asynchronous operation status */
-typedef enum H5_status_t{
-    H5AO_PENDING,       /* Operation has not yet completed */
-    H5AO_SUCCEEDED,     /* Operation has completed, successfully */
-    H5AO_FAILED,        /* Operation has completed, but failed */
-    H5AO_CANCELLED      /* Operation has not completed and has been cancelled */
-} H5_status_t;
 
 #define H5_REQUEST_NULL NULL
-#define H5_EVENT_QUEUE_NULL -1
+#define H5_EVENT_STACK_NULL -1
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,20 +57,21 @@ extern "C" {
 /* Public Prototypes */
 /*********************/
 
-/* API wrappers */
-H5_DLL hid_t H5EQcreate(hid_t fapl_id);
-H5_DLL herr_t H5EQinsert(hid_t event_q, H5_request_t req);
-H5_DLL herr_t H5EQpop(hid_t event_q, H5_request_t *req);
-H5_DLL herr_t H5EQwait(hid_t event_q, int *num_requests, H5_status_t **status);
-H5_DLL herr_t H5EQtest(hid_t event_q, int *num_remaining);
-H5_DLL herr_t H5EQclose(hid_t event_q);
-
-/* Asynchronous test & wait operations */
-H5_DLL herr_t H5AOcancel(H5_request_t req, H5_status_t *status);
-H5_DLL herr_t H5AOtest(H5_request_t req, H5_status_t *status);
-H5_DLL herr_t H5AOwait(H5_request_t req, H5_status_t *status);
+H5_DLL hid_t H5EScreate(void);
+H5_DLL herr_t H5ESget_count(hid_t es_id, size_t *count);
+    //H5_DLL herr_t H5ESget_event_info(hid_t es_id,  size_t start_idx,  size_t count, 
+    //const char *ev_trace_str_arr[], H5ES_status_t ev_status_arr[], 
+    //H5E_stack_id ev_err_stack_id_arr[]);
+H5_DLL herr_t H5EStest(hid_t es_id, size_t event_idx, H5ES_status_t *status);
+H5_DLL herr_t H5EStest_all(hid_t es_id,  H5ES_status_t *status);
+H5_DLL herr_t H5ESwait(hid_t es_id, size_t event_idx, H5ES_status_t *status);
+H5_DLL herr_t H5ESwait_all(hid_t es_id,  H5ES_status_t *status);
+H5_DLL herr_t H5EScancel(hid_t es_id, size_t event_idx, H5ES_status_t *status);
+H5_DLL herr_t H5EScancel_all(hid_t es_id,  H5ES_status_t *status);
+H5_DLL herr_t H5ESclear(hid_t es_id);
+H5_DLL herr_t H5ESclose(hid_t es_id);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* _H5EQpublic_H */
+#endif /* _H5ESpublic_H */

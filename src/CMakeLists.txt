@@ -631,14 +631,14 @@ IF (HDF5_ENABLE_EFF)
     SET (H5FF_SRCS
         ${HDF5_SRC_DIR}/H5FF.c
         ${HDF5_SRC_DIR}/H5M.c
-        ${HDF5_SRC_DIR}/H5EQ.c
+        ${HDF5_SRC_DIR}/H5ES.c
         ${HDF5_SRC_DIR}/H5RC.c
         ${HDF5_SRC_DIR}/H5TR.c
     )
     SET (H5FF_HDRS
         ${HDF5_SRC_DIR}/H5FFpublic.h
         ${HDF5_SRC_DIR}/H5Mpublic.h
-        ${HDF5_SRC_DIR}/H5EQpublic.h
+        ${HDF5_SRC_DIR}/H5ESpublic.h
         ${HDF5_SRC_DIR}/H5RCpublic.h
         ${HDF5_SRC_DIR}/H5TRpublic.h
     )

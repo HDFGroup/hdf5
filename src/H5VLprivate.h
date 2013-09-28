@@ -110,9 +110,9 @@ H5_DLL herr_t H5VL_object_optional(void *obj, H5VL_loc_params_t loc_params, H5VL
 //H5_DLL herr_t H5VL_object_free_loc(hid_t loc_id, void *location, hid_t dxpl_id, hid_t event_q);
 H5_DLL herr_t H5VL_object_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t event_q);
 
-H5_DLL herr_t H5VL_request_cancel(void **req, H5VL_t *vol_plugin, H5_status_t *status);
-H5_DLL herr_t H5VL_request_test(void **req, H5VL_t *vol_plugin, H5_status_t *status);
-H5_DLL herr_t H5VL_request_wait(void **req, H5VL_t *vol_plugin, H5_status_t *status);
+H5_DLL herr_t H5VL_request_cancel(void **req, H5VL_t *vol_plugin, H5ES_status_t *status);
+H5_DLL herr_t H5VL_request_test(void **req, H5VL_t *vol_plugin, H5ES_status_t *status);
+H5_DLL herr_t H5VL_request_wait(void **req, H5VL_t *vol_plugin, H5ES_status_t *status);
 
 H5_DLL herr_t H5VL_fapl_open(struct H5P_genplist_t *plist, H5VL_class_t *vol_cls, const void *vol_info);
 H5_DLL herr_t H5VL_fapl_copy(H5VL_class_t *vol_cls, const void *vol_info, void **copied_info);

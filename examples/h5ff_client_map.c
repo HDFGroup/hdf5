@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     hid_t map1, map2, map3;
     hid_t tid1, tid2, rid1, rid2, rid3;
     hid_t fapl_id, dxpl_id, trspl_id;
-    hid_t event_q;
+    hid_t e_stack;
 
     const char *str_wdata[5]= {
         "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
@@ -37,15 +37,13 @@ int main(int argc, char **argv) {
     int provided;
     MPI_Request mpi_req;
 
-    H5_status_t *status = NULL;
-    int num_requests = 0;
+    H5ES_status_t status;
+    size_t num_events = 0;
     herr_t ret;
 
     hsize_t count = -1;
     int key, value;
     hbool_t exists;
-    H5_request_t req1;
-    H5_status_t status1;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {
@@ -80,8 +78,8 @@ int main(int argc, char **argv) {
        the event queue.
 
        Multiple Event queue can be created used by the application. */
-    event_q = H5EQcreate(fapl_id);
-    assert(event_q);
+    e_stack = H5EScreate();
+    assert(e_stack);
 
     /* create the file. */
     file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
@@ -91,7 +89,7 @@ int main(int argc, char **argv) {
        This can be asynchronous, but here we need the acquired ID 
        right after the call to start the transaction so we make synchronous. */
     version = 0;
-    rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
+    rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
     assert(0 == version);
 
     /* create transaction object */
@@ -104,7 +102,7 @@ int main(int argc, char **argv) {
        Leader can tell its delegates that the transaction is
        started. */
     if(0 == my_rank) {
-        ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
+        ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
     }
 
@@ -116,6 +114,8 @@ int main(int argc, char **argv) {
        while others wait for the ibcast to complete */
     if(0 != my_rank)
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
+
+    assert(1 == trans_num);
 
     /* 
        Assume the following object create calls are collective.
@@ -131,14 +131,14 @@ int main(int argc, char **argv) {
     */
 
     /* create two groups */
-    gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
-    gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+    gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+    gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
 
     /* Create 3 Map objects with the key type being 32 bit LE integer */
 
     /* First Map object with a Value type a 32 bit LE integer */
     map1 = H5Mcreate_ff(file_id, "MAP_1", H5T_STD_I32LE, H5T_STD_I32LE, 
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
+                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
 
     /* Second Map object with a Value type being an HDF5 VL datatype */
     {
@@ -158,14 +158,12 @@ int main(int argc, char **argv) {
 
         /* Create a datatype to refer to */
         dtid1 = H5Tvlen_create (H5T_NATIVE_UINT);
-
         map2 = H5Mcreate_ff(gid1, "MAP_2", H5T_STD_I32LE, dtid1, 
-                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
+                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
     }
 
     /* Third Map object with a Value type being an HDF5 VL string */
     {
-        hid_t dtid;
 
         /* Create a datatype to refer to */
         dtid2 = H5Tcopy(H5T_C_S1);
@@ -173,7 +171,7 @@ int main(int argc, char **argv) {
 
         /* Val type, VL string */
         map3 = H5Mcreate_ff(gid2, "MAP_3", H5T_STD_I32LE, dtid2, 
-                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
+                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
     }
 
     /* write some KV pairs to each map object. */
@@ -181,32 +179,33 @@ int main(int argc, char **argv) {
         key = 1;
         value = 1000;
         ret = H5Mset_ff(map1, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, tid1, event_q);
+                        H5P_DEFAULT, tid1, e_stack);
         assert(ret == 0);
 
         for(i=0 ; i<5 ; i++) {
             key = i;
             ret = H5Mset_ff(map2, H5T_STD_I32LE, &key, dtid1, &wdata[i],
-                            H5P_DEFAULT, tid1, event_q);
+                            H5P_DEFAULT, tid1, e_stack);
             assert(ret == 0);
         }
 
         for(i=0 ; i<5 ; i++) {
             key = i;
             ret = H5Mset_ff(map3, H5T_STD_I32LE, &key, dtid2, str_wdata[i],
-                            H5P_DEFAULT, tid1, event_q);
+                            H5P_DEFAULT, tid1, e_stack);
             assert(ret == 0);
         }
     }
 
+    /* Just for Funsies, wait on a valid random index in the ES */
+    H5ESwait(e_stack, 4, &status);
+
     /* none leader procs have to complete operations before notifying the leader */
     if(0 != my_rank) {
-        H5EQwait(event_q, &num_requests, &status);
-        printf("%d requests in event queue. Completions: ", num_requests);
-        for(i=0 ; i<num_requests; i++)
-            fprintf(stderr, "%d ",status[i]);
-        fprintf(stderr, "\n");
-        free(status);
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
     }
 
     /* Barrier to make sure all processes are done writing so Process
@@ -218,7 +217,7 @@ int main(int argc, char **argv) {
     if(0 == my_rank) {
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
 
-        ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, H5_EVENT_QUEUE_NULL);
+        ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, H5_EVENT_STACK_NULL);
         assert(0 == ret);
     }
 
@@ -230,15 +229,13 @@ int main(int argc, char **argv) {
     assert(0 == ret);
 
     /* release container version 0. This is async. */
-    ret = H5RCrelease(rid1, event_q);
+    ret = H5RCrelease(rid1, e_stack);
     assert(0 == ret);
 
-    H5EQwait(event_q, &num_requests, &status);
-    printf("%d requests in event queue. Completions: ", num_requests);
-    for(i=0 ; i<num_requests; i++)
-        fprintf(stderr, "%d ",status[i]);
-    fprintf(stderr, "\n");
-    free(status);
+    H5ESget_count(e_stack, &num_events);
+    H5ESwait_all(e_stack, &status);
+    H5ESclear(e_stack);
+    printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
     /* Leader process tells delegates that container version 1 is acquired */
     version = 1;
@@ -253,11 +250,11 @@ int main(int argc, char **argv) {
 
     /* issue some read operations using the read context acquired */
 
-    ret = H5Mget_count_ff(map3, &count, rid2, event_q);
+    ret = H5Mget_count_ff(map3, &count, rid2, e_stack);
     assert(ret == 0);
 
     key = 1;
-    ret = H5Mexists_ff(map3, H5T_STD_I32LE, &key, &exists, rid2, event_q);
+    ret = H5Mexists_ff(map3, H5T_STD_I32LE, &key, &exists, rid2, e_stack);
     assert(ret == 0);
 
     /* create & start transaction 2 with Multiple Leader - No Delegate Model. */
@@ -266,38 +263,36 @@ int main(int argc, char **argv) {
     trspl_id = H5Pcreate (H5P_TR_START);
     ret = H5Pset_trspl_num_peers(trspl_id, my_size);
     assert(0 == ret);
-    ret = H5TRstart(tid2, trspl_id, event_q);
+    ret = H5TRstart(tid2, trspl_id, e_stack);
     assert(0 == ret);
     ret = H5Pclose(trspl_id);
     assert(0 == ret);
 
     /* modify container contents using transaction started. */
     key = 1;
-    ret = H5Mdelete_ff(map3, H5T_STD_I32LE, &key, tid2, event_q);
+    ret = H5Mdelete_ff(map3, H5T_STD_I32LE, &key, tid2, e_stack);
     assert(ret == 0);
 
     /* finish transaction 2 */
-    ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, event_q);
+    ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, e_stack);
     assert(0 == ret);
 
     if(my_rank == 0) {
         /* release container version 1. This is async. */
-        ret = H5RCrelease(rid2, event_q);
+        ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);
     }
 
-    assert(H5Gclose_ff(gid1, event_q) == 0);
-    assert(H5Gclose_ff(gid2, event_q) == 0);
-    assert(H5Mclose_ff(map1, event_q) == 0);
-    assert(H5Mclose_ff(map2, event_q) == 0);
-    assert(H5Mclose_ff(map3, event_q) == 0);
+    assert(H5Gclose_ff(gid1, e_stack) == 0);
+    assert(H5Gclose_ff(gid2, e_stack) == 0);
+    assert(H5Mclose_ff(map1, e_stack) == 0);
+    assert(H5Mclose_ff(map2, e_stack) == 0);
+    assert(H5Mclose_ff(map3, e_stack) == 0);
 
-    H5EQwait(event_q, &num_requests, &status);
-    printf("%d requests in event queue. Completions: ", num_requests);
-    for(i=0 ; i<num_requests; i++)
-        fprintf(stderr, "%d ",status[i]);
-    fprintf(stderr, "\n");
-    free(status);
+    H5ESget_count(e_stack, &num_events);
+    H5ESwait_all(e_stack, &status);
+    H5ESclear(e_stack);
+    printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
     ret = H5RCclose(rid1);
     assert(0 == ret);
@@ -308,14 +303,14 @@ int main(int argc, char **argv) {
 
     /* acquire container version 2 - EXACT */
     version = 2;
-    rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
+    rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
     assert(2 == version);
 
     /* Now read some data from the container */
 
-    map1 = H5Mopen_ff(file_id, "MAP_1", H5P_DEFAULT, rid3, event_q);
-    map2 = H5Mopen_ff(file_id, "G1/MAP_2", H5P_DEFAULT, rid3, event_q);
-    map3 = H5Mopen_ff(file_id, "G1/G2/MAP_3", H5P_DEFAULT, rid3, event_q);
+    map1 = H5Mopen_ff(file_id, "MAP_1", H5P_DEFAULT, rid3, e_stack);
+    map2 = H5Mopen_ff(file_id, "G1/MAP_2", H5P_DEFAULT, rid3, e_stack);
+    map3 = H5Mopen_ff(file_id, "G1/G2/MAP_3", H5P_DEFAULT, rid3, e_stack);
 
     {
         int key, value;
@@ -324,12 +319,11 @@ int main(int argc, char **argv) {
         key = 1;
         value = -1;
         ret = H5Mget_ff(map1, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, rid3, event_q);
+                        H5P_DEFAULT, rid3, e_stack);
 
-        if(H5EQpop(event_q, &req1) < 0)
-            exit(1);
-        assert(H5AOwait(req1, &status1) == 0);
-        assert (status1);
+        H5ESwait(e_stack, 0, &status);
+        printf("H5Mget Completion status = %d\n", status);
+        assert (status);
 
         printf("Value recieved = %d\n", value);
         /* this is the fake value we sent from the server */
@@ -339,7 +333,7 @@ int main(int argc, char **argv) {
             for(i=0 ; i<5 ; i++) {
                 key = i;
                 ret = H5Mget_ff(map2, H5T_STD_I32LE, &key, dtid1, &rdata[i],
-                                H5P_DEFAULT, rid3, H5_EVENT_QUEUE_NULL);
+                                H5P_DEFAULT, rid3, H5_EVENT_STACK_NULL);
                 assert(ret == 0);
             }
 
@@ -357,7 +351,7 @@ int main(int argc, char **argv) {
             for(i=0 ; i<5 ; i++) {
                 key = i;
                 ret = H5Mget_ff(map3, H5T_STD_I32LE, &key, dtid2, &str_rdata[i],
-                                H5P_DEFAULT, rid3, H5_EVENT_QUEUE_NULL);
+                                H5P_DEFAULT, rid3, H5_EVENT_STACK_NULL);
                 assert(ret == 0);
             }
 
@@ -369,32 +363,39 @@ int main(int argc, char **argv) {
         }
     }
 
+    ret = H5Tclose(dtid1);
+    assert(ret == 0);
+    ret = H5Tclose(dtid2);
+    assert(ret == 0);
+
     /* release container version 1. This is async. */
-    ret = H5RCrelease(rid3, event_q);
+    ret = H5RCrelease(rid3, e_stack);
     assert(0 == ret);
 
-    assert(H5Mclose_ff(map1, event_q) == 0);
-    assert(H5Mclose_ff(map2, event_q) == 0);
-    assert(H5Mclose_ff(map3, event_q) == 0);
-
-    H5Tclose(dtid1);
-    H5Tclose(dtid2);
+    assert(H5Mclose_ff(map1, e_stack) == 0);
+    assert(H5Mclose_ff(map2, e_stack) == 0);
+    assert(H5Mclose_ff(map3, e_stack) == 0);
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
-    assert(H5Fclose_ff(file_id, event_q) == 0);
+    assert(H5Fclose_ff(file_id, e_stack) == 0);
 
     fprintf(stderr, "\n*****************************************************************************************************************\n");
-    fprintf(stderr, "Wait on everything in EQ and check Results of operations in EQ\n");
+    fprintf(stderr, "Wait on everything in ES and check Results of operations in ES\n");
     fprintf(stderr, "*****************************************************************************************************************\n");
 
-    /* wait on all requests and print completion status */
-    H5EQwait(event_q, &num_requests, &status);
-    fprintf(stderr, "%d requests in event queue. Completions: ", num_requests);
-    for(i=0 ; i<num_requests; i++)
-        fprintf(stderr, "%d ",status[i]);
-    fprintf(stderr, "\n");
-    free(status);
+    H5ESget_count(e_stack, &num_events);
+
+    H5EStest_all(e_stack, &status);
+    printf("%d events in event stack. H5EStest_all Completion status = %d\n", num_events, status);
+
+    H5ESwait_all(e_stack, &status);
+    printf("%d events in event stack. H5ESwait_all Completion status = %d\n", num_events, status);
+
+    H5EStest_all(e_stack, &status);
+    printf("%d events in event stack. H5EStest_all Completion status = %d\n", num_events, status);
+
+    H5ESclear(e_stack);
 
     ret = H5RCclose(rid3);
     assert(0 == ret);
@@ -406,7 +407,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Finalize EFF stack\n");
     fprintf(stderr, "*****************************************************************************************************************\n");
 
-    H5EQclose(event_q);
+    H5ESclose(e_stack);
     H5Pclose(fapl_id);
 
     for(i=0 ; i<5 ; i++) {

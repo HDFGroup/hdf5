@@ -26,7 +26,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5EQprivate.h"        /* Event Queues                         */
+#include "H5ESprivate.h"        /* Event Queues                         */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"		/* Links        		  	*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -195,7 +195,7 @@ H5M_term_interface(void)
  */
 hid_t
 H5Mcreate_ff(hid_t loc_id, const char *name, hid_t keytype, hid_t valtype, 
-             hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, hid_t trans_id, hid_t eq_id)
+             hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, hid_t trans_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -207,7 +207,7 @@ H5Mcreate_ff(hid_t loc_id, const char *name, hid_t keytype, hid_t valtype,
 
     FUNC_ENTER_API(FAIL)
     H5TRACE9("i", "i*siiiiiii", loc_id, name, keytype, valtype, lcpl_id, mcpl_id,
-             mapl_id, trans_id, eq_id);
+             mapl_id, trans_id, estack_id);
 
     /* Check arguments */
     if(!name || !*name)
@@ -247,7 +247,7 @@ H5Mcreate_ff(hid_t loc_id, const char *name, hid_t keytype, hid_t valtype,
     if(vol_plugin->cls->value != IOD)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "only IOD plugin supports MAP objects")
 
-    if(eq_id != H5_EVENT_QUEUE_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -255,6 +255,7 @@ H5Mcreate_ff(hid_t loc_id, const char *name, hid_t keytype, hid_t valtype,
         req = &request->req;
         request->next = NULL;
         request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
     }
 
     /* call the IOD specific private routine to create a map object */
@@ -266,14 +267,8 @@ H5Mcreate_ff(hid_t loc_id, const char *name, hid_t keytype, hid_t valtype,
     vol_plugin->nrefs ++;
 
     if(request && *req) {
-        H5EQ_t *eq = NULL;                    /* event queue token */
-
-        /* get the eq object */
-        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
-
-        if(H5EQ_insert(eq, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue")
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
     }
 
     /* Get an atom for the map */
@@ -307,7 +302,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, hid_t rcxt_id, hid_t eq_id)
+H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, hid_t rcxt_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -318,7 +313,7 @@ H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, hid_t rcxt_id, hid_t e
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("i", "i*siii", loc_id, name, mapl_id, rcxt_id, eq_id);
+    H5TRACE5("i", "i*siii", loc_id, name, mapl_id, rcxt_id, estack_id);
 
     /* Check arguments */
     if(!name || !*name)
@@ -344,7 +339,7 @@ H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, hid_t rcxt_id, hid_t e
     if(vol_plugin->cls->value != IOD)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "only IOD plugin supports MAP objects");
 
-    if(eq_id != H5_EVENT_QUEUE_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -352,6 +347,7 @@ H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, hid_t rcxt_id, hid_t e
         req = &request->req;
         request->next = NULL;
         request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
     }
 
     /* call the IOD specific private routine to create a map object */
@@ -361,14 +357,8 @@ H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, hid_t rcxt_id, hid_t e
     /* increment the ref count on the VOL plugin */
     vol_plugin->nrefs ++;
     if(request && *req) {
-        H5EQ_t *eq = NULL;                    /* event queue token */
-
-        /* get the eq object */
-        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
-
-        if(H5EQ_insert(eq, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue")
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
     }
 
     /* Get an atom for the map */
@@ -405,7 +395,7 @@ done:
  */
 herr_t
 H5Mset_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, 
-          const void *value, hid_t dxpl_id, hid_t trans_id, hid_t eq_id)
+          const void *value, hid_t dxpl_id, hid_t trans_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -415,7 +405,7 @@ H5Mset_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
 
     FUNC_ENTER_API(FAIL)
     H5TRACE8("e", "ii*xi*xiii", map_id, key_mem_type_id, key, val_mem_type_id,
-             value, dxpl_id, trans_id, eq_id);
+             value, dxpl_id, trans_id, estack_id);
 
     /* check arguments */
     if(!map_id)
@@ -435,7 +425,7 @@ H5Mset_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
     if(NULL == (map = (void *)H5I_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid map identifier")
 
-    if(eq_id != H5_EVENT_QUEUE_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -443,6 +433,7 @@ H5Mset_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
         req = &request->req;
         request->next = NULL;
         request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
     }
 
     /* Set the data through the IOD VOL */
@@ -451,14 +442,8 @@ H5Mset_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
 	HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set map KV pair")
 
     if(request && *req) {
-        H5EQ_t *eq = NULL;                    /* event queue token */
-
-        /* get the eq object */
-        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
-
-        if(H5EQ_insert(eq, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
     }
 
 done:
@@ -488,7 +473,7 @@ done:
  */
 herr_t
 H5Mget_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, 
-          void *value, hid_t dxpl_id, hid_t rcxt_id, hid_t eq_id)
+          void *value, hid_t dxpl_id, hid_t rcxt_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -498,7 +483,7 @@ H5Mget_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
 
     FUNC_ENTER_API(FAIL)
     H5TRACE8("e", "ii*xi*xiii", map_id, key_mem_type_id, key, val_mem_type_id,
-             value, dxpl_id, rcxt_id, eq_id);
+             value, dxpl_id, rcxt_id, estack_id);
 
     /* check arguments */
     if(!map_id)
@@ -518,7 +503,7 @@ H5Mget_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
     if(NULL == (map = (void *)H5I_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid map identifier")
 
-    if(eq_id != H5_EVENT_QUEUE_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -526,6 +511,7 @@ H5Mget_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
         req = &request->req;
         request->next = NULL;
         request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
     }
 
     /* Get the data through the IOD VOL */
@@ -534,14 +520,8 @@ H5Mget_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {
-        H5EQ_t *eq = NULL;                    /* event queue token */
-
-        /* get the eq object */
-        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
-
-        if(H5EQ_insert(eq, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
     }
 
 done:
@@ -572,7 +552,7 @@ done:
  */
 herr_t
 H5Mget_types_ff(hid_t map_id, hid_t *key_type_id, hid_t *val_type_id, 
-                hid_t rcxt_id, hid_t eq_id)
+                hid_t rcxt_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -581,7 +561,7 @@ H5Mget_types_ff(hid_t map_id, hid_t *key_type_id, hid_t *val_type_id,
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*i*iii", map_id, key_type_id, val_type_id, rcxt_id, eq_id);
+    H5TRACE5("e", "i*i*iii", map_id, key_type_id, val_type_id, rcxt_id, estack_id);
 
     /* check arguments */
     if(!map_id)
@@ -594,7 +574,7 @@ H5Mget_types_ff(hid_t map_id, hid_t *key_type_id, hid_t *val_type_id,
     if(NULL == (map = (void *)H5I_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid map identifier")
 
-    if(eq_id != H5_EVENT_QUEUE_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -602,6 +582,7 @@ H5Mget_types_ff(hid_t map_id, hid_t *key_type_id, hid_t *val_type_id,
         req = &request->req;
         request->next = NULL;
         request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
     }
 
     /* Get the data through the IOD VOL */
@@ -609,14 +590,8 @@ H5Mget_types_ff(hid_t map_id, hid_t *key_type_id, hid_t *val_type_id,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {
-        H5EQ_t *eq = NULL;                    /* event queue token */
-
-        /* get the eq object */
-        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
-
-        if(H5EQ_insert(eq, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
     }
 
 done:
@@ -642,7 +617,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Mget_count_ff(hid_t map_id, hsize_t *count, hid_t rcxt_id, hid_t eq_id)
+H5Mget_count_ff(hid_t map_id, hsize_t *count, hid_t rcxt_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -651,7 +626,7 @@ H5Mget_count_ff(hid_t map_id, hsize_t *count, hid_t rcxt_id, hid_t eq_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*hii", map_id, count, rcxt_id, eq_id);
+    H5TRACE4("e", "i*hii", map_id, count, rcxt_id, estack_id);
 
     /* check arguments */
     if(!map_id)
@@ -664,7 +639,7 @@ H5Mget_count_ff(hid_t map_id, hsize_t *count, hid_t rcxt_id, hid_t eq_id)
     if(NULL == (map = (void *)H5I_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid map identifier")
 
-    if(eq_id != H5_EVENT_QUEUE_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -672,6 +647,7 @@ H5Mget_count_ff(hid_t map_id, hsize_t *count, hid_t rcxt_id, hid_t eq_id)
         req = &request->req;
         request->next = NULL;
         request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
     }
 
     /* Get the data through the IOD VOL */
@@ -679,14 +655,8 @@ H5Mget_count_ff(hid_t map_id, hsize_t *count, hid_t rcxt_id, hid_t eq_id)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {
-        H5EQ_t *eq = NULL;                    /* event queue token */
-
-        /* get the eq object */
-        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
-
-        if(H5EQ_insert(eq, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
     }
 
 done:
@@ -715,7 +685,7 @@ done:
  */
 herr_t
 H5Mexists_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, 
-             hbool_t *exists, hid_t rcxt_id, hid_t eq_id)
+             hbool_t *exists, hid_t rcxt_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -724,7 +694,8 @@ H5Mexists_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "ii*x*bii", map_id, key_mem_type_id, key, exists, rcxt_id, eq_id);
+    H5TRACE6("e", "ii*x*bii", map_id, key_mem_type_id, key, exists, rcxt_id,
+             estack_id);
 
     /* check arguments */
     if(!map_id)
@@ -737,7 +708,7 @@ H5Mexists_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
     if(NULL == (map = (void *)H5I_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid map identifier")
 
-    if(eq_id != H5_EVENT_QUEUE_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -745,6 +716,7 @@ H5Mexists_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
         req = &request->req;
         request->next = NULL;
         request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
     }
 
     /* Get the data through the IOD VOL */
@@ -752,14 +724,8 @@ H5Mexists_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {
-        H5EQ_t *eq = NULL;                    /* event queue token */
-
-        /* get the eq object */
-        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
-
-        if(H5EQ_insert(eq, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
     }
 
 done:
@@ -831,7 +797,7 @@ done:
  */
 herr_t
 H5Mdelete_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, 
-             hid_t trans_id, hid_t eq_id)
+             hid_t trans_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -840,7 +806,7 @@ H5Mdelete_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "ii*xii", map_id, key_mem_type_id, key, trans_id, eq_id);
+    H5TRACE5("e", "ii*xii", map_id, key_mem_type_id, key, trans_id, estack_id);
 
     /* check arguments */
     if(!map_id)
@@ -853,7 +819,7 @@ H5Mdelete_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
     if(NULL == (map = (void *)H5I_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid map identifier")
 
-    if(eq_id != H5_EVENT_QUEUE_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -861,6 +827,7 @@ H5Mdelete_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
         req = &request->req;
         request->next = NULL;
         request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
     }
 
     /* delete the key pair through the IOD VOL */
@@ -868,14 +835,8 @@ H5Mdelete_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req) {
-        H5EQ_t *eq = NULL;                    /* event queue token */
-
-        /* get the eq object */
-        if(NULL == (eq = (H5EQ_t *)H5I_object_verify(eq_id, H5I_EQ)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
-
-        if(H5EQ_insert(eq, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
     }
 done:
     FUNC_LEAVE_API(ret_value)
@@ -899,13 +860,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Mclose_ff(hid_t map_id, hid_t eq_id)
+H5Mclose_ff(hid_t map_id, hid_t estack_id)
 {
     H5VL_t  *vol_plugin = NULL;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", map_id, eq_id);
+    H5TRACE2("e", "ii", map_id, estack_id);
 
     /* Check args */
     if(NULL == H5I_object_verify(map_id, H5I_MAP))
@@ -916,7 +877,7 @@ H5Mclose_ff(hid_t map_id, hid_t eq_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     /* set the event queue and dxpl IDs to be passed on to the VOL layer */
-    vol_plugin->close_eq_id = eq_id;
+    vol_plugin->close_estack_id = estack_id;
     vol_plugin->close_dxpl_id = H5AC_dxpl_id;
 
     /*
@@ -954,7 +915,7 @@ H5M_close_map(void *map, H5VL_t *vol_plugin)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(vol_plugin->close_eq_id != H5_EVENT_QUEUE_NULL) {
+    if(vol_plugin->close_estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -962,6 +923,7 @@ H5M_close_map(void *map, H5VL_t *vol_plugin)
         req = &request->req;
         request->next = NULL;
         request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
     }
 
     /* Close the map through the VOL*/
@@ -969,8 +931,8 @@ H5M_close_map(void *map, H5VL_t *vol_plugin)
 	HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to close map")
 
     if(request && *req) {
-        if(H5EQinsert(vol_plugin->close_eq_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+        if(H5ES_insert(vol_plugin->close_estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
     }
 
     vol_plugin->nrefs --;

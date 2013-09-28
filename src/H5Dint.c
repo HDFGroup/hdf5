@@ -2078,7 +2078,7 @@ H5D__vlen_get_buf_size(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim, c
     if(H5VL_dataset_read(vlen_bufsize->dset, vlen_bufsize->vol_plugin, 
                          type_id, vlen_bufsize->mspace_id, 
                          vlen_bufsize->fspace_id, vlen_bufsize->xfer_pid, 
-                         vlen_bufsize->fl_tbuf, H5_EVENT_QUEUE_NULL) < 0)
+                         vlen_bufsize->fl_tbuf, H5_EVENT_STACK_NULL) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:

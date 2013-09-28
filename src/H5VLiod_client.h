@@ -99,7 +99,7 @@ typedef struct H5VL_iod_request_t {
     void *req; /* the request pointer correponding to the Mercury request */
     struct H5VL_iod_object_t *obj; /* The object pointer that this request is associated with */
     H5VL_iod_state_t state; /* current internal state of the request */
-    H5_status_t status; /* external status given to use of request */
+    H5ES_status_t status; /* external status given to use of request */
     uint64_t axe_id; /* The AXE ID this request was assigned */
     unsigned ref_count; /* reference count to know when this request can be freed. */
     H5VL_iod_req_info_t *trans_info; /* pointer to transaction or read context struct for this request */

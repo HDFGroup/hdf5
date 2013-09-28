@@ -326,7 +326,8 @@ H5VL_iod_server_cancel_op(hg_handle_t handle)
 {
     AXE_task_t axe_id;
     AXE_remove_status_t remove_status;
-    H5_status_t ret_value = H5AO_PENDING;
+    H5ES_status_t status = H5ES_STATUS_IN_PROGRESS;
+    int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -350,7 +351,7 @@ H5VL_iod_server_cancel_op(hg_handle_t handle)
         /* Attempt to cancel the task manually */
     }
 done:
-    HG_Handler_start_output(handle, &ret_value);
+    HG_Handler_start_output(handle, &status);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_cancel_op() */
 

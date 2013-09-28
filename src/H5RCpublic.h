@@ -59,10 +59,10 @@ extern "C" {
 H5_DLL hid_t H5RCcreate(hid_t file_id, uint64_t container_version);
 H5_DLL herr_t H5RCget_version(hid_t rcxt_id, uint64_t *version);
 H5_DLL hid_t H5RCacquire(hid_t file_id, /*IN/OUT*/ uint64_t *container_version, 
-                         hid_t rcapl_id, hid_t eq_id);
-H5_DLL herr_t H5RCrelease(hid_t rcxt_id , hid_t eq_id);
-H5_DLL herr_t H5RCpersist(hid_t rcxt_id, hid_t eq_id);
-H5_DLL herr_t H5RCsnapshot(hid_t rcxt_id, const char *snapshot_name, hid_t eq_id);
+                         hid_t rcapl_id, hid_t estack_id);
+H5_DLL herr_t H5RCrelease(hid_t rcxt_id , hid_t estack_id);
+H5_DLL herr_t H5RCpersist(hid_t rcxt_id, hid_t estack_id);
+H5_DLL herr_t H5RCsnapshot(hid_t rcxt_id, const char *snapshot_name, hid_t estack_id);
 H5_DLL herr_t H5RCclose(hid_t rcxt_id);
 
 H5_DLL herr_t H5Pset_rcapl_version_request(hid_t rcapl_id, H5RC_request_t acquire_req);

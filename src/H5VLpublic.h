@@ -23,7 +23,7 @@
 #include "stdarg.h"
 
 #include "H5public.h"
-#include "H5EQpublic.h"
+#include "H5ESpublic.h"
 #include "H5Apublic.h"		/* Attributes				*/
 #include "H5Fpublic.h"
 #include "H5Lpublic.h"
@@ -295,11 +295,11 @@ typedef struct H5VL_object_class_t {
     herr_t (*close) (void *obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, void **req);
 } H5VL_object_class_t;
 
-/* H5AO routines */
+/* async routines */
 typedef struct H5VL_async_class_t {
-    herr_t (*cancel)(void **, H5_status_t *);
-    herr_t (*test)  (void **, H5_status_t *);
-    herr_t (*wait)  (void **, H5_status_t *);
+    herr_t (*cancel)(void **, H5ES_status_t *);
+    herr_t (*test)  (void **, H5ES_status_t *);
+    herr_t (*wait)  (void **, H5ES_status_t *);
 } H5VL_async_class_t;
 
 /* enum value to identify the class of a VOL plugin (mostly for comparison purposes) */
@@ -338,7 +338,7 @@ struct H5VL_t {
     const char         *container_name; /* name of the underlying storage container */
     unsigned long       feature_flags;  /* VOL Driver feature Flags */
     int                 nrefs;          /* number of references by objects using this struct */
-    hid_t               close_eq_id;
+    hid_t               close_estack_id;
     hid_t               close_dxpl_id;
 };
 
@@ -410,9 +410,9 @@ H5_DLL herr_t H5VLobject_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *v
 H5_DLL herr_t H5VLobject_optional(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_misc_t optional_type, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLobject_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, hid_t dxpl_id, void **req);
 
-H5_DLL herr_t H5VLrequest_cancel(void **req, H5VL_t *vol_plugin, H5_status_t *status);
-H5_DLL herr_t H5VLrequest_test(void **req, H5VL_t *vol_plugin, H5_status_t *status);
-H5_DLL herr_t H5VLrequest_wait(void **req, H5VL_t *vol_plugin, H5_status_t *status);
+H5_DLL herr_t H5VLrequest_cancel(void **req, H5VL_t *vol_plugin, H5ES_status_t *status);
+H5_DLL herr_t H5VLrequest_test(void **req, H5VL_t *vol_plugin, H5ES_status_t *status);
+H5_DLL herr_t H5VLrequest_wait(void **req, H5VL_t *vol_plugin, H5ES_status_t *status);
 
 /* Function prototypes */
 H5_DLL hid_t H5VLregister(const H5VL_class_t *cls);

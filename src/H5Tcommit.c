@@ -175,7 +175,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
 
     /* commit the datatype through the VOL */
     if (NULL == (dt = H5VL_datatype_commit(obj, loc_params, vol_plugin, name, type_id, lcpl_id, 
-                                           tcpl_id, tapl_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
+                                           tcpl_id, tapl_id, H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     /* attach the vol object created using the commit call to the 
@@ -336,7 +336,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 
     /* commite the datatype through the VOL */
     if (NULL == (dt = H5VL_datatype_commit(obj, loc_params, vol_plugin, NULL, type_id, H5P_DEFAULT, 
-                                           tcpl_id, tapl_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
+                                           tcpl_id, tapl_id, H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     /* attach the vol object created using the commit call to the 
@@ -625,7 +625,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
 
     /* Create the datatype through the VOL */
     if(NULL == (dt = H5VL_datatype_open(obj, loc_params, vol_plugin, name, tapl_id, 
-                                        H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
+                                        H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open datatype")
 
     /* Get an atom for the datatype */
@@ -634,7 +634,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
 
 done:
     if (ret_value < 0 && dt)
-        if(H5VL_datatype_close (dt, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL) < 0)
+        if(H5VL_datatype_close (dt, vol_plugin, H5AC_dxpl_id, H5_EVENT_STACK_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Topen2() */
@@ -696,7 +696,7 @@ H5Tget_create_plist(hid_t dtype_id)
 
         /* get the rest of the plist through the VOL */
         if(H5VL_datatype_get(type, vol_plugin, H5VL_DATATYPE_GET_TCPL, 
-                             H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, new_tcpl_id) < 0)
+                             H5AC_dxpl_id, H5_EVENT_STACK_NULL, new_tcpl_id) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get datatype")
     } /* end if */
 
@@ -969,7 +969,7 @@ H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hbool_t app_ref)
 
     /* get required buf size for encoding the datatype */
     if((nalloc = H5VL_datatype_get_binary(dt_obj, vol_plugin, NULL, 0, 
-                                          H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
+                                          H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get datatype size")
 
     /* allocate buffer to store binary description of the datatype */
@@ -978,7 +978,7 @@ H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hbool_t app_ref)
 
     /* get binary description of the datatype */
     if((nalloc = H5VL_datatype_get_binary(dt_obj, vol_plugin, buf, (size_t) nalloc, 
-                                          H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
+                                          H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get datatype size")
 
     if(NULL == (dt = H5T_decode(buf)))
@@ -1021,7 +1021,7 @@ H5T_close_datatype(void *type, H5VL_t *vol_plugin)
     /* Close the datatype through the VOL*/
     if (NULL != dt->vol_obj)
         if((ret_value = H5VL_datatype_close(dt->vol_obj, vol_plugin, 
-                                            vol_plugin->close_dxpl_id, vol_plugin->close_eq_id)) < 0)
+                                            vol_plugin->close_dxpl_id, vol_plugin->close_estack_id)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype")
 
 done:

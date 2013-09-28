@@ -21,12 +21,12 @@ int main(int argc, char **argv) {
     hid_t fapl_id, dxpl_id;
     int my_rank, my_size;
     int provided;
-    hid_t event_q;
-    H5_status_t *status = NULL;
+    hid_t e_stack;
+    H5ES_status_t *status = NULL;
     int num_requests = 0, i;
     herr_t ret;
     H5_request_t req1;
-    H5_status_t status1;
+    H5ES_status_t status;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {
@@ -61,11 +61,11 @@ int main(int argc, char **argv) {
        the event queue.
 
        Multiple Event queue can be created used by the application. */
-    event_q = H5EQcreate(fapl_id);
-    assert(event_q);
+    e_stack = H5EScreate();
+    assert(e_stack);
 
     /* create the file. This is asynchronous, but the file_id can be used. */
-    file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, event_q);
+    file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, e_stack);
     assert(file_id);
 
     /* Create 1-D dataspace */
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 
     /* Create 1-D chunked dataset */
     if((dsid = H5Dcreate_ff(file_id, "dset", H5T_NATIVE_UINT, sid, 
-                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0 , event_q)) < 0) {
+                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0 , e_stack)) < 0) {
         fprintf(stderr, "Failed\n");
         exit(1);
     }
@@ -92,12 +92,12 @@ int main(int argc, char **argv) {
 
     printf("App Dataset Id = %d  File id = %d\n", dsid, file_id);
     ret = H5DOappend_ff(dsid, H5P_DEFAULT, 1, 10, H5T_NATIVE_UINT, 
-                        write_elem, 0 , event_q);
+                        write_elem, 0 , e_stack);
     assert(ret<0);
 
     /* Append 60 elements to dataset, along proper axis */
     if(H5DOappend_ff(dsid, H5P_DEFAULT, 0, 60, H5T_NATIVE_UINT, 
-                     write_elem, 0 , event_q) < 0) {
+                     write_elem, 0 , e_stack) < 0) {
         fprintf(stderr, "Failed\n");
         exit(1);
     }
@@ -130,11 +130,11 @@ int main(int argc, char **argv) {
 
     /* Sequence 10 elements from dataset, along bad axis */
     ret = H5DOsequence_ff(dsid, H5P_DEFAULT, 1, 0, 60, H5T_NATIVE_UINT, 
-                          read_elem, 0 , event_q);
+                          read_elem, 0 , e_stack);
 
     /* Sequence first 60 elements from dataset, along proper axis */
     ret = H5DOsequence_ff(dsid, H5P_DEFAULT, 0, 0, 60, H5T_NATIVE_UINT, 
-                          read_elem, 0 , event_q);
+                          read_elem, 0 , e_stack);
     assert(ret == 0);
 
     /* close dataset */
@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
 
         /* Create Dataset */
         if((dsid = H5Dcreate_ff(file_id, "dset_vl", tid, sid, 
-                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0 , event_q)) < 0) {
+                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0 , e_stack)) < 0) {
             fprintf(stderr, "Failed\n");
             exit(1);
         }
@@ -198,7 +198,7 @@ int main(int argc, char **argv) {
         H5Tclose(tid);
 
         /* close dataset */
-        assert(H5Dclose_ff(dsid, event_q) == 0);
+        assert(H5Dclose_ff(dsid, e_stack) == 0);
 
     }
 
@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
 
         /* Create Dataset */
         if((dsid = H5Dcreate_ff(file_id, "dset_vl_str", tid, sid, 
-                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0 , event_q)) < 0) {
+                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0 , e_stack)) < 0) {
             fprintf(stderr, "Failed\n");
             exit(1);
         }
@@ -246,18 +246,18 @@ int main(int argc, char **argv) {
         H5Tclose(tid);
 
         /* close dataset */
-        assert(H5Dclose_ff(dsid, event_q) == 0);
+        assert(H5Dclose_ff(dsid, e_stack) == 0);
     }
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
-    assert(H5Fclose_ff(file_id, event_q) == 0);
+    assert(H5Fclose_ff(file_id, e_stack) == 0);
 
     fprintf(stderr, "\n*****************************************************************************************************************\n");
     fprintf(stderr, "Wait on everything in EQ and check Results of operations in EQ\n");
     fprintf(stderr, "*****************************************************************************************************************\n");
 
     /* wait on all requests and print completion status */
-    H5EQwait(event_q, &num_requests, &status);
+    H5EQwait(e_stack, &num_requests, &status);
     fprintf(stderr, "%d requests in event queue. Completions: ", num_requests);
     for(i=0 ; i<num_requests; i++)
         fprintf(stderr, "%d ",status[i]);
@@ -276,7 +276,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Finalize EFF stack\n");
     fprintf(stderr, "*****************************************************************************************************************\n");
 
-    H5EQclose(event_q);
+    H5ESclose(e_stack);
     H5Pclose(fapl_id);
 
     /* This finalizes the EFF stack. ships a terminate and IOD finalize to the server 

@@ -183,7 +183,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 
     /* Create the dataset through the VOL */
     if(NULL == (dset = H5VL_dataset_create(obj, loc_params, vol_plugin, name, dcpl_id, 
-                                           H5P_DATASET_ACCESS_DEFAULT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
+                                           H5P_DATASET_ACCESS_DEFAULT, H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     /* Get an atom for the dataset */
@@ -192,7 +192,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 
 done:
     if (ret_value < 0 && dset)
-        if(H5VL_dataset_close (dset, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL) < 0)
+        if(H5VL_dataset_close (dset, vol_plugin, H5AC_dxpl_id, H5_EVENT_STACK_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate1() */
@@ -244,7 +244,7 @@ H5Dopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Create the dataset through the VOL */
-    if(NULL == (dset = H5VL_dataset_open(obj, loc_params, vol_plugin, name, dapl_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
+    if(NULL == (dset = H5VL_dataset_open(obj, loc_params, vol_plugin, name, dapl_id, H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     /* Get an atom for the dataset */
@@ -253,7 +253,7 @@ H5Dopen1(hid_t loc_id, const char *name)
 
 done:
     if (ret_value < 0 && dset)
-        if(H5VL_dataset_close (dset, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL) < 0)
+        if(H5VL_dataset_close (dset, vol_plugin, H5AC_dxpl_id, H5_EVENT_STACK_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dopen1() */

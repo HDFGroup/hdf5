@@ -1768,7 +1768,7 @@ H5Tclose(hid_t type_id)
      * so we attach synchronous event q to it so it can pass through the VL layer. */
     if (NULL != (vol_plugin = (H5VL_t *)H5I_get_aux(type_id))) {
         /* set the event queue and dxpl IDs to be passed on to the VOL layer */
-        vol_plugin->close_eq_id = H5_EVENT_QUEUE_NULL;
+        vol_plugin->close_estack_id = H5_EVENT_STACK_NULL;
         vol_plugin->close_dxpl_id = H5AC_dxpl_id;
     }
 
