@@ -393,6 +393,11 @@ writer (char* filename, hid_t fapl, fsizes_t testsize, int wrt_n)
         HDfprintf(stdout, "Unexpected file size of NOFILE\n");
         goto error;
         break;
+
+    default:
+        HDfprintf(stdout, "Unexpected file size(%d)\n", testsize);
+        goto error;
+        break;
     }
 
     /*
@@ -431,7 +436,8 @@ writer (char* filename, hid_t fapl, fsizes_t testsize, int wrt_n)
     hs_size[0] = WRT_SIZE;
     if ((mem_space = H5Screate_simple (1, hs_size, hs_size)) < 0) goto error;
     for (i=0; i<wrt_n; i++) {
-        hs_start[0] = randll (size2[0], i);
+	/* start position must be at least hs_size from the end */
+        hs_start[0] = randll (size2[0]-hs_size[0], i);
         HDfprintf (out, "#%03d 0x%016Hx\n", i, hs_start[0]);
         if (H5Sselect_hyperslab (space2, H5S_SELECT_SET, hs_start, NULL,
                 hs_size, NULL) < 0) goto error;
@@ -604,7 +610,6 @@ usage(void)
 int testvfd(vfd_t vfd)
 {
     hid_t	fapl=-1;
-    hsize_t	family_size;
     char	filename[1024];
     fsizes_t	testsize;
 
