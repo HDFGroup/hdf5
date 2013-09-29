@@ -19,8 +19,8 @@
 // subclasses.  It also inherits from DataType and passes down the
 // services that are common to all the datatypes.
 
-#ifndef _H5AtomType_H
-#define _H5AtomType_H
+#ifndef __H5AtomType_H
+#define __H5AtomType_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -57,14 +57,16 @@ class H5_DLLCPP AtomType : public DataType {
 	// Sets the total size for an atomic datatype.
 	void setSize( size_t size ) const;
 
-	///\brief Returns this class name
+	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("AtomType"); }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Copy constructor - makes copy of the original object
 	AtomType( const AtomType& original );
 
 	// Noop destructor
 	virtual ~AtomType();
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
    protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -78,4 +80,4 @@ class H5_DLLCPP AtomType : public DataType {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5AtomType_H

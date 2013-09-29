@@ -140,7 +140,7 @@ static void test_file_create()
     	// Test create with H5F_ACC_TRUNC. This will truncate the existing file.
 	file1 = new H5File (FILE1, H5F_ACC_TRUNC);
 
-	// Try to truncate first file again. This should fail because file1
+	// Try to create first file again. This should fail because file1
 	// is the same file and is currently open. Skip it on OpenVMS because
         // it creates another version of the file.
 #ifndef H5_HAVE_FILE_VERSIONS
@@ -492,6 +492,116 @@ static void test_file_name()
 }   // test_file_name()
 
 
+#define NUM_OBJS	4
+#define NUM_ATTRS	3
+const int	RANK1 = 1;
+const int	ATTR1_DIM1 = 3;
+const H5std_string	FILE5("tfattrs.h5");
+const H5std_string	FATTR1_NAME ("file attribute 1");
+const H5std_string	FATTR2_NAME ("file attribute 2");
+int fattr_data[ATTR1_DIM1]={512,-234,98123}; /* Test data for file attribute */
+int dattr_data[ATTR1_DIM1]={256,-123,1000}; /* Test data for dataset attribute */
+static void test_file_attribute()
+{
+    int rdata[ATTR1_DIM1];
+    int i;
+
+    // Output message about test being performed
+    SUBTEST("File Attribute");
+
+    H5std_string file_name;
+    try {
+        // Create a file using default properties.
+	H5File file5(FILE5, H5F_ACC_TRUNC);
+
+	// Create the data space
+	hsize_t dims[RANK1] = {ATTR1_DIM1};
+	DataSpace space(RANK1, dims);
+
+	// Create two attributes for the file
+	Attribute fattr1(file5.createAttribute(FATTR1_NAME, PredType::NATIVE_FLOAT, space));
+	Attribute fattr2(file5.createAttribute(FATTR2_NAME, PredType::NATIVE_INT, space));
+
+	fattr2.write(PredType::NATIVE_INT, fattr_data);
+
+	try {
+	    // Try to create the same attribute again (should fail)
+	    Attribute fattr_dup(file5.createAttribute(FATTR2_NAME, PredType::NATIVE_INT, space));
+	    // Should FAIL but didn't, so throw an invalid action exception
+	    throw InvalidActionException("H5File createAttribute", "Attempted to create an existing attribute.");
+	}
+	catch( AttributeIException E ) // catch creating existing attribute
+	{} // do nothing, FAIL expected
+
+	// Create a new dataset
+	DataSet dataset(file5.createDataSet (DSETNAME, PredType::NATIVE_INT, space));
+
+	// Create an attribute for the dataset
+	Attribute dattr(dataset.createAttribute(DATTRNAME, PredType::NATIVE_INT, space));
+
+	// Write data to the second file attribute
+	dattr.write(PredType::NATIVE_INT, dattr_data);
+
+	// Test flushing out the data from the attribute object
+        dattr.flush(H5F_SCOPE_GLOBAL);
+
+	// Get and verify the number of all objects in the file
+	// Current: 1 file, 2 file attr, 1 ds, and 1 ds attr.
+	ssize_t num_objs = file5.getObjCount(H5F_OBJ_ALL);
+	verify_val(num_objs, 5, "H5File::getObjCount", __LINE__, __FILE__);
+
+	num_objs = file5.getObjCount(H5F_OBJ_GROUP);
+	verify_val(num_objs, 0, "H5File::getObjCount(H5F_OBJ_GROUP)", __LINE__, __FILE__);
+	num_objs = file5.getObjCount(H5F_OBJ_DATASET);
+	verify_val(num_objs, 1, "H5File::getObjCount(H5F_OBJ_DATASET)", __LINE__, __FILE__);
+	num_objs = file5.getObjCount(H5F_OBJ_ATTR);
+	verify_val(num_objs, 3, "H5File::getObjCount(H5F_OBJ_ATTR)", __LINE__, __FILE__);
+	num_objs = file5.getObjCount(H5F_OBJ_DATATYPE);
+	verify_val(num_objs, 0, "H5File::getObjCount(H5F_OBJ_DATATYPE)", __LINE__, __FILE__);
+	num_objs = file5.getObjCount(H5F_OBJ_FILE);
+	verify_val(num_objs, 1, "H5File::getObjCount(H5F_OBJ_FILE)", __LINE__, __FILE__);
+	
+	// Get the file name using the attributes
+	H5std_string fname = fattr1.getFileName();
+	verify_val(fname, FILE5, "H5File::getFileName()", __LINE__, __FILE__);
+
+	fname.clear();
+	fname = dattr.getFileName();
+	verify_val(fname, FILE5, "H5File::getFileName()", __LINE__, __FILE__);
+
+	// Get the class of a file attribute's datatype
+	H5T_class_t atclass = fattr1.getTypeClass();
+	verify_val(atclass, H5T_FLOAT, "Attribute::getTypeClass()", __LINE__, __FILE__);
+
+	// Get and verify the number of attributes attached to a file
+	int n_attrs = file5.getNumAttrs();
+	verify_val(n_attrs, 2, "H5File::getNumAttrs()", __LINE__, __FILE__);
+
+	// Get and verify the number of attributes attached to a dataset
+	n_attrs = 0;
+	n_attrs = dataset.getNumAttrs();
+	verify_val(n_attrs, 1, "DataSet::getNumAttrs()", __LINE__, __FILE__);
+
+	// Read back attribute's data
+	HDmemset(rdata, 0, sizeof(rdata));
+        dattr.read(PredType::NATIVE_INT, rdata);
+        /* Check results */
+        for (i = 0; i < ATTR1_DIM1; i++) {
+            if (rdata[i] != dattr_data[i]) {
+                H5_FAILED();
+		cerr << endl;
+                cerr << "element [" << i << "] is " << rdata[i] <<
+			"but should have been " << dattr_data[i] << endl;
+                }
+            }
+	PASSED();
+    }   // end of try block
+
+    catch (Exception E) {
+        issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}   // test_file_attribute()
+
 /*-------------------------------------------------------------------------
  * Function:    test_file
  *
@@ -518,6 +628,7 @@ void test_file()
     test_file_open();	// Test file opening
     test_file_size();	// Test file size
     test_file_name();	// Test getting file's name
+    test_file_attribute();	// Test file attribute feature
 }   // test_file()
 
 

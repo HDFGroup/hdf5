@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5IntType_H
-#define _H5IntType_H
+#ifndef __H5IntType_H
+#define __H5IntType_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -35,7 +35,7 @@ class H5_DLLCPP IntType : public AtomType {
 	// Sets the sign proprety for an integer type.
 	void setSign( H5T_sign_t sign ) const;
 
-	///\brief Returns this class name
+	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("IntType"); }
 
 	// Default constructor
@@ -53,4 +53,4 @@ class H5_DLLCPP IntType : public AtomType {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5IntType_H

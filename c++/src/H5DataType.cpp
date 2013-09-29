@@ -49,6 +49,13 @@ namespace H5 {
 #endif
 
 //--------------------------------------------------------------------------
+// Function:	DataType default constructor
+///\brief	Default constructor: Creates a stub datatype
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+DataType::DataType() : H5Object(), id(0) {}
+
+//--------------------------------------------------------------------------
 // Function:	DataType overloaded constructor
 ///\brief	Creates a datatype using an existing datatype's id
 ///\param	existing_id - IN: Id of the existing datatype
@@ -88,32 +95,6 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object()
 // Function:	DataType overload constructor - dereference
 ///\brief	Given a reference, ref, to an hdf5 group, creates a
 ///		DataType object
-///\param       obj - IN: Specifying location referenced object is in
-///\param	ref - IN: Reference pointer
-///\param	ref_type - IN: Reference type - default to H5R_OBJECT
-///\exception	H5::ReferenceException
-///\par Description
-///		\c obj can be DataSet, Group, or named DataType, that
-///		is a datatype that has been named by DataType::commit.
-// Programmer	Binh-Minh Ribler - Oct, 2006
-// Modification
-//	Jul, 2008
-//		Added for application convenience.
-//--------------------------------------------------------------------------
-DataType::DataType(H5Object& obj, const void* ref, H5R_type_t ref_type) : H5Object()
-{
-    try {
-	id = p_dereference(obj.getId(), ref, ref_type);
-    } catch (ReferenceException deref_error) {
-	throw ReferenceException("DataType constructor - located by an H5Object",
-		deref_error.getDetailMsg());
-    }
-}
-
-//--------------------------------------------------------------------------
-// Function:	DataType overload constructor - dereference
-///\brief	Given a reference, ref, to an hdf5 group, creates a
-///		DataType object
 ///\param       h5file - IN: Location referenced object is in
 ///\param	ref - IN: Reference pointer
 ///\param	ref_type - IN: Reference type - default to H5R_OBJECT
@@ -123,14 +104,9 @@ DataType::DataType(H5Object& obj, const void* ref, H5R_type_t ref_type) : H5Obje
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataType::DataType(H5File& h5file, const void* ref, H5R_type_t ref_type) : H5Object()
+DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type) : H5Object(), id(0)
 {
-    try {
-	id = p_dereference(h5file.getId(), ref, ref_type);
-    } catch (ReferenceException deref_error) {
-	throw ReferenceException("DataType constructor - located by an H5File",
-		deref_error.getDetailMsg());
-    }
+    id = H5Location::p_dereference(loc.getId(), ref, ref_type, "constructor - by dereference");
 }
 
 //--------------------------------------------------------------------------
@@ -146,22 +122,10 @@ DataType::DataType(H5File& h5file, const void* ref, H5R_type_t ref_type) : H5Obj
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataType::DataType(Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Object()
+DataType::DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Object(), id(0)
 {
-    try {
-	id = p_dereference(attr.getId(), ref, ref_type);
-    } catch (ReferenceException deref_error) {
-	throw ReferenceException("DataType constructor - located by an Attribute",
-		deref_error.getDetailMsg());
-    }
+    id = H5Location::p_dereference(attr.getId(), ref, ref_type, "constructor - by dereference");
 }
-
-//--------------------------------------------------------------------------
-// Function:	DataType default constructor
-///\brief	Default constructor: Creates a stub datatype
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-DataType::DataType() : H5Object(), id(0) {}
 
 //--------------------------------------------------------------------------
 // Function:	DataType copy constructor
@@ -679,54 +643,10 @@ bool DataType::isVariableStr() const
    }
 }
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-//--------------------------------------------------------------------------
-// Function:	DataType::getObjType
-///\brief	Retrieves the type of object that an object reference points to.
-///\param		ref      - IN: Reference to query
-///\param		ref_type - IN: Type of reference to query
-///\return	Object type, which can be one of the following:
-///			\li \c H5G_LINK Object is a symbolic link.
-///			\li \c H5G_GROUP Object is a group.
-///			\li \c H5G_DATASET   Object is a dataset.
-///			\li \c H5G_TYPE Object is a named datatype
-///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-H5G_obj_t DataType::getObjType(void *ref, H5R_type_t ref_type) const
-{
-   try {
-      return(p_get_obj_type(ref, ref_type));
-   }
-   catch (IdComponentException E) {
-      throw DataTypeIException(inMemFunc("getObjType"), E.getDetailMsg());
-   }
-}
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-
-//--------------------------------------------------------------------------
-// Function:	DataType::getRegion
-///\brief	Retrieves a dataspace with the region pointed to selected.
-///\param	ref      - IN: Reference to get region of
-///\param	ref_type - IN: Type of reference to get region of - default
-///\return	DataSpace instance
-///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
-{
-   try {
-      DataSpace dataspace(p_get_region(ref, ref_type));
-      return(dataspace);
-   }
-   catch (IdComponentException E) {
-      throw DataTypeIException(inMemFunc("getRegion"), E.getDetailMsg());
-   }
-}
-
 //--------------------------------------------------------------------------
 // Function:    DataType::getId
-// Purpose:     Get the id of this attribute
+///\brief       Get the id of this datatype
+///\return      Datatype identifier
 // Modification:
 //      May 2008 - BMR
 //              Class hierarchy is revised to address bugzilla 1068.  Class
@@ -740,6 +660,7 @@ hid_t DataType::getId() const
    return(id);
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    DataType::p_setId
 ///\brief       Sets the identifier of this object to a new value.
@@ -764,6 +685,7 @@ void DataType::p_setId(const hid_t new_id)
    // reset object's id to the given id
    id = new_id;
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	DataType::close

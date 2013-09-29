@@ -17,8 +17,8 @@
 // Class VarLenType inherits from DataType and provides wrappers for
 // the HDF5 C's Variable-length Datatypes.
 
-#ifndef _H5VarLenType_H
-#define _H5VarLenType_H
+#ifndef __H5VarLenType_H
+#define __H5VarLenType_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -30,7 +30,7 @@ class H5_DLLCPP VarLenType : public DataType {
 	// on the specified base type.
 	VarLenType(const DataType* base_type);
 
-	///\brief Returns this class name
+	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("VarLenType"); }
 
 	// Copy constructor: makes copy of the original object.
@@ -49,4 +49,4 @@ class H5_DLLCPP VarLenType : public DataType {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5VarLenType_H

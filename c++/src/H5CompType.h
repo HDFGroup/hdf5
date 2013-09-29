@@ -17,8 +17,8 @@
 // Class CompType inherits from DataType and provides accesses to a compound
 // datatype.
 
-#ifndef _H5CompType_H
-#define _H5CompType_H
+#ifndef __H5CompType_H
+#define __H5CompType_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -97,7 +97,7 @@ class H5_DLLCPP CompType : public DataType {
 	// Recursively removes padding from within this compound datatype.
 	void pack() const;
 
-	///\brief Returns this class name
+	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("CompType"); }
 
 	// Noop destructor.
@@ -111,4 +111,4 @@ class H5_DLLCPP CompType : public DataType {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5CompType_H

@@ -42,8 +42,13 @@
 
 #include "h5cpputil.h"	// C++ utilility header file
 
-const H5std_string	FILENAME("tattr.h5");
-const H5std_string	ATTR_TMP_NAME("temp_name");
+const H5std_string	FILE_BASIC("tattr_basic.h5");
+const H5std_string	FILE_COMPOUND("tattr_compound.h5");
+const H5std_string	FILE_SCALAR("tattr_scalar.h5");
+const H5std_string	FILE_MULTI("tattr_multi.h5");
+const H5std_string	FILE_DTYPE("tattr_dtype.h5");
+const H5std_string	ATTR_TMP_NAME("temp_attr_name");
+const H5std_string	FATTR_TMP_NAME("temp_fattr_name");
 const size_t		ATTR_MAX_DIMS = 7;
 
 /* 3-D dataset with fixed dimensions */
@@ -62,6 +67,10 @@ const H5std_string ATTR1_NAME("Attr1");
 const int ATTR1_RANK = 1;
 const int ATTR1_DIM1 = 3;
 int attr_data1[ATTR1_DIM1]={512,-234,98123}; /* Test data for 1st attribute */
+
+// File attribute, using the same rank and dimensions as ATTR1_NAME's
+const H5std_string FATTR1_NAME("File Attr1");
+const H5std_string FATTR2_NAME("File Attr2");
 
 const H5std_string ATTR2_NAME("Attr2");
 const int ATTR2_RANK = 2;
@@ -121,7 +130,7 @@ static void test_attr_basic_write()
 
     try {
 	// Create file
-	H5File fid1 (FILENAME, H5F_ACC_TRUNC);
+	H5File fid1 (FILE_BASIC, H5F_ACC_TRUNC);
 
 	// Create dataspace for dataset
 	DataSpace ds_space (SPACE1_RANK, dims1);
@@ -135,6 +144,12 @@ static void test_attr_basic_write()
 
 	// Create dataspace for attribute
 	DataSpace att_space (ATTR1_RANK, dims2);
+
+	// Create a file attribute
+	Attribute file_attr2 = fid1.createAttribute (FATTR1_NAME, PredType::NATIVE_INT, att_space);
+
+	// Create a file attribute
+	Attribute file_attr1 = fid1.createAttribute (FATTR2_NAME, PredType::NATIVE_INT, att_space);
 
 	// Create an attribute for the dataset
 	Attribute ds_attr1 = dataset.createAttribute (ATTR1_NAME, PredType::NATIVE_INT, att_space);
@@ -163,8 +178,9 @@ static void test_attr_basic_write()
 	    if(attr_data1[i]!=read_data1[i])
 		TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d,read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
 
-	// Create another attribute for this dataset
-	Attribute ds_attr2 = dataset.createAttribute (ATTR1A_NAME, PredType::NATIVE_INT, att_space);
+	// Create two more attributes for this dataset, but only write to one.
+	Attribute ds_attr2 = dataset.createAttribute (ATTR2_NAME, PredType::NATIVE_INT, att_space);
+	Attribute ds_attr3 = dataset.createAttribute (ATTR3_NAME, PredType::NATIVE_INT, att_space);
 
 	// Write attribute information
 	ds_attr2.write (PredType::NATIVE_INT, attr_data1a);
@@ -180,6 +196,7 @@ static void test_attr_basic_write()
 	// Close both attributes
 	ds_attr1.close();
 	ds_attr2.close();
+	ds_attr3.close();
 
 	/*
 	 *		Test attribute with group
@@ -240,14 +257,32 @@ static void test_attr_rename()
 
     try {
 	// Open file
-	H5File fid1(FILENAME, H5F_ACC_RDWR);
+	H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
+
+	// Check rename of attribute belonging to a file
+
+	// Change attribute name
+	fid1.renameAttr(FATTR1_NAME, FATTR_TMP_NAME);
+
+	// Open attribute again
+	Attribute fattr1(fid1.openAttribute(FATTR_TMP_NAME));
+
+	// Verify new attribute name
+	H5std_string fattr_name = fattr1.getName();
+	verify_val(fattr_name, FATTR_TMP_NAME, "Attribute::getName", __LINE__, __FILE__);
+
+	int num_attrs = fid1.getNumAttrs();
+	verify_val(num_attrs, 2, "Attribute::getNumAttrs", __LINE__, __FILE__);
+
+	// Change first file attribute back to the original name
+	fid1.renameAttr(FATTR_TMP_NAME, FATTR1_NAME);
 
 	// Open the dataset
 	DataSet dataset = fid1.openDataSet(DSET1_NAME);
 
-	// Check rename
+	// Check rename of attribute belonging to a dataset
 
-	// change attribute name
+	// Change attribute name
 	dataset.renameAttr(ATTR1_NAME, ATTR_TMP_NAME);
 
 	// Open attribute again
@@ -269,11 +304,11 @@ static void test_attr_rename()
     	attr1.close();
 
 	// Open the second attribute
-	Attribute attr2(dataset.openAttribute(ATTR1A_NAME));
+	Attribute attr2(dataset.openAttribute(ATTR2_NAME));
 
 	// Verify second attribute name
 	H5std_string attr2_name = attr2.getName();
-	verify_val(attr2_name, ATTR1A_NAME, "Attribute::getName", __LINE__, __FILE__);
+	verify_val(attr2_name, ATTR2_NAME, "Attribute::getName", __LINE__, __FILE__);
 
 	// Read attribute information immediately, without closing attribute
 	attr2.read (PredType::NATIVE_INT, read_data1);
@@ -311,14 +346,14 @@ static void test_attr_basic_read()
 
     try {
 	// Open file
-	H5File fid1(FILENAME, H5F_ACC_RDWR);
+	H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
 
 	// Open the dataset
 	DataSet dataset = fid1.openDataSet(DSET1_NAME);
 
 	// Verify the correct number of attributes
 	int num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 2, "H5Object::getNumAttrs", __LINE__, __FILE__);
+	verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
 	// Open an attribute for the dataset
 	Attribute ds_attr=dataset.openAttribute(ATTR1_NAME);
@@ -378,7 +413,7 @@ static void test_attr_compound_write()
 
     try {
 	// Create file
-	H5File fid1(FILENAME.c_str(), H5F_ACC_TRUNC);
+	H5File fid1(FILE_COMPOUND.c_str(), H5F_ACC_TRUNC);
 
 	// Create dataspace for dataset
 	hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
@@ -442,14 +477,14 @@ static void test_attr_compound_read()
 
     try {
 	// Open file
-	H5File fid1(FILENAME, H5F_ACC_RDWR);
+	H5File fid1(FILE_COMPOUND, H5F_ACC_RDWR);
 
 	// Open the dataset
 	DataSet dataset = fid1.openDataSet(DSET1_NAME);
 
 	// Verify the correct number of attributes
 	int num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 1, "H5Object::getNumAttrs", __LINE__, __FILE__);
+	verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
 	// Open 1st attribute for the dataset
 	Attribute attr = dataset.openAttribute((unsigned)0);
@@ -571,7 +606,7 @@ static void test_attr_scalar_write()
 
     try {
 	// Create file
-	H5File fid1(FILENAME, H5F_ACC_TRUNC);
+	H5File fid1(FILE_SCALAR, H5F_ACC_TRUNC);
 
 	// Create dataspace for dataset
 	hsize_t	dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
@@ -625,14 +660,14 @@ static void test_attr_scalar_read()
 
     try {
 	// Open file
-	H5File fid1(FILENAME, H5F_ACC_RDWR);
+	H5File fid1(FILE_SCALAR, H5F_ACC_RDWR);
 
 	// Open the dataset
 	DataSet dataset = fid1.openDataSet(DSET1_NAME);
 
 	// Verify the correct number of attributes
 	int num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 1, "H5Object::getNumAttrs", __LINE__, __FILE__);
+	verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
 	// Open an attribute for the dataset
 	Attribute ds_attr=dataset.openAttribute(ATTR5_NAME);
@@ -669,7 +704,7 @@ static void test_attr_mult_write()
 
     try {
 	// Create file
-	H5File fid1 (FILENAME, H5F_ACC_TRUNC);
+	H5File fid1 (FILE_MULTI, H5F_ACC_TRUNC);
 
 	// Create dataspace for dataset
 	hsize_t	dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
@@ -746,14 +781,14 @@ static void test_attr_mult_read()
 
     try {
 	// Open file
-	H5File fid1(FILENAME, H5F_ACC_RDWR);
+	H5File fid1(FILE_MULTI, H5F_ACC_RDWR);
 
 	// Open the dataset
 	DataSet dataset = fid1.openDataSet(DSET1_NAME);
 
 	// Verify the correct number of attributes
 	int num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 3, "H5Object::getNumAttrs", __LINE__, __FILE__);
+	verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
 	// Open 1st attribute for the dataset
 	Attribute attr = dataset.openAttribute((unsigned)0);
@@ -929,22 +964,42 @@ static void test_attr_mult_read()
 static void test_attr_delete()
 {
     H5std_string  attr_name; // Buffer for attribute names
+    int ii;
 
-	// Output message about test being performed
+    // Output message about test being performed
     SUBTEST("Removing Attribute Function");
 
     try {
-	// Open file
-	H5File fid1(FILENAME, H5F_ACC_RDWR);
+	// Open file.
+	H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
+
+	// Get the number of file attributes
+	int num_attrs = fid1.getNumAttrs();
+	verify_val(num_attrs, 2, "H5File::getNumAttrs", __LINE__, __FILE__);
+
+	// Delete the second file attribute
+	fid1.removeAttr(FATTR2_NAME);
+
+	// Get the number of file attributes
+	num_attrs = fid1.getNumAttrs();
+	verify_val(num_attrs, 1, "H5File::getNumAttrs", __LINE__, __FILE__);
+
+	// Verify the name of the only file attribute left
+	Attribute fattr = fid1.openAttribute((uint)0);
+	H5std_string attr_name = fattr.getName();
+	verify_val(attr_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+	fattr.close();
+	
+	// Test deleting non-existing attribute
 
 	// Open the dataset
 	DataSet dataset = fid1.openDataSet(DSET1_NAME);
 
 	// Verify the correct number of attributes
-	int num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 3, "H5Object::getNumAttrs", __LINE__, __FILE__);
+	num_attrs = dataset.getNumAttrs();
+	verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
-	// Try to delete bogus attribute, should fail.
+	// Try to delete bogus attribute, should fail
 	try {
 	    dataset.removeAttr("Bogus");
 
@@ -954,16 +1009,18 @@ static void test_attr_delete()
 	catch (AttributeIException E) // catching invalid removing attribute
         {} // do nothing, exception expected
 
+	// Test deleting dataset's attributes
+
 	// Verify the correct number of attributes
 	num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 3, "H5Object::getNumAttrs", __LINE__, __FILE__);
+	verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
 	// Delete middle (2nd) attribute
 	dataset.removeAttr(ATTR2_NAME);
 
 	// Verify the correct number of attributes
 	num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 2, "H5Object::getNumAttrs", __LINE__, __FILE__);
+	verify_val(num_attrs, 2, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
 	// Open 1st attribute for the dataset
 	Attribute attr = dataset.openAttribute((unsigned)0);
@@ -989,9 +1046,9 @@ static void test_attr_delete()
 
 	// Verify the correct number of attributes
 	num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 1, "H5Object::getNumAttrs", __LINE__, __FILE__);
+	verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
-	// Open last (formally 3rd) attribute for the dataset
+	// Open the only attribute for the dataset (formally 3rd)
 	attr = dataset.openAttribute((unsigned)0);
 
 	// Verify Name
@@ -1005,7 +1062,7 @@ static void test_attr_delete()
 
 	// Verify the correct number of attributes
 	num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 0, "H5Object::getNumAttrs", __LINE__, __FILE__);
+	verify_val(num_attrs, 0, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
 	PASSED();
     } // end try block
@@ -1035,19 +1092,19 @@ static void test_attr_dtype_shared()
 
     try {
 	// Create a file
-	H5File fid1(FILENAME, H5F_ACC_TRUNC);
+	H5File fid1(FILE_DTYPE, H5F_ACC_TRUNC);
 
 	// Close file
 	fid1.close();
 
 	// Get size of file
 	h5_stat_size_t empty_filesize;       // Size of empty file
-	empty_filesize = h5_get_file_size(FILENAME.c_str(), H5P_DEFAULT);
+	empty_filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
 	if (empty_filesize < 0)
             TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
 	// Open the file again
-	fid1.openFile(FILENAME, H5F_ACC_RDWR);
+	fid1.openFile(FILE_DTYPE, H5F_ACC_RDWR);
 
 	// Enclosing to work around the issue of unused variables and/or
 	// objects created by copy constructors stay around until end of
@@ -1120,7 +1177,7 @@ static void test_attr_dtype_shared()
 	fid1.close();
 
 	// Open the file again
-	fid1.openFile(FILENAME, H5F_ACC_RDWR);
+	fid1.openFile(FILE_DTYPE, H5F_ACC_RDWR);
 
 	{ // Second enclosed block...
 
@@ -1161,7 +1218,7 @@ static void test_attr_dtype_shared()
 	fid1.close();
 
 	// Check size of file
-	filesize = h5_get_file_size(FILENAME.c_str(), H5P_DEFAULT);
+	filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
 	verify_val((long)filesize, (long)empty_filesize, "Checking file size", __LINE__, __FILE__);
 
 	PASSED();
@@ -1192,7 +1249,7 @@ static void test_string_attr()
 
     try {
 	// Create file
-	H5File fid1(FILENAME, H5F_ACC_RDWR);
+	H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
 
 	//
 	// Fixed-lenth string attributes
@@ -1349,6 +1406,6 @@ extern "C"
 #endif
 void cleanup_attr()
 {
-    HDremove(FILENAME.c_str());
+    //HDremove(FILENAME.c_str());
 }
 

@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5FileCreatPropList_H
-#define _H5FileCreatPropList_H
+#ifndef __H5FileCreatPropList_H
+#define __H5FileCreatPropList_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -60,7 +60,7 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 	// indexing chunked datasets.
 	void setIstorek( unsigned ik ) const;
 
-	///\brief Returns this class name
+	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("FileCreatPropList"); }
 
 	// Copy constructor: creates a copy of a FileCreatPropList object.
@@ -76,4 +76,4 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5FileCreatPropList_H

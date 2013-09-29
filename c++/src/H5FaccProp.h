@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5FileAccPropList_H
-#define _H5FileAccPropList_H
+#ifndef __H5FileAccPropList_H
+#define __H5FileAccPropList_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -123,7 +123,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
 	// Returns garbage collecting references setting.
 	unsigned getGcReferences() const;
 
-	///\brief Returns this class name
+	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("FileAccPropList"); }
 
 	// Copy constructor: creates a copy of a FileAccPropList object.
@@ -139,4 +139,4 @@ class H5_DLLCPP FileAccPropList : public PropList {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5FileAccPropList_H
