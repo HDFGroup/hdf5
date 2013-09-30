@@ -19,7 +19,7 @@ $! Build examples after you install libraries and examples.
 $! install.com installs binaries under the HDF5 directory in the top
 $! source directory.
 $!
-$ define zlib_dir disk$user:[hdfgroup.zlib-1_2_5_ieee]
+$ define zlib_dir SYS$SYSUSERS:[lu.zlib-1_2_5]
 $ ccopt = "/float=ieee_float/nowarnings/define=H5_VMS/include=zlib_dir"
 $ ccc := cc 'ccopt /include=([-.-.include])
 $ type sys$input
