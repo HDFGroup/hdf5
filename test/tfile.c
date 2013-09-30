@@ -994,7 +994,7 @@ test_get_obj_ids(void)
     for(n = 0; n < NDSETS; n++) {
          sprintf(dname, "dataset%d", n);
          dset[n] = H5Dcreate2(fid, dname, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-         CHECK(dset[m], FAIL, "H5Dcreate2");
+         CHECK(dset[n], FAIL, "H5Dcreate2");
     }
 
     /* The number of opened objects should be NGROUPS + NDSETS + 1.  One is opened file. */
