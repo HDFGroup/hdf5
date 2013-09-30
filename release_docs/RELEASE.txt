@@ -90,7 +90,16 @@ New Features
 
     C++ API
     -------
-    - None
+    - A new class, H5::H5Location, is added to represent the location concept
+      in the C library.  It is a base class to H5::H5File and H5::H5Ojbect,
+      whose member functions are moved into H5::H5Location.  H5::H5File can
+      now inherent those functions.  As a result, an H5::H5File object can have
+      an attribute. (BMR - 2013/09/27)
+    - Added wrappers for H5Rget_obj_type2 and two overloaded functions that
+      do not require the name of the object. (BMR - 2013/09/28)
+    - Added tutorial examples to c++/examples.  They can be installed by
+      "make install-examples" and, in the installed directory, they can be
+      executed by running the script file run-c++-ex.sh. (BMR - 2013/09/28)
 
 
 Support for New Platforms, Languages, and Compilers
