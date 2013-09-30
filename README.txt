@@ -21,20 +21,17 @@ The following  mailing lists are currently set up for HDF5 Library users:
     hdf-forum   - For general discussion of the HDF5 library with
                   other users.
 
-    hdf5dev     - For discussion of the HDF5 library development
-                  with developers and other interested parties.
-
-To subscribe to a list, send mail to "<list>-subscribe@hdfgroup.org".
+To subscribe to a list, send mail to "<list>-subscribe@lists.hdfgroup.org".
 where <list> is the name of the list.  For example, send a request 
 to subscribe to the 'news' mail list to the following address:
-    news-subscribe@hdfgroup.org
+    news-subscribe@lists.hdfgroup.org
 
-Messages to be sent to the list should be sent to "<list>@hdfgroup.org".
+Messages sent to the list should be addressed to "<list>@lists.hdfgroup.org".
 
 Periodic code snapshots are provided at the following URL:
     ftp://ftp.hdfgroup.uiuc.edu/pub/outgoing/hdf5/snapshots
-Please read the README.txt file in that directory before working with a library
-snapshot.
+Please read the README.txt file in that directory before working with a 
+library snapshot.
 
 The HDF5 website is located at http://hdfgroup.org/HDF5/
 
