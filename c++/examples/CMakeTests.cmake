@@ -35,12 +35,12 @@
       NAME cpp_ex_tutr-clear-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
-          cmprss.h5
-          dset.h5
-          extend.h5
-          group.h5
-          groups.h5
-          subset.h5
+          h5tutr_cmprss.h5
+          h5tutr_dset.h5
+          h5tutr_extend.h5
+          h5tutr_group.h5
+          h5tutr_groups.h5
+          h5tutr_subset.h5
   )
   IF (NOT "${last_test}" STREQUAL "")
     SET_TESTS_PROPERTIES (cpp_ex_tutr-clear-objects PROPERTIES DEPENDS ${last_test})
@@ -56,4 +56,6 @@
   ENDFOREACH (example ${tutr_examples})
 #the following dependicies are handled by the order of the files
 #  SET_TESTS_PROPERTIES(cpp_ex_h5tutr_crtatt PROPERTIES DEPENDS cpp_ex_h5tutr_crtdat)
+#  SET_TESTS_PROPERTIES(cpp_ex_h5tutr_rdwt PROPERTIES DEPENDS cpp_ex_h5tutr_crtdat)
+#  SET_TESTS_PROPERTIES(cpp_ex_h5tutr_crtgrpd PROPERTIES DEPENDS cpp_ex_h5tutr_crtgrpar)
   
