@@ -120,6 +120,8 @@ Bug Fixes since HDF5-1.8.11
     - Modified H5detect.c to scan floating point types for padding bits before
       analyzing the type further.  This should fix problems with gcc 4.8
       (NAF - 2013/09/19 - HDFFV-8523/HDFFV-8500)
+    - HDF5 rpaths are no longer encoded in the library files when configured
+      with --disable-sharedlib-rpath. (LRK-2013-09-23 - HDFFV-8276)
 
     Library
     -------
@@ -146,6 +148,9 @@ Bug Fixes since HDF5-1.8.11
               HDFFV-8134 (ADB - 2013/08/01).
     - h5dump correctly exports subsetted data to a file, using the --output
       option.  (ADB  - 2013/06/07 HDFFV-8447)
+    - h5cc and other compile scripts now default to linking shared libraries
+      when HDF5 is configured with the --disable-static option.  
+      (LRK - 2013-09-23 - HDFFV-8141)
 
     F90 API
     -------
@@ -183,37 +188,37 @@ They are built with the configure process unless specified otherwise.
     Linux 2.6.18-308.13.1.el5PAE  GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP i686 i686 i386         compilers for 32-bit applications;
     (jam)                             Version 4.1.2 20080704 (Red Hat 4.1.2-54)
-                                      Version 4.6.3
+                                      Version 4.8.1
                                   PGI C, Fortran, C++ Compilers for 32-bit
                                   applications;
-                                      Version 11.9-0
-                                      Version 12.5-0
+                                      Version 13.7-0
                                   Intel(R) C, C++, Fortran Compiler for 32-bit
                                   applications;
-                                      Version 12.1 (Build 20110811)
-                                      Version 12.1 (Build 20120212)
+                                      Version 13.1.3 (Build 20130607)
 
     Linux 2.6.18-308.16.1.el5     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers for 64-bit applications;
-    (koala)                           Version 4.1.2 20080704 (Red Hat 4.1.2-52)
-                                      Version 4.6.3
+    (koala)                           Version 4.1.2 20080704 (Red Hat 4.1.2-54)
+                                      Version 4.8.1
                                   PGI C, Fortran, C++ for 64-bit target on 
                                   x86-64;
-                                      Version 11.9-0 
-                                      Version 12.5-0
+                                      Version 13.7-0 
                                   Intel(R) C, C++, Fortran Compilers for 
                                   applications running on Intel(R) 64; 
-                                      Version 12.1 (Build 20110811)
-                                      Version 12.1 (Build 20120212)
+                                      Version 13.1.3 (Build 20130607)
 
-    Linux 2.6.32-358.2.1.el6      GNU C (gcc), Fortran (gfortran), C++ (g++)
+    Linux 2.6.32-358.18.1.el6      GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
     (platypus)                       Version 4.4.7 20120313
+                                     Version 4.8.1
+                                  PGI C, Fortran, C++ for 64-bit target on 
+                                  x86-64;
+                                      Version 13.7-0 
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
-                                     Version 12.1 20120212
+                                     Version 13.1.3 (Build 20130607)
 
-    Linux 2.6.32-358.2.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
+    Linux 2.6.32-358.18.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
     #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
     (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
                                   IBM XL C/C++ V11.1
@@ -245,11 +250,11 @@ They are built with the configure process unless specified otherwise.
 
     Mac OS X Lion 10.7.3          Apple clang/clang++ version 3.0 from Xcode 4.6.1
     64-bit                        gfortran GNU Fortran (GCC) 4.6.2
-    (duck)                        Intel icc/icpc/ifort version 13.0
+    (duck)                        Intel icc/icpc/ifort version 13.0.3
 
     Mac OS X Mountain Lion 10.8.1 Apple clang/clang++ version 4.2 from Xcode 4.6.1
     64-bit    			  gfortran GNU Fortran (GCC) 4.6.2
-    (wren)                        Intel icc/icpc/ifort version 13.0.1.119
+    (wren)                        Intel icc/icpc/ifort version 13.0.3
 
     OpenVMS  IA64 V8.4            HP C V7.3-018         
     (Boeing)                      HP Fortran V8.2-104939-50H96
@@ -271,7 +276,7 @@ Tested Configuration Features Summary
 Platform                              C         F90/   F90      C++  zlib  SZIP
                                       parallel  F2003  parallel
 Solaris2.11 32-bit                      n        y/y    n        y    y     y
-Solaris2.11 64-bit                      n        y/n    n        y    y     y
+Solaris2.11 64-bit                      n        y/y    n        y    y     y
 Windows 7                               y        y/y    n        y    y     y
 Windows 7 x64                           y        y/y    n        y    y     y
 Windows 7 Cygwin                        n        y/n    n        y    y     y
@@ -287,7 +292,7 @@ CentOS 5.9 Linux 2.6.18-308 i686 PGI    n        y/y    n        y    y     y
 CentOS 5.9 Linux 2.6.18 x86_64 GNU      y        y/y    y        y    y     y
 CentOS 5.9 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
 CentOS 5.9 Linux 2.6.18 x86_64 PGI      n        y/y    n        y    y     y
-CentOS 6.4 Linux 2.6.32 x86_64 GNU      n        y/n    n        y    y     y
+CentOS 6.4 Linux 2.6.32 x86_64 GNU      n        y/y    n        y    y     y
 CentOS 6.4 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
 Linux 2.6.32-358.2.1.el6.ppc64          n        y/n    n        y    y     y
 OpenVMS IA64 V8.4                       n        y/n    n        y    y     n
@@ -332,15 +337,15 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP x86_64 GNU/Linux           gcc 4.1.2 and gfortran 4.1.2
     (koala)                       g95 (GCC 4.0.3 (g95 0.94!)
                                   
-    FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
-    (loyalty)                     gcc 4.6.1 20110422
-                                  g++ 4.6.1 20110422
-                                  gfortran 4.6.1 20110422
+    FreeBSD 8.2-STABLE i386       gcc 4.5.4 [FreeBSD] 20110526
+    (loyalty)                     gcc 4.6.1 20110527
+                                  g++ 4.6.1 20110527
+                                  gfortran 4.6.1 20110527
 
-    FreeBSD 8.2-STABLE amd64      gcc 4.2.1 [FreeBSD] 20070719
-    (freedom)                     gcc 4.6.1 20110422
-                                  g++ 4.6.1 20110422
-                                  gfortran 4.6.1 20110422
+    FreeBSD 8.2-STABLE amd64      gcc 4.5.4 [FreeBSD] 20110526
+    (freedom)                     gcc 4.6.1 20110527
+                                  g++ 4.6.1 20110527
+                                  gfortran 4.6.1 20110527
 
     Debian7.1.0 3.2.0-4-amd64 #1 SMP Debian 3.2.46-1 x86_64 GNU/Linux
                                   gcc (Debian 4.7.2-5) 4.7.2
