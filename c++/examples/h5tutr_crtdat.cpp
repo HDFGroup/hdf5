@@ -27,7 +27,7 @@
     using namespace H5;
 #endif
 
-const H5std_string	FILE_NAME("dset.h5");
+const H5std_string	FILE_NAME("h5tutr_dset.h5");
 const H5std_string	DATASET_NAME("dset");
 const int	 NX = 4;                     // dataset dimensions
 const int	 NY = 6;

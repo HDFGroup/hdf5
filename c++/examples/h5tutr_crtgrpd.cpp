@@ -31,7 +31,7 @@
 #endif  // H5_NO_STD
 #endif
 
-const H5std_string FILE_NAME("groups.h5");
+const H5std_string FILE_NAME("h5tutr_groups.h5");
 const H5std_string DATASET_NAME1("/MyGroup/dset1");
 const H5std_string DATASET_NAME2("dset2");
 const int	RANK = 2;

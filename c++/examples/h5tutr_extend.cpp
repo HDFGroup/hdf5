@@ -31,7 +31,7 @@
 #endif  // H5_NO_STD
 #endif
 
-const H5std_string	FILE_NAME("extend.h5");
+const H5std_string	FILE_NAME("h5tutr_extend.h5");
 const H5std_string	DATASETNAME("ExtendibleArray");
 
 int main (void)
