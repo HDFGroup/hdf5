@@ -31,7 +31,7 @@
 #endif  // H5_NO_STD
 #endif
 
-const H5std_string	FILE_NAME("cmprss.h5");
+const H5std_string	FILE_NAME("h5tutr_cmprss.h5");
 const H5std_string	DATASET_NAME("Compressed_Data");
 const int	DIM0 = 100;
 const int	DIM1 = 20;
