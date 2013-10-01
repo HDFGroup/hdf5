@@ -254,7 +254,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* MSC - retrieve metadata - need IOD*/
@@ -273,15 +273,16 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_close(mdkv_oh, NULL, NULL))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close meta data KV handle");
 
+    /* MSC - fake stuff for now*/
+    map_oh.cookie = 1;
+    output.keytype_id = H5Tcopy(H5T_NATIVE_INT);
+    output.valtype_id = H5Tcopy(H5T_NATIVE_INT);
+    output.mcpl_id = H5P_GROUP_CREATE_DEFAULT;
+
     output.iod_id = map_id;
     output.mdkv_id = sp[0];
     output.attrkv_id = sp[1];
     output.iod_oh = map_oh;
-
-    /* MSC - fake datatypes for now*/
-    output.keytype_id = H5Tcopy(H5T_NATIVE_INT);
-    output.valtype_id = H5Tcopy(H5T_NATIVE_INT);
-    output.mcpl_id = H5P_GROUP_CREATE_DEFAULT;
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with map open, sending response to client\n");

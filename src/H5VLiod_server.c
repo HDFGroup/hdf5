@@ -140,6 +140,8 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     MERCURY_HANDLER_REGISTER("link_remove", H5VL_iod_server_link_remove, 
                              link_op_in_t, ret_t);
 
+    MERCURY_HANDLER_REGISTER("object_open_by_token", H5VL_iod_server_object_open_by_token, 
+                             object_token_in_t, iod_handle_t);
     MERCURY_HANDLER_REGISTER("object_open", H5VL_iod_server_object_open, 
                              object_op_in_t, object_open_out_t);
     MERCURY_HANDLER_REGISTER("object_copy", H5VL_iod_server_object_copy, 
@@ -2015,6 +2017,60 @@ H5VL_iod_server_link_remove(hg_handle_t handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_link_remove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_open_by_token
+ *
+ * Purpose:	Function shipper registered call for Object Open by token.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_object_open_by_token(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    object_token_in_t *input = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (object_token_in_t *)
+                H5MM_malloc(sizeof(object_token_in_t))))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_object_open_by_token_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_object_open_by_token() */
 
 
 /*-------------------------------------------------------------------------

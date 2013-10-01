@@ -82,6 +82,7 @@ static hg_id_t H5VL_LINK_EXISTS_ID;
 static hg_id_t H5VL_LINK_GET_INFO_ID;
 static hg_id_t H5VL_LINK_GET_VAL_ID;
 static hg_id_t H5VL_LINK_REMOVE_ID;
+static hg_id_t H5VL_OBJECT_OPEN_BY_TOKEN_ID;
 static hg_id_t H5VL_OBJECT_OPEN_ID;
 static hg_id_t H5VL_OBJECT_COPY_ID;
 static hg_id_t H5VL_OBJECT_EXISTS_ID;
@@ -528,7 +529,7 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
 
     /* forward the call to the ION */
     if(HG_Forward(PEER, op_id, input, output, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship file create");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
 
     /* Store/wait on request */
     if(do_async) {
@@ -667,6 +668,8 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     H5VL_LINK_ITERATE_ID = MERCURY_REGISTER("link_iterate", link_op_in_t, ret_t);
     H5VL_LINK_REMOVE_ID  = MERCURY_REGISTER("link_remove", link_op_in_t, ret_t);
 
+    H5VL_OBJECT_OPEN_BY_TOKEN_ID = MERCURY_REGISTER("object_open_by_token", 
+                                                    object_token_in_t, iod_handle_t);
     H5VL_OBJECT_OPEN_ID   = MERCURY_REGISTER("object_open", object_op_in_t, object_open_out_t);
     H5VL_OBJECT_COPY_ID   = MERCURY_REGISTER("object_copy", object_copy_in_t, ret_t);
     H5VL_OBJECT_EXISTS_ID = MERCURY_REGISTER("object_exists", object_op_in_t, htri_t);
@@ -5070,6 +5073,277 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_obj_open_token
+ *
+ * Purpose:	Opens a object inside IOD file using it IOD ID
+ *
+ * Return:	Success:	object id. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              September, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, void **req)
+{
+    object_token_in_t input;
+    const uint8_t *buf_ptr = (const uint8_t *)token;
+    H5O_type_t obj_type;
+    iod_obj_id_t iod_id, mdkv_id, attrkv_id;
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDmemcpy(&iod_id, buf_ptr, sizeof(iod_obj_id_t));
+    buf_ptr += sizeof(iod_obj_id_t);
+    HDmemcpy(&mdkv_id, buf_ptr, sizeof(iod_obj_id_t));
+    buf_ptr += sizeof(iod_obj_id_t);
+    HDmemcpy(&attrkv_id, buf_ptr, sizeof(iod_obj_id_t));
+    buf_ptr += sizeof(iod_obj_id_t);
+    HDmemcpy(&obj_type, buf_ptr, sizeof(H5O_type_t));
+    buf_ptr += sizeof(H5O_type_t);
+    
+    switch(obj_type) {
+    case H5O_TYPE_DATASET:
+        {
+            H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+
+            /* allocate the dataset object that is returned to the user */
+            if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+            dset->remote_dset.iod_oh.cookie = IOD_OH_UNDEFINED;
+            dset->remote_dset.iod_id = iod_id;
+            dset->remote_dset.mdkv_id = mdkv_id;
+            dset->remote_dset.attrkv_id = attrkv_id;
+
+            dset->dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+            dset->remote_dset.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
+
+            /* decode dtype */
+            {
+                H5T_t *dt = NULL;
+                size_t dt_size;
+
+                HDmemcpy(&dt_size, buf_ptr, sizeof(size_t));
+                buf_ptr += sizeof(size_t);
+                /* Create datatype by decoding buffer */
+                if(NULL == (dt = H5T_decode((const unsigned char *)buf_ptr)))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
+                /* Register the type */
+                if((dset->remote_dset.type_id = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register data type");
+                buf_ptr += dt_size;
+            }
+
+            /* decode dspace */
+            {
+                H5S_t *ds;
+                size_t space_size;
+
+                HDmemcpy(&space_size, buf_ptr, sizeof(size_t));
+                buf_ptr += sizeof(size_t);
+                if((ds = H5S_decode((const unsigned char *)buf_ptr)) == NULL)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object");
+                /* Register the type  */
+                if((dset->remote_dset.space_id = H5I_register(H5I_DATASPACE, ds, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, NULL, "unable to register dataspace");
+                buf_ptr += space_size;
+            }
+
+            input.coh = rc->file->remote_file.coh;
+            input.iod_id = iod_id;
+
+            /* set common object parameters */
+            dset->common.obj_type = H5I_DATASET;
+            dset->common.file = rc->file;
+            dset->common.file->nopen_objs ++;
+            dset->common.obj_name = NULL;
+
+            if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
+                                            (H5VL_iod_object_t *)dset, 1, 0, NULL,
+                                            (H5VL_iod_req_info_t *)rc, &input, 
+                                            &dset->remote_dset.iod_oh, dset, req) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship dataset open_by_token");
+
+            ret_value = (void *)dset;
+            *opened_type = H5I_DATASET;
+            break;
+        }
+    case H5O_TYPE_NAMED_DATATYPE:
+        {
+            H5VL_iod_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
+
+            /* allocate the datatype object that is returned to the user */
+            if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+            dtype->remote_dtype.iod_oh.cookie = IOD_OH_UNDEFINED;
+            dtype->remote_dtype.iod_id = iod_id;
+            dtype->remote_dtype.mdkv_id = mdkv_id;
+            dtype->remote_dtype.attrkv_id = attrkv_id;
+
+            dtype->tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+            dtype->remote_dtype.tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
+
+            /* decode dtype */
+            {
+                H5T_t *dt = NULL;
+                size_t dt_size;
+
+                HDmemcpy(&dt_size, buf_ptr, sizeof(size_t));
+                buf_ptr += sizeof(size_t);
+                /* Create datatype by decoding buffer */
+                if(NULL == (dt = H5T_decode((const unsigned char *)buf_ptr)))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
+                /* Register the type */
+                if((dtype->remote_dtype.type_id = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register data type");
+                buf_ptr += dt_size;
+            }
+
+            /* set the input structure for the HG encode routine */
+            input.coh = rc->file->remote_file.coh;
+            input.iod_id = iod_id;
+
+            /* set common object parameters */
+            dtype->common.obj_type = H5I_DATATYPE;
+            dtype->common.file = rc->file;
+            dtype->common.file->nopen_objs ++;
+            dtype->common.obj_name = NULL;
+
+            if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
+                                            (H5VL_iod_object_t *)dtype, 1, 0, NULL,
+                                            (H5VL_iod_req_info_t *)rc, &input, 
+                                            &dtype->remote_dtype.iod_oh, dtype, req) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship datatype open_by_token");
+
+            ret_value = (void *)dtype;
+            *opened_type = H5I_DATATYPE;
+            break;
+        }
+    case H5O_TYPE_GROUP:
+        {
+            H5VL_iod_group_t  *grp = NULL; /* the group object that is created and passed to the user */
+
+            /* allocate the dataset object that is returned to the user */
+            if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+            grp->remote_group.iod_oh.cookie = IOD_OH_UNDEFINED;
+            grp->remote_group.iod_id = iod_id;
+            grp->remote_group.mdkv_id = mdkv_id;
+            grp->remote_group.attrkv_id = attrkv_id;
+
+            grp->remote_group.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+            grp->gapl_id = H5P_GROUP_ACCESS_DEFAULT;
+
+            /* set the input structure for the HG encode routine */
+            input.coh = rc->file->remote_file.coh;
+            input.iod_id = iod_id;
+
+            /* set common object parameters */
+            grp->common.obj_type = H5I_GROUP;
+            grp->common.file = rc->file;
+            grp->common.file->nopen_objs ++;
+            grp->common.obj_name = NULL;
+
+            if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
+                                            (H5VL_iod_object_t *)grp, 1, 0, NULL,
+                                            (H5VL_iod_req_info_t *)rc, &input, 
+                                            &grp->remote_group.iod_oh, grp, req) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship group open_by_token");
+
+            ret_value = (void *)grp;
+            *opened_type = H5I_GROUP;
+            break;
+        }
+    case H5O_TYPE_MAP:
+        {
+            H5VL_iod_map_t  *map = NULL; /* the map object that is created and passed to the user */
+
+            /* allocate the dataset object that is returned to the user */
+            if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+            map->remote_map.iod_oh.cookie = IOD_OH_UNDEFINED;
+            map->remote_map.iod_id = iod_id;
+            map->remote_map.mdkv_id = mdkv_id;
+            map->remote_map.attrkv_id = attrkv_id;
+
+            map->remote_map.mcpl_id = H5P_GROUP_CREATE_DEFAULT;
+            map->mapl_id = H5P_GROUP_ACCESS_DEFAULT;
+
+            /* decode key_type */
+            {
+                H5T_t *dt = NULL;
+                size_t dt_size;
+
+                HDmemcpy(&dt_size, buf_ptr, sizeof(size_t));
+                buf_ptr += sizeof(size_t);
+                /* Create datatype by decoding buffer */
+                if(NULL == (dt = H5T_decode((const unsigned char *)buf_ptr)))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
+                /* Register the type */
+                if((map->remote_map.keytype_id = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register data type");
+                buf_ptr += dt_size;
+            }
+            /* decode val_type */
+            {
+                H5T_t *dt = NULL;
+                size_t dt_size;
+
+                HDmemcpy(&dt_size, buf_ptr, sizeof(size_t));
+                buf_ptr += sizeof(size_t);
+                /* Create datatype by decoding buffer */
+                if(NULL == (dt = H5T_decode((const unsigned char *)buf_ptr)))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
+                /* Register the type */
+                if((map->remote_map.valtype_id = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register data type");
+                buf_ptr += dt_size;
+            }
+
+            /* set the input structure for the HG encode routine */
+            input.coh = rc->file->remote_file.coh;
+            input.iod_id = iod_id;
+
+            /* set common object parameters */
+            map->common.obj_type = H5I_MAP;
+            map->common.file = rc->file;
+            map->common.file->nopen_objs ++;
+            map->common.obj_name = NULL;
+
+#if H5VL_IOD_DEBUG
+            printf("Map open by token %llu: ID %llu\n", 
+                   g_axe_id, input.iod_id);
+#endif
+
+            if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
+                                            (H5VL_iod_object_t *)map, 1, 0, NULL, 
+                                            (H5VL_iod_req_info_t *)rc, &input, 
+                                            &map->remote_map, map, req) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship map open");
+
+            ret_value = (void *)map;
+            *opened_type = H5I_MAP;
+            break;
+        }
+    case H5O_TYPE_UNKNOWN:
+    case H5O_TYPE_NTYPES:
+    default:
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "not a valid file object (dataset, map, group, or datatype)");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}/* end H5VL_iod_obj_open_token() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_object_open
  *
  * Purpose:	Opens a object inside IOD file.
@@ -5092,6 +5366,8 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
     H5RC_t *rc = NULL;
     size_t num_parents = 0;
     char *loc_name = NULL;
+    object_op_in_t input;
+    H5VL_iod_remote_object_t remote_obj; /* generic remote object structure */
     H5VL_iod_request_t **parent_reqs = NULL;
     void *ret_value;
 
@@ -5107,407 +5383,236 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a READ CONTEXT ID")
 
-    if(H5VL_OBJECT_BY_ADDR == loc_params.type) {
-        switch(loc_params.loc_data.loc_by_addr.obj_type) {
-        case H5O_TYPE_DATASET:
-            {
-                dset_open_in_t input;
-                H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+            /* allocate parent request array */
+            if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                        H5MM_malloc(sizeof(H5VL_iod_request_t *))))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate parent req element");
 
-                /* allocate the dataset object that is returned to the user */
-                if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+    /* retrieve parent requests */
+    if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)rc, parent_reqs, &num_parents) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to retrieve parent requests");
 
-                dset->remote_dset.iod_oh.cookie = IOD_OH_UNDEFINED;
-                dset->remote_dset.iod_id = IOD_ID_UNDEFINED;
-                dset->remote_dset.dcpl_id = -1;
-                dset->remote_dset.type_id = -1;
-                dset->remote_dset.space_id = -1;
+    /* retrieve IOD info of location object */
+    if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, &input.loc_mdkv_id, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
-                input.coh = obj->file->remote_file.coh;
-                input.loc_id = loc_params.loc_data.loc_by_addr.addr;
-                input.loc_oh.cookie = IOD_OH_UNDEFINED;
-                input.name = ".";
-                input.dapl_id = H5P_DATASET_ACCESS_DEFAULT;
-                input.rcxt_num  = rc->c_version;
-                input.cs_scope = obj->file->md_integrity_scope;
+    if(H5VL_OBJECT_BY_SELF == loc_params.type)
+        loc_name = strdup(".");
+    else if(H5VL_OBJECT_BY_NAME == loc_params.type)
+        loc_name = strdup(loc_params.loc_data.loc_by_name.name);
 
-                dset->dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+    /* set the input structure for the HG encode routine */
+    input.coh = obj->file->remote_file.coh;
+    input.loc_name = loc_name;
+    input.rcxt_num  = rc->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
-                /* set common object parameters */
-                dset->common.obj_type = H5I_DATASET;
-                dset->common.file = obj->file;
-                dset->common.file->nopen_objs ++;
-                dset->common.obj_name = NULL;
+    /* H5Oopen has to be synchronous */
+    if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_ID, HG_OBJECT_OPEN, 
+                                    obj, 1, num_parents, parent_reqs,
+                                    (H5VL_iod_req_info_t *)rc, &input, 
+                                    &remote_obj, &remote_obj, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship object open");
 
-                if(H5VL__iod_create_and_forward(H5VL_DSET_OPEN_ID, HG_DSET_OPEN, 
-                                                (H5VL_iod_object_t *)dset, 1, 0, NULL,
-                                                (H5VL_iod_req_info_t *)rc, &input, &dset->remote_dset, dset, req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship dataset create");
+    *opened_type = remote_obj.obj_type;
 
-                *opened_type = H5I_DATASET;
-                ret_value = (void *)dset;
-                break;
+    if(loc_name) 
+        HDfree(loc_name);
+
+    switch(remote_obj.obj_type) {
+    case H5I_DATASET:
+        {
+            H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+
+            /* allocate the dataset object that is returned to the user */
+            if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+            dset->remote_dset.iod_oh.cookie = remote_obj.iod_oh.cookie;
+            dset->remote_dset.iod_id = remote_obj.iod_id;
+            dset->remote_dset.mdkv_id = remote_obj.mdkv_id;
+            dset->remote_dset.attrkv_id = remote_obj.attrkv_id;
+            dset->remote_dset.dcpl_id = remote_obj.cpl_id;
+            dset->remote_dset.type_id = remote_obj.type_id;
+            dset->remote_dset.space_id = remote_obj.space_id;
+
+            if(dset->remote_dset.dcpl_id == H5P_DEFAULT){
+                dset->remote_dset.dcpl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT);
             }
-        case H5O_TYPE_NAMED_DATATYPE:
+
+            HDassert(dset->remote_dset.dcpl_id);
+            HDassert(dset->remote_dset.type_id);
+            HDassert(dset->remote_dset.space_id);
+
+            /* setup the local dataset struct */
+            /* store the entire path of the dataset locally */
             {
-                dtype_open_in_t input;
-                H5VL_iod_dtype_t *dtype = NULL; /* the dataset object that is created and passed to the user */
+                size_t obj_name_len = HDstrlen(obj->obj_name);
+                size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
 
-                /* allocate the datatype object that is returned to the user */
-                if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
-
-                dtype->remote_dtype.iod_oh.cookie = IOD_OH_UNDEFINED;
-                dtype->remote_dtype.iod_id = IOD_ID_UNDEFINED;
-                dtype->remote_dtype.tcpl_id = -1;
-                dtype->remote_dtype.type_id = -1;
-
-                /* set the input structure for the HG encode routine */
-                input.coh = obj->file->remote_file.coh;
-                input.loc_id = loc_params.loc_data.loc_by_addr.addr;
-                input.loc_oh.cookie = IOD_OH_UNDEFINED;
-                input.name = ".";
-                input.tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
-                input.rcxt_num  = rc->c_version;
-                input.cs_scope = obj->file->md_integrity_scope;
-
-                dtype->tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
-
-                /* set common object parameters */
-                dtype->common.obj_type = H5I_DATATYPE;
-                dtype->common.file = obj->file;
-                dtype->common.file->nopen_objs ++;
-                dtype->common.obj_name = NULL;
-
-                if(H5VL__iod_create_and_forward(H5VL_DTYPE_OPEN_ID, HG_DTYPE_OPEN, 
-                                                (H5VL_iod_object_t *)dtype, 1, 0, NULL,
-                                                (H5VL_iod_req_info_t *)rc, &input, &dtype->remote_dtype, dtype, req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship datatype open");
-
-                *opened_type = H5I_DATATYPE;
-                ret_value = (void *)dtype;
-                break;
+                if (NULL == (dset->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+                HDmemcpy(dset->common.obj_name, obj->obj_name, obj_name_len);
+                HDmemcpy(dset->common.obj_name+obj_name_len, 
+                         loc_params.loc_data.loc_by_name.name, name_len);
+                dset->common.obj_name[obj_name_len+name_len] = '\0';
             }
-        case H5O_TYPE_GROUP:
-            {
-                group_open_in_t input;
-                H5VL_iod_group_t  *grp = NULL; /* the group object that is created and passed to the user */
 
-                /* allocate the dataset object that is returned to the user */
-                if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+            if((dset->dapl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
 
-                grp->remote_group.iod_oh.cookie = IOD_OH_UNDEFINED;
-                grp->remote_group.iod_id = IOD_ID_UNDEFINED;
-                grp->remote_group.gcpl_id = -1;
+            /* set common object parameters */
+            dset->common.obj_type = H5I_DATASET;
+            dset->common.file = obj->file;
+            dset->common.file->nopen_objs ++;
 
-                /* set the input structure for the HG encode routine */
-                input.coh = obj->file->remote_file.coh;
-                input.loc_id = loc_params.loc_data.loc_by_addr.addr;
-                input.loc_oh.cookie = IOD_OH_UNDEFINED;
-                input.name = ".";
-                input.gapl_id = H5P_GROUP_ACCESS_DEFAULT;
-                input.rcxt_num  = rc->c_version;
-                input.cs_scope = obj->file->md_integrity_scope;
-
-                grp->gapl_id = H5P_GROUP_ACCESS_DEFAULT;
-
-                /* set common object parameters */
-                grp->common.obj_type = H5I_GROUP;
-                grp->common.file = obj->file;
-                grp->common.file->nopen_objs ++;
-                grp->common.obj_name = NULL;
-
-                if(H5VL__iod_create_and_forward(H5VL_GROUP_OPEN_ID, HG_GROUP_OPEN, 
-                                                (H5VL_iod_object_t *)grp, 1, 0, NULL,
-                                                (H5VL_iod_req_info_t *)rc, &input, &grp->remote_group, grp, req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship group open");
-
-                *opened_type = H5I_GROUP;
-                ret_value = (void *)grp;
-
-                break;
-            }
-        case H5O_TYPE_MAP:
-            {
-                map_open_in_t input;
-                H5VL_iod_map_t  *map = NULL; /* the map object that is created and passed to the user */
-
-                /* allocate the dataset object that is returned to the user */
-                if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
-
-                map->remote_map.iod_oh.cookie = IOD_OH_UNDEFINED;
-                map->remote_map.iod_id = IOD_ID_UNDEFINED;
-                map->remote_map.keytype_id = -1;
-                map->remote_map.valtype_id = -1;
-
-                /* set the input structure for the HG encode routine */
-                input.coh = obj->file->remote_file.coh;
-                input.loc_id = loc_params.loc_data.loc_by_addr.addr;
-                input.loc_oh.cookie = IOD_OH_UNDEFINED;
-                input.name = ".";
-                input.mapl_id = H5P_GROUP_ACCESS_DEFAULT;
-                input.rcxt_num  = rc->c_version;
-                input.cs_scope = obj->file->md_integrity_scope;
-
-                map->mapl_id = H5P_GROUP_ACCESS_DEFAULT;
-
-                /* set common object parameters */
-                map->common.obj_type = H5I_MAP;
-                map->common.file = obj->file;
-                map->common.file->nopen_objs ++;
-                map->common.obj_name = NULL;
-
-                if(H5VL__iod_create_and_forward(H5VL_MAP_OPEN_ID, HG_MAP_OPEN, 
-                                                (H5VL_iod_object_t *)map, 1, 0, NULL, 
-                                                (H5VL_iod_req_info_t *)rc, &input, &map->remote_map, map, req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship map open");
-
-                *opened_type = H5I_MAP;
-                ret_value = (void *)map;
-
-                break;
-            }
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "not a valid file object (dataset, map, group, or datatype)");
+            ret_value = (void *)dset;
+            break;
         }
-    }
-    else {
-        object_op_in_t input;
-        H5VL_iod_remote_object_t remote_obj; /* generic remote object structure */
+    case H5I_DATATYPE:
+        {
+            H5VL_iod_dtype_t *dtype = NULL; /* the dataset object that is created and passed to the user */
 
-        /* allocate parent request array */
-        if(NULL == (parent_reqs = (H5VL_iod_request_t **)
-                    H5MM_malloc(sizeof(H5VL_iod_request_t *))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate parent req element");
+            /* allocate the dataset object that is returned to the user */
+            if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-        /* retrieve parent requests */
-        if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)rc, parent_reqs, &num_parents) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to retrieve parent requests");
+            dtype->remote_dtype.iod_oh.cookie = remote_obj.iod_oh.cookie;
+            dtype->remote_dtype.iod_id = remote_obj.iod_id;
+            dtype->remote_dtype.mdkv_id = remote_obj.mdkv_id;
+            dtype->remote_dtype.attrkv_id = remote_obj.attrkv_id;
+            dtype->remote_dtype.tcpl_id = remote_obj.cpl_id;
+            dtype->remote_dtype.type_id = remote_obj.type_id;
 
-        /* retrieve IOD info of location object */
-        if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, &input.loc_mdkv_id, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
-
-        if(H5VL_OBJECT_BY_SELF == loc_params.type)
-            loc_name = strdup(".");
-        else if(H5VL_OBJECT_BY_NAME == loc_params.type)
-            loc_name = strdup(loc_params.loc_data.loc_by_name.name);
-
-        /* set the input structure for the HG encode routine */
-        input.coh = obj->file->remote_file.coh;
-        input.loc_name = loc_name;
-        input.rcxt_num  = rc->c_version;
-        input.cs_scope = obj->file->md_integrity_scope;
-
-        /* H5Oopen has to be synchronous */
-        if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_ID, HG_OBJECT_OPEN, 
-                                        obj, 1, num_parents, parent_reqs,
-                                        (H5VL_iod_req_info_t *)rc, &input, 
-                                        &remote_obj, &remote_obj, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship object open");
-
-        *opened_type = remote_obj.obj_type;
-
-        if(loc_name) 
-            HDfree(loc_name);
-
-        switch(remote_obj.obj_type) {
-        case H5I_DATASET:
-            {
-                H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
-
-                /* allocate the dataset object that is returned to the user */
-                if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
-
-                dset->remote_dset.iod_oh.cookie = remote_obj.iod_oh.cookie;
-                dset->remote_dset.iod_id = remote_obj.iod_id;
-                dset->remote_dset.mdkv_id = remote_obj.mdkv_id;
-                dset->remote_dset.attrkv_id = remote_obj.attrkv_id;
-                dset->remote_dset.dcpl_id = remote_obj.cpl_id;
-                dset->remote_dset.type_id = remote_obj.type_id;
-                dset->remote_dset.space_id = remote_obj.space_id;
-
-                if(dset->remote_dset.dcpl_id == H5P_DEFAULT){
-                    dset->remote_dset.dcpl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT);
-                }
-
-                HDassert(dset->remote_dset.dcpl_id);
-                HDassert(dset->remote_dset.type_id);
-                HDassert(dset->remote_dset.space_id);
-
-                /* setup the local dataset struct */
-                /* store the entire path of the dataset locally */
-                {
-                    size_t obj_name_len = HDstrlen(obj->obj_name);
-                    size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
-
-                    if (NULL == (dset->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-                    HDmemcpy(dset->common.obj_name, obj->obj_name, obj_name_len);
-                    HDmemcpy(dset->common.obj_name+obj_name_len, 
-                             loc_params.loc_data.loc_by_name.name, name_len);
-                    dset->common.obj_name[obj_name_len+name_len] = '\0';
-                }
-
-                if((dset->dapl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT)) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
-
-                /* set common object parameters */
-                dset->common.obj_type = H5I_DATASET;
-                dset->common.file = obj->file;
-                dset->common.file->nopen_objs ++;
-
-                ret_value = (void *)dset;
-                break;
+            if(dtype->remote_dtype.tcpl_id == H5P_DEFAULT){
+                dtype->remote_dtype.tcpl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT);
             }
-        case H5I_DATATYPE:
+
+            HDassert(dtype->remote_dtype.tcpl_id);
+            HDassert(dtype->remote_dtype.type_id);
+
+            /* setup the local dataset struct */
+            /* store the entire path of the dataset locally */
             {
-                H5VL_iod_dtype_t *dtype = NULL; /* the dataset object that is created and passed to the user */
+                size_t obj_name_len = HDstrlen(obj->obj_name);
+                size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
 
-                /* allocate the dataset object that is returned to the user */
-                if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
-
-                dtype->remote_dtype.iod_oh.cookie = remote_obj.iod_oh.cookie;
-                dtype->remote_dtype.iod_id = remote_obj.iod_id;
-                dtype->remote_dtype.mdkv_id = remote_obj.mdkv_id;
-                dtype->remote_dtype.attrkv_id = remote_obj.attrkv_id;
-                dtype->remote_dtype.tcpl_id = remote_obj.cpl_id;
-                dtype->remote_dtype.type_id = remote_obj.type_id;
-
-                if(dtype->remote_dtype.tcpl_id == H5P_DEFAULT){
-                    dtype->remote_dtype.tcpl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT);
-                }
-
-                HDassert(dtype->remote_dtype.tcpl_id);
-                HDassert(dtype->remote_dtype.type_id);
-
-                /* setup the local dataset struct */
-                /* store the entire path of the dataset locally */
-                {
-                    size_t obj_name_len = HDstrlen(obj->obj_name);
-                    size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
-
-                    if (NULL == (dtype->common.obj_name = (char *)HDmalloc
-                                 (obj_name_len + name_len + 1)))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-                    HDmemcpy(dtype->common.obj_name, obj->obj_name, obj_name_len);
-                    HDmemcpy(dtype->common.obj_name+obj_name_len, 
-                             loc_params.loc_data.loc_by_name.name, name_len);
-                    dtype->common.obj_name[obj_name_len+name_len] = '\0';
-                }
-
-                if((dtype->tapl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT)) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
-
-                /* set common object parameters */
-                dtype->common.obj_type = H5I_DATATYPE;
-                dtype->common.file = obj->file;
-                dtype->common.file->nopen_objs ++;
-
-                ret_value = (void *)dtype;
-                break;
+                if (NULL == (dtype->common.obj_name = (char *)HDmalloc
+                             (obj_name_len + name_len + 1)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+                HDmemcpy(dtype->common.obj_name, obj->obj_name, obj_name_len);
+                HDmemcpy(dtype->common.obj_name+obj_name_len, 
+                         loc_params.loc_data.loc_by_name.name, name_len);
+                dtype->common.obj_name[obj_name_len+name_len] = '\0';
             }
-        case H5I_GROUP:
-            {
-                H5VL_iod_group_t  *grp = NULL; /* the group object that is created and passed to the user */
 
-                /* allocate the dataset object that is returned to the user */
-                if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+            if((dtype->tapl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
 
-                grp->remote_group.iod_oh.cookie = remote_obj.iod_oh.cookie;
-                grp->remote_group.iod_id = remote_obj.iod_id;
-                grp->remote_group.mdkv_id = remote_obj.mdkv_id;
-                grp->remote_group.attrkv_id = remote_obj.attrkv_id;
-                grp->remote_group.gcpl_id = remote_obj.cpl_id;
+            /* set common object parameters */
+            dtype->common.obj_type = H5I_DATATYPE;
+            dtype->common.file = obj->file;
+            dtype->common.file->nopen_objs ++;
 
-                if(grp->remote_group.gcpl_id == H5P_DEFAULT){
-                    grp->remote_group.gcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
-                }
-
-                HDassert(grp->remote_group.gcpl_id);
-
-                /* setup the local dataset struct */
-                /* store the entire path of the dataset locally */
-                {
-                    size_t obj_name_len = HDstrlen(obj->obj_name);
-                    size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
-
-                    if (NULL == (grp->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-                    HDmemcpy(grp->common.obj_name, obj->obj_name, obj_name_len);
-                    HDmemcpy(grp->common.obj_name+obj_name_len, 
-                             loc_params.loc_data.loc_by_name.name, name_len);
-                    grp->common.obj_name[obj_name_len+name_len] = '\0';
-                }
-
-                if((grp->gapl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT)) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy gapl");
-
-                /* set common object parameters */
-                grp->common.obj_type = H5I_GROUP;
-                grp->common.file = obj->file;
-                grp->common.file->nopen_objs ++;
-
-                ret_value = (void *)grp;
-                break;
-            }
-        case H5I_MAP:
-            {
-                H5VL_iod_map_t  *map = NULL; /* the map object that is created and passed to the user */
-
-                /* allocate the dataset object that is returned to the user */
-                if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
-
-                map->remote_map.iod_oh.cookie = remote_obj.iod_oh.cookie;
-                map->remote_map.iod_id = remote_obj.iod_id;
-                map->remote_map.mdkv_id = remote_obj.mdkv_id;
-                map->remote_map.attrkv_id = remote_obj.attrkv_id;
-                map->remote_map.mcpl_id = remote_obj.cpl_id;
-
-                if(map->remote_map.mcpl_id == H5P_DEFAULT){
-                    map->remote_map.mcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
-                }
-
-                HDassert(map->remote_map.mcpl_id);
-
-                /* setup the local dataset struct */
-                /* store the entire path of the dataset locally */
-                {
-                    size_t obj_name_len = HDstrlen(obj->obj_name);
-                    size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
-
-                    if (NULL == (map->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-                    HDmemcpy(map->common.obj_name, obj->obj_name, obj_name_len);
-                    HDmemcpy(map->common.obj_name+obj_name_len, 
-                             loc_params.loc_data.loc_by_name.name, name_len);
-                    map->common.obj_name[obj_name_len+name_len] = '\0';
-                }
-
-                if((map->mapl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT)) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy mapl");
-
-                /* set common object parameters */
-                map->common.obj_type = H5I_MAP;
-                map->common.file = obj->file;
-                map->common.file->nopen_objs ++;
-
-                ret_value = (void *)map;
-                break;
-            }
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, NULL, "not a valid file object (dataset, map, group, or datatype)")
-                break;
+            ret_value = (void *)dtype;
+            break;
         }
+    case H5I_GROUP:
+        {
+            H5VL_iod_group_t  *grp = NULL; /* the group object that is created and passed to the user */
+
+            /* allocate the dataset object that is returned to the user */
+            if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+            grp->remote_group.iod_oh.cookie = remote_obj.iod_oh.cookie;
+            grp->remote_group.iod_id = remote_obj.iod_id;
+            grp->remote_group.mdkv_id = remote_obj.mdkv_id;
+            grp->remote_group.attrkv_id = remote_obj.attrkv_id;
+            grp->remote_group.gcpl_id = remote_obj.cpl_id;
+
+            if(grp->remote_group.gcpl_id == H5P_DEFAULT){
+                grp->remote_group.gcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
+            }
+
+            HDassert(grp->remote_group.gcpl_id);
+
+            /* setup the local dataset struct */
+            /* store the entire path of the dataset locally */
+            {
+                size_t obj_name_len = HDstrlen(obj->obj_name);
+                size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
+
+                if (NULL == (grp->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+                HDmemcpy(grp->common.obj_name, obj->obj_name, obj_name_len);
+                HDmemcpy(grp->common.obj_name+obj_name_len, 
+                         loc_params.loc_data.loc_by_name.name, name_len);
+                grp->common.obj_name[obj_name_len+name_len] = '\0';
+            }
+
+            if((grp->gapl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy gapl");
+
+            /* set common object parameters */
+            grp->common.obj_type = H5I_GROUP;
+            grp->common.file = obj->file;
+            grp->common.file->nopen_objs ++;
+
+            ret_value = (void *)grp;
+            break;
+        }
+    case H5I_MAP:
+        {
+            H5VL_iod_map_t  *map = NULL; /* the map object that is created and passed to the user */
+
+            /* allocate the dataset object that is returned to the user */
+            if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+            map->remote_map.iod_oh.cookie = remote_obj.iod_oh.cookie;
+            map->remote_map.iod_id = remote_obj.iod_id;
+            map->remote_map.mdkv_id = remote_obj.mdkv_id;
+            map->remote_map.attrkv_id = remote_obj.attrkv_id;
+            map->remote_map.mcpl_id = remote_obj.cpl_id;
+
+            if(map->remote_map.mcpl_id == H5P_DEFAULT){
+                map->remote_map.mcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
+            }
+
+            HDassert(map->remote_map.mcpl_id);
+
+            /* setup the local dataset struct */
+            /* store the entire path of the dataset locally */
+            {
+                size_t obj_name_len = HDstrlen(obj->obj_name);
+                size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
+
+                if (NULL == (map->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+                HDmemcpy(map->common.obj_name, obj->obj_name, obj_name_len);
+                HDmemcpy(map->common.obj_name+obj_name_len, 
+                         loc_params.loc_data.loc_by_name.name, name_len);
+                map->common.obj_name[obj_name_len+name_len] = '\0';
+            }
+
+            if((map->mapl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy mapl");
+
+            /* set common object parameters */
+            map->common.obj_type = H5I_MAP;
+            map->common.file = obj->file;
+            map->common.file->nopen_objs ++;
+
+            ret_value = (void *)map;
+            break;
+        }
+    default:
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, NULL, "not a valid file object (dataset, map, group, or datatype)")
+            break;
     }
-done:
+
+ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_object_open */
 
@@ -6780,216 +6885,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_cancel
- *
- * Purpose:	Cancel an asynchronous operation
- *
- * Return:	Success:	SUCCEED
- *		Failure:	FAIL
- *
- * Programmer:	Mohamad Chaarawi
- *		April 2013
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5VL_iod_cancel(void **req, H5ES_status_t *status)
-{
-    H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
-    hg_status_t hg_status;
-    int         ret;
-    H5VL_iod_state_t state;
-    hg_request_t hg_req;       /* Local function shipper request, for sync. operations */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* request has completed already, can not cancel */
-    if(request->state == H5VL_IOD_COMPLETED) {
-        /* Call the completion function to check return values and free resources */
-        if(H5VL_iod_request_complete(request->obj->file, request) < 0)
-            fprintf(stderr, "Operation Failed!\n");
-
-        *status = request->status;
-
-        /* free the mercury request */
-        request->req = H5MM_xfree(request->req);
-
-        /* Decrement ref count on request */
-        H5VL_iod_request_decr_rc(request);
-    }
-
-    /* forward the cancel call to the IONs */
-    if(HG_Forward(PEER, H5VL_CANCEL_OP_ID, &request->axe_id, &state, &hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute write");
-
-    /* Wait on the cancel request to return */
-    ret = HG_Wait(hg_req, HG_MAX_IDLE_TIME, &hg_status);
-
-    /* If the actual wait Fails, then the status of the cancel
-       operation is unknown */
-    if(HG_FAIL == ret)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to wait on cancel request")
-    else {
-        if(hg_status) {
-            /* If the operation to be canceled has already completed,
-               mark it so and complete it locally */
-            if(state == H5VL_IOD_COMPLETED) {
-                if(H5VL_IOD_PENDING == request->state) {
-                    if(H5VL_iod_request_wait(request->obj->file, request) < 0)
-                        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request");
-                }
-
-                *status = request->status;
-
-                /* free the mercury request */
-                request->req = H5MM_xfree(request->req);
-
-                /* Decrement ref count on request */
-                H5VL_iod_request_decr_rc(request);
-            }
-
-            /* if the status returned is cancelled, then cancel it
-               locally too */
-            else if (state == H5VL_IOD_CANCELLED) {
-                request->status = H5ES_STATUS_CANCEL;
-                request->state = H5VL_IOD_CANCELLED;
-                if(H5VL_iod_request_cancel(request->obj->file, request) < 0)
-                    fprintf(stderr, "Operation Failed!\n");
-
-                *status = request->status;
-
-                /* free the mercury request */
-                request->req = H5MM_xfree(request->req);
-
-                /* Decrement ref count on request */
-                H5VL_iod_request_decr_rc(request);
-            }
-        }
-        else
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Cancel Operation taking too long. Aborting");
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_cancel() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_iod_test
- *
- * Purpose:	Test for an asynchronous operation's completion
- *
- * Return:	Success:	SUCCEED
- *		Failure:	FAIL
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, March 20, 2013
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5VL_iod_test(void **req, H5ES_status_t *status)
-{
-    H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
-    hg_status_t hg_status;
-    int         ret;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Test completion of the request if is still pending */
-    if(H5VL_IOD_PENDING == request->state) {
-        ret = HG_Wait(*((hg_request_t *)request->req), 0, &hg_status);
-        if(HG_FAIL == ret) {
-            fprintf(stderr, "failed to wait on request\n");
-            request->status = H5ES_STATUS_FAIL;
-            request->state = H5VL_IOD_COMPLETED;
-
-            /* remove the request from the file linked list */
-            H5VL_iod_request_delete(request->obj->file, request);
-
-            /* free the mercury request */
-            request->req = H5MM_xfree(request->req);
-
-            /* Decrement ref count on request */
-            H5VL_iod_request_decr_rc(request);
-        }
-        else {
-            if(hg_status) {
-                request->status = H5ES_STATUS_SUCCEED;
-                request->state = H5VL_IOD_COMPLETED;
-
-                /* Call the completion function to check return values and free resources */
-                if(H5VL_iod_request_complete(request->obj->file, request) < 0)
-                    fprintf(stderr, "Operation Failed!\n");
-
-                *status = request->status;
-
-                /* free the mercury request */
-                request->req = H5MM_xfree(request->req);
-
-                /* Decrement ref count on request */
-                H5VL_iod_request_decr_rc(request);
-            }
-            /* request has not finished, set return status appropriately */
-            else
-                *status = request->status;
-        }
-    }
-    else {
-        *status = request->status;
-        /* free the mercury request */
-        request->req = H5MM_xfree(request->req);
-
-        /* Decrement ref count on request */
-        H5VL_iod_request_decr_rc(request);
-    }
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5VL_iod_test() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_iod_wait
- *
- * Purpose:	Wait for an asynchronous operation to complete
- *
- * Return:	Success:	SUCCEED
- *		Failure:	FAIL
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, March 20, 2013
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5VL_iod_wait(void **req, H5ES_status_t *status)
-{
-    H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Wait on completion of the request if it was not completed */
-    if(H5VL_IOD_PENDING == request->state) {
-        if(H5VL_iod_request_wait(request->obj->file, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
-    }
-
-    *status = request->status;
-
-    /* free the mercury request */
-    request->req = H5MM_xfree(request->req);
-
-    /* Decrement ref count on request */
-    H5VL_iod_request_decr_rc(request);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_wait() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_rc_acquire
  *
  * Purpose:	Forwards an acquire for a read context to IOD.
@@ -7602,5 +7497,215 @@ H5VL_iod_tr_abort(H5TR_t *tr, void **req)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_tr_abort() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_cancel
+ *
+ * Purpose:	Cancel an asynchronous operation
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		April 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_cancel(void **req, H5ES_status_t *status)
+{
+    H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
+    hg_status_t hg_status;
+    int         ret;
+    H5VL_iod_state_t state;
+    hg_request_t hg_req;       /* Local function shipper request, for sync. operations */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* request has completed already, can not cancel */
+    if(request->state == H5VL_IOD_COMPLETED) {
+        /* Call the completion function to check return values and free resources */
+        if(H5VL_iod_request_complete(request->obj->file, request) < 0)
+            fprintf(stderr, "Operation Failed!\n");
+
+        *status = request->status;
+
+        /* free the mercury request */
+        request->req = H5MM_xfree(request->req);
+
+        /* Decrement ref count on request */
+        H5VL_iod_request_decr_rc(request);
+    }
+
+    /* forward the cancel call to the IONs */
+    if(HG_Forward(PEER, H5VL_CANCEL_OP_ID, &request->axe_id, &state, &hg_req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute write");
+
+    /* Wait on the cancel request to return */
+    ret = HG_Wait(hg_req, HG_MAX_IDLE_TIME, &hg_status);
+
+    /* If the actual wait Fails, then the status of the cancel
+       operation is unknown */
+    if(HG_FAIL == ret)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to wait on cancel request")
+    else {
+        if(hg_status) {
+            /* If the operation to be canceled has already completed,
+               mark it so and complete it locally */
+            if(state == H5VL_IOD_COMPLETED) {
+                if(H5VL_IOD_PENDING == request->state) {
+                    if(H5VL_iod_request_wait(request->obj->file, request) < 0)
+                        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request");
+                }
+
+                *status = request->status;
+
+                /* free the mercury request */
+                request->req = H5MM_xfree(request->req);
+
+                /* Decrement ref count on request */
+                H5VL_iod_request_decr_rc(request);
+            }
+
+            /* if the status returned is cancelled, then cancel it
+               locally too */
+            else if (state == H5VL_IOD_CANCELLED) {
+                request->status = H5ES_STATUS_CANCEL;
+                request->state = H5VL_IOD_CANCELLED;
+                if(H5VL_iod_request_cancel(request->obj->file, request) < 0)
+                    fprintf(stderr, "Operation Failed!\n");
+
+                *status = request->status;
+
+                /* free the mercury request */
+                request->req = H5MM_xfree(request->req);
+
+                /* Decrement ref count on request */
+                H5VL_iod_request_decr_rc(request);
+            }
+        }
+        else
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Cancel Operation taking too long. Aborting");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_cancel() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_test
+ *
+ * Purpose:	Test for an asynchronous operation's completion
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, March 20, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_test(void **req, H5ES_status_t *status)
+{
+    H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
+    hg_status_t hg_status;
+    int         ret;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Test completion of the request if is still pending */
+    if(H5VL_IOD_PENDING == request->state) {
+        ret = HG_Wait(*((hg_request_t *)request->req), 0, &hg_status);
+        if(HG_FAIL == ret) {
+            fprintf(stderr, "failed to wait on request\n");
+            request->status = H5ES_STATUS_FAIL;
+            request->state = H5VL_IOD_COMPLETED;
+
+            /* remove the request from the file linked list */
+            H5VL_iod_request_delete(request->obj->file, request);
+
+            /* free the mercury request */
+            request->req = H5MM_xfree(request->req);
+
+            /* Decrement ref count on request */
+            H5VL_iod_request_decr_rc(request);
+        }
+        else {
+            if(hg_status) {
+                request->status = H5ES_STATUS_SUCCEED;
+                request->state = H5VL_IOD_COMPLETED;
+
+                /* Call the completion function to check return values and free resources */
+                if(H5VL_iod_request_complete(request->obj->file, request) < 0)
+                    fprintf(stderr, "Operation Failed!\n");
+
+                *status = request->status;
+
+                /* free the mercury request */
+                request->req = H5MM_xfree(request->req);
+
+                /* Decrement ref count on request */
+                H5VL_iod_request_decr_rc(request);
+            }
+            /* request has not finished, set return status appropriately */
+            else
+                *status = request->status;
+        }
+    }
+    else {
+        *status = request->status;
+        /* free the mercury request */
+        request->req = H5MM_xfree(request->req);
+
+        /* Decrement ref count on request */
+        H5VL_iod_request_decr_rc(request);
+    }
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL_iod_test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_wait
+ *
+ * Purpose:	Wait for an asynchronous operation to complete
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, March 20, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_wait(void **req, H5ES_status_t *status)
+{
+    H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Wait on completion of the request if it was not completed */
+    if(H5VL_IOD_PENDING == request->state) {
+        if(H5VL_iod_request_wait(request->obj->file, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
+    }
+
+    *status = request->status;
+
+    /* free the mercury request */
+    request->req = H5MM_xfree(request->req);
+
+    /* Decrement ref count on request */
+    H5VL_iod_request_decr_rc(request);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_wait() */
 
 #endif /* H5_HAVE_EFF */

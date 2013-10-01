@@ -39,6 +39,63 @@
  *-------------------------------------------------------------------------
  */
 void
+H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine, 
+                                        size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                                        size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                                        void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    object_token_in_t *input = (object_token_in_t *)op_data->input;
+    iod_handle_t coh = input->coh; /* the container handle */
+    iod_obj_id_t obj_id = input->iod_id; /* The ID of the object */
+    //iod_trans_id_t rtid = input->rcxt_num;
+    //uint32_t cs_scope = input->cs_scope;
+    iod_handle_t obj_oh; /* The handle for object */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Start Object Open by token = %llu\n", obj_id);
+#endif
+
+    /* MSC - this needs to be read write ?? */
+    if (iod_obj_open_write(coh, obj_id, NULL /*hints*/, &obj_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Done with object open by token, sending response to client\n");
+#endif
+
+    HG_Handler_start_output(op_data->hg_handle, &obj_oh);
+
+done:
+    if(ret_value < 0) {
+        obj_oh.cookie = IOD_OH_UNDEFINED;
+        HG_Handler_start_output(op_data->hg_handle, &obj_oh);
+    }
+
+    input = (object_op_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5VL_iod_server_object_open_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_open_cb
+ *
+ * Purpose:	Opens an existing object in the container
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+void
 H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine, 
                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 

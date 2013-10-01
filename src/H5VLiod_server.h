@@ -114,6 +114,7 @@ H5_DLL int H5VL_iod_server_link_get_info(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_link_get_val(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_link_remove(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_link_iterate(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_open_by_token(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_open(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_copy(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_visit(hg_handle_t handle);
@@ -284,6 +285,10 @@ H5_DLL void H5VL_iod_server_link_remove_cb(AXE_engine_t axe_engine,
                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
 
+H5_DLL void H5VL_iod_server_object_open_by_token_cb(AXE_engine_t axe_engine, 
+                                                    size_t num_n_parents, AXE_task_t n_parents[], 
+                                                    size_t num_s_parents, AXE_task_t s_parents[], 
+                                                    void *_op_data);
 H5_DLL void H5VL_iod_server_object_open_cb(AXE_engine_t axe_engine,  
                                            size_t num_n_parents, AXE_task_t n_parents[], 
                                            size_t num_s_parents, AXE_task_t s_parents[], 

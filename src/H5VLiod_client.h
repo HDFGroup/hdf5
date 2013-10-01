@@ -74,6 +74,7 @@ typedef enum H5RQ_type_t {
     HG_MAP_ITERATE,
     HG_MAP_DELETE,
     HG_MAP_CLOSE,
+    HG_OBJECT_OPEN_BY_TOKEN,
     HG_OBJECT_OPEN,
     HG_OBJECT_COPY,
     HG_OBJECT_VISIT,
@@ -387,6 +388,9 @@ H5_DLL herr_t H5VL_iod_map_iterate(void *map, hid_t key_mem_type_id, hid_t value
 H5_DLL herr_t H5VL_iod_map_delete(void *map, hid_t key_mem_type_id, const void *key, 
                                   hid_t trans_id, void **req);
 H5_DLL herr_t H5VL_iod_map_close(void *map, void **req);
+
+H5_DLL void * H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, 
+                                      H5I_type_t *opened_type, void **req);
 
 /* private routines for RC */
 H5_DLL herr_t H5VL_iod_rc_acquire(H5VL_iod_file_t *file, H5RC_t *rc, 

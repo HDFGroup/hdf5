@@ -201,8 +201,9 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t lo
     cur_id = loc_id;
 
     if(cur_oh.cookie == IOD_OH_UNDEFINED) {
+        /* MSC - this needs to be read write ?? */
         /* open the current group */
-        if (iod_obj_open_read(coh, loc_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, loc_id, NULL /*hints*/, &cur_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
     }
 

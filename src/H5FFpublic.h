@@ -154,8 +154,8 @@ H5_DLL herr_t H5Lget_val_ff(hid_t link_loc_id, const char *link_name, void *link
 
 H5_DLL hid_t H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id,
                         hid_t rcxt_id);
-//H5_DLL hid_t H5Oopen_by_addr_ff(hid_t loc_id, haddr_ff_t addr, H5O_type_t type, 
-//hid_t rcxt_id, hid_t estack_id);
+H5_DLL herr_t H5Oget_token(hid_t obj_id, void *token, size_t *token_size);
+H5_DLL hid_t H5Oopen_by_token(const void *token, hid_t rcxt_id, hid_t estack_id);
 H5_DLL herr_t H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
                          hid_t lapl_id, hid_t trans_id, hid_t estack_id);
 H5_DLL herr_t H5Oexists_by_name_ff(hid_t loc_id, const char *name, hbool_t *ret, 

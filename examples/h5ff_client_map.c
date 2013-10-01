@@ -30,12 +30,14 @@ int main(int argc, char **argv) {
     hvl_t rdata[5];   /* Information to write */
     int i;
 
+    void *map_token1, *map_token2, *map_token3;
+    size_t token_size1, token_size2, token_size3;
     uint64_t version;
     uint64_t trans_num;
 
     int my_rank, my_size;
     int provided;
-    MPI_Request mpi_req;
+    MPI_Request mpi_req, mpi_reqs[6];
 
     H5ES_status_t status;
     size_t num_events = 0;
@@ -81,6 +83,31 @@ int main(int argc, char **argv) {
     e_stack = H5EScreate();
     assert(e_stack);
 
+
+    /* set write buffer for VL data*/
+    {
+        int increment, j, n;
+
+        n = 0;
+        increment = 4;
+        /* Allocate and initialize VL data to write */
+        for(i = 0; i < 5; i++) {
+            int temp = i*increment + increment;
+
+            wdata[i].p = malloc(temp * sizeof(unsigned int));
+            wdata[i].len = temp;
+            for(j = 0; j < temp; j++)
+                ((unsigned int *)wdata[i].p)[j] = n ++;
+        } /* end for */
+    }
+
+    /* Create an HDF5 VL datatype */
+    dtid1 = H5Tvlen_create (H5T_NATIVE_UINT);
+    /* Create an HDF5 VL string datatype */
+    dtid2 = H5Tcopy(H5T_C_S1);
+    H5Tset_size(dtid2,H5T_VARIABLE);
+
+
     /* create the file. */
     file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     assert(file_id);
@@ -102,76 +129,99 @@ int main(int argc, char **argv) {
        Leader can tell its delegates that the transaction is
        started. */
     if(0 == my_rank) {
+        trans_num = 1;
         ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
+
+        /* Leader also create some objects in transaction 1 */
+
+        /* create two groups */
+        gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+
+        /* Create 3 Map objects with the key type being 32 bit LE integer */
+
+        /* First Map object with a Value type a 32 bit LE integer */
+        map1 = H5Mcreate_ff(file_id, "MAP_1", H5T_STD_I32LE, H5T_STD_I32LE, 
+                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
+
+        /* Second Map object with a Value type being an HDF5 VL datatype */
+        map2 = H5Mcreate_ff(gid1, "MAP_2", H5T_STD_I32LE, dtid1, 
+                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
+
+        /* Third Map object with a Value type being an HDF5 VL string */
+        map3 = H5Mcreate_ff(gid2, "MAP_3", H5T_STD_I32LE, dtid2, 
+                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
+
+        assert(H5Gclose_ff(gid1, e_stack) == 0);
+        assert(H5Gclose_ff(gid2, e_stack) == 0);
     }
 
     /* Tell Delegates that transaction 1 is started */
-    trans_num = 1;
     MPI_Ibcast(&trans_num, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD, &mpi_req);
+
+    /* Do the local-to-global, global-to-local, so all delegates can
+       write the maps created in transaction 1 */
+
+    if(0 == my_rank) {
+        /* get the token size of each map */
+        ret = H5Oget_token(map1, NULL, &token_size1);
+        assert(0 == ret);
+        ret = H5Oget_token(map2, NULL, &token_size2);
+        assert(0 == ret);
+        ret = H5Oget_token(map3, NULL, &token_size3);
+        assert(0 == ret);
+
+        /* allocate buffers for each token */
+        map_token1 = malloc(token_size1);
+        map_token2 = malloc(token_size2);
+        map_token3 = malloc(token_size3);
+
+        /* get the token buffer */
+        ret = H5Oget_token(map1, map_token1, &token_size1);
+        assert(0 == ret);
+        ret = H5Oget_token(map2, map_token2, &token_size2);
+        assert(0 == ret);
+        ret = H5Oget_token(map3, map_token3, &token_size3);
+        assert(0 == ret);
+
+        /* bcast the token sizes and the tokens */ 
+        MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
+        MPI_Ibcast(&token_size2, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[1]);
+        MPI_Ibcast(&token_size3, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[2]);
+        MPI_Ibcast(map_token1, token_size1, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[3]);
+        MPI_Ibcast(map_token2, token_size2, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[4]);
+        MPI_Ibcast(map_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[5]);
+    }
 
     /* Leader can continue writing to transaction 1, 
        while others wait for the ibcast to complete */
-    if(0 != my_rank)
+    if(0 != my_rank) {
+
+        /* this wait if for the transaction start */
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
+        assert(1 == trans_num);
 
-    assert(1 == trans_num);
+        /* recieve the token sizes */ 
+        MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
+        MPI_Ibcast(&token_size2, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[1]);
+        MPI_Ibcast(&token_size3, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[2]);
+        MPI_Waitall(3, mpi_reqs, MPI_STATUS_IGNORE);
 
-    /* 
-       Assume the following object create calls are collective.
+        /* allocate buffers for each token */
+        map_token1 = malloc(token_size1);
+        map_token2 = malloc(token_size2);
+        map_token3 = malloc(token_size3);
 
-       In a real world scenario, the following create calls are
-       independent by default; i.e. only 1 process, typically a leader
-       process, calls them. The user does the local-to-global,
-       global-to-local thing to get the objects accessible to all delegates. 
+        /* recieve the tokens */
+        MPI_Ibcast(map_token1, token_size1, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
+        MPI_Ibcast(map_token2, token_size2, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[1]);
+        MPI_Ibcast(map_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[2]);
+        MPI_Waitall(3, mpi_reqs, MPI_STATUS_IGNORE);
 
-       This will not fail here because IOD used for now is skeletal,
-       so it does not matter if the calls are collective or
-       independent.
-    */
-
-    /* create two groups */
-    gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-
-    /* Create 3 Map objects with the key type being 32 bit LE integer */
-
-    /* First Map object with a Value type a 32 bit LE integer */
-    map1 = H5Mcreate_ff(file_id, "MAP_1", H5T_STD_I32LE, H5T_STD_I32LE, 
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
-
-    /* Second Map object with a Value type being an HDF5 VL datatype */
-    {
-        int increment, j, n;
-
-        n = 0;
-        increment = 4;
-        /* Allocate and initialize VL data to write */
-        for(i = 0; i < 5; i++) {
-            int temp = i*increment + increment;
-
-            wdata[i].p = malloc(temp * sizeof(unsigned int));
-            wdata[i].len = temp;
-            for(j = 0; j < temp; j++)
-                ((unsigned int *)wdata[i].p)[j] = n ++;
-        } /* end for */
-
-        /* Create a datatype to refer to */
-        dtid1 = H5Tvlen_create (H5T_NATIVE_UINT);
-        map2 = H5Mcreate_ff(gid1, "MAP_2", H5T_STD_I32LE, dtid1, 
-                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
-    }
-
-    /* Third Map object with a Value type being an HDF5 VL string */
-    {
-
-        /* Create a datatype to refer to */
-        dtid2 = H5Tcopy(H5T_C_S1);
-        H5Tset_size(dtid2,H5T_VARIABLE);
-
-        /* Val type, VL string */
-        map3 = H5Mcreate_ff(gid2, "MAP_3", H5T_STD_I32LE, dtid2, 
-                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
+        map1 = H5Oopen_by_token(map_token1, rid1, e_stack);
+        map2 = H5Oopen_by_token(map_token2, rid1, e_stack);
+        map3 = H5Oopen_by_token(map_token3, rid1, e_stack);
     }
 
     /* write some KV pairs to each map object. */
@@ -216,6 +266,7 @@ int main(int argc, char **argv) {
        read context on it */
     if(0 == my_rank) {
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
+        MPI_Waitall(6, mpi_reqs, MPI_STATUS_IGNORE);
 
         ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, H5_EVENT_STACK_NULL);
         assert(0 == ret);
@@ -283,8 +334,6 @@ int main(int argc, char **argv) {
         assert(0 == ret);
     }
 
-    assert(H5Gclose_ff(gid1, e_stack) == 0);
-    assert(H5Gclose_ff(gid2, e_stack) == 0);
     assert(H5Mclose_ff(map1, e_stack) == 0);
     assert(H5Mclose_ff(map2, e_stack) == 0);
     assert(H5Mclose_ff(map3, e_stack) == 0);
@@ -415,6 +464,10 @@ int main(int argc, char **argv) {
         if(my_size == 1)
             free(rdata[i].p);
     }
+
+    free(map_token1);
+    free(map_token2);
+    free(map_token3);
 
     /* This finalizes the EFF stack. ships a terminate and IOD finalize to the server 
        and shutsdown the FS server (when all clients send the terminate request) 

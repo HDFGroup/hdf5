@@ -42,6 +42,7 @@
 #include "H5Apkg.h"             /* Attribute access			*/
 #include "H5Dpkg.h"             /* Dataset access			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5ESprivate.h"        /* Event Stacks                         */
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FFprivate.h"        /* FastForward wrappers                 */
 #include "H5Gpkg.h"             /* Group access				*/
@@ -2668,7 +2669,183 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_ff() */
 
-#if 0
+/*-------------------------------------------------------------------------
+ * Function:	H5Oget_token
+ *
+ * Purpose: This function retrieves a token representing an object in
+ * HDF5. This token can be used in H5Oopen_by_token(), to open the
+ * object in the same transaction it was created in. If the token
+ * buffer is NULL, the token size is returned in token_size.
+ *
+ * Return:	Success:	Non-negative with the link value in BUF.
+ * 		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              August 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5Oget_token(hid_t obj_id, /*OUT*/void *token, /*OUT*/size_t *token_size)
+{
+    H5VL_iod_object_t *obj = NULL;        /* object token of loc_id */
+    iod_obj_id_t iod_id, mdkv_id, attrkv_id;
+    H5O_type_t type;
+    uint8_t *buf_ptr = (uint8_t *)token;
+    size_t dt_size = 0, space_size = 0;
+    H5T_t *dt = NULL;
+    H5S_t *space = NULL;
+    size_t keytype_size = 0, valtype_size;
+    H5T_t *kt = NULL, *vt = NULL;
+    herr_t ret_value = SUCCEED;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* get the file object */
+    if(NULL == (obj = (H5VL_iod_object_t *)H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
+
+    *token_size = sizeof(iod_obj_id_t)*3 + sizeof(H5O_type_t);
+
+    switch(obj->obj_type) {
+        case H5I_GROUP:
+            iod_id = ((const H5VL_iod_group_t *)obj)->remote_group.iod_id;
+            mdkv_id = ((const H5VL_iod_group_t *)obj)->remote_group.mdkv_id;
+            attrkv_id = ((const H5VL_iod_group_t *)obj)->remote_group.attrkv_id;
+            type = H5O_TYPE_GROUP;
+            break;
+        case H5I_DATASET:
+            {
+                H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)obj;
+
+                iod_id = dset->remote_dset.iod_id;
+                mdkv_id = dset->remote_dset.mdkv_id;
+                attrkv_id = dset->remote_dset.attrkv_id;
+                type = H5O_TYPE_DATASET;
+
+                if(NULL == (dt = (H5T_t *)H5I_object_verify(dset->remote_dset.type_id, 
+                                                            H5I_DATATYPE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a datatype")
+                if(NULL == (space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
+                                                               H5I_DATASPACE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a dataspace")
+
+                if(H5T_encode(dt, NULL, &dt_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+
+                if(H5S_encode(space, NULL, &space_size) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
+
+                *token_size += dt_size + space_size + sizeof(size_t)*2;
+
+                break;
+            }
+        case H5I_DATATYPE:
+            {
+                H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)obj;
+
+                iod_id = dtype->remote_dtype.iod_id;
+                mdkv_id = dtype->remote_dtype.mdkv_id;
+                attrkv_id = dtype->remote_dtype.attrkv_id;
+                type = H5O_TYPE_NAMED_DATATYPE;
+
+                if(NULL == (dt = (H5T_t *)H5I_object_verify(dtype->remote_dtype.type_id, 
+                                                            H5I_DATATYPE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a datatype")
+
+                if(H5T_encode(dt, NULL, &dt_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+
+                *token_size += dt_size + sizeof(size_t);
+
+                break;
+            }
+        case H5I_MAP:
+            {
+                H5VL_iod_map_t *map = (H5VL_iod_map_t *)obj;
+
+                iod_id = map->remote_map.iod_id;
+                mdkv_id = map->remote_map.mdkv_id;
+                attrkv_id = map->remote_map.attrkv_id;
+                type = H5O_TYPE_MAP;
+
+                if(NULL == (kt = (H5T_t *)H5I_object_verify(map->remote_map.keytype_id, 
+                                                            H5I_DATATYPE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a datatype")
+
+                if(H5T_encode(kt, NULL, &keytype_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+
+                if(NULL == (vt = (H5T_t *)H5I_object_verify(map->remote_map.valtype_id, 
+                                                            H5I_DATATYPE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a datatype")
+
+                if(H5T_encode(vt, NULL, &valtype_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+
+                *token_size += keytype_size + valtype_size + sizeof(size_t)*2;
+
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad object");
+    }
+
+    if(token) {
+        HDmemcpy(buf_ptr, &iod_id, sizeof(iod_obj_id_t));
+        buf_ptr += sizeof(iod_obj_id_t);
+        HDmemcpy(buf_ptr, &mdkv_id, sizeof(iod_obj_id_t));
+        buf_ptr += sizeof(iod_obj_id_t);
+        HDmemcpy(buf_ptr, &attrkv_id, sizeof(iod_obj_id_t));
+        buf_ptr += sizeof(iod_obj_id_t);
+        HDmemcpy(buf_ptr, &type, sizeof(H5O_type_t));
+        buf_ptr += sizeof(H5O_type_t);
+
+        switch(obj->obj_type) {
+        case H5I_GROUP:
+            break;
+        case H5I_DATASET:
+            HDmemcpy(buf_ptr, &dt_size, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if(H5T_encode(dt, buf_ptr, &dt_size) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+            buf_ptr += dt_size;
+
+            HDmemcpy(buf_ptr, &space_size, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if(H5S_encode(space, buf_ptr, &space_size) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
+            buf_ptr += space_size;
+            break;
+        case H5I_DATATYPE:
+            HDmemcpy(buf_ptr, &dt_size, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if(H5T_encode(dt, buf_ptr, &dt_size) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+            buf_ptr += dt_size;
+            break;
+        case H5I_MAP:
+            HDmemcpy(buf_ptr, &keytype_size, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if(H5T_encode(kt, buf_ptr, &keytype_size) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+            buf_ptr += keytype_size;
+
+            HDmemcpy(buf_ptr, &valtype_size, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if(H5T_encode(vt, buf_ptr, &valtype_size) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+            buf_ptr += valtype_size;
+            break;
+        default:
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad object");
+        }
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oget_token() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Oopen_by_addr_ff
@@ -2687,59 +2864,59 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5Oopen_by_addr_ff(hid_t loc_id, haddr_ff_t addr, H5O_type_t type, 
-                   hid_t rcxt_id, hid_t estack_id)
+hid_t 
+H5Oopen_by_token(const void *token, hid_t rcxt_id, hid_t estack_id)
 {
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
-    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
-    H5I_type_t  opened_type;
-    void       *opened_obj = NULL;
-    H5VL_loc_params_t loc_params;
-    hid_t       ret_value = FAIL;
+    H5RC_t *rc = NULL;
+    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    H5I_type_t opened_type;
+    void  *opened_obj = NULL;
+    const uint8_t *buf_ptr = (const uint8_t *)token;
+    hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("i", "ia", loc_id, addr);
 
-    loc_params.type = H5VL_OBJECT_BY_ADDR;
-    loc_params.loc_data.loc_by_addr.addr = addr;
-    loc_params.loc_data.loc_by_addr.obj_type = type;
-    loc_params.obj_type = H5I_get_type(loc_id);
+    if(NULL == token)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no token")
 
-    /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the RC object */
+    if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Read Context ID")
+
     /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(rcxt_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
-    /* store the transaction ID in the dxpl */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
+    }
 
-    if(H5O_TYPE_NAMED_DATATYPE == type) {
-        /* Open the object through the VOL */
-        if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, 
-                                                  dxpl_id, H5_EVENT_STACK_NULL)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+    if(NULL == (opened_obj = H5VL_iod_obj_open_token(token, rc, &opened_type, req)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object");
+
+    if(request && *req) {
+        /* insert in stack */
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
     }
-    else {
-        /* Open the object through the VOL */
-        if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, 
-                                                  dxpl_id, estack_id)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
-    }
+
+    vol_plugin->nrefs ++;
+    /* create hid_t for opened object */
     if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_addr_ff() */
-#endif
 
 
 /*-------------------------------------------------------------------------

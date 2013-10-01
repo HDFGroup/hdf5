@@ -39,7 +39,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5ESprivate.h"        /* Event Queues                         */
+#include "H5ESprivate.h"        /* Event Stacks                         */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Ipkg.h"		/* IDs Package header	  		*/
 #include "H5Lprivate.h"		/* Links        		  	*/

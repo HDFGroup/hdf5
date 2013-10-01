@@ -13,8 +13,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
- *              March, 2013
+ * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.org>
+ *              September, 2013
  *
  * Purpose:	Wrappers around existing HDF5 to support Exascale FastForward
  *              functionality.
@@ -34,7 +34,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5ESprivate.h"        /* Event Queues                         */
+#include "H5ESprivate.h"        /* Event Stacks                         */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
@@ -93,7 +93,7 @@ static const H5I_class_t H5I_ES_CLS[1] = {{
  *		Failure:	negative
  *
  * Programmer:	Mohamad Chaarawi
- *              April 2013
+ *              September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -189,7 +189,7 @@ H5ES_term_interface(void)
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -227,7 +227,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -278,7 +278,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -312,7 +312,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -362,7 +362,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -396,7 +396,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -478,7 +478,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -512,7 +512,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -563,7 +563,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -597,7 +597,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -685,7 +685,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -719,7 +719,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -768,7 +768,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -802,7 +802,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -882,7 +882,7 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Mohamad Chaarawi
- *		April 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -913,7 +913,7 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Mohamad Chaarawi
- *		April 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -952,8 +952,7 @@ H5ESclear(hid_t es_id)
 
         tail->vol_plugin->nrefs --;
         if (0 == tail->vol_plugin->nrefs) {
-            tail->vol_plugin->container_name = (const char *)H5MM_xfree
-                (tail->vol_plugin->container_name);
+            tail->vol_plugin->container_name = H5MM_xfree(tail->vol_plugin->container_name);
             tail->vol_plugin = (H5VL_t *)H5MM_xfree(tail->vol_plugin);
         }
         tail->vol_plugin = NULL;
@@ -981,7 +980,7 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Mohamad Chaarawi
- *		April 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1015,7 +1014,7 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Mohamad Chaarawi
- *              March 2013
+ *              September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1046,7 +1045,7 @@ H5ES_close(H5ES_t *e_stack)
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1110,7 +1109,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1159,7 +1158,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1209,7 +1208,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *		March 2013
+ *		September 2013
  *
  *-------------------------------------------------------------------------
  */
