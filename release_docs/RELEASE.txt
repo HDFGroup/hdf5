@@ -1183,9 +1183,9 @@ Supported Platforms
                                   Visual Studio 2012 w/ Intel Fortran 13 (cmake)
                                   Cygwin(CYGWIN_NT-6.1 1.7.25(0.270/5/3) gcc(4.8.1) compiler and gfortran)
                                   (cmake and autotools)
-    Windows 8                     Visual Studio 2012 w/ Intel Fortran 13 (cmake)
+    Windows 8.1                   Visual Studio 2012 w/ Intel Fortran 13 (cmake)
 
-    Windows 8 x64                 Visual Studio 2012 w/ Intel Fortran 13 (cmake)
+    Windows 8.1 x64               Visual Studio 2012 w/ Intel Fortran 13 (cmake)
 
     Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
     Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6
@@ -1292,32 +1292,32 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (Debian 4.7.2-5) 4.7.2
                                   (cmake and autotools)
 
-    Fedora19 3.9.9-301.fc19.i6866 #1 SMP i686 i686 i386 GNU/Linux
+    Fedora19 3.11.1-200.fc19.i6866 #1 SMP i686 i686 i386 GNU/Linux
                                   gcc (GCC) 4.8.1 20130603 (Red Hat 4.8.1-1)
                                   GNU Fortran (GCC) 4.8.1 20130603 (Red Hat 4.8.1-1)
                                   (cmake and autotools)
 
-    Fedora19 3.9.9-301.fc19.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
+    Fedora19 3.11.1-200.fc19.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
                                   gcc (GCC) 4.8.1 20130603 (Red Hat 4.8.1-1)
                                   GNU Fortran (GCC) 4.8.1 20130603 (Red Hat 4.8.1-1)
                                   (cmake and autotools)
 
-    SUSE 12.3 3.7.10-1.1-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
+    SUSE 12.3 3.7.10-1.16-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
                                   gcc (SUSE Linux) 4.7.2
                                   GNU Fortran (SUSE Linux) 4.7.2
                                   (cmake and autotools)
 
-    SUSE 12.3 3.7.10-1.1-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
+    SUSE 12.3 3.7.10-1.16-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
                                   gcc (SUSE Linux) 4.7.2
                                   GNU Fortran (SUSE Linux) 4.7.2 
                                   (cmake and autotools)
 
-    Ubuntu 13.04 3.8.0-26-generic #38-Ubuntu SMP i686 GNU/Linux
+    Ubuntu 13.04 3.8.0-30-generic #44-Ubuntu SMP i686 GNU/Linux
                                   gcc (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
                                   GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu1) 4.7.3
                                   (cmake and autotools)
 
-    Ubuntu 13.04 3.8.0-26-generic #38-Ubuntu SMP x86_64 GNU/Linux
+    Ubuntu 13.04 3.8.0-30-generic #44-Ubuntu SMP x86_64 GNU/Linux
                                   gcc (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
                                   GNU Fortran (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
                                   (cmake and autotools)
