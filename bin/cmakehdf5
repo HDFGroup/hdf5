@@ -219,6 +219,19 @@ if (NOT LOCAL_SKIP_TEST)
   endif()
   message ("test DONE")
 endif (NOT LOCAL_SKIP_TEST)
+if(NOT LOCAL_MEMCHECK_TEST)
+  ##-----------------------------------------------
+  ## Package the product
+  ##-----------------------------------------------
+  execute_process(COMMAND cpack -C ${CTEST_BUILD_CONFIGURATION} -V
+    WORKING_DIRECTORY ${CTEST_BINARY_DIRECTORY}
+    RESULT_VARIABLE cpackResult
+    OUTPUT_VARIABLE cpackLog
+    ERROR_VARIABLE cpackLog.err
+  )
+  file(WRITE ${CTEST_BINARY_DIRECTORY}/cpack.log "${cpackLog.err}" "${cpackLog}")
+endif(NOT LOCAL_MEMCHECK_TEST)
+#-----------------------------------------------------------------------------
 
 message ("DONE")
 EOF
