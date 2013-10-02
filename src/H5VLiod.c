@@ -2281,6 +2281,25 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t UNUSED loc_params,
     if(H5P_get(plist, H5VL_DSET_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id");
 
+    /* Check that no values other than the first dimension in MAX dims
+       is H5S_UNLIMITED. */
+    {
+        H5S_t *ds = NULL;
+        int ndims, i;
+        hsize_t max_dims[H5S_MAX_RANK];
+
+        if(NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataspace")
+
+        ndims = (int)H5S_GET_EXTENT_NDIMS(ds);
+        H5S_get_simple_extent_dims(ds, NULL, max_dims);
+
+        for(i=1; i<ndims; i++) {
+            if(max_dims[i] == H5S_UNLIMITED)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "only first dimension can be H5S_UNLIMITED.");
+        }
+    }
+
     /* get the transaction ID */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
@@ -2567,6 +2586,36 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         dset->common.request = NULL;
     }
 
+    /* At the IOD server, the array object is actually created with
+       MAX dims, not current dims. So here we need to range check the
+       filespace against the current dimensions of the dataset to make
+       sure that the I/O happens in the current range and not the
+       extensible one. */
+    {
+        H5S_t *dset_space, *io_space;
+        hsize_t dset_dims[H5S_MAX_RANK], io_dims[H5S_MAX_RANK];
+        int dset_ndims, io_ndims, i;
+
+        if(NULL == (dset_space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        if(NULL == (io_space = (H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+        dset_ndims = (int)H5S_GET_EXTENT_NDIMS(dset_space);
+        io_ndims = (int)H5S_GET_EXTENT_NDIMS(io_space);
+
+        if(dset_ndims < io_ndims)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection not within dataset's dataspace");
+
+        H5S_get_simple_extent_dims(dset_space, dset_dims, NULL);
+        H5S_get_simple_extent_dims(io_space, io_dims, NULL);
+
+        for(i=0 ; i<io_ndims ; i++) {
+            if(dset_dims[i] < io_dims[i])
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection Out of range");
+        }
+    }
+
     /* check arguments */
     if(H5S_ALL != mem_space_id) {
 	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
@@ -2766,6 +2815,36 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
             HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
         dset->common.request = NULL;
+    }
+
+    /* At the IOD server, the array object is actually created with
+       MAX dims, not current dims. So here we need to range check the
+       filespace against the current dimensions of the dataset to make
+       sure that the I/O happens in the current range and not the
+       extensible one. */
+    {
+        H5S_t *dset_space, *io_space;
+        hsize_t dset_dims[H5S_MAX_RANK], io_dims[H5S_MAX_RANK];
+        int dset_ndims, io_ndims, i;
+
+        if(NULL == (dset_space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        if(NULL == (io_space = (H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+        dset_ndims = (int)H5S_GET_EXTENT_NDIMS(dset_space);
+        io_ndims = (int)H5S_GET_EXTENT_NDIMS(io_space);
+
+        if(dset_ndims < io_ndims)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection not within dataset's dataspace");
+
+        H5S_get_simple_extent_dims(dset_space, dset_dims, NULL);
+        H5S_get_simple_extent_dims(io_space, io_dims, NULL);
+
+        for(i=0 ; i<io_ndims ; i++) {
+            if(dset_dims[i] < io_dims[i])
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection Out of range");
+        }
     }
 
     /* check arguments */
@@ -5162,6 +5241,11 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
             dset->common.file->nopen_objs ++;
             dset->common.obj_name = NULL;
 
+#if H5VL_IOD_DEBUG
+            printf("Dataset open by token %llu: ID %llu\n", 
+                   g_axe_id, input.iod_id);
+#endif
+
             if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
                                             (H5VL_iod_object_t *)dset, 1, 0, NULL,
                                             (H5VL_iod_req_info_t *)rc, &input, 
@@ -5214,6 +5298,11 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
             dtype->common.file->nopen_objs ++;
             dtype->common.obj_name = NULL;
 
+#if H5VL_IOD_DEBUG
+            printf("Named Datatype open by token %llu: ID %llu\n", 
+                   g_axe_id, input.iod_id);
+#endif
+
             if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
                                             (H5VL_iod_object_t *)dtype, 1, 0, NULL,
                                             (H5VL_iod_req_info_t *)rc, &input, 
@@ -5249,6 +5338,11 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
             grp->common.file = rc->file;
             grp->common.file->nopen_objs ++;
             grp->common.obj_name = NULL;
+
+#if H5VL_IOD_DEBUG
+            printf("Group open by token %llu: ID %llu\n", 
+                   g_axe_id, input.iod_id);
+#endif
 
             if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
                                             (H5VL_iod_object_t *)grp, 1, 0, NULL,

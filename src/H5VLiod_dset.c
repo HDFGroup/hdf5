@@ -92,15 +92,16 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
+    hid_t space_id = input->space_id;
     iod_handle_t dset_oh, cur_oh, mdkv_oh;
     iod_obj_id_t cur_id;
     const char *name = input->name; /* name of dset including path to create */
     char *last_comp; /* the name of the dataset obtained from the last component in the path */
     hid_t dcpl_id;
     iod_array_struct_t array; /* IOD array struct describing the dataset's dimensions */
-    iod_size_t *max_dims;
     scratch_pad sp;
     iod_ret_t ret;
+    iod_size_t array_dims[H5S_MAX_RANK], current_dims[H5S_MAX_RANK];
     hbool_t collective = FALSE; /* MSC - change when we allow for collective */
     herr_t ret_value = SUCCEED;
 
@@ -115,14 +116,19 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Set the IOD array creation parameters */
     array.cell_size = H5Tget_size(input->type_id);
-    array.num_dims = H5Sget_simple_extent_ndims(input->space_id);
-    if(NULL == (array.current_dims = (iod_size_t *)malloc (sizeof(iod_size_t) * array.num_dims)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dimention size array");
-    if(NULL == (max_dims = (iod_size_t *)malloc (sizeof(iod_size_t) * array.num_dims)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dimention size array");
-    if(H5Sget_simple_extent_dims(input->space_id, array.current_dims, max_dims) < 0)
+    array.num_dims = H5Sget_simple_extent_ndims(space_id);
+
+    if(H5Sget_simple_extent_dims(space_id, current_dims, array_dims) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get dimentions' sizes");
-    array.firstdim_max = max_dims[0];
+
+    if(H5S_UNLIMITED == array_dims[0]) {
+        array_dims[0] = current_dims[0];
+        array.firstdim_max = H5S_UNLIMITED;
+    }
+    else {
+        array.firstdim_max = array_dims[0];
+    }
+
     array.chunk_dims = NULL;
     array.dims_seq = NULL;
 
@@ -215,7 +221,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* insert dataspace metadata */
-        if(H5VL_iod_insert_dataspace(mdkv_oh, wtid, input->space_id, 
+        if(H5VL_iod_insert_dataspace(mdkv_oh, wtid, space_id, 
                                      NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
@@ -238,7 +244,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 #if H5_DO_NATIVE
     H5Pset_alloc_time(input->dcpl_id,H5D_ALLOC_TIME_EARLY);
     cur_oh.cookie = H5Dcreate2(loc_handle.cookie, last_comp, input->type_id, 
-                               input->space_id, input->lcpl_id, 
+                               space_id, input->lcpl_id, 
                                input->dcpl_id, input->dapl_id);
     assert(cur_oh.cookie);
 #endif
@@ -259,8 +265,6 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
-    if(max_dims) free(max_dims);
-    if(array.current_dims) free(array.current_dims);
     last_comp = (char *)H5MM_xfree(last_comp);
     input = (dset_create_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);

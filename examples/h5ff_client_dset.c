@@ -31,9 +31,11 @@ int main(int argc, char **argv) {
     hsize_t dims[1];
     hsize_t extent;
 
+    void *dset_token1, *dset_token2, *dset_token3;
+    size_t token_size1, token_size2, token_size3;
     int my_rank, my_size;
     int provided;
-    MPI_Request mpi_req;
+    MPI_Request mpi_req, mpi_reqs[6];
 
     H5ES_status_t status;
     size_t num_events = 0;
@@ -111,50 +113,100 @@ int main(int argc, char **argv) {
        Leader can tell its delegates that the transaction is
        started. */
     if(0 == my_rank) {
+        trans_num = 1;
         ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
-        trans_num = 1;
+        /* Leader also create some objects in transaction 1 */
+
+        /* create group hierarchy /G1/G2/G3 */
+        gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        assert(gid1 > 0);
+        gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        assert(gid2 > 0);
+        gid3 = H5Gcreate_ff(gid2, "G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        assert(gid3 > 0);
+
+        /* create datasets */
+        did1 = H5Dcreate_ff(gid1, "D1", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        assert(did1 > 0);
+        did2 = H5Dcreate_ff(gid2, "D2", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        assert(did2 > 0);
+        did3 = H5Dcreate_ff(gid3, "D3", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        assert(did3 > 0);
+
+        ret = H5Gclose_ff(gid1, e_stack);
+        assert(ret == 0);
+        ret = H5Gclose_ff(gid2, e_stack);
+        assert(ret == 0);
+        ret = H5Gclose_ff(gid3, e_stack);
+        assert(ret == 0);
     }
 
     /* Tell Delegates that transaction 1 is started */
     MPI_Ibcast(&trans_num, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD, &mpi_req);
 
+    /* Do the local-to-global, global-to-local, so all delegates can
+       write to the dsets created in transaction 1 */
+
+    if(0 == my_rank) {
+        /* get the token size of each dset */
+        ret = H5Oget_token(did1, NULL, &token_size1);
+        assert(0 == ret);
+        ret = H5Oget_token(did2, NULL, &token_size2);
+        assert(0 == ret);
+        ret = H5Oget_token(did3, NULL, &token_size3);
+        assert(0 == ret);
+
+        /* allocate buffers for each token */
+        dset_token1 = malloc(token_size1);
+        dset_token2 = malloc(token_size2);
+        dset_token3 = malloc(token_size3);
+
+        /* get the token buffer */
+        ret = H5Oget_token(did1, dset_token1, &token_size1);
+        assert(0 == ret);
+        ret = H5Oget_token(did2, dset_token2, &token_size2);
+        assert(0 == ret);
+        ret = H5Oget_token(did3, dset_token3, &token_size3);
+        assert(0 == ret);
+
+        /* bcast the token sizes and the tokens */ 
+        MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
+        MPI_Ibcast(&token_size2, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[1]);
+        MPI_Ibcast(&token_size3, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[2]);
+        MPI_Ibcast(dset_token1, token_size1, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[3]);
+        MPI_Ibcast(dset_token2, token_size2, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[4]);
+        MPI_Ibcast(dset_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[5]);
+    }
+
     /* Leader can continue writing to transaction 1, 
        while others wait for the ibcast to complete */
-    if(0 != my_rank)
+    if(0 != my_rank) {
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
+        assert(1 == trans_num);
 
-    assert(1 == trans_num);
+        /* recieve the token sizes */ 
+        MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
+        MPI_Ibcast(&token_size2, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[1]);
+        MPI_Ibcast(&token_size3, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[2]);
+        MPI_Waitall(3, mpi_reqs, MPI_STATUS_IGNORE);
 
-    /* 
-       Assume the following object create calls are collective.
+        /* allocate buffers for each token */
+        dset_token1 = malloc(token_size1);
+        dset_token2 = malloc(token_size2);
+        dset_token3 = malloc(token_size3);
 
-       In a real world scenario, the following create calls are
-       independent by default; i.e. only 1 process, typically a leader
-       process, calls them. The user does the local-to-global,
-       global-to-local thing to get the objects accessible to all delegates. 
+        /* recieve the tokens */
+        MPI_Ibcast(dset_token1, token_size1, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
+        MPI_Ibcast(dset_token2, token_size2, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[1]);
+        MPI_Ibcast(dset_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[2]);
+        MPI_Waitall(3, mpi_reqs, MPI_STATUS_IGNORE);
 
-       This will not fail here because IOD used for now is skeletal,
-       so it does not matter if the calls are collective or
-       independent.
-    */
-
-  /* create group hierarchy /G1/G2/G3 */
-    gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    assert(gid1 > 0);
-    gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    assert(gid2 > 0);
-    gid3 = H5Gcreate_ff(gid2, "G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    assert(gid3 > 0);
-
-    /* create datasets */
-    did1 = H5Dcreate_ff(gid1, "D1", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    assert(did1 > 0);
-    did2 = H5Dcreate_ff(gid2, "D2", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    assert(did2 > 0);
-    did3 = H5Dcreate_ff(gid3, "D3", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    assert(did3 > 0);
+        did1 = H5Oopen_by_token(dset_token1, rid1, e_stack);
+        did2 = H5Oopen_by_token(dset_token2, rid1, e_stack);
+        did3 = H5Oopen_by_token(dset_token3, rid1, e_stack);
+    }
 
     /* write data to datasets */
 
@@ -227,8 +279,6 @@ int main(int argc, char **argv) {
 
     /* close some objects */
     ret = H5Dclose_ff(did1, e_stack);
-    assert(ret == 0);
-    ret = H5Gclose_ff(gid1, e_stack);
     assert(ret == 0);
 
     /* release container version 0. This is async. */
@@ -341,17 +391,25 @@ int main(int argc, char **argv) {
 
     /* Do more updates on transaction 2 */
 
-    extent = 10;
-    ret = H5Dset_extent_ff(did1, &extent, tid2, e_stack);
-    assert(ret == 0);
+    if(0 == my_rank) {
+        extent = 10;
+        ret = H5Dset_extent_ff(did1, &extent, tid2, e_stack);
+        assert(ret == 0);
+    }
 
-    extent = 30;
-    ret = H5Dset_extent_ff(did2, &extent, tid2, e_stack);
-    assert(ret == 0);
+    if((my_size > 1 && 1 == my_rank) || 
+       (my_size == 1 && 0 == my_rank)) {
+        extent = 30;
+        ret = H5Dset_extent_ff(did2, &extent, tid2, e_stack);
+        assert(ret == 0);
+    }
 
-    extent = 60;
-    ret = H5Dset_extent_ff(did3, &extent, tid2, e_stack);
-    assert(ret == 0);
+    if((my_size > 2 && 2 == my_rank) || 
+       (my_size == 1 && 0 == my_rank)) {
+        extent = 60;
+        ret = H5Dset_extent_ff(did3, &extent, tid2, e_stack);
+        assert(ret == 0);
+    }
 
     /* finish transaction 2 - all have to call */
     ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, e_stack);
@@ -371,10 +429,6 @@ int main(int argc, char **argv) {
     ret = H5Dclose_ff(did3, e_stack);
     assert(ret == 0);
     ret = H5Gclose_ff(gid1, e_stack);
-    assert(ret == 0);
-    ret = H5Gclose_ff(gid2, e_stack);
-    assert(ret == 0);
-    ret = H5Gclose_ff(gid3, e_stack);
     assert(ret == 0);
 
     ret = H5Sclose(sid);

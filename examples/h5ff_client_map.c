@@ -319,10 +319,13 @@ int main(int argc, char **argv) {
     ret = H5Pclose(trspl_id);
     assert(0 == ret);
 
-    /* modify container contents using transaction started. */
-    key = 1;
-    ret = H5Mdelete_ff(map3, H5T_STD_I32LE, &key, tid2, e_stack);
-    assert(ret == 0);
+    if((my_size > 1 && 1 == my_rank) || 
+       (my_size == 1 && 0 == my_rank)) {
+        /* modify container contents using transaction started. */
+        key = 1;
+        ret = H5Mdelete_ff(map3, H5T_STD_I32LE, &key, tid2, e_stack);
+        assert(ret == 0);
+    }
 
     /* finish transaction 2 */
     ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, e_stack);
