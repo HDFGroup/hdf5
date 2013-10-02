@@ -48,7 +48,7 @@ Notes: This short set of instructions is written for users who want to
          cpack -C Release CPackConfig.cmake
       
       6. Install with this command:
-         HDF5-1.8.11-win32.exe
+         HDF5-1.8.12-win32.exe
         
    B. Linux Quick Step Building HDF5 Libraries with CMake Using GCC
 
@@ -76,7 +76,7 @@ Notes: This short set of instructions is written for users who want to
          cpack -C Release CPackConfig.cmake
       
       6. Install with this command:
-         HDF5-1.8.11-Linux.sh
+         HDF5-1.8.12-Linux.sh
       
 
 
@@ -120,13 +120,20 @@ II. Preconditions
    4. Windows developers should install NSIS to create an install image with CPack.
       Visual Studio Express users will not be able to package HDF5 into
       an install image executable.
+   
+   5. Developers should copy the config/cmake/cacheinit.cmake file and alter the
+      the settings for the developers' environment. Then the only options needed
+      on the command line are those options that are different. Example using HDF
+      default cache file:
+               cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 10" \
+               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF ..
 
 
 Notes: More information about using CMake can be found at the KitWare site, 
        www.cmake.org.
          
        CMake uses the command line; however, the visual CMake tool is 
-       recommended for the configuration step. The steps are similar for
+       available for the configuration step. The steps are similar for
        all the operating systems supported by CMake.
        
        NOTES:
@@ -147,7 +154,8 @@ Notes: More information about using CMake can be found at the KitWare site,
                  www.hdfgroup.org/CDash/HowToSubmit. 
             
          4. See the appendix at the bottom of this file for examples of using
-            a ctest script for building and testing. 
+            a ctest script for building and testing. Using a ctest script is
+            preferred because of its flexibility.
             
 
 
@@ -170,7 +178,7 @@ These five steps are described in detail below.
 
    1. Run CMake
 
-      The CMake executable is named "cmake-gui.exe" on Windows and should be
+      The visual CMake executable is named "cmake-gui.exe" on Windows and should be
       available in your Start menu. For Linux, UNIX, and Mac users the
       executable is named "cmake-gui" and can be found where CMake was 
       installed. 
@@ -183,7 +191,7 @@ These five steps are described in detail below.
       then use c:\MyHDFstuff\hdf5\build or c:\MyHDFstuff\build\hdf5 as the 
       build directory.
       
-      OPTIONAL:
+      PREFERRED:
         Users can perform the configuration step without using the visual 
         cmake-gui program. We use the file cacheinit.cmake in the 
         config/cmake folder for our testing. This file enables all the 
@@ -261,7 +269,7 @@ These five steps are described in detail below.
 
    2. Configure the cache settings
 
-      2.1  Click the Configure button. If this is the first time you are 
+      2.1  Visual CMake users, click the Configure button. If this is the first time you are 
            running cmake-gui in this directory, you will be prompted for the 
            generator you wish to use (for example on Windows, Visual Studio 9 2008). 
            CMake will read in the CMakeLists.txt files from the source directory and 
@@ -279,9 +287,9 @@ These five steps are described in detail below.
            On linux, if you are using the Unix Makefiles generator, the Makefiles will
            be created in the build folder.
 
-      2.2  Alternative command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
+      2.2  Preferred command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
       
-               cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 9 2008" \
+               cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 10" \
                -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF ..
 
       2.3  On Windows, if you are using a Visual Studio Express version you must 
@@ -293,7 +301,8 @@ These five steps are described in detail below.
    3. Build HDF5
    
       On Windows, you can build HDF5 using either the Visual Studio Environment 
-      or the command line. The command line is used on linux, Unix, and Mac.
+      or the command line. The command line can be used on all platforms;
+      Windows, linux, Unix, and Mac.
 
       To build from the command line, navigate to your build directory and
       execute the following:
@@ -478,8 +487,15 @@ The example is for a linux machine, but the same scripts can be used on
 a Windows machine by adjusting the CTEST_CMAKE_GENERATOR option in the
 product specific script.
 
-CTestScript.cmake
+NOTE: these files are available at the HDF web site:
+    http://www.hdfgroup.org/xxx/cmake-help.html
 
+    CTestScript.cmake
+    SZip.tar.gz
+    ZLib.tar.gz
+    
+    HDF518WindowsRWDICMake.cmake
+    HDF518LinuxRWDICMake.cmake
 
 
 ========================================================================
@@ -702,42 +718,42 @@ message("Dashboard script configuration:\n${vars}\n")
  
 #-----------------------------------------------------------------------------
 ## NORMAL process
-## -- LOCAL_SKIP_UPDATE skips updating the source folder from svn
-## -- LOCAL_NO_SUBMIT skips reporting to CDash server
+## -- LOCAL_UPDATE updates the source folder from svn
+## -- LOCAL_SUBMIT reports to CDash server
 ## -- LOCAL_SKIP_TEST skips the test process (only builds)
 ## -- LOCAL_MEMCHECK_TEST executes the Valgrind testing
 ## -- LOCAL_COVERAGE_TEST executes code coverage process
 ## --------------------------
 CTEST_START (${MODEL} TRACK ${MODEL})
-if(NOT LOCAL_SKIP_UPDATE)
+if(LOCAL_UPDATE)
   CTEST_UPDATE (SOURCE "${CTEST_SOURCE_DIRECTORY}")
-endif(NOT LOCAL_SKIP_UPDATE)
+endif(LOCAL_UPDATE)
 CTEST_CONFIGURE (BUILD "${CTEST_BINARY_DIRECTORY}")
 CTEST_READ_CUSTOM_FILES ("${CTEST_BINARY_DIRECTORY}")
-if(NOT LOCAL_NO_SUBMIT)
+if(LOCAL_SUBMIT)
   CTEST_SUBMIT (PARTS Update Configure Notes)
-endif(NOT LOCAL_NO_SUBMIT)
+endif(LOCAL_SUBMIT)
   CTEST_BUILD (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
-if(NOT LOCAL_NO_SUBMIT)
+if(LOCAL_SUBMIT)
   CTEST_SUBMIT (PARTS Build)
-endif(NOT LOCAL_NO_SUBMIT)
+endif(LOCAL_SUBMIT)
 if(NOT LOCAL_SKIP_TEST)
   if(NOT LOCAL_MEMCHECK_TEST)
     CTEST_TEST (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args})
-    if(NOT LOCAL_NO_SUBMIT)
+    if(LOCAL_SUBMIT)
       CTEST_SUBMIT (PARTS Test)
-    endif(NOT LOCAL_NO_SUBMIT)
+    endif(LOCAL_SUBMIT)
   else(NOT LOCAL_MEMCHECK_TEST)
     CTEST_MEMCHECK (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args})
-    if(NOT LOCAL_NO_SUBMIT)
+    if(LOCAL_SUBMIT)
       CTEST_SUBMIT (PARTS MemCheck)
-    endif(NOT LOCAL_NO_SUBMIT)
+    endif(LOCAL_SUBMIT)
   endif(NOT LOCAL_MEMCHECK_TEST)
   if(LOCAL_COVERAGE_TEST)
     CTEST_COVERAGE (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
-    if(NOT LOCAL_NO_SUBMIT)
+    if(LOCAL_SUBMIT)
       CTEST_SUBMIT (PARTS Coverage)
-    endif(NOT LOCAL_NO_SUBMIT)
+    endif(LOCAL_SUBMIT)
   endif(LOCAL_COVERAGE_TEST)
 endif(NOT LOCAL_SKIP_TEST)
 if(NOT LOCAL_MEMCHECK_TEST)
