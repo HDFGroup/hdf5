@@ -14,6 +14,8 @@ DPRINT=:
 progname=`basename $0`	# program name
 cminfile="cmakemin.$$" # Cmake minimum file
 cfgfile=$progname.$$	# configure file
+ctest_log=ctest.log    # output of ctest script
+install_log=install.log  # output of installation
 $DPRINT $cfgfile
 
 # Remove temporary generated files if exit 0
@@ -36,7 +38,8 @@ TIMESTAMP
 
 # Explain what and where log files are.
 cat <<EOF
-ctest.log: output of ctest script.
+$ctest_log: output of ctest script.
+$install_log: output of installation
 Log files will be stored in Testing/Temporary:
     LastConfigure_<timestamp>.log: output of configure
     LastBuild_<timestamp>.log: output of build
@@ -230,6 +233,7 @@ if(NOT LOCAL_MEMCHECK_TEST)
     ERROR_VARIABLE cpackLog.err
   )
   file(WRITE ${CTEST_BINARY_DIRECTORY}/cpack.log "${cpackLog.err}" "${cpackLog}")
+  message ("installing with ${CPACK_PACKAGE_FILE_NAME} in ./usr")
 endif(NOT LOCAL_MEMCHECK_TEST)
 #-----------------------------------------------------------------------------
 
@@ -238,7 +242,15 @@ EOF
 
 
 # Run ctest
-ctest -S $cfgfile -C Release -V -O ctest.log
+ctest -S $cfgfile -C Release -V -O $ctest_log
+exit_code=$?
+if [ $exit_code = 0 ]; then
+    echo CTest script completed without error
+else
+    echo Error encountered CTest script
+fi
+echo installing...
+./*.sh > $install_log
 exit_code=$?
 if [ $exit_code = 0 ]; then
     echo Complete without error
