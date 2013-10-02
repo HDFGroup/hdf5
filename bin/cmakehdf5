@@ -233,7 +233,6 @@ if(NOT LOCAL_MEMCHECK_TEST)
     ERROR_VARIABLE cpackLog.err
   )
   file(WRITE ${CTEST_BINARY_DIRECTORY}/cpack.log "${cpackLog.err}" "${cpackLog}")
-  message ("installing with ${CPACK_PACKAGE_FILE_NAME} in ./usr")
 endif(NOT LOCAL_MEMCHECK_TEST)
 #-----------------------------------------------------------------------------
 
@@ -249,8 +248,10 @@ if [ $exit_code = 0 ]; then
 else
     echo Error encountered CTest script
 fi
-echo installing...
-./*.sh > $install_log
+# Using HDF5-*.sh because actual name is unavailable
+install_sh=HDF5-*.sh
+echo installing with $install_sh ...
+./$install_sh --skip-license > $install_log
 exit_code=$?
 if [ $exit_code = 0 ]; then
     echo Complete without error
