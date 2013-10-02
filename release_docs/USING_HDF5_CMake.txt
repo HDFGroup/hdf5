@@ -77,7 +77,7 @@ These steps are described in more detail below.
 
    1. Run CMake
 
-      The CMake executable is named "cmake-gui.exe" on Windows and should be
+      The visual CMake executable is named "cmake-gui.exe" on Windows and should be
       available in your Start menu. For Linux, UNIX, and Mac users the
       executable is named "cmake-gui" and can be found where CMake was 
       installed. 
@@ -87,7 +87,7 @@ These steps are described in more detail below.
       c:\MyHDFstuff\hdf5, then use c:\MyHDFstuff\hdf5\build or 
       c:\MyHDFstuff\build\hdf5 for the build directory. 
       
-      OPTIONAL:
+      PREFERRED:
         Users can perform the configuration step without using the visual 
         cmake-gui program. The following is an example command line 
         configuration step executed within the build directory:
@@ -118,9 +118,9 @@ These steps are described in more detail below.
 
    2. Configure the cache settings
 
-      2.1  Click the Configure button. If this is the first time you are 
+      2.1  Visual CMake users, click the Configure button. If this is the first time you are 
            running cmake-gui in this directory, you will be prompted for the 
-           generator you wish to use (for example on Windows, Visual Studio 9 2008). 
+           generator you wish to use (for example on Windows, Visual Studio 10). 
            CMake will read in the CMakeLists.txt files from the source directory and 
            display options for the HDF5 project. After the first configure you 
            can adjust the cache settings and/or specify locations of other programs.
@@ -138,7 +138,7 @@ These steps are described in more detail below.
 
       2.2  Alternative command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
       
-           cmake -G "Visual Studio 9 2008" -DBUILD_TESTING:BOOL=ON -DUSE_SHARED_LIBS:BOOL=ON ..
+           cmake -G "Visual Studio 10" -DBUILD_TESTING:BOOL=ON -DUSE_SHARED_LIBS:BOOL=ON ..
 
    3. Build HDF5 Applications
    
@@ -219,6 +219,13 @@ is entered on the command line and the build folder is created as a sub-folder.
 Windows should adjust the forward slash to double backslashes, except for
 the HDF_DIR environment variable.
 
+NOTE: these files are available at the HDF web site:
+    http://www.hdfgroup.org/xxx/cmake-help.html
+
+    CTestScript.cmake
+    
+    HDF518ExamplesWindowsbinaryCMake.cmake
+
 
 
 ========================================================================
@@ -252,11 +259,6 @@ set(SITE_OS_VERSION "os version")
 set(SITE_OS_BITS "os size")
 set(SITE_COMPILER_NAME "compiler name")
 set(SITE_COMPILER_VERSION "compiler version")
-
-# skip submit to cdash
-set(LOCAL_NO_SUBMIT "True")
-# skip update source from repository
-set(LOCAL_SKIP_UPDATE "True")
 
 # needed for source updates, change as required
 set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5-examples/trunk/1_8")
