@@ -369,7 +369,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifdef JK_ORI
+#if 0 // JK_SINGLE_PATH_CUTOFF  ORI
 herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
@@ -760,91 +760,9 @@ H5D__pre_write_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dx
             if(NULL == dset->oloc.file)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
-            /* Direct chunk write */
-            if(direct_write) {
-                uint32_t direct_filters = 0;
-                hsize_t *direct_offset;
-                size_t   direct_datasize = 0;
-                int      ndims = 0;
-                hsize_t  dims[H5O_LAYOUT_NDIMS];
-                hsize_t  internal_offset[H5O_LAYOUT_NDIMS];
-                int      i;
+            if(H5D__pre_write(info[j].dset_id, info[j].mem_type_id, info[j].mem_space_id, info[j].file_space_id, dxpl_id, info[j].wbuf) < 0) 
+	            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data") 
 
-                if(H5D_CHUNKED != dset->shared->layout.type)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
-
-                if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME, &direct_filters) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting filter info for direct chunk write")
-
-                if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME, &direct_offset) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting offset info for direct chunk write")
-
-                if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, &direct_datasize) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting data size for direct chunk write")
-
-                /* The library's chunking code requires the offset terminates with a zero. So transfer the 
-                 * offset array to an internal offset array */ 
-                if((ndims = H5S_get_simple_extent_dims(dset->shared->space, dims, NULL)) < 0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve dataspace extent dims")
-
-                for(i=0; i<ndims; i++) {
-                    /* Make sure the offset doesn't exceed the dataset's dimensions */
-                    if(direct_offset[i] > dims[i])
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
-
-                    /* Make sure the offset fall right on a chunk's boundary */
-                    if(direct_offset[i] % dset->shared->layout.u.chunk.dim[i])
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
-
-                    internal_offset[i] = direct_offset[i]; 
-                }
-	   
-                /* Terminate the offset with a zero */ 
-                internal_offset[ndims] = 0;
-
-                /* write raw data */
-                if(H5D__chunk_direct_write(dset, dxpl_id, direct_filters, internal_offset, direct_datasize, info[j].wbuf) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write chunk directly")
-            } else {     /* Non direct write */
-                const H5S_t *mem_space = NULL;
-                const H5S_t *file_space = NULL;
-                char        fake_char;
-
-                if(info[j].mem_space_id < 0 || info[j].file_space_id < 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-                if(H5S_ALL != info[j].mem_space_id) {
-                    if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(info[j].mem_space_id, H5I_DATASPACE)))
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-                    /* Check for valid selection */
-                    if(H5S_SELECT_VALID(mem_space) != TRUE)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection+offset not within extent")
-                } /* end if */
-
-                if(H5S_ALL != info[j].file_space_id) {
-                    if(NULL == (file_space = (const H5S_t *)H5I_object_verify(info[j].file_space_id, H5I_DATASPACE)))
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-                    /* Check for valid selection */
-                    if(H5S_SELECT_VALID(file_space) != TRUE)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent")
-                } /* end if */
-
-                if(!info[j].wbuf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
-	            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
-
-                /* If the buffer is nil, and 0 element is selected, make a fake buffer.
-                 * This is for some MPI package like ChaMPIon on NCSA's tungsten which
-                 * doesn't support this feature.
-                 */
-                if(!info[j].wbuf)
-                info[j].wbuf = &fake_char;
-
-                /* write raw data */
-                if(H5D__write(dset, info[j].mem_type_id, mem_space, file_space, dxpl_id, info[j].wbuf) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
-            } 
         } /* end of for loop */
     }
     else if (xfer_mode == H5FD_MPIO_COLLECTIVE)  /* Parallel (collective) mode */
@@ -1377,6 +1295,22 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D__read_mdset() */
 #endif
+
+#if 0 // JK_SINGLE_PATH_CUTOFF  // TEST
+void Convert_io_info_multi2single(H5D_io_info_md_t *io_info_md, H5D_io_info_t *io_info)
+{
+    io_info->dset = io_info_md->dsets_info[0].dset;
+    io_info->dxpl_cache =  io_info_md->dxpl_cache;
+    io_info-> dxpl_id = io_info_md->dxpl_id;
+    io_info->store = io_info_md->dsets_info[0].store;
+    io_info->layout_ops = io_info_md->dsets_info[0].layout_ops;
+    io_info->io_ops =  io_info_md->io_ops;
+    io_info->op_type =  io_info_md->op_type;
+    io_info->u.rbuf = io_info_md->dsets_info[0].u.rbuf;
+    io_info->u.wbuf = io_info_md->dsets_info[0].u.wbuf;
+}
+#endif
+
 
 
 /*-------------------------------------------------------------------------
@@ -2063,7 +1997,6 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
       * detour through single-dset path */
      if (TRUE == io_info_md.is_coll_broken) {
         size_t i;
-        H5P_genplist_t *dx_plist;
 
         /* loop with serial & single-dset write IO path */
         for (i=0; i< count; i++) {
@@ -2582,7 +2515,9 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
             io_info->io_ops.multi_read = dset->shared->layout.ops->par_read;
             io_info->io_ops.multi_write = dset->shared->layout.ops->par_write;
             io_info->io_ops.single_read = H5D__mpio_select_read;
+            #if 0 // JK_SINGLE_PATH_CUTOFF
             io_info->io_ops.single_write = H5D__mpio_select_write;
+            #endif
         } /* end if */
         else {
             /* If we won't be doing collective I/O, but the user asked for
@@ -2665,7 +2600,7 @@ H5D__ioinfo_adjust_mdset_OLD(H5D_io_info_md_t *io_info_md,
         #endif
 
         /* Check if we can set direct MPI-IO read/write functions */
-        if((opt = H5D__mpio_opt_possible_mdset(io_info_md, file_space, mem_space, type_info, dset, dx_plist)) < 0)
+        if((opt = H5D__mpio_opt_possible_mdset_OK8_OLD(io_info_md, file_space, mem_space, type_info, dset, dx_plist)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ")
 
         /* Check if we can use the optimized parallel I/O routines */

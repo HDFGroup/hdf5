@@ -412,7 +412,7 @@ done:
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "couldn't set global no collective cause property")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D__mpio_opt_possible() */
+} /* H5D__mpio_opt_possible_mdset() */
 #endif
 
 #if 0 // JK_WORK_OK8_OLD_REMOVE
@@ -562,6 +562,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if 0 // JK_SINGLE_PATH_CUTOFF
 herr_t
 H5D__mpio_select_write(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *type_info,
     hsize_t mpi_buf_count, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space)
@@ -579,6 +580,7 @@ H5D__mpio_select_write(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSE
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mpio_select_write() */
+#endif
 
 #ifndef JK_WORK
 herr_t
@@ -627,6 +629,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if 0 // JK_MCHUNK_OPT_REMOVE
 static herr_t
 H5D__ioinfo_xfer_mode(H5D_io_info_t *io_info, H5P_genplist_t *dx_plist,
     H5FD_mpio_xfer_t xfer_mode)
@@ -657,6 +660,7 @@ H5D__ioinfo_xfer_mode(H5D_io_info_t *io_info, H5P_genplist_t *dx_plist,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__ioinfo_xfer_mode() */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -672,6 +676,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if 0 // JK_MCHUNK_OPT_REMOVE
 static herr_t
 H5D__ioinfo_coll_opt_mode(H5D_io_info_t *io_info, H5P_genplist_t *dx_plist,
     H5FD_mpio_collective_opt_t coll_opt_mode)
@@ -688,6 +693,7 @@ H5D__ioinfo_coll_opt_mode(H5D_io_info_t *io_info, H5P_genplist_t *dx_plist,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__ioinfo_coll_opt_mode() */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -847,6 +853,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if 0 // JK_SINGLE_PATH_CUTOFF
 herr_t
 H5D__contig_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t UNUSED nelmts, const H5S_t *file_space, const H5S_t *mem_space,
@@ -879,6 +886,7 @@ H5D__contig_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_collective_write() */
+#endif
 
 #if 0 // JK_TODO_NOCOLLCAUSE_REMOVE
 // Seperate layout.ops is not necessary yet.
@@ -1330,6 +1338,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if 0 // JK_SINGLE_PATH_CUTOFF
 herr_t
 H5D__chunk_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
@@ -1346,6 +1355,7 @@ H5D__chunk_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_collective_write() */
+#endif 
 
 #ifndef JK_WORK
 herr_t

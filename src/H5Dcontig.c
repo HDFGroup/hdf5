@@ -136,7 +136,11 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
     #endif
 #ifdef H5_HAVE_PARALLEL
     H5D__contig_collective_read,
+    #if 0 // JK_SINGLE_PATH_CUTOFF
     H5D__contig_collective_write,
+    #else
+    NULL,
+    #endif
     #ifndef JK_WORK
     H5D__mdset_collective_read,
     H5D__mdset_collective_write,
