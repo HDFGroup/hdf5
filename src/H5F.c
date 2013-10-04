@@ -109,7 +109,6 @@ H5FL_DEFINE(H5F_file_t);
 static const H5I_class_t H5I_FILE_CLS[1] = {{
     H5I_FILE,			/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     0,				/* # of reserved IDs for class */
     (H5I_free_t)H5F_close	/* Callback routine for closing objects of this class */
 }};

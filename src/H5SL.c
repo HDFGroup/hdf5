@@ -681,6 +681,10 @@ H5SL_insert_common(H5SL_t *slist, void *item, const void *key)
             H5SL_INSERT(OBJ, slist, prev, const H5_obj_t, key, -)
             break;
 
+        case H5SL_TYPE_HID:
+            H5SL_INSERT(SCALAR, slist, prev, const hid_t, key, -)
+            break;
+
         case H5SL_TYPE_GENERIC:
             H5SL_INSERT(GENERIC, slist, prev, const void, key, -)
             break;
@@ -1110,6 +1114,10 @@ H5SL_remove(H5SL_t *slist, const void *key)
             H5SL_REMOVE(OBJ, slist, x, const H5_obj_t, key, -)
             break;
 
+        case H5SL_TYPE_HID:
+            H5SL_REMOVE(SCALAR, slist, x, const hid_t, key, -)
+            break;
+
         case H5SL_TYPE_GENERIC:
             H5SL_REMOVE(GENERIC, slist, x, const void, key, -)
             break;
@@ -1293,6 +1301,10 @@ H5SL_search(H5SL_t *slist, const void *key)
             H5SL_SEARCH(OBJ, slist, x, const H5_obj_t, key, -)
             break;
 
+        case H5SL_TYPE_HID:
+            H5SL_SEARCH(SCALAR, slist, x, const hid_t, key, -)
+            break;
+
         case H5SL_TYPE_GENERIC:
             H5SL_SEARCH(GENERIC, slist, x, const void, key, -)
             break;
@@ -1380,6 +1392,10 @@ H5SL_less(H5SL_t *slist, const void *key)
 
         case H5SL_TYPE_OBJ:
             H5SL_SEARCH(OBJ, slist, x, const H5_obj_t, key, -)
+            break;
+
+        case H5SL_TYPE_HID:
+            H5SL_SEARCH(SCALAR, slist, x, const hid_t, key, -)
             break;
 
         case H5SL_TYPE_GENERIC:
@@ -1484,6 +1500,10 @@ H5SL_greater(H5SL_t *slist, const void *key)
             H5SL_SEARCH(OBJ, slist, x, const H5_obj_t, key, -)
             break;
 
+        case H5SL_TYPE_HID:
+            H5SL_SEARCH(SCALAR, slist, x, const hid_t, key, -)
+            break;
+
         case H5SL_TYPE_GENERIC:
             H5SL_SEARCH(GENERIC, slist, x, const void, key, -)
             break;
@@ -1576,6 +1596,10 @@ H5SL_find(H5SL_t *slist, const void *key)
             H5SL_FIND(OBJ, slist, x, const H5_obj_t, key, -)
             break;
 
+        case H5SL_TYPE_HID:
+            H5SL_FIND(SCALAR, slist, x, const hid_t, key, -)
+            break;
+
         case H5SL_TYPE_GENERIC:
             H5SL_FIND(GENERIC, slist, x, const void, key, -)
             break;
@@ -1663,6 +1687,10 @@ H5SL_below(H5SL_t *slist, const void *key)
 
         case H5SL_TYPE_OBJ:
             H5SL_FIND(OBJ, slist, x, const H5_obj_t, key, -)
+            break;
+
+        case H5SL_TYPE_HID:
+            H5SL_FIND(SCALAR, slist, x, const hid_t, key, -)
             break;
 
         case H5SL_TYPE_GENERIC:
@@ -1765,6 +1793,10 @@ H5SL_above(H5SL_t *slist, const void *key)
 
         case H5SL_TYPE_OBJ:
             H5SL_FIND(OBJ, slist, x, const H5_obj_t, key, -)
+            break;
+
+        case H5SL_TYPE_HID:
+            H5SL_FIND(SCALAR, slist, x, const hid_t, key, -)
             break;
 
         case H5SL_TYPE_GENERIC:
@@ -1994,7 +2026,8 @@ H5SL_item(H5SL_node_t *slist_node)
 herr_t
 H5SL_iterate(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 {
-    H5SL_node_t *node;  /* Pointers to skip list nodes */
+    H5SL_node_t *node;  /* Pointer to current skip list node */
+    H5SL_node_t *next;  /* Pointer to next skip list node */
     herr_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -2008,12 +2041,16 @@ H5SL_iterate(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     /* Free skip list nodes */
     node = slist->header->forward[0];
     while(node != NULL) {
+        /* Protect against the node being deleted by the callback */
+        next = node->forward[0];
+
         /* Call the iterator callback */
         /* Casting away const OK -QAK */
         if((ret_value = (op)(node->item, (void *)node->key, op_data)) != 0)
             break;
 
-        node = node->forward[0];
+        /* Advance to next node */
+        node = next;
     } /* end while */
 
     FUNC_LEAVE_NOAPI(ret_value)

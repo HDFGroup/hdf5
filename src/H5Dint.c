@@ -110,7 +110,6 @@ static H5D_shared_t H5D_def_dset;
 static const H5I_class_t H5I_DATASET_CLS[1] = {{
     H5I_DATASET,		/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     0,				/* # of reserved IDs for class */
     (H5I_free_t)H5D_close       /* Callback routine for closing objects of this class */
 }};

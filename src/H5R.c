@@ -77,7 +77,6 @@ static ssize_t H5R_get_name(H5F_t *file, hid_t lapl_id, hid_t dxpl_id, hid_t id,
 static const H5I_class_t H5I_REFERENCE_CLS[1] = {{
     H5I_REFERENCE,		/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     0,				/* # of reserved IDs for class */
     NULL			/* Callback routine for closing objects of this class */
 }};
