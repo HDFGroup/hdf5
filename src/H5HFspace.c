@@ -613,7 +613,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_space_sect_change_class(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sect, unsigned new_class)
+H5HF_space_sect_change_class(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sect, uint16_t new_class)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
