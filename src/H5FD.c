@@ -116,8 +116,7 @@ static unsigned long file_serial_no;
 /* File driver ID class */
 static const H5I_class_t H5I_VFL_CLS[1] = {{
     H5I_VFL,			/* ID class value */
-    0,				/* Class flags */
-    64,				/* Minimum hash size for class */
+    H5I_CLASS_REUSE_IDS,	/* Class flags */
     0,				/* # of reserved IDs for class */
     (H5I_free_t)H5FD_free_cls	/* Callback routine for closing objects of this class */
 }};
