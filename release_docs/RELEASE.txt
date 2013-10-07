@@ -1,12 +1,12 @@
-HDF5 version 1.8.12-snap20 currently under development
+HDF5 version 1.8.13-snap0 currently under development
 ================================================================================
 
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.11 and 
-HDF5-1.8.12-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.12-*. 
+This document describes the differences between HDF5-1.8.12 and 
+HDF5-1.8.13-*, and contains information on the platforms tested and 
+known problems in HDF5-1.8.13-*. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
@@ -45,7 +45,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms, Languages, and Compilers
-- Bug Fixes since HDF5-1.8.11
+- Bug Fixes since HDF5-1.8.12
 - Supported Platforms
 - Supported Configuration Features Summary
 - More Tested Platforms
@@ -57,13 +57,7 @@ New Features
 
     Configuration
     -------------
-    - New configuration option added to change the default plugin path.
-      configure option is --with-default-plugin=location
-      cmake option is -DH5_DEFAULT_PLUGINDIR:PATH=location
-      HDFFV-8513.  (ADB 2013/09/04)
-    - Rename FFLAGS to FCFLAGS in configure (ADB 2013/08/13)
-    - CMake can now package a compressed examples file, the default for 
-      Windows binaries from HDF Group.  (ADB  - 2013/07/22)
+    - None (XYZ YYYY/MM/DD)
     
     Library
     -------
@@ -75,10 +69,7 @@ New Features
  
     Tools
     -----
-    - h5dump: Added option -N --any_path, which searches the file for paths that
-              match the search path. HDFFV-7989 (ADB - 2013/08/12).
-    - h5dump: Added optional arg 0 to -A, which excludes attributes from display.
-              HDFFV-8134 (ADB - 2013/08/01).
+    - None
 
     High-Level APIs
     ---------------
@@ -90,46 +81,23 @@ New Features
 
     C++ API
     -------
-    - Added tutorial examples to c++/examples.  They can be installed by
-      "make install-examples" and, in the installed directory, they can be
-      executed by running the script file run-c++-ex.sh. (BMR - 2013/09/28)
-    - A new class, H5::H5Location, is added to represent the location concept
-      in the C library.  It is a base class to H5::H5File and H5::H5Ojbect,
-      whose member functions are moved into H5::H5Location.  H5::H5File can
-      now inherent those functions.  As a result, an H5::H5File object can have
-      an attribute. (BMR - 2013/09/27)
-    - Added wrappers for H5Rget_obj_type2 to retrieve the type of the object
-      that an object reference points to. (BMR - 2013/09/27)
-	H5O_type_t H5Location::getRefObjType(void *ref, H5R_type_t ref_type)
-    - Added wrappers for H5Aexist to check whether an attribute exists given
-      a name. (BMR - 2013/09/27)
-	bool H5::H5Location::attrExists(const char* name)
-	bool H5::H5Location::attrExists(const H5std_string& name)
-    - Added a number of overloaded functions for convenience. (BMR - 2013/09/27)
+    - None 
 
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
     - None
 
-Bug Fixes since HDF5-1.8.11
+Bug Fixes since HDF5-1.8.12
 ===========================
 
     Configuration
     -------------
-    - Modified H5detect.c to scan floating point types for padding bits before
-      analyzing the type further.  This should fix problems with gcc 4.8
-      (NAF - 2013/09/19 - HDFFV-8523/HDFFV-8500)
-    - HDF5 rpaths are no longer encoded in the library files when configured
-      with --disable-sharedlib-rpath. (LRK-2013-09-23 - HDFFV-8276)
+    - None
 
     Library
     -------
-    - Added const qualifier to source buffer parameters in H5Dgather and
-      H5D_scatter_func_t (H5Dscatter callback).  (NAF - 2013/7/09)
-
-    - CMake can now creates *.so.{lt_version} files with the same version as 
-      configure.  (ADB  - 2013/06/05 HDFFV-8437)
+    - None
 
     Parallel Library
     ----------------
@@ -141,16 +109,7 @@ Bug Fixes since HDF5-1.8.11
 
     Tools
     -----
-    - h5repack: Added ability to use plugin filters. HDFFV-8345 (ADB - 2013/09/04).
-    - h5dump: Added option -N --any_path, which searches the file for paths that
-              match the search path. HDFFV-7989 (ADB - 2013/08/12).
-    - h5dump: Added optional arg 0 to -A, which excludes attributes from display.
-              HDFFV-8134 (ADB - 2013/08/01).
-    - h5dump correctly exports subsetted data to a file, using the --output
-      option.  (ADB  - 2013/06/07 HDFFV-8447)
-    - h5cc and other compile scripts now default to linking shared libraries
-      when HDF5 is configured with the --disable-static option.  
-      (LRK - 2013-09-23 - HDFFV-8141)
+    - None
 
     F90 API
     -------
@@ -170,11 +129,7 @@ Bug Fixes since HDF5-1.8.11
 
     Testing
     -------
-    - test/big sometimes failed with the message of "file selection+offset not
-      within extent". This has been fixed. (AKC - 2013/09/28 HDFFV-8271).
-    - tools/h5diff/testh5diff.sh is run in every "make check", even after it
-      has passed in the previous run. It should not run again if there is no
-      code changes. Fixed. (AKC - 2013/07/19 HDFFV-8392)
+    - None
 
 Supported Platforms
 ===================
