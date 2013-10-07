@@ -549,10 +549,12 @@ H5SL_init_interface(void)
 
     /* Allocate space for array of factories */
     H5SL_fac_g = (H5FL_fac_head_t **)H5MM_malloc(sizeof(H5FL_fac_head_t *));
+    HDassert(H5SL_fac_g);
     H5SL_fac_nalloc_g = 1;
 
     /* Initialize first factory */
     H5SL_fac_g[0] = H5FL_fac_init(sizeof(H5SL_node_t *));
+    HDassert(H5SL_fac_g[0]);
     H5SL_fac_nused_g = 1;
 
     FUNC_LEAVE_NOAPI(SUCCEED)

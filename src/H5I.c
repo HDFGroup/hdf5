@@ -562,9 +562,6 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
         if(NULL == (cur = (H5I_id_info_t *)H5SL_item(curr_node)))
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID info for node")
 
-        /* Get the next node in the list */
-        next_node = H5SL_next(curr_node);
-
         /*
          * Do nothing to the object if the reference count is larger than
          * one and forcing is off.
@@ -598,13 +595,16 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
             } /* end else */
         } /* end else */
 
+        /* Get the next node in the list */
+        next_node = H5SL_next(curr_node);
+
         /* Check if we should delete this node or not */
         if(delete_node) {
             /* Decrement the number of IDs in the type */
             (type_ptr->id_count)--;
 
             /* Remove the node from the list */
-            if(NULL == H5SL_remove(type_ptr->ids, cur))
+            if(NULL == H5SL_remove(type_ptr->ids, &cur->id))
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, FAIL, "can't remove ID node from skip list")
 
             /* Free the node */
