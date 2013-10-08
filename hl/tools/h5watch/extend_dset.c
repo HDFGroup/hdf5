@@ -139,8 +139,8 @@ extend_dset_two(const char *file, char *dname)
 	    goto done;
 
 	/* Set up the new extended dimension sizes  */
-        ext_dims[0] = cur_dims[0] + two_tests[i][0];
-        ext_dims[1] = cur_dims[1] + two_tests[i][1];
+        ext_dims[0] = cur_dims[0] + (hsize_t)two_tests[i][0];
+        ext_dims[1] = cur_dims[1] + (hsize_t)two_tests[i][1];
 
 	/* Extend the dataset */
 	if(H5Dset_extent(did, ext_dims) < 0)
@@ -148,7 +148,7 @@ extend_dset_two(const char *file, char *dname)
 
 	num_elmts = 1;
 	for(j = 0; j < (unsigned)ndims; j++)
-	    num_elmts *= ext_dims[j];
+	    num_elmts *= (unsigned)ext_dims[j];
 	
 	/* Compound type */
 	if(!HDstrcmp(dname, DSET_CMPD_TWO)) {
@@ -172,7 +172,7 @@ extend_dset_two(const char *file, char *dname)
 	} else { /* Integer type */
 	    HDmemset(ibuf, 0, sizeof(ibuf));
 	    for(j = 0; j < num_elmts; j++)
-		ibuf[j] = i + 1;
+		ibuf[j] = (int)(i + 1);
 
 	    /* Write to the dataset */
 	    if(H5Dwrite(did, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf) < 0)
@@ -261,7 +261,7 @@ extend_dset_one(const char *file, char *dname)
 	    goto done;
 
 	/* Set up the new extended dimension sizes  */
-	ext_dims[0] = cur_dims[0] + one_tests[i];
+	ext_dims[0] = cur_dims[0] + (hsize_t)one_tests[i];
 
 	/* Extend the dataset */
 	if(H5Dset_extent(did, ext_dims) < 0)
@@ -272,7 +272,7 @@ extend_dset_one(const char *file, char *dname)
 
 	    /* Select the extended region */
 	    offset[0] = cur_dims[0];
-	    count[0] = one_tests[i];
+	    count[0] = (hsize_t)one_tests[i];
 	    if((sid = H5Dget_space(did)) < 0)
 		goto done;
 	    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
@@ -305,7 +305,7 @@ extend_dset_one(const char *file, char *dname)
 		    goto done;
 	    } else { /* Integer type */
 		for(j = 0; j < (unsigned)one_tests[i]; j++)
-		    ibuf[j] = j;
+		    ibuf[j] = (int)j;
 
 		/* Write to the extended region of the dataset */
 		if(H5Dwrite(did, dtid, mid, sid, H5P_DEFAULT, ibuf) < 0)

@@ -182,9 +182,9 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     if(NULL == (hdr = (uint8_t *)H5WB_actual(wb, fspace->hdr_size)))
         HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, NULL, "can't get actual buffer")
 
-    /* Read header from disk */
-    if(H5F_block_read(f, H5FD_MEM_FSPACE_HDR, addr, fspace->hdr_size, dxpl_id, hdr) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_READERROR, NULL, "can't read free space header")
+    /* Read and validate header from disk */
+    if(H5F_read_check_metadata(f, H5FD_MEM_FSPACE_HDR, addr, fspace->hdr_size, fspace->hdr_size, dxpl_id, hdr, &computed_chksum) < 0)
+        HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for free space header")
 
     p = hdr;
 
@@ -241,17 +241,14 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     /* Allocated size of serialized free space sections */
     H5F_DECODE_LENGTH(udata->f, p, fspace->alloc_sect_size);
 
-    /* Compute checksum on indirect block */
-    computed_chksum = H5_checksum_metadata(hdr, (size_t)(p - (const uint8_t *)hdr), 0);
-
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
 
     HDassert((size_t)(p - (const uint8_t *)hdr) == fspace->hdr_size);
 
-    /* Verify checksum */
+    /* Verify checksum with checksum computed via H5F_read_check_metadata() */
     if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
+        HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for free space header")
 
     /* Set return value */
     ret_value = fspace;
@@ -577,9 +574,9 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata
     if(NULL == (buf = H5FL_BLK_MALLOC(sect_block, (size_t)udata->fspace->sect_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Read buffer from disk */
-    if(H5F_block_read(f, H5FD_MEM_FSPACE_SINFO, udata->fspace->sect_addr, (size_t)udata->fspace->sect_size, dxpl_id, buf) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_READERROR, NULL, "can't read free space sections")
+    /* Read and validate free space sections from disk */
+    if(H5F_read_check_metadata(f, H5FD_MEM_FSPACE_SINFO, udata->fspace->sect_addr, (size_t)udata->fspace->sect_size, (size_t)udata->fspace->sect_size, dxpl_id, buf, &computed_chksum) < 0)
+        HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for free space sections")
 
     /* Deserialize free sections from buffer available */
     p = buf;
@@ -671,15 +668,12 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata
         HDassert(old_tot_space == udata->fspace->tot_space);
     } /* end if */
 
-    /* Compute checksum on indirect block */
-    computed_chksum = H5_checksum_metadata(buf, (size_t)(p - (const uint8_t *)buf), 0);
-
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
 
-    /* Verify checksum */
+    /* Verify checksum with checksum computed via H5F_read_check_metadata() */
     if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
+        HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for free space sections")
 
     /* Sanity check */
     HDassert((size_t)(p - (const uint8_t *)buf) == old_sect_size);

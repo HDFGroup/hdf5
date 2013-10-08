@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <stdlib.h>
+#include <string.h>
 
 /*
  *  WATCH.h5: file with various types of datasets for testing--                                   

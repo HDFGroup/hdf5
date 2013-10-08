@@ -3566,6 +3566,571 @@ test_swmr_read(void)
 
 /****************************************************************
 **
+**  test_read_attempts(): 
+**  This test checks whether the public routines H5Pset_read_attempts() 
+**  and H5Pget_read_attempts() work properly.
+**
+*****************************************************************/
+static void
+test_read_attempts(void)
+{
+    hid_t fapl;    	/* File access property list */
+    hid_t file_fapl;    /* The file's access property list */
+    hid_t fid, fid1, fid2, fid3;    	/* File IDs */
+    unsigned attempts;	/* The # of read attempts */
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing H5Fget/set_read_attempts()\n"));
+
+    /* 
+     * Set A:
+     *	Tests on verifying the # of read attempts when:
+     *    --setting/getting read attemps from a copy of the 
+     *	    file access property list.
+     */
+    /* Create a copy of file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Get # of read attempts -- should be the default: 1 */
+    ret = H5Pget_read_attempts(fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, 1, "H5Pget_read_attempts");
+
+    /* Set the # of read attempts to 0--should fail */
+    ret = H5Pset_read_attempts(fapl, 0);
+    VERIFY(ret, FAIL, "H5Pset_read_attempts");
+
+    /* Set the # of read attempts to a # > 0--should succeed */
+    ret = H5Pset_read_attempts(fapl, 9);
+    VERIFY(ret, 0, "H5Pset_read_attempts");
+
+    /* Retrieve the # of read attempts -- should succeed and equal to 9 */
+    ret = H5Pget_read_attempts(fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, 9, "H5Pget_read_attempts");
+
+    /* Set the # of read attempts to the non-SWMR access default: H5F_READ_ATTEMPTS --should succeed */
+    ret = H5Pset_read_attempts(fapl, H5F_READ_ATTEMPTS);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+
+    /* Retrieve the # of read attempts -- should succeed and equal to H5F_READ_ATTEMPTS */
+    ret = H5Pget_read_attempts(fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, H5F_READ_ATTEMPTS, "H5Pget_read_attempts");
+
+    /* Set the # of read attempts to the SWMR access default: H5F_SWMR_READ_ATEMPTS --should succeed */
+    ret = H5Pset_read_attempts(fapl, H5F_SWMR_READ_ATTEMPTS);
+    VERIFY(ret, 0, "H5Pset_read_attempts");
+
+    /* Retrieve the # of read attempts -- should succeed and equal to H5F_SWMR_READ_ATTEMPTS */
+    ret = H5Pget_read_attempts(fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, H5F_SWMR_READ_ATTEMPTS, "H5Pget_read_attempts");
+
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* 
+     * Set B:
+     *	Tests on verifying read attempts when:
+     *	  --create a file with non-SWMR access
+     *	  --opening files with SWMR access 
+     *	  --using default or non-default file access property list
+     */
+    /* Test 1 */
+    /* Create a file with non-SWMR access and default fapl */
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist");
+
+    /* Retrieve the # of read attempts from file's fapl -- should be H5F_READ_ATTEMPTS */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, H5F_READ_ATTEMPTS, "H5Pget_read_attempts");
+
+    /* Close the file */
+    ret=H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Test 2 */
+    /* Open the file with SWMR access and default fapl */
+    fid = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist");
+
+    /* Retrieve the # of read attempts from file's fapl -- should be H5F_SWMR_READ_ATTEMPTS */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, H5F_SWMR_READ_ATTEMPTS, "H5Fget_read_attempts");
+
+    /* Close the file */
+    ret=H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Test 3 */
+    /* Create a copy of file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set the # of read attempts */
+    ret = H5Pset_read_attempts(fapl, 9);
+    CHECK(ret, FAIL, "H5Pset_read_attempts");
+
+    /* Open the file with SWMR access and fapl (non-default & set to 9) */
+    fid = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist");
+
+    /* Retrieve the # of read attempts from file's fapl -- should be 9 */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, 9, "H5Pget_read_attempts");
+
+    /* Close the file */
+    ret=H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Test 4 */
+    /* Create a copy of file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set the # of read attempts */
+    ret = H5Pset_read_attempts(fapl, 1);
+    CHECK(ret, FAIL, "H5Pset_read_attempts");
+
+    /* Open the file with SWMR access and fapl (non-default & set to 1) */
+    fid = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist");
+
+    /* Retrieve the # of read attempts from file fapl -- should succeed and equal to 1 */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, 1, "H5Pget_read_attempts");
+
+    /* Close the file */
+    ret=H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Test 5 */
+    /* Create a copy of file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Open the file with SWMR_READ and fapl (non-default but unset) */
+    fid = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist");
+
+    /* Retrieve the # of read attempts from file's fapl -- should be H5F_SWMR_READ_ATTEMPTS */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, H5F_SWMR_READ_ATTEMPTS, "H5Pget_read_attempts");
+
+    /* Close the file */
+    ret=H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* 
+     * Set C:
+     *	Tests on verifying read attempts when:
+     *	  --create a file with SWMR access
+     *	  --opening files with non-SWMR access 
+     *	  --using default or non-default file access property list
+     */
+    /* Test 1 */
+    /* Create a file with non-SWMR access and default fapl */
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist");
+
+    /* Retrieve the # of read attempts from file's fapl -- should be H5F_SWMR_READ_ATTEMPTS */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, H5F_SWMR_READ_ATTEMPTS, "H5Pget_read_attempts");
+
+    /* Close the file */
+    ret=H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Test 2 */
+    /* Open the file with non-SWMR access and default fapl */
+    fid = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist");
+
+    /* Retrieve the # of read attempts from file's fapl -- should be H5F_READ_ATTEMPTS */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, H5F_READ_ATTEMPTS, "H5Pget_read_attempts");
+
+    /* Close the file */
+    ret=H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Test 3 */
+    /* Create a copy of file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set the # of read attempts */
+    ret = H5Pset_read_attempts(fapl, 9);
+    CHECK(ret, FAIL, "H5Pset_read_attempts");
+
+    /* Open the file with SWMR access and fapl (non-default & set to 9) */
+    fid = H5Fopen(FILE1, H5F_ACC_RDONLY, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist");
+
+    /* Retrieve the # of read attempts from file's fapl -- should be H5F_READ_ATTEMPTS */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, H5F_READ_ATTEMPTS, "H5Pget_read_attempts");
+
+    /* Close the file */
+    ret=H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Test 4 */
+    /* Create a copy of file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set the # of read attempts */
+    ret = H5Pset_read_attempts(fapl, 1);
+    CHECK(ret, FAIL, "H5Pset_read_attempts");
+
+    /* Open the file with SWMR access and fapl (non-default & set to 1) */
+    fid = H5Fopen(FILE1, H5F_ACC_RDONLY, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist");
+
+    /* Retrieve the # of read attempts from file fapl -- should succeed and equal to 1 */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, 1, "H5Fget_read_attempts");
+
+    /* Close the file */
+    ret=H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Test 5 */
+    /* Create a copy of file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Open the file with SWMR_READ and fapl (non-default but unset) */
+    fid = H5Fopen(FILE1, H5F_ACC_RDONLY, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Pget_access_plist");
+
+    /* Retrieve the # of read attempts from file's fapl -- should be H5F_READ_ATTEMPTS */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, H5F_READ_ATTEMPTS, "H5Fget_read_attempts");
+
+    /* Close the file */
+    ret=H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+
+
+
+    /* Create a copy of file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set the # of read attempts */
+    ret = H5Pset_read_attempts(fapl, 9);
+    CHECK(ret, FAIL, "H5Pset_read_attempts");
+
+    /* Create a file */
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Open file again with SWMR access and default fapl */
+    fid = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist");
+
+    /* Retrieve the # of read attempts from file fapl -- should be H5F_READ_ATTEMPTS */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, H5F_READ_ATTEMPTS, "H5Pget_read_attempts");
+
+    /* Close the file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Open file again with SWMR access and default fapl */
+    fid = H5Fopen(FILE1, H5F_ACC_SWMR_READ, H5P_DEFAULT);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist");
+
+    /* Retrieve the # of read attempts from file fapl -- should be H5F_SWMR_READ_ATTEMPTS */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, H5F_SWMR_READ_ATTEMPTS, "H5Pget_read_attempts");
+
+    /* Close the file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* 
+     * Set D:
+     *	Tests on verifying read attempts when:
+     *    --create with non-SWMR access
+     *	  --opening files with SWMR access 
+     *    --H5reopen the files
+     */
+
+    /* Create a file */
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Open file again with SWMR access and default fapl */
+    fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, H5P_DEFAULT);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Create a copy of file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set the # of read attempts */
+    ret = H5Pset_read_attempts(fapl, 9);
+    CHECK(ret, FAIL, "H5Pset_read_attempts");
+
+    /* Open file again with SWMR access and fapl (non-default & set to 9) */
+    fid2 = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl);
+    CHECK(fid3, FAIL, "H5Fopen");
+
+    /* Re-open fid1 */
+    fid = H5Freopen(fid1);
+    CHECK(fid, FAIL, "H5Freopen");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist");
+
+    /* Retrieve the # of read attempts from file fapl -- should be H5F_SWMR_READ_ATTEMPTS */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, H5F_SWMR_READ_ATTEMPTS, "H5Fget_read_attempts");
+
+    /* Close the file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open fid2 */
+    fid = H5Freopen(fid2);
+    CHECK(fid, FAIL, "H5Pclose");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist");
+
+    /* Retrieve the # of read attempts from file fapl -- should be 9 */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, 9, "H5Pget_read_attempts");
+
+    /* Close the file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close all the files */
+    ret=H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret=H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* 
+     * Set E:
+     *	Tests on verifying read attempts when:
+     *    --create with SWMR access
+     *	  --opening files with non-SWMR access 
+     *    --H5reopen the files
+     */
+
+    /* Create a file */
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Open file again with non-SWMR access and default fapl */
+    fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Create a copy of file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set the # of read attempts */
+    ret = H5Pset_read_attempts(fapl, 9);
+    CHECK(ret, FAIL, "H5Pset_read_attempts");
+
+    /* Open file again with non-SWMR access and fapl (non-default & set to 9) */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDONLY, fapl);
+    CHECK(fid3, FAIL, "H5Fopen");
+
+    /* Re-open fid1 */
+    fid = H5Freopen(fid1);
+    CHECK(fid, FAIL, "H5Freopen");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist"); 
+    /* Retrieve the # of read attempts from file fapl -- should be H5F_READ_ATTEMPTS */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, H5F_READ_ATTEMPTS, "H5Fget_read_attempts");
+
+    /* Close the file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open fid2 */
+    fid = H5Freopen(fid2);
+    CHECK(fid, FAIL, "H5Freopen");
+
+    /* Get file's fapl */
+    file_fapl = H5Fget_access_plist(fid);
+    CHECK(file_fapl, FAIL, "H5Fget_access_plist");
+
+    /* Retrieve the # of read attempts from file fapl -- should be H5F_READ_ATTEMPTS */
+    ret = H5Pget_read_attempts(file_fapl, &attempts);
+    CHECK(ret, FAIL, "H5Pget_read_attempts");
+    VERIFY(attempts, H5F_READ_ATTEMPTS, "H5Pget_read_attempts");
+
+    /* Close the file's fapl */
+    ret = H5Pclose(file_fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close all the files */
+    ret=H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret=H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+} /* end test_read_attempts() */
+
+/****************************************************************
+**
 **  test_deprec(): 
 **	Test deprecated functionality.
 **
@@ -3749,6 +4314,7 @@ test_file(void)
     test_libver_macros2();      /* Test the macros for library version comparison */
     test_swmr_write();          /* Tests for SWMR write access flag */
     test_swmr_read();           /* Tests for SWMR read access flag */
+    test_read_attempts();    	/* Tests for public routine H5Fget/set_read_attempts() */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     test_deprec();              /* Test deprecated routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

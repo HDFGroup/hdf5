@@ -20,6 +20,7 @@
 #include <float.h>
 
 #include "h5tools.h"
+#include "h5tools_dump.h"
 #include "h5tools_utils.h"
 #include "h5tools_ref.h"
 #include "h5trav.h"
@@ -189,7 +190,7 @@ doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
             info.line_per_line = 1;
         }
         else
-            info.line_ncols = g_display_width;
+            info.line_ncols = (unsigned)g_display_width;
 
         info.line_multi_new = 1;
 
@@ -313,7 +314,6 @@ done:
 static herr_t 
 monitor_dataset(hid_t fid, char *dsetname)
 {
-    char drivername[50];/* Driver's name for opening the file */
     hid_t did;		/* dataset id */
     hid_t sid;		/* dataspace id */
     int	ndims;		/* # of dimensions in the dataspace */
@@ -404,7 +404,7 @@ monitor_dataset(hid_t fid, char *dsetname)
 	}
 	    
 	/* Save the current dimension sizes */
-	HDmemcpy(prev_dims, cur_dims, ndims * sizeof(hsize_t));
+	HDmemcpy(prev_dims, cur_dims, (size_t)ndims * sizeof(hsize_t));
 
 	/* Sleep before next monitor */
         HDsleep(g_polling_interval);
@@ -516,9 +516,9 @@ done:
 static herr_t
 check_dataset(hid_t fid, char *dsetname)
 {
-    hid_t did;		/* Dataset id */
-    hid_t dcp;		/* Dataset creation property */
-    hid_t sid;		/* Dataset's dataspace id */
+    hid_t did=-1;		/* Dataset id */
+    hid_t dcp=-1;		/* Dataset creation property */
+    hid_t sid=-1;		/* Dataset's dataspace id */
     int	  ndims;	/* # of dimensions in the dataspace */
     unsigned u;		/* Local index variable */
     hsize_t cur_dims[H5S_MAX_RANK];	/* size of dataspace dimensions */
@@ -583,14 +583,14 @@ check_dataset(hid_t fid, char *dsetname)
     }
 
 done: 
+    H5Eset_auto2(H5E_DEFAULT, func, edata);
+
     /* Closing */
     H5E_BEGIN_TRY
 	H5Sclose(sid);
 	H5Pclose(dcp);
 	H5Dclose(did);
     H5E_END_TRY
-
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     return(ret_value);
 } /* check_dataset() */
@@ -712,7 +712,7 @@ parse_command_line(int argc, const char *argv[])
             break;
 
         case 'w': /* --width=N */
-	    g_display_width = HDstrtol(opt_arg, NULL, 0);
+	    g_display_width = (int)HDstrtol(opt_arg, NULL, 0);
 	    if(g_display_width < 0) {
 		usage(h5tools_getprogname());
 		leave(EXIT_FAILURE);

@@ -338,6 +338,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     /* Make a copy of the default file access property list */
     if(NULL == (old_plist = (H5P_genplist_t *)H5I_object(H5P_LST_FILE_ACCESS_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
     if((ret_value = H5P_copy_plist(old_plist, app_ref)) < 0)
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "can't copy file access property list")
     if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(ret_value)))
@@ -365,6 +366,8 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     if(H5P_set(new_plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &(f->shared->sdata_aggr.alloc_size)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' cache size")
     if(H5P_set(new_plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
+    if(H5P_set(new_plist, H5F_ACS_READ_ATTEMPTS_NAME, &(f->read_attempts)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
     if(f->shared->efc)
         efc_size = H5F_efc_max_nfiles(f->shared->efc);
@@ -930,6 +933,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
         /* Get the FAPL values to cache */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
+
         if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, &(f->shared->mdc_initCacheCfg)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial metadata cache resize config")
         if(H5P_get(plist, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, &(f->shared->rdcc_nslots)) < 0)
@@ -959,6 +963,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
         if(efc_size > 0)
             if(NULL == (f->shared->efc = H5F_efc_create(efc_size)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create external file cache")
+
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
@@ -1355,6 +1360,22 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     file->intent = flags;
     file->open_name = H5MM_xstrdup(name);
 
+    /* Get the file access property list, for future queries */
+    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
+
+    /* Retrieve the # of read attempts here so that sohm in superblock will get the correct # of attempts */
+    if(H5P_get(a_plist, H5F_ACS_READ_ATTEMPTS_NAME, &file->read_attempts) < 0)
+	HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get the # of read attempts")
+
+    /* When opening file with SWMR access, the # of read attempts is H5_SWMR_READ_ATTEMPTS if not set */
+    /* When opening file with non-SWMR access, the # of read attempts is always H5F_READ_ATTEMPTS (set or not set) */
+    if(file->intent & H5F_ACC_SWMR_READ || file->intent & H5F_ACC_SWMR_WRITE) {
+	if(!file->read_attempts)
+	    file->read_attempts = H5F_SWMR_READ_ATTEMPTS;
+    } else
+	file->read_attempts = H5F_READ_ATTEMPTS;
+
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
@@ -1386,9 +1407,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group")
     } /* end if */
 
-    /* Get the file access property list, for future queries */
-    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
     /*
      * Decide the file close degree.  If it's the first time to open the
@@ -2119,6 +2137,9 @@ H5Freopen(hid_t file_id)
 
     /* Keep old file's read/write intent in new file */
     new_file->intent = old_file->intent;
+
+    /* Keep old file's read attempts in new file */
+    new_file->read_attempts = old_file->read_attempts;
 
     /* Duplicate old file's names */
     new_file->open_name = H5MM_xstrdup(old_file->open_name);

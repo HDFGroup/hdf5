@@ -264,6 +264,7 @@ struct H5F_file_t {
  */
 struct H5F_t {
     unsigned		intent;		/* The flags passed to H5F_open()*/
+    unsigned 		read_attempts;	/* The # of reads to try when reading metadata with checksum */
     char		*open_name;	/* Name used to open file	*/
     char		*actual_name;	/* Actual name of the file, after resolving symlinks, etc. */
     char               	*extpath;       /* Path for searching target external link file */
