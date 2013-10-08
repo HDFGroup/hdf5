@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
     hid_t map;
     hid_t tid1, tid2, rid1, rid2;
     hid_t fapl_id, dxpl_id, trspl_id;
-    hid_t event_q;
+    hid_t e_stack;
 
     uint64_t version;
     uint64_t trans_num;
@@ -26,15 +26,13 @@ int main(int argc, char **argv) {
     int provided;
     MPI_Request mpi_req;
 
-    H5_status_t *status = NULL;
-    int num_requests = 0, i;
+    H5ES_status_t status;
+    size_t num_events = 0;
     herr_t ret;
 
     hsize_t count = -1;
     int key, value;
     hbool_t exists = -1;
-    H5_request_t req1;
-    H5_status_t status1;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {
@@ -69,16 +67,16 @@ int main(int argc, char **argv) {
        the event queue.
 
        Multiple Event queue can be created used by the application. */
-    event_q = H5EQcreate(fapl_id);
-    assert(event_q);
+    e_stack = H5EScreate();
+    assert(e_stack);
 
-    /* create the file. This is asynchronous, but the file_id can be used. */
+    /* create the file. */
     file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     assert(file_id);
 
     /* acquire container version 0 - EXACT */
     version = 0;
-    rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
+    rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
     assert(0 == version);
 
     /******************************** Transaction 1 ****************************************/
@@ -88,7 +86,7 @@ int main(int argc, char **argv) {
 
     /* start transaction 1 with default num_peers (= 0). */
     if(0 == my_rank) {
-        ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
+        ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
     }
 
@@ -102,14 +100,14 @@ int main(int argc, char **argv) {
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
 
     /* create a group G1 on the root group */
-    gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+    gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
 
     /* to be able to create G2 on G1, we have to use G1's ID as the starting location */
-    gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+    gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
 
     /* If we happen to do something like this :
 
-       gid2 = H5Gcreate_ff(file_id, "G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+       gid2 = H5Gcreate_ff(file_id, "G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
 
        We will get a failure when the operation completes, because the
        path G1/G2 indicates that we have to read G1 from IOD in read
@@ -123,12 +121,11 @@ int main(int argc, char **argv) {
 
     /* none leader procs have to complete operations before notifying the leader */
     if(0 != my_rank) {
-        H5EQwait(event_q, &num_requests, &status);
-        printf("%d requests in event queue. Completions: ", num_requests);
-        for(i=0 ; i<num_requests; i++)
-            fprintf(stderr, "%d ",status[i]);
-        fprintf(stderr, "\n");
-        free(status);
+        /* wait on all requests and print completion status */
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
     }
 
     /* Barrier to make sure all processes are done writing so Process
@@ -138,7 +135,7 @@ int main(int argc, char **argv) {
     if(0 == my_rank) {
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
 
-        ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, H5_EVENT_QUEUE_NULL);
+        ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, H5_EVENT_STACK_NULL);
         assert(0 == ret);
     }
 
@@ -152,15 +149,14 @@ int main(int argc, char **argv) {
     /******************************** END Transaction 1 ****************************************/
 
     /* release container version 0. This is async. */
-    ret = H5RCrelease(rid1, event_q);
+    ret = H5RCrelease(rid1, e_stack);
     assert(0 == ret);
 
-    H5EQwait(event_q, &num_requests, &status);
-    printf("%d requests in event queue. Completions: ", num_requests);
-    for(i=0 ; i<num_requests; i++)
-        fprintf(stderr, "%d ",status[i]);
-    fprintf(stderr, "\n");
-    free(status);
+    /* wait on all requests and print completion status */
+    H5ESget_count(e_stack, &num_events);
+    H5ESwait_all(e_stack, &status);
+    H5ESclear(e_stack);
+    printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
     /* Process 0 tells other procs that container version 1 is acquired */
     version = 1;
@@ -182,7 +178,7 @@ int main(int argc, char **argv) {
     trspl_id = H5Pcreate (H5P_TR_START);
     ret = H5Pset_trspl_num_peers(trspl_id, my_size);
     assert(0 == ret);
-    ret = H5TRstart(tid2, trspl_id, event_q);
+    ret = H5TRstart(tid2, trspl_id, e_stack);
     assert(0 == ret);
     ret = H5Pclose(trspl_id);
     assert(0 == ret);
@@ -194,19 +190,19 @@ int main(int argc, char **argv) {
        location. The latter would be more performant, since we already
        have G2 open, so it will avoid extra access to get to G2 as
        would be in the former case. */
-    gid3 = H5Gcreate_ff(gid2, "G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, event_q);
+    gid3 = H5Gcreate_ff(gid2, "G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
     /* This will work too:
-       gid3 = H5Gcreate_ff(file_id, "G1/G2/G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, event_q);
+       gid3 = H5Gcreate_ff(file_id, "G1/G2/G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
     */
 
     /* create a Map object under G3. Since G3 is created in the same
        transaction as the map create will occur, the direct location
        for G3 is needed for the create to succeed. */
     map = H5Mcreate_ff(gid3, "MAP", H5T_STD_I32LE, H5T_STD_I32LE, 
-                       H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid2, event_q);
+                       H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid2, e_stack);
 
     /* finish transaction 2 */
-    ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, event_q);
+    ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, e_stack);
     assert(0 == ret);
 
     ret = H5TRclose(tid2);
@@ -214,14 +210,16 @@ int main(int argc, char **argv) {
 
     /******************************** END Transaction 2 ****************************************/
 
-    /* release container version 1. This is async. */
-    ret = H5RCrelease(rid2, event_q);
-    assert(0 == ret);
+    if(my_rank == 0) {
+        /* release container version 1. This is async. */
+        ret = H5RCrelease(rid2, e_stack);
+        assert(0 == ret);
+    }
 
-    assert(H5Gclose_ff(gid1, event_q) == 0);
-    assert(H5Gclose_ff(gid2, event_q) == 0);
-    assert(H5Gclose_ff(gid3, event_q) == 0);
-    assert(H5Mclose_ff(map, event_q) == 0);
+    assert(H5Gclose_ff(gid1, e_stack) == 0);
+    assert(H5Gclose_ff(gid2, e_stack) == 0);
+    assert(H5Gclose_ff(gid3, e_stack) == 0);
+    assert(H5Mclose_ff(map, e_stack) == 0);
 
     ret = H5RCclose(rid1);
     assert(0 == ret);
@@ -230,17 +228,15 @@ int main(int argc, char **argv) {
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
-    assert(H5Fclose_ff(file_id, event_q) == 0);
+    assert(H5Fclose_ff(file_id, e_stack) == 0);
 
     /* wait on all requests and print completion status */
-    H5EQwait(event_q, &num_requests, &status);
-    fprintf(stderr, "%d requests in event queue. Completions: ", num_requests);
-    for(i=0 ; i<num_requests; i++)
-        fprintf(stderr, "%d ",status[i]);
-    fprintf(stderr, "\n");
-    free(status);
+    H5ESget_count(e_stack, &num_events);
+    H5ESwait_all(e_stack, &status);
+    H5ESclear(e_stack);
+    printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
-    H5EQclose(event_q);
+    H5ESclose(e_stack);
     H5Pclose(fapl_id);
 
     /* This finalizes the EFF stack. ships a terminate and IOD finalize to the server 

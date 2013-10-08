@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
 
     hid_t tid1, tid2, rid1, rid2, rid3, rid4;
     hid_t fapl_id, trspl_id;
-    hid_t event_q;
+    hid_t e_stack;
 
     uint64_t version;
     uint64_t trans_num;
@@ -36,8 +36,8 @@ int main(int argc, char **argv) {
     int provided;
     MPI_Request mpi_req;
 
-    H5_status_t *status = NULL;
-    int num_requests = 0;
+    H5ES_status_t status;
+    size_t num_events = 0;
     herr_t ret;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
@@ -87,8 +87,8 @@ int main(int argc, char **argv) {
        the event queue.
 
        Multiple Event queue can be created used by the application. */
-    event_q = H5EQcreate(fapl_id);
-    assert(event_q);
+    e_stack = H5EScreate();
+    assert(e_stack);
 
     /* create the file. */
     fid1 = H5Fcreate(file_name1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
@@ -97,11 +97,13 @@ int main(int argc, char **argv) {
     fid2 = H5Fcreate(file_name2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     assert(fid1);
 
-    /* acquire container version 0 on both containers - EXACT */
+    /* acquire container version 0 on both containers - EXACT 
+       This can be asynchronous, but here we need the acquired ID 
+       right after the call to start the transaction so we make synchronous. */
     version = 0;
-    rid1 = H5RCacquire(fid1, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
+    rid1 = H5RCacquire(fid1, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
     assert(0 == version);
-    rid2 = H5RCacquire(fid2, &version, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
+    rid2 = H5RCacquire(fid2, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
     assert(0 == version);
 
     /* create transaction objects */
@@ -110,11 +112,15 @@ int main(int argc, char **argv) {
     tid2 = H5TRcreate(fid2, rid2, (uint64_t)1);
     assert(tid1);
 
-    /* start transaction 1 with default num_peers (= 0). */
+    /* start transaction 1 with default Leader/Delegate model. Leader
+       which is rank 0 here starts the transaction. It can be
+       asynchronous, but we make it synchronous here so that the
+       Leader can tell its delegates that the transaction is
+       started. */
     if(0 == my_rank) {
-        ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
+        ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
-        ret = H5TRstart(tid2, H5P_DEFAULT, H5_EVENT_QUEUE_NULL);
+        ret = H5TRstart(tid2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
     }
 
@@ -127,12 +133,14 @@ int main(int argc, char **argv) {
     if(0 != my_rank)
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
 
-    /* create groups */
-    gid1 = H5Gcreate_ff(fid1, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
-    gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, event_q);
+    assert(1 == trans_num);
 
-    gid3 = H5Gcreate_ff(fid2, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, event_q);
-    gid4 = H5Gcreate_ff(gid3, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, event_q);
+    /* create groups */
+    gid1 = H5Gcreate_ff(fid1, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+    gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+
+    gid3 = H5Gcreate_ff(fid2, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
+    gid4 = H5Gcreate_ff(gid3, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
 
     /* create a 32 bit integer LE datatype. This is a local operation
        that does not touch the file */
@@ -144,9 +152,9 @@ int main(int argc, char **argv) {
      * because they do not depend on the committed state of the datatype.
      */
      H5Tcommit_ff(fid1, "int", dtid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
-                  tid1, event_q);
+                  tid1, e_stack);
      H5Tcommit_ff(fid2, "int", dtid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
-                  tid2, event_q);
+                  tid2, e_stack);
 
     /* create a dataspace. This is a local Bookeeping operation that 
        does not touch the file */
@@ -155,41 +163,41 @@ int main(int argc, char **argv) {
 
     /* create Datasets */
     did1 = H5Dcreate_ff(gid2,"D1",dtid1,sid,
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, event_q);
+                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
     did2 = H5Dcreate_ff(gid4,"D1",dtid2,sid,
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid2, event_q);
+                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid2, e_stack);
 
     /* Raw data write on D1. */
-    H5Dwrite_ff(did1, dtid1, sid, sid, H5P_DEFAULT, wdata1, tid1, event_q);
-    H5Dwrite_ff(did2, dtid2, sid, sid, H5P_DEFAULT, wdata2, tid2, event_q);
+    H5Dwrite_ff(did1, dtid1, sid, sid, H5P_DEFAULT, wdata1, tid1, e_stack);
+    H5Dwrite_ff(did2, dtid2, sid, sid, H5P_DEFAULT, wdata2, tid2, e_stack);
 
     /* none leader procs have to complete operations before notifying the leader */
     if(0 != my_rank) {
-        H5EQwait(event_q, &num_requests, &status);
-        printf("%d requests in event queue. Completions: ", num_requests);
-        for(i=0 ; i<num_requests; i++)
-            fprintf(stderr, "%d ",status[i]);
-        fprintf(stderr, "\n");
-        free(status);
+        /* wait on all requests and print completion status */
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
     }
 
     /* Barrier to make sure all processes are done writing so Process
        0 can finish transaction 1 and acquire a read context on it. */
     MPI_Barrier(MPI_COMM_WORLD);
 
+    /* Leader process finished the transaction after all clients
+       finish their updates. Leader also asks the library to acquire
+       the committed transaction, that becomes a readable version
+       after the commit completes. */
     if(0 == my_rank) {
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
 
         /* make this synchronous so we know the container version has been acquired */
-        ret = H5TRfinish(tid1, H5P_DEFAULT, &rid3, H5_EVENT_QUEUE_NULL);
+        ret = H5TRfinish(tid1, H5P_DEFAULT, &rid3, H5_EVENT_STACK_NULL);
         assert(0 == ret);
         /* make this synchronous so we know the container version has been acquired */
-        ret = H5TRfinish(tid2, H5P_DEFAULT, &rid4, H5_EVENT_QUEUE_NULL);
+        ret = H5TRfinish(tid2, H5P_DEFAULT, &rid4, H5_EVENT_STACK_NULL);
         assert(0 == ret);
     }
-
-    /* another barrier so other processes know that container version is acquried */
-    MPI_Barrier(MPI_COMM_WORLD);
 
     /* Local op */
     ret = H5TRclose(tid1);
@@ -199,9 +207,9 @@ int main(int argc, char **argv) {
     assert(0 == ret);
 
     /* release container version 0. This is async. */
-    ret = H5RCrelease(rid1, event_q);
+    ret = H5RCrelease(rid1, e_stack);
     assert(0 == ret);
-    ret = H5RCrelease(rid2, event_q);
+    ret = H5RCrelease(rid2, e_stack);
     assert(0 == ret);
 
     /* other processes just create a read context object; no need to
@@ -214,9 +222,9 @@ int main(int argc, char **argv) {
     }
 
     /* read data from datasets with read version 1. */
-    ret = H5Dread_ff(did1, dtid1, sid, sid, H5P_DEFAULT, rdata1, rid3, event_q);
+    ret = H5Dread_ff(did1, dtid1, sid, sid, H5P_DEFAULT, rdata1, rid3, e_stack);
     assert(ret == 0);
-    ret = H5Dread_ff(did2, dtid2, sid, sid, H5P_DEFAULT, rdata2, rid4, event_q);
+    ret = H5Dread_ff(did2, dtid2, sid, sid, H5P_DEFAULT, rdata2, rid4, e_stack);
     assert(ret == 0);
 
     fprintf(stderr, "\n*****************************************************************************************************************\n");
@@ -225,34 +233,33 @@ int main(int argc, char **argv) {
 
     /* closing did1 acts as a barrier task at the server for all
        operations dependeing on the dataset. This is asynchronous. */
-    assert(H5Dclose_ff(did1, event_q) == 0);
-    assert(H5Dclose_ff(did2, event_q) == 0);
+    assert(H5Dclose_ff(did1, e_stack) == 0);
+    assert(H5Dclose_ff(did2, e_stack) == 0);
 
-    assert(H5Tclose_ff(dtid1, event_q) == 0);
-    assert(H5Tclose_ff(dtid2, event_q) == 0);
+    assert(H5Tclose_ff(dtid1, e_stack) == 0);
+    assert(H5Tclose_ff(dtid2, e_stack) == 0);
 
-    assert(H5Gclose_ff(gid1, event_q) == 0);
-    assert(H5Gclose_ff(gid2, event_q) == 0);
-    assert(H5Gclose_ff(gid3, event_q) == 0);
-    assert(H5Gclose_ff(gid4, event_q) == 0);
+    assert(H5Gclose_ff(gid1, e_stack) == 0);
+    assert(H5Gclose_ff(gid2, e_stack) == 0);
+    assert(H5Gclose_ff(gid3, e_stack) == 0);
+    assert(H5Gclose_ff(gid4, e_stack) == 0);
 
     /* none leader procs have to complete operations before notifying the leader */
     if(0 != my_rank) {
-        H5EQwait(event_q, &num_requests, &status);
-        printf("%d requests in event queue. Completions: ", num_requests);
-        for(i=0 ; i<num_requests; i++)
-            fprintf(stderr, "%d ",status[i]);
-        fprintf(stderr, "\n");
-        free(status);
+        /* wait on all requests and print completion status */
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
 
     /* release container version 1. This is async. */
     if(0 == my_rank) {
-        ret = H5RCrelease(rid3, event_q);
+        ret = H5RCrelease(rid3, e_stack);
         assert(0 == ret);
-        ret = H5RCrelease(rid4, event_q);
+        ret = H5RCrelease(rid4, e_stack);
         assert(0 == ret);
     }
 
@@ -261,16 +268,15 @@ int main(int argc, char **argv) {
     ret = H5RCclose(rid4);
     assert(0 == ret);
 
-    assert(H5Fclose_ff(fid1, event_q) == 0);
-    assert(H5Fclose_ff(fid2, event_q) == 0);
+    assert(H5Fclose_ff(fid1, e_stack) == 0);
+    assert(H5Fclose_ff(fid2, e_stack) == 0);
 
     /* wait on all requests and print completion status */
-    H5EQwait(event_q, &num_requests, &status);
-    fprintf(stderr, "%d requests in event queue. Completions: ", num_requests);
-    for(i=0 ; i<num_requests; i++)
-        fprintf(stderr, "%d ",status[i]);
-    fprintf(stderr, "\n");
-    free(status);
+    /* wait on all requests and print completion status */
+    H5ESget_count(e_stack, &num_events);
+    H5ESwait_all(e_stack, &status);
+    H5ESclear(e_stack);
+    printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
     fprintf(stderr, "Printing After Waiting for data in first file");
     for(i=0;i<nelem;++i)
@@ -282,7 +288,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%d ",rdata2[i]);
     fprintf(stderr, "\n");
 
-    H5EQclose(event_q);
+    H5ESclose(e_stack);
     H5Pclose(fapl_id);
 
     free(wdata1);

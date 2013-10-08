@@ -19,12 +19,12 @@ int main(int argc, char **argv) {
     hid_t rid1;
     hid_t aid;
     hid_t fapl_id;
-    hid_t event_q;
+    hid_t e_stack;
     uint64_t version;
     int my_rank, my_size;
     int provided;
-    H5_status_t *status = NULL;
-    int num_requests = 0, i;
+    H5ES_status_t status;
+    size_t num_events = 0;
     herr_t ret;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
@@ -60,11 +60,11 @@ int main(int argc, char **argv) {
        the event queue.
 
        Multiple Event queue can be created used by the application. */
-    event_q = H5EQcreate(fapl_id);
-    assert(event_q);
+    e_stack = H5EScreate();
+    assert(e_stack);
 
     /* Open the file and ask to acquire the latest readable version */
-    file_id = H5Fopen_ff(file_name, H5F_ACC_RDONLY, fapl_id, &rid1, H5_EVENT_QUEUE_NULL);
+    file_id = H5Fopen_ff(file_name, H5F_ACC_RDONLY, fapl_id, &rid1, H5_EVENT_STACK_NULL);
     assert(file_id);
 
     /* query the latest readable version number */
@@ -73,42 +73,41 @@ int main(int argc, char **argv) {
     assert(version == 1024);
 
     /* create objects */
-    gid = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, rid1, event_q);
+    gid = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, rid1, e_stack);
     assert(gid > 0);
-    did = H5Dopen_ff(gid, "D1", H5P_DEFAULT, rid1, event_q);
+    did = H5Dopen_ff(gid, "D1", H5P_DEFAULT, rid1, e_stack);
     assert(did > 0);
-    map = H5Mopen_ff(file_id, "MAP1", H5P_DEFAULT, rid1, event_q);
+    map = H5Mopen_ff(file_id, "MAP1", H5P_DEFAULT, rid1, e_stack);
     assert(map > 0);
-    dtid = H5Topen_ff(file_id, "DT1", H5P_DEFAULT, rid1, event_q);
+    dtid = H5Topen_ff(file_id, "DT1", H5P_DEFAULT, rid1, e_stack);
     assert(dtid > 0);
-    aid = H5Aopen_ff(did, "ATTR_DSET", H5P_DEFAULT, rid1, event_q);
+    aid = H5Aopen_ff(did, "ATTR_DSET", H5P_DEFAULT, rid1, e_stack);
     assert(aid > 0);
 
-    assert(H5Gclose_ff(gid, event_q) == 0);
-    assert(H5Dclose_ff(did, event_q) == 0);
-    assert(H5Tclose_ff(dtid, event_q) == 0);
-    assert(H5Mclose_ff(map, event_q) == 0);
-    assert(H5Aclose_ff(aid, event_q) == 0);
+    assert(H5Gclose_ff(gid, e_stack) == 0);
+    assert(H5Dclose_ff(did, e_stack) == 0);
+    assert(H5Tclose_ff(dtid, e_stack) == 0);
+    assert(H5Mclose_ff(map, e_stack) == 0);
+    assert(H5Aclose_ff(aid, e_stack) == 0);
 
     /* release container version 1024. This is async. */
-    ret = H5RCrelease(rid1, event_q);
+    ret = H5RCrelease(rid1, e_stack);
     assert(0 == ret);
 
     ret = H5RCclose(rid1);
     assert(0 == ret);
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
-    assert(H5Fclose_ff(file_id, event_q) == 0);
+    assert(H5Fclose_ff(file_id, e_stack) == 0);
 
-    H5EQwait(event_q, &num_requests, &status);
-    printf("%d requests in event queue. Completions: ", num_requests);
-    for(i=0 ; i<num_requests; i++)
-        fprintf(stderr, "%d ",status[i]);
-    fprintf(stderr, "\n");
-    free(status);
+    /* wait on all requests and print completion status */
+    H5ESget_count(e_stack, &num_events);
+    H5ESwait_all(e_stack, &status);
+    H5ESclear(e_stack);
+    printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
     H5Pclose(fapl_id);
-    H5EQclose(event_q);
+    H5ESclose(e_stack);
 
     /* This finalizes the EFF stack. ships a terminate and IOD finalize to the server 
        and shutsdown the FS server (when all clients send the terminate request) 
