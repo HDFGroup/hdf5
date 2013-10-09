@@ -488,7 +488,7 @@ a Windows machine by adjusting the CTEST_CMAKE_GENERATOR option in the
 product specific script.
 
 NOTE: these files are available at the HDF web site:
-    http://www.hdfgroup.org/xxx/cmake-help.html
+    http://www.hdfgroup.org/HDF5/release/cmakebuild.html
 
     CTestScript.cmake
     SZip.tar.gz
