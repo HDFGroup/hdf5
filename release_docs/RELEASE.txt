@@ -375,6 +375,10 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* Running make check for the tools can fail in the tools tests if make was not
+  run prior. The tests for the tools use other tools in the tests, therefore
+  all the tools should be built before testing the tools. (ADB - 2013/10/09)
+
 * On OpenVMS, two soft conversion functions (H5T__conv_i_f and H5T__conv_f_i)
   have bugs.  They convert data between floating-point numbers and integers.
   But the library's default is hard conversion.  The user should avoid
