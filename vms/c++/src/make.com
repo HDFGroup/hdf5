@@ -69,6 +69,8 @@ $ ccc H5IntType.cxx
 $ lib/insert/object hdf5_cplus H5IntType
 $ ccc H5Library.cxx
 $ lib/insert/object hdf5_cplus H5Library
+$ ccc H5Location.cxx
+$ lib/insert/object hdf5_cplus H5Location
 $ ccc H5Object.cxx
 $ lib/insert/object hdf5_cplus H5Object
 $ ccc H5PredType.cxx
