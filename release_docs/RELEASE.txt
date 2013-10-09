@@ -58,7 +58,7 @@ New Features
     Configuration
     -------------
     - New configuration option added to change the default plugin path.
-      configure option is --with-default-plugin=location
+      configure option is --with-default-plugindir=location
       cmake option is -DH5_DEFAULT_PLUGINDIR:PATH=location
       HDFFV-8513.  (ADB 2013/09/04)
     - Rename FFLAGS to FCFLAGS in configure (ADB 2013/08/13)
