@@ -25,6 +25,7 @@
 
 #include "h5test.h"
 #include "H5srcdir.h"
+#include "H5Dpublic.h"
 #include "H5Vprivate.h"
 #ifdef H5_HAVE_SZLIB_H
 #   include "szlib.h"
@@ -60,7 +61,8 @@ const char *FILENAME[] = {
     "chunk_fixed",	/* 12 */
     "copy_dcpl_newfile",/* 13 */
     "partial_chunks",   /* 14 */
-    "layout_extend",
+    "layout_extend",    /* 15 */
+    "swmr_fail",        /* 16 */
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -8319,9 +8321,12 @@ test_chunk_fast(hid_t fapl)
 
     /* Loop over using SWMR access to write */
     for(swmr = FALSE; swmr <= TRUE; swmr++) {
-#ifdef H5_HAVE_FILTER_DEFLATE
-        hbool_t     compress;       /* Whether chunks should be compressed */
+         hbool_t     compress;       /* Whether chunks should be compressed */
 
+        /* SWMR is only supported on the latest file format */
+        if(swmr && H5F_LIBVER_LATEST != low)
+            continue;
+#ifdef H5_HAVE_FILTER_DEFLATE
         /* Loop over compressing chunks */
         for(compress = FALSE; compress <= TRUE; compress++) {
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -9726,7 +9731,7 @@ test_idx_compatible(void)
 
 	/* Verify index type */
 	if(idx_type != H5D_CHUNK_IDX_BTREE) 
-	    FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+	    FAIL_PUTS_ERROR("should be using v1 B-tree as index")
 
 	if(H5Dclose(did) < 0) FAIL_STACK_ERROR
 
@@ -9739,7 +9744,7 @@ test_idx_compatible(void)
 
 	/* Verify index type */
 	if(idx_type != H5D_CHUNK_IDX_BTREE) 
-	    FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+	    FAIL_PUTS_ERROR("should be using v1 B-tree as index")
 
 	if(H5Dclose(did) < 0) FAIL_STACK_ERROR
 
@@ -10012,6 +10017,112 @@ error:
     } H5E_END_TRY;
     return -1;
 } /* end test_large_chunk_shrink() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: test_swmr_v1_btree_ci_fail
+ *
+ * Purpose: Tests to see if the library will disallow creation of or
+ *          writing to a version 1 B-tree under SWMR semantics.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_swmr_v1_btree_ci_fail(hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       fid = -1;       /* File ID */
+    hid_t       my_fapl = -1;   /* File access property list ID */
+    hid_t       dcpl = -1;      /* Dataset creation property list ID */
+    hid_t       sid = -1;       /* Dataspace ID */
+    hid_t       did = -1;       /* Dataset ID */
+    hsize_t     dims[1];        /* Size of dataset */
+    hsize_t     max_dims[1];    /* Maximum size of dataset */
+    hsize_t     chunk_dims[1];  /* Chunk dimensions */
+    herr_t      err;            /* Error return value */
+    H5D_chunk_index_t idx_type; /* Chunk index type */
+    int         data = 0;       /* Data to be written to the dataset */
+
+    TESTING("expected dataset create/write failure under SWMR using v-1 B-trees");
+
+    h5_fixname(FILENAME[16], fapl, filename, sizeof filename);
+
+    /* Copy the file access property list */
+    if((my_fapl = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Open the test file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Create a dataset */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+    chunk_dims[0] = 64;
+    if(H5Pset_chunk(dcpl, 1, chunk_dims) < 0) FAIL_STACK_ERROR
+    dims[0] = 0;
+    max_dims[0] = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(1, dims, max_dims)) < 0) FAIL_STACK_ERROR
+    if((did = H5Dcreate2(fid, DSET_DEFAULT_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Explicitly check that the dataset is using a v-1 B-tree index */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) FAIL_STACK_ERROR
+    if(idx_type != H5D_CHUNK_IDX_BTREE) FAIL_PUTS_ERROR("created dataset is not version 1 B-tree")
+
+    /* Close the file */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    /* Reopen the file with SWMR write access */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, my_fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Attempt to create a dataset that uses v-1 B-tree chunk indexing under
+     * SWMR write semantics.  This will fail.
+     */
+    H5E_BEGIN_TRY {
+        did = H5Dcreate2(fid, DSET_CHUNKED_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(did >= 0) {
+        H5_FAILED();
+        puts("    library allowed creation of a version 1 B-tree indexed dataset under SWMR semantics");
+	goto error;
+    }
+
+    /* Attempt to write to a dataset that uses v-1 B-tree chunk indexing under
+     * SWMR semantics.  Since the library can't protect a v-1 B-tree node under
+     * SWMR semantics (we have no idea if someone will try to modify it), 
+     * even opening the dataset will fail.
+     */
+    H5E_BEGIN_TRY {
+        did = H5Dopen(fid, DSET_DEFAULT_NAME, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(did >= 0) {
+        H5_FAILED();
+        puts("    library allowed opening (and potential writing) to a version 1 B-tree indexed dataset under SWMR semantics");
+        goto error;
+    }
+
+    /* Close everything */
+    if(H5Pclose(my_fapl) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    return -1;
+    H5E_BEGIN_TRY {
+        H5Pclose(my_fapl);
+        H5Pclose(dcpl);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+} /* end test_swmr_v1_btree_ci_fail() */
+
+
 
 
 /*-------------------------------------------------------------------------
@@ -11074,6 +11185,9 @@ main(void)
     /* Testing setup */
     h5_reset();
     fapl = h5_fileaccess();
+
+    /* Test that SWMR access fails with version 1 B-tree access */
+    nerrors += (test_swmr_v1_btree_ci_fail(fapl) < 0 ? 1 : 0);
 
     /* Turn off the chunk cache, so all the chunks are immediately written to disk */
     if(H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)

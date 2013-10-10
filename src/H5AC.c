@@ -1359,6 +1359,14 @@ H5AC_protect(H5F_t *f,
     if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR) && rw == H5AC_WRITE)
 	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "no write intent on file")
 
+    /* FIXME: (temporary)
+     * Check to ensure that version 1 B-tree nodes are not being protected
+     * under SWMR writes.  This will be replaced with a more extensive
+     * SWMR-safe metadata check in the future.
+     */
+    if((H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) && H5AC_BT_ID == type->id)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "can't protect/write version 1 B-tree nodes under SWMR writes")
+
 #if H5AC__TRACE_FILE_ENABLED
     /* For the protect call, only the addr and type id is really necessary
      * in the trace file.  Include the size of the entry protected as a
