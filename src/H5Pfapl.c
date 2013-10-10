@@ -2472,7 +2472,7 @@ H5P__facc_cache_config_cmp(const void *_config1, const void *_config2, size_t UN
     if(config1->close_trace_file > config2->close_trace_file) HGOTO_DONE(1);
 
     if((ret_value = HDstrncmp(config1->trace_file_name, config2->trace_file_name, 
-                              H5AC__MAX_TRACE_FILE_NAME_LEN + 1)) != 0)
+                              (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + 1))) != 0)
         HGOTO_DONE(ret_value);
 
     if(config1->evictions_enabled < config2->evictions_enabled) HGOTO_DONE(-1);
