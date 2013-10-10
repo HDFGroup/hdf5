@@ -301,13 +301,13 @@ CONTENTS
               Intel or PGI compilers. 
 
 4.3.6. Specifying other programs
-        The build system has been tuned for use with GNU make but also 
-        works with other versions of make.  If the `make' command runs a
-        non-GNU version but a GNU version is available under a different
-        name (perhaps `gmake'), then HDF5 can be configured to use it by
-        setting the MAKE variable. Note that whatever value is used for
-        MAKE must also be used as the make command when building the
-        library:
+        The build system has been tuned for use with GNU make which is
+        the preferred version. Other versions of make may or may not work
+        completely.  If the `make' command runs a non-GNU version but a GNU
+        version is available under a different name (perhaps `gmake'), then
+        HDF5 can be configured to use it by setting the MAKE variable. Note
+        that whatever value is used for MAKE must also be used as the make
+        command when building the library:
 
             $ MAKE=gmake ./configure
             $ gmake
