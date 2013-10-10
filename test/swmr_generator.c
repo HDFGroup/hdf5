@@ -102,10 +102,14 @@ gen_skeleton(const char *filename, unsigned verbose, unsigned swmr_write,
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         return -1;
 
-    /* Select the correct index type */
-    if(strcmp(index_type, "b1"))
-        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            return -1;
+    /* We ALWAYS select the latest file format for SWMR */
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        return -1;
+
+    /* There are two chunk indexes tested here.
+     * With one unlimited dimension, we get the extensible array index
+     * type, with two unlimited dimensions, we get a v-2 B-tree.
+     */
     if(!strcmp(index_type, "b2"))
         max_dims[0] = H5S_UNLIMITED;
 
@@ -243,7 +247,7 @@ usage(void)
     printf("\n");
     printf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
     printf("\n");
-    printf("<index type> should be b1, b2, fa, or ea (fa not yet implemented)\n");
+    printf("<index type> should be b2 or ea\n");
     printf("\n");
     printf("Defaults to verbose (no '-q' given), no SWMR_WRITE mode (no '-s' given) no\n");
     printf("compression ('-c -1'), v1 b-tree indexing (-i b1), and will generate a random\n");
@@ -280,8 +284,7 @@ int main(int argc, const char *argv[])
                     /* Chunk index type */
                     case 'i':
                         index_type = argv[u + 1];
-                        if(strcmp(index_type, "b1")
-                                && strcmp(index_type, "ea")
+                        if(strcmp(index_type, "ea")
                                 && strcmp(index_type, "b2"))
                             usage();
                         u += 2;

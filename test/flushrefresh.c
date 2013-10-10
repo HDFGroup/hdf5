@@ -145,6 +145,10 @@ int main(int argc, const char *argv[])
     /* Variables */
     const char *envval = NULL;
 
+    /* Initialize library */
+    if(H5open() < 0)
+        TEST_ERROR;
+
     /* Parse command line options */
     if (argc == 1) {
 
@@ -275,7 +279,7 @@ herr_t test_flush(void)
      **************************************************************************/
 
     /* Variables */
-    hid_t fid,gid,gid2,gid3,sid,tid1,tid2,tid3,did,did2,did3,rid,status = 0;
+    hid_t fid,gid,gid2,gid3,sid,tid1,tid2,tid3,did,did2,did3,rid,fapl,status = 0;
     hsize_t dims[2] = {3,5};
 
     /* Testing Message */
@@ -288,8 +292,10 @@ herr_t test_flush(void)
     /* CREATE TEST FILE */
     /* ================ */
 
-    /* Create file, open root group */
-    if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    /* Create file, open root group - have to use latest file format for SWMR */
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR;
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR; 
+    if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
     if ((rid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create data space and types */
@@ -508,6 +514,7 @@ herr_t test_flush(void)
     /* ================== */
     /* Cleanup and Return */  
     /* ================== */
+    if (H5Pclose(fapl) < 0) TEST_ERROR;
     if (H5Gclose(gid) < 0) TEST_ERROR;
     if (H5Gclose(gid2) < 0) TEST_ERROR;
     if (H5Dclose(did) < 0) TEST_ERROR;
@@ -598,7 +605,7 @@ herr_t test_refresh(void)
      **************************************************************************/
 
     /* Variables */
-    hid_t aid,fid,sid,tid1,did,dcpl = 0;
+    hid_t aid,fid,sid,tid1,did,dcpl,fapl = 0;
     hid_t gid,gid2,gid3,tid2,tid3,did2,did3,status = 0;
     hsize_t dims[2] = {50,50};
     hsize_t cdims[2] = {1,1};
@@ -615,7 +622,9 @@ herr_t test_refresh(void)
     /* ================ */
 
     /* Create File */
-    if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR;
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR;
+    if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
 
     /* Create data space and types */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
@@ -760,6 +769,7 @@ herr_t test_refresh(void)
     /* ================== */
 
     /* Close Stuff */
+    if (H5Pclose(fapl) < 0) TEST_ERROR;
     if (H5Tclose(tid1) < 0) TEST_ERROR;
     if (H5Tclose(tid2) < 0) TEST_ERROR;
     if (H5Tclose(tid3) < 0) TEST_ERROR;
