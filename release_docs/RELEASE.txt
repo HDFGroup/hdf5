@@ -379,6 +379,9 @@ Known Problems
   run prior. The tests for the tools use other tools in the tests, therefore
   all the tools should be built before testing the tools. (ADB - 2013/10/09)
 
+* Make provided by Solaris fails in "make check". Solaris users should use
+  gmake to build and install the HDF5 software. (AKC - 2013/10/08 - HDFFV-8534)
+
 * On OpenVMS, two soft conversion functions (H5T__conv_i_f and H5T__conv_f_i)
   have bugs.  They convert data between floating-point numbers and integers.
   But the library's default is hard conversion.  The user should avoid
