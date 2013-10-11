@@ -1,0 +1,122 @@
+usage: h5repack [OPTIONS] file1 file2
+  file1                    Input HDF5 File
+  file2                    Output HDF5 File
+  OPTIONS
+   -h, --help              Print a usage message and exit
+   -v, --verbose           Verbose mode, print object information
+   -V, --version           Print version number and exit
+   -n, --native            Use a native HDF5 type when repacking
+   -L, --latest            Use latest version of file format
+   -c L1, --compact=L1     Maximum number of links in header messages
+   -d L2, --indexed=L2     Minimum number of links in the indexed format
+   -s S[:F], --ssize=S[:F] Shared object header message minimum size
+   -m M, --minimum=M       Do not apply the filter to datasets smaller than M
+   -e E, --file=E          Name of file E with the -f and -l options
+   -u U, --ublock=U        Name of file U with user block data to be added
+   -b B, --block=B         Size of user block to be added
+   -M A, --metadata_block_size=A  Metadata block size for H5Pset_meta_block_size
+   -t T, --threshold=T     Threshold value for H5Pset_alignment
+   -a A, --alignment=A     Alignment value for H5Pset_alignment
+   -f FILT, --filter=FILT  Filter type
+   -l LAYT, --layout=LAYT  Layout type
+   -S FS_STRGY, --fs_strategy=FS_STRGY  File space management strategy
+   -T FS_THRD, --fs_threshold=FS_THRD   Free-space section threshold
+
+    M - is an integer greater than 1, size of dataset in bytes (default is 0) 
+    E - is a filename.
+    S - is an integer
+    U - is a filename.
+    T - is an integer
+    A - is an integer greater than zero
+    B - is the user block size, any value that is 512 or greater and is
+        a power of 2 (1024 default)
+    F - is the shared object header message type, any of <dspace|dtype|fill|
+        pline|attr>. If F is not specified, S applies to all messages
+
+    FS_STRGY is the file space management strategy to use for the output file.
+             It is a string as listed below:
+        ALL_PERSIST - Use persistent free-space managers, aggregators and virtual file driver
+                      for file space allocation
+        ALL - Use non-persistent free-space managers, aggregators and virtual file driver
+              for file space allocation
+        AGGR_VFD - Use aggregators and virtual file driver for file space allocation
+        VFD - Use virtual file driver for file space allocation
+
+    FS_THRD is the free-space section threshold to use for the output file.
+            It is the minimum size (in bytes) of free-space sections to be tracked
+            by the the library's free-space managers.
+
+    FILT - is a string with the format:
+
+      <list of objects>:<name of filter>=<filter parameters>
+
+      <list of objects> is a comma separated list of object names, meaning apply
+        compression only to those objects. If no names are specified, the filter
+        is applied to all objects
+      <name of filter> can be:
+        GZIP, to apply the HDF5 GZIP filter (GZIP compression)
+        SZIP, to apply the HDF5 SZIP filter (SZIP compression)
+        SHUF, to apply the HDF5 shuffle filter
+        FLET, to apply the HDF5 checksum filter
+        NBIT, to apply the HDF5 NBIT filter (NBIT compression)
+        SOFF, to apply the HDF5 Scale/Offset filter
+        UD,   to apply a user defined filter
+        NONE, to remove all filters
+      <filter parameters> is optional filter parameter information
+        GZIP=<deflation level> from 1-9
+        SZIP=<pixels per block,coding> pixels per block is a even number in
+            2-32 and coding method is either EC or NN
+        SHUF (no parameter)
+        FLET (no parameter)
+        NBIT (no parameter)
+        SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type
+            is either IN or DS
+        UD=<filter_number,cd_value_count,value_1[,value_2,...,value_N]>
+            required values for filter_number,cd_value_count,value_1
+            optional values for value_2 to value_N
+        NONE (no parameter)
+
+    LAYT - is a string with the format:
+
+      <list of objects>:<layout type>=<layout parameters>
+
+      <list of objects> is a comma separated list of object names, meaning that
+        layout information is supplied for those objects. If no names are
+        specified, the layout type is applied to all objects
+      <layout type> can be:
+        CHUNK, to apply chunking layout
+        COMPA, to apply compact layout
+        CONTI, to apply contiguous layout
+      <layout parameters> is optional layout information
+        CHUNK=DIM[xDIM...xDIM], the chunk size of each dimension
+        COMPA (no parameter)
+        CONTI (no parameter)
+
+Examples of use:
+
+1) h5repack -v -f GZIP=1 file1 file2
+
+   GZIP compression with level 1 to all objects
+
+2) h5repack -v -f dset1:SZIP=8,NN file1 file2
+
+   SZIP compression with 8 pixels per block and NN coding method to object dset1
+
+3) h5repack -v -l dset1,dset2:CHUNK=20x10 -f dset3,dset4,dset5:NONE file1 file2
+
+   Chunked layout, with a layout size of 20x10, to objects dset1 and dset2
+   and remove filters to objects dset3, dset4, dset5
+
+4) h5repack -L -c 10 -s 20:dtype file1 file2 
+
+   Using latest file format with maximum compact group size of 10 and
+   and minimum shared datatype size of 20
+
+5) h5repack -f SHUF -f GZIP=1 file1 file2 
+
+   Add both filters SHUF and GZIP in this order to all datasets
+
+6) h5repack -f UD=307,1,9 file1 file2 
+
+   Add bzip2 filter to all datasets
+

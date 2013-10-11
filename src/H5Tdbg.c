@@ -237,6 +237,8 @@ H5T_debug(const H5T_t *dt, FILE *stream)
         case H5T_STATE_OPEN:
             s2 = "[named,open]";
             break;
+        default:
+            HDassert(0 && "This Should never be executed!");
     } /* end switch */
 
     fprintf(stream, "%s%s {nbytes=%lu", s1, s2, (unsigned long)(dt->shared->size));

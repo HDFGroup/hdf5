@@ -14,6 +14,8 @@ DPRINT=:
 progname=`basename $0`	# program name
 cminfile="cmakemin.$$" # Cmake minimum file
 cfgfile=$progname.$$	# configure file
+ctest_log=ctest.log    # output of ctest script
+install_log=install.log  # output of installation
 $DPRINT $cfgfile
 
 # Remove temporary generated files if exit 0
@@ -36,7 +38,8 @@ TIMESTAMP
 
 # Explain what and where log files are.
 cat <<EOF
-ctest.log: output of ctest script.
+$ctest_log: output of ctest script.
+$install_log: output of installation
 Log files will be stored in Testing/Temporary:
     LastConfigure_<timestamp>.log: output of configure
     LastBuild_<timestamp>.log: output of build
@@ -76,7 +79,7 @@ set (CTEST_MAX_N 8)
 set (LOCAL_NO_SUBMIT TRUE)	# No CDash submit.
 set (MODEL "Experimental")
 set (CDASH_LOCAL TRUE)
-set (SITE_BUILDNAME_SUFFIX "SHARED")
+set (SITE_BUILDNAME_SUFFIX "cmakehdf5")
 
 # -- URL set for internal check, default is to not update
 set (LOCAL_SKIP_UPDATE TRUE)
@@ -219,13 +222,36 @@ if (NOT LOCAL_SKIP_TEST)
   endif()
   message ("test DONE")
 endif (NOT LOCAL_SKIP_TEST)
+if(NOT LOCAL_MEMCHECK_TEST)
+  ##-----------------------------------------------
+  ## Package the product
+  ##-----------------------------------------------
+  execute_process(COMMAND cpack -C ${CTEST_BUILD_CONFIGURATION} -V
+    WORKING_DIRECTORY ${CTEST_BINARY_DIRECTORY}
+    RESULT_VARIABLE cpackResult
+    OUTPUT_VARIABLE cpackLog
+    ERROR_VARIABLE cpackLog.err
+  )
+  file(WRITE ${CTEST_BINARY_DIRECTORY}/cpack.log "${cpackLog.err}" "${cpackLog}")
+endif(NOT LOCAL_MEMCHECK_TEST)
+#-----------------------------------------------------------------------------
 
 message ("DONE")
 EOF
 
 
 # Run ctest
-ctest -S $cfgfile -C Release -O ctest.log
+ctest -S $cfgfile -C Release -V -O $ctest_log
+exit_code=$?
+if [ $exit_code = 0 ]; then
+    echo CTest script completed without error
+else
+    echo Error encountered CTest script
+fi
+# Using HDF5-*.sh because actual name is unavailable
+install_sh=HDF5-*.sh
+echo installing with $install_sh ...
+./$install_sh --skip-license > $install_log
 exit_code=$?
 if [ $exit_code = 0 ]; then
     echo Complete without error

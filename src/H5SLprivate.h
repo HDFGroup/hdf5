@@ -48,6 +48,7 @@ typedef enum {
     H5SL_TYPE_UNSIGNED, /* Skip list keys are 'unsigned's */
     H5SL_TYPE_SIZE,     /* Skip list keys are 'size_t's */
     H5SL_TYPE_OBJ,      /* Skip list keys are 'H5_obj_t's */
+    H5SL_TYPE_HID,      /* Skip list keys are 'hid_t's */
     H5SL_TYPE_GENERIC   /* Skip list keys are unknown, comparison callback supplied */
 } H5SL_type_t;
 

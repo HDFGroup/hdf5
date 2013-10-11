@@ -134,7 +134,6 @@
 static const H5I_class_t H5I_GROUP_CLS[1] = {{
     H5I_GROUP,			/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     0,				/* # of reserved IDs for class */
     (H5I_free_t)H5G_close	/* Callback routine for closing objects of this class */
 }};
@@ -495,14 +494,7 @@ done:
 hid_t
 H5Gget_create_plist(hid_t group_id)
 {
-    H5O_linfo_t         linfo;		        /* Link info message            */
-    htri_t	        ginfo_exists;
-    htri_t	        linfo_exists;
-    htri_t              pline_exists;
     H5G_t		*group = NULL;
-    H5P_genplist_t      *gcpl_plist;
-    H5P_genplist_t      *new_plist;
-    hid_t		new_gcpl_id = FAIL;
     hid_t		ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)

@@ -86,7 +86,7 @@
 herr_t
 H5B2_stat_info(H5B2_t *bt2, H5B2_stat_t *info)
 {
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
     HDassert(info);

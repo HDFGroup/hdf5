@@ -482,7 +482,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
 }
 
 /* Epsilon for floating-point comparisons */
-#define FP_EPSILON 0.000001
+#define FP_EPSILON 0.000001f
 
 
 /* misc type definitions */

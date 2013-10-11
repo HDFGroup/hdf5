@@ -152,6 +152,14 @@ ENDIF (WIN32)
 #
 SET (H5_DEFAULT_VFD H5FD_SEC2)
 
+IF (NOT DEFINED "H5_DEFAULT_PLUGINDIR")
+  IF (WINDOWS)
+    SET (H5_DEFAULT_PLUGINDIR "%ALLUSERSPROFILE%/hdf5/lib/plugin")
+  ELSE (WINDOWS)
+    SET (H5_DEFAULT_PLUGINDIR "/usr/local/hdf5/lib/plugin")
+  ENDIF (WINDOWS)
+ENDIF (NOT DEFINED "H5_DEFAULT_PLUGINDIR")
+
 IF (WINDOWS)
   SET (H5_HAVE_WINDOWS 1)
   # ----------------------------------------------------------------------
@@ -172,7 +180,9 @@ IF (WINDOWS)
   IF (NOT MINGW)
     SET (H5_HAVE_GETHOSTNAME 1)
   ENDIF (NOT MINGW)
-  SET (H5_HAVE_GETCONSOLESCREENBUFFERINFO 1)
+  IF (NOT UNIX AND NOT CYGWIN AND NOT MINGW)
+    SET (H5_HAVE_GETCONSOLESCREENBUFFERINFO 1)
+  ENDIF (NOT UNIX AND NOT CYGWIN AND NOT MINGW)
   SET (H5_HAVE_FUNCTION 1)
   SET (H5_GETTIMEOFDAY_GIVES_TZ 1)
   SET (H5_HAVE_TIMEZONE 1)
@@ -555,7 +565,9 @@ IF (NOT APPLE)
   IF (NOT H5_SIZEOF_SSIZE_T)
     SET (H5_SIZEOF_SSIZE_T 0)
   ENDIF (NOT H5_SIZEOF_SSIZE_T)
-  H5_CHECK_TYPE_SIZE (ptrdiff_t    H5_SIZEOF_PTRDIFF_T)
+  IF (NOT WINDOWS)
+    H5_CHECK_TYPE_SIZE (ptrdiff_t    H5_SIZEOF_PTRDIFF_T)
+  ENDIF (NOT WINDOWS)
 ENDIF (NOT APPLE)
 
 H5_CHECK_TYPE_SIZE (off_t          H5_SIZEOF_OFF_T)
@@ -610,7 +622,9 @@ IF (NOT WINDOWS)
   CHECK_FUNCTION_EXISTS (_getvideoconfig   H5_HAVE__GETVIDEOCONFIG)
   CHECK_FUNCTION_EXISTS (gettextinfo       H5_HAVE_GETTEXTINFO)
   CHECK_FUNCTION_EXISTS (_scrsize          H5_HAVE__SCRSIZE)
-  CHECK_FUNCTION_EXISTS (GetConsoleScreenBufferInfo    H5_HAVE_GETCONSOLESCREENBUFFERINFO)
+  IF (NOT CYGWIN AND NOT MINGW)
+    CHECK_FUNCTION_EXISTS (GetConsoleScreenBufferInfo    H5_HAVE_GETCONSOLESCREENBUFFERINFO)
+  ENDIF (NOT CYGWIN AND NOT MINGW)
   CHECK_SYMBOL_EXISTS (TIOCGWINSZ "sys/ioctl.h" H5_HAVE_TIOCGWINSZ)
   CHECK_SYMBOL_EXISTS (TIOCGETD   "sys/ioctl.h" H5_HAVE_TIOCGETD)
 ENDIF (NOT WINDOWS)
@@ -1057,7 +1071,11 @@ H5ConversionTests (H5_ULONG_TO_FLOAT_ACCURATE "Checking IF accurately converting
 # 64-bit machines, where the short program below tests if round-up is
 # correctly handled.
 #
-H5ConversionTests (H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE "Checking IF accurately converting unsigned long long to floating-point values")
+IF (CMAKE_SYSTEM MATCHES "solaris2.*")
+  H5ConversionTests (H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE "Checking IF accurately converting unsigned long long to floating-point values")
+ELSE (CMAKE_SYSTEM MATCHES "solaris2.*")
+  SET(H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE 1)
+ENDIF (CMAKE_SYSTEM MATCHES "solaris2.*")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
 # 'float' or 'double' to 'unsigned long long' values.

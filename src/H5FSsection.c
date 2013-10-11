@@ -2072,7 +2072,7 @@ H5FS_sect_stats(const H5FS_t *fspace, hsize_t *tot_space, hsize_t *nsects)
  */
 herr_t
 H5FS_sect_change_class(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
-    H5FS_section_info_t *sect, unsigned new_class)
+    H5FS_section_info_t *sect, uint16_t new_class)
 {
     const H5FS_section_class_t *old_cls;        /* Old class of section */
     const H5FS_section_class_t *new_cls;        /* New class of section */

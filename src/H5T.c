@@ -494,10 +494,10 @@ size_t H5T_NATIVE_UINT_FAST64_ALIGN_g	= 0;
 
 /* Useful floating-point values for conversion routines */
 /* (+/- Inf for all floating-point types) */
-float H5T_NATIVE_FLOAT_POS_INF_g        = 0.0;
-float H5T_NATIVE_FLOAT_NEG_INF_g        = 0.0;
-double H5T_NATIVE_DOUBLE_POS_INF_g      = 0.0;
-double H5T_NATIVE_DOUBLE_NEG_INF_g      = 0.0;
+float H5T_NATIVE_FLOAT_POS_INF_g        = 0.0f;
+float H5T_NATIVE_FLOAT_NEG_INF_g        = 0.0f;
+double H5T_NATIVE_DOUBLE_POS_INF_g      = (double)0.0f;
+double H5T_NATIVE_DOUBLE_NEG_INF_g      = (double)0.0f;
 
 /* Declare the free list for H5T_t's and H5T_shared_t's */
 H5FL_DEFINE(H5T_t);
@@ -528,7 +528,6 @@ H5FL_DEFINE_STATIC(H5T_path_t);
 static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
     H5I_DATATYPE,		/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     8,				/* # of reserved IDs for class */
     (H5I_free_t)H5T_close	/* Callback routine for closing objects of this class */
 }};
@@ -2395,7 +2394,7 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
             if(NULL == (new_path = H5FL_CALLOC(H5T_path_t)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
             HDstrncpy(new_path->name, name, (size_t)H5T_NAMELEN);
-            new_path->name[H5T_NAMELEN-1] = '\0';
+            new_path->name[H5T_NAMELEN - 1] = '\0';
             if(NULL == (new_path->src = H5T_copy(old_path->src, H5T_COPY_ALL)) ||
                     NULL == (new_path->dst=H5T_copy(old_path->dst, H5T_COPY_ALL)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy data types")
@@ -3247,6 +3246,8 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                 new_dt->shared->state = H5T_STATE_RDONLY;
             }
             break;
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, NULL, "invalid copy method type")
     } /* end switch */
 
     /* Update fields in the new struct, if we aren't sharing an already opened
@@ -3449,6 +3450,8 @@ H5T_lock (H5T_t *dt, hbool_t immutable)
         case H5T_STATE_OPEN:
             /*void*/
             break;
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "invalid datatype state")
     }
 
 done:
@@ -4511,7 +4514,8 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	    H5E_clear_stack(H5E_DEFAULT); /*ignore the error*/
 	} /* end if */
         else {
-	    HDstrcpy(path->name, H5T_g.soft[i].name);
+	    HDstrncpy(path->name, H5T_g.soft[i].name, (size_t)H5T_NAMELEN);
+	    path->name[H5T_NAMELEN - 1] = '\0';
 	    path->func = H5T_g.soft[i].func;
 	    path->is_hard = FALSE;
 	} /* end else */
@@ -4850,6 +4854,8 @@ H5T_oloc(H5T_t *dt)
             HDassert(dt->sh_loc.type == H5O_SHARE_TYPE_COMMITTED);
             ret_value = &dt->oloc;
             break;
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, NULL, "invalid datatype state")
     } /* end switch */
 
 done:
@@ -4888,6 +4894,8 @@ H5T_nameof(H5T_t *dt)
         case H5T_STATE_OPEN:
             ret_value = &(dt->path);
             break;
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, NULL, "invalid datatype state")
     } /* end switch */
 
 done:

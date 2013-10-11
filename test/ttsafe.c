@@ -52,69 +52,71 @@ int main(void)
 #define NAME_OFFSET 6         /* offset for "name<num>" */
 
 /* pre-condition: num must be a non-negative number */
-static int num_digits(int num)
+static unsigned
+num_digits(int num)
 {
-	int i;
+    unsigned u;
 
-	if (num == 0)
-		return 1;
+    if(num == 0)
+        return 1;
 
-	for (i = 0; num > 0; i++)
-		num = num / 10;
+    for(u = 0; num > 0; u++)
+        num = num / 10;
 
-	return i;
+    return u;
 }
 
 /* Routine to generate attribute names for numeric values */
 char *gen_name(int value)
 {
-	char *temp;
-	int i, length;
+    char *temp;
+    unsigned length;
+    int i;
 
-	length = num_digits(MAX_NUM_NAME - 1);
-	temp = (char *)HDmalloc((NAME_OFFSET + length + 1) * sizeof(char));
-	temp = HDstrcpy(temp, "attrib");
-	temp[NAME_OFFSET + length] = '\0';
+    length = num_digits(MAX_NUM_NAME - 1);
+    temp = (char *)HDmalloc(NAME_OFFSET + length + 1);
+    temp = HDstrcpy(temp, "attrib");
+    temp[NAME_OFFSET + length] = '\0';
 
-	for (i = length - 1; i >= 0; i--) {
-		temp[NAME_OFFSET + i] = (char)((int)'0' + value % 10);
-		value = value / 10;
-	}
+    for (i = (int)(length - 1); i >= 0; i--) {
+        temp[NAME_OFFSET + i] = (char)((int)'0' + value % 10);
+        value = value / 10;
+    }
 
-	return temp;
+    return temp;
 }
 
 int main(int argc, char *argv[])
 {
-        /* Initialize testing framework */
-        TestInit(argv[0], NULL, NULL);
+    /* Initialize testing framework */
+    TestInit(argv[0], NULL, NULL);
 
-        /* Tests are generally arranged from least to most complexity... */
-        AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
-        AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
+    /* Tests are generally arranged from least to most complexity... */
+    AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
+    AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
 #ifdef H5_HAVE_PTHREAD_H    
-        /* Thread cancellability only supported with pthreads ... */
-        AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test", NULL);
+    /* Thread cancellability only supported with pthreads ... */
+    AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test", NULL);
 #endif /* H5_HAVE_PTHREAD_H */
-        AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation", NULL);
+    AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation", NULL);
 
-        /* Display testing information */
-        TestInfo(argv[0]);
+    /* Display testing information */
+    TestInfo(argv[0]);
 
-        /* Parse command line arguments */
-        TestParseCmdLine(argc,argv);
+    /* Parse command line arguments */
+    TestParseCmdLine(argc,argv);
 
-        /* Perform requested testing */
-        PerformTests();
+    /* Perform requested testing */
+    PerformTests();
 
-        /* Display test summary, if requested */
-	if (GetTestSummary())
-            TestSummary();
+    /* Display test summary, if requested */
+    if (GetTestSummary())
+        TestSummary();
 
-        /* Clean up test files, if allowed */
-	if (GetTestCleanup() && !getenv("HDF5_NOCLEANUP"))
-            TestCleanup();
+    /* Clean up test files, if allowed */
+    if (GetTestCleanup() && !getenv("HDF5_NOCLEANUP"))
+        TestCleanup();
 
-	return GetTestNumErrs();
+    return GetTestNumErrs();
 } /* end main() */
 #endif  /*H5_HAVE_THREADSAFE*/

@@ -109,7 +109,6 @@ H5FL_DEFINE(H5F_file_t);
 static const H5I_class_t H5I_FILE_CLS[1] = {{
     H5I_FILE,			/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     0,				/* # of reserved IDs for class */
     (H5I_free_t)H5F_close	/* Callback routine for closing objects of this class */
 }};
@@ -667,6 +666,13 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
     HDassert(obj_ptr);
     HDassert(olist);
 
+    /* Check if we've filled up the array.  Return TRUE only if
+     * we have filled up the array. Otherwise return FALSE(RET_VALUE is
+     * preset to FALSE) because H5I_iterate needs the return value of 
+     * FALSE to continue the iteration. */
+    if(olist->max_index>0 && olist->list_index>=olist->max_index)
+        HGOTO_DONE(TRUE)  /* Indicate that the iterator should stop */
+
     /* Count file IDs */
     if(olist->obj_type == H5I_FILE) {
         if((olist->file_info.local &&
@@ -682,13 +688,6 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             /* Increment the number of open objects */
 	    if(olist->obj_id_count)
 	    	(*olist->obj_id_count)++;
-
-            /* Check if we've filled up the array.  Return TRUE only if
-             * we have filled up the array. Otherwise return FALSE(RET_VALUE is
-             * preset to FALSE) because H5I_iterate needs the return value of 
- 	     * FALSE to continue the iteration. */
-            if(olist->max_index>0 && olist->list_index>=olist->max_index)
-                HGOTO_DONE(TRUE)  /* Indicate that the iterator should stop */
 	}
     } /* end if */
     else { /* either count opened object IDs or put the IDs on the list */
@@ -747,13 +746,6 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             /* Increment the number of open objects */
 	    if(olist->obj_id_count)
             	(*olist->obj_id_count)++;
-
-            /* Check if we've filled up the array.  Return TRUE only if
-             * we have filled up the array. Otherwise return FALSE(RET_VALUE is
-             * preset to FALSE) because H5I_iterate needs the return value of 
-	     * FALSE to continue iterating. */
-            if(olist->max_index>0 && olist->list_index>=olist->max_index)
-                HGOTO_DONE(TRUE)  /* Indicate that the iterator should stop */
     	} /* end if */
     } /* end else */
 
@@ -825,22 +817,25 @@ done:
 htri_t
 H5Fis_hdf5(const char *name)
 {
-    H5FD_t	*file = NULL;           /* Low-level file struct */
-    htri_t	ret_value;              /* Return value */
+    H5FD_t      *file = NULL;           /* Low-level file struct */
+    haddr_t     sig_addr;               /* Address of hdf5 file signature */
+    htri_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "*s", name);
 
     /* Check args and all the boring stuff. */
     if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
     /* Open the file at the virtual file layer */
     if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)))
-	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
+        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
-    ret_value = (HADDR_UNDEF != H5F_locate_signature(file, H5AC_ind_dxpl_id));
+    if(H5F_locate_signature(file, H5AC_ind_dxpl_id, &sig_addr) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
+    ret_value = (HADDR_UNDEF != sig_addr);
 
 done:
     /* Close the file */
@@ -3200,7 +3195,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_set_grp_btree_shared(H5F_t *f, H5RC_t *rc)
+H5F_set_grp_btree_shared(H5F_t *f, H5UC_t *rc)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR

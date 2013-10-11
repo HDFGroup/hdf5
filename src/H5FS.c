@@ -104,7 +104,7 @@ H5FL_DEFINE(H5FS_t);
  */
 H5FS_t *
 H5FS_create(H5F_t *f, hid_t dxpl_id, haddr_t *fs_addr, const H5FS_create_t *fs_create,
-    size_t nclasses, const H5FS_section_class_t *classes[], void *cls_init_udata, hsize_t alignment, hsize_t threshold)
+    uint16_t nclasses, const H5FS_section_class_t *classes[], void *cls_init_udata, hsize_t alignment, hsize_t threshold)
 {
     H5FS_t *fspace = NULL;      /* New free space structure */
     H5FS_t *ret_value;          /* Return value */
@@ -191,7 +191,7 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
  *-------------------------------------------------------------------------
  */
 H5FS_t *
-H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, size_t nclasses,
+H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, uint16_t nclasses,
     const H5FS_section_class_t *classes[], void *cls_init_udata, hsize_t alignment, hsize_t threshold)
 {
     H5FS_t *fspace = NULL;      /* New free space structure */
@@ -586,7 +586,7 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d, fspace->rc = %u\n", FUNC, ret_va
  *-------------------------------------------------------------------------
  */
 H5FS_t *
-H5FS_new(const H5F_t *f, size_t nclasses, const H5FS_section_class_t *classes[],
+H5FS_new(const H5F_t *f, uint16_t nclasses, const H5FS_section_class_t *classes[],
     void *cls_init_udata)
 {
     H5FS_t *fspace = NULL;      /* Free space manager */

@@ -123,7 +123,6 @@ H5FL_DEFINE_STATIC(H5E_msg_t);
 static const H5I_class_t H5I_ERRCLS_CLS[1] = {{
     H5I_ERROR_CLASS,		/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     0,				/* # of reserved IDs for class */
     (H5I_free_t)H5E_unregister_class /* Callback routine for closing objects of this class */
 }};
@@ -132,7 +131,6 @@ static const H5I_class_t H5I_ERRCLS_CLS[1] = {{
 static const H5I_class_t H5I_ERRMSG_CLS[1] = {{
     H5I_ERROR_MSG,		/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     0,				/* # of reserved IDs for class */
     (H5I_free_t)H5E_close_msg   /* Callback routine for closing objects of this class */
 }};
@@ -141,7 +139,6 @@ static const H5I_class_t H5I_ERRMSG_CLS[1] = {{
 static const H5I_class_t H5I_ERRSTK_CLS[1] = {{
     H5I_ERROR_STACK,		/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     0,				/* # of reserved IDs for class */
     (H5I_free_t)H5E_close_stack /* Callback routine for closing objects of this class */
 }};

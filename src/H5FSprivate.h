@@ -173,10 +173,10 @@ H5FL_SEQ_EXTERN(H5FS_section_class_t);
 
 /* Free space manager routines */
 H5_DLL H5FS_t *H5FS_create(H5F_t *f, hid_t dxpl_id, haddr_t *fs_addr,
-    const H5FS_create_t *fs_create, size_t nclasses,
+    const H5FS_create_t *fs_create, uint16_t nclasses,
     const H5FS_section_class_t *classes[], void *cls_init_udata, hsize_t alignment, hsize_t threshold);
 H5_DLL H5FS_t *H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr,
-    size_t nclasses, const H5FS_section_class_t *classes[], void *cls_init_udata, hsize_t alignment, hsize_t threshold);
+    uint16_t nclasses, const H5FS_section_class_t *classes[], void *cls_init_udata, hsize_t alignment, hsize_t threshold);
 H5_DLL herr_t H5FS_size(const H5F_t *f, const H5FS_t *fspace, hsize_t *meta_size);
 H5_DLL herr_t H5FS_delete(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr);
 H5_DLL herr_t H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace);
@@ -199,7 +199,7 @@ H5_DLL herr_t H5FS_sect_iterate(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, H5FS_op
 H5_DLL herr_t H5FS_sect_stats(const H5FS_t *fspace, hsize_t *tot_space,
     hsize_t *nsects);
 H5_DLL herr_t H5FS_sect_change_class(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
-    H5FS_section_info_t *sect, unsigned new_class);
+    H5FS_section_info_t *sect, uint16_t new_class);
 H5_DLL htri_t H5FS_sect_try_shrink_eoa(const H5F_t *f, hid_t dxpl_id, const H5FS_t *fspace, void *op_data);
 H5_DLL herr_t H5FS_sect_query_last_sect(const H5FS_t *fspace, haddr_t *sect_addr, hsize_t *sect_size);
 

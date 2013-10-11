@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.159], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.166], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -431,14 +431,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([HID_T])
   AC_SUBST([SIZE_T])
   AC_SUBST([OBJECT_NAMELEN_DEFAULT_F])
-
-  ## --------------------------------------------------------------------
-  ## General Fortran flags
-  ## Only add FFLAGS to FCFLAGS if it's set.
-  if test "x$FFLAGS" != "x" ; then
-    AM_FCFLAGS="${AM_FCFLAGS} ${FFLAGS}"
-    FCFLAGS="${FCFLAGS} ${FFLAGS}"
-  fi
 
   ## --------------------------------------------------------------------
   ## Fortran source extention
@@ -1054,12 +1046,15 @@ if test "X$STATIC_EXEC" = "Xyes"; then
   ## Issue a warning if -static flag is not supported.
   if test "X$lt_cv_prog_compiler_static_works" = "Xno"; then
       echo "    warning: -static flag not supported on this system; executable won't statically link shared system libraries."
+      LT_STATIC_EXEC=""
+  else
+    LT_STATIC_EXEC="-all-static"
   fi
-  LT_STATIC_EXEC="-all-static"
 else
   echo "no"
   LT_STATIC_EXEC=""
 fi
+AM_CONDITIONAL([USE_PLUGINS_CONDITIONAL], [test "X$LT_STATIC_EXEC" = X])
 
 AC_SUBST([LT_STATIC_EXEC])
 
@@ -1097,6 +1092,13 @@ case "X-$RPATH" in
     AC_MSG_ERROR([\'$enableval\' is not a valid rpath type])
     ;;
 esac
+## ----------------------------------------------------------------------
+## When sharedlib-rpath is disabled, setting runpath_var to "" above, don't
+## add libhdf5 as a dependency for the other hdf5 libs, either.  This keeps 
+## the rpath to libhdf5 out of the lib files as well as the executables.
+AM_CONDITIONAL([LT_ADD_LIBHDF5_DEPENDENCY], [test "X$runpath_var" != X])
+
+AC_SUBST([LT_ADD_LIBHDF5_DEPENDENCY])
 
 AC_MSG_CHECKING([make])
 
@@ -1475,7 +1477,7 @@ case "$host_cpu-$host_vendor-$host_os" in
     ;;
 esac
 
-## Need to add the AM_ and H5_ into CPFLAGS/CPPFLAGS to make them visible 
+## Need to add the AM_ and H5_ into CFLAGS/CPPFLAGS to make them visible 
 ## for configure checks.
 ## Note: Both will be restored by the end of configure.
 CPPFLAGS="$H5_CPPFLAGS $AM_CPPFLAGS $CPPFLAGS"
@@ -2156,7 +2158,14 @@ AC_TRY_COMPILE([
 ## ----------------------------------------------------------------------
 ## How do we figure out the width of a tty in characters?
 ##
-AC_CHECK_FUNCS([_getvideoconfig gettextinfo GetConsoleScreenBufferInfo])
+AC_CHECK_FUNCS([_getvideoconfig gettextinfo])
+case "`uname`" in
+  CYGWIN*)
+    ;;
+  *)
+    AC_CHECK_FUNCS([GetConsoleScreenBufferInfo])
+    ;;
+esac
 AC_CHECK_FUNCS([_scrsize ioctl])
 
 AC_MSG_CHECKING([for struct videoconfig])
@@ -2716,10 +2725,7 @@ case "X-$enable_parallel" in
           integer:: ierr
           call mpi_file_open( ierr )
           end],,
-          [AC_CHECK_LIB([mpi], [
-            include 'mpif.h'
-            integer:: ierr
-            call mpi_file_open( ierr )],, [PARALLEL=no])])
+          [AC_CHECK_LIB([mpi], [mpi_file_open],, [PARALLEL=no])])
 
       ## Then try link a simple MPI-IO program.  If fail, try again with
       ## -lmpio.
@@ -2730,10 +2736,7 @@ case "X-$enable_parallel" in
             integer:: ierr
             call mpi_file_open( ierr )
             end],,
-            [AC_CHECK_LIB([mpio], [
-              include 'mpif.h'
-              integer:: ierr
-              call mpi_file_open( ierr )],, [PARALLEL=no])])
+            [AC_CHECK_LIB([mpio], [mpi_file_open],, [PARALLEL=no])])
       fi
 
       ## Change to the C language
@@ -3099,6 +3102,27 @@ else
 fi
 
 AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])
+
+## ----------------------------------------------------------------------
+## Enable custom plugin default path for library.  It requires SHARED support.
+##
+AC_MSG_CHECKING([for custom plugin default path definition])
+AC_ARG_WITH([default-plugindir],
+            [AS_HELP_STRING([--with-default-plugindir=location],
+                            [Specify default location for plugins
+                            [default="/usr/local/hdf5/lib/plugin"]])],,
+            withval="/usr/local/hdf5/lib/plugin")
+
+if test "X$withval" = "X"; then
+    AC_MSG_RESULT([default])
+    default_plugindir="/usr/local/hdf5/lib/plugin"
+else
+    AC_MSG_RESULT([$withval])
+    default_plugindir=$withval
+fi
+
+AC_DEFINE_UNQUOTED([DEFAULT_PLUGINDIR], ["$default_plugindir"],
+            [Define the default plugins path to compile])
 
 ## ----------------------------------------------------------------------
 ## Decide whether the presence of user's exception handling functions is
@@ -4523,6 +4547,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5jam/testh5jam.sh
                  tools/h5repack/Makefile
                  tools/h5repack/h5repack.sh
+                 tools/h5repack/h5repack_plugin.sh
                  tools/h5ls/Makefile
                  tools/h5copy/Makefile
                  tools/h5copy/testh5copy.sh

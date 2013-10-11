@@ -3421,14 +3421,19 @@ static void gent_array8(void)
                 H5P_DEFAULT);
         if(dset>=0)
             status = H5Dwrite (dset, filetype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+            HDassert(status >= 0);
     }
     /*
      * Close and release resources.
      */
     status = H5Dclose (dset);
+    HDassert(status >= 0);
     status = H5Sclose (space);
+    HDassert(status >= 0);
     status = H5Tclose (filetype);
+    HDassert(status >= 0);
     status = H5Fclose (file);
+    HDassert(status >= 0);
 }
 
 static void gent_empty(void)
@@ -3834,7 +3839,7 @@ static void write_attr_in(hid_t loc_id,
 
     /* create 1D attributes with dimension [2], 2 elements */
     hsize_t    dims[1]={2};
-    char       buf1[2][2]= {"ab","de"};        /* string */
+    char       buf1[2][3]= {"ab","de"};        /* string */
     char       buf2[2]= {1,2};                 /* bitfield, opaque */
     s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
     hobj_ref_t buf4[2];                        /* reference */
@@ -3846,7 +3851,7 @@ static void write_attr_in(hid_t loc_id,
 
     /* create 2D attributes with dimension [3][2], 6 elements */
     hsize_t    dims2[2]={3,2};
-    char       buf12[6][2]= {"ab","cd","ef","gh","ij","kl"};         /* string */
+    char       buf12[6][3]= {"ab","cd","ef","gh","ij","kl"};         /* string */
     char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
     s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
     hobj_ref_t buf42[3][2];                                          /* reference */
@@ -3857,7 +3862,7 @@ static void write_attr_in(hid_t loc_id,
 
     /* create 3D attributes with dimension [4][3][2], 24 elements */
     hsize_t    dims3[3]={4,3,2};
-    char       buf13[24][2]= {"ab","cd","ef","gh","ij","kl","mn","pq",
+    char       buf13[24][3]= {"ab","cd","ef","gh","ij","kl","mn","pq",
             "rs","tu","vw","xz","AB","CD","EF","GH",
             "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
     char       buf23[4][3][2];    /* bitfield, opaque */
@@ -4276,7 +4281,7 @@ static void write_dset_in(hid_t loc_id,
 
     /* create 1D attributes with dimension [2], 2 elements */
     hsize_t    dims[1]={2};
-    char       buf1[2][2]= {"ab","de"};        /* string */
+    char       buf1[2][3]= {"ab","de"};        /* string */
     char       buf2[2]= {1,2};                 /* bitfield, opaque */
     s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
     hobj_ref_t buf4[2];                        /* reference */
@@ -4288,7 +4293,7 @@ static void write_dset_in(hid_t loc_id,
 
     /* create 2D attributes with dimension [3][2], 6 elements */
     hsize_t    dims2[2]={3,2};
-    char       buf12[6][2]= {"ab","cd","ef","gh","ij","kl"};         /* string */
+    char       buf12[6][3]= {"ab","cd","ef","gh","ij","kl"};         /* string */
     char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
     s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
     hobj_ref_t buf42[3][2];                                          /* reference */
@@ -4299,7 +4304,7 @@ static void write_dset_in(hid_t loc_id,
 
     /* create 3D attributes with dimension [4][3][2], 24 elements */
     hsize_t    dims3[3]={4,3,2};
-    char       buf13[24][2]= {"ab","cd","ef","gh","ij","kl","mn","pq",
+    char       buf13[24][3]= {"ab","cd","ef","gh","ij","kl","mn","pq",
             "rs","tu","vw","xz","AB","CD","EF","GH",
             "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
     char       buf23[4][3][2];    /* bitfield, opaque */
@@ -7397,14 +7402,17 @@ gent_charsets(void)
     sid = H5Screate_simple( 1, dim, NULL );
     fid = H5Fcreate( FILE68, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
     status = H5Tset_cset( ascii_dtid, H5T_CSET_ASCII );
+    HDassert(status >= 0);
     H5Tinsert( charset_dtid, "ascii", HOFFSET(CharSetInfo, ascii_p_ ), ascii_dtid );
 
     status = H5Tset_cset( utf8_dtid, H5T_CSET_UTF8 );
+    HDassert(status >= 0);
     H5Tinsert( charset_dtid, "utf8", HOFFSET( CharSetInfo, utf8_p_ ), utf8_dtid );
 
     did = H5Dcreate2( fid, "CharSets", charset_dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
 
     status = H5Dwrite( did, charset_dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, writeData );
+    HDassert(status >= 0);
 
     H5Tclose( charset_dtid );
     H5Tclose( ascii_dtid );
@@ -7415,7 +7423,7 @@ gent_charsets(void)
 }
 
 static void gent_compound_intsizes(void) {
-    hid_t fid, dataset, space, root;
+    hid_t fid, dataset, space;
     hsize_t dims[2];
     hsize_t    array_dim8[]={F70_XDIM,F70_YDIM8}; /* Array dimensions         */
     hsize_t    array_dim16[]={F70_XDIM,F70_YDIM16}; /* Array dimensions         */
@@ -7992,7 +8000,6 @@ static void gent_nested_compound_dt(void) {       /* test nested data type */
     dset3_t dset3[10];
 
     enumtype dset4[] = {RED, GREEN, BLUE, GREEN, WHITE, BLUE};
-    dset1_t dset5[10];
 
     int i, j, k;
     unsigned ndims;

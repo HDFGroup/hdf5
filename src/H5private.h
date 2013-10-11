@@ -277,12 +277,15 @@
 #ifdef __cplusplus
 #   define __attribute__(X)  /*void*/
 #   define UNUSED    /*void*/
+#   define NORETURN  /*void*/
 #else /* __cplusplus */
 #ifdef H5_HAVE_ATTRIBUTE
 #   define UNUSED    __attribute__((unused))
+#   define NORETURN  __attribute__((noreturn))
 #else
 #   define __attribute__(X)  /*void*/
 #   define UNUSED    /*void*/
+#   define NORETURN  /*void*/
 #endif
 #endif /* __cplusplus */
 
@@ -2353,6 +2356,25 @@ func_init_failed:                    \
   #define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)
   #define HDcompile_assert(e)     do { typedef struct { unsigned int b: (e); } x; } while(0)
 */
+
+/* Macros for enabling/disabling particular GCC warnings */
+/* (see the following web-sites for more info:
+ *      http://www.dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
+ *      http://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
+ */
+/* These pragmas are only implemented usefully in gcc 4.6+ */
+#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406
+    #define GCC_DIAG_STR(s) #s
+    #define GCC_DIAG_JOINSTR(x,y) GCC_DIAG_STR(x ## y)
+    #define GCC_DIAG_DO_PRAGMA(x) _Pragma (#x)
+    #define GCC_DIAG_PRAGMA(x) GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
+
+    #define GCC_DIAG_OFF(x) GCC_DIAG_PRAGMA(push) GCC_DIAG_PRAGMA(ignored GCC_DIAG_JOINSTR(-W,x))
+    #define GCC_DIAG_ON(x) GCC_DIAG_PRAGMA(pop)
+#else
+    #define GCC_DIAG_OFF(x)
+    #define GCC_DIAG_ON(x)
+#endif
 
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);

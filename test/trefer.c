@@ -514,7 +514,7 @@ test_reference_region(void)
     hsize_t	high[SPACE2_RANK];	/* Selection bounds */
     hdset_reg_ref_t      *wbuf,		/* buffer to write to disk */
                *rbuf;       /* buffer read from disk */
-    hdset_reg_ref_t  nvrbuf[3]={0,101,1000000000}; /* buffer with non-valid refs */
+    hdset_reg_ref_t  nvrbuf[3]={{0},{101},{1000000000}}; /* buffer with non-valid refs */
     uint8_t    *dwbuf,      /* Buffer for writing numeric data to disk */
                *drbuf;      /* Buffer for reading numeric data from disk */
     uint8_t    *tu8;        /* Temporary pointer to uint8 data */

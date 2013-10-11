@@ -361,7 +361,7 @@ H5G__ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5_copy_depth_t depth)
 void
 H5G__ent_reset(H5G_entry_t *ent)
 {
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(ent);

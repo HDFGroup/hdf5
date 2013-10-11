@@ -754,14 +754,14 @@ H5_DLL herr_t H5HF_space_remove(H5HF_hdr_t *hdr, hid_t dxpl_id,
 H5_DLL herr_t H5HF_space_close(H5HF_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5HF_space_delete(H5HF_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5HF_space_sect_change_class(H5HF_hdr_t *hdr, hid_t dxpl_id,
-    H5HF_free_section_t *sect, unsigned new_class);
+    H5HF_free_section_t *sect, uint16_t new_class);
 
 /* Free space section routines */
 H5_DLL H5HF_free_section_t *H5HF_sect_single_new(hsize_t sect_off,
     size_t sect_size, H5HF_indirect_t *parent, unsigned par_entry);
 H5_DLL herr_t H5HF_sect_single_revive(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect);
-H5_DLL herr_t H5HF_sect_single_dblock_info(H5HF_hdr_t *hdr, hid_t dxpl_id,
+H5_DLL herr_t H5HF_sect_single_dblock_info(H5HF_hdr_t *hdr,
     H5HF_free_section_t *sect, haddr_t *dblock_addr, size_t *dblock_size);
 H5_DLL herr_t H5HF_sect_single_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect, size_t amt);

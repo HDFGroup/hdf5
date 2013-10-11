@@ -33,7 +33,7 @@
 -esym(534, H5CS_push, H5CS_pop)
 -esym(534, H5I_clear_type, H5I_dec_type_ref)
 -esym(534, H5MM_xfree)
--esym(534, H5RC_decr)
+-esym(534, H5UC_decr)
 -esym(534, H5V_array_fill)
 
 

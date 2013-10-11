@@ -180,7 +180,7 @@ do_sio(parameters param)
         break;
     default:
         /* unknown request */
-        fprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
         GOTOERROR(FAIL);
     }
 
@@ -285,6 +285,10 @@ done:
         case HDF5:
             if (fd.h5fd != -1)
                 hrc = do_fclose(iot, &fd);
+			break;
+        default:
+            /* unknown request */
+            HDassert(0 && "Unknown IO type");
             break;
     }
 
@@ -330,6 +334,11 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
             suffix = "%05d.h5";
         else if (vfd == multi)
             suffix = NULL;
+        break;
+    default:
+        /* unknown request */
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+        HDassert(0 && "Unknown IO type");
         break;
     }
 
@@ -506,6 +515,11 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
         }
 
         break;
+
+    default:
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+        GOTOERROR(FAIL);
+        break;
     } /* end switch */
 
 
@@ -546,7 +560,12 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
             HDfprintf(stderr, "HDF5 Property List Close failed\n");
             GOTOERROR(FAIL);
         }
+        break;
 
+        default:
+        /* unknown request */
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+        GOTOERROR(FAIL);
         break;
     }
 
@@ -684,6 +703,12 @@ static herr_t dset_write(int local_dim, file_descr *fd, parameters *parms, void 
                     h5dset_space_id, h5dxpl, buffer);
                 VRFY((hrc >= 0), "H5Dwrite");
 
+                break;
+				
+            default:
+                /* unknown request */
+                HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+                HDassert(0 && "Unknown IO type");
                 break;
             } /* switch (parms->io_type) */
         }
@@ -832,7 +857,12 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
             fprintf(stderr, "HDF5 Property List Create failed\n");
             GOTOERROR(FAIL);
         }
+        break;
 
+    default:
+        /* unknown request */
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+        GOTOERROR(FAIL);
         break;
     } /* end switch */
 
@@ -849,9 +879,13 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
             HDfprintf(stderr, "HDF5 Dataset open failed\n");
             GOTOERROR(FAIL);
         }
-
         break;
-
+		
+        default:
+        /* unknown request */
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+        GOTOERROR(FAIL);
+        break;
     } /* end switch */
 
     /* Start "raw data" read timer */
@@ -974,6 +1008,12 @@ static herr_t dset_read(int local_dim, file_descr *fd, parameters *parms,
                 }
 #endif
                 break;
+				
+            default:
+                /* unknown request */
+                HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+                HDassert(0 && "Unknown IO type");
+                break;
             } /* switch (parms->io_type) */
         }
     }
@@ -1086,6 +1126,12 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             GOTOERROR(FAIL);
         }
         break;
+		
+    default:
+        /* unknown request */
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)param->io_type);
+        GOTOERROR(FAIL);
+        break;
     }
 
 done:
@@ -1103,25 +1149,25 @@ done:
 hid_t
 set_vfd(parameters *param)
 {
-    hid_t fapl = -1;
+    hid_t my_fapl = -1;
     vfdtype  vfd;
 
     vfd = param->vfd;
 
-    if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0) return -1;
+    if ((my_fapl=H5Pcreate(H5P_FILE_ACCESS))<0) return -1;
 
     if (vfd == sec2) {
         /* Unix read() and write() system calls */
-        if (H5Pset_fapl_sec2(fapl)<0) return -1;
+        if (H5Pset_fapl_sec2(my_fapl)<0) return -1;
     } else if (vfd == stdio) {
         /* Standard C fread() and fwrite() system calls */
-        if (H5Pset_fapl_stdio(fapl)<0) return -1;
+        if (H5Pset_fapl_stdio(my_fapl)<0) return -1;
     } else if (vfd == core) {
         /* In-core temporary file with 1MB increment */
-        if (H5Pset_fapl_core(fapl, (size_t)1024*1024, TRUE)<0) return -1;
+        if (H5Pset_fapl_core(my_fapl, (size_t)1024*1024, TRUE)<0) return -1;
     } else if (vfd == split) {
         /* Split meta data and raw data each using default driver */
-        if (H5Pset_fapl_split(fapl,
+        if (H5Pset_fapl_split(my_fapl,
                               "-m.h5", H5P_DEFAULT,
                               "-r.h5", H5P_DEFAULT)<0)
             return -1;
@@ -1147,7 +1193,7 @@ set_vfd(parameters *param)
             memb_addr[mt] = MAX(mt-1,0)*(HADDR_MAX/10);
         }
 
-        if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
+        if (H5Pset_fapl_multi(my_fapl, memb_map, memb_fapl, memb_name,
                               memb_addr, FALSE)<0) {
             return -1;
         }
@@ -1157,20 +1203,20 @@ set_vfd(parameters *param)
         /* Family of files, each 1MB and using the default driver */
         /* if ((val=HDstrtok(NULL, " \t\n\r")))
             fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024); */
-        if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
+        if (H5Pset_fapl_family(my_fapl, fam_size, H5P_DEFAULT)<0)
             return -1;
     } else if (vfd == direct) {
 #ifdef H5_HAVE_DIRECT
         /* Linux direct read() and write() system calls.  Set memory boundary, file block size,
          * and copy buffer size to the default values. */
-        if (H5Pset_fapl_direct(fapl, 1024, 4096, 8*4096)<0) return -1;
+        if (H5Pset_fapl_direct(my_fapl, 1024, 4096, 8*4096)<0) return -1;
 #endif
     } else {
         /* Unknown driver */
         return -1;
     }
 
-    return fapl;
+    return my_fapl;
 }
 
 /*
@@ -1208,6 +1254,12 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
 
         fd->h5fd = -1;
         break;
+		
+    default:
+        /* unknown request */
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+        GOTOERROR(FAIL);
+        break;
     }
 
 done:
@@ -1234,7 +1286,7 @@ do_cleanupfile(iotype iot, char *filename)
 
     if (clean_file_g){
 
-     switch (iot) {
+    switch (iot) {
     case POSIXIO:
           HDremove(filename);
         break;
@@ -1273,9 +1325,15 @@ do_cleanupfile(iotype iot, char *filename)
                 HDremove(filename);
             }
             H5Pclose(fapl);
-            break;
-      }
-}
+        break;
+			
+    default:
+        /* unknown request */
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+        HDassert(0 && "Unknown IO type");
+        break;
+    }
+    }
 }
 
 #ifdef H5_HAVE_GPFS

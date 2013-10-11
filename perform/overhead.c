@@ -250,6 +250,11 @@ test(fill_t fill_style, const double splits[],
             break;
         case FILL_ALL:
             abort();
+        default:
+            /* unknown request */
+            HDfprintf(stderr, "Unknown fill style\n");
+            goto error;
+            break;
         }
 
         /* Write the chunk */
@@ -305,6 +310,11 @@ test(fill_t fill_style, const double splits[],
             break;
         case FILL_ALL:
             abort();
+        default:
+            /* unknown request */
+            HDfprintf(stderr, "Unknown fill style\n");
+            goto error;
+            break;
         }
 
         if (HDfstat(fd, &sb) < 0) goto error;

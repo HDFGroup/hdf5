@@ -36,10 +36,11 @@ hid_t H5tools_ERR_CLS_g = -1;
 hid_t H5E_tools_g = -1;
 hid_t H5E_tools_min_id_g = -1;
 int         compound_data;
-FILE       *rawattrstream;      /* should initialize to stdout but gcc moans about it */
-FILE       *rawdatastream;      /* should initialize to stdout but gcc moans about it */
-FILE       *rawoutstream;       /* should initialize to stdout but gcc moans about it */
-FILE       *rawerrorstream;     /* should initialize to stderr but gcc moans about it */
+FILE       *rawattrstream = NULL;      /* should initialize to stdout but gcc moans about it */
+FILE       *rawdatastream = NULL;      /* should initialize to stdout but gcc moans about it */
+FILE       *rawinstream = NULL;        /* should initialize to stdin but gcc moans about it */
+FILE       *rawoutstream = NULL;       /* should initialize to stdout but gcc moans about it */
+FILE       *rawerrorstream = NULL;     /* should initialize to stderr but gcc moans about it */
 int         bin_output;         /* binary output */
 int         bin_form;           /* binary form */
 int         region_output;      /* region output */
@@ -74,7 +75,7 @@ static const char *drivernames[]={
 
 /* This enum should match the entries in the above drivers_list since they
  * are indexes into the drivers_list array. */
-enum {
+typedef enum {
     SEC2_IDX = 0
    ,FAMILY_IDX
    ,SPLIT_IDX
@@ -120,6 +121,8 @@ h5tools_init(void)
             rawattrstream = stdout;
         if (!rawdatastream)
             rawdatastream = stdout;
+        if (!rawinstream)
+            rawinstream = stdin;
         if (!rawoutstream)
             rawoutstream = stdout;
         if (!rawerrorstream)
@@ -172,6 +175,12 @@ h5tools_close(void)
             else
                 rawdatastream = NULL;
         }
+        if (rawinstream && rawinstream != stdin) {
+            if (fclose(rawinstream))
+                perror("closing rawinstream");
+            else
+                rawinstream = NULL;
+        }
         if (rawoutstream && rawoutstream != stdout) {
             if (fclose(rawoutstream))
                 perror("closing rawoutstream");
@@ -195,6 +204,254 @@ h5tools_close(void)
 
         h5tools_init_g = 0;
     }
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_set_data_output_file
+ *
+ * Purpose:     Open fname as the output file for dataset raw data.
+ *      Set rawdatastream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *      negative -- failed
+ *
+ * Programmer:  Albert Cheng, 2000/09/30
+ *
+ * Modifications:
+ *  pvn June, 1, 2006. Add a switch for binary output
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5tools_set_data_output_file(const char *fname, int is_bin)
+{
+    int     retvalue = FAIL;
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawdatastream is changed only when succeeded */
+
+    if (rawdatastream && rawdatastream != stdout) {
+        if (HDfclose(rawdatastream))
+            HDperror("closing rawdatastream");
+        else
+            rawdatastream = NULL;
+    }
+
+    /* First check if filename is string "NULL" */
+    if (fname != NULL) {
+        /* binary output */
+        if (is_bin) {
+            if ((f = HDfopen(fname, "wb")) != NULL) {
+                rawdatastream = f;
+                retvalue = SUCCEED;
+            }
+        }
+        else {
+            if ((f = HDfopen(fname, "w")) != NULL) {
+                rawdatastream = f;
+                retvalue = SUCCEED;
+            }
+        }
+    }
+    else {
+        rawdatastream = NULL;
+        retvalue = SUCCEED;
+    }
+
+    return retvalue;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_set_attr_output_file
+ *
+ * Purpose:     Open fname as the output file for attribute raw data.
+ *      Set rawattrstream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *      negative -- failed
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5tools_set_attr_output_file(const char *fname, int is_bin)
+{
+    int     retvalue = FAIL;
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawattrstream is changed only when succeeded */
+
+    if (rawattrstream && rawattrstream != stdout) {
+        if (HDfclose(rawattrstream))
+            HDperror("closing rawattrstream");
+        else
+            rawattrstream = NULL;
+    }
+
+    /* First check if filename is string "NULL" */
+    if (fname != NULL) {
+        /* binary output */
+        if (is_bin) {
+			if ((f = HDfopen(fname, "wb")) != NULL) {
+				rawattrstream = f;
+				retvalue = SUCCEED;
+			}
+        }
+        else {
+			if ((f = HDfopen(fname, "w")) != NULL) {
+				rawattrstream = f;
+				retvalue = SUCCEED;
+			}
+        }
+    }
+    else {
+        rawattrstream = NULL;
+        retvalue = SUCCEED;
+    }
+
+    return retvalue;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_set_input_file
+ *
+ * Purpose:     Open fname as the input file for raw input.
+ *      Set rawinstream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *      negative -- failed
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5tools_set_input_file(const char *fname, int is_bin)
+{
+    int     retvalue = FAIL;
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawinstream is changed only when succeeded */
+
+    if (rawinstream && rawinstream != stdin) {
+        if (HDfclose(rawinstream))
+            HDperror("closing rawinstream");
+        else
+        	rawinstream = NULL;
+    }
+    /* First check if filename is string "NULL" */
+    if (fname != NULL) {
+        /* binary output */
+        if (is_bin) {
+			if ((f = HDfopen(fname, "rb")) != NULL) {
+				rawinstream = f;
+				retvalue = SUCCEED;
+			}
+        }
+        else {
+			if ((f = HDfopen(fname, "r")) != NULL) {
+				rawinstream = f;
+				retvalue = SUCCEED;
+			}
+        }
+    }
+    else {
+    	rawinstream = NULL;
+        retvalue = SUCCEED;
+    }
+
+    return retvalue;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_set_output_file
+ *
+ * Purpose:     Open fname as the output file for raw output.
+ *      Set rawoutstream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *      negative -- failed
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5tools_set_output_file(const char *fname, int is_bin)
+{
+    int     retvalue = FAIL;
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawoutstream is changed only when succeeded */
+
+    if (rawoutstream && rawoutstream != stdout) {
+        if (HDfclose(rawoutstream))
+            HDperror("closing rawoutstream");
+        else
+            rawoutstream = NULL;
+    }
+    /* First check if filename is string "NULL" */
+    if (fname != NULL) {
+        /* binary output */
+        if (is_bin) {
+			if ((f = HDfopen(fname, "wb")) != NULL) {
+					rawoutstream = f;
+					retvalue = SUCCEED;
+			}
+        }
+        else {
+			if ((f = HDfopen(fname, "w")) != NULL) {
+					rawoutstream = f;
+					retvalue = SUCCEED;
+			}
+        }
+    }
+    else {
+        rawoutstream = NULL;
+        retvalue = SUCCEED;
+    }
+
+    return retvalue;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_set_error_file
+ *
+ * Purpose:     Open fname as the error output file for dataset raw error.
+ *      Set rawerrorstream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *      negative -- failed
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5tools_set_error_file(const char *fname, int is_bin)
+{
+    int     retvalue = FAIL;
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawerrorstream is changed only when succeeded */
+
+    if (rawerrorstream && rawerrorstream != stderr) {
+        if (HDfclose(rawerrorstream))
+            HDperror("closing rawerrorstream");
+        else
+            rawerrorstream = NULL;
+    }
+
+    /* First check if filename is string "NULL" */
+    if (fname != NULL) {
+    /* binary output */
+		if (is_bin) {
+			if ((f = HDfopen(fname, "wb")) != NULL) {
+				rawerrorstream = f;
+				retvalue = SUCCEED;
+			}
+        }
+        else {
+			if ((f = HDfopen(fname, "w")) != NULL) {
+				rawerrorstream = f;
+				retvalue = SUCCEED;
+			}
+		}
+    }
+    else {
+    	rawerrorstream = NULL;
+        retvalue = SUCCEED;
+    }
+
+    return retvalue;
 }
 
 /*-------------------------------------------------------------------------
@@ -621,18 +878,18 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
        the prefix is printed one indentation level before */
     if (info->pindex) {
         for (i = 0; i < indentlevel - 1; i++) {
-            PUTSTREAM(h5tools_str_fmt(&str, 0, info->line_indent), stream);
+            PUTSTREAM(h5tools_str_fmt(&str, (size_t)0, info->line_indent), stream);
         }
     }
 
     if (elmtno == 0 && secnum == 0 && info->line_1st) {
-        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
+        PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_1st), stream);
     }
     else if (secnum && info->line_cont) {
-        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_cont), stream);
+        PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_cont), stream);
     }
     else {
-        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
+        PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_pre), stream);
     }
 
     templength = h5tools_str_len(&prefix);
@@ -640,7 +897,7 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
     for (i = 0; i < indentlevel; i++) {
         /*we already made the indent for the array indices case */
         if (!info->pindex) {
-            PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
+            PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_indent), stream);
             templength += h5tools_str_len(&prefix);
         }
         else {
@@ -716,18 +973,18 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
        the prefix is printed one indentation level before */
     if (info->pindex) {
         for (i = 0; i < indentlevel - 1; i++) {
-            PUTSTREAM(h5tools_str_fmt(&str, 0, info->line_indent), stream);
+            PUTSTREAM(h5tools_str_fmt(&str, (size_t)0, info->line_indent), stream);
         }
     }
 
     if (elmtno == 0 && secnum == 0 && info->line_1st) {
-        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
+        PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_1st), stream);
     }
     else if (secnum && info->line_cont) {
-        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_cont), stream);
+        PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_cont), stream);
     }
     else {
-        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
+        PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_pre), stream);
     }
 
     templength = h5tools_str_len(&prefix);
@@ -735,7 +992,7 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
     for (i = 0; i < indentlevel; i++) {
         /*we already made the indent for the array indices case */
         if (!info->pindex) {
-            PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
+            PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_indent), stream);
             templength += h5tools_str_len(&prefix);
         }
         else {
@@ -792,7 +1049,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
     if (stream == NULL)
         return dimension_break;
 
-    s = h5tools_str_fmt(buffer, 0, "%s");
+    s = h5tools_str_fmt(buffer, (size_t)0, "%s");
 
     /*
      * If the element would split on multiple lines if printed at our
@@ -946,7 +1203,7 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
     int      secnum; /*section sequence number */
     int      multiline; /*datum was multiline  */
 
-    s = h5tools_str_fmt(buffer, 0, "%s");
+    s = h5tools_str_fmt(buffer, (size_t)0, "%s");
 
     /*
      * If the element would split on multiple lines if printed at our
@@ -1186,8 +1443,10 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                         offset = H5Tget_member_offset(tid, j);
                         memb   = H5Tget_member_type(tid, j);
 
-                        if (render_bin_output(stream, container, memb, mem + offset, 1) < 0)
-                            return FAIL;
+                        if (render_bin_output(stream, container, memb, mem + offset, 1) < 0) {
+                            H5Tclose(memb);
+                            H5E_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output of compound member failed");
+                        }
 
                         H5Tclose(memb);
                     }
@@ -1216,8 +1475,10 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
                     mem = ((unsigned char*)_mem) + block_index * size;
                     /* dump the array element */
-                    if (render_bin_output(stream, container, memb, mem, nelmts) < 0)
+                    if (render_bin_output(stream, container, memb, mem, nelmts) < 0) {
+                        H5Tclose(memb);
                         H5E_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output failed");
+                    }
                 }
                 H5Tclose(memb);
             }
@@ -1236,8 +1497,10 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                     nelmts = ((hvl_t *) mem)->len;
 
                     /* dump the array element */
-                    if (render_bin_output(stream, container, memb, ((char *) (((hvl_t *) mem)->p)), nelmts) < 0)
+                    if (render_bin_output(stream, container, memb, ((char *) (((hvl_t *) mem)->p)), nelmts) < 0) {
+                        H5Tclose(memb);
                         H5E_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output failed");
+                    }
                 }
                 H5Tclose(memb);
             }
@@ -1358,15 +1621,16 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
         }
 
         if(H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
-            HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sselect_hyperslab failed");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sselect_hyperslab failed");
 
         if(H5Dread(region_id, type_id, mem_space, sid1, H5P_DEFAULT, region_buf) < 0)
-            HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Dread failed");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
 
         if(H5Sget_simple_extent_dims(mem_space, total_size, NULL) < 0)
-            HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
 
-        render_bin_output(stream, container, type_id, (char*)region_buf, numelem);
+        if(render_bin_output(stream, container, type_id, (char*)region_buf, numelem) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "render_bin_output of data region failed");
         /* Render the region data element end */
     } /* end for (blkndx = 0; blkndx < nblocks; blkndx++) */
 
@@ -1468,7 +1732,7 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
  *      hssize_t npoints is the number of points in the region
  *-------------------------------------------------------------------------
  */
-static int
+int
 render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
         FILE *stream, hid_t container,
         int ndims, hid_t type_id, hssize_t npoints)
@@ -1496,9 +1760,10 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
     if(H5Dread(region_id, type_id, mem_space, region_space, H5P_DEFAULT, region_buf) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
     if(H5Sget_simple_extent_dims(region_space, dims1, NULL) < 0)
-        HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
 
-    render_bin_output(stream, container, type_id, (char*)region_buf, npoints);
+    if(render_bin_output(stream, container, type_id, (char*)region_buf, npoints) < 0)
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "render_bin_output of data points failed");
 
  done:
     HDfree(region_buf);
