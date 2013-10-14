@@ -14,11 +14,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Class AbstractDs is an abstract base class, from which Attribute and
-// DataSet inherit.  It provides the services that are common to both
-// Attribute and DataSet.  It also inherits from H5Object and passes down
-// the services that H5Object provides.
-
 #ifndef __AbstractDs_H
 #define __AbstractDs_H
 
@@ -33,6 +28,14 @@ class FloatType;
 class IntType;
 class StrType;
 class VarLenType;
+
+/*! \class AbstractDs
+    \brief AbstractDs is an abstract base class, inherited by Attribute
+     and DataSet.
+
+    It provides a collection of services that are common to both Attribute
+    and DataSet.  AbstractDs inherits from H5Object.
+*/
 class H5_DLLCPP AbstractDs {
    public:
 	// Gets a copy the datatype of that this abstract dataset uses.

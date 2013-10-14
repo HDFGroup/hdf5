@@ -14,6 +14,9 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// Class DSetMemXferPropList represents the HDF5 dataset transfer property list
+// and inherits from PropList.
+
 #ifndef __H5DSetMemXferPropList_H
 #define __H5DSetMemXferPropList_H
 
@@ -21,6 +24,10 @@
 namespace H5 {
 #endif
 
+/*! \class DSetMemXferPropList
+    \brief Class DSetMemXferPropList represents the dataset memory and
+    transfer property list.
+*/
 class H5_DLLCPP DSetMemXferPropList : public PropList {
    public:
 	static const DSetMemXferPropList DEFAULT;

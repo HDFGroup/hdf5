@@ -14,9 +14,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Class ArrayType inherits from DataType and provides wrappers for the
-// HDF5 C's Array Datatypes.
-
 #ifndef __H5ArrayType_H
 #define __H5ArrayType_H
 
@@ -24,6 +21,10 @@
 namespace H5 {
 #endif
 
+/*! \class ArrayType
+    \brief Class ArrayType inherits from DataType and provides wrappers for
+     the HDF5's Array Datatypes.
+*/
 class H5_DLLCPP ArrayType : public DataType {
    public:
 	// Constructor that creates a new array data type based on the

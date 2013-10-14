@@ -19,10 +19,6 @@
 
 #include "H5Classes.h"		// constains forward class declarations
 
-// H5Location is an abstract class.  It provides a collection of wrappers
-// of C functions which take location IDs.  Most of these were in H5Object
-// but are now moved here for H5File's access.
-
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
@@ -41,8 +37,15 @@ class UserData4Aiterate { // user data for attribute iteration
 	H5Location* location;
 };
 
-// An H5Location can be a file, group, dataset, or committed datatype.
+/*! \class H5Location
+    \brief H5Location is an abstract base class, added in version 1.8.12.
 
+    It provides a collection of wrappers for the C functions that take a
+    location identifier to specify the HDF5 object.  The location identifier
+    can be either file, group, dataset, or named datatype.
+*/
+// Most of these methods were in H5Object but are now moved here because
+// a location can be a file, group, dataset, or named datatype. -BMR, 2013-10-1
 class H5_DLLCPP H5Location : public IdComponent {
    public:
 	// Creates an attribute for the specified object at this location
@@ -154,10 +157,10 @@ class H5_DLLCPP H5Location : public IdComponent {
 	// Retrieves the type of object that an object reference points to.
 	H5O_type_t p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const;
 
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
 	// Noop destructor.
 	virtual ~H5Location();
-
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; /* end class H5Location */
 

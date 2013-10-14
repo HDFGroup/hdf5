@@ -21,6 +21,7 @@
 namespace H5 {
 #endif
 
+//! Class PropList provides operations for generic property lists.
 class H5_DLLCPP PropList : public IdComponent {
    public:
 	// Default property list

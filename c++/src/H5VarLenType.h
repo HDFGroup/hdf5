@@ -24,6 +24,7 @@
 namespace H5 {
 #endif
 
+//! VarLenType operates on the HDF5 C's Variable-length Datatypes.
 class H5_DLLCPP VarLenType : public DataType {
    public:
 	// Constructor that creates a variable-length datatype based

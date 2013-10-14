@@ -14,6 +14,9 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// Class FileAccPropList represents the HDF5 file access property list and
+// inherits from DataType.
+
 #ifndef __H5FileAccPropList_H
 #define __H5FileAccPropList_H
 
@@ -21,7 +24,7 @@
 namespace H5 {
 #endif
 
-// class for file access properties
+//! Class FileAccPropList represents the HDF5 file access property list.
 class H5_DLLCPP FileAccPropList : public PropList {
    public:
 	static const FileAccPropList DEFAULT;
