@@ -185,11 +185,12 @@ STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z._]*)
 #-----------------------------------------------------------------------------
 FILE (READ ${HDF5_SOURCE_DIR}/config/lt_vers.am _lt_vers_am_contents)
 STRING (REGEX REPLACE ".*LT_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$"
-    "\\1" H5_SOVERS_MAJOR ${_lt_vers_am_contents})
+    "\\1" H5_SOVERS_INTERFACE ${_lt_vers_am_contents})
 STRING (REGEX REPLACE ".*LT_VERS_REVISION[ \t]+=[ \t]+([0-9]*).*$"
     "\\1" H5_SOVERS_MINOR ${_lt_vers_am_contents})
 STRING (REGEX REPLACE ".*LT_VERS_AGE[ \t]+=[ \t]+([0-9]*).*$"
     "\\1" H5_SOVERS_RELEASE ${_lt_vers_am_contents})
+MATH(EXPR H5_SOVERS_MAJOR ${H5_SOVERS_INTERFACE}-${H5_SOVERS_RELEASE})
 MESSAGE (STATUS "SOVERSION: ${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
 
 #-----------------------------------------------------------------------------
