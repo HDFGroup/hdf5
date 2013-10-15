@@ -168,10 +168,10 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	dt_arith$(EXEEXT) dtypes$(EXEEXT) dsets$(EXEEXT) \
 	cmpd_dset$(EXEEXT) filter_fail$(EXEEXT) extend$(EXEEXT) \
 	external$(EXEEXT) efc$(EXEEXT) objcopy$(EXEEXT) links$(EXEEXT) \
-	unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) fillval$(EXEEXT) \
-	mount$(EXEEXT) flush1$(EXEEXT) flush2$(EXEEXT) \
-	app_ref$(EXEEXT) enum$(EXEEXT) set_extent$(EXEEXT) \
-	ttsafe$(EXEEXT) enc_dec_plist$(EXEEXT) \
+	twriteorder$(EXEEXT) unlink$(EXEEXT) big$(EXEEXT) \
+	mtime$(EXEEXT) fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
+	flush2$(EXEEXT) app_ref$(EXEEXT) enum$(EXEEXT) \
+	set_extent$(EXEEXT) ttsafe$(EXEEXT) enc_dec_plist$(EXEEXT) \
 	enc_dec_plist_with_endianess$(EXEEXT) getname$(EXEEXT) \
 	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
 	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
@@ -544,6 +544,10 @@ am_ttsafe_OBJECTS = ttsafe.$(OBJEXT) ttsafe_dcreate.$(OBJEXT) \
 ttsafe_OBJECTS = $(am_ttsafe_OBJECTS)
 ttsafe_LDADD = $(LDADD)
 ttsafe_DEPENDENCIES = libh5test.la $(LIBHDF5)
+twriteorder_SOURCES = twriteorder.c
+twriteorder_OBJECTS = twriteorder.$(OBJEXT)
+twriteorder_LDADD = $(LDADD)
+twriteorder_DEPENDENCIES = libh5test.la $(LIBHDF5)
 unlink_SOURCES = unlink.c
 unlink_OBJECTS = unlink.$(OBJEXT)
 unlink_LDADD = $(LDADD)
@@ -621,7 +625,7 @@ SOURCES = $(libdynlib1_la_SOURCES) $(libdynlib2_la_SOURCES) \
 	swmr_generator.c swmr_reader.c swmr_remove_reader.c \
 	swmr_remove_writer.c swmr_sparse_reader.c swmr_sparse_writer.c \
 	swmr_writer.c tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c unregister.c \
+	$(ttsafe_SOURCES) twriteorder.c unlink.c unregister.c \
 	$(use_append_chunk_SOURCES) $(use_append_mchunks_SOURCES) \
 	vfd.c
 DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
@@ -646,7 +650,7 @@ DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
 	swmr_generator.c swmr_reader.c swmr_remove_reader.c \
 	swmr_remove_writer.c swmr_sparse_reader.c swmr_sparse_writer.c \
 	swmr_writer.c tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c unregister.c \
+	$(ttsafe_SOURCES) twriteorder.c unlink.c unregister.c \
 	$(use_append_chunk_SOURCES) $(use_append_mchunks_SOURCES) \
 	vfd.c
 am__can_run_installinfo = \
@@ -959,20 +963,21 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
 	tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
 	fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 \
 	ttime.h5 trefer[1-3].h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 \
-	flush.h5 enum1.h5 titerate.h5 ttsafe.h5 tarray1.h5 tgenprop.h5 \
-	tmisc[0-9]*.h5 set_extent[1-5].h5 ext[12].bin getname.h5 \
-	getname[1-3].h5 sec2_file.h5 direct_file.h5 \
-	family_file000[0-3][0-9].h5 new_family_v16_000[0-3][0-9].h5 \
-	multi_file-[rs].h5 core_file plugin.h5 new_move_[ab].h5 \
-	ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 dtransform.h5 \
-	test_filters.h5 get_file_name.h5 tstint[1-2].h5 \
-	unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5 \
-	objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5 \
-	earray.h5 efc[0-5].h5 log_vfd_out.log new_multi_file_v16-r.h5 \
-	new_multi_file_v16-s.h5 split_get_file_image_test-m.h5 \
-	split_get_file_image_test-r.h5 file_image_core_test.h5.copy \
-	unregister_filter_1.h5 unregister_filter_2.h5 swmr_data.h5 \
-	use_append_chunk.h5 use_append_mchunks.h5 flushrefresh.h5 \
+	twriteorder.dat flush.h5 enum1.h5 titerate.h5 ttsafe.h5 \
+	tarray1.h5 tgenprop.h5 tmisc[0-9]*.h5 set_extent[1-5].h5 \
+	ext[12].bin getname.h5 getname[1-3].h5 sec2_file.h5 \
+	direct_file.h5 family_file000[0-3][0-9].h5 \
+	new_family_v16_000[0-3][0-9].h5 multi_file-[rs].h5 core_file \
+	plugin.h5 new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 \
+	err_compat.h5 dtransform.h5 test_filters.h5 get_file_name.h5 \
+	tstint[1-2].h5 unlink_chunked.h5 btree2.h5 objcopy_src.h5 \
+	objcopy_dst.h5 objcopy_ext.dat trefer1.h5 trefer2.h5 \
+	app_ref.h5 farray.h5 earray.h5 efc[0-5].h5 log_vfd_out.log \
+	new_multi_file_v16-r.h5 new_multi_file_v16-s.h5 \
+	split_get_file_image_test-m.h5 split_get_file_image_test-r.h5 \
+	file_image_core_test.h5.copy unregister_filter_1.h5 \
+	unregister_filter_2.h5 swmr_data.h5 use_append_chunk.h5 \
+	use_append_mchunks.h5 flushrefresh.h5 \
 	flushrefresh_VERIFICATION_START \
 	flushrefresh_VERIFICATION_CHECKPOINT1 \
 	flushrefresh_VERIFICATION_CHECKPOINT2 \
@@ -997,7 +1002,8 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # other current library code tests.
 TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            pool accum hyperslab istore bittests dt_arith \
-           dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
+           dtypes dsets cmpd_dset filter_fail extend external efc objcopy\
+	   links twriteorder unlink \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_with_endianess\
            getname vfd ntypes dangle dtransform reserved cross_read \
@@ -1494,6 +1500,9 @@ testmeta$(EXEEXT): $(testmeta_OBJECTS) $(testmeta_DEPENDENCIES) $(EXTRA_testmeta
 ttsafe$(EXEEXT): $(ttsafe_OBJECTS) $(ttsafe_DEPENDENCIES) $(EXTRA_ttsafe_DEPENDENCIES) 
 	@rm -f ttsafe$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(ttsafe_OBJECTS) $(ttsafe_LDADD) $(LIBS)
+twriteorder$(EXEEXT): $(twriteorder_OBJECTS) $(twriteorder_DEPENDENCIES) $(EXTRA_twriteorder_DEPENDENCIES) 
+	@rm -f twriteorder$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(twriteorder_OBJECTS) $(twriteorder_LDADD) $(LIBS)
 unlink$(EXEEXT): $(unlink_OBJECTS) $(unlink_DEPENDENCIES) $(EXTRA_unlink_DEPENDENCIES) 
 	@rm -f unlink$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(unlink_OBJECTS) $(unlink_LDADD) $(LIBS)
@@ -1637,6 +1646,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tunicode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tvlstr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tvltypes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/twriteorder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unlink.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unregister.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/use_append_chunk.Po@am__quote@

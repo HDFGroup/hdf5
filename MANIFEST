@@ -1130,6 +1130,7 @@
 ./test/tunicode.c
 ./test/tvlstr.c
 ./test/tvltypes.c
+./test/twriteorder.c
 ./test/unlink.c
 ./test/unregister.c
 ./test/use_append_chunk.c
