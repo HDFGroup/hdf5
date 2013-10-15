@@ -56,6 +56,7 @@ typedef enum H5VL_iod_metadata_t {
 /* the AXE op data strucutre stored with every operation */
 typedef struct op_data_t {
     void *input;
+    void *output;
     hg_handle_t hg_handle;
 } op_data_t;
 

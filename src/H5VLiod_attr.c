@@ -150,7 +150,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* close the Metadata KV object */
-        if(iod_obj_close(mdkv_oh, NULL, NULL))
+        if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* if the starting location is not the last component, need to
@@ -183,7 +183,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* close the Attribute KV object */
-        if(iod_obj_close(attr_kv_oh, NULL, NULL))
+        if(iod_obj_close(attr_kv_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
     }
 
@@ -353,7 +353,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL))
+    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
     {
@@ -456,7 +456,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the attribute if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");        
         opened_locally = TRUE;
     }
@@ -477,7 +477,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
     /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL))
+    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 #endif
 
@@ -564,7 +564,7 @@ done:
 
     /* close the attribute if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL))
+        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
 
@@ -668,7 +668,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
     /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL))
+    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 #endif
 
@@ -729,7 +729,7 @@ done:
 
     /* close the attribute if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL))
+        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
     FUNC_LEAVE_NOAPI_VOID
@@ -955,7 +955,7 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* close the Attribute KV object */
-    if(iod_obj_close(attr_kv_oh, NULL, NULL))
+    if(iod_obj_close(attr_kv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
 #if H5_DO_NATIVE

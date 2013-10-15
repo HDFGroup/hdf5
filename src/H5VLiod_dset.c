@@ -226,7 +226,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* close the Metadata KV object */
-        if(iod_obj_close(mdkv_oh, NULL, NULL))
+        if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* add link in parent group to current object */
@@ -351,7 +351,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL))
+    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
     {
@@ -477,7 +477,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
         opened_locally = TRUE;
     }
@@ -661,7 +661,7 @@ done:
 
     /* close the dataset if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL))
+        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
     FUNC_LEAVE_NOAPI_VOID
@@ -879,7 +879,7 @@ done:
 
     /* close the dataset if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL))
+        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
     FUNC_LEAVE_NOAPI_VOID
@@ -1078,7 +1078,7 @@ done:
 
     /* close the dataset if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL))
+        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
     FUNC_LEAVE_NOAPI_VOID
@@ -1164,7 +1164,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* close the metadata scratch pad */
-        if(iod_obj_close(mdkv_oh, NULL, NULL))
+        if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
     }
 #endif
@@ -1185,7 +1185,7 @@ done:
 
     /* close the dataset if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL))
+        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
 
@@ -1666,7 +1666,7 @@ H5VL__iod_server_vl_data_io_cb(void UNUSED *elem, hid_t type_id, unsigned ndims,
         free(blob_desc);
 
         /* close BLOB */
-        if(iod_obj_close(blob_oh, NULL, NULL))
+        if(iod_obj_close(blob_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* update the array element with the blob_id and sequence length */
@@ -1723,7 +1723,7 @@ H5VL__iod_server_vl_data_io_cb(void UNUSED *elem, hid_t type_id, unsigned ndims,
         udata->buf_ptr += old_seq_len * udata->mem_type_size;
 
         /* close BLOB */
-        if(iod_obj_close(blob_oh, NULL, NULL))
+        if(iod_obj_close(blob_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         free(mem_desc);

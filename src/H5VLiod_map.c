@@ -157,7 +157,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
         /* MSC - insert Value datatype metadata */
 
         /* close MD KV object */
-        if(iod_obj_close(mdkv_oh, NULL, NULL))
+        if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* add link in parent group to current object */
@@ -270,7 +270,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL))
+    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close meta data KV handle");
 
     /* MSC - fake stuff for now*/
@@ -478,7 +478,7 @@ done:
 
     /* close the map if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL))
+        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
 
@@ -740,7 +740,7 @@ done:
 
     /* close the map if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL))
+        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
 
@@ -817,7 +817,7 @@ done:
 
     /* close the map if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL))
+        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
 
@@ -907,7 +907,7 @@ done:
 
     /* close the map if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL))
+        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
 
@@ -987,7 +987,7 @@ done:
 
     /* close the map if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL))
+        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
 

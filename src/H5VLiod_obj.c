@@ -231,7 +231,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL))
+    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
 
@@ -459,11 +459,11 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - wait to see if IOD will have an object copy */
 
     /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL))
+    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
     /* close the object handle */
     if(input->src_loc_oh.cookie != obj_oh.cookie && 
-       iod_obj_close(obj_oh, NULL, NULL))
+       iod_obj_close(obj_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
     /* Insert object in the destination path */
@@ -674,10 +674,10 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
     oinfo.num_attrs = num_attrs;
 
     /* close the metadata KV */
-    if(iod_obj_close(mdkv_oh, NULL, NULL))
+    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
     /* close the  attribute KV */
-    if(iod_obj_close(attrkv_oh, NULL, NULL))
+    if(iod_obj_close(attrkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
     if(loc_oh.cookie != obj_oh.cookie && 
@@ -790,7 +790,7 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* close metadata KV and object */
-    if(iod_obj_close(mdkv_oh, NULL, NULL))
+    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
     if(loc_oh.cookie != obj_oh.cookie && 
@@ -907,7 +907,7 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* close metadata KV and object */
-    if(iod_obj_close(mdkv_oh, NULL, NULL))
+    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
     if(loc_oh.cookie != obj_oh.cookie && 

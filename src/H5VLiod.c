@@ -1465,6 +1465,13 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     ret_value = (void *)file;
 
 done:
+
+    if(ret_value == NULL) {
+        if(file != NULL) {
+            file = H5FL_FREE(H5VL_iod_file_t, file);
+        } /* end if */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_file_create() */
 
@@ -1571,6 +1578,13 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
     ret_value = (void *)file;
 
 done:
+
+    if(ret_value == NULL) {
+        if(file != NULL) {
+            file = H5FL_FREE(H5VL_iod_file_t, file);
+        } /* end if */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_file_open() */
 
@@ -2008,6 +2022,12 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
     ret_value = (void *)grp;
 
 done:
+    if(ret_value == NULL) {
+        if(grp != NULL) {
+            grp = H5FL_FREE(H5VL_iod_group_t, grp);
+        } /* end if */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_group_create() */
 
@@ -2119,6 +2139,12 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
     ret_value = (void *)grp;
 
 done:
+    if(ret_value == NULL) {
+        if(grp != NULL) {
+            grp = H5FL_FREE(H5VL_iod_group_t, grp);
+        } /* end if */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_group_open() */
 
@@ -2409,6 +2435,12 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t UNUSED loc_params,
     ret_value = (void *)dset;
 
 done:
+    if(ret_value == NULL) {
+        if(dset != NULL) {
+            dset = H5FL_FREE(H5VL_iod_dset_t, dset);
+        } /* end if */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_dataset_create() */
 
@@ -2524,6 +2556,12 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
     ret_value = (void *)dset;
 
 done:
+    if(ret_value == NULL) {
+        if(dset != NULL) {
+            dset = H5FL_FREE(H5VL_iod_dset_t, dset);
+        } /* end if */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_dataset_open() */
 
@@ -3369,6 +3407,13 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t UNUSED loc_params, const 
     ret_value = (void *)dtype;
 
 done:
+
+    if(ret_value == NULL) {
+        if(dtype != NULL) {
+            dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
+        } /* end if */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_datatype_commit() */
 
@@ -3482,6 +3527,13 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const ch
     ret_value = (void *)dtype;
 
 done:
+
+    if(ret_value == NULL) {
+        if(dtype != NULL) {
+            dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
+        } /* end if */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_datatype_open() */
 
@@ -3780,6 +3832,12 @@ done:
     if(loc_name) 
         HDfree(loc_name);
 
+    if(ret_value == NULL) {
+        if(attr != NULL) {
+            attr = H5FL_FREE(H5VL_iod_attr_t, attr);
+        } /* end if */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_attribute_create() */
 
@@ -3911,6 +3969,13 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
 done:
     if(loc_name) 
         HDfree(loc_name);
+
+    if(ret_value == NULL) {
+        if(attr != NULL) {
+            attr = H5FL_FREE(H5VL_iod_attr_t, attr);
+        } /* end if */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_attribute_open() */
 
@@ -5171,6 +5236,10 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
     const uint8_t *buf_ptr = (const uint8_t *)token;
     H5O_type_t obj_type;
     iod_obj_id_t iod_id, mdkv_id, attrkv_id;
+    H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+    H5VL_iod_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
+    H5VL_iod_group_t  *grp = NULL; /* the group object that is created and passed to the user */
+    H5VL_iod_map_t  *map = NULL; /* the map object that is created and passed to the user */
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -5186,246 +5255,230 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
     
     switch(obj_type) {
     case H5O_TYPE_DATASET:
+        /* allocate the dataset object that is returned to the user */
+        if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+        dset->remote_dset.iod_oh.cookie = IOD_OH_UNDEFINED;
+        dset->remote_dset.iod_id = iod_id;
+        dset->remote_dset.mdkv_id = mdkv_id;
+        dset->remote_dset.attrkv_id = attrkv_id;
+
+        dset->dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+        dset->remote_dset.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
+
+        /* decode dtype */
         {
-            H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+            H5T_t *dt = NULL;
+            size_t dt_size;
 
-            /* allocate the dataset object that is returned to the user */
-            if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+            HDmemcpy(&dt_size, buf_ptr, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            /* Create datatype by decoding buffer */
+            if(NULL == (dt = H5T_decode((const unsigned char *)buf_ptr)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
+            /* Register the type */
+            if((dset->remote_dset.type_id = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register data type");
+            buf_ptr += dt_size;
+        }
 
-            dset->remote_dset.iod_oh.cookie = IOD_OH_UNDEFINED;
-            dset->remote_dset.iod_id = iod_id;
-            dset->remote_dset.mdkv_id = mdkv_id;
-            dset->remote_dset.attrkv_id = attrkv_id;
+        /* decode dspace */
+        {
+            H5S_t *ds;
+            size_t space_size;
 
-            dset->dapl_id = H5P_DATASET_ACCESS_DEFAULT;
-            dset->remote_dset.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
+            HDmemcpy(&space_size, buf_ptr, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if((ds = H5S_decode((const unsigned char *)buf_ptr)) == NULL)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object");
+            /* Register the type  */
+            if((dset->remote_dset.space_id = H5I_register(H5I_DATASPACE, ds, TRUE)) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, NULL, "unable to register dataspace");
+            buf_ptr += space_size;
+        }
 
-            /* decode dtype */
-            {
-                H5T_t *dt = NULL;
-                size_t dt_size;
+        input.coh = rc->file->remote_file.coh;
+        input.iod_id = iod_id;
 
-                HDmemcpy(&dt_size, buf_ptr, sizeof(size_t));
-                buf_ptr += sizeof(size_t);
-                /* Create datatype by decoding buffer */
-                if(NULL == (dt = H5T_decode((const unsigned char *)buf_ptr)))
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
-                /* Register the type */
-                if((dset->remote_dset.type_id = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register data type");
-                buf_ptr += dt_size;
-            }
-
-            /* decode dspace */
-            {
-                H5S_t *ds;
-                size_t space_size;
-
-                HDmemcpy(&space_size, buf_ptr, sizeof(size_t));
-                buf_ptr += sizeof(size_t);
-                if((ds = H5S_decode((const unsigned char *)buf_ptr)) == NULL)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object");
-                /* Register the type  */
-                if((dset->remote_dset.space_id = H5I_register(H5I_DATASPACE, ds, TRUE)) < 0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, NULL, "unable to register dataspace");
-                buf_ptr += space_size;
-            }
-
-            input.coh = rc->file->remote_file.coh;
-            input.iod_id = iod_id;
-
-            /* set common object parameters */
-            dset->common.obj_type = H5I_DATASET;
-            dset->common.file = rc->file;
-            dset->common.file->nopen_objs ++;
-            dset->common.obj_name = NULL;
+        /* set common object parameters */
+        dset->common.obj_type = H5I_DATASET;
+        dset->common.file = rc->file;
+        dset->common.file->nopen_objs ++;
+        dset->common.obj_name = NULL;
 
 #if H5VL_IOD_DEBUG
-            printf("Dataset open by token %llu: ID %llu\n", 
-                   g_axe_id, input.iod_id);
+        printf("Dataset open by token %llu: ID %llu\n", 
+               g_axe_id, input.iod_id);
 #endif
 
-            if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
-                                            (H5VL_iod_object_t *)dset, 1, 0, NULL,
-                                            (H5VL_iod_req_info_t *)rc, &input, 
-                                            &dset->remote_dset.iod_oh, dset, req) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship dataset open_by_token");
+        if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
+                                        (H5VL_iod_object_t *)dset, 1, 0, NULL,
+                                        (H5VL_iod_req_info_t *)rc, &input, 
+                                        &dset->remote_dset.iod_oh, dset, req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship dataset open_by_token");
 
-            ret_value = (void *)dset;
-            *opened_type = H5I_DATASET;
-            break;
-        }
+        ret_value = (void *)dset;
+        *opened_type = H5I_DATASET;
+        break;
     case H5O_TYPE_NAMED_DATATYPE:
+        /* allocate the datatype object that is returned to the user */
+        if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+        dtype->remote_dtype.iod_oh.cookie = IOD_OH_UNDEFINED;
+        dtype->remote_dtype.iod_id = iod_id;
+        dtype->remote_dtype.mdkv_id = mdkv_id;
+        dtype->remote_dtype.attrkv_id = attrkv_id;
+
+        dtype->tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+        dtype->remote_dtype.tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
+
+        /* decode dtype */
         {
-            H5VL_iod_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
+            H5T_t *dt = NULL;
+            size_t dt_size;
 
-            /* allocate the datatype object that is returned to the user */
-            if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+            HDmemcpy(&dt_size, buf_ptr, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            /* Create datatype by decoding buffer */
+            if(NULL == (dt = H5T_decode((const unsigned char *)buf_ptr)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
+            /* Register the type */
+            if((dtype->remote_dtype.type_id = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register data type");
+            buf_ptr += dt_size;
+        }
 
-            dtype->remote_dtype.iod_oh.cookie = IOD_OH_UNDEFINED;
-            dtype->remote_dtype.iod_id = iod_id;
-            dtype->remote_dtype.mdkv_id = mdkv_id;
-            dtype->remote_dtype.attrkv_id = attrkv_id;
+        /* set the input structure for the HG encode routine */
+        input.coh = rc->file->remote_file.coh;
+        input.iod_id = iod_id;
 
-            dtype->tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
-            dtype->remote_dtype.tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
-
-            /* decode dtype */
-            {
-                H5T_t *dt = NULL;
-                size_t dt_size;
-
-                HDmemcpy(&dt_size, buf_ptr, sizeof(size_t));
-                buf_ptr += sizeof(size_t);
-                /* Create datatype by decoding buffer */
-                if(NULL == (dt = H5T_decode((const unsigned char *)buf_ptr)))
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
-                /* Register the type */
-                if((dtype->remote_dtype.type_id = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register data type");
-                buf_ptr += dt_size;
-            }
-
-            /* set the input structure for the HG encode routine */
-            input.coh = rc->file->remote_file.coh;
-            input.iod_id = iod_id;
-
-            /* set common object parameters */
-            dtype->common.obj_type = H5I_DATATYPE;
-            dtype->common.file = rc->file;
-            dtype->common.file->nopen_objs ++;
-            dtype->common.obj_name = NULL;
+        /* set common object parameters */
+        dtype->common.obj_type = H5I_DATATYPE;
+        dtype->common.file = rc->file;
+        dtype->common.file->nopen_objs ++;
+        dtype->common.obj_name = NULL;
 
 #if H5VL_IOD_DEBUG
-            printf("Named Datatype open by token %llu: ID %llu\n", 
-                   g_axe_id, input.iod_id);
+        printf("Named Datatype open by token %llu: ID %llu\n", 
+               g_axe_id, input.iod_id);
 #endif
 
-            if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
-                                            (H5VL_iod_object_t *)dtype, 1, 0, NULL,
-                                            (H5VL_iod_req_info_t *)rc, &input, 
-                                            &dtype->remote_dtype.iod_oh, dtype, req) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship datatype open_by_token");
+        if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
+                                        (H5VL_iod_object_t *)dtype, 1, 0, NULL,
+                                        (H5VL_iod_req_info_t *)rc, &input, 
+                                        &dtype->remote_dtype.iod_oh, dtype, req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship datatype open_by_token");
 
-            ret_value = (void *)dtype;
-            *opened_type = H5I_DATATYPE;
-            break;
-        }
+        ret_value = (void *)dtype;
+        *opened_type = H5I_DATATYPE;
+        break;
     case H5O_TYPE_GROUP:
-        {
-            H5VL_iod_group_t  *grp = NULL; /* the group object that is created and passed to the user */
+        /* allocate the dataset object that is returned to the user */
+        if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-            /* allocate the dataset object that is returned to the user */
-            if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+        grp->remote_group.iod_oh.cookie = IOD_OH_UNDEFINED;
+        grp->remote_group.iod_id = iod_id;
+        grp->remote_group.mdkv_id = mdkv_id;
+        grp->remote_group.attrkv_id = attrkv_id;
 
-            grp->remote_group.iod_oh.cookie = IOD_OH_UNDEFINED;
-            grp->remote_group.iod_id = iod_id;
-            grp->remote_group.mdkv_id = mdkv_id;
-            grp->remote_group.attrkv_id = attrkv_id;
+        grp->remote_group.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+        grp->gapl_id = H5P_GROUP_ACCESS_DEFAULT;
 
-            grp->remote_group.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
-            grp->gapl_id = H5P_GROUP_ACCESS_DEFAULT;
+        /* set the input structure for the HG encode routine */
+        input.coh = rc->file->remote_file.coh;
+        input.iod_id = iod_id;
 
-            /* set the input structure for the HG encode routine */
-            input.coh = rc->file->remote_file.coh;
-            input.iod_id = iod_id;
-
-            /* set common object parameters */
-            grp->common.obj_type = H5I_GROUP;
-            grp->common.file = rc->file;
-            grp->common.file->nopen_objs ++;
-            grp->common.obj_name = NULL;
+        /* set common object parameters */
+        grp->common.obj_type = H5I_GROUP;
+        grp->common.file = rc->file;
+        grp->common.file->nopen_objs ++;
+        grp->common.obj_name = NULL;
 
 #if H5VL_IOD_DEBUG
-            printf("Group open by token %llu: ID %llu\n", 
-                   g_axe_id, input.iod_id);
+        printf("Group open by token %llu: ID %llu\n", 
+               g_axe_id, input.iod_id);
 #endif
 
-            if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
-                                            (H5VL_iod_object_t *)grp, 1, 0, NULL,
-                                            (H5VL_iod_req_info_t *)rc, &input, 
-                                            &grp->remote_group.iod_oh, grp, req) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship group open_by_token");
+        if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
+                                        (H5VL_iod_object_t *)grp, 1, 0, NULL,
+                                        (H5VL_iod_req_info_t *)rc, &input, 
+                                        &grp->remote_group.iod_oh, grp, req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship group open_by_token");
 
-            ret_value = (void *)grp;
-            *opened_type = H5I_GROUP;
-            break;
-        }
+        ret_value = (void *)grp;
+        *opened_type = H5I_GROUP;
+        break;
     case H5O_TYPE_MAP:
+        /* allocate the dataset object that is returned to the user */
+        if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+        map->remote_map.iod_oh.cookie = IOD_OH_UNDEFINED;
+        map->remote_map.iod_id = iod_id;
+        map->remote_map.mdkv_id = mdkv_id;
+        map->remote_map.attrkv_id = attrkv_id;
+
+        map->remote_map.mcpl_id = H5P_GROUP_CREATE_DEFAULT;
+        map->mapl_id = H5P_GROUP_ACCESS_DEFAULT;
+
+        /* decode key_type */
         {
-            H5VL_iod_map_t  *map = NULL; /* the map object that is created and passed to the user */
+            H5T_t *dt = NULL;
+            size_t dt_size;
 
-            /* allocate the dataset object that is returned to the user */
-            if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+            HDmemcpy(&dt_size, buf_ptr, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            /* Create datatype by decoding buffer */
+            if(NULL == (dt = H5T_decode((const unsigned char *)buf_ptr)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
+            /* Register the type */
+            if((map->remote_map.keytype_id = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register data type");
+            buf_ptr += dt_size;
+        }
+        /* decode val_type */
+        {
+            H5T_t *dt = NULL;
+            size_t dt_size;
 
-            map->remote_map.iod_oh.cookie = IOD_OH_UNDEFINED;
-            map->remote_map.iod_id = iod_id;
-            map->remote_map.mdkv_id = mdkv_id;
-            map->remote_map.attrkv_id = attrkv_id;
+            HDmemcpy(&dt_size, buf_ptr, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            /* Create datatype by decoding buffer */
+            if(NULL == (dt = H5T_decode((const unsigned char *)buf_ptr)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
+            /* Register the type */
+            if((map->remote_map.valtype_id = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register data type");
+            buf_ptr += dt_size;
+        }
 
-            map->remote_map.mcpl_id = H5P_GROUP_CREATE_DEFAULT;
-            map->mapl_id = H5P_GROUP_ACCESS_DEFAULT;
+        /* set the input structure for the HG encode routine */
+        input.coh = rc->file->remote_file.coh;
+        input.iod_id = iod_id;
 
-            /* decode key_type */
-            {
-                H5T_t *dt = NULL;
-                size_t dt_size;
-
-                HDmemcpy(&dt_size, buf_ptr, sizeof(size_t));
-                buf_ptr += sizeof(size_t);
-                /* Create datatype by decoding buffer */
-                if(NULL == (dt = H5T_decode((const unsigned char *)buf_ptr)))
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
-                /* Register the type */
-                if((map->remote_map.keytype_id = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register data type");
-                buf_ptr += dt_size;
-            }
-            /* decode val_type */
-            {
-                H5T_t *dt = NULL;
-                size_t dt_size;
-
-                HDmemcpy(&dt_size, buf_ptr, sizeof(size_t));
-                buf_ptr += sizeof(size_t);
-                /* Create datatype by decoding buffer */
-                if(NULL == (dt = H5T_decode((const unsigned char *)buf_ptr)))
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
-                /* Register the type */
-                if((map->remote_map.valtype_id = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register data type");
-                buf_ptr += dt_size;
-            }
-
-            /* set the input structure for the HG encode routine */
-            input.coh = rc->file->remote_file.coh;
-            input.iod_id = iod_id;
-
-            /* set common object parameters */
-            map->common.obj_type = H5I_MAP;
-            map->common.file = rc->file;
-            map->common.file->nopen_objs ++;
-            map->common.obj_name = NULL;
+        /* set common object parameters */
+        map->common.obj_type = H5I_MAP;
+        map->common.file = rc->file;
+        map->common.file->nopen_objs ++;
+        map->common.obj_name = NULL;
 
 #if H5VL_IOD_DEBUG
-            printf("Map open by token %llu: ID %llu\n", 
-                   g_axe_id, input.iod_id);
+        printf("Map open by token %llu: ID %llu\n", 
+               g_axe_id, input.iod_id);
 #endif
 
-            if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
-                                            (H5VL_iod_object_t *)map, 1, 0, NULL, 
-                                            (H5VL_iod_req_info_t *)rc, &input, 
-                                            &map->remote_map, map, req) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship map open");
+        if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
+                                        (H5VL_iod_object_t *)map, 1, 0, NULL, 
+                                        (H5VL_iod_req_info_t *)rc, &input, 
+                                        &map->remote_map, map, req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship map open");
 
-            ret_value = (void *)map;
-            *opened_type = H5I_MAP;
-            break;
-        }
+        ret_value = (void *)map;
+        *opened_type = H5I_MAP;
+        break;
     case H5O_TYPE_UNKNOWN:
     case H5O_TYPE_NTYPES:
     default:
@@ -5433,6 +5486,36 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
     }
 
 done:
+
+    if(ret_value == NULL) {
+        switch(obj_type) {
+            case H5O_TYPE_DATASET:
+                if(dset != NULL) {
+                    dset = H5FL_FREE(H5VL_iod_dset_t, dset);
+                } /* end if */
+                break;
+            case H5O_TYPE_NAMED_DATATYPE:
+                if(dtype != NULL) {
+                    dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
+                } /* end if */
+                break;
+            case H5O_TYPE_GROUP:
+                if(grp != NULL) {
+                    grp = H5FL_FREE(H5VL_iod_group_t, grp);
+                } /* end if */
+                break;
+            case H5O_TYPE_MAP:
+                if(map != NULL) {
+                    map = H5FL_FREE(H5VL_iod_map_t, map);
+                } /* end if */
+                break;
+            case H5O_TYPE_UNKNOWN:
+            case H5O_TYPE_NTYPES:
+            default:
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "not a valid object type");
+        } /* end switch */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 }/* end H5VL_iod_obj_open_token() */
 
@@ -5462,6 +5545,10 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
     char *loc_name = NULL;
     object_op_in_t input;
     H5VL_iod_remote_object_t remote_obj; /* generic remote object structure */
+    H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+    H5VL_iod_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
+    H5VL_iod_group_t  *grp = NULL; /* the group object that is created and passed to the user */
+    H5VL_iod_map_t  *map = NULL; /* the map object that is created and passed to the user */
     H5VL_iod_request_t **parent_reqs = NULL;
     void *ret_value;
 
@@ -5515,198 +5602,210 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
     switch(remote_obj.obj_type) {
     case H5I_DATASET:
-        {
-            H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+        /* allocate the dataset object that is returned to the user */
+        if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-            /* allocate the dataset object that is returned to the user */
-            if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+        dset->remote_dset.iod_oh.cookie = remote_obj.iod_oh.cookie;
+        dset->remote_dset.iod_id = remote_obj.iod_id;
+        dset->remote_dset.mdkv_id = remote_obj.mdkv_id;
+        dset->remote_dset.attrkv_id = remote_obj.attrkv_id;
+        dset->remote_dset.dcpl_id = remote_obj.cpl_id;
+        dset->remote_dset.type_id = remote_obj.type_id;
+        dset->remote_dset.space_id = remote_obj.space_id;
 
-            dset->remote_dset.iod_oh.cookie = remote_obj.iod_oh.cookie;
-            dset->remote_dset.iod_id = remote_obj.iod_id;
-            dset->remote_dset.mdkv_id = remote_obj.mdkv_id;
-            dset->remote_dset.attrkv_id = remote_obj.attrkv_id;
-            dset->remote_dset.dcpl_id = remote_obj.cpl_id;
-            dset->remote_dset.type_id = remote_obj.type_id;
-            dset->remote_dset.space_id = remote_obj.space_id;
-
-            if(dset->remote_dset.dcpl_id == H5P_DEFAULT){
-                dset->remote_dset.dcpl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT);
-            }
-
-            HDassert(dset->remote_dset.dcpl_id);
-            HDassert(dset->remote_dset.type_id);
-            HDassert(dset->remote_dset.space_id);
-
-            /* setup the local dataset struct */
-            /* store the entire path of the dataset locally */
-            {
-                size_t obj_name_len = HDstrlen(obj->obj_name);
-                size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
-
-                if (NULL == (dset->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-                HDmemcpy(dset->common.obj_name, obj->obj_name, obj_name_len);
-                HDmemcpy(dset->common.obj_name+obj_name_len, 
-                         loc_params.loc_data.loc_by_name.name, name_len);
-                dset->common.obj_name[obj_name_len+name_len] = '\0';
-            }
-
-            if((dset->dapl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT)) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
-
-            /* set common object parameters */
-            dset->common.obj_type = H5I_DATASET;
-            dset->common.file = obj->file;
-            dset->common.file->nopen_objs ++;
-
-            ret_value = (void *)dset;
-            break;
+        if(dset->remote_dset.dcpl_id == H5P_DEFAULT){
+            dset->remote_dset.dcpl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT);
         }
+
+        HDassert(dset->remote_dset.dcpl_id);
+        HDassert(dset->remote_dset.type_id);
+        HDassert(dset->remote_dset.space_id);
+
+        /* setup the local dataset struct */
+        /* store the entire path of the dataset locally */
+        {
+            size_t obj_name_len = HDstrlen(obj->obj_name);
+            size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
+
+            if (NULL == (dset->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+            HDmemcpy(dset->common.obj_name, obj->obj_name, obj_name_len);
+            HDmemcpy(dset->common.obj_name+obj_name_len, 
+                     loc_params.loc_data.loc_by_name.name, name_len);
+            dset->common.obj_name[obj_name_len+name_len] = '\0';
+        }
+
+        if((dset->dapl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
+
+        /* set common object parameters */
+        dset->common.obj_type = H5I_DATASET;
+        dset->common.file = obj->file;
+        dset->common.file->nopen_objs ++;
+
+        ret_value = (void *)dset;
+        break;
     case H5I_DATATYPE:
-        {
-            H5VL_iod_dtype_t *dtype = NULL; /* the dataset object that is created and passed to the user */
+        /* allocate the dataset object that is returned to the user */
+        if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-            /* allocate the dataset object that is returned to the user */
-            if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+        dtype->remote_dtype.iod_oh.cookie = remote_obj.iod_oh.cookie;
+        dtype->remote_dtype.iod_id = remote_obj.iod_id;
+        dtype->remote_dtype.mdkv_id = remote_obj.mdkv_id;
+        dtype->remote_dtype.attrkv_id = remote_obj.attrkv_id;
+        dtype->remote_dtype.tcpl_id = remote_obj.cpl_id;
+        dtype->remote_dtype.type_id = remote_obj.type_id;
 
-            dtype->remote_dtype.iod_oh.cookie = remote_obj.iod_oh.cookie;
-            dtype->remote_dtype.iod_id = remote_obj.iod_id;
-            dtype->remote_dtype.mdkv_id = remote_obj.mdkv_id;
-            dtype->remote_dtype.attrkv_id = remote_obj.attrkv_id;
-            dtype->remote_dtype.tcpl_id = remote_obj.cpl_id;
-            dtype->remote_dtype.type_id = remote_obj.type_id;
-
-            if(dtype->remote_dtype.tcpl_id == H5P_DEFAULT){
-                dtype->remote_dtype.tcpl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT);
-            }
-
-            HDassert(dtype->remote_dtype.tcpl_id);
-            HDassert(dtype->remote_dtype.type_id);
-
-            /* setup the local dataset struct */
-            /* store the entire path of the dataset locally */
-            {
-                size_t obj_name_len = HDstrlen(obj->obj_name);
-                size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
-
-                if (NULL == (dtype->common.obj_name = (char *)HDmalloc
-                             (obj_name_len + name_len + 1)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-                HDmemcpy(dtype->common.obj_name, obj->obj_name, obj_name_len);
-                HDmemcpy(dtype->common.obj_name+obj_name_len, 
-                         loc_params.loc_data.loc_by_name.name, name_len);
-                dtype->common.obj_name[obj_name_len+name_len] = '\0';
-            }
-
-            if((dtype->tapl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT)) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
-
-            /* set common object parameters */
-            dtype->common.obj_type = H5I_DATATYPE;
-            dtype->common.file = obj->file;
-            dtype->common.file->nopen_objs ++;
-
-            ret_value = (void *)dtype;
-            break;
+        if(dtype->remote_dtype.tcpl_id == H5P_DEFAULT){
+            dtype->remote_dtype.tcpl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT);
         }
+
+        HDassert(dtype->remote_dtype.tcpl_id);
+        HDassert(dtype->remote_dtype.type_id);
+
+        /* setup the local dataset struct */
+        /* store the entire path of the dataset locally */
+        {
+            size_t obj_name_len = HDstrlen(obj->obj_name);
+            size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
+
+            if (NULL == (dtype->common.obj_name = (char *)HDmalloc
+                         (obj_name_len + name_len + 1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+            HDmemcpy(dtype->common.obj_name, obj->obj_name, obj_name_len);
+            HDmemcpy(dtype->common.obj_name+obj_name_len, 
+                     loc_params.loc_data.loc_by_name.name, name_len);
+            dtype->common.obj_name[obj_name_len+name_len] = '\0';
+        }
+
+        if((dtype->tapl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
+
+        /* set common object parameters */
+        dtype->common.obj_type = H5I_DATATYPE;
+        dtype->common.file = obj->file;
+        dtype->common.file->nopen_objs ++;
+
+        ret_value = (void *)dtype;
+        break;
     case H5I_GROUP:
-        {
-            H5VL_iod_group_t  *grp = NULL; /* the group object that is created and passed to the user */
+        /* allocate the dataset object that is returned to the user */
+        if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-            /* allocate the dataset object that is returned to the user */
-            if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+        grp->remote_group.iod_oh.cookie = remote_obj.iod_oh.cookie;
+        grp->remote_group.iod_id = remote_obj.iod_id;
+        grp->remote_group.mdkv_id = remote_obj.mdkv_id;
+        grp->remote_group.attrkv_id = remote_obj.attrkv_id;
+        grp->remote_group.gcpl_id = remote_obj.cpl_id;
 
-            grp->remote_group.iod_oh.cookie = remote_obj.iod_oh.cookie;
-            grp->remote_group.iod_id = remote_obj.iod_id;
-            grp->remote_group.mdkv_id = remote_obj.mdkv_id;
-            grp->remote_group.attrkv_id = remote_obj.attrkv_id;
-            grp->remote_group.gcpl_id = remote_obj.cpl_id;
-
-            if(grp->remote_group.gcpl_id == H5P_DEFAULT){
-                grp->remote_group.gcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
-            }
-
-            HDassert(grp->remote_group.gcpl_id);
-
-            /* setup the local dataset struct */
-            /* store the entire path of the dataset locally */
-            {
-                size_t obj_name_len = HDstrlen(obj->obj_name);
-                size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
-
-                if (NULL == (grp->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-                HDmemcpy(grp->common.obj_name, obj->obj_name, obj_name_len);
-                HDmemcpy(grp->common.obj_name+obj_name_len, 
-                         loc_params.loc_data.loc_by_name.name, name_len);
-                grp->common.obj_name[obj_name_len+name_len] = '\0';
-            }
-
-            if((grp->gapl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT)) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy gapl");
-
-            /* set common object parameters */
-            grp->common.obj_type = H5I_GROUP;
-            grp->common.file = obj->file;
-            grp->common.file->nopen_objs ++;
-
-            ret_value = (void *)grp;
-            break;
+        if(grp->remote_group.gcpl_id == H5P_DEFAULT){
+            grp->remote_group.gcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
         }
+
+        HDassert(grp->remote_group.gcpl_id);
+
+        /* setup the local dataset struct */
+        /* store the entire path of the dataset locally */
+        {
+            size_t obj_name_len = HDstrlen(obj->obj_name);
+            size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
+
+            if (NULL == (grp->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+            HDmemcpy(grp->common.obj_name, obj->obj_name, obj_name_len);
+            HDmemcpy(grp->common.obj_name+obj_name_len, 
+                     loc_params.loc_data.loc_by_name.name, name_len);
+            grp->common.obj_name[obj_name_len+name_len] = '\0';
+        }
+
+        if((grp->gapl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy gapl");
+
+        /* set common object parameters */
+        grp->common.obj_type = H5I_GROUP;
+        grp->common.file = obj->file;
+        grp->common.file->nopen_objs ++;
+
+        ret_value = (void *)grp;
+        break;
     case H5I_MAP:
-        {
-            H5VL_iod_map_t  *map = NULL; /* the map object that is created and passed to the user */
+        /* allocate the dataset object that is returned to the user */
+        if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-            /* allocate the dataset object that is returned to the user */
-            if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+        map->remote_map.iod_oh.cookie = remote_obj.iod_oh.cookie;
+        map->remote_map.iod_id = remote_obj.iod_id;
+        map->remote_map.mdkv_id = remote_obj.mdkv_id;
+        map->remote_map.attrkv_id = remote_obj.attrkv_id;
+        map->remote_map.mcpl_id = remote_obj.cpl_id;
 
-            map->remote_map.iod_oh.cookie = remote_obj.iod_oh.cookie;
-            map->remote_map.iod_id = remote_obj.iod_id;
-            map->remote_map.mdkv_id = remote_obj.mdkv_id;
-            map->remote_map.attrkv_id = remote_obj.attrkv_id;
-            map->remote_map.mcpl_id = remote_obj.cpl_id;
-
-            if(map->remote_map.mcpl_id == H5P_DEFAULT){
-                map->remote_map.mcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
-            }
-
-            HDassert(map->remote_map.mcpl_id);
-
-            /* setup the local dataset struct */
-            /* store the entire path of the dataset locally */
-            {
-                size_t obj_name_len = HDstrlen(obj->obj_name);
-                size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
-
-                if (NULL == (map->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-                HDmemcpy(map->common.obj_name, obj->obj_name, obj_name_len);
-                HDmemcpy(map->common.obj_name+obj_name_len, 
-                         loc_params.loc_data.loc_by_name.name, name_len);
-                map->common.obj_name[obj_name_len+name_len] = '\0';
-            }
-
-            if((map->mapl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT)) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy mapl");
-
-            /* set common object parameters */
-            map->common.obj_type = H5I_MAP;
-            map->common.file = obj->file;
-            map->common.file->nopen_objs ++;
-
-            ret_value = (void *)map;
-            break;
+        if(map->remote_map.mcpl_id == H5P_DEFAULT){
+            map->remote_map.mcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
         }
+
+        HDassert(map->remote_map.mcpl_id);
+
+        /* setup the local dataset struct */
+        /* store the entire path of the dataset locally */
+        {
+            size_t obj_name_len = HDstrlen(obj->obj_name);
+            size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
+
+            if (NULL == (map->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+            HDmemcpy(map->common.obj_name, obj->obj_name, obj_name_len);
+            HDmemcpy(map->common.obj_name+obj_name_len, 
+                     loc_params.loc_data.loc_by_name.name, name_len);
+            map->common.obj_name[obj_name_len+name_len] = '\0';
+        }
+
+        if((map->mapl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy mapl");
+
+        /* set common object parameters */
+        map->common.obj_type = H5I_MAP;
+        map->common.file = obj->file;
+        map->common.file->nopen_objs ++;
+
+        ret_value = (void *)map;
+        break;
     default:
         HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, NULL, "not a valid file object (dataset, map, group, or datatype)")
             break;
     }
 
- done:
+done:
+
+    if(ret_value == NULL) {
+        switch(remote_obj.obj_type) {
+            case H5I_DATASET:
+                if(dset != NULL) {
+                    dset = H5FL_FREE(H5VL_iod_dset_t, dset);
+                } /* end if */
+                break;
+            case H5I_DATATYPE:
+                if(dtype != NULL) {
+                    dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
+                } /* end if */
+                break;
+            case H5I_GROUP:
+                if(grp != NULL) {
+                    grp = H5FL_FREE(H5VL_iod_group_t, grp);
+                } /* end if */
+                break;
+            case H5I_MAP:
+                if(map != NULL) {
+                    map = H5FL_FREE(H5VL_iod_map_t, map);
+                } /* end if */
+                break;
+            default:
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "not a valid object type");
+        } /* end switch */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_object_open */
 
@@ -6325,6 +6424,12 @@ H5VL_iod_map_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
     ret_value = (void *)map;
 
 done:
+    if(ret_value == NULL) {
+        if(map != NULL) {
+            map = H5FL_FREE(H5VL_iod_map_t, map);
+        } /* end if */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_map_create() */
 
@@ -6416,6 +6521,12 @@ H5VL_iod_map_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char *n
     ret_value = (void *)map;
 
 done:
+    if(ret_value == NULL) {
+        if(map != NULL) {
+            map = H5FL_FREE(H5VL_iod_map_t, map);
+        } /* end if */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_map_open() */
 

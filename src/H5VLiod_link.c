@@ -125,12 +125,12 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* close the metadata scratch pad */
-        if(iod_obj_close(mdkv_oh, NULL, NULL))
+        if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* close the target location */
         if(input->target_loc_oh.cookie != target_oh.cookie) {
-            if(iod_obj_close(target_oh, NULL, NULL))
+            if(iod_obj_close(target_oh, NULL, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
         }
     }
@@ -150,7 +150,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 
     /* close the source location */
     if(input->loc_oh.cookie != src_oh.cookie) {
-        if(iod_obj_close(src_oh, NULL, NULL))
+        if(iod_obj_close(src_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
     }
 
@@ -310,11 +310,11 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* close the metadata scratch pad */
-        if(iod_obj_close(mdkv_oh, NULL, NULL))
+        if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* close the target location */
-        if(iod_obj_close(target_oh, NULL, NULL))
+        if(iod_obj_close(target_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
     }
 
@@ -762,10 +762,10 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
         }
         /* close the metadata scratch pad */
-        if(iod_obj_close(mdkv_oh, NULL, NULL))
+        if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
         /* close the object */
-        if(iod_obj_close(obj_oh, NULL, NULL))
+        if(iod_obj_close(obj_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* If this was the only link to the object, remove the object */

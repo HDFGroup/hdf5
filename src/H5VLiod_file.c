@@ -162,7 +162,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         if (iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
-        if(iod_obj_close(mdkv_oh, NULL, NULL))
+        if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
     }
 
@@ -310,7 +310,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL))
+    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
 
     output.coh = coh;
@@ -446,7 +446,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
-        if(iod_obj_close(mdkv_oh, NULL, NULL))
+        if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
 
         /* finish the transaction */
