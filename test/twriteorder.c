@@ -18,9 +18,15 @@
 *
 * Test to verify that the write order is strictly consistent.
 * The SWMR feature requires that the order of write is strictly consistent.
-* <<design requirements of SWMR>>
+* "Strict consistency in computer science is the most stringent consistency
+* model.  It says that a read operation has to return the result of the
+* latest write operation which occurred on that data item."--
+* (http://en.wikipedia.org/wiki/Linearizability#Definition_of_linearizability).
+* This is also an alternative form of what POSIX write require that after a
+* write operation has returned success, all reads issued afterward should
+* get the same data the write has written.
 *
-* Created: Albert Cheng, 2013/5/28.
+* Created: Albert Cheng, 2013/8/28.
 * Modified:
 *************************************************************/
 
@@ -58,14 +64,13 @@
 #include "h5test.h"
 
 #define DATAFILE   "twriteorder.dat"
-#define READERS_MAX	10	/* max number of readers */
+/* #define READERS_MAX	10 */	/* max number of readers */
 #define BLOCKSIZE_DFT   1024	/* 1KB */
 #define PARTITION_DFT	2048	/* 2KB */
 #define NLINKEDBLOCKS_DFT 512	/* default 512 */
-#define ITERATIONS_DFT	10	/* default 10 */
+#define ITERATIONS_DFT	1	/* default 1 */
 #define SIZE_BLKADDR	4	/* expected sizeof blkaddr */
 #define Hgoto_error(val)	{ret_value=val; goto done;}
-#define Hgoto_done		{goto done;}
 
 /* type declarations */
 typedef enum part_t {
@@ -78,13 +83,122 @@ typedef enum part_t {
 int create_wo_file(void);
 int write_wo_file(void);
 int read_wo_file(void);
+void usage(const char *prog);
 int setup_parameters(int argc, char * const argv[]);
+int parse_option(int argc, char * const argv[]);
 
 /* Global Variable definitions */
 const char *progname_g="twriteorder";	/* program name */
 int	write_fd_g;
 int	blocksize_g, part_size_g, nlinkedblock_g, iterations_g;
 part_t  launch_g;
+
+/* Function definitions */
+
+/* Show help page */
+void
+usage(const char *prog)
+{
+    fprintf(stderr, "usage: %s [OPTIONS]\n", prog);
+    fprintf(stderr, "  OPTIONS\n");
+    fprintf(stderr, "     -h            Print a usage message and exit\n");
+    fprintf(stderr, "     -l w|r        launch writer or reader only. [default: launch both]\n");
+    fprintf(stderr, "     -b N          Block size [default: %d]\n", BLOCKSIZE_DFT);
+    fprintf(stderr, "     -p N          Partition size [default: %d]\n", PARTITION_DFT);
+    fprintf(stderr, "     -n N          Number of linked blocks [default: %d]\n", NLINKEDBLOCKS_DFT);
+    fprintf(stderr, "     -i N          Number of iterations to repeat the whole thing. [default: %d] (not yet implemented.\n", ITERATIONS_DFT);
+    fprintf(stderr, "\n");
+}
+
+/* Setup test parameters by parsing command line options.
+ * Setup default values if not set by options. */
+int
+parse_option(int argc, char * const argv[])
+{
+    int ret_value=0;
+    int c;
+    /* command line options: See function usage for a description */
+    /* const char *nagg_options = "f:hi:l:n:s:y:z:"; */
+    const char *nagg_options = "hb:i:l:n:p:";
+
+    /* suppress getopt from printing error */
+    opterr = 0;
+
+    while (1){
+	c = getopt (argc, argv, nagg_options);
+	if (-1 == c)
+	    break;
+	switch (c) {
+	  case 'h':
+	    usage(progname_g);
+	    exit(0);
+	    break;
+	  case 'b':	/* number of planes to write/read */
+	    if ((blocksize_g = atoi(optarg)) <= 0){
+		fprintf(stderr, "bad blocksize %s, must be a positive integer\n", optarg);
+		usage(progname_g);
+		Hgoto_error(-1);
+	    };
+	    break;
+	  case 'n':	/* number of planes to write/read */
+	    if ((nlinkedblock_g = atoi(optarg)) <= 0){
+		fprintf(stderr, "bad number of linked blocks %s, must be a positive integer\n", optarg);
+		usage(progname_g);
+		Hgoto_error(-1);
+	    };
+	    break;
+	  case 'p':	/* number of planes to write/read */
+	    if ((part_size_g = atoi(optarg)) <= 0){
+		fprintf(stderr, "bad partition size %s, must be a positive integer\n", optarg);
+		usage(progname_g);
+		Hgoto_error(-1);
+	    };
+	    break;
+	  case 'i':	/* iterations */
+	    if ((iterations_g = atoi(optarg)) <= 0){
+		fprintf(stderr, "bad iterations number %s, must be a positive integer\n", optarg);
+		usage(progname_g);
+		Hgoto_error(-1);
+	    };
+	    break;
+	  case 'l':	/* launch reader or writer only */
+	    switch (*optarg) {
+	      case 'r':	/* reader only */
+		launch_g = UC_READER;
+		break;
+	      case 'w': /* writer only */
+		launch_g = UC_WRITER;
+		break;
+	      default:
+		fprintf(stderr, "launch value(%c) should be w or r only.\n", *optarg);
+		usage(progname_g);
+		Hgoto_error(-1);
+		break;
+	    }
+	    printf("launch = %d\n", launch_g);
+	    break;
+	  case '?':
+	    fprintf(stderr, "getopt returned '%c'.\n", c);
+	    usage(progname_g);
+	    Hgoto_error(-1);
+	  default:
+	    fprintf(stderr, "getopt returned unexpected value.\n");
+	    fprintf(stderr, "Unexpected value is %d\n", c);
+	    Hgoto_error(-1);
+	}
+    }
+
+    /* verify partition size must be >= blocksize */
+    if (part_size_g < blocksize_g ){
+	fprintf(stderr, "Blocksize %d should not be bigger than partition size %d\n",
+	    blocksize_g, part_size_g);
+	Hgoto_error(-1);                                                                  
+    }
+
+done:
+    /* All done. */
+    return(ret_value);
+}
 
 /* Setup parameters for the test case.
  * Return: 0 succeed; -1 fail.
@@ -95,29 +209,20 @@ int setup_parameters(int argc, char * const argv[])
     blocksize_g = BLOCKSIZE_DFT;
     part_size_g = PARTITION_DFT;
     nlinkedblock_g = NLINKEDBLOCKS_DFT;
-    iterations_g = 1;
+    iterations_g = ITERATIONS_DFT;
     launch_g = UC_READWRITE;
 
     /* parse options */
-    /* no option support yet */
-    /* dummy assignment to silence compiler warnings */
-    argc = argc;
-    argv = argv;
-#if 0
     if (parse_option(argc, argv) < 0){
 	return(-1);
     }
-#endif
 
     /* show parameters and return */
-#if 0
-    show_parameters();
-#else
     printf("blocksize = %ld\n", (long)blocksize_g);
     printf("part_size = %ld\n", (long)part_size_g);
     printf("nlinkedblock = %ld\n", (long)nlinkedblock_g);
     printf("iterations = %ld\n", (long)iterations_g);
-#endif
+    printf("launch = %d\n", launch_g);
     return(0);
 }
 
@@ -153,7 +258,6 @@ int write_wo_file(void)
     int blkaddr_old=0;
     int i;
     char buffer[BLOCKSIZE_DFT];
-    char pbuffer=&buffer[0];
     int  ret_code;
     
 
@@ -164,10 +268,12 @@ int write_wo_file(void)
 	/* store old block address in byte 0-3 */
 	HDmemcpy(&buffer[0], &blkaddr_old, sizeof(blkaddr_old));
 	/* fill the rest with the lowest byte of i */
-	HDmemset(&buffer[4], i & 0xff, BLOCKSIZE_DFT-4);
+	HDmemset(&buffer[4], i & 0xff, (size_t) (BLOCKSIZE_DFT-4));
 	/* write the block */
-	printf("writting block at %d\n", blkaddr);
-	HDlseek(write_fd_g, blkaddr, SEEK_SET);
+#ifdef DEBUG
+	printf("writing block at %d\n", blkaddr);
+#endif
+	HDlseek(write_fd_g, (HDoff_t)blkaddr, SEEK_SET);
 	if ((ret_code=HDwrite(write_fd_g, buffer, (size_t)blocksize_g)) != blocksize_g){
 	    printf("blkaddr write failed in partition %d\n", i);
 	    return -1;
@@ -175,13 +281,14 @@ int write_wo_file(void)
 	blkaddr_old = blkaddr;
     }
     /* write the last blkaddr in partition 0 */
-    HDlseek(write_fd_g, 0, SEEK_SET);
+    HDlseek(write_fd_g, (HDoff_t)0, SEEK_SET);
     if ((ret_code=HDwrite(write_fd_g, &blkaddr_old, (size_t)sizeof(blkaddr_old))) != sizeof(blkaddr_old)){
 	printf("blkaddr write failed in partition %d\n", 0);
 	return -1;
     }
 
     /* all writes done. return succeess. */
+    printf("wrote %d blocks\n", nlinkedblock_g);
     return 0;
 }
 
@@ -190,6 +297,7 @@ int read_wo_file(void)
     int read_fd;
     int blkaddr=0;
     int ret_code;
+    int linkedblocks_read=0;
     char buffer[BLOCKSIZE_DFT];
 
     /* Open the data file */
@@ -199,25 +307,33 @@ int read_wo_file(void)
     }
     /* keep reading the initial block address until it is non-zero before proceeding. */
     while (blkaddr == 0){
-	HDlseek(read_fd, 0, SEEK_SET);
+	HDlseek(read_fd, (HDoff_t)0, SEEK_SET);
 	if ((ret_code=HDread(read_fd, &blkaddr, (size_t)sizeof(blkaddr))) != sizeof(blkaddr)){
 	    printf("blkaddr read failed in partition %d\n", 0);
 	    return -1;
 	}
     }
+    linkedblocks_read++;
+
     /* got a non-zero blkaddr. Proceed down the linked blocks. */
+#ifdef DEBUG
     printf("got initial block address=%d\n", blkaddr);
+#endif
     while (blkaddr != 0){
-	HDlseek(read_fd, blkaddr, SEEK_SET);
+	HDlseek(read_fd, (HDoff_t)blkaddr, SEEK_SET);
 	if ((ret_code=HDread(read_fd, buffer, (size_t)blocksize_g)) != blocksize_g){
 	    printf("blkaddr read failed in partition %d\n", 0);
 	    return -1;
 	}
+	linkedblocks_read++;
 	/* retrieve the block address in byte 0-3 */
 	HDmemcpy(&blkaddr, &buffer[0], sizeof(blkaddr));
+#ifdef DEBUG
 	printf("got next block address=%d\n", blkaddr);
+#endif
     }
 
+    printf("read %d blocks\n", linkedblocks_read);
     return 0;
 }
 
@@ -234,7 +350,7 @@ main(int argc, char *argv[])
 {
     /*pid_t childpid[READERS_MAX];
     int child_ret_value[READERS_MAX];*/
-    pid_t childpid;
+    pid_t childpid=0;
     int child_ret_value;
     pid_t mypid, tmppid;
     int	child_status;
@@ -262,6 +378,8 @@ main(int argc, char *argv[])
 	}else
 	    printf("File created.\n");
     }
+    /* flush output before possible fork */
+    HDfflush(stdout);
 
     if (launch_g==UC_READWRITE){
 	/* fork process */
@@ -283,6 +401,8 @@ main(int argc, char *argv[])
 		fprintf(stderr, "read_wo_file encountered error\n");
 		exit(1);
 	    }
+	    /* Reader is done. Clean up by removing the data file */
+	    HDremove(DATAFILE);
 	    exit(0);
 	}
     }
@@ -327,7 +447,3 @@ done:
 
     return(ret_value);
 }
-
-#if 0
-
-#endif
