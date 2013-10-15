@@ -28,6 +28,7 @@ srcdir=@srcdir@
 # Define symbols
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
+EXIT_VALUE=$EXIT_SUCCESS	# Default all tests succeed
 RESULT_PASSED=" PASSED"
 RESULT_FAILED="*FAILED*"
 RESULT_SKIP="-SKIP-"
@@ -98,6 +99,26 @@ TOOLTEST() {
 }
 
 
+# run write order test here temporary
+WRITEORDER=twriteorder
+for p in $WRITEORDER; do
+    TOOLTEST $p
+    TOOLTEST $p -b 1000
+    TOOLTEST $p -p 3000
+    TOOLTEST $p -n 2000
+    TOOLTEST $p -l w
+    TOOLTEST $p -l r
+done
+
+# Report test results
+if test $nerrors -eq 0 ; then
+    echo "$WRITEORDER test passed."
+else
+    echo "$WRITEORDER test failed with $nerrors errors."
+    EXIT_VALUE=$EXIT_FAILURE
+    nerrors=0           # reset nerror for the regular tests below.
+fi
+
 # main body
 for p in $USECASES_PROGRAMS; do
     TOOLTEST $p
@@ -118,8 +139,9 @@ done
 # Report test results and exit
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."
-    exit $EXIT_SUCCESS
 else
     echo "$TESTNAME tests failed with $nerrors errors."
-    exit $EXIT_FAILURE
+    EXIT_VALUE=$EXIT_FAILURE
 fi
+
+exit $EXIT_VALUE
