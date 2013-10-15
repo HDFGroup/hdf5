@@ -870,8 +870,8 @@
 ./src/H5Rpkg.h
 ./src/H5Rprivate.h
 ./src/H5Rpublic.h
-./src/H5RC.c
-./src/H5RCprivate.h
+./src/H5UC.c
+./src/H5UCprivate.h
 ./src/H5RS.c
 ./src/H5RSprivate.h
 ./src/H5S.c
@@ -2361,7 +2361,6 @@
 ./hl/tools/h5watch/h5watch.c
 ./hl/tools/h5watch/h5watchgentest.c
 ./hl/tools/h5watch/testh5watch.sh.in
-./hl/tools/h5watch/WATCH.h5
 
 # expected test output from testing h5watch
 #

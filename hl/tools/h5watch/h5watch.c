@@ -20,6 +20,7 @@
 #include <float.h>
 
 #include "h5tools.h"
+#include "h5tools_dump.h"
 #include "h5tools_utils.h"
 #include "h5tools_ref.h"
 #include "h5trav.h"
@@ -313,7 +314,6 @@ done:
 static herr_t 
 monitor_dataset(hid_t fid, char *dsetname)
 {
-    char drivername[50];/* Driver's name for opening the file */
     hid_t did;		/* dataset id */
     hid_t sid;		/* dataspace id */
     int	ndims;		/* # of dimensions in the dataspace */

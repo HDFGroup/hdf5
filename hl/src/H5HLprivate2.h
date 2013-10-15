@@ -66,6 +66,7 @@
 #ifndef HDrealloc
     #define HDrealloc(M,Z)              realloc(M,Z)
 #endif /* HDrealloc */
+H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDfree
     #define HDfree(M)           free(M)
 #endif /* HDfree */
