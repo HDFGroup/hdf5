@@ -90,7 +90,7 @@ Group::Group(const hid_t existing_id) : H5Object()
 //--------------------------------------------------------------------------
 // Function:	Group overload constructor - dereference
 ///\brief	Given a reference, ref, to an hdf5 group, creates a Group object
-///\param	obj - IN: Specifying location referenced object is in
+///\param	loc - IN: Specifying location referenced object is in
 ///\param	ref - IN: Reference pointer
 ///\param	ref_type - IN: Reference type - default to H5R_OBJECT
 ///\exception	H5::ReferenceException

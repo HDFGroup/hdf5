@@ -24,6 +24,13 @@ namespace H5 {
 #endif
 
 class DataSpace;
+/*! \class IdComponent
+    \brief Class IdComponent provides wrappers of the C functions that
+     operate on an HDF5 identifier.
+
+    In most cases, the C library handles these operations and an application
+    rarely needs them.
+*/
 class H5_DLLCPP IdComponent {
    public:
 	// Increment reference counter.

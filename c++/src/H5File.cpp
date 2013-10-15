@@ -274,19 +274,6 @@ void H5File::reOpen()
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5File::reopen
-// Purpose:	Reopens this file.
-// Exception	H5::FileIException
-// Description
-//		This function is replaced by the above function reOpen.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-void H5File::reopen()
-{
-   H5File::reOpen();
-}
-
-//--------------------------------------------------------------------------
 // Function:	H5File::getCreatePlist
 ///\brief	Returns the creation property list of this file
 ///\return	FileCreatPropList object
@@ -505,6 +492,20 @@ hsize_t H5File::getFileSize() const
    return (file_size);
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:	H5File::reopen
+// Purpose:	Reopens this file.
+// Exception	H5::FileIException
+// Description
+//		This function is replaced by the above function reOpen.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void H5File::reopen()
+{
+   H5File::reOpen();
+}
+
 //--------------------------------------------------------------------------
 // Function:	H5File::getLocId
 // Purpose:	Get the id of this file
@@ -517,6 +518,7 @@ hid_t H5File::getLocId() const
 {
    return( getId() );
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:    H5File::getId

@@ -21,6 +21,11 @@
 namespace H5 {
 #endif
 
+/*! \class Group
+    \brief Class Group represents an HDF5 group.
+
+    It inherits many operations from H5Location and CommonFG.
+*/
 class H5_DLLCPP Group : public H5Object, public CommonFG {
    public:
 	// Close this group.

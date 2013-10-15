@@ -14,6 +14,9 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// Class DataType inherits from H5Object and has several subclasses for
+// specific HDF5 data types.
+
 #ifndef __H5DataType_H
 #define __H5DataType_H
 
@@ -21,6 +24,13 @@
 namespace H5 {
 #endif
 
+/*! \class DataType
+    \brief Class DataType provides generic operations on HDF5 datatypes.
+
+    DataType inherits from H5Object because a named datatype is an HDF5
+    object and is a base class of ArrayType, AtomType, CompType, EnumType,
+    and VarLenType.
+*/
 class H5_DLLCPP DataType : public H5Object {
    public:
 	// Creates a datatype given its class and size
@@ -47,10 +57,8 @@ class H5_DLLCPP DataType : public H5Object {
 
 	// Commits a transient datatype to a file; this datatype becomes
 	// a named datatype which can be accessed from the location.
-	void commit( H5File& loc, const char* name);
-	void commit( H5File& loc, const H5std_string& name);
-	void commit( H5Object& loc, const char* name);
-	void commit( H5Object& loc, const H5std_string& name);
+	void commit( H5Location& loc, const char* name);
+	void commit( H5Location& loc, const H5std_string& name);
 
 	// Determines whether this datatype is a named datatype or
 	// a transient datatype.
