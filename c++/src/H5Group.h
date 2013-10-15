@@ -21,6 +21,11 @@
 namespace H5 {
 #endif
 
+/*! \class Group
+    \brief Class Group represents an HDF5 group.
+
+    It inherits many operations from H5Location and CommonFG.
+*/
 class H5_DLLCPP Group : public H5Object, public CommonFG {
    public:
 	// Close this group.
@@ -56,14 +61,14 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	// Creates a copy of an existing group using its id.
 	Group( const hid_t group_id );
 
-   private:
-	hid_t id;	// HDF5 group id
-
    protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Sets the group id.
 	virtual void p_setId(const hid_t new_id);
 #endif // DOXYGEN_SHOULD_SKIP_THIS
+
+   private:
+	hid_t id;	// HDF5 group id
 };
 #ifndef H5_NO_NAMESPACE
 }

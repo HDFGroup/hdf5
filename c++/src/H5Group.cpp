@@ -90,7 +90,7 @@ Group::Group(const hid_t existing_id) : H5Object()
 //--------------------------------------------------------------------------
 // Function:	Group overload constructor - dereference
 ///\brief	Given a reference, ref, to an hdf5 group, creates a Group object
-///\param	obj - IN: Specifying location referenced object is in
+///\param	loc - IN: Specifying location referenced object is in
 ///\param	ref - IN: Reference pointer
 ///\param	ref_type - IN: Reference type - default to H5R_OBJECT
 ///\exception	H5::ReferenceException
@@ -101,8 +101,6 @@ Group::Group(const hid_t existing_id) : H5Object()
 //--------------------------------------------------------------------------
 Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(0)
 {
-     /* H5Location::dereference(loc, ref, ref_type, plist);
- */ 
     id = H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
 
@@ -118,14 +116,6 @@ Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type, const 
 Group::Group(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(0)
 {
     id = H5Location::p_dereference(attr.getId(), ref, ref_type, plist, "constructor - by dereference");
-/*
-    try {
-	id = p_dereference(attr.getId(), ref, ref_type, plist);
-    } catch (ReferenceException deref_error) {
-	throw ReferenceException("Group constructor - located by an Attribute",
-		deref_error.getDetailMsg());
-    }
-*/
 }
 
 //--------------------------------------------------------------------------
