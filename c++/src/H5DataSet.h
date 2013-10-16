@@ -14,15 +14,20 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Class DataSet inherits from AbstractDs and provides accesses to a dataset.
-
-#ifndef _H5DataSet_H
-#define _H5DataSet_H
+#ifndef __H5DataSet_H
+#define __H5DataSet_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
 
+/*! \class DataSet
+    \brief Class DataSet operates on HDF5 datasets.
+
+    An datasets has many characteristics similar to an attribute, thus both
+    Attribute and DataSet are derivatives of AbstractDs.  DataSet also
+    inherits from H5Object because a dataset is an HDF5 object.
+*/
 class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
    public:
 	// Close this dataset.
@@ -76,16 +81,12 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
 	// Iterates the selected elements in the specified dataspace - not implemented in C++ style yet
         int iterateElems( void* buf, const DataType& type, const DataSpace& space, H5D_operator_t op, void* op_data = NULL );
 
-	// Retrieves a dataspace with the region pointed to selected.
-	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
-
 	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("DataSet"); }
 
 	// Creates a dataset by way of dereference.
-	DataSet(H5Object& obj, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
-	DataSet(H5File& h5file, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
-	DataSet(Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+	DataSet(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 
 	// Default constructor.
 	DataSet();
@@ -102,10 +103,15 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
 	// Destructor: properly terminates access to this dataset.
 	virtual ~DataSet();
 
+   protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+        // Sets the dataset id.
+        virtual void p_setId(const hid_t new_id);
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
    private:
 	hid_t id;       // HDF5 dataset id
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
         // This function contains the common code that is used by
         // getTypeClass and various API functions getXxxType
         // defined in AbstractDs for generic datatype and specific
@@ -115,13 +121,8 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
 	// Reads variable or fixed len strings from this dataset.
 	void p_read_fixed_len(const hid_t mem_type_id, const hid_t mem_space_id, const hid_t file_space_id, const hid_t xfer_plist_id, H5std_string& strg) const;
 	void p_read_variable_len(const hid_t mem_type_id, const hid_t mem_space_id, const hid_t file_space_id, const hid_t xfer_plist_id, H5std_string& strg) const;
-
-   protected:
-        // Sets the dataset id.
-        virtual void p_setId(const hid_t new_id);
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 };
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5DataSet_H

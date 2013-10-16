@@ -14,14 +14,10 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5Location_H
-#define _H5Location_H
+#ifndef __H5Location_H
+#define __H5Location_H
 
 #include "H5Classes.h"		// constains forward class declarations
-
-// H5Location is an abstract class.  It provides a collection of wrappers
-// of C functions which take location IDs.  Most of these were in H5Object
-// but are now moved here for H5File's access.
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -34,15 +30,23 @@ typedef void (*attr_operator_t)( H5Location& loc/*in*/,
                                  const H5std_string attr_name/*in*/,
                                  void *operator_data/*in,out*/);
 
-class UserData4Aiterate { // user data for attribute iteration
+//! User data for attribute iteration
+class UserData4Aiterate {
    public:
-        attr_operator_t op;
-        void* opData;
-        H5Location* location;
+	attr_operator_t op;
+	void* opData;
+	H5Location* location;
 };
 
-// An H5Location can be a file, group, dataset, named datatype, or attribute.
+/*! \class H5Location
+    \brief H5Location is an abstract base class, added in version 1.8.12.
 
+    It provides a collection of wrappers for the C functions that take a
+    location identifier to specify the HDF5 object.  The location identifier
+    can be either file, group, dataset, or named datatype.
+*/
+// Most of these methods were in H5Object but are now moved here because
+// a location can be a file, group, dataset, or named datatype. -BMR, 2013-10-1
 class H5_DLLCPP H5Location : public IdComponent {
    public:
 	// Creates an attribute for the specified object at this location
@@ -85,33 +89,52 @@ class H5_DLLCPP H5Location : public IdComponent {
 	bool attrExists(const char* name) const;
 	bool attrExists(const H5std_string& name) const;
 
-	// Removes the named attribute from this location.
-	void removeAttr(const char* name) const;
-	void removeAttr(const H5std_string& name) const;
-
 	// Renames the named attribute to a new name.
 	void renameAttr(const char* oldname, const char* newname) const;
 	void renameAttr(const H5std_string& oldname, const H5std_string& newname) const;
 
+	// Removes the named attribute from this location.
+	void removeAttr(const char* name) const;
+	void removeAttr(const H5std_string& name) const;
+
+	// Sets the comment for an HDF5 object specified by its name.
+	void setComment(const char* name, const char* comment) const;
+	void setComment(const H5std_string& name, const H5std_string& comment) const;
+	void setComment(const char* comment) const;
+	void setComment(const H5std_string& comment) const;
+
+	// Retrieves comment for the HDF5 object specified by its name.
+	H5std_string getComment(const char* name, size_t bufsize=256) const;
+	H5std_string getComment(const H5std_string& name, size_t bufsize=256) const;
+
+	// Removes the comment for the HDF5 object specified by its name.
+	void removeComment(const char* name) const;
+	void removeComment(const H5std_string& name) const;
+
 	// Creates a reference to a named object or to a dataset region
 	// in this object.
+	void reference(void* ref, const char* name, 
+			H5R_type_t ref_type = H5R_OBJECT) const;
+	void reference(void* ref, const H5std_string& name,
+			H5R_type_t ref_type = H5R_OBJECT) const;
 	void reference(void* ref, const char* name, const DataSpace& dataspace,
 			H5R_type_t ref_type = H5R_DATASET_REGION) const;
-	void reference(void* ref, const char* name) const;
-	void reference(void* ref, const H5std_string& name) const;
+	void reference(void* ref, const H5std_string& name, const DataSpace& dataspace,
+			H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
 	// Open a referenced object whose location is specified by either
 	// a file, an HDF5 object, or an attribute.
-	void dereference(H5File& h5file, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
-	void dereference(H5Object& obj, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
-	void dereference(Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	void dereference(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+	void dereference(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 
-        // For subclasses.
-        virtual hid_t getId() const = 0;
+	// Retrieves a dataspace with the region pointed to selected.
+	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+
+	///\brief Returns an identifier. (pure virtual)
+	virtual hid_t getId() const = 0;
 
    protected:
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Default constructor,
+	// Default constructor
 	H5Location();
 
 	// Creates a copy of an existing object giving the location id.
@@ -120,11 +143,12 @@ class H5_DLLCPP H5Location : public IdComponent {
 	// Copy constructor.
 	H5Location(const H5Location& original);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Creates a reference to an HDF5 object or a dataset region.
 	void p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const;
 
 	// Dereferences a ref into an HDF5 id.
-	hid_t p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_type);
+	hid_t p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_type, const PropList& plist, const char* from_func);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Retrieves the type of object that an object reference points to.
@@ -134,17 +158,14 @@ class H5_DLLCPP H5Location : public IdComponent {
 	// Retrieves the type of object that an object reference points to.
 	H5O_type_t p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const;
 
-	// Retrieves a dataspace with the region pointed to selected.
-	hid_t p_get_region(void *ref, H5R_type_t ref_type) const;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Noop destructor.
 	virtual ~H5Location();
-
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; /* end class H5Location */
 
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5Location_H

@@ -40,8 +40,8 @@
 #define UI_FORMAT     "%-15u %-15u %-15u\n"
 #define LI_FORMAT     "%-15ld %-15ld %-15ld\n"
 #define ULI_FORMAT    "%-15lu %-15lu %-15lu\n"
-#define LLI_FORMAT    "%-15"H5_PRINTF_LL_WIDTH"d %-15"H5_PRINTF_LL_WIDTH"d %-15"H5_PRINTF_LL_WIDTH"d\n"
-#define ULLI_FORMAT   "%-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"u\n"
+#define LLI_FORMAT    "%-15" H5_PRINTF_LL_WIDTH "d %-15" H5_PRINTF_LL_WIDTH "d %-15" H5_PRINTF_LL_WIDTH "d\n"
+#define ULLI_FORMAT   "%-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "u\n"
 
 /* with -p option */
 #define F_FORMAT_P    "%-15.10g %-15.10g %-15.10g %-14.10g\n"
@@ -54,8 +54,8 @@
 #define UI_FORMAT_P   "%-15u %-15u %-15u %-14f\n"
 #define LI_FORMAT_P   "%-15ld %-15ld %-15ld %-14f\n"
 #define ULI_FORMAT_P  "%-15lu %-15lu %-15lu %-14f\n"
-#define LLI_FORMAT_P  "%-15"H5_PRINTF_LL_WIDTH"d %-15"H5_PRINTF_LL_WIDTH"d %-15"H5_PRINTF_LL_WIDTH"d %-14f\n"
-#define ULLI_FORMAT_P "%-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"d %-14f\n"
+#define LLI_FORMAT_P  "%-15" H5_PRINTF_LL_WIDTH "d %-15" H5_PRINTF_LL_WIDTH "d %-15" H5_PRINTF_LL_WIDTH "d %-14f\n"
+#define ULLI_FORMAT_P "%-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "d %-14f\n"
 #define SPACES        "          "
 
 /* not comparable */
@@ -69,8 +69,8 @@
 #define UI_FORMAT_P_NOTCOMP   "%-15u %-15u %-15u not comparable\n"
 #define LI_FORMAT_P_NOTCOMP   "%-15ld %-15ld %-15ld not comparable\n"
 #define ULI_FORMAT_P_NOTCOMP  "%-15lu %-15lu %-15lu not comparable\n"
-#define LLI_FORMAT_P_NOTCOMP  "%-15"H5_PRINTF_LL_WIDTH"d %-15"H5_PRINTF_LL_WIDTH"d %-15"H5_PRINTF_LL_WIDTH"d not comparable\n"
-#define ULLI_FORMAT_P_NOTCOMP "%-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"d not comparable\n"
+#define LLI_FORMAT_P_NOTCOMP  "%-15" H5_PRINTF_LL_WIDTH "d %-15" H5_PRINTF_LL_WIDTH "d %-15" H5_PRINTF_LL_WIDTH "d not comparable\n"
+#define ULLI_FORMAT_P_NOTCOMP "%-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "d not comparable\n"
 
 
 /* if system EPSILON is defined, use the system EPSILON; otherwise, use
@@ -109,7 +109,7 @@ static hbool_t not_comparable;
     if(0 == (A) && 0 == (B))                         \
         both_zero = TRUE;                            \
     if(0 != (A))                                     \
-        per = (double)ABS((double)(B - A) / (double)A); \
+        per = (double)ABS((double)((B) - (A)) / (double)(A)); \
     else                                             \
         not_comparable = TRUE;                       \
 }
@@ -119,16 +119,16 @@ static hbool_t not_comparable;
     per = -1;                                        \
     not_comparable = FALSE;                          \
     both_zero = FALSE;                               \
-    if(A == 0 && B == 0)                             \
+    if((A) == 0 && (B) == 0)                         \
         both_zero = TRUE;                            \
-    if(A != 0)                                       \
-        per = ABS((double)((TYPE)(B - A)) / (double)A) ;   \
+    if((A) != 0)                                     \
+        per = ABS((double)((TYPE)((B) - (A))) / (double)(A)) ; \
     else                                             \
         not_comparable = TRUE;                       \
 }
 
 
-#   define PDIFF(a,b)    ( (b>a) ? (b-a) : (a-b))
+#define PDIFF(a,b)    (((b) > (a)) ? ((b) - (a)) : ((a) -(b)))
 
 typedef struct mcomp_t
 {
@@ -890,9 +890,8 @@ static hsize_t diff_datum(void       *_mem1,
             /* calculate the number of array elements */
             for (u = 0, nelmts = 1; u < (unsigned)ndims; u++)
                 nelmts *= adims[u];
-            for (u = 0; u < nelmts; u++)
-            {
-               nfound+=diff_datum(
+            for (u = 0; u < nelmts; u++) {
+               nfound += diff_datum(
                    mem1 + u * size,
                    mem2 + u * size, /* offset */
                    memb_type,
@@ -907,7 +906,7 @@ static hsize_t diff_datum(void       *_mem1,
                    container1_id,
                    container2_id,
                    ph, members);
-           }
+            }
             H5Tclose(memb_type);
         }
         break;
@@ -5793,14 +5792,14 @@ int ull2float(unsigned long long ull_value, float *f_value)
 
  src_size = H5Tget_size(H5T_NATIVE_ULLONG);
  dst_size = H5Tget_size(H5T_NATIVE_FLOAT);
- buf = (unsigned char*)HDcalloc(1, MAX(src_size, dst_size));
+ buf = (unsigned char*)HDcalloc((size_t)1, MAX(src_size, dst_size));
  if(!buf)
   goto error;
 
  HDmemcpy(buf, &ull_value, src_size);
 
  /* do conversion */
- if(H5Tconvert(H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT, 1, buf, NULL, dxpl_id)<0)
+ if(H5Tconvert(H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT, (size_t)1, buf, NULL, dxpl_id)<0)
   goto error;
 
  HDmemcpy(f_value, buf, dst_size);
@@ -6359,9 +6358,9 @@ static void get_member_types(hid_t tid, mcomp_t *members)
             return;
         members->n = (unsigned)nmembs;
 
-        members->ids = (hid_t *)HDcalloc(members->n, sizeof(hid_t));
-        members->offsets = (size_t *)HDcalloc(members->n, sizeof(size_t));
-        members->m = (mcomp_t **)HDcalloc(members->n, sizeof(mcomp_t *));
+        members->ids = (hid_t *)HDcalloc((size_t)members->n, sizeof(hid_t));
+        members->offsets = (size_t *)HDcalloc((size_t)members->n, sizeof(size_t));
+        members->m = (mcomp_t **)HDcalloc((size_t)members->n, sizeof(mcomp_t *));
 
         for(u = 0; u < members->n; u++)
         {

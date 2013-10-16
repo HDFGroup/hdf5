@@ -2685,7 +2685,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5Oget_token(hid_t obj_id, /*OUT*/void *token, /*OUT*/size_t *token_size)
 {
     H5VL_iod_object_t *obj = NULL;        /* object token of loc_id */
@@ -2864,7 +2864,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hid_t 
+hid_t
 H5Oopen_by_token(const void *token, hid_t rcxt_id, hid_t estack_id)
 {
     H5RC_t *rc = NULL;
@@ -2877,6 +2877,7 @@ H5Oopen_by_token(const void *token, hid_t rcxt_id, hid_t estack_id)
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("i", "*xii", token, rcxt_id, estack_id);
 
     if(NULL == token)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no token")

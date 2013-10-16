@@ -2919,6 +2919,107 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_get_parent_info */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_search_name
+ *
+ * Purpose:     return pointer to object with given full path name
+ *
+ * Return:	Success:	pointer to object
+ *		Failure:	NULL (not found)
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+const void *
+H5I_search_name(void *_file, char *name, H5I_type_t type)
+{
+    H5I_id_type_t   *type_ptr;      /*ptr to the type       */
+    const void *ret_value = NULL;      /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    type_ptr = H5I_id_type_list_g[type];
+    if(type_ptr == NULL || type_ptr->count <= 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "invalid type")
+
+    /* Only iterate through hash table if there are IDs in group */
+    if(type_ptr->ids > 0) {
+        H5I_id_info_t *id_ptr;      /*ptr to the new ID     */
+        unsigned i;                 /*counter               */
+
+        /* Start at the beginning of the array */
+        for(i = 0; i < type_ptr->cls->hash_size; i++) {
+            id_ptr = type_ptr->id_list[i];
+            while(id_ptr) {
+                H5VL_iod_file_t *file = (H5VL_iod_file_t *)_file;
+
+                switch(type) {
+                case H5I_GROUP:
+                    {
+                        const H5VL_iod_group_t *grp = (const H5VL_iod_group_t *)id_ptr->obj_ptr;
+
+                        if (file == grp->common.file &&
+                            0 == strcmp(grp->common.obj_name, name)) {
+                            ret_value = id_ptr->obj_ptr;
+                            HGOTO_DONE(id_ptr->obj_ptr);
+                        }
+                        break;
+                    }
+                case H5I_DATASET:
+                    {
+                        const H5VL_iod_dset_t *dset = (const H5VL_iod_dset_t *)id_ptr->obj_ptr;
+
+                        if (file == dset->common.file && 
+                            0 == strcmp(dset->common.obj_name, name)) {
+                            ret_value = id_ptr->obj_ptr;
+                            HGOTO_DONE(id_ptr->obj_ptr);
+                        }
+                        break;
+                    }
+                case H5I_MAP:
+                    {
+                        const H5VL_iod_map_t *map = (const H5VL_iod_map_t *)id_ptr->obj_ptr;
+
+                        if (file == map->common.file &&
+                            0 == strcmp(map->common.obj_name, name)) {
+                            ret_value = id_ptr->obj_ptr;
+                            HGOTO_DONE(id_ptr->obj_ptr);
+                        }
+                        break;
+                    }
+                case H5I_DATATYPE:
+                    {
+                        const H5T_t *dt = (const H5T_t *)id_ptr->obj_ptr;
+
+                        if(H5T_committed(dt)) {
+                            const H5VL_iod_dtype_t *dtype ;
+
+                            dtype = (const H5VL_iod_dtype_t *)H5T_get_named_type(dt);
+
+                            if (file == dtype->common.file && 
+                                0 == strcmp(dtype->common.obj_name, name)) {
+                                ret_value = id_ptr->obj_ptr;
+                                HGOTO_DONE(id_ptr->obj_ptr);
+                            }
+                        }
+                        break;
+                    }
+                default:
+                    HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "invalid type")
+                }
+                id_ptr = id_ptr->next;
+            } /* end while */
+        } /* end for */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I_search_name() */
+
 #endif
 
 #endif /* H5_HAVE_EFF */

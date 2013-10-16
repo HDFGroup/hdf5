@@ -80,7 +80,6 @@ H5FL_DEFINE(H5TR_t);
 static const H5I_class_t H5I_TR_CLS[1] = {{
     H5I_TR,        		/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     2,				/* # of reserved IDs for class */
     (H5I_free_t)H5TR_close,   	/* Callback routine for closing objects of this class */
     NULL                        /* Callback routine for closing auxilary objects of this class */

@@ -14,16 +14,17 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Class CompType inherits from DataType and provides accesses to a compound
-// datatype.
-
-#ifndef _H5CompType_H
-#define _H5CompType_H
+#ifndef __H5CompType_H
+#define __H5CompType_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
 
+/*! \class CompType
+    \brief CompType is a derivative of a DataType and operates on HDF5
+    compound datatypes.
+*/
 class H5_DLLCPP CompType : public DataType {
    public:
 	// Default constructor
@@ -111,4 +112,4 @@ class H5_DLLCPP CompType : public DataType {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5CompType_H

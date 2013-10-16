@@ -14,13 +14,14 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5FloatType_H
-#define _H5FloatType_H
+#ifndef __H5FloatType_H
+#define __H5FloatType_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
 
+//! Class FloatType operates on HDF5 floating point datatype.
 class H5_DLLCPP FloatType : public AtomType {
    public:
         // Creates a floating-point type using a predefined type
@@ -71,4 +72,4 @@ class H5_DLLCPP FloatType : public AtomType {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5FloatType_H

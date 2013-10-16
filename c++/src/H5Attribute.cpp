@@ -44,6 +44,7 @@ namespace H5 {
 #endif  // H5_NO_STD
 #endif
 
+class H5_DLLCPP H5Object;  // forward declaration for UserData4Aiterate
 //--------------------------------------------------------------------------
 // Function:	Attribute default constructor
 ///\brief	Default constructor: Creates a stub attribute
@@ -411,7 +412,8 @@ void Attribute::flush(H5F_scope_t scope) const
 
 //--------------------------------------------------------------------------
 // Function:    Attribute::getId
-// Purpose:     Get the id of this attribute
+///\brief	Get the id of this attribute
+///\return	Attribute identifier
 // Description:
 //		Class hierarchy is revised to address bugzilla 1068.  Class
 //		AbstractDS and Attribute are moved out of H5Object.  In

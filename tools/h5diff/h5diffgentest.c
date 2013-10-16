@@ -4874,7 +4874,7 @@ static void test_data_nocomparables (const char * fname, int make_diffs)
     int data1[DIM_ARRY] = {0,0,0};
     int data2[DIM_ARRY] = {1,1,1};
     int data3[DIM_ARRY+1] = {1,1,1,1};
-    int data1_dim2[DIM_ARRY][1] = {0,0,0};
+    int data1_dim2[DIM_ARRY][1] = {{0},{0},{0}};
     int rank_attr;
     char data1_str[DIM_ARRY][STR_SIZE]= {"ab","cd","ef"};
     herr_t  status = SUCCEED;

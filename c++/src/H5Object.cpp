@@ -52,8 +52,6 @@ H5Object::H5Object() : H5Location() {}
 //--------------------------------------------------------------------------
 H5Object::H5Object( const hid_t object_id ) : H5Location( object_id ) {}
 
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-
 //--------------------------------------------------------------------------
 // Function:	H5Object copy constructor
 ///\brief	Copy constructor: makes a copy of the original H5Object
@@ -69,6 +67,7 @@ H5Object::H5Object( const H5Object& original ) : H5Location( original ) {}
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Object::~H5Object() {}
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef H5_NO_NAMESPACE
 } // end namespace

@@ -403,6 +403,15 @@
 ./c++/examples/expected.out
 ./c++/examples/extend_ds.cpp
 ./c++/examples/h5group.cpp
+./c++/examples/h5tutr_cmprss.cpp
+./c++/examples/h5tutr_crtatt.cpp
+./c++/examples/h5tutr_crtdat.cpp
+./c++/examples/h5tutr_crtgrpar.cpp
+./c++/examples/h5tutr_crtgrp.cpp
+./c++/examples/h5tutr_crtgrpd.cpp
+./c++/examples/h5tutr_extend.cpp
+./c++/examples/h5tutr_rdwt.cpp
+./c++/examples/h5tutr_subset.cpp
 ./c++/examples/readdata.cpp
 ./c++/examples/testh5c++.sh.in
 ./c++/examples/writedata.cpp
@@ -1263,6 +1272,7 @@
 ./tools/h5repack/Makefile.am
 ./tools/h5repack/Makefile.in
 ./tools/h5repack/h5repack.sh.in
+./tools/h5repack/h5repack_plugin.sh.in
 ./tools/h5repack/h5repack.c
 ./tools/h5repack/h5repack.h
 ./tools/h5repack/h5repack_copy.c
@@ -1754,7 +1764,6 @@
 ./tools/testfiles/tfpformat.h5
 
 # h5dump h5repack validation
-./tools/testfiles/h5repack_filters.h5.ddl
 ./tools/testfiles/zerodim.ddl
 ./tools/testfiles/zerodim.h5
 
@@ -2125,30 +2134,35 @@
 ./tools/h5diff/testfiles/non_comparables2.h5
 
 #test files for h5repack
-./tools/h5repack/testfiles/h5repack_fill.h5
-./tools/h5repack/testfiles/h5repack_objs.h5
 ./tools/h5repack/testfiles/h5repack_attr.h5
+./tools/h5repack/testfiles/h5repack_attr_refs.h5
+./tools/h5repack/testfiles/h5repack_deflate.h5
+./tools/h5repack/testfiles/h5repack_early.h5
+./tools/h5repack/testfiles/h5repack_ext.bin
+./tools/h5repack/testfiles/h5repack_ext.h5
+./tools/h5repack/testfiles/h5repack_fill.h5
+./tools/h5repack/testfiles/h5repack_filters.h5
+./tools/h5repack/testfiles/h5repack_fletcher.h5
 ./tools/h5repack/testfiles/h5repack_hlink.h5
+./tools/h5repack/testfiles/h5repack.info
 ./tools/h5repack/testfiles/h5repack_layout.h5
-./tools/h5repack/testfiles/h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/h5repack_layouto.h5
 ./tools/h5repack/testfiles/h5repack_layout2.h5
 ./tools/h5repack/testfiles/h5repack_layout3.h5
-./tools/h5repack/testfiles/h5repack_early.h5
-./tools/h5repack/testfiles/h5repack_szip.h5
-./tools/h5repack/testfiles/h5repack_deflate.h5
-./tools/h5repack/testfiles/h5repack_shuffle.h5
-./tools/h5repack/testfiles/h5repack_fletcher.h5
-./tools/h5repack/testfiles/h5repack_filters.h5
-./tools/h5repack/testfiles/h5repack_nbit.h5
-./tools/h5repack/testfiles/h5repack_soffset.h5
-./tools/h5repack/testfiles/h5repack.info
-./tools/h5repack/testfiles/h5repack_ext.bin
-./tools/h5repack/testfiles/h5repack_ext.h5
-./tools/h5repack/testfiles/ublock.bin
 ./tools/h5repack/testfiles/h5repack_named_dtypes.h5
+./tools/h5repack/testfiles/h5repack_nbit.h5
+./tools/h5repack/testfiles/h5repack_objs.h5
 ./tools/h5repack/testfiles/h5repack_refs.h5
-./tools/h5repack/testfiles/h5repack_attr_refs.h5
+./tools/h5repack/testfiles/h5repack_shuffle.h5
+./tools/h5repack/testfiles/h5repack_soffset.h5
+./tools/h5repack/testfiles/h5repack_szip.h5
+./tools/h5repack/testfiles/ublock.bin
+./tools/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
+./tools/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst
+./tools/h5repack/testfiles/h5repack-help.txt
+./tools/h5repack/testfiles/h5repack_filters.h5.tst
+./tools/h5repack/testfiles/h5repack_layout.h5.ddl
+./tools/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
 
 # jam utility and tests
 ./tools/h5jam/h5jam.c

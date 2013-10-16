@@ -156,11 +156,6 @@ case "$cc_vendor-$cc_version" in
       gcc-3.*)
         PROD_CFLAGS="-O3"
         ;;
-      gcc-4.8.*)
-	# temp patch: when GCC 4.8.x is used for Linux, dt_arith fails if -O*
-	# is used. Remove any -O* flags. (AKC HDFFV-8500)
-	PROD_CFLAGS="`echo $PROD_CFLAGS | sed -e 's/-O[0-3]*//'`"
-	;;
       gcc-4.*)
         PROD_CFLAGS="-O3"
         ;;
@@ -220,8 +215,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wformat=2"
 
     # The "unreachable code" warning appears to be reliable now...
-    # (this warning was removed in gcc 4.5+)
-    #H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
+    H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
     H5_CFLAGS="$H5_CFLAGS -Wendif-labels"

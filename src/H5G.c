@@ -135,7 +135,6 @@
 static const H5I_class_t H5I_GROUP_CLS[1] = {{
     H5I_GROUP,			/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     0,				/* # of reserved IDs for class */
     NULL,                 	/* Callback routine for closing objects of this class */
     (H5I_free2_t)H5G_close_group /* Callback routine for closing auxilary objects of this class */

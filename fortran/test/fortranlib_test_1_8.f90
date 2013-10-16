@@ -196,6 +196,16 @@ SUBROUTINE test_genprop_basic_class(cleanup, total_error)
   INTEGER :: size
   LOGICAL :: flag
 
+  !/* Output message about test being performed */
+
+  !WRITE(*,*) "Testing Basic Generic Property List Class Creation Functionality"
+
+  ! Try some bogus value for class identifier; function should fail gracefully
+
+  cid1 = 456
+  CALL H5Pget_class_name_f(cid1, name, size, error)
+  CALL VERIFY("H5Pget_class_name", error, -1, error)
+
   ! /* Create a new generic class, derived from the root of the class hierarchy */
   CALL H5Pcreate_class_f(H5P_ROOT_F, CLASS1_NAME, cid1, error)
   CALL check("H5Pcreate_class", error, total_error)
