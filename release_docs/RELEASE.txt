@@ -1330,6 +1330,13 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
+  catches some defined behavior in the alignment algorithm of the macro DETECT_I
+  in H5detect.c (Issue 8147).  Since the algorithm is trying to detect the alignment 
+  of integers, ideally the flag -fcatch-undefined-behavior shouldn't to be used for 
+  H5detect.c. In the future, we can separate flags for H5detect.c from the rest of 
+  the library. (SLU - 2013/10/16)
+
 * The 5.9 C++ compiler on Sun failed to compile a C++ test ttypes.cpp.  It
   complains with this message:
       "/home/hdf5/src/H5Vprivate.h", line 130: Error: __func__ is not defined.
