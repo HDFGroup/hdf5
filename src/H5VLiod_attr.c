@@ -48,7 +48,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     attr_create_in_t *input = (attr_create_in_t *)op_data->input;
     attr_create_out_t output;
     iod_handle_t coh = input->coh; /* container handle */
-    iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
+    iod_handles_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t loc_attrkv_id = input->loc_attrkv_id; /* The ID of the attribute KV of the location object*/
     iod_obj_id_t attr_id = input->attr_id; /* The ID of the attribute that needs to be created */
@@ -56,7 +56,8 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
-    iod_handle_t attr_oh, attr_kv_oh, obj_oh, mdkv_oh; /* object handles */
+    iod_handles_t attr_oh, obj_oh; /* object handles */
+    iod_handle_t attr_kv_oh, mdkv_oh;
     iod_obj_id_t obj_id;
     const char *loc_name = input->path; /* path to start hierarchy traversal */
     const char *attr_name = input->attr_name; /* attribute's name */
@@ -64,14 +65,12 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_size_t *max_dims; /* MAX dims for IOD */
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
-    iod_ret_t ret;
-    hbool_t collective = FALSE; /* MSC - change when we allow for collective */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start attribute Create %s on object path %s\n", attr_name, loc_name);
+        fprintf(stderr, "Start attribute Create %s on object path %s\n", attr_name, loc_name);
 #endif
 
     /* Open the object where the attribute needs to be created. */
@@ -92,117 +91,104 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     array.dims_seq = NULL;
 
     /* create the attribute */
-    ret = iod_obj_create(coh, wtid, NULL/*hints*/, IOD_OBJ_ARRAY, NULL, &array,
-                         &attr_id, NULL /*event*/);
-    if(collective && (0 == ret || EEXISTS == ret)) {
-        /* Attribute has been created by another process, open it */
-        if (iod_obj_open_write(coh, attr_id, NULL, &attr_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open attribute");
-    }
-    else if(!collective && 0 != ret) {
+    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_ARRAY, NULL, &array, &attr_id, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create Attribute");
+
+    if (iod_obj_open_read(coh, attr_id, NULL, &attr_oh.rd_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open attribute");
+    if (iod_obj_open_write(coh, attr_id, NULL, &attr_oh.wr_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open attribute");
+
+    /* create the metadata KV object for the attribute */
+    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
+
+    /* set values for the scratch pad object */
+    sp[0] = mdkv_id;
+    sp[1] = IOD_ID_UNDEFINED;
+    sp[2] = IOD_ID_UNDEFINED;
+    sp[3] = IOD_ID_UNDEFINED;
+
+    /* set scratch pad in attribute */
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        sp_cs = H5checksum(&sp, sizeof(sp), NULL);
+        if (iod_obj_set_scratch(attr_oh.wr_oh, wtid, &sp, &sp_cs, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+    }
+    else {
+        if (iod_obj_set_scratch(attr_oh.wr_oh, wtid, &sp, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
     }
 
-    /* for the process that succeeded in creating the attribute, update
-       the parent scratch pad, create attribute scratch pad */
-    if(0 == ret) {
-        /* create the metadata KV object for the attribute */
-        if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, 
-                          NULL, NULL, &mdkv_id, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
+    /* Open Metadata KV object for write */
+    if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
-        /* set values for the scratch pad object */
-        sp[0] = mdkv_id;
-        sp[1] = IOD_ID_UNDEFINED;
-        sp[2] = IOD_ID_UNDEFINED;
-        sp[3] = IOD_ID_UNDEFINED;
+    /* insert object type metadata */
+    if(H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_ATTR, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
-        /* set scratch pad in attribute */
-        if(cs_scope & H5_CHECKSUM_IOD) {
-            sp_cs = H5checksum(&sp, sizeof(sp), NULL);
-            if (iod_obj_set_scratch(attr_oh, wtid, &sp, &sp_cs, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
-        }
-        else {
-            if (iod_obj_set_scratch(attr_oh, wtid, &sp, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
-        }
+    /* MSC - need to check size of datatype if it fits in
+       entry otherwise create a BLOB*/
+    /* insert datatype metadata */
+    if(H5VL_iod_insert_datatype(mdkv_oh, wtid, input->type_id, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
-        /* Open Metadata KV object for write */
-        if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
+    /* insert dataspace metadata */
+    if(H5VL_iod_insert_dataspace(mdkv_oh, wtid, input->space_id, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
-        /* insert object type metadata */
-        if(H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_ATTR, 
-                                       NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+    /* close the Metadata KV object */
+    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-        /* MSC - need to check size of datatype if it fits in
-           entry otherwise create a BLOB*/
-        /* insert datatype metadata */
-        if(H5VL_iod_insert_datatype(mdkv_oh, wtid, input->type_id, 
-                                    NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+    /* if the starting location is not the last component, need to
+       read the attrkv_id of the last object where attribute needs
+       to be created */
+    if(loc_id != obj_id) {
+        /* get scratch pad of the parent */
+        if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-        /* insert dataspace metadata */
-        if(H5VL_iod_insert_dataspace(mdkv_oh, wtid, input->space_id, 
-                                     NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
-
-        /* close the Metadata KV object */
-        if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-
-        /* if the starting location is not the last component, need to
-           read the attrkv_id of the last object where attribute needs
-           to be created */
-        if(loc_id != obj_id) {
-            /* get scratch pad of the parent */
-            if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
-
-            if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
-                /* verify scratch pad integrity */
-                if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
-            }
-
-            /* open the attribute KV in scratch pad */
-            if (iod_obj_open_write(coh, sp[1], NULL /*hints*/, &attr_kv_oh, NULL) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
-        }
-        else {
-            /* open the attribute KV */
-            if (iod_obj_open_write(coh, loc_attrkv_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
+        if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+            /* verify scratch pad integrity */
+            if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
         }
 
-        /* insert new attribute in scratch pad of current object */
-        if(H5VL_iod_insert_new_link(attr_kv_oh, wtid, attr_name, 
-                                    H5L_TYPE_HARD, &attr_id, NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
-
-        /* close the Attribute KV object */
-        if(iod_obj_close(attr_kv_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        /* open the attribute KV in scratch pad */
+        if (iod_obj_open_write(coh, sp[1], NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
+    else {
+        /* open the attribute KV */
+        if (iod_obj_open_write(coh, loc_attrkv_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    }
+
+    /* insert new attribute in scratch pad of current object */
+    if(H5VL_iod_insert_new_link(attr_kv_oh, wtid, attr_name, 
+                                H5L_TYPE_HARD, &attr_id, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+
+    /* close the Attribute KV object */
+    if(iod_obj_close(attr_kv_oh, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
     /* close parent group if it is not the location we started the
        traversal into */
-    if(loc_handle.cookie != obj_oh.cookie) {
-        iod_obj_close(obj_oh, NULL, NULL);
+    if(loc_handle.rd_oh.cookie != obj_oh.rd_oh.cookie) {
+        iod_obj_close(obj_oh.rd_oh, NULL, NULL);
     }
 
 #if H5_DO_NATIVE
-    obj_oh.cookie = H5Acreate2(obj_oh.cookie, attr_name, input->type_id, 
+    iod_oh.wr_oh.cookie = H5Acreate2(obj_oh.cookie, attr_name, input->type_id, 
                                input->space_id, H5P_DEFAULT, H5P_DEFAULT);
     HDassert(obj_oh.cookie);
 #endif
 
-    output.iod_oh = obj_oh;
-
-    /* MSC - fake so not to fail */
-    output.iod_oh.cookie = 10;
+    output.iod_oh.rd_oh.cookie = attr_oh.rd_oh.cookie;
+    output.iod_oh.wr_oh.cookie = attr_oh.wr_oh.cookie;
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with attr create, sending response to client\n");
@@ -210,12 +196,13 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
 
     HG_Handler_start_output(op_data->hg_handle, &output);
 
-done:
+ done:
 
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
         fprintf(stderr, "Failed Attribute Create\n");
-        output.iod_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
@@ -251,16 +238,17 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     attr_open_in_t *input = (attr_open_in_t *)op_data->input;
     attr_open_out_t output;
     iod_handle_t coh = input->coh; /* container handle */
-    iod_handle_t loc_handle = input->loc_oh; /* location handle to start traversal */
+    iod_handles_t loc_handle = input->loc_oh; /* location handle to start traversal */
     iod_obj_id_t loc_id = input->loc_id; /* location ID */
     iod_obj_id_t loc_attrkv_id = input->loc_attrkv_id; /* The ID of the attribute KV of the location object*/
-    iod_trans_id_t rtid = input->rcxt_num;
-    uint32_t cs_scope = input->cs_scope;
-    iod_handle_t attr_kv_oh, attr_oh, obj_oh, mdkv_oh;
-    iod_obj_id_t obj_id;
-    iod_obj_id_t attr_id;
     const char *loc_name = input->path; /* current  path to start traversal */
     const char *attr_name = input->attr_name; /* attribute's name to open */
+    iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
+    iod_handles_t attr_oh, obj_oh;
+    iod_handle_t attr_kv_oh, mdkv_oh;
+    iod_obj_id_t obj_id;
+    iod_obj_id_t attr_id;
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
     H5VL_iod_link_t iod_link;
@@ -282,7 +270,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
        to be created */
     if(loc_id != obj_id) {
         /* get scratch pad of the object */
-        if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
+        if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
@@ -299,12 +287,12 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
         /* open the attribute KV in scratch pad */
-        if (iod_obj_open_write(coh, sp[1], NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[1], NULL /*hints*/, &attr_kv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
     else {
         /* open the attribute KV */
-        if (iod_obj_open_write(coh, loc_attrkv_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, loc_attrkv_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
 
@@ -318,18 +306,20 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* close parent group if it is not the location we started the
        traversal into */
-    if(loc_handle.cookie != obj_oh.cookie) {
-        iod_obj_close(obj_oh, NULL, NULL);
+    if(loc_handle.rd_oh.cookie != obj_oh.rd_oh.cookie) {
+        iod_obj_close(obj_oh.rd_oh, NULL, NULL);
     }
     /* close the attribute KV holder */
     iod_obj_close(attr_kv_oh, NULL, NULL);
 
     /* open the attribute */
-    if (iod_obj_open_write(coh, attr_id, NULL /*hints*/, &attr_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, attr_id, NULL /*hints*/, &attr_oh.rd_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+    if (iod_obj_open_write(coh, attr_id, NULL /*hints*/, &attr_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
     /* get scratch pad of the attribute */
-    if(iod_obj_get_scratch(attr_oh, rtid, &sp, &sp_cs, NULL) < 0)
+    if(iod_obj_get_scratch(attr_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
@@ -339,7 +329,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* open the metadata scratch pad of the attribute */
-    if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
 #if 0
@@ -382,7 +372,8 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
 
     output.iod_id = attr_id;
     output.mdkv_id = sp[0];
-    output.iod_oh = attr_oh;
+    output.iod_oh.rd_oh.cookie = attr_oh.rd_oh.cookie;
+    output.iod_oh.wr_oh.cookie = attr_oh.wr_oh.cookie;
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with attr open, sending response to client\n");
@@ -392,7 +383,8 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        output.iod_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_id = IOD_ID_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
@@ -429,7 +421,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     attr_io_in_t *input = (attr_io_in_t *)op_data->input;
     iod_handle_t coh = input->coh; /* container handle */
-    iod_handle_t iod_oh = input->iod_oh; /* attribute's object handle */
+    iod_handle_t iod_oh = input->iod_oh.rd_oh; /* attribute's object handle */
     iod_obj_id_t iod_id = input->iod_id; /* attribute's ID */
     iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV */
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
@@ -594,7 +586,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     attr_io_in_t *input = (attr_io_in_t *)op_data->input;
     iod_handle_t coh = input->coh; /* container handle */
-    iod_handle_t iod_oh = input->iod_oh; /* attribute's object handle */
+    iod_handle_t iod_oh = input->iod_oh.wr_oh; /* attribute's object handle */
     iod_obj_id_t iod_id = input->iod_id; /* attribute's ID */
     iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV */
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
@@ -758,11 +750,11 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     attr_op_in_t *input = (attr_op_in_t *)op_data->input;
     iod_handle_t coh = input->coh; /* container handle */
-    iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
+    iod_handles_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
-    iod_handle_t obj_oh; /* current object handle accessed */
+    iod_handles_t obj_oh; /* current object handle accessed */
     iod_handle_t attr_kv_oh; /* KV handle holding attributes for object */
     iod_obj_id_t obj_id;
     const char *loc_name = input->path; /* path to start hierarchy traversal */
@@ -785,7 +777,7 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     if(obj_id != loc_id) {
         /* get scratch pad of the parent */
-        if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
+        if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
@@ -804,19 +796,19 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
         /* open the attribute KV in scratch pad */
-        if (iod_obj_open_write(coh, sp[1], NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[1], NULL /*hints*/, &attr_kv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
     else {
         /* open the attribute KV  */
-        if (iod_obj_open_write(coh, input->loc_attrkv_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, input->loc_attrkv_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
 
     /* close parent group if it is not the location we started the
        traversal into */
-    if(loc_handle.cookie != obj_oh.cookie) {
-        iod_obj_close(obj_oh, NULL, NULL);
+    if(loc_handle.rd_oh.cookie != obj_oh.rd_oh.cookie) {
+        iod_obj_close(obj_oh.rd_oh, NULL, NULL);
     }
 
     /* get attribute ID */
@@ -837,7 +829,6 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
 done:
-
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with attr exists, sending response to client\n");
 #endif
@@ -873,10 +864,10 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     attr_rename_in_t *input = (attr_rename_in_t *)op_data->input;
     iod_handle_t coh = input->coh; /* container handle */
-    iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
+    iod_handles_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
-    iod_handle_t obj_oh; /* current object handle accessed */
-    iod_handle_t attr_kv_oh; /* KV handle holding attributes for object */
+    iod_handles_t obj_oh; /* current object handle accessed */
+    iod_handles_t attr_kv_oh; /* KV handle holding attributes for object */
     iod_obj_id_t obj_id, attr_id;
     const char *loc_name = input->path; /* path to start hierarchy traversal */
     const char *old_name = input->old_attr_name;
@@ -903,7 +894,7 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
 
     if(loc_id != obj_id) {
         /* get scratch pad of the parent */
-        if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
+        if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
@@ -920,23 +911,27 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
         /* open the attribute KV in scratch pad */
-        if (iod_obj_open_write(coh, sp[1], NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[1], NULL /*hints*/, &attr_kv_oh.rd_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
+        if (iod_obj_open_write(coh, sp[1], NULL /*hints*/, &attr_kv_oh.wr_oh, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
     else {
         /* open the attribute KV  */
-        if (iod_obj_open_write(coh, input->loc_attrkv_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, input->loc_attrkv_id, NULL /*hints*/, &attr_kv_oh.rd_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
+        if (iod_obj_open_write(coh, input->loc_attrkv_id, NULL /*hints*/, &attr_kv_oh.wr_oh, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
 
     /* close parent group if it is not the location we started the
        traversal into */
-    if(loc_handle.cookie != obj_oh.cookie) {
-        iod_obj_close(obj_oh, NULL, NULL);
+    if(loc_handle.rd_oh.cookie != obj_oh.rd_oh.cookie) {
+        iod_obj_close(obj_oh.rd_oh, NULL, NULL);
     }
 
     /* get attribute ID */
-    if(H5VL_iod_get_metadata(attr_kv_oh, rtid, H5VL_IOD_LINK, 
+    if(H5VL_iod_get_metadata(attr_kv_oh.rd_oh, rtid, H5VL_IOD_LINK, 
                              old_name, NULL, NULL, &iod_link) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Attribute ID from parent KV store");
 
@@ -946,17 +941,19 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
     /* remove attribute with old name */
     kv.key = old_name;
     kvs.kv = &kv;
-    if(iod_kv_unlink_keys(attr_kv_oh, wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
+    if(iod_kv_unlink_keys(attr_kv_oh.wr_oh, wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
 
     /* insert attribute with new name */
-    if(H5VL_iod_insert_new_link(attr_kv_oh, wtid, new_name, 
+    if(H5VL_iod_insert_new_link(attr_kv_oh.wr_oh, wtid, new_name, 
                                 H5L_TYPE_HARD, &attr_id, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* close the Attribute KV object */
-    if(iod_obj_close(attr_kv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+    if(iod_obj_close(attr_kv_oh.rd_oh, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't close object");
+    if(iod_obj_close(attr_kv_oh.wr_oh, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't close object");
 
 #if H5_DO_NATIVE
     ret_value = H5Arename(loc_handle.cookie, old_name, new_name);
@@ -999,10 +996,10 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     attr_op_in_t *input = (attr_op_in_t *)op_data->input;
     iod_handle_t coh = input->coh; /* container handle */
-    iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
+    iod_handles_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
-    iod_handle_t obj_oh; /* current object handle accessed */
-    iod_handle_t attr_kv_oh; /* KV handle holding attributes for object */
+    iod_handles_t obj_oh; /* current object handle accessed */
+    iod_handles_t attr_kv_oh; /* KV handle holding attributes for object */
     iod_obj_id_t obj_id, attr_id;
     const char *loc_name = input->path; /* path to start hierarchy traversal */
     const char *attr_name = input->attr_name; /* attribute's name */
@@ -1022,13 +1019,13 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start attribute Remove %s\n", attr_name);
 #endif
 
-    /* Open the object where the attribute needs to be checked. */
+    /* Open the object where the attribute needs to be removed. */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     if(loc_id != obj_id) {
         /* get scratch pad of the parent */
-        if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
+        if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
@@ -1045,23 +1042,27 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
         /* open the attribute KV in scratch pad */
-        if (iod_obj_open_write(coh, sp[1], NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[1], NULL /*hints*/, &attr_kv_oh.rd_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
+        if (iod_obj_open_write(coh, sp[1], NULL /*hints*/, &attr_kv_oh.wr_oh, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
     else {
         /* open the attribute KV  */
-        if (iod_obj_open_write(coh, input->loc_attrkv_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, input->loc_attrkv_id, NULL /*hints*/, &attr_kv_oh.rd_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
+        if (iod_obj_open_write(coh, input->loc_attrkv_id, NULL /*hints*/, &attr_kv_oh.wr_oh, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
 
     /* close parent group if it is not the location we started the
        traversal into */
-    if(loc_handle.cookie != obj_oh.cookie) {
-        iod_obj_close(obj_oh, NULL, NULL);
+    if(loc_handle.rd_oh.cookie != obj_oh.rd_oh.cookie) {
+        iod_obj_close(obj_oh.rd_oh, NULL, NULL);
     }
 
     /* get attribute ID */
-    if(H5VL_iod_get_metadata(attr_kv_oh, rtid, H5VL_IOD_LINK, 
+    if(H5VL_iod_get_metadata(attr_kv_oh.rd_oh, rtid, H5VL_IOD_LINK, 
                              attr_name, NULL, NULL, &iod_link) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Attribute ID from parent KV store");
 
@@ -1071,10 +1072,16 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     /* remove attribute */
     kv.key = attr_name;
     kvs.kv = &kv;
-    if(iod_kv_unlink_keys(attr_kv_oh,wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
+    if(iod_kv_unlink_keys(attr_kv_oh.wr_oh, wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
     if(iod_obj_unlink(coh, attr_id, wtid, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
+
+    /* close the Attribute KV object */
+    if(iod_obj_close(attr_kv_oh.rd_oh, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't close object");
+    if(iod_obj_close(attr_kv_oh.wr_oh, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't close object");
 
 #if H5_DO_NATIVE
     ret_value = H5Adelete(loc_handle.cookie, attr_name);
@@ -1115,7 +1122,7 @@ H5VL_iod_server_attr_close_cb(AXE_engine_t UNUSED axe_engine,
 {
     op_data_t *op_data = (op_data_t *)_op_data;
     attr_close_in_t *input = (attr_close_in_t *)op_data->input;
-    iod_handle_t iod_oh = input->iod_oh; /* iod handle to close */
+    iod_handles_t iod_oh = input->iod_oh; /* iod handle to close */
     //iod_obj_id_t iod_id = input->iod_id; /* iod id of object to close */
     herr_t ret_value = SUCCEED;
 
@@ -1125,17 +1132,21 @@ H5VL_iod_server_attr_close_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start attribute Close\n");
 #endif
 
-    if(iod_oh.cookie != IOD_OH_UNDEFINED) {
-#if H5_DO_NATIVE
-        HDassert(H5Aclose(iod_oh.cookie) == SUCCEED);
+#if 0
+    if(IOD_OH_UNDEFINED == iod_oh.wr_oh.cookie ||
+       IOD_OH_UNDEFINED == iod_oh.rd_oh.cookie) {
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't close object with invalid handle");
+    }
 #endif
-        if((ret_value = iod_obj_close(iod_oh, NULL, NULL)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-    }
-    else {
-        /* MSC - need a way to kill object handle for this group */
-        fprintf(stderr, "I do not have the OH of this attribute to close it\n");
-    }
+
+#if H5_DO_NATIVE
+    ret_value = H5Aclose(iod_oh.cookie);
+#endif
+
+    if((iod_obj_close(iod_oh.rd_oh, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+    if((iod_obj_close(iod_oh.wr_oh, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
 done:
 #if H5VL_IOD_DEBUG

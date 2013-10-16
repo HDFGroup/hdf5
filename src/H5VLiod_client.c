@@ -471,7 +471,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)req->obj;
 
-            if(IOD_OH_UNDEFINED == attr->remote_attr.iod_oh.cookie) {
+            if(IOD_OH_UNDEFINED == attr->remote_attr.iod_oh.rd_oh.cookie) {
                 fprintf(stderr, "failed to create/open Attribute\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
@@ -485,7 +485,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             H5VL_iod_group_t *group = (H5VL_iod_group_t *)req->obj;
 
-            if(IOD_OH_UNDEFINED == group->remote_group.iod_oh.cookie) {
+            if(IOD_OH_UNDEFINED == group->remote_group.iod_oh.rd_oh.cookie) {
                 fprintf(stderr, "failed to create/open Group\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
@@ -499,7 +499,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             H5VL_iod_map_t *map = (H5VL_iod_map_t *)req->obj;
 
-            if(IOD_OH_UNDEFINED == map->remote_map.iod_oh.cookie) {
+            if(IOD_OH_UNDEFINED == map->remote_map.iod_oh.rd_oh.cookie) {
                 fprintf(stderr, "failed to create/open Map\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
@@ -513,7 +513,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
 
-            if(IOD_OH_UNDEFINED == dset->remote_dset.iod_oh.cookie) {
+            if(IOD_OH_UNDEFINED == dset->remote_dset.iod_oh.rd_oh.cookie) {
                 fprintf(stderr, "failed to create/open Dataset\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
@@ -527,7 +527,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)req->obj;
 
-            if(IOD_OH_UNDEFINED == dtype->remote_dtype.iod_oh.cookie) {
+            if(IOD_OH_UNDEFINED == dtype->remote_dtype.iod_oh.rd_oh.cookie) {
                 fprintf(stderr, "failed to create/open Attribute\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
@@ -1280,9 +1280,9 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         }
     case HG_OBJECT_OPEN_BY_TOKEN:
         {
-            iod_handle_t *oh = (iod_handle_t *)req->data;
+            iod_handles_t *oh = (iod_handles_t *)req->data;
 
-            if(IOD_OH_UNDEFINED == (*oh).cookie) {
+            if(IOD_OH_UNDEFINED == (*oh).rd_oh.cookie) {
                 fprintf(stderr, "failed to Open object by token\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
@@ -1780,11 +1780,11 @@ H5VL_iod_get_obj_requests(H5VL_iod_object_t *obj, /*IN/OUT*/ size_t *count,
 
 herr_t
 H5VL_iod_get_loc_info(H5VL_iod_object_t *obj, iod_obj_id_t *iod_id, 
-                      iod_handle_t *iod_oh, iod_obj_id_t *mdkv_oh, 
-                      iod_obj_id_t *attrkv_oh)
+                      iod_handles_t *iod_oh, iod_obj_id_t *mdkv_id, 
+                      iod_obj_id_t *attrkv_id)
 {
     iod_obj_id_t id, md, at;
-    iod_handle_t oh;
+    iod_handles_t oh;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1828,10 +1828,10 @@ H5VL_iod_get_loc_info(H5VL_iod_object_t *obj, iod_obj_id_t *iod_id,
         *iod_id = id;
     if(iod_oh)
         *iod_oh = oh;
-    if(mdkv_oh)
-        *mdkv_oh = md;
-    if(attrkv_oh)
-        *attrkv_oh = at;
+    if(mdkv_id)
+        *mdkv_id = md;
+    if(attrkv_id)
+        *attrkv_id = at;
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_get_loc_info() */

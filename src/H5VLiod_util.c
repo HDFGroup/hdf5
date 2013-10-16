@@ -48,16 +48,17 @@
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc_handle, 
+H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t loc_handle, 
                          const char *path, iod_trans_id_t rtid, hbool_t create_interm_grps,
                          /* out */char **last_comp, /* out */iod_obj_id_t *iod_id, 
-                         /* out */iod_handle_t *iod_oh)
+                         /* out */iod_handles_t *iod_oh)
 {
     char comp_buf[1024];     /* Temporary buffer for path components */
     char *comp;              /* Pointer to buffer for path components */
     H5WB_t *wb = NULL;       /* Wrapped buffer for temporary buffer */
     size_t nchars;	     /* component name length	*/
-    iod_handle_t cur_oh, prev_oh;
+    iod_handles_t cur_oh;
+    iod_handle_t prev_oh;
     iod_obj_id_t cur_id;
     herr_t ret_value = SUCCEED;
 
@@ -66,12 +67,12 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc
     /* Creating intermediate groups is not supported for now */
     assert(FALSE == create_interm_grps);
 
-    cur_oh = loc_handle;
+    cur_oh.rd_oh.cookie = loc_handle.rd_oh.cookie;
     cur_id = loc_id;
 
-    if(cur_oh.cookie == IOD_OH_UNDEFINED) {
-        /* open the current group */
-        if (iod_obj_open_read(coh, loc_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+    /* open the current group */
+    if(cur_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
+        if (iod_obj_open_read(coh, loc_id, NULL /*hints*/, &cur_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
     }
 
@@ -110,10 +111,10 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc
 
         kv_size = sizeof(H5VL_iod_link_t);
 
-        prev_oh = cur_oh;
+        prev_oh.cookie = cur_oh.rd_oh.cookie;
 
         /* lookup next object in the current group */
-        if(H5VL_iod_get_metadata(cur_oh, rtid, H5VL_IOD_LINK, 
+        if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
                                  comp, NULL, NULL, &value) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
@@ -140,13 +141,13 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc
 #endif
             cur_id = value.u.iod_id;
 
-        /* Close previous handle unless it is the original one */
-        if(loc_handle.cookie != prev_oh.cookie && 
+        /* Close previous read handle unless it is the original one */
+        if(loc_handle.rd_oh.cookie != prev_oh.cookie && 
            iod_obj_close(prev_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
 
         /* open the current group */
-        if (iod_obj_open_read(coh, cur_id, NULL, &cur_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, cur_id, NULL, &cur_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
 	/* Advance to next component in string */
@@ -158,7 +159,16 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc
         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer");
 
     *iod_id = cur_id;
-    *iod_oh = cur_oh;
+    (*iod_oh).rd_oh.cookie = cur_oh.rd_oh.cookie;
+
+    if(cur_id != loc_id ||
+       loc_handle.wr_oh.cookie == IOD_OH_UNDEFINED) {
+        /* open a write handle on the ID. */
+        if (iod_obj_open_write(coh, cur_id, NULL, &cur_oh.wr_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+    }
+        
+    (*iod_oh).wr_oh.cookie = cur_oh.wr_oh.cookie;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -168,14 +178,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_open_path
  *
- * Purpose: 
- *     Function to Traverse the path in IOD KV objects given the
- *     starting location ID, object handle, and path name. This walks
- *     through the IOD KV objects to get to the last component in the
- *     path and opens the last component. Usually this is called when
- *     opening an object. The Function returns the iod ID and object
- *     handle of the last component, and the last component
- *     string, if the user requests it.
+ * Purpose: Function to Traverse the path in IOD KV objects given the
+ * starting location ID, object handle, and path name. This walks
+ * through the IOD KV objects to get to the last component in the path
+ * and opens the last component for read only, i.e. does not open the
+ * wr_oh, but will set it to undefined. Usually this is called when
+ * opening an object.
  *
  * Return:	Success:	SUCCEED 
  *		Failure:	Negative
@@ -183,27 +191,27 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc_handle, 
+H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t loc_handle, 
                           const char *path, iod_trans_id_t rtid,
-                          /*out*/iod_obj_id_t *iod_id, /*out*/iod_handle_t *iod_oh)
+                          /*out*/iod_obj_id_t *iod_id, /*out*/iod_handles_t *iod_oh)
 {
     char comp_buf[1024];     /* Temporary buffer for path components */
     char *comp;              /* Pointer to buffer for path components */
     H5WB_t *wb = NULL;       /* Wrapped buffer for temporary buffer */
     size_t nchars;	     /* component name length	*/
-    iod_handle_t cur_oh, prev_oh;
+    iod_handles_t cur_oh;
+    iod_handle_t prev_oh;
     iod_obj_id_t cur_id;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    cur_oh = loc_handle;
+    cur_oh.rd_oh.cookie = loc_handle.rd_oh.cookie;
     cur_id = loc_id;
 
-    if(cur_oh.cookie == IOD_OH_UNDEFINED) {
-        /* MSC - this needs to be read write ?? */
+    if(cur_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
         /* open the current group */
-        if (iod_obj_open_write(coh, loc_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, loc_id, NULL /*hints*/, &cur_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
     }
 
@@ -233,10 +241,10 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t lo
 
         kv_size = sizeof(H5VL_iod_link_t);
 
-        prev_oh = cur_oh;
+        prev_oh.cookie = cur_oh.rd_oh.cookie;
 
         /* lookup next object in the current group */
-        if(H5VL_iod_get_metadata(cur_oh, rtid, H5VL_IOD_LINK, 
+        if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
                                  comp, NULL, NULL, &value) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
@@ -260,12 +268,12 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t lo
             cur_id = value.iod_id;
 
         /* Close previous handle unless it is the original one */
-        if(loc_handle.cookie != prev_oh.cookie && 
+        if(loc_handle.rd_oh.cookie != prev_oh.cookie && 
            iod_obj_close(prev_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
 
         /* open the current group */
-        if (iod_obj_open_read(coh, cur_id, NULL, &cur_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, cur_id, NULL, &cur_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
 	/* Advance to next component in string */
@@ -277,7 +285,8 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t lo
         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer");
 
     *iod_id = cur_id;
-    *iod_oh = cur_oh;
+    (*iod_oh).rd_oh.cookie = cur_oh.rd_oh.cookie;
+    (*iod_oh).wr_oh.cookie = IOD_OH_UNDEFINED;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

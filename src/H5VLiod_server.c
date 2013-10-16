@@ -141,7 +141,7 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
                              link_op_in_t, ret_t);
 
     MERCURY_HANDLER_REGISTER("object_open_by_token", H5VL_iod_server_object_open_by_token, 
-                             object_token_in_t, iod_handle_t);
+                             object_token_in_t, iod_handles_t);
     MERCURY_HANDLER_REGISTER("object_open", H5VL_iod_server_object_open, 
                              object_op_in_t, object_open_out_t);
     MERCURY_HANDLER_REGISTER("object_copy", H5VL_iod_server_object_copy, 

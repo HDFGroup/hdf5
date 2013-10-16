@@ -50,7 +50,7 @@ H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t obj_id = input->iod_id; /* The ID of the object */
     //iod_trans_id_t rtid = input->rcxt_num;
     //uint32_t cs_scope = input->cs_scope;
-    iod_handle_t obj_oh; /* The handle for object */
+    iod_handles_t obj_oh; /* The handle for object */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -59,8 +59,9 @@ H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start Object Open by token = %llu\n", obj_id);
 #endif
 
-    /* MSC - this needs to be read write ?? */
-    if (iod_obj_open_write(coh, obj_id, NULL /*hints*/, &obj_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, obj_id, NULL /*hints*/, &obj_oh.rd_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+    if (iod_obj_open_write(coh, obj_id, NULL /*hints*/, &obj_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
 #if H5VL_IOD_DEBUG
@@ -71,7 +72,8 @@ H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        obj_oh.cookie = IOD_OH_UNDEFINED;
+        obj_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
+        obj_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &obj_oh);
     }
 
@@ -107,7 +109,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* the container handle */
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
-    iod_handle_t obj_oh; /* The handle for object */
+    iod_handles_t obj_oh; /* The handle for object */
     iod_obj_id_t obj_id; /* The ID of the object */
     iod_handle_t mdkv_oh;
     scratch_pad sp;
@@ -127,7 +129,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
 
     if(obj_id != input->loc_id) {
         /* get scratch pad of the object */
-        if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
+        if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
@@ -137,12 +139,12 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* open the metadata KV */
-        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
     else {
         /* open the metadata KV */
-        if (iod_obj_open_write(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
     /* MSC - NEED IOD */
@@ -206,7 +208,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
             file_desc.frag->len = (iod_size_t)buf_size;
 
             /* read the serialized type value from the BLOB object */
-            if(iod_blob_read(obj_oh, rtid, NULL, &mem_desc, &file_desc, &iod_cs, NULL) < 0)
+            if(iod_blob_read(obj_oh.rd_oh, rtid, NULL, &mem_desc, &file_desc, &iod_cs, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
             /* MSC - NEED IOD */
 #if 0
@@ -268,7 +270,8 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_id = obj_id;
     output.mdkv_id = sp[0];
     output.attrkv_id = sp[1];
-    output.iod_oh = obj_oh;
+    output.iod_oh.rd_oh.cookie = obj_oh.rd_oh.cookie;
+    output.iod_oh.wr_oh.cookie = obj_oh.wr_oh.cookie;
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with object open, sending response to client\n");
@@ -278,7 +281,8 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        output.iod_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_id = IOD_ID_UNDEFINED;
         output.cpl_id = H5P_GROUP_CREATE_DEFAULT;
         HG_Handler_start_output(op_data->hg_handle, &output);
@@ -331,10 +335,10 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
-    iod_handle_t dst_oh; /* The handle for the dst object where link is created*/
+    iod_handles_t dst_oh; /* The handle for the dst object where link is created*/
     iod_obj_id_t dst_id; /* The ID of the dst object where link is created*/
     iod_obj_id_t obj_id; /* The ID of the object to be moved/copied */
-    iod_handle_t obj_oh; /* The handle for the object to be moved/copied */
+    iod_handles_t obj_oh; /* The handle for the object to be moved/copied */
     iod_obj_id_t new_id; /* The ID of the new object */
     iod_handle_t mdkv_oh;/* The handle of the metadata KV for source object */
     char *new_name = NULL;
@@ -351,6 +355,9 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start object copy\n");
 #endif
 
+    /* MSC - NEED IOD & a lot more work*/
+#if 0
+
     /* Traverse Path and open object */
     if(H5VL_iod_server_open_path(coh, input->src_loc_id, input->src_loc_oh, input->src_loc_name, 
                                  rtid, &obj_id, &obj_oh) < 0)
@@ -363,9 +370,6 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
                                 FALSE, rtid, &new_name, &dst_id, &dst_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-
-    /* MSC - NEED IOD & a lot more work*/
-#if 0
     /* get scratch pad of the object */
     if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
@@ -436,14 +440,12 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
 
             /* MSC - NEED IOD */
-#if 0
             /* calculate a checksum for the datatype */
             dt_cs = H5checksum(buf, buf_size, NULL);
 
             /* Verifty checksum against one given by IOD */
             if(iod_cs != dt_cs)
                 HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
-#endif
 
             /* decode the datatype */
             if((output.type_id = H5Tdecode(buf)) < 0)
@@ -470,7 +472,6 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
     if(H5VL_iod_insert_new_link(dst_oh, wtid, new_name, 
                                 H5L_TYPE_HARD, &obj_id, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
-#endif
 
     /* close dst group if it is not the location we started the
        traversal into */
@@ -478,11 +479,6 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
         iod_obj_close(dst_oh, NULL, NULL);
     }
 
-#if H5_DO_NATIVE
-    if(H5Ocopy(input->src_loc_oh.cookie, input->src_loc_name, 
-               input->dst_loc_oh.cookie, input->dst_loc_name,
-               H5P_DEFAULT, H5P_DEFAULT) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't copy object");
 #endif
 
 done:
@@ -523,11 +519,11 @@ H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     object_op_in_t *input = (object_op_in_t *)op_data->input;
     iod_handle_t coh = input->coh;
-    iod_handle_t loc_oh = input->loc_oh;
+    iod_handles_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
-    iod_handle_t obj_oh;
+    iod_handles_t obj_oh;
     iod_obj_id_t obj_id;
     const char *loc_name = input->loc_name;
     htri_t ret = -1;
@@ -542,8 +538,8 @@ H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine,
     }
     else {
         /* close the object */
-        if(loc_oh.cookie != obj_oh.cookie && 
-           iod_obj_close(obj_oh, NULL, NULL) < 0)
+        if(loc_oh.rd_oh.cookie != obj_oh.rd_oh.cookie && 
+           iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* set return to TRUE */
@@ -594,11 +590,12 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
     object_op_in_t *input = (object_op_in_t *)op_data->input;
     H5O_ff_info_t oinfo;
     iod_handle_t coh = input->coh;
-    iod_handle_t loc_oh = input->loc_oh;
+    iod_handles_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
-    iod_handle_t obj_oh, mdkv_oh, attrkv_oh;
+    iod_handles_t obj_oh;
+    iod_handle_t mdkv_oh, attrkv_oh;
     iod_obj_id_t obj_id;
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
@@ -617,7 +614,7 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
 
     if(obj_id != loc_id) {
         /* get scratch pad of the object */
-        if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
+        if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
@@ -627,17 +624,17 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* open the metadata KV */
-        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
     else {
         /* open the metadata KV */
-        if (iod_obj_open_write(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
 
     /* open the attribute scratch pad */
-    if (iod_obj_open_write(coh, sp[1], NULL /*hints*/, &attrkv_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, sp[1], NULL /*hints*/, &attrkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, H5VL_IOD_KEY_OBJ_TYPE,
@@ -680,8 +677,8 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_close(attrkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-    if(loc_oh.cookie != obj_oh.cookie && 
-       iod_obj_close(obj_oh, NULL, NULL) < 0)
+    if(loc_oh.rd_oh.cookie != obj_oh.rd_oh.cookie && 
+       iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
     /* MSC - fake now */
@@ -734,12 +731,13 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     object_set_comment_in_t *input = (object_set_comment_in_t *)op_data->input;
     iod_handle_t coh = input->coh;
-    iod_handle_t loc_oh = input->loc_oh;
+    iod_handles_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
-    iod_handle_t obj_oh, mdkv_oh;
+    iod_handles_t obj_oh;
+    iod_handle_t mdkv_oh;
     iod_obj_id_t obj_id;
     const char *loc_name = input->path;
     const char *comment = input->comment;
@@ -755,7 +753,7 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
 
     if(loc_id != obj_id) {
         /* get scratch pad of the object */
-        if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
+        if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
@@ -793,8 +791,8 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-    if(loc_oh.cookie != obj_oh.cookie && 
-       iod_obj_close(obj_oh, NULL, NULL) < 0)
+    if(loc_oh.rd_oh.cookie != obj_oh.rd_oh.cookie && 
+       iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
 #if H5_DO_NATIVE
@@ -840,12 +838,13 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     object_get_comment_out_t output;
     name_t comment;
     iod_handle_t coh = input->coh;
-    iod_handle_t loc_oh = input->loc_oh;
+    iod_handles_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
     size_t length = input->length;
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
-    iod_handle_t obj_oh, mdkv_oh;
+    iod_handle_t mdkv_oh;
+    iod_handles_t obj_oh;
     iod_obj_id_t obj_id;
     const char *loc_name = input->path;
     scratch_pad sp;
@@ -861,7 +860,7 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
 
     if(loc_id != obj_id) {
         /* get scratch pad of the object */
-        if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
+        if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
@@ -871,12 +870,12 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* open the metadata KV */
-        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
     else {
         /* open the metadata KV */
-        if (iod_obj_open_write(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
 
@@ -910,8 +909,8 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-    if(loc_oh.cookie != obj_oh.cookie && 
-       iod_obj_close(obj_oh, NULL, NULL) < 0)
+    if(loc_oh.rd_oh.cookie != obj_oh.rd_oh.cookie && 
+       iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
 

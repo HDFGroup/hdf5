@@ -52,7 +52,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     unsigned num_peers = input->num_peers; /* the number of peers participating in creation */
     unsigned int mode; /* create mode */
     iod_handle_t coh; /* container handle */
-    iod_handle_t root_oh; /* root object handle */
+    iod_handles_t root_oh; /* root object handle */
     iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
     iod_obj_id_t mdkv_id, attr_id; /* metadata and attribute KV IDs for the file */
     iod_ret_t ret;
@@ -84,9 +84,11 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     /* create the root group */
     ret = iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, NULL, NULL, 
                          &input->root_id, NULL);
-    if(0 == ret || EEXISTS == ret) {
+    if(0 == ret || EEXIST == ret) {
         /* root group has been created, open it */
-        if (iod_obj_open_write(coh, input->root_id, NULL, &root_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, input->root_id, NULL, &root_oh.rd_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open root group");
+        if (iod_obj_open_write(coh, input->root_id, NULL, &root_oh.wr_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open root group");
     }
     else {
@@ -122,14 +124,14 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 
             sp_cs = H5checksum(&sp, sizeof(sp), NULL);
             /* set scratch pad in root group */
-            if (iod_obj_set_scratch(root_oh, first_tid, &sp, &sp_cs, NULL) < 0)
+            if (iod_obj_set_scratch(root_oh.wr_oh, first_tid, &sp, &sp_cs, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
         }
         else {
 #if H5VL_IOD_DEBUG
             fprintf(stderr, "METADATA INTEGRITY DISABLED\n");
 #endif
-            if (iod_obj_set_scratch(root_oh, first_tid, &sp, NULL, NULL) < 0)
+            if (iod_obj_set_scratch(root_oh.wr_oh, first_tid, &sp, NULL, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
         }
 
@@ -138,7 +140,6 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
         /* store metadata */
-
         if(H5P_DEFAULT == input->fcpl_id)
             input->fcpl_id = H5Pcopy(H5P_FILE_CREATE_DEFAULT);
         fcpl_id = input->fcpl_id;
@@ -177,8 +178,9 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Created Native file %s with ID %d\n", input->name, root_oh.cookie);
 #endif
 
-    output.coh = coh;
-    output.root_oh = root_oh;
+    output.coh.cookie = coh.cookie;
+    output.root_oh.rd_oh = root_oh.rd_oh;
+    output.root_oh.wr_oh = root_oh.wr_oh;
     output.kv_oid_index = 1;
     output.array_oid_index = 1;
     output.blob_oid_index = 1;
@@ -192,7 +194,8 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 done:
     if(ret_value < 0) {
         output.coh.cookie = IOD_OH_UNDEFINED;
-        output.root_oh.cookie = IOD_OH_UNDEFINED;
+        output.root_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
+        output.root_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         output.kv_oid_index = 0;
         output.array_oid_index = 0;
         output.blob_oid_index = 0;
@@ -231,7 +234,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     unsigned int mode = input->flags; /* File Open mode */
     hbool_t acquire = input->acquire;
     iod_handle_t coh; /* container handle */
-    iod_handle_t root_oh; /* root object handle */
+    iod_handles_t root_oh; /* root object handle */
     iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
@@ -265,11 +268,13 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
     /* open the root group */
-    if (iod_obj_open_write(coh, ROOT_ID, NULL /*hints*/, &root_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, ROOT_ID, NULL /*hints*/, &root_oh.rd_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object");
+    if (iod_obj_open_write(coh, ROOT_ID, NULL /*hints*/, &root_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object");
 
     /* get scratch pad of root group */
-    if(iod_obj_get_scratch(root_oh, rtid, &sp, &sp_cs, NULL) < 0)
+    if(iod_obj_get_scratch(root_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
 
     if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
@@ -279,7 +284,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* retrieve all metadata from scratch pad */
@@ -313,9 +318,10 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
 
-    output.coh = coh;
+    output.coh.cookie = coh.cookie;
     output.root_id = ROOT_ID;
-    output.root_oh = root_oh;
+    output.root_oh.rd_oh = root_oh.rd_oh;
+    output.root_oh.wr_oh = root_oh.wr_oh;
 
     /* If the user did not ask to acquire the latest readable version, finish it here */
     if(TRUE != acquire) {
@@ -344,7 +350,8 @@ done:
     if(ret_value < 0) {
         output.coh.cookie = IOD_OH_UNDEFINED;
         output.root_id = IOD_ID_UNDEFINED;
-        output.root_oh.cookie = IOD_OH_UNDEFINED;
+        output.root_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
+        output.root_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         output.fcpl_id = H5P_FILE_CREATE_DEFAULT;
         output.kv_oid_index = 0;
         output.array_oid_index = 0;
@@ -382,7 +389,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     file_close_in_t *input = (file_close_in_t *)op_data->input;
     iod_handle_t coh = input->coh;
-    iod_handle_t root_oh = input->root_oh;
+    iod_handles_t root_oh = input->root_oh;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -416,7 +423,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
         /* get scratch pad of root group */
-        if(iod_obj_get_scratch(root_oh, rtid, &sp, &sp_cs, NULL) < 0)
+        if(iod_obj_get_scratch(root_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
 
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
@@ -455,7 +462,9 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* close the root group */
-    if(iod_obj_close(root_oh, NULL, NULL) < 0)
+    if(iod_obj_close(root_oh.rd_oh, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close root object handle");
+    if(iod_obj_close(root_oh.wr_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close root object handle");
 
     /* close the container */

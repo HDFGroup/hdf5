@@ -167,6 +167,30 @@ int hg_proc_iod_handle_t(hg_proc_t proc, void *data)
         ret = HG_FAIL;
         return ret;
     }
+
+    return ret;
+}
+
+/* Define hg_proc_iod_handles_t */
+int hg_proc_iod_handles_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+    iod_handles_t *struct_data = (iod_handles_t *)data;
+
+    ret = hg_proc_iod_handle_t(proc, &struct_data->rd_oh);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    ret = hg_proc_iod_handle_t(proc, &struct_data->wr_oh);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
     return ret;
 }
 
