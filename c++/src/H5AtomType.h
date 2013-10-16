@@ -14,11 +14,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Class AtomType is a base class, from which IntType, FloatType, StrType,
-// and PredType inherit.  It provides the services that are common to these
-// subclasses.  It also inherits from DataType and passes down the
-// services that are common to all the datatypes.
-
 #ifndef __H5AtomType_H
 #define __H5AtomType_H
 
@@ -26,6 +21,13 @@
 namespace H5 {
 #endif
 
+/*! \class AtomType
+    \brief AtomType is a base class, inherited by IntType, FloatType,
+     StrType, and PredType.
+
+    AtomType provides operations on HDF5 atomic datatypes.  It also inherits
+    from DataType.
+*/
 class H5_DLLCPP AtomType : public DataType {
    public:
 	// Returns the byte order of an atomic datatype.

@@ -371,7 +371,7 @@ herr_t H5PTclose( hid_t table_id )
   htbl_t * table;
 
   /* Remove the ID from the library */
-  if((table = H5Iremove_verify(table_id, H5PT_ptable_id_type)) ==NULL)
+  if((table = (htbl_t *)H5Iremove_verify(table_id, H5PT_ptable_id_type)) ==NULL)
     goto out;
 
   /* If the library found the table, remove it */

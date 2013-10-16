@@ -395,7 +395,8 @@ writer (char* filename, hid_t fapl, fsizes_t testsize, int wrt_n)
         break;
 
     default:
-        HDassert(0 && "Invalid test size.");
+        HDfprintf(stdout, "Unexpected file size(%d)\n", testsize);
+        goto error;
         break;
     }
 

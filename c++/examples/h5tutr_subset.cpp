@@ -31,7 +31,7 @@
 #endif  // H5_NO_STD
 #endif
 
-const H5std_string	FILE_NAME("subset.h5");
+const H5std_string	FILE_NAME("h5tutr_subset.h5");
 const H5std_string	DATASET_NAME("IntArray");
 
 const int     RANK = 2;

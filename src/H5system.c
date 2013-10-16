@@ -201,7 +201,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                         if(sizeof(hsize_t) < sizeof(long))
                             modifier[0] = '\0';
                         else if(sizeof(hsize_t) == sizeof(long))
-                            HDstrncpy(modifier, "l", 2);
+                            HDstrncpy(modifier, "l", (size_t)2);
                         else
                             HDstrncpy(modifier, H5_PRINTF_LL_WIDTH, HDstrlen(H5_PRINTF_LL_WIDTH) + 1);
                         break;
@@ -211,7 +211,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                         if(sizeof(size_t) < sizeof(long))
                             modifier[0] = '\0';
                         else if(sizeof(size_t) == sizeof(long))
-                            HDstrncpy(modifier, "l", 2);
+                            HDstrncpy(modifier, "l", (size_t)2);
                         else
                             HDstrncpy(modifier, H5_PRINTF_LL_WIDTH, HDstrlen(H5_PRINTF_LL_WIDTH) + 1);
                         break;

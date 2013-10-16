@@ -565,9 +565,9 @@ void H5Location::p_reference(void* ref, const char* name, hid_t space_id, H5R_ty
 ///\param	ref_type - IN: Type of reference to query, valid values are:
 ///		\li \c H5R_OBJECT         - Reference is an object reference.
 ///		\li \c H5R_DATASET_REGION - Reference is a dataset region
-///			reference. - this is the default
+///			reference. (default)
 ///\exception	H5::ReferenceException
-///\notes	This method is more suitable for a dataset region reference.
+///\note	This method is more suitable for a dataset region reference.
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Location::reference(void* ref, const char* name, const DataSpace& dataspace, H5R_type_t ref_type) const
@@ -591,9 +591,9 @@ void H5Location::reference(void* ref, const char* name, const DataSpace& dataspa
 ///\param	ref_type - IN: Type of reference to query, valid values are:
 ///		\li \c H5R_OBJECT         - Reference is an object reference.
 ///		\li \c H5R_DATASET_REGION - Reference is a dataset region
-///			reference. - this is the default
+///			reference. (default)
 ///\exception	H5::ReferenceException
-///\notes	This method is more suitable for a dataset region reference.
+///\note	This method is more suitable for a dataset region reference.
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Location::reference(void* ref, const H5std_string& name, const DataSpace& dataspace, H5R_type_t ref_type) const
@@ -614,10 +614,10 @@ void H5Location::reference(void* ref, const H5std_string& name, const DataSpace&
 ///\param	ref - IN: Reference pointer
 ///\param	name - IN: Name of the object to be referenced
 ///\param	ref_type - IN: Type of reference to query, valid values are:
-///		\li \c H5R_OBJECT         - Reference is an object reference.
+///		\li \c H5R_OBJECT         - Reference is an object reference (default)
 ///		\li \c H5R_DATASET_REGION - Reference is a dataset region
 ///\exception	H5::ReferenceException
-///\notes	This method is more suitable for an object reference.
+///\note	This method is more suitable for an object reference.
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Location::reference(void* ref, const char* name, H5R_type_t ref_type) const
@@ -638,9 +638,9 @@ void H5Location::reference(void* ref, const char* name, H5R_type_t ref_type) con
 ///\param	ref - IN: Reference pointer
 ///\param	name - IN: Name of the object to be referenced - \c H5std_string
 ///\param	ref_type - IN: Type of reference to query, valid values are:
-///		\li \c H5R_OBJECT         - Reference is an object reference.
+///		\li \c H5R_OBJECT         - Reference is an object reference (default)
 ///		\li \c H5R_DATASET_REGION - Reference is a dataset region
-///\notes	This method is more suitable for an object reference.
+///\note	This method is more suitable for an object reference.
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Location::reference(void* ref, const H5std_string& name, H5R_type_t ref_type) const
@@ -684,7 +684,7 @@ hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_ty
 //--------------------------------------------------------------------------
 // Function:	H5Location::dereference
 ///\brief	Dereferences a reference into an HDF5 object, given an HDF5 object.
-///\param	obj - IN: Object specifying the location of the referenced object
+///\param	loc - IN: Location of the referenced object
 ///\param	ref - IN: Reference pointer
 ///\param	ref_type - IN: Reference type
 ///\exception	H5::ReferenceException

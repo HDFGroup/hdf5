@@ -148,7 +148,7 @@ H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int 
 	      fspace->ghost_sect_count);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Number of free space section classes:",
-	      fspace->nclasses);
+	      (unsigned)fspace->nclasses);
     HDfprintf(stream, "%*s%-*s %u%%\n", indent, "", fwidth,
 	      "Shrink percent:",
 	      fspace->shrink_percent);

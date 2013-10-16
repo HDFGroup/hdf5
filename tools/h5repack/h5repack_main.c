@@ -21,6 +21,8 @@
 #define PROGRAMNAME "h5repack"
 
 static int parse_command_line(int argc, const char **argv, pack_opt_t* options);
+static void leave(int ret) NORETURN;
+
 
 /* module-scoped variables */
 static int has_i_o = 0;
@@ -563,7 +565,6 @@ done:
 int main(int argc, const char **argv) {
 
 	pack_opt_t options; /*the global options */
-	int ret = -1;
 
 	h5tools_setprogname(PROGRAMNAME);
 	h5tools_setstatus(EXIT_SUCCESS);

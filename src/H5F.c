@@ -63,7 +63,6 @@
 static const H5I_class_t H5I_FILE_CLS[1] = {{
     H5I_FILE,			/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     0,				/* # of reserved IDs for class */
     NULL,                       /* Callback routine for closing objects of this class */
     (H5I_free2_t)H5F_close_file /* Callback routine for closing auxilary objects of this class */
