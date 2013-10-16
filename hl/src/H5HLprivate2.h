@@ -70,6 +70,7 @@
     #define HDfflush(F)         fflush(F)
 #endif /* HDfflush */
 H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
+H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDfree
     #define HDfree(M)           free(M)
 #endif /* HDfree */

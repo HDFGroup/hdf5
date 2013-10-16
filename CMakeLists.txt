@@ -507,16 +507,16 @@ IF (NOT MSVC)
     SET (H5_CFLAGS3 "${H5_CFLAGS3} -Wlogical-op -Wlarger-than=2048 -Wvla")
 
     # Append more extra warning flags that only gcc 4.4+ know about
-    SET (H5_CFLAGS3 "${H5_CFLAGS4} -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat")
+    SET (H5_CFLAGS4 "${H5_CFLAGS4} -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat")
 
     # Append more extra warning flags that only gcc 4.5+ know about
     SET (H5_CFLAGS4 "${H5_CFLAGS4} -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants")
 
     # Append more extra warning flags that only gcc 4.6+ know about
-    SET (H5_CFLAGS4 "${H5_CFLAGS5} -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines")
+    SET (H5_CFLAGS5 "${H5_CFLAGS5} -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines")
 
     # Append more extra warning flags that only gcc 4.7+ know about
-    SET (H5_CFLAGS4 "${H5_CFLAGS5} -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn")
+    SET (H5_CFLAGS5 "${H5_CFLAGS5} -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn")
 ENDIF (NOT MSVC)
   
 #-----------------------------------------------------------------------------
@@ -603,6 +603,16 @@ IF (HDF5_ENABLE_GROUPFOUR_WARNINGS)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${H5_CFLAGS4}")
   ENDIF (NOT MSVC)
 ENDIF (HDF5_ENABLE_GROUPFOUR_WARNINGS)
+
+#-----------------------------------------------------------------------------
+# Option to allow the user to enable warnings by groups
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_GROUPFIVE_WARNINGS "Enable group five warnings" OFF)
+IF (HDF5_ENABLE_GROUPFIVE_WARNINGS)
+  IF (NOT MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${H5_CFLAGS5}")
+  ENDIF (NOT MSVC)
+ENDIF (HDF5_ENABLE_GROUPFIVE_WARNINGS)
 
 #-----------------------------------------------------------------------------
 # This is in here to help some of the GCC based IDES like Eclipse
