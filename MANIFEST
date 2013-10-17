@@ -952,6 +952,7 @@
 ./test/H5srcdir_str.h.in
 ./test/Makefile.am
 ./test/Makefile.in
+./test/SWMR_POSIX_Order_UG.txt
 ./test/SWMR_UseCase_UG.txt
 ./test/accum.c
 ./test/accum_swmr_reader.c
