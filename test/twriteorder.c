@@ -68,7 +68,6 @@
 #define BLOCKSIZE_DFT   1024	/* 1KB */
 #define PARTITION_DFT	2048	/* 2KB */
 #define NLINKEDBLOCKS_DFT 512	/* default 512 */
-#define ITERATIONS_DFT	1	/* default 1 */
 #define SIZE_BLKADDR	4	/* expected sizeof blkaddr */
 #define Hgoto_error(val)	{ret_value=val; goto done;}
 
@@ -90,7 +89,7 @@ int parse_option(int argc, char * const argv[]);
 /* Global Variable definitions */
 const char *progname_g="twriteorder";	/* program name */
 int	write_fd_g;
-int	blocksize_g, part_size_g, nlinkedblock_g, iterations_g;
+int	blocksize_g, part_size_g, nlinkedblock_g;
 part_t  launch_g;
 
 /* Function definitions */
@@ -106,7 +105,7 @@ usage(const char *prog)
     fprintf(stderr, "     -b N          Block size [default: %d]\n", BLOCKSIZE_DFT);
     fprintf(stderr, "     -p N          Partition size [default: %d]\n", PARTITION_DFT);
     fprintf(stderr, "     -n N          Number of linked blocks [default: %d]\n", NLINKEDBLOCKS_DFT);
-    fprintf(stderr, "     -i N          Number of iterations to repeat the whole thing. [default: %d] (not yet implemented.\n", ITERATIONS_DFT);
+    fprintf(stderr, "     where N is an integer value\n");
     fprintf(stderr, "\n");
 }
 
@@ -118,14 +117,13 @@ parse_option(int argc, char * const argv[])
     int ret_value=0;
     int c;
     /* command line options: See function usage for a description */
-    /* const char *nagg_options = "f:hi:l:n:s:y:z:"; */
-    const char *nagg_options = "hb:i:l:n:p:";
+    const char *cmd_options = "hb:l:n:p:";
 
     /* suppress getopt from printing error */
     opterr = 0;
 
     while (1){
-	c = getopt (argc, argv, nagg_options);
+	c = getopt (argc, argv, cmd_options);
 	if (-1 == c)
 	    break;
 	switch (c) {
@@ -150,13 +148,6 @@ parse_option(int argc, char * const argv[])
 	  case 'p':	/* number of planes to write/read */
 	    if ((part_size_g = atoi(optarg)) <= 0){
 		fprintf(stderr, "bad partition size %s, must be a positive integer\n", optarg);
-		usage(progname_g);
-		Hgoto_error(-1);
-	    };
-	    break;
-	  case 'i':	/* iterations */
-	    if ((iterations_g = atoi(optarg)) <= 0){
-		fprintf(stderr, "bad iterations number %s, must be a positive integer\n", optarg);
 		usage(progname_g);
 		Hgoto_error(-1);
 	    };
@@ -209,7 +200,6 @@ int setup_parameters(int argc, char * const argv[])
     blocksize_g = BLOCKSIZE_DFT;
     part_size_g = PARTITION_DFT;
     nlinkedblock_g = NLINKEDBLOCKS_DFT;
-    iterations_g = ITERATIONS_DFT;
     launch_g = UC_READWRITE;
 
     /* parse options */
@@ -221,7 +211,6 @@ int setup_parameters(int argc, char * const argv[])
     printf("blocksize = %ld\n", (long)blocksize_g);
     printf("part_size = %ld\n", (long)part_size_g);
     printf("nlinkedblock = %ld\n", (long)nlinkedblock_g);
-    printf("iterations = %ld\n", (long)iterations_g);
     printf("launch = %d\n", launch_g);
     return(0);
 }
