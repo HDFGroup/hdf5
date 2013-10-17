@@ -1,0 +1,94 @@
+POSIX Write Order Test Instructions
+===================================
+
+Purpose
+-------
+This documents shows the requirments, implementaion design and instructions
+of building and running the POSIX Write Order test.  The name of the
+test is twriteorder and it resides in the test/ directory.
+
+Requirements
+------------
+The test is to verify that the write order is strictly consistent.
+The SWMR feature requires that the order of write is strictly consistent.
+"Strict consistency in computer science is the most stringent consistency
+model.  It says that a read operation has to return the result of the
+latest write operation which occurred on that data item."--
+(http://en.wikipedia.org/wiki/Linearizability#Definition_of_linearizability).
+This is also an alternative form of what POSIX write require that after a
+write operation has returned success, all reads issued afterward should
+get the same data the write has written.
+
+Implementation Design
+---------------------
+The test simulates what SWMR does by writing chained blocks and see if
+they can be read back correctly.
+There is a writer process and a read process.
+The file is divided into 2KB partitions. Then writer writes 1 chained
+block, each of 1KB big, in each partition after the first partition.
+Each chained block has this structure:
+Byte 0-3: offset address of its child block. The last child uses 0 as NULL.
+Byte 4-1023: some artificial data.
+The child block address of Block 1 is NULL (0).
+The child block address of Block 2 is the offset address of Block 1.
+The child block address of Block n is the offset address of Block n-1.
+After all n blocks are written, the offset address of Block n is written
+to the offset 0 of the first partition.
+Therefore, by the time the offset address of Block n is written to this
+position, all n chain-linked blocks have been written.
+
+The other reader processes will try to read the address value at the
+offset 0. The value is initially NULL(0). When it changes to non-zero,
+it signifies the writer process has written all the chain-link blocks
+and they are ready for the reader processes to access.
+
+If the system, in which the writer and reader processes run, the readers
+will always get all chain-linked blocks correctly. If the order of write
+is not maintained, some reader processes may found unexpect block data.
+
+Building the Tests
+------------------
+The name of the test is twriteorder in the test directory. It is added
+to the test suite and is built during the "make" process and is run by
+the test_usecases.sh test. Users may inspect test/test_usecases.sh.in
+to see the examples of testing.
+
+Running the Tests
+-----------------
+twriteorder test accepts the following options:
+$ ./twriteorder -h
+usage: twriteorder [OPTIONS]
+  OPTIONS
+     -h            Print a usage message and exit
+     -l w|r        launch writer or reader only. [default: launch both]
+     -b N          Block size [default: 1024]
+     -p N          Partition size [default: 2048]
+     -n N          Number of linked blocks [default: 512]
+
+More Examples
+-------------
+
+# run test with default parameters and launch both writer and reader
+#processes.
+$ twriteorder
+
+# run test with blocksize of 1000 bytes (default is 1024 bytes).
+$ twriteorder -b 1000
+
+# run test with partition size of 3000 bytes (default is 2048 bytes).
+$ twriteorder -p 3000
+
+# run test with 2000 linked blocks (default is 512 blocks).
+$ twriteorder -n 2000
+
+# Launch only the writer process.
+$ twriteorder -l w
+
+# Launch only the reader process.
+$ twriteorder -l r
+
+Note that if you want to launch the writer and the reader processes
+manually (for example in different machines sharing a common file system),
+you need to start the writer process (-l w) first, and then the reader
+process (-l r).
+
