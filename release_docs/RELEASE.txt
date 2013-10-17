@@ -1331,7 +1331,7 @@ The following platforms are not supported but have been tested for this release.
 Known Problems
 ==============
 * CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
-  catches some defined behavior in the alignment algorithm of the macro DETECT_I
+  catches some undefined behavior in the alignment algorithm of the macro DETECT_I
   in H5detect.c (Issue 8147).  Since the algorithm is trying to detect the alignment 
   of integers, ideally the flag -fcatch-undefined-behavior shouldn't to be used for 
   H5detect.c. In the future, we can separate flags for H5detect.c from the rest of 
