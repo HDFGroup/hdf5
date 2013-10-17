@@ -494,6 +494,10 @@ int main(int argc, char **argv) {
     free(rdata2);
     free(rdata3);
 
+    free(dset_token1);
+    free(dset_token2);
+    free(dset_token3);
+
     EFF_finalize();
     MPI_Finalize();
 

@@ -73,6 +73,10 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         fprintf(stderr, "Start attribute Create %s on object path %s\n", attr_name, loc_name);
 #endif
 
+    /* MSC - Remove when we have IOD */
+    attr_oh.rd_oh.cookie=0;
+    attr_oh.wr_oh.cookie=0;
+
     /* Open the object where the attribute needs to be created. */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
@@ -311,6 +315,10 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     }
     /* close the attribute KV holder */
     iod_obj_close(attr_kv_oh, NULL, NULL);
+
+  /* MSC - Remove when we have IOD */
+    attr_oh.rd_oh.cookie=0;
+    attr_oh.wr_oh.cookie=0;
 
     /* open the attribute */
     if (iod_obj_open_read(coh, attr_id, NULL /*hints*/, &attr_oh.rd_oh, NULL) < 0)

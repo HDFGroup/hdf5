@@ -59,6 +59,10 @@ H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start Object Open by token = %llu\n", obj_id);
 #endif
 
+    /* MSC - Remove when we have IOD */
+    obj_oh.rd_oh.cookie=0;
+    obj_oh.wr_oh.cookie=0;
+
     if (iod_obj_open_read(coh, obj_id, NULL /*hints*/, &obj_oh.rd_oh, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
     if (iod_obj_open_write(coh, obj_id, NULL /*hints*/, &obj_oh.wr_oh, NULL) < 0)
@@ -121,6 +125,10 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start Object Open\n");
 #endif
+
+    /* MSC - Remove when we have IOD */
+    obj_oh.rd_oh.cookie=0;
+    obj_oh.wr_oh.cookie=0;
 
     /* Traverse Path and open object */
     if(H5VL_iod_server_open_path(coh, input->loc_id, input->loc_oh, input->loc_name, 
@@ -243,8 +251,8 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     switch(output.obj_type){
     case H5I_GROUP:
         output.cpl_id = H5P_GROUP_CREATE_DEFAULT;
-        output.type_id = 0;
-        output.space_id = 0;
+        output.type_id = FAIL;
+        output.space_id = FAIL;
         break;
     case H5I_DATASET:
         output.cpl_id = H5P_DATASET_CREATE_DEFAULT;
@@ -254,7 +262,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     case H5I_DATATYPE:
         output.cpl_id = H5P_DATATYPE_CREATE_DEFAULT;
         output.type_id = obj_oh.cookie;
-        output.space_id = 0;
+        output.space_id = FAIL;
         break;
     default:
         HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "not a valid object (dataset, group, or datatype)")
@@ -263,8 +271,8 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     /* Fake something */
     output.obj_type = H5I_GROUP;
     output.cpl_id = H5P_GROUP_CREATE_DEFAULT;
-    output.type_id = 0;
-    output.space_id = 0;
+    output.type_id = FAIL;
+    output.space_id = FAIL;
 #endif
 
     output.iod_id = obj_id;
@@ -284,7 +292,9 @@ done:
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_id = IOD_ID_UNDEFINED;
-        output.cpl_id = H5P_GROUP_CREATE_DEFAULT;
+        output.cpl_id = FAIL;
+        output.type_id = FAIL;
+        output.space_id = FAIL;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 

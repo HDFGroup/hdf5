@@ -75,6 +75,10 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start datatype Commit %s\n", name);
 #endif
 
+    /* MSC - Remove when we have IOD */
+    dtype_oh.rd_oh.cookie=0;
+    dtype_oh.wr_oh.cookie=0;
+
     /* the traversal will retrieve the location where the datatype needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
@@ -298,6 +302,10 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     /* Traverse Path and open dtype */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, &dtype_id, &dtype_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
+
+    /* MSC - Remove when we have IOD */
+    dtype_oh.rd_oh.cookie=0;
+    dtype_oh.wr_oh.cookie=0;
 
     /* open a write handle on the ID. */
     if (iod_obj_open_write(coh, dtype_id, NULL, &dtype_oh.wr_oh, NULL) < 0)

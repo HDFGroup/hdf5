@@ -106,6 +106,10 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* MSC - Remove when we have IOD */
+    dset_oh.rd_oh.cookie=0;
+    dset_oh.wr_oh.cookie=0;
+
     /* the traversal will retrieve the location where the dataset needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
@@ -313,9 +317,13 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, &dset_id, &dset_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
+    /* MSC - Remove when we have IOD */
+    dset_oh.rd_oh.cookie=0;
+    dset_oh.wr_oh.cookie=0;
+
     /* open a write handle on the ID. */
     if (iod_obj_open_write(coh, dset_id, NULL, &dset_oh.wr_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current dset");
 
     /* get scratch pad of the dataset */
     if(iod_obj_get_scratch(dset_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
@@ -414,6 +422,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
+        fprintf(stderr, "DSET open FAILED\n");
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_id = IOD_ID_UNDEFINED;

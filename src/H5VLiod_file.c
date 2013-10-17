@@ -66,6 +66,10 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start file create %s\n", input->name);
 #endif
 
+    /* MSC - Remove when we have IOD */
+    root_oh.rd_oh.cookie=0;
+    root_oh.wr_oh.cookie=0;
+
     /* convert HDF5 flags to IOD flags */
     mode = (input->flags&H5F_ACC_RDWR) ? IOD_CONT_RW : IOD_CONT_RO;
     if (input->flags&H5F_ACC_CREAT) 
@@ -248,6 +252,10 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start file open %s %d %d\n", input->name, input->flags, input->fapl_id);
 #endif
+
+    /* MSC - Remove when we have IOD */
+    root_oh.rd_oh.cookie=0;
+    root_oh.wr_oh.cookie=0;
 
     if(H5Pget_metadata_integrity_scope(input->fapl_id, &cs_scope) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");

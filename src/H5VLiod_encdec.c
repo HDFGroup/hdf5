@@ -719,7 +719,7 @@ int hg_proc_hid_t(hg_proc_t proc, void *data)
     op = hg_proc_get_op(proc);
 
     if (HG_ENCODE == op || HG_FREE == op) {
-        if(0 == id)
+        if(FAIL == id)
             type = H5I_UNINIT;
         else
             type = H5Iget_type(id);
@@ -757,6 +757,12 @@ int hg_proc_hid_t(hg_proc_t proc, void *data)
         }
         break;
     case H5I_UNINIT:
+        ret = hg_proc_int32_t(proc, (hid_t *)data);
+        if (ret != HG_SUCCESS) {
+            HG_ERROR_DEFAULT("Proc error");
+            ret = HG_FAIL;
+            return ret;
+        }
         break;
     default:
         HG_ERROR_DEFAULT("Unsupported hid_t - Proc error");

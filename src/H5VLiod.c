@@ -696,7 +696,13 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     /* forward the init call to the ION and wait for its completion */
     if(HG_Forward(PEER, H5VL_EFF_INIT_ID, &num_procs, &ret_value, &hg_req) < 0)
         return FAIL;
+
+    /* Wait for it to compete */
     HG_Wait(hg_req, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE);
+
+    /* Free Mercury request */
+    if(HG_Request_free(hg_req) != HG_SUCCESS)
+        return FAIL;
 
     return ret_value;
 } /* end EFF_init() */
@@ -743,7 +749,12 @@ EFF_finalize(void)
     /* forward the finalize call to the ION and wait for it to complete */
     if(HG_Forward(PEER, H5VL_EFF_FINALIZE_ID, &ret_value, &ret_value, &hg_req) < 0)
         return FAIL;
+
     HG_Wait(hg_req, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE);
+
+    /* Free Mercury request */
+    if(HG_Request_free(hg_req) != HG_SUCCESS)
+        return FAIL;
 
     /* Free addr id */
     if (HG_SUCCESS != NA_Addr_free(network_class, PEER))

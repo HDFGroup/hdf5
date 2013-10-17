@@ -78,6 +78,10 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start map create %s\n", name);
 #endif
 
+    /* MSC - Remove when we have IOD */
+    map_oh.rd_oh.cookie=0;
+    map_oh.wr_oh.cookie=0;
+
     /* the traversal will retrieve the location where the map needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
@@ -174,7 +178,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_oh.wr_oh.cookie = map_oh.wr_oh.cookie;
     HG_Handler_start_output(op_data->hg_handle, &output);
 
- done:
+done:
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
         fprintf(stderr, "Failed Map Create\n");
@@ -238,6 +242,10 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     /* Traverse Path and open map */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, &map_id, &map_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
+
+    /* MSC - Remove when we have IOD */
+    map_oh.rd_oh.cookie=0;
+    map_oh.wr_oh.cookie=0;
 
     /* open a write handle on the ID. */
     if (iod_obj_open_write(coh, map_id, NULL, &map_oh.wr_oh, NULL) < 0)
