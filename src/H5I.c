@@ -99,6 +99,11 @@ typedef struct {
     void *ret_obj;              /* Object to return */
 } H5I_search_ud_t;
 
+typedef struct {
+    H5I_iterate_func_t op;      /* Application's callback routine */
+    void *op_data;              /* Application's user data */
+} H5I_iterate_pub_ud_t;
+
 /* User data for iterator callback when IDs have wrapped */
 typedef struct {
     unsigned nextid;            /* Next ID to expect */
@@ -146,6 +151,7 @@ static void *H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id);
 static int H5I__inc_type_ref(H5I_type_t type);
 static int H5I__get_type_ref(H5I_type_t type);
 static H5I_id_info_t *H5I__find_id(hid_t id);
+static int H5I__iterate_pub_cb(void *obj, hid_t id, void *udata);
 #ifdef H5I_DEBUG_OUTPUT
 static herr_t H5I__debug(H5I_type_t type);
 #endif /* H5I_DEBUG_OUTPUT */
@@ -2083,14 +2089,88 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5I__iterate_pub_cb
+ *
+ * Purpose:     Callback routine for H5Iiterate, when it calls
+ *              H5I_iterate.  Calls "user" callback search function, and
+ *              then sets return value, based on the result of that
+ *              callback.
+ *
+ * Return:      The value returned by the user callback
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, October 11, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5I__iterate_pub_cb(void UNUSED *obj, hid_t id, void *_udata)
+{
+    H5I_iterate_pub_ud_t *udata = (H5I_iterate_pub_ud_t *)_udata; /* User data for callback */
+    herr_t ret_value;   /* Callback return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    ret_value = (*udata->op)(id, udata->op_data);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I__iterate_pub_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Iiterate
+ *
+ * Purpose:     Call the callback funciton op for each member of the id
+ *              type type.  op takes as parameters the id and a
+ *              passthrough of op_data, and returns an herr_t.  A positive
+ *              return from op will cause the iteration to stop and
+ *              H5Iiterate will return the value returned by op.  A
+ *              negative return from op will cause the iteration to stop
+ *              and H5Iiterate will return failure.  A zero return from op
+ *              will allow iteration to continue, as long as there are
+ *              other ids remaining in type.
+ *
+ * Limitation:  Currently there is no way to start searching from where a
+ *              previous search left off.
+ *
+ * Return:      The last value returned by op
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, October 11, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Iiterate(H5I_type_t type, H5I_iterate_func_t op, void *op_data)
+{
+    H5I_iterate_pub_ud_t int_udata;  /* Internal user data */
+    herr_t ret_value;            /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Set up udata struct */
+    int_udata.op = op;
+    int_udata.op_data = op_data;
+
+    /* Note that H5I_iterate returns an error code.  We ignore it 
+     * here, as we can't do anything with it without revising the API.
+     */
+    if((ret_value = H5I_iterate(type, H5I__iterate_pub_cb, &int_udata, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADITER, FAIL, "can't iterate over ids")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Iiterate() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5I__iterate_cb
  *
  * Purpose:	Callback routine for H5I_iterate, invokes "user" callback
  *              function, and then sets return value, based on the result of
  *              that callback.
  *
- * Return:	Success:	Non-negative on success
- *		Failure:	Negative
+ * Return:	Value returned by callback
  *
  * Programmer:	Quincey Koziol
  *		Thursday, October 3, 2013
@@ -2107,16 +2187,9 @@ H5I__iterate_cb(void *_item, void UNUSED *_key, void *_udata)
     FUNC_ENTER_STATIC_NOERR
 
     /* Don't make callback if app_ref is set and the appl. ref count is 0 */
-    if((!udata->app_ref) || (item->app_count > 0)) {
-        herr_t cb_ret_val;
-
+    if((!udata->app_ref) || (item->app_count > 0))
         /* (Casting away const OK) */
-        cb_ret_val = (*udata->user_func)((void *)item->obj_ptr, item->id, udata->user_udata);
-        if(cb_ret_val > 0)
-            ret_value = H5_ITER_STOP;	/* terminate iteration early */
-        else if(cb_ret_val < 0)
-            ret_value = H5_ITER_ERROR;  /* indicate failure (which terminates iteration) */
-    } /* end if */
+        ret_value = (*udata->user_func)((void *)item->obj_ptr, item->id, udata->user_udata);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__iterate_cb() */
@@ -2130,21 +2203,18 @@ H5I__iterate_cb(void *_item, void UNUSED *_key, void *_udata)
  *		Stop if FUNC returns a non zero value (i.e. anything 
  *		other than H5_ITER_CONT).  
  *
- *		If FUNC returns a positive value (i.e. H5_ITER_STOP), 
- *		return SUCCEED.
- *
- *		If FUNC returns a negative value (i.e. H5_ITER_ERROR), 
- *		return FAIL.
+ *		Returns the last value returned by the callback, or FAIL
+ *		if an internal error occurred.
  *		
  *		The FUNC should take a pointer to the object and the 
  *		udata as arguments and return non-zero to terminate 
- *		siteration, and zero to continue.
+ *		iteration, and zero to continue.
  *
  * Limitation:	Currently there is no way to start the iteration from 
  *		where a previous iteration left off.
  *
- * Return:	Success:	SUCCEED
- *		Failure:	FAIL
+ * Return:	Success:	Last value returned by callback
+ *		Failure:	FAIL or last value returned by callback
  *
  * Programmer:	John Mainzer
  *		Monday, December 6, 2011
@@ -2168,7 +2238,6 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
     /* Only iterate through ID list if it is initialized and there are IDs in type */
     if(type_ptr && type_ptr->init_count > 0 && type_ptr->id_count > 0) {
         H5I_iterate_ud_t iter_udata;    /* User data for iteration callback */
-        herr_t iter_status;             /* Iteration status */
 
         /* Set up iterator user data */
         iter_udata.user_func = func;
@@ -2176,7 +2245,7 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
         iter_udata.app_ref = app_ref;
 
         /* Iterate over IDs */
-        if((iter_status = H5SL_iterate(type_ptr->ids, H5I__iterate_cb, &iter_udata)) < 0)
+        if((ret_value = H5SL_iterate(type_ptr->ids, H5I__iterate_cb, &iter_udata)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_BADITER, FAIL, "iteration failed")
     } /* end if */
 
