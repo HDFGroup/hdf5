@@ -30,12 +30,12 @@
 #include "H5Rpublic.h"
 
 /* Asynchronous operation status */
-typedef enum {
-    H5AO_PENDING,       /* Operation has not yet completed */
-    H5AO_SUCCEEDED,     /* Operation has completed, successfully */
-    H5AO_FAILED,        /* Operation has completed, but failed */
-    H5AO_CANCELLED      /* Operation has no completed and has been cancelled */
-} H5_status_t;
+typedef enum H5ES_status_t {
+    H5ES_STATUS_IN_PROGRESS,   /* Operation has not yet completed */
+    H5ES_STATUS_SUCCEED,       /* Operation has completed, successfully */
+    H5ES_STATUS_FAIL,          /* Operation has completed, but failed */
+    H5ES_STATUS_CANCEL         /* Operation has not completed and has been cancelled */
+} H5ES_status_t;
 
 /* Dataset creation property names */
 #define H5VL_DSET_TYPE_ID        "dataset_type_id"
@@ -303,9 +303,9 @@ typedef struct H5VL_object_class_t {
 
 /* H5AO routines */
 typedef struct H5VL_async_class_t {
-    herr_t (*cancel)(void **, H5_status_t *);
-    herr_t (*test)  (void **, H5_status_t *);
-    herr_t (*wait)  (void **, H5_status_t *);
+    herr_t (*cancel)(void **, H5ES_status_t *);
+    herr_t (*test)  (void **, H5ES_status_t *);
+    herr_t (*wait)  (void **, H5ES_status_t *);
 } H5VL_async_class_t;
 
 /* enum value to identify the class of a VOL plugin (mostly for comparison purposes) */
@@ -413,9 +413,9 @@ H5_DLL herr_t H5VLobject_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *v
 H5_DLL herr_t H5VLobject_optional(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_misc_t optional_type, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLobject_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, hid_t dxpl_id, void **req);
 
-H5_DLL herr_t H5VLrequest_cancel(void **req, H5VL_t *vol_plugin, H5_status_t *status);
-H5_DLL herr_t H5VLrequest_test(void **req, H5VL_t *vol_plugin, H5_status_t *status);
-H5_DLL herr_t H5VLrequest_wait(void **req, H5VL_t *vol_plugin, H5_status_t *status);
+H5_DLL herr_t H5VLrequest_cancel(void **req, H5VL_t *vol_plugin, H5ES_status_t *status);
+H5_DLL herr_t H5VLrequest_test(void **req, H5VL_t *vol_plugin, H5ES_status_t *status);
+H5_DLL herr_t H5VLrequest_wait(void **req, H5VL_t *vol_plugin, H5ES_status_t *status);
 
 /* Function prototypes */
 H5_DLL hid_t H5VLregister(const H5VL_class_t *cls);

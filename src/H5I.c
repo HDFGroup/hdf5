@@ -2323,7 +2323,7 @@ H5Iget_file_id(hid_t obj_id)
         }
 
         /* Get the file through the VOL */
-        if(H5VL_file_get(obj, vol_plugin, H5VL_OBJECT_GET_FILE, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, type, &file) < 0)
+        if(H5VL_file_get(obj, vol_plugin, H5VL_OBJECT_GET_FILE, H5AC_dxpl_id, H5_EVENT_STACK_NULL, type, &file) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to get file")
 
         if (NULL == file)
