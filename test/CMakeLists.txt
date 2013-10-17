@@ -186,7 +186,7 @@ SET (H5_TESTS
     objcopy
     links
     unlink
-    big
+#    big
     mtime
     fillval
     mount
@@ -215,6 +215,9 @@ SET (H5_TESTS
     file_image
     unregister
 )
+IF (NOT CYGWIN)
+  SET (H5_TESTS "${H5_TESTS} big")
+ENDIF (NOT CYGWIN)
 
 FOREACH (test ${H5_TESTS})
   ADD_H5_EXE(${test})

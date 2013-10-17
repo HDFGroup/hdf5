@@ -381,7 +381,7 @@ IF (HDF5_TEST_VFD)
       objcopy
       links
       unlink
-      big
+#      big
       mtime
       fillval
       mount
@@ -408,7 +408,10 @@ IF (HDF5_TEST_VFD)
       testmeta
       links_env
       unregister
-)
+  )
+  IF (NOT CYGWIN)
+    SET (H5_VFD_TESTS "${H5_VFD_TESTS} big")
+  ENDIF (NOT CYGWIN)
   
   IF (DIRECT_VFD)
     SET (VFD_LIST ${VFD_LIST} direct)
