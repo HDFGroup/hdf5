@@ -31,6 +31,7 @@
  *  FLET, to apply the HDF5 checksum filter
  *  NBIT, to apply the HDF5 NBIT filter (NBIT compression)
  *  SOFF, to apply the HDF5 scale+offset filter (compression)
+ *  UD, to apply a User Defined filter k, m, n1[,…,nm]
  *  NONE, to remove the filter
  *
  * Examples:
@@ -51,402 +52,468 @@ obj_list_t* parse_filter(const char *str,
                          pack_opt_t *options,
                          int *is_glb)
 {
-    unsigned    i, u;
-    char        c;
-    size_t      len=HDstrlen(str);
-    int         j, m, n, k, l, end_obj=-1, no_param=0;
-    char        sobj[MAX_NC_NAME];
-    char        scomp[10];
-    char        stype[5];
-    char        smask[3];
-    obj_list_t* obj_list=NULL;
-    unsigned    pixels_per_block;
+	unsigned    i, u;
+	char        c;
+	size_t      len=HDstrlen(str);
+	int         j, m, n, k, l, p, r, q, end_obj=-1, no_param=0;
+	char        sobj[MAX_NC_NAME];
+	char        scomp[10];
+	char        stype[5];
+	char        smask[3];
+	obj_list_t* obj_list=NULL;
+	unsigned    pixels_per_block;
 
 
-    /* initialize compression  info */
-    HDmemset(filt,0,sizeof(filter_info_t));
-    *is_glb = 0;
+	/* initialize compression  info */
+	HDmemset(filt,0,sizeof(filter_info_t));
+	*is_glb = 0;
 
-    /* check for the end of object list and number of objects */
-    for ( i = 0, n = 0; i < len; i++)
-    {
-        c = str[i];
-        if ( c==':' )
-        {
-            end_obj=i;
-        }
-        if ( c==',' )
-        {
-            n++;
-        }
-    }
+	/* check for the end of object list and number of objects */
+	for ( i = 0, n = 0; i < len; i++)
+	{
+		c = str[i];
+		if ( c==':' )
+		{
+			end_obj=i;
+		}
+		if ( c==',' )
+		{
+			n++;
+		}
+	}
 
-    if (end_obj==-1) /* missing : */
-    {
-        /* apply to all objects */
-        options->all_filter=1;
-        *is_glb = 1;
-    }
+	if (end_obj==-1) /* missing : */
+	{
+		/* apply to all objects */
+		options->all_filter=1;
+		*is_glb = 1;
+	}
 
-    n++;
-    obj_list = (obj_list_t*) HDmalloc(n*sizeof(obj_list_t));
-    if (obj_list==NULL)
-    {
-        error_msg("could not allocate object list\n");
-        return NULL;
-    }
-    *n_objs=n;
+	n++;
+	obj_list = (obj_list_t*) HDmalloc(n*sizeof(obj_list_t));
+	if (obj_list==NULL)
+	{
+		error_msg("could not allocate object list\n");
+		return NULL;
+	}
+	*n_objs=n;
 
-    /* get object list */
-    for ( j = 0, k = 0, n = 0; j < end_obj; j++, k++)
-    {
-        c = str[j];
-        sobj[k] = c;
-        if ( c==',' || j==end_obj-1)
-        {
-            if ( c==',') sobj[k]='\0'; else sobj[k+1]='\0';
-            HDstrcpy(obj_list[n].obj,sobj);
-            HDmemset(sobj,0,sizeof(sobj));
-            n++;
-            k=-1;
-        }
-    }
-    /* nothing after : */
-    if (end_obj+1==(int)len)
-    {
-        if (obj_list) HDfree(obj_list);
-        error_msg("input Error: Invalid compression type in <%s>\n",str);
-        HDexit(EXIT_FAILURE);
-    }
-
-
-    /* get filter additional parameters */
-    m=0;
-    for ( i=end_obj+1, k=0, j=0; i<len; i++,k++)
-    {
-        c = str[i];
-        scomp[k]=c;
-        if ( c=='=' || i==len-1)
-        {
-            if ( c=='=') /*one more parameter */
-            {
-                scomp[k]='\0';     /*cut space */
-
-               /*-------------------------------------------------------------------------
-                * H5Z_FILTER_SZIP
-                * szip has the format SZIP=<pixels per block,coding>
-                * pixels per block is a even number in 2-32 and coding method is 'EC' or 'NN'
-                * example SZIP=8,NN
-                *-------------------------------------------------------------------------
-                */
-                if (HDstrcmp(scomp,"SZIP")==0)
-                {
-                    l=-1; /* mask index check */
-                    for ( m=0,u=i+1; u<len; u++,m++)
-                    {
-                        if (str[u]==',')
-                        {
-                            stype[m]='\0'; /* end digit of szip */
-                            l=0;  /* start EC or NN search */
-                            u++;  /* skip ',' */
-                        }
-                        c = str[u];
-                        if (!isdigit(c) && l==-1){
-                            if (obj_list) HDfree(obj_list);
-                            error_msg("compression parameter not digit in <%s>\n",str);
-                            HDexit(EXIT_FAILURE);
-                        }
-                        if (l==-1)
-                            stype[m]=c;
-                        else
-                        {
-                            smask[l]=c;
-                            l++;
-                            if (l==2)
-                            {
-                                smask[l]='\0';
-                                i=len-1; /* end */
-                                (*n_objs)--; /* we counted an extra ',' */
-                                if (HDstrcmp(smask,"NN")==0)
-                                    filt->cd_values[j++]=H5_SZIP_NN_OPTION_MASK;
-                                else if (HDstrcmp(smask,"EC")==0)
-                                    filt->cd_values[j++]=H5_SZIP_EC_OPTION_MASK;
-                                else
-                                {
-                                    error_msg("szip mask must be 'NN' or 'EC' \n");
-                                    HDexit(EXIT_FAILURE);
-                                }
+	/* get object list */
+	for ( j = 0, k = 0, n = 0; j < end_obj; j++, k++)
+	{
+		c = str[j];
+		sobj[k] = c;
+		if ( c==',' || j==end_obj-1)
+		{
+			if ( c==',') sobj[k]='\0'; else sobj[k+1]='\0';
+			HDstrcpy(obj_list[n].obj,sobj);
+			HDmemset(sobj,0,sizeof(sobj));
+			n++;
+			k=-1;
+		}
+	}
+	/* nothing after : */
+	if (end_obj+1==(int)len)
+	{
+		if (obj_list) HDfree(obj_list);
+		error_msg("input Error: Invalid compression type in <%s>\n",str);
+		HDexit(EXIT_FAILURE);
+	}
 
 
-                            }
-                        }
+	/* get filter additional parameters */
+	m=0;
+	for ( i=end_obj+1, k=0, j=0; i<len; i++,k++)
+	{
+		c = str[i];
+		scomp[k]=c;
+		if ( c=='=' || i==len-1)
+		{
+			if ( c=='=') /*one more parameter */
+			{
+				scomp[k]='\0';     /*cut space */
 
-                    }  /* u */
-                } /*if */
-
-                  /*-------------------------------------------------------------------------
-                  * H5Z_FILTER_SCALEOFFSET
-                  * scaleoffset has the format SOFF=<scale_factor,scale_type>
-                  * scale_type can be
-                  *   integer datatype, H5Z_SO_INT (IN)
-                  *   float datatype using D-scaling method, H5Z_SO_FLOAT_DSCALE  (DS)
-                  *   float datatype using E-scaling method, H5Z_SO_FLOAT_ESCALE  (ES) , not yet implemented
-                  * for integer datatypes, scale_factor denotes Minimum Bits
-                  * for float datatypes, scale_factor denotes decimal scale factor
-                  *  examples
-                  *  SOFF=31,IN
-                  *  SOFF=3,DF
-                  *-------------------------------------------------------------------------
-                */
-
-                else if (HDstrcmp(scomp,"SOFF")==0)
-                {
-                    l=-1; /* mask index check */
-                    for ( m=0,u=i+1; u<len; u++,m++)
-                    {
-                        if (str[u]==',')
-                        {
-                            stype[m]='\0'; /* end digit */
-                            l=0;  /* start 'IN' , 'DS', or 'ES' search */
-                            u++;  /* skip ',' */
-                        }
-                        c = str[u];
-                        if (!isdigit(c) && l==-1){
-                            if (obj_list) HDfree(obj_list);
-                            error_msg("compression parameter is not a digit in <%s>\n",str);
-                            HDexit(EXIT_FAILURE);
-                        }
-                        if (l==-1)
-                            stype[m]=c;
-                        else
-                        {
-                            smask[l]=c;
-                            l++;
-                            if (l==2)
-                            {
-                                smask[l]='\0';
-                                i=len-1; /* end */
-                                (*n_objs)--; /* we counted an extra ',' */
-                                if (HDstrcmp(smask,"IN")==0)
-                                    filt->cd_values[j++]=H5Z_SO_INT;
-                                else if (HDstrcmp(smask,"DS")==H5Z_SO_FLOAT_DSCALE)
-                                    filt->cd_values[j++]=H5Z_SO_FLOAT_DSCALE;
-                                else
-                                {
-                                    error_msg("scale type must be 'IN' or 'DS' \n");
-                                    HDexit(EXIT_FAILURE);
-                                }
-
-                            }
-                        }
-
-                    }  /* u */
-                } /*if */
+				/*-------------------------------------------------------------------------
+				 * H5Z_FILTER_SZIP
+				 * szip has the format SZIP=<pixels per block,coding>
+				 * pixels per block is a even number in 2-32 and coding method is 'EC' or 'NN'
+				 * example SZIP=8,NN
+				 *-------------------------------------------------------------------------
+				 */
+				if (HDstrcmp(scomp,"SZIP")==0)
+				{
+					l=-1; /* mask index check */
+					for ( m=0,u=i+1; u<len; u++,m++)
+					{
+						if (str[u]==',')
+						{
+							stype[m]='\0'; /* end digit of szip */
+							l=0;  /* start EC or NN search */
+							u++;  /* skip ',' */
+						}
+						c = str[u];
+						if (!isdigit(c) && l==-1)
+						{
+							if (obj_list) HDfree(obj_list);
+							error_msg("compression parameter not digit in <%s>\n",str);
+							HDexit(EXIT_FAILURE);
+						}
+						if (l==-1)
+							stype[m]=c;
+						else
+						{
+							smask[l]=c;
+							l++;
+							if (l==2)
+							{
+								smask[l]='\0';
+								i=len-1; /* end */
+								(*n_objs)--; /* we counted an extra ',' */
+								if (HDstrcmp(smask,"NN")==0)
+									filt->cd_values[j++]=H5_SZIP_NN_OPTION_MASK;
+								else if (HDstrcmp(smask,"EC")==0)
+									filt->cd_values[j++]=H5_SZIP_EC_OPTION_MASK;
+								else
+								{
+									error_msg("szip mask must be 'NN' or 'EC' \n");
+									HDexit(EXIT_FAILURE);
+								}
 
 
-               /*-------------------------------------------------------------------------
-                * all other filters
-                *-------------------------------------------------------------------------
-                */
+							}
+						}
 
-                else
-                {
-                    /* here we could have 1 or 2 digits  */
-                    for ( m=0,u=i+1; u<len; u++,m++)
-                    {
-                        c = str[u];
-                        if (!isdigit(c)){
-                            if (obj_list) HDfree(obj_list);
-                            error_msg("compression parameter is not a digit in <%s>\n",str);
-                            HDexit(EXIT_FAILURE);
-                        }
-                        stype[m]=c;
-                    } /* u */
+					}  /* u */
+				} /*if */
 
-                    stype[m]='\0';
-                } /*if */
+				/*-------------------------------------------------------------------------
+				 * H5Z_FILTER_SCALEOFFSET
+				 * scaleoffset has the format SOFF=<scale_factor,scale_type>
+				 * scale_type can be
+				 *   integer datatype, H5Z_SO_INT (IN)
+				 *   float datatype using D-scaling method, H5Z_SO_FLOAT_DSCALE  (DS)
+				 *   float datatype using E-scaling method, H5Z_SO_FLOAT_ESCALE  (ES) , not yet implemented
+				 * for integer datatypes, scale_factor denotes Minimum Bits
+				 * for float datatypes, scale_factor denotes decimal scale factor
+				 *  examples
+				 *  SOFF=31,IN
+				 *  SOFF=3,DF
+				 *-------------------------------------------------------------------------
+				 */
 
+				else if (HDstrcmp(scomp,"SOFF")==0)
+				{
+					l=-1; /* mask index check */
+					for ( m=0,u=i+1; u<len; u++,m++)
+					{
+						if (str[u]==',')
+						{
+							stype[m]='\0'; /* end digit */
+							l=0;  /* start 'IN' , 'DS', or 'ES' search */
+							u++;  /* skip ',' */
+						}
+						c = str[u];
+						if (!isdigit(c) && l==-1)
+						{
+							if (obj_list) HDfree(obj_list);
+							error_msg("compression parameter is not a digit in <%s>\n",str);
+							HDexit(EXIT_FAILURE);
+						}
+						if (l==-1)
+							stype[m]=c;
+						else
+						{
+							smask[l]=c;
+							l++;
+							if (l==2)
+							{
+								smask[l]='\0';
+								i=len-1; /* end */
+								(*n_objs)--; /* we counted an extra ',' */
+								if (HDstrcmp(smask,"IN")==0)
+									filt->cd_values[j++]=H5Z_SO_INT;
+								else if (HDstrcmp(smask,"DS")==H5Z_SO_FLOAT_DSCALE)
+									filt->cd_values[j++]=H5Z_SO_FLOAT_DSCALE;
+								else
+								{
+									error_msg("scale type must be 'IN' or 'DS' \n");
+									HDexit(EXIT_FAILURE);
+								}
 
+							}
+						}
 
-                filt->cd_values[j++]=atoi(stype);
-                i+=m; /* jump */
-   }
-   else if (i==len-1)
-   { /*no more parameters */
-       scomp[k+1]='\0';
-       no_param=1;
-   }
+					}  /* u */
+				} /*if */
+				/*-------------------------------------------------------------------------
+				 * User Defined
+				 *   has the format UD=<filter_number,cd_value_count,value_1[,value_2,...,value_N]>
+				 *  BZIP2 example
+				 *  UD=307,1,9
+				 *-------------------------------------------------------------------------
+				 */
 
-  /*-------------------------------------------------------------------------
-   * translate from string to filter symbol
-   *-------------------------------------------------------------------------
-   */
+				else if (HDstrcmp(scomp,"UD")==0)
+				{
+					l=-1; /* filter number index check */
+					p=-1; /* CD_VAL count check */
+					r=-1; /* CD_VAL check */
+					for ( m=0,q=0,u=i+1; u<len; u++,m++,q++)
+					{
+						if (str[u]==',')
+						{
+							stype[q]='\0'; /* end digit */
+							if (l==-1)
+							{
+								filt->filtn=atoi(stype);
+								l=0;
+							}
+							else if (p==-1)
+							{
+								filt->cd_nelmts=atoi(stype);
+								p=0;
+							}
+							else
+								r=0;
+							q=0;
+							u++;  /* skip ',' */
+						}
+						c = str[u];
+						if (!isdigit(c) && l==-1)
+						{
+							if (obj_list) HDfree(obj_list);
+							error_msg("filter number parameter is not a digit in <%s>\n",str);
+							HDexit(EXIT_FAILURE);
+						}
+						stype[q]=c;
+						if (l==0 && p==0)
+						{
+							if (r==0)
+								filt->cd_values[j++]=atoi(stype);
+						}
 
-  /*-------------------------------------------------------------------------
-   * H5Z_FILTER_NONE
-   *-------------------------------------------------------------------------
-   */
-   if (HDstrcmp(scomp,"NONE")==0)
-   {
-       filt->filtn=H5Z_FILTER_NONE;
-       filt->cd_nelmts = 0;
-   }
+					}  /* u */
 
-  /*-------------------------------------------------------------------------
-   * H5Z_FILTER_DEFLATE
-   *-------------------------------------------------------------------------
-   */
-   else if (HDstrcmp(scomp,"GZIP")==0)
-   {
-       filt->filtn=H5Z_FILTER_DEFLATE;
-       filt->cd_nelmts = 1;
-       if (no_param)
-       { /*no more parameters, GZIP must have parameter */
-           if (obj_list) HDfree(obj_list);
-           error_msg("missing compression parameter in <%s>\n",str);
-           HDexit(EXIT_FAILURE);
-       }
-   }
-
-  /*-------------------------------------------------------------------------
-   * H5Z_FILTER_SZIP
-   *-------------------------------------------------------------------------
-   */
-   else if (HDstrcmp(scomp,"SZIP")==0)
-   {
-       filt->filtn=H5Z_FILTER_SZIP;
-       filt->cd_nelmts = 2;
-       if (no_param)
-       { /*no more parameters, SZIP must have parameter */
-           if (obj_list) HDfree(obj_list);
-           error_msg("missing compression parameter in <%s>\n",str);
-           HDexit(EXIT_FAILURE);
-       }
-   }
-
-   /*-------------------------------------------------------------------------
-   * H5Z_FILTER_SHUFFLE
-   *-------------------------------------------------------------------------
-   */
-   else if (HDstrcmp(scomp,"SHUF")==0)
-   {
-       filt->filtn=H5Z_FILTER_SHUFFLE;
-       filt->cd_nelmts = 0;
-       if (m>0)
-       { /*shuffle does not have parameter */
-           if (obj_list) HDfree(obj_list);
-           error_msg("extra parameter in SHUF <%s>\n",str);
-           HDexit(EXIT_FAILURE);
-       }
-   }
-  /*-------------------------------------------------------------------------
-   * H5Z_FILTER_FLETCHER32
-   *-------------------------------------------------------------------------
-   */
-   else if (HDstrcmp(scomp,"FLET")==0)
-   {
-       filt->filtn=H5Z_FILTER_FLETCHER32;
-       filt->cd_nelmts = 0;
-       if (m>0)
-       { /*shuffle does not have parameter */
-           if (obj_list) HDfree(obj_list);
-           error_msg("extra parameter in FLET <%s>\n",str);
-           HDexit(EXIT_FAILURE);
-       }
-   }
-  /*-------------------------------------------------------------------------
-   * H5Z_FILTER_NBIT
-   *-------------------------------------------------------------------------
-   */
-   else if (HDstrcmp(scomp,"NBIT")==0)
-   {
-       filt->filtn=H5Z_FILTER_NBIT;
-       filt->cd_nelmts = 0;
-       if (m>0)
-       { /*nbit does not have parameter */
-           if (obj_list) HDfree(obj_list);
-           error_msg("extra parameter in NBIT <%s>\n",str);
-           HDexit(EXIT_FAILURE);
-       }
-   }
-  /*-------------------------------------------------------------------------
-   * H5Z_FILTER_SCALEOFFSET
-   *-------------------------------------------------------------------------
-   */
-   else if (HDstrcmp(scomp,"SOFF")==0)
-   {
-       filt->filtn=H5Z_FILTER_SCALEOFFSET;
-       filt->cd_nelmts = 2;
-       if (no_param)
-       { /*no more parameters, SOFF must have parameter */
-           if (obj_list) HDfree(obj_list);
-           error_msg("missing compression parameter in <%s>\n",str);
-           HDexit(EXIT_FAILURE);
-       }
-   }
-   else {
-       if (obj_list) HDfree(obj_list);
-       error_msg("invalid filter type in <%s>\n",str);
-       HDexit(EXIT_FAILURE);
-   }
-  }
- } /*i*/
-
-  /*-------------------------------------------------------------------------
-   * check valid parameters
-   *-------------------------------------------------------------------------
-   */
-
-   switch (filt->filtn)
-   {
-
-  /*-------------------------------------------------------------------------
-   * H5Z_FILTER_DEFLATE
-   *-------------------------------------------------------------------------
-   */
-
-   case H5Z_FILTER_DEFLATE:
-       if (filt->cd_values[0]>9 )
-       {
-           if (obj_list) HDfree(obj_list);
-           error_msg("invalid compression parameter in <%s>\n",str);
-           HDexit(EXIT_FAILURE);
-       }
-       break;
-
-  /*-------------------------------------------------------------------------
-   * H5Z_FILTER_SZIP
-   *-------------------------------------------------------------------------
-   */
-
-   case H5Z_FILTER_SZIP:
-       pixels_per_block=filt->cd_values[0];
-       if ((pixels_per_block%2)==1)
-       {
-           if (obj_list) HDfree(obj_list);
-           error_msg("pixels_per_block is not even in <%s>\n",str);
-           HDexit(EXIT_FAILURE);
-       }
-       if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK)
-       {
-           if (obj_list) HDfree(obj_list);
-           error_msg("pixels_per_block is too large in <%s>\n",str);
-           HDexit(EXIT_FAILURE);
-       }
-       if ( (HDstrcmp(smask,"NN")!=0) && (HDstrcmp(smask,"EC")!=0) )
-       {
-           if (obj_list) HDfree(obj_list);
-           error_msg("szip mask must be 'NN' or 'EC' \n");
-           HDexit(EXIT_FAILURE);
-       }
-       break;
-   default:
-       break;
+					stype[q]='\0';
+				} /*if */
 
 
-   };
+				/*-------------------------------------------------------------------------
+				 * all other filters
+				 *-------------------------------------------------------------------------
+				 */
 
-   return obj_list;
+				else
+				{
+					/* here we could have 1 or 2 digits  */
+					for ( m=0,u=i+1; u<len; u++,m++)
+					{
+						c = str[u];
+						if (!isdigit(c)){
+							if (obj_list) HDfree(obj_list);
+							error_msg("compression parameter is not a digit in <%s>\n",str);
+							HDexit(EXIT_FAILURE);
+						}
+						stype[m]=c;
+					} /* u */
+
+					stype[m]='\0';
+				} /*if */
+
+
+
+				filt->cd_values[j++]=atoi(stype);
+				i+=m; /* jump */
+			}
+			else if (i==len-1)
+			{ /*no more parameters */
+				scomp[k+1]='\0';
+				no_param=1;
+			}
+
+			/*-------------------------------------------------------------------------
+			 * translate from string to filter symbol
+			 *-------------------------------------------------------------------------
+			 */
+
+			/*-------------------------------------------------------------------------
+			 * H5Z_FILTER_NONE
+			 *-------------------------------------------------------------------------
+			 */
+			if (HDstrcmp(scomp,"NONE")==0)
+			{
+				filt->filtn=H5Z_FILTER_NONE;
+				filt->cd_nelmts = 0;
+			}
+
+			/*-------------------------------------------------------------------------
+			 * H5Z_FILTER_DEFLATE
+			 *-------------------------------------------------------------------------
+			 */
+			else if (HDstrcmp(scomp,"GZIP")==0)
+			{
+				filt->filtn=H5Z_FILTER_DEFLATE;
+				filt->cd_nelmts = 1;
+				if (no_param)
+				{ /*no more parameters, GZIP must have parameter */
+					if (obj_list) HDfree(obj_list);
+					error_msg("missing compression parameter in <%s>\n",str);
+					HDexit(EXIT_FAILURE);
+				}
+			}
+
+			/*-------------------------------------------------------------------------
+			 * H5Z_FILTER_SZIP
+			 *-------------------------------------------------------------------------
+			 */
+			else if (HDstrcmp(scomp,"SZIP")==0)
+			{
+				filt->filtn=H5Z_FILTER_SZIP;
+				filt->cd_nelmts = 2;
+				if (no_param)
+				{ /*no more parameters, SZIP must have parameter */
+					if (obj_list) HDfree(obj_list);
+					error_msg("missing compression parameter in <%s>\n",str);
+					HDexit(EXIT_FAILURE);
+				}
+			}
+
+			/*-------------------------------------------------------------------------
+			 * H5Z_FILTER_SHUFFLE
+			 *-------------------------------------------------------------------------
+			 */
+			else if (HDstrcmp(scomp,"SHUF")==0)
+			{
+				filt->filtn=H5Z_FILTER_SHUFFLE;
+				filt->cd_nelmts = 0;
+				if (m>0)
+				{ /*shuffle does not have parameter */
+					if (obj_list) HDfree(obj_list);
+					error_msg("extra parameter in SHUF <%s>\n",str);
+					HDexit(EXIT_FAILURE);
+				}
+			}
+			/*-------------------------------------------------------------------------
+			 * H5Z_FILTER_FLETCHER32
+			 *-------------------------------------------------------------------------
+			 */
+			else if (HDstrcmp(scomp,"FLET")==0)
+			{
+				filt->filtn=H5Z_FILTER_FLETCHER32;
+				filt->cd_nelmts = 0;
+				if (m>0)
+				{ /*shuffle does not have parameter */
+					if (obj_list) HDfree(obj_list);
+					error_msg("extra parameter in FLET <%s>\n",str);
+					HDexit(EXIT_FAILURE);
+				}
+			}
+			/*-------------------------------------------------------------------------
+			 * H5Z_FILTER_NBIT
+			 *-------------------------------------------------------------------------
+			 */
+			else if (HDstrcmp(scomp,"NBIT")==0)
+			{
+				filt->filtn=H5Z_FILTER_NBIT;
+				filt->cd_nelmts = 0;
+				if (m>0)
+				{ /*nbit does not have parameter */
+					if (obj_list) HDfree(obj_list);
+					error_msg("extra parameter in NBIT <%s>\n",str);
+					HDexit(EXIT_FAILURE);
+				}
+			}
+			/*-------------------------------------------------------------------------
+			 * H5Z_FILTER_SCALEOFFSET
+			 *-------------------------------------------------------------------------
+			 */
+			else if (HDstrcmp(scomp,"SOFF")==0)
+			{
+				filt->filtn=H5Z_FILTER_SCALEOFFSET;
+				filt->cd_nelmts = 2;
+				if (no_param)
+				{ /*no more parameters, SOFF must have parameter */
+					if (obj_list) HDfree(obj_list);
+					error_msg("missing compression parameter in <%s>\n",str);
+					HDexit(EXIT_FAILURE);
+				}
+			}
+			/*-------------------------------------------------------------------------
+			 * User Defined Filter
+			 *-------------------------------------------------------------------------
+			 */
+			else if (HDstrcmp(scomp,"UD")==0)
+			{
+				if (filt->cd_nelmts != j)
+				{ /* parameters does not match count */
+					if (obj_list) HDfree(obj_list);
+					error_msg("incorrect number of compression parameters in <%s>\n",str);
+					HDexit(EXIT_FAILURE);
+				}
+			}
+			else {
+				if (obj_list) HDfree(obj_list);
+				error_msg("invalid filter type in <%s>\n",str);
+				HDexit(EXIT_FAILURE);
+			}
+		}
+	} /*i*/
+
+	/*-------------------------------------------------------------------------
+	 * check valid parameters
+	 *-------------------------------------------------------------------------
+	 */
+
+	switch (filt->filtn)
+	{
+
+	/*-------------------------------------------------------------------------
+	 * H5Z_FILTER_DEFLATE
+	 *-------------------------------------------------------------------------
+	 */
+
+	case H5Z_FILTER_DEFLATE:
+		if (filt->cd_values[0]>9 )
+		{
+			if (obj_list) HDfree(obj_list);
+			error_msg("invalid compression parameter in <%s>\n",str);
+			HDexit(EXIT_FAILURE);
+		}
+		break;
+
+		/*-------------------------------------------------------------------------
+		 * H5Z_FILTER_SZIP
+		 *-------------------------------------------------------------------------
+		 */
+
+	case H5Z_FILTER_SZIP:
+		pixels_per_block=filt->cd_values[0];
+		if ((pixels_per_block%2)==1)
+		{
+			if (obj_list) HDfree(obj_list);
+			error_msg("pixels_per_block is not even in <%s>\n",str);
+			HDexit(EXIT_FAILURE);
+		}
+		if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK)
+		{
+			if (obj_list) HDfree(obj_list);
+			error_msg("pixels_per_block is too large in <%s>\n",str);
+			HDexit(EXIT_FAILURE);
+		}
+		if ( (HDstrcmp(smask,"NN")!=0) && (HDstrcmp(smask,"EC")!=0) )
+		{
+			if (obj_list) HDfree(obj_list);
+			error_msg("szip mask must be 'NN' or 'EC' \n");
+			HDexit(EXIT_FAILURE);
+		}
+		break;
+	default:
+		break;
+
+
+	};
+
+	return obj_list;
 }
 
 

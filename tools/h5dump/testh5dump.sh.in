@@ -797,6 +797,40 @@ TOOLTEST5() {
     fi
 
 }
+# ADD_HELP_TEST
+TOOLTEST_HELP() {
+
+    expect="$TESTDIR/$1"
+    actual="$TESTDIR/`basename $1 .txt`.out"
+    actual_err="$TESTDIR/`basename $1 .txt`.err"
+    shift
+
+    # Run test.
+    TESTING $DUMPER $@
+    (
+      cd $TESTDIR
+      $RUNSERIAL $DUMPER_BIN "$@"
+    ) >$actual 2>$actual_err
+    cat $actual_err >> $actual
+
+    if [ ! -f $expectdata ]; then
+    # Create the expect data file if it doesn't yet exist.
+      echo " CREATED"
+      cp $actual $expect-CREATED
+    elif $CMP $expect $actual; then
+      echo " PASSED"
+    else
+      echo "*FAILED*"
+      echo "    Expected output (*.txt) differs from actual output (*.out)"
+      nerrors="`expr $nerrors + 1`"
+    fi
+    
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actual_err
+    fi
+
+}
 
 # Print a "SKIP" message
 SKIP() {
@@ -873,7 +907,7 @@ IMPORTTEST()
 # prepare for test
 COPY_TESTFILES_TO_TESTDIR
 
-#TOOLTEST h5dump-help.txt -h
+TOOLTEST_HELP h5dump-help.txt -h
 
 # test data output redirection
 TOOLTEST tnoddl.ddl --enable-error-stack --ddl -y packedbits.h5

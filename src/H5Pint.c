@@ -4787,9 +4787,6 @@ done:
 char *
 H5P_get_class_path(H5P_genclass_t *pclass)
 {
-    char *par_path;     /* Parent class's full path */
-    size_t par_path_len;/* Parent class's full path's length */
-    size_t my_path_len; /* This class's name's length */
     char *ret_value;    /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -4797,33 +4794,32 @@ H5P_get_class_path(H5P_genclass_t *pclass)
     HDassert(pclass);
 
     /* Recursively build the full path */
-    if(pclass->parent!=NULL) {
+    if(pclass->parent != NULL) {
+        char *par_path;     /* Parent class's full path */
+
         /* Get the parent class's path */
-        par_path=H5P_get_class_path(pclass->parent);
-        if(par_path!=NULL) {
-            /* Get the string lengths we need to allocate space */
-            par_path_len=HDstrlen(par_path);
-            my_path_len=HDstrlen(pclass->name);
+        par_path = H5P_get_class_path(pclass->parent);
+        if(par_path != NULL) {
+            size_t ret_str_len;
 
             /* Allocate enough space for the parent class's path, plus the '/'
              * separator, this class's name and the string terminator
              */
-            if(NULL == (ret_value = (char *)H5MM_malloc(par_path_len + 1 + my_path_len + 1)))
+            ret_str_len = HDstrlen(par_path) + 1 + HDstrlen(pclass->name) + 1;
+            if(NULL == (ret_value = (char *)H5MM_malloc(ret_str_len)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for class name")
 
             /* Build the full path for this class */
-            HDstrcpy(ret_value,par_path);
-            HDstrcat(ret_value,"/");
-            HDstrcat(ret_value,pclass->name);
+            HDsnprintf(ret_value, ret_str_len, "%s/%s", par_path, pclass->name);
 
             /* Free the parent class's path */
             H5MM_xfree(par_path);
         } /* end if */
         else
-            ret_value=H5MM_xstrdup(pclass->name);
+            ret_value = H5MM_xstrdup(pclass->name);
     } /* end if */
     else
-        ret_value=H5MM_xstrdup(pclass->name);
+        ret_value = H5MM_xstrdup(pclass->name);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
