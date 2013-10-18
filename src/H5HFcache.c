@@ -408,7 +408,8 @@ H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     uint32_t            stored_chksum;  	/* Stored metadata checksum value */
     uint32_t            computed_chksum; 	/* Computed metadata checksum value */
     size_t 		tries, max_tries;	/* The # of read attempts */
-	size_t fixed_tries;
+    size_t 		fixed_tries;		/* The # of read attempts for the minimum portion */
+    size_t 		retries;		/* The # of retries */
     H5HF_hdr_t		*ret_value;     	/* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -488,8 +489,14 @@ H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     if(tries == 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum after all tries (%u) for fractal heap header", max_tries)
-    else if((max_tries - tries + 1) > 1)
-        HDfprintf(stderr, "%s: SUCCESS after %u attempts\n", FUNC, max_tries - tries + 1);
+
+    /* Calculate and track the # of retry */
+    retries = max_tries - tries;
+    if(retries) { /* Does not track 0 retry */
+        HDfprintf(stderr, "%s: SUCCESS after %u retries\n", FUNC, retries);
+	if(H5F_track_metadata_read_retries(f, H5AC_FHEAP_HDR_ID, retries) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "cannot track read tries = %u ", retries)
+    }
 
     p = buf;
 
@@ -845,7 +852,7 @@ H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
         HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read and validate indirect block from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_FHEAP_IBLOCK, addr, iblock->size, iblock->size, dxpl_id, buf, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, H5FD_MEM_FHEAP_IBLOCK, H5AC_FHEAP_IBLOCK_ID, addr, iblock->size, iblock->size, dxpl_id, buf, &computed_chksum) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Get temporary pointer to serialized indirect block */
@@ -1308,6 +1315,7 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     uint32_t 		computed_chksum;       /* Computed metadata checksum value */
     uint32_t 		stored_chksum;         /* Metadata checksum value */
     size_t 		tries, max_tries;	/* The # of read attempts */
+    size_t 		retries;		/* The # of retries */
     size_t 		chk_size;		/* The size for validating checksum */
     uint8_t 		*chk_p;			/* Pointer to the area for validating checksum */
     size_t 		read_size;       	/* Size of filtered direct block to read */
@@ -1431,8 +1439,14 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     if(tries == 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum after all tries (%u) for fractal heap direct block", max_tries)
-    else if((max_tries - tries + 1) > 1)
-        HDfprintf(stderr, "%s: SUCCESS after %u attempts\n", FUNC, max_tries - tries + 1);
+
+    /* Calculate and track the # of retries */
+    retries = max_tries - tries;
+    if(retries) { /* Does not track 0 retry */
+        HDfprintf(stderr, "%s: SUCCESS after %u retries\n", FUNC, retries);
+	if(H5F_track_metadata_read_retries(f, H5AC_FHEAP_DBLOCK_ID, retries) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "cannot track read retries = %u ", retries)
+    }
 
     /* Start decoding direct block */
     p = dblock->blk;

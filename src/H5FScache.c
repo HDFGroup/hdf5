@@ -183,7 +183,7 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
         HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read and validate header from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_FSPACE_HDR, addr, fspace->hdr_size, fspace->hdr_size, dxpl_id, hdr, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, H5FD_MEM_FSPACE_HDR, H5AC_FSPACE_HDR_ID, addr, fspace->hdr_size, fspace->hdr_size, dxpl_id, hdr, &computed_chksum) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for free space header")
 
     p = hdr;
@@ -575,7 +575,7 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Read and validate free space sections from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_FSPACE_SINFO, udata->fspace->sect_addr, (size_t)udata->fspace->sect_size, (size_t)udata->fspace->sect_size, dxpl_id, buf, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, H5FD_MEM_FSPACE_SINFO, H5AC_FSPACE_SINFO_ID, udata->fspace->sect_addr, (size_t)udata->fspace->sect_size, (size_t)udata->fspace->sect_size, dxpl_id, buf, &computed_chksum) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for free space sections")
 
     /* Deserialize free sections from buffer available */

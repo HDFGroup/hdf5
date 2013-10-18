@@ -291,9 +291,11 @@ H5F_get_checksums(uint8_t *buf, size_t chk_size, uint32_t *s_chksum/*out*/, uint
  * 		a) read the piece of metadata
  * 		b) calculate checksum for the buffer of metadata
  * 		c) decode the checksum stored in the buffer of metadata
-  		d) compare the computed checksum with its stored checksum
+ *		d) compare the computed checksum with its stored checksum
  *	       	The library will perform (a) to (d) above for "f->read_attempts"
  *		times or until the checksum comparison in (d) passes.
+ *		This routine also tracks the # of retries via 
+ *		H5F_track_metadata_read_retries()
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -302,13 +304,14 @@ H5F_get_checksums(uint8_t *buf, size_t chk_size, uint32_t *s_chksum/*out*/, uint
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_read_check_metadata(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t read_size, size_t chk_size,
+H5F_read_check_metadata(H5F_t *f, H5FD_mem_t type, H5AC_type_t actype, haddr_t addr, size_t read_size, size_t chk_size,
     hid_t dxpl_id, uint8_t *buf/*out*/, uint32_t *chksum/*out*/)
 {
-    size_t tries, max_tries;
+    size_t tries, max_tries;	/* The # of read attempts */
+    size_t retries;		/* The # of retries */
     uint32_t stored_chksum;  	/* Stored metadata checksum value */
     uint32_t computed_chksum; 	/* Computed metadata checksum value */
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -332,8 +335,14 @@ H5F_read_check_metadata(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t re
     if(tries == 0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "incorrect metadatda checksum after all read attempts (%u) for %u bytes:c_chksum=%u, s_chkum=%u", 
 	    max_tries, chk_size, computed_chksum, stored_chksum)
-    else if((max_tries - tries + 1) > 1)
-        HDfprintf(stderr, "%s: SUCCESS after %u attempts; type=%u\n", FUNC, max_tries - tries + 1, type);
+
+    /* Calculate and track the # of retries */
+    retries = max_tries - tries;
+    if(retries) { /* Does not track 0 retry */
+        HDfprintf(stderr, "%s: SUCCESS after %u retries; actype=%u\n", FUNC, retries, actype);
+	if(H5F_track_metadata_read_retries(f, actype, retries) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "cannot track read tries = %u ", retries)
+    }
 
     /* Return the computed checksum */
     if(chksum)

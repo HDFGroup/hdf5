@@ -319,6 +319,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     size_t	buf_size;       /* Size of prefix+chunk #0 buffer */
     haddr_t     eoa;		/* Relative end of file address	*/
     size_t 	tries, max_tries;	/* The # of read attempts */
+    size_t	retries;		/* The # of retries */
     size_t 	fixed_tries; 		/* The # of read attempts for prefix */
     uint32_t 	stored_chksum;     	/* Stored metadata checksum value */
     uint32_t 	computed_chksum;   	/* Computed metadata checksum value */
@@ -420,8 +421,14 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     if(tries == 0)
        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "incorrect metadata checksum for object header chunk after all read tries (%u) for %u bytes", max_tries, buf_size)
-    else if((max_tries - tries + 1) > 1)
-        HDfprintf(stderr, "%s: SUCCESS after %u attempts\n", FUNC, max_tries - tries + 1);
+
+    /* Calculate and track the # of retries */
+    retries = max_tries - tries;
+    if(retries) { /* Does not track 0 retry */
+        HDfprintf(stderr, "%s: SUCCESS after %u retries\n", FUNC, retries);
+	if(H5F_track_metadata_read_retries(f, H5AC_OHDR_ID, retries) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "cannot track read retries = %u ", retries)
+    }
 
     /* File-specific, non-stored information */
     oh->sizeof_size = H5F_SIZEOF_SIZE(udata->common.f);
@@ -818,7 +825,7 @@ H5O_cache_chk_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     /* Read rest of the raw data */
     if(udata->oh->version == H5O_VERSION_2 && udata->decoding) {
 	/* Read and validate object header continuation chunk */
-	if(H5F_read_check_metadata(f, H5FD_MEM_OHDR, addr, udata->size, udata->size, dxpl_id, buf, NULL) < 0)
+	if(H5F_read_check_metadata(f, H5FD_MEM_OHDR, H5AC_OHDR_CHK_ID, addr, udata->size, udata->size, dxpl_id, buf, NULL) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "incorrect metadata checksum for object header continuation chunk")
     } else {
 	/* Read the header object continuation chunk */

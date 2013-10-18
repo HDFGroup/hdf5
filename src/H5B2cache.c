@@ -188,7 +188,7 @@ H5B2__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
         HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read and validate header from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_BTREE, addr, hdr->hdr_size, hdr->hdr_size, dxpl_id, buf, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, H5FD_MEM_BTREE, H5AC_BT2_HDR_ID, addr, hdr->hdr_size, hdr->hdr_size, dxpl_id, buf, &computed_chksum) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 B-tree header")
 
     /* Get temporary pointer to serialized header */
@@ -607,7 +607,7 @@ H5B2__cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     chk_size = H5B2_INT_PREFIX_SIZE + (udata->nrec * udata->hdr->rrec_size) + ((udata->nrec + 1) * H5B2_INT_POINTER_SIZE(udata->hdr, udata->depth));
 
     /* Read and validate internal node from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_BTREE, addr, udata->hdr->node_size, chk_size, dxpl_id, udata->hdr->page, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, H5FD_MEM_BTREE, H5AC_BT2_INT_ID, addr, udata->hdr->node_size, chk_size, dxpl_id, udata->hdr->page, &computed_chksum) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 internal node")
 
     p = udata->hdr->page;
@@ -1030,7 +1030,7 @@ H5B2__cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata
     chk_size = H5B2_LEAF_PREFIX_SIZE + (udata->nrec * udata->hdr->rrec_size);
 
     /* Read and validate leaf node from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_BTREE, addr, udata->hdr->node_size, chk_size, dxpl_id, udata->hdr->page, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, H5FD_MEM_BTREE, H5AC_BT2_LEAF_ID, addr, udata->hdr->node_size, chk_size, dxpl_id, udata->hdr->page, &computed_chksum) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 leaf node")
 
     p = udata->hdr->page;

@@ -1598,6 +1598,32 @@ H5FD_get_feature_flags(const H5FD_t *file, unsigned long *feature_flags)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_set_feature_flags
+ *
+ * Purpose:	Set the feature flags for the VFD
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Vailin Choi; Oct 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_set_feature_flags(H5FD_t *file, unsigned long feature_flags)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(file);
+
+    /* Set the file's feature flags */
+    file->feature_flags = feature_flags;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FD_set_feature_flags() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_get_fs_type_map
  *
  * Purpose:	Retrieve the free space type mapping for the VFD

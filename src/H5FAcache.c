@@ -195,7 +195,7 @@ H5FA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata))
         H5E_THROW(H5E_CANTGET, "can't get actual buffer")
 
     /* Read and vaildate header from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_FARRAY_HDR, addr, size, size, dxpl_id, buf, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, H5FD_MEM_FARRAY_HDR, H5AC_FARRAY_HDR_ID, addr, size, size, dxpl_id, buf, &computed_chksum) < 0)
         H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for fixed array header")
 
     /* Get temporary pointer to serialized header */
@@ -539,7 +539,7 @@ H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
         H5E_THROW(H5E_CANTGET, "can't get actual buffer")
 
      /* Read and validate data block from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_FARRAY_DBLOCK, addr, size, size, dxpl_id, buf, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, H5FD_MEM_FARRAY_DBLOCK, H5AC_FARRAY_DBLOCK_ID, addr, size, size, dxpl_id, buf, &computed_chksum) < 0)
         H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for fixed array data block")
 
     /* Get temporary pointer to serialized header */
@@ -932,7 +932,7 @@ HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
         H5E_THROW(H5E_CANTGET, "can't get actual buffer")
 
     /* Read and validate data block page from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_FARRAY_DBLK_PAGE, addr, size, size, dxpl_id, buf, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, H5FD_MEM_FARRAY_DBLK_PAGE, H5AC_FARRAY_DBLK_PAGE_ID, addr, size, size, dxpl_id, buf, &computed_chksum) < 0)
         H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for fixed array data block page")
 
     /* Get temporary pointer to serialized header */

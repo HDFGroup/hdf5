@@ -159,7 +159,7 @@ H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *udata)
         HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read and validate shared message table from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_SOHM_TABLE, addr, table->table_size, table->table_size, dxpl_id, buf, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, H5FD_MEM_SOHM_TABLE, H5AC_SOHM_TABLE_ID, addr, table->table_size, table->table_size, dxpl_id, buf, &computed_chksum) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, NULL, "incorrect metadata checksum for shared message table")
 
     /* Get temporary pointer to serialized table */
@@ -494,7 +494,7 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     chk_size = H5SM_LIST_SIZE(udata->f, udata->header->num_messages);
 
     /* Read and validate shared message list from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_SOHM_INDEX, addr, udata->header->list_size, chk_size, dxpl_id, buf, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, H5FD_MEM_SOHM_INDEX, H5AC_SOHM_LIST_ID, addr, udata->header->list_size, chk_size, dxpl_id, buf, &computed_chksum) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, NULL, "incorrect metadata checksum for shared message list")
 
 

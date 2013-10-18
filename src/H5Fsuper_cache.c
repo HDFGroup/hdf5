@@ -127,9 +127,10 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     size_t              variable_size;      /*variable sizeof superblock    */
     uint8_t            *p;                  /* Temporary pointer into encoding buffer */
     unsigned            super_vers;         /* Superblock version          */
-    hbool_t            *dirtied = (hbool_t *)_udata;  /* Set up dirtied out value */
+    hbool_t            *dirtied = (hbool_t *)_udata;  	/* Set up dirtied out value */
     size_t 		tries, max_tries;   /* The # of read attempts to try */
-    size_t 		fixed_tries; 	    /* The # of read attempts to try */
+    size_t 		fixed_tries; 	    /* The # of read attempts to try for the fixed-size portion */
+    size_t 		retries; 	    /* The # of retries */
     uint32_t 		computed_chksum;    /* Computed checksum  */
     uint32_t 		stored_chksum;      /* Checksum read from file  */
     H5F_super_t        	*ret_value;         /* Return value */
@@ -240,8 +241,13 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     if(tries == 0)
 	/* After all tries (for SWMR access) or after 1 try (for non-SWMR) */
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "bad checksum or bad byte number in superblock")
-    else if((max_tries - tries + 1) > 1)
-        HDfprintf(stderr, "%s: SUCCESS after %u attempts\n", FUNC, max_tries - tries + 1);
+
+    retries = max_tries - tries;
+    if(retries) { /* Does not track 0 retry */
+        HDfprintf(stderr, "%s: SUCCESS after %u retries\n", FUNC, retries);
+	if(H5F_track_metadata_read_retries(f, H5AC_SUPERBLOCK_ID, retries) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "cannot track read retries = %u ", retries)
+    }
 
     /* Check for older version of superblock format */
     if(super_vers < HDF5_SUPERBLOCK_VERSION_2) {

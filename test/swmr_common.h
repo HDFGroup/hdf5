@@ -75,5 +75,6 @@ hid_t create_symbol_datatype(void);
 int generate_name(char *name_buf, unsigned level, unsigned count);
 int generate_symbols(void);
 int shutdown_symbols(void);
+int print_metadata_retries_info(hid_t fid);
 
 #endif /* _SWMR_COMMON_H */
