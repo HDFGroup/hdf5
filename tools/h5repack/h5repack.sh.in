@@ -117,11 +117,15 @@ $SRC_TOOLS_TESTFILES/tfamily00010.h5
 "
 
 LIST_OTHER_TEST_FILES="
+$SRC_H5REPACK_TESTFILES/h5repack-help.txt
 $SRC_H5REPACK_TESTFILES/h5repack_ext.bin
 $SRC_H5REPACK_TESTFILES/ublock.bin
 $SRC_H5REPACK_TESTFILES/h5repack.info
+$SRC_H5REPACK_TESTFILES/deflate_limit.h5repack_layout.h5.ddl
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5.ddl
-$SRC_TOOLS_TESTFILES/h5repack_filters.h5.ddl
+$SRC_H5REPACK_TESTFILES/h5repack_filters.h5.tst
+$SRC_H5REPACK_TESTFILES/h5repack_layout.h5-plugin_test.ddl
+$SRC_H5REPACK_TESTFILES/plugin_test.h5repack_layout.h5.tst
 "
 
 #
@@ -436,7 +440,7 @@ TOOLTEST1()
 #
 TOOLTESTV() 
 {
-    expect="$TESTDIR/$2.ddl"
+    expect="$TESTDIR/$2.tst"
     actual="$TESTDIR/`basename $2 .ddl`.out"
     actual_err="$TESTDIR/`basename $2 .ddl`.err"
 
@@ -468,7 +472,7 @@ TOOLTESTV()
      echo " PASSED"
     else
      echo "*FAILED*"
-     echo "    Expected result (*.ddl) differs from actual result (*.out)"
+     echo "    Expected result (*.tst) differs from actual result (*.out)"
      nerrors="`expr $nerrors + 1`"
      test yes = "$verbose" && diff -c $expect $actual |sed 's/^/    /'
     fi
@@ -484,7 +488,7 @@ TOOLTEST_DUMP()
 {
     infile=$TESTDIR/$2
     outfile=$TESTDIR/out-$1.$2
-    expect="$TESTDIR/$2.ddl"
+    expect="$TESTDIR/$1.$2.ddl"
     actual="$TESTDIR/out-$1.$2.out"
     actual_err="$TESTDIR/out-$1.$2.err"
 
@@ -592,6 +596,40 @@ TOOLTEST_META()
     
     rm -f $outfile
 }
+# ADD_HELP_TEST
+TOOLTEST_HELP() {
+
+    expect="$TESTDIR/$1"
+    actual="$TESTDIR/`basename $1 .txt`.out"
+    actual_err="$TESTDIR/`basename $1 .txt`.err"
+    shift
+
+    # Run test.
+    TESTING $H5REPACK $@
+    (
+      cd $TESTDIR
+      $RUNSERIAL $H5REPACK_BIN "$@"
+    ) >$actual 2>$actual_err
+    cat $actual_err >> $actual
+
+    if [ ! -f $expect ]; then
+    # Create the expect data file if it doesn't yet exist.
+      echo " CREATED"
+      cp $actual $expect-CREATED
+    elif cmp -s $expect $actual; then
+      echo " PASSED"
+    else
+      echo "*FAILED*"
+      echo "    Expected output (*.txt) differs from actual output (*.out)"
+      nerrors="`expr $nerrors + 1`"
+    fi
+    
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actual_err
+    fi
+
+}
 
 # This is different from $srcdir/../../bin/output_filter.sh
 STDOUT_FILTER() {
@@ -629,6 +667,8 @@ fi
 ##############################################################################
 # prepare for test
 COPY_TESTFILES_TO_TESTDIR
+
+TOOLTEST_HELP h5repack-help.txt -h
 
 # copy files (these files have no filters) 
 TOOLTEST fill h5repack_fill.h5

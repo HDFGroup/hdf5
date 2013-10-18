@@ -43,7 +43,6 @@
 /* Windows support */
 #ifdef H5_HAVE_WIN32_API
 
-#define H5PL_DEFAULT_PATH       "%ALLUSERSPROFILE%/hdf5/lib/plugin"
 #define H5PL_PATH_SEPARATOR     ";"
 
 /* Handle for dynamic library */
@@ -66,7 +65,6 @@ typedef const void *(__cdecl *H5PL_get_plugin_info_t)(void);
 /* Unix support */
 #else /* H5_HAVE_WIN32_API */
 
-#define H5PL_DEFAULT_PATH       "/usr/local/hdf5/lib/plugin"
 #define H5PL_PATH_SEPARATOR     ":"
 
 /* Handle for dynamic library */
@@ -86,6 +84,8 @@ typedef const void *(__cdecl *H5PL_get_plugin_info_t)(void);
 
 typedef const void *(*H5PL_get_plugin_info_t)(void);
 #endif /* H5_HAVE_WIN32_API */
+
+#define H5PL_DEFAULT_PATH       H5_DEFAULT_PLUGIN
 
 /* Special symbol to indicate no plugin loading */
 #define H5PL_NO_PLUGIN          "::"

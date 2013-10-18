@@ -152,6 +152,14 @@ ENDIF (WIN32)
 #
 SET (H5_DEFAULT_VFD H5FD_SEC2)
 
+IF (NOT DEFINED "H5_DEFAULT_PLUGIN")
+  IF (WINDOWS)
+    SET (H5_DEFAULT_PLUGIN "%ALLUSERSPROFILE%/hdf5/lib/plugin")
+  ELSE (WINDOWS)
+    SET (H5_DEFAULT_PLUGIN "/usr/local/hdf5/lib/plugin")
+  ENDIF (WINDOWS)
+ENDIF (NOT DEFINED "H5_DEFAULT_PLUGIN")
+
 IF (WINDOWS)
   SET (H5_HAVE_WINDOWS 1)
   # ----------------------------------------------------------------------

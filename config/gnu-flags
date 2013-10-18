@@ -220,8 +220,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wformat=2"
 
     # The "unreachable code" warning appears to be reliable now...
-    # (this warning was removed in gcc 4.5+)
-    #H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
+    H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
     H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
