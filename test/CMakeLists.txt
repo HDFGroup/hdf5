@@ -216,7 +216,7 @@ SET (H5_TESTS
     unregister
 )
 IF (NOT CYGWIN)
-  SET (H5_TESTS "${H5_TESTS} big")
+  SET (H5_TESTS ${H5_TESTS} big)
 ENDIF (NOT CYGWIN)
 
 FOREACH (test ${H5_TESTS})
