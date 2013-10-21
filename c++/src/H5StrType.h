@@ -21,6 +21,7 @@
 namespace H5 {
 #endif
 
+//! Class StrType operates on HDF5 string datatypes.
 class H5_DLLCPP StrType : public AtomType {
    public:
 	// Creates a string type using a predefined type

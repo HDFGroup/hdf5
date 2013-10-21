@@ -325,7 +325,7 @@ H5G_build_fullpath(const char *prefix, const char *name)
     /* Build full path */
     HDstrncpy(full_path, prefix, orig_path_len + 1);
     if(need_sep)
-        HDstrncat(full_path, "/", 1);
+        HDstrncat(full_path, "/", (size_t)1);
     HDstrncat(full_path, name, name_len);
 
     /* Create reference counted string for path */
@@ -1331,7 +1331,7 @@ H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *
         /* If there's a buffer provided, copy into it, up to the limit of its size */
         if(name) {
             /* Copy the initial path separator */
-            HDstrncpy(name, "/", 2);
+            HDstrncpy(name, "/", (size_t)2);
 
             /* Append the rest of the path */
             /* (less one character, for the initial path separator) */

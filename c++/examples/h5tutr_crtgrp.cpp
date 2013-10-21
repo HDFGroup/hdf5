@@ -31,7 +31,7 @@
 #endif  // H5_NO_STD
 #endif
 
-const H5std_string FILE_NAME("group.h5");
+const H5std_string FILE_NAME("h5tutr_group.h5");
 
 int main(void)
 {

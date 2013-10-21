@@ -21,6 +21,7 @@
 namespace H5 {
 #endif
 
+//! Class EnumType operates on HDF5 enum datatypes.
 class H5_DLLCPP EnumType : public DataType {
 
    public:

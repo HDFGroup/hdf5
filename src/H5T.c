@@ -528,7 +528,6 @@ H5FL_DEFINE_STATIC(H5T_path_t);
 static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
     H5I_DATATYPE,		/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     8,				/* # of reserved IDs for class */
     (H5I_free_t)H5T_close	/* Callback routine for closing objects of this class */
 }};

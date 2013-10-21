@@ -722,7 +722,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 	HDsnprintf(lib_str, sizeof(lib_str), "HDF5 library version: %d.%d.%d",
 	    H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
 	if(*substr) {
-	    HDstrncat(lib_str, "-", 1);
+	    HDstrncat(lib_str, "-", (size_t)1);
 	    HDstrncat(lib_str, substr, (sizeof(lib_str) - HDstrlen(lib_str)) - 1);
 	} /* end if */
 	if (HDstrcmp(lib_str, H5_lib_vers_info_g)){

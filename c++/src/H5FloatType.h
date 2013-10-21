@@ -21,6 +21,7 @@
 namespace H5 {
 #endif
 
+//! Class FloatType operates on HDF5 floating point datatype.
 class H5_DLLCPP FloatType : public AtomType {
    public:
         // Creates a floating-point type using a predefined type

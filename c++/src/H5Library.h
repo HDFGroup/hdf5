@@ -29,6 +29,12 @@ namespace H5 {
 	// calling H5close
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
+/*! \class H5Library
+    \brief Class H5Library operates the HDF5 library globably.
+
+    It is not neccessary to construct an instance of H5Library to use the
+    methods.
+*/
 class H5_DLLCPP H5Library {
    public:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

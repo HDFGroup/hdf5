@@ -184,7 +184,7 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 	     * assume that it's free space.
 	     */
 	    HDassert(NULL == heap->obj[0].begin);
-	    heap->obj[0].size = ((const uint8_t *)heap->chunk + heap->size) - p;
+	    heap->obj[0].size = (size_t)(((const uint8_t *)heap->chunk + heap->size) - p);
 	    heap->obj[0].begin = p;
 	    p += heap->obj[0].size;
 	} /* end if */

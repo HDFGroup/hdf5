@@ -95,7 +95,7 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object()
 // Function:	DataType overload constructor - dereference
 ///\brief	Given a reference, ref, to an hdf5 group, creates a
 ///		DataType object
-///\param       h5file - IN: Location referenced object is in
+///\param       loc - IN: Location referenced object is in
 ///\param	ref - IN: Reference pointer
 ///\param	ref_type - IN: Reference type - default to H5R_OBJECT
 ///\exception	H5::ReferenceException
@@ -106,8 +106,6 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object()
 //--------------------------------------------------------------------------
 DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(0)
 {
- /*     H5Location::dereference(loc, ref, ref_type, plist);
- */ 
     id = H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
 
@@ -127,13 +125,6 @@ DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, 
 DataType::DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(0)
 {
     id = H5Location::p_dereference(attr.getId(), ref, ref_type, plist, "constructor - by dereference");
-     /* try {
-	id = p_dereference(attr.getId(), ref, ref_type, plist);
-    } catch (ReferenceException deref_error) {
-	throw ReferenceException("DataType constructor - located by an Attribute",
-		deref_error.getDetailMsg());
-    }
- */ 
 }
 
 //--------------------------------------------------------------------------
@@ -268,38 +259,12 @@ void DataType::p_commit(hid_t loc_id, const char* name)
 // Function:	DataType::commit
 ///\brief	Commits a transient datatype to a file, creating a new
 ///		named datatype
-///\param	loc - IN: A file
-///\param	name - IN: Name of the datatype
-///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-void DataType::commit(H5File& loc, const char* name)
-{
-   p_commit(loc.getLocId(), name);
-}
-
-//--------------------------------------------------------------------------
-// Function:	DataType::commit
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function only in the type of the
-///		argument \a name.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-void DataType::commit(H5File& loc, const H5std_string& name)
-{
-   p_commit(loc.getLocId(), name.c_str());
-}
-
-//--------------------------------------------------------------------------
-// Function:	DataType::commit
-///\brief	Commits a transient datatype to a file, creating a new
-///		named datatype
-///\param	loc - IN: Either a group, dataset, named datatype, or attribute.
+///\param	loc - IN: A location (file, dataset, datatype, or group)
 ///\param	name - IN: Name of the datatype
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - Jan, 2007
 //--------------------------------------------------------------------------
-void DataType::commit(H5Object& loc, const char* name)
+void DataType::commit(H5Location& loc, const char* name)
 {
    p_commit(loc.getId(), name);
 }
@@ -311,7 +276,7 @@ void DataType::commit(H5Object& loc, const char* name)
 ///		argument \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataType::commit(H5Object& loc, const H5std_string& name)
+void DataType::commit(H5Location& loc, const H5std_string& name)
 {
    p_commit(loc.getId(), name.c_str());
 }

@@ -557,7 +557,7 @@ test_core(void)
 
     /* Append ".copy" to the filename from the source directory */
     VERIFY(HDstrlen(filename) < (1023 - 5), "file name too long.");
-    HDstrncpy(copied_filename, filename, 1023);
+    HDstrncpy(copied_filename, filename, (size_t)1023);
     copied_filename[1023] = '\0';
     HDstrcat(copied_filename, ".copy");
 
