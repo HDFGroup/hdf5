@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5Object_H
-#define _H5Object_H
+#ifndef __H5Object_H
+#define __H5Object_H
 
 #include "H5Location.h"
 #include "H5Classes.h"		// constains forward class declarations
@@ -40,6 +40,7 @@ namespace H5 {
 
 class H5_DLLCPP H5Object : public H5Location {
    public:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Copy constructor: makes copy of an H5Object object.
 	H5Object(const H5Object& original);
 
@@ -47,7 +48,6 @@ class H5_DLLCPP H5Object : public H5Location {
 	virtual ~H5Object();
 
    protected:
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Default constructor
 	H5Object();
 
@@ -61,4 +61,4 @@ class H5_DLLCPP H5Object : public H5Location {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5Object_H

@@ -42,6 +42,8 @@ int check_values (hsize_t i, hsize_t j, int apoint, int acheck);
 int test_report (int, const H5std_string&);
 void issue_fail_msg(const char* where, int line, const char* file_name,
 		    const char* message="");
+void issue_fail_msg(const char* where, int line, const char* file_name,
+		    const char* func_name, const char* message);
 
 class InvalidActionException : public Exception {
    public:

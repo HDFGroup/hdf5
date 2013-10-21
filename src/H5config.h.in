@@ -18,7 +18,7 @@
 #undef CXX_HAVE_OFFSETOF
 
 /* Define the default plugins path to compile */
-#undef DEFAULT_PLUGIN
+#undef DEFAULT_PLUGINDIR
 
 /* Define the default virtual file driver to compile */
 #undef DEFAULT_VFD
