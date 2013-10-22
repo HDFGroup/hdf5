@@ -376,6 +376,17 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* Source directory names with spaces in them will cause failures in configure
+  or make on mac (HDFFV-8152), linux, and probably all other platforms.  If a 
+  configure command with a space is run from a build directory, it will exit with 
+  an error message:  "checking whether build environment is sane... configure: 
+  error: unsafe srcdir value: '/scr/lrknox/hdf5 v1.8.12'".  If configure is run 
+  inside or below the directory with the space in the name, libtool will get the 
+  directory path from the system, put the part of the path before the space in the 
+  libdir variable in .../src/libhdf5.la, and then fail to find the nonexistent 
+  directory.  This is a know libtool issue and the suggested workaround is to 
+  rename the directory without spaces.  (LRK - 2013/10/22)
+
 * CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
   catches some undefined behavior in the alignment algorithm of the macro DETECT_I
   in H5detect.c (Issue 8147).  Since the algorithm is trying to detect the alignment
