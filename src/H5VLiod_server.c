@@ -31,7 +31,7 @@ static int terminate_requests = 0;
 static hbool_t shutdown = FALSE;
 
 herr_t
-H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
+EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
 {
     na_class_t *network_class = NULL;
     int num_procs;

@@ -380,6 +380,10 @@ H5_DLL herr_t H5VL__iod_server_adjust_buffer(hid_t from_type_id, hid_t to_type_i
                                              hid_t dxpl_id, size_t size, void **buf, 
                                              hbool_t *is_vl_data, size_t *_buf_size);
 H5_DLL herr_t H5VL_iod_verify_scratch_pad(scratch_pad sp, uint32_t iod_cs);
+H5_DLL herr_t H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id, 
+                                        hid_t type_id, hbool_t write_op, void *buf,
+                                        size_t buf_size, uint32_t cs, uint32_t cs_scope,
+                                        iod_trans_id_t tid);
 
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_server_H */

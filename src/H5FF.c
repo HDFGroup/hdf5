@@ -197,14 +197,14 @@ done:
  */
 hid_t
 H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id, 
-           /*OUT*/hid_t *rcxt_id, hid_t estack_id)
+           hid_t *rcxt_id, hid_t estack_id)
 {
     void    *file = NULL;            /* file token from VOL plugin */
     H5VL_t  *vol_plugin;             /* VOL plugin information */
     hid_t    ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("i", "*sIuii", filename, flags, fapl_id, estack_id);
+    H5TRACE5("i", "*sIui*ii", filename, flags, fapl_id, rcxt_id, estack_id);
 
     /* Check/fix arguments. */
     if(!filename || !*filename)
@@ -774,7 +774,7 @@ done:
  */
 herr_t
 H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-           hid_t file_space_id, hid_t dxpl_id, void *buf/*out*/,
+           hid_t file_space_id, hid_t dxpl_id, void *buf,
            hid_t rcxt_id, hid_t estack_id)
 {
     H5VL_t     *vol_plugin;
@@ -783,7 +783,7 @@ H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "iiiiixii", dset_id, mem_type_id, mem_space_id, file_space_id,
+    H5TRACE8("e", "iiiii*xii", dset_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf, rcxt_id, estack_id);
 
     if(mem_space_id < 0 || file_space_id < 0)
@@ -2480,7 +2480,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lget_info_ff(hid_t loc_id, const char *name, H5L_ff_info_t *linfo /*out*/,
+H5Lget_info_ff(hid_t loc_id, const char *name, H5L_ff_info_t *linfo ,
                hid_t lapl_id, hid_t rcxt_id, hid_t estack_id)
 {
     void    *obj = NULL;        /* object token of loc_id */
@@ -2549,7 +2549,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lget_val_ff(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
+H5Lget_val_ff(hid_t loc_id, const char *name, void *buf, size_t size,
               hid_t lapl_id, hid_t rcxt_id, hid_t estack_id)
 {
     void    *obj = NULL;        /* object token of loc_id */
@@ -2560,7 +2560,7 @@ H5Lget_val_ff(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sxziii", loc_id, name, buf, size, lapl_id, rcxt_id, estack_id);
+    H5TRACE7("e", "i*s*xziii", loc_id, name, buf, size, lapl_id, rcxt_id, estack_id);
 
     /* Check arguments */
     if(!name || !*name)
@@ -2686,7 +2686,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Oget_token(hid_t obj_id, /*OUT*/void *token, /*OUT*/size_t *token_size)
+H5Oget_token(hid_t obj_id, void *token, size_t *token_size)
 {
     H5VL_iod_object_t *obj = NULL;        /* object token of loc_id */
     iod_obj_id_t iod_id, mdkv_id, attrkv_id;
@@ -2700,6 +2700,7 @@ H5Oget_token(hid_t obj_id, /*OUT*/void *token, /*OUT*/size_t *token_size)
     herr_t ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*x*z", obj_id, token, token_size);
 
     /* get the file object */
     if(NULL == (obj = (H5VL_iod_object_t *)H5VL_get_object(obj_id)))

@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
        Finally, when all clients send a terminate call, the function shipper interface
        is finalized the operation returns. */
-    H5VLiod_start_handler(MPI_COMM_WORLD, MPI_INFO_NULL);
+    EFF_start_server(MPI_COMM_WORLD, MPI_INFO_NULL);
     //H5close();
     MPI_Finalize();
 

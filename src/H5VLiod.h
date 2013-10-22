@@ -58,7 +58,7 @@ extern "C" {
 
 H5_DLL H5VL_class_t *H5VL_iod_init(void);
 H5_DLL herr_t H5Pset_fapl_iod(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
-H5_DLL herr_t H5VLiod_start_handler(MPI_Comm comm, MPI_Info info);
+H5_DLL herr_t EFF_start_server(MPI_Comm comm, MPI_Info info);
 H5_DLL herr_t EFF_init(MPI_Comm comm, MPI_Info info);
 H5_DLL herr_t EFF_finalize(void);
 

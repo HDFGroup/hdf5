@@ -46,12 +46,6 @@ typedef struct {
 } H5VL_iod_server_vl_io_t;
 
 static herr_t 
-H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id, 
-                          hid_t type_id, hbool_t write_op, void *buf,
-                          size_t buf_size, uint32_t cs, uint32_t cs_scope,
-                          iod_trans_id_t tid);
-
-static herr_t 
 H5VL__iod_server_vl_data_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id, 
                             hid_t mem_type_id, hid_t dset_type_id, hbool_t write_op, 
                             void *buf, size_t buf_size, hid_t dxpl_id, iod_trans_id_t tid);
@@ -1280,7 +1274,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t 
+herr_t 
 H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id, 
                           hid_t type_id, hbool_t write_op, void *buf, 
                           size_t buf_size, uint32_t cs, uint32_t cs_scope, 

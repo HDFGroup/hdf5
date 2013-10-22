@@ -380,7 +380,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5RCacquire(hid_t file_id, /*IN/OUT*/ uint64_t *c_version, 
+H5RCacquire(hid_t file_id, uint64_t *c_version, 
             hid_t rcapl_id, hid_t estack_id)
 {
     void *file = NULL;
