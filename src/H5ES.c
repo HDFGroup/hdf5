@@ -282,12 +282,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ESwait(hid_t es_id, size_t event_idx, H5ES_status_t *status/*OUT*/)
+H5ESwait(hid_t es_id, size_t event_idx, H5ES_status_t *status)
 {
     H5ES_t *e_stack = NULL;                    /* event stack token */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iz*Es", es_id, event_idx, status);
 
     /* get the e_stack object */
     if(NULL == (e_stack = (H5ES_t *)H5I_object_verify(es_id, H5I_ES)))
@@ -316,7 +317,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_wait(H5ES_t *e_stack, size_t event_idx, H5ES_status_t *_status/*OUT*/)
+H5ES_wait(H5ES_t *e_stack, size_t event_idx, H5ES_status_t *_status)
 {
     H5_priv_request_t *cur = NULL;
     size_t u = 0;
@@ -366,12 +367,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ESwait_all(hid_t es_id, H5ES_status_t *status/*OUT*/)
+H5ESwait_all(hid_t es_id, H5ES_status_t *status)
 {
     H5ES_t *e_stack = NULL;                    /* event stack token */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Es", es_id, status);
 
     /* get the e_stack object */
     if(NULL == (e_stack = (H5ES_t *)H5I_object_verify(es_id, H5I_ES)))
@@ -400,7 +402,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_wait_all(H5ES_t *e_stack, H5ES_status_t *_status/*OUT*/)
+H5ES_wait_all(H5ES_t *e_stack, H5ES_status_t *_status)
 {
     H5_priv_request_t *cur = NULL;
     size_t u = 0;
@@ -482,12 +484,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5EStest(hid_t es_id, size_t event_idx, H5ES_status_t *status/*OUT*/)
+H5EStest(hid_t es_id, size_t event_idx, H5ES_status_t *status)
 {
     H5ES_t *e_stack = NULL;                    /* event stack token */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iz*Es", es_id, event_idx, status);
 
     /* get the e_stack object */
     if(NULL == (e_stack = (H5ES_t *)H5I_object_verify(es_id, H5I_ES)))
@@ -516,7 +519,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_test(H5ES_t *e_stack, size_t event_idx, H5ES_status_t *_status/*OUT*/)
+H5ES_test(H5ES_t *e_stack, size_t event_idx, H5ES_status_t *_status)
 {
     H5_priv_request_t *cur = NULL;
     size_t u = 0;
@@ -567,12 +570,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5EStest_all(hid_t es_id, H5ES_status_t *status/*OUT*/)
+H5EStest_all(hid_t es_id, H5ES_status_t *status)
 {
     H5ES_t *e_stack = NULL;                    /* event stack token */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Es", es_id, status);
 
     /* get the e_stack object */
     if(NULL == (e_stack = (H5ES_t *)H5I_object_verify(es_id, H5I_ES)))
@@ -601,7 +605,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_test_all(H5ES_t *e_stack, H5ES_status_t *_status/*OUT*/)
+H5ES_test_all(H5ES_t *e_stack, H5ES_status_t *_status)
 {
     H5_priv_request_t *cur = NULL;
     size_t u = 0;
@@ -689,12 +693,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5EScancel(hid_t es_id, size_t event_idx, H5ES_status_t *status/*OUT*/)
+H5EScancel(hid_t es_id, size_t event_idx, H5ES_status_t *status)
 {
     H5ES_t *e_stack = NULL;                    /* event stack token */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iz*Es", es_id, event_idx, status);
 
     /* get the e_stack object */
     if(NULL == (e_stack = (H5ES_t *)H5I_object_verify(es_id, H5I_ES)))
@@ -723,7 +728,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_cancel(H5ES_t *e_stack, size_t event_idx, H5ES_status_t *_status/*OUT*/)
+H5ES_cancel(H5ES_t *e_stack, size_t event_idx, H5ES_status_t *_status)
 {
     H5_priv_request_t *cur = NULL;
     size_t u = 0;
@@ -772,12 +777,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5EScancel_all(hid_t es_id, H5ES_status_t *status/*OUT*/)
+H5EScancel_all(hid_t es_id, H5ES_status_t *status)
 {
     H5ES_t *e_stack = NULL;                    /* event stack token */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Es", es_id, status);
 
     /* get the e_stack object */
     if(NULL == (e_stack = (H5ES_t *)H5I_object_verify(es_id, H5I_ES)))
@@ -806,7 +812,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_cancel_all(H5ES_t *e_stack, H5ES_status_t *_status/*OUT*/)
+H5ES_cancel_all(H5ES_t *e_stack, H5ES_status_t *_status)
 {
     H5_priv_request_t *cur = NULL;
     size_t u = 0;
@@ -886,12 +892,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ESget_count( hid_t es_id, size_t *count)
+H5ESget_count(hid_t es_id, size_t *count)
 {
     H5ES_t *e_stack = NULL;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*z", es_id, count);
 
     /* get the e_stack object */
     if(NULL == (e_stack = (H5ES_t *)H5I_object_verify(es_id, H5I_ES)))
@@ -1156,7 +1163,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ESpop(hid_t es_id, H5_request_t *req/*OUT*/)
+H5ESpop(hid_t es_id, H5_request_t *req)
 {
     H5ES_t *eq = NULL;                     /* event stack token */
     H5_priv_request_t *priv_req = NULL;  /* internal request struct */
@@ -1165,6 +1172,7 @@ H5ESpop(hid_t es_id, H5_request_t *req/*OUT*/)
     herr_t ret_value = SUCCEED;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*x", es_id, req);
 
     /* Check arguments. */
     if(H5I_ES != H5I_get_type(es_id))
@@ -1206,13 +1214,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ESwait(hid_t es_id, size_t event_idx, H5ES_status_t *status/*OUT*/)
+H5ESwait(hid_t es_id, size_t event_idx, H5ES_status_t *status)
 {
     H5ES_t *e_stack = NULL;                    /* event stack token */
     H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event stack should use */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iz*Es", es_id, event_idx, status);
 
     /* get the e_stack object */
     if(NULL == (e_stack = (H5ES_t *)H5I_object_verify(es_id, H5I_ES)))
@@ -1251,6 +1260,7 @@ H5AOcancel(H5_request_t req, H5ES_status_t *status)
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "x*Es", req, status);
 
     if(H5VL_request_cancel(&request->req, request->vol_plugin, status) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to cancel request");
@@ -1285,6 +1295,7 @@ H5AOtest(H5_request_t req, H5ES_status_t *status)
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "x*Es", req, status);
 
     if(H5VL_request_test(&request->req, request->vol_plugin, status) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to test request");
@@ -1321,6 +1332,7 @@ H5AOwait(H5_request_t req, H5ES_status_t *status)
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "x*Es", req, status);
 
     if(H5VL_request_wait(&request->req, request->vol_plugin, status) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to test request");

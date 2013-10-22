@@ -369,6 +369,7 @@ H5VLobject_register(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls)
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("i", "*xIt*x", obj, obj_type, cls);
 
     /* Build the vol plugin struct */
     if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
@@ -405,6 +406,7 @@ H5VLget_object(hid_t obj_id, void **obj, H5VL_t **vol_plugin)
     hid_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i**x**x", obj_id, obj, vol_plugin);
 
     /* Check args */
     if(!obj)
@@ -605,6 +607,7 @@ H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t dxpl
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "*x*xVai**xx", obj, vol_plugin, get_type, dxpl_id, req, arguments);
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -724,6 +727,8 @@ H5VLattr_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "*xx*x*si**x", obj, loc_params, vol_plugin, attr_name, dxpl_id,
+             req);
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -755,6 +760,7 @@ H5VLattr_close(void *attr, H5VL_t *vol_plugin, hid_t dxpl_id, void UNUSED **req)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "*x*xi**x", attr, vol_plugin, dxpl_id, req);
 
     if (NULL == attr || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -851,6 +857,7 @@ H5VLdatatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_
     ssize_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("Zs", "*x*x*szi**x", obj, vol_plugin, buf, size, dxpl_id, req);
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -883,6 +890,7 @@ H5VLdatatype_get(void *obj, H5VL_t *vol_plugin, H5VL_datatype_get_t get_type,
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "*x*xVti**xx", obj, vol_plugin, get_type, dxpl_id, req, arguments);
 
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -926,6 +934,7 @@ H5VLdatatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, void UNUSED **re
     herr_t		ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "*x*xi**x", dt, vol_plugin, dxpl_id, req);
 
     if (NULL == dt || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -1023,6 +1032,8 @@ H5VLdataset_read(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_sp
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE8("e", "*x*xiiii*x**x", dset, vol_plugin, mem_type_id, mem_space_id,
+             file_space_id, plist_id, buf, req);
 
     if (NULL == dset || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -1056,6 +1067,8 @@ H5VLdataset_write(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_s
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE8("e", "*x*xiiii*x**x", dset, vol_plugin, mem_type_id, mem_space_id,
+             file_space_id, plist_id, buf, req);
 
     if (NULL == dset || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -1088,6 +1101,7 @@ H5VLdataset_set_extent(void *dset, H5VL_t *vol_plugin, const hsize_t size[], hid
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*x*x*hi**x", dset, vol_plugin, size, dxpl_id, req);
 
     if (NULL == dset || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -1119,6 +1133,8 @@ H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "*x*xVdi**xx", dset, vol_plugin, get_type, dxpl_id, req,
+             arguments);
 
     if (NULL == dset || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -1216,6 +1232,7 @@ H5VLdataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, void UNUSED **r
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "*x*xi**x", dset, vol_plugin, dxpl_id, req);
 
     if (NULL == dset || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -1307,6 +1324,7 @@ H5VLfile_flush(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "*xx*xFsi**x", obj, loc_params, vol_plugin, scope, dxpl_id, req);
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -1338,6 +1356,8 @@ H5VLfile_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, hid_t dxp
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "*x*xVfi**xx", file, vol_plugin, get_type, dxpl_id, req,
+             arguments);
 
     if(NULL == file || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -1444,6 +1464,8 @@ H5VLfile_misc(void *file, H5VL_t *vol_plugin, H5VL_file_misc_t misc_type, hid_t 
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "*x*xVmi**xx", file, vol_plugin, misc_type, dxpl_id, req,
+             arguments);
 
     if(NULL == file || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -1512,6 +1534,8 @@ H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "*x*xVni**xx", file, vol_plugin, optional_type, dxpl_id, req,
+             arguments);
 
     if(NULL == file || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -1670,6 +1694,7 @@ H5VLfile_close(void *file, H5VL_t *vol_plugin, hid_t dxpl_id, void UNUSED **req)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "*x*xi**x", file, vol_plugin, dxpl_id, req);
 
     if(NULL == file || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -1767,6 +1792,7 @@ H5VLgroup_get(void *obj, H5VL_t *vol_plugin, H5VL_group_get_t get_type, hid_t dx
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "*x*xVgi**xx", obj, vol_plugin, get_type, dxpl_id, req, arguments);
 
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -1820,6 +1846,7 @@ H5VLgroup_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, void UNUSED **req)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "*x*xi**x", grp, vol_plugin, dxpl_id, req);
 
     if(NULL == grp || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -1850,6 +1877,8 @@ H5VLlink_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_
     herr_t               ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE8("e", "Vc*xx*xiii**x", create_type, obj, loc_params, vol_plugin,
+             lcpl_id, lapl_id, dxpl_id, req);
 
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -1945,6 +1974,8 @@ H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_l
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*xx*xVli**xx", obj, loc_params, vol_plugin, get_type, dxpl_id,
+             req, arguments);
 
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -2080,6 +2111,9 @@ H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, H5VL_t *vol_plugin
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE12("e", "*xx*x*s*xx*x*siii**x", src_obj, loc_params1, vol_plugin1,
+             src_name, dst_obj, loc_params2, vol_plugin2, dst_name, ocpypl_id,
+             lcpl_id, dxpl_id, req);
 
     if(NULL == src_obj || NULL == dst_obj || NULL == vol_plugin1 || 
        NULL == vol_plugin2 || NULL == vol_plugin1->cls || NULL == vol_plugin2->cls)
@@ -2146,6 +2180,8 @@ H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*xx*xVoi**xx", obj, loc_params, vol_plugin, get_type, dxpl_id,
+             req, arguments);
 
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -2248,6 +2284,8 @@ H5VLobject_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5V
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*xx*xVxi**xx", obj, loc_params, vol_plugin, misc_type, dxpl_id,
+             req, arguments);
 
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -2323,6 +2361,7 @@ H5VLobject_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, hi
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*xx*xi**x", obj, loc_params, vol_plugin, dxpl_id, req);
 
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
@@ -2353,6 +2392,7 @@ H5VLrequest_cancel(void **req, H5VL_t *vol_plugin, H5ES_status_t *status)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "**x*x*Es", req, vol_plugin, status);
 
     if(NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request/VOL class pointer")
@@ -2383,6 +2423,7 @@ H5VLrequest_test(void **req, H5VL_t *vol_plugin, H5ES_status_t *status)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "**x*x*Es", req, vol_plugin, status);
 
     if(NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request/VOL class pointer")
@@ -2413,6 +2454,7 @@ H5VLrequest_wait(void **req, H5VL_t *vol_plugin, H5ES_status_t *status)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "**x*x*Es", req, vol_plugin, status);
 
     if(NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request/VOL class pointer")

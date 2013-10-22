@@ -26,6 +26,7 @@
 #include "H5ACpublic.h"		/* Metadata cache			*/
 #include "H5Dpublic.h"		/* Datasets				*/
 #include "H5Epublic.h"		/* Errors				*/
+#include "H5ESpublic.h"		/* Event Stacks				*/
 #include "H5Fpublic.h"		/* Files				*/
 #include "H5FDpublic.h"		/* File drivers				*/
 #include "H5FFpublic.h"         /* FastForward wrappers                 */
@@ -36,8 +37,10 @@
 #include "H5Opublic.h"		/* Object headers			*/
 #include "H5Ppublic.h"		/* Property lists			*/
 #include "H5Rpublic.h"		/* References				*/
+#include "H5RCpublic.h"		/* Read Contexts			*/
 #include "H5Spublic.h"		/* Dataspaces				*/
 #include "H5Tpublic.h"		/* Datatypes				*/
+#include "H5TRpublic.h"		/* Transcations 			*/
 #include "H5Zpublic.h"		/* Data filters				*/
 #include "H5VLpublic.h"		/* VOL plugins			        */
 

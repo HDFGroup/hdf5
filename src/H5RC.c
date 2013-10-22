@@ -204,6 +204,7 @@ H5Pset_rcapl_version_request(hid_t rcapl_id, H5RC_request_t acquire_req)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iRc", rcapl_id, acquire_req);
 
     if(H5RC_LAST < acquire_req)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "Acquire request can be either H5RC_EXACT, H5RC_NEXT, or H5RC_LAST");
@@ -240,6 +241,7 @@ H5Pget_rcapl_version_request(hid_t rcapl_id, H5RC_request_t *acquire_req)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Rc", rcapl_id, acquire_req);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(rcapl_id, H5P_RC_ACQUIRE)))
@@ -280,6 +282,7 @@ H5RCcreate(hid_t file_id, uint64_t c_version)
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("i", "iIl", file_id, c_version);
 
     /* get the file object */
     if(NULL == (file = (void *)H5I_object_verify(file_id, H5I_FILE)))
@@ -351,6 +354,7 @@ H5RCget_version(hid_t rc_id, uint64_t *version)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Il", rc_id, version);
 
     /* get the RC object */
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rc_id, H5I_RC)))
@@ -391,6 +395,7 @@ H5RCacquire(hid_t file_id, uint64_t *c_version,
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("i", "i*Ilii", file_id, c_version, rcapl_id, estack_id);
 
     /* get the file object */
     if(NULL == (file = (void *)H5I_object_verify(file_id, H5I_FILE)))

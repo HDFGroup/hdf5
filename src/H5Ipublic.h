@@ -77,6 +77,9 @@ typedef herr_t (*H5I_free2_t)(void*,void*);
 /* Type of the function to compare objects & keys */
 typedef int (*H5I_search_func_t)(void *obj, hid_t id, void *key);
 
+/* Type of the H5Iiterate callback function */
+typedef herr_t (*H5I_iterate_func_t)(hid_t id, void *udata);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -99,6 +102,7 @@ H5_DLL int H5Iinc_type_ref(H5I_type_t type);
 H5_DLL int H5Idec_type_ref(H5I_type_t type);
 H5_DLL int H5Iget_type_ref(H5I_type_t type);
 H5_DLL void *H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key);
+H5_DLL herr_t H5Iiterate(H5I_type_t type, H5I_iterate_func_t op, void *op_data);
 H5_DLL herr_t H5Inmembers(H5I_type_t type, hsize_t *num_members);
 H5_DLL htri_t H5Itype_exists(H5I_type_t type);
 H5_DLL htri_t H5Iis_valid(hid_t id);

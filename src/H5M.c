@@ -770,6 +770,8 @@ H5Miterate_ff(hid_t map_id, hid_t key_mem_type_id, hid_t value_mem_type_id,
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "iiix*xi", map_id, key_mem_type_id, value_mem_type_id,
+             callback_func, context, rcxt_id);
 
 done:
     FUNC_LEAVE_API(ret_value)

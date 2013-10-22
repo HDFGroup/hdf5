@@ -22,10 +22,6 @@
 /* System headers needed by this file */
 
 /* Public headers needed by this file */
-#include "H5public.h"
-#include "H5Ipublic.h"
-
-#ifdef H5_HAVE_EFF
 
 /*****************/
 /* Public Macros */
@@ -35,6 +31,7 @@
 /*******************/
 /* Public Typedefs */
 /*******************/
+
 typedef enum H5RC_request_t{
     H5RC_EXACT, /* default */
     H5RC_PREV,
@@ -51,6 +48,7 @@ typedef enum H5RC_request_t{
 extern "C" {
 #endif
 
+#ifdef H5_HAVE_EFF
 /*********************/
 /* Public Prototypes */
 /*********************/

@@ -295,6 +295,7 @@ H5TRcreate(hid_t file_id, hid_t rc_id, uint64_t trans_num)
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("i", "iiIl", file_id, rc_id, trans_num);
 
     /* get the file object */
     if(NULL == (file = (void *)H5I_object_verify(file_id, H5I_FILE)))
@@ -536,6 +537,7 @@ H5TRset_dependency(hid_t tr_id, uint64_t trans_num, hid_t estack_id)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iIli", tr_id, trans_num, estack_id);
 
     /* get the TR object */
     if(NULL == (tr = (H5TR_t *)H5I_object_verify(tr_id, H5I_TR)))
@@ -595,6 +597,7 @@ H5TRskip(hid_t file_id, uint64_t start_trans_num, uint64_t count, hid_t estack_i
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "iIlIli", file_id, start_trans_num, count, estack_id);
 
     /* get the file object */
     if(NULL == (file = (void *)H5I_object_verify(file_id, H5I_FILE)))

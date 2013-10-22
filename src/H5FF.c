@@ -2491,7 +2491,7 @@ H5Lget_info_ff(hid_t loc_id, const char *name, H5L_ff_info_t *linfo ,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*sxiii", loc_id, name, linfo, lapl_id, rcxt_id, estack_id);
+    H5TRACE6("e", "i*s*xiii", loc_id, name, linfo, lapl_id, rcxt_id, estack_id);
 
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
@@ -3443,7 +3443,7 @@ H5Oget_info_ff(hid_t loc_id, H5O_ff_info_t *oinfo, hid_t rcxt_id, hid_t estack_i
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", loc_id, oinfo);
+    H5TRACE4("e", "i*xii", loc_id, oinfo, rcxt_id, estack_id);
 
     /* Check args */
     if(!oinfo)
@@ -3500,7 +3500,7 @@ H5Oget_info_by_name_ff(hid_t loc_id, const char *name, H5O_ff_info_t *oinfo,
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*s*xi", loc_id, name, oinfo, lapl_id);
+    H5TRACE6("e", "i*s*xiii", loc_id, name, oinfo, lapl_id, rcxt_id, estack_id);
 
     /* Check args */
     if(!name || !*name)
