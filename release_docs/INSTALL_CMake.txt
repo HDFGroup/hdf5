@@ -35,10 +35,10 @@ Notes: This short set of instructions is written for users who want to
       3. Open a command prompt at:
          c:\MyHDFstuff\hdf5\build
       
-      4. Configure the C library, tools and tests with this command:
+      4. Configure the C library, tools, and tests with this command:
          cmake -G "Visual Studio 10" -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..
       
-      3. Build the C library, tools and tests with this command:
+      3. Build the C library, tools, and tests with this command:
          cmake --build . --config Release
       
       4. Test the C library and tools with this command:
@@ -63,10 +63,10 @@ Notes: This short set of instructions is written for users who want to
       3. Open a command prompt at:
          ~\MyHDFstuff\hdf5\build
       
-      4. Configure the C library, tools and tests with this command:
+      4. Configure the C library, tools, and tests with this command:
          cmake -G "Unix Makefiles" -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..
       
-      3. Build the C library, tools and tests with this command:
+      3. Build the C library, tools, and tests with this command:
          cmake --build . --config Release
       
       4. Test the C library and tools with this command:
@@ -301,8 +301,8 @@ These five steps are described in detail below.
    3. Build HDF5
    
       On Windows, you can build HDF5 using either the Visual Studio Environment 
-      or the command line. The command line can be used on all platforms;
-      Windows, linux, Unix, and Mac.
+      or the command line. The command line can be used on all platforms:
+      Windows, Linux, Unix, and Mac.
 
       To build from the command line, navigate to your build directory and
       execute the following:
@@ -468,13 +468,13 @@ V. User Defined Options for HDF5 Libraries with CMake
 ========================================================================
 
 Support for User Defined macros and options has been added. The file
-UserMacros.cmake has an example of the technique. In the folder,
-config/cmake/UserMacros, is an implementation for Windows Visual Studio
+UserMacros.cmake has an example of the technique. In the folder 
+config/cmake/UserMacros is an implementation for Windows Visual Studio
 users for linking libraries to the static CRT - Windows_MT.cmake. 
 
 Copy the contents of the file, both macro and option, into the 
 UserMacros.cmake file. Then enable the option to the CMake configuration,
-build and test process.
+build, and test process.
 
 ========================================================================
 VI. APPENDIX
