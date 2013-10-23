@@ -57,11 +57,11 @@ New Features
 
     Configuration
     -------------
-    - New configuration option added to change the default plugin path.
-      configure option is --with-default-plugindir=location
-      cmake option is -DH5_DEFAULT_PLUGINDIR:PATH=location
+    - Added a configuration option to change the default plugin path.
+      The configure option is --with-default-plugindir=location.
+      The cmake option is -DH5_DEFAULT_PLUGINDIR:PATH=location.
       HDFFV-8513.  (ADB 2013/09/04)
-    - Rename FFLAGS to FCFLAGS in configure (ADB 2013/08/13)
+    - Renamed FFLAGS to FCFLAGS in configure. (ADB 2013/08/13)
     - CMake can now package a compressed examples file, the default for 
       Windows binaries from HDF Group.  (ADB  - 2013/07/22)
     
@@ -75,12 +75,13 @@ New Features
  
     Tools
     -----
-    - h5repack: Added ability to use plugin filters to read and write files. 
-              The option uses the filter number. HDFFV-8345 (ADB - 2013/09/04).
-    - h5dump: Added option -N --any_path, which searches the file for paths that
-              match the search path. HDFFV-7989 (ADB - 2013/08/12).
-    - h5dump: Added optional arg 0 to -A, which excludes attributes from display.
-              HDFFV-8134 (ADB - 2013/08/01).
+    - h5repack: Added the ability to use plugin filters to read and write 
+              files. The option uses the filter number. HDFFV-8345 
+              (ADB - 2013/09/04).
+    - h5dump: Added the option -N --any_path, which searches the file for 
+              paths that match the search path. HDFFV-7989 (ADB - 2013/08/12).
+    - h5dump: Added the optional arg 0 to -A, which excludes attributes 
+              from display. HDFFV-8134 (ADB - 2013/08/01).
 
     High-Level APIs
     ---------------
@@ -92,7 +93,7 @@ New Features
 
     C++ API
     -------
-    - Added tutorial examples to c++/examples.  They can be installed by
+    - Added tutorial examples to C++/examples.  They can be installed by
       "make install-examples" and, in the installed directory, they can be
       executed by running the script file run-c++-ex.sh. (BMR - 2013/09/28)
     - A new class, H5::H5Location, is added to represent the location concept
@@ -120,7 +121,7 @@ Bug Fixes since HDF5-1.8.11
     Configuration
     -------------
     - Modified H5detect.c to scan floating point types for padding bits before
-      analyzing the type further.  This should fix problems with gcc 4.8
+      analyzing the type further.  This should fix problems with gcc 4.8. 
       (NAF - 2013/09/19 - HDFFV-8523/HDFFV-8500)
     - HDF5 rpaths are no longer encoded in the library files when configured
       with --disable-sharedlib-rpath. (LRK-2013-09-23 - HDFFV-8276)
@@ -130,7 +131,7 @@ Bug Fixes since HDF5-1.8.11
     - Added const qualifier to source buffer parameters in H5Dgather and
       H5D_scatter_func_t (H5Dscatter callback).  (NAF - 2013/7/09)
 
-    - CMake can now creates *.so.{lt_version} files with the same version as 
+    - CMake now creates *.so.{lt_version} files with the same version as 
       configure.  (ADB  - 2013/06/05 HDFFV-8437)
 
     Parallel Library
@@ -143,10 +144,10 @@ Bug Fixes since HDF5-1.8.11
 
     Tools
     -----
-    - h5dump: Added option -N --any_path, which searches the file for paths that
-              match the search path. HDFFV-7989 (ADB - 2013/08/12).
-    - h5dump: Added optional arg 0 to -A, which excludes attributes from display.
-              HDFFV-8134 (ADB - 2013/08/01).
+    - h5dump: Added the option -N --any_path, which searches the file for 
+              paths that match the search path. HDFFV-7989 (ADB - 2013/08/12).
+    - h5dump: Added the optional arg 0 to -A, which excludes attributes 
+              from display. HDFFV-8134 (ADB - 2013/08/01).
     - h5dump correctly exports subsetted data to a file, using the --output
       option.  (ADB  - 2013/06/07 HDFFV-8447)
     - h5cc and other compile scripts now default to linking shared libraries
@@ -174,7 +175,7 @@ Bug Fixes since HDF5-1.8.11
     - test/big sometimes failed with the message of "file selection+offset not
       within extent". This has been fixed. (AKC - 2013/09/28 HDFFV-8271).
     - tools/h5diff/testh5diff.sh is run in every "make check", even after it
-      has passed in the previous run. It should not run again if there is no
+      has passed in the previous run. It should not run again if there are no
       code changes. Fixed. (AKC - 2013/07/19 HDFFV-8392)
 
 Supported Platforms
@@ -254,7 +255,7 @@ They are built with the configure process unless specified otherwise.
     (duck)                        Intel icc/icpc/ifort version 13.0.3
 
     Mac OS X Mountain Lion 10.8.1 Apple clang/clang++ version 4.2 from Xcode 4.6.1
-    64-bit    			  gfortran GNU Fortran (GCC) 4.6.2
+    64-bit                        gfortran GNU Fortran (GCC) 4.6.2
     (wren)                        Intel icc/icpc/ifort version 13.0.3
 
     OpenVMS  IA64 V8.4            HP C V7.3-018         
@@ -377,29 +378,30 @@ The following platforms are not supported but have been tested for this release.
 Known Problems
 ==============
 * Source directory names with spaces in them will cause failures in configure
-  or make on mac (HDFFV-8152), linux, and probably all other platforms.  If a 
-  configure command with a space is run from a build directory, it will exit with 
-  an error message:  "checking whether build environment is sane... configure: 
-  error: unsafe srcdir value: '/scr/lrknox/hdf5 v1.8.12'".  If configure is run 
-  inside or below the directory with the space in the name, libtool will get the 
-  directory path from the system, put the part of the path before the space in the 
-  libdir variable in .../src/libhdf5.la, and then fail to find the nonexistent 
-  directory.  This is a know libtool issue and the suggested workaround is to 
-  rename the directory without spaces.  (LRK - 2013/10/22)
+  or make on Mac (HDFFV-8152), Linux, and probably all other platforms.  If a 
+  configure command with a space is run from a build directory, it will exit 
+  with an error message:  "checking whether build environment is sane... 
+  configure: error: unsafe srcdir value: '/scr/lrknox/hdf5 v1.8.12'".  If 
+  configure is run inside or below the directory with the space in the name, 
+  libtool will get the directory path from the system, put the part of the 
+  path before the space in the libdir variable in .../src/libhdf5.la, and 
+  then fail to find the nonexistent directory.  This is a known libtool issue 
+  and the suggested workaround is to rename the directory without spaces. 
+  (LRK - 2013/10/22)
 
 * CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
-  catches some undefined behavior in the alignment algorithm of the macro DETECT_I
-  in H5detect.c (Issue 8147).  Since the algorithm is trying to detect the alignment
-  of integers, ideally the flag -fcatch-undefined-behavior shouldn't to be used for
-  H5detect.c. In the future, we can separate flags for H5detect.c from the rest of
-  the library. (SLU - 2013/10/16)
+  catches some undefined behavior in the alignment algorithm of the macro 
+  DETECT_I in H5detect.c (Issue 8147).  Since the algorithm is trying to 
+  detect the alignment of integers, ideally the flag -fcatch-undefined-behavior 
+  shouldn't to be used for H5detect.c. In the future, we can separate flags 
+  for H5detect.c from the rest of the library. (SLU - 2013/10/16)
 
 * Running make check for the tools can fail in the tools tests if make was not
   run prior. The tests for the tools use other tools in the tests, therefore
   all the tools should be built before testing the tools. (ADB - 2013/10/09)
 
 * Make provided by Solaris fails in "make check". Solaris users should use
-  gmake to build and install the HDF5 software. (AKC - 2013/10/08 - HDFFV-8534)
+  gmake to build and install HDF5 software. (AKC - 2013/10/08 - HDFFV-8534)
 
 * On OpenVMS, two soft conversion functions (H5T__conv_i_f and H5T__conv_f_i)
   have bugs.  They convert data between floating-point numbers and integers.
@@ -465,14 +467,14 @@ Known Problems
 * On hopper, the build failed when RUNSERIAL and RUNPARALLEL are set
   to aprun -np X, because the H5lib_settings.c file was not generated
   properly. Not setting those environment variables works, because
-  configure was able to automatically detect that it's a Cray system
+  configure was able to automatically detect that it is a Cray system
   and used the proper launch commands when necessary. 
   (MSC - 2012/04/18)
 
 * The data conversion test dt_arith.c fails in "long double" to integer
   conversion on Ubuntu 11.10 (3.0.0.13 kernel) with GCC 4.6.1 if the library
-  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
-  (3.2.2 on Fedora) doesn't have the problem.  Users should lower the 
+  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernel
+  (3.2.2 on Fedora) do not have the problem.  Users should lower the 
   optimization level (-O1 or -O0) by defining CFLAGS in the command line of 
   "configure" like:
 
