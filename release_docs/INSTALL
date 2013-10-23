@@ -525,15 +525,10 @@ CONTENTS
         NEW_DIR/bin directory.  This utility will fix the h5cc, h5fc and
         h5c++ scripts to reflect the new NEW_DIR location.
 
-        Another option that can be used if shared libraries were built is:
-
-             $ make install DESTDIR=STAGE_DIR
-
-        where STAGE_DIR is a stage directory.  The contents of 
-        $DESTDIR/$prefix (from configure - if --prefix was not used for 
-        configure, $prefix will be <path to the build directory>/hdf5)
-        can be tarred and untarred in the final install location, and
-        h5redeploy run in the bin directory there.
+        If shared libraries were enabled, configure must be run with 
+        --prefix=<final install directory>.  HDF5 can then be installed 
+        directly with "make install" or using a stage directory with 
+        "make install DESTDIR=STAGE_DIR".
 
         The library can be used without installing it by pointing the
         compiler at the `src' and 'src/.libs' directory for include files and
