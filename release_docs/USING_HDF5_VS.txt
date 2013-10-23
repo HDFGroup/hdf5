@@ -13,17 +13,17 @@ The following two sections are helpful if you do not use CMake to build
 your applications.
                                                                         
 ========================================================================
-Using Visual Studio 2010 with HDF5 Libraries built with Visual Studio 2010
+Using Visual Studio 2010 with HDF5 Libraries Built with Visual Studio 2010
 ========================================================================
 
-   1. Set up path for external libraries and headers
+   1. Set up the path for external libraries and headers
 
-      The path settings will need to be in project property sheets per project. 
-      Go to "Project" and select "Properties", find "Configuration Properties", 
-      and then "VC++ Directories".
+      The path settings will need to be in the project property sheets 
+      per project. Go to "Project" and select "Properties", find 
+      "Configuration Properties", and then "VC++ Directories".
           
       1.1 If you are building on 64-bit Windows, find the "Platform" dropdown
-              and select "x64".
+          and select "x64".
               
       1.2 Add the header path to the "Include Directories" setting.
           
@@ -32,17 +32,17 @@ Using Visual Studio 2010 with HDF5 Libraries built with Visual Studio 2010
       1.4 Select Linker->Input and beginning with the
           "Additional Dependencies" line, enter the library names. The
           external libraries should be listed first, followed by the HDF5
-          library, and then optionally the HDF5 High Level, Fortran or C++
+          library, and then optionally the HDF5 High Level, Fortran, or C++
           libraries. For example, to compile a C++ application, enter:
 
           szip.lib zlib.lib hdf5.lib hdf5_cpp.lib
 
                                                                          
 ==========================================================================
-Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
+Using Visual Studio 2008 with HDF5 Libraries Built with Visual Studio 2008
 ==========================================================================
 
-   2. Set up path for external libraries and headers
+   2. Set up the path for external libraries and headers
 
       Invoke Microsoft Visual Studio and go to "Tools" and select "Options", 
       find "Projects", and then "VC++ Directories".
@@ -51,20 +51,22 @@ Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
           and select "x64".
 
       2.2 Find the box "Show directories for", choose "Include files", add the 
-          header path (i.e. c:\Program Files\HDF_Group\HDF5\1.8.x\include)
-          to the included directories.
+          header path (in other words, 
+          c:\Program Files\HDF_Group\HDF5\1.8.x\include) to the included 
+          directories.
 
       2.3 Find the box "Show directories for", choose "Library files", add the
-          library path (i.e. c:\Program Files\HDF_Group\HDF5\1.8.x\lib)
-          to the library directories.
+          library path (in other words, 
+          c:\Program Files\HDF_Group\HDF5\1.8.x\lib) to the library 
+          directories.
           
-      2.4 If using Fortran libraries, you will also need to setup the path
+      2.4 If using the Fortran libraries, you will also need to setup the path
           for the Intel Fortran compiler.
           
       2.5 Select Project->Properties->Linker->Input and beginning with the
           "Additional Dependencies" line, enter the library names. The
           external libraries should be listed first, followed by the HDF5
-          library, and then optionally the HDF5 High Level, Fortran or C++
+          library, and then optionally the HDF5 High Level, Fortran, or C++
           libraries. For example, to compile a C++ application, enter:
 
           szip.lib zlib.lib hdf5.lib hdf5_cpp.lib
@@ -75,14 +77,14 @@ Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
 
     3.1 FAQ
     
-    Many other common questions and hints are located online and being updated
-    in the HDF5 FAQ.  For Windows-specific questions, please see:
+    Many common questions and hints are located online in the HDF5 FAQ. 
+    For Windows-specific questions, please see:
     
         http://www.hdfgroup.org/HDF5/faq/windows.html
         
-    For all other general questions, you can look in the general FAQ:
+    For all other general questions, look in the general FAQ:
     
         http://hdfgroup.org/HDF5-FAQ.html
     
 ************************************************************************
- Please send email to help@hdfgroup.org for further assistance.
+Please send email to help@hdfgroup.org for further assistance.
