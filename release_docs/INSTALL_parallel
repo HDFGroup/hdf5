@@ -4,13 +4,13 @@
 
 1. Overview
 -----------
-This file contains instructions for the installation of parallel HDF5 (PHDF5).
+This file contains instructions for the installation of Parallel HDF5 (PHDF5).
 It is assumed that you are familiar with the general installation steps as
 described in the INSTALL file.  Get familiar with that file before trying
-the parallel HDF5 installation.
+the Parallel HDF5 installation.
 
-The remaining of this section explains the requirements to run PHDF5.
-Section 2 shows quick instructions for some well know systems.  Section 3
+The rest of this section explains the requirements to run PHDF5.
+Section 2 shows quick instructions for some well known systems.  Section 3
 explains the details of the installation steps. Section 4 shows some details
 of running the parallel test suites.
 
@@ -19,12 +19,12 @@ of running the parallel test suites.
 -----------------
 PHDF5 requires an MPI compiler with MPI-IO support and a POSIX compliant
 (Ref. 1) parallel file system.  If you don't know yet, you should first consult
-with your system support staff of information how to compile an MPI program,
-how to run an MPI application, and how to access the parallel file system.
-There are sample MPI-IO C and Fortran programs in the appendix section of
-"Sample programs".  You can use them to run simple tests of your MPI compilers
-and the parallel file system. Also, the t_posix_compliant test in testpar
-verifies if the file system is POSIX compliant.
+with your system support staff for information on how to compile an MPI 
+program, how to run an MPI application, and how to access the parallel file 
+system. There are sample MPI-IO C and Fortran programs in the appendix section 
+of "Sample Programs".  You can use them to run simple tests of your MPI 
+compilers and parallel file system. Also, the t_posix_compliant test in 
+testpar verifies if the file system is POSIX compliant.
 
 
 1.2. Further Help
@@ -38,18 +38,18 @@ In your mail, please include the output of "uname -a". If you have run the
 the file "config.log".
 
 
-2. Quick Instruction for known systems
+2. Quick Instruction for Known Systems
 --------------------------------------
-The following shows particular steps to run the parallel HDF5 configure for
+The following shows particular steps to run the Parallel HDF5 configure for
 a few machines we've tested. If your particular platform is not shown or
 somehow the steps do not work for yours, please go to the next section for
 more detailed explanations.
 
 
-2.1. Know parallel compilers
+2.1. Known Parallel Compilers
 ----------------------------
 HDF5 knows several parallel compilers: mpicc, hcc, mpcc, mpcc_r.  To build
-parallel HDF5 with one of the above, just set CC as it and configure.
+Parallel HDF5 with one of the above, just set CC to it and configure.
 The "--enable-parallel" is optional in this case.
 
     $ CC=/usr/local/mpi/bin/mpicc ./configure --prefix=<install-directory>
@@ -61,13 +61,13 @@ The "--enable-parallel" is optional in this case.
 
 2.2. IBM SP
 -----------
-During the build stage, the H5detect is compiled and executed to generate
+During the build stage, H5detect is compiled and executed to generate
 the source file H5Tinit.c which is compiled as part of the HDF5 library. In
 parallel mode, make sure your environment variables are set correctly to
 execute a single process mpi application. Otherwise, multiple processes
 attempt to write to the same H5Tinit.c file, resulting in a scrambled
 source file.  Unfortunately, the setting varies from machine to machine.
-E.g., the following works for the IBM SP machine at LLNL.
+For example, the following works for the IBM SP machine at LLNL.
 
     setenv MP_PROCS     1
     setenv MP_NODES     1
@@ -75,7 +75,7 @@ E.g., the following works for the IBM SP machine at LLNL.
     setenv MP_RMPOOL    0
     setenv LLNL_COMPILE_SINGLE_THREADED TRUE    # for LLNL site only
 
-The shared library configuration is problematic.  So, only static library
+The shared library configuration is problematic.  So, only the static library
 is supported.
 
 Then do the following steps:
@@ -87,7 +87,7 @@ Then do the following steps:
     $ make install
 
 We also suggest that you add "-qxlf90=autodealloc" to FFLAGS when building
-parallel with fortran enabled.  This can be done by invoking:
+parallel with Fortran enabled.  This can be done by invoking:
 
     setenv FFLAGS -qxlf90=autodealloc		# 32 bit build
 or
@@ -97,7 +97,7 @@ prior to running configure.  Recall that the "-q64" is necessary for 64
 bit builds.
 
 
-2.3. Linux 2.4 and greater
+2.3. Linux 2.4 and Greater
 --------------------------
 Be sure that your installation of MPICH was configured with the following
 configuration command-line option:
@@ -112,9 +112,9 @@ Linux kernels 2.4 and greater.
 -------------------------
 Both serial and parallel HDF5 are supported in Red Storm.
 
-2.4.1 Building serial HDF5 for Red Storm
+2.4.1 Building Serial HDF5 for Red Storm
 ------------------------------------------
-The following steps are for building the serial HDF5 for the Red Storm
+The following steps are for building the Serial HDF5 for the Red Storm
 compute nodes.  They would probably work for other Cray XT3 systems but have
 not been verified.
 
@@ -132,7 +132,7 @@ $ make check
 # if all is well, install the binary.
 $ make install
 
-2.4.2 Building parallel HDF5 for Red Storm
+2.4.2 Building Parallel HDF5 for Red Storm
 ------------------------------------------
 The following steps are for building the Parallel HDF5 for the Red Storm
 compute nodes.  They would probably work for other Cray XT3 systems but have
@@ -153,11 +153,11 @@ $ make check
 # if all is well, install the binary.
 $ make install
 
-2.4.3 Red Storm known problems
+2.4.3 Red Storm Known Problems
 ------------------------------
 For Red Storm, a Cray XT3 system, the yod command sometimes gives the
 message,  "yod allocation delayed for node recovery".  This interferes with
-test suites that do not expect seeing this message.  To bypass this problem,
+test suites that do not expect to see this message.  To bypass this problem,
 I launch the executables with a command shell script called "myyod" which
 consists of the following lines.  (You should set $RUNSERIAL and $RUNPARALLEL
 to use myyod instead of yod.)
@@ -197,11 +197,11 @@ not been verified.
 
 Obtain a copy from the HDF ftp server:
 http://www.hdfgroup.org/ftp/HDF5/current/src/
-(link might change, so always double check the HDF group website).
+(the link might change, so always doublecheck the HDF Group website).
 
 $ wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-x.x.x.tar.gz
 
-unpack the tarball
+Unpack the tarball.
 
 $ cd hdf5-x.x.x/
 $ CC=cc FC=ftn ./configure \
@@ -216,7 +216,7 @@ scripts and allocate nodes for your job. For Hopper, all the
 information can be found on:
 http://www.nersc.gov/systems/hopper-cray-xe6/
 
-save the PBS script into your HDF5 build directory. The PBS script
+Save the PBS script into your HDF5 build directory. The PBS script
 should contain (besides the PBS node allocation requests)the
 following:
 
@@ -234,7 +234,7 @@ make check
 Once the job runs and all is well, install the binary:
 $ make install
 
-2.5.2 Hopper known issues
+2.5.2 Hopper Known Issues
 ------------------------------
 Sometimes when building the library with make, you might get this problem:
 
@@ -254,12 +254,12 @@ If that happens, you are probable running with make -j <x>. In that
 case, you need to cleanup everything and start again as detailed above
 but use serial make (do not use -j <x>).
 
-3. Detail explanation
+3. Detailed Explanation
 ---------------------
 
-3.1. Installation steps (Uni/Multiple processes modes)
+3.1. Installation Steps (Uni/Multiple Processes Modes)
 -----------------------
-During the step of configure, you must be running in the uni-process mode.
+During the configure step, you must be running in the uni-process mode.
 If multiple processes are doing the configure simultaneously, they will
 incur errors.
 
@@ -267,38 +267,40 @@ In the build step (make), it depends on your make command whether it can
 run correctly in multiple processes mode.  If you are not sure, you should
 try running it in uni-process mode.
 
-In the test step (make check), if your system can control number of processes
-running in the MPI application, you can just use "make check".  But if your
-system (e.g., IBM SP) has a fixed number of processes for each batch run,
-you need to do the serial tests by "make check-s", requesting 1 process and
-then do the parallel tests by "make check-p", requesting n processes.
+In the test step (make check), if your system can control the number of 
+processes running in the MPI application, you can just use "make check".  
+But if your system (for example, IBM SP) has a fixed number of processes 
+for each batch run, you need to do the serial tests by "make check-s", 
+requesting 1 process and then do the parallel tests by "make check-p", 
+requesting n processes.
 
 Lastly, "make install" should be run in the uni-process mode.
 
 
-3.2. Configure details
+3.2. Configure Details
 ----------------------
-The HDF5 library can be configured to use MPI and MPI-IO for parallelism on
+The HDF5 Library can be configured to use MPI and MPI-IO for parallelism on
 a distributed multi-processor system. The easiest way to do this is to have
-a properly installed parallel compiler (e.g., MPICH's mpicc or IBM's mpcc_r)
-and supply the compiler name as the value of the CC environment variable.
-For examples,
+a properly installed parallel compiler (for example, MPICH's mpicc or 
+IBM's mpcc_r) and supply the compiler name as the value of the CC 
+environment variable. For example,
 
     $ CC=mpcc_r ./configure
     $ CC=/usr/local/mpi/bin/mpicc ./configure
 
-If no such a compiler command is available then you must use your normal
-C compiler along with the location(s) of MPI/MPI-IO files to be used.
+If no such compiler command is available then you must use your normal
+C compiler along with the location(s) of the MPI/MPI-IO files to be used.
 For example,
 
     $ CPPFLAGS=-I/usr/local/mpi/include \
       LDFLAGS=-L/usr/local/mpi/lib/LINUX/ch_p4 \
       ./configure --enable-parallel=mpich
 
-If a parallel library is being built then configure attempts to determine how
+If a parallel library is being built, then configure attempts to determine how
 to run a parallel application on one processor and on many processors. If the
-compiler is `mpicc' and the user hasn't specified values for RUNSERIAL and
-RUNPARALLEL then configure chooses `mpiexec' from the same directory as `mpicc':
+compiler is `mpicc' and the user has not specified values for RUNSERIAL and
+RUNPARALLEL, then configure chooses `mpiexec' from the same directory as 
+`mpicc':
 
     RUNSERIAL:    /usr/local/mpi/bin/mpiexec -np 1
     RUNPARALLEL:  /usr/local/mpi/bin/mpiexec -np $${NPROCS:=6}
@@ -307,45 +309,45 @@ The `$${NPROCS:=6}' will be substituted with the value of the NPROCS
 environment variable at the time `make check' is run (or the value 6).
 
 
-4. Parallel test suite
+4. Parallel Test Suite
 ----------------------
 The testpar/ directory contains tests for Parallel HDF5 and MPI-IO.  Here are
 some notes about some of the tests.
 
-The t_mpi tests the basic functionalities of some MPI-IO features used by
+t_mpi tests the basic functionalities of some MPI-IO features used by
 Parallel HDF5.  It usually exits with non-zero code if a required MPI-IO
 feature does not succeed as expected.  One exception is the testing of
-accessing files larger than 2GB.  If the underlying filesystem or if the
+accessing files larger than 2GB.  If the underlying file system or the
 MPI-IO library fails to handle file sizes larger than 2GB, the test will
 print informational messages stating the failure but will not exit with
 non-zero code.  Failure to support file size greater than 2GB is not a fatal
-error for HDF5 because HDF5 can use other file-drivers such as families of
+error for HDF5 because HDF5 can use other file drivers such as families of
 files to bypass the file size limit.
 
-The t_posix_compliant tests if the file system is POSIX compliant when POSIX
+t_posix_compliant tests if the file system is POSIX compliant when POSIX
 and MPI IO APIs are used.  This is for information only and it always exits
 with 0 even when non-compliance errors have occurred.  This is to prevent
-the test from aborting the remaining parallel HDF5 tests unnecessarily.
+the test from aborting the remaining Parallel HDF5 tests unnecessarily.
 
-The t_cache does many small sized I/O requests and may not run well in a
+t_cache does many small sized I/O requests and may not run well in a
 slow file system such as NFS disk. If it takes a long time to run it, try
-set the environment variable $HDF5_PARAPREFIX to a file system more suitable
-for MPI-IO requests before running t_cache.
+setting the environment variable $HDF5_PARAPREFIX to a file system more 
+suitable for MPI-IO requests before running t_cache.
 
 By default, the parallel tests use the current directory as the test directory.
-This can be changed by the environment variable $HDF5_PARAPREFIX.  For example,
+This can be changed by the environment variable $HDF5_PARAPREFIX. For example,
 if the tests should use directory /PFS/user/me, do
     HDF5_PARAPREFIX=/PFS/user/me
     export HDF5_PARAPREFIX
     make check
 
-(In some batch job system, you many need to hardset HDF5_PARAPREFIX in the
+(In some batch job systems, you many need to hardset HDF5_PARAPREFIX in the
 shell initial files like .profile, .cshrc, etc.)
 
 
 Reference
 ---------
-1. POSIX Compliant. A good explanation is by Donald Lewin,
+1. POSIX Compliant. A good explanation is by Donald Lewin.
     After a write() to a regular file has successfully returned, any
     successful read() from each byte position on the file that was modified
     by that write() will return the date that was written by the write(). A
@@ -357,11 +359,11 @@ Reference
 	& Associates.
 
 
-Appendix A. Sample programs
+Appendix A. Sample Programs
 ---------------------------
 Here are sample MPI-IO C and Fortran programs.  You may use them to run simple
 tests of your MPI compilers and the parallel file system.  The MPI commands
-used here are mpicc, mpif90 and mpiexec.  Replace them with the commands of
+used here are mpicc, mpif90, and mpiexec.  Replace them with the commands of
 your system.
 
 The programs assume they run in the parallel file system. Thus they create
@@ -380,8 +382,8 @@ Example compiling and running:
 
 ==> Sample_mpio.c <==
 /* Simple MPI-IO program testing if a parallel file can be created.
- * Default filename can be specified via first program argument.
- * Each process writes something, then reads all data back.
+ * Default filename can be specified via the first program argument.
+ * Each process writes something and then reads all data back.
  */
 
 #include <mpi.h>
@@ -498,7 +500,7 @@ main(int ac, char **av)
 ! file using MPI-IO calls.
 !
 ! USE MPI is the proper way to bring in MPI definitions but many
-! MPI Fortran compiler supports the pseudo standard of INCLUDE.
+! MPI Fortran compilers support the pseudo standard of INCLUDE.
 ! So, HDF5 uses the INCLUDE statement instead.
 ! 
 
