@@ -1672,6 +1672,7 @@ extern char H5libhdf5_settings[]; /* embedded library information */
 #define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8)        /*void*/
 #define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9)    /*void*/
 #define H5TRACE11(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) /*void*/
+#define H5TRACE12(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) /*void*/
 #define H5TRACE_RETURN(V)                    /*void*/
 #endif
 
