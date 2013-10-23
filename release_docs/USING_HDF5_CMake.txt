@@ -78,7 +78,7 @@ These steps are described in more detail below.
    1. Run CMake
 
       The visual CMake executable is named "cmake-gui.exe" on Windows and should be
-      available in your Start menu. For Linux, UNIX, and Mac users the
+      available in your Start menu. For Linux, UNIX, and Mac users, the
       executable is named "cmake-gui" and can be found where CMake was 
       installed. 
       
