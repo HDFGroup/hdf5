@@ -1,61 +1,68 @@
-		Building and installation instructions for Alpha Open VMS
+        Building and Installation Instructions for Alpha Open VMS
                               HDF5 1.8.12 release
                                18 September 2013
    
 
 
-		CONTENTS
-		--------
+        CONTENTS
+        --------
                 
-		1. Obtaining HDF5
-		2. Building and testing HDF5 C, Fortran and C++ libraries,
-                   and utilities
-		3. Installing HDF5 libraries
-		4. Known problems
+        1. Obtaining HDF5
+        2. Building and Testing HDF5 C, Fortran, and C++ Libraries
+           and Utilities
+        3. Installing HDF5 Libraries
+        4. Known Problems
 
 
-	1.Obtaining HDF5
+    1. Obtaining HDF5
 
-	  Please see INSTALL file in this directory for downloading instructions.
+       Please see the INSTALL file in this directory for downloading 
+       instructions.
 
-	2. Building and testing HDF5 C, Fortran and C++ libraries and utilities.
+    2. Building and Testing HDF5 C, Fortran, and C++ Libraries and Utilities
 
            IMPORTANT: This version REQUIRES GNU ZLIB library to be installed
                       on a system. You may download the source code from
                       http://www.zlib.net/
 
-                      The newest ZLIB 1.2.8 doesn't work properly on OpenVMS.
-                      But ZLIB 1.2.5 works fine.
+                      The newest ZLIB 1.2.8 does not work properly on OpenVMS, 
+                      but ZLIB 1.2.5 works fine.
 
-	 -  Use tar command to untar HDF5 source ball
+    -  Use the tar command to untar HDF5 source ball
 
-		tar -xvf <source>.tar
+       tar -xvf <source>.tar
 
-	 -  Change default directory to [.<source>.vms]
-         -  Specify top HDF5 source directory in the build.com file where the 
+    -  Change the default directory to [.<source>.vms]
+         -  Specify the top HDF5 source directory in the build.com file where 
             "hdf5top" is defined.
          -  Edit make.com:
-         	specify path to ZLIB library
-        	if necessary, modify compilation flags 
-	    Do NOT REMOVE /define=H5_VMS and /standard=strict_ansi qualifiers.
-         -  Run build.com command file 
-		@build
-            We recommend using batch queue to build and test this distribution. 
-            The command file runs make.com and builds 
-			C library, tests, and utilities	
-			Fortran library and tests
-			C++ library and tests
-            It also runs test scripts to test C, Fortran and C++ libraries, and
-	    h5dump, h5diff, h5ls, and h5repack utilities.
+                - Specify the path to the ZLIB library
+                - If necessary, modify the compilation flags 
+        Do NOT REMOVE the /define=H5_VMS and /standard=strict_ansi qualifiers.
+         -  Run the build.com command file 
+         
+        @build
+        
+            We recommend using a batch queue to build and test this 
+            distribution. 
+            
+            The command file runs make.com and builds the C library, tests, 
+            and utilities, the Fortran library and tests, and the C++ 
+            library and tests. It also runs test scripts to test C, Fortran, 
+            and C++ libraries, and the h5dump, h5diff, h5ls, and h5repack 
+            utilities.
 
-	3. Installing HDF5 libraries
+    3. Installing HDF5 Libraries
 
-	   Modify install.com file to specify installation directory (hdf5top) 
-           and run
-	       @install
-           to install HDF5 C, Fortran, and C++ libraries, and utilities.
-           The script will create the directories shown below in the
-           installation directory:
+       Modify the install.com file to specify the installation directory 
+       (hdf5top) and run
+       
+        @install
+        
+        to install HDF5 C, Fortran, and C++ libraries, and utilities.
+        
+        The script will create the directories shown below in the
+        installation directory:
 
            [.HDF5]...
            [.HDF5.INCLUDE]
@@ -70,13 +77,13 @@
            to build examples against the installed libraries and to verify 
            the installation.
 
-	4. Known problems
+	4. Known Problems
 
-           - There is no support for szip compression filter.
+           - There is no support for the szip compression filter.
            - Two soft conversion functions (H5T__conv_i_f and H5T__conv_f_i)
              have bugs.  They convert data between floating-point numbers and 
-             integers.  But the library's default is hard conversion.  The user 
-             should avoid explicitly enabling soft conversion between floating-point 
-             numbers and integers. 
+             integers, but the library's default is hard conversion.  The user 
+             should avoid explicitly enabling soft conversion between 
+             floating-point numbers and integers. 
 
-	For help contact help@hdfgroup.org
+    For help, contact help@hdfgroup.org.
