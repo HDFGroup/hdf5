@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5Group_H
-#define _H5Group_H
+#ifndef __H5Group_H
+#define __H5Group_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -25,9 +25,6 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
    public:
 	// Close this group.
 	virtual void close();
-
-	// Retrieves a dataspace with the region pointed to selected.
-	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
 	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("Group"); }
@@ -39,9 +36,10 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	virtual hid_t getLocId() const;
 
 	// Creates a group by way of dereference.
-	Group(H5Object& obj, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
-        Group(H5File& h5file, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
-        Group(Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	Group(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+         /* Group(H5File& h5file, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
+ */ 
+        Group(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 
 	// default constructor
 	Group();
@@ -62,10 +60,12 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	hid_t id;	// HDF5 group id
 
    protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Sets the group id.
 	virtual void p_setId(const hid_t new_id);
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 };
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5Group_H

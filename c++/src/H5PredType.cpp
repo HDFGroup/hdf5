@@ -56,6 +56,7 @@ PredType::PredType( const hid_t predtype_id ) : AtomType( predtype_id )
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PredType::PredType() : AtomType() {}
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	PredType copy constructor
@@ -65,6 +66,7 @@ PredType::PredType() : AtomType() {}
 //--------------------------------------------------------------------------
 PredType::PredType( const PredType& original ) : AtomType( original ) {}
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Flag to terminate HDF5 library in DataType::~DataType
 const PredType PredType::AtExit(H5CPP_EXITED);
 

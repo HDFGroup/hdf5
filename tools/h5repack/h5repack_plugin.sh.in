@@ -222,7 +222,7 @@ COPY_TESTFILES_TO_TESTDIR
 
 # Run the test
 arg="h5repack_layout.h5 -v -f UD=257,1,9"
-#TOOLTEST_DUMP plugin_test $arg 
+TOOLTEST_DUMP plugin_test $arg 
 
 # print results
 if test $nerrors -ne 0 ; then

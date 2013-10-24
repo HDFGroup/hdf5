@@ -98,14 +98,14 @@ Examples of use:
 
    GZIP compression with level 1 to all objects
 
-2) h5repack -v -f A:SZIP=8,NN file1 file2
+2) h5repack -v -f dset1:SZIP=8,NN file1 file2
 
-   SZIP compression with 8 pixels per block and NN coding method to object A
+   SZIP compression with 8 pixels per block and NN coding method to object dset1
 
-3) h5repack -v -l A,B:CHUNK=20x10 -f C,D,F:NONE file1 file2
+3) h5repack -v -l dset1,dset2:CHUNK=20x10 -f dset3,dset4,dset5:NONE file1 file2
 
-   Chunked layout, with a layout size of 20x10, to objects A and B
-   and remove filters to objects C, D, F
+   Chunked layout, with a layout size of 20x10, to objects dset1 and dset2
+   and remove filters to objects dset3, dset4, dset5
 
 4) h5repack -L -c 10 -s 20:dtype file1 file2 
 

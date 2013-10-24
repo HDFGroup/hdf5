@@ -169,7 +169,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
         if((attr1_id = H5Aopen_by_idx(loc1_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)curr1, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
         /* get name */
-        if(H5Aget_name(attr1_id, ATTR_NAME_MAX, name1) < 0)
+        if(H5Aget_name(attr1_id, (size_t)ATTR_NAME_MAX, name1) < 0)
             goto error;
 
         /*------------------ 
@@ -177,7 +177,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
         if((attr2_id = H5Aopen_by_idx(loc2_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)curr2, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
         /* get name */
-        if(H5Aget_name(attr2_id, ATTR_NAME_MAX, name2) < 0)
+        if(H5Aget_name(attr2_id, (size_t)ATTR_NAME_MAX, name2) < 0)
             goto error;
 
         /* criteria is string compare */
@@ -225,7 +225,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
         if((attr1_id = H5Aopen_by_idx(loc1_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)curr1, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
         /* get name */
-        if(H5Aget_name(attr1_id, ATTR_NAME_MAX, name1) < 0)
+        if(H5Aget_name(attr1_id, (size_t)ATTR_NAME_MAX, name1) < 0)
             goto error;
 
         table_attr_mark_exist(infile, name1, table_lp);
@@ -247,7 +247,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
         if((attr2_id = H5Aopen_by_idx(loc2_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)curr2, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
         /* get name */
-        if(H5Aget_name(attr2_id, ATTR_NAME_MAX, name2) < 0)
+        if(H5Aget_name(attr2_id, (size_t)ATTR_NAME_MAX, name2) < 0)
             goto error;
 
         table_attr_mark_exist(infile, name2, table_lp);
@@ -447,8 +447,8 @@ hsize_t diff_attr(hid_t loc1_id,
         for(j = 0; j < rank1; j++)
             nelmts1 *= dims1[j];
 
-        buf1 = (void *)HDmalloc((unsigned)(nelmts1 * msize1));
-        buf2 = (void *)HDmalloc((unsigned)(nelmts1 * msize2));
+        buf1 = (void *)HDmalloc((size_t)(nelmts1 * msize1));
+        buf2 = (void *)HDmalloc((size_t)(nelmts1 * msize2));
         if(buf1 == NULL || buf2 == NULL) {
             parallel_print( "cannot read into memory\n" );
             goto error;

@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5EnumType_H
-#define _H5EnumType_H
+#ifndef __H5EnumType_H
+#define __H5EnumType_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -74,4 +74,4 @@ class H5_DLLCPP EnumType : public DataType {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5EnumType_H

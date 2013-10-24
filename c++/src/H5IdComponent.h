@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _IdComponent_H
-#define _IdComponent_H
+#ifndef __IdComponent_H
+#define __IdComponent_H
 
 // IdComponent represents an HDF5 object that has an identifier.
 
@@ -44,8 +44,10 @@ class H5_DLLCPP IdComponent {
 	// Assignment operator.
 	IdComponent& operator=( const IdComponent& rhs );
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Gets the identifier of this object.
 	virtual hid_t getId () const = 0;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Sets the identifier of this object to a new value.
 	void setId(const hid_t new_id);
@@ -96,4 +98,4 @@ class H5_DLLCPP IdComponent {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __IdComponent_H

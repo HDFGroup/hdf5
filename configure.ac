@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.164-swmr_chksum0], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.165-swmr_chksum0], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -1046,12 +1046,15 @@ if test "X$STATIC_EXEC" = "Xyes"; then
   ## Issue a warning if -static flag is not supported.
   if test "X$lt_cv_prog_compiler_static_works" = "Xno"; then
       echo "    warning: -static flag not supported on this system; executable won't statically link shared system libraries."
+      LT_STATIC_EXEC=""
+  else
+    LT_STATIC_EXEC="-all-static"
   fi
-  LT_STATIC_EXEC="-all-static"
 else
   echo "no"
   LT_STATIC_EXEC=""
 fi
+AM_CONDITIONAL([USE_PLUGINS_CONDITIONAL], [test "X$LT_STATIC_EXEC" = X])
 
 AC_SUBST([LT_STATIC_EXEC])
 
@@ -1089,6 +1092,13 @@ case "X-$RPATH" in
     AC_MSG_ERROR([\'$enableval\' is not a valid rpath type])
     ;;
 esac
+## ----------------------------------------------------------------------
+## When sharedlib-rpath is disabled, setting runpath_var to "" above, don't
+## add libhdf5 as a dependency for the other hdf5 libs, either.  This keeps 
+## the rpath to libhdf5 out of the lib files as well as the executables.
+AM_CONDITIONAL([LT_ADD_LIBHDF5_DEPENDENCY], [test "X$runpath_var" != X])
+
+AC_SUBST([LT_ADD_LIBHDF5_DEPENDENCY])
 
 AC_MSG_CHECKING([make])
 
@@ -3052,27 +3062,6 @@ if test "X$default_vfd" = "Xyes"; then
 fi
 
 ## ----------------------------------------------------------------------
-## Enable custom plugin default path for library.  It requires SHARED support.
-##
-AC_MSG_CHECKING([for Custom Plugin Default Path definition])
-AC_ARG_WITH([default-plugin],
-            [AS_HELP_STRING([--with-default-plugin=location],
-                            [Specify default location for plugins
-                            [default="/usr/local/hdf5/lib/plugin"]])],,
-            withval="/usr/local/hdf5/lib/plugin")
-
-if test "X$withval" = "X"; then
-    AC_MSG_RESULT([default])
-    default_plugin="/usr/local/hdf5/lib/plugin"
-else
-    AC_MSG_RESULT([$withval])
-    default_plugin=$withval
-fi
-
-AC_DEFINE_UNQUOTED([DEFAULT_PLUGIN], ["$default_plugin"],
-            [Define the default plugins path to compile])
-
-## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
 
@@ -3113,6 +3102,27 @@ else
 fi
 
 AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])
+
+## ----------------------------------------------------------------------
+## Enable custom plugin default path for library.  It requires SHARED support.
+##
+AC_MSG_CHECKING([for custom plugin default path definition])
+AC_ARG_WITH([default-plugindir],
+            [AS_HELP_STRING([--with-default-plugindir=location],
+                            [Specify default location for plugins
+                            [default="/usr/local/hdf5/lib/plugin"]])],,
+            withval="/usr/local/hdf5/lib/plugin")
+
+if test "X$withval" = "X"; then
+    AC_MSG_RESULT([default])
+    default_plugindir="/usr/local/hdf5/lib/plugin"
+else
+    AC_MSG_RESULT([$withval])
+    default_plugindir=$withval
+fi
+
+AC_DEFINE_UNQUOTED([DEFAULT_PLUGINDIR], ["$default_plugindir"],
+            [Define the default plugins path to compile])
 
 ## ----------------------------------------------------------------------
 ## Decide whether the presence of user's exception handling functions is

@@ -4,6 +4,8 @@
 
 # To use this option, copy both the macro and option code
 # into the root UserMacros.cmake file. 
+# OR add an include to the root UserMacros.cmake file:
+# INCLUDE(path_to_file/WINDOWS_MT.cmake)
 
 #-----------------------------------------------------------------------------
 # Option to Build with Static CRT libraries on Windows

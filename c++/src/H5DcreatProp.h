@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5DSCreatPropList_H
-#define _H5DSCreatPropList_H
+#ifndef __H5DSCreatPropList_H
+#define __H5DSCreatPropList_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -123,4 +123,4 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5DSCreatPropList_H

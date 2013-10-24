@@ -64,6 +64,10 @@ RunTest()
 # Run tests
 if [ $? -eq 0 ]
 then
+    echo "*************************************************"
+    echo "**            Run C++ API Examples             **"
+    echo "**                                             **"
+    echo "*************************************************"
     if (RunTest create &&\
         rm create &&\
         RunTest readdata &&\
@@ -81,6 +85,33 @@ then
         EXIT_VALUE=${EXIT_SUCCESS}
     else
         EXIT_VALUE=${EXIT_FAILURE}
+    fi
+    echo
+    echo "***************************************************"
+    echo "**             Run Tutorial Examples             **"
+    echo "**                                               **"
+    echo "***************************************************"
+    if (RunTest h5tutr_crtdat &&\
+	rm h5tutr_crtdat &&\
+	RunTest h5tutr_rdwt &&\
+	rm h5tutr_rdwt &&\
+	RunTest h5tutr_crtatt &&\
+	rm h5tutr_crtatt &&\
+	RunTest h5tutr_crtgrp &&\
+	rm h5tutr_crtgrp &&\
+	RunTest h5tutr_crtgrpar &&\
+	rm h5tutr_crtgrpar &&\
+	RunTest h5tutr_crtgrpd &&\
+	rm h5tutr_crtgrpd &&\
+	RunTest h5tutr_extend &&\
+	rm h5tutr_extend &&\
+	RunTest h5tutr_subset &&\
+	rm h5tutr_subset &&\
+	RunTest h5tutr_cmprss &&\
+	rm h5tutr_cmprss ); then
+	EXIT_VALUE=${EXIT_SUCCESS}
+    else
+	EXIT_VALUE=${EXIT_FAILURE}
     fi
 fi
 
