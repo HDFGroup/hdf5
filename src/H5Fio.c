@@ -304,11 +304,11 @@ H5F_get_checksums(uint8_t *buf, size_t chk_size, uint32_t *s_chksum/*out*/, uint
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_read_check_metadata(H5F_t *f, H5FD_mem_t type, H5AC_type_t actype, haddr_t addr, size_t read_size, size_t chk_size,
+H5F_read_check_metadata(H5F_t *f, H5FD_mem_t type, unsigned actype, haddr_t addr, size_t read_size, size_t chk_size,
     hid_t dxpl_id, uint8_t *buf/*out*/, uint32_t *chksum/*out*/)
 {
-    size_t tries, max_tries;	/* The # of read attempts */
-    size_t retries;		/* The # of retries */
+    unsigned tries, max_tries;	/* The # of read attempts */
+    unsigned retries;		/* The # of retries */
     uint32_t stored_chksum;  	/* Stored metadata checksum value */
     uint32_t computed_chksum; 	/* Computed metadata checksum value */
     herr_t ret_value = SUCCEED;	/* Return value */
@@ -341,7 +341,7 @@ H5F_read_check_metadata(H5F_t *f, H5FD_mem_t type, H5AC_type_t actype, haddr_t a
     if(retries) { /* Does not track 0 retry */
         HDfprintf(stderr, "%s: SUCCESS after %u retries; actype=%u\n", FUNC, retries, actype);
 	if(H5F_track_metadata_read_retries(f, actype, retries) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "cannot track read tries = %u ", retries)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "cannot track read tries = %u ", retries)
     }
 
     /* Return the computed checksum */

@@ -318,9 +318,9 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     size_t	spec_read_size; /* Size of buffer to speculatively read in */
     size_t	buf_size;       /* Size of prefix+chunk #0 buffer */
     haddr_t     eoa;		/* Relative end of file address	*/
-    size_t 	tries, max_tries;	/* The # of read attempts */
-    size_t	retries;		/* The # of retries */
-    size_t 	fixed_tries; 		/* The # of read attempts for prefix */
+    unsigned 	tries, max_tries;	/* The # of read attempts */
+    unsigned 	retries;		/* The # of retries */
+    unsigned 	fixed_tries; 		/* The # of read attempts for prefix */
     uint32_t 	stored_chksum;     	/* Stored metadata checksum value */
     uint32_t 	computed_chksum;   	/* Computed metadata checksum value */
     H5O_t	*ret_value;     	/* Return value */

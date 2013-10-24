@@ -463,7 +463,7 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     uint32_t stored_chksum;     /* Stored metadata checksum value */
     uint32_t computed_chksum;   /* Computed metadata checksum value */
     size_t x;                   /* Counter variable for messages in list */
-    uint32_t chk_size;       	/* Exact size with checksum at the end */
+    size_t chk_size;       	/* Exact size with checksum at the end */
     H5SM_list_t *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

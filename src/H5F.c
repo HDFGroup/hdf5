@@ -1375,7 +1375,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 	if(!file->read_attempts)
 	    file->read_attempts = H5F_SWMR_METADATA_READ_ATTEMPTS;
 	/* Turn off accumulator */
-	shared->feature_flags = lf->feature_flags & ~H5FD_FEAT_ACCUMULATE_METADATA;
+	shared->feature_flags = lf->feature_flags & ~(unsigned)H5FD_FEAT_ACCUMULATE_METADATA;
 	if(H5FD_set_feature_flags(lf, shared->feature_flags) < 0)
 	     HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't set feature_flags in VFD")
     } else
@@ -1383,8 +1383,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 
     /* Determine the # of bins for metdata read retries */
     file->retries_nbins = 0;
-    if(file->read_attempts > 1)
-	file->retries_nbins = HDlog10((double)(file->read_attempts - 1)) + 1;
+    if(file->read_attempts > 1) {
+	double tmp;
+	tmp = HDlog10((double)(file->read_attempts - 1));
+	file->retries_nbins = (unsigned)tmp + 1;
+    }
 
     /* Initialize the tracking for metadata read retries */
     for(i = 0; i < H5AC_NTYPES; i++)
@@ -3505,9 +3508,10 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_track_metadata_read_retries(H5F_t *f, H5AC_type_t actype, unsigned retries)
+H5F_track_metadata_read_retries(H5F_t *f, unsigned actype, unsigned retries)
 {
     unsigned log_ind;			/* Index to the array of retries based on log10 of retries */
+    double tmp;
     herr_t ret_value = SUCCEED; 	/* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3522,11 +3526,12 @@ H5F_track_metadata_read_retries(H5F_t *f, H5AC_type_t actype, unsigned retries)
 
     /* Allocate memory for retries */
     if(f->retries[actype] == NULL)
-        if((f->retries[actype] = (uint32_t *)HDcalloc(f->retries_nbins, sizeof(uint32_t))) == NULL)
+        if((f->retries[actype] = (uint32_t *)HDcalloc((size_t)f->retries_nbins, sizeof(uint32_t))) == NULL)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Index to retries based on log10 */
-    log_ind = HDlog10((double)retries);
+    tmp = HDlog10((double)retries);
+    log_ind = (unsigned)tmp;
     HDassert(log_ind < f->retries_nbins);
 
     /* Increment the # of the "retries" */

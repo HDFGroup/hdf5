@@ -407,9 +407,9 @@ H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     const uint8_t	*p;             /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  	/* Stored metadata checksum value */
     uint32_t            computed_chksum; 	/* Computed metadata checksum value */
-    size_t 		tries, max_tries;	/* The # of read attempts */
-    size_t 		fixed_tries;		/* The # of read attempts for the minimum portion */
-    size_t 		retries;		/* The # of retries */
+    unsigned		tries, max_tries;	/* The # of read attempts */
+    unsigned 		fixed_tries;		/* The # of read attempts for the minimum portion */
+    unsigned		retries;		/* The # of retries */
     H5HF_hdr_t		*ret_value;     	/* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1314,9 +1314,9 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     haddr_t             heap_addr;      /* Address of heap header in the file */
     uint32_t 		computed_chksum;       /* Computed metadata checksum value */
     uint32_t 		stored_chksum;         /* Metadata checksum value */
-    size_t 		tries, max_tries;	/* The # of read attempts */
-    size_t 		retries;		/* The # of retries */
-    size_t 		chk_size;		/* The size for validating checksum */
+    unsigned 		tries, max_tries;	/* The # of read attempts */
+    unsigned		retries;		/* The # of retries */
+    size_t		chk_size;		/* The size for validating checksum */
     uint8_t 		*chk_p;			/* Pointer to the area for validating checksum */
     size_t 		read_size;       	/* Size of filtered direct block to read */
     H5HF_direct_t	*ret_value;     	/* Return value */

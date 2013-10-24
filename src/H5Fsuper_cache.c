@@ -123,14 +123,14 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     haddr_t             eof;                /*end of file address           */
     uint8_t             sizeof_addr;        /* Size of offsets in the file (in bytes) */
     uint8_t             sizeof_size;        /* Size of lengths in the file (in bytes) */
-    const size_t        fixed_size = H5F_SUPERBLOCK_FIXED_SIZE; /*fixed sizeof superblock   */
+    const size_t      	fixed_size = H5F_SUPERBLOCK_FIXED_SIZE; /*fixed sizeof superblock   */
     size_t              variable_size;      /*variable sizeof superblock    */
     uint8_t            *p;                  /* Temporary pointer into encoding buffer */
     unsigned            super_vers;         /* Superblock version          */
     hbool_t            *dirtied = (hbool_t *)_udata;  	/* Set up dirtied out value */
-    size_t 		tries, max_tries;   /* The # of read attempts to try */
-    size_t 		fixed_tries; 	    /* The # of read attempts to try for the fixed-size portion */
-    size_t 		retries; 	    /* The # of retries */
+    unsigned 		tries, max_tries;   /* The # of read attempts to try */
+    unsigned 		fixed_tries; 	    /* The # of read attempts to try for the fixed-size portion */
+    unsigned 		retries; 	    /* The # of retries */
     uint32_t 		computed_chksum;    /* Computed checksum  */
     uint32_t 		stored_chksum;      /* Checksum read from file  */
     H5F_super_t        	*ret_value;         /* Return value */
@@ -164,6 +164,8 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     sblock->cache_info.flush_me_collectively = TRUE;
 #endif
 
+    H5_CHECK_OVERFLOW(fixed_size, size_t, haddr_t);
+
     /* Get the # of read attempts */
     tries = max_tries = f->read_attempts;
     do {
@@ -171,7 +173,6 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
 	do {
 	    /* Read fixed-size portion of the superblock */
 	    p = sbuf;
-	    H5_CHECK_OVERFLOW(fixed_size, size_t, haddr_t);
 	    if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, (haddr_t)fixed_size) < 0)
 		HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "set end of space allocation request failed")
 	    if(H5FD_read(lf, dxpl_id, H5FD_MEM_SUPER, (haddr_t)0, fixed_size, p) < 0)
@@ -230,7 +231,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
 	    shared->sizeof_addr = sizeof_addr;  /* Keep a local copy also */
     
 	    /* Retrieve stored and computed checksum */
-	    H5F_get_checksums(sbuf, fixed_size + H5F_SUPERBLOCK_VARLEN_SIZE_V2(f), &stored_chksum, &computed_chksum);
+	    H5F_get_checksums(sbuf, fixed_size + (size_t)H5F_SUPERBLOCK_VARLEN_SIZE_V2(f), &stored_chksum, &computed_chksum);
 
 	    /* Verify correct checksum */
 	    if(stored_chksum == computed_chksum)

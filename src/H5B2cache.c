@@ -575,7 +575,7 @@ H5B2__cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned		u;              /* Local index variable */
-    uint32_t 		chk_size;	/* Exact size of the node with checksum at the end */
+    size_t 		chk_size;	/* Exact size of the node with checksum at the end */
     H5B2_internal_t	*ret_value;     /* Return value */
 
     FUNC_ENTER_STATIC
@@ -604,10 +604,9 @@ H5B2__cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     internal->shadowed_prev = NULL;
 
     /* Internal node prefix header + records + child pointer triplets: size with checksum at the end */
-    chk_size = H5B2_INT_PREFIX_SIZE + (udata->nrec * udata->hdr->rrec_size) + ((udata->nrec + 1) * H5B2_INT_POINTER_SIZE(udata->hdr, udata->depth));
-
+    chk_size = H5B2_INT_PREFIX_SIZE + (udata->nrec * udata->hdr->rrec_size) + ((size_t)(udata->nrec + 1) * H5B2_INT_POINTER_SIZE(udata->hdr, udata->depth));
     /* Read and validate internal node from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_BTREE, H5AC_BT2_INT_ID, addr, udata->hdr->node_size, chk_size, dxpl_id, udata->hdr->page, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, H5FD_MEM_BTREE, H5AC_BT2_INT_ID, addr, (size_t)udata->hdr->node_size, chk_size, dxpl_id, udata->hdr->page, &computed_chksum) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 internal node")
 
     p = udata->hdr->page;
@@ -768,7 +767,7 @@ H5B2__cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t add
 
 	/* Write the B-tree internal node */
         HDassert((size_t)(p - internal->hdr->page) <= internal->hdr->node_size);
-	if(H5F_block_write(f, H5FD_MEM_BTREE, addr, internal->hdr->node_size, dxpl_id, internal->hdr->page) < 0)
+	if(H5F_block_write(f, H5FD_MEM_BTREE, addr, (size_t)internal->hdr->node_size, dxpl_id, internal->hdr->page) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to save B-tree internal node to disk")
 
 	internal->cache_info.is_dirty = FALSE;
@@ -998,7 +997,7 @@ H5B2__cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned		u;              /* Local index variable */
-    uint32_t 		chk_size;	/* Exact size of the node with checksum at the end */
+    size_t 		chk_size;	/* Exact size of the node with checksum at the end */
     H5B2_leaf_t		*ret_value;     /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1030,7 +1029,7 @@ H5B2__cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata
     chk_size = H5B2_LEAF_PREFIX_SIZE + (udata->nrec * udata->hdr->rrec_size);
 
     /* Read and validate leaf node from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_BTREE, H5AC_BT2_LEAF_ID, addr, udata->hdr->node_size, chk_size, dxpl_id, udata->hdr->page, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, H5FD_MEM_BTREE, H5AC_BT2_LEAF_ID, addr, (size_t)udata->hdr->node_size, chk_size, dxpl_id, udata->hdr->page, &computed_chksum) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 leaf node")
 
     p = udata->hdr->page;
@@ -1157,7 +1156,7 @@ H5B2__cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H
 
 	/* Write the B-tree leaf node */
         HDassert((size_t)(p - leaf->hdr->page) <= leaf->hdr->node_size);
-	if(H5F_block_write(f, H5FD_MEM_BTREE, addr, leaf->hdr->node_size, dxpl_id, leaf->hdr->page) < 0)
+	if(H5F_block_write(f, H5FD_MEM_BTREE, addr, (size_t)leaf->hdr->node_size, dxpl_id, leaf->hdr->page) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to save B-tree leaf node to disk")
 
 	leaf->cache_info.is_dirty = FALSE;

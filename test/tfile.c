@@ -3577,11 +3577,11 @@ test_swmr_read(void)
 static void
 test_metadata_read_attempts(void)
 {
-    hid_t fapl;    	/* File access property list */
-    hid_t file_fapl;    /* The file's access property list */
-    hid_t fid, fid1, fid2, fid3;    	/* File IDs */
-    unsigned attempts;	/* The # of read attempts */
-    herr_t ret;         /* Generic return value */
+    hid_t fapl;    		/* File access property list */
+    hid_t file_fapl;    	/* The file's access property list */
+    hid_t fid, fid1, fid2;    	/* File IDs */
+    unsigned attempts;		/* The # of read attempts */
+    herr_t ret;         	/* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing H5Pget/set_metadata_read_attempts()\n"));
@@ -3920,7 +3920,7 @@ test_metadata_read_attempts(void)
 
     /* Create a file */
     fid = H5Fcreate(FILE1, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl);
-    CHECK(fid1, FAIL, "H5Fcreate");
+    CHECK(fid, FAIL, "H5Fcreate");
 
     /* Close the file */
     ret = H5Fclose(fid);
@@ -3949,7 +3949,7 @@ test_metadata_read_attempts(void)
 
     /* Open file again with SWMR access and default fapl */
     fid = H5Fopen(FILE1, H5F_ACC_SWMR_READ, H5P_DEFAULT);
-    CHECK(fid2, FAIL, "H5Fopen");
+    CHECK(fid, FAIL, "H5Fopen");
 
     /* Get file's fapl */
     file_fapl = H5Fget_access_plist(fid);
@@ -3978,7 +3978,7 @@ test_metadata_read_attempts(void)
 
     /* Create a file */
     fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(fid1, FAIL, "H5Fcreate");
+    CHECK(fid, FAIL, "H5Fcreate");
 
     /* Close the file */
     ret = H5Fclose(fid);
@@ -3986,7 +3986,7 @@ test_metadata_read_attempts(void)
 
     /* Open file again with SWMR access and default fapl */
     fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, H5P_DEFAULT);
-    CHECK(fid2, FAIL, "H5Fopen");
+    CHECK(fid1, FAIL, "H5Fopen");
 
     /* Create a copy of file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -3998,7 +3998,7 @@ test_metadata_read_attempts(void)
 
     /* Open file again with SWMR access and fapl (non-default & set to 9) */
     fid2 = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl);
-    CHECK(fid3, FAIL, "H5Fopen");
+    CHECK(fid2, FAIL, "H5Fopen");
 
     /* Re-open fid1 */
     fid = H5Freopen(fid1);
@@ -4078,7 +4078,7 @@ test_metadata_read_attempts(void)
 
     /* Open file again with non-SWMR access and fapl (non-default & set to 9) */
     fid2 = H5Fopen(FILE1, H5F_ACC_RDONLY, fapl);
-    CHECK(fid3, FAIL, "H5Fopen");
+    CHECK(fid2, FAIL, "H5Fopen");
 
     /* Re-open fid1 */
     fid = H5Freopen(fid1);
@@ -4188,7 +4188,7 @@ test_metadata_read_retries_info(void)
     /* Initialize buffer data */
     for(i = n = 0; i < 6; i++)
 	for(j = 0; j < 10; j++)
-              buf[i][j] = n++;
+              buf[i][j] = (int)n++;
 
     /* Write to the 2 datasets */
     ret = H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
