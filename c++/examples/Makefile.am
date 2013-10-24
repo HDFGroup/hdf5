@@ -40,6 +40,9 @@ INSTALL_SCRIPT_FILES = run-c++-ex.sh
 # Some of the examples depend on files created by running other examples
 readdata.chkexe_: create.chkexe_
 chunks.chkexe_: extend_ds.chkexe_
+h5tutr_rdwt.chkexe_: h5tutrcrtdat.chkexe
+h5tutrcrtatt.chkexe_: h5tutrcrtdat.chkexe
+h5tutr_crtgrpd.chkexe_: h5tutr_crtgrpar.chkexe
 
 # Tell conclude.am that these are C++ tests.
 CXX_API=yes

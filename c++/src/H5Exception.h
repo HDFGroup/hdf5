@@ -28,6 +28,11 @@ namespace H5 {
 #endif
 #endif
 
+/*! \class Exception
+    \brief Exception provides wrappers of HDF5 error handling functions.
+
+    Many classes are derived from Exception for specific HDF5 C interfaces.
+*/
 class H5_DLLCPP Exception {
    public:
 	// Creates an exception with a function name where the failure occurs
@@ -78,13 +83,13 @@ class H5_DLLCPP Exception {
 	// virtual Destructor
 	virtual ~Exception();
 
-   private:
-	H5std_string detail_message;
-	H5std_string func_name;
-
    protected:
         // Default value for detail_message
         static const char DEFAULT_MSG[];
+
+   private:
+	H5std_string detail_message;
+	H5std_string func_name;
 };
 
 class H5_DLLCPP FileIException : public Exception {

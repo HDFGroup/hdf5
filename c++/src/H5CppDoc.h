@@ -37,17 +37,17 @@
  * closely represent the interfaces of the HDF5 APIs, as followed:
  *
  * \verbatim
- 	HDF5 C APIs				C++ Classes
- 	-----------				-----------
- 	Attribute Interface (H5A)		Attribute
- 	Datasets Interface (H5D)		DataSet
- 	Error Interface (H5E)			Exception
- 	File Interface (H5F)			H5File
- 	Group Interface (H5G)			Group
- 	Identifier Interface (H5I)		IdComponent
- 	Property List Interface (H5P)		PropList and subclasses
- 	Dataspace Interface (H5S)		DataSpace
- 	Datatype Interface (H5T)		DataType and subclasses
+        HDF5 C APIs                       C++ Classes
+        -----------                       -----------
+        Attribute Interface (H5A)         Attribute
+        Datasets Interface (H5D)          DataSet
+        Error Interface (H5E)             Exception
+        File Interface (H5F)              H5File
+        Group Interface (H5G)             Group
+        Identifier Interface (H5I)        IdComponent
+        Property List Interface (H5P)     PropList and subclasses
+        Dataspace Interface (H5S)         DataSpace
+        Datatype Interface (H5T)          DataType and subclasses
   \endverbatim
  * \section install_sec Installation
  *

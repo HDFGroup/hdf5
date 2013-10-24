@@ -21,6 +21,10 @@
 namespace H5 {
 #endif
 
+/*! \class DSetMemXferPropList
+    \brief Class DSetMemXferPropList represents the dataset memory and
+    transfer property list.
+*/
 class H5_DLLCPP DSetMemXferPropList : public PropList {
    public:
 	static const DSetMemXferPropList DEFAULT;

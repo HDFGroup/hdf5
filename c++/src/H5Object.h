@@ -38,6 +38,12 @@
 namespace H5 {
 #endif
 
+/*! \class H5Object
+    \brief Class H5Object is a bridge between H5Location and DataSet, DataType,
+     and Group.
+
+    All the wrappers in H5Object were moved to H5Location.
+*/
 class H5_DLLCPP H5Object : public H5Location {
    public:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

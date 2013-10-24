@@ -269,7 +269,6 @@ H5FL_DEFINE_STATIC(H5P_genplist_t);
 static const H5I_class_t H5I_GENPROPCLS_CLS[1] = {{
     H5I_GENPROP_CLS,		/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     0,				/* # of reserved IDs for class */
     (H5I_free_t)H5P_close_class	/* Callback routine for closing objects of this class */
 }};
@@ -278,7 +277,6 @@ static const H5I_class_t H5I_GENPROPCLS_CLS[1] = {{
 static const H5I_class_t H5I_GENPROPLST_CLS[1] = {{
     H5I_GENPROP_LST,		/* ID class value */
     0,				/* Class flags */
-    128,			/* Minimum hash size for class */
     0,				/* # of reserved IDs for class */
     (H5I_free_t)H5P_close	/* Callback routine for closing objects of this class */
 }};

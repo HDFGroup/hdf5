@@ -992,7 +992,7 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
 
                 /* Add the path separator to the current path */
                 HDassert(udata->path[udata->curr_path_len] == '\0');
-                HDstrncpy(&(udata->path[udata->curr_path_len]), "/", 2);
+                HDstrncpy(&(udata->path[udata->curr_path_len]), "/", (size_t)2);
                 udata->curr_path_len++;
 
                 /* Attempt to get the link info for this group */

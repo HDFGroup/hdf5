@@ -17,13 +17,18 @@
 #ifndef __IdComponent_H
 #define __IdComponent_H
 
-// IdComponent represents an HDF5 object that has an identifier.
-
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
 
 class DataSpace;
+/*! \class IdComponent
+    \brief Class IdComponent provides wrappers of the C functions that
+     operate on an HDF5 identifier.
+
+    In most cases, the C library handles these operations and an application
+    rarely needs them.
+*/
 class H5_DLLCPP IdComponent {
    public:
 	// Increment reference counter.
@@ -76,11 +81,10 @@ class H5_DLLCPP IdComponent {
 	virtual ~IdComponent();
 
    protected:
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
 	// Default constructor.
 	IdComponent();
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Gets the name of the file, in which an HDF5 object belongs.
 	H5std_string p_get_file_name() const;
 

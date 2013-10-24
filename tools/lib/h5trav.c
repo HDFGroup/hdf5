@@ -49,7 +49,7 @@ typedef struct {
 } trav_print_udata_t;
 
 /* format for hsize_t */
-#define HSIZE_T_FORMAT   "%"H5_PRINTF_LL_WIDTH"u"
+#define HSIZE_T_FORMAT   "%" H5_PRINTF_LL_WIDTH "u"
 
 /*-------------------------------------------------------------------------
  * local functions

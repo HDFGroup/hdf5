@@ -27,8 +27,8 @@
     using namespace H5;
 #endif
 
-const H5std_string	FILE_NAME( "dset.h5" );
-const H5std_string	DATASET_NAME( "dset" );
+const H5std_string	FILE_NAME("h5tutr_dset.h5");
+const H5std_string	DATASET_NAME("dset");
 const int 	DIM0 = 4;	               // dataset dimensions
 const int 	DIM1 = 6;
 
@@ -52,24 +52,24 @@ int main (void)
 	Exception::dontPrint();
 
 	// Open an existing file and dataset.
-	H5File file( FILE_NAME, H5F_ACC_RDWR );
-	DataSet dataset = file.openDataSet( DATASET_NAME );
+	H5File file(FILE_NAME, H5F_ACC_RDWR);
+	DataSet dataset = file.openDataSet(DATASET_NAME);
 
 	// Write the data to the dataset using default memory space, file
 	// space, and transfer properties.
-	dataset.write( data, PredType::NATIVE_INT );
+	dataset.write(data, PredType::NATIVE_INT);
 
     }  // end of try block
 
     // catch failure caused by the H5File operations
-    catch( FileIException error )
+    catch(FileIException error)
     {
 	error.printError();
 	return -1;
     }
 
     // catch failure caused by the DataSet operations
-    catch( DataSetIException error )
+    catch(DataSetIException error)
     {
 	error.printError();
 	return -1;
