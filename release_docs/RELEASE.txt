@@ -259,7 +259,7 @@ They are built with the configure process unless specified otherwise.
     (wren)                        Intel icc/icpc/ifort version 13.0.3
 
     OpenVMS  IA64 V8.4            HP C V7.3-018         
-    (Boeing)                      HP Fortran V8.2-104939-50H96
+                                  HP Fortran V8.2-104939-50H96
                                   HP C++ V7.4-004 
 
 Tested Configuration Features Summary
@@ -391,10 +391,8 @@ Known Problems
 
 * CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
   catches some undefined behavior in the alignment algorithm of the macro 
-  DETECT_I in H5detect.c (Issue 8147).  Since the algorithm is trying to 
-  detect the alignment of integers, ideally the flag -fcatch-undefined-behavior 
-  shouldn't to be used for H5detect.c. In the future, we can separate flags 
-  for H5detect.c from the rest of the library. (SLU - 2013/10/16)
+  DETECT_I in H5detect.c (HDFFV-8147). This issue will be addressed in the 
+  next release.  (SLU - 2013/10/16)
 
 * Running make check for the tools can fail in the tools tests if make was not
   run prior. The tests for the tools use other tools in the tests, therefore
