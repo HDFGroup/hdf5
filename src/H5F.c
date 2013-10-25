@@ -63,7 +63,7 @@ typedef struct H5F_olist_t {
         } ptr;
     } file_info;
     size_t     list_index;      /* Current index in open ID array */
-    size_t     max_index;            /* Maximum # of IDs to put into array */
+    size_t     max_nobjs;       /* Maximum # of IDs to put into array */
 } H5F_olist_t;
 
 
@@ -506,7 +506,8 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id")
     if(0 == (types & H5F_OBJ_ALL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type")
-    HDassert(oid_list);
+    if(!oid_list)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "object ID list is NULL")
 
     /* Perform the query */
     if(H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE, &obj_id_count) < 0)
@@ -565,7 +566,7 @@ done:
  *---------------------------------------------------------------------------
  */
 static herr_t
-H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr)
+H5F_get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr)
 {
     size_t obj_id_count=0;      /* Number of open IDs */
     H5F_olist_t olist;          /* Structure to hold search results */
@@ -577,10 +578,10 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_
     HDassert(obj_id_count_ptr);
 
     /* Set up search information */
-    olist.obj_id_list  = (max_index==0 ? NULL : obj_id_list);
+    olist.obj_id_list  = (max_nobjs==0 ? NULL : obj_id_list);
     olist.obj_id_count = &obj_id_count;
     olist.list_index   = 0;
-    olist.max_index   = max_index;
+    olist.max_nobjs   = max_nobjs;
 
     /* Determine if we are searching for local or global objects */
     if(types & H5F_OBJ_LOCAL) {
@@ -600,38 +601,54 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_
             HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)")
     } /* end if */
 
-    /* Search through dataset IDs to count number of datasets, and put their
+    /* If the caller just wants to count the number of objects (OLIST.MAX_NOBJS is zero),
+     * or the caller wants to get the list of IDs and the list isn't full,
+     * search through dataset IDs to count number of datasets, and put their
      * IDs on the object list */
-    if(types & H5F_OBJ_DATASET) {
-        olist.obj_type = H5I_DATASET;
-        if(H5I_iterate(H5I_DATASET, H5F_get_objects_cb, &olist, app_ref) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(2)")
-    } /* end if */
+    if(!olist.max_nobjs || (olist.max_nobjs && olist.list_index<olist.max_nobjs)) { 
+        if (types & H5F_OBJ_DATASET) {
+            olist.obj_type = H5I_DATASET;
+            if(H5I_iterate(H5I_DATASET, H5F_get_objects_cb, &olist, app_ref) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(2)")
+        } /* end if */
+    } 
 
-    /* Search through group IDs to count number of groups, and put their
+    /* If the caller just wants to count the number of objects (OLIST.MAX_NOBJS is zero),
+     * or the caller wants to get the list of IDs and the list isn't full,
+     * search through group IDs to count number of groups, and put their
      * IDs on the object list */
-    if(types & H5F_OBJ_GROUP) {
-        olist.obj_type = H5I_GROUP;
-        if(H5I_iterate(H5I_GROUP, H5F_get_objects_cb, &olist, app_ref) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(3)")
-    } /* end if */
+    if(!olist.max_nobjs || (olist.max_nobjs && olist.list_index<olist.max_nobjs)) { 
+        if(types & H5F_OBJ_GROUP) {
+            olist.obj_type = H5I_GROUP;
+            if(H5I_iterate(H5I_GROUP, H5F_get_objects_cb, &olist, app_ref) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(3)")
+        } /* end if */
+    } 
 
-    /* Search through datatype IDs to count number of named datatypes, and put their
+    /* If the caller just wants to count the number of objects (OLIST.MAX_NOBJS is zero),
+     * or the caller wants to get the list of IDs and the list isn't full,
+     * search through datatype IDs to count number of named datatypes, and put their
      * IDs on the object list */
-    if(types & H5F_OBJ_DATATYPE) {
-        olist.obj_type = H5I_DATATYPE;
-        if(H5I_iterate(H5I_DATATYPE, H5F_get_objects_cb, &olist, app_ref) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(4)")
-    } /* end if */
+    if(!olist.max_nobjs || (olist.max_nobjs && olist.list_index<olist.max_nobjs)) { 
+        if(types & H5F_OBJ_DATATYPE) {
+            olist.obj_type = H5I_DATATYPE;
+            if(H5I_iterate(H5I_DATATYPE, H5F_get_objects_cb, &olist, app_ref) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(4)")
+        } /* end if */
+    } 
 
-    /* Search through attribute IDs to count number of attributes, and put their
+    /* If the caller just wants to count the number of objects (OLIST.MAX_NOBJS is zero),
+     * or the caller wants to get the list of IDs and the list isn't full,
+     * search through attribute IDs to count number of attributes, and put their
      * IDs on the object list */
-    if(types & H5F_OBJ_ATTR) {
-        olist.obj_type = H5I_ATTR;
-        if(H5I_iterate(H5I_ATTR, H5F_get_objects_cb, &olist, app_ref) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(5)")
-    } /* end if */
-
+    if(!olist.max_nobjs || (olist.max_nobjs && olist.list_index<olist.max_nobjs)) {
+        if(types & H5F_OBJ_ATTR) {
+            olist.obj_type = H5I_ATTR;
+            if(H5I_iterate(H5I_ATTR, H5F_get_objects_cb, &olist, app_ref) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(5)")
+        } /* end if */
+    }
+ 
     /* Set the number of objects currently open */
     *obj_id_count_ptr = obj_id_count;
 
@@ -647,8 +664,8 @@ done:
  * 		object is in the file, and either count it or put its ID
  *		on the list.
  *
- * Return:      TRUE if the array of object IDs is filled up.
- *              FALSE otherwise.
+ * Return:      H5_ITER_STOP if the array of object IDs is filled up.
+ *              H5_ITER_CONT otherwise.
  *
  * Programmer:  Raymond Lu
  *              Wednesday, Dec 5, 2001
@@ -659,19 +676,13 @@ static int
 H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 {
     H5F_olist_t *olist = (H5F_olist_t *)key;    /* Alias for search info */
-    int      ret_value = FALSE;    /* Return value */
+    int         ret_value = H5_ITER_CONT;    /* Return value */
+    hbool_t     add_obj = FALSE;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(obj_ptr);
     HDassert(olist);
-
-    /* Check if we've filled up the array.  Return TRUE only if
-     * we have filled up the array. Otherwise return FALSE(RET_VALUE is
-     * preset to FALSE) because H5I_iterate needs the return value of 
-     * FALSE to continue the iteration. */
-    if(olist->max_index>0 && olist->list_index>=olist->max_index)
-        HGOTO_DONE(TRUE)  /* Indicate that the iterator should stop */
 
     /* Count file IDs */
     if(olist->obj_type == H5I_FILE) {
@@ -679,15 +690,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
                         (!olist->file_info.ptr.file || (olist->file_info.ptr.file && (H5F_t*)obj_ptr == olist->file_info.ptr.file) ))
                 ||  (!olist->file_info.local &&
                         ( !olist->file_info.ptr.shared || (olist->file_info.ptr.shared && ((H5F_t*)obj_ptr)->shared == olist->file_info.ptr.shared) ))) {
-            /* Add the object's ID to the ID list, if appropriate */
-            if(olist->obj_id_list) {
-                olist->obj_id_list[olist->list_index] = obj_id;
-		olist->list_index++;
-	    }
-
-            /* Increment the number of open objects */
-	    if(olist->obj_id_count)
-	    	(*olist->obj_id_count)++;
+            add_obj = TRUE;
 	}
     } /* end if */
     else { /* either count opened object IDs or put the IDs on the list */
@@ -726,7 +729,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 	    case H5I_ERROR_STACK:
 	    case H5I_NTYPES:
             default:
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "unknown data object")
 	} /* end switch */
 
         if((olist->file_info.local &&
@@ -737,17 +740,28 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
                     ((!olist->file_info.ptr.shared && olist->obj_type == H5I_DATATYPE && H5T_is_immutable((H5T_t *)obj_ptr) == FALSE)
                             || (!olist->file_info.ptr.shared && olist->obj_type != H5I_DATATYPE)
                             || (oloc && oloc->file && oloc->file->shared == olist->file_info.ptr.shared)))) {
-            /* Add the object's ID to the ID list, if appropriate */
-            if(olist->obj_id_list) {
-            	olist->obj_id_list[olist->list_index] = obj_id;
-		olist->list_index++;
-	    } /* end if */
-
-            /* Increment the number of open objects */
-	    if(olist->obj_id_count)
-            	(*olist->obj_id_count)++;
+            add_obj = TRUE;
     	} /* end if */
     } /* end else */
+
+    if(TRUE==add_obj) {
+        /* Add the object's ID to the ID list, if appropriate */
+        if(olist->obj_id_list) {
+            olist->obj_id_list[olist->list_index] = obj_id;
+	    olist->list_index++;
+	} /* end if */
+
+        /* Increment the number of open objects */
+	if(olist->obj_id_count)
+            (*olist->obj_id_count)++;
+
+        /* Check if we've filled up the array.  Return H5_ITER_STOP only if
+         * we have filled up the array. Otherwise return H5_ITER_CONT(RET_VALUE is
+         * preset to H5_ITER_CONT) because H5I_iterate needs the return value of 
+         * H5_ITER_CONT to continue the iteration. */
+        if(olist->max_nobjs>0 && olist->list_index>=olist->max_nobjs)
+            HGOTO_DONE(H5_ITER_STOP)  /* Indicate that the iterator should stop */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
