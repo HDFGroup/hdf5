@@ -772,4 +772,46 @@ int hg_proc_hid_t(hg_proc_t proc, void *data)
     return ret;
 }
 
+int hg_proc_iod_layout_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+    iod_layout_t *layout = (iod_layout_t *)data;
+
+    ret = hg_proc_int32_t(proc, (int32_t *)layout->loc);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    ret = hg_proc_int32_t(proc, (int32_t *)layout->type);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    ret = hg_proc_uint32_t(proc, &layout->target_start);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    ret = hg_proc_uint32_t(proc, &layout->target_num);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    ret = hg_proc_size_t(proc, &layout->stripe_size);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    return ret;
+}
 #endif /* H5_HAVE_EFF */

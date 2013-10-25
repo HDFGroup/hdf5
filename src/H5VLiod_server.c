@@ -27,27 +27,33 @@
 static AXE_engine_t engine;
 static MPI_Comm iod_comm;
 static int num_peers = 0;
+static int num_ions = 0;
 static int terminate_requests = 0;
 static hbool_t shutdown = FALSE;
 
-herr_t
-EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
+void 
+EFF__mercury_register_callbacks(void)
 {
-    na_class_t *network_class = NULL;
-    int num_procs;
-    AXE_engine_attr_t engine_attr;
-    herr_t ret_value = SUCCEED;
 
-    MPI_Comm_size(comm, &num_procs);
+    //H5VL_EFF_OPEN_CONTAINER = MERCURY_REGISTER("container_open", hg_const_string_t, iod_handle_t);
+    MERCURY_HANDLER_REGISTER("container_open", H5VL_iod_server_container_open, 
+                             hg_const_string_t, iod_handle_t);
 
-    iod_comm = comm;
+    //H5VL_EFF_CLOSE_CONTAINER = MERCURY_REGISTER("container_close", iod_handle_t, ret_t);
+    MERCURY_HANDLER_REGISTER("container_close", H5VL_iod_server_container_close, 
+                             iod_handle_t, ret_t);
 
-    /* initialize the netwrok class */
-    network_class = NA_MPI_Init(NULL, MPI_INIT_SERVER);
-    if(HG_SUCCESS != HG_Handler_init(network_class))
-        return FAIL;
-    if(HG_SUCCESS != HG_Bulk_init(network_class))
-        return FAIL;
+    MERCURY_HANDLER_REGISTER("analysis_execute", H5VL_iod_server_analysis_execute, 
+                             analysis_execute_in_t, analysis_execute_out_t);
+
+    //H5VL_EFF_ANALYSIS_FARM = MERCURY_REGISTER("analysis_farm", analysis_farm_in_t, 
+    //analysis_farm_out_t);
+    MERCURY_HANDLER_REGISTER("analysis_farm", H5VL_iod_server_analysis_farm, 
+                             analysis_farm_in_t, analysis_farm_out_t);
+
+    //H5VL_EFF_ANALYSIS_FARM_FREE = MERCURY_REGISTER("analysis_farm_free", uint64_t, ret_t);
+    MERCURY_HANDLER_REGISTER("analysis_farm_free", H5VL_iod_server_analysis_farm_free, 
+                             uint64_t, ret_t);
 
     /* Register function and encoding/decoding functions */
     MERCURY_HANDLER_REGISTER("eff_init", H5VL_iod_server_eff_init, 
@@ -178,6 +184,27 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
                              tr_abort_in_t, ret_t);
 
     MERCURY_HANDLER_REGISTER("cancel_op", H5VL_iod_server_cancel_op, uint64_t, uint8_t);
+}
+
+herr_t
+EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
+{
+    na_class_t *network_class = NULL;
+    AXE_engine_attr_t engine_attr;
+    herr_t ret_value = SUCCEED;
+
+    MPI_Comm_size(comm, &num_ions);
+
+    iod_comm = comm;
+
+    /* initialize the netwrok class */
+    network_class = NA_MPI_Init(NULL, MPI_INIT_SERVER);
+    if(HG_SUCCESS != HG_Handler_init(network_class))
+        return FAIL;
+    if(HG_SUCCESS != HG_Bulk_init(network_class))
+        return FAIL;
+
+    EFF__mercury_register_callbacks();
 
     /* Initialize engine attribute */
     if(AXEengine_attr_init(&engine_attr) != AXE_SUCCEED)
@@ -308,6 +335,211 @@ done:
     HG_Handler_start_output(handle, &ret_value);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_eff_finalize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_analysis_execute
+ *
+ * Purpose:	Function shipper registered call for Executing Analysis.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_analysis_execute(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    analysis_execute_in_t *input = NULL;
+    AXE_task_t axe_id;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (analysis_execute_in_t *)H5MM_malloc(sizeof(analysis_execute_in_t))))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(AXE_SUCCEED != AXEgenerate_task_id(engine, &axe_id))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to generate ID for AXE task");
+
+    op_data->hg_handle = handle;
+    op_data->num_ions = num_ions;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_analysis_execute_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_analysis_execute() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_analysis_farm
+ *
+ * Purpose:	Function shipper registered call for Analysis Farming.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_analysis_farm(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    analysis_farm_in_t *input = NULL;
+    AXE_task_t axe_id;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (analysis_farm_in_t *)H5MM_malloc(sizeof(analysis_farm_in_t))))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(AXE_SUCCEED != AXEgenerate_task_id(engine, &axe_id))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to generate ID for AXE task");
+
+    op_data->hg_handle = handle;
+    op_data->num_ions = num_ions;
+    op_data->axe_id = axe_id;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_analysis_farm_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_analysis_farm() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_analysis_farm_free
+ *
+ * Purpose:	Function shipper registered call for Analysis Farming.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_analysis_farm_free(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    AXE_task_t *input = NULL;
+    AXE_task_t axe_id;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (AXE_task_t *)H5MM_malloc(sizeof(AXE_task_t))))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(AXE_SUCCEED != AXEgenerate_task_id(engine, &axe_id))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to generate ID for AXE task");
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_analysis_farm_free_cb, op_data, NULL))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_analysis_farm_free() */
+
+int
+H5VL_iod_server_container_open(hg_handle_t handle)
+{
+    const char *file_name;
+    iod_handle_t coh;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(HG_FAIL == HG_Handler_get_input(handle, &file_name))
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    /* open the container */
+    if(iod_container_open(file_name, NULL, IOD_CONT_RO, &coh, NULL))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
+
+    HG_Handler_start_output(handle, &coh);
+
+done:
+    if(ret_value < 0) {
+        coh.cookie = IOD_OH_UNDEFINED;
+        HG_Handler_start_output(handle, &coh);
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_container_open() */
+
+int
+H5VL_iod_server_container_close(hg_handle_t handle)
+{
+    iod_handle_t coh;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(HG_FAIL == HG_Handler_get_input(handle, &coh))
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    /* open the container */
+    if(iod_container_close(coh, NULL, NULL))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
+
+done:
+    HG_Handler_start_output(handle, &ret_value);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_container_open() */
+
 
 
 /*-------------------------------------------------------------------------

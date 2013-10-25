@@ -41,6 +41,7 @@
 #define H5VL_IOD_KEY_OBJ_TYPE        "object_type"
 #define H5VL_IOD_KEY_OBJ_DATATYPE    "object_datatype"
 #define H5VL_IOD_KEY_OBJ_DATASPACE   "object_dataspace"
+#define ROOT_ID 0
 
 /* Enum for metadata types stored in MD KV for HDF5->IOD objects */
 typedef enum H5VL_iod_metadata_t {
@@ -56,6 +57,9 @@ typedef enum H5VL_iod_metadata_t {
 typedef struct op_data_t {
     void *input;
     void *output;
+    uint32_t num_ions;
+    AXE_task_t axe_id;
+    na_addr_t *target_ions;
     hg_handle_t hg_handle;
 } op_data_t;
 
@@ -71,6 +75,19 @@ typedef struct H5VL_iod_link_t {
     } u;
     iod_obj_id_t iod_id;     /* The ID of the object the link points to */
 } H5VL_iod_link_t;
+
+hg_id_t H5VL_EFF_OPEN_CONTAINER;
+hg_id_t H5VL_EFF_CLOSE_CONTAINER;
+hg_id_t H5VL_EFF_ANALYSIS_FARM;
+hg_id_t H5VL_EFF_ANALYSIS_FARM_FREE;
+
+H5_DLL void EFF__mercury_register_callbacks(void);
+
+H5_DLL int H5VL_iod_server_analysis_execute(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_analysis_farm(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_analysis_farm_free(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_container_open(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_container_close(hg_handle_t handle);
 
 H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_eff_finalize(hg_handle_t handle);
@@ -131,6 +148,19 @@ H5_DLL int H5VL_iod_server_trans_finish(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_trans_set_dependency(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_trans_skip(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_trans_abort(hg_handle_t handle);
+
+H5_DLL void H5VL_iod_server_analysis_execute_cb(AXE_engine_t axe_engine, 
+                                                size_t num_n_parents, AXE_task_t n_parents[], 
+                                                size_t num_s_parents, AXE_task_t s_parents[], 
+                                                void *_op_data);
+H5_DLL void H5VL_iod_server_analysis_farm_cb(AXE_engine_t axe_engine, 
+                                             size_t num_n_parents, AXE_task_t n_parents[], 
+                                             size_t num_s_parents, AXE_task_t s_parents[], 
+                                             void *_op_data);
+H5_DLL void H5VL_iod_server_analysis_farm_free_cb(AXE_engine_t axe_engine, 
+                                                  size_t num_n_parents, AXE_task_t n_parents[], 
+                                                  size_t num_s_parents, AXE_task_t s_parents[], 
+                                                  void *_op_data);
 
 H5_DLL void H5VL_iod_server_file_create_cb(AXE_engine_t axe_engine, 
                                            size_t num_n_parents, AXE_task_t n_parents[], 

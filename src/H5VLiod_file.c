@@ -24,8 +24,6 @@
  * Purpose:	The IOD plugin server side file routines.
  */
 
-static iod_obj_id_t ROOT_ID;
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_file_create_cb
