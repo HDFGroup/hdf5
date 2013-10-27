@@ -511,7 +511,7 @@
 #define H5_PACKAGE_NAME "HDF5"
 
 /* Define to the full name and version of this package. */
-#define H5_PACKAGE_STRING "HDF5 1.9.168"
+#define H5_PACKAGE_STRING "HDF5 1.9.169"
 
 /* Define to the one symbol short name of this package. */
 #define H5_PACKAGE_TARNAME "hdf5"
@@ -520,7 +520,7 @@
 #define H5_PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define H5_PACKAGE_VERSION "1.9.168"
+#define H5_PACKAGE_VERSION "1.9.169"
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #define H5_PRINTF_LL_WIDTH "ll"
@@ -683,7 +683,7 @@
 /* #undef H5_USING_MEMCHECKER */
 
 /* Version number of package */
-#define H5_VERSION "1.9.168"
+#define H5_VERSION "1.9.169"
 
 /* Define if vsnprintf() returns the correct value for formatted strings that
    don't fit into size allowed */
