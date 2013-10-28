@@ -356,7 +356,6 @@ H5VL_iod_server_analysis_execute(hg_handle_t handle)
 {
     op_data_t *op_data = NULL;
     analysis_execute_in_t *input = NULL;
-    AXE_task_t axe_id;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -373,14 +372,19 @@ H5VL_iod_server_analysis_execute(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXE_SUCCEED != AXEgenerate_task_id(engine, &axe_id))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to generate ID for AXE task");
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range, 
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    //if(AXE_SUCCEED != AXEgenerate_task_id(engine, &axe_id))
+    //HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to generate ID for AXE task");
 
     op_data->hg_handle = handle;
     op_data->num_ions = num_ions;
     op_data->input = (void *)input;
 
-    if (AXE_SUCCEED != AXEcreate_task(engine, axe_id, 0, NULL, 0, NULL, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
                                       H5VL_iod_server_analysis_execute_cb, op_data, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 

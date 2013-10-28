@@ -426,6 +426,20 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     HDassert(req->state == H5VL_IOD_COMPLETED);
 
     switch(req->type) {
+    case HG_ANALYSIS_EXECUTE:
+        {
+            analysis_execute_out_t *output = (analysis_execute_out_t *)req->data;
+
+            if(SUCCEED != output->ret) {
+                fprintf(stderr, "Analysis Execute failed at the server\n");
+                req->status = H5ES_STATUS_FAIL;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+            free(output);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
     case HG_FILE_CREATE:
         if(IOD_OH_UNDEFINED == req->obj->file->remote_file.coh.cookie) {
             fprintf(stderr, "failed to create file\n");
@@ -1540,6 +1554,15 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     HDassert(req->state == H5VL_IOD_CANCELLED);
 
     switch(req->type) {
+    case HG_ANALYSIS_EXECUTE:
+        {
+            analysis_execute_out_t *output = (analysis_execute_out_t *)req->data;
+
+            free(output);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
     case HG_DSET_WRITE:
     case HG_DSET_READ:
     case HG_ATTR_WRITE:

@@ -41,6 +41,7 @@
 /* function shipper IDs for different routines */
 static hg_id_t H5VL_EFF_INIT_ID;
 static hg_id_t H5VL_EFF_FINALIZE_ID;
+static hg_id_t H5VL_ANALYSIS_EXECUTE_ID;
 static hg_id_t H5VL_FILE_CREATE_ID;
 static hg_id_t H5VL_FILE_OPEN_ID;
 static hg_id_t H5VL_FILE_CLOSE_ID;
@@ -616,6 +617,10 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     /* Register function and encoding/decoding functions */
     H5VL_EFF_INIT_ID     = MERCURY_REGISTER("eff_init", eff_init_in_t, ret_t);
     H5VL_EFF_FINALIZE_ID = MERCURY_REGISTER("eff_finalize", ret_t, ret_t);
+
+    H5VL_ANALYSIS_EXECUTE_ID = MERCURY_REGISTER("analysis_execute", 
+                                                analysis_execute_in_t, 
+                                                analysis_execute_out_t);
 
     H5VL_FILE_CREATE_ID = MERCURY_REGISTER("file_create", file_create_in_t, file_create_out_t);
     H5VL_FILE_OPEN_ID   = MERCURY_REGISTER("file_open", file_open_in_t, file_open_out_t);
@@ -1365,6 +1370,53 @@ H5Pget_dcpl_append_only(hid_t dcpl_id, hbool_t *flag/*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_dcpl_append_only() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_analysis_execute
+ *
+ * Purpose:	Creates a file as a iod HDF5 file.
+ *
+ * Return:	Success:	the file id. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_analysis_execute(const char *file_name, const char *obj_name, hid_t query_id,
+                          void **req)
+{
+    analysis_execute_in_t input;
+    analysis_execute_out_t *output;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* set the input structure for the HG encode routine */
+    input.file_name = file_name;
+    input.obj_name = obj_name;
+    input.query_id = query_id;
+
+#if H5VL_IOD_DEBUG
+    printf("Analysis Execute on file %s Object %s\n", 
+           input.file_name, input.obj_name);
+#endif
+
+    if(NULL == (output = (analysis_execute_out_t *)H5MM_malloc(sizeof(analysis_execute_out_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate analysis output struct");
+
+    if(H5VL__iod_create_and_forward(H5VL_ANALYSIS_EXECUTE_ID, HG_ANALYSIS_EXECUTE, 
+                                    NULL, 0, 0, NULL,
+                                    NULL, &input, output, output, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship file create");
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_analysis_execute() */
 
 
 /*-------------------------------------------------------------------------
