@@ -57,9 +57,7 @@ typedef enum H5VL_iod_metadata_t {
 typedef struct op_data_t {
     void *input;
     void *output;
-    uint32_t num_ions;
     AXE_task_t axe_id;
-    na_addr_t *target_ions;
     hg_handle_t hg_handle;
 } op_data_t;
 
@@ -76,6 +74,8 @@ typedef struct H5VL_iod_link_t {
     iod_obj_id_t iod_id;     /* The ID of the object the link points to */
 } H5VL_iod_link_t;
 
+extern uint32_t num_ions_g;
+extern na_addr_t *server_addr_g;
 extern hg_id_t H5VL_EFF_OPEN_CONTAINER;
 extern hg_id_t H5VL_EFF_CLOSE_CONTAINER;
 extern hg_id_t H5VL_EFF_ANALYSIS_FARM;

@@ -110,20 +110,20 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
 
     /* *********************** TEMP THING */
     if(NULL == (hg_reqs = (hg_request_t *)malloc
-                (sizeof(hg_request_t) * op_data->num_ions)))
+                (sizeof(hg_request_t) * num_ions_g)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
 
     if(NULL == (temp_cohs = (iod_handle_t *)malloc
-                (sizeof(iod_handle_t) * op_data->num_ions)))
+                (sizeof(iod_handle_t) * num_ions_g)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate container handles");
 
-    for(i=0 ; i<op_data->num_ions ; i++) {
-        if(HG_Forward(op_data->target_ions[i], H5VL_EFF_OPEN_CONTAINER, &file_name, &temp_cohs[i], 
+    for(i=0 ; i<num_ions_g ; i++) {
+        if(HG_Forward(server_addr_g[i], H5VL_EFF_OPEN_CONTAINER, &file_name, &temp_cohs[i], 
                       &hg_reqs[i]) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
     }
 
-    for(i=0 ; i<op_data->num_ions ; i++) {
+    for(i=0 ; i<num_ions_g ; i++) {
         if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, &status) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
         if(!status) {
@@ -186,7 +186,6 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Farm work */
     {
-        na_addr_t *target_address = NULL;
         analysis_farm_in_t farm_input;
         analysis_farm_out_t *farm_output = NULL;
         H5VLiod_analysis_data_t *farm_data = NULL;
@@ -204,10 +203,6 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
                     (sizeof(H5VLiod_analysis_data_t) * layout.target_num)))
             HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
 
-        if(NULL == (target_address = (na_addr_t *)malloc
-                    (sizeof(na_addr_t) * layout.target_num)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
-
         farm_input.obj_id = obj_id;
         farm_input.rtid = rtid;
         farm_input.layout = layout;
@@ -217,13 +212,10 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
         /* MSC - add python stuff ... */
 
         for(i=0 ; i<layout.target_num ; i++) {
-
-            /* MSC - need to translate ION number to target address */
-
             farm_input.coh = temp_cohs[i];
             farm_input.target_idx = i+layout.target_start;
             /* forward the call to the target server */
-            if(HG_Forward(target_address[i], H5VL_EFF_ANALYSIS_FARM, &farm_input, 
+            if(HG_Forward(server_addr_g[i+layout.target_start], H5VL_EFF_ANALYSIS_FARM, &farm_input, 
                           &farm_output[i], &hg_reqs[i]) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
         }
@@ -250,7 +242,8 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
                                         HG_BULK_READWRITE, &bulk_block_handle);
 
             /* Write bulk data here and wait for the data to be there  */
-            if(HG_SUCCESS != HG_Bulk_read_all(target_address[i], farm_output[i].bulk_handle, 
+            if(HG_SUCCESS != HG_Bulk_read_all(server_addr_g[i+layout.target_start], 
+                                              farm_output[i].bulk_handle, 
                                               bulk_block_handle, &bulk_request))
                 HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
             /* wait for it to complete */
@@ -266,8 +259,8 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
 
             /* forward a free call to the target server */
-            if(HG_Forward(target_address[i], H5VL_EFF_ANALYSIS_FARM_FREE, &farm_output[i].axe_id, 
-                          &farm_output[i], &hg_reqs[i]) < 0)
+            if(HG_Forward(server_addr_g[i+layout.target_start], H5VL_EFF_ANALYSIS_FARM_FREE, 
+                          &farm_output[i].axe_id, &farm_output[i], &hg_reqs[i]) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
         }
 
@@ -291,8 +284,6 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
             free(hg_reqs);
         if(farm_output)
             free(farm_output);
-        if(target_address)
-            free(target_address);
 
         /* MSC - All data is gathered in farm data. Do Python Aggregation step */
 
@@ -308,17 +299,17 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction 0");
 
     if(NULL == (hg_reqs = (hg_request_t *)malloc
-                (sizeof(hg_request_t) * op_data->num_ions)))
+                (sizeof(hg_request_t) * num_ions_g)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
 
     /* *********************** TEMP THING */
-    for(i=0 ; i<op_data->num_ions ; i++) {
-        if(HG_Forward(op_data->target_ions[i], H5VL_EFF_CLOSE_CONTAINER, &temp_cohs[i], &ret_value, 
+    for(i=0 ; i<num_ions_g ; i++) {
+        if(HG_Forward(server_addr_g[i], H5VL_EFF_CLOSE_CONTAINER, &temp_cohs[i], &ret_value, 
                       &hg_reqs[i]) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
     }
 
-    for(i=0 ; i<op_data->num_ions ; i++) {
+    for(i=0 ; i<num_ions_g ; i++) {
         if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, &status) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
         if(!status) {

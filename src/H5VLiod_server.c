@@ -27,11 +27,11 @@
 static AXE_engine_t engine;
 static MPI_Comm iod_comm;
 static int num_peers = 0;
-static int num_ions = 0;
 static int terminate_requests = 0;
 static hbool_t shutdown = FALSE;
-static na_addr_t *server_addr = NULL;
 
+uint32_t num_ions_g = 0;
+na_addr_t *server_addr_g = NULL;
 hg_id_t H5VL_EFF_OPEN_CONTAINER;
 hg_id_t H5VL_EFF_CLOSE_CONTAINER;
 hg_id_t H5VL_EFF_ANALYSIS_FARM;
@@ -203,7 +203,7 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
     FILE *config = NULL;
     herr_t ret_value = SUCCEED;
 
-    MPI_Comm_size(comm, &num_ions);
+    MPI_Comm_size(comm, &num_ions_g);
     MPI_Comm_rank(comm, &my_rank);
 
     /******************* Initialize mercury ********************/
@@ -211,8 +211,8 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
     network_class = NA_MPI_Init(NULL, MPI_INIT_SERVER);
 
     /* Allocate table addrs */
-    na_addr_table = (char**) malloc(num_ions * sizeof(char*));
-    for (i = 0; i < num_ions; i++) {
+    na_addr_table = (char**) malloc(num_ions_g * sizeof(char*));
+    for (i = 0; i < num_ions_g; i++) {
         na_addr_table[i] = (char*) malloc(MPI_MAX_PORT_NAME);
     }
 
@@ -220,7 +220,7 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
     strcpy(na_addr_table[my_rank], addr_name);
 
 #ifdef NA_HAS_MPI
-    for (i = 0; i < num_ions; i++) {
+    for (i = 0; i < num_ions_g; i++) {
         MPI_Bcast(na_addr_table[i], MPI_MAX_PORT_NAME,
                   MPI_BYTE, i, comm);
     }
@@ -230,8 +230,8 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
     if (my_rank == 0) {
         config = fopen("port.cfg", "w+");
         if (config != NULL) {
-            fprintf(config, "%d\n", num_ions);
-            for (i = 0; i < num_ions; i++) {
+            fprintf(config, "%d\n", num_ions_g);
+            for (i = 0; i < num_ions_g; i++) {
                 fprintf(config, "%s\n", na_addr_table[i]);
             }
             fclose(config);
@@ -249,9 +249,9 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
 
     /* Look up addr id */
     /* We do the lookup here but this may not be optimal */
-    server_addr = (na_addr_t *) malloc(num_ions * sizeof(na_addr_t));
-    for (i = 0; i < num_ions; i++) {
-        if(NA_SUCCESS != NA_Addr_lookup(network_class, na_addr_table[i], &server_addr[i])) {
+    server_addr_g = (na_addr_t *) malloc(num_ions_g * sizeof(na_addr_t));
+    for (i = 0; i < num_ions_g; i++) {
+        if(NA_SUCCESS != NA_Addr_lookup(network_class, na_addr_table[i], &server_addr_g[i])) {
             fprintf(stderr, "Could not find addr\n");
             return FAIL;
         }
@@ -286,10 +286,10 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
         return FAIL;
 
     /******************* Finalize mercury ********************/
-    for (i = 0; i < num_ions; i++) {
-        NA_Addr_free(network_class, server_addr[i]);
+    for (i = 0; i < num_ions_g; i++) {
+        NA_Addr_free(network_class, server_addr_g[i]);
     }
-    free(server_addr);
+    free(server_addr_g);
 
     if(HG_SUCCESS != HG_Bulk_finalize())
         return FAIL;
@@ -301,12 +301,12 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
         return FAIL;
 
     if (na_addr_table) {
-        for (i = 0; i < num_ions; i++) {
+        for (i = 0; i < num_ions_g; i++) {
             free(na_addr_table[i]);
         }
         free(na_addr_table);
         na_addr_table = NULL;
-        num_ions = 0;
+        num_ions_g = 0;
     }
     /***************** END Finalize mercury *******************/
 
@@ -452,7 +452,6 @@ H5VL_iod_server_analysis_execute(hg_handle_t handle)
     //HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to generate ID for AXE task");
 
     op_data->hg_handle = handle;
-    op_data->num_ions = num_ions;
     op_data->input = (void *)input;
 
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
@@ -504,7 +503,6 @@ H5VL_iod_server_analysis_farm(hg_handle_t handle)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to generate ID for AXE task");
 
     op_data->hg_handle = handle;
-    op_data->num_ions = num_ions;
     op_data->axe_id = axe_id;
     op_data->input = (void *)input;
 
