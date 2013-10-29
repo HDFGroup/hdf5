@@ -38,6 +38,8 @@
 
 #ifdef H5_HAVE_EFF
 
+#define H5VL_IOD_MAX_ADDR_NAME 256
+
 /* function shipper IDs for different routines */
 static hg_id_t H5VL_EFF_INIT_ID;
 static hg_id_t H5VL_EFF_FINALIZE_ID;
@@ -573,12 +575,13 @@ done:
 herr_t
 EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
 {
-    char mpi_port_name[MPI_MAX_PORT_NAME];
-    FILE *config;
+    //char mpi_port_name[MPI_MAX_PORT_NAME];
+    int tag = 123456;
     hg_request_t hg_req;
     int num_procs, my_rank;
     na_addr_t ion_target;
     AXE_task_t axe_seed;
+    char addr_name[H5VL_IOD_MAX_ADDR_NAME];
     herr_t ret_value = SUCCEED;
 
     MPI_Comm_size(comm, &num_procs);
@@ -595,22 +598,62 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     axe_list.head = NULL;
     axe_list.tail = NULL;
 
-    /* This is a temporary solution for connecting to the server using
-       mercury */
-    if ((config = fopen("port.cfg", "r")) != NULL) {
-        fread(mpi_port_name, sizeof(char), MPI_MAX_PORT_NAME, config);
-        printf("Using MPI port name: %s.\n", mpi_port_name);
+    /* MSC - This is a temporary solution for connecting to the server
+       using mercury */
+    /* Only rank 0 reads file */
+    if (my_rank == 0) {
+        int count, index=0, num_ions;
+        FILE *config;
+        char config_addr_name[H5VL_IOD_MAX_ADDR_NAME];
+
+        config = fopen("port.cfg", "r");
+
+        fscanf(config, "%d\n", &num_ions);
+        fprintf(stderr, "Found %d servers\n", num_ions);
+
+        /* read a line */
+        if(fgets(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, config) != NULL) {
+            strncpy(addr_name, config_addr_name, H5VL_IOD_MAX_ADDR_NAME);
+            count = 1;
+            while(num_procs > index + (count*num_ions)) {
+                MPI_Send(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, MPI_BYTE, 
+                         index + (count*num_ions), tag, comm);
+                count ++;
+            }
+            index++;
+        }
+
+        while (fgets(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, config) != NULL) {
+            count = 0;
+            while(num_procs > index + (count*num_ions)) {
+                MPI_Send(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, MPI_BYTE, 
+                         index + (count*num_ions), tag, comm);
+                count ++;
+            }
+            index ++;
+        }
         fclose(config);
     }
+    else {
+        MPI_Recv(addr_name, H5VL_IOD_MAX_ADDR_NAME, MPI_BYTE, 
+                 0, tag, comm, MPI_STATUS_IGNORE);
+    }
+
+    fprintf(stderr, "CN %d Connecting to ION %s\n", my_rank, addr_name);
 
     /* initialize Mercury stuff */
     network_class = NA_MPI_Init(NULL, 0);
-    if (HG_SUCCESS != HG_Init(network_class))
+
+    if (HG_SUCCESS != HG_Init(network_class)) {
+        fprintf(stderr, "Failed to initialize Mercury\n");
         return FAIL;
-    if (HG_SUCCESS != HG_Bulk_init(network_class))
+    }
+    //if (HG_SUCCESS != HG_Bulk_init(network_class))
+    //return FAIL;
+    if (NA_SUCCESS !=  NA_Addr_lookup(network_class, addr_name, &ion_target))  {
+        fprintf(stderr, "Server lookup failed\n");
         return FAIL;
-    if (HG_SUCCESS !=  NA_Addr_lookup(network_class, mpi_port_name, &ion_target))
-        return FAIL;
+    }
 
     PEER = ion_target;
 
@@ -699,8 +742,10 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     H5VL_CANCEL_OP_ID = MERCURY_REGISTER("cancel_op", uint64_t, uint8_t);
 
     /* forward the init call to the ION and wait for its completion */
-    if(HG_Forward(PEER, H5VL_EFF_INIT_ID, &num_procs, &ret_value, &hg_req) < 0)
+    if(HG_SUCCESS != HG_Forward(PEER, H5VL_EFF_INIT_ID, &num_procs, &ret_value, &hg_req)) {
+        fprintf(stderr, "Failed to initialize Stack\n");
         return FAIL;
+    }
 
     /* Wait for it to compete */
     HG_Wait(hg_req, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE);

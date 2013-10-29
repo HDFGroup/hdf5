@@ -30,28 +30,34 @@ static int num_peers = 0;
 static int num_ions = 0;
 static int terminate_requests = 0;
 static hbool_t shutdown = FALSE;
+static na_addr_t *server_addr = NULL;
+
+hg_id_t H5VL_EFF_OPEN_CONTAINER;
+hg_id_t H5VL_EFF_CLOSE_CONTAINER;
+hg_id_t H5VL_EFF_ANALYSIS_FARM;
+hg_id_t H5VL_EFF_ANALYSIS_FARM_FREE;
 
 void 
 EFF__mercury_register_callbacks(void)
 {
 
-    //H5VL_EFF_OPEN_CONTAINER = MERCURY_REGISTER("container_open", hg_const_string_t, iod_handle_t);
+    H5VL_EFF_OPEN_CONTAINER = MERCURY_REGISTER("container_open", hg_const_string_t, iod_handle_t);
     MERCURY_HANDLER_REGISTER("container_open", H5VL_iod_server_container_open, 
                              hg_const_string_t, iod_handle_t);
 
-    //H5VL_EFF_CLOSE_CONTAINER = MERCURY_REGISTER("container_close", iod_handle_t, ret_t);
+    H5VL_EFF_CLOSE_CONTAINER = MERCURY_REGISTER("container_close", iod_handle_t, ret_t);
     MERCURY_HANDLER_REGISTER("container_close", H5VL_iod_server_container_close, 
                              iod_handle_t, ret_t);
 
     MERCURY_HANDLER_REGISTER("analysis_execute", H5VL_iod_server_analysis_execute, 
                              analysis_execute_in_t, analysis_execute_out_t);
 
-    //H5VL_EFF_ANALYSIS_FARM = MERCURY_REGISTER("analysis_farm", analysis_farm_in_t, 
-    //analysis_farm_out_t);
+    H5VL_EFF_ANALYSIS_FARM = MERCURY_REGISTER("analysis_farm", analysis_farm_in_t, 
+                                              analysis_farm_out_t);
     MERCURY_HANDLER_REGISTER("analysis_farm", H5VL_iod_server_analysis_farm, 
                              analysis_farm_in_t, analysis_farm_out_t);
 
-    //H5VL_EFF_ANALYSIS_FARM_FREE = MERCURY_REGISTER("analysis_farm_free", uint64_t, ret_t);
+    H5VL_EFF_ANALYSIS_FARM_FREE = MERCURY_REGISTER("analysis_farm_free", uint64_t, ret_t);
     MERCURY_HANDLER_REGISTER("analysis_farm_free", H5VL_iod_server_analysis_farm_free, 
                              uint64_t, ret_t);
 
@@ -191,18 +197,66 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
 {
     na_class_t *network_class = NULL;
     AXE_engine_attr_t engine_attr;
+    int my_rank = 0, i;
+    const char *addr_name;
+    char **na_addr_table = NULL;
+    FILE *config = NULL;
     herr_t ret_value = SUCCEED;
 
     MPI_Comm_size(comm, &num_ions);
+    MPI_Comm_rank(comm, &my_rank);
+
+    /******************* Initialize mercury ********************/
+    /* initialize the netwrok class */
+    network_class = NA_MPI_Init(NULL, MPI_INIT_SERVER);
+
+    /* Allocate table addrs */
+    na_addr_table = (char**) malloc(num_ions * sizeof(char*));
+    for (i = 0; i < num_ions; i++) {
+        na_addr_table[i] = (char*) malloc(MPI_MAX_PORT_NAME);
+    }
+
+    addr_name = NA_MPI_Get_port_name(network_class);
+    strcpy(na_addr_table[my_rank], addr_name);
+
+#ifdef NA_HAS_MPI
+    for (i = 0; i < num_ions; i++) {
+        MPI_Bcast(na_addr_table[i], MPI_MAX_PORT_NAME,
+                  MPI_BYTE, i, comm);
+    }
+#endif
+
+    /* Only rank 0 writes file */
+    if (my_rank == 0) {
+        config = fopen("port.cfg", "w+");
+        if (config != NULL) {
+            fprintf(config, "%d\n", num_ions);
+            for (i = 0; i < num_ions; i++) {
+                fprintf(config, "%s\n", na_addr_table[i]);
+            }
+            fclose(config);
+        }
+    }
 
     iod_comm = comm;
 
-    /* initialize the netwrok class */
-    network_class = NA_MPI_Init(NULL, MPI_INIT_SERVER);
+    if(HG_SUCCESS != HG_Init(network_class))
+        return FAIL;
     if(HG_SUCCESS != HG_Handler_init(network_class))
         return FAIL;
     if(HG_SUCCESS != HG_Bulk_init(network_class))
         return FAIL;
+
+    /* Look up addr id */
+    /* We do the lookup here but this may not be optimal */
+    server_addr = (na_addr_t *) malloc(num_ions * sizeof(na_addr_t));
+    for (i = 0; i < num_ions; i++) {
+        if(NA_SUCCESS != NA_Addr_lookup(network_class, na_addr_table[i], &server_addr[i])) {
+            fprintf(stderr, "Could not find addr\n");
+            return FAIL;
+        }
+    }
+    /***************** END Initialize mercury *******************/
 
     EFF__mercury_register_callbacks();
 
@@ -231,12 +285,30 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
     if(AXEengine_attr_destroy(&engine_attr) != AXE_SUCCEED)
         return FAIL;
 
+    /******************* Finalize mercury ********************/
+    for (i = 0; i < num_ions; i++) {
+        NA_Addr_free(network_class, server_addr[i]);
+    }
+    free(server_addr);
+
     if(HG_SUCCESS != HG_Bulk_finalize())
         return FAIL;
     if(HG_SUCCESS != HG_Handler_finalize())
         return FAIL;
+    if(HG_SUCCESS != HG_Finalize())
+        return FAIL;
     if(NA_SUCCESS != NA_Finalize(network_class))
         return FAIL;
+
+    if (na_addr_table) {
+        for (i = 0; i < num_ions; i++) {
+            free(na_addr_table[i]);
+        }
+        free(na_addr_table);
+        na_addr_table = NULL;
+        num_ions = 0;
+    }
+    /***************** END Finalize mercury *******************/
 
     return ret_value;
 }
@@ -290,8 +362,7 @@ H5VL_iod_server_eff_init(hg_handle_t handle)
     if(iod_initialize(iod_comm, NULL, num_procs, num_procs, NULL) < 0 )
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't initialize");
 
-    /* MSC - this needs to be changed to be the number of peers connecting to this server */
-    num_peers = num_procs;
+    num_peers ++;
 
 done:
     HG_Handler_start_output(handle, &ret_value);

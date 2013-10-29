@@ -76,10 +76,10 @@ typedef struct H5VL_iod_link_t {
     iod_obj_id_t iod_id;     /* The ID of the object the link points to */
 } H5VL_iod_link_t;
 
-hg_id_t H5VL_EFF_OPEN_CONTAINER;
-hg_id_t H5VL_EFF_CLOSE_CONTAINER;
-hg_id_t H5VL_EFF_ANALYSIS_FARM;
-hg_id_t H5VL_EFF_ANALYSIS_FARM_FREE;
+extern hg_id_t H5VL_EFF_OPEN_CONTAINER;
+extern hg_id_t H5VL_EFF_CLOSE_CONTAINER;
+extern hg_id_t H5VL_EFF_ANALYSIS_FARM;
+extern hg_id_t H5VL_EFF_ANALYSIS_FARM_FREE;
 
 H5_DLL void EFF__mercury_register_callbacks(void);
 
