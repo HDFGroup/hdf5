@@ -88,7 +88,7 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     const char *obj_name = input->obj_name;
     hid_t query_id = input->query_id;
     hid_t space_id = FAIL, type_id = FAIL;
-    iod_container_tids_t tids;
+    iod_cont_trans_stat_t *tids;
     iod_trans_id_t rtid;
     iod_handle_t coh; /* the container handle */
     iod_handles_t root_handle; /* root handle */
@@ -96,7 +96,7 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     iod_handles_t obj_oh; /* object handle */
     iod_handle_t mdkv_oh;
     iod_layout_t layout;
-    uint32_t i;
+    int i;
     hg_request_t *hg_reqs = NULL;
     iod_handle_t *temp_cohs;
     hg_status_t status;
@@ -137,19 +137,22 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     /* *********************** END TEMP THING */
 
     /* open the container */
-    if(iod_container_open(file_name, NULL, IOD_CONT_RO, &coh, NULL))
+    if(iod_container_open(file_name, NULL, IOD_CONT_R, &coh, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
-    if(iod_container_query_tids(coh, &tids, NULL) < 0)
+    if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
 
-    rtid = tids.latest_rdable;
+    rtid = tids->latest_rdable;
 
-    if(iod_trans_start(coh, &rtid, NULL, 0, IOD_TRANS_RD, NULL) < 0)
+    if(iod_free_cont_trans_stat(coh, tids) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
+
+    if(iod_trans_start(coh, &rtid, NULL, 0, IOD_TRANS_R, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
-    root_handle.rd_oh.cookie = IOD_OH_UNDEFINED;
-    root_handle.wr_oh.cookie = IOD_OH_UNDEFINED;
+    root_handle.rd_oh = IOD_HANDLE_INVALID;
+    root_handle.wr_oh = IOD_HANDLE_INVALID;
 
     /* Traverse Path to retrieve object ID, and open object */
     if(H5VL_iod_server_open_path(coh, ROOT_ID, root_handle, obj_name, 

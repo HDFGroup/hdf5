@@ -71,7 +71,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
         fprintf(stderr, "Exact Acquire Read Context %llu\n", input->c_version);
 #endif
-        if(iod_trans_start(coh, &c_version, NULL, 0, IOD_TRANS_RD, NULL) < 0)
+        if(iod_trans_start(coh, &c_version, NULL, 0, IOD_TRANS_R, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't acquire read context");
         acquired_version = c_version;
         break;
@@ -80,25 +80,25 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
         fprintf(stderr, "Acquire LAST Read Context\n");
 #endif
         c_version = IOD_TID_UNKNOWN;
-        if(iod_trans_start(coh, &c_version, NULL, 0, IOD_TRANS_RD, NULL) < 0)
+        if(iod_trans_start(coh, &c_version, NULL, 0, IOD_TRANS_R, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't acquire read context");
         acquired_version = c_version;
         break;
     case H5RC_NEXT:
         {
-            iod_container_tids_t tids;
+            iod_cont_trans_stat_t *tids;
             uint64_t u;
 
 #if H5VL_IOD_DEBUG
             fprintf(stderr, "Next Acquire Read Context %llu\n", input->c_version);
 #endif
-            if(iod_container_query_tids(coh, &tids, NULL) < 0)
+            if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
 
             acquired_version = IOD_TID_UNKNOWN;
 
-            for(u=c_version; u<tids.latest_rdable ; u++) {
-                if(iod_trans_start(coh, &u, NULL, 0, IOD_TRANS_RD, NULL) < 0)
+            for(u=c_version; u<tids->latest_rdable ; u++) {
+                if(iod_trans_start(coh, &u, NULL, 0, IOD_TRANS_R, NULL) < 0)
                     continue;
                 acquired_version = u;
                 break;
@@ -108,22 +108,25 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, 
                             "can't get a read version after %llu\n", c_version);
             }
+
+            if(iod_free_cont_trans_stat(coh, tids) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
             break;
         }
     case H5RC_PREV:
         {
-            iod_container_tids_t tids;
+            iod_cont_trans_stat_t *tids;
             uint64_t u;
 
 #if H5VL_IOD_DEBUG
             fprintf(stderr, "Next Acquire Read Context %llu\n", input->c_version);
 #endif
-            if(iod_container_query_tids(coh, &tids, NULL) < 0)
+            if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
 
-            if(c_version >= tids.latest_rdable) {
-                acquired_version = tids.latest_rdable;
-                if(iod_trans_start(coh, &acquired_version, NULL, 0, IOD_TRANS_RD, NULL) < 0)
+            if(c_version >= tids->latest_rdable) {
+                acquired_version = tids->latest_rdable;
+                if(iod_trans_start(coh, &acquired_version, NULL, 0, IOD_TRANS_R, NULL) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't acquire read context");
                 break;
             }
@@ -132,7 +135,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
             u=c_version;
 
             for(u=c_version; u>0; u--) {
-                if(iod_trans_start(coh, &u, NULL, 0, IOD_TRANS_RD, NULL) < 0)
+                if(iod_trans_start(coh, &u, NULL, 0, IOD_TRANS_R, NULL) < 0)
                     continue;
                 acquired_version = u;
                 break;
@@ -142,6 +145,10 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, 
                             "can't get a read version before %llu\n", c_version);
             }
+
+            if(iod_free_cont_trans_stat(coh, tids) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
+
             break;
         }
     default:
@@ -282,6 +289,7 @@ H5VL_iod_server_rcxt_snapshot_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     rc_snapshot_in_t *input = (rc_snapshot_in_t *)op_data->input;
     iod_handle_t coh = input->coh; /* the container handle */    
+    iod_trans_id_t tid = input->c_version;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -291,7 +299,7 @@ H5VL_iod_server_rcxt_snapshot_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* MSC - can only snapshot latest version */
-    if(iod_container_snapshot(coh, input->snapshot_name, NULL, NULL) < 0)
+    if(iod_container_snapshot(coh, tid, input->snapshot_name, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't snapshot Read Context %llu", input->c_version);
 
 done:
@@ -345,7 +353,7 @@ H5VL_iod_server_trans_start_cb(AXE_engine_t UNUSED axe_engine,
     if(H5Pget_trspl_num_peers(trspl_id, &num_peers) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get acquire request property");
 
-    if(iod_trans_start(coh, &trans_num, NULL, num_peers, IOD_TRANS_WR, NULL) < 0)
+    if(iod_trans_start(coh, &trans_num, NULL, num_peers, IOD_TRANS_W, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
 #if H5VL_IOD_DEBUG
@@ -406,7 +414,7 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
         fprintf(stderr, "Transaction Acquire after Finish %llu\n", trans_num);
 #endif
 
-        if(iod_trans_start(coh, &trans_num, NULL, 0, IOD_TRANS_RD, NULL) < 0)
+        if(iod_trans_start(coh, &trans_num, NULL, 0, IOD_TRANS_R, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't acquire read context");
     }
 
@@ -447,6 +455,7 @@ H5VL_iod_server_trans_set_dependency_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     tr_set_depend_in_t *input = (tr_set_depend_in_t *)op_data->input;
     iod_handle_t coh = input->coh; /* the container handle */
+    iod_trans_depend_desc_t depends;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -456,7 +465,10 @@ H5VL_iod_server_trans_set_dependency_cb(AXE_engine_t UNUSED axe_engine,
             input->child_trans_num, input->parent_trans_num);
 #endif
 
-    fprintf(stderr, "Can't do Set_Dependency with Current IOD\n");
+    /* MSC - set depends */
+
+    if(iod_trans_depend(coh, depends, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set dependency between transactions");
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with Transaction Set_Dependency\n");
@@ -497,6 +509,7 @@ H5VL_iod_server_trans_skip_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* the container handle */
     iod_trans_id_t start_trans_num = input->start_trans_num;
     uint64_t count = input->count;
+    iod_trans_range_desc_t skip_ranges;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -505,7 +518,10 @@ H5VL_iod_server_trans_skip_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Transaction Skip %llu starting at %llu\n", count, start_trans_num);
 #endif
 
-    fprintf(stderr, "NO IOD Transaction Skip at the moment\n");
+    /* MSC - set skip ranges */
+    skip_ranges.n_range = 1;
+    if(iod_trans_skip(coh, skip_ranges, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't skip transactions");
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with Transaction Skip\n");
@@ -553,7 +569,7 @@ H5VL_iod_server_trans_abort_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Transaction Abort %llu\n", input->trans_num);
 #endif
 
-    if(iod_trans_finish(coh, trans_num, NULL, IOD_TRANS_ABORT_SINGLE, NULL) < 0)
+    if(iod_trans_finish(coh, trans_num, NULL, IOD_TRANS_ABORT_DEPENDENT, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't abort transaction");
 
 #if H5VL_IOD_DEBUG

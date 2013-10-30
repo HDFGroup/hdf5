@@ -164,21 +164,6 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
     }
 
-#if H5_DO_NATIVE
-    if(H5VL_LINK_CREATE_HARD == create_type) {
-        if(H5Lcreate_hard(input->target_loc_oh.cookie, input->target_name, 
-                          input->loc_oh.cookie, input->loc_name, H5P_DEFAULT, H5P_DEFAULT) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create hard link");
-    }
-    else if(H5VL_LINK_CREATE_SOFT == create_type) {
-        if(H5Lcreate_soft(input->target_name, input->loc_oh.cookie, input->loc_name, 
-                          H5P_DEFAULT, H5P_DEFAULT) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create soft link");
-    }
-    else
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Invalid Link type");    
-#endif
-
 done:
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with link create, sending response %d to client\n", 
@@ -278,7 +263,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
         kvs.kv = &kv;
 
         /* remove link from source object */
-        if(iod_kv_unlink_keys(src_oh.wr_oh, wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
+        if(iod_kv_unlink_keys(src_oh.wr_oh, wtid, NULL, 1, &kvs, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
     }
 
@@ -350,21 +335,6 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
         iod_obj_close(dst_oh.wr_oh, NULL, NULL);
     }
 
-#if H5_DO_NATIVE
-    if(copy_flag) {
-        if(H5Lcopy(input->src_loc_oh.cookie, input->src_loc_name, 
-                   input->dst_loc_oh.cookie, input->dst_loc_name,
-                   H5P_DEFAULT, H5P_DEFAULT) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create hard link");
-    }
-    else {
-        if(H5Lmove(input->src_loc_oh.cookie, input->src_loc_name, 
-                   input->dst_loc_oh.cookie, input->dst_loc_name,
-                   H5P_DEFAULT, H5P_DEFAULT) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create hard link");
-    }
-#endif
-
 done:
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with link move, sending response to client\n");
@@ -435,7 +405,7 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* check the last component */
-    if(iod_kv_get_value(cur_oh.rd_oh, rtid, last_comp, 
+    if(iod_kv_get_value(cur_oh.rd_oh, rtid, last_comp, strlen(last_comp),
                         NULL, &kv_size, NULL, NULL) < 0) {
         ret = FALSE;
     } /* end if */
@@ -443,11 +413,8 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
         ret = TRUE;
     }
 
-#if H5_DO_NATIVE
-    ret = H5Lexists(loc_oh.cookie, loc_name, H5P_DEFAULT);
-#else
+    /* MSC - fake */
     ret = FALSE;
-#endif
 
 done:
 
@@ -746,7 +713,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     /* unlink object from conainer */
     kv.key = last_comp;
     kvs.kv = &kv;
-    if(iod_kv_unlink_keys(cur_oh.wr_oh, wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
+    if(iod_kv_unlink_keys(cur_oh.wr_oh, wtid, NULL, 1, &kvs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
 
     /* MSC - NEED IOD */
@@ -826,11 +793,6 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     if(input->loc_oh.wr_oh.cookie != cur_oh.wr_oh.cookie) {
         iod_obj_close(cur_oh.wr_oh, NULL, NULL);
     }
-
-#if H5_DO_NATIVE
-    if(H5Ldelete(loc_oh.cookie, loc_name, H5P_DEFAULT) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
-#endif
 
 done:
 

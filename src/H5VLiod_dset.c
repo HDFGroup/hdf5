@@ -101,8 +101,8 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
     /* MSC - Remove when we have IOD */
-    dset_oh.rd_oh.cookie=0;
-    dset_oh.wr_oh.cookie=0;
+    dset_oh.rd_oh.cookie=12345;
+    dset_oh.wr_oh.cookie=12345;
 
     /* the traversal will retrieve the location where the dataset needs
        to be created. The traversal will fail if an intermediate group
@@ -127,7 +127,6 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     array.chunk_dims = NULL;
-    array.dims_seq = NULL;
 
     /* MSC - NEED TO FIX THAT */
 #if 0
@@ -163,8 +162,8 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     /* set values for the scratch pad object */
     sp[0] = mdkv_id;
     sp[1] = attrkv_id;
-    sp[2] = IOD_ID_UNDEFINED;
-    sp[3] = IOD_ID_UNDEFINED;
+    sp[2] = IOD_OBJ_INVALID;
+    sp[3] = IOD_OBJ_INVALID;
 
     /* set scratch pad in dataset */
     if(cs_scope & H5_CHECKSUM_IOD) {
@@ -232,14 +231,6 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
         iod_obj_close(cur_oh.wr_oh, NULL, NULL);
     }
 
-#if H5_DO_NATIVE
-    H5Pset_alloc_time(input->dcpl_id,H5D_ALLOC_TIME_EARLY);
-    cur_oh.cookie = H5Dcreate2(loc_handle.cookie, last_comp, input->type_id, 
-                               space_id, input->lcpl_id, 
-                               input->dcpl_id, input->dapl_id);
-    assert(cur_oh.cookie);
-#endif
-
     output.iod_oh.rd_oh.cookie = dset_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = dset_oh.wr_oh.cookie;
 
@@ -253,8 +244,8 @@ done:
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
         fprintf(stderr, "failed to create/open Dataset\n");
-        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
@@ -312,8 +303,8 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* MSC - Remove when we have IOD */
-    dset_oh.rd_oh.cookie=0;
-    dset_oh.wr_oh.cookie=0;
+    dset_oh.rd_oh.cookie=12345;
+    dset_oh.wr_oh.cookie=12345;
 
     /* open a write handle on the ID. */
     if (iod_obj_open_write(coh, dset_id, NULL, &dset_oh.wr_oh, NULL) < 0)
@@ -360,21 +351,11 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
         hsize_t dims[1];
         //hid_t space_id, type_id;
 
-#if H5_DO_NATIVE
-        dset_oh.cookie = H5Dopen(loc_handle.cookie, name, input->dapl_id);
-        fprintf(stderr, "dataset name %s    Location %d    ID %d\n", 
-               name, loc_handle.cookie, dset_oh.cookie);
-        HDassert(dset_oh.cookie);
-        output.space_id = H5Dget_space(dset_oh.cookie);
-        output.type_id = H5Dget_type(dset_oh.cookie);
-        output.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
-#else
-        /* fake a dataspace, type, and dcpl */
+        /* MSC - fake a dataspace, type, and dcpl */
         dims [0] = 60;
         output.space_id = H5Screate_simple(1, dims, NULL);
         output.type_id = H5Tcopy(H5T_STD_I32LE);
         output.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
-#endif
 
 #if 0
         output.dcpl_size = 0;
@@ -417,9 +398,9 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
 done:
     if(ret_value < 0) {
         fprintf(stderr, "DSET open FAILED\n");
-        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_id = IOD_ID_UNDEFINED;
+        output.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+        output.iod_id = IOD_OBJ_INVALID;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
@@ -529,20 +510,9 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
             int32_t *ptr = (int32_t *)buf;
             int i;
 
-#if H5_DO_NATIVE
-            {
-                hid_t mspace;
-                hsize_t dims[1];
-
-                dims[0] = nelmts;
-                mspace = H5Screate_simple(1, dims, NULL);
-                ret_value = H5Dread(iod_oh.rd_oh.cookie, src_id, mspace, space_id, dxpl_id, buf);
-                H5Sclose(mspace);
-            }
-#else /* fake data */
+            /* MSC - fake data */
             for(i=0;i<60;++i)
                 ptr[i] = i;
-#endif
 
             /* do data conversion */
             if(H5Tconvert(src_id, dst_id, nelmts, buf, NULL, dxpl_id) < 0)
@@ -572,61 +542,58 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
                                        FALSE, buf, buf_size, dxpl_id, rtid) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
-#if H5_DO_NATIVE
-            ret_value = H5Dread(iod_oh.rd_oh.cookie, src_id, H5S_ALL, space_id, dxpl_id, buf);
-#else /* fake data */
-            {
-                H5T_class_t class;
+        /* MSC - fake data */
+        {
+            H5T_class_t class;
 
-                class = H5Tget_class(dst_id);
+            class = H5Tget_class(dst_id);
 
-                if(H5T_VLEN == class) {
-                    int i=0, n=0, k=0, j=0, increment=4;
-                    int *ptr = (int *)buf;
+            if(H5T_VLEN == class) {
+                int i=0, n=0, k=0, j=0, increment=4;
+                int *ptr = (int *)buf;
 
-                    for(i = 0; i < 5; i++) {
-                        int temp = i*increment + increment;
+                for(i = 0; i < 5; i++) {
+                    int temp = i*increment + increment;
 
-                        ptr[k++] = temp;
-                        for(j = 0; j < temp; j++)
-                            ptr[k++] = n ++;
-                    } /* end for */
-                }
-                else if (H5T_STRING == class) {
-                    uint8_t *ptr = (uint8_t *)buf;
-                    size_t temp_size;
-
-                    temp_size = 93;
-                    memcpy(ptr, &temp_size, sizeof(size_t));
-                    ptr += sizeof(size_t);
-                    strcpy((char *)ptr, "Four score and seven years ago our forefathers brought forth on this continent a new nation,");
-                    ptr += temp_size;
-
-                    temp_size = 86;
-                    memcpy(ptr, &temp_size, sizeof(size_t));
-                    ptr += sizeof(size_t);
-                    strcpy((char *)ptr, "conceived in liberty and dedicated to the proposition that all men are created equal.");
-                    ptr += temp_size;
-
-                    temp_size = 41;
-                    memcpy(ptr, &temp_size, sizeof(size_t));
-                    ptr += sizeof(size_t);
-                    strcpy((char *)ptr, "Now we are engaged in a great civil war,");
-                    ptr += temp_size;
-
-                    temp_size = 89;
-                    memcpy(ptr, &temp_size, sizeof(size_t));
-                    ptr += sizeof(size_t);
-                    strcpy((char *)ptr, "testing whether that nation or any nation so conceived and so dedicated can long endure.");
-                    ptr += temp_size;
-
-                }
+                    ptr[k++] = temp;
+                    for(j = 0; j < temp; j++)
+                        ptr[k++] = n ++;
+                } /* end for */
             }
-#endif
-            if(!(raw_cs_scope & H5_CHECKSUM_NONE)) {
-                /* calculate a checksum for the data to be sent */
-                cs = H5checksum(buf, buf_size, NULL);
+            else if (H5T_STRING == class) {
+                uint8_t *ptr = (uint8_t *)buf;
+                size_t temp_size;
+
+                temp_size = 93;
+                memcpy(ptr, &temp_size, sizeof(size_t));
+                ptr += sizeof(size_t);
+                strcpy((char *)ptr, "Four score and seven years ago our forefathers brought forth on this continent a new nation,");
+                ptr += temp_size;
+
+                temp_size = 86;
+                memcpy(ptr, &temp_size, sizeof(size_t));
+                ptr += sizeof(size_t);
+                strcpy((char *)ptr, "conceived in liberty and dedicated to the proposition that all men are created equal.");
+                ptr += temp_size;
+
+                temp_size = 41;
+                memcpy(ptr, &temp_size, sizeof(size_t));
+                ptr += sizeof(size_t);
+                strcpy((char *)ptr, "Now we are engaged in a great civil war,");
+                ptr += temp_size;
+
+                temp_size = 89;
+                memcpy(ptr, &temp_size, sizeof(size_t));
+                ptr += sizeof(size_t);
+                strcpy((char *)ptr, "testing whether that nation or any nation so conceived and so dedicated can long endure.");
+                ptr += temp_size;
+
             }
+        }
+        if(!(raw_cs_scope & H5_CHECKSUM_NONE)) {
+            /* calculate a checksum for the data to be sent */
+            cs = H5checksum(buf, buf_size, NULL);
+        }
     }
 
     /* Create a new block handle to write the data */
@@ -806,7 +773,7 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* Read list IO */
-    if(iod_array_read_list(coh, rtid, (iod_size_t)num_descriptors, 
+    if(iod_array_read_list(coh, rtid, (int)num_descriptors, 
                            io_array, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
@@ -1043,29 +1010,6 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
     }
 
-#if H5_DO_NATIVE
-    {
-        hid_t mspace;
-        hsize_t dims[1];
-
-        dims[0] = nelmts;
-        mspace = H5Screate_simple(1, dims, NULL);
-        ret_value = H5Dwrite(iod_oh.wr_oh.cookie, dst_id, mspace, space_id, dxpl_id, buf);
-        H5Sclose(mspace);
-        {
-            char *temp_name;
-            H5D_t *dset;
-            H5G_name_t *g_name;
-
-            dset = (H5D_t *)H5I_object(iod_oh.wr_oh.cookie);
-            g_name = H5D_nameof(dset);
-            temp_name = H5RS_get_str(g_name->user_path_r);
-            fprintf(stderr, "Dset name %s\n", temp_name);
-        }
-        assert(ret_value == 0);
-    }
-#endif
-
 done:
 #if H5VL_IOD_DEBUG 
     fprintf(stderr, "Done with dset write, sending %d response to client\n", ret_value);
@@ -1173,10 +1117,6 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     }
 #endif
 
-#if H5_DO_NATIVE
-    ret_value = H5Dset_extent(iod_oh.wr_oh.cookie, input->dims.size);
-#endif
-
 done:
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with dset set_extent, sending response to client\n");
@@ -1234,10 +1174,6 @@ H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine,
        IOD_OH_UNDEFINED == iod_oh.rd_oh.cookie) {
         HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSE, FAIL, "can't close object with invalid handle");
     }
-#endif
-
-#if H5_DO_NATIVE
-    ret_value = H5Dclose(iod_oh.wr_oh.cookie);
 #endif
 
     if(iod_obj_close(iod_oh.rd_oh, NULL, NULL) < 0)
@@ -1392,13 +1328,13 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
 
     if(write_op) {
         /* Write list IO */
-        if(iod_array_write_list(coh, tid, (iod_size_t)num_descriptors, 
+        if(iod_array_write_list(coh, tid, (int)num_descriptors, 
                                 io_array, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
     }
     else {
         /* Read list IO */
-        if(iod_array_read_list(coh, tid, (iod_size_t)num_descriptors, 
+        if(iod_array_read_list(coh, tid, (int)num_descriptors, 
                                io_array, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
     }

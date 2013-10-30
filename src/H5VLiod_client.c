@@ -2058,13 +2058,13 @@ H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index,
     /* toggle the object type bits */
     switch(type) {
     case IOD_OBJ_ARRAY:
-        tmp_id |= IOD_OBJ_TYPE_ARRAY;
+        IOD_OBJID_SETTYPE(tmp_id, IOD_OBJ_ARRAY)
         break;
     case IOD_OBJ_KV:
-        tmp_id |= IOD_OBJ_TYPE_KV;
+        IOD_OBJID_SETTYPE(tmp_id, IOD_OBJ_KV)
         break;
     case IOD_OBJ_BLOB:
-        tmp_id |= IOD_OBJ_TYPE_BLOB;
+        IOD_OBJID_SETTYPE(tmp_id, IOD_OBJ_BLOB)
         break;
     case IOD_OBJ_ANY:
     default:
@@ -2072,7 +2072,7 @@ H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index,
     }
 
     /* toggle the owner bit */
-    tmp_id |= IOD_OBJID_APP;
+    IOD_OBJID_SETOWNER_APP(tmp_id)
 
     *id = tmp_id;
 done:

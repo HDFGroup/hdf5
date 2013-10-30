@@ -65,11 +65,11 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* MSC - Remove when we have IOD */
-    root_oh.rd_oh.cookie=0;
-    root_oh.wr_oh.cookie=0;
+    root_oh.rd_oh.cookie=12345;
+    root_oh.wr_oh.cookie=12345;
 
     /* convert HDF5 flags to IOD flags */
-    mode = (input->flags&H5F_ACC_RDWR) ? IOD_CONT_RW : IOD_CONT_RO;
+    mode = (input->flags&H5F_ACC_RDWR) ? IOD_CONT_RW : IOD_CONT_R;
     if (input->flags&H5F_ACC_CREAT) 
         mode |= IOD_CONT_CREATE;
 
@@ -80,7 +80,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create container");
 
-    if(iod_trans_start(coh, &first_tid, NULL, num_peers, IOD_TRANS_WR, NULL) < 0)
+    if(iod_trans_start(coh, &first_tid, NULL, num_peers, IOD_TRANS_W, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
     /* create the root group */
@@ -118,8 +118,8 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         /* set values for the scratch pad object */
         sp[0] = mdkv_id;
         sp[1] = attr_id;
-        sp[2] = IOD_ID_UNDEFINED;
-        sp[3] = IOD_ID_UNDEFINED;
+        sp[2] = IOD_OBJ_INVALID;
+        sp[3] = IOD_OBJ_INVALID;
 
         if(cs_scope & H5_CHECKSUM_IOD) {
             iod_checksum_t sp_cs;
@@ -152,16 +152,19 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 
         kv.value = &value;
         kv.value_len = sizeof(uint64_t);
+        kv.key = (void *)H5VL_IOD_KEY_KV_IDS_INDEX;
+        kv.key_len = strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
 
-        kv.key = H5VL_IOD_KEY_KV_IDS_INDEX;
         if (iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
-        kv.key = H5VL_IOD_KEY_ARRAY_IDS_INDEX;
+        kv.key = (void *)H5VL_IOD_KEY_ARRAY_IDS_INDEX;
+        kv.key_len = strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
         if (iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
-        kv.key = H5VL_IOD_KEY_BLOB_IDS_INDEX;
+        kv.key = (void *)H5VL_IOD_KEY_BLOB_IDS_INDEX;
+        kv.key_len = strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
         if (iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
@@ -172,13 +175,6 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     /* Finish  the transaction */
     if(iod_trans_finish(coh, first_tid, NULL, 0, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction 0");
-
-#if H5_DO_NATIVE
-    coh.cookie = H5Fcreate(input->name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    HDassert(coh.cookie);
-    root_oh.cookie = coh.cookie;
-    fprintf(stderr, "Created Native file %s with ID %d\n", input->name, root_oh.cookie);
-#endif
 
     output.coh.cookie = coh.cookie;
     output.root_oh.rd_oh = root_oh.rd_oh;
@@ -195,9 +191,9 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        output.coh.cookie = IOD_OH_UNDEFINED;
-        output.root_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        output.root_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+        output.coh = IOD_HANDLE_INVALID;
+        output.root_oh.rd_oh = IOD_HANDLE_INVALID;
+        output.root_oh.wr_oh = IOD_HANDLE_INVALID;
         output.kv_oid_index = 0;
         output.array_oid_index = 0;
         output.blob_oid_index = 0;
@@ -240,7 +236,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
-    iod_container_tids_t tids;
+    iod_cont_trans_stat_t *tids;
     iod_trans_id_t rtid;
     uint32_t cs_scope = 0;
     herr_t ret_value = SUCCEED;
@@ -252,8 +248,9 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* MSC - Remove when we have IOD */
-    root_oh.rd_oh.cookie=0;
-    root_oh.wr_oh.cookie=0;
+    root_oh.rd_oh.cookie=12345;
+    root_oh.wr_oh.cookie=12345;
+    coh.cookie=12345;
 
     if(H5Pget_metadata_integrity_scope(input->fapl_id, &cs_scope) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
@@ -262,15 +259,19 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
-    if(iod_container_query_tids(coh, &tids, NULL) < 0)
+    if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
 
-    rtid = tids.latest_rdable;
+    /* MSC - add when we have IOD */
+    //rtid = tids->latest_rdable;
+
+    if(iod_free_cont_trans_stat(coh, tids) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
 
     /* MSC - fake something for now */
     rtid = 1024;
 
-    if(iod_trans_start(coh, &rtid, NULL, 0, IOD_TRANS_RD, NULL) < 0)
+    if(iod_trans_start(coh, &rtid, NULL, 0, IOD_TRANS_R, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
     /* open the root group */
@@ -336,16 +337,6 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction 0");
     }
 
-#if H5_DO_NATIVE
-    {
-        H5Pset_sieve_buf_size(input->fapl_id, 0);
-        coh.cookie = H5Fopen(input->name, H5F_ACC_RDWR, input->fapl_id);
-        assert(coh.cookie);
-        root_oh.cookie = coh.cookie;
-        fprintf(stderr, "Opened Native file %s with ID %d\n", input->name, root_oh.cookie);
-    }
-#endif
-
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with file open, sending response to client\n");
 #endif
@@ -354,10 +345,10 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        output.coh.cookie = IOD_OH_UNDEFINED;
-        output.root_id = IOD_ID_UNDEFINED;
-        output.root_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        output.root_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+        output.coh = IOD_HANDLE_INVALID;
+        output.root_id = IOD_OBJ_INVALID;
+        output.root_oh.rd_oh = IOD_HANDLE_INVALID;
+        output.root_oh.wr_oh = IOD_HANDLE_INVALID;
         output.fcpl_id = H5P_FILE_CREATE_DEFAULT;
         output.kv_oid_index = 0;
         output.array_oid_index = 0;
@@ -404,14 +395,10 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start file close\n");
 #endif
 
-#if H5_DO_NATIVE
-    H5Fclose(coh.cookie);
-#endif
-
     /* The root client request will create a transaction and store the
        final indexes for used up IDs */
     if(input->max_kv_index && input->max_array_index && input->max_blob_index) {
-        iod_container_tids_t tids;
+        iod_cont_trans_stat_t *tids;
         iod_trans_id_t trans_num, rtid;
         scratch_pad sp;
         iod_checksum_t sp_cs = 0;
@@ -419,13 +406,16 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
         uint32_t cs_scope = input->cs_scope;
 
-        if(iod_container_query_tids(coh, &tids, NULL) < 0)
+        if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
 
-        trans_num = tids.latest_wrting + 1;
-        rtid = tids.latest_rdable;
+        trans_num = tids->latest_wrting + 1;
+        rtid = tids->latest_rdable;
 
-        if(iod_trans_start(coh, &trans_num, NULL, 0, IOD_TRANS_WR, NULL) < 0)
+        if(iod_free_cont_trans_stat(coh, tids) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
+
+        if(iod_trans_start(coh, &trans_num, NULL, 0, IOD_TRANS_W, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
         /* get scratch pad of root group */
@@ -445,17 +435,22 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         /* insert current indexes in the metadata KV object */
         kv.value = &input->max_kv_index;
         kv.value_len = sizeof(uint64_t);
-        kv.key = H5VL_IOD_KEY_KV_IDS_INDEX;
+        kv.key = (void *)H5VL_IOD_KEY_KV_IDS_INDEX;
+        kv.key_len = strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
         if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
         kv.value = &input->max_array_index;
         kv.value_len = sizeof(uint64_t);
-        kv.key = H5VL_IOD_KEY_ARRAY_IDS_INDEX;
+        kv.key = (void *)H5VL_IOD_KEY_ARRAY_IDS_INDEX;
+        kv.key_len = strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
         if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
         kv.value = &input->max_blob_index;
         kv.value_len = sizeof(uint64_t);
-        kv.key = H5VL_IOD_KEY_BLOB_IDS_INDEX;
+        kv.key = (void *)H5VL_IOD_KEY_BLOB_IDS_INDEX;
+        kv.key_len = strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
         if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 

@@ -76,8 +76,8 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* MSC - Remove when we have IOD */
-    dtype_oh.rd_oh.cookie=0;
-    dtype_oh.wr_oh.cookie=0;
+    dtype_oh.rd_oh.cookie=12345;
+    dtype_oh.wr_oh.cookie=12345;
 
     /* the traversal will retrieve the location where the datatype needs
        to be created. The traversal will fail if an intermediate group
@@ -106,8 +106,8 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     /* set values for the scratch pad object */
     sp[0] = mdkv_id;
     sp[1] = attr_id;
-    sp[2] = IOD_ID_UNDEFINED;
-    sp[3] = IOD_ID_UNDEFINED;
+    sp[2] = IOD_OBJ_INVALID;
+    sp[3] = IOD_OBJ_INVALID;
 
     /* set scratch pad in datatype */
     if(cs_scope & H5_CHECKSUM_IOD) {
@@ -191,6 +191,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 
         key = strdup(H5VL_IOD_KEY_DTYPE_SIZE);
         kv.key = key;
+        kv.key_len = strlen(key);
         kv.value_len = sizeof(iod_size_t);
         kv.value = &buf_size;
 
@@ -208,15 +209,6 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
                                 H5L_TYPE_HARD, &dtype_id, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
-
-#if H5_DO_NATIVE
-    cur_oh.cookie = H5Tcopy(input->type_id);
-    if(H5Tcommit2(loc_handle.wr_oh.cookie, last_comp, cur_oh.cookie, 
-                  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't commit datatype");
-    fprintf(stderr, "Committed Native Datatype %s with ID %d on %d\n",
-            last_comp, cur_oh.cookie, loc_handle.cookie);
-#endif
 
     /* close parent group and its scratch pad if it is not the
        location we started the traversal into */
@@ -238,8 +230,8 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
@@ -304,8 +296,8 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* MSC - Remove when we have IOD */
-    dtype_oh.rd_oh.cookie=0;
-    dtype_oh.wr_oh.cookie=0;
+    dtype_oh.rd_oh.cookie=12345;
+    dtype_oh.wr_oh.cookie=12345;
 
     /* open a write handle on the ID. */
     if (iod_obj_open_write(coh, dtype_id, NULL, &dtype_oh.wr_oh, NULL) < 0)
@@ -387,17 +379,9 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     free(buf);
 #endif
 
-#if H5_DO_NATIVE
-    printf("datatype name %s    location %d\n", name, loc_handle.cookie);
-    dtype_oh.cookie = H5Topen(loc_handle.wr_oh.cookie, name, input->tapl_id);
-    HDassert(dtype_oh.cookie);
-    output.type_id = dtype_oh.cookie;
-    output.tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
-#else
-    /* fake a type, and tcpl */
+    /* MSC - fake a type, and tcpl */
     output.type_id = H5Tcopy(H5T_NATIVE_INT);
     output.tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
-#endif
 
     output.iod_id = dtype_id;
     output.mdkv_id = sp[0];
@@ -413,15 +397,11 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_id = IOD_ID_UNDEFINED;
+        output.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+        output.iod_id = IOD_OBJ_INVALID;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
-
-#if !H5_DO_NATIVE
-    H5Tclose(output.type_id);
-#endif
 
     input = (dtype_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -467,10 +447,6 @@ H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine,
        IOD_OH_UNDEFINED == iod_oh.rd_oh.cookie) {
         HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSE, FAIL, "can't close object with invalid handle");
     }
-#endif
-
-#if H5_DO_NATIVE
-    ret_value = H5Tclose(iod_oh.wr_oh.cookie);
 #endif
 
     if((iod_obj_close(iod_oh.rd_oh, NULL, NULL)) < 0)

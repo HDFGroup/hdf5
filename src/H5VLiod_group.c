@@ -72,8 +72,8 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* MSC - Remove when we have IOD */
-    grp_oh.rd_oh.cookie=0;
-    grp_oh.wr_oh.cookie=0;
+    grp_oh.rd_oh.cookie=12345;
+    grp_oh.wr_oh.cookie=12345;
 
     /* the traversal will retrieve the location where the group needs
        to be created. The traversal will fail if an intermediate group
@@ -102,8 +102,8 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     /* set values for the scratch pad object */
     sp[0] = mdkv_id;
     sp[1] = attrkv_id;
-    sp[2] = IOD_ID_UNDEFINED;
-    sp[3] = IOD_ID_UNDEFINED;
+    sp[2] = IOD_OBJ_INVALID;
+    sp[3] = IOD_OBJ_INVALID;
 
     /* set scratch pad in group */
     if(cs_scope & H5_CHECKSUM_IOD) {
@@ -160,13 +160,6 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
         iod_obj_close(cur_oh.wr_oh, NULL, NULL);
     }
 
-
-#if H5_DO_NATIVE
-    grp_oh.cookie = H5Gcreate2(loc_handle.cookie, name, input->lcpl_id, 
-                               input->gcpl_id, input->gapl_id);
-    HDassert(grp_oh.cookie);
-#endif
-
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with group create, sending response to client\n");
 #endif
@@ -180,8 +173,8 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
         fprintf(stderr, "Failed Group Create\n");
-        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
@@ -239,8 +232,8 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* MSC - Remove when we have IOD */
-    grp_oh.rd_oh.cookie=0;
-    grp_oh.wr_oh.cookie=0;
+    grp_oh.rd_oh.cookie=12345;
+    grp_oh.wr_oh.cookie=12345;
 
     /* open a write handle on the ID. */
     if (iod_obj_open_write(coh, grp_id, NULL, &grp_oh.wr_oh, NULL) < 0)
@@ -276,11 +269,6 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close meta data KV handle");
 
-#if H5_DO_NATIVE
-    grp_oh.cookie = H5Gopen(loc_handle.cookie, name, input->gapl_id);
-    HDassert(grp_oh.cookie);
-#endif
-
     output.iod_id = grp_id;
     output.iod_oh.rd_oh.cookie = grp_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = grp_oh.wr_oh.cookie;
@@ -296,9 +284,9 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_id = IOD_ID_UNDEFINED;
+        output.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+        output.iod_id = IOD_OBJ_INVALID;
         output.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
@@ -352,10 +340,6 @@ H5VL_iod_server_group_close_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
     if((iod_obj_close(iod_oh.wr_oh, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-
-#if H5_DO_NATIVE
-    ret_value = H5Gclose(iod_oh.cookie);
-#endif
 
 done:
 #if H5VL_IOD_DEBUG

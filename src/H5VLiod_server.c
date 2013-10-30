@@ -30,7 +30,9 @@ static int num_peers = 0;
 static int terminate_requests = 0;
 static hbool_t shutdown = FALSE;
 
-uint32_t num_ions_g = 0;
+iod_obj_id_t ROOT_ID = 0;
+
+int num_ions_g = 0;
 na_addr_t *server_addr_g = NULL;
 hg_id_t H5VL_EFF_OPEN_CONTAINER;
 hg_id_t H5VL_EFF_CLOSE_CONTAINER;
@@ -349,7 +351,7 @@ done:
 int
 H5VL_iod_server_eff_init(hg_handle_t handle)
 {
-    int num_procs;
+    uint32_t num_procs;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -359,8 +361,12 @@ H5VL_iod_server_eff_init(hg_handle_t handle)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     /* initialize the IOD library */
-    if(iod_initialize(iod_comm, NULL, num_procs, num_procs, NULL) < 0 )
+    if(iod_initialize(iod_comm, NULL, num_procs, num_procs) < 0 )
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't initialize");
+
+    /* set the root ID */
+    IOD_OBJID_SETOWNER_APP(ROOT_ID)
+    IOD_OBJID_SETTYPE(ROOT_ID, IOD_OBJ_KV)
 
     num_peers ++;
 
@@ -397,7 +403,7 @@ H5VL_iod_server_eff_finalize(hg_handle_t handle)
        terminate request, then finalize IOD and indicate that it is
        time to shutdown the server */
     if(terminate_requests == num_peers) {
-        if(iod_finalize(NULL, NULL) < 0 )
+        if(iod_finalize(NULL) < 0 )
             HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, HG_FAIL, "can't finalize IOD");
         shutdown = TRUE;
     }
@@ -578,14 +584,14 @@ H5VL_iod_server_container_open(hg_handle_t handle)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     /* open the container */
-    if(iod_container_open(file_name, NULL, IOD_CONT_RO, &coh, NULL))
+    if(iod_container_open(file_name, NULL, IOD_CONT_R, &coh, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
     HG_Handler_start_output(handle, &coh);
 
 done:
     if(ret_value < 0) {
-        coh.cookie = IOD_OH_UNDEFINED;
+        coh = IOD_HANDLE_INVALID;
         HG_Handler_start_output(handle, &coh);
     }
 

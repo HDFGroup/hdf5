@@ -24,8 +24,6 @@
  * Purpose:	The IOD plugin server side map routines.
  */
 
-#define EEXIST 1
-
 /* temp debug value for faking vl data */
 int g_debug_counter = 0;
 
@@ -79,8 +77,8 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* MSC - Remove when we have IOD */
-    map_oh.rd_oh.cookie=0;
-    map_oh.wr_oh.cookie=0;
+    map_oh.rd_oh.cookie=12345;
+    map_oh.wr_oh.cookie=12345;
 
     /* the traversal will retrieve the location where the map needs
        to be created. The traversal will fail if an intermediate group
@@ -109,8 +107,8 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     /* set values for the scratch pad object */
     sp[0] = mdkv_id;
     sp[1] = attr_id;
-    sp[2] = IOD_ID_UNDEFINED;
-    sp[3] = IOD_ID_UNDEFINED;
+    sp[2] = IOD_OBJ_INVALID;
+    sp[3] = IOD_OBJ_INVALID;
 
     /* set scratch pad in map */
     if(cs_scope & H5_CHECKSUM_IOD) {
@@ -182,8 +180,8 @@ done:
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
         fprintf(stderr, "Failed Map Create\n");
-        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
@@ -244,8 +242,8 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* MSC - Remove when we have IOD */
-    map_oh.rd_oh.cookie=0;
-    map_oh.wr_oh.cookie=0;
+    map_oh.rd_oh.cookie=12345;
+    map_oh.wr_oh.cookie=12345;
 
     /* open a write handle on the ID. */
     if (iod_obj_open_write(coh, map_id, NULL, &map_oh.wr_oh, NULL) < 0)
@@ -300,9 +298,9 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_id = IOD_ID_UNDEFINED;
+        output.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+        output.iod_id = IOD_OBJ_INVALID;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
@@ -572,14 +570,14 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
                                       key.buf_size, &key.buf, &key_is_vl, &key_size) < 0) 
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
-    if(iod_kv_get_value(iod_oh, rtid, key.buf, NULL, 
+    if(iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, NULL, 
                         &src_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
 
     if(val_is_vl) {
         H5T_class_t class;
 
-        if(iod_kv_get_value(iod_oh, rtid, key.buf, val_buf, 
+        if(iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, val_buf, 
                             &src_size, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
         class = H5Tget_class(val_memtype_id);
@@ -680,7 +678,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
         if(NULL == (val_buf = malloc((size_t)src_size)))
             HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
 
-        if(iod_kv_get_value(iod_oh, rtid, key.buf, val_buf, 
+        if(iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, val_buf, 
                             &src_size, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
 
@@ -783,7 +781,8 @@ H5VL_iod_server_map_get_count_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t iod_id = input->iod_id;
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
-    iod_size_t num;
+    int num;
+    hsize_t output;
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
 
@@ -806,18 +805,19 @@ H5VL_iod_server_map_get_count_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - fake something for now */
     num = 3;
 
+    output = num;
 #if H5VL_IOD_DEBUG 
     fprintf(stderr, "Done with map get_count, sending %d response to client\n", ret_value);
 #endif
 
-    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &num))
+    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &output))
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't send result of map get");
 
 done:
 
     if(ret_value < 0) {
-        num = IOD_COUNT_UNDEFINED;
-        if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &num))
+        output = IOD_COUNT_UNDEFINED;
+        if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &output))
             HDONE_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't send result of map get_count");
     }
 
@@ -889,7 +889,7 @@ H5VL_iod_server_map_exists_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
     /* determine if the Key exists by querying its value size */
-    if(iod_kv_get_value(iod_oh, rtid, key.buf, NULL, 
+    if(iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, NULL, 
                         &val_size, NULL, NULL) < 0)
         exists = FALSE;
     else
@@ -979,7 +979,7 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
     kv.key = key.buf;
     kvs.kv = &kv;
 
-    if(iod_kv_unlink_keys(iod_oh, wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
+    if(iod_kv_unlink_keys(iod_oh, wtid, NULL, 1, &kvs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
 
 done:

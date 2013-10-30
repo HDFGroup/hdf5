@@ -1509,9 +1509,9 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     /* allocate the file object that is returned to the user */
     if(NULL == (file = H5FL_CALLOC(H5VL_iod_file_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD file struct");
-    file->remote_file.root_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-    file->remote_file.root_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-    file->remote_file.root_id = IOD_ID_UNDEFINED;
+    file->remote_file.root_oh.rd_oh = IOD_HANDLE_INVALID;
+    file->remote_file.root_oh.wr_oh = IOD_HANDLE_INVALID;
+    file->remote_file.root_id = IOD_OBJ_INVALID;
     file->remote_file.c_version = 0;
     MPI_Comm_rank(fa->comm, &file->my_rank);
     MPI_Comm_size(fa->comm, &file->num_procs);
@@ -1635,12 +1635,12 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
     if(NULL == (file = H5FL_CALLOC(H5VL_iod_file_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD file struct");
 
-    file->remote_file.coh.cookie = IOD_OH_UNDEFINED;
-    file->remote_file.root_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-    file->remote_file.root_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-    file->remote_file.root_id = IOD_ID_UNDEFINED;
-    file->remote_file.mdkv_id = IOD_ID_UNDEFINED;
-    file->remote_file.attrkv_id = IOD_ID_UNDEFINED;
+    file->remote_file.coh = IOD_HANDLE_INVALID;
+    file->remote_file.root_oh.rd_oh = IOD_HANDLE_INVALID;
+    file->remote_file.root_oh.wr_oh = IOD_HANDLE_INVALID;
+    file->remote_file.root_id = IOD_OBJ_INVALID;
+    file->remote_file.mdkv_id = IOD_OBJ_INVALID;
+    file->remote_file.attrkv_id = IOD_OBJ_INVALID;
     file->remote_file.fcpl_id = -1;
     file->remote_file.c_version = IOD_TID_UNKNOWN;
 
@@ -2057,8 +2057,8 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
     if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-    grp->remote_group.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-    grp->remote_group.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+    grp->remote_group.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+    grp->remote_group.iod_oh.wr_oh = IOD_HANDLE_INVALID;
 
     /* Generate IOD IDs for the group to be created */
     H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
@@ -2199,11 +2199,11 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
     if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-    grp->remote_group.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-    grp->remote_group.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-    grp->remote_group.iod_id = IOD_ID_UNDEFINED;
-    grp->remote_group.mdkv_id = IOD_ID_UNDEFINED;
-    grp->remote_group.attrkv_id = IOD_ID_UNDEFINED;
+    grp->remote_group.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+    grp->remote_group.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+    grp->remote_group.iod_id = IOD_OBJ_INVALID;
+    grp->remote_group.mdkv_id = IOD_OBJ_INVALID;
+    grp->remote_group.attrkv_id = IOD_OBJ_INVALID;
 
     /* set the input structure for the HG encode routine */
     input.coh = obj->file->remote_file.coh;
@@ -2464,9 +2464,9 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t UNUSED loc_params,
     if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-    dset->remote_dset.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-    dset->remote_dset.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-    dset->remote_dset.iod_id = IOD_ID_UNDEFINED;
+    dset->remote_dset.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+    dset->remote_dset.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+    dset->remote_dset.iod_id = IOD_OBJ_INVALID;
 
     /* Generate IOD IDs for the dset to be created */
     H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
@@ -2615,11 +2615,11 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
     if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-    dset->remote_dset.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-    dset->remote_dset.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-    dset->remote_dset.iod_id = IOD_ID_UNDEFINED;
-    dset->remote_dset.mdkv_id = IOD_ID_UNDEFINED;
-    dset->remote_dset.attrkv_id = IOD_ID_UNDEFINED;
+    dset->remote_dset.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+    dset->remote_dset.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+    dset->remote_dset.iod_id = IOD_OBJ_INVALID;
+    dset->remote_dset.mdkv_id = IOD_OBJ_INVALID;
+    dset->remote_dset.attrkv_id = IOD_OBJ_INVALID;
     dset->remote_dset.dcpl_id = -1;
     dset->remote_dset.type_id = -1;
     dset->remote_dset.space_id = -1;
@@ -3441,9 +3441,9 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t UNUSED loc_params, const 
     if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-    dtype->remote_dtype.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-    dtype->remote_dtype.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-    dtype->remote_dtype.iod_id = IOD_ID_UNDEFINED;
+    dtype->remote_dtype.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+    dtype->remote_dtype.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+    dtype->remote_dtype.iod_id = IOD_OBJ_INVALID;
 
     /* Generate IOD IDs for the group to be created */
     H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
@@ -3589,11 +3589,11 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const ch
     if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-    dtype->remote_dtype.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-    dtype->remote_dtype.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-    dtype->remote_dtype.iod_id = IOD_ID_UNDEFINED;
-    dtype->remote_dtype.mdkv_id = IOD_ID_UNDEFINED;
-    dtype->remote_dtype.attrkv_id = IOD_ID_UNDEFINED;
+    dtype->remote_dtype.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+    dtype->remote_dtype.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+    dtype->remote_dtype.iod_id = IOD_OBJ_INVALID;
+    dtype->remote_dtype.mdkv_id = IOD_OBJ_INVALID;
+    dtype->remote_dtype.attrkv_id = IOD_OBJ_INVALID;
     dtype->remote_dtype.tcpl_id = -1;
     dtype->remote_dtype.type_id = -1;
 
@@ -3857,8 +3857,8 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     if(NULL == (attr = H5FL_CALLOC(H5VL_iod_attr_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-    attr->remote_attr.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-    attr->remote_attr.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+    attr->remote_attr.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+    attr->remote_attr.iod_oh.wr_oh = IOD_HANDLE_INVALID;
 
     /* Generate IOD IDs for the attr to be created */
     H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
@@ -4017,10 +4017,10 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     if(NULL == (attr = H5FL_CALLOC(H5VL_iod_attr_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-    attr->remote_attr.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-    attr->remote_attr.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-    attr->remote_attr.iod_id = IOD_ID_UNDEFINED;
-    attr->remote_attr.mdkv_id = IOD_ID_UNDEFINED;
+    attr->remote_attr.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+    attr->remote_attr.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+    attr->remote_attr.iod_id = IOD_OBJ_INVALID;
+    attr->remote_attr.mdkv_id = IOD_OBJ_INVALID;
     attr->remote_attr.acpl_id = -1;
     attr->remote_attr.type_id = -1;
     attr->remote_attr.space_id = -1;
@@ -5375,8 +5375,8 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-        dset->remote_dset.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        dset->remote_dset.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+        dset->remote_dset.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        dset->remote_dset.iod_oh.wr_oh = IOD_HANDLE_INVALID;
         dset->remote_dset.iod_id = iod_id;
         dset->remote_dset.mdkv_id = mdkv_id;
         dset->remote_dset.attrkv_id = attrkv_id;
@@ -5443,8 +5443,8 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-        dtype->remote_dtype.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        dtype->remote_dtype.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+        dtype->remote_dtype.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        dtype->remote_dtype.iod_oh.wr_oh = IOD_HANDLE_INVALID;
         dtype->remote_dtype.iod_id = iod_id;
         dtype->remote_dtype.mdkv_id = mdkv_id;
         dtype->remote_dtype.attrkv_id = attrkv_id;
@@ -5497,8 +5497,8 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-        grp->remote_group.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        grp->remote_group.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+        grp->remote_group.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        grp->remote_group.iod_oh.wr_oh = IOD_HANDLE_INVALID;
         grp->remote_group.iod_id = iod_id;
         grp->remote_group.mdkv_id = mdkv_id;
         grp->remote_group.attrkv_id = attrkv_id;
@@ -5535,8 +5535,8 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-        map->remote_map.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        map->remote_map.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+        map->remote_map.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        map->remote_map.iod_oh.wr_oh = IOD_HANDLE_INVALID;
         map->remote_map.iod_id = iod_id;
         map->remote_map.mdkv_id = mdkv_id;
         map->remote_map.attrkv_id = attrkv_id;
@@ -6466,9 +6466,9 @@ H5VL_iod_map_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
     if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-    map->remote_map.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-    map->remote_map.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-    map->remote_map.iod_id = IOD_ID_UNDEFINED;
+    map->remote_map.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+    map->remote_map.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+    map->remote_map.iod_id = IOD_OBJ_INVALID;
     map->remote_map.mcpl_id = -1;
 
     /* Generate IOD IDs for the map to be created */
@@ -6595,11 +6595,11 @@ H5VL_iod_map_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char *n
     if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-    map->remote_map.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-    map->remote_map.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-    map->remote_map.iod_id = IOD_ID_UNDEFINED;
-    map->remote_map.mdkv_id = IOD_ID_UNDEFINED;
-    map->remote_map.attrkv_id = IOD_ID_UNDEFINED;
+    map->remote_map.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+    map->remote_map.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+    map->remote_map.iod_id = IOD_OBJ_INVALID;
+    map->remote_map.mdkv_id = IOD_OBJ_INVALID;
+    map->remote_map.attrkv_id = IOD_OBJ_INVALID;
     map->remote_map.keytype_id = -1;
     map->remote_map.valtype_id = -1;
 

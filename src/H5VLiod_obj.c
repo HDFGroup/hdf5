@@ -60,8 +60,8 @@ H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* MSC - Remove when we have IOD */
-    obj_oh.rd_oh.cookie=0;
-    obj_oh.wr_oh.cookie=0;
+    obj_oh.rd_oh.cookie=12345;
+    obj_oh.wr_oh.cookie=12345;
 
     if (iod_obj_open_read(coh, obj_id, NULL /*hints*/, &obj_oh.rd_oh, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
@@ -76,12 +76,12 @@ H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        obj_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        obj_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+        obj_oh.rd_oh = IOD_HANDLE_INVALID;
+        obj_oh.wr_oh = IOD_HANDLE_INVALID;
         HG_Handler_start_output(op_data->hg_handle, &obj_oh);
     }
 
-    input = (object_op_in_t *)H5MM_xfree(input);
+    input = (object_token_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
     FUNC_LEAVE_NOAPI_VOID
@@ -127,8 +127,8 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* MSC - Remove when we have IOD */
-    obj_oh.rd_oh.cookie=0;
-    obj_oh.wr_oh.cookie=0;
+    obj_oh.rd_oh.cookie=12345;
+    obj_oh.wr_oh.cookie=12345;
 
     /* Traverse Path and open object */
     if(H5VL_iod_server_open_path(coh, input->loc_id, input->loc_oh, input->loc_name, 
@@ -244,36 +244,11 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-
-#if H5_DO_NATIVE
-    obj_oh.cookie = H5Oopen(input->loc_oh.cookie, input->loc_name, H5P_DEFAULT);
-    output.obj_type = H5Iget_type(obj_oh.cookie);
-    switch(output.obj_type){
-    case H5I_GROUP:
-        output.cpl_id = H5P_GROUP_CREATE_DEFAULT;
-        output.type_id = FAIL;
-        output.space_id = FAIL;
-        break;
-    case H5I_DATASET:
-        output.cpl_id = H5P_DATASET_CREATE_DEFAULT;
-        output.type_id = H5Dget_type(obj_oh.cookie);
-        output.space_id = H5Dget_space(obj_oh.cookie);
-        break;
-    case H5I_DATATYPE:
-        output.cpl_id = H5P_DATATYPE_CREATE_DEFAULT;
-        output.type_id = obj_oh.cookie;
-        output.space_id = FAIL;
-        break;
-    default:
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "not a valid object (dataset, group, or datatype)")
-    }
-#else
-    /* Fake something */
+    /* MSC - fake */
     output.obj_type = H5I_GROUP;
     output.cpl_id = H5P_GROUP_CREATE_DEFAULT;
     output.type_id = FAIL;
     output.space_id = FAIL;
-#endif
 
     output.iod_id = obj_id;
     output.mdkv_id = sp[0];
@@ -289,9 +264,9 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_id = IOD_ID_UNDEFINED;
+        output.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+        output.iod_id = IOD_OBJ_INVALID;
         output.cpl_id = FAIL;
         output.type_id = FAIL;
         output.space_id = FAIL;
@@ -302,10 +277,6 @@ done:
     case H5I_GROUP:
         break;
     case H5I_DATASET:
-#if H5_DO_NATIVE
-        H5Tclose(output.type_id);
-        H5Sclose(output.space_id);
-#endif
         break;
     case H5I_DATATYPE:
         break;
@@ -558,11 +529,8 @@ H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
 
-#if H5_DO_NATIVE
-    ret = H5Oexists_by_name(loc_oh.cookie, loc_name, H5P_DEFAULT);
-#else
+    /* MSC - fake */
     ret = FALSE;
-#endif
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with Object exists, sending response to client\n");
@@ -610,7 +578,7 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
     H5I_type_t obj_type;
-    iod_size_t num_attrs = 0;
+    int num_attrs = 0;
     const char *loc_name = input->loc_name;
     herr_t ret_value = SUCCEED;
 
@@ -706,7 +674,7 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
 done:
     if(ret_value < 0) {
         oinfo.type = H5O_TYPE_UNKNOWN;
-        oinfo.addr = IOD_ID_UNDEFINED;
+        oinfo.addr = IOD_OBJ_INVALID;
         oinfo.rc = 0;
         oinfo.num_attrs = 0;
         HG_Handler_start_output(op_data->hg_handle, &oinfo);
@@ -805,12 +773,8 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
        iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-#if H5_DO_NATIVE
-    if(H5Oset_comment(loc_oh.cookie, comment) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Unable to set object comment");
-#endif
-
 done:
+
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with set comment, sending response to client\n");
 #endif
@@ -923,22 +887,13 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
        iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-
-#if H5_DO_NATIVE
-    if(0 != length) {
-        size = H5Oget_comment(loc_oh.cookie, NULL, length);
-        comment.value = malloc(size+1);
-    }
-    if((size = H5Oget_comment(loc_oh.cookie, comment.value, length)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Unable to get object comment");
-#else
+    /* MSC - fake */
     if(length) {
         comment.value = strdup("fake comment");
         size = strlen(comment.value) + 1;
     }
     else
         size = 22;
-#endif
 
     *comment.value_size = size;
 

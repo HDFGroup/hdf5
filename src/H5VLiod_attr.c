@@ -74,8 +74,8 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* MSC - Remove when we have IOD */
-    attr_oh.rd_oh.cookie=0;
-    attr_oh.wr_oh.cookie=0;
+    attr_oh.rd_oh.cookie=12345;
+    attr_oh.wr_oh.cookie=12345;
 
     /* Open the object where the attribute needs to be created. */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, rtid, &obj_id, &obj_oh) < 0)
@@ -92,7 +92,6 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get dimentions' sizes");
     array.firstdim_max = max_dims[0];
     array.chunk_dims = NULL;
-    array.dims_seq = NULL;
 
     /* create the attribute */
     if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_ARRAY, NULL, &array, &attr_id, NULL) < 0)
@@ -109,9 +108,9 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
 
     /* set values for the scratch pad object */
     sp[0] = mdkv_id;
-    sp[1] = IOD_ID_UNDEFINED;
-    sp[2] = IOD_ID_UNDEFINED;
-    sp[3] = IOD_ID_UNDEFINED;
+    sp[1] = IOD_OBJ_INVALID;
+    sp[2] = IOD_OBJ_INVALID;
+    sp[3] = IOD_OBJ_INVALID;
 
     /* set scratch pad in attribute */
     if(cs_scope & H5_CHECKSUM_IOD) {
@@ -185,12 +184,6 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         iod_obj_close(obj_oh.rd_oh, NULL, NULL);
     }
 
-#if H5_DO_NATIVE
-    iod_oh.wr_oh.cookie = H5Acreate2(obj_oh.cookie, attr_name, input->type_id, 
-                               input->space_id, H5P_DEFAULT, H5P_DEFAULT);
-    HDassert(obj_oh.cookie);
-#endif
-
     output.iod_oh.rd_oh.cookie = attr_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = attr_oh.wr_oh.cookie;
 
@@ -205,8 +198,8 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
         fprintf(stderr, "Failed Attribute Create\n");
-        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
@@ -286,7 +279,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
         /* MSC - Dont do this check until we have a real IOD */
 #if 0
         /* if attribute KV does not exist, return error*/
-        if(IOD_ID_UNDEFINED == sp[1])
+        if(IOD_OBJ_INVALID == sp[1])
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Object has no attributes");
 #endif
 
@@ -317,8 +310,8 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_close(attr_kv_oh, NULL, NULL);
 
   /* MSC - Remove when we have IOD */
-    attr_oh.rd_oh.cookie=0;
-    attr_oh.wr_oh.cookie=0;
+    attr_oh.rd_oh.cookie=12345;
+    attr_oh.wr_oh.cookie=12345;
 
     /* open the attribute */
     if (iod_obj_open_read(coh, attr_id, NULL /*hints*/, &attr_oh.rd_oh, NULL) < 0)
@@ -356,26 +349,12 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
 
     {
         hsize_t dims[1];
-        //hid_t space_id, type_id;
 
-#if H5_DO_NATIVE
-        printf("attr name %s  location %d %s\n", attr_name, loc_handle.cookie, loc_name);
-        if(strcmp(loc_name, ".") == 0)
-            attr_oh.cookie = H5Aopen(loc_handle.cookie, attr_name, H5P_DEFAULT);
-        else
-            attr_oh.cookie = H5Aopen_by_name(loc_handle.cookie, loc_name, 
-                                            attr_name, H5P_DEFAULT, H5P_DEFAULT);
-        HDassert(attr_oh.cookie);
-        output.space_id = H5Aget_space(attr_oh.cookie);
-        output.type_id = H5Aget_type(attr_oh.cookie);
-        output.acpl_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
-#else
-        /* fake a dataspace, type, and dcpl */
+        /* MSC - fake a dataspace, type, and dcpl */
         dims [0] = 60;
         output.space_id = H5Screate_simple(1, dims, NULL);
         output.type_id = H5Tcopy(H5T_NATIVE_INT);
         output.acpl_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
-#endif
     }
 
     output.iod_id = attr_id;
@@ -391,9 +370,9 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-        output.iod_id = IOD_ID_UNDEFINED;
+        output.iod_oh.rd_oh = IOD_HANDLE_INVALID;
+        output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+        output.iod_id = IOD_OBJ_INVALID;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
@@ -521,12 +500,9 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
         hbool_t flag;
         int *buf_ptr = (int *)buf;
 
-#if H5_DO_NATIVE
-    ret_value = H5Aread(iod_oh.cookie, type_id, buf);
-#else
-    for(i=0;i<60;++i)
-        buf_ptr[i] = i;
-#endif
+        /* MSC - fake */
+        for(i=0;i<60;++i)
+            buf_ptr[i] = i;
     }
 
     /* Create a new block handle to write the data */
@@ -702,10 +678,6 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_array_write(iod_oh, wtid, NULL, mem_desc, &file_desc, &attr_cs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
 
-#if H5_DO_NATIVE
-    ret_value = H5Awrite(iod_oh.cookie, type_id, buf);
-#endif
-
 done:
 #if H5VL_IOD_DEBUG 
     fprintf(stderr, "Done with attr write, sending %d response to client\n", ret_value);
@@ -797,7 +769,7 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
         /* MSC - Dont do this check until we have a real IOD */
 #if 0
         /* if attribute KV does not exist, return false*/
-        if(IOD_ID_UNDEFINED == sp[1]) {
+        if(IOD_OBJ_INVALID == sp[1]) {
             ret = FALSE;
             HGOTO_DONE(SUCCEED);
         }
@@ -820,8 +792,8 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* get attribute ID */
-    if(iod_kv_get_value(attr_kv_oh, rtid, attr_name, NULL, 
-                        &kv_size, NULL, NULL) < 0) {
+    if(iod_kv_get_value(attr_kv_oh, rtid, attr_name, (iod_size_t)strlen(attr_name), 
+                        NULL, &kv_size, NULL, NULL) < 0) {
         ret = FALSE;
     }
     else {
@@ -830,11 +802,8 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     iod_obj_close(attr_kv_oh, NULL, NULL);
 
-#if H5_DO_NATIVE
-    ret = H5Aexists(loc_handle.cookie, attr_name);
-#else
+    /* MSC - fake */
     ret = FALSE;
-#endif
 
 done:
 #if H5VL_IOD_DEBUG
@@ -914,7 +883,7 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
         /* MSC - Dont do this check until we have a real IOD */
 #if 0
         /* if attribute KV does not exist, return error*/
-        if(IOD_ID_UNDEFINED == sp[1])
+        if(IOD_OBJ_INVALID == sp[1])
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Object has no attributes");
 #endif
 
@@ -947,9 +916,10 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
     attr_id = iod_link.u.iod_id;
 
     /* remove attribute with old name */
-    kv.key = old_name;
+    kv.key = (void *)old_name;
+    kv.key_len = strlen(old_name);
     kvs.kv = &kv;
-    if(iod_kv_unlink_keys(attr_kv_oh.wr_oh, wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
+    if(iod_kv_unlink_keys(attr_kv_oh.wr_oh, wtid, NULL, 1, &kvs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
 
     /* insert attribute with new name */
@@ -962,10 +932,6 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't close object");
     if(iod_obj_close(attr_kv_oh.wr_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't close object");
-
-#if H5_DO_NATIVE
-    ret_value = H5Arename(loc_handle.cookie, old_name, new_name);
-#endif
 
 done:
 
@@ -1045,7 +1011,7 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
         /* MSC - Dont do this check until we have a real IOD */
 #if 0
         /* if attribute KV does not exist, return error*/
-        if(IOD_ID_UNDEFINED == sp[1])
+        if(IOD_OBJ_INVALID == sp[1])
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Object has no attributes");
 #endif
 
@@ -1078,9 +1044,10 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     attr_id = iod_link.u.iod_id;
 
     /* remove attribute */
-    kv.key = attr_name;
+    kv.key = (void *)attr_name;
+    kv.key_len = strlen(attr_name);
     kvs.kv = &kv;
-    if(iod_kv_unlink_keys(attr_kv_oh.wr_oh, wtid, NULL, (iod_size_t)1, &kvs, NULL) < 0)
+    if(iod_kv_unlink_keys(attr_kv_oh.wr_oh, wtid, NULL, 1, &kvs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
     if(iod_obj_unlink(coh, attr_id, wtid, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
@@ -1090,10 +1057,6 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't close object");
     if(iod_obj_close(attr_kv_oh.wr_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't close object");
-
-#if H5_DO_NATIVE
-    ret_value = H5Adelete(loc_handle.cookie, attr_name);
-#endif
 
 done:
 #if H5VL_IOD_DEBUG
@@ -1145,10 +1108,6 @@ H5VL_iod_server_attr_close_cb(AXE_engine_t UNUSED axe_engine,
        IOD_OH_UNDEFINED == iod_oh.rd_oh.cookie) {
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't close object with invalid handle");
     }
-#endif
-
-#if H5_DO_NATIVE
-    ret_value = H5Aclose(iod_oh.cookie);
 #endif
 
     if((iod_obj_close(iod_oh.rd_oh, NULL, NULL)) < 0)

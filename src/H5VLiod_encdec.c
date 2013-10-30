@@ -160,8 +160,7 @@ int hg_proc_iod_handle_t(hg_proc_t proc, void *data)
     int ret = HG_SUCCESS;
     iod_handle_t *struct_data = (iod_handle_t *)data;
 
-    //ret = hg_proc_uint64_t(proc, &struct_data->cookie);
-    ret = hg_proc_int32_t(proc, &struct_data->cookie);
+    ret = hg_proc_uint64_t(proc, &struct_data->cookie);
     if (ret != HG_SUCCESS) {
         HG_ERROR_DEFAULT("Proc error");
         ret = HG_FAIL;
