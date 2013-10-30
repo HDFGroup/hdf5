@@ -2773,9 +2773,7 @@ AC_ARG_ENABLE([eff],
 
 case "X-$enableval" in
   X-yes)
-    # Check mercury (--enable-parallel requires static linking)
-    PKG_PROG_PKG_CONFIG
-    PKG_CONFIG="$PKG_CONFIG --static"
+    # Check mercury
     PKG_CHECK_MODULES(MERCURY, mercury)
     AM_CFLAGS="$AM_CFLAGS $MERCURY_CFLAGS"
     AM_LDFLAGS="$AM_LDFLAGS $MERCURY_LIBS"
