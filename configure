@@ -28444,7 +28444,7 @@ fi
 
 case "X-$enableval" in
   X-yes)
-    # Check mercury
+    # Check mercury (--enable-parallel requires static linking)
 
 
 
@@ -28565,6 +28565,7 @@ $as_echo "no" >&6; }
 		PKG_CONFIG=""
 	fi
 fi
+    PKG_CONFIG="$PKG_CONFIG --static"
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MERCURY" >&5
