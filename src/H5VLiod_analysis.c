@@ -105,10 +105,8 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* forward a call to every ION to open the container */
-    /* MSC - need ION list */
-
     /* *********************** TEMP THING */
+    /* forward a call to every ION to open the container */
     if(NULL == (hg_reqs = (hg_request_t *)malloc
                 (sizeof(hg_request_t) * num_ions_g)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
@@ -135,7 +133,6 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
         if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
     }
-
     free(hg_reqs);
     /* *********************** END TEMP THING */
 
@@ -321,7 +318,6 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
         if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
     }
-
     free(hg_reqs);
     free(temp_cohs);
     /* *********************** END TEMP THING */
@@ -578,7 +574,7 @@ H5VL__iod_get_query_data_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned nd
     HDassert(ndim == 1);
 
     /* MSC - NEED H5Q iterface */
-    //if(H5Qapply(udata->query_id, elem, type_id)) {
+    //if(H5Qmatch(udata->query_id, elem, type_id)) {
     if (1) {
         udata->num_elmts ++;
         if(H5Sselect_elements(udata->space_query, H5S_SELECT_APPEND, 1, point))

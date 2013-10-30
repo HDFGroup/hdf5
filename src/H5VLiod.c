@@ -648,8 +648,6 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
         fprintf(stderr, "Failed to initialize Mercury\n");
         return FAIL;
     }
-    //if (HG_SUCCESS != HG_Bulk_init(network_class))
-    //return FAIL;
     if (NA_SUCCESS !=  NA_Addr_lookup(network_class, addr_name, &ion_target))  {
         fprintf(stderr, "Server lookup failed\n");
         return FAIL;
