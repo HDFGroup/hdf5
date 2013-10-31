@@ -282,7 +282,7 @@ test_mpio_gb_file(char *filename)
 	printf("Skipped GB file range test "
 		"because MPI_Offset cannot support it\n");
     }else{
-	buf = malloc(MB);
+	buf = HDmalloc(MB);
 	VRFY((buf!=NULL), "malloc succeed");
 
 	/* open a new file. Remove it first in case it exists. */
