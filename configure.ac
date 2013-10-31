@@ -4097,7 +4097,7 @@ if test -n "$cc_version_info"; then
 fi
 
 AC_SUBST([FC_VERSION])
-## Strip anything that looks like a flag off of $CC
+## Strip anything that looks like a flag off of $FC
 FC_NOFLAGS=`echo $FC | sed 's/ -.*//'`
 
 if `echo $FC_NOFLAGS | grep ^/ >/dev/null 2>&1`; then
@@ -4116,7 +4116,7 @@ if test -n "$fc_version_info"; then
 fi
 
 AC_SUBST([CXX_VERSION])
-## Strip anything that looks like a flag off of $CC
+## Strip anything that looks like a flag off of $CXX
 CXX_NOFLAGS=`echo $CXX | sed 's/ -.*//'`
 
 if `echo $CXX_NOFLAGS | grep ^/ >/dev/null 2>&1`; then
