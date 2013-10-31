@@ -592,7 +592,8 @@ H5Dget_create_plist(hid_t dset_id)
     if(NULL == (dset = (void *)H5I_object(dset_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
-    if(H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_DCPL, H5AC_dxpl_id, H5_EVENT_STACK_NULL, &ret_value) < 0)
+    if(H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_DCPL, H5AC_dxpl_id, 
+                        H5_EVENT_STACK_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataset creation properties")
 
 done:

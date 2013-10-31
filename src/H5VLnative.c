@@ -1268,17 +1268,27 @@ H5VL_native_datatype_get(void *obj, H5VL_datatype_get_t get_type,
         /* H5Tget_create_plist */
         case H5VL_DATATYPE_GET_TCPL:
             {
-                H5P_genplist_t  *new_plist;     /* New datatype creation property list */
-                hid_t	tcpl_id = va_arg (arguments, hid_t);
+                hid_t *ret_id = va_arg (arguments, hid_t *);
+                H5P_genplist_t *tcpl_plist = NULL; /* New datatype creation property list */
+                hid_t tcpl_id;
+
+                /* Copy the default datatype creation property list */
+                if(NULL == (tcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_DATATYPE_CREATE_g)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get default creation property list")
+                if((tcpl_id = H5P_copy_plist(tcpl_plist, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to copy the creation property list")
+
+                 tcpl_plist = NULL;
 
                 /* Get property list object for new TCPL */
-                if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(tcpl_id)))
+                if(NULL == (tcpl_plist = (H5P_genplist_t *)H5I_object(tcpl_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list");
 
                 /* Retrieve any object creation properties */
-                if(H5O_get_create_plist(&dt->oloc, H5AC_ind_dxpl_id, new_plist) < 0)
+                if(H5O_get_create_plist(&dt->oloc, H5AC_ind_dxpl_id, tcpl_plist) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object creation info");
 
+                *ret_id = tcpl_id;
                 break;
             }
         default:
