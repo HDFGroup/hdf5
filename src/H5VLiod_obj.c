@@ -221,7 +221,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
             /* MSC - NEED IOD */
 #if 0
             /* calculate a checksum for the datatype */
-            dt_cs = H5checksum(buf, buf_size, NULL);
+            dt_cs = H5_checksum_crc64(buf, buf_size);
 
             /* Verifty checksum against one given by IOD */
             if(iod_cs != dt_cs)
@@ -422,7 +422,7 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
 
             /* MSC - NEED IOD */
             /* calculate a checksum for the datatype */
-            dt_cs = H5checksum(buf, buf_size, NULL);
+            dt_cs = H5_checksum_crc64(buf, buf_size);
 
             /* Verifty checksum against one given by IOD */
             if(iod_cs != dt_cs)

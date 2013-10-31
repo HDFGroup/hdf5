@@ -33,7 +33,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-
+#include "mchecksum.h"          /* Mercury Checksum library             */
 
 /****************/
 /* Local Macros */
@@ -664,3 +664,61 @@ H5_hash_string(const char *str)
     FUNC_LEAVE_NOAPI(hash)
 } /* end H5_hash_string() */
 
+uint64_t 
+H5_checksum_crc64(const void *buf, size_t buf_size)
+{
+    const char *hash_method = "crc64";
+    size_t hash_size;
+    uint64_t hash;
+    mchecksum_object_t checksum;
+
+    /* Initialize checksum */
+    mchecksum_init(hash_method, &checksum);
+
+    /* Update checksum */
+    mchecksum_update(checksum, buf, buf_size);
+
+    /* Get size of checksum */
+    hash_size = mchecksum_get_size(checksum);
+
+    assert(hash_size == sizeof(uint64_t));
+
+    /* get checksum value */
+    mchecksum_get(checksum, &hash, hash_size, 1);
+
+    /* Destroy checksum */
+    mchecksum_destroy(checksum);
+
+    return hash;
+}
+
+uint64_t 
+H5_checksum_crc64_fragments(void **buf, size_t *buf_size, size_t count)
+{
+    const char *hash_method = "crc64";
+    size_t hash_size;
+    uint64_t hash;
+    size_t i;
+    mchecksum_object_t checksum;
+
+    /* Initialize checksum */
+    mchecksum_init(hash_method, &checksum);
+
+    /* Update checksum */
+    for (i = 0; i < count; i++) {
+        mchecksum_update(checksum, buf[i], buf_size[i]);
+    }
+
+    /* Get size of checksum */
+    hash_size = mchecksum_get_size(checksum);
+
+    assert(hash_size == sizeof(uint64_t));
+
+    /* get checksum value */
+    mchecksum_get(checksum, &hash, hash_size, 1);
+
+    /* Destroy checksum */
+    mchecksum_destroy(checksum);
+
+    return hash;
+}

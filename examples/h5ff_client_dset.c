@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
     H5ES_status_t status;
     size_t num_events = 0;
     unsigned int i = 0;
-    uint32_t cs = 0,read1_cs = 0, read2_cs = 0;
+    uint64_t cs = 0,read1_cs = 0, read2_cs = 0;
     uint32_t cs_scope = 0;
     herr_t ret;
 
@@ -213,7 +213,7 @@ int main(int argc, char **argv) {
     /* Attach a checksum to the dxpl which is verified all the way
        down at the server */
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-    cs = H5checksum(wdata1, sizeof(int32_t) * nelem, NULL);
+    cs = H5_checksum_crc64(wdata1, sizeof(int32_t) * nelem);
     H5Pset_dxpl_checksum(dxpl_id, cs);
 
     /* tell HDF5 to disable all data integrity checks for this write */
@@ -227,7 +227,7 @@ int main(int argc, char **argv) {
     /* Raw data write on D2. same as previous, but here we indicate
        through the property list that we want to inject a
        corruption. */
-    cs = H5checksum(wdata2, sizeof(int32_t) * nelem, NULL);
+    cs = H5_checksum_crc64(wdata2, sizeof(int32_t) * nelem);
     H5Pset_dxpl_checksum(dxpl_id, cs);
     H5Pset_dxpl_inject_corruption(dxpl_id, 1);
 
@@ -465,7 +465,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%d ",rdata1[i]);
     fprintf(stderr, "\n");
     fprintf(stderr, 
-            "Checksum Receieved = %u  Checksum Computed = %u (Should be Equal)\n", 
+            "Checksum Receieved = %llu  Checksum Computed = %llu (Should be Equal)\n", 
             read1_cs, cs);
 
     fprintf(stderr, "Read Data2 (corrupted): ");
@@ -473,7 +473,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%d ",rdata2[i]);
     fprintf(stderr, "\n");
     fprintf(stderr, 
-            "Checksum Receieved = %u  Checksum Computed = %u (Should NOT be Equal)\n", 
+            "Checksum Receieved = %llu  Checksum Computed = %llu (Should NOT be Equal)\n", 
             read2_cs, cs);
 
     assert(read1_cs == cs);

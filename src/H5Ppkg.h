@@ -211,12 +211,14 @@ H5_DLL herr_t H5P__encode_hsize_t(const void *value, void **_pp, size_t *size);
 H5_DLL herr_t H5P__encode_size_t(const void *value, void **_pp, size_t *size);
 H5_DLL herr_t H5P__encode_unsigned(const void *value, void **_pp, size_t *size);
 H5_DLL herr_t H5P__encode_uint8_t(const void *value, void **_pp, size_t *size);
+H5_DLL herr_t H5P__encode_uint64_t(const void *value, void **_pp, size_t *size);
 H5_DLL herr_t H5P__encode_hbool_t(const void *value, void **_pp, size_t *size);
 H5_DLL herr_t H5P__encode_double(const void *value, void **_pp, size_t *size);
 H5_DLL herr_t H5P__decode_hsize_t(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_size_t(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_unsigned(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_uint8_t(const void **_pp, void *value);
+H5_DLL herr_t H5P__decode_uint64_t(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_hbool_t(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_double(const void **_pp, void *value);
 

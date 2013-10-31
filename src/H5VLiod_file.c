@@ -124,7 +124,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         if(cs_scope & H5_CHECKSUM_IOD) {
             iod_checksum_t sp_cs;
 
-            sp_cs = H5checksum(&sp, sizeof(sp), NULL);
+            sp_cs = H5_checksum_crc64(&sp, sizeof(sp));
             /* set scratch pad in root group */
             if (iod_obj_set_scratch(root_oh.wr_oh, first_tid, &sp, &sp_cs, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");

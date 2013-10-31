@@ -717,7 +717,7 @@ H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_n
 {
     iod_kv_t kv;
     void  *value = NULL;
-    const uint8_t *val_ptr = NULL;
+    uint8_t *val_ptr = NULL;
     size_t value_len;
     herr_t ret_value = SUCCEED;
 
@@ -738,13 +738,13 @@ H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_n
             }
         case H5L_TYPE_SOFT:
             {
-                value_len = sizeof(H5L_type_t) + strlen((char *)link_val) + 1;
+                value_len = sizeof(H5L_type_t) + strlen((const char *)link_val) + 1;
                 value = malloc(value_len);
 
                 val_ptr = (uint8_t *)value;
 
                 memcpy(val_ptr, &link_type, sizeof(H5L_type_t));
-                strcpy((char *)(val_ptr+sizeof(H5L_type_t)), (char *)link_val);
+                strcpy((char *)(val_ptr+sizeof(H5L_type_t)), (const char *)link_val);
 
                 break;
             }
@@ -1015,7 +1015,7 @@ H5VL_iod_verify_scratch_pad(scratch_pad sp, iod_checksum_t iod_cs)
 
     /* MSC - Need IOD */
 #if 0
-    computed_cs = H5checksum(&sp, sizeof(sp), NULL);
+    computed_cs = H5_checksum_crc64(&sp, sizeof(sp));
 
     if(computed_cs != iod_cs) {
         fprintf(stderr, "Scratch pad integrity check failed. IOD cs = %u, Computed cs = %u",

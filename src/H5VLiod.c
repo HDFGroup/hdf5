@@ -602,7 +602,7 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
        using mercury */
     /* Only rank 0 reads file */
     if (my_rank == 0) {
-        int count, index=0, num_ions;
+        int count, line=0, num_ions;
         FILE *config;
         char config_addr_name[H5VL_IOD_MAX_ADDR_NAME];
 
@@ -615,22 +615,22 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
         if(fgets(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, config) != NULL) {
             strncpy(addr_name, config_addr_name, H5VL_IOD_MAX_ADDR_NAME);
             count = 1;
-            while(num_procs > index + (count*num_ions)) {
+            while(num_procs > line + (count*num_ions)) {
                 MPI_Send(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, MPI_BYTE, 
-                         index + (count*num_ions), tag, comm);
+                         line + (count*num_ions), tag, comm);
                 count ++;
             }
-            index++;
+            line++;
         }
 
         while (fgets(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, config) != NULL) {
             count = 0;
-            while(num_procs > index + (count*num_ions)) {
+            while(num_procs > line + (count*num_ions)) {
                 MPI_Send(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, MPI_BYTE, 
-                         index + (count*num_ions), tag, comm);
+                         line + (count*num_ions), tag, comm);
                 count ++;
             }
-            index ++;
+            line ++;
         }
         fclose(config);
     }
@@ -957,7 +957,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_dxpl_checksum(hid_t dxpl_id, uint32_t cs)
+H5Pset_dxpl_checksum(hid_t dxpl_id, uint64_t cs)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -995,7 +995,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_dxpl_checksum(hid_t dxpl_id, uint32_t *cs/*out*/)
+H5Pget_dxpl_checksum(hid_t dxpl_id, uint64_t *cs/*out*/)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -1031,7 +1031,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t *cs)
+H5Pset_dxpl_checksum_ptr(hid_t dxpl_id, uint64_t *cs)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1069,7 +1069,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t **cs/*out*/)
+H5Pget_dxpl_checksum_ptr(hid_t dxpl_id, uint64_t **cs/*out*/)
 {
     H5P_genplist_t *plist = NULL;              /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -2945,13 +2945,13 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     char fake_char;
     int *status = NULL;
     H5VL_iod_io_info_t *info; /* info struct used to manage I/O parameters once the operation completes*/
-    uint32_t internal_cs; /* internal checksum calculated in this function */
+    uint64_t internal_cs; /* internal checksum calculated in this function */
     size_t *vl_string_len = NULL; /* array that will contain lengths of strings if the datatype is a VL string type */
     H5VL_iod_request_t **parent_reqs = NULL;
     size_t num_parents = 0;
     hid_t trans_id;
     H5TR_t *tr = NULL;
-    uint32_t user_cs;
+    uint64_t user_cs;
     uint32_t raw_cs_scope = 0;
     herr_t ret_value = SUCCEED;
 
@@ -3062,7 +3062,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     if((raw_cs_scope & H5_CHECKSUM_MEMORY) && user_cs && 
        user_cs != internal_cs) {
-        fprintf(stderr, "Errrr.. In memory Data corruption. expecting %u, got %u\n",
+        fprintf(stderr, "Errrr.. In memory Data corruption. expecting %llu, got %llu\n",
                 user_cs, internal_cs);
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "Checksum verification failed");
     }
@@ -4155,6 +4155,19 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
         attr->common.request = NULL;
     }
 
+    /* MSC - VLEN datatypes for attributes are not supported for now. */
+    {
+        H5T_class_t class;
+        H5T_t *dt = NULL;
+
+        if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
+
+        class = H5T_get_class(dt, FALSE);
+        if(H5T_VLEN == class || (H5T_STRING == class && H5T_is_variable_str(dt)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "VLEN datatypes for attributes not supported");
+    }
+
     /* calculate the size of the buffer needed */
     size = H5Sget_simple_extent_npoints(attr->remote_attr.space_id) * H5Tget_size(type_id);
 
@@ -4235,8 +4248,8 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     hg_bulk_t *bulk_handle = NULL;
     int *status = NULL;
     size_t size;
+    uint64_t internal_cs; /* internal checksum calculated in this function */
     H5VL_iod_io_info_t *info;
-    uint32_t cs;
     size_t num_parents = 0;
     hid_t trans_id;
     H5TR_t *tr = NULL;
@@ -4262,14 +4275,24 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
         attr->common.request = NULL;
     }
 
+    /* MSC - VLEN datatypes for attributes are not supported for now. */
+    {
+        H5T_class_t class;
+        H5T_t *dt = NULL;
+
+        if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
+
+        class = H5T_get_class(dt, FALSE);
+        if(H5T_VLEN == class || (H5T_STRING == class && H5T_is_variable_str(dt)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "VLEN datatypes for attributes not supported");
+    }
+
     /* calculate the size of the buffer needed */
     size = H5Sget_simple_extent_npoints(attr->remote_attr.space_id) * H5Tget_size(type_id);
 
     /* calculate a checksum for the data */
-    cs = H5_checksum_fletcher32(buf, size);
-
-    /* MSC- store it in a global variable for now so that the read can see it (for demo purposes */
-    printf("Checksum Generated for attribute data at client: %u\n", cs);
+    internal_cs = H5_checksum_crc64(buf, size);
 
     /* allocate a bulk data transfer handle */
     if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
@@ -4298,6 +4321,7 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     input.space_id = attr->remote_attr.space_id;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
+    input.checksum = internal_cs;
     input.cs_scope = attr->common.file->md_integrity_scope;
 
     status = (int *)malloc(sizeof(int));
@@ -6679,7 +6703,7 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
     size_t num_parents = 0;
     H5TR_t *tr = NULL;
     hg_bulk_t *value_handle = NULL;
-    uint32_t key_cs, value_cs, user_cs;
+    uint64_t key_cs, value_cs, user_cs;
     uint32_t raw_cs_scope;
     H5VL_iod_request_t **parent_reqs = NULL;
     H5T_class_t val_type_class;
@@ -6731,7 +6755,7 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
 
     if((raw_cs_scope & H5_CHECKSUM_MEMORY) && user_cs && 
        user_cs != value_cs) {
-        fprintf(stderr, "Errrr.. In memory Data corruption. expecting %u, got %u\n",
+        fprintf(stderr, "Errrr.. In memory Data corruption. expecting %llu, got %llu\n",
                 user_cs, value_cs);
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "Checksum verification failed");
     }
@@ -6819,7 +6843,7 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
     size_t key_size, val_size;
     hg_bulk_t *value_handle = NULL;
     hg_bulk_t dummy_handle;
-    uint32_t key_cs = 0;
+    uint64_t key_cs = 0;
     H5RC_t *rc = NULL;
     size_t num_parents = 0;
     hbool_t val_is_vl;
@@ -7046,7 +7070,7 @@ H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key,
     size_t key_size;
     H5RC_t *rc = NULL;
     size_t num_parents = 0;
-    uint32_t key_cs = 0;
+    uint64_t key_cs = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     H5VL_iod_exists_info_t *info = NULL;
     herr_t ret_value = SUCCEED;
@@ -7125,7 +7149,7 @@ H5VL_iod_map_delete(void *_map, hid_t key_mem_type_id, const void *key,
     int *status = NULL;
     size_t num_parents = 0;
     H5TR_t *tr = NULL;
-    uint32_t key_cs = 0;
+    uint64_t key_cs = 0;
     H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;
 

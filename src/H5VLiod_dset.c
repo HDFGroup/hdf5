@@ -169,7 +169,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     if(cs_scope & H5_CHECKSUM_IOD) {
         iod_checksum_t sp_cs;
 
-        sp_cs = H5checksum(&sp, sizeof(sp), NULL);
+        sp_cs = H5_checksum_crc64(&sp, sizeof(sp));
         if (iod_obj_set_scratch(dset_oh.wr_oh, wtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
     }
@@ -450,7 +450,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     hg_bulk_request_t bulk_request; /* HG request */
     size_t size, buf_size;
     void *buf = NULL; /* buffer to hold outgoing data */
-    uint32_t cs = 0; /* checksum value */
+    iod_checksum_t cs = 0; /* checksum value */
     uint32_t raw_cs_scope;
     hbool_t is_vl_data;
     size_t nelmts; /* number of elements selected to read */
@@ -499,7 +499,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     if(!is_vl_data) {
         /* If the data is not VL, we can read the data from the array the normal way */
         if(H5VL__iod_server_final_io(coh, iod_oh.rd_oh, space_id, src_id, 
-                                     FALSE, buf, buf_size, 0, raw_cs_scope, rtid) < 0) {
+                                     FALSE, buf, buf_size, (uint64_t)0, raw_cs_scope, rtid) < 0) {
             fprintf(stderr, "can't read from array object\n");
             ret_value = FAIL;
             goto done;
@@ -520,7 +520,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
 
             if(raw_cs_scope) {
                 /* calculate a checksum for the data to be sent */
-                cs = H5checksum(buf, size, NULL);
+                cs = H5_checksum_crc64(buf, size);
             }
 #if H5VL_IOD_DEBUG
             else {
@@ -592,7 +592,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
         }
         if(!(raw_cs_scope & H5_CHECKSUM_NONE)) {
             /* calculate a checksum for the data to be sent */
-            cs = H5checksum(buf, buf_size, NULL);
+            cs = H5_checksum_crc64(buf, buf_size);
         }
     }
 
@@ -619,7 +619,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
 #if H5VL_IOD_DEBUG 
-    fprintf(stderr, "Done with dset read, checksum %u, sending response to client\n", cs);
+    fprintf(stderr, "Done with dset read, checksum %llu, sending response to client\n", cs);
 #endif
 
     input = (dset_io_in_t *)H5MM_xfree(input);
@@ -788,7 +788,7 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
 #if 0
         /* Verify checksum for that entry */
         buf_ptr = (uint8_t *)buf;
-        entry_cs = H5checksum(buf_ptr, sizeof(iod_size_t) + sizeof(iod_obj_id_t), NULL);
+        entry_cs = H5_checksum_crc64(buf_ptr, sizeof(iod_size_t) + sizeof(iod_obj_id_t));
         if(entry_cs != io_array[n].cs)
             HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading");
         buf_ptr += sizeof(iod_size_t) + sizeof(iod_obj_id_t);
@@ -883,7 +883,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t iod_id = input->iod_id; /* dset ID */
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
     hid_t space_id = input->space_id; /* file space selection */
-    uint32_t cs = input->checksum; /* checksum recieved for data */
+    uint64_t cs = input->checksum; /* checksum recieved for data */
     hid_t src_id = input->mem_type_id; /* the memory type of the elements */
     hid_t dst_id = input->dset_type_id; /* the datatype of the dataset's element */
     iod_trans_id_t wtid = input->trans_num;
@@ -894,7 +894,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     hg_bulk_request_t bulk_request; /* HG request */
     size_t size, buf_size;
     hbool_t is_vl_data;
-    uint32_t data_cs = 0;
+    iod_checksum_t data_cs = 0;
     uint32_t raw_cs_scope;
     unsigned u;
     void *buf = NULL;
@@ -955,9 +955,9 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
 
     /* verify data if transfer flag is set */
     if(raw_cs_scope & H5_CHECKSUM_TRANSFER) {
-        data_cs = H5checksum(buf, size, NULL);
+        data_cs = H5_checksum_crc64(buf, size);
         if(cs != data_cs) {
-            fprintf(stderr, "Errrr.. Network transfer Data corruption. expecting %u, got %u\n",
+            fprintf(stderr, "Errrr.. Network transfer Data corruption. expecting %llu, got %llu\n",
                     cs, data_cs);
             ret_value = FAIL;
             goto done;
@@ -1213,7 +1213,7 @@ done:
 herr_t 
 H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id, 
                           hid_t type_id, hbool_t write_op, void *buf, 
-                          size_t buf_size, uint32_t cs, uint32_t cs_scope, 
+                          size_t buf_size, iod_checksum_t cs, uint32_t cs_scope, 
                           iod_trans_id_t tid)
 {
     int ndims, i; /* dataset's rank/number of dimensions */
@@ -1299,7 +1299,7 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
 
         /* If this is a write op, compute the checksum for each memory fragment */
         if(write_op && (cs_scope & H5_CHECKSUM_IOD))
-            cs_list[n] = H5checksum(buf_ptr, (size_t)num_bytes, NULL);
+            cs_list[n] = H5_checksum_crc64(buf_ptr, (size_t)num_bytes);
 
         buf_ptr += num_bytes;
 
@@ -1354,7 +1354,7 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
     if(!write_op && (cs_scope & H5_CHECKSUM_IOD)) {
         hsize_t num_bytes = 0;
         hsize_t num_elems = 1;
-        uint32_t checksum;
+        iod_checksum_t checksum;
 
         buf_ptr = (uint8_t *)buf;
 
@@ -1364,7 +1364,7 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
                 num_elems *= (hslabs[n].count[i] * hslabs[n].block[i]);
             num_bytes = num_elems * elmt_size;
 
-            checksum = H5checksum(buf_ptr, (size_t)num_bytes, NULL);
+            checksum = H5_checksum_crc64(buf_ptr, (size_t)num_bytes);
 
             if(checksum != cs_list[n]) {
                 fprintf(stderr, "Data Corruption detected when reading\n");
@@ -1502,7 +1502,6 @@ H5VL__iod_server_vl_data_io_cb(void UNUSED *elem, hid_t type_id, unsigned ndims,
     size_t old_seq_len = 0;
     unsigned u;
     iod_checksum_t entry_cs = 0, read_cs = 0;
-    H5_checksum_seed_t cs;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1536,11 +1535,17 @@ H5VL__iod_server_vl_data_io_cb(void UNUSED *elem, hid_t type_id, unsigned ndims,
 
     /* MSC - NEED IOD */
 #if 0
-    /* compute checksum of blob ID and sequence length */
-    cs.a = cs.b = cs.c = cs.state = 0;
-    cs.total_length = sizeof(iod_obj_id_t) + sizeof(iod_size_t);
-    entry_cs = H5checksum(&blob_id, sizeof(iod_obj_id_t), &cs);
-    entry_cs = H5checksum(&seq_len, sizeof(iod_size_t), &cs);
+    {
+        void *buffers[2];
+        size_t buf_sizes[2];
+
+        buffers[0] = &blob_id;
+        buf_sizes[0] = sizeof(iod_obj_id_t);
+        buffers[1] = &seq_len;
+        buf_sizes[1] = sizeof(iod_size_t);
+
+        entry_cs = H5_checksum_crc64_fragments(buffers, buf_sizes, 2);
+    }
 
     if(entry_cs != read_cs)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading");
@@ -1622,10 +1627,17 @@ H5VL__iod_server_vl_data_io_cb(void UNUSED *elem, hid_t type_id, unsigned ndims,
         mem_desc->frag[1].len = sizeof(iod_size_t);
 
         /* compute checksum of blob ID and sequence length */
-        cs.a = cs.b = cs.c = cs.state = 0;
-        cs.total_length = sizeof(iod_obj_id_t) + sizeof(iod_size_t);
-        entry_cs = H5checksum(&blob_id, sizeof(iod_obj_id_t), &cs);
-        entry_cs = H5checksum(&seq_len, sizeof(iod_size_t), &cs);
+        {
+            void *buffers[2];
+            size_t buf_sizes[2];
+
+            buffers[0] = &blob_id;
+            buf_sizes[0] = sizeof(iod_obj_id_t);
+            buffers[1] = &seq_len;
+            buf_sizes[1] = sizeof(iod_size_t);
+
+            entry_cs = H5_checksum_crc64_fragments(buffers, buf_sizes, 2);
+        }
 
         /* write the blob ID & size to the array element */
         if(iod_array_write(udata->iod_oh, tid, NULL, 

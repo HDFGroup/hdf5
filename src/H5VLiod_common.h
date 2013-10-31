@@ -40,7 +40,7 @@ typedef enum H5VL_iod_state_t {
 
 typedef struct H5VL_iod_read_status_t {
     int ret;
-    uint32_t cs;
+    uint64_t cs;
     size_t buf_size;
 } H5VL_iod_read_status_t;
 
@@ -167,7 +167,7 @@ MERCURY_GEN_PROC(attr_io_in_t, ((axe_t)(axe_info)) ((uint32_t)(cs_scope))
                  ((uint64_t)(rcxt_num)) ((uint64_t)(trans_num))
                  ((iod_handle_t)(coh)) ((iod_handles_t)(iod_oh)) 
                  ((iod_obj_id_t)(iod_id)) ((iod_obj_id_t)(mdkv_id))
-                 ((hid_t)(space_id))
+                 ((uint64_t)(checksum)) ((hid_t)(space_id))
                  ((hid_t)(type_id)) ((hg_bulk_t)(bulk_handle)))
 MERCURY_GEN_PROC(attr_close_in_t, ((axe_t)(axe_info))
                  ((iod_handles_t)(iod_oh)) ((iod_obj_id_t)(iod_id)))
@@ -215,7 +215,7 @@ MERCURY_GEN_PROC(map_set_in_t, ((axe_t)(axe_info)) ((uint32_t)(cs_scope))
                  ((iod_obj_id_t)(iod_id)) 
                  ((hid_t)(key_maptype_id)) ((hid_t)(key_memtype_id)) ((binary_buf_t)(key))
                  ((hid_t)(val_maptype_id)) ((hid_t)(val_memtype_id))
-                 ((uint32_t)(val_checksum)) ((hg_bulk_t)(val_handle))
+                 ((uint64_t)(val_checksum)) ((hg_bulk_t)(val_handle))
                  ((hid_t)(dxpl_id)))
 MERCURY_GEN_PROC(map_get_in_t, ((axe_t)(axe_info)) ((uint32_t)(cs_scope))
                  ((uint64_t)(rcxt_num))
@@ -225,7 +225,7 @@ MERCURY_GEN_PROC(map_get_in_t, ((axe_t)(axe_info)) ((uint32_t)(cs_scope))
                  ((hid_t)(val_maptype_id)) ((hid_t)(val_memtype_id)) ((hbool_t)(val_is_vl))
                  ((hg_bulk_t)(val_handle))
                  ((size_t)(val_size)) ((hid_t)(dxpl_id)))
-MERCURY_GEN_PROC(map_get_out_t, ((int32_t)(ret)) ((size_t)(val_size)) ((uint32_t)(val_cs)))
+MERCURY_GEN_PROC(map_get_out_t, ((int32_t)(ret)) ((size_t)(val_size)) ((uint64_t)(val_cs)))
 MERCURY_GEN_PROC(map_get_count_in_t, ((axe_t)(axe_info)) ((uint32_t)(cs_scope))
                  ((uint64_t)(rcxt_num))
                  ((iod_handle_t)(coh)) ((iod_handles_t)(iod_oh))
@@ -265,7 +265,7 @@ MERCURY_GEN_PROC(dset_io_in_t, ((axe_t)(axe_info)) ((uint32_t)(cs_scope))
                  ((iod_handle_t)(coh)) ((iod_handles_t)(iod_oh)) 
                  ((iod_obj_id_t)(iod_id)) ((iod_obj_id_t)(mdkv_id))
                  ((hid_t)(dset_type_id)) ((hid_t)(mem_type_id))
-                 ((hid_t)(space_id)) ((hid_t)(dxpl_id)) ((uint32_t)(checksum))
+                 ((hid_t)(space_id)) ((hid_t)(dxpl_id)) ((uint64_t)(checksum))
                  ((hg_bulk_t)(bulk_handle)))
 MERCURY_GEN_PROC(dset_get_vl_size_in_t, ((axe_t)(axe_info)) ((uint32_t)(cs_scope))
                  ((uint64_t)(rcxt_num))
@@ -273,7 +273,7 @@ MERCURY_GEN_PROC(dset_get_vl_size_in_t, ((axe_t)(axe_info)) ((uint32_t)(cs_scope
                  ((iod_obj_id_t)(iod_id)) ((iod_obj_id_t)(mdkv_id))
                  ((hid_t)(mem_type_id))
                  ((hid_t)(space_id)) ((hid_t)(dxpl_id)))
-MERCURY_GEN_PROC(dset_read_out_t, ((int32_t)(ret)) ((uint32_t)(cs)) ((size_t)(buf_size)))
+MERCURY_GEN_PROC(dset_read_out_t, ((int32_t)(ret)) ((uint64_t)(cs)) ((size_t)(buf_size)))
 MERCURY_GEN_PROC(dset_close_in_t, ((axe_t)(axe_info))
                  ((iod_handles_t)(iod_oh)) ((iod_obj_id_t)(iod_id)))
 

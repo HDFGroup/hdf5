@@ -47,8 +47,7 @@ H5FL_EXTERN(H5VL_iod_dtype_t);
 typedef struct {
     size_t buf_size;
     uint8_t *buf_ptr;
-    uint32_t checksum;
-    uint8_t **off;
+    void **off;
     size_t *len;
     hsize_t curr_seq;
     size_t *str_len; /* used only for VL strings */
@@ -677,7 +676,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                     req->state = H5VL_IOD_COMPLETED;
                 }
                 else {
-                    uint32_t internal_cs = 0;
+                    uint64_t internal_cs = 0;
                     uint32_t raw_cs_scope = info->raw_cs_scope;
 
                     /* calculate a checksum for the data recieved */
@@ -687,7 +686,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                     /* verify data integrity */
                     if((raw_cs_scope & H5_CHECKSUM_TRANSFER) &&
                        internal_cs != read_status->cs) {
-                        fprintf(stderr, "Errrrr!  Dataset Read integrity failure (expecting %u got %u).\n",
+                        fprintf(stderr, 
+                                "Errrrr!  Dataset Read integrity failure (expecting %llu got %llu).\n",
                                 read_status->cs, internal_cs);
                         req->status = H5ES_STATUS_FAIL;
                         req->state = H5VL_IOD_COMPLETED;
@@ -732,7 +732,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 dset_io_in_t input;
                 void *read_buf;
                 H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
-                uint32_t internal_cs = 0;
+                uint64_t internal_cs = 0;
                 size_t buf_size = status->buf_size;
                 hid_t rcxt_id;
                 H5RC_t *rc;
@@ -788,7 +788,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 }
 
                 /* calculate a checksum for the data recieved */
-                internal_cs = H5_checksum_lookup4(read_buf, buf_size, NULL);
+                internal_cs = H5_checksum_crc64(read_buf, buf_size);
 
                 /* scatter the data into the user's buffer */
                 if(H5VL__iod_vl_read_finalize(buf_size, read_buf, (void *)info->buf_ptr, 
@@ -800,7 +800,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
                 /* verify data integrity */
                 if(internal_cs != vl_status.cs) {
-                    fprintf(stderr, "Errrrr!  Dataset Read integrity failure (expecting %u got %u).\n",
+                    fprintf(stderr, 
+                            "Errrrr!  Dataset Read integrity failure (expecting %llu got %llu).\n",
                             internal_cs, status->cs);
                     req->status = H5ES_STATUS_FAIL;
                     req->state = H5VL_IOD_COMPLETED;
@@ -913,16 +914,17 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                         req->state = H5VL_IOD_COMPLETED;
                     }
                     else {
-                        uint32_t internal_cs = 0;
+                        uint64_t internal_cs = 0;
                         uint32_t raw_cs_scope = info->raw_cs_scope;
 
                         /* calculate a checksum for the data recieved */
-                        internal_cs = H5_checksum_lookup4(info->val_ptr, info->val_size, NULL);
+                        internal_cs = H5_checksum_crc64(info->val_ptr, info->val_size);
 
                         /* verify data integrity */
                         if((raw_cs_scope & H5_CHECKSUM_TRANSFER) &&
                            internal_cs != output->val_cs) {
-                            fprintf(stderr, "Errrrr!  MAP Get integrity failure (expecting %u got %u).\n",
+                            fprintf(stderr, 
+                                    "Errrrr!  MAP Get integrity failure (expecting %llu got %llu).\n",
                                     output->val_cs, internal_cs);
                             req->status = H5ES_STATUS_FAIL;
                             req->state = H5VL_IOD_COMPLETED;
@@ -2136,11 +2138,11 @@ H5VL__iod_pre_write_cb(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim,
                 udata->str_len[i] = HDstrlen(buf[i]) + 1;
                 udata->buf_size += udata->str_len[i] + sizeof(size_t);
 
-                udata->off[udata->curr_seq] = (uint8_t *)(udata->str_len+i);
+                udata->off[udata->curr_seq] = (void *)(udata->str_len+i);
                 udata->len[udata->curr_seq] = sizeof(size_t);
                 udata->curr_seq ++;
 
-                udata->off[udata->curr_seq] = (uint8_t*)buf[i];
+                udata->off[udata->curr_seq] = (void *)buf[i];
                 udata->len[udata->curr_seq] = udata->str_len[i];
                 udata->curr_seq ++;
 
@@ -2160,11 +2162,11 @@ H5VL__iod_pre_write_cb(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim,
                 elmt_size = H5T_get_size(super) * vl->len;
                 udata->buf_size += elmt_size + sizeof(size_t);
 
-                udata->off[udata->curr_seq] = (uint8_t *)udata->buf_ptr;
+                udata->off[udata->curr_seq] = (void *)udata->buf_ptr;
                 udata->len[udata->curr_seq] = sizeof(size_t);
                 udata->curr_seq ++;
 
-                udata->off[udata->curr_seq] = (uint8_t *)(vl->p);
+                udata->off[udata->curr_seq] = (void *)(vl->p);
                 udata->len[udata->curr_seq] = elmt_size;
                 udata->curr_seq ++;
 
@@ -2201,12 +2203,12 @@ done:
  */
 herr_t
 H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf, 
-                   /*out*/uint32_t *_checksum, 
+                   /*out*/uint64_t *_checksum, 
                    /*out*/hg_bulk_t *bulk_handle,
                    /*out*/size_t **vl_str_len)
 {
     hsize_t buf_size = 0;
-    uint32_t checksum = 0;
+    uint64_t checksum = 0;
     H5S_t *space = NULL;
     H5T_t *dt = NULL;
     size_t nelmts;
@@ -2231,7 +2233,6 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
             if(H5T_is_variable_str(dt)) {
                 char bogus;                 /* bogus value to pass to H5Diterate() */
                 H5VL_iod_pre_write_t udata;
-                H5_checksum_seed_t cs;
                 hg_bulk_segment_t *bulk_segments = NULL;
                 unsigned u;
 
@@ -2241,8 +2242,7 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
                 /* set H5Diterate op_data */
                 udata.buf_size = 0;
                 udata.buf_ptr = (uint8_t *)buf;
-                udata.checksum = 0;
-                udata.off = (uint8_t **)malloc(nelmts * 2 * sizeof(uint8_t *));
+                udata.off = (void **)malloc(nelmts * 2 * sizeof(void *));
                 udata.len = (size_t *)malloc(nelmts * 2 * sizeof(size_t));
                 udata.curr_seq = 0;
 
@@ -2258,7 +2258,7 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
                                                             sizeof(hg_bulk_segment_t));
 
                 for (u = 0; u <udata.curr_seq ; u++) {
-                    bulk_segments[u].address = (void *)udata.off[u];
+                    bulk_segments[u].address = udata.off[u];
                     bulk_segments[u].size = udata.len[u];
                 }
 
@@ -2270,14 +2270,9 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
                 free(bulk_segments);
                 bulk_segments = NULL;
 
-                if(_checksum) {
-                    /* compute checksum of length array and the actual stings array */
-                    cs.a = cs.b = cs.c = cs.state = 0;
-                    cs.total_length = buf_size;
-                    for(u = 0; u < udata.curr_seq ; u++) {
-                        checksum = H5_checksum_lookup4(udata.off[u], udata.len[u], &cs);
-                    }
-                }
+                if(_checksum)
+                    checksum = H5_checksum_crc64_fragments(udata.off, udata.len, 
+                                                           (size_t)udata.curr_seq);
 
                 /* cleanup */
                 if(udata.curr_seq) {
@@ -2369,14 +2364,12 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
             {
                 char bogus;                 /* bogus value to pass to H5Diterate() */
                 H5VL_iod_pre_write_t udata;
-                H5_checksum_seed_t cs;
                 hg_bulk_segment_t *bulk_segments = NULL;
                 unsigned u;
 
                 udata.buf_size = 0;
                 udata.buf_ptr = (uint8_t *)buf;
-                udata.checksum = 0;
-                udata.off = (uint8_t **)malloc(nelmts * 2 * sizeof(uint8_t *));
+                udata.off = (void **)malloc(nelmts * 2 * sizeof(void *));
                 udata.len = (size_t *)malloc(nelmts * 2 * sizeof(size_t));
                 udata.curr_seq = 0;
 
@@ -2391,7 +2384,7 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
                 bulk_segments = (hg_bulk_segment_t *)malloc((size_t)udata.curr_seq * 
                                                             sizeof(hg_bulk_segment_t));
                 for (u = 0; u < udata.curr_seq ; u++) {
-                    bulk_segments[u].address = (void *)udata.off[u];
+                    bulk_segments[u].address = udata.off[u];
                     bulk_segments[u].size = udata.len[u];
                 }
 
@@ -2404,13 +2397,9 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
                 free(bulk_segments);
                 bulk_segments = NULL;
 
-                cs.a = cs.b = cs.c = cs.state = 0;
-                cs.total_length = buf_size;
-
                 if(_checksum) {
-                    for(u = 0; u < udata.curr_seq ; u++) {
-                        checksum = H5_checksum_lookup4(udata.off[u], udata.len[u], &cs);
-                    }
+                    checksum = H5_checksum_crc64_fragments(udata.off, udata.len, 
+                                                           (size_t)udata.curr_seq);
                 }
 
                 /* cleanup */
@@ -2746,7 +2735,7 @@ done:
  */
 herr_t
 H5VL_iod_map_get_size(hid_t type_id, const void *buf, 
-                      /*out*/uint32_t *checksum, 
+                      /*out*/uint64_t *checksum, 
                       /*out*/size_t *size, /*out*/H5T_class_t *dt_class)
 {
     size_t buf_size = 0;
@@ -2768,7 +2757,7 @@ H5VL_iod_map_get_size(hid_t type_id, const void *buf,
                 buf_size = HDstrlen((const char*)buf) + 1;
 
                 /* compute checksum */
-                *checksum = H5_checksum_lookup4(buf, buf_size, NULL);
+                *checksum = H5_checksum_crc64(buf, buf_size);
                 break;
             }
         case H5T_INTEGER:
@@ -2789,7 +2778,7 @@ H5VL_iod_map_get_size(hid_t type_id, const void *buf,
             buf_size = H5T_get_size(dt);
 
             /* compute checksum */
-            *checksum = H5_checksum_lookup4(buf, buf_size, NULL);
+            *checksum = H5_checksum_crc64(buf, buf_size);
             break;
 
             /* If this is a variable length datatype, iterate over it */
@@ -2806,7 +2795,7 @@ H5VL_iod_map_get_size(hid_t type_id, const void *buf,
                 buf_size = H5T_get_size(super) * vl->len;
 
                 /* compute checksum */
-                *checksum = H5_checksum_lookup4(vl->p, buf_size, NULL);
+                *checksum = H5_checksum_crc64(vl->p, buf_size);
                 H5T_close(super);
                 break;
             }

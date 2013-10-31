@@ -31,6 +31,7 @@
 #include "H5Spkg.h"		/* Dataspaces 				*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
+#include "mchecksum.h"          /* Mercury Checksum library             */
 
 /* Local functions */
 #ifdef LATER
@@ -2160,7 +2161,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-uint32_t
+uint64_t
 H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, const H5S_t *space)
 {
     hsize_t _off[H5D_IO_VECTOR_SIZE];      /* Array to store sequence offsets in memory */
@@ -2170,7 +2171,7 @@ H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, const H5S_t *spac
     H5S_sel_iter_t iter;    /* Memory selection iteration info */
     hbool_t iter_init = 0;  /* Memory selection iteration info has been initialized */
     size_t nseq;            /* Number of sequences generated */
-    uint32_t ret_value = 0;
+    uint64_t ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2184,13 +2185,15 @@ H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, const H5S_t *spac
         if(H5S_SELECT_OFFSET(space, off) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "can't retrieve memory selection offset");
 
-        ret_value = H5_checksum_lookup4(buf, buf_size, NULL);
+        ret_value = H5_checksum_crc64(buf, buf_size);
     } /* end if */
     else {
         size_t nelem;           /* Number of elements used in sequences */
         size_t i;
         const uint8_t *p = (const uint8_t *)buf;
-        H5_checksum_seed_t cs;
+        const char *hash_method = "crc64";
+        size_t hash_size;
+        mchecksum_object_t checksum;
 
         /* Initialize iterator */
         if(H5S_select_iter_init(&iter, space, elmt_size) < 0)
@@ -2199,8 +2202,8 @@ H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, const H5S_t *spac
 
         nseq = 0;
 
-        cs.a = cs.b = cs.c = cs.state = 0;
-        //cs.total_length = elmt_size * nelmts;
+        /* Initialize checksum */
+        mchecksum_init(hash_method, &checksum);
 
         /* Loop, until all bytes are processed */
         while(nelmts > 0) {
@@ -2210,10 +2213,21 @@ H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, const H5S_t *spac
                 HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
             for(i=0 ; i<nseq ; i++) {
-                ret_value = H5_checksum_lookup4(p+off[i], len[i], &cs);
+                mchecksum_update(checksum, p+off[i], len[i]);
             }
             nelmts -= nelem;
         } /* end while */
+
+        /* Get size of checksum */
+        hash_size = mchecksum_get_size(checksum);
+
+        assert(hash_size == sizeof(uint64_t));
+
+        /* get checksum value */
+        mchecksum_get(checksum, &ret_value, hash_size, 1);
+
+        /* Destroy checksum */
+        mchecksum_destroy(checksum);
     } /* end else */
 
 done:

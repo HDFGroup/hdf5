@@ -114,7 +114,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
 
     /* set scratch pad in attribute */
     if(cs_scope & H5_CHECKSUM_IOD) {
-        sp_cs = H5checksum(&sp, sizeof(sp), NULL);
+        sp_cs = H5_checksum_crc64(&sp, sizeof(sp));
         if (iod_obj_set_scratch(attr_oh.wr_oh, wtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
     }
@@ -490,7 +490,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
 
     /* MSC - NEED IOD */
 #if 0
-    attr_cs = H5checksum(buf, size, NULL);
+    attr_cs = H5_checksum_crc64(buf, size);
     if(attr_cs != iod_cs)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data corruption detected when reading attribute");
 #endif
@@ -672,7 +672,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     /* set the file descriptor */
     file_desc = hslabs;
 
-    attr_cs = H5checksum(buf, size, NULL);
+    attr_cs = H5_checksum_crc64(buf, size);
 
     /* write from array object */
     if(iod_array_write(iod_oh, wtid, NULL, mem_desc, &file_desc, &attr_cs, NULL) < 0)

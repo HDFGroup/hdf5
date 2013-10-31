@@ -114,7 +114,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     if(cs_scope & H5_CHECKSUM_IOD) {
         iod_checksum_t sp_cs;
 
-        sp_cs = H5checksum(&sp, sizeof(sp), NULL);
+        sp_cs = H5_checksum_crc64(&sp, sizeof(sp));
         if (iod_obj_set_scratch(map_oh.wr_oh, wtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
     }
@@ -346,7 +346,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     hid_t val_maptype_id = input->val_maptype_id;
     binary_buf_t key = input->key;
     hg_bulk_t value_handle = input->val_handle; /* bulk handle for data */
-    uint32_t value_cs = input->val_checksum; /* checksum recieved for data */
+    iod_checksum_t value_cs = input->val_checksum; /* checksum recieved for data */
     hid_t dxpl_id = input->dxpl_id;
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
@@ -406,11 +406,11 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
 
     /* verify data if transfer flag is set */
     if(raw_cs_scope & H5_CHECKSUM_TRANSFER) {
-        uint32_t data_cs;
+        iod_checksum_t data_cs;
 
-        data_cs = H5checksum(val_buf, val_size, NULL);
+        data_cs = H5_checksum_crc64(val_buf, val_size);
         if(value_cs != data_cs) {
-            fprintf(stderr, "Errrr.. Network transfer Data corruption. expecting %u, got %u\n",
+            fprintf(stderr, "Errrr.. Network transfer Data corruption. expecting %llu, got %llu\n",
                     value_cs, data_cs);
             ret_value = FAIL;
             goto done;
@@ -648,7 +648,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
         output.val_size = src_size;
         if(raw_cs_scope) {
             /* calculate a checksum for the data to be sent */
-            output.val_cs = H5checksum(val_buf, (size_t)src_size, NULL);
+            output.val_cs = H5_checksum_crc64(val_buf, (size_t)src_size);
         }
 #if H5VL_IOD_DEBUG
         else {
@@ -696,7 +696,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
 
         if(raw_cs_scope) {
             /* calculate a checksum for the data to be sent */
-            output.val_cs = H5checksum(val_buf, val_size, NULL);
+            output.val_cs = H5_checksum_crc64(val_buf, val_size);
         }
 #if H5VL_IOD_DEBUG
         else {

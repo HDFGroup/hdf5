@@ -113,7 +113,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     if(cs_scope & H5_CHECKSUM_IOD) {
         iod_checksum_t sp_cs;
 
-        sp_cs = H5checksum(&sp, sizeof(sp), NULL);
+        sp_cs = H5_checksum_crc64(&sp, sizeof(sp));
         if (iod_obj_set_scratch(dtype_oh.wr_oh, wtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
     }
@@ -153,7 +153,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         iod_checksum_t dt_cs;
 
         /* calculate a checksum for the datatype */
-        dt_cs = H5checksum(buf, buf_size, NULL);
+        dt_cs = H5_checksum_crc64(buf, buf_size);
 
         /* write the serialized type value to the BLOB object */
         if(iod_blob_write(dtype_oh.wr_oh, wtid, NULL, mem_desc, file_desc, &dt_cs, NULL) < 0)
@@ -362,7 +362,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - NEED IOD */
     if(iod_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* calculate a checksum for the datatype */
-        dt_cs = H5checksum(buf, buf_size, NULL);
+        dt_cs = H5_checksum_crc64(buf, buf_size);
 
         /* Verifty checksum against one given by IOD */
         if(iod_cs != dt_cs)
