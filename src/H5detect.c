@@ -124,7 +124,7 @@ static int bit_cmp(int, int *, volatile void *, volatile void *,
 static void fix_order(int, int, int *, const char **);
 static int imp_bit(int, int *, volatile void *, volatile void *,
     const unsigned char *);
-static unsigned long find_bias(int, int, int *, void *);
+static unsigned long find_bias(int, int, int *, volatile void *);
 static void precision (detected_t*);
 static void print_header(void);
 static void detect_C89_integers(void);
@@ -1135,7 +1135,7 @@ imp_bit(int n, int *perm, volatile void *_a, volatile void *_b,
  *-------------------------------------------------------------------------
  */
 static unsigned long
-find_bias(int epos, int esize, int *perm, void *_a)
+find_bias(int epos, int esize, int *perm, volatile void *_a)
 {
     unsigned char	*a = (unsigned char *) _a;
     unsigned char	mask;
