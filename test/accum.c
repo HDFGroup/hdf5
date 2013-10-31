@@ -1661,9 +1661,9 @@ test_random_write(void)
     unsigned u;                 /* Local index variable */
 
     /* Allocate space for the write & read buffers */
-    wbuf = (uint8_t *)malloc(RANDOM_BUF_SIZE);
+    wbuf = (uint8_t *)HDmalloc(RANDOM_BUF_SIZE);
     HDassert(wbuf);
-    rbuf = (uint8_t *)calloc(RANDOM_BUF_SIZE, 1);
+    rbuf = (uint8_t *)HDcalloc(RANDOM_BUF_SIZE, 1);
     HDassert(rbuf);
 
     /* Initialize write buffer */
@@ -1681,9 +1681,9 @@ HDfprintf(stderr, "Random # seed was: %u\n", seed);
     HDsrandom(seed);
 
     /* Allocate space for the segment length buffer */
-    off = (size_t *)malloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
+    off = (size_t *)HDmalloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
     HDassert(off);
-    len = (size_t *)malloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
+    len = (size_t *)HDmalloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
     HDassert(len);
 
     /* Randomly choose lengths of segments */

@@ -113,7 +113,7 @@ void tts_acreate(void)
      * with the dataset
      */
     for(i = 0; i < NUM_THREADS; i++) {
-        attrib_data = malloc(sizeof(ttsafe_name_data_t));
+        attrib_data = HDmalloc(sizeof(ttsafe_name_data_t));
         attrib_data->dataset = dataset;
         attrib_data->datatype = datatype;
         attrib_data->dataspace = dataspace;
@@ -170,7 +170,7 @@ void *tts_acreate_thread(void *client_data)
                           H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write data to the attribute */
-    attribute_data = malloc(sizeof(int));
+    attribute_data = HDmalloc(sizeof(int));
     *attribute_data = attrib_data->current_index;
     H5Awrite(attribute, H5T_NATIVE_INT, attribute_data);
     H5Aclose(attribute);

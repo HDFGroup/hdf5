@@ -477,7 +477,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
 
         HDclose(f);
 
-        free (tconv_buf);
+        HDfree (tconv_buf);
         PASSED();
     } /* end if */
     else {
@@ -1848,13 +1848,13 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if(H5Dclose (dataset) < 0) goto error;
     if(H5Sclose (sid) < 0) goto error;
     if(H5Pclose (dxpl) < 0) goto error;
-    free (tconv_buf);
+    HDfree (tconv_buf);
 
     return(0);
 
 error:
     if(tconv_buf)
-        free (tconv_buf);
+        HDfree (tconv_buf);
     return -1;
 }
 
@@ -6533,7 +6533,7 @@ auxread_fdata(hid_t fid, const char *name)
     if(H5Dclose(dset_id) < 0)
         goto error;
     if(buf)
-        free(buf);
+        HDfree(buf);
 
     return 0;
 
@@ -6545,7 +6545,7 @@ error:
         H5Tclose(ftype_id);
         H5Tclose(mtype_id);
         if(buf)
-            free(buf);
+            HDfree(buf);
     } H5E_END_TRY;
     return -1;
 }

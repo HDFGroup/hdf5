@@ -165,7 +165,7 @@ main (int argc, const char *argv[])
   if (res < (long)size)
     {
       if (buf)
-  free (buf);
+  HDfree (buf);
       HDclose (fd);
       exit (EXIT_FAILURE);
     }
@@ -173,7 +173,7 @@ main (int argc, const char *argv[])
   HDwrite (1, buf, (unsigned)size);
 
   if (buf)
-    free (buf);
+    HDfree (buf);
   HDclose (fd);
   return (EXIT_SUCCESS);
 }

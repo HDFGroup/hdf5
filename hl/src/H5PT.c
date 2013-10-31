@@ -13,9 +13,12 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <stdlib.h>
+
 #include "H5PTprivate.h"
 #include "H5TBprivate.h"
-#include <stdlib.h>
+
+#define HDfree(X) free(X)
 
 /*  Packet Table private data */
 
@@ -33,6 +36,7 @@ static H5I_type_t H5PT_ptable_id_type = H5I_UNINIT;
 #define H5PT_HASH_TABLE_SIZE 64
 
 /* Packet Table private functions */
+static herr_t H5PT_free_id(void *id);
 static herr_t H5PT_close( htbl_t* table );
 static herr_t H5PT_create_index(htbl_t *table_id);
 static herr_t H5PT_set_index(htbl_t *table_id, hsize_t pt_index);
@@ -84,11 +88,11 @@ hid_t H5PTcreate_fl ( hid_t loc_id,
 
   /* Register the packet table ID type if this is the first table created */
   if(H5PT_ptable_id_type < 0)
-    if((H5PT_ptable_id_type = H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)free)) < 0)
+    if((H5PT_ptable_id_type = H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)H5PT_free_id)) < 0)
       goto out;
 
   /* Get memory for the table identifier */
-  table = (htbl_t *)malloc(sizeof(htbl_t));
+  table = (htbl_t *)HDmalloc(sizeof(htbl_t));
 
   /* Create a simple data space with unlimited size */
   dims[0] = 0;
@@ -142,7 +146,7 @@ hid_t H5PTcreate_fl ( hid_t loc_id,
     H5Pclose(plist_id);
     H5Dclose(dset_id);
     if(table)
-      free(table);
+      HDfree(table);
     H5E_END_TRY
     return H5I_INVALID_HID;
 }
@@ -232,10 +236,10 @@ hid_t H5PTopen( hid_t loc_id,
 
   /* Register the packet table ID type if this is the first table created */
   if( H5PT_ptable_id_type < 0)
-    if((H5PT_ptable_id_type = H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)free)) < 0)
+    if((H5PT_ptable_id_type = H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)H5PT_free_id)) < 0)
       goto out;
 
-  table = (htbl_t *)malloc(sizeof(htbl_t));
+  table = (htbl_t *)HDmalloc(sizeof(htbl_t));
 
   if ( table == NULL ) {
     goto out;
@@ -291,12 +295,26 @@ out:
   {
     H5Dclose(table->dset_id);
     H5Tclose(table->type_id);
-    free(table);
+    HDfree(table);
   }
   H5E_END_TRY
   return H5I_INVALID_HID;
 }
 
+/*-------------------------------------------------------------------------
+ * Function: H5PT_free_id
+ *
+ * Purpose: Free an id.  Callback for H5Iregister_type.
+ *
+ * Return: Success: 0, Failure: N/A
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PT_free_id(void *id)
+{
+    HDfree(id);
+    return 0;
+}
 
 /*-------------------------------------------------------------------------
  * Function: H5PT_close
@@ -331,7 +349,7 @@ H5PT_close( htbl_t* table)
   if(H5Tclose(table->type_id) < 0)
     goto out;
 
-  free(table);
+  HDfree(table);
 
   return 0;
 
@@ -342,7 +360,7 @@ out:
     H5Dclose(table->dset_id);
     H5Tclose(table->type_id);
     H5E_END_TRY
-    free(table);
+    HDfree(table);
   }
   return -1;
 }
