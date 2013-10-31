@@ -1422,7 +1422,7 @@ H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_ca
     herr_t ret_value = SUCCEED;   /* return value */
     
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*Dn*Dn", plist_id, local_no_collective_cause,
+    H5TRACE3("e", "i*Iu*Iu", plist_id, local_no_collective_cause,
              global_no_collective_cause);
 
     /* Get the plist structure */
