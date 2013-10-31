@@ -146,8 +146,15 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
                                    NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
-    /* MSC - insert Key datatype metadata */
-    /* MSC - insert Value datatype metadata */
+    /* insert Key datatype metadata */
+    if(H5VL_iod_insert_datatype_with_key(mdkv_oh, wtid, keytype, H5VL_IOD_KEY_MAP_KEY_TYPE,
+                                         NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+
+    /* insert Value datatype metadata */
+    if(H5VL_iod_insert_datatype_with_key(mdkv_oh, wtid, valtype, H5VL_IOD_KEY_MAP_VALUE_TYPE,
+                                         NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* close MD KV object */
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
@@ -272,6 +279,16 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
                              H5VL_IOD_KEY_OBJ_LINK_COUNT,
                              NULL, NULL, &output.link_count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
+
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
+                             H5VL_IOD_KEY_MAP_KEY_TYPE,
+                             NULL, NULL, &output.keytype_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
+
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
+                             H5VL_IOD_KEY_MAP_VALUE_TYPE,
+                             NULL, NULL, &output.valtype_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 #endif
 

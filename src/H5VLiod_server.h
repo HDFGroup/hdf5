@@ -39,6 +39,8 @@
 #define H5VL_IOD_KEY_OBJ_TYPE        "object_type"
 #define H5VL_IOD_KEY_OBJ_DATATYPE    "object_datatype"
 #define H5VL_IOD_KEY_OBJ_DATASPACE   "object_dataspace"
+#define H5VL_IOD_KEY_MAP_KEY_TYPE    "map_keytype"
+#define H5VL_IOD_KEY_MAP_VALUE_TYPE  "map_valtype"
 
 /* Enum for metadata types stored in MD KV for HDF5->IOD objects */
 typedef enum H5VL_iod_metadata_t {
@@ -396,6 +398,9 @@ H5_DLL herr_t H5VL_iod_insert_object_type(iod_handle_t oh, iod_trans_id_t tid, H
                                           iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
 H5_DLL herr_t H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
                                        iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
+H5_DLL herr_t  H5VL_iod_insert_datatype_with_key(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id, 
+                                                 const char *key, iod_hint_list_t *hints, 
+                                                 iod_checksum_t *cs, iod_event_t *event);
 H5_DLL herr_t H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
                                         iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
 H5_DLL herr_t H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_name,

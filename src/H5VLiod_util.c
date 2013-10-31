@@ -643,6 +643,56 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_insert_datatype_with_key
+ *
+ * Purpose:     Function to insert a datatype in an 
+ *              IOD KV object.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_insert_datatype_with_key(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id, 
+                                  const char *key, iod_hint_list_t *hints, 
+                                  iod_checksum_t *cs, iod_event_t *event)
+{
+    void *value = NULL;
+    iod_kv_t kv;
+    size_t buf_size;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine the buffer size needed to store the encoded type */ 
+    if(H5Tencode(type_id,  NULL, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode type");
+    if(NULL == (value = malloc (buf_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate type buffer");
+    /* encode type */ 
+    if(H5Tencode(type_id, value, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode type");
+
+    kv.key = (void *)key;
+    kv.key_len = (iod_size_t)strlen(key);
+    kv.value = value;
+    kv.value_len = (iod_size_t)buf_size;
+    /* insert kv pair into KV */
+    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+done:
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_insert_dataspace
  *
  * Purpose:     Function to insert a dataspace in an 
