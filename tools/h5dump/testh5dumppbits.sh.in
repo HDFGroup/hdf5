@@ -38,7 +38,7 @@ H5DIFF_BIN=`pwd`/$H5DIFF          # The path of the h5diff  tool binary
 H5IMPORT=../h5import/h5import     # The h5import tool name 
 H5IMPORT_BIN=`pwd`/$H5IMPORT      # The path of the h5import  tool binary
 
-
+RM='rm -rf'
 CMP='cmp -s'
 DIFF='diff -c'
 CP='cp'
@@ -187,6 +187,19 @@ COPY_TESTFILES_TO_TESTDIR()
             fi
         fi
     done
+}
+
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=`$DIRNAME $tstfile`
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $TESTDIR
+    fi
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -576,6 +589,8 @@ TOOLTEST tpbitsLongLengthExceeded.ddl --enable-error-stack -d /DS32BITS -M 26,7 
 # Incomplete pair of packed bits request.
 TOOLTEST tpbitsIncomplete.ddl --enable-error-stack -d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5
 
+# Clean up temporary files/directories
+CLEAN_TESTFILES_AND_TESTDIR
 
 # Report test results and exit
 if test $nerrors -eq 0 ; then
