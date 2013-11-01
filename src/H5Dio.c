@@ -56,7 +56,7 @@ static herr_t H5D__write(H5D_t *dataset, hid_t mem_type_id,
     const H5S_t *mem_space, const H5S_t *file_space, hid_t dset_xfer_plist,
     const void *buf);
 #ifndef JK_WORK
-static herr_t H5D__read_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id);
+static herr_t H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id);
 static herr_t H5D__write_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id);
 #endif
 static herr_t H5D__pre_write(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
@@ -215,7 +215,7 @@ H5Dread_multi(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id)
     char           fake_char;
     H5P_genplist_t *plist;              /* Property list pointer */
     H5FD_mpio_xfer_t xfer_mode;
-    H5FD_mpio_chunk_opt_t chunk_opt_mode;
+    //H5FD_mpio_chunk_opt_t chunk_opt_mode;
     size_t i;
 
     herr_t         ret_value = SUCCEED;  /* Return value */
@@ -225,29 +225,6 @@ H5Dread_multi(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id)
     //JK_TODO_LATER
     //H5TRACE4("e", "iiDti", file_id, count, info, dxpl_id);
     
-    // JK_SUDO
-    // loop count for check args for multi dsets
-    //
-    // if (dxpl prop == Serial) // H5FD_MPIO_INDEPENDENT
-    // {
-    //      loop count for H5D__read()  
-    // }
-    // else  // Parallel // H5FD_MPIO_COLLECTIVE
-    // {
-    //      if (dxpl prop == Independent_IO) 
-    //      {
-    //        loop and resuse existing func paths
-    //      }
-    //      else if (dxpl prop == collective IO)
-    //      {
-    //        do the multi dset operations
-    //      }
-    // }
-
-    /* check count */
-    if (count <=0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "count is invalid")
-
     /* Get the default dataset transfer property list if the user didn't 
      * provide one */
     if(H5P_DEFAULT == dxpl_id)
@@ -270,9 +247,6 @@ H5Dread_multi(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id)
     fflush(stdout);
     #endif
 
-
-
-    // JK TEST
     if(xfer_mode == H5FD_MPIO_INDEPENDENT)  /* Serial mode */
     {
         for (i=0; i < count; i++)
@@ -325,11 +299,135 @@ HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
     }
     else if (xfer_mode == H5FD_MPIO_COLLECTIVE)  /* Parallel mode */
     {
-        //if(H5P_get(plist, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, &chunk_opt_mode) < 0)
-        //    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
-        //
-        //if(H5D__read_mdset(file_id, count, info, dxpl_id) < 0)
-        //    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+        //char fake_char;
+        for (i=0;i<count; i++)
+        {
+            //const H5S_t *mem_space = NULL;
+            //const H5S_t *file_space = NULL;
+
+            if(info[i].mem_space_id < 0 || info[i].file_space_id < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+            if(H5S_ALL != info[i].mem_space_id) {
+                if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(info[i].mem_space_id, H5I_DATASPACE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+                /* Check for valid selection */
+                if(H5S_SELECT_VALID(mem_space) != TRUE)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection+offset not within extent")
+            } /* end if */
+
+            if(H5S_ALL != info[i].file_space_id) {
+                if(NULL == (file_space = (const H5S_t *)H5I_object_verify(info[i].file_space_id, H5I_DATASPACE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+                /* Check for valid selection */
+                if(H5S_SELECT_VALID(file_space) != TRUE)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent")
+            } /* end if */
+
+            if(!info[i].rbuf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
+	            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no input buffer")
+
+            /* If the buffer is nil, and 0 element is selected, make a fake buffer.
+             * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+             * doesn't support this feature.
+             * This is needed to prevent fail in H5F_block_write checking 
+             * buf address because buf is not provided if this process doesn't
+             * select any chunk.
+             */
+            if(!info[i].rbuf)
+                info[i].rbuf = &fake_char;
+        }
+
+        #if 1 // JK_COUNT0
+        /* Case for the current process without any dset to work on, thus doing
+         * nothing but just participate to prevent hanging, since all process 
+         * have to participate collective MPI funcs (below).
+         */
+        if (0 == count) {
+#ifdef H5_HAVE_PARALLEL
+            int local_cause = 0;
+            int global_cause = 0;
+            size_t num_chunkf=0;
+            size_t sum_chunkf=0;
+            int mpi_code;
+            H5F_t *file;
+            //H5FD_mpio_collective_opt_t para_io_mode;
+            H5FD_mpio_chunk_opt_t chunk_opt_mode;
+
+            //if(H5P_get(plist, H5D_XFER_IO_XFER_MODE_NAME, &para_io_mode) < 0)
+            //    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+            if(H5P_get(plist, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, &chunk_opt_mode) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+
+            if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+	        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+
+            /* just to match up with MPI_Allreduce from H5D__mpio_opt_possible_mdset() */
+            if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 1, MPI_INT, MPI_BOR, H5F_mpi_get_comm(file))))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
+            #ifdef JK_DBG
+            printf ("JKDBG p:%d %s:%d COUNT=0> local_cause:%d  global_cause:%d\n", getpid(), __FILE__,__LINE__, local_cause, global_cause );
+            fflush(stdout);
+            #endif
+
+            #ifndef JK_NOCOLLCAUSE
+            /* if collective mode is not broken according to the
+             * H5D__mpio_opt_possible_mdset, since the below MPI funcs will be 
+             * called only in collective mode */
+            if (!global_cause) {
+            #endif
+                MPI_Status mpi_stat;
+                MPI_File mpi_fh_p;
+                MPI_File mpi_fh;
+
+                /* just to match up with MPI_Allreduce from H5D__mpio_get_sum_piece() */
+                if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&num_chunkf, &sum_chunkf, 1, MPI_UNSIGNED, MPI_SUM, H5F_mpi_get_comm(file))))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
+                #ifdef JK_DBG
+                printf ("JKDBG p:%d %s:%d COUNT=0> num_chunkf:%d  sum_chunkf:%d\n", getpid(), __FILE__,__LINE__, num_chunkf, sum_chunkf);
+                fflush(stdout);
+                #endif
+
+                if (H5F_get_mpi_handle(file, (MPI_File **) &mpi_fh_p) <0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file handle")
+                mpi_fh = *(MPI_File*)mpi_fh_p;
+
+                #ifdef JK_DBG
+                printf ("JKDBG p:%d %s:%d COUNT=0> mpi_fh: %x , mpi_fh addr:%x\n", getpid(), __FILE__,__LINE__, *(MPI_File*)mpi_fh_p, mpi_fh_p);
+                printf ("JKDBG p:%d %s:%d COUNT=0> mpi_fh: %x , mpi_fh addr:%x\n", getpid(), __FILE__,__LINE__, mpi_fh, &mpi_fh);
+                fflush(stdout);
+                #endif
+
+                /* just to match up with the 1st MPI_File_set_view from H5FD_mpio_read() */
+                if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, "native", MPI_INFO_NULL)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+
+                /* just to match up with MPI_File_read_at_all from H5FD_mpio_read() */
+
+                // JK_TODO make this based on the internal H5FD_MPIO_COLLECTIVE_IO 
+                // OR add H5FD_MPIO_CHUNK_MULTI_IO . Later AT_ONCE_IO too
+                //if(para_io_mode == H5FD_MPIO_COLLECTIVE_IO) 
+                if(chunk_opt_mode == H5FD_MPIO_CHUNK_ONE_IO || 
+                   chunk_opt_mode == H5FD_MPIO_CHUNK_MULTI_IO ) {
+                    HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
+                    if(MPI_SUCCESS != (mpi_code = MPI_File_read_at_all(mpi_fh, 0, NULL, 0, MPI_BYTE, &mpi_stat)))
+                        HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code)
+                }
+
+                /* just to match up with the 2nd MPI_File_set_view (reset) in H5FD_mpio_read() */
+                if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, "native", MPI_INFO_NULL)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+            #ifndef JK_NOCOLLCAUSE
+            } /* end if !global_cause */ 
+            #endif
+#endif /* H5_HAVE_PARALLEL */
+        }
+        else  /* this process select one or more dset to work on */
+        #endif // JK_COUNT0
+            if(H5D__read_mdset(file_id, count, info, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     }
 
 done:
@@ -436,7 +534,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         dset_info[0].file_space_id = file_space_id;
         dset_info[0].wbuf = buf;
         
-        if(H5D__pre_write_mdset(NULL, 1, dset_info, dxpl_id) < 0) 
+        if(H5D__pre_write_mdset((hid_t)NULL, 1, dset_info, dxpl_id) < 0) 
 	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
     }
     else  // COMPACT , EFL
@@ -767,7 +865,6 @@ H5D__pre_write_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dx
     }
     else if (xfer_mode == H5FD_MPIO_COLLECTIVE)  /* Parallel (collective) mode */
     {
-        #ifndef JK_TODO_MAKE_NOSELECTION_COMMON // This is same as the above. Make Common function.
         char fake_char;
         for (j=0;j<count; j++)
         {
@@ -808,7 +905,6 @@ H5D__pre_write_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dx
             if(!info[j].wbuf)
                 info[j].wbuf = &fake_char;
         }
-        #endif
 
         #ifndef JK_COUNT0
         /* Case for the current process without any dset to work on, thus doing
@@ -860,7 +956,7 @@ H5D__pre_write_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dx
                 fflush(stdout);
                 #endif
 
-                if (H5F_get_mpi_handle(file, &mpi_fh_p) <0)
+                if (H5F_get_mpi_handle(file, (MPI_File **) &mpi_fh_p) <0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file handle")
                 mpi_fh = *(MPI_File*)mpi_fh_p;
 
@@ -1107,15 +1203,21 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D__read() */
 
-#ifdef JK_WORK
+#ifndef JK_WORK
 static herr_t
-H5D__read_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id);
+H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id)
 {
-    H5D_chunk_map_t fm;                 /* Chunk file<->memory mapping */
-    H5D_io_info_t io_info;              /* Dataset I/O info     */
-    H5D_type_info_t type_info;          /* Datatype info for operation */
+    //H5D_chunk_map_t fm;                 /* Chunk file<->memory mapping */
+    //H5D_io_info_t io_info;              /* Dataset I/O info     */
+    //H5D_type_info_t type_info;          /* Datatype info for operation */
+    H5D_io_info_md_t io_info_md;        /* Dataset I/O info for multi dsets */
     hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
+    H5D_dset_info_t *dset_info_array = NULL;
+    #ifdef JK_ORI
     H5S_t * projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
+    #else
+    H5S_t ** projected_mem_space;       /* If not NULL, ptr to dataspace containing a     */
+    #endif
                                         /* projection of the supplied mem_space to a new  */
                                         /* data space with rank equal to that of          */
                                         /* file_space.                                    */
@@ -1128,7 +1230,11 @@ H5D__read_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id
                                         /* Note that if this variable is used, the        */
                                         /* projected mem space must be discarded at the   */
                                         /* end of the function to avoid a memory leak.    */
+    #ifdef JK_ORI                                        
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
+    #else
+    H5D_storage_t *store=NULL;          /*union of EFL and chunk pointer in file space */
+    #endif
     hssize_t	snelmts;                /*total number of elmts	(signed) */
     hsize_t	nelmts;                 /*total number of elmts	*/
 #ifdef H5_HAVE_PARALLEL
@@ -1138,161 +1244,377 @@ H5D__read_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
+    
+    #ifndef JK_WORK
+    H5D_t *dataset=NULL;  // old args
+    const H5S_t *file_space = NULL; // old arg
+    const H5S_t *mem_space = NULL;  // old arg
+    size_t i;
+    #endif
+    #ifndef JK_SHAPE_SAME_P
+    /* save original rbuf */
+    void ** info_rbuf_ori;
+    #endif
 
+    #if 0 // JK_TEST_ADDR_TAG_OLD_REMOVE
     FUNC_ENTER_STATIC_TAG(dxpl_id, dataset->oloc.addr, FAIL)
+    #else
+    FUNC_ENTER_STATIC
+    #endif
 
-    /* check args */
-    HDassert(dataset && dataset->oloc.file);
+    #ifndef JK_MULTI_DSET
+    io_info_md.sel_pieces = NULL;
+    io_info_md.store_faddr = 0;
+    io_info_md.base_maddr_r = NULL;
+    #ifndef JK_DEBUG_SLMEM
+    io_info_md.mc_cnt=0;
+    #endif
+    #endif // JK_MULTI_DSET
 
-    if(!file_space)
-        file_space = dataset->shared->space;
-    if(!mem_space)
-        mem_space = file_space;
-    if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dst dataspace has invalid selection")
-    H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
+    /* malloc dset_info */
+    if(NULL == (io_info_md.dsets_info = (H5D_dset_info_t *)H5MM_calloc(count * sizeof(H5D_dset_info_t))))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
+    /* simplify code read */
+    dset_info_array = io_info_md.dsets_info;
 
-    /* Fill the DXPL cache values for later use */
-    if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
+    #ifndef JK_WORK
+    if(NULL == ( projected_mem_space = (H5S_t **)H5MM_calloc(count * sizeof(H5S_t*))))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "couldn't allocate dset space array ptr")
 
-    /* Set up datatype info for operation */
-    if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, FALSE, &type_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
-    type_info_init = TRUE;
+    if(NULL == (store = (H5D_storage_t *)H5MM_malloc(count * sizeof(H5D_storage_t))))
+        HGOTO_ERROR(H5E_STORAGE, H5E_CANTALLOC, FAIL, "couldn't allocate dset storage info array buffer")
+    
+    #endif
 
-#ifdef H5_HAVE_PARALLEL
-    /* Collective access is not permissible without a MPI based VFD */
-    if(dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE && 
-            !(H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI)))
-        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based drivers only")
-#endif /*H5_HAVE_PARALLEL*/
+    #ifndef JK_SHAPE_SAME_P
+    /* allocate wbuf ptr array to save original wbuf ptr */
+    if(NULL == (info_rbuf_ori = (void **)H5MM_calloc(count * sizeof(void*))))
+        HGOTO_ERROR(H5E_STORAGE, H5E_CANTALLOC, FAIL, "couldn't allocate ori buf array")
+    #endif
 
-    /* Make certain that the number of elements in each selection is the same */
-    if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
-
-    /* Make sure that both selections have their extents set */
-    if(!(H5S_has_extent(file_space)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set")
-    if(!(H5S_has_extent(mem_space)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
-
-    /* H5S_select_shape_same() has been modified to accept topologically identical
-     * selections with different rank as having the same shape (if the most 
-     * rapidly changing coordinates match up), but the I/O code still has 
-     * difficulties with the notion.
-     *
-     * To solve this, we check to see if H5S_select_shape_same() returns true, 
-     * and if the ranks of the mem and file spaces are different.  If the are, 
-     * construct a new mem space that is equivalent to the old mem space, and 
-     * use that instead.
-     *
-     * Note that in general, this requires us to touch up the memory buffer as 
-     * well.
-     */
-    if(TRUE == H5S_select_shape_same(mem_space, file_space) &&
-            H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
-        void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
-                                /* to the beginning of the projected mem space.  */
-
-        /* Attempt to construct projected dataspace for memory dataspace */
-        if(H5S_select_construct_projection(mem_space, &projected_mem_space,
-                (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf, type_info.dst_type_size) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
-        HDassert(projected_mem_space);
-        HDassert(adj_buf);
-
-        /* Switch to using projected memory dataspace & adjusted buffer */
-        mem_space = projected_mem_space;
-        buf = adj_buf;
-    } /* end if */
-
-
-    /* Retrieve dataset properties */
-    /* <none needed in the general case> */
-
-    /* If space hasn't been allocated and not using external storage,
-     * return fill value to buffer if fill time is upon allocation, or
-     * do nothing if fill time is never.  If the dataset is compact and
-     * fill time is NEVER, there is no way to tell whether part of data
-     * has been overwritten.  So just proceed in reading.
-     */
-    if(nelmts > 0 && dataset->shared->dcpl_cache.efl.nused == 0 &&
-            !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)) {
-        H5D_fill_value_t fill_status;   /* Whether/How the fill value is defined */
-
-        /* Retrieve dataset's fill-value properties */
-        if(H5P_is_fill_value_defined(&dataset->shared->dcpl_cache.fill, &fill_status) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined")
-
-        /* Should be impossible, but check anyway... */
-        if(fill_status == H5D_FILL_VALUE_UNDEFINED &&
-                (dataset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_ALLOC || dataset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET))
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "read failed: dataset doesn't exist, no data can be read")
-
-        /* If we're never going to fill this dataset, just leave the junk in the user's buffer */
-        if(dataset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_NEVER)
-            HGOTO_DONE(SUCCEED)
-
-        /* Go fill the user's selection with the dataset's fill value */
-        if(H5D__fill(dataset->shared->dcpl_cache.fill.buf, dataset->shared->type, buf, type_info.mem_type, mem_space, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed")
-        else
-            HGOTO_DONE(SUCCEED)
-    } /* end if */
-
-    /* Set up I/O operation */
-    io_info.op_type = H5D_IO_OP_READ;
-    io_info.u.rbuf = buf;
-    if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
-#ifdef H5_HAVE_PARALLEL
-    io_info_init = TRUE;
-#endif /*H5_HAVE_PARALLEL*/
-
-    /* Sanity check that space is allocated, if there are elements */
-    if(nelmts > 0)
-        HDassert((*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)
-                || dataset->shared->dcpl_cache.efl.nused > 0
-                || dataset->shared->layout.type == H5D_COMPACT);
-
-    /* Call storage method's I/O initialization routine */
-    HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
-    if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
-    io_op_init = TRUE;
+    /* iterate dsets */
+    for (i=0; i < count; i++)
+    {
+        /* check args */
+        // JK - dataset : info[i].dset_id , loop
+        #ifdef JK_ORI
+        //HDassert(dataset && dataset->oloc.file);
+        #else
+        if(NULL == (dataset = (H5D_t *)H5I_object_verify(info[i].dset_id, H5I_DATASET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+        if(NULL == dataset->oloc.file)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+        #endif
+    
+        #ifndef JK_NEW // get file_space
+        /* Initialize file dataspace information */
+        if(H5S_ALL != info[i].file_space_id) {
+            if(NULL == (file_space = (const H5S_t *)H5I_object_verify(info[i].file_space_id, H5I_DATASPACE)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+    
+            /* Check for valid selection */
+            if(H5S_SELECT_VALID(file_space) != TRUE)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent")
+        } /* end if */
+        #endif
+        if(!file_space)
+            file_space = dataset->shared->space;
+    
+        #ifndef JK_NEW // get mem_space
+        /* Initialize memory dataspace information */
+        if(H5S_ALL != info[i].mem_space_id) {
+            if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(info[i].mem_space_id, H5I_DATASPACE)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+    
+            /* Check for valid selection */
+            if(H5S_SELECT_VALID(mem_space) != TRUE)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection+offset not within extent")
+        } /* end if */
+        #endif
+        if(!mem_space)
+            mem_space = file_space;
+    
+        if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
+    	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dst dataspace has invalid selection")
+        H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
+    
+        /* Fill the DXPL cache values for later use */
+        if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
+    
+        /* Set up datatype info for operation */
+        #ifdef JK_ORI
+        if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, FALSE, &type_info) < 0)
+        #else
+        if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, info[i].mem_type_id, TRUE, &(dset_info_array[i].type_info)) < 0)
+        #endif
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
+        type_info_init = TRUE;
+    
+    #ifdef H5_HAVE_PARALLEL
+        /* Collective access is not permissible without a MPI based VFD */
+        if(dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE && 
+                !(H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI)))
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based drivers only")
+    #endif /*H5_HAVE_PARALLEL*/
+    
+        /* Make certain that the number of elements in each selection is the same */
+        if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
+    
+        /* Make sure that both selections have their extents set */
+        if(!(H5S_has_extent(file_space)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set")
+        if(!(H5S_has_extent(mem_space)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
+    
+        /* H5S_select_shape_same() has been modified to accept topologically 
+         * identical selections with different rank as having the same shape
+         * (if the most rapidly changing coordinates match up), but the I/O
+         * code still has difficulties with the notion.
+         *
+         * To solve this, we check to see if H5S_select_shape_same() returns
+         * true, and if the ranks of the mem and file spaces are different.
+         * If the are, construct a new mem space that is equivalent to the
+         * old mem space, and use that instead.
+         *
+         * Note that in general, this requires us to touch up the memory buffer
+         * as well.
+         */
+    
+        #ifndef JK_SHAPE_SAME_P
+        /* Save original read buf pointer */
+        info_rbuf_ori[i] = info[i].rbuf;
+        #endif
+    
+        if(TRUE == H5S_select_shape_same(mem_space, file_space) &&
+                H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
+            void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
+                                    /* to the beginning of the projected mem space.  */
+    
+            /* Attempt to construct projected dataspace for memory dataspace */
+            #ifdef JK_ORI
+            if(H5S_select_construct_projection(mem_space, &projected_mem_space,
+                    (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf, type_info.dst_type_size) < 0)
+            #else
+            if(H5S_select_construct_projection(mem_space, &(projected_mem_space[i]),
+                    (unsigned)H5S_GET_EXTENT_NDIMS(file_space), info[i].rbuf, &adj_buf, (hsize_t) dset_info_array[i].type_info.dst_type_size) < 0)
+            #endif
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
+            #ifdef JK_ORI
+            HDassert(projected_mem_space);
+            #else
+            HDassert(projected_mem_space[i]);
+            #endif
+            HDassert(adj_buf);
+    
+            /* Switch to using projected memory dataspace & adjusted buffer */
+            #ifdef JK_ORI
+            mem_space = projected_mem_space;
+            buf = adj_buf;
+            #else
+            mem_space = projected_mem_space[i];
+            info[i].rbuf = adj_buf;
+            #endif
+        } /* end if */
+    
+    
+        /* Retrieve dataset properties */
+        /* <none needed in the general case> */
+    
+        /* If space hasn't been allocated and not using external storage,
+         * return fill value to buffer if fill time is upon allocation, or
+         * do nothing if fill time is never.  If the dataset is compact and
+         * fill time is NEVER, there is no way to tell whether part of data
+         * has been overwritten.  So just proceed in reading.
+         */
+        if(nelmts > 0 && dataset->shared->dcpl_cache.efl.nused == 0 &&
+                !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)) {
+            H5D_fill_value_t fill_status;   /* Whether/How the fill value is defined */
+    
+            /* Retrieve dataset's fill-value properties */
+            if(H5P_is_fill_value_defined(&dataset->shared->dcpl_cache.fill, &fill_status) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined")
+    
+            /* Should be impossible, but check anyway... */
+            if(fill_status == H5D_FILL_VALUE_UNDEFINED &&
+                    (dataset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_ALLOC || dataset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET))
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "read failed: dataset doesn't exist, no data can be read")
+    
+            /* If we're never going to fill this dataset, just leave the junk in the user's buffer */
+            if(dataset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_NEVER)
+                HGOTO_DONE(SUCCEED)
+    
+            /* Go fill the user's selection with the dataset's fill value */
+            #if 0 // JK_ORI_REMOVE
+            if(H5D__fill(dataset->shared->dcpl_cache.fill.buf, dataset->shared->type, buf, type_info.mem_type, mem_space, dxpl_id) < 0)
+            #else
+            if(H5D__fill(dataset->shared->dcpl_cache.fill.buf, dataset->shared->type, info[i].rbuf, dset_info_array[i].type_info.mem_type, mem_space, dxpl_id) < 0)
+            #endif
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed")
+            else
+                HGOTO_DONE(SUCCEED)
+        } /* end if */
+    
+        /* Set up I/O operation */
+        #if 0 // JK_ORI_REMOVE
+        io_info.op_type = H5D_IO_OP_READ;
+        io_info.u.rbuf = buf;
+        #else
+        io_info_md.op_type = H5D_IO_OP_READ;
+        dset_info_array[i].u.rbuf = info[i].rbuf;
+        #endif
+    
+        #ifndef JK_WORK_TEST
+        dset_info_array[i].index = i;
+        #endif
+    
+        #if 0 // JK_ORI_REMOVE
+        if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
+        #else
+        if(H5D__ioinfo_init_mdset(dataset, dxpl_cache, dxpl_id, &(dset_info_array[i]), &(store[i]), &io_info_md) < 0)
+        #endif
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
+    #ifdef H5_HAVE_PARALLEL
+        io_info_init = TRUE;
+    #endif /*H5_HAVE_PARALLEL*/
+    
+        /* Sanity check that space is allocated, if there are elements */
+        if(nelmts > 0)
+            HDassert((*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)
+                    || dataset->shared->dcpl_cache.efl.nused > 0
+                    || dataset->shared->layout.type == H5D_COMPACT);
+    
+        /* Call storage method's I/O initialization routine */
+        // JK This is filling fm , io_info_md.dset_info[] is same here to be filled and generate piece_infos in skip list
+        #if 0 // JK_ORI_REMOVE
+        HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
+        if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+        #else
+        if(dset_info_array[i].layout_ops.io_init_md && (*dset_info_array[i].layout_ops.io_init_md)(&io_info_md, &(dset_info_array[i].type_info), nelmts, file_space, mem_space, &(dset_info_array[i])) < 0)
+        #endif
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
+    
+        io_op_init = TRUE;
+    } // end of for loop
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
+    #if 0 // JK_ORI_REMOVE
     if(H5D__ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, &fm) < 0)
+    #else
+    if(H5D__ioinfo_adjust_mdset(count, &io_info_md, dxpl_id) < 0)
+    #endif
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Invoke correct "high level" I/O routine */
+    #if 0 // JK_ORI_REMOVE
     if((*io_info.io_ops.multi_read)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+    #else
+    #ifndef JK_NOCOLLCAUSE
+    /* If collective mode is broken, perform read IO in independent mode via 
+     * single-dset path with looping. 
+     * Multiple-dset path can not be called since it is not supported, so make 
+     * detour through single-dset path */
+    if (TRUE == io_info_md.is_coll_broken) {
+
+       /* loop with serial & single-dset read IO path */
+       for (i=0; i< count; i++) {
+           H5D_t   *dset = NULL;
+           const H5S_t *mspace = NULL;
+           const H5S_t *fspace = NULL;
+
+           #ifndef JK_SHAPE_SAME_P
+           /* Restore ori wbuf , so it can be passed as initial state for 
+            * single-dset path */
+           info[i].rbuf = info_rbuf_ori[i];
+           #endif
+           /* convert dset id to dset */
+           if(NULL == (dset = (H5D_t *)H5I_object_verify(info[i].dset_id, H5I_DATASET)))
+               HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+           /* convert file space id to file space */
+           if(NULL == (fspace = (const H5S_t *)H5I_object_verify(info[i].file_space_id, H5I_DATASPACE)))
+               HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+           /* convert mem space id to mem space */
+           if(NULL == (mspace = (const H5S_t *)H5I_object_verify(info[i].mem_space_id, H5I_DATASPACE)))
+               HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+           /* perform single dset read */
+           if(H5D__read(dset, info[i].mem_type_id, mspace, fspace, dxpl_id, info[i].rbuf) < 0) 
+	           HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't prepare for reading data")
+       }
+    } else
+    #endif
+        if((*io_info_md.io_ops.multi_read_md)(file_id, count, &io_info_md) < 0)
+    #endif
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
-    /* Shut down the I/O op information */
-    if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+    /* iterate dsets */
+    for (i=0; i < count; i++) 
+    {
+        /* Shut down the I/O op information */
+        #if 0 // JK_ORI_REMOVE
+        if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
+        #else
+        if(io_op_init && dset_info_array[i].layout_ops.io_term_md && (*dset_info_array[i].layout_ops.io_term_md)(&(dset_info_array[i]), &io_info_md) < 0)
+        #endif
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+    } /* end of for */
+
 #ifdef H5_HAVE_PARALLEL
     /* Shut down io_info struct */
+    #if 0 // JK_ORI_REMOVE
     if(io_info_init)
         if(H5D__ioinfo_term(&io_info) < 0)
+    #else
+    if(io_info_init && H5D__ioinfo_term_mdset(&io_info_md) < 0)
+    #endif
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
-    /* Shut down datatype info for operation */
-    if(type_info_init && H5D__typeinfo_term(&type_info) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
-    /* discard projected mem space if it was created */
-    if(NULL != projected_mem_space)
-        if(H5S_close(projected_mem_space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
+    /* iterate dsets */
+    for (i=0; i< count; i++)
+    {
+        /* Shut down datatype info for operation */
+        #if 0 // JK_ORI_REMOVE
+        if(type_info_init && H5D__typeinfo_term(&type_info) < 0)
+        #else
+        if(type_info_init && H5D__typeinfo_term(&(dset_info_array[i].type_info)) < 0)
+        #endif
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
+        /* discard projected mem space if it was created */
+        #if 0 // JK_ORI_REMOVE
+        if(NULL != projected_mem_space)
+            if(H5S_close(projected_mem_space) < 0)
+        #else
+        if(NULL != projected_mem_space[i])
+            if(H5S_close(projected_mem_space[i]) < 0)
+        #endif
+                HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
+    } // end of for loop
+
+    #ifndef JK_SHAPE_SAME_P
+    /* free original rbuf ptr array */
+    if (info_rbuf_ori)
+        H5MM_xfree(info_rbuf_ori);
+    #endif
+
+    if(io_info_md.dsets_info)
+        H5MM_xfree(io_info_md.dsets_info);
+
+    if(projected_mem_space)
+        H5MM_xfree(projected_mem_space);
+
+    if(store)
+        H5MM_xfree(store);
+
+    #if 0 // JK_TEST_ADDR_TAG_OLD_REMOVE
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+    #else
+    FUNC_LEAVE_NOAPI(ret_value)
+    #endif
 } /* end H5D__read_mdset() */
 #endif
 
@@ -1586,9 +1908,9 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
 //(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_t *file_space, hid_t dxpl_id, const void *buf)
 {    
     //H5D_io_info_t io_info;            /* Dataset I/O info     */
-    H5D_io_info_md_t io_info_md;        /* Dataset I/O info for multi dsets */
     //H5D_chunk_map_t fm;               /* Chunk file<->memory mapping */
     //H5D_type_info_t type_info;          /* Datatype info for operation */
+    H5D_io_info_md_t io_info_md;        /* Dataset I/O info for multi dsets */
     hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
     H5D_dset_info_t *dset_info_array = NULL;
     #ifdef JK_ORI
@@ -1697,282 +2019,282 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
    #endif    
    #endif // JK_TODO_D866
 
-  /* iterate dsets */
-  for (i=0; i < count; i++)
-  {
-    /* check args */
-    // JK - dataset : info[i].dset_id , loop
-    #ifdef JK_ORI
-    //HDassert(dataset && dataset->oloc.file);
-    #else
-    if(NULL == (dataset = (H5D_t *)H5I_object_verify(info[i].dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-    if(NULL == dataset->oloc.file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-    #endif
-    #ifdef JK_DBG
-    printf ("JKDBG p:%d %s:%d> dataset%d->oloc.addr: %llu\n", getpid(), __FILE__, __LINE__,i, dataset->oloc.addr);
-    #endif
-
-    #if 0 // JK_TEST_ADDR_TAG_OLD_REMOVE
-    if(H5AC_tag(dxpl_id, dataset->oloc.addr, &prev_tag) < 0)                                     HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
-    #endif
-
-    /* All filters in the DCPL must have encoding enabled. */
-    if(!dataset->shared->checked_filters) {
-        if(H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
-
-        dataset->shared->checked_filters = TRUE;
-    } /* end if */
-
-    /* Check if we are allowed to write to this file */
-    if(0 == (H5F_INTENT(dataset->oloc.file) & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
-
-    /* Fill the DXPL cache values for later use */
-    if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
-
-    /* Set up datatype info for operation */
-    #ifdef JK_ORI
-    if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, TRUE, &type_info) < 0)
-    #else
-    if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, info[i].mem_type_id, TRUE, &(dset_info_array[i].type_info)) < 0)
-    #endif
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
-    type_info_init = TRUE;
-
-    /* Various MPI based checks */
-#ifdef H5_HAVE_PARALLEL
-    if H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI) {
-        /* If MPI based VFD is used, no VL datatype support yet. */
-        /* This is because they use the global heap in the file and we don't */
-        /* support parallel access of that yet */
-        #ifdef JK_ORI
-        if(H5T_detect_class(type_info.mem_type, H5T_VLEN, FALSE) > 0)
-        #else
-        if(H5T_detect_class(dset_info_array[i].type_info.mem_type, H5T_VLEN, FALSE) > 0)
-        #endif
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing VL datatypes yet")
-
-        /* If MPI based VFD is used, no VL datatype support yet. */
-        /* This is because they use the global heap in the file and we don't */
-        /* support parallel access of that yet */
-        /* We should really use H5T_detect_class() here, but it will be difficult
-         * to detect the type of the reference if it is nested... -QAK
-         */
-        #ifdef JK_ORI
-        if(H5T_get_class(type_info.mem_type, TRUE) == H5T_REFERENCE &&
-                H5T_get_ref_type(type_info.mem_type) == H5R_DATASET_REGION)
-        #else
-        if(H5T_get_class(dset_info_array[i].type_info.mem_type, TRUE) == H5T_REFERENCE &&
-           H5T_get_ref_type(dset_info_array[i].type_info.mem_type) == H5R_DATASET_REGION)
-        #endif
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing region reference datatypes yet")
-
-        /* Can't write to chunked datasets with filters, in parallel */
-        if(dataset->shared->layout.type == H5D_CHUNKED &&
-                dataset->shared->dcpl_cache.pline.nused > 0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot write to chunked storage with filters in parallel")
-    } /* end if */
-    else {
-        /* Collective access is not permissible without a MPI based VFD */
-        if(dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE)
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based driver only")
-    } /* end else */
-#endif /*H5_HAVE_PARALLEL*/
-
-    #ifndef JK_NEW // get file_space
-    /* Initialize file dataspace information */
-    if(H5S_ALL != info[i].file_space_id) {
-        if(NULL == (file_space = (const H5S_t *)H5I_object_verify(info[i].file_space_id, H5I_DATASPACE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-        /* Check for valid selection */
-        if(H5S_SELECT_VALID(file_space) != TRUE)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent")
-    } /* end if */
-    #endif
-    if(!file_space)
-        file_space = dataset->shared->space;
-
-    #ifndef JK_NEW // get mem_space
-    /* Initialize memory dataspace information */
-    if(H5S_ALL != info[i].mem_space_id) {
-        if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(info[i].mem_space_id, H5I_DATASPACE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-        /* Check for valid selection */
-        if(H5S_SELECT_VALID(mem_space) != TRUE)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection+offset not within extent")
-    } /* end if */
-    #endif
-    if(!mem_space)
-        mem_space = file_space;
-
-    #ifdef JK_DBG_SHAPE_SAME_P
+    /* iterate dsets */
+    for (i=0; i < count; i++)
     {
-        size_t a;
-        printf("\nJKDBG %s|%d DBG_SHAPE_SAME_P Before> buf : ", __FUNCTION__, __LINE__);
-        for (a=0; a < 2; a++) {
-            //printf("%u ", (uint32_t) ((uint32_t *)info[i].wbuf)[a]);
-            printf("%f ", (float) ((float *)info[i].wbuf)[a]);
-        }
-        printf(" \n");
-        printf("JKDBG %s|%d DBG_SHAPE_SAME_P Before> ShapeSame:%d  Mem Ndims: %u File Ndims: %u \n", __FUNCTION__, __LINE__, H5S_select_shape_same(mem_space, file_space), H5S_GET_EXTENT_NDIMS(mem_space), H5S_GET_EXTENT_NDIMS(file_space));
-    }
-    #endif
-
-    /* H5S_select_shape_same() has been modified to accept topologically 
-     * identical selections with different rank as having the same shape 
-     * (if the most rapidly changing coordinates match up), but the I/O 
-     * code still has difficulties with the notion.
-     *
-     * To solve this, we check to see if H5S_select_shape_same() returns 
-     * true, and if the ranks of the mem and file spaces are different.  
-     * If the are, construct a new mem space that is equivalent to the 
-     * old mem space, and use that instead.
-     *
-     * Note that in general, this requires us to touch up the memory buffer 
-     * as well.
-     */
-    #ifndef JK_SHAPE_SAME_P
-    /* Save original write buf pointer */
-    info_wbuf_ori[i] = info[i].wbuf;
-    #endif
-    if(TRUE == H5S_select_shape_same(mem_space, file_space) &&
-            H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
-        const void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
-                                /* to the beginning of the projected mem space.  */
-
+        /* check args */
+        // JK - dataset : info[i].dset_id , loop
+        #ifdef JK_ORI
+        //HDassert(dataset && dataset->oloc.file);
+        #else
+        if(NULL == (dataset = (H5D_t *)H5I_object_verify(info[i].dset_id, H5I_DATASET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+        if(NULL == dataset->oloc.file)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+        #endif
+        #ifdef JK_DBG
+        printf ("JKDBG p:%d %s:%d> dataset%d->oloc.addr: %llu\n", getpid(), __FILE__, __LINE__,i, dataset->oloc.addr);
+        #endif
+    
+        #if 0 // JK_TEST_ADDR_TAG_OLD_REMOVE
+        if(H5AC_tag(dxpl_id, dataset->oloc.addr, &prev_tag) < 0)                                     HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
+        #endif
+    
+        /* All filters in the DCPL must have encoding enabled. */
+        if(!dataset->shared->checked_filters) {
+            if(H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
+    
+            dataset->shared->checked_filters = TRUE;
+        } /* end if */
+    
+        /* Check if we are allowed to write to this file */
+        if(0 == (H5F_INTENT(dataset->oloc.file) & H5F_ACC_RDWR))
+    	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
+    
+        /* Fill the DXPL cache values for later use */
+        if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
+    
+        /* Set up datatype info for operation */
+        #ifdef JK_ORI
+        if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, TRUE, &type_info) < 0)
+        #else
+        if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, info[i].mem_type_id, TRUE, &(dset_info_array[i].type_info)) < 0)
+        #endif
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
+        type_info_init = TRUE;
+    
+        /* Various MPI based checks */
+    #ifdef H5_HAVE_PARALLEL
+        if H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI) {
+            /* If MPI based VFD is used, no VL datatype support yet. */
+            /* This is because they use the global heap in the file and we don't */
+            /* support parallel access of that yet */
+            #ifdef JK_ORI
+            if(H5T_detect_class(type_info.mem_type, H5T_VLEN, FALSE) > 0)
+            #else
+            if(H5T_detect_class(dset_info_array[i].type_info.mem_type, H5T_VLEN, FALSE) > 0)
+            #endif
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing VL datatypes yet")
+    
+            /* If MPI based VFD is used, no VL datatype support yet. */
+            /* This is because they use the global heap in the file and we don't */
+            /* support parallel access of that yet */
+            /* We should really use H5T_detect_class() here, but it will be difficult
+             * to detect the type of the reference if it is nested... -QAK
+             */
+            #ifdef JK_ORI
+            if(H5T_get_class(type_info.mem_type, TRUE) == H5T_REFERENCE &&
+                    H5T_get_ref_type(type_info.mem_type) == H5R_DATASET_REGION)
+            #else
+            if(H5T_get_class(dset_info_array[i].type_info.mem_type, TRUE) == H5T_REFERENCE &&
+               H5T_get_ref_type(dset_info_array[i].type_info.mem_type) == H5R_DATASET_REGION)
+            #endif
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing region reference datatypes yet")
+    
+            /* Can't write to chunked datasets with filters, in parallel */
+            if(dataset->shared->layout.type == H5D_CHUNKED &&
+                    dataset->shared->dcpl_cache.pline.nused > 0)
+                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot write to chunked storage with filters in parallel")
+        } /* end if */
+        else {
+            /* Collective access is not permissible without a MPI based VFD */
+            if(dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE)
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based driver only")
+        } /* end else */
+    #endif /*H5_HAVE_PARALLEL*/
+    
+        #ifndef JK_NEW // get file_space
+        /* Initialize file dataspace information */
+        if(H5S_ALL != info[i].file_space_id) {
+            if(NULL == (file_space = (const H5S_t *)H5I_object_verify(info[i].file_space_id, H5I_DATASPACE)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+    
+            /* Check for valid selection */
+            if(H5S_SELECT_VALID(file_space) != TRUE)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent")
+        } /* end if */
+        #endif
+        if(!file_space)
+            file_space = dataset->shared->space;
+    
+        #ifndef JK_NEW // get mem_space
+        /* Initialize memory dataspace information */
+        if(H5S_ALL != info[i].mem_space_id) {
+            if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(info[i].mem_space_id, H5I_DATASPACE)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+    
+            /* Check for valid selection */
+            if(H5S_SELECT_VALID(mem_space) != TRUE)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection+offset not within extent")
+        } /* end if */
+        #endif
+        if(!mem_space)
+            mem_space = file_space;
+    
         #ifdef JK_DBG_SHAPE_SAME_P
-        printf("JKDBG %s|%d DBG_SHAPE_SAME_P> CONTRUCT_PROJECTION! \n", __FUNCTION__, __LINE__);
-        #endif
-        /* Attempt to construct projected dataspace for memory dataspace */
-        #ifdef JK_ORI
-        if(H5S_select_construct_projection(mem_space, &projected_mem_space,
-                (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf, type_info.src_type_size) < 0)
-        #else                
-        if(H5S_select_construct_projection(mem_space, &(projected_mem_space[i]),
-                (unsigned)H5S_GET_EXTENT_NDIMS(file_space), info[i].wbuf, &adj_buf, (hsize_t) dset_info_array[i].type_info.src_type_size) < 0)
-        #endif
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
-        #ifdef JK_ORI
-        HDassert(projected_mem_space);
-        #else
-        HDassert(projected_mem_space[i]);
-        #endif
-        HDassert(adj_buf);
-
-        /* Switch to using projected memory dataspace & adjusted buffer */
-        #ifdef JK_ORI
-        mem_space = projected_mem_space;
-        buf = adj_buf;
-        #else
-        mem_space = projected_mem_space[i];
-        info[i].wbuf = adj_buf;
-        #endif
-    } /* end if */
-    #ifdef JK_DBG_SHAPE_SAME_P
-    {
-        size_t a;
-        printf("JKDBG %s|%d DBG_SHAPE_SAME_P After> buf : ", __FUNCTION__, __LINE__);
-        for (a=0; a < 10; a++) {
-            printf("%u ", (uint32_t) ((uint32_t *)info[i].wbuf)[a]);
+        {
+            size_t a;
+            printf("\nJKDBG %s|%d DBG_SHAPE_SAME_P Before> buf : ", __FUNCTION__, __LINE__);
+            for (a=0; a < 2; a++) {
+                //printf("%u ", (uint32_t) ((uint32_t *)info[i].wbuf)[a]);
+                printf("%f ", (float) ((float *)info[i].wbuf)[a]);
+            }
+            printf(" \n");
+            printf("JKDBG %s|%d DBG_SHAPE_SAME_P Before> ShapeSame:%d  Mem Ndims: %u File Ndims: %u \n", __FUNCTION__, __LINE__, H5S_select_shape_same(mem_space, file_space), H5S_GET_EXTENT_NDIMS(mem_space), H5S_GET_EXTENT_NDIMS(file_space));
         }
-        printf(" \n");
-        printf("JKDBG %s|%d DBG_SHAPE_SAME_P After> ShapeSame:%d  Mem Ndims: %u File Ndims: %u \n", __FUNCTION__, __LINE__, H5S_select_shape_same(mem_space, file_space), H5S_GET_EXTENT_NDIMS(mem_space), H5S_GET_EXTENT_NDIMS(file_space));
-        printf(" \n");
-    }
-    #endif
-
-    #ifdef JK_DBG
-    printf("JKDBG %s|%d > ShapeSame:%d  Mem NPnts: %lld File NPnts: %lld \n", __FUNCTION__, __LINE__, H5S_select_shape_same(mem_space, file_space), H5S_GET_SELECT_NPOINTS(mem_space), H5S_GET_SELECT_NPOINTS(file_space));
-    #endif
-
-    if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
-    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, hsize_t);
-
-    /* Make certain that the number of elements in each selection is the same */
-    if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
-
-    /* Make sure that both selections have their extents set */
-    if(!(H5S_has_extent(file_space)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set")
-    if(!(H5S_has_extent(mem_space)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
-
-    /* Retrieve dataset properties */
-    /* <none needed currently> */
-
-    // JK_TODO_TEST Test this code
-    /* Allocate data space and initialize it if it hasn't been. */
-    if(nelmts > 0 && dataset->shared->dcpl_cache.efl.nused == 0 &&
-            !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)) {
-        hssize_t file_nelmts;   /* Number of elements in file dataset's dataspace */
-        hbool_t full_overwrite; /* Whether we are over-writing all the elements */
-
-        /* Get the number of elements in file dataset's dataspace */
-        if((file_nelmts = H5S_GET_EXTENT_NPOINTS(file_space)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "can't retrieve number of elements in file dataset")
-
-        /* Always allow fill values to be written if the dataset has a VL datatype */
-        if(H5T_detect_class(dataset->shared->type, H5T_VLEN, FALSE))
-            full_overwrite = FALSE;
-        else
-            full_overwrite = (hbool_t)((hsize_t)file_nelmts == nelmts ? TRUE : FALSE);
-
- 	/* Allocate storage */
-        if(H5D__alloc_storage(dataset, dxpl_id, H5D_ALLOC_WRITE, full_overwrite, NULL) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
-    } /* end if */
-
-
-    /* Set up I/O operation */
-    #if 0 // JK_ORI_REMOVE
-    io_info.op_type = H5D_IO_OP_WRITE;
-    io_info.u.wbuf = buf;
-    #else
-    io_info_md.op_type = H5D_IO_OP_WRITE;
-    dset_info_array[i].u.wbuf = info[i].wbuf;
-    #endif
-
-    #ifndef JK_WORK_TEST
-    dset_info_array[i].index = i;
-    #endif
-
-    #if 0 // JK_ORI_REMOVE
-    if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
-    #else
-    // JK_TODO_CONSIDER_LATER get out of loop (better code?)
-    if(H5D__ioinfo_init_mdset(dataset, dxpl_cache, dxpl_id, &(dset_info_array[i]), &(store[i]), &io_info_md) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
-    #endif
-#ifdef H5_HAVE_PARALLEL
-    io_info_init = TRUE;
-#endif /*H5_HAVE_PARALLEL*/
-
-    /* Call storage method's I/O initialization routine */
-    // JK This is filling fm , io_info_md.dset_info[] is same here to be filled and generate piece_infos in skip list
-    #if 0 // JK_ORI_REMOVE
-    HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
-    if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
-    #else
-     #ifdef JK_DBG
-     printf("JKDBG %s|%d> i:%d\n", __FUNCTION__, __LINE__, i);
-     #endif
-
-    // JK May reduce .type_info
-    if(dset_info_array[i].layout_ops.io_init_md && (*dset_info_array[i].layout_ops.io_init_md)(&io_info_md, &(dset_info_array[i].type_info), nelmts, file_space, mem_space, &(dset_info_array[i])) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
-    #endif
-    io_op_init = TRUE;
-  } // end of for loop
+        #endif
+    
+        /* H5S_select_shape_same() has been modified to accept topologically 
+         * identical selections with different rank as having the same shape 
+         * (if the most rapidly changing coordinates match up), but the I/O 
+         * code still has difficulties with the notion.
+         *
+         * To solve this, we check to see if H5S_select_shape_same() returns 
+         * true, and if the ranks of the mem and file spaces are different.  
+         * If the are, construct a new mem space that is equivalent to the 
+         * old mem space, and use that instead.
+         *
+         * Note that in general, this requires us to touch up the memory buffer 
+         * as well.
+         */
+        #ifndef JK_SHAPE_SAME_P
+        /* Save original write buf pointer */
+        info_wbuf_ori[i] = info[i].wbuf;
+        #endif
+        if(TRUE == H5S_select_shape_same(mem_space, file_space) &&
+                H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
+            const void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
+                                    /* to the beginning of the projected mem space.  */
+    
+            #ifdef JK_DBG_SHAPE_SAME_P
+            printf("JKDBG %s|%d DBG_SHAPE_SAME_P> CONTRUCT_PROJECTION! \n", __FUNCTION__, __LINE__);
+            #endif
+            /* Attempt to construct projected dataspace for memory dataspace */
+            #ifdef JK_ORI
+            if(H5S_select_construct_projection(mem_space, &projected_mem_space,
+                    (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf, type_info.src_type_size) < 0)
+            #else                
+            if(H5S_select_construct_projection(mem_space, &(projected_mem_space[i]),
+                    (unsigned)H5S_GET_EXTENT_NDIMS(file_space), info[i].wbuf, &adj_buf, (hsize_t) dset_info_array[i].type_info.src_type_size) < 0)
+            #endif
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
+            #ifdef JK_ORI
+            HDassert(projected_mem_space);
+            #else
+            HDassert(projected_mem_space[i]);
+            #endif
+            HDassert(adj_buf);
+    
+            /* Switch to using projected memory dataspace & adjusted buffer */
+            #ifdef JK_ORI
+            mem_space = projected_mem_space;
+            buf = adj_buf;
+            #else
+            mem_space = projected_mem_space[i];
+            info[i].wbuf = adj_buf;
+            #endif
+        } /* end if */
+        #ifdef JK_DBG_SHAPE_SAME_P
+        {
+            size_t a;
+            printf("JKDBG %s|%d DBG_SHAPE_SAME_P After> buf : ", __FUNCTION__, __LINE__);
+            for (a=0; a < 10; a++) {
+                printf("%u ", (uint32_t) ((uint32_t *)info[i].wbuf)[a]);
+            }
+            printf(" \n");
+            printf("JKDBG %s|%d DBG_SHAPE_SAME_P After> ShapeSame:%d  Mem Ndims: %u File Ndims: %u \n", __FUNCTION__, __LINE__, H5S_select_shape_same(mem_space, file_space), H5S_GET_EXTENT_NDIMS(mem_space), H5S_GET_EXTENT_NDIMS(file_space));
+            printf(" \n");
+        }
+        #endif
+    
+        #ifdef JK_DBG
+        printf("JKDBG %s|%d > ShapeSame:%d  Mem NPnts: %lld File NPnts: %lld \n", __FUNCTION__, __LINE__, H5S_select_shape_same(mem_space, file_space), H5S_GET_SELECT_NPOINTS(mem_space), H5S_GET_SELECT_NPOINTS(file_space));
+        #endif
+    
+        if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
+    	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
+        H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, hsize_t);
+    
+        /* Make certain that the number of elements in each selection is the same */
+        if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
+    	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
+    
+        /* Make sure that both selections have their extents set */
+        if(!(H5S_has_extent(file_space)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set")
+        if(!(H5S_has_extent(mem_space)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
+    
+        /* Retrieve dataset properties */
+        /* <none needed currently> */
+    
+        // JK_TODO_TEST Test this code
+        /* Allocate data space and initialize it if it hasn't been. */
+        if(nelmts > 0 && dataset->shared->dcpl_cache.efl.nused == 0 &&
+                !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)) {
+            hssize_t file_nelmts;   /* Number of elements in file dataset's dataspace */
+            hbool_t full_overwrite; /* Whether we are over-writing all the elements */
+    
+            /* Get the number of elements in file dataset's dataspace */
+            if((file_nelmts = H5S_GET_EXTENT_NPOINTS(file_space)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "can't retrieve number of elements in file dataset")
+    
+            /* Always allow fill values to be written if the dataset has a VL datatype */
+            if(H5T_detect_class(dataset->shared->type, H5T_VLEN, FALSE))
+                full_overwrite = FALSE;
+            else
+                full_overwrite = (hbool_t)((hsize_t)file_nelmts == nelmts ? TRUE : FALSE);
+    
+     	/* Allocate storage */
+            if(H5D__alloc_storage(dataset, dxpl_id, H5D_ALLOC_WRITE, full_overwrite, NULL) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
+        } /* end if */
+    
+    
+        /* Set up I/O operation */
+        #if 0 // JK_ORI_REMOVE
+        io_info.op_type = H5D_IO_OP_WRITE;
+        io_info.u.wbuf = buf;
+        #else
+        io_info_md.op_type = H5D_IO_OP_WRITE;
+        dset_info_array[i].u.wbuf = info[i].wbuf;
+        #endif
+    
+        #ifndef JK_WORK_TEST
+        dset_info_array[i].index = i;
+        #endif
+    
+        #if 0 // JK_ORI_REMOVE
+        if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
+        #else
+        // JK_TODO_CONSIDER_LATER get out of loop (better code?)
+        if(H5D__ioinfo_init_mdset(dataset, dxpl_cache, dxpl_id, &(dset_info_array[i]), &(store[i]), &io_info_md) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
+        #endif
+    #ifdef H5_HAVE_PARALLEL
+        io_info_init = TRUE;
+    #endif /*H5_HAVE_PARALLEL*/
+    
+        /* Call storage method's I/O initialization routine */
+        // JK This is filling fm , io_info_md.dset_info[] is same here to be filled and generate piece_infos in skip list
+        #if 0 // JK_ORI_REMOVE
+        HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
+        if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
+        #else
+         #ifdef JK_DBG
+         printf("JKDBG %s|%d> i:%d\n", __FUNCTION__, __LINE__, i);
+         #endif
+    
+        // JK May reduce .type_info
+        if(dset_info_array[i].layout_ops.io_init_md && (*dset_info_array[i].layout_ops.io_init_md)(&io_info_md, &(dset_info_array[i].type_info), nelmts, file_space, mem_space, &(dset_info_array[i])) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
+        #endif
+        io_op_init = TRUE;
+    } // end of for loop
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
@@ -1996,8 +2318,6 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
       * Multiple-dset path can not be called since it is not supported, so make 
       * detour through single-dset path */
      if (TRUE == io_info_md.is_coll_broken) {
-        size_t i;
-
         /* loop with serial & single-dset write IO path */
         for (i=0; i< count; i++) {
             #ifndef JK_SHAPE_SAME_P
@@ -2034,25 +2354,25 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
 
 done:
 
-  /* iterate dsets */
-  for (i=0; i < count; i++) 
-  {
-    #ifdef JK_DBG
-    if(dset_info_array[i].layout)
-        printf("JKDBG %s|%d> Dset[%u] , Type: %d\n", __FUNCTION__, __LINE__,i, dset_info_array[i].layout->type);
-    else
-        printf("JKDBG %s|%d> Dset[%u] , Type: N/A\n", __FUNCTION__, __LINE__,i);
-    #endif
+    /* iterate dsets */
+    for (i=0; i < count; i++) 
+    {
+        #ifdef JK_DBG
+        if(dset_info_array[i].layout)
+            printf("JKDBG %s|%d> Dset[%u] , Type: %d\n", __FUNCTION__, __LINE__,i, dset_info_array[i].layout->type);
+        else
+            printf("JKDBG %s|%d> Dset[%u] , Type: N/A\n", __FUNCTION__, __LINE__,i);
+        #endif
 
-    #ifdef JK_ORI
-    /* Shut down the I/O op information */
-    if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
-    #else // JK NOTE: Open this after io_init is all done.
-    /* Shut down the I/O op information */
-    if(io_op_init && dset_info_array[i].layout_ops.io_term_md && (*dset_info_array[i].layout_ops.io_term_md)(&(dset_info_array[i]), &io_info_md) < 0)
-    #endif
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
-  } /* end of for */
+        #ifdef JK_ORI
+        /* Shut down the I/O op information */
+        if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
+        #else // JK NOTE: Open this after io_init is all done.
+        /* Shut down the I/O op information */
+        if(io_op_init && dset_info_array[i].layout_ops.io_term_md && (*dset_info_array[i].layout_ops.io_term_md)(&(dset_info_array[i]), &io_info_md) < 0)
+        #endif
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+    } /* end of for */
 
 #ifdef H5_HAVE_PARALLEL
     /* Shut down io_info struct */
@@ -2064,25 +2384,26 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
 
+    /* iterate dsets */
     for (i=0; i< count; i++)
     {
-    /* Shut down datatype info for operation */
-    #ifdef JK_ORI
-    if(type_info_init && H5D__typeinfo_term(&type_info) < 0)
-    #else
-    if(type_info_init && H5D__typeinfo_term(&(dset_info_array[i].type_info)) < 0)
-    #endif
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
+        /* Shut down datatype info for operation */
+        #ifdef JK_ORI
+        if(type_info_init && H5D__typeinfo_term(&type_info) < 0)
+        #else
+        if(type_info_init && H5D__typeinfo_term(&(dset_info_array[i].type_info)) < 0)
+        #endif
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
-    /* discard projected mem space if it was created */
-    #ifdef JK_ORI
-    if(NULL != projected_mem_space)
-        if(H5S_close(projected_mem_space) < 0)
-    #else
-    if(NULL != projected_mem_space[i])
-        if(H5S_close(projected_mem_space[i]) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
-    #endif // JK_LATER
+        /* discard projected mem space if it was created */
+        #ifdef JK_ORI
+        if(NULL != projected_mem_space)
+            if(H5S_close(projected_mem_space) < 0)
+        #else
+        if(NULL != projected_mem_space[i])
+            if(H5S_close(projected_mem_space[i]) < 0)
+        #endif // JK_LATER
+                HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
     }
 
     #ifndef JK_SHAPE_SAME_P
@@ -2709,9 +3030,9 @@ H5D__ioinfo_adjust_mdset(const size_t count, H5D_io_info_md_t *io_info_md, hid_t
             io_info_md->io_ops.multi_write = dset0->shared->layout.ops->par_write;
             /* Multi dset case: still first dset can be used since same function is
              * shared for both Chunked and Contiguous dset */
-            //io_info_md->io_ops.multi_read_md = dset0->shared->layout.ops->par_read_md;
+            io_info_md->io_ops.multi_read_md = dset0->shared->layout.ops->par_read_md;
             io_info_md->io_ops.multi_write_md = dset0->shared->layout.ops->par_write_md;
-            //io_info_md->io_ops.single_read = H5D__mpio_select_read_mdset;
+            io_info_md->io_ops.single_read_md = H5D__mpio_select_read_mdset;
             io_info_md->io_ops.single_write_md = H5D__mpio_select_write_mdset;
            #endif
         } /* end if */

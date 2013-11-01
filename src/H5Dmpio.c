@@ -550,6 +550,40 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mpio_select_read() */
 
+#ifndef JK_WORK
+herr_t
+H5D__mpio_select_read_mdset(const H5D_io_info_md_t *io_info_md, hsize_t mpi_buf_count, 
+    const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space)
+{
+    #ifdef JK_ORI
+    const H5D_contig_storage_t *store_contig = &(io_info->store->contig);    /* Contiguous storage info for this I/O operation */
+    #endif
+    /* all dsets are in the same file, so just get it from the first dset */
+    const H5F_t *file = io_info_md->dsets_info[0].dset->oloc.file;
+
+    #ifndef JK_MULTI_DSET
+    void *rbuf = NULL;
+    /* memory addr from a piece with lowest file addr */
+    rbuf = io_info_md->base_maddr_r;
+    #endif
+
+    #ifdef JK_DBG
+    printf("JKDBG %s:%d> rbuf: %x\n", __FILE__, __LINE__, rbuf);
+    #endif
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /*OKAY: CAST DISCARDS CONST QUALIFIER*/
+    H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
+    if(H5F_block_read(file, H5FD_MEM_DRAW, io_info_md->store_faddr, (size_t)mpi_buf_count, io_info_md->dxpl_id, rbuf) < 0)
+       HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't finish collective parallel write")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__mpio_select_write() */
+#endif
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__mpio_select_write
@@ -1359,7 +1393,7 @@ done:
 
 #ifndef JK_WORK
 herr_t
-H5D__mdset_collective_read (const hid_t file_id, const size_t count, H5D_io_info_md_t *io_info_md)
+H5D__mdset_collective_read(const hid_t file_id, const size_t count, H5D_io_info_md_t *io_info_md)
 //(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 //    hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
 //    H5D_chunk_map_t *fm)
@@ -1872,6 +1906,7 @@ if(H5DEBUG(D))
         #ifndef JK_MEM_MPITYPE
         /* local variable for base address for write buffer */
         const void * base_wbuf_addr = NULL;
+        void * base_rbuf_addr = NULL;
         #endif
 
         /* Get the number of chunks with a selection */
@@ -1957,6 +1992,7 @@ if(H5DEBUG(D))
             ctg_store.contig.dset_addr = piece_info->faddr;
             #ifndef JK_MEM_MPITYPE
             base_wbuf_addr = piece_info->dset_info->u.wbuf;
+            base_rbuf_addr = piece_info->dset_info->u.rbuf;
             #endif
            #else // REMOVE
             /* Sort the chunk address */
@@ -2001,12 +2037,23 @@ if(H5DEBUG(D))
                 chunk_file_disp_array[u] = (MPI_Aint)piece_info->faddr - (MPI_Aint)ctg_store.contig.dset_addr;
 
                 #ifndef JK_MEM_MPITYPE
-                chunk_mem_disp_array[u] = (MPI_Aint)piece_info->dset_info->u.wbuf - (MPI_Aint)base_wbuf_addr;
-                 #ifdef JK_DBG2
+                if(io_info_md->op_type == H5D_IO_OP_WRITE) {
+                    chunk_mem_disp_array[u] = (MPI_Aint)piece_info->dset_info->u.wbuf - (MPI_Aint)base_wbuf_addr;
+                    #if 0 // JK_DBG
+                    printf("dset_info->u.wbuf: %x\n", piece_info->dset_info->u.wbuf);
+                    printf("base_wbuf_addr: %x\n", base_wbuf_addr);
+                    #endif
+                } 
+                else if (io_info_md->op_type == H5D_IO_OP_READ) {
+                    chunk_mem_disp_array[u] = (MPI_Aint)piece_info->dset_info->u.rbuf - (MPI_Aint)base_rbuf_addr;
+                    #if 0 // JK_DBG
+                    printf("dset_info->u.rbuf: %x\n", piece_info->dset_info->u.rbuf);
+                    printf("base_rbuf_addr: %x\n", base_rbuf_addr);
+                    #endif
+                }
+                 #if 0 // JK_DBG
                  printf("JKDBG %s:%d P%d> mem_disp[%d]: ", __FILE__, __LINE__, mpi_rank, u);
                  printf("%x\n", chunk_mem_disp_array[u]);
-                 printf("dset_info->u.wbuf: %x\n", piece_info->dset_info->u.wbuf);
-                 printf("base_wbuf_addr: %x\n", base_wbuf_addr);
                  #endif
                 #endif
                 /* Advance to next piece in list */
@@ -2082,6 +2129,7 @@ if(H5DEBUG(D))
             #ifndef JK_MULTI_DSET
             /* just provide a valid mem address. no actual IO occur */
             base_wbuf_addr = io_info_md->dsets_info[0].u.wbuf;
+            base_rbuf_addr = io_info_md->dsets_info[0].u.rbuf;
            #endif
 
             /* Set the MPI datatype to just participate */
@@ -2102,6 +2150,7 @@ if(H5DEBUG(D))
         #ifndef JK_MULTI_DSET
         io_info_md->store_faddr = ctg_store.contig.dset_addr;
         io_info_md->base_maddr_w = base_wbuf_addr;
+        io_info_md->base_maddr_r = base_rbuf_addr;
         #endif
         #endif
 
