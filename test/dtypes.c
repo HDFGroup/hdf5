@@ -7062,7 +7062,7 @@ test_utf_ascii_conv(void)
     char *ascii_r = NULL;
     const char *ascii_w = "bar!";
     char *utf8_r = NULL;
-
+    char		filename[1024];
     char ascii2[4], utf8_2[4];
     herr_t status;
 
@@ -7095,7 +7095,8 @@ test_utf_ascii_conv(void)
         FAIL_STACK_ERROR
 
     /* Create a file */
-    if((fid = H5Fcreate(FILENAME[10], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    h5_fixname(FILENAME[10], H5P_DEFAULT, filename, sizeof filename);
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create a scalar dataspace for the dataset */
     if((sid = H5Screate(H5S_SCALAR)) < 0) FAIL_STACK_ERROR

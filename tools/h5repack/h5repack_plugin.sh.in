@@ -35,7 +35,7 @@ TEST_NAME=ud_plugin
 FROM_DIR=`pwd`/.libs
 PLUGIN_LIB="$FROM_DIR/libdynlibadd.*"
 PLUGIN_LIBDIR=testdir3
-RM="rm -rf"
+RM='rm -rf'
 
 GREP='grep'
 CP='cp'
@@ -116,6 +116,19 @@ COPY_TESTFILES_TO_TESTDIR()
             fi
         fi
     done
+}
+
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=`$DIRNAME $tstfile`
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $TESTDIR
+    fi
 }
 
 # Print a $* message left justified in a field of 70 characters
@@ -233,6 +246,10 @@ else
     exit_code=$EXIT_SUCCESS
 fi
 
+# Clean up temporary files/directories
+CLEAN_TESTFILES_AND_TESTDIR
+
 # Clean up temporary files/directories and leave
 $RM $PLUGIN_LIBDIR
+
 exit $exit_code

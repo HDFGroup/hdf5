@@ -30,7 +30,7 @@ H5DIFF_BIN=`pwd`/$H5DIFF          # The path of the h5diff  tool binary
 H5IMPORT=../h5import/h5import     # The h5import tool name 
 H5IMPORT_BIN=`pwd`/$H5IMPORT      # The path of the h5import  tool binary
 
-
+RM='rm -rf'
 CMP='cmp'
 DIFF='diff -c'
 CP='cp'
@@ -394,6 +394,19 @@ COPY_TESTFILES_TO_TESTDIR()
             fi
         fi
     done
+}
+
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=`$DIRNAME $tstfile`
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $TESTDIR
+    fi
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -1258,6 +1271,8 @@ TOOLTEST5 filter_fail.ddl --enable-error-stack filter_fail.h5
 # test for -o -y for dataset with attributes
 TOOLTEST2 tall-6.exp --enable-error-stack -y -o tall-6.txt -d /g1/g1.1/dset1.1.1 tall.h5
 
+# Clean up temporary files/directories
+CLEAN_TESTFILES_AND_TESTDIR
 
 # Report test results and exit
 if test $nerrors -eq 0 ; then
