@@ -100,6 +100,7 @@ ADD_TEST (
     COMMAND    ${CMAKE_COMMAND}
         -E remove 
         coord.h5
+        dtypes10.h5
         sys_file1
         tattr.h5
         tfile1.h5
@@ -107,6 +108,8 @@ ADD_TEST (
         tfile3.h5
         tfile4.h5
         tfile5.h5
+        tfile6.h5
+        tfile7.h5
         th5o_file
         th5s1.h5
         tselect.h5
