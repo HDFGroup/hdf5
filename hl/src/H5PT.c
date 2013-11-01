@@ -18,8 +18,6 @@
 #include "H5PTprivate.h"
 #include "H5TBprivate.h"
 
-#define HDfree(X) free(X)
-
 /*  Packet Table private data */
 
 typedef struct
