@@ -64,10 +64,6 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start file create %s\n", input->name);
 #endif
 
-    /* MSC - Remove when we have IOD */
-    root_oh.rd_oh.cookie=12345;
-    root_oh.wr_oh.cookie=12345;
-
     /* convert HDF5 flags to IOD flags */
     mode = (input->flags&H5F_ACC_RDWR) ? IOD_CONT_RW : IOD_CONT_R;
     if (input->flags&H5F_ACC_CREAT) 
@@ -238,6 +234,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_checksum_t sp_cs = 0;
     iod_cont_trans_stat_t *tids;
     iod_trans_id_t rtid;
+    iod_size_t key_size = 0, val_size = 0;
     uint32_t cs_scope = 0;
     herr_t ret_value = SUCCEED;
 
@@ -246,11 +243,6 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start file open %s %d %d\n", input->name, input->flags, input->fapl_id);
 #endif
-
-    /* MSC - Remove when we have IOD */
-    root_oh.rd_oh.cookie=12345;
-    root_oh.wr_oh.cookie=12345;
-    coh.cookie=12345;
 
     if(H5Pget_metadata_integrity_scope(input->fapl_id, &cs_scope) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
@@ -262,14 +254,10 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
 
-    /* MSC - add when we have IOD */
-    //rtid = tids->latest_rdable;
+    rtid = tids->latest_rdable;
 
     if(iod_free_cont_trans_stat(coh, tids) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
-
-    /* MSC - fake something for now */
-    rtid = 1024;
 
     if(iod_trans_start(coh, &rtid, NULL, 0, IOD_TRANS_R, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
@@ -295,31 +283,26 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* retrieve all metadata from scratch pad */
-    /* MSC - fake for now */
-    output.kv_oid_index = 1;
-    output.array_oid_index = 1;
-    output.blob_oid_index = 1;
-    output.c_version = rtid;
-    output.fcpl_id = H5P_FILE_CREATE_DEFAULT;
-
-    /* MSC - NEED IOD */
-#if 0
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
                              NULL, NULL, &output.fcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve fcpl");
 
-    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_KV_IDS_INDEX, &output.kv_oid_index, 
-                        sizeof(uint64_t), NULL, NULL) < 0)
+    val_size = sizeof(uint64_t);
+    key_size = strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
+
+    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_KV_IDS_INDEX, key_size,
+                        &output.kv_oid_index, &val_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "KV index lookup failed");
 
-    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_ARRAY_IDS_INDEX, &output.array_oid_index, 
-                        sizeof(uint64_t), NULL, NULL) < 0)
+    key_size = strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
+    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_ARRAY_IDS_INDEX, key_size,
+                        &output.array_oid_index, &val_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Array index lookup failed");
 
-    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_BLOB_IDS_INDEX, &output.blob_oid_index, 
-                        sizeof(uint64_t), NULL, NULL) < 0)
+    key_size = strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
+    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_BLOB_IDS_INDEX, key_size,
+                        &output.blob_oid_index, &val_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "BLOB index lookup failed");
-#endif
 
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
@@ -329,6 +312,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     output.root_id = ROOT_ID;
     output.root_oh.rd_oh = root_oh.rd_oh;
     output.root_oh.wr_oh = root_oh.wr_oh;
+    output.c_version = rtid;
 
     /* If the user did not ask to acquire the latest readable version, finish it here */
     if(TRUE != acquire) {

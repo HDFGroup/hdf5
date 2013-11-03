@@ -76,10 +76,6 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start map create %s\n", name);
 #endif
 
-    /* MSC - Remove when we have IOD */
-    map_oh.rd_oh.cookie=12345;
-    map_oh.wr_oh.cookie=12345;
-
     /* the traversal will retrieve the location where the map needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
@@ -248,10 +244,6 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, &map_id, &map_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
-    /* MSC - Remove when we have IOD */
-    map_oh.rd_oh.cookie=12345;
-    map_oh.wr_oh.cookie=12345;
-
     /* open a write handle on the ID. */
     if (iod_obj_open_write(coh, map_id, NULL, &map_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current map");
@@ -270,16 +262,9 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-    /* MSC - retrieve metadata - need IOD*/
-#if 0
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, 
                              H5VL_IOD_KEY_OBJ_CPL, NULL, NULL, &output.mcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve gcpl");
-
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
-                             H5VL_IOD_KEY_OBJ_LINK_COUNT,
-                             NULL, NULL, &output.link_count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
                              H5VL_IOD_KEY_MAP_KEY_TYPE,
@@ -290,16 +275,10 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
                              H5VL_IOD_KEY_MAP_VALUE_TYPE,
                              NULL, NULL, &output.valtype_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
-#endif
 
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close meta data KV handle");
-
-    /* MSC - fake stuff for now*/
-    output.keytype_id = H5Tcopy(H5T_NATIVE_INT);
-    output.valtype_id = H5Tcopy(H5T_NATIVE_INT);
-    output.mcpl_id = H5P_GROUP_CREATE_DEFAULT;
 
     output.iod_id = map_id;
     output.mdkv_id = sp[0];
@@ -448,7 +427,8 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
                                       val_size, &val_buf, &val_is_vl_data, &new_val_size) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
-    /* MSC - fake debugging */
+#if H5VL_IOD_DEBUG
+    /* fake debugging */
     if(val_is_vl_data) {
         H5T_class_t class;
         size_t seq_len = val_size, u;
@@ -470,6 +450,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     else {
         fprintf(stderr, "Map Set value = %d; size = %zu\n", *((int *)val_buf), val_size);
     }
+#endif
 
     if(!key_is_vl_data) {
         /* convert data if needed */
@@ -482,9 +463,12 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* MSC - do IOD checksum - can't now */
+
     kv.key = key.buf;
+    kv.key_len = key_size;
     kv.value = val_buf;
     kv.value_len = (iod_size_t)new_val_size;
+
     /* insert kv pair into MAP */
     if (iod_kv_set(iod_oh, wtid, NULL, &kv, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
@@ -592,77 +576,13 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
 
     if(val_is_vl) {
-        H5T_class_t class;
-
         if(iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, val_buf, 
                             &src_size, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
-        class = H5Tget_class(val_memtype_id);
-
-        /* MSC - fake something */
-        val_buf = NULL;
-        if(!client_val_buf_size) {
-            g_debug_counter ++;
-            if(g_debug_counter == 6) g_debug_counter=1;
-        }
-
-        if(H5T_VLEN == class) {
-            int n=0, k=0, j=0, increment=4;
-            int *ptr;
-
-            src_size = g_debug_counter*increment*sizeof(int);
-
-            if(NULL == (val_buf = malloc((size_t)src_size)))
-                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
-
-            ptr = (int *)val_buf;
-
-            for(j = 0; j < g_debug_counter*increment; j++)
-                ptr[k++] = n ++;
-        }
-        else if (H5T_STRING == class) {
-            uint8_t *ptr;
-            size_t temp_size;
-
-            temp_size = 94;
-            if(NULL == (val_buf = malloc(temp_size)))
-                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
-
-            ptr = (uint8_t *)val_buf;
-
-            switch(g_debug_counter) {
-            case 1:
-                src_size = 93;
-                strcpy((char *)ptr, "Four score and seven years ago our forefathers brought forth on this continent a new nation,");
-                ptr += src_size;
-                break;
-            case 2:
-                src_size = 86;
-                strcpy((char *)ptr, "conceived in liberty and dedicated to the proposition that all men are created equal.");
-                ptr += src_size;
-                break;
-            case 3:
-                src_size = 41;
-                strcpy((char *)ptr, "Now we are engaged in a great civil war,");
-                ptr += src_size;
-                break;
-            case 4:
-                src_size = 89;
-                strcpy((char *)ptr, "testing whether that nation or any nation so conceived and so dedicated can long endure.");
-                ptr += src_size;
-                break;
-            case 5:
-                src_size = 26;
-                strcpy((char *)ptr, "President Abraham Lincoln");
-                ptr += src_size;
-                break;
-            default:
-                HDassert(0 && "should not be here!!!");
-            }
-        }
 
         output.ret = ret_value;
         output.val_size = src_size;
+
         if(raw_cs_scope) {
             /* calculate a checksum for the data to be sent */
             output.val_cs = H5_checksum_crc64(val_buf, (size_t)src_size);
@@ -707,9 +627,6 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
         /* do data conversion */
         if(H5Tconvert(val_maptype_id, val_memtype_id, 1, val_buf, NULL, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
-
-        /* MSC - fake something */
-        *((int *)val_buf) = 1024;
 
         if(raw_cs_scope) {
             /* calculate a checksum for the data to be sent */
@@ -819,10 +736,8 @@ H5VL_iod_server_map_get_count_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_kv_get_num(iod_oh, rtid, &num, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Number of KV pairs in MAP");
 
-    /* MSC - fake something for now */
-    num = 3;
-
     output = num;
+
 #if H5VL_IOD_DEBUG 
     fprintf(stderr, "Done with map get_count, sending %d response to client\n", ret_value);
 #endif
@@ -994,6 +909,7 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
     kv.key = key.buf;
+    kv.key_len = key_size;
     kvs.kv = &kv;
 
     if(iod_kv_unlink_keys(iod_oh, wtid, NULL, 1, &kvs, NULL) < 0)
@@ -1049,14 +965,6 @@ H5VL_iod_server_map_close_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start map close\n");
-#endif
-
-    /* MSC - Need IOD to return error here */
-#if 0
-    if(IOD_OH_UNDEFINED == iod_oh.wr_oh.cookie ||
-       IOD_OH_UNDEFINED == iod_oh.rd_oh.cookie) {
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSE, FAIL, "can't close object with invalid handle");
-    }
 #endif
 
     if((iod_obj_close(iod_oh.rd_oh, NULL, NULL)) < 0)

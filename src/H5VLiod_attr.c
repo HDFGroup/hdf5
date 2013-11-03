@@ -73,10 +73,6 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         fprintf(stderr, "Start attribute Create %s on object path %s\n", attr_name, loc_name);
 #endif
 
-    /* MSC - Remove when we have IOD */
-    attr_oh.rd_oh.cookie=12345;
-    attr_oh.wr_oh.cookie=12345;
-
     /* Open the object where the attribute needs to be created. */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
@@ -132,7 +128,8 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* MSC - need to check size of datatype if it fits in
-       entry otherwise create a BLOB*/
+       entry otherwise create a BLOB */
+
     /* insert datatype metadata */
     if(H5VL_iod_insert_datatype(mdkv_oh, wtid, input->type_id, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
@@ -276,12 +273,9 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
         }
 
-        /* MSC - Dont do this check until we have a real IOD */
-#if 0
         /* if attribute KV does not exist, return error*/
         if(IOD_OBJ_INVALID == sp[1])
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Object has no attributes");
-#endif
 
         /* open the attribute KV in scratch pad */
         if (iod_obj_open_read(coh, sp[1], NULL /*hints*/, &attr_kv_oh, NULL) < 0)
@@ -309,10 +303,6 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     /* close the attribute KV holder */
     iod_obj_close(attr_kv_oh, NULL, NULL);
 
-  /* MSC - Remove when we have IOD */
-    attr_oh.rd_oh.cookie=12345;
-    attr_oh.wr_oh.cookie=12345;
-
     /* open the attribute */
     if (iod_obj_open_read(coh, attr_id, NULL /*hints*/, &attr_oh.rd_oh, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
@@ -333,7 +323,6 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-#if 0
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, H5VL_IOD_KEY_OBJ_DATATYPE,
                              NULL, NULL, &output.type_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve datatype");
@@ -341,21 +330,10 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
                              NULL, NULL, &output.space_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
-#endif
 
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-
-    {
-        hsize_t dims[1];
-
-        /* MSC - fake a dataspace, type, and dcpl */
-        dims [0] = 60;
-        output.space_id = H5Screate_simple(1, dims, NULL);
-        output.type_id = H5Tcopy(H5T_NATIVE_INT);
-        output.acpl_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
-    }
 
     output.iod_id = attr_id;
     output.mdkv_id = sp[0];
@@ -376,8 +354,8 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
-    H5Sclose(output.space_id);
-    H5Tclose(output.type_id);
+    //H5Sclose(output.space_id);
+    //H5Tclose(output.type_id);
 
     input = (attr_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -410,9 +388,9 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* container handle */
     iod_handle_t iod_oh = input->iod_oh.rd_oh; /* attribute's object handle */
     iod_obj_id_t iod_id = input->iod_id; /* attribute's ID */
-    iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV */
+    //iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV */
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
-    hid_t type_id = input->type_id; /* datatype ID of data */
+    //hid_t type_id = input->type_id; /* datatype ID of data */
     hid_t space_id = input->space_id; /* dataspace of attribute */
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
@@ -423,7 +401,6 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     iod_hyperslab_t hslabs; /* IOD hyperslab generated from HDF5 filespace */
     size_t size; /* size of outgoing bulk data */
     void *buf; /* buffer to hold outgoing data */
-    iod_handle_t mdkv_oh; /* metadata KV handle of attribute */
     iod_checksum_t iod_cs = 0, attr_cs = 0;
     int ndims; /* dataset's rank/number of dimensions */
     hssize_t num_descriptors = 0; /* number of IOD file descriptors needed to describe filespace selection */
@@ -488,21 +465,11 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_array_read(iod_oh, rtid, NULL, mem_desc, &file_desc, &iod_cs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
-    /* MSC - NEED IOD */
-#if 0
-    attr_cs = H5_checksum_crc64(buf, size);
-    if(attr_cs != iod_cs)
-        HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data corruption detected when reading attribute");
-#endif
+    if(cs_scope & H5_CHECKSUM_MEMORY) {
+        attr_cs = H5_checksum_crc64(buf, size);
 
-    {
-        int i;
-        hbool_t flag;
-        int *buf_ptr = (int *)buf;
-
-        /* MSC - fake */
-        for(i=0;i<60;++i)
-            buf_ptr[i] = i;
+        if(attr_cs != iod_cs)
+            HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data corruption detected when reading attribute");
     }
 
     /* Create a new block handle to write the data */
@@ -572,12 +539,12 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* container handle */
     iod_handle_t iod_oh = input->iod_oh.wr_oh; /* attribute's object handle */
     iod_obj_id_t iod_id = input->iod_id; /* attribute's ID */
-    iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV */
+    //iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV */
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
-    hid_t type_id = input->type_id; /* datatype ID of data */
+    //hid_t type_id = input->type_id; /* datatype ID of data */
     hid_t space_id = input->space_id; /* dataspace of attribute */
     iod_trans_id_t wtid = input->trans_num;
-    iod_trans_id_t rtid = input->rcxt_num;
+    //iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
     hg_bulk_block_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
@@ -587,9 +554,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     size_t size; /* size of outgoing bulk data */
     void *buf; /* buffer to hold outgoing data */
     int ndims; /* dataset's rank/number of dimensions */
-    scratch_pad sp;
-    iod_checksum_t sp_cs = 0, attr_cs = 0;
-    iod_handle_t mdkv_oh; /* metadata KV handle of attribute */
+    iod_checksum_t attr_cs = 0;
     hssize_t num_descriptors = 0; /* number of IOD file descriptors needed to describe filespace selection*/
     na_addr_t source = HG_Handler_get_addr(op_data->hg_handle); /* source address to pull data from */
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the attribute here or if it was already opened */
@@ -672,11 +637,18 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     /* set the file descriptor */
     file_desc = hslabs;
 
-    attr_cs = H5_checksum_crc64(buf, size);
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        attr_cs = H5_checksum_crc64(buf, size);
 
-    /* write from array object */
-    if(iod_array_write(iod_oh, wtid, NULL, mem_desc, &file_desc, &attr_cs, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
+        /* write from array object */
+        if(iod_array_write(iod_oh, wtid, NULL, mem_desc, &file_desc, &attr_cs, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
+    }
+    else {
+        /* write from array object */
+        if(iod_array_write(iod_oh, wtid, NULL, mem_desc, &file_desc, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
+    }
 
 done:
 #if H5VL_IOD_DEBUG 
@@ -766,14 +738,11 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
         }
 
-        /* MSC - Dont do this check until we have a real IOD */
-#if 0
         /* if attribute KV does not exist, return false*/
         if(IOD_OBJ_INVALID == sp[1]) {
             ret = FALSE;
             HGOTO_DONE(SUCCEED);
         }
-#endif
 
         /* open the attribute KV in scratch pad */
         if (iod_obj_open_read(coh, sp[1], NULL /*hints*/, &attr_kv_oh, NULL) < 0)
@@ -801,9 +770,6 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     iod_obj_close(attr_kv_oh, NULL, NULL);
-
-    /* MSC - fake */
-    ret = FALSE;
 
 done:
 #if H5VL_IOD_DEBUG
@@ -880,12 +846,9 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
         }
 
-        /* MSC - Dont do this check until we have a real IOD */
-#if 0
         /* if attribute KV does not exist, return error*/
         if(IOD_OBJ_INVALID == sp[1])
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Object has no attributes");
-#endif
 
         /* open the attribute KV in scratch pad */
         if (iod_obj_open_read(coh, sp[1], NULL /*hints*/, &attr_kv_oh.rd_oh, NULL) < 0)
@@ -1008,12 +971,9 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
         }
 
-        /* MSC - Dont do this check until we have a real IOD */
-#if 0
         /* if attribute KV does not exist, return error*/
         if(IOD_OBJ_INVALID == sp[1])
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Object has no attributes");
-#endif
 
         /* open the attribute KV in scratch pad */
         if (iod_obj_open_read(coh, sp[1], NULL /*hints*/, &attr_kv_oh.rd_oh, NULL) < 0)

@@ -75,10 +75,6 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start datatype Commit %s\n", name);
 #endif
 
-    /* MSC - Remove when we have IOD */
-    dtype_oh.rd_oh.cookie=12345;
-    dtype_oh.wr_oh.cookie=12345;
-
     /* the traversal will retrieve the location where the datatype needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
@@ -282,7 +278,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
     iod_checksum_t dt_cs = 0, iod_cs = 0;
-    iod_size_t kv_size;
+    iod_size_t key_size=0, val_size=0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -294,10 +290,6 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     /* Traverse Path and open dtype */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, &dtype_id, &dtype_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
-
-    /* MSC - Remove when we have IOD */
-    dtype_oh.rd_oh.cookie=12345;
-    dtype_oh.wr_oh.cookie=12345;
 
     /* open a write handle on the ID. */
     if (iod_obj_open_write(coh, dtype_id, NULL, &dtype_oh.wr_oh, NULL) < 0)
@@ -317,22 +309,16 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-    /* MSC  -  NEED IOD */
-#if 0
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
                              NULL, NULL, &output.tcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve tcpl");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
-                             H5VL_IOD_KEY_OBJ_LINK_COUNT,
-                             NULL, NULL, &output.link_count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
-
-    kv_size = sizeof(iod_size_t);
+    val_size = sizeof(iod_size_t);
+    key_size = strlen(H5VL_IOD_KEY_DTYPE_SIZE);
 
     /* retrieve blob size metadata from scratch pad */
-    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, &buf_size, 
-                        &kv_size, NULL, NULL) < 0)
+    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, key_size,
+                        &buf_size, &val_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "datatype size lookup failed");
 
     if(NULL == (buf = malloc(buf_size)))
@@ -356,10 +342,9 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     file_desc->frag[0].len = (iod_size_t)buf_size;
 
     /* read the serialized type value from the BLOB object */
-    if(iod_blob_read(dtype_oh, rtid, NULL, &mem_desc, &file_desc, &iod_cs, NULL) < 0)
+    if(iod_blob_read(dtype_oh.rd_oh, rtid, NULL, mem_desc, file_desc, &iod_cs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
 
-    /* MSC - NEED IOD */
     if(iod_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* calculate a checksum for the datatype */
         dt_cs = H5_checksum_crc64(buf, buf_size);
@@ -377,11 +362,6 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to decode datatype");
 
     free(buf);
-#endif
-
-    /* MSC - fake a type, and tcpl */
-    output.type_id = H5Tcopy(H5T_NATIVE_INT);
-    output.tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
 
     output.iod_id = dtype_id;
     output.mdkv_id = sp[0];
@@ -439,14 +419,6 @@ H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start datatype Close\n");
-#endif
-
-    /* MSC - Need IOD to return error here */
-#if 0
-    if(IOD_OH_UNDEFINED == iod_oh.wr_oh.cookie ||
-       IOD_OH_UNDEFINED == iod_oh.rd_oh.cookie) {
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSE, FAIL, "can't close object with invalid handle");
-    }
 #endif
 
     if((iod_obj_close(iod_oh.rd_oh, NULL, NULL)) < 0)

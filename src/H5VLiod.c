@@ -5718,10 +5718,10 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a READ CONTEXT ID")
 
-            /* allocate parent request array */
-            if(NULL == (parent_reqs = (H5VL_iod_request_t **)
-                        H5MM_malloc(sizeof(H5VL_iod_request_t *))))
-                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate parent req element");
+    /* allocate parent request array */
+    if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                H5MM_malloc(sizeof(H5VL_iod_request_t *))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate parent req element");
 
     /* retrieve parent requests */
     if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)rc, parent_reqs, &num_parents) < 0)
@@ -5766,8 +5766,8 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
         dset->remote_dset.mdkv_id = remote_obj.mdkv_id;
         dset->remote_dset.attrkv_id = remote_obj.attrkv_id;
         dset->remote_dset.dcpl_id = remote_obj.cpl_id;
-        dset->remote_dset.type_id = remote_obj.type_id;
-        dset->remote_dset.space_id = remote_obj.space_id;
+        dset->remote_dset.type_id = remote_obj.id1;
+        dset->remote_dset.space_id = remote_obj.id2;
 
         if(dset->remote_dset.dcpl_id == H5P_DEFAULT){
             dset->remote_dset.dcpl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT);
@@ -5812,7 +5812,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
         dtype->remote_dtype.mdkv_id = remote_obj.mdkv_id;
         dtype->remote_dtype.attrkv_id = remote_obj.attrkv_id;
         dtype->remote_dtype.tcpl_id = remote_obj.cpl_id;
-        dtype->remote_dtype.type_id = remote_obj.type_id;
+        dtype->remote_dtype.type_id = remote_obj.id1;
 
         if(dtype->remote_dtype.tcpl_id == H5P_DEFAULT){
             dtype->remote_dtype.tcpl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT);
@@ -5895,16 +5895,16 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
         map->remote_map.iod_oh.rd_oh.cookie = remote_obj.iod_oh.rd_oh.cookie;
         map->remote_map.iod_oh.wr_oh.cookie = remote_obj.iod_oh.wr_oh.cookie;
-        map->remote_map.iod_id = remote_obj.iod_id;
-        map->remote_map.mdkv_id = remote_obj.mdkv_id;
-        map->remote_map.attrkv_id = remote_obj.attrkv_id;
-        map->remote_map.mcpl_id = remote_obj.cpl_id;
+        map->remote_map.iod_id     = remote_obj.iod_id;
+        map->remote_map.mdkv_id    = remote_obj.mdkv_id;
+        map->remote_map.attrkv_id  = remote_obj.attrkv_id;
+        map->remote_map.mcpl_id    = remote_obj.cpl_id;
+        map->remote_map.keytype_id = remote_obj.id1;
+        map->remote_map.valtype_id = remote_obj.id2;
 
         if(map->remote_map.mcpl_id == H5P_DEFAULT){
             map->remote_map.mcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
         }
-
-        HDassert(map->remote_map.mcpl_id);
 
         /* setup the local dataset struct */
         /* store the entire path of the dataset locally */

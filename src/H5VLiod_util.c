@@ -118,13 +118,7 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
                                  comp, NULL, NULL, &value) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
-        /* MSC - NEED IOD */
-#if 0
         /* if this a soft link, traverse the link value if the ID is undefined */
-        /* NOTE: Soft links can not be created and accessed in the
-           same transaction; The transaction that created the soft
-           link must be used as the version for accessing the soft
-           link here - MSC 8/7/2103 */
         if(H5L_TYPE_SOFT == value.link_type) {
             if('/' == *value.u.symbolic_name) {
                 cur_id = ROOT_ID;
@@ -138,7 +132,6 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
             free(value.u.symbolic_name);
         }
         else
-#endif
             cur_id = value.u.iod_id;
 
         /* Close previous read handle unless it is the original one */
@@ -248,8 +241,6 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
                                  comp, NULL, NULL, &value) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
-        /* MSC - NEED IOD */
-#if 0
         /* if this a soft link, traverse the link value if the ID is undefined */
         if(H5L_TYPE_SOFT == value.link_type) {
             if('/' == *value.u.symbolic_name) {
@@ -264,7 +255,6 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
             free(value.u.symbolic_name);
         }
         else
-#endif
             cur_id = value.iod_id;
 
         /* Close previous handle unless it is the original one */
@@ -914,9 +904,6 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
             if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, cs, event) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
-            /* MSC - faking for now */
-            val_size = sizeof(H5L_type_t) + sizeof(iod_obj_id_t);
-
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 
@@ -927,9 +914,6 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
 
             iod_link->link_type = *((H5L_type_t *)val_ptr);
             val_ptr += sizeof(H5L_type_t);
-
-            /* MSC - faking for now */
-            iod_link->link_type = H5L_TYPE_HARD;
 
             switch(iod_link->link_type) {
                 case H5L_TYPE_HARD:
@@ -1061,20 +1045,16 @@ H5VL_iod_verify_scratch_pad(scratch_pad sp, iod_checksum_t iod_cs)
     iod_checksum_t computed_cs = 0;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* MSC - Need IOD */
-#if 0
     computed_cs = H5_checksum_crc64(&sp, sizeof(sp));
 
     if(computed_cs != iod_cs) {
-        fprintf(stderr, "Scratch pad integrity check failed. IOD cs = %u, Computed cs = %u",
+        fprintf(stderr, "Scratch pad integrity check failed. IOD cs = %llu, Computed cs = %llu",
                 iod_cs, computed_cs);
         ret_value = FAIL;
     }
-#endif
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_verify_scratch_pad() */
 

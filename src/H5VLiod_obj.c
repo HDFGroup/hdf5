@@ -59,10 +59,6 @@ H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start Object Open by token = %llu\n", obj_id);
 #endif
 
-    /* MSC - Remove when we have IOD */
-    obj_oh.rd_oh.cookie=12345;
-    obj_oh.wr_oh.cookie=12345;
-
     if (iod_obj_open_read(coh, obj_id, NULL /*hints*/, &obj_oh.rd_oh, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
     if (iod_obj_open_write(coh, obj_id, NULL /*hints*/, &obj_oh.wr_oh, NULL) < 0)
@@ -126,10 +122,6 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start Object Open\n");
 #endif
 
-    /* MSC - Remove when we have IOD */
-    obj_oh.rd_oh.cookie=12345;
-    obj_oh.wr_oh.cookie=12345;
-
     /* Traverse Path and open object */
     if(H5VL_iod_server_open_path(coh, input->loc_id, input->loc_oh, input->loc_name, 
                                  rtid, &obj_id, &obj_oh) < 0)
@@ -155,21 +147,26 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
         if (iod_obj_open_read(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
-    /* MSC - NEED IOD */
-#if 0
+
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, H5VL_IOD_KEY_OBJ_TYPE,
                              NULL, NULL, &output.obj_type) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
-
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, H5VL_IOD_KEY_OBJ_LINK_COUNT,
-                             NULL, NULL, &output.link_count) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
     switch(output.obj_type) {
     case H5I_MAP:
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
                                  NULL, NULL, &output.cpl_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve mcpl");
+
+        if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
+                                 H5VL_IOD_KEY_MAP_KEY_TYPE,
+                                 NULL, NULL, &output.id1) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
+
+        if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
+                                 H5VL_IOD_KEY_MAP_VALUE_TYPE,
+                                 NULL, NULL, &output.id2) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
         break;
     case H5I_GROUP:
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
@@ -182,11 +179,11 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
 
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, H5VL_IOD_KEY_OBJ_DATATYPE,
-                                 NULL, NULL, &output.type_id) < 0)
+                                 NULL, NULL, &output.id1) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve datatype");
 
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
-                                 NULL, NULL, &output.space_id) < 0)
+                                 NULL, NULL, &output.id2) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
         break;
     case H5I_DATATYPE:
@@ -196,10 +193,14 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
             iod_mem_desc_t mem_desc; /* memory descriptor used for reading */
             iod_blob_iodesc_t file_desc; /* file descriptor used to write */
             iod_checksum_t dt_cs = 0, iod_cs = 0;
+            iod_size_t key_size, val_size;
+
+            key_size = strlen(H5VL_IOD_KEY_DTYPE_SIZE);
+            val_size = sizeof(iod_size_t);
 
             /* retrieve blob size metadata from scratch pad */
-            if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, &buf_size, 
-                                sizeof(iod_size_t), NULL, NULL) < 0)
+            if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, key_size,
+                                &buf_size, &val_size, NULL, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "datatype size lookup failed");
 
             if(NULL == (buf = malloc(buf_size)))
@@ -218,18 +219,16 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
             /* read the serialized type value from the BLOB object */
             if(iod_blob_read(obj_oh.rd_oh, rtid, NULL, &mem_desc, &file_desc, &iod_cs, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
-            /* MSC - NEED IOD */
-#if 0
+
             /* calculate a checksum for the datatype */
             dt_cs = H5_checksum_crc64(buf, buf_size);
 
             /* Verifty checksum against one given by IOD */
             if(iod_cs != dt_cs)
                 HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
-#endif
 
             /* decode the datatype */
-            if((output.type_id = H5Tdecode(buf)) < 0)
+            if((output.id1 = H5Tdecode(buf)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to decode datatype");
 
             free(buf);
@@ -238,17 +237,9 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Invalid object type");
     }
 
-#endif
-
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-
-    /* MSC - fake */
-    output.obj_type = H5I_GROUP;
-    output.cpl_id = H5P_GROUP_CREATE_DEFAULT;
-    output.type_id = FAIL;
-    output.space_id = FAIL;
 
     output.iod_id = obj_id;
     output.mdkv_id = sp[0];
@@ -268,8 +259,8 @@ done:
         output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
         output.iod_id = IOD_OBJ_INVALID;
         output.cpl_id = FAIL;
-        output.type_id = FAIL;
-        output.space_id = FAIL;
+        output.id1 = FAIL;
+        output.id2 = FAIL;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
@@ -529,9 +520,6 @@ H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
 
-    /* MSC - fake */
-    ret = FALSE;
-
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with Object exists, sending response to client\n");
 #endif
@@ -619,9 +607,6 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
                              NULL, NULL, &obj_type) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
-    /* MSC - fake now */
-    obj_type = H5I_GROUP;
-
     switch(obj_type) {
     case H5I_GROUP:
         oinfo.type = H5O_TYPE_GROUP;
@@ -658,12 +643,6 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
     if(loc_oh.rd_oh.cookie != obj_oh.rd_oh.cookie && 
        iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-
-    /* MSC - fake now */
-    oinfo.type = H5O_TYPE_GROUP;
-    oinfo.num_attrs = 20;
-    oinfo.rc = 1;
-    oinfo.addr = 123456789;
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with Object get_info, sending response to client\n");
@@ -823,7 +802,8 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     const char *loc_name = input->path;
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
-    ssize_t size = 0;
+    iod_size_t key_size, val_size = 0;
+    void *value = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -857,17 +837,17 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     comment.value = NULL;
     comment.size = length;
 
-    /* MSC - NEED IOD */
-#if 0
-    if(iod_kv_get_value(oh, rtid, H5VL_IOD_KEY_OBJ_COMMENT, NULL, 
-                        &size, NULL, NULL) < 0)
+    key_size = strlen(H5VL_IOD_KEY_OBJ_COMMENT);
+
+    if(iod_kv_get_value(obj_oh.rd_oh, rtid, H5VL_IOD_KEY_OBJ_COMMENT, key_size,
+                        NULL, &val_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
-    if(NULL == (value = malloc (size)))
+    if(NULL == (value = malloc ((size_t)val_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 
-    if(iod_kv_get_value(oh, rtid, H5VL_IOD_KEY_OBJ_COMMENT, value, 
-                        &size, NULL, NULL) < 0)
+    if(iod_kv_get_value(obj_oh.rd_oh, rtid, H5VL_IOD_KEY_OBJ_COMMENT, key_size,
+                        value, &val_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
     if(length) {
@@ -877,7 +857,6 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     free(value);
-#endif
 
     /* close metadata KV and object */
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
@@ -887,15 +866,7 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
        iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-    /* MSC - fake */
-    if(length) {
-        comment.value = strdup("fake comment");
-        size = strlen(comment.value) + 1;
-    }
-    else
-        size = 22;
-
-    *comment.value_size = size;
+    *comment.value_size = val_size;
 
 done:
     output.ret = ret_value;

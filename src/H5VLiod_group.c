@@ -71,10 +71,6 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
         fprintf(stderr, "Start group create %s\n", name);
 #endif
 
-    /* MSC - Remove when we have IOD */
-    grp_oh.rd_oh.cookie=12345;
-    grp_oh.wr_oh.cookie=12345;
-
     /* the traversal will retrieve the location where the group needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
@@ -231,10 +227,6 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, &grp_id, &grp_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
-    /* MSC - Remove when we have IOD */
-    grp_oh.rd_oh.cookie=12345;
-    grp_oh.wr_oh.cookie=12345;
-
     /* open a write handle on the ID. */
     if (iod_obj_open_write(coh, grp_id, NULL, &grp_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
@@ -253,17 +245,9 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-    /* MSC - retrieve metadata, need IOD */
-#if 0
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, 
                              H5VL_IOD_KEY_OBJ_CPL, NULL, NULL, &output.gcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve gcpl");
-
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
-                             H5VL_IOD_KEY_OBJ_LINK_COUNT,
-                             NULL, NULL, &output.link_count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
-#endif
 
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
@@ -274,7 +258,6 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_oh.wr_oh.cookie = grp_oh.wr_oh.cookie;
     output.mdkv_id = sp[0];
     output.attrkv_id = sp[1];
-    output.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with group open, sending response to client\n");
@@ -328,13 +311,10 @@ H5VL_iod_server_group_close_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start group close\n");
 #endif
 
-    /* MSC - Need IOD to return error here */
-#if 0
     if(IOD_OH_UNDEFINED == iod_oh.wr_oh.cookie ||
        IOD_OH_UNDEFINED == iod_oh.rd_oh.cookie) {
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSE, FAIL, "can't close object with invalid handle");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close object with invalid handle");
     }
-#endif
 
     if((iod_obj_close(iod_oh.rd_oh, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");

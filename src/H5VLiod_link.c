@@ -387,7 +387,7 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
     uint32_t cs_scope = input->cs_scope;
     char *last_comp = NULL;
     htri_t ret = -1;
-    iod_size_t kv_size = 0;
+    iod_size_t val_size = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -405,16 +405,13 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* check the last component */
-    if(iod_kv_get_value(cur_oh.rd_oh, rtid, last_comp, strlen(last_comp),
-                        NULL, &kv_size, NULL, NULL) < 0) {
+    if(iod_kv_get_value(cur_oh.rd_oh, rtid, last_comp, (iod_size_t)strlen(last_comp),
+                        NULL, &val_size, NULL, NULL) < 0) {
         ret = FALSE;
     } /* end if */
     else {
         ret = TRUE;
     }
-
-    /* MSC - fake */
-    ret = FALSE;
 
 done:
 
@@ -501,13 +498,12 @@ H5VL_iod_server_link_get_info_cb(AXE_engine_t UNUSED axe_engine,
         break;
     case H5L_TYPE_SOFT:
         linfo.u.val_size = strlen(iod_link.u.symbolic_name) + 1;
+    case H5L_TYPE_ERROR:
+    case H5L_TYPE_EXTERNAL:
+    case H5L_TYPE_MAX:
     default:
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unsuppored link type");
     }
-
-    /* MSC - fake for now */
-    linfo.type = H5L_TYPE_SOFT;
-    linfo.u.val_size = 10;
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with link get_info, sending response to client\n");
@@ -577,7 +573,6 @@ H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t cur_id;
     const char *loc_name = input->path;
     char *last_comp = NULL;
-    ssize_t size = 0;
     H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
@@ -597,11 +592,6 @@ H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine,
     if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
                              last_comp, NULL, NULL, &iod_link) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
-
-    /* MSC - fake for now */
-    iod_link.link_type = H5L_TYPE_SOFT;
-    iod_link.u.symbolic_name = strdup("FAKE_SOFT");
-    size = strlen(iod_link.u.symbolic_name)+1;
 
     if(H5L_TYPE_SOFT != iod_link.link_type)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "link is not SOFT");
@@ -716,16 +706,15 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_kv_unlink_keys(cur_oh.wr_oh, wtid, NULL, 1, &kvs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
 
-    /* MSC - NEED IOD */
-#if 0
     /* check the metadata information for the object and remove
        it from the container if this is the last link to it */
     if(iod_link.link_type == H5L_TYPE_HARD) {
         iod_handle_t obj_oh;
-        iod_handle_t mdkv_oh;
+        iod_handles_t mdkv_oh;
         scratch_pad sp;
         iod_checksum_t sp_cs = 0;
         uint64_t link_count = 0;
+        iod_obj_id_t obj_id;
 
         obj_id = iod_link.u.iod_id;
 
@@ -783,7 +772,6 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
         }
     }
-#endif
 
     /* close parent group if it is not the location we started the
        traversal into */

@@ -202,8 +202,8 @@ typedef struct H5VL_iod_remote_object_t {
     iod_obj_id_t mdkv_id;
     iod_obj_id_t attrkv_id;
     hid_t cpl_id;
-    hid_t type_id;
-    hid_t space_id;
+    hid_t id1;
+    hid_t id2;
 } H5VL_iod_remote_object_t;
 
 /* a common strcut between all client side objects */
