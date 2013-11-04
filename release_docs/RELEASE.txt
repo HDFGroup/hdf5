@@ -1,12 +1,12 @@
-HDF5 version 1.8.12-pre2 released on 2013-10-24
+HDF5 version 1.8.12 released on 2013-11-04
 ================================================================================
 
 INTRODUCTION
 ============
 
 This document describes the differences between HDF5-1.8.11 and 
-HDF5-1.8.12-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.12-*. 
+HDF5-1.8.12, and contains information on the platforms tested and 
+known problems in HDF5-1.8.12. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
@@ -377,6 +377,12 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* Several HDF5 command-line tools and tests leave behind generated files
+  that are not cleaned up with "make clean" or "make distclean" when software
+  is built in place. The issue will be addressed in the 1.8.13 release. We
+  recommend to use build directory to compile and test HDF5 as described
+  in the INSTALL file, section 4.2.
+ 
 * Source directory names with spaces in them will cause failures in configure
   or make on Mac (HDFFV-8152), Linux, and probably all other platforms.  If a 
   configure command with a space is run from a build directory, it will exit 
