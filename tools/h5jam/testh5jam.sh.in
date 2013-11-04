@@ -511,10 +511,10 @@ TOOLTEST_OUTPUT() {
 	    # Create the expect file if it doesn't yet exist.
         echo " CREATED"
         cp $actual $expect
-	    rm -f $actual $actual_err
+	    rm -f $actual $actual_sav $actual_err $actual_err_sav
     elif $CMP $expect $actual; then
         echo " PASSED"
-	    rm -f $actual $actual_err
+	    rm -f $actual $actual_sav $actual_err $actual_err_sav
     else
         echo "*FAILED*"
 	    echo "    Expected result differs from actual result"
