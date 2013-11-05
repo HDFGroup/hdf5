@@ -56,7 +56,7 @@ H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start Object Open by token = %llu\n", obj_id);
+    fprintf(stderr, "Start Object Open by token = %"PRIu64"\n", obj_id);
 #endif
 
     if (iod_obj_open_read(coh, obj_id, NULL /*hints*/, &obj_oh.rd_oh, NULL) < 0)

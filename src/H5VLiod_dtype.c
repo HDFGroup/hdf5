@@ -284,7 +284,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start datatype Open %s with Loc ID %llu\n", name, loc_id);
+    fprintf(stderr, "Start datatype Open %s with Loc ID %"PRIu64"\n", name, loc_id);
 #endif
 
     /* Traverse Path and open dtype */

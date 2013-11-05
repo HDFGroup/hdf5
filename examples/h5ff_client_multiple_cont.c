@@ -12,8 +12,8 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name1[]="eff_file_1.h5";
-    const char file_name2[]="eff_file_2.h5";
+    const char file_name1[]="/eff_file_1";
+    const char file_name2[]="/eff_file_2";
     hid_t fid1, fid2;
     hid_t gid1, gid2, gid3, gid4;
     hid_t sid;
@@ -95,8 +95,9 @@ int main(int argc, char **argv) {
     assert(fid1);
     /* create second file */
     fid2 = H5Fcreate(file_name2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-    assert(fid1);
+    assert(fid2);
 
+#if 0
     /* acquire container version 0 on both containers - EXACT 
        This can be asynchronous, but here we need the acquired ID 
        right after the call to start the transaction so we make synchronous. */
@@ -267,6 +268,7 @@ int main(int argc, char **argv) {
     assert(0 == ret);
     ret = H5RCclose(rid4);
     assert(0 == ret);
+#endif
 
     assert(H5Fclose_ff(fid1, e_stack) == 0);
     assert(H5Fclose_ff(fid2, e_stack) == 0);

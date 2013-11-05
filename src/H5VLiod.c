@@ -518,13 +518,13 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
     axe_info->count = axe_list.last_released_task - axe_info->start_range + 1;
 
 #if H5VL_IOD_DEBUG
-    printf("Operation %llu Dependencies: ", request->axe_id);
+    printf("Operation %"PRIu64" Dependencies: ", request->axe_id);
     for(u=0 ; u<num_parents ; u++)
-        printf("%llu ", axe_info->parent_axe_ids[u]);
+        printf("%"PRIu64" ", axe_info->parent_axe_ids[u]);
     printf("\n");
 
     if(axe_info->count) {
-        printf("Operation %llu will finish tasks %llu through %llu\n",
+        printf("Operation %"PRIu64" will finish tasks %"PRIu64" through %"PRIu64"\n",
                request->axe_id, axe_info->start_range, 
                axe_info->start_range+axe_info->count-1);
     }
@@ -963,7 +963,7 @@ H5Pset_dxpl_checksum(hid_t dxpl_id, uint64_t cs)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iIu", dxpl_id, cs);
+    H5TRACE2("e", "iIl", dxpl_id, cs);
 
     if(dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
@@ -1037,7 +1037,7 @@ H5Pset_dxpl_checksum_ptr(hid_t dxpl_id, uint64_t *cs)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Iu", dxpl_id, cs);
+    H5TRACE2("e", "i*Il", dxpl_id, cs);
 
     if(dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
@@ -1560,7 +1560,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     file->common.file = file;
 
 #if H5VL_IOD_DEBUG
-    printf("File Create %s IOD ROOT ID %llu, axe id %llu\n", 
+    printf("File Create %s IOD ROOT ID %"PRIu64", axe id %"PRIu64"\n", 
            name, input.root_id, g_axe_id);
 #endif
 
@@ -1675,7 +1675,7 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
     file->common.file = file;
 
 #if H5VL_IOD_DEBUG
-    printf("File Open %s axe id %llu\n", name, g_axe_id);
+    printf("File Open %s axe id %"PRIu64"\n", name, g_axe_id);
 #endif
 
     if(H5VL__iod_create_and_forward(H5VL_FILE_OPEN_ID, HG_FILE_OPEN, 
@@ -1944,7 +1944,7 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED dxpl_id, void **req)
             input.max_array_index = object_indexes[1];
             input.max_blob_index = object_indexes[2];
 
-            printf("File Close MAXs: %llu %llu %llu\n", 
+            printf("File Close MAXs: %"PRIu64" %"PRIu64" %"PRIu64"\n", 
                    input.max_kv_index, input.max_array_index, input.max_blob_index);
         }
         else {
@@ -1977,7 +1977,7 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED dxpl_id, void **req)
     }
 
 #if H5VL_IOD_DEBUG
-    printf("File Close Root ID %llu axe id %llu\n", input.root_id, g_axe_id);
+    printf("File Close Root ID %"PRIu64" axe id %"PRIu64"\n", input.root_id, g_axe_id);
 #endif
 
     if(H5VL__iod_create_and_forward(H5VL_FILE_CLOSE_ID, HG_FILE_CLOSE, 
@@ -2118,7 +2118,7 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
     grp->common.file->nopen_objs ++;
 
 #if H5VL_IOD_DEBUG
-    printf("Group Create %s, IOD ID %llu, axe id %llu\n", 
+    printf("Group Create %s, IOD ID %"PRIu64", axe id %"PRIu64"\n", 
            name, input.grp_id, g_axe_id);
 #endif
 
@@ -2215,7 +2215,7 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
     input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
-    printf("Group Open %s LOC ID %llu, axe id %llu\n", 
+    printf("Group Open %s LOC ID %"PRIu64", axe id %"PRIu64"\n", 
            name, input.loc_id, g_axe_id);
 #endif
 
@@ -2357,7 +2357,7 @@ H5VL_iod_group_close(void *_grp, hid_t UNUSED dxpl_id, void **req)
     status = (int *)malloc(sizeof(int));
 
 #if H5VL_IOD_DEBUG
-    printf("Group Close IOD ID %llu, axe id %llu\n", 
+    printf("Group Close IOD ID %"PRIu64", axe id %"PRIu64"\n", 
            input.iod_id, g_axe_id);
 #endif
 
@@ -2533,7 +2533,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t UNUSED loc_params,
     dset->common.file->nopen_objs ++;
 
 #if H5VL_IOD_DEBUG
-    printf("Dataset Create %s IOD ID %llu, axe id %llu\n", 
+    printf("Dataset Create %s IOD ID %"PRIu64", axe id %"PRIu64"\n", 
            name, input.dset_id, g_axe_id);
 #endif
 
@@ -2655,7 +2655,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
     dset->common.file->nopen_objs ++;
 
 #if H5VL_IOD_DEBUG
-    printf("Dataset Open %s LOC ID %llu, axe id %llu\n", 
+    printf("Dataset Open %s LOC ID %"PRIu64", axe id %"PRIu64"\n", 
            name, input.loc_id, g_axe_id);
 #endif
 
@@ -2893,9 +2893,9 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
 #if H5VL_IOD_DEBUG
     if(!is_vl_data)
-        printf("Dataset Read, axe id %llu\n", g_axe_id);
+        printf("Dataset Read, axe id %"PRIu64"\n", g_axe_id);
     else
-        printf("Dataset GET size, axe id %llu\n", g_axe_id);
+        printf("Dataset GET size, axe id %"PRIu64"\n", g_axe_id);
 #endif
 
     /* forward the call to the IONs */
@@ -3062,7 +3062,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     if((raw_cs_scope & H5_CHECKSUM_MEMORY) && user_cs && 
        user_cs != internal_cs) {
-        fprintf(stderr, "Errrr.. In memory Data corruption. expecting %llu, got %llu\n",
+        fprintf(stderr, "Errrr.. In memory Data corruption. expecting %"PRIu64", got %"PRIu64"\n",
                 user_cs, internal_cs);
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "Checksum verification failed");
     }
@@ -3094,7 +3094,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     status = (int *)malloc(sizeof(int));
 
 #if H5VL_IOD_DEBUG
-    printf("Dataset Write, axe id %llu\n", g_axe_id);
+    printf("Dataset Write, axe id %"PRIu64"\n", g_axe_id);
 #endif
 
     /* setup info struct for I/O request 
@@ -3188,7 +3188,7 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[],
     input.cs_scope = dset->common.file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
-    printf("Dataset Set Extent, axe id %llu\n", g_axe_id);
+    printf("Dataset Set Extent, axe id %"PRIu64"\n", g_axe_id);
 #endif
 
     status = (int *)malloc(sizeof(int));
@@ -3367,7 +3367,7 @@ H5VL_iod_dataset_close(void *_dset, hid_t UNUSED dxpl_id, void **req)
     status = (int *)malloc(sizeof(int));
 
 #if H5VL_IOD_DEBUG
-    printf("Dataset Close IOD ID %llu, axe id %llu\n", 
+    printf("Dataset Close IOD ID %"PRIu64", axe id %"PRIu64"\n", 
            input.iod_id, g_axe_id);
 #endif
 
@@ -3481,7 +3481,7 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t UNUSED loc_params, const 
     input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
-    printf("Datatype Commit %s IOD ID %llu, axe id %llu\n", 
+    printf("Datatype Commit %s IOD ID %"PRIu64", axe id %"PRIu64"\n", 
            name, input.dtype_id, g_axe_id);
 #endif
 
@@ -3607,7 +3607,7 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const ch
     input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
-    printf("Datatype Open %s LOC ID %llu, axe id %llu\n", 
+    printf("Datatype Open %s LOC ID %"PRIu64", axe id %"PRIu64"\n", 
            name, input.loc_id, g_axe_id);
 #endif
 
@@ -3780,7 +3780,7 @@ H5VL_iod_datatype_close(void *obj, hid_t UNUSED dxpl_id, void **req)
     input.iod_id = dtype->remote_dtype.iod_id;
 
 #if H5VL_IOD_DEBUG
-    printf("Datatype Close IOD ID %llu, axe id %llu\n", input.iod_id, g_axe_id);
+    printf("Datatype Close IOD ID %"PRIu64", axe id %"PRIu64"\n", input.iod_id, g_axe_id);
 #endif
 
     status = (int *)malloc(sizeof(int));
@@ -3928,7 +3928,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     attr->common.obj_name = strdup(attr_name);
 
 #if H5VL_IOD_DEBUG
-    printf("Attribute Create %s IOD ID %llu, axe id %llu\n", 
+    printf("Attribute Create %s IOD ID %"PRIu64", axe id %"PRIu64"\n", 
            attr_name, input.attr_id, g_axe_id);
 #endif
 
@@ -4051,7 +4051,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
-    printf("Attribute Open %s LOC ID %llu, axe id %llu\n", 
+    printf("Attribute Open %s LOC ID %"PRIu64", axe id %"PRIu64"\n", 
            attr_name, input.loc_id, g_axe_id);
 #endif
 
@@ -4211,7 +4211,7 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
     info->bulk_handle = bulk_handle;
 
 #if H5VL_IOD_DEBUG
-    printf("Attribute Read IOD ID %llu, axe id %llu\n", 
+    printf("Attribute Read IOD ID %"PRIu64", axe id %"PRIu64"\n", 
            input.iod_id, g_axe_id);
 #endif
 
@@ -4334,7 +4334,7 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     info->bulk_handle = bulk_handle;
 
 #if H5VL_IOD_DEBUG
-    printf("Attribute Write IOD ID %llu, axe id %llu\n", 
+    printf("Attribute Write IOD ID %"PRIu64", axe id %"PRIu64"\n", 
            input.iod_id, g_axe_id);
 #endif
 
@@ -4423,7 +4423,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
     status = (int *)malloc(sizeof(int));
 
 #if H5VL_IOD_DEBUG
-    printf("Attribute Remove loc %s name %s, axe id %llu\n", 
+    printf("Attribute Remove loc %s name %s, axe id %"PRIu64"\n", 
            loc_name, attr_name, g_axe_id);
 #endif
 
@@ -4603,7 +4603,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 input.trans_num  = 0;
 
 #if H5VL_IOD_DEBUG
-                printf("Attribute Exists loc %s name %s, axe id %llu\n", 
+                printf("Attribute Exists loc %s name %s, axe id %"PRIu64"\n", 
                        loc_name, attr_name, g_axe_id);
 #endif
 
@@ -4714,7 +4714,7 @@ H5VL_iod_attribute_close(void *_attr, hid_t UNUSED dxpl_id, void **req)
     input.iod_id = attr->remote_attr.iod_id;
 
 #if H5VL_IOD_DEBUG
-    printf("Attribute Close IOD ID %llu, axe id %llu\n", input.iod_id, g_axe_id);
+    printf("Attribute Close IOD ID %"PRIu64", axe id %"PRIu64"\n", input.iod_id, g_axe_id);
 #endif
 
     if(H5VL__iod_create_and_forward(H5VL_ATTR_CLOSE_ID, HG_ATTR_CLOSE, 
@@ -5175,7 +5175,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 input.path = loc_name;
 
 #if H5VL_IOD_DEBUG
-                printf("Link Exists axe %llu: %s ID %llu\n", 
+                printf("Link Exists axe %"PRIu64": %s ID %"PRIu64"\n", 
                        g_axe_id, loc_name, input.loc_id);
 #endif
 
@@ -5209,7 +5209,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 input.path = loc_name;
 
 #if H5VL_IOD_DEBUG
-                printf("Link get info axe %llu: %s ID %llu\n", 
+                printf("Link get info axe %"PRIu64": %s ID %"PRIu64"\n", 
                        g_axe_id, loc_name, input.loc_id);
 #endif
 
@@ -5254,7 +5254,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 result->value.val = buf;
 
 #if H5VL_IOD_DEBUG
-                printf("Link get val axe %llu: %s ID %llu\n", 
+                printf("Link get val axe %"PRIu64": %s ID %"PRIu64"\n", 
                        g_axe_id, loc_name, input.loc_id);
 #endif
 
@@ -5348,7 +5348,7 @@ H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, vo
     input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
-    printf("Link Remove axe %llu: %s ID %llu\n", 
+    printf("Link Remove axe %"PRIu64": %s ID %"PRIu64"\n", 
            g_axe_id, loc_name, input.loc_id);
 #endif
 
@@ -5459,7 +5459,7 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         dset->common.obj_name = NULL;
 
 #if H5VL_IOD_DEBUG
-        printf("Dataset open by token %llu: ID %llu\n", 
+        printf("Dataset open by token %"PRIu64": ID %"PRIu64"\n", 
                g_axe_id, input.iod_id);
 #endif
 
@@ -5513,7 +5513,7 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         dtype->common.obj_name = NULL;
 
 #if H5VL_IOD_DEBUG
-        printf("Named Datatype open by token %llu: ID %llu\n", 
+        printf("Named Datatype open by token %"PRIu64": ID %"PRIu64"\n", 
                g_axe_id, input.iod_id);
 #endif
 
@@ -5551,7 +5551,7 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         grp->common.obj_name = NULL;
 
 #if H5VL_IOD_DEBUG
-        printf("Group open by token %llu: ID %llu\n", 
+        printf("Group open by token %"PRIu64": ID %"PRIu64"\n", 
                g_axe_id, input.iod_id);
 #endif
 
@@ -5620,7 +5620,7 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         map->common.obj_name = NULL;
 
 #if H5VL_IOD_DEBUG
-        printf("Map open by token %llu: ID %llu\n", 
+        printf("Map open by token %"PRIu64": ID %"PRIu64"\n", 
                g_axe_id, input.iod_id);
 #endif
 
@@ -6159,7 +6159,7 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
                 input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
-                printf("Attribute Rename %s to %s LOC ID %llu, axe id %llu\n", 
+                printf("Attribute Rename %s to %s LOC ID %"PRIu64", axe id %"PRIu64"\n", 
                        old_name, new_name, input.loc_id, g_axe_id);
 #endif
 
@@ -6316,7 +6316,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 input.loc_name = loc_name;
 
 #if H5VL_IOD_DEBUG
-                printf("Object Exists axe %llu: %s ID %llu\n", 
+                printf("Object Exists axe %"PRIu64": %s ID %"PRIu64"\n", 
                        g_axe_id, input.loc_name, input.loc_id);
 #endif
 
@@ -6384,7 +6384,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 result->name.value = comment;
 
 #if H5VL_IOD_DEBUG
-                printf("Object Get Comment axe %llu: %s ID %llu\n", 
+                printf("Object Get Comment axe %"PRIu64": %s ID %"PRIu64"\n", 
                        g_axe_id, loc_name, input.loc_id);
 #endif
 
@@ -6418,7 +6418,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 input.loc_name = loc_name;
 
 #if H5VL_IOD_DEBUG
-                printf("Object get_info axe %llu: %s ID %llu\n", 
+                printf("Object get_info axe %"PRIu64": %s ID %"PRIu64"\n", 
                        g_axe_id, input.loc_name, input.loc_id);
 #endif
 
@@ -6542,7 +6542,7 @@ H5VL_iod_map_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
     input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
-    printf("Map Create %s, IOD ID %llu, axe id %llu\n", 
+    printf("Map Create %s, IOD ID %"PRIu64", axe id %"PRIu64"\n", 
            name, input.map_id, g_axe_id);
 #endif
 
@@ -6647,7 +6647,7 @@ H5VL_iod_map_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char *n
     input.cs_scope = obj->file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
-    printf("Map Open %s LOC ID %llu, axe id %llu\n", 
+    printf("Map Open %s LOC ID %"PRIu64", axe id %"PRIu64"\n", 
            name, input.loc_id, g_axe_id);
 #endif
 
@@ -6755,7 +6755,7 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
 
     if((raw_cs_scope & H5_CHECKSUM_MEMORY) && user_cs && 
        user_cs != value_cs) {
-        fprintf(stderr, "Errrr.. In memory Data corruption. expecting %llu, got %llu\n",
+        fprintf(stderr, "Errrr.. In memory Data corruption. expecting %"PRIu64", got %"PRIu64"\n",
                 user_cs, value_cs);
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "Checksum verification failed");
     }
@@ -6809,7 +6809,7 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
     status = (int *)malloc(sizeof(int));
 
 #if H5VL_IOD_DEBUG
-    printf("MAP set, value size %zu, axe id %llu\n", val_size, g_axe_id);
+    printf("MAP set, value size %zu, axe id %"PRIu64"\n", val_size, g_axe_id);
 #endif
 
     /* setup info struct for I/O request 
@@ -6924,7 +6924,7 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
     input.cs_scope = map->common.file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
-    printf("MAP Get, axe id %llu\n", g_axe_id);
+    printf("MAP Get, axe id %"PRIu64"\n", g_axe_id);
 #endif
 
     /* get the plist pointer */
@@ -7048,7 +7048,7 @@ H5VL_iod_map_get_count(void *_map, hsize_t *count, hid_t rcxt_id, void **req)
     input.cs_scope = map->common.file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
-    printf("MAP Get count, axe id %llu\n", g_axe_id);
+    printf("MAP Get count, axe id %"PRIu64"\n", g_axe_id);
 #endif
 
     if(H5VL__iod_create_and_forward(H5VL_MAP_GET_COUNT_ID, HG_MAP_GET_COUNT, 
@@ -7106,7 +7106,7 @@ H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key,
     input.trans_num  = 0;
 
 #if H5VL_IOD_DEBUG
-    printf("MAP EXISTS, axe id %llu\n", g_axe_id);
+    printf("MAP EXISTS, axe id %"PRIu64"\n", g_axe_id);
 #endif
 
     /* setup info struct for exists request. 
@@ -7184,7 +7184,7 @@ H5VL_iod_map_delete(void *_map, hid_t key_mem_type_id, const void *key,
     input.cs_scope = map->common.file->md_integrity_scope;
 
 #if H5VL_IOD_DEBUG
-    printf("MAP DELETE, axe id %llu\n", g_axe_id);
+    printf("MAP DELETE, axe id %"PRIu64"\n", g_axe_id);
 #endif
 
     status = (int *)malloc(sizeof(int));
@@ -7233,7 +7233,7 @@ herr_t H5VL_iod_map_close(void *_map, void **req)
     input.iod_id = map->remote_map.iod_id;
 
 #if H5VL_IOD_DEBUG
-    printf("Map Close IOD ID %llu, axe id %llu\n", input.iod_id, g_axe_id);
+    printf("Map Close IOD ID %"PRIu64", axe id %"PRIu64"\n", input.iod_id, g_axe_id);
 #endif
 
     status = (int *)malloc(sizeof(int));
@@ -7285,7 +7285,7 @@ H5VL_iod_rc_acquire(H5VL_iod_file_t *file, H5RC_t *rc, uint64_t *c_version,
     rc_info->c_version_ptr = c_version;
 
 #if H5VL_IOD_DEBUG
-    printf("Read Context Acquire, version %llu, axe id %llu\n", 
+    printf("Read Context Acquire, version %"PRIu64", axe id %"PRIu64"\n", 
            input.c_version, g_axe_id);
 #endif
 
@@ -7396,7 +7396,7 @@ H5VL_iod_rc_release(H5RC_t *rc, void **req)
     status = (int *)malloc(sizeof(int));
 
 #if H5VL_IOD_DEBUG
-    printf("Read Context Release, version %llu, axe id %llu\n", 
+    printf("Read Context Release, version %"PRIu64", axe id %"PRIu64"\n", 
            input.c_version, g_axe_id);
 #endif
 
@@ -7447,7 +7447,7 @@ H5VL_iod_rc_persist(H5RC_t *rc, void **req)
     status = (int *)malloc(sizeof(int));
 
 #if H5VL_IOD_DEBUG
-    printf("Read Context Persist, version %llu, axe id %llu\n", 
+    printf("Read Context Persist, version %"PRIu64", axe id %"PRIu64"\n", 
            input.c_version, g_axe_id);
 #endif
 
@@ -7491,7 +7491,7 @@ H5VL_iod_rc_snapshot(H5RC_t *rc, const char *snapshot_name, void **req)
     status = (int *)malloc(sizeof(int));
 
 #if H5VL_IOD_DEBUG
-    printf("Read Context Snapshot, version %llu, axe id %llu\n", 
+    printf("Read Context Snapshot, version %"PRIu64", axe id %"PRIu64"\n", 
            input.c_version, g_axe_id);
 #endif
 
@@ -7535,7 +7535,7 @@ H5VL_iod_tr_start(H5TR_t *tr, hid_t trspl_id, void **req)
     status = (int *)malloc(sizeof(int));
 
 #if H5VL_IOD_DEBUG
-    printf("Transaction start, number %llu, axe id %llu\n", 
+    printf("Transaction start, number %"PRIu64", axe id %"PRIu64"\n", 
            input.trans_num, g_axe_id);
 #endif
 
@@ -7647,7 +7647,7 @@ H5VL_iod_tr_finish(H5TR_t *tr, hbool_t acquire, hid_t trfpl_id, void **req)
     status = (int *)malloc(sizeof(int));
 
 #if H5VL_IOD_DEBUG
-    printf("Transaction Finish, %llu, axe id %llu\n", 
+    printf("Transaction Finish, %"PRIu64", axe id %"PRIu64"\n", 
            input.trans_num, g_axe_id);
 #endif
 
@@ -7704,7 +7704,7 @@ H5VL_iod_tr_set_dependency(H5TR_t *tr, uint64_t trans_num, void **req)
     input.parent_trans_num = trans_num;
 
 #if H5VL_IOD_DEBUG
-    printf("Transaction Set Dependency, %llu on %llu axe id %llu\n", 
+    printf("Transaction Set Dependency, %"PRIu64" on %"PRIu64" axe id %"PRIu64"\n", 
            input.child_trans_num, input.parent_trans_num, g_axe_id);
 #endif
 
@@ -7749,7 +7749,7 @@ H5VL_iod_tr_skip(H5VL_iod_file_t *file, uint64_t start_trans_num, uint64_t count
     input.count = count;
 
 #if H5VL_IOD_DEBUG
-    printf("Transaction Skip, tr %llu count %llu,, axe id %llu\n", 
+    printf("Transaction Skip, tr %"PRIu64" count %"PRIu64",, axe id %"PRIu64"\n", 
            input.start_trans_num, input.count, g_axe_id);
 #endif
 
@@ -7849,7 +7849,7 @@ H5VL_iod_tr_abort(H5TR_t *tr, void **req)
     status = (int *)malloc(sizeof(int));
 
 #if H5VL_IOD_DEBUG
-    printf("Transaction Abort, tr %llu, axe id %llu\n", 
+    printf("Transaction Abort, tr %"PRIu64", axe id %"PRIu64"\n", 
            input.trans_num, g_axe_id);
 #endif
 

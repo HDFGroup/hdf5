@@ -326,7 +326,7 @@ H5VL__iod_server_finish_axe_tasks(AXE_engine_t axe_engine, AXE_task_t start_rang
 
     for(u=start_range ; u<count+start_range ; u++) {
         if(AXE_SUCCEED != AXEfinish(axe_engine, u))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE task %llu", u);
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE task %"PRIu64"", u);
     }
 
 done:

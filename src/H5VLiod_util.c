@@ -1050,7 +1050,7 @@ H5VL_iod_verify_scratch_pad(scratch_pad sp, iod_checksum_t iod_cs)
     computed_cs = H5_checksum_crc64(&sp, sizeof(sp));
 
     if(computed_cs != iod_cs) {
-        fprintf(stderr, "Scratch pad integrity check failed. IOD cs = %llu, Computed cs = %llu",
+        fprintf(stderr, "Scratch pad integrity check failed. IOD cs = %"PRIu64", Computed cs = %"PRIu64"",
                 iod_cs, computed_cs);
         ret_value = FAIL;
     }

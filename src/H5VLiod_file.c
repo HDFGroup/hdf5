@@ -76,9 +76,10 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create container");
 
+    fprintf(stderr, "Container Open: %"PRIu64"\n", coh.cookie);
     if(iod_trans_start(coh, &first_tid, NULL, num_peers, IOD_TRANS_W, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
-
+    fprintf(stderr, "Transaction Start: %"PRIu64"\n", first_tid);
     /* create the root group */
     ret = iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, NULL, NULL, 
                          &input->root_id, NULL);

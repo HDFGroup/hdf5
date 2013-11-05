@@ -266,7 +266,7 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
                             cur_req->status = H5ES_STATUS_SUCCEED;
                             cur_req->state = H5VL_IOD_COMPLETED;
                             if(H5VL_iod_request_complete(file, cur_req) < 0) {
-                                fprintf(stderr, "Operation %llu Failed!\n", cur_req->axe_id);
+                                fprintf(stderr, "Operation %"PRIu64" Failed!\n", cur_req->axe_id);
                             }
                         }
                     }
@@ -278,7 +278,7 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
         /* request complete, remove it from list & break */
         else {
             if(H5VL_iod_request_complete(file, request) < 0) {
-                fprintf(stderr, "Operation %llu Failed!\n", request->axe_id);
+                fprintf(stderr, "Operation %"PRIu64" Failed!\n", request->axe_id);
             }
             break;
         }
@@ -335,7 +335,7 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
         }
 
         if(H5VL_iod_request_complete(file, cur_req) < 0)
-            fprintf(stderr, "Operation %llu Failed!\n", cur_req->axe_id);
+            fprintf(stderr, "Operation %"PRIu64" Failed!\n", cur_req->axe_id);
 
         cur_req = tmp_req;
     }
@@ -393,7 +393,7 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
                     cur_req->status = H5ES_STATUS_SUCCEED;
                     cur_req->state = H5VL_IOD_COMPLETED;
                     if(H5VL_iod_request_complete(file, cur_req) < 0)
-                        fprintf(stderr, "Operation %llu Failed!\n", cur_req->axe_id);
+                        fprintf(stderr, "Operation %"PRIu64" Failed!\n", cur_req->axe_id);
                 }
             }
         }
@@ -687,7 +687,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                     if((raw_cs_scope & H5_CHECKSUM_TRANSFER) &&
                        internal_cs != read_status->cs) {
                         fprintf(stderr, 
-                                "Errrrr!  Dataset Read integrity failure (expecting %llu got %llu).\n",
+                                "Errrrr!  Dataset Read integrity failure (expecting %"PRIu64" got %"PRIu64").\n",
                                 read_status->cs, internal_cs);
                         req->status = H5ES_STATUS_FAIL;
                         req->state = H5VL_IOD_COMPLETED;
@@ -801,7 +801,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 /* verify data integrity */
                 if(internal_cs != vl_status.cs) {
                     fprintf(stderr, 
-                            "Errrrr!  Dataset Read integrity failure (expecting %llu got %llu).\n",
+                            "Errrrr!  Dataset Read integrity failure (expecting %"PRIu64" got %"PRIu64").\n",
                             internal_cs, status->cs);
                     req->status = H5ES_STATUS_FAIL;
                     req->state = H5VL_IOD_COMPLETED;
@@ -924,7 +924,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                         if((raw_cs_scope & H5_CHECKSUM_TRANSFER) &&
                            internal_cs != output->val_cs) {
                             fprintf(stderr, 
-                                    "Errrrr!  MAP Get integrity failure (expecting %llu got %llu).\n",
+                                    "Errrrr!  MAP Get integrity failure (expecting %"PRIu64" got %"PRIu64").\n",
                                     output->val_cs, internal_cs);
                             req->status = H5ES_STATUS_FAIL;
                             req->state = H5VL_IOD_COMPLETED;
@@ -1468,7 +1468,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_rc_info_t *rc_info = (H5VL_iod_rc_info_t *)req->data;
 
             if(SUCCEED != rc_info->result.ret) {
-                fprintf(stderr, "Failed to Acquire Read Context %llu\n", *(rc_info->c_version_ptr));
+                fprintf(stderr, "Failed to Acquire Read Context %"PRIu64"\n", *(rc_info->c_version_ptr));
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }

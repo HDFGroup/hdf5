@@ -80,6 +80,12 @@
 /* Define if the function stack tracing code is to be compiled in */
 #undef HAVE_CODESTACK
 
+/* Define to 1 if you have the <daos_api.h> header file. */
+#undef HAVE_DAOS_API_H
+
+/* Define to 1 if you have the <daos_types.h> header file. */
+#undef HAVE_DAOS_TYPES_H
+
 /* Define if Darwin or Mac OS X */
 #undef HAVE_DARWIN
 
@@ -208,6 +214,9 @@
 /* Define to 1 if you have the `axe' library (-laxe). */
 #undef HAVE_LIBAXE
 
+/* Define to 1 if you have the `daos_posix' library (-ldaos_posix). */
+#undef HAVE_LIBDAOS_POSIX
+
 /* Define to 1 if you have the `dl' library (-ldl). */
 #undef HAVE_LIBDL
 
@@ -223,6 +232,9 @@
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
+/* Define to 1 if you have the `mdhim' library (-lmdhim). */
+#undef HAVE_LIBMDHIM
+
 /* Define to 1 if you have the `mpe' library (-lmpe). */
 #undef HAVE_LIBMPE
 
@@ -237,6 +249,12 @@
 
 /* Define to 1 if you have the `nsl' library (-lnsl). */
 #undef HAVE_LIBNSL
+
+/* Define to 1 if you have the `pbl' library (-lpbl). */
+#undef HAVE_LIBPBL
+
+/* Define to 1 if you have the `plfs' library (-lplfs). */
+#undef HAVE_LIBPLFS
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
@@ -285,6 +303,9 @@
 
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL
+
+/* Define to 1 if you have the <plfs.h> header file. */
+#undef HAVE_PLFS_H
 
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H

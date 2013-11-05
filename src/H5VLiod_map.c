@@ -234,7 +234,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start map open %s with Loc ID %llu\n", name, loc_id);
+    fprintf(stderr, "Start map open %s with Loc ID %"PRIu64"\n", name, loc_id);
 #endif
 
     output.keytype_id = -1;
@@ -406,7 +406,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
 
         data_cs = H5_checksum_crc64(val_buf, val_size);
         if(value_cs != data_cs) {
-            fprintf(stderr, "Errrr.. Network transfer Data corruption. expecting %llu, got %llu\n",
+            fprintf(stderr, "Errrr.. Network transfer Data corruption. expecting %"PRIu64", got %"PRIu64"\n",
                     value_cs, data_cs);
             ret_value = FAIL;
             goto done;

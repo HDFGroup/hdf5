@@ -69,7 +69,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
     switch(acquire_req) {
     case H5RC_EXACT:
 #if H5VL_IOD_DEBUG
-        fprintf(stderr, "Exact Acquire Read Context %llu\n", input->c_version);
+        fprintf(stderr, "Exact Acquire Read Context %"PRIu64"\n", input->c_version);
 #endif
         if(iod_trans_start(coh, &c_version, NULL, 0, IOD_TRANS_R, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't acquire read context");
@@ -90,7 +90,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
             uint64_t u;
 
 #if H5VL_IOD_DEBUG
-            fprintf(stderr, "Next Acquire Read Context %llu\n", input->c_version);
+            fprintf(stderr, "Next Acquire Read Context %"PRIu64"\n", input->c_version);
 #endif
             if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
@@ -106,7 +106,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
 
             if(IOD_TID_UNKNOWN == acquired_version) {
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, 
-                            "can't get a read version after %llu\n", c_version);
+                            "can't get a read version after %"PRIu64"\n", c_version);
             }
 
             if(iod_free_cont_trans_stat(coh, tids) < 0)
@@ -119,7 +119,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
             uint64_t u;
 
 #if H5VL_IOD_DEBUG
-            fprintf(stderr, "Next Acquire Read Context %llu\n", input->c_version);
+            fprintf(stderr, "Next Acquire Read Context %"PRIu64"\n", input->c_version);
 #endif
             if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
@@ -143,7 +143,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
 
             if(IOD_TID_UNKNOWN == acquired_version) {
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, 
-                            "can't get a read version before %llu\n", c_version);
+                            "can't get a read version before %"PRIu64"\n", c_version);
             }
 
             if(iod_free_cont_trans_stat(coh, tids) < 0)
@@ -159,7 +159,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
     output.ret = ret_value;
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Done with Acquire Read Context. Acquired %llu\n", output.c_version);
+    fprintf(stderr, "Done with Acquire Read Context. Acquired %"PRIu64"\n", output.c_version);
 #endif
 
     HG_Handler_start_output(op_data->hg_handle, &output);
@@ -206,11 +206,11 @@ H5VL_iod_server_rcxt_release_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Release Read Context %llu\n", input->c_version);
+    fprintf(stderr, "Release Read Context %"PRIu64"\n", input->c_version);
 #endif
 
     if(iod_trans_finish(coh, input->c_version, NULL, 0, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't release Read Context %llu", input->c_version);
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't release Read Context %"PRIu64"", input->c_version);
 
 done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
@@ -250,11 +250,11 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Persist Read Context %llu\n", input->c_version);
+    fprintf(stderr, "Persist Read Context %"PRIu64"\n", input->c_version);
 #endif
 
     if(iod_trans_persist(coh, input->c_version, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't persist Read Context %llu", input->c_version);
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't persist Read Context %"PRIu64"", input->c_version);
 
 done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
@@ -295,12 +295,12 @@ H5VL_iod_server_rcxt_snapshot_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Snapshot %s with Read Context %llu\n", input->snapshot_name, input->c_version);
+    fprintf(stderr, "Snapshot %s with Read Context %"PRIu64"\n", input->snapshot_name, input->c_version);
 #endif
 
     /* MSC - can only snapshot latest version */
     if(iod_container_snapshot(coh, tid, input->snapshot_name, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't snapshot Read Context %llu", input->c_version);
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't snapshot Read Context %"PRIu64"", input->c_version);
 
 done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
@@ -343,7 +343,7 @@ H5VL_iod_server_trans_start_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Transaction Start %llu\n", input->trans_num);
+    fprintf(stderr, "Transaction Start %"PRIu64"\n", input->trans_num);
 #endif
 
     if(H5P_DEFAULT == input->trspl_id)
@@ -401,7 +401,7 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Transaction Finish %llu\n", input->trans_num);
+    fprintf(stderr, "Transaction Finish %"PRIu64"\n", input->trans_num);
 #endif
 
     /* Finish  the transaction */
@@ -411,7 +411,7 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
     /* if the flag is true, acquire a read context on the finished transaction */
     if(TRUE == acquire) {
 #if H5VL_IOD_DEBUG
-        fprintf(stderr, "Transaction Acquire after Finish %llu\n", trans_num);
+        fprintf(stderr, "Transaction Acquire after Finish %"PRIu64"\n", trans_num);
 #endif
 
         if(iod_trans_start(coh, &trans_num, NULL, 0, IOD_TRANS_R, NULL) < 0)
@@ -461,14 +461,14 @@ H5VL_iod_server_trans_set_dependency_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Transaction Set_Dependency %llu on %llu\n", 
+    fprintf(stderr, "Transaction Set_Dependency %"PRIu64" on %"PRIu64"\n", 
             input->child_trans_num, input->parent_trans_num);
 #endif
 
     /* MSC - set depends */
 
-    if(iod_trans_depend(coh, depends, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set dependency between transactions");
+    //if(iod_trans_depend(coh, depends, NULL) < 0)
+    //HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set dependency between transactions");
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with Transaction Set_Dependency\n");
@@ -515,13 +515,13 @@ H5VL_iod_server_trans_skip_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Transaction Skip %llu starting at %llu\n", count, start_trans_num);
+    fprintf(stderr, "Transaction Skip %"PRIu64" starting at %"PRIu64"\n", count, start_trans_num);
 #endif
 
     /* MSC - set skip ranges */
     skip_ranges.n_range = 1;
-    if(iod_trans_skip(coh, skip_ranges, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't skip transactions");
+    //if(iod_trans_skip(coh, skip_ranges, NULL) < 0)
+    //HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't skip transactions");
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with Transaction Skip\n");
@@ -566,7 +566,7 @@ H5VL_iod_server_trans_abort_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Transaction Abort %llu\n", input->trans_num);
+    fprintf(stderr, "Transaction Abort %"PRIu64"\n", input->trans_num);
 #endif
 
     if(iod_trans_finish(coh, trans_num, NULL, IOD_TRANS_ABORT_DEPENDENT, NULL) < 0)

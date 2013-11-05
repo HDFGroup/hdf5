@@ -1763,6 +1763,158 @@ case $withval in
 esac
 
 ## ----------------------------------------------------------------------
+## Is plfs present? It has a header file `plfs.h' and a library
+## `-lplfs' and their locations might be specified with the `--with-plfs'
+## command-line switch. The value is an include path and/or a library path.
+## If the library path is specified then it must be preceded by a comma.
+##
+AC_ARG_WITH([plfs],
+            [AS_HELP_STRING([--with-plfs=DIR],
+                            [Use plfs [default=no]])],,
+            [withval=no])
+
+case $withval in
+  yes)
+    HAVE_PLFS="yes"
+    AC_CHECK_HEADERS([plfs.h])
+    AC_CHECK_LIB([plfs], [plfs_utime], [MYPLFS_LIBS='-lplfs'], [unset HAVE_PLFS])
+    AC_SUBST([MYPLFS_LIBS])
+    if test -z "$HAVE_PLFS" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find plfs library])
+    fi
+    ;;
+  no)
+    HAVE_PLFS="no"
+    AC_MSG_CHECKING([for plfs library])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_PLFS="yes"
+    case "$withval" in
+      *,*)
+        plfs_inc="`echo $withval |cut -f1 -d,`"
+        plfs_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          plfs_inc="$withval/include"
+          plfs_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$plfs_inc" = "X/usr/include"; then
+      plfs_inc=""
+    fi
+    if test "X$plfs_lib" = "X/usr/lib"; then
+      plfs_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$plfs_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$plfs_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$plfs_inc"
+    fi
+
+    AC_CHECK_HEADERS([plfs.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+
+    if test -n "$plfs_lib"; then
+      LDFLAGS="$LDFLAGS -L$plfs_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$plfs_lib"
+    fi
+
+    AC_CHECK_LIB([plfs], [plfs_utime],, 
+		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PLFS])
+
+    if test -z "$HAVE_PLFS" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find plfs library])
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Is the daos_posix present? It has a header file `daos_posix.h' and a library
+## `-ldaos_posix' and their locations might be specified with the `--with-daos_posix'
+## command-line switch. The value is an include path and/or a library path.
+## If the library path is specified then it must be preceded by a comma.
+##
+AC_ARG_WITH([daos_posix],
+            [AS_HELP_STRING([--with-daos-posix=DIR],
+                            [Use daos_posix [default=no]])],,
+            [withval=no])
+
+case $withval in
+  yes)
+    HAVE_DAOS_POSIX="yes"
+    AC_CHECK_HEADERS([daos_api.h] [daos_types.h])
+    AC_CHECK_LIB([daos_posix], [daos_posix_init],[MYDAOS_POSIX_LIBS='-ldaos_posix'], [unset HAVE_DAOS_POSIX])
+    AC_SUBST([MYDAOS_POSIX_LIBS])
+    if test -z "$HAVE_DAOS_POSIX" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find daos_posix library])
+    fi
+    ;;
+  no)
+    HAVE_DAOS_POSIX="no"
+    AC_MSG_CHECKING([for daos_posix library])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_DAOS_POSIX="yes"
+    case "$withval" in
+      *,*)
+        daos_posix_inc="`echo $withval |cut -f1 -d,`"
+        daos_posix_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          daos_posix_inc="$withval"
+          daos_posix_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$daos_posix_inc" = "X/usr/include"; then
+      daos_posix_inc=""
+    fi
+    if test "X$daos_posix_lib" = "X/usr/lib"; then
+      daos_posix_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$daos_posix_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$daos_posix_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$daos_posix_inc"
+    fi
+
+    AC_CHECK_HEADERS([daos_api.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+
+    if test -n "$daos_posix_lib"; then
+      LDFLAGS="$LDFLAGS -L$daos_posix_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$daos_posix_lib"
+    fi
+
+    AC_CHECK_LIB([daos_posix], [daos_posix_finalize],, 
+		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_DAOS_POSIX])
+
+    if test -z "$HAVE_DAOS_POSIX" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find daos_posix library])
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
 ## Is the iod present? It has a header file `IOD.h' and a library
 ## `-liod' and their locations might be specified with the `--with-iod'
 ## command-line switch. The value is an include path and/or a library path.
@@ -1777,7 +1929,7 @@ case $withval in
   yes)
     HAVE_IOD="yes"
     AC_CHECK_HEADERS([iod_api.h])
-    AC_CHECK_LIB([iod], [iod_initialize],[MYIOD_LIBS='-liod'], [unset HAVE_IOD])
+    AC_CHECK_LIB([iod], [iod_initialize],[MYIOD_LIBS="-liod -lmdhim -lpbl"], [unset HAVE_IOD])
     AC_SUBST([MYIOD_LIBS])
     if test -z "$HAVE_IOD" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find iod library])
@@ -1799,6 +1951,10 @@ case $withval in
         if test -n "$withval"; then
           iod_inc="$withval/include"
           iod_lib="$withval/src"
+          pbl_inc="$withval/src/dep/pbl/src"
+          pbl_lib="$withval/src/dep/pbl/src"
+          mdhim_inc="$withval/src/dep/mdhim/src"
+          mdhim_lib="$withval/src/dep/mdhim/src"
         fi
         ;;
     esac
@@ -1818,19 +1974,25 @@ case $withval in
     saved_AM_LDFLAGS="$AM_LDFLAGS"
 
     if test -n "$iod_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$iod_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$iod_inc"
+      CPPFLAGS="$CPPFLAGS -I$iod_inc -I$mdhim_inc -I$pbl_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$iod_inc -I$mdhim_inc -I$pbl_inc"
     fi
 
     AC_CHECK_HEADERS([iod_api.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
 
     if test -n "$iod_lib"; then
-      LDFLAGS="$LDFLAGS -L$iod_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$iod_lib"
+      LDFLAGS="$LDFLAGS -L$iod_lib -L$mdhim_lib -L$pbl_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$iod_lib -L$mdhim_lib -L$pbl_lib"
     fi
 
-    AC_CHECK_LIB([iod], [iod_finalize],, 
+    AC_CHECK_LIB([pbl], [pbl_malloc],, 
 		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD])
+    AC_CHECK_LIB([mdhim], [mdhimFinalize],, 
+		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD],
+		[-lpbl])
+    AC_CHECK_LIB([iod], [iod_finalize],, 
+		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD],
+		[-lmdhim -lpbl])
 
     if test -z "$HAVE_IOD" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find iod library])
@@ -2786,7 +2948,7 @@ case "X-$enableval" in
                                      #include <iod_api.h>
                                      #include <iod_types.h>
                                      #include <stdlib.h>],
-				    [AXEend_try(); iod_finalize(NULL, NULL);],
+				    [AXEend_try(); iod_finalize(NULL);],
                                     [AC_DEFINE([HAVE_EFF], [1],
                                                [Define if we have EFF VOL plugins support])
                                        AC_MSG_RESULT([yes])

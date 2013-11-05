@@ -292,7 +292,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG 
-    fprintf(stderr, "Start dataset Open %s with Loc ID %llu\n", name, loc_id);
+    fprintf(stderr, "Start dataset Open %s with Loc ID %"PRIu64"\n", name, loc_id);
 #endif
 
     /* Traverse Path and open dset */
@@ -515,7 +515,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
 #if H5VL_IOD_DEBUG 
-    fprintf(stderr, "Done with dset read, checksum %llu, sending response to client\n", cs);
+    fprintf(stderr, "Done with dset read, checksum %"PRIu64", sending response to client\n", cs);
 #endif
 
     input = (dset_io_in_t *)H5MM_xfree(input);
@@ -845,7 +845,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     if(raw_cs_scope & H5_CHECKSUM_TRANSFER) {
         data_cs = H5_checksum_crc64(buf, size);
         if(cs != data_cs) {
-            fprintf(stderr, "Errrr.. Network transfer Data corruption. expecting %llu, got %llu\n",
+            fprintf(stderr, "Errrr.. Network transfer Data corruption. expecting %"PRIu64", got %"PRIu64"\n",
                     cs, data_cs);
             ret_value = FAIL;
             goto done;
