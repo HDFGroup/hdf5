@@ -241,8 +241,8 @@ done:
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
         fprintf(stderr, "failed to create/open Dataset\n");
-        output.iod_oh.rd_oh = IOD_HANDLE_INVALID;
-        output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
@@ -348,8 +348,8 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
 done:
     if(ret_value < 0) {
         fprintf(stderr, "DSET open FAILED\n");
-        output.iod_oh.rd_oh = IOD_HANDLE_INVALID;
-        output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_id = IOD_OBJ_INVALID;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }

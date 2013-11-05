@@ -52,7 +52,6 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh; /* container handle */
     iod_handles_t root_oh; /* root object handle */
     iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
-    iod_obj_id_t mdkv_id, attr_id; /* metadata and attribute KV IDs for the file */
     iod_ret_t ret;
     iod_trans_id_t first_tid = 0;
     uint32_t cs_scope = 0;
@@ -70,28 +69,27 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         mode |= IOD_CONT_CREATE;
 
     if(H5Pget_metadata_integrity_scope(input->fapl_id, &cs_scope) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+        HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 
     /* Create the Container */
     if(iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create container");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't create container");
 
-    fprintf(stderr, "Container Open: %"PRIu64"\n", coh.cookie);
     if(iod_trans_start(coh, &first_tid, NULL, num_peers, IOD_TRANS_W, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
-    fprintf(stderr, "Transaction Start: %"PRIu64"\n", first_tid);
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
+
     /* create the root group */
     ret = iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, NULL, NULL, 
                          &input->root_id, NULL);
-    if(0 == ret || EEXIST == ret) {
+    if(0 == ret || -EEXIST == ret) {
         /* root group has been created, open it */
         if (iod_obj_open_read(coh, input->root_id, NULL, &root_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open root group");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open root group");
         if (iod_obj_open_write(coh, input->root_id, NULL, &root_oh.wr_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open root group");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open root group");
     }
     else {
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create root group");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create root group");
     }
 
     /* for the process that succeeded in creating the group, create
@@ -104,17 +102,17 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 
         /* create the metadata KV object for the root group */
         if(iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, 
-                          NULL, NULL, &mdkv_id, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
+                          NULL, NULL, &input->mdkv_id, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
         /* create the attribute KV object for the root group */
         if(iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, 
-                          NULL, NULL, &attr_id, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
+                          NULL, NULL, &input->attrkv_id, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create attribute KV object");
 
         /* set values for the scratch pad object */
-        sp[0] = mdkv_id;
-        sp[1] = attr_id;
+        sp[0] = input->mdkv_id;
+        sp[1] = input->attrkv_id;
         sp[2] = IOD_OBJ_INVALID;
         sp[3] = IOD_OBJ_INVALID;
 
@@ -124,19 +122,21 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
             sp_cs = H5_checksum_crc64(&sp, sizeof(sp));
             /* set scratch pad in root group */
             if (iod_obj_set_scratch(root_oh.wr_oh, first_tid, &sp, &sp_cs, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
         }
         else {
 #if H5VL_IOD_DEBUG
             fprintf(stderr, "METADATA INTEGRITY DISABLED\n");
 #endif
             if (iod_obj_set_scratch(root_oh.wr_oh, first_tid, &sp, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
         }
 
+        fprintf(stderr, "Set scratch M: %"PRIu64"  A: %"PRIu64"\n", sp[0], sp[1]);
+
         /* Store Metadata in scratch pad */
-        if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
+        if (iod_obj_open_write(coh, input->mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
         /* store metadata */
         if(H5P_DEFAULT == input->fcpl_id)
@@ -145,7 +145,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         /* insert plist metadata */
         if(H5VL_iod_insert_plist(mdkv_oh, first_tid, fcpl_id, 
                                  NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert link count KV value");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert link count KV value");
 
         kv.value = &value;
         kv.value_len = sizeof(uint64_t);
@@ -153,44 +153,45 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         kv.key_len = strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
 
         if (iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
         kv.key = (void *)H5VL_IOD_KEY_ARRAY_IDS_INDEX;
         kv.key_len = strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
         if (iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
         kv.key = (void *)H5VL_IOD_KEY_BLOB_IDS_INDEX;
         kv.key_len = strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
         if (iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
         if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
     }
 
     /* Finish  the transaction */
     if(iod_trans_finish(coh, first_tid, NULL, 0, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction 0");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction 0");
 
     output.coh.cookie = coh.cookie;
     output.root_oh.rd_oh = root_oh.rd_oh;
     output.root_oh.wr_oh = root_oh.wr_oh;
-    output.kv_oid_index = 1;
-    output.array_oid_index = 1;
-    output.blob_oid_index = 1;
+    output.kv_oid_index = 3;
+    output.array_oid_index = 3;
+    output.blob_oid_index = 3;
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Done with file create, sending response to client \n");
+    fprintf(stderr, "Done with file create coh: %"PRIu64" root rd: %"PRIu64"  wr: %"PRIu64"\n",
+            coh.cookie, root_oh.rd_oh.cookie, root_oh.wr_oh.cookie);
 #endif
 
     HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
     if(ret_value < 0) {
-        output.coh = IOD_HANDLE_INVALID;
-        output.root_oh.rd_oh = IOD_HANDLE_INVALID;
-        output.root_oh.wr_oh = IOD_HANDLE_INVALID;
+        output.coh.cookie = IOD_OH_UNDEFINED;
+        output.root_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
+        output.root_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         output.kv_oid_index = 0;
         output.array_oid_index = 0;
         output.blob_oid_index = 0;
@@ -246,68 +247,70 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     if(H5Pget_metadata_integrity_scope(input->fapl_id, &cs_scope) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+        HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 
     /* open the container */
     if(iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
     if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
 
     rtid = tids->latest_rdable;
 
     if(iod_free_cont_trans_stat(coh, tids) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
 
     if(iod_trans_start(coh, &rtid, NULL, 0, IOD_TRANS_R, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
     /* open the root group */
     if (iod_obj_open_read(coh, ROOT_ID, NULL /*hints*/, &root_oh.rd_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object");
     if (iod_obj_open_write(coh, ROOT_ID, NULL /*hints*/, &root_oh.wr_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object");
 
     /* get scratch pad of root group */
     if(iod_obj_get_scratch(root_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
 
     if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
         if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
     }
+
+    fprintf(stderr, "Get scratch M: %"PRIu64"  A: %"PRIu64"\n", sp[0], sp[1]);
 
     /* open the metadata scratch pad */
     if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* retrieve all metadata from scratch pad */
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
                              NULL, NULL, &output.fcpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve fcpl");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve fcpl");
 
     val_size = sizeof(uint64_t);
     key_size = strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
 
     if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_KV_IDS_INDEX, key_size,
                         &output.kv_oid_index, &val_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "KV index lookup failed");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "KV index lookup failed");
 
     key_size = strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
     if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_ARRAY_IDS_INDEX, key_size,
                         &output.array_oid_index, &val_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Array index lookup failed");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Array index lookup failed");
 
     key_size = strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
     if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_BLOB_IDS_INDEX, key_size,
                         &output.blob_oid_index, &val_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "BLOB index lookup failed");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "BLOB index lookup failed");
 
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
 
     output.coh.cookie = coh.cookie;
     output.root_id = ROOT_ID;
@@ -319,7 +322,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     if(TRUE != acquire) {
         output.c_version = IOD_TID_UNKNOWN;
         if(iod_trans_finish(coh, rtid, NULL, 0, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction 0");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction 0");
     }
 
 #if H5VL_IOD_DEBUG
@@ -330,10 +333,10 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        output.coh = IOD_HANDLE_INVALID;
+        output.coh.cookie = IOD_OH_UNDEFINED;
         output.root_id = IOD_OBJ_INVALID;
-        output.root_oh.rd_oh = IOD_HANDLE_INVALID;
-        output.root_oh.wr_oh = IOD_HANDLE_INVALID;
+        output.root_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
+        output.root_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         output.fcpl_id = H5P_FILE_CREATE_DEFAULT;
         output.kv_oid_index = 0;
         output.array_oid_index = 0;
@@ -392,30 +395,31 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         uint32_t cs_scope = input->cs_scope;
 
         if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
 
-        trans_num = tids->latest_wrting + 1;
-        rtid = tids->latest_rdable;
+        // NEED IOD Transactions
+        //trans_num = tids->latest_wrting + 1;
+        //rtid = tids->latest_rdable;
 
         if(iod_free_cont_trans_stat(coh, tids) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
 
         if(iod_trans_start(coh, &trans_num, NULL, 0, IOD_TRANS_W, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
         /* get scratch pad of root group */
         if(iod_obj_get_scratch(root_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
 
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
             /* verify scratch pad integrity */
             if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
         }
 
         /* open the metadata scratch pad */
         if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
         /* insert current indexes in the metadata KV object */
         kv.value = &input->max_kv_index;
@@ -423,44 +427,48 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         kv.key = (void *)H5VL_IOD_KEY_KV_IDS_INDEX;
         kv.key_len = strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
         if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
         kv.value = &input->max_array_index;
         kv.value_len = sizeof(uint64_t);
         kv.key = (void *)H5VL_IOD_KEY_ARRAY_IDS_INDEX;
         kv.key_len = strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
         if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
         kv.value = &input->max_blob_index;
         kv.value_len = sizeof(uint64_t);
         kv.key = (void *)H5VL_IOD_KEY_BLOB_IDS_INDEX;
         kv.key_len = strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
         if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
         if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
 
         /* finish the transaction */
         if(iod_trans_finish(coh, trans_num, NULL, 0, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction");
     }
+
+    fprintf(stderr, "Closing ROOT Group: R: %"PRIu64"  W: %"PRIu64"\n", root_oh.rd_oh, root_oh.wr_oh);
 
     /* close the root group */
     if(iod_obj_close(root_oh.rd_oh, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close root object handle");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "can't close root object handle");
     if(iod_obj_close(root_oh.wr_oh, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close root object handle");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "can't close root object handle");
+
+    fprintf(stderr, "Closing Container: %"PRIu64"\n", coh);
 
     /* close the container */
     if(iod_container_close(coh, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close container");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTDEC, FAIL, "can't close container");
 
 done:
     fprintf(stderr, "Done with file close, sending response to client\n");
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
-        HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't send result of file close to client");
+        HDONE_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "can't send result of file close to client");
 
     input = (file_close_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);

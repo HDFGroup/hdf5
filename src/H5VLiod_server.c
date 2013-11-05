@@ -591,7 +591,7 @@ H5VL_iod_server_container_open(hg_handle_t handle)
 
 done:
     if(ret_value < 0) {
-        coh = IOD_HANDLE_INVALID;
+        coh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(handle, &coh);
     }
 

@@ -72,8 +72,8 @@ H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        obj_oh.rd_oh = IOD_HANDLE_INVALID;
-        obj_oh.wr_oh = IOD_HANDLE_INVALID;
+        obj_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
+        obj_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &obj_oh);
     }
 
@@ -255,8 +255,8 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        output.iod_oh.rd_oh = IOD_HANDLE_INVALID;
-        output.iod_oh.wr_oh = IOD_HANDLE_INVALID;
+        output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_id = IOD_OBJ_INVALID;
         output.cpl_id = FAIL;
         output.id1 = FAIL;

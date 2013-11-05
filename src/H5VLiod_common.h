@@ -27,7 +27,7 @@
 #ifdef H5_HAVE_EFF
 
 #define NA_UNDEFINED NULL
-#define IOD_OH_UNDEFINED 0//(pow(2.0,64.0) - 1)
+#define IOD_OH_UNDEFINED ((uint64_t)0)//(pow(2.0,64.0) - 1)
 #define IOD_ID_UNDEFINED ((uint64_t)(-1))//(pow(2.0,64.0) - 1)
 #define IOD_COUNT_UNDEFINED ((uint64_t)(-1))//(pow(2.0,64.0) - 1)
 #define H5VL_IOD_DEBUG 1

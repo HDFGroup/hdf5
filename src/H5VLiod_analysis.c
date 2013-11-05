@@ -151,8 +151,8 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_trans_start(coh, &rtid, NULL, 0, IOD_TRANS_R, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
-    root_handle.rd_oh = IOD_HANDLE_INVALID;
-    root_handle.wr_oh = IOD_HANDLE_INVALID;
+    root_handle.rd_oh.cookie = IOD_OH_UNDEFINED;
+    root_handle.wr_oh.cookie = IOD_OH_UNDEFINED;
 
     /* Traverse Path to retrieve object ID, and open object */
     if(H5VL_iod_server_open_path(coh, ROOT_ID, root_handle, obj_name, 
