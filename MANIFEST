@@ -1467,8 +1467,12 @@
 ./tools/testfiles/tcontents.ddl
 ./tools/testfiles/tcontiguos.ddl
 ./tools/testfiles/tcmpdattrintsize.ddl
+./tools/testfiles/tcmpdintarray.ddl
+./tools/testfiles/tcmpdints.ddl
 ./tools/testfiles/tcmpdintsize.ddl
 ./tools/testfiles/tcmpdattrintsize.h5
+./tools/testfiles/tcmpdintarray.h5
+./tools/testfiles/tcmpdints.h5
 ./tools/testfiles/tcmpdintsize.h5
 ./tools/testfiles/tcomp-1.ddl
 ./tools/testfiles/tcomp-2.ddl
