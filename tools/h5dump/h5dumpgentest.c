@@ -8852,14 +8852,14 @@ static void gent_compound_int_array(void) {
 static void gent_compound_ints(void) {
     hid_t fid, dataset, space;
     hsize_t dims[1];
-    uint8_t  valu8bits;
-    uint16_t valu16bits;
-    uint32_t valu32bits;
-    uint64_t valu64bits;
-    int8_t  val8bits;
-    int16_t val16bits;
-    int32_t val32bits;
-    int64_t val64bits;
+    uint8_t  valu8bits = (uint8_t) ~0u;  /* all 1s */
+    uint16_t valu16bits = (uint16_t) ~0u;  /* all 1s */
+    uint32_t valu32bits = (uint32_t) ~0u;  /* all 1s */
+    uint64_t valu64bits = (uint64_t) ~0Lu;  /* all 1s */
+    int8_t  val8bits = (int8_t) ~0;  /* all 1s */
+    int16_t val16bits = (int16_t) ~0;  /* all 1s */
+    int32_t val32bits = (int32_t) ~0;  /* all 1s */
+    int64_t val64bits = (int64_t) ~0L;  /* all 1s */
     /* Structure and array for compound types                             */
     typedef struct Cmpd1Struct {
             uint8_t  dsetu8;
@@ -8873,6 +8873,7 @@ static void gent_compound_ints(void) {
             double  dsetdbl;
     } Cmpd1Struct;
     Cmpd1Struct Cmpd1[F77_LENGTH];
+
     typedef struct Cmpd2Struct {
             uint64_t dsetu64;
             uint32_t dsetu32;
@@ -8891,7 +8892,7 @@ static void gent_compound_ints(void) {
     herr_t status; /* Error checking variable */
     hsize_t dim[] = { F77_LENGTH }; /* Dataspace dimensions     */
 
-    int m, n, o; /* Array init loop vars     */
+    int m; /* Array init loop vars     */
 
     /* Initialize the data in the arrays/datastructure                */
     for (m = 0; m < F77_LENGTH; m++) {
@@ -9008,6 +9009,16 @@ static void gent_compound_ints(void) {
     status = H5Tclose(Cmpd1Structid);
     HDassert(status >= 0);
 
+    status = H5Sclose(space);
+    HDassert(status >= 0);
+
+    status = H5Dclose(dataset);
+    HDassert(status >= 0);
+
+    /* Create the dataspace                                           */
+    space = H5Screate_simple(F76_RANK, dim, NULL);
+    HDassert(space >= 0);
+
     /* Create the memory data type                                    */
     Cmpd2Structid = H5Tcreate(H5T_COMPOUND, sizeof(Cmpd2Struct));
     HDassert(Cmpd2Structid >= 0);
@@ -9044,7 +9055,7 @@ static void gent_compound_ints(void) {
     dataset = H5Dcreate2(fid, F77_DATASETNAME2, Cmpd2Structid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write data to the dataset                                      */
-    status = H5Dwrite(dataset, Cmpd2Structid, H5S_ALL, H5S_ALL, H5P_DEFAULT, Cmpd1);
+    status = H5Dwrite(dataset, Cmpd2Structid, H5S_ALL, H5S_ALL, H5P_DEFAULT, Cmpd2);
     HDassert(status >= 0);
 
     /* Release resources                                              */
