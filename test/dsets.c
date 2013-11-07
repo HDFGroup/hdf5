@@ -4021,7 +4021,7 @@ test_nbit_int_size(hid_t file)
    */
    for (i=0; i < DSET_DIM1; i++)
        for (j=0; j < DSET_DIM2; j++)
-           orig_data[i][j] = rand() % (int)pow(2, precision-1) <<offset;
+           orig_data[i][j] = rand() % (int)pow((double)2, (double)(precision-1)) << offset;
 
 
    /* Describe the dataspace. */
@@ -7811,13 +7811,15 @@ test_chunk_expand(hid_t fapl)
     H5D_alloc_time_t alloc_time;        /* Storage allocation time */
     unsigned    write_elem, read_elem;  /* Element written/read */
     unsigned    u;              /* Local index variable */
+    size_t      size;           /* Size of type */
     herr_t      status;         /* Generic return value */
 
     TESTING("filter expanding chunks too much");
 
     h5_fixname(FILENAME[10], fapl, filename, sizeof filename);
 
-    if(sizeof(size_t) <= 4) {
+    size = sizeof(size_t);
+    if(size <= 4) {
 	SKIPPED();
 	puts("    Current machine can't test for error");
     } /* end if */
@@ -8287,7 +8289,7 @@ test_scatter(void)
         scatter_info.size = 8;
 
         /* Scatter data */
-        if(H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
             TEST_ERROR
 
         /* Verify data */
@@ -8327,7 +8329,7 @@ test_scatter(void)
         scatter_info.size = 12;
 
         /* Scatter data */
-        if(H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
             TEST_ERROR
 
         /* Verify data */
@@ -8385,7 +8387,7 @@ test_scatter(void)
         scatter_info.size = 36;
 
         /* Scatter data */
-        if(H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
             TEST_ERROR
 
         /* Verify data */
@@ -8441,7 +8443,7 @@ test_scatter(void)
         scatter_info.size = 16;
 
         /* Scatter data */
-        if(H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
             TEST_ERROR
 
         /* Verify data */
@@ -8475,7 +8477,7 @@ test_scatter(void)
         scatter_info.size = 4;
 
         /* Scatter data */
-        if(H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
             TEST_ERROR
 
         /* Verify data */
@@ -8952,7 +8954,7 @@ test_scatter_error(void)
     scatter_info.src_buf = src_buf;
     scatter_info.block = sizeof(src_buf)/sizeof(src_buf[0]);
     scatter_info.size = 6;
-    if(H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+    if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
         TEST_ERROR
 
 
@@ -8969,21 +8971,21 @@ test_scatter_error(void)
     scatter_info.src_buf = src_buf;
     scatter_info.size = 6;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_cb, &scatter_info, sid, sid, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, sid, sid, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
     scatter_info.src_buf = src_buf;
     scatter_info.size = 6;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, H5T_NATIVE_INT, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, H5T_NATIVE_INT, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
     scatter_info.src_buf = src_buf;
     scatter_info.size = 6;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, NULL);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, NULL);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
@@ -8994,7 +8996,7 @@ test_scatter_error(void)
     scatter_info.src_buf = src_buf;
     scatter_info.size = 7;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
@@ -9005,7 +9007,7 @@ test_scatter_error(void)
     scatter_info.src_buf = src_buf;
     scatter_info.size = 6;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_error_cb_fail, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_fail, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
@@ -9016,7 +9018,7 @@ test_scatter_error(void)
     scatter_info.src_buf = src_buf;
     scatter_info.size = 6;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_error_cb_null, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_null, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
@@ -9026,7 +9028,7 @@ test_scatter_error(void)
      */
     cb_unalign_nbytes = 0;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
@@ -9037,13 +9039,13 @@ test_scatter_error(void)
      */
     cb_unalign_nbytes = sizeof(src_buf[0]) - 1;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
     cb_unalign_nbytes = sizeof(src_buf[0]) + 1;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
