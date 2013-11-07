@@ -4109,7 +4109,7 @@ test_nbit_int_size(hid_t file)
    */
    for (i=0; i < DSET_DIM1; i++)
        for (j=0; j < DSET_DIM2; j++)
-           orig_data[i][j] = rand() % (int)pow(2, precision-1) <<offset;
+           orig_data[i][j] = rand() % (int)pow((double)2, (double)(precision-1)) << offset;
 
 
    /* Describe the dataspace. */
@@ -10022,8 +10022,8 @@ error:
 /*-------------------------------------------------------------------------
  * Function: test_swmr_v1_btree_ci_fail
  *
- * Purpose: Tests to see if the library will disallow creation of or
- *          writing to a version 1 B-tree under SWMR semantics.
+ * Purpose: Checks to see if the library will disallow writing to a version
+ *          1 B-tree under SWMR semantics.
  *
  * Return:      Success: 0
  *              Failure: -1
@@ -10035,75 +10035,87 @@ test_swmr_v1_btree_ci_fail(hid_t fapl)
 {
     char        filename[FILENAME_BUF_SIZE];
     hid_t       fid = -1;       /* File ID */
-    hid_t       my_fapl = -1;   /* File access property list ID */
+    hid_t       v1_fapl = -1;   /* fapl that will create v1 B-tree symbol tables and indexes */
+    hid_t       fh_fapl = -1;   /* fapl that will create fractal heap symbol tables */
     hid_t       dcpl = -1;      /* Dataset creation property list ID */
     hid_t       sid = -1;       /* Dataspace ID */
     hid_t       did = -1;       /* Dataset ID */
     hsize_t     dims[1];        /* Size of dataset */
     hsize_t     max_dims[1];    /* Maximum size of dataset */
     hsize_t     chunk_dims[1];  /* Chunk dimensions */
-    herr_t      err;            /* Error return value */
+    herr_t      err = -1;       /* Error return value */
     H5D_chunk_index_t idx_type; /* Chunk index type */
-    int         data = 0;       /* Data to be written to the dataset */
+    int         data = 42;      /* Data to be written to the dataset */
 
-    TESTING("expected dataset create/write failure under SWMR using v-1 B-trees");
+    TESTING("expected SWMR behavior using v-1 B-trees");
 
     h5_fixname(FILENAME[16], fapl, filename, sizeof filename);
 
     /* Copy the file access property list */
-    if((my_fapl = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
+    if((v1_fapl = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
+    if((fh_fapl = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
+    if(H5Pset_libver_bounds(fh_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
 
-    /* Open the test file */
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) FAIL_STACK_ERROR
+    /* Create the test file, then close and reopen.
+     *
+     * We'll create the file with the file access property list that
+     * uses the latest file format so that the group is indexed with a
+     * fractal heap.  If we don't do this, there can be issues when
+     * opening the file under SWMR since the root group will use a v1
+     * B-tree for the symbol table.
+     *
+     * The close and re-open is so that new datasets are indexed with
+     * the old v1 B-tree scheme.
+     */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fh_fapl)) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, v1_fapl)) < 0) FAIL_STACK_ERROR
 
-    /* Create a dataset */
+    /* Create a dataset that uses v1 B-tree chunk indexing */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
     chunk_dims[0] = 64;
     if(H5Pset_chunk(dcpl, 1, chunk_dims) < 0) FAIL_STACK_ERROR
-    dims[0] = 0;
+    dims[0] = 1;
     max_dims[0] = H5S_UNLIMITED;
     if((sid = H5Screate_simple(1, dims, max_dims)) < 0) FAIL_STACK_ERROR
     if((did = H5Dcreate2(fid, DSET_DEFAULT_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Explicitly check that the dataset is using a v-1 B-tree index */
     if(H5D__layout_idx_type_test(did, &idx_type) < 0) FAIL_STACK_ERROR
-    if(idx_type != H5D_CHUNK_IDX_BTREE) FAIL_PUTS_ERROR("created dataset is not version 1 B-tree")
+    if(idx_type != H5D_CHUNK_IDX_BTREE) 
+        FAIL_PUTS_ERROR("created dataset not indexed by version 1 B-tree")
 
     /* Close the file */
     if(H5Dclose(did) < 0) FAIL_STACK_ERROR
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     /* Reopen the file with SWMR write access */
-    if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, my_fapl)) < 0) FAIL_STACK_ERROR
-
-    /* Attempt to create a dataset that uses v-1 B-tree chunk indexing under
-     * SWMR write semantics.  This will fail.
-     */
-    H5E_BEGIN_TRY {
-        did = H5Dcreate2(fid, DSET_CHUNKED_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    } H5E_END_TRY;
-    if(did >= 0) {
-        H5_FAILED();
-        puts("    library allowed creation of a version 1 B-tree indexed dataset under SWMR semantics");
-	goto error;
-    }
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, v1_fapl)) < 0) FAIL_STACK_ERROR
 
     /* Attempt to write to a dataset that uses v-1 B-tree chunk indexing under
-     * SWMR semantics.  Since the library can't protect a v-1 B-tree node under
-     * SWMR semantics (we have no idea if someone will try to modify it), 
-     * even opening the dataset will fail.
+     * SWMR semantics.
      */
+    did = -1;
+    err = -1;
     H5E_BEGIN_TRY {
         did = H5Dopen(fid, DSET_DEFAULT_NAME, H5P_DEFAULT);
+        if(did >= 0) {
+            err = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data);
+        }
     } H5E_END_TRY;
-    if(did >= 0) {
+
+    /* Fail on successful write */
+    if(did >= 0 && err >= 0) {
         H5_FAILED();
-        puts("    library allowed opening (and potential writing) to a version 1 B-tree indexed dataset under SWMR semantics");
+        puts("    library allowed writing to a version 1 B-tree indexed dataset under SWMR semantics");
         goto error;
     }
 
     /* Close everything */
-    if(H5Pclose(my_fapl) < 0) FAIL_STACK_ERROR
+    if(did >= 0)
+        if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(v1_fapl) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(fh_fapl) < 0) FAIL_STACK_ERROR
     if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
     if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
@@ -10112,17 +10124,16 @@ test_swmr_v1_btree_ci_fail(hid_t fapl)
     return 0;
 
 error:
-    return -1;
     H5E_BEGIN_TRY {
-        H5Pclose(my_fapl);
+        H5Pclose(v1_fapl);
+        H5Pclose(fh_fapl);
         H5Pclose(dcpl);
         H5Dclose(did);
         H5Sclose(sid);
         H5Fclose(fid);
     } H5E_END_TRY;
+    return -1;
 } /* end test_swmr_v1_btree_ci_fail() */
-
-
 
 
 /*-------------------------------------------------------------------------
@@ -10232,7 +10243,7 @@ test_scatter(void)
         scatter_info.size = 8;
 
         /* Scatter data */
-        if(H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
             TEST_ERROR
 
         /* Verify data */
@@ -10272,7 +10283,7 @@ test_scatter(void)
         scatter_info.size = 12;
 
         /* Scatter data */
-        if(H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
             TEST_ERROR
 
         /* Verify data */
@@ -10330,7 +10341,7 @@ test_scatter(void)
         scatter_info.size = 36;
 
         /* Scatter data */
-        if(H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
             TEST_ERROR
 
         /* Verify data */
@@ -10386,7 +10397,7 @@ test_scatter(void)
         scatter_info.size = 16;
 
         /* Scatter data */
-        if(H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
             TEST_ERROR
 
         /* Verify data */
@@ -10420,7 +10431,7 @@ test_scatter(void)
         scatter_info.size = 4;
 
         /* Scatter data */
-        if(H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
             TEST_ERROR
 
         /* Verify data */
@@ -10897,7 +10908,7 @@ test_scatter_error(void)
     scatter_info.src_buf = src_buf;
     scatter_info.block = sizeof(src_buf)/sizeof(src_buf[0]);
     scatter_info.size = 6;
-    if(H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+    if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
         TEST_ERROR
 
 
@@ -10914,21 +10925,21 @@ test_scatter_error(void)
     scatter_info.src_buf = src_buf;
     scatter_info.size = 6;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_cb, &scatter_info, sid, sid, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, sid, sid, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
     scatter_info.src_buf = src_buf;
     scatter_info.size = 6;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, H5T_NATIVE_INT, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, H5T_NATIVE_INT, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
     scatter_info.src_buf = src_buf;
     scatter_info.size = 6;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, NULL);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, NULL);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
@@ -10939,7 +10950,7 @@ test_scatter_error(void)
     scatter_info.src_buf = src_buf;
     scatter_info.size = 7;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
@@ -10950,7 +10961,7 @@ test_scatter_error(void)
     scatter_info.src_buf = src_buf;
     scatter_info.size = 6;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_error_cb_fail, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_fail, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
@@ -10961,7 +10972,7 @@ test_scatter_error(void)
     scatter_info.src_buf = src_buf;
     scatter_info.size = 6;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_error_cb_null, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_null, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
@@ -10971,7 +10982,7 @@ test_scatter_error(void)
      */
     cb_unalign_nbytes = 0;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
@@ -10982,13 +10993,13 @@ test_scatter_error(void)
      */
     cb_unalign_nbytes = sizeof(src_buf[0]) - 1;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
     cb_unalign_nbytes = sizeof(src_buf[0]) + 1;
     H5E_BEGIN_TRY {
-        ret = H5Dscatter(scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 
