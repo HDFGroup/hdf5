@@ -132,11 +132,11 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
         }
 
-        fprintf(stderr, "Set scratch M: %"PRIu64"  A: %"PRIu64"\n", sp[0], sp[1]);
+        fprintf(stderr, "Set scratch M: %"PRIx64"  A: %"PRIx64"\n", sp[0], sp[1]);
 
         /* Store Metadata in scratch pad */
         if (iod_obj_open_write(coh, input->mdkv_id, NULL, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open metadata KV");
 
         /* store metadata */
         if(H5P_DEFAULT == input->fcpl_id)
@@ -411,6 +411,9 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         if(iod_obj_get_scratch(root_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
 
+        fprintf(stderr, "root OH %"PRIu64" MDKV ID %"PRIx64"\n", 
+                root_oh.rd_oh.cookie, sp[0]);
+
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
             /* verify scratch pad integrity */
             if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
@@ -418,8 +421,8 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* open the metadata scratch pad */
-        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+        if (iod_obj_open_write(coh, sp[0], NULL, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open metadata KV");
 
         /* insert current indexes in the metadata KV object */
         kv.value = &input->max_kv_index;

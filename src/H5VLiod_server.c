@@ -399,12 +399,13 @@ H5VL_iod_server_eff_finalize(hg_handle_t handle)
     /* increment the number of terminate requests received so far */
     terminate_requests ++;
 
+    if(iod_finalize(NULL) < 0 )
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTDEC, HG_FAIL, "can't finalize IOD");
+
     /* if all the peers that connected at the beginning have sent the
        terminate request, then finalize IOD and indicate that it is
        time to shutdown the server */
     if(terminate_requests == num_peers) {
-        if(iod_finalize(NULL) < 0 )
-            HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, HG_FAIL, "can't finalize IOD");
         shutdown = TRUE;
     }
 

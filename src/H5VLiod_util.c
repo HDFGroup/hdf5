@@ -136,9 +136,10 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
             cur_id = value.u.iod_id;
 
         /* Close previous read handle unless it is the original one */
-        if(loc_handle.rd_oh.cookie != prev_oh.cookie && 
-           iod_obj_close(prev_oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+        if(loc_handle.rd_oh.cookie != prev_oh.cookie) {
+            if(iod_obj_close(prev_oh, NULL, NULL) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+        }
 
         /* open the current group */
         if (iod_obj_open_read(coh, cur_id, NULL, &cur_oh.rd_oh, NULL) < 0)
@@ -328,8 +329,8 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
             /* populate the hyperslab */
             for(i=0 ; i<ndims ; i++) {
                 hslabs[0].start[i] = 0;
-                hslabs[0].stride[i] = 1;
                 hslabs[0].block[i] = dims[i];
+                hslabs[0].stride[i] = dims[i];
                 hslabs[0].count[i] = 1;
             }
         }
@@ -361,9 +362,9 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                     cur_ptr += n*ndims;
                     for(i=0 ; i<ndims ; i++) {
                         hslabs[n].start[i] = *(cur_ptr+i);
-                        hslabs[n].stride[i] = 1;
                         hslabs[n].count[i] = 1;
                         hslabs[n].block[i] = *(cur_ptr+ndims+i) + 1 - hslabs[n].start[i];
+                        hslabs[n].stride[i] = hslabs[n].block[i];
                     }
                 }
 
@@ -416,9 +417,9 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                         cur_ptr += n*ndims*2;
                         for(i=0 ; i<ndims ; i++) {
                             hslabs[n].start[i] = *(cur_ptr+i);
-                            hslabs[n].stride[i] = 1;
                             hslabs[n].count[i] = 1;
                             hslabs[n].block[i] = *(cur_ptr+ndims+i) + 1 - hslabs[n].start[i];
+                            hslabs[n].stride[i] = hslabs[n].block[i];
                         }
                     }
 
@@ -796,7 +797,6 @@ H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_n
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unsupported link type");
     }
 
-    fprintf(stderr, "inserting Key %s in %"PRIu64" \n", link_name, oh);
     kv.key = (void *)link_name;
     kv.key_len = (iod_size_t)strlen(link_name);
     kv.value = value;
@@ -902,11 +902,12 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         {
             H5VL_iod_link_t *iod_link = (H5VL_iod_link_t *)ret;
             uint8_t *val_ptr;
+            iod_ret_t ret; 
 
-            fprintf(stderr, "Looking up Key %s in %"PRIu64" \n", key, oh);
-            if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, cs, event) < 0)
+            if((ret = iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, cs, event)) < 0) {
+                fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
-
+            }
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 

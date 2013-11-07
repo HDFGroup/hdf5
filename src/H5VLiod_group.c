@@ -78,7 +78,8 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-    fprintf(stderr, "Creating at OH %"PRIu64" ID %"PRIx64"\n", cur_oh.wr_oh, cur_id);
+    fprintf(stderr, "Creating Group ID %"PRIx64") ", grp_id);
+    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64")\n", cur_oh.wr_oh, cur_id);
 
     /* create the group */
     if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &grp_id, NULL) < 0)
@@ -152,10 +153,12 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     /* close parent group if it is not the location we started the
        traversal into */
     if(loc_handle.rd_oh.cookie != cur_oh.rd_oh.cookie) {
-        iod_obj_close(cur_oh.rd_oh, NULL, NULL);
+        if(iod_obj_close(cur_oh.rd_oh, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
     }
     if(loc_handle.wr_oh.cookie != cur_oh.wr_oh.cookie) {
-        iod_obj_close(cur_oh.wr_oh, NULL, NULL);
+        if(iod_obj_close(cur_oh.wr_oh, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
     }
 
 #if H5VL_IOD_DEBUG

@@ -72,7 +72,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start datatype Commit %s\n", name);
+        fprintf(stderr, "Start datatype commit %s at %"PRIu64"\n", name, loc_handle.wr_oh);
 #endif
 
     /* the traversal will retrieve the location where the datatype needs
@@ -80,24 +80,27 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
        does not exist. */
     if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, rtid, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+
+    fprintf(stderr, "Creating Datatype ID %"PRIx64" ", dtype_id);
+    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64")\n", cur_oh.wr_oh, cur_id);
 
     /* create the datatype */
     if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_BLOB, NULL, NULL, &dtype_id, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create Datatype");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create BLOB");
 
     if (iod_obj_open_read(coh, dtype_id, NULL, &dtype_oh.rd_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Datatype");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open BLOB");
     if (iod_obj_open_write(coh, dtype_id, NULL, &dtype_oh.wr_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Datatype");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open BLOB");
 
     /* create the metadata KV object for the datatype */
     if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
     /* create the attribute KV object for the datatype */
     if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &attr_id, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create attribute KV object");
 
     /* set values for the scratch pad object */
     sp[0] = mdkv_id;
@@ -111,25 +114,25 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 
         sp_cs = H5_checksum_crc64(&sp, sizeof(sp));
         if (iod_obj_set_scratch(dtype_oh.wr_oh, wtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
     }
     else {
         if (iod_obj_set_scratch(dtype_oh.wr_oh, wtid, &sp, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
     }
 
     /* Store Metadata in scratch pad */
     if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open metadata KV object");
 
     /* determine the buffer size needed to store the encoded type of the datatype */ 
     if(H5Tencode(input->type_id, NULL, &buf_size) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode datatype type");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode datatype type");
     if(NULL == (buf = malloc (buf_size)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate type buffer");
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate type buffer");
     /* encode datatype of the datatype */ 
     if(H5Tencode(input->type_id, buf, &buf_size) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode datatype type");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode datatype type");
 
     /* create memory descriptor for writing */
     mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
@@ -153,12 +156,12 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 
         /* write the serialized type value to the BLOB object */
         if(iod_blob_write(dtype_oh.wr_oh, wtid, NULL, mem_desc, file_desc, &dt_cs, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
     }
     else {
         /* write the serialized type value to the BLOB object */
         if(iod_blob_write(dtype_oh.wr_oh, wtid, NULL, mem_desc, file_desc, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
     }
 
     free(mem_desc);
@@ -170,15 +173,15 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 
     /* insert plist metadata */
     if(H5VL_iod_insert_plist(mdkv_oh, wtid, tcpl_id, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* insert link count metadata */
     if(H5VL_iod_insert_link_count(mdkv_oh, wtid, (uint64_t)1, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* insert object type metadata */
     if(H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_DATATYPE, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* store the datatype size */
     {
@@ -192,19 +195,19 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         kv.value = &buf_size;
 
         if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
         free(key);
     }
 
     /* close the Metadata KV object */
     if(iod_obj_close(mdkv_oh, NULL, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
     /* add link in parent group to current object */
     if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
                                 H5L_TYPE_HARD, &dtype_id, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* close parent group and its scratch pad if it is not the
        location we started the traversal into */
@@ -289,29 +292,29 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Traverse Path and open dtype */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, &dtype_id, &dtype_oh) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* open a write handle on the ID. */
     if (iod_obj_open_write(coh, dtype_id, NULL, &dtype_oh.wr_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current datatype");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current datatype");
 
     /* get scratch pad of the datatype */
     if(iod_obj_get_scratch(dtype_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
         if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
     }
 
     /* open the metadata scratch pad */
     if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
                              NULL, NULL, &output.tcpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve tcpl");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve tcpl");
 
     val_size = sizeof(iod_size_t);
     key_size = strlen(H5VL_IOD_KEY_DTYPE_SIZE);
@@ -319,14 +322,14 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     /* retrieve blob size metadata from scratch pad */
     if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, key_size,
                         &buf_size, &val_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "datatype size lookup failed");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "datatype size lookup failed");
 
     if(NULL == (buf = malloc(buf_size)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate BLOB read buffer");
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate BLOB read buffer");
 
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
     /* create memory descriptor for writing */
     mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
@@ -343,7 +346,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* read the serialized type value from the BLOB object */
     if(iod_blob_read(dtype_oh.rd_oh, rtid, NULL, mem_desc, file_desc, &iod_cs, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
 
     if(iod_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* calculate a checksum for the datatype */
@@ -351,7 +354,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 
         /* Verifty checksum against one given by IOD */
         if(iod_cs != dt_cs)
-            HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
+            HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
     }
 
     free(mem_desc);
@@ -359,7 +362,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* decode the datatype */
     if((output.type_id = H5Tdecode(buf)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to decode datatype");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to decode datatype");
 
     free(buf);
 
@@ -421,16 +424,20 @@ H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start datatype Close\n");
 #endif
 
-    if((iod_obj_close(iod_oh.rd_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-    if((iod_obj_close(iod_oh.wr_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+    if(IOD_OH_UNDEFINED == iod_oh.wr_oh.cookie ||
+       IOD_OH_UNDEFINED == iod_oh.rd_oh.cookie) {
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close object with invalid handle");
+    }
 
-done:
+    if((iod_obj_close(iod_oh.rd_oh, NULL, NULL)) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Read OH");
+    if((iod_obj_close(iod_oh.wr_oh, NULL, NULL)) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Write OH");
+
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with dtype close, sending response to client\n");
 #endif
-
+done:
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     input = (dtype_close_in_t *)H5MM_xfree(input);

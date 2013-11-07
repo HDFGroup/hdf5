@@ -15,17 +15,16 @@ int main(int argc, char **argv) {
     const char file_name1[]="/eff_file_1";
     const char file_name2[]="/eff_file_2";
     hid_t fid1, fid2;
-    hid_t gid1, gid2, gid3, gid4;
-    hid_t sid;
+    hid_t gid1, gid2;
     hid_t did1, did2;
     hid_t dtid1, dtid2;
-
+    hid_t sid;
     hid_t tid1, tid2, rid1, rid2, rid3, rid4;
     hid_t fapl_id, trspl_id;
     hid_t e_stack;
 
-    void *gid_token1, *gid_token2, *gid_token3, *gid_token4;
-    size_t token_size1, token_size2, token_size3, token_size4;
+    void *token1, *token2, *token3, *token4, *token5, *token6;
+    size_t token_size1, token_size2, token_size3, token_size4, token_size5, token_size6;
     uint64_t version;
     uint64_t trans_num;
 
@@ -36,7 +35,7 @@ int main(int argc, char **argv) {
     hsize_t dims[1];
     int my_rank, my_size;
     int provided;
-    MPI_Request mpi_req, mpi_reqs[8];
+    MPI_Request mpi_req, mpi_reqs[12];
 
     H5ES_status_t status;
     size_t num_events = 0;
@@ -79,6 +78,16 @@ int main(int argc, char **argv) {
         rdata2[i] = 0;
         wdata2[i]=i;
     }
+
+    /* create a 32 bit integer LE datatype. This is a local operation
+       that does not touch the file */
+    dtid1 = H5Tcopy(H5T_NATIVE_INT);
+    dtid2 = H5Tcopy(H5T_NATIVE_INT);
+
+    /* create a dataspace. This is a local Bookeeping operation that 
+       does not touch the file */
+    dims [0] = 60;
+    sid = H5Screate_simple(1, dims, NULL);
 
     /* create an event Queue for managing asynchronous requests.
 
@@ -128,16 +137,27 @@ int main(int argc, char **argv) {
 
         /* create groups */
         gid1 = H5Gcreate_ff(fid1, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-        gid2 = H5Gcreate_ff(fid1, "G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-        //gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        gid2 = H5Gcreate_ff(fid2, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
 
-        gid3 = H5Gcreate_ff(fid2, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
-        gid4 = H5Gcreate_ff(gid3, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
+        /* Commit datatypes to the files */
+        H5Tcommit_ff(fid1, "int", dtid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
+                     tid1, e_stack);
+        H5Tcommit_ff(fid2, "int", dtid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
+                     tid2, e_stack);
+
+        /* create Datasets */
+        did1 = H5Dcreate_ff(gid1, "D1", dtid1, sid,
+                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
+        did2 = H5Dcreate_ff(gid2, "D1", dtid2, sid,
+                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid2, e_stack);
+
+        /* Raw data write on D1. */
+        H5Dwrite_ff(did1, dtid1, sid, sid, H5P_DEFAULT, wdata1, tid1, e_stack);
+        H5Dwrite_ff(did2, dtid2, sid, sid, H5P_DEFAULT, wdata2, tid2, e_stack);
     }
 
     /* Tell other procs that transaction 1 is started */
     MPI_Ibcast(&trans_num, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD, &mpi_req);
-
 
     /* Do the local-to-global, global-to-local, so all delegates can
        write the gids created in transaction 1 */
@@ -148,36 +168,57 @@ int main(int argc, char **argv) {
         assert(0 == ret);
         ret = H5Oget_token(gid2, NULL, &token_size2);
         assert(0 == ret);
-        ret = H5Oget_token(gid3, NULL, &token_size3);
+        ret = H5Oget_token(dtid1, NULL, &token_size3);
         assert(0 == ret);
-        ret = H5Oget_token(gid4, NULL, &token_size4);
+        ret = H5Oget_token(dtid2, NULL, &token_size4);
+        assert(0 == ret);
+        ret = H5Oget_token(did1, NULL, &token_size5);
+        assert(0 == ret);
+        ret = H5Oget_token(did2, NULL, &token_size6);
         assert(0 == ret);
 
         /* allocate buffers for each token */
-        gid_token1 = malloc(token_size1);
-        gid_token2 = malloc(token_size2);
-        gid_token3 = malloc(token_size3);
-        gid_token4 = malloc(token_size4);
+        token1 = malloc(token_size1);
+        token2 = malloc(token_size2);
+        token3 = malloc(token_size3);
+        token4 = malloc(token_size4);
+        token5 = malloc(token_size5);
+        token6 = malloc(token_size6);
 
         /* get the token buffer */
-        ret = H5Oget_token(gid1, gid_token1, &token_size1);
+        ret = H5Oget_token(gid1, token1, &token_size1);
         assert(0 == ret);
-        ret = H5Oget_token(gid2, gid_token2, &token_size2);
+        ret = H5Oget_token(gid2, token2, &token_size2);
         assert(0 == ret);
-        ret = H5Oget_token(gid3, gid_token3, &token_size3);
+        ret = H5Oget_token(dtid1, token3, &token_size3);
         assert(0 == ret);
-        ret = H5Oget_token(gid4, gid_token4, &token_size4);
+        ret = H5Oget_token(dtid2, token4, &token_size4);
         assert(0 == ret);
+        ret = H5Oget_token(did1, token5, &token_size5);
+        assert(0 == ret);
+        ret = H5Oget_token(did2, token6, &token_size6);
+        assert(0 == ret);
+
+        /* make sure the create operations have completed before
+           telling the delegates to open them */
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
         /* bcast the token sizes and the tokens */ 
         MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
         MPI_Ibcast(&token_size2, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[1]);
         MPI_Ibcast(&token_size3, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[2]);
         MPI_Ibcast(&token_size4, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[3]);
-        MPI_Ibcast(gid_token1, token_size1, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[4]);
-        MPI_Ibcast(gid_token2, token_size2, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[5]);
-        MPI_Ibcast(gid_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[6]);
-        MPI_Ibcast(gid_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[7]);
+        MPI_Ibcast(&token_size5, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[4]);
+        MPI_Ibcast(&token_size6, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[5]);
+        MPI_Ibcast(token1, token_size1, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[6]);
+        MPI_Ibcast(token2, token_size2, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[7]);
+        MPI_Ibcast(token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[8]);
+        MPI_Ibcast(token4, token_size4, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[9]);
+        MPI_Ibcast(token5, token_size5, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[10]);
+        MPI_Ibcast(token6, token_size6, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[11]);
     }
 
     /* Leader can continue writing to transaction 1, 
@@ -193,25 +234,38 @@ int main(int argc, char **argv) {
         MPI_Ibcast(&token_size2, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[1]);
         MPI_Ibcast(&token_size3, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[2]);
         MPI_Ibcast(&token_size4, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[3]);
-        MPI_Waitall(4, mpi_reqs, MPI_STATUS_IGNORE);
+        MPI_Ibcast(&token_size5, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[4]);
+        MPI_Ibcast(&token_size6, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[5]);
+        MPI_Waitall(6, mpi_reqs, MPI_STATUS_IGNORE);
 
         /* allocate buffers for each token */
-        gid_token1 = malloc(token_size1);
-        gid_token2 = malloc(token_size2);
-        gid_token3 = malloc(token_size3);
-        gid_token4 = malloc(token_size4);
+        token1 = malloc(token_size1);
+        token2 = malloc(token_size2);
+        token3 = malloc(token_size3);
+        token4 = malloc(token_size4);
+        token5 = malloc(token_size5);
+        token6 = malloc(token_size6);
 
         /* recieve the tokens */
-        MPI_Ibcast(gid_token1, token_size1, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
-        MPI_Ibcast(gid_token2, token_size2, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[1]);
-        MPI_Ibcast(gid_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[2]);
-        MPI_Ibcast(gid_token4, token_size4, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[3]);
-        MPI_Waitall(4, mpi_reqs, MPI_STATUS_IGNORE);
+        MPI_Ibcast(token1, token_size1, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
+        MPI_Ibcast(token2, token_size2, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[1]);
+        MPI_Ibcast(token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[2]);
+        MPI_Ibcast(token4, token_size4, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[3]);
+        MPI_Ibcast(token5, token_size5, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[4]);
+        MPI_Ibcast(token6, token_size6, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[5]);
+        MPI_Waitall(6, mpi_reqs, MPI_STATUS_IGNORE);
 
-        gid1 = H5Oopen_by_token(gid_token1, rid1, e_stack);
-        gid2 = H5Oopen_by_token(gid_token2, rid1, e_stack);
-        gid3 = H5Oopen_by_token(gid_token3, rid2, e_stack);
-        gid4 = H5Oopen_by_token(gid_token4, rid2, e_stack);
+        gid1 = H5Oopen_by_token(token1, rid1, e_stack);
+        gid2 = H5Oopen_by_token(token2, rid2, e_stack);
+        dtid1 = H5Oopen_by_token(token3, rid1, e_stack);
+        dtid2 = H5Oopen_by_token(token4, rid2, e_stack);
+        did1 = H5Oopen_by_token(token5, rid1, e_stack);
+        did2 = H5Oopen_by_token(token6, rid2, e_stack);
+
+        ret = H5Dread_ff(did1, dtid1, sid, sid, H5P_DEFAULT, rdata1, rid1, e_stack);
+        assert(ret == 0);
+        ret = H5Dread_ff(did2, dtid2, sid, sid, H5P_DEFAULT, rdata2, rid2, e_stack);
+        assert(ret == 0);
     }
 
     /* none leader procs have to complete operations before notifying the leader */
@@ -220,6 +274,16 @@ int main(int argc, char **argv) {
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
+
+        fprintf(stderr, "Read Data from container 1: ");
+        for(i=0;i<nelem;++i)
+            fprintf(stderr, "%d ",rdata1[i]);
+        fprintf(stderr, "\n");
+
+        fprintf(stderr, "Read Data from container 2: ");
+        for(i=0;i<nelem;++i)
+            fprintf(stderr, "%d ",rdata2[i]);
+        fprintf(stderr, "\n");
     }
 
     /* Barrier to make sure all processes are done writing so Process
@@ -258,118 +322,23 @@ int main(int argc, char **argv) {
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
-
-#if 0
-    /* create a 32 bit integer LE datatype. This is a local operation
-       that does not touch the file */
-    dtid1 = H5Tcopy(H5T_STD_I32LE);
-    dtid2 = H5Tcopy(H5T_STD_I32LE);
-
-    /* Commit the datatype to the file. This is asynchronous & immediate. 
-     * Other Local H5T type operations can be issued before completing this call
-     * because they do not depend on the committed state of the datatype.
-     */
-     H5Tcommit_ff(fid1, "int", dtid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
-                  tid1, e_stack);
-     H5Tcommit_ff(fid2, "int", dtid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
-                  tid2, e_stack);
-
-    /* create a dataspace. This is a local Bookeeping operation that 
-       does not touch the file */
-    dims [0] = 60;
-    sid = H5Screate_simple(1, dims, NULL);
-
-    /* create Datasets */
-    did1 = H5Dcreate_ff(gid2,"D1",dtid1,sid,
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
-    did2 = H5Dcreate_ff(gid4,"D1",dtid2,sid,
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid2, e_stack);
-
-    /* Raw data write on D1. */
-    H5Dwrite_ff(did1, dtid1, sid, sid, H5P_DEFAULT, wdata1, tid1, e_stack);
-    H5Dwrite_ff(did2, dtid2, sid, sid, H5P_DEFAULT, wdata2, tid2, e_stack);
-
-    /* none leader procs have to complete operations before notifying the leader */
-    if(0 != my_rank) {
-        /* wait on all requests and print completion status */
-        H5ESget_count(e_stack, &num_events);
-        H5ESwait_all(e_stack, &status);
-        H5ESclear(e_stack);
-        printf("%d events in event stack. Completion status = %d\n", num_events, status);
-    }
-
-    /* Barrier to make sure all processes are done writing so Process
-       0 can finish transaction 1 and acquire a read context on it. */
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    /* Leader process finished the transaction after all clients
-       finish their updates. Leader also asks the library to acquire
-       the committed transaction, that becomes a readable version
-       after the commit completes. */
-    if(0 == my_rank) {
-        MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
-
-        /* make this synchronous so we know the container version has been acquired */
-        ret = H5TRfinish(tid1, H5P_DEFAULT, &rid3, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-        /* make this synchronous so we know the container version has been acquired */
-        ret = H5TRfinish(tid2, H5P_DEFAULT, &rid4, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-    }
-
-    /* Local op */
-    ret = H5TRclose(tid1);
-    assert(0 == ret);
-    /* Local op */
-    ret = H5TRclose(tid2);
-    assert(0 == ret);
-
-    /* release container version 0. This is async. */
-    ret = H5RCrelease(rid1, e_stack);
-    assert(0 == ret);
-    ret = H5RCrelease(rid2, e_stack);
-    assert(0 == ret);
-
-    /* other processes just create a read context object; no need to
-       acquire it */
-    if(0 != my_rank) {
-        rid3 = H5RCcreate(fid1, version);
-        assert(rid3 > 0);
-        rid4 = H5RCcreate(fid2, version);
-        assert(rid4 > 0);
-    }
-
-    /* read data from datasets with read version 1. */
-    ret = H5Dread_ff(did1, dtid1, sid, sid, H5P_DEFAULT, rdata1, rid3, e_stack);
-    assert(ret == 0);
-    ret = H5Dread_ff(did2, dtid2, sid, sid, H5P_DEFAULT, rdata2, rid4, e_stack);
-    assert(ret == 0);
-
     fprintf(stderr, "\n*****************************************************************************************************************\n");
     fprintf(stderr, "Close Objects\n");
     fprintf(stderr, "*****************************************************************************************************************\n");
 
-    /* closing did1 acts as a barrier task at the server for all
-       operations dependeing on the dataset. This is asynchronous. */
     assert(H5Dclose_ff(did1, e_stack) == 0);
     assert(H5Dclose_ff(did2, e_stack) == 0);
 
     assert(H5Tclose_ff(dtid1, e_stack) == 0);
     assert(H5Tclose_ff(dtid2, e_stack) == 0);
 
-#endif
-
     assert(H5Gclose_ff(gid1, e_stack) == 0);
     assert(H5Gclose_ff(gid2, e_stack) == 0);
-    assert(H5Gclose_ff(gid3, e_stack) == 0);
-    assert(H5Gclose_ff(gid4, e_stack) == 0);
 
     ret = H5RCclose(rid1);
     assert(0 == ret);
     ret = H5RCclose(rid2);
     assert(0 == ret);
-
-    MPI_Barrier(MPI_COMM_WORLD);
 
     assert(H5Fclose_ff(fid1, e_stack) == 0);
     assert(H5Fclose_ff(fid2, e_stack) == 0);
@@ -381,7 +350,15 @@ int main(int argc, char **argv) {
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
     H5ESclose(e_stack);
+    H5Sclose(sid);
     H5Pclose(fapl_id);
+
+    free(token1);
+    free(token2);
+    free(token3);
+    free(token4);
+    free(token5);
+    free(token6);
 
     free(wdata1);
     free(rdata1);
@@ -396,7 +373,7 @@ int main(int argc, char **argv) {
        and shutsdown the FS server (when all clients send the terminate request) 
        and client */
     EFF_finalize();
-
     MPI_Finalize();
+
     return 0;
 }

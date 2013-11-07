@@ -1310,7 +1310,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)req->obj;
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "DATATYPE delete failed at the server\n");
+                fprintf(stderr, "datatype close failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }

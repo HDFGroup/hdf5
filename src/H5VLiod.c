@@ -3507,7 +3507,7 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t UNUSED loc_params, const 
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dtype");
 
     /* set common object parameters */
-    dtype->common.obj_type = H5I_DATASET;
+    dtype->common.obj_type = H5I_DATATYPE;
     dtype->common.file = obj->file;
     dtype->common.file->nopen_objs ++;
 
