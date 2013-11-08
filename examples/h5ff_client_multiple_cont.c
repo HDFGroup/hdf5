@@ -146,9 +146,9 @@ int main(int argc, char **argv) {
                      tid2, e_stack);
 
         /* create Datasets */
-        did1 = H5Dcreate_ff(fid1, "D1", dtid1, sid,
+        did1 = H5Dcreate_ff(gid1, "D1", dtid1, sid,
                             H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
-        did2 = H5Dcreate_ff(fid2, "D1", dtid2, sid,
+        did2 = H5Dcreate_ff(gid2, "D1", dtid2, sid,
                             H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid2, e_stack);
 
         /* Raw data write on D1. */
@@ -255,12 +255,21 @@ int main(int argc, char **argv) {
         MPI_Ibcast(token6, token_size6, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[5]);
         MPI_Waitall(6, mpi_reqs, MPI_STATUS_IGNORE);
 
+        /*
         gid1 = H5Oopen_by_token(token1, rid1, e_stack);
         gid2 = H5Oopen_by_token(token2, rid2, e_stack);
         dtid1 = H5Oopen_by_token(token3, rid1, e_stack);
         dtid2 = H5Oopen_by_token(token4, rid2, e_stack);
         did1 = H5Oopen_by_token(token5, rid1, e_stack);
         did2 = H5Oopen_by_token(token6, rid2, e_stack);
+        */
+
+        gid1 = H5Gopen_ff(fid1, "G1", H5P_DEFAULT, rid2, e_stack);
+        gid2 = H5Gopen_ff(fid2, "G1", H5P_DEFAULT, rid2, e_stack);
+        dtid1 = H5Topen_ff(fid1, "int", H5P_DEFAULT, rid2, e_stack);
+        dtid2 = H5Topen_ff(fid2, "int", H5P_DEFAULT, rid2, e_stack);
+        did1 = H5Dopen_ff(gid1, "D1", H5P_DEFAULT, rid2, e_stack);
+        did2 = H5Dopen_ff(gid2, "D1", H5P_DEFAULT, rid2, e_stack);
 
         {
             hid_t dxpl_id;

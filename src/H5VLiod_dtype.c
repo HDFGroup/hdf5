@@ -186,18 +186,15 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     /* store the datatype size */
     {
         iod_kv_t kv;
-        char *key = NULL;
 
-        key = strdup(H5VL_IOD_KEY_DTYPE_SIZE);
-        kv.key = key;
-        kv.key_len = strlen(key);
+        kv.key = (void *)H5VL_IOD_KEY_DTYPE_SIZE;
+        kv.key_len = strlen(H5VL_IOD_KEY_DTYPE_SIZE);
         kv.value_len = sizeof(iod_size_t);
         kv.value = &buf_size;
 
         if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
-        free(key);
     }
 
     /* close the Metadata KV object */
@@ -287,7 +284,8 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start datatype Open %s with Loc ID %"PRIu64"\n", name, loc_id);
+    fprintf(stderr, "Start datatype open %s at (OH %"PRIu64" ID %"PRIx64")\n", 
+            name, loc_handle.rd_oh.cookie, loc_id);
 #endif
 
     /* Traverse Path and open dtype */
@@ -346,7 +344,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* read the serialized type value from the BLOB object */
     if(iod_blob_read(dtype_oh.rd_oh, rtid, NULL, mem_desc, file_desc, &iod_cs, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read from BLOB object");
 
     if(iod_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* calculate a checksum for the datatype */
@@ -357,13 +355,12 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
     }
 
-    free(mem_desc);
-    free(file_desc);
-
     /* decode the datatype */
     if((output.type_id = H5Tdecode(buf)) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to decode datatype");
 
+    free(mem_desc);
+    free(file_desc);
     free(buf);
 
     output.iod_id = dtype_id;

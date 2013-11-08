@@ -202,12 +202,13 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
     FUNC_ENTER_NOAPI_NOINIT
 
     cur_oh.rd_oh.cookie = loc_handle.rd_oh.cookie;
+    cur_oh.wr_oh.cookie = loc_handle.wr_oh.cookie;
     cur_id = loc_id;
 
     if(cur_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
         /* open the current group */
-        if (iod_obj_open_read(coh, loc_id, NULL /*hints*/, &cur_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+        if (iod_obj_open_read(coh, loc_id, NULL, &cur_oh.rd_oh, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open start location");
     }
 
     /* Wrap the local buffer for serialized header info */
@@ -257,7 +258,7 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
             free(value.u.symbolic_name);
         }
         else
-            cur_id = value.iod_id;
+            cur_id = value.u.iod_id;
 
         /* Close previous handle unless it is the original one */
         if(loc_handle.rd_oh.cookie != prev_oh.cookie && 
@@ -839,7 +840,7 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
     switch(md_type) {
     case H5VL_IOD_PLIST:
         {
-            hid_t plist_id = *((hid_t *)ret);
+            hid_t plist_id;
 
             if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, cs, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
@@ -851,7 +852,9 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
             if((plist_id = H5Pdecode(value)) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode gcpl");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode cpl");
+
+            *((hid_t *)ret) = plist_id;
             break;
         }
     case H5VL_IOD_LINK_COUNT:
@@ -861,7 +864,7 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         break;
     case H5VL_IOD_DATATYPE:
         {
-            hid_t type_id = *((hid_t *)ret);
+            hid_t type_id;
 
             if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, cs, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
@@ -873,12 +876,14 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
             if((type_id = H5Tdecode(value)) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode gcpl");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode datatype");
+
+            *((hid_t *)ret) = type_id;
             break;
         }
     case H5VL_IOD_DATASPACE:
         {
-            hid_t space_id = *((hid_t *)ret);
+            hid_t space_id;
 
             if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, cs, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
@@ -889,8 +894,10 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
             if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, cs, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
-            if((space_id = H5Tdecode(value)) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode gcpl");
+            if((space_id = H5Sdecode(value)) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode dataspace");
+
+            *((hid_t *)ret) = space_id;
             break;
         }
     case H5VL_IOD_OBJECT_TYPE:

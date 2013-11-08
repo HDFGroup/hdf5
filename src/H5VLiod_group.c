@@ -228,7 +228,8 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start group open %s with Loc ID %"PRIu64"\n", name, loc_id);
+    fprintf(stderr, "Start group open %s at (OH %"PRIu64" ID %"PRIx64")\n", 
+            name, loc_handle.rd_oh.cookie, loc_id);
 #endif
 
     /* Traverse Path and open group */
@@ -236,7 +237,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* open a write handle on the ID. */
-    if (iod_obj_open_write(coh, grp_id, NULL, &grp_oh.wr_oh, NULL) < 0)
+    if(iod_obj_open_write(coh, grp_id, NULL, &grp_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
     /* get scratch pad of group */

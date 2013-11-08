@@ -2053,6 +2053,17 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
     if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+    }
+
     /* allocate the group object that is returned to the user */
     if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
@@ -2194,6 +2205,17 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
     /* retrieve IOD info of location object */
     if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+    }
 
     /* allocate the group object that is returned to the user */
     if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
@@ -2460,6 +2482,17 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t UNUSED loc_params,
     if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+    }
+
     /* allocate the dataset object that is returned to the user */
     if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
@@ -2610,6 +2643,17 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
     /* retrieve IOD info of location object */
     if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+    }
 
     /* allocate the dataset object that is returned to the user */
     if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
@@ -3437,6 +3481,17 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t UNUSED loc_params, const 
     if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+    }
+
     /* allocate the datatype object that is returned to the user */
     if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
@@ -3584,6 +3639,17 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const ch
     /* retrieve IOD info of location object */
     if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+    }
 
     /* allocate the datatype object that is returned to the user */
     if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
@@ -3863,6 +3929,17 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+    }
+
     /* allocate the attribute object that is returned to the user */
     if(NULL == (attr = H5FL_CALLOC(H5VL_iod_attr_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
@@ -4022,6 +4099,17 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     /* retrieve IOD info of location object */
     if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+    }
 
     /* allocate the attribute object that is returned to the user */
     if(NULL == (attr = H5FL_CALLOC(H5VL_iod_attr_t)))
@@ -4404,6 +4492,17 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
     if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+    }
+
     if(H5VL_OBJECT_BY_SELF == loc_params.type)
         loc_name = strdup(".");
     else if(H5VL_OBJECT_BY_NAME == loc_params.type)
@@ -4586,6 +4685,17 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 /* retrieve IOD info of location object */
                 if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &input.loc_attrkv_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+                /* MSC - If location object not opened yet, wait for it. */
+                if(IOD_OBJ_INVALID == iod_id) {
+                    /* Synchronously wait on the request attached to the dataset */
+                    if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+                        HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    obj->request = NULL;
+                    /* retrieve IOD info of location object */
+                    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+                }
 
                 if(H5VL_OBJECT_BY_SELF == loc_params.type)
                     loc_name = strdup(".");
@@ -4804,6 +4914,17 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
+                /* MSC - If location object not opened yet, wait for it. */
+                if(IOD_OBJ_INVALID == input.loc_id) {
+                    /* Synchronously wait on the request attached to the dataset */
+                    if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+                        HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    obj->request = NULL;
+                    /* retrieve IOD info of location object */
+                    if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+                }
+
                 if(H5VL_OBJECT_BY_SELF == loc_params.type)
                     loc_name = strdup(".");
                 else if(H5VL_OBJECT_BY_NAME == loc_params.type)
@@ -4826,6 +4947,18 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 if(H5VL_iod_get_loc_info(target_obj, &input.target_loc_id, 
                                          &input.target_loc_oh, &input.target_mdkv_id, NULL) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+                /* MSC - If location object not opened yet, wait for it. */
+                if(IOD_OBJ_INVALID == input.target_loc_id) {
+                    /* Synchronously wait on the request attached to the dataset */
+                    if(H5VL_iod_request_wait(target_obj->file, target_obj->request) < 0)
+                        HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    target_obj->request = NULL;
+                    /* retrieve IOD info of location object */
+                    if(H5VL_iod_get_loc_info(target_obj, &input.target_loc_id, 
+                                             &input.target_loc_oh, NULL, NULL) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+                }
 
                 if(H5VL_OBJECT_BY_SELF == target_params.type)
                     target_name = strdup(".");
@@ -4881,6 +5014,17 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
+                /* MSC - If location object not opened yet, wait for it. */
+                if(IOD_OBJ_INVALID == input.loc_id) {
+                    /* Synchronously wait on the request attached to the dataset */
+                    if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+                        HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    obj->request = NULL;
+                    /* retrieve IOD info of location object */
+                    if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+                }
+
                 if(H5VL_OBJECT_BY_SELF == loc_params.type)
                     loc_name = strdup(".");
                 else if(H5VL_OBJECT_BY_NAME == loc_params.type)
@@ -4895,6 +5039,18 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 if(H5VL_iod_get_loc_info(target_obj, &input.target_loc_id, 
                                          &input.target_loc_oh, &input.target_mdkv_id, NULL) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+                /* MSC - If location object not opened yet, wait for it. */
+                if(IOD_OBJ_INVALID == input.target_loc_id) {
+                    /* Synchronously wait on the request attached to the dataset */
+                    if(H5VL_iod_request_wait(target_obj->file, target_obj->request) < 0)
+                        HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    target_obj->request = NULL;
+                    /* retrieve IOD info of location object */
+                    if(H5VL_iod_get_loc_info(target_obj, &input.target_loc_id, 
+                                             &input.target_loc_oh, NULL, NULL) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+                }
 
                 /* set the input structure for the HG encode routine */
                 input.create_type = H5VL_LINK_CREATE_SOFT;
@@ -5002,9 +5158,22 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
     /* retrieve parent requests */
     if(H5VL_iod_get_parent_requests(src_obj, (H5VL_iod_req_info_t *)tr, parent_reqs, &num_parents) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
     /* retrieve IOD info of location object */
     if(H5VL_iod_get_loc_info(src_obj, &input.src_loc_id, &input.src_loc_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == input.src_loc_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(src_obj->file, src_obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        src_obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(src_obj, &input.src_loc_id, 
+                                 &input.src_loc_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+    }
 
     if(H5VL_OBJECT_BY_SELF == loc_params1.type)
         src_name = strdup(".");
@@ -5014,9 +5183,22 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
     /* retrieve parent requests */
     if(H5VL_iod_get_parent_requests(dst_obj, NULL, parent_reqs, &num_parents) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
     /* retrieve IOD info of location object */
     if(H5VL_iod_get_loc_info(dst_obj, &input.dst_loc_id, &input.dst_loc_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == input.dst_loc_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(dst_obj->file, dst_obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        dst_obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(dst_obj, &input.dst_loc_id, 
+                                 &input.dst_loc_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+    }
 
     if(H5VL_OBJECT_BY_SELF == loc_params2.type)
         dst_name = strdup(".");
@@ -5152,6 +5334,17 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
     /* retrieve IOD info of location object */
     if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+    }
 
     switch (get_type) {
         /* H5Lexists */
@@ -5334,6 +5527,17 @@ H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, vo
     /* retrieve IOD info of location object */
     if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == input.loc_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+    }
 
     if(H5VL_OBJECT_BY_SELF == loc_params.type)
         loc_name = strdup(".");
@@ -5730,6 +5934,17 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
     /* retrieve IOD info of location object */
     if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, &input.loc_mdkv_id, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == input.loc_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+    }
 
     if(H5VL_OBJECT_BY_SELF == loc_params.type)
         loc_name = strdup(".");
@@ -6133,6 +6348,17 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
     if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+    }
+
     switch (misc_type) {
         /* H5Arename/rename_by_name */
         case H5VL_ATTR_RENAME:
@@ -6293,6 +6519,17 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
     /* retrieve IOD info of location object */
     if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+    }
 
     switch (get_type) {
         /* H5Oexists_by_name */
@@ -6496,6 +6733,17 @@ H5VL_iod_map_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
     if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
 
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+    }
+
     /* allocate the map object that is returned to the user */
     if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
@@ -6624,6 +6872,17 @@ H5VL_iod_map_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char *n
     /* retrieve IOD info of location object */
     if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
+    }
 
     /* allocate the map object that is returned to the user */
     if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
