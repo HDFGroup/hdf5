@@ -95,14 +95,14 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     hid_t dcpl_id;
     iod_array_struct_t array; /* IOD array struct describing the dataset's dimensions */
     scratch_pad sp;
-    iod_ret_t ret;
+    iod_ret_t ret = 0;
     iod_size_t array_dims[H5S_MAX_RANK], current_dims[H5S_MAX_RANK];
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-        fprintf(stderr, "Start dataset create %s at %"PRIu64"\n", name, loc_handle.wr_oh);
+    fprintf(stderr, "Start dataset create %s at %"PRIu64"\n", name, loc_handle.wr_oh);
 #endif
 
     /* the traversal will retrieve the location where the dataset needs
@@ -116,8 +116,8 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64")\n", cur_oh.wr_oh, cur_id);
 
     /* Set the IOD array creation parameters */
-    array.cell_size = H5Tget_size(input->type_id);
-    array.num_dims = H5Sget_simple_extent_ndims(space_id);
+    array.cell_size = (uint32_t)H5Tget_size(input->type_id);
+    array.num_dims = (uint32_t)H5Sget_simple_extent_ndims(space_id);
 
     if(H5Sget_simple_extent_dims(space_id, current_dims, array_dims) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get dimentions' sizes");
@@ -129,17 +129,11 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     else {
         array.firstdim_max = array_dims[0];
     }
-    array.current_dims = current_dims;
-    array.chunk_dims = NULL;
 
-    /* MSC - NEED TO FIX THAT */
-#if 0
-    if(layout.type == H5D_CHUNKED) {
-        if(NULL == (array.chunk_dims = malloc (sizeof(iod_size_t) * layout.u.chunk.ndims)))
-            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate chunk dimention size array");
-        array.chunk_dims;
-    }
-#endif
+    array.current_dims = current_dims;
+
+    /* MSC - Add chunking support */
+    array.chunk_dims = NULL;
 
 #if H5VL_IOD_DEBUG 
     fprintf(stderr, "now creating the dataset %s cellsize %d num dimenstions %d\n",
@@ -147,16 +141,17 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* create the dataset */
-    ret = iod_obj_create(coh, wtid, NULL, IOD_OBJ_ARRAY, NULL, &array, &dset_id, NULL);
+    ret = iod_obj_create(coh, wtid, NULL, IOD_OBJ_ARRAY, NULL, 
+                         &array, &dset_id, NULL);
     if(ret != 0) {
         fprintf(stderr, "ret: %d error: %s\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create Array object");
     }
 
-    if (iod_obj_open_read(coh, dset_id, NULL, &dset_oh.rd_oh, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Dataset for Read");
     if (iod_obj_open_write(coh, dset_id, NULL, &dset_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Dataset for Write");
+    if (iod_obj_open_read(coh, dset_id, NULL, &dset_oh.rd_oh, NULL) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Dataset for Read");
 
     /* create the attribute KV object for the dataset */
     if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &attrkv_id, NULL) < 0)
@@ -542,7 +537,7 @@ done:
     }
 
     /* close the dataset if we opened it in this routine */
-    if(opened_locally) {
+    if(TRUE == opened_locally) {
         if(iod_obj_close(iod_oh.rd_oh, NULL, NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
@@ -752,7 +747,7 @@ done:
         free(buf);
 
     /* close the dataset if we opened it in this routine */
-    if(opened_locally) {
+    if(TRUE == opened_locally) {
         if(iod_obj_close(iod_oh.rd_oh, NULL, NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
@@ -808,6 +803,10 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+#if H5VL_IOD_DEBUG 
+    fprintf(stderr, "Start dataset Write on OH %"PRIu64" OID %"PRIx64"\n", iod_oh.wr_oh, iod_id);
+#endif
 
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.wr_oh.cookie == IOD_OH_UNDEFINED) {
@@ -929,7 +928,7 @@ done:
         free(buf);
 
     /* close the dataset if we opened it in this routine */
-    if(opened_locally) {
+    if(TRUE == opened_locally) {
         if(iod_obj_close(iod_oh.wr_oh, NULL, NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }

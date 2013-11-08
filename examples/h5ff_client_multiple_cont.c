@@ -146,9 +146,9 @@ int main(int argc, char **argv) {
                      tid2, e_stack);
 
         /* create Datasets */
-        did1 = H5Dcreate_ff(gid1, "D1", dtid1, sid,
+        did1 = H5Dcreate_ff(fid1, "D1", dtid1, sid,
                             H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
-        did2 = H5Dcreate_ff(gid2, "D1", dtid2, sid,
+        did2 = H5Dcreate_ff(fid2, "D1", dtid2, sid,
                             H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid2, e_stack);
 
         /* Raw data write on D1. */
@@ -262,10 +262,22 @@ int main(int argc, char **argv) {
         did1 = H5Oopen_by_token(token5, rid1, e_stack);
         did2 = H5Oopen_by_token(token6, rid2, e_stack);
 
-        ret = H5Dread_ff(did1, dtid1, sid, sid, H5P_DEFAULT, rdata1, rid1, e_stack);
-        assert(ret == 0);
-        ret = H5Dread_ff(did2, dtid2, sid, sid, H5P_DEFAULT, rdata2, rid2, e_stack);
-        assert(ret == 0);
+        {
+            hid_t dxpl_id;
+            uint64_t cs_scope;
+            dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+            /* tell HDF5 to disable all data integrity checks for this write */
+            cs_scope = 0;
+            ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
+            assert(ret == 0);
+
+            ret = H5Dread_ff(did1, dtid1, sid, sid, dxpl_id, rdata1, rid1, e_stack);
+            assert(ret == 0);
+            ret = H5Dread_ff(did2, dtid2, sid, sid, dxpl_id, rdata2, rid2, e_stack);
+            assert(ret == 0);
+
+            H5Pclose(dxpl_id);
+        }
     }
 
     /* none leader procs have to complete operations before notifying the leader */

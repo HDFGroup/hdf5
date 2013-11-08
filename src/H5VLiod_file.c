@@ -177,8 +177,8 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     output.root_oh.rd_oh = root_oh.rd_oh;
     output.root_oh.wr_oh = root_oh.wr_oh;
     output.kv_oid_index = 3;
-    output.array_oid_index = 3;
-    output.blob_oid_index = 3;
+    output.array_oid_index = 0;
+    output.blob_oid_index = 0;
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with file create coh: %"PRIu64" root rd: %"PRIu64"  wr: %"PRIu64"\n",
