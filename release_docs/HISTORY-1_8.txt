@@ -3,6 +3,7 @@ HDF5 History
 
 This file contains development history of HDF5 1.8 branch
 
+14.      Release Information for hdf5-1.8.12
 13.      Release Information for hdf5-1.8.11
 12.      Release Information for hdf5-1.8.10-patch1
 11.      Release Information for hdf5-1.8.10
@@ -18,6 +19,597 @@ This file contains development history of HDF5 1.8 branch
 01.      Release Information for hdf5-1.8.0
 
 [Search on the string '%%%%' for section breaks of each release.]
+
+%%%%1.8.12%%%%   
+
+HDF5 version 1.8.12 released on 2013-11-04
+================================================================================
+
+INTRODUCTION
+============
+
+This document describes the differences between HDF5-1.8.11 and 
+HDF5-1.8.12, and contains information on the platforms tested and 
+known problems in HDF5-1.8.12. 
+For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
+and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
+
+Links to the HDF5 1.8.12 source code, documentation, and additional materials
+can be found on the HDF5 web page at:
+
+     http://www.hdfgroup.org/products/hdf5/
+
+The HDF5 1.8.12 release can be obtained from:
+
+     http://www.hdfgroup.org/HDF5/release/obtain5.html
+
+User documentation for 1.8.12 can be accessed directly at this location: 
+
+     http://www.hdfgroup.org/HDF5/doc/
+
+New features in the HDF5-1.8.x release series, including brief general 
+descriptions of some new and modified APIs, are described in the "What's New 
+in 1.8.0?" document:
+
+     http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
+
+All new and modified APIs are listed in detail in the "HDF5 Software Changes 
+from Release to Release" document, in the section "Release 1.8.12 (current 
+release) versus Release 1.8.11":
+
+     http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
+
+If you have any questions or comments, please send them to the HDF Help Desk:
+
+     help@hdfgroup.org
+
+
+CONTENTS
+========
+
+- New Features
+- Support for New Platforms, Languages, and Compilers
+- Bug Fixes since HDF5-1.8.11
+- Supported Platforms
+- Supported Configuration Features Summary
+- More Tested Platforms
+- Known Problems
+
+
+New Features
+============
+
+    Configuration
+    -------------
+    - Added a configuration option to change the default plugin path.
+      The configure option is --with-default-plugindir=location.
+      The cmake option is -DH5_DEFAULT_PLUGINDIR:PATH=location.
+      HDFFV-8513.  (ADB 2013/09/04)
+    - Renamed FFLAGS to FCFLAGS in configure. (ADB 2013/08/13)
+    - CMake can now package a compressed examples file, the default for 
+      Windows binaries from HDF Group.  (ADB  - 2013/07/22)
+    
+    Library
+    -------
+    - None
+ 
+    Parallel Library
+    ----------------
+    - None
+ 
+    Tools
+    -----
+    - h5repack: Added the ability to use plugin filters to read and write 
+              files. The option uses the filter number. HDFFV-8345 
+              (ADB - 2013/09/04).
+    - h5dump: Added the option -N --any_path, which searches the file for 
+              paths that match the search path. HDFFV-7989 (ADB - 2013/08/12).
+    - h5dump: Added the optional arg 0 to -A, which excludes attributes 
+              from display. HDFFV-8134 (ADB - 2013/08/01).
+
+    High-Level APIs
+    ---------------
+    - None
+
+    Fortran API
+    -----------
+    - None
+
+    C++ API
+    -------
+    - Added tutorial examples to C++/examples.  They can be installed by
+      "make install-examples" and, in the installed directory, they can be
+      executed by running the script file run-c++-ex.sh. (BMR - 2013/09/28)
+    - A new class, H5::H5Location, is added to represent the location concept
+      in the C library.  It is a base class to H5::H5File and H5::H5Ojbect,
+      whose member functions are moved into H5::H5Location.  H5::H5File can
+      now inherent those functions.  As a result, an H5::H5File object can have
+      an attribute. (BMR - 2013/09/27)
+    - Added wrappers for H5Rget_obj_type2 to retrieve the type of the object
+      that an object reference points to. (BMR - 2013/09/27)
+	H5O_type_t H5Location::getRefObjType(void *ref, H5R_type_t ref_type)
+    - Added wrappers for H5Aexist to check whether an attribute exists given
+      a name. (BMR - 2013/09/27)
+	bool H5::H5Location::attrExists(const char* name)
+	bool H5::H5Location::attrExists(const H5std_string& name)
+    - Added a number of overloaded functions for convenience. (BMR - 2013/09/27)
+
+
+Support for New Platforms, Languages, and Compilers
+===================================================
+    - None
+
+Bug Fixes since HDF5-1.8.11
+===========================
+
+    Configuration
+    -------------
+    - Modified H5detect.c to scan floating point types for padding bits before
+      analyzing the type further.  This should fix problems with gcc 4.8. 
+      (NAF - 2013/09/19 - HDFFV-8523/HDFFV-8500)
+    - HDF5 rpaths are no longer encoded in the library files when configured
+      with --disable-sharedlib-rpath. (LRK-2013-09-23 - HDFFV-8276)
+
+    Library
+    -------
+    - Added const qualifier to source buffer parameters in H5Dgather and
+      H5D_scatter_func_t (H5Dscatter callback).  (NAF - 2013/7/09)
+
+    - CMake now creates *.so.{lt_version} files with the same version as 
+      configure.  (ADB  - 2013/06/05 HDFFV-8437)
+
+    Parallel Library
+    ----------------
+    - None
+
+    Performance
+    -------------
+    - None
+
+    Tools
+    -----
+    - h5dump: Added the option -N --any_path, which searches the file for 
+              paths that match the search path. HDFFV-7989 (ADB - 2013/08/12).
+    - h5dump: Added the optional arg 0 to -A, which excludes attributes 
+              from display. HDFFV-8134 (ADB - 2013/08/01).
+    - h5dump correctly exports subsetted data to a file, using the --output
+      option.  (ADB  - 2013/06/07 HDFFV-8447)
+    - h5cc and other compile scripts now default to linking shared libraries
+      when HDF5 is configured with the --disable-static option.  
+      (LRK - 2013-09-23 - HDFFV-8141)
+
+    F90 API
+    -------
+    - None
+
+    C++ API
+    ------
+    - None
+
+    High-Level APIs:
+    ------
+    - None
+
+    Fortran High-Level APIs:
+    ------
+    - None
+
+    Testing
+    -------
+    - test/big sometimes failed with the message of "file selection+offset not
+      within extent". This has been fixed. (AKC - 2013/09/28 HDFFV-8271).
+    - tools/h5diff/testh5diff.sh is run in every "make check", even after it
+      has passed in the previous run. It should not run again if there are no
+      code changes. Fixed. (AKC - 2013/07/19 HDFFV-8392)
+
+Supported Platforms
+===================
+The following platforms are supported and have been tested for this release.
+They are built with the configure process unless specified otherwise.
+
+    AIX 5.3                       xlc 10.1.0.5
+    (NASA G-ADA)                  xlC 10.1.0.5
+                                  xlf90 12.1.0.6
+
+    Linux 2.6.18-308.13.1.el5PAE  GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP i686 i686 i386         compilers for 32-bit applications;
+    (jam)                             Version 4.1.2 20080704 (Red Hat 4.1.2-54)
+                                      Version 4.8.1
+                                  PGI C, Fortran, C++ Compilers for 32-bit
+                                  applications;
+                                      Version 13.7-0
+                                  Intel(R) C, C++, Fortran Compiler for 32-bit
+                                  applications;
+                                      Version 13.1.3 (Build 20130607)
+
+    Linux 2.6.18-308.16.1.el5     GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers for 64-bit applications;
+    (koala)                           Version 4.1.2 20080704 (Red Hat 4.1.2-54)
+                                      Version 4.8.1
+                                  PGI C, Fortran, C++ for 64-bit target on 
+                                  x86-64;
+                                      Version 13.7-0 
+                                  Intel(R) C, C++, Fortran Compilers for 
+                                  applications running on Intel(R) 64; 
+                                      Version 13.1.3 (Build 20130607)
+
+    Linux 2.6.32-358.18.1.el6      GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (platypus)                       Version 4.4.7 20120313
+                                     Version 4.8.1
+                                  PGI C, Fortran, C++ for 64-bit target on 
+                                  x86-64;
+                                      Version 13.7-0 
+                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                  compilers:
+                                     Version 13.1.3 (Build 20130607)
+
+    Linux 2.6.32-358.18.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
+                                  IBM XL C/C++ V11.1
+                                  IBM XL Fortran V13.1
+
+    SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
+    (emu)                         Sun Fortran 95 8.6 SunOS_sparc
+                                  Sun C++ 5.12 SunOS_sparc
+
+    Windows 7                     Visual Studio 2008 w/ Intel Fortran 11 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Visual Studio 2012 w/ Intel Fortran 13 (cmake)
+                                  Cygwin(CYGWIN_NT-6.1 1.7.15(0.260/5/3) gcc(4.5.3) compiler and gfortran)
+                                  (cmake and autotools)
+
+    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Visual Studio 2012 w/ Intel Fortran 13 (cmake)
+
+    Windows 8.1                   Visual Studio 2012 w/ Intel Fortran 13 (cmake)
+
+    Windows 8.1 x64               Visual Studio 2012 w/ Intel Fortran 13 (cmake)
+
+    Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
+    Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6
+    64-bit                        gfortran GNU Fortran (GCC) 4.6.2
+    (fred)                        Intel C (icc), Fortran (ifort), C++ (icpc)
+                                      12.1 Build 20120928
+
+    Mac OS X Lion 10.7.3          Apple clang/clang++ version 3.0 from Xcode 4.6.1
+    64-bit                        gfortran GNU Fortran (GCC) 4.6.2
+    (duck)                        Intel icc/icpc/ifort version 13.0.3
+
+    Mac OS X Mountain Lion 10.8.1 Apple clang/clang++ version 4.2 from Xcode 4.6.1
+    64-bit                        gfortran GNU Fortran (GCC) 4.6.2
+    (wren)                        Intel icc/icpc/ifort version 13.0.3
+
+    OpenVMS  IA64 V8.4            HP C V7.3-018         
+                                  HP Fortran V8.2-104939-50H96
+                                  HP C++ V7.4-004 
+
+Tested Configuration Features Summary
+=====================================
+
+    In the tables below
+          y   = tested 
+          n   = not tested in this release
+          C   = Cluster
+          W   = Workstation
+          x   = not working in this release
+          dna = does not apply
+          ( ) = footnote appears below second table
+          <blank> = testing incomplete on this feature or platform 
+
+Platform                              C         F90/   F90      C++  zlib  SZIP
+                                      parallel  F2003  parallel
+Solaris2.11 32-bit                      n        y/y    n        y    y     y
+Solaris2.11 64-bit                      n        y/y    n        y    y     y
+Windows 7                               y        y/y    n        y    y     y
+Windows 7 x64                           y        y/y    n        y    y     y
+Windows 7 Cygwin                        n        y/n    n        y    y     y
+Windows 8.1                             n        y/y    n        y    y     y
+Windows 8.1   x64                       n        y/y    n        y    y     y
+Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
+Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
+Mac OS X Mountain Lion 10.8.1 64-bit    n        y/y    n        y    y     y
+AIX 5.3 32- and 64-bit                  n        y/n    n        y    y     y
+CentOS 5.9 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
+CentOS 5.9 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
+CentOS 5.9 Linux 2.6.18-308 i686 PGI    n        y/y    n        y    y     y
+CentOS 5.9 Linux 2.6.18 x86_64 GNU      y        y/y    y        y    y     y
+CentOS 5.9 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
+CentOS 5.9 Linux 2.6.18 x86_64 PGI      n        y/y    n        y    y     y
+CentOS 6.4 Linux 2.6.32 x86_64 GNU      n        y/y    n        y    y     y
+CentOS 6.4 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
+Linux 2.6.32-358.2.1.el6.ppc64          n        y/n    n        y    y     y
+OpenVMS IA64 V8.4                       n        y/n    n        y    y     n
+
+Platform                                 Shared  Shared    Shared    Thread-  
+                                         C libs  F90 libs  C++ libs  safe     
+Solaris2.11 32-bit                         y       y         y         y        
+Solaris2.11 64-bit                         y       y         y         y        
+Windows 7                                  y       y         y         y
+Windows 7 x64                              y       y         y         y
+Windows 7 Cygwin                           n       n         n         y
+Windows 8.1                                y       y         y         y
+Windows 8.1 x64                            y       y         y         y
+Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
+Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
+Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
+AIX 5.3 32- and 64-bit                     y       n         n         y        
+CentOS 5.9 Linux 2.6.18-308 i686 GNU       y       y         y         y        
+CentOS 5.9 Linux 2.6.18-308 i686 Intel     y       y         y         n        
+CentOS 5.9 Linux 2.6.18-308 i686 PGI       y       y         y         n        
+CentOS 5.9 Linux 2.6.18 x86_64 GNU         y       y         y         y        
+CentOS 5.9 Linux 2.6.18 x86_64 Intel       y       y         y         n        
+CentOS 5.9 Linux 2.6.18 x86_64 PGI         y       y         y         n     
+CentOS 6.4 Linux 2.6.32 x86_64 GNU         y       y         y         n
+CentOS 6.4 Linux 2.6.32 x86_64 Intel       y       y         y         n
+Linux 2.6.32-358.2.1.el6.ppc64             y       y         y         n 
+OpenVMS IA64 V8.4                          n       n         n         n
+
+Compiler versions for each platform are listed in the preceding
+"Supported Platforms" table.
+
+
+More Tested Platforms
+=====================
+The following platforms are not supported but have been tested for this release.
+
+    Linux 2.6.18-308.13.1.el5PAE  MPICH mpich2-1.4.1p1 compiled with
+    #1 SMP i686 i686 i386             gcc 4.1.2 and gfortran 4.1.2
+    (jam)                         g95 (GCC 4.0.3 (g95 0.94!)
+
+    Linux 2.6.18-308.16.1.el5     MPICH mpich2-1.4.1p1 compiled with
+    #1 SMP x86_64 GNU/Linux           gcc 4.1.2 and gfortran 4.1.2
+    (koala)                       g95 (GCC 4.0.3 (g95 0.94!)
+                                  
+    FreeBSD 8.2-STABLE i386       gcc 4.5.4 [FreeBSD] 20110526
+    (loyalty)                     gcc 4.6.1 20110527
+                                  g++ 4.6.1 20110527
+                                  gfortran 4.6.1 20110527
+
+    FreeBSD 8.2-STABLE amd64      gcc 4.5.4 [FreeBSD] 20110526
+    (freedom)                     gcc 4.6.1 20110527
+                                  g++ 4.6.1 20110527
+                                  gfortran 4.6.1 20110527
+
+    Debian7.1.0 3.2.0-4-amd64 #1 SMP Debian 3.2.46-1 x86_64 GNU/Linux
+                                  gcc (Debian 4.7.2-5) 4.7.2
+                                  GNU Fortran (Debian 4.7.2-5) 4.7.2
+                                  (cmake and autotools)
+
+    Fedora19 3.11.1-200.fc19.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (GCC) 4.8.1 20130603 (Red Hat 4.8.1-1)
+                                  GNU Fortran (GCC) 4.8.1 20130603 (Red Hat 4.8.1-1)
+                                  (cmake and autotools)
+
+    SUSE 12.3 3.7.10-1.16-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (SUSE Linux) 4.7.2
+                                  GNU Fortran (SUSE Linux) 4.7.2 
+                                  (cmake and autotools)
+
+    Ubuntu 13.04 3.8.0-30-generic #44-Ubuntu SMP x86_64 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
+                                  GNU Fortran (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
+                                  (cmake and autotools)
+    
+    Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46
+    hopper.nersc.gov              pgcc 12.5-0 64-bit target on x86-64 Linux -tp shanghai
+                                  pgf90 12.5-0 64-bit target on x86-64 Linux -tp shanghai
+                                  pgCC 12.5-0 64-bit target on x86-64 Linux -tp shanghai
+
+
+Known Problems
+==============
+* Several HDF5 command-line tools and tests leave behind generated files
+  that are not cleaned up with "make clean" or "make distclean" when software
+  is built in place. The issue will be addressed in the 1.8.13 release. We
+  recommend to use build directory to compile and test HDF5 as described
+  in the INSTALL file, section 4.2.
+ 
+* Source directory names with spaces in them will cause failures in configure
+  or make on Mac (HDFFV-8152), Linux, and probably all other platforms.  If a 
+  configure command with a space is run from a build directory, it will exit 
+  with an error message:  "checking whether build environment is sane... 
+  configure: error: unsafe srcdir value: '/scr/lrknox/hdf5 v1.8.12'".  If 
+  configure is run inside or below the directory with the space in the name, 
+  libtool will get the directory path from the system, put the part of the 
+  path before the space in the libdir variable in .../src/libhdf5.la, and 
+  then fail to find the nonexistent directory.  This is a known libtool issue 
+  and the suggested workaround is to rename the directory without spaces. 
+  (LRK - 2013/10/22)
+
+* CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
+  catches some undefined behavior in the alignment algorithm of the macro 
+  DETECT_I in H5detect.c (HDFFV-8147). This issue will be addressed in the 
+  next release.  (SLU - 2013/10/16)
+
+* Running make check for the tools can fail in the tools tests if make was not
+  run prior. The tests for the tools use other tools in the tests, therefore
+  all the tools should be built before testing the tools. (ADB - 2013/10/09)
+
+* Make provided by Solaris fails in "make check". Solaris users should use
+  gmake to build and install HDF5 software. (AKC - 2013/10/08 - HDFFV-8534)
+
+* On OpenVMS, two soft conversion functions (H5T__conv_i_f and H5T__conv_f_i)
+  have bugs.  They convert data between floating-point numbers and integers.
+  But the library's default is hard conversion.  The user should avoid
+  explicitly enabling soft conversion between floating-point numbers and
+  integers. (Issue VMS-8; SLU - 2013/09/19)
+
+* On OpenVMS, ZLIB 1.2.8 library doesn't work properly.  ZLIB 1.2.5 works
+  fine.  So please use ZLIB 1.2.5 to build HDF5 library. (Issue VMS-5;
+  SLU 2013/09/19)  
+
+* When building using the Cray compilers on Cray machines, HDF5
+  configure mistakenly thinks the compiler is an intel compiler and
+  sets the -std=c99 flag which breaks configure on Cray. To build HDF5
+  properly on a Cray machine, please consult with the instructions in
+  INSTALL_parallel for building on Hopper.
+  (MSC - 2013/04/26 - HDFFV-8429)
+
+* The h5dump and h5diff utilities occasionally produce different output
+  between Linux and Windows systems. This is caused by lower-level library
+  routines that fail to write fill values to the user's buffer when reading
+  unallocated chunks from datasets that have a fill value set to
+  H5D_FILL_VALUE_DEFAULT. Due to platform differences the return of
+  spurious data values has only been encountered on Windows 32-bit systems.
+  (Issue HDFFV-8247; JP - 2013/03/27)
+
+* The 5.9 C++ compiler on Sun failed to compile a C++ test ttypes.cpp.  It 
+  complains with this message:
+      "/home/hdf5/src/H5Vprivate.h", line 130: Error: __func__ is not defined.
+  
+  The reason is that __func__ is a predefined identifier in C99 standard.  The
+  HDF5 C library uses it in H5private.h.  The test ttypes.cpp includes 
+  H5private.h (H5Tpkg.h<-H5Fprivate.h<-H5Vprivate.h<-H5private.h).  Sun's 5.9
+  C++ compiler doesn't support __func__, thus fails to compile the C++ test.
+  But Sun's 5.11 C++ compiler does.  To check whether your Sun C++ compiler 
+  knows this identifier, try to compile the following simple C++ program:
+      #include<stdio.h>
+
+      int main(void)
+      {
+          printf("%s\n", __func__);
+          return 0;
+      }
+  (SLU - 2012/11/5)
+
+* The C++ and FORTRAN bindings are not currently working on FreeBSD with the
+  native release 8.2 compilers (4.2.1), but are working with gcc 4.6 from the
+  ports (and probably gcc releases after that).
+  (QAK - 2012/10/19)
+
+* The following h5dump test case fails in BG/P machines (and potentially other
+  machines that use a command script to launch executables):
+
+   h5dump --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0"
+     tno-subset.h5
+  
+  This is due to the embedded spaces in the dataset name being interpreted
+  by the command script launcher as meta-characters, thus passing three
+  arguments to h5dump's -d flag. The command passes if run by hand, just
+  not via the test script.
+  (AKC - 2012/05/03)
+
+* On hopper, the build failed when RUNSERIAL and RUNPARALLEL are set
+  to aprun -np X, because the H5lib_settings.c file was not generated
+  properly. Not setting those environment variables works, because
+  configure was able to automatically detect that it is a Cray system
+  and used the proper launch commands when necessary. 
+  (MSC - 2012/04/18)
+
+* The data conversion test dt_arith.c fails in "long double" to integer
+  conversion on Ubuntu 11.10 (3.0.0.13 kernel) with GCC 4.6.1 if the library
+  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernel
+  (3.2.2 on Fedora) do not have the problem.  Users should lower the 
+  optimization level (-O1 or -O0) by defining CFLAGS in the command line of 
+  "configure" like:
+
+      CFLAGS=-O1 ./configure
+
+  This will overwrite the library's default optimization level.
+  (SLU - 2012/02/07 - HDFFV-7829)
+  This issue is no longer present on Ubuntu 12.10 (3.5.0 kernel) with 
+  gcc 4.7.2.
+
+* The STDIO VFD does not work on some architectures, possibly due to 32/64
+  bit or large file issues.  The basic STDIO VFD test is known to fail on
+  64-bit SunOS 5.10 on SPARC when built with -m64 and 32-bit OS X/Darwin
+  10.7.0.  The STDIO VFD test has been disabled while we investigate and
+  a fix should appear in a future release.
+  (DER - 2011/10/14 - HDFFV-8235)
+
+* h5diff can report inconsistent results when comparing datasets of enum type
+  that contain invalid values.  This is due to how enum types are handled in
+  the library and will be addressed in a future release.
+  (DER - 2011/10/14 - HDFFV-7527)
+
+* The links test can fail under the stdio VFD due to some issues with external
+  links.  This will be investigated and fixed in a future release.
+  (DER - 2011/10/14 - HDFFV-7768)
+
+* After the shared library support was fixed for some bugs, it was discovered
+  that "make prefix=XXX install" no longer works for shared libraries. It
+  still works correctly for static libraries. Therefore, if you want to
+  install the HDF5 shared libraries in a location such as /usr/local/hdf5,
+  you need to specify the location via the --prefix option during configure 
+  time. E.g, ./configure --prefix=/usr/local/hdf5 ...
+  (AKC - 2011/05/07 - HDFFV-7583)
+
+* The parallel test, t_shapesame, in testpar/, may run for a long time and may
+  be terminated by the alarm signal.  If that happens, one can increase the
+  alarm seconds (default is 1200 seconds = 20 minutes) by setting the
+  environment variable, $HDF5_ALARM_SECONDS, to a larger value such as 3600
+  (60 minutes).  Note that the t_shapesame test may fail in some systems 
+  (see the "While working on the 1.8.6 release..." problem below).  If 
+  it does, it will waste more time if $HDF5_ALARM_SECONDS is set
+  to a larger value.
+  (AKC - 2011/05/07)
+
+* The C++ and FORTRAN bindings are not currently working on FreeBSD.
+  (QAK - 2011/04/26)
+
+* Shared Fortran libraries are not quite working on AIX. While they are
+  generated when --enable-shared is specified, the fortran and hl/fortran
+  tests fail. We are looking into the issue. HL and C++ shared libraries
+  should now be working as intended, however.
+  (MAM - 2011/04/20)
+
+* The --with-mpe configure option does not work with Mpich2.
+  (AKC - 2011/03/10)
+
+* While working on the 1.8.6 release of HDF5, a bug was discovered that can
+  occur when reading from a dataset in parallel shortly after it has been
+  written to collectively. The issue was exposed by a new test in the parallel
+  HDF5 test suite, but had existed before that. We believe the problem lies with
+  certain MPI implementations and/or file systems.
+
+  We have provided a pure MPI test program, as well as a standalone HDF5
+  program, that can be used to determine if this is an issue on your system.
+  They should be run across multiple nodes with a varying number of processes.
+  These programs can be found at:
+  http://www.hdfgroup.org/ftp/HDF5/examples/known_problems/
+  (NAF - 2011/01/19)
+
+* All the VFL drivers aren't backward compatible.  In H5FDpublic.h, the
+  structure H5FD_class_t changed in 1.8.  There is new parameter added to
+  get_eoa and set_eoa callback functions.  A new callback function
+  get_type_map was added in.  The public function H5FDrealloc was taken
+  out in 1.8.  The problem only happens when users define their own driver
+  for 1.6 and try to plug in 1.8 library.  Because there's only one user 
+  complaining about it, we (Elena, Quincey, and I) decided to leave it as 
+  it is (see bug report #1279).  Quincey will make a plan for 1.10.
+  (SLU - 2010/02/02)
+
+* The --enable-static-exec configure flag will only statically link libraries
+  if the static version of that library is present. If only the shared version
+  of a library exists (i.e., most system libraries on Solaris, AIX, and Mac,
+  for example, only have shared versions), the flag should still result in a 
+  successful compilation, but note that the installed executables will not be 
+  fully static. Thus, the only guarantee on these systems is that the 
+  executable is statically linked with just the HDF5 library.
+  (MAM - 2009/11/04)
+  
+* Parallel tests failed with 16 processes with data inconsistency at testphdf5
+  / dataset_readAll. Parallel tests also failed with 32 and 64 processes with
+  collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
+  with MPI IO.
+  (CMC - 2009/04/28)
+
+* On an Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers, 
+  use -mp -O1 compilation flags to build the libraries. A higher level of 
+  optimization causes failures in several HDF5 library tests. 
+
+* A dataset created or rewritten with a v1.6.3 library or after cannot be read 
+  with the v1.6.2 library or before when the Fletcher32 EDC filter is enabled.
+  There was a bug in the calculation of the Fletcher32 checksum in the 
+  library before v1.6.3; the checksum value was not consistent between big-
+  endian and little-endian systems.  This bug was fixed in Release 1.6.3.  
+  However, after fixing the bug, the checksum value was no longer the same as 
+  before on little-endian system.  Library releases after 1.6.4 can still read 
+  datasets created or rewritten with an HDF5 library of v1.6.2 or before.  
+  (SLU - 2005/06/30)
 
 %%%%1.8.11%%%%   
 
