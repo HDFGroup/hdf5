@@ -112,8 +112,10 @@ typedef struct H5D_chunk_addr_info_t {
 /********************/
 /* Local Prototypes */
 /********************/
+#if 0 // JK_SINGLE_PATH_CUTOFF
 static herr_t H5D__chunk_collective_io(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, H5D_chunk_map_t *fm);
+#endif
 #ifndef JK_WORK    
 static herr_t H5D__piece_mdset_io(const hid_t file_id, const size_t count, 
     H5D_io_info_md_t *io_info_md);
@@ -123,25 +125,31 @@ static herr_t H5D__multi_chunk_collective_io(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, H5D_chunk_map_t *fm,
     H5P_genplist_t *dx_plist);
 #endif    
+#if 0 // JK_SINGLE_PATH_CUTOFF
 static herr_t H5D__link_chunk_collective_io(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, H5D_chunk_map_t *fm, int sum_chunk,
     H5P_genplist_t *dx_plist);
+#endif
 #ifndef JK_WORK    
 static herr_t H5D__all_piece_collective_io(const hid_t file_id, const size_t count, 
     H5D_io_info_md_t *io_info_md, H5P_genplist_t *dx_plist);
 #endif
+#if 0 // JK_SINGLE_PATH_CUTOFF
 static herr_t H5D__inter_collective_io(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, const H5S_t *file_space,
     const H5S_t *mem_space);
 static herr_t H5D__final_collective_io(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, hsize_t nelmts, MPI_Datatype *mpi_file_type,
     MPI_Datatype *mpi_buf_type);
+#endif
 #ifndef JK_WORK
 static herr_t H5D__final_collective_io_mdset(H5D_io_info_md_t *io_info_md,
     hsize_t mpi_buf_count, MPI_Datatype *mpi_file_type, MPI_Datatype *mpi_buf_type);
 #endif
+#if 0 // JK_SINGLE_PATH_CUTOFF
 static herr_t H5D__sort_chunk(H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
     H5D_chunk_addr_info_t chunk_addr_info_array[], int many_chunk_opt);
+#endif
 #if 0 // JK_WORK_REMOVE
 static herr_t H5D__sort_piece(H5D_io_info_md_t *io_info_md, 
     H5D_chunk_addr_info_t chunk_addr_info_array[], int sum_chunk);
@@ -156,8 +164,10 @@ static herr_t H5D__ioinfo_coll_opt_mode(H5D_io_info_t *io_info, H5P_genplist_t *
     H5FD_mpio_collective_opt_t coll_opt_mode);
 static herr_t H5D__mpio_get_min_chunk(const H5D_io_info_t *io_info,
     const H5D_chunk_map_t *fm, int *min_chunkf);
+#if 0 // JK_SINGLE_PATH_CUTOFF
 static herr_t H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info,
     const H5D_chunk_map_t *fm, int *sum_chunkf);
+#endif
 
 
 /*********************/
@@ -780,6 +790,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if 0 // JK_SINGLE_PATH_CUTOFF
 static herr_t
 H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
     int *sum_chunkf)
@@ -803,6 +814,7 @@ H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mpio_get_sum_chunk() */
+#endif
 
 #ifndef JK_WORK
 static herr_t
@@ -1023,6 +1035,7 @@ done:
 #endif // JK_TODO_NOCOLLCAUSE_REMOVE
 
 
+#if 0 // JK_SINGLE_PATH_CUTOFF
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_collective_io
  *
@@ -1193,6 +1206,7 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_collective_io */
+#endif
 
 #ifndef JK_WORK
 static herr_t
@@ -1458,6 +1472,7 @@ done:
  * Date: 2012-10-10
  *-------------------------------------------------------------------------
  */
+#if 0 // JK_SINGLE_PATH_CUTOFF
 static herr_t
 H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     H5D_chunk_map_t *fm, int sum_chunk, H5P_genplist_t *dx_plist)
@@ -1724,6 +1739,7 @@ if(H5DEBUG(D))
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__link_chunk_collective_io */
+#endif
 
 #ifndef JK_WORK
 static herr_t
@@ -2069,15 +2085,29 @@ if(H5DEBUG(D))
            #endif // JK_
 
             /* Create final MPI derived datatype for the file */
+            /* Note: consider to use 'MPI_Type_create_struct' instead of
+             * 'MPI_Type_struct' which is deprecated as of MPI-2 - JKM */
+            #if defined(MPI_VERSION) && MPI_VERSION >= 2
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_file_counts, chunk_file_disp_array, chunk_ftype, &chunk_final_ftype)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
+            #else
             if(MPI_SUCCESS != (mpi_code = MPI_Type_struct((int)num_chunk, chunk_mpi_file_counts, chunk_file_disp_array, chunk_ftype, &chunk_final_ftype)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_struct failed", mpi_code)
+            #endif
             if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&chunk_final_ftype)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
             chunk_final_ftype_is_derived = TRUE;
 
             /* Create final MPI derived datatype for memory */
+            /* Note: consider to use 'MPI_Type_create_struct' instead of
+             * 'MPI_Type_struct' which is deprecated as of MPI-2 - JKM */
+            #if defined(MPI_VERSION) && MPI_VERSION >= 2
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_mem_counts, chunk_mem_disp_array, chunk_mtype, &chunk_final_mtype)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
+            #else
             if(MPI_SUCCESS != (mpi_code = MPI_Type_struct((int)num_chunk, chunk_mpi_mem_counts, chunk_mem_disp_array, chunk_mtype, &chunk_final_mtype)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_struct failed", mpi_code)
+            #endif
             if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&chunk_final_mtype)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
             chunk_final_mtype_is_derived = TRUE;
@@ -2426,6 +2456,7 @@ done:
 
 
 
+#if 0 // JK_SINGLE_PATH_CUTOFF
 /*-------------------------------------------------------------------------
  * Function:    H5D__inter_collective_io
  *
@@ -2535,6 +2566,7 @@ if(H5DEBUG(D))
 #endif
       FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__final_collective_io */
+#endif
 
 #ifndef JK_WORK
 static herr_t
@@ -2564,7 +2596,7 @@ if(H5DEBUG(D))
     HDfprintf(H5DEBUG(D),"ret_value before leaving final_collective_io=%d\n",ret_value);
 #endif
       FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__final_collective_io */
+} /* end H5D__final_collective_io_mdset */
 #endif
 
 
@@ -2596,6 +2628,7 @@ H5D__cmp_chunk_addr(const void *chunk_addr_info1, const void *chunk_addr_info2)
 } /* end H5D__cmp_chunk_addr() */
 
 
+#if 0 // JK_SINGLE_PATH_CUTOFF
 /*-------------------------------------------------------------------------
  * Function:    H5D__sort_chunk
  *
@@ -2738,6 +2771,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__sort_chunk() */
+#endif
 
 #if 0 // JK_WORK_REMOVE
 static herr_t
@@ -2889,7 +2923,7 @@ done:
         H5MM_xfree(total_chunk_addr_array);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__sort_chunk() */
+} /* end H5D__sort_piece() */
 #endif
 
 

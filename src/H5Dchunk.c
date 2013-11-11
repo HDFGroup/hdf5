@@ -5477,6 +5477,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_prune_by_extent() */
 
+#if 0 // JK_SINGLE_PATH_CUTOFF
 #ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
@@ -5563,6 +5564,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_addrmap() */
 #endif /* H5_HAVE_PARALLEL */
+#endif
 
 
 /*-------------------------------------------------------------------------
