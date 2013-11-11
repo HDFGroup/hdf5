@@ -141,6 +141,7 @@ H5FL_BLK_DEFINE(type_conv);
  *
  *-------------------------------------------------------------------------
  */
+#if 0 // JK_REWIRE_SINGLE_PATH_READ  ORI
 herr_t
 H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
@@ -204,6 +205,98 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dread() */
+#else
+herr_t
+H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
+{
+    #if 1 // JK_WORK
+    H5D_rw_multi_t dset_info[1];
+    #endif
+    H5D_t		   *dset = NULL;
+    const H5S_t		   *mem_space = NULL;
+    const H5S_t		   *file_space = NULL;
+    char                    fake_char;
+    herr_t                  ret_value = SUCCEED;  /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id,
+             plist_id, buf);
+
+    /* check arguments */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if(NULL == dset->oloc.file)
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    #if 0 // JK_DBG
+    if (dset->shared->layout.ops == H5D_LOPS_EFL)
+        printf("JKDBG %s|%d> EFL layout!  efl.nused:%d (if >0 then EFL)\n", __FILE__, __LINE__, dset->shared->dcpl_cache.efl.nused);
+    #endif
+
+    if(mem_space_id < 0 || file_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+    if(H5S_ALL != mem_space_id) {
+	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(mem_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
+    } /* end if */
+    if(H5S_ALL != file_space_id) {
+	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(file_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
+    } /* end if */
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == plist_id)
+        plist_id= H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
+
+    /* If the buffer is nil, and 0 element is selected, make a fake buffer.
+     * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+     * doesn't support this feature.
+     */
+    if(!buf)
+        buf = &fake_char;
+
+    #ifndef JK_ALSO_CONTIG1
+    /* multi-dset support CHUNKED and internal CONTIGUOUS only ,
+     * not external CONTIGUOUS */
+    if(dset->shared->layout.type == H5D_CHUNKED ||
+       (dset->shared->layout.type == H5D_CONTIGUOUS && 
+        dset->shared->layout.ops != H5D_LOPS_EFL))
+    #endif
+    {
+        dset_info[0].dset_id = dset_id;
+        dset_info[0].mem_type_id = mem_type_id;
+        dset_info[0].mem_space_id = mem_space_id;
+        dset_info[0].file_space_id = file_space_id;
+        dset_info[0].rbuf = buf;
+        
+        //if(H5Dread_multi((hid_t) NULL, 1, dset_info, plist_id) < 0) // METHOD1 but mimic H5D__pre_write_mdset
+        if(H5D__read_mdset((hid_t) NULL, 1, dset_info, plist_id) < 0) // METHOD2
+	        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+    }
+    else /* COMPACT , EFL */
+        /* read raw data */
+        if(H5D__read(dset, mem_type_id, mem_space, file_space, plist_id, buf/*out*/) < 0)
+	        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dread() */
+#endif
 
 #ifndef JK_WORK
 herr_t
@@ -494,7 +587,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
 {
     herr_t                  ret_value = SUCCEED;  /* Return value */
-    H5D_rw_multi_t dset_info[2];
+    H5D_rw_multi_t dset_info[1];
     H5D_t	*dset = NULL;
 
     FUNC_ENTER_API(FAIL)
@@ -506,11 +599,13 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
     {
-        // JK fake the output to match origial output of src/test/err_compat, since its just verifing feature.
-        //HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-        H5E_printf_stack(NULL, "../../hdf5/src/H5Dio.c", "H5D__pre_write", 464, H5E_ERR_CLS_g, H5E_ARGS, H5E_BADTYPE, "not a dataset");
-        H5E_printf_stack(NULL, __FILE__, FUNC, 391, H5E_ERR_CLS_g, H5E_DATASET, H5E_WRITEERROR, "can't prepare for writing data");
-        HGOTO_DONE(FAIL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+        #if 0 // JK_TODO_REMOVE
+        // JK_TODO_REMOVE mimic the output to match origial output of src/test/err_compat, just update the output file for the new change. It just verify expected error by comparing output.
+        //H5E_printf_stack(NULL, "../../hdf5/src/H5Dio.c", "H5D__pre_write", 464, H5E_ERR_CLS_g, H5E_ARGS, H5E_BADTYPE, "not a dataset");
+        //H5E_printf_stack(NULL, __FILE__, FUNC, 391, H5E_ERR_CLS_g, H5E_DATASET, H5E_WRITEERROR, "can't prepare for writing data");
+        //HGOTO_DONE(FAIL)
+        #endif
     }
 
     #ifdef JK_DBG
@@ -535,12 +630,12 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         dset_info[0].wbuf = buf;
         
         if(H5D__pre_write_mdset((hid_t)NULL, 1, dset_info, dxpl_id) < 0) 
-	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
+	        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
     }
     else  // COMPACT , EFL
     {
         if(H5D__pre_write(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf) < 0) 
-	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
+	        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
     }
 
 done:
@@ -1255,6 +1350,10 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
     /* save original rbuf */
     void ** info_rbuf_ori;
     #endif
+    #if 1 // JK_REWIRE_SINGLE_PATH_READ
+    H5P_genplist_t *plist;
+    H5FD_mpio_xfer_t xfer_mode;
+    #endif
 
     #if 0 // JK_TEST_ADDR_TAG_OLD_REMOVE
     FUNC_ENTER_STATIC_TAG(dxpl_id, dataset->oloc.addr, FAIL)
@@ -1290,6 +1389,49 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
     /* allocate wbuf ptr array to save original wbuf ptr */
     if(NULL == (info_rbuf_ori = (void **)H5MM_calloc(count * sizeof(void*))))
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTALLOC, FAIL, "couldn't allocate ori buf array")
+    #endif
+
+    #if 1 // JK_REWIRE_SINGLE_PATH_READ
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+    /* Get the property list */
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+    /* Get the transfer mode */
+    if(H5P_get(plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+
+    /* if serial mode, loop with single-dset read IO path */
+    if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
+        for (i=0; i< count; i++) {
+            H5D_t   *dset = NULL;
+            const H5S_t *mspace = NULL;
+            const H5S_t *fspace = NULL;
+
+            /* convert dset id to dset */
+            if(NULL == (dset = (H5D_t *)H5I_object_verify(info[i].dset_id, H5I_DATASET)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+            /* convert file space id to file space */
+
+            #if 1 // JK_TODO_READ  Fix testphdf5 -x fill -x actualio -x fiodc -x atomicity - OR mimic H5D__pre_write_mdset()
+            if(H5S_ALL != info[i].file_space_id)
+            #endif
+                if(NULL == (fspace = (const H5S_t *)H5I_object_verify(info[i].file_space_id, H5I_DATASPACE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+            /* convert mem space id to mem space */
+            #if 1 // JK_TODO_READ  Fix testphdf5 -x fill -x actualio -x fiodc -x atomicity OR mimic H5D__pre_write_mdset()
+            if(H5S_ALL != info[i].mem_space_id) 
+            #endif
+                if(NULL == (mspace = (const H5S_t *)H5I_object_verify(info[i].mem_space_id, H5I_DATASPACE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+            /* perform single dset read */
+            if(H5D__read(dset, info[i].mem_type_id, mspace, fspace, dxpl_id, info[i].rbuf) < 0) 
+	            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't prepare for reading data")
+        }
+        HGOTO_DONE(SUCCEED)
+    }
     #endif
 
     /* iterate dsets */
@@ -1519,30 +1661,37 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
      * detour through single-dset path */
     if (TRUE == io_info_md.is_coll_broken) {
 
-       /* loop with serial & single-dset read IO path */
-       for (i=0; i< count; i++) {
-           H5D_t   *dset = NULL;
-           const H5S_t *mspace = NULL;
-           const H5S_t *fspace = NULL;
+        /* loop with serial & single-dset read IO path */
+        for (i=0; i< count; i++) {
+            H5D_t   *dset = NULL;
+            const H5S_t *mspace = NULL;
+            const H5S_t *fspace = NULL;
 
-           #ifndef JK_SHAPE_SAME_P
-           /* Restore ori wbuf , so it can be passed as initial state for 
-            * single-dset path */
-           info[i].rbuf = info_rbuf_ori[i];
-           #endif
-           /* convert dset id to dset */
-           if(NULL == (dset = (H5D_t *)H5I_object_verify(info[i].dset_id, H5I_DATASET)))
-               HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-           /* convert file space id to file space */
-           if(NULL == (fspace = (const H5S_t *)H5I_object_verify(info[i].file_space_id, H5I_DATASPACE)))
-               HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-           /* convert mem space id to mem space */
-           if(NULL == (mspace = (const H5S_t *)H5I_object_verify(info[i].mem_space_id, H5I_DATASPACE)))
-               HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-           /* perform single dset read */
-           if(H5D__read(dset, info[i].mem_type_id, mspace, fspace, dxpl_id, info[i].rbuf) < 0) 
-	           HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't prepare for reading data")
-       }
+            #ifndef JK_SHAPE_SAME_P
+            /* Restore ori wbuf , so it can be passed as initial state for 
+             * single-dset path */
+            info[i].rbuf = info_rbuf_ori[i];
+            #endif
+            /* convert dset id to dset */
+            if(NULL == (dset = (H5D_t *)H5I_object_verify(info[i].dset_id, H5I_DATASET)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+            /* convert file space id to file space */
+            #if 1 // JK_TODO_READ  Fix testphdf5 -x  cmpdsetr -x null -x nocolcause OR mimic H5D__pre_write_mdset()
+            if(H5S_ALL != info[i].file_space_id)
+            #endif
+                if(NULL == (fspace = (const H5S_t *)H5I_object_verify(info[i].file_space_id, H5I_DATASPACE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+            /* convert mem space id to mem space */
+            #if 1 // JK_TODO_READ  Fix testphdf5 -x  cmpdsetr -x null -x nocolcause OR mimic H5D__pre_write_mdset()
+            if(H5S_ALL != info[i].mem_space_id) 
+            #endif
+                if(NULL == (mspace = (const H5S_t *)H5I_object_verify(info[i].mem_space_id, H5I_DATASPACE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+            /* perform single dset read */
+            if(H5D__read(dset, info[i].mem_type_id, mspace, fspace, dxpl_id, info[i].rbuf) < 0) 
+	            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't prepare for reading data")
+        }
     } else
     #endif
         if((*io_info_md.io_ops.multi_read_md)(file_id, count, &io_info_md) < 0)
@@ -2330,9 +2479,9 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
         }
      } else
      #endif
-    if((*io_info_md.io_ops.multi_write_md)(file_id, count, &io_info_md) < 0)
+        if((*io_info_md.io_ops.multi_write_md)(file_id, count, &io_info_md) < 0)
     #endif
-        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 #ifdef OLD_WAY
 /*
@@ -2774,8 +2923,8 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
     #ifndef JK_NOCOLLCAUSE
-     #ifndef JK_TODO_REMOVE_LATER
-     // JK_NOTE: remove only the if condition line when READ is ready, 
+     #if 0 // JK_TODO_REMOVE_READ
+     // JK_TODO_READ : remove only the if condition line when READ is ready, 
      // because this should work for both WIRTE & READ cases
      if(io_info->op_type == H5D_IO_OP_WRITE)
      #endif
@@ -2815,8 +2964,8 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
 
         #ifndef JK_NOCOLLCAUSE
         if (
-           #ifndef JK_TODO_REMOVE_LATER
-           // JK_NOTE: remove only this condition line when READ is ready, 
+           #if 0  // JK_TODO_REMOVE_READ
+           // JK_TODO_READ: remove only this condition line when READ is ready, 
            // because this should work for both WIRTE & READ cases
            io_info->op_type == H5D_IO_OP_WRITE &&
            #endif
@@ -2835,8 +2984,8 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
             /* Override the I/O op pointers to the MPI-specific routines */
             io_info->io_ops.multi_read = dset->shared->layout.ops->par_read;
             io_info->io_ops.multi_write = dset->shared->layout.ops->par_write;
-            io_info->io_ops.single_read = H5D__mpio_select_read;
             #if 0 // JK_SINGLE_PATH_CUTOFF
+            io_info->io_ops.single_read = H5D__mpio_select_read;
             io_info->io_ops.single_write = H5D__mpio_select_write;
             #endif
         } /* end if */
@@ -2927,7 +3076,7 @@ H5D__ioinfo_adjust_mdset_OLD(H5D_io_info_md_t *io_info_md,
         /* Check if we can use the optimized parallel I/O routines */
         if(opt == TRUE) {
             /* Override the I/O op pointers to the MPI-specific routines */
-           #ifndef JK_TODO_READ
+           #ifndef JK_TODO // READ
             io_info_md->io_ops.multi_read = dset->shared->layout.ops->par_read;
             io_info_md->io_ops.multi_write = dset->shared->layout.ops->par_write;
             //io_info_md->io_ops.multi_read_md = dset->shared->layout.ops->par_read_md;
@@ -3024,7 +3173,7 @@ H5D__ioinfo_adjust_mdset(const size_t count, H5D_io_info_md_t *io_info_md, hid_t
         /* Check if we can use the optimized parallel I/O routines */
         if(opt == TRUE) {
             /* Override the I/O op pointers to the MPI-specific routines */
-           #ifndef JK_TODO_WORK // READ
+           #ifndef JK_WORK 
             /* Single dset case: only first dset exist */
             io_info_md->io_ops.multi_read = dset0->shared->layout.ops->par_read;
             io_info_md->io_ops.multi_write = dset0->shared->layout.ops->par_write;

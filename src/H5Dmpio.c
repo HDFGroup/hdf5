@@ -533,6 +533,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if 0 // JK_SINGLE_PATH_CUTOFF
 herr_t
 H5D__mpio_select_read(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *type_info,
     hsize_t mpi_buf_count, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space)
@@ -549,6 +550,7 @@ H5D__mpio_select_read(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mpio_select_read() */
+#endif
 
 #ifndef JK_WORK
 herr_t
@@ -581,7 +583,7 @@ H5D__mpio_select_read_mdset(const H5D_io_info_md_t *io_info_md, hsize_t mpi_buf_
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__mpio_select_write() */
+} /* end H5D__mpio_select_read_mdset() */
 #endif
 
 
@@ -647,7 +649,7 @@ H5D__mpio_select_write_mdset(const H5D_io_info_md_t *io_info_md, hsize_t mpi_buf
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__mpio_select_write() */
+} /* end H5D__mpio_select_write_mdset() */
 #endif
 
 
@@ -840,6 +842,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if 0 // JK_SINGLE_PATH_CUTOFF
 herr_t
 H5D__contig_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t UNUSED nelmts, const H5S_t *file_space, const H5S_t *mem_space,
@@ -872,6 +875,7 @@ H5D__contig_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_collective_read() */
+#endif 
 
 
 /*-------------------------------------------------------------------------
@@ -1341,6 +1345,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if 0 // JK_SINGLE_PATH_CUTOFF
 herr_t
 H5D__chunk_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
@@ -1357,6 +1362,7 @@ H5D__chunk_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_i
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_collective_read() */
+#endif
 
 
 /*-------------------------------------------------------------------------

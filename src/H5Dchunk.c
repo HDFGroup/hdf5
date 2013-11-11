@@ -284,10 +284,11 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
     //H5D__chunk_write_mdset,
     #endif
 #ifdef H5_HAVE_PARALLEL
-    H5D__chunk_collective_read,
     #if 0 // JK_SINGLE_PATH_CUTOFF
+    H5D__chunk_collective_read,
     H5D__chunk_collective_write,
     #else
+    NULL,
     NULL,
     #endif
     #ifndef JK_WORK

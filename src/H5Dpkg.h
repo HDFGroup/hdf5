@@ -852,39 +852,41 @@ H5_DLL herr_t H5D__fill_term(H5D_fill_buf_info_t *fb_info);
 #define H5Dmpio_DEBUG
 #endif /*H5Dmpio_DEBUG*/
 #endif/*H5S_DEBUG*/
+#if 0 // JK_SINGLE_PATH_CUTOFF
 /* MPI-IO function to read, it will select either regular or irregular read */
 H5_DLL herr_t H5D__mpio_select_read(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);
 
 /* MPI-IO function to write, it will select either regular or irregular read */
-#if 0 // JK_SINGLE_PATH_CUTOFF
 H5_DLL herr_t H5D__mpio_select_write(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);
 #endif    
 #ifndef JK_WORK    
+/* MPI-IO function to read, it will select either regular or irregular read */
 H5_DLL herr_t H5D__mpio_select_read_mdset(const H5D_io_info_md_t *io_info_md,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);
+/* MPI-IO function to write, it will select either regular or irregular write */
 H5_DLL herr_t H5D__mpio_select_write_mdset(const H5D_io_info_md_t *io_info_md,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);
 #endif
 
+#if 0 // JK_SINGLE_PATH_CUTOFF
 /* MPI-IO functions to handle contiguous collective IO */
 H5_DLL herr_t H5D__contig_collective_read(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
     const H5S_t *mem_space, H5D_chunk_map_t *fm);
-#if 0 // JK_SINGLE_PATH_CUTOFF
 H5_DLL herr_t H5D__contig_collective_write(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
     const H5S_t *mem_space, H5D_chunk_map_t *fm);
 #endif    
 
+#if 0 // JK_SINGLE_PATH_CUTOFF
 /* MPI-IO functions to handle chunked collective IO */
 H5_DLL herr_t H5D__chunk_collective_read(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
     const H5S_t *mem_space, H5D_chunk_map_t *fm);
-#if 0 // JK_SINGLE_PATH_CUTOFF
 H5_DLL herr_t H5D__chunk_collective_write(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
     const H5S_t *mem_space, H5D_chunk_map_t *fm);
