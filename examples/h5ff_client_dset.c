@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     int32_t *rdata1 = NULL, *rdata2 = NULL;
     int16_t *rdata3 = NULL;
     const unsigned int nelem=60;
-    hsize_t dims[1];
+    hsize_t dims[1], max_dims[1];
     hsize_t extent;
 
     void *dset_token1, *dset_token2, *dset_token3;
@@ -92,7 +92,8 @@ int main(int argc, char **argv) {
 
     /* create 1-D dataspace with 60 elements */
     dims [0] = nelem;
-    sid = H5Screate_simple(1, dims, NULL);
+    max_dims [0] = H5S_UNLIMITED;
+    sid = H5Screate_simple(1, dims, max_dims);
 
     dtid = H5Tcopy(H5T_STD_I32LE);
 
@@ -134,13 +135,6 @@ int main(int argc, char **argv) {
         assert(did2 > 0);
         did3 = H5Dcreate_ff(gid3, "D3", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         assert(did3 > 0);
-
-        ret = H5Gclose_ff(gid1, e_stack);
-        assert(ret == 0);
-        ret = H5Gclose_ff(gid2, e_stack);
-        assert(ret == 0);
-        ret = H5Gclose_ff(gid3, e_stack);
-        assert(ret == 0);
     }
 
     /* Tell Delegates that transaction 1 is started */
@@ -170,6 +164,13 @@ int main(int argc, char **argv) {
         assert(0 == ret);
         ret = H5Oget_token(did3, dset_token3, &token_size3);
         assert(0 == ret);
+
+        /* make sure the create operations have completed before
+           telling the delegates to open them */
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
         /* bcast the token sizes and the tokens */ 
         MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
@@ -277,10 +278,6 @@ int main(int argc, char **argv) {
     ret = H5TRclose(tid1);
     assert(0 == ret);
 
-    /* close some objects */
-    ret = H5Dclose_ff(did1, e_stack);
-    assert(ret == 0);
-
     /* release container version 0. This is async. */
     ret = H5RCrelease(rid1, e_stack);
     assert(0 == ret);
@@ -300,6 +297,19 @@ int main(int argc, char **argv) {
         rid2 = H5RCcreate(file_id, version);
         assert(rid2 > 0);
     }
+
+    /* close some objects */
+    if(0 == my_rank) {
+        ret = H5Gclose_ff(gid1, e_stack);
+        assert(ret == 0);
+        ret = H5Gclose_ff(gid2, e_stack);
+        assert(ret == 0);
+        ret = H5Gclose_ff(gid3, e_stack);
+        assert(ret == 0);
+    }
+
+    ret = H5Dclose_ff(did1, e_stack);
+    assert(ret == 0);
 
     /* Open objects closed before */
     gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, rid2, e_stack);
@@ -326,13 +336,14 @@ int main(int argc, char **argv) {
     /* Give a location to the DXPL to store the checksum once the read has completed */
     H5Pset_dxpl_checksum_ptr(dxpl_id, &read2_cs);
 
-    ret = H5Dread_ff(did2, dtid, sid, sid, dxpl_id, rdata2, rid2, e_stack);
+    ret = H5Dread_ff(did1, dtid, sid, sid, dxpl_id, rdata2, rid2, e_stack);
     assert(ret == 0);
     H5Pclose(dxpl_id);
 
     /* Raw data read on D3. This is asynchronous.  Note that the type
        is different than the dataset type. */
-    ret = H5Dread_ff(did3, H5T_STD_I16BE, sid, sid, H5P_DEFAULT, rdata3, rid2, e_stack);
+    ret = H5Dread_ff(did3, H5T_STD_I16BE, sid, sid, H5P_DEFAULT, rdata3, 
+                     rid2, e_stack);
     assert(ret == 0);
 
 

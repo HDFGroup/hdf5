@@ -1245,7 +1245,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "DATASET CLOSE failed at the server\n");
+                fprintf(stderr, "DATASET %s CLOSE failed at the server\n",
+                        dset->common.obj_name);
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }

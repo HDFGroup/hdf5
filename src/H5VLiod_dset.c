@@ -694,8 +694,9 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
         /* Verify checksum for that entry */
         buf_ptr = (uint8_t *)buf;
         entry_cs = H5_checksum_crc64(buf_ptr, sizeof(iod_size_t) + sizeof(iod_obj_id_t));
-        if(entry_cs != *(io_array[n].cs))
-            HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading");
+        /* MSC - no CS from IOD */
+        //if(entry_cs != *(io_array[n].cs))
+        //HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading");
         buf_ptr += sizeof(iod_size_t) + sizeof(iod_obj_id_t);
 
         free(io_array[n].mem_desc);
@@ -1067,13 +1068,14 @@ H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start dataset Close\n");
+    fprintf(stderr, "Start dataset Close %"PRIu64" %"PRIu64"\n",
+            iod_oh.rd_oh, iod_oh.wr_oh);
 #endif
 
     if(iod_obj_close(iod_oh.rd_oh, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Read Array object");
     if(iod_obj_close(iod_oh.wr_oh, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Write Array object");
 
 done:
 #if H5VL_IOD_DEBUG
@@ -1264,11 +1266,13 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
 
             checksum = H5_checksum_crc64(buf_ptr, (size_t)num_bytes);
 
+            /* MSC - No CS from IOD yet
             if(checksum != cs_list[n]) {
                 fprintf(stderr, "Data Corruption detected when reading\n");
                 ret_value = FAIL;
                 goto done;
             }
+            */
             buf_ptr += num_bytes;
         }
     }
@@ -1443,8 +1447,9 @@ H5VL__iod_server_vl_data_io_cb(void UNUSED *elem, hid_t type_id, unsigned ndims,
         entry_cs = H5_checksum_crc64_fragments(buffers, buf_sizes, 2);
     }
 
-    if(entry_cs != read_cs)
-        HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading");
+    /* MSC - no CS from IOD */
+    //if(entry_cs != read_cs)
+    //HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading");
 
     free(mem_desc);
 
