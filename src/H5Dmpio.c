@@ -1567,7 +1567,7 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
     #endif
     
     herr_t              ret_value = SUCCEED;
-    #ifndef JK_DBG
+    #ifdef JK_DBG
     int mpi_rank;
     #endif
 
@@ -1593,7 +1593,7 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
     }
     #endif
 
-    #ifndef JK_DBG
+    #ifdef JK_DBG
     mpi_rank = H5F_mpi_get_rank(io_info_md->dsets_info[0].dset->oloc.file);
     #endif
 

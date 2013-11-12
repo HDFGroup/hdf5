@@ -2271,7 +2271,7 @@ H5D__create_piece_mem_map_hyper(const H5D_io_info_md_t *io_info_md, const H5D_ds
     hssize_t piece_adjust[H5O_LAYOUT_NDIMS];  /* Adjustment to make to a particular chunk */
     unsigned    u;                          /* Local index variable */
     herr_t	ret_value = SUCCEED;        /* Return value */
-    #ifndef JK_DBG
+    #ifdef JK_DBG
     unsigned cnt_piece=0;
     #endif
 

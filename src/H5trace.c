@@ -448,9 +448,11 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     fprintf(out, "H5FD_MPIO_CHUNK_ONE_IO");
                                     break;
 
+                                #if 0 // JK_MCHUNK_OPT_REMOVE
                                 case H5FD_MPIO_CHUNK_MULTI_IO:
                                     fprintf(out, "H5FD_MPIO_CHUNK_MULTI_IO");
                                     break;
+                                #endif
 
                                 default:
                                     fprintf(out, "%ld", (long)opt);
