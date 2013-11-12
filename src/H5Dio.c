@@ -84,10 +84,6 @@ static herr_t H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
     const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm);
 #ifndef JK_WORK    
 static herr_t H5D__ioinfo_adjust_mdset(const size_t count, H5D_io_info_md_t *io_info_md, hid_t dxpl_id);
-static herr_t H5D__ioinfo_adjust_mdset_OLD(H5D_io_info_md_t *io_info_md, 
-    const H5D_t *dset, hid_t dxpl_id,
-    const H5S_t *file_space, const H5S_t *mem_space,
-    const H5D_type_info_t *type_info, const H5D_dset_info_t *dinfo);
 #endif
 static herr_t H5D__ioinfo_term(H5D_io_info_t *io_info);
 #ifndef JK_WORK
@@ -598,15 +594,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-    {
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-        #if 0 // JK_TODO_REMOVE
-        // JK_TODO_REMOVE mimic the output to match origial output of src/test/err_compat, just update the output file for the new change. It just verify expected error by comparing output.
-        //H5E_printf_stack(NULL, "../../hdf5/src/H5Dio.c", "H5D__pre_write", 464, H5E_ERR_CLS_g, H5E_ARGS, H5E_BADTYPE, "not a dataset");
-        //H5E_printf_stack(NULL, __FILE__, FUNC, 391, H5E_ERR_CLS_g, H5E_DATASET, H5E_WRITEERROR, "can't prepare for writing data");
-        //HGOTO_DONE(FAIL)
-        #endif
-    }
 
     #ifdef JK_DBG
     if (dset->shared->layout.ops == H5D_LOPS_EFL)
@@ -776,126 +764,6 @@ H5D__pre_write(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__pre_write() */
-
-
-#if 0 // JK_TODO_NOT_NEED_REMOVE
-/* this is without Direct_write feature */
-herr_t
-H5Dwrite_multi_JK_NODIRECTW(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id)
-{
-    H5D_t           *dset = NULL;
-    const H5S_t     *mem_space = NULL;
-    const H5S_t	    *file_space = NULL;
-    char            fake_char;
-    size_t          i;
-    H5P_genplist_t 	   *plist;      /* Property list pointer */
-    H5FD_mpio_xfer_t xfer_mode;
-    H5FD_mpio_chunk_opt_t chunk_opt_mode;
-    herr_t          ret_value = SUCCEED;  /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    //H5TRACE4("e", "iiDti", file_id, count, info, dxpl_id);
-
-    // ----------------------------------------------
-    // JK SUDO
-    // loop count for check args for multi dsets
-    //
-    // if (dxpl prop == Serial)
-    // {
-    //      loop count for H5D__write()  
-    // }
-    // else  // Parallel
-    // {
-    //        do the multi dset operations
-    // }
-    //
-    //
-
-    // -------------------------------------------------
-
-    /* check count */
-    if (count <=0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "count is invalid")
-
-    /* check H5D_rw_multi_t pointer NULL */
-
-    /* Get the default dataset transfer property list if the user didn't provide one */
-    if(H5P_DEFAULT == dxpl_id)
-        dxpl_id= H5P_DATASET_XFER_DEFAULT;
-
-    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
-
-    /* Get the transfer mode */
-    if(H5P_get(plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
-
-
-
-    if(xfer_mode == H5FD_MPIO_INDEPENDENT)  /* Serial mode */
-    {
-        /* iterate each selected dataset */
-        for (i=0; i < count; i++)
-        {
-            /* check arguments */
-            if(NULL == (dset = (H5D_t *)H5I_object_verify(info[i].dset_id, H5I_DATASET)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-            if(NULL == dset->oloc.file)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-
-            if(info[i].mem_space_id < 0 || info[i].file_space_id < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-            if(H5S_ALL != info[i].mem_space_id) {
-                if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(info[i].mem_space_id, H5I_DATASPACE)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-                /* Check for valid selection */
-                if(H5S_SELECT_VALID(mem_space) != TRUE)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection+offset not within extent")
-            } /* end if */
-
-            if(H5S_ALL != info[i].file_space_id) {
-                if(NULL == (file_space = (const H5S_t *)H5I_object_verify(info[i].file_space_id, H5I_DATASPACE)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-                /* Check for valid selection */
-                if(H5S_SELECT_VALID(file_space) != TRUE)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent")
-            } /* end if */
-
-
-            if(!info[i].wbuf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
-
-            /* If the buffer is nil, and 0 element is selected, make a fake buffer.
-             * This is for some MPI package like ChaMPIon on NCSA's tungsten which
-             * doesn't support this feature.
-             */
-            if(!info[i].wbuf)
-            info[i].wbuf = &fake_char;
-
-            /* write raw data */
-            if(H5D__write(dset, info[i].mem_type_id, mem_space, file_space, dxpl_id, info[i].wbuf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
-        }
-    }
-    else if (xfer_mode == H5FD_MPIO_COLLECTIVE)  /* Parallel mode */
-    {
-        //JK REMOVE
-        //if(H5P_get(plist, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, &chunk_opt_mode) < 0)
-        //    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
-        
-        if(H5D__write_mdset(file_id, count, info, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
-
-    }
-
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Dwrite() */
-#endif // JK_TODO_NOT_NEED_REMOVE
 
 
 #ifndef JK_WORK 
@@ -1355,11 +1223,7 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
     H5FD_mpio_xfer_t xfer_mode;
     #endif
 
-    #if 0 // JK_TEST_ADDR_TAG_OLD_REMOVE
-    FUNC_ENTER_STATIC_TAG(dxpl_id, dataset->oloc.addr, FAIL)
-    #else
     FUNC_ENTER_STATIC
-    #endif
 
     #ifndef JK_MULTI_DSET
     io_info_md.sel_pieces = NULL;
@@ -1588,34 +1452,21 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
                 HGOTO_DONE(SUCCEED)
     
             /* Go fill the user's selection with the dataset's fill value */
-            #if 0 // JK_ORI_REMOVE
-            if(H5D__fill(dataset->shared->dcpl_cache.fill.buf, dataset->shared->type, buf, type_info.mem_type, mem_space, dxpl_id) < 0)
-            #else
             if(H5D__fill(dataset->shared->dcpl_cache.fill.buf, dataset->shared->type, info[i].rbuf, dset_info_array[i].type_info.mem_type, mem_space, dxpl_id) < 0)
-            #endif
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed")
             else
                 HGOTO_DONE(SUCCEED)
         } /* end if */
     
         /* Set up I/O operation */
-        #if 0 // JK_ORI_REMOVE
-        io_info.op_type = H5D_IO_OP_READ;
-        io_info.u.rbuf = buf;
-        #else
         io_info_md.op_type = H5D_IO_OP_READ;
         dset_info_array[i].u.rbuf = info[i].rbuf;
-        #endif
     
         #ifndef JK_WORK_TEST
         dset_info_array[i].index = i;
         #endif
     
-        #if 0 // JK_ORI_REMOVE
-        if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
-        #else
         if(H5D__ioinfo_init_mdset(dataset, dxpl_cache, dxpl_id, &(dset_info_array[i]), &(store[i]), &io_info_md) < 0)
-        #endif
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
     #ifdef H5_HAVE_PARALLEL
         io_info_init = TRUE;
@@ -1628,32 +1479,19 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
                     || dataset->shared->layout.type == H5D_COMPACT);
     
         /* Call storage method's I/O initialization routine */
-        // JK This is filling fm , io_info_md.dset_info[] is same here to be filled and generate piece_infos in skip list
-        #if 0 // JK_ORI_REMOVE
-        HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
-        if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
-        #else
+        /* Init io_info_md.dset_info[] and generate piece_info in skip list */
         if(dset_info_array[i].layout_ops.io_init_md && (*dset_info_array[i].layout_ops.io_init_md)(&io_info_md, &(dset_info_array[i].type_info), nelmts, file_space, mem_space, &(dset_info_array[i])) < 0)
-        #endif
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
-    
         io_op_init = TRUE;
     } // end of for loop
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
-    #if 0 // JK_ORI_REMOVE
-    if(H5D__ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, &fm) < 0)
-    #else
     if(H5D__ioinfo_adjust_mdset(count, &io_info_md, dxpl_id) < 0)
-    #endif
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Invoke correct "high level" I/O routine */
-    #if 0 // JK_ORI_REMOVE
-    if((*io_info.io_ops.multi_read)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
-    #else
     #ifndef JK_NOCOLLCAUSE
     /* If collective mode is broken, perform read IO in independent mode via 
      * single-dset path with looping. 
@@ -1695,7 +1533,6 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
     } else
     #endif
         if((*io_info_md.io_ops.multi_read_md)(file_id, count, &io_info_md) < 0)
-    #endif
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
@@ -1703,22 +1540,13 @@ done:
     for (i=0; i < count; i++) 
     {
         /* Shut down the I/O op information */
-        #if 0 // JK_ORI_REMOVE
-        if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
-        #else
         if(io_op_init && dset_info_array[i].layout_ops.io_term_md && (*dset_info_array[i].layout_ops.io_term_md)(&(dset_info_array[i]), &io_info_md) < 0)
-        #endif
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
     } /* end of for */
 
 #ifdef H5_HAVE_PARALLEL
     /* Shut down io_info struct */
-    #if 0 // JK_ORI_REMOVE
-    if(io_info_init)
-        if(H5D__ioinfo_term(&io_info) < 0)
-    #else
     if(io_info_init && H5D__ioinfo_term_mdset(&io_info_md) < 0)
-    #endif
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -1726,21 +1554,12 @@ done:
     for (i=0; i< count; i++)
     {
         /* Shut down datatype info for operation */
-        #if 0 // JK_ORI_REMOVE
-        if(type_info_init && H5D__typeinfo_term(&type_info) < 0)
-        #else
         if(type_info_init && H5D__typeinfo_term(&(dset_info_array[i].type_info)) < 0)
-        #endif
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
         /* discard projected mem space if it was created */
-        #if 0 // JK_ORI_REMOVE
-        if(NULL != projected_mem_space)
-            if(H5S_close(projected_mem_space) < 0)
-        #else
         if(NULL != projected_mem_space[i])
             if(H5S_close(projected_mem_space[i]) < 0)
-        #endif
                 HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
     } // end of for loop
 
@@ -1759,11 +1578,7 @@ done:
     if(store)
         H5MM_xfree(store);
 
-    #if 0 // JK_TEST_ADDR_TAG_OLD_REMOVE
-    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-    #else
     FUNC_LEAVE_NOAPI(ret_value)
-    #endif
 } /* end H5D__read_mdset() */
 #endif
 
@@ -2054,8 +1869,8 @@ done:
 #ifndef JK_WORK
 static herr_t
 H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id)
-//(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_t *file_space, hid_t dxpl_id, const void *buf)
 {    
+    // JK_TODO_REMOVE Comments
     //H5D_io_info_t io_info;            /* Dataset I/O info     */
     //H5D_chunk_map_t fm;               /* Chunk file<->memory mapping */
     //H5D_type_info_t type_info;          /* Datatype info for operation */
@@ -2104,21 +1919,9 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
     const void ** info_wbuf_ori;
     #endif
 
-    #if 0 // JK_TEST_ADDR_TAG_OLD_REMOVE
-    //haddr_t prev_tag = HADDR_UNDEF;
-    dataset = (H5D_t *)H5I_object_verify(info[1].dset_id, H5I_DATASET);
-    FUNC_ENTER_STATIC_TAG(dxpl_id, dataset->oloc.addr, FAIL)
-    #else
     FUNC_ENTER_STATIC
-    #endif
 
    #ifndef JK_MULTI_DSET
-    #if 0 // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
-    #ifdef H5_HAVE_PARALLEL
-    io_info_md.select_piece = NULL;
-    #endif
-    io_info_md.select_piece_last_size = 0;
-    #endif // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
     io_info_md.sel_pieces = NULL;
     io_info_md.store_faddr = 0;
     io_info_md.base_maddr_w = NULL;
@@ -2183,10 +1986,6 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
         #endif
         #ifdef JK_DBG
         printf ("JKDBG p:%d %s:%d> dataset%d->oloc.addr: %llu\n", getpid(), __FILE__, __LINE__,i, dataset->oloc.addr);
-        #endif
-    
-        #if 0 // JK_TEST_ADDR_TAG_OLD_REMOVE
-        if(H5AC_tag(dxpl_id, dataset->oloc.addr, &prev_tag) < 0)                                     HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
         #endif
     
         /* All filters in the DCPL must have encoding enabled. */
@@ -2403,56 +2202,29 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
     
     
         /* Set up I/O operation */
-        #if 0 // JK_ORI_REMOVE
-        io_info.op_type = H5D_IO_OP_WRITE;
-        io_info.u.wbuf = buf;
-        #else
         io_info_md.op_type = H5D_IO_OP_WRITE;
         dset_info_array[i].u.wbuf = info[i].wbuf;
-        #endif
     
         #ifndef JK_WORK_TEST
         dset_info_array[i].index = i;
         #endif
     
-        #if 0 // JK_ORI_REMOVE
-        if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
-        #else
-        // JK_TODO_CONSIDER_LATER get out of loop (better code?)
         if(H5D__ioinfo_init_mdset(dataset, dxpl_cache, dxpl_id, &(dset_info_array[i]), &(store[i]), &io_info_md) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
-        #endif
     #ifdef H5_HAVE_PARALLEL
         io_info_init = TRUE;
     #endif /*H5_HAVE_PARALLEL*/
     
         /* Call storage method's I/O initialization routine */
-        // JK This is filling fm , io_info_md.dset_info[] is same here to be filled and generate piece_infos in skip list
-        #if 0 // JK_ORI_REMOVE
-        HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
-        if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
-        #else
-         #ifdef JK_DBG
-         printf("JKDBG %s|%d> i:%d\n", __FUNCTION__, __LINE__, i);
-         #endif
-    
-        // JK May reduce .type_info
+        /* Init io_info_md.dset_info[] and generate piece_info in skip list */
         if(dset_info_array[i].layout_ops.io_init_md && (*dset_info_array[i].layout_ops.io_init_md)(&io_info_md, &(dset_info_array[i].type_info), nelmts, file_space, mem_space, &(dset_info_array[i])) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
-        #endif
         io_op_init = TRUE;
-    } // end of for loop
+    } /* end of Count for loop */
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
-    #if 0 // JK_ORI_REMOVE
-    if(H5D__ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, &fm) < 0)
-    #else
     if(H5D__ioinfo_adjust_mdset(count, &io_info_md, dxpl_id) < 0)
-    //if(H5D__ioinfo_adjust_mdset_OLD(&io_info_md, dataset, dxpl_id, file_space, mem_space, &(dset_info_array[i].type_info), &(dset_info_array[i])) < 0)
-    #endif
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -2570,11 +2342,7 @@ done:
     if(store)
         H5MM_xfree(store);
 
-    #if 0 // JK_TEST_ADDR_TAG_OLD_REMOVE
-    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-    #else
     FUNC_LEAVE_NOAPI(ret_value)
-    #endif
 } /* end H5D__write_mdset */
 #endif
 
@@ -2685,17 +2453,6 @@ H5D__ioinfo_init_mdset(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dx
     /* Set the "high-level" I/O operations for the dataset */
     io_info_md->io_ops.multi_read = dset->shared->layout.ops->ser_read;
     io_info_md->io_ops.multi_write = dset->shared->layout.ops->ser_write;
-    #if 0 // JK_TODO_NOCOLLCAUSE_REMOVE // not need any more, worked by other nocaolcause code
-    // JK_POINT - point selection is not supported for collective IO
-    //   so H5D__mpio_opt_possible_mdset() detect and return FALSE. 
-    //   in ori code, just serial write is set, but here func interface is different
-    //   so need to wrap original serial write and set it here.
-    //   Anyway this will also resolve POSIX case, as they all are detected by same
-    //   H5D__mpio_opt_possible_mdset(). 
-    // when work with serial-mdset if use layout.ops_md - Not Necessary
-    //io_info_md->io_ops.multi_read = dset->shared->layout.ops->ser_read_md;
-    //io_info_md->io_ops.multi_write_md = dset->shared->layout.ops->ser_write_md;
-    #endif
 
     /* Set the I/O operations for reading/writing single blocks on disk */
     if(dset_info->type_info.is_xform_noop && dset_info->type_info.is_conv_noop) {
@@ -2923,19 +2680,12 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
     #ifndef JK_NOCOLLCAUSE
-     #if 0 // JK_TODO_REMOVE_READ
-     // JK_TODO_READ : remove only the if condition line when READ is ready, 
-     // because this should work for both WIRTE & READ cases
-     if(io_info->op_type == H5D_IO_OP_WRITE)
-     #endif
-    {
     if(H5P_get(dx_plist, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, &global_no_collective_cause) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get global value")
 
      #ifdef JK_DBG
      printf("JKDBG %s|%d> Dset layout:%d, global-cause:%d\n", __FUNCTION__, __LINE__, dset->shared->layout.type, global_no_collective_cause );
      #endif
-    }
     #endif // JK_NOCOLLCAUSE
 
     /* Reset the actual io mode properties to the default values in case
@@ -2963,21 +2713,14 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
 
         #ifndef JK_NOCOLLCAUSE
-        if (
-           #if 0  // JK_TODO_REMOVE_READ
-           // JK_TODO_READ: remove only this condition line when READ is ready, 
-           // because this should work for both WIRTE & READ cases
-           io_info->op_type == H5D_IO_OP_WRITE &&
-           #endif
-           /* if collective broken cause already calculated, no need to do again */
-           global_no_collective_cause > 0) {
+        /* if collective broken cause already calculated, no need to do again */
+        if (global_no_collective_cause > 0)
             opt = FALSE;
-        }
         else
         #endif
-        /* Check if we can set direct MPI-IO read/write functions */
-        if((opt = H5D__mpio_opt_possible(io_info, file_space, mem_space, type_info, fm, dx_plist)) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ")
+            /* Check if we can set direct MPI-IO read/write functions */
+            if((opt = H5D__mpio_opt_possible(io_info, file_space, mem_space, type_info, fm, dx_plist)) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ")
 
         /* Check if we can use the optimized parallel I/O routines */
         if(opt == TRUE) {
@@ -3007,102 +2750,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__ioinfo_adjust() */
 
-#if 0 // JK_WORK_OLD_REMOVE
-// JK_TODO_LATER - make this call only once, so can make H5D__mpio_opt_possible_mdset() to check mdset at once
-static herr_t
-H5D__ioinfo_adjust_mdset_OLD(H5D_io_info_md_t *io_info_md, 
-    const H5D_t *dset, hid_t dxpl_id,
-    const H5S_t *file_space, const H5S_t *mem_space,
-    const H5D_type_info_t *type_info, const H5D_dset_info_t *dinfo)
-{
-    H5P_genplist_t *dx_plist;       /* Data transer property list */
-    H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode; /* performed chunk optimization */
-    H5D_mpio_actual_io_mode_t actual_io_mode; /* performed io mode */
-    herr_t	ret_value = SUCCEED;	/* Return value	*/
-
-    FUNC_ENTER_STATIC
-
-    /* check args */
-    HDassert(dset);
-    HDassert(dset->oloc.file);
-    HDassert(mem_space);
-    HDassert(file_space);
-    HDassert(type_info);
-    HDassert(type_info->tpath);
-    HDassert(io_info_md);
-
-    /* Get the dataset transfer property list */
-    if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
-
-    /* Reset the actual io mode properties to the default values in case
-     * the dxpl was previously used in a collective I/O operation.
-     */
-    actual_chunk_opt_mode = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
-    actual_io_mode = H5D_MPIO_NO_COLLECTIVE;
-    if(H5P_set(dx_plist, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, &actual_chunk_opt_mode) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "couldn't set actual chunk opt mode property")
-    if(H5P_set(dx_plist, H5D_MPIO_ACTUAL_IO_MODE_NAME, &actual_io_mode) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "couldn't set actual io mode property")
-
-    /* Make any parallel I/O adjustments */
-    if(io_info_md->using_mpi_vfd) {
-        htri_t opt;         /* Flag whether a selection is optimizable */
-
-        /* Record the original state of parallel I/O transfer options */
-        io_info_md->orig.xfer_mode = io_info_md->dxpl_cache->xfer_mode;
-        io_info_md->orig.coll_opt_mode = io_info_md->dxpl_cache->coll_opt_mode;
-        io_info_md->orig.io_ops.single_read = io_info_md->io_ops.single_read;
-        io_info_md->orig.io_ops.single_write = io_info_md->io_ops.single_write;
-        #ifndef JK_WORK
-        io_info_md->orig.io_ops.single_read_md = io_info_md->io_ops.single_read_md;
-        io_info_md->orig.io_ops.single_write_md = io_info_md->io_ops.single_write_md;
-        #endif
-
-        /* Get MPI communicator */
-        if(MPI_COMM_NULL == (io_info_md->comm = H5F_mpi_get_comm(dset->oloc.file)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
-        #ifdef JK_TODO_LATER
-        // make H5D__mpio_opt_possible_mdset Loop
-        // for (i=0; i < count ; i++) {
-        //    H5D__mpio_opt_possible_mdset()
-        // }
-        #endif
-
-        /* Check if we can set direct MPI-IO read/write functions */
-        if((opt = H5D__mpio_opt_possible_mdset_OK8_OLD(io_info_md, file_space, mem_space, type_info, dset, dx_plist)) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ")
-
-        /* Check if we can use the optimized parallel I/O routines */
-        if(opt == TRUE) {
-            /* Override the I/O op pointers to the MPI-specific routines */
-           #ifndef JK_TODO // READ
-            io_info_md->io_ops.multi_read = dset->shared->layout.ops->par_read;
-            io_info_md->io_ops.multi_write = dset->shared->layout.ops->par_write;
-            //io_info_md->io_ops.multi_read_md = dset->shared->layout.ops->par_read_md;
-            io_info_md->io_ops.multi_write_md = dset->shared->layout.ops->par_write_md;
-            //io_info_md->io_ops.single_read = H5D__mpio_select_read_mdset;
-            io_info_md->io_ops.single_write_md = H5D__mpio_select_write_mdset;
-           #endif
-        } /* end if */
-        else {
-            /* If we won't be doing collective I/O, but the user asked for
-             * collective I/O, change the request to use independent I/O, but
-             * mark it so that we remember to revert the change.
-             */
-            if(io_info_md->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
-                /* Change the xfer_mode to independent for handling the I/O */
-                io_info_md->dxpl_cache->xfer_mode = H5FD_MPIO_INDEPENDENT;
-                if(H5P_set(dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &io_info_md->dxpl_cache->xfer_mode) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode")
-            } /* end if */
-        } /* end else */
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__ioinfo_adjust() */
-#endif // JK_WORK_OLD_REMOVE
 
 #ifndef JK_WORK_NEW // run only once and loop just 'H5D__mpio_opt_possible'
 static herr_t

@@ -96,16 +96,12 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
     #endif
     H5D__contig_read,
     H5D__contig_write,
-    #if 0 // JK_TODO_NOCOLLCAUSE_REMOVE
-    // NULL,
-    //NULL,
-    #endif
 #ifdef H5_HAVE_PARALLEL
     NULL,
     NULL,
    #ifndef JK_WORK
-    NULL,  // read_mdset
-    NULL,  // wirte_mdset
+    NULL,
+    NULL,
    #endif
 #endif /* H5_HAVE_PARALLEL */
     H5D__efl_readvv,
@@ -113,7 +109,7 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
     NULL,
     NULL,
    #ifndef JK_WORK
-    NULL  // io_term_mdset
+    NULL
    #endif
 }};
 

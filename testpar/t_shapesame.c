@@ -1486,12 +1486,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
             k = 0;
         }
 
-        #if 0 // JK_TEST_MAN_REMOVE
-        k = 1;          
-        {
-        #else
         do {
-        #endif
             /* since small rank >= 2 and large_rank > small_rank, we 
              * have large_rank >= 3.  Since PAR_SS_DR_MAX_RANK == 5
              * (baring major re-orgaization), this gives us:
@@ -1670,13 +1665,9 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                       ( (tv_ptr->small_rank - 1) <= 1 ) &&
                       ( l < tv_ptr->edge_size ) );
             k++;
-        #if 0 // JK_TEST_MAN_REMOVE
-        }
-        #else
         } while ( ( tv_ptr->large_rank > 3 ) &&
                   ( (tv_ptr->small_rank - 1) <= 2 ) &&
                   ( k < tv_ptr->edge_size ) );
-        #endif
         j++;
     } while ( ( tv_ptr->large_rank > 4 ) &&
               ( (tv_ptr->small_rank - 1) <= 3 ) &&
@@ -1834,12 +1825,7 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
             k = 0;
         }
 
-        #if 0 // JK_TEST_MAN_REMOVE
-        k=1;
-        {
-        #else
         do {
-        #endif
             /* since small rank >= 2 and large_rank > small_rank, we 
              * have large_rank >= 3.  Since PAR_SS_DR_MAX_RANK == 5
              * (baring major re-orgaization), this gives us:
@@ -2028,13 +2014,9 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
                       ( (tv_ptr->small_rank - 1) <= 1 ) &&
                       ( l < tv_ptr->edge_size ) );
             k++;
-        #if 0 // JK_TEST_MAN_REMOVE
-        }
-        #else
         } while ( ( tv_ptr->large_rank > 3 ) &&
                   ( (tv_ptr->small_rank - 1) <= 2 ) &&
                   ( k < tv_ptr->edge_size ) );
-        #endif
         j++;
     } while ( ( tv_ptr->large_rank > 4 ) &&
               ( (tv_ptr->small_rank - 1) <= 3 ) &&
@@ -2361,9 +2343,6 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* contiguous data set, independent I/O */
                     chunk_edge_size = 0;
 
-                    #if 0 // JK_TEST_REMOVE
-                    if (test_num==1)
-                    #endif
                     contig_hs_dr_pio_test__run_test(test_num,
                                                    edge_size,
                                                    chunk_edge_size,
@@ -2385,10 +2364,6 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* contiguous data set, collective I/O */
                     chunk_edge_size = 0;
 
-                    #if 0 // JK_TEST_REMOVE
-                    // 1,3,4 failed 
-                    if (test_num==1)
-                    #endif
                     contig_hs_dr_pio_test__run_test(test_num,
                                                    edge_size,
                                                    chunk_edge_size,
@@ -2410,9 +2385,6 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* chunked data set, independent I/O */
                     chunk_edge_size = 5;
 
-                    #if 0 // JK_TEST_REMOVE
-                    if (test_num==1)
-                    #endif
                     contig_hs_dr_pio_test__run_test(test_num,
                                                    edge_size,
                                                    chunk_edge_size,
@@ -2433,14 +2405,6 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                 case COL_CHUNKED:
                     /* chunked data set, collective I/O */
                     chunk_edge_size = 5;
-
-                    #if 0 // JK_TEST_REMOVE
-                    printf ("JKDBG %s:%d p:%d> express_test:%d, test_num:%d\n", __FUNCTION__,__LINE__, getpid(), express_test, test_num );
-                    fflush(stdout);
-                    //express_test = 3;
-                    // JK_NOTE test_num = 1,3,4 - FAILED /  2,5 - OK
-                    if (test_num==1)
-                    #endif
 
                     contig_hs_dr_pio_test__run_test(test_num,
                                                    edge_size,

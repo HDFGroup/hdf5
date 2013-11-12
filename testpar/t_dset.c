@@ -3375,13 +3375,6 @@ test_no_collective_cause_mode(int selection_mode)
     ret = H5Dwrite(dataset, data_type, mem_space, file_space, dxpl_write, buffer);
     if(ret < 0) H5Eprint2(H5E_DEFAULT, stdout);
     VRFY((ret >= 0), "H5Dwrite() dataset multichunk write succeeded");
-    #ifdef JK_MULTI_IO_BEFORE_CLOSE_TEST // multi write test
-    /* same write, just to test multi IO before Dclose do not break 
-     * This was part of JK_SHAPE_SAME_P test */
-    ret = H5Dwrite(dataset, data_type, mem_space, file_space, dxpl_write, buffer);
-    if(ret < 0) H5Eprint2(H5E_DEFAULT, stdout);
-    VRFY((ret >= 0), "H5Dwrite() dataset multichunk write succeeded");
-    #endif
 
 
     /* Get the cause of broken collective I/O */
@@ -3402,14 +3395,6 @@ test_no_collective_cause_mode(int selection_mode)
 
     if(ret < 0) H5Eprint2(H5E_DEFAULT, stdout);
     VRFY((ret >= 0), "H5Dread() dataset multichunk read succeeded");
-    #ifdef JK_MULTI_IO_BEFORE_CLOSE_TEST // multi read test
-    /* same read, just to test multi IO before Dclose do not break
-     * This was part of JK_SHAPE_SAME_P test */
-    ret = H5Dread(dataset, data_type, mem_space, file_space, dxpl_read, buffer);
-
-    if(ret < 0) H5Eprint2(H5E_DEFAULT, stdout);
-    VRFY((ret >= 0), "H5Dread() dataset multichunk read succeeded");
-    #endif
    
     /* Get the cause of broken collective I/O */
     ret = H5Pget_mpio_no_collective_cause (dxpl_read, &no_collective_cause_local_read, &no_collective_cause_global_read);

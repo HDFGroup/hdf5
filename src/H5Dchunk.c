@@ -189,14 +189,8 @@ static herr_t H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *typ
 static herr_t H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *fm);
-#if 0 // JK_TODO_NOCOLLCAUSE_REMOVE
-static herr_t H5D__chunk_write_mdset(const hid_t file_id, const size_t count, H5D_io_info_md_t *io_info_md);
-#endif
 static herr_t H5D__chunk_flush(H5D_t *dset, hid_t dxpl_id);
 static herr_t H5D__chunk_io_term(const H5D_chunk_map_t *fm);
-#if 0 // JK_SLCLOSE_ISSUE_REMOVE // also use in H5Dcontig.c
-static herr_t H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md);
-#endif
 static herr_t H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
 
 /* "Nonexistent" layout operation callback */
@@ -237,12 +231,7 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *di,
 #endif
 static herr_t H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm);
 #ifndef JK_WORK
- #ifdef JK_MAY_PUT_BACK
- herr_t
- #else
- static herr_t
- #endif
- H5D__create_piece_mem_map_hyper(const H5D_io_info_md_t *io_info_md,
+static herr_t H5D__create_piece_mem_map_hyper(const H5D_io_info_md_t *io_info_md,
     const H5D_dset_info_t *dinfo);
 #endif
 static herr_t H5D__chunk_file_cb(void *elem, hid_t type_id, unsigned ndims,
@@ -279,10 +268,6 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
     #endif    
     H5D__chunk_read,
     H5D__chunk_write,
-    #if 0 // JK_TODO_NOCOLLCAUSE_REMOVE
-    // H5D__chunk_read_mdset,
-    //H5D__chunk_write_mdset,
-    #endif
 #ifdef H5_HAVE_PARALLEL
     #if 0 // JK_SINGLE_PATH_CUTOFF
     H5D__chunk_collective_read,
@@ -322,10 +307,6 @@ const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {{
     #endif      
     NULL,
     NULL,
-    #if 0 // JK_TODO_NOCOLLCAUSE_REMOVE
-    // NULL, 
-    //NULL,
-    #endif
 #ifdef H5_HAVE_PARALLEL
     NULL,
     NULL,
@@ -1094,59 +1075,6 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
         dinfo->chunk_dim[u] = dinfo->layout->u.chunk.dim[u];
     } /* end for */
 
-#if 0 // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE ---I
-#ifdef H5_HAVE_PARALLEL
-    /* Calculate total chunk in file map*/
-    #ifdef JK_ORI
-    fm->select_chunk = NULL;
-    #else
-     #ifdef JK_MULTI_DSET // ORI REMOVE - init in H5D__write_mdset() out of loop
-    //io_info_md->select_piece = NULL;
-     #endif
-    #endif
-    if(io_info_md->using_mpi_vfd) {
-        #ifndef JK_MULTI_DSET
-        size_t pieces_size;
-        H5D_piece_info_t ** buf_ptr;
-        H5D_piece_info_t ** new_total_pieces;
-        #endif
-        H5_CHECK_OVERFLOW(dinfo->layout->u.chunk.nchunks, hsize_t, size_t);
-        #ifdef JK_ORI
-        if(NULL == (dinfo->select_chunk = (H5D_chunk_info_t **)H5MM_calloc((size_t)dinfo->layout->u.chunk.nchunks * sizeof(H5D_chunk_info_t *))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
-        #else
-         #ifndef JK_MULTI_DSET
-        // JK_TODO_LATER_CONSIDER : Also consider canculate how many piece_info out of loop and pass here to malloc all at once (this should include chunked and contig dsets).
-        /* first time */
-        pieces_size = (size_t)dinfo->layout->u.chunk.nchunks * sizeof(H5D_piece_info_t *);
-
-        if(NULL == io_info_md->select_piece)
-            buf_ptr = NULL;
-        else {
-            buf_ptr = io_info_md->select_piece;
-            pieces_size += io_info_md->select_piece_last_size;
-        }
-
-        #ifdef JK_DBG
-        printf ("JKDBG p:%d %s:%d> pieces_size: %d\n", getpid(), __FILE__, __LINE__, pieces_size);
-        #endif
-
-
-        /* alloc accumulativly for all pieces from multi dsets */
-        if(NULL == (new_total_pieces = (H5D_piece_info_t **)H5MM_realloc(buf_ptr, pieces_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate piece info")
-
-        io_info_md->select_piece = new_total_pieces;
-        io_info_md->select_piece_last_size = pieces_size;
-         #else
-        if(NULL == (io_info_md->select_piece = (H5D_piece_info_t **)H5MM_calloc((size_t)dinfo->layout->u.chunk.nchunks * sizeof(H5D_piece_info_t *))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate piece info")
-         #endif 
-        #endif
-    } /* end if */
-#endif /* H5_HAVE_PARALLEL */
-#endif // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE ---O
-
 
     /* Initialize "last chunk" information */
     dinfo->last_index = (hsize_t)-1;
@@ -1466,12 +1394,6 @@ done:
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping")
     } /* end if */
 
-    #if 0 // JK_ORI_REMOVE // JK_COUNT0 work
-    /* Reset the global dataspace info */
-    dinfo->file_space = NULL;
-    dinfo->mem_space = NULL;
-    #endif
-
     if(iter_init && H5S_SELECT_ITER_RELEASE(&(dinfo->mem_iter)) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
     if(f_tid != (-1) && H5I_dec_ref(f_tid) < 0)
@@ -1752,9 +1674,6 @@ H5D__create_piece_map_single(H5D_dset_info_t *di, const H5D_io_info_md_t
     hsize_t     sel_start[H5O_LAYOUT_NDIMS]; /* Offset of low bound of file selection */
     hsize_t     sel_end[H5O_LAYOUT_NDIMS];  /* Offset of high bound of file selection */
     unsigned    u;                          /* Local index variable */
-    #if 0 // JK_SL_P_FADDR_NOTNEED_REMOVE
-    //haddr_t prev_tag = HADDR_UNDEF;
-    #endif
     #ifndef JK_SL_P_FADDR
     H5D_chunk_ud_t udata;   /* User data for querying piece info */
     #endif
@@ -1801,18 +1720,6 @@ H5D__create_piece_map_single(H5D_dset_info_t *di, const H5D_io_info_md_t
     if(H5S_SELECT_ADJUST_U(di->single_space, piece_info->coords) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
 
-#if 0 // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
-#ifdef H5_HAVE_PARALLEL
-    /* store chunk selection information */
-    if(io_info_md->using_mpi_vfd)
-        #ifdef JK_ORI
-        fm->select_chunk[chunk_info->index] = chunk_info;
-        #else
-        io_info_md->select_piece[piece_info->index] = piece_info;
-        #endif
-#endif /* H5_HAVE_PARALLEL */
-#endif // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
-
     /* Set the file dataspace for the chunk to the shared 'single' dataspace */
     piece_info->fspace = di->single_space;
 
@@ -1830,23 +1737,12 @@ H5D__create_piece_map_single(H5D_dset_info_t *di, const H5D_io_info_md_t
     /* make connection to related dset info from this piece_info */
     piece_info->dset_info = di;
     #endif
-    #if 0 // JK_SL_P_FADDR_NOTNEED_REMOVE
-    /* set metadata tagging with dset oheader addr for H5D__chunk_lookup */
-    if(H5AC_tag(io_info_md->dxpl_id, piece_info->dset_info->dset->oloc.addr, &prev_tag) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
-    #endif
     #ifndef JK_SL_P_FADDR
     /* get chunk file address */
     if(H5D__chunk_lookup(piece_info->dset_info->dset, io_info_md->dxpl_id,
             piece_info->coords, piece_info->index, &udata) < 0)
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
     piece_info->faddr = udata.addr;
-    #endif
-    #if 0 // JK_SL_P_FADDR_NOTNEED_REMOVE
-    /* Reset metadata tagging */
-    if(H5AC_tag(io_info_md->dxpl_id, prev_tag, NULL) < 0)
-        HDONE_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
-     //If CONTIG : piece_info->faddr = io_info_md->store->contig->dset_addr;
     #endif
 
     #ifdef JK_DBG
@@ -2094,9 +1990,6 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
 
     /* Iterate through each chunk in the dataset */
     while(sel_points) {
-        #if 0 // JK_SL_P_FADDR_NOTNEED_REMOVE
-        //haddr_t prev_tag = HADDR_UNDEF;
-        #endif
         #ifndef JK_SL_P_FADDR
         H5D_chunk_ud_t udata;   /* User data for querying chunk info */
         #endif
@@ -2148,18 +2041,6 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
             /* Set the chunk index */
             new_piece_info->index=chunk_index;
 
-#if 0 // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
-#ifdef H5_HAVE_PARALLEL
-            /* store chunk selection information */
-            if(io_info_md->using_mpi_vfd)
-                #ifdef JK_WORK
-                fm->select_chunk[chunk_index] = new_chunk_info;
-                #else
-                io_info_md->select_piece[chunk_index] = new_piece_info;
-                #endif
-#endif /* H5_HAVE_PARALLEL */
-#endif // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
-
             /* Set the file chunk dataspace */
             new_piece_info->fspace = tmp_fchunk;
             new_piece_info->fspace_shared = FALSE;
@@ -2178,11 +2059,6 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
             new_piece_info->dset_info = dinfo;
             #endif
 
-            #if 0 // JK_SL_P_FADDR_NOTNEED_REMOVE
-            /* set metadata tagging with dset oheader addr for H5D__chunk_lookup */
-            //if(H5AC_tag(io_info_md->dxpl_id, new_piece_info->dset_info->dset->oloc.addr, &prev_tag) < 0)
-            //    HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
-            #endif
             #ifndef JK_SL_P_FADDR // JK_TEST
             #ifdef JK_DBG
             printf("JKDBG %s|%d > coord [0]: %llu, [1]: %llu, cindex: %llu\n", __FUNCTION__, __LINE__, new_piece_info->coords[0], new_piece_info->coords[1], new_piece_info->index);
@@ -2201,11 +2077,6 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
             new_piece_info->faddr = 0xaa2 + (k*8);
             k++;
             #endif // JK_SL_P_FADDR
-            #if 0 // JK_SL_P_FADDR_NOTNEED_REMOVE
-            /* Reset metadata tagging */
-            //if(H5AC_tag(io_info_md->dxpl_id, prev_tag, NULL) < 0)
-            //    HDONE_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
-            #endif
 
             #ifdef JK_DBG
             printf("JKDBG %s|%d> k:%d,  new_piece_info->faddr: 0x%x\n", __FUNCTION__, __LINE__,k, new_piece_info->faddr);
@@ -2388,11 +2259,7 @@ done:
 } /* end H5D__create_chunk_mem_map_hyper() */
 
 #ifndef JK_WORK
- #ifdef JK_MAY_PUT_BACK
- herr_t
- #else
 static herr_t
- #endif
 H5D__create_piece_mem_map_hyper(const H5D_io_info_md_t *io_info_md, const H5D_dset_info_t *dinfo)
 {
     H5SL_node_t *curr_node;                 /* Current node in skip list */
@@ -3328,29 +3195,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__chunk_write() */
 
-#if 0 // JK_TODO_NOCOLLCAUSE_REMOVE
-static herr_t 
-H5D__chunk_write_mdset(const hid_t file_id, const size_t count, H5D_io_info_md_t *io_info_md)
-{
-    size_t i;
-    herr_t	ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    #ifdef JK_DBG
-    printf("JKDBG %s|%d> count: %d\n", __FUNCTION__, __LINE__, count);
-    #endif
-
-    for(i = 0; i < count; i++) {
-        //if((*io_info.io_ops.multi_write)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
-    
-        //    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-#endif // JK_TODO_NOCOLLCAUSE_REMOVE
 
 
 /*-------------------------------------------------------------------------
@@ -3490,17 +3334,6 @@ H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md
     if(di->mchunk_tmpl)
         if(H5S_close(di->mchunk_tmpl) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory piece dataspace template")
-#if 0 // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
-#ifdef H5_HAVE_PARALLEL
-    if(io_info_md->select_piece)
-    {
-        H5MM_xfree(io_info_md->select_piece);
-        #ifndef JK_MULTI_DSET
-        io_info_md->select_piece = NULL;
-        #endif
-    }
-#endif /* H5_HAVE_PARALLEL */
-#endif // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

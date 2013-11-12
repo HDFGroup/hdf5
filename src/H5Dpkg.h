@@ -152,10 +152,6 @@ typedef struct H5D_layout_ops_t {
     #endif
     H5D_layout_read_func_t ser_read;    /* High-level I/O routine for reading data in serial */
     H5D_layout_write_func_t ser_write;  /* High-level I/O routine for writing data in serial */
-    #ifdef JK_TODO_NOCOLLCAUSE_REMOVE // no coll cause
-    //H5D_layout_read_md_func_t ser_read_md;    /* High-level I/O routine for reading data in serial */
-    //H5D_layout_write_md_func_t ser_write_md;  /* High-level I/O routine for writing data in serial */
-    #endif
 #ifdef H5_HAVE_PARALLEL
     H5D_layout_read_func_t par_read;    /* High-level I/O routine for reading data in parallel */
     H5D_layout_write_func_t par_write;  /* High-level I/O routine for writing data in parallel */
@@ -255,17 +251,14 @@ typedef struct H5D_io_info_t {
 } H5D_io_info_t;
 
 #ifndef JK_WORK
+// JK_TODO_REMOVE Comments
 
 // piece info for multiple dsets
 // (from H5D_chunk_info_t)
 typedef struct H5D_piece_info_t {
     haddr_t faddr;         /* file addr. key of skip list */
     hsize_t index;              /* "Index" of chunk in dataset */
-    #ifdef JK_ORI_REMOVE
-    uint32_t chunk_points;      /* Number of elements selected in chunk */
-    #else
     uint32_t piece_points;      /* Number of elements selected in piece */
-    #endif
     hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
     const H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
     unsigned fspace_shared;     /* Indicate that the file space for a chunk is shared and shouldn't be freed */
@@ -312,19 +305,11 @@ typedef struct H5D_dset_info_t {
     H5S_sel_type msel_type;     /* Selection type in memory */
 
     H5S_t  *single_space;       /* Dataspace for single chunk */
-    #ifdef JK_ORI_REMOVE
-    //H5D_chunk_info_t *single_chunk_info;  /* Pointer to single chunk's info */
-    #else
     H5D_piece_info_t *single_piece_info;
-    #endif
     hbool_t use_single;         /* Whether I/O is on a single element */
 
     hsize_t last_index;         /* Index of last chunk operated on */
-    #ifdef JK_ORI_REMOVE
-    H5D_chunk_info_t *last_chunk_info;
-    #else
-    H5D_piece_info_t *last_piece_info;  /* Pointer to last chunk's info */
-    #endif
+    H5D_piece_info_t *last_piece_info;  /* Pointer to last piece's info */
 
     hsize_t chunk_dim[H5O_LAYOUT_NDIMS];    /* Size of chunk in each dimension */
 
@@ -353,19 +338,7 @@ typedef struct H5D_io_info_md_t {
     H5D_io_op_type_t op_type;
 
     H5D_dset_info_t *dsets_info; /* multiple dsets info */
-    // OR
-    //H5SL_t *sel_dsets;          /* Skip list containing information for each dset selected */
-    //H5SL_t *sel_chunks;       /* Skip list containing information for each chunk selected */
     H5SL_t *sel_pieces;         /* Skip list containing information for each piece selected */
-#ifdef H5_HAVE_PARALLEL
-    //H5D_chunk_info_t **select_chunk;    /* Store the information about whether this chunk is selected or not */
-   #ifdef JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
-    H5D_piece_info_t **select_piece;    /* Store the information about whether this piece is selected or not */
-    #ifndef JK_MULTI_DSET
-    size_t select_piece_last_size;
-    #endif
-   #endif
-#endif /* H5_HAVE_PARALLEL */
 
     #ifndef JK_MULTI_DSET
     haddr_t store_faddr;
@@ -915,7 +888,7 @@ H5_DLL htri_t H5D__mpio_opt_possible_mdset(const size_t count, H5D_io_info_md_t 
 #endif /* H5_HAVE_PARALLEL */
 
 #ifndef JK_SLCLOSE_ISSUE
-/* JK this is needed for CONTIG dset skiplist free (sel_pieces) for layout_ops.io_term_md */
+/* JK this is needed for CONTIG dset skiplist free (sel_pieces) for layout_ops.io_term_md. Was static in H5Dchunk.c */
 H5_DLL herr_t H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md);
 #endif
 
