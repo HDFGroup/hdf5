@@ -10,7 +10,7 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name[]="eff_file.h5";
+    const char file_name[]="eff_file_dset.h5";
 
     hid_t file_id;
     hid_t gid1, gid2, gid3;

@@ -903,9 +903,28 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 fprintf(stderr, "MAP get failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
+
+                /* free stuff associated with request */
+                info->value_handle = (hg_bulk_t *)H5MM_xfree(info->value_handle);
+                if(H5Tclose(info->val_mem_type_id) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release datatype");
+                if(H5Tclose(info->key_mem_type_id) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release datatype");
+                if(H5Pclose(info->dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to release plist");
+
+                free(info->output);
+                info->output = NULL;
+                info = (H5VL_iod_map_io_info_t *)H5MM_xfree(info);
+                req->data = NULL;
+
+                /* remove request from file list */
+                H5VL_iod_request_delete(file, req);
+                break;
             }
             else {
-                /* If the data is not VL, then just free resources and remove the request */
+                /* If the data is not VL, then just free resources and
+                   remove the request */
                 if(!info->val_is_vl) {
                     /* Free memory handle */
                     if(HG_SUCCESS != HG_Bulk_handle_free(*info->value_handle)) {
@@ -938,6 +957,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                         if(info->val_cs_ptr)
                             *info->val_cs_ptr = internal_cs;
                     }
+
                     free(info->output);
                     info->output = NULL;
                     info->value_handle = (hg_bulk_t *)H5MM_xfree(info->value_handle);
@@ -1034,6 +1054,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release datatype");
                         if(H5Pclose(info->dxpl_id) < 0)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to release plist");
+
                         free(info->output);
                         info->output = NULL;
                         info = (H5VL_iod_map_io_info_t *)H5MM_xfree(info);

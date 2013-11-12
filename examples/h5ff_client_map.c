@@ -10,7 +10,7 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name[]="map_file.h5";
+    const char file_name[]="eff_file_map.h5";
     hid_t file_id;
     hid_t gid1, gid2, dtid1, dtid2;
     hid_t map1, map2, map3;
@@ -153,8 +153,28 @@ int main(int argc, char **argv) {
         map3 = H5Mcreate_ff(gid2, "MAP_3", H5T_STD_I32LE, dtid2, 
                             H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
 
-        assert(H5Gclose_ff(gid1, e_stack) == 0);
-        assert(H5Gclose_ff(gid2, e_stack) == 0);
+        /* write some KV pairs to each map object. */
+        {
+            key = 1;
+            value = 1000;
+            ret = H5Mset_ff(map1, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
+                            H5P_DEFAULT, tid1, e_stack);
+            assert(ret == 0);
+
+            for(i=0 ; i<5 ; i++) {
+                key = i;
+                ret = H5Mset_ff(map2, H5T_STD_I32LE, &key, dtid1, &wdata[i],
+                                H5P_DEFAULT, tid1, e_stack);
+                assert(ret == 0);
+            }
+
+            for(i=0 ; i<5 ; i++) {
+                key = i;
+                ret = H5Mset_ff(map3, H5T_STD_I32LE, &key, dtid2, str_wdata[i],
+                                H5P_DEFAULT, tid1, e_stack);
+                assert(ret == 0);
+            }
+        }
     }
 
     /* Tell Delegates that transaction 1 is started */
@@ -184,6 +204,13 @@ int main(int argc, char **argv) {
         assert(0 == ret);
         ret = H5Oget_token(map3, map_token3, &token_size3);
         assert(0 == ret);
+
+        /* make sure the create operations have completed before
+           telling the delegates to open them */
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
         /* bcast the token sizes and the tokens */ 
         MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
@@ -224,31 +251,6 @@ int main(int argc, char **argv) {
         map3 = H5Oopen_by_token(map_token3, rid1, e_stack);
     }
 
-    /* write some KV pairs to each map object. */
-    {
-        key = 1;
-        value = 1000;
-        ret = H5Mset_ff(map1, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, tid1, e_stack);
-        assert(ret == 0);
-
-        for(i=0 ; i<5 ; i++) {
-            key = i;
-            ret = H5Mset_ff(map2, H5T_STD_I32LE, &key, dtid1, &wdata[i],
-                            H5P_DEFAULT, tid1, e_stack);
-            assert(ret == 0);
-        }
-
-        for(i=0 ; i<5 ; i++) {
-            key = i;
-            ret = H5Mset_ff(map3, H5T_STD_I32LE, &key, dtid2, str_wdata[i],
-                            H5P_DEFAULT, tid1, e_stack);
-            assert(ret == 0);
-        }
-    }
-
-    /* Just for Funsies, wait on a valid random index in the ES */
-    H5ESwait(e_stack, 4, &status);
 
     /* none leader procs have to complete operations before notifying the leader */
     if(0 != my_rank) {
@@ -298,14 +300,18 @@ int main(int argc, char **argv) {
         rid2 = H5RCcreate(file_id, version);
         assert(rid2 > 0);
     }
+    if(0 == my_rank) {
+        assert(H5Gclose_ff(gid1, e_stack) == 0);
+        assert(H5Gclose_ff(gid2, e_stack) == 0);
+    }
 
     /* issue some read operations using the read context acquired */
 
-    ret = H5Mget_count_ff(map3, &count, rid2, e_stack);
+    ret = H5Mget_count_ff(map2, &count, rid2, e_stack);
     assert(ret == 0);
 
     key = 1;
-    ret = H5Mexists_ff(map3, H5T_STD_I32LE, &key, &exists, rid2, e_stack);
+    ret = H5Mexists_ff(map1, H5T_STD_I32LE, &key, &exists, rid2, e_stack);
     assert(ret == 0);
 
     /* create & start transaction 2 with Multiple Leader - No Delegate Model. */
@@ -378,40 +384,40 @@ int main(int argc, char **argv) {
         assert (status);
 
         printf("Value recieved = %d\n", value);
-        /* this is the fake value we sent from the server */
-        assert(value == 1024);
 
-        if(my_size == 1) {
-            for(i=0 ; i<5 ; i++) {
-                key = i;
-                ret = H5Mget_ff(map2, H5T_STD_I32LE, &key, dtid1, &rdata[i],
-                                H5P_DEFAULT, rid3, H5_EVENT_STACK_NULL);
-                assert(ret == 0);
-            }
+        for(i=0 ; i<5 ; i++) {
+            key = i;
+            ret = H5Mget_ff(map2, H5T_STD_I32LE, &key, dtid1, &rdata[i],
+                            H5P_DEFAULT, rid3, H5_EVENT_STACK_NULL);
+            assert(ret == 0);
+        }
 
-            /* Print VL DATA */
-            fprintf(stderr, "Reading VL Data: \n");
-            for(i = 0; i < 5; i++) {
-                int temp = i*increment + increment;
+        /* Print VL DATA */
+        fprintf(stderr, "Reading VL Data: \n");
+        for(i = 0; i < 5; i++) {
+            int temp = i*increment + increment;
 
-                fprintf(stderr, "Key %d  size %zu: ", i, rdata[i].len);
-                for(j = 0; j < temp; j++)
-                    fprintf(stderr, "%d ",((unsigned int *)rdata[i].p)[j]);
-                fprintf(stderr, "\n");
-            } /* end for */
+            fprintf(stderr, "Key %d  size %zu: ", i, rdata[i].len);
+            for(j = 0; j < temp; j++)
+                fprintf(stderr, "%d ",((unsigned int *)rdata[i].p)[j]);
+            fprintf(stderr, "\n");
+        } /* end for */
 
-            for(i=0 ; i<5 ; i++) {
-                key = i;
-                ret = H5Mget_ff(map3, H5T_STD_I32LE, &key, dtid2, &str_rdata[i],
-                                H5P_DEFAULT, rid3, H5_EVENT_STACK_NULL);
-                assert(ret == 0);
-            }
+        for(i=0 ; i<5 ; i++) {
+            key = i;
+            ret = H5Mget_ff(map3, H5T_STD_I32LE, &key, dtid2, &str_rdata[i],
+                            H5P_DEFAULT, rid3, H5_EVENT_STACK_NULL);
+            assert(ret == 0);
+        }
 
-            fprintf(stderr, "Reading VL Strings: \n");
-            for(i=0 ; i<5 ; i++) {
-                fprintf(stderr, "Key %d:  %s\n", i, str_rdata[i]);
+        fprintf(stderr, "Reading VL Strings: \n");
+
+        for(i=0 ; i<5 ; i++) {
+            fprintf(stderr, "Key %d:  %s\n", i, str_rdata[i]);
+            if(i == 1)
+                assert(0 == strlen(str_rdata[i]));
+            else
                 free(str_rdata[i]);
-            }
         }
     }
 
@@ -452,7 +458,7 @@ int main(int argc, char **argv) {
     ret = H5RCclose(rid3);
     assert(0 == ret);
 
-    assert (count == 3);
+    assert (count == 5);
     assert (exists > 0);
 
     fprintf(stderr, "\n*****************************************************************************************************************\n");
