@@ -12,7 +12,7 @@ set(CTEST_SOURCE_NAME ${CTEST_SCRIPT_ARG})
 set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
 set(CTEST_BUILD_CONFIGURATION "Release")
 #set(NO_MAC_FORTRAN "true")
-#set(BUILD_OPTIONS ""${BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+#set(BUILD_OPTIONS ""${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=OFF")
 #set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_ENABLE_F2003:BOOL=ON)
 
 ###############################################################################################################
