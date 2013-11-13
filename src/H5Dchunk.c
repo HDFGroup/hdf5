@@ -269,13 +269,8 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
     H5D__chunk_read,
     H5D__chunk_write,
 #ifdef H5_HAVE_PARALLEL
-    #if 0 // JK_SINGLE_PATH_CUTOFF
-    H5D__chunk_collective_read,
-    H5D__chunk_collective_write,
-    #else
     NULL,
     NULL,
-    #endif
     #ifndef JK_WORK
     H5D__mdset_collective_read,
     H5D__mdset_collective_write,
@@ -5256,94 +5251,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_prune_by_extent() */
 
-#if 0 // JK_SINGLE_PATH_CUTOFF
-#ifdef H5_HAVE_PARALLEL
-
-/*-------------------------------------------------------------------------
- * Function:	H5D__chunk_addrmap_cb
- *
- * Purpose:     Callback when obtaining the chunk addresses for all existing chunks
- *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Kent Yang
- *              Tuesday, November 15, 2005
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
-{
-    H5D_chunk_it_ud2_t	*udata = (H5D_chunk_it_ud2_t *)_udata;  /* User data for callback */
-    unsigned       rank = udata->common.layout->ndims - 1;    /* # of dimensions of dataset */
-    hsize_t        chunk_index;
-    int            ret_value = H5_ITER_CONT;     /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Compute the index for this chunk */
-    if(H5V_chunk_index(rank, chunk_rec->offset, udata->common.layout->dim, udata->common.layout->down_chunks, &chunk_index) < 0)
-       HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, H5_ITER_ERROR, "can't get chunk index")
-
-    /* Set it in the userdata to return */
-    udata->chunk_addr[chunk_index] = chunk_rec->chunk_addr;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D__chunk_addrmap_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D__chunk_addrmap
- *
- * Purpose:     Obtain the chunk addresses for all existing chunks
- *
- * Return:	Success:	Non-negative on succeed.
- *		Failure:	negative value
- *
- * Programmer:  Kent Yang
- *              November 15, 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D__chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[])
-{
-    H5D_chk_idx_info_t idx_info;        /* Chunked index info */
-    H5D_t *dset = io_info->dset;        /* Local pointer to dataset info */
-    H5D_chunk_it_ud2_t udata;          	/* User data for iteration callback */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    HDassert(dset);
-    HDassert(dset->shared);
-    HDassert(chunk_addr);
-
-    /* Set up user data for B-tree callback */
-    HDmemset(&udata, 0, sizeof(udata));
-    udata.common.layout = &dset->shared->layout.u.chunk;
-    udata.common.storage = &dset->shared->layout.storage.u.chunk;
-    udata.common.rdcc = &(dset->shared->cache.chunk);
-    udata.chunk_addr = chunk_addr;
-
-    /* Compose chunked index info struct */
-    idx_info.f = dset->oloc.file;
-    idx_info.dxpl_id = io_info->dxpl_id;
-    idx_info.pline = &dset->shared->dcpl_cache.pline;
-    idx_info.layout = &dset->shared->layout.u.chunk;
-    idx_info.storage = &dset->shared->layout.storage.u.chunk;
-
-    /* Iterate over chunks to build mapping of chunk addresses */
-    if((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_addrmap_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to iterate over chunk index to build address map")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__chunk_addrmap() */
-#endif /* H5_HAVE_PARALLEL */
-#endif
 
 
 /*-------------------------------------------------------------------------

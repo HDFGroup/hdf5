@@ -135,73 +135,11 @@ H5FL_BLK_DEFINE(type_conv);
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
  *
+ * Modification: Jonathan Kim  Nov, 2013
+ *   Make the path via multi-dset path for CONTIG/CHUNKED dsets.
+ *   This is part multi-dset work.
  *-------------------------------------------------------------------------
  */
-#if 0 // JK_REWIRE_SINGLE_PATH_READ  ORI
-herr_t
-H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
-{
-    H5D_t		   *dset = NULL;
-    const H5S_t		   *mem_space = NULL;
-    const H5S_t		   *file_space = NULL;
-    char                    fake_char;
-    herr_t                  ret_value = SUCCEED;  /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id,
-             plist_id, buf);
-
-    /* check arguments */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-    if(NULL == dset->oloc.file)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-
-    if(mem_space_id < 0 || file_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-    if(H5S_ALL != mem_space_id) {
-	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(mem_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
-    } /* end if */
-    if(H5S_ALL != file_space_id) {
-	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(file_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
-    } /* end if */
-
-    /* Get the default dataset transfer property list if the user didn't provide one */
-    if (H5P_DEFAULT == plist_id)
-        plist_id= H5P_DATASET_XFER_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
-
-    /* If the buffer is nil, and 0 element is selected, make a fake buffer.
-     * This is for some MPI package like ChaMPIon on NCSA's tungsten which
-     * doesn't support this feature.
-     */
-    if(!buf)
-        buf = &fake_char;
-
-    /* read raw data */
-    if(H5D__read(dset, mem_type_id, mem_space, file_space, plist_id, buf/*out*/) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Dread() */
-#else
 herr_t
 H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
@@ -292,7 +230,6 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dread() */
-#endif
 
 #ifndef JK_WORK
 herr_t
@@ -553,30 +490,11 @@ done:
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
  *
+ * Modification: Jonathan Kim  Nov, 2013
+ *      Make the path via multi-dset path for CONTIG/CHUNKED dsets.
+ *      This is part multi-dset work.
  *-------------------------------------------------------------------------
  */
-#if 0 // JK_SINGLE_PATH_CUTOFF  ORI
-herr_t
-H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
-{
-    herr_t                  ret_value = SUCCEED;  /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id,
-             dxpl_id, buf);
-
-    if(!dset_id)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-
-    if(H5D__pre_write(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf) < 0) 
-	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Dwrite() */
-
-#else // JK_SINGLE_CHUNK_TEST
 herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
@@ -619,7 +537,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         if(H5D__pre_write_mdset((hid_t)NULL, 1, dset_info, dxpl_id) < 0) 
 	        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
     }
-    else  // COMPACT , EFL
+    else  /* COMPACT , EFL */
     {
         if(H5D__pre_write(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf) < 0) 
 	        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
@@ -628,7 +546,6 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dwrite() */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -1205,10 +1122,8 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
     /* save original rbuf */
     void ** info_rbuf_ori;
     #endif
-    #if 1 // JK_REWIRE_SINGLE_PATH_READ
     H5P_genplist_t *plist;
     H5FD_mpio_xfer_t xfer_mode;
-    #endif
 
     FUNC_ENTER_STATIC
 
@@ -1242,7 +1157,6 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTALLOC, FAIL, "couldn't allocate ori buf array")
     #endif
 
-    #if 1 // JK_REWIRE_SINGLE_PATH_READ
     /* Get the default dataset transfer property list if the user didn't provide one */
     if(H5P_DEFAULT == dxpl_id)
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
@@ -1280,7 +1194,6 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
         }
         HGOTO_DONE(SUCCEED)
     }
-    #endif
 
     /* iterate dsets */
     for (i=0; i < count; i++)
@@ -1539,21 +1452,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__read_mdset() */
-#endif
-
-#if 0 // JK_SINGLE_PATH_CUTOFF  // TEST
-void Convert_io_info_multi2single(H5D_io_info_md_t *io_info_md, H5D_io_info_t *io_info)
-{
-    io_info->dset = io_info_md->dsets_info[0].dset;
-    io_info->dxpl_cache =  io_info_md->dxpl_cache;
-    io_info-> dxpl_id = io_info_md->dxpl_id;
-    io_info->store = io_info_md->dsets_info[0].store;
-    io_info->layout_ops = io_info_md->dsets_info[0].layout_ops;
-    io_info->io_ops =  io_info_md->io_ops;
-    io_info->op_type =  io_info_md->op_type;
-    io_info->u.rbuf = io_info_md->dsets_info[0].u.rbuf;
-    io_info->u.wbuf = io_info_md->dsets_info[0].u.wbuf;
-}
 #endif
 
 
@@ -2589,10 +2487,6 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
             /* Override the I/O op pointers to the MPI-specific routines */
             io_info->io_ops.multi_read = dset->shared->layout.ops->par_read;
             io_info->io_ops.multi_write = dset->shared->layout.ops->par_write;
-            #if 0 // JK_SINGLE_PATH_CUTOFF
-            io_info->io_ops.single_read = H5D__mpio_select_read;
-            io_info->io_ops.single_write = H5D__mpio_select_write;
-            #endif
         } /* end if */
         else {
             /* If we won't be doing collective I/O, but the user asked for
