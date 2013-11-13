@@ -554,10 +554,8 @@ int main(int argc, char **argv)
     if (MAINPROCESS && GetTestSummary())
         TestSummary();
 
-#ifndef JK_ORI_SKIP
     /* Clean up test files */
     h5_cleanup(FILENAME, fapl);
-#endif    
 
     nerrors += GetTestNumErrs();
 

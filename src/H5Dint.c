@@ -1426,7 +1426,7 @@ H5D_close(H5D_t *dataset)
                     HDassert(H5SL_count(dataset->shared->cache.sel_pieces) == 0);
                     H5SL_close(dataset->shared->cache.sel_pieces);
                     dataset->shared->cache.sel_pieces = NULL;
-                    #ifdef JK_DEBUG_SLMEM
+                    #ifdef JK_DBG_SLMEM
                     printf("JKDBG %s|%d p:%d>  SL_CLOSE\n", __FUNCTION__, __LINE__, getpid());
                     fflush (stdout);
                     #endif

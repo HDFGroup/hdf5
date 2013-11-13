@@ -166,7 +166,7 @@ static herr_t H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info,
 htri_t
 H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     const H5S_t *mem_space, const H5D_type_info_t *type_info,
-    const H5D_chunk_map_t *fm, H5P_genplist_t *dx_plist)
+    UNUSED const H5D_chunk_map_t *fm, H5P_genplist_t *dx_plist)
 {
     /* variables to set cause of broken collective I/O */
     int local_cause = 0;
@@ -431,9 +431,6 @@ herr_t
 H5D__mpio_select_read_mdset(const H5D_io_info_md_t *io_info_md, hsize_t mpi_buf_count, 
     const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space)
 {
-    #ifdef JK_ORI
-    const H5D_contig_storage_t *store_contig = &(io_info->store->contig);    /* Contiguous storage info for this I/O operation */
-    #endif
     /* all dsets are in the same file, so just get it from the first dset */
     const H5F_t *file = io_info_md->dsets_info[0].dset->oloc.file;
 
@@ -497,9 +494,6 @@ herr_t
 H5D__mpio_select_write_mdset(const H5D_io_info_md_t *io_info_md, hsize_t mpi_buf_count, 
     const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space)
 {
-    #ifdef JK_ORI
-    const H5D_contig_storage_t *store_contig = &(io_info->store->contig);    /* Contiguous storage info for this I/O operation */
-    #endif
     /* all dsets are in the same file, so just get it from the first dset */
     const H5F_t *file = io_info_md->dsets_info[0].dset->oloc.file;
 
@@ -872,11 +866,7 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
 
     /* step 2:  Go ahead to do IO.*/
     if(H5D_ONE_LINK_CHUNK_IO == io_option)  {
-       #ifdef JK_ORI
-        if(H5D__link_chunk_collective_io(io_info, type_info, fm, sum_chunk, dx_plist) < 0)
-       #else
         if(H5D__all_piece_collective_io(file_id, count, io_info_md, dx_plist) < 0)
-       #endif
             HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish linked chunk MPI-IO")
     } /* end if */
 done:
@@ -953,9 +943,6 @@ done:
 #ifndef JK_WORK
 herr_t
 H5D__mdset_collective_read(const hid_t file_id, const size_t count, H5D_io_info_md_t *io_info_md)
-//(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-//    hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
-//    H5D_chunk_map_t *fm)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -971,9 +958,6 @@ done:
 
 herr_t
 H5D__mdset_collective_write(const hid_t file_id, const size_t count, H5D_io_info_md_t *io_info_md)
- //(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
- //   hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
- //   H5D_chunk_map_t *fm)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1350,11 +1334,7 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "couldn't set actual io mode property")
 
     /* Get the sum # of chunks */
-    #ifdef JK_ORI
-    if(H5D__mpio_get_sum_chunk(io_info, fm, &sum_chunk) < 0)
-    #else
     if(H5D__mpio_get_sum_piece(io_info_md, &sum_chunk_allproc) < 0)
-    #endif
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSWAP, FAIL, "unable to obtain the total chunk number of all processes");
 
     #ifdef JK_DBG
@@ -1583,22 +1563,14 @@ if(H5DEBUG(D))
     HDfprintf(H5DEBUG(D),"before coming to final collective IO\n");
 #endif
     /* Set up the base storage address for this chunk */
-    #ifdef JK_ORI
-    io_info->store = &ctg_store;
-    #else
     #ifndef JK_MULTI_DSET
     io_info_md->store_faddr = ctg_store.contig.dset_addr;
     io_info_md->base_maddr_w = base_wbuf_addr;
     io_info_md->base_maddr_r = base_rbuf_addr;
     #endif
-    #endif
 
     /* Perform final collective I/O operation */
-    #ifdef JK_WORK
-    if(H5D__final_collective_io(io_info, type_info, mpi_buf_count, &chunk_final_ftype, &chunk_final_mtype) < 0)
-    #else
     if(H5D__final_collective_io_mdset(io_info_md, mpi_buf_count, &chunk_final_ftype, &chunk_final_mtype) < 0)
-    #endif
         HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish MPI-IO")
     }  
 

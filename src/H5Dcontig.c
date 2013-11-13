@@ -169,9 +169,6 @@ H5FL_BLK_EXTERN(type_conv);
 #ifndef JK_ALSO_CONTIG1
 /* Declare a free list to manage the H5D_piece_info_t struct */
 H5FL_EXTERN(H5D_piece_info_t);
- #ifdef JK_TODO_MAY_PUT_BACK
-H5_DLLVAR herr_t H5D__create_piece_mem_map_hyper(const H5D_io_info_md_t *io_info_md, const H5D_dset_info_t *dinfo);
- #endif
 #endif
 
 
@@ -725,17 +722,8 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
             new_piece_info->index = 0;
 
             /* Set the file chunk dataspace */
-            #ifdef JK_PER_DSET // NOT NEED use temp
-            new_piece_info->fspace = file_space;
-            /* set true for sharing mem space with dset, which means
-             * fspace gets free by applicaton H5Sclose(), and
-             * doesn't require providing layout_ops.io_term() for H5D_LOPS_CONTIG.
-             */
-            new_piece_info->fspace_shared = TRUE;
-            #else
             new_piece_info->fspace = tmp_fspace;
             new_piece_info->fspace_shared = FALSE;
-            #endif
 
             /* Set the memory chunk dataspace */
             #ifndef JK_PER_DSET
@@ -753,13 +741,9 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
             new_piece_info->mspace_shared = TRUE;
             #endif
 
-            /* Copy the chunk's coordinates */
+            /* Copy the piece's coordinates */
             for(u = 0; u < dinfo->f_ndims; u++)
-            #ifdef JK_ORI
-                new_piece_info->coords[u]=coords[u];
-            #else
                 new_piece_info->coords[u] = 0;
-            #endif
             new_piece_info->coords[dinfo->f_ndims] = 0;
 
             /* make connection to related dset info from this piece_info */

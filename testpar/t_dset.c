@@ -2736,7 +2736,8 @@ test_actual_io_mode(int selection_mode) {
         /* Request collective I/O */
         ret = H5Pset_dxpl_mpio(dxpl_write, H5FD_MPIO_COLLECTIVE);
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
-        
+    }
+
     /* Make a copy of the dxpl to test the read operation */
     dxpl_read = H5Pcopy(dxpl_write);
     VRFY((dxpl_read >= 0), "H5Pcopy succeeded");

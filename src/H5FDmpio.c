@@ -1380,7 +1380,7 @@ H5FD_mpio_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
 
     *file_handle = &(file->f);
-    #ifdef JK_COUNT0_DBG
+    #ifdef JK_DBG_COUNT0
     //printf ("JKDBG p:%d %s:%d COUNT=0> MPI_File - fd:%x,  addr fd:%x\n", getpid(), __FUNCTION__,__LINE__, file->f, &(file->f));
     fflush(stdout);
     printf ("JKDBG p:%d %s:%d COUNT=0> MPI_File - fd:%x, fd addr:%x\n", getpid(), __FUNCTION__,__LINE__, *(MPI_File*)(*file_handle), *file_handle);

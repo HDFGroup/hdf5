@@ -1168,17 +1168,10 @@ done:
 static herr_t
 H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id)
 {
-    //H5D_chunk_map_t fm;                 /* Chunk file<->memory mapping */
-    //H5D_io_info_t io_info;              /* Dataset I/O info     */
-    //H5D_type_info_t type_info;          /* Datatype info for operation */
     H5D_io_info_md_t io_info_md;        /* Dataset I/O info for multi dsets */
     hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
     H5D_dset_info_t *dset_info_array = NULL;
-    #ifdef JK_ORI
-    H5S_t * projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
-    #else
     H5S_t ** projected_mem_space;       /* If not NULL, ptr to dataspace containing a     */
-    #endif
                                         /* projection of the supplied mem_space to a new  */
                                         /* data space with rank equal to that of          */
                                         /* file_space.                                    */
@@ -1191,11 +1184,7 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
                                         /* Note that if this variable is used, the        */
                                         /* projected mem space must be discarded at the   */
                                         /* end of the function to avoid a memory leak.    */
-    #ifdef JK_ORI                                        
-    H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-    #else
     H5D_storage_t *store=NULL;          /*union of EFL and chunk pointer in file space */
-    #endif
     hssize_t	snelmts;                /*total number of elmts	(signed) */
     hsize_t	nelmts;                 /*total number of elmts	*/
 #ifdef H5_HAVE_PARALLEL
@@ -1274,17 +1263,14 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
             /* convert dset id to dset */
             if(NULL == (dset = (H5D_t *)H5I_object_verify(info[i].dset_id, H5I_DATASET)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-            /* convert file space id to file space */
 
-            #if 1 // JK_TODO_READ  Fix testphdf5 -x fill -x actualio -x fiodc -x atomicity - OR mimic H5D__pre_write_mdset()
+            /* convert file space id to file space */
             if(H5S_ALL != info[i].file_space_id)
-            #endif
                 if(NULL == (fspace = (const H5S_t *)H5I_object_verify(info[i].file_space_id, H5I_DATASPACE)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
             /* convert mem space id to mem space */
-            #if 1 // JK_TODO_READ  Fix testphdf5 -x fill -x actualio -x fiodc -x atomicity OR mimic H5D__pre_write_mdset()
             if(H5S_ALL != info[i].mem_space_id) 
-            #endif
                 if(NULL == (mspace = (const H5S_t *)H5I_object_verify(info[i].mem_space_id, H5I_DATASPACE)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
@@ -1300,15 +1286,10 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
     for (i=0; i < count; i++)
     {
         /* check args */
-        // JK - dataset : info[i].dset_id , loop
-        #ifdef JK_ORI
-        //HDassert(dataset && dataset->oloc.file);
-        #else
         if(NULL == (dataset = (H5D_t *)H5I_object_verify(info[i].dset_id, H5I_DATASET)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
         if(NULL == dataset->oloc.file)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-        #endif
     
         #ifndef JK_NEW // get file_space
         /* Initialize file dataspace information */
@@ -1347,11 +1328,7 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
     
         /* Set up datatype info for operation */
-        #ifdef JK_ORI
-        if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, FALSE, &type_info) < 0)
-        #else
         if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, info[i].mem_type_id, TRUE, &(dset_info_array[i].type_info)) < 0)
-        #endif
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
         type_info_init = TRUE;
     
@@ -1397,29 +1374,15 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
                                     /* to the beginning of the projected mem space.  */
     
             /* Attempt to construct projected dataspace for memory dataspace */
-            #ifdef JK_ORI
-            if(H5S_select_construct_projection(mem_space, &projected_mem_space,
-                    (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf, type_info.dst_type_size) < 0)
-            #else
             if(H5S_select_construct_projection(mem_space, &(projected_mem_space[i]),
                     (unsigned)H5S_GET_EXTENT_NDIMS(file_space), info[i].rbuf, &adj_buf, (hsize_t) dset_info_array[i].type_info.dst_type_size) < 0)
-            #endif
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
-            #ifdef JK_ORI
-            HDassert(projected_mem_space);
-            #else
             HDassert(projected_mem_space[i]);
-            #endif
             HDassert(adj_buf);
     
             /* Switch to using projected memory dataspace & adjusted buffer */
-            #ifdef JK_ORI
-            mem_space = projected_mem_space;
-            buf = adj_buf;
-            #else
             mem_space = projected_mem_space[i];
             info[i].rbuf = adj_buf;
-            #endif
         } /* end if */
     
     
@@ -1511,16 +1474,14 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
             /* convert dset id to dset */
             if(NULL == (dset = (H5D_t *)H5I_object_verify(info[i].dset_id, H5I_DATASET)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
             /* convert file space id to file space */
-            #if 1 // JK_TODO_READ  Fix testphdf5 -x  cmpdsetr -x null -x nocolcause OR mimic H5D__pre_write_mdset()
             if(H5S_ALL != info[i].file_space_id)
-            #endif
                 if(NULL == (fspace = (const H5S_t *)H5I_object_verify(info[i].file_space_id, H5I_DATASPACE)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
             /* convert mem space id to mem space */
-            #if 1 // JK_TODO_READ  Fix testphdf5 -x  cmpdsetr -x null -x nocolcause OR mimic H5D__pre_write_mdset()
             if(H5S_ALL != info[i].mem_space_id) 
-            #endif
                 if(NULL == (mspace = (const H5S_t *)H5I_object_verify(info[i].mem_space_id, H5I_DATASPACE)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
@@ -1868,18 +1829,10 @@ done:
 static herr_t
 H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id)
 {    
-    // JK_TODO_REMOVE Comments
-    //H5D_io_info_t io_info;            /* Dataset I/O info     */
-    //H5D_chunk_map_t fm;               /* Chunk file<->memory mapping */
-    //H5D_type_info_t type_info;          /* Datatype info for operation */
     H5D_io_info_md_t io_info_md;        /* Dataset I/O info for multi dsets */
     hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
     H5D_dset_info_t *dset_info_array = NULL;
-    #ifdef JK_ORI
-    H5S_t * projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
-    #else
     H5S_t ** projected_mem_space; /* If not NULL, ptr to dataspace containing a     */
-    #endif
                                         /* projection of the supplied mem_space to a new  */
                                         /* data space with rank equal to that of          */
                                         /* file_space.                                    */
@@ -1892,11 +1845,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
                                         /* Note that if this variable is used, the        */
                                         /* projected mem space must be discarded at the   */
                                         /* end of the function to avoid a memory leak.    */
-    #ifdef JK_ORI                                        
-    H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-    #else
     H5D_storage_t *store=NULL;               /*union of EFL and chunk pointer in file space */
-    #endif
     hssize_t	snelmts;                /*total number of elmts	(signed) */
     hsize_t	nelmts;                 /*total number of elmts	*/
 #ifdef H5_HAVE_PARALLEL
@@ -1940,7 +1889,6 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
 
     if(NULL == (store = (H5D_storage_t *)H5MM_malloc(count * sizeof(H5D_storage_t))))
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTALLOC, FAIL, "couldn't allocate dset storage info array buffer")
-    
     #endif
 
     #ifndef JK_SHAPE_SAME_P
@@ -1949,39 +1897,14 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTALLOC, FAIL, "couldn't allocate ori buf array")
     #endif
 
-    #ifdef JK_TODO_D866
-    #ifdef H5_HAVE_PARALLEL
-    /* JK this take care of H5AC_COLLECTIVE_META_WRITE can not be find by
-     * H5P_get() when # of dset is over 865. */
-    {
-     unsigned coll_meta_write = 1;
-     htri_t  check_prop;
-     check_prop = H5Pexist(dxpl_id, H5AC_COLLECTIVE_META_WRITE_NAME);
-     //printf("JKDBG %s|%d check Pexist: %d\n", __FUNCTION__, __LINE__, check_prop);
-     if(0 == check_prop)
-     {
-         //printf("JKDBG %s|%d H5AC_COLLECTIVE_META_WRITE_NAME NOT Exist!\n", __FUNCTION__, __LINE__);
-         if (0 > H5Pinsert2(dxpl_id, H5AC_COLLECTIVE_META_WRITE_NAME,H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write, NULL, NULL, NULL, NULL, NULL, NULL)) {
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
-         }
-     }
-    }
-   #endif    
-   #endif // JK_TODO_D866
-
     /* iterate dsets */
     for (i=0; i < count; i++)
     {
         /* check args */
-        // JK - dataset : info[i].dset_id , loop
-        #ifdef JK_ORI
-        //HDassert(dataset && dataset->oloc.file);
-        #else
         if(NULL == (dataset = (H5D_t *)H5I_object_verify(info[i].dset_id, H5I_DATASET)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
         if(NULL == dataset->oloc.file)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-        #endif
         #ifdef JK_DBG
         printf ("JKDBG p:%d %s:%d> dataset%d->oloc.addr: %llu\n", getpid(), __FILE__, __LINE__,i, dataset->oloc.addr);
         #endif
@@ -2003,11 +1926,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
     
         /* Set up datatype info for operation */
-        #ifdef JK_ORI
-        if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, TRUE, &type_info) < 0)
-        #else
         if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, info[i].mem_type_id, TRUE, &(dset_info_array[i].type_info)) < 0)
-        #endif
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
         type_info_init = TRUE;
     
@@ -2017,11 +1936,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
             /* If MPI based VFD is used, no VL datatype support yet. */
             /* This is because they use the global heap in the file and we don't */
             /* support parallel access of that yet */
-            #ifdef JK_ORI
-            if(H5T_detect_class(type_info.mem_type, H5T_VLEN, FALSE) > 0)
-            #else
             if(H5T_detect_class(dset_info_array[i].type_info.mem_type, H5T_VLEN, FALSE) > 0)
-            #endif
                 HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing VL datatypes yet")
     
             /* If MPI based VFD is used, no VL datatype support yet. */
@@ -2030,13 +1945,8 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
             /* We should really use H5T_detect_class() here, but it will be difficult
              * to detect the type of the reference if it is nested... -QAK
              */
-            #ifdef JK_ORI
-            if(H5T_get_class(type_info.mem_type, TRUE) == H5T_REFERENCE &&
-                    H5T_get_ref_type(type_info.mem_type) == H5R_DATASET_REGION)
-            #else
             if(H5T_get_class(dset_info_array[i].type_info.mem_type, TRUE) == H5T_REFERENCE &&
                H5T_get_ref_type(dset_info_array[i].type_info.mem_type) == H5R_DATASET_REGION)
-            #endif
                 HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing region reference datatypes yet")
     
             /* Can't write to chunked datasets with filters, in parallel */
@@ -2118,29 +2028,15 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
             printf("JKDBG %s|%d DBG_SHAPE_SAME_P> CONTRUCT_PROJECTION! \n", __FUNCTION__, __LINE__);
             #endif
             /* Attempt to construct projected dataspace for memory dataspace */
-            #ifdef JK_ORI
-            if(H5S_select_construct_projection(mem_space, &projected_mem_space,
-                    (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf, type_info.src_type_size) < 0)
-            #else                
             if(H5S_select_construct_projection(mem_space, &(projected_mem_space[i]),
                     (unsigned)H5S_GET_EXTENT_NDIMS(file_space), info[i].wbuf, &adj_buf, (hsize_t) dset_info_array[i].type_info.src_type_size) < 0)
-            #endif
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
-            #ifdef JK_ORI
-            HDassert(projected_mem_space);
-            #else
             HDassert(projected_mem_space[i]);
-            #endif
             HDassert(adj_buf);
     
             /* Switch to using projected memory dataspace & adjusted buffer */
-            #ifdef JK_ORI
-            mem_space = projected_mem_space;
-            buf = adj_buf;
-            #else
             mem_space = projected_mem_space[i];
             info[i].wbuf = adj_buf;
-            #endif
         } /* end if */
         #ifdef JK_DBG_SHAPE_SAME_P
         {
@@ -2227,30 +2123,26 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
 #endif /*H5_HAVE_PARALLEL*/
 
 
-    /* Invoke correct "high level" I/O routine */
-    #ifdef JK_ORI
-    if((*io_info.io_ops.multi_write)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
-    #else
-     #ifndef JK_NOCOLLCAUSE
-     /* If collective mode is broken, perform write IO in independent mode via 
-      * single-dset path with looping. 
-      * Multiple-dset path can not be called since it is not supported, so make 
-      * detour through single-dset path */
-     if (TRUE == io_info_md.is_coll_broken) {
-        /* loop with serial & single-dset write IO path */
-        for (i=0; i< count; i++) {
-            #ifndef JK_SHAPE_SAME_P
-            /* Restore ori wbuf , so it can be passed as initial state for 
-             * single-dset path */
-            info[i].wbuf = info_wbuf_ori[i];
-            #endif
-            if(H5D__pre_write(info[i].dset_id, info[i].mem_type_id, info[i].mem_space_id, info[i].file_space_id, dxpl_id, info[i].wbuf) < 0) 
-	            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
-        }
-     } else
-     #endif
-        if((*io_info_md.io_ops.multi_write_md)(file_id, count, &io_info_md) < 0)
+    #ifndef JK_NOCOLLCAUSE
+    /* If collective mode is broken, perform write IO in independent mode via 
+     * single-dset path with looping. 
+     * Multiple-dset path can not be called since it is not supported, so make 
+     * detour through single-dset path */
+    if (TRUE == io_info_md.is_coll_broken) {
+       /* loop with serial & single-dset write IO path */
+       for (i=0; i< count; i++) {
+           #ifndef JK_SHAPE_SAME_P
+           /* Restore ori wbuf , so it can be passed as initial state for 
+            * single-dset path */
+           info[i].wbuf = info_wbuf_ori[i];
+           #endif
+           if(H5D__pre_write(info[i].dset_id, info[i].mem_type_id, info[i].mem_space_id, info[i].file_space_id, dxpl_id, info[i].wbuf) < 0) 
+	           HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
+       }
+    } else
     #endif
+        /* Invoke correct "high level" I/O routine */
+        if((*io_info_md.io_ops.multi_write_md)(file_id, count, &io_info_md) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 #ifdef OLD_WAY
@@ -2283,23 +2175,14 @@ done:
             printf("JKDBG %s|%d> Dset[%u] , Type: N/A\n", __FUNCTION__, __LINE__,i);
         #endif
 
-        #ifdef JK_ORI
-        /* Shut down the I/O op information */
-        if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
-        #else // JK NOTE: Open this after io_init is all done.
         /* Shut down the I/O op information */
         if(io_op_init && dset_info_array[i].layout_ops.io_term_md && (*dset_info_array[i].layout_ops.io_term_md)(&(dset_info_array[i]), &io_info_md) < 0)
-        #endif
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
     } /* end of for */
 
 #ifdef H5_HAVE_PARALLEL
     /* Shut down io_info struct */
-    #ifdef JK_ORI
-    if(io_info_init && H5D__ioinfo_term(&io_info) < 0)
-    #else
     if(io_info_init && H5D__ioinfo_term_mdset(&io_info_md) < 0)
-    #endif
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -2307,21 +2190,12 @@ done:
     for (i=0; i< count; i++)
     {
         /* Shut down datatype info for operation */
-        #ifdef JK_ORI
-        if(type_info_init && H5D__typeinfo_term(&type_info) < 0)
-        #else
         if(type_info_init && H5D__typeinfo_term(&(dset_info_array[i].type_info)) < 0)
-        #endif
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
         /* discard projected mem space if it was created */
-        #ifdef JK_ORI
-        if(NULL != projected_mem_space)
-            if(H5S_close(projected_mem_space) < 0)
-        #else
         if(NULL != projected_mem_space[i])
             if(H5S_close(projected_mem_space[i]) < 0)
-        #endif // JK_LATER
                 HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
     }
 
@@ -2425,11 +2299,7 @@ H5D__ioinfo_init_mdset(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dx
     HDassert(io_info_md);
 
     /* Set up "normal" I/O fields */
-    #ifdef JK_ORI
-    io_info->dset = dset;
-    #else
     dset_info->dset = dset;
-    #endif
     io_info_md->dxpl_cache = dxpl_cache;
     io_info_md->dxpl_id = dxpl_id;
     #ifndef JK_NOCOLLCAUSE
@@ -2438,13 +2308,7 @@ H5D__ioinfo_init_mdset(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dx
     dset_info->store = store;
 
     /* Set I/O operations to initial values */
-    #ifdef JK_ORI
-    io_info->layout_ops = *dset->shared->layout.ops;
-    #else
     dset_info->layout_ops = *dset->shared->layout.ops;
-    //dset_info->layout_ops_md = *dset->shared->layout.ops_md;
-    //io_info_md->layout_ops_md = *dset->shared->layout.ops_md;
-    #endif
 
    #ifndef JK_SERIAL  
    // JK NOTE: this is SERIAL INIT so not effect for PARALLE
