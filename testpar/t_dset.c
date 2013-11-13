@@ -2556,10 +2556,6 @@ test_actual_io_mode(int selection_mode) {
     H5D_mpio_actual_io_mode_t   actual_io_mode_expected = -1;
     const char  * filename;
     const char  * test_name;
-    #if 0 // JK_MCHUNK_OPT_REMOVE
-    hbool_t     direct_multi_chunk_io;
-    hbool_t     multi_chunk_io;
-    #endif
     hbool_t     is_chunked;
     hbool_t     is_collective;
     int         mpi_size = -1; 
@@ -2589,23 +2585,6 @@ test_actual_io_mode(int selection_mode) {
     char message[256];
     herr_t      ret;
    
-    #if 0 // JK_MCHUNK_OPT_REMOVE
-    /* Set up some flags to make some future if statements slightly more readable */
-    direct_multi_chunk_io = (
-        selection_mode == TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND ||
-        selection_mode == TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL );
-    
-    /* Note: RESET performs the same tests as MULTI_CHUNK_MIX_DISAGREE and then
-     * tests independent I/O
-     */
-    multi_chunk_io = (
-        selection_mode == TEST_ACTUAL_IO_MULTI_CHUNK_IND ||
-        selection_mode == TEST_ACTUAL_IO_MULTI_CHUNK_COL ||
-        selection_mode == TEST_ACTUAL_IO_MULTI_CHUNK_MIX ||
-        selection_mode == TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE ||
-        selection_mode == TEST_ACTUAL_IO_RESET );
-    #endif
- 
     is_chunked = (
         selection_mode != TEST_ACTUAL_IO_CONTIGUOUS &&
         selection_mode != TEST_ACTUAL_IO_NO_COLLECTIVE);
@@ -2666,118 +2645,6 @@ test_actual_io_mode(int selection_mode) {
      * and also set up some selection-dependeent test info. */
     switch(selection_mode) {
         
-       #if 0 // JK_MCHUNK_OPT_REMOVE
-        /* Independent I/O with optimization */
-        case TEST_ACTUAL_IO_MULTI_CHUNK_IND:
-        case TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND:
-            /* Since the dataset is chunked by row and each process selects a row,
-             * each process  writes to a different chunk. This forces all I/O to be
-             * independent.
-             */
-            slab_set(mpi_rank, mpi_size, start, count, stride, block, BYROW);
-            
-            test_name = "Multi Chunk - Independent";
-            actual_chunk_opt_mode_expected = H5D_MPIO_MULTI_CHUNK;
-            actual_io_mode_expected = H5D_MPIO_CHUNK_INDEPENDENT;
-            break;
-
-        /* Collective I/O with optimization */
-        case TEST_ACTUAL_IO_MULTI_CHUNK_COL:
-        case TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL:
-            /* The dataset is chunked by rows, so each process takes a column which
-             * spans all chunks. Since the processes write non-overlapping regular
-             * selections to each chunk, the operation is purely collective.
-             */
-            slab_set(mpi_rank, mpi_size, start, count, stride, block, BYCOL);
-            
-            test_name = "Multi Chunk - Collective";
-            actual_chunk_opt_mode_expected = H5D_MPIO_MULTI_CHUNK;
-            actual_io_mode_expected = H5D_MPIO_CHUNK_COLLECTIVE;
-            break;
-        
-        /* Mixed I/O with optimization */
-        case TEST_ACTUAL_IO_MULTI_CHUNK_MIX:
-            /* A chunk will be assigned collective I/O only if it is selected by each
-             * process. To get mixed I/O, have the root select all chunks and each
-             * subsequent process select the first and nth chunk. The first chunk,
-             * accessed by all, will be assigned collective I/O while each other chunk
-             * will be accessed only by the root and the nth procecess and will be
-             * assigned independent I/O. Each process will access one chunk collectively
-             * and at least one chunk independently, reporting mixed I/O.
-             */
-           
-            if(mpi_rank == 0) {
-                 /* Select the first column */
-                 slab_set(mpi_rank, mpi_size, start, count, stride, block, BYCOL);
-            } else {
-                /* Select the first and the nth chunk in the nth column */
-                block[0] = dim0 / mpi_size;
-                block[1] = dim1 / mpi_size;
-                count[0] = 2;
-                count[1] = 1;
-                stride[0] = mpi_rank * block[0];
-                stride[1] = 1;
-                start[0] = 0;
-                start[1] = mpi_rank*block[1];
-            }
-                
-            test_name = "Multi Chunk - Mixed";
-            actual_chunk_opt_mode_expected = H5D_MPIO_MULTI_CHUNK;
-            actual_io_mode_expected = H5D_MPIO_CHUNK_MIXED;
-            break;
-
-        /* RESET tests that the properties are properly reset to defaults each time I/O is
-         * performed. To acheive this, we have RESET perform collective I/O (which would change
-         * the values from the defaults) followed by independent I/O (which should report the
-         * default values). RESET doesn't need to have a unique selection, so we reuse
-         * MULTI_CHUMK_MIX_DISAGREE, which was chosen because it is a complex case that works 
-         * on all builds. The independent section of RESET can be found at the end of this function.
-         */
-        case TEST_ACTUAL_IO_RESET:
-
-        /* Mixed I/O with optimization and internal disagreement */
-        case TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE:
-            /* A chunk will be assigned collective I/O only if it is selected by each
-             * process. To get mixed I/O with disagreement, assign process n to the
-             * first chunk and the nth chunk. The first chunk, selected by all, is 
-             * assgigned collective I/O, while each other process gets independent I/O.
-             * Since the root process with only access the first chunk, it will report
-             * collective I/O. The subsequent processes will access the first chunk
-             * collectively, and their other chunk indpendently, reporting mixed I/O.
-             */
-
-            if(mpi_rank == 0) {
-                 /* Select the first chunk in the first column */
-                 slab_set(mpi_rank, mpi_size, start, count, stride, block, BYCOL);
-                 block[0] = block[0] / mpi_size;
-            } else {
-                /* Select the first and the nth chunk in the nth column */
-                block[0] = dim0 / mpi_size;
-                block[1] = dim1 / mpi_size;
-                count[0] = 2;
-                count[1] = 1;
-                stride[0] = mpi_rank * block[0];
-                stride[1] = 1;
-                start[0] = 0;
-                start[1] = mpi_rank*block[1];
-            }
-            
-            /* If the testname was not already set by the RESET case */
-            if (selection_mode == TEST_ACTUAL_IO_RESET)
-                test_name = "RESET";
-            else
-                test_name = "Multi Chunk - Mixed (Disagreement)";
-            
-            actual_chunk_opt_mode_expected = H5D_MPIO_MULTI_CHUNK;
-               
-            if(mpi_rank == 0)
-                actual_io_mode_expected = H5D_MPIO_CHUNK_COLLECTIVE;
-            else
-                actual_io_mode_expected = H5D_MPIO_CHUNK_MIXED;
-            
-            break; 
-       #endif // JK_MCHUNK_OPT_REMOVE
-
         #ifndef JK_TODO_MCHUNK_OPT
         /* RESET tests that the properties are properly reset to defaults each time I/O is
          * performed. To acheive this, we have RESET perform collective I/O (which would change
@@ -2870,32 +2737,6 @@ test_actual_io_mode(int selection_mode) {
         ret = H5Pset_dxpl_mpio(dxpl_write, H5FD_MPIO_COLLECTIVE);
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
         
-        #if 0 // JK_MCHUNK_OPT_REMOVE
-        /* Set the threshold number of processes per chunk to twice mpi_size. 
-         * This will prevent the threshold from ever being met, thus forcing 
-         * multi chunk io instead of link chunk io.
-         * This is via deault.
-         */
-        if(multi_chunk_io) {
-            /* force multi-chunk-io by threshold */
-            ret = H5Pset_dxpl_mpio_chunk_opt_num(dxpl_write, (unsigned) mpi_size*2);
-            VRFY((ret >= 0), "H5Pset_dxpl_mpio_chunk_opt_num succeeded");
-
-            /* set this to manipulate testing senario about allocating processes
-             * to chunks */
-            ret = H5Pset_dxpl_mpio_chunk_opt_ratio(dxpl_write, (unsigned) 99);
-            VRFY((ret >= 0), "H5Pset_dxpl_mpio_chunk_opt_ratio succeeded");
-        }
-
-        /* Set directly go to multi-chunk-io without threshold calc. */
-        if(direct_multi_chunk_io) {
-            /* set for multi chunk io by property*/
-            ret = H5Pset_dxpl_mpio_chunk_opt(dxpl_write, H5FD_MPIO_CHUNK_MULTI_IO);
-            VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
-        }
-        #endif
-    }
-
     /* Make a copy of the dxpl to test the read operation */
     dxpl_read = H5Pcopy(dxpl_write);
     VRFY((dxpl_read >= 0), "H5Pcopy succeeded");
@@ -3024,28 +2865,6 @@ actual_io_mode_tests(void) {
     
     test_actual_io_mode(TEST_ACTUAL_IO_NO_COLLECTIVE);
     
-  #if 0 // JK_MCHUNK_OPT_REMOVE  
-    /* 
-     * Test multi-chunk-io via proc_num threshold
-     */
-    test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_IND);
-    test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_COL);
-    
-    /* The Multi Chunk Mixed test requires atleast three processes. */
-    if (mpi_size > 2)
-        test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX);
-    else
-        HDfprintf(stdout, "Multi Chunk Mixed test requires 3 proceses minimum\n");
-    
-    test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE);
-
-    /* 
-     * Test multi-chunk-io via setting direct property
-     */
-    test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND);
-    test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL);
-  #endif // JK_MCHUNK_OPT_REMOVE
-
     test_actual_io_mode(TEST_ACTUAL_IO_LINK_CHUNK);
     test_actual_io_mode(TEST_ACTUAL_IO_CONTIGUOUS);
  

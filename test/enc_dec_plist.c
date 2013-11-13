@@ -216,10 +216,6 @@ main(void)
         FAIL_STACK_ERROR
     if((H5Pset_dxpl_mpio_collective_opt(dxpl, H5FD_MPIO_INDIVIDUAL_IO)) < 0)
         FAIL_STACK_ERROR
-    #if 0 // JK_MCHUNK_OPT_REMOVE
-    if((H5Pset_dxpl_mpio_chunk_opt(dxpl, H5FD_MPIO_CHUNK_MULTI_IO)) < 0)
-        FAIL_STACK_ERROR
-    #endif
     if((H5Pset_dxpl_mpio_chunk_opt_ratio(dxpl, 30)) < 0)
         FAIL_STACK_ERROR
     if((H5Pset_dxpl_mpio_chunk_opt_num(dxpl, 40)) < 0)

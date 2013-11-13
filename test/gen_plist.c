@@ -165,10 +165,6 @@ main(void)
         assert(ret > 0);
     if((ret = H5Pset_dxpl_mpio_collective_opt(dxpl1, H5FD_MPIO_INDIVIDUAL_IO)) < 0)
         assert(ret > 0);
-    #if 0 // JK_MCHUNK_OPT_REMOVE
-    if((ret = H5Pset_dxpl_mpio_chunk_opt(dxpl1, H5FD_MPIO_CHUNK_MULTI_IO)) < 0)
-        assert(ret > 0);
-    #endif
     if((ret = H5Pset_dxpl_mpio_chunk_opt_ratio(dxpl1, 30)) < 0)
         assert(ret > 0);
     if((ret = H5Pset_dxpl_mpio_chunk_opt_num(dxpl1, 40)) < 0)

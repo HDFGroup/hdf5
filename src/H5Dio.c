@@ -498,11 +498,7 @@ HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
                 // JK_TODO make this based on the internal H5FD_MPIO_COLLECTIVE_IO 
                 // OR add H5FD_MPIO_CHUNK_MULTI_IO . Later AT_ONCE_IO too
                 //if(para_io_mode == H5FD_MPIO_COLLECTIVE_IO) 
-                if(chunk_opt_mode == H5FD_MPIO_CHUNK_ONE_IO 
-                   #if 0 // JK_MCHUNK_OPT_REMOVE
-                   || chunk_opt_mode == H5FD_MPIO_CHUNK_MULTI_IO
-                   #endif
-                   ) {
+                if(chunk_opt_mode == H5FD_MPIO_CHUNK_ONE_IO)  {
                     HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
                     if(MPI_SUCCESS != (mpi_code = MPI_File_read_at_all(mpi_fh, 0, NULL, 0, MPI_BYTE, &mpi_stat)))
                         HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code)
@@ -941,11 +937,7 @@ H5D__pre_write_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dx
                 // JK_TODO make this based on the internal H5FD_MPIO_COLLECTIVE_IO 
                 // OR add H5FD_MPIO_CHUNK_MULTI_IO . Later AT_ONCE_IO too
                 //if(para_io_mode == H5FD_MPIO_COLLECTIVE_IO) 
-                if(chunk_opt_mode == H5FD_MPIO_CHUNK_ONE_IO 
-                   #if 0 // JK_MCHUNK_OPT_REMOVE
-                   || chunk_opt_mode == H5FD_MPIO_CHUNK_MULTI_IO
-                   #endif
-                   ) {
+                if(chunk_opt_mode == H5FD_MPIO_CHUNK_ONE_IO)  {
                     HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
                     if(MPI_SUCCESS != (mpi_code = MPI_File_write_at_all(mpi_fh, 0, NULL, 0, MPI_BYTE, &mpi_stat)))
                         HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mpi_code)
