@@ -982,7 +982,8 @@ H5VL_iod_server_map_close_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start map close\n");
+    fprintf(stderr, "Start map Close %"PRIu64" %"PRIu64"\n",
+            iod_oh.rd_oh, iod_oh.wr_oh);
 #endif
 
     if((iod_obj_close(iod_oh.rd_oh, NULL, NULL)) < 0)
