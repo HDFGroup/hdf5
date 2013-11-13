@@ -1216,7 +1216,7 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
     io_info_md.sel_pieces = NULL;
     io_info_md.store_faddr = 0;
     io_info_md.base_maddr_r = NULL;
-    #ifndef JK_DEBUG_SLMEM
+    #ifdef JK_DBG_SLMEM
     io_info_md.mc_cnt=0;
     #endif
     #endif // JK_MULTI_DSET
@@ -1872,7 +1872,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
     io_info_md.sel_pieces = NULL;
     io_info_md.store_faddr = 0;
     io_info_md.base_maddr_w = NULL;
-    #ifndef JK_DEBUG_SLMEM
+    #ifdef JK_DBG_SLMEM
     io_info_md.mc_cnt=0;
     #endif
    #endif // JK_MULTI_DSET

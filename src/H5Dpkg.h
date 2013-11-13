@@ -350,7 +350,7 @@ typedef struct H5D_io_info_md_t {
     hbool_t is_coll_broken;
     #endif
 
-    #ifndef JK_DEBUG_SLMEM
+    #ifdef JK_DBG_SLMEM
     unsigned int mc_cnt; /* sl_create count */
     #endif
 } H5D_io_info_md_t;
