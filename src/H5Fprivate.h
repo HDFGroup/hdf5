@@ -645,9 +645,7 @@ H5_DLL herr_t H5F_super_dirty(H5F_t *f);
 
 /* Parallel I/O (i.e. MPI) related routines */
 #ifdef H5_HAVE_PARALLEL
-#ifndef JK_COUNT0
 H5_DLL herr_t H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle);
-#endif 
 H5_DLL int H5F_mpi_get_rank(const H5F_t *f);
 H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 H5_DLL int H5F_mpi_get_size(const H5F_t *f);

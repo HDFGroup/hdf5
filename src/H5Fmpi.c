@@ -78,21 +78,18 @@
 
 #ifdef H5_HAVE_PARALLEL
 
-#ifndef JK_COUNT0
 /*-------------------------------------------------------------------------
  * Function:    H5F_get_mpi_handle
  *
  * Purpose:     Retrieves MPI File handle.
  *
  * Return:      Success:        The size (positive)
- *
  *              Failure:        Negative
  *
  * Programmer:  Jonathan Kim
  *              June 5, 2013
  *
  * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -118,7 +115,6 @@ H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_mpi_handle() */
-#endif
 
 
 /*-------------------------------------------------------------------------

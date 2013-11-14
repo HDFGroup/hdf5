@@ -1357,6 +1357,8 @@ done:
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
  *
+ * Modification: Jonathan Kim  Nov, 2013
+ *   Add for close piece info in skiplist for CONTIG/CHUNK for multi-dset work.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1392,7 +1394,6 @@ H5D_close(H5D_t *dataset)
         /* Free cached information for each kind of dataset */
         switch(dataset->shared->layout.type) {
             case H5D_CONTIGUOUS:
-                #ifndef JK_SLCLOSE_ISSUE
                 /* Check for skip list for iterating over pieces during I/O to close */
                 if(dataset->shared->cache.sel_pieces) {
                     size_t cnt=0; 
@@ -1404,7 +1405,6 @@ H5D_close(H5D_t *dataset)
                     H5SL_close(dataset->shared->cache.sel_pieces);
                     dataset->shared->cache.sel_pieces = NULL;
                 } /* end if */
-                #endif
                 break;
 
             case H5D_CHUNKED:
@@ -1414,7 +1414,7 @@ H5D_close(H5D_t *dataset)
                     H5SL_close(dataset->shared->cache.chunk.sel_chunks);
                     dataset->shared->cache.chunk.sel_chunks = NULL;
                 } /* end if */
-                #ifndef JK_SLCLOSE_ISSUE
+
                 /* Check for skip list for iterating over pieces during I/O to close */
                 if(dataset->shared->cache.sel_pieces) {
                     size_t cnt=0; 
@@ -1430,7 +1430,6 @@ H5D_close(H5D_t *dataset)
                     fflush (stdout);
                     #endif
                 } /* end if */
-                #endif
 
                 /* Check for cached single chunk dataspace */
                 if(dataset->shared->cache.chunk.single_space) {

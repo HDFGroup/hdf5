@@ -405,11 +405,9 @@ H5D__mpio_select_read_mdset(const H5D_io_info_md_t *io_info_md, hsize_t mpi_buf_
     /* all dsets are in the same file, so just get it from the first dset */
     const H5F_t *file = io_info_md->dsets_info[0].dset->oloc.file;
 
-    #ifndef JK_MULTI_DSET
     void *rbuf = NULL;
     /* memory addr from a piece with lowest file addr */
     rbuf = io_info_md->base_maddr_r;
-    #endif
 
     #ifdef JK_DBG
     printf("JKDBG %s:%d> rbuf: %x\n", __FILE__, __LINE__, rbuf);
@@ -450,11 +448,9 @@ H5D__mpio_select_write_mdset(const H5D_io_info_md_t *io_info_md, hsize_t mpi_buf
     /* all dsets are in the same file, so just get it from the first dset */
     const H5F_t *file = io_info_md->dsets_info[0].dset->oloc.file;
 
-    #ifndef JK_MULTI_DSET
     const void *wbuf = NULL;
     /* memory addr from a piece with lowest file addr */
     wbuf = io_info_md->base_maddr_w;
-    #endif
 
     #ifdef JK_DBG
     printf("JKDBG %s:%d> wbuf: %x\n", __FILE__, __LINE__, wbuf);
@@ -728,9 +724,7 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
     int                *chunk_mpi_mem_counts = NULL;    /* Count of MPI memory datatype for each chunk */
     int                 mpi_code;           /* MPI return code */
     H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode = H5D_MPIO_LINK_CHUNK;
-    #ifndef JK_ALSO_CONTIG1
     H5D_mpio_actual_io_mode_t actual_io_mode = 0;
-    #endif
     
     herr_t              ret_value = SUCCEED;
     #ifdef JK_DBG
@@ -739,10 +733,8 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
 
     FUNC_ENTER_STATIC
 
-    #ifndef JK_ALSO_CONTIG1
     /* set actual_io_mode */ 
     for (i=0; i < count; i++) {
-        #ifndef JK_ACTUALIO_MDSET
         if (io_info_md->dsets_info[i].layout->type == H5D_CHUNKED)
             actual_io_mode |= H5D_MPIO_CHUNK_COLLECTIVE;
         else if (io_info_md->dsets_info[i].layout->type == H5D_CONTIGUOUS) {
@@ -754,9 +746,7 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
         }
         else
             HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
-        #endif
     }
-    #endif
 
     #ifdef JK_DBG
     mpi_rank = H5F_mpi_get_rank(io_info_md->dsets_info[0].dset->oloc.file);
@@ -784,16 +774,12 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
     size_t num_chunk;       /* Number of chunks for this process */
     size_t u=0;               /* Local index variable */
 
-    #ifndef JK_SL_P_FADDR
     H5SL_node_t    *piece_node;         /* Current node in chunk skip list */
     H5D_piece_info_t *piece_info;
-    #endif
 
-    #ifndef JK_MEM_MPITYPE
     /* local variable for base address for write buffer */
     const void * base_wbuf_addr = NULL;
     void * base_rbuf_addr = NULL;
-    #endif
 
     /* Get the number of chunks with a selection */
     num_chunk = H5SL_count(io_info_md->sel_pieces);
@@ -856,26 +842,24 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
         }
         #endif // JK_DBG
 
-       #ifndef JK_SL_P_FADDR
+        /* get first piece, which is sorted in skiplist */
         if(NULL == (piece_node = H5SL_first(io_info_md->sel_pieces)))
             HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get piece node from skipped list")
         if(NULL == (piece_info = (H5D_piece_info_t *)H5SL_item(piece_node)))
             HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get piece info from skipped list")
-        /* save lowest address */
+        /* save lowest file address */
         ctg_store.contig.dset_addr = piece_info->faddr;
-        #ifndef JK_MEM_MPITYPE
+
+        /* save base mem addr of piece for read/write */
         base_wbuf_addr = piece_info->dset_info->u.wbuf;
         base_rbuf_addr = piece_info->dset_info->u.rbuf;
-        #endif
-       #endif
 
 #ifdef H5D_DEBUG
 if(H5DEBUG(D))
     HDfprintf(H5DEBUG(D),"before iterate over selected pieces\n");
 #endif
 
-        /* Obtain MPI derived datatype from all individual chunks */
-       #ifndef JK_SL_P_FADDR
+        /* Obtain MPI derived datatype from all individual pieces */
         /* Iterate over selected pieces for this process */
         while(piece_node) {
             if(NULL == (piece_info = (H5D_piece_info_t *)H5SL_item(piece_node)))
@@ -903,7 +887,6 @@ if(H5DEBUG(D))
              * (assume MPI_Aint big enough to hold it) */
             chunk_file_disp_array[u] = (MPI_Aint)piece_info->faddr - (MPI_Aint)ctg_store.contig.dset_addr;
 
-            #ifndef JK_MEM_MPITYPE
             if(io_info_md->op_type == H5D_IO_OP_WRITE) {
                 chunk_mem_disp_array[u] = (MPI_Aint)piece_info->dset_info->u.wbuf - (MPI_Aint)base_wbuf_addr;
                 #if 0 // JK_DBG
@@ -922,12 +905,11 @@ if(H5DEBUG(D))
              printf("JKDBG %s:%d P%d> mem_disp[%d]: ", __FILE__, __LINE__, mpi_rank, u);
              printf("%x\n", chunk_mem_disp_array[u]);
              #endif
-            #endif
+
             /* Advance to next piece in list */
             u++;
             piece_node = H5SL_next(piece_node);
         } /* end while */
-       #endif // JK_SL_P_FADDR
 
         /* Create final MPI derived datatype for the file */
         /* Note: consider to use 'MPI_Type_create_struct' instead of
@@ -976,19 +958,15 @@ if(H5DEBUG(D))
         printf("JKDBG %s:%d P%d> NO Selection for this process\n", __FILE__, __LINE__, mpi_rank);
         #endif
 
-        // JK_TODO_DSET_FADDR_VERIFY // both works , just double check and decided
         /* since this process doesn't do any io, just pass a valid addr.
          * at this point dset object hear address is availbe to any 
-         * process, so just pass it. 0x0 also work, but just to
-         * be more causious. */
+         * process, so just pass it. 0x0 also work fine */
         ctg_store.contig.dset_addr = 0x0;
-        //ctg_store.contig.dset_addr = io_info_md->dsets_info[0].dset->oloc.addr;
+        /* or ctg_store.contig.dset_addr = io_info_md->dsets_info[0].dset->oloc.addr; */
         
-        #ifndef JK_MULTI_DSET
         /* just provide a valid mem address. no actual IO occur */
         base_wbuf_addr = io_info_md->dsets_info[0].u.wbuf;
         base_rbuf_addr = io_info_md->dsets_info[0].u.rbuf;
-       #endif
 
         /* Set the MPI datatype to just participate */
         chunk_final_ftype = MPI_BYTE;
@@ -1000,12 +978,10 @@ if(H5DEBUG(D))
 if(H5DEBUG(D))
     HDfprintf(H5DEBUG(D),"before coming to final collective IO\n");
 #endif
-    /* Set up the base storage address for this chunk */
-    #ifndef JK_MULTI_DSET
+    /* Set up the base storage address for this piece */
     io_info_md->store_faddr = ctg_store.contig.dset_addr;
     io_info_md->base_maddr_w = base_wbuf_addr;
     io_info_md->base_maddr_r = base_rbuf_addr;
-    #endif
 
     /* Perform final collective I/O operation */
     if(H5D__final_collective_io_mdset(io_info_md, mpi_buf_count, &chunk_final_ftype, &chunk_final_mtype) < 0)

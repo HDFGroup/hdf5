@@ -99,9 +99,7 @@ static herr_t H5D__contig_construct(H5F_t *f, H5D_t *dset);
 static herr_t H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *cm);
-#ifndef JK_ALSO_CONTIG1
 static herr_t H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space, H5D_dset_info_t *dinfo);
-#endif
 static ssize_t H5D__contig_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
@@ -125,9 +123,7 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
     NULL,
     H5D__contig_is_space_alloc,
     H5D__contig_io_init,
-    #ifndef JK_ALSO_CONTIG1
     H5D__contig_io_init_mdset,
-    #endif
     H5D__contig_read,
     H5D__contig_write,
 #ifdef H5_HAVE_PARALLEL
@@ -140,9 +136,7 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
     H5D__contig_writevv,
     H5D__contig_flush,
     NULL,
-    #ifndef JK_SLCLOSE_ISSUE
     H5D__piece_io_term_mdset
-    #endif
 }};
 
 
@@ -159,10 +153,8 @@ H5FL_BLK_EXTERN(type_conv);
 /*******************/
 /* Externs         */
 /*******************/
-#ifndef JK_ALSO_CONTIG1
 /* Declare a free list to manage the H5D_piece_info_t struct */
 H5FL_EXTERN(H5D_piece_info_t);
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -527,14 +519,22 @@ H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__contig_io_init() */
 
-#ifndef JK_ALSO_CONTIG1
+/*-------------------------------------------------------------------------
+ * Function:	H5D__contig_io_init_mdset
+ *
+ * Purpose:	Performs initialization before any sort of I/O on the raw data
+ *
+ *          This was referred from H5D__contig_io_init for multi-dset work.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Jonathan Kim
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_dset_info_t *dinfo)
-    //(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *type_info,
-    //hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
-    //H5D_chunk_map_t UNUSED *cm)
 {
     H5D_t *dataset = dinfo->dset;     /* Local pointer to dataset info */
 
@@ -544,20 +544,13 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
     int sm_ndims;               /* The number of dimensions of the memory buffer's dataspace (signed) */
     int sf_ndims;               /* The number of dimensions of the file dataspace (signed) */
     H5SL_node_t *curr_node;
-    #ifndef JK_H5S_SCALAR
     H5S_class_t fsclass_type;   /* file space class type */
-    #endif
     H5S_sel_type fsel_type;     /* file space selection type */
     hbool_t sel_hyper_flag;
 
     herr_t ret_value = SUCCEED;	/* Return value		*/
 
-    //FUNC_ENTER_STATIC_NOERR  // ORI
     FUNC_ENTER_STATIC
-
-    // ORI
-    //io_info->store->contig.dset_addr = io_info->dset->shared->layout.storage.u.contig.addr;
-    //io_info->store->contig.dset_size = io_info->dset->shared->layout.storage.u.contig.size;
 
     /* Get layout for dataset */
     dinfo->layout = &(dataset->shared->layout);
@@ -605,21 +598,17 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
     dinfo->file_space = file_space;
     dinfo->mem_space = mem_space;
 
-    #ifndef JK_MULTI_DSET
-     /* Only need single skip list point over multiple read/write IO 
-      * and multiple dsets until H5D_close. Thus check both 
-      * since io_info_md->sel_pieces only lives single write/read IO, 
-      * even cache.sel_pieces lives until Dclose */
+    /* Only need single skip list point over multiple read/write IO 
+     * and multiple dsets until H5D_close. Thus check both 
+     * since io_info_md->sel_pieces only lives single write/read IO, 
+     * even cache.sel_pieces lives until Dclose */
     if(NULL == dataset->shared->cache.sel_pieces &&
        NULL == io_info_md->sel_pieces) {
-        #ifndef JK_SL_P_FADDR
         if(NULL == (dataset->shared->cache.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-        #endif
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for piece selections")
-        #ifndef JK_SLCLOSE_ISSUE
+
         /* keep the skip list in cache, so do not need to recreate until close */
         io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
-        #endif
     } /* end if */
 
     /* this is need when multiple write/read occurs on the same dsets,
@@ -628,19 +617,16 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
             io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
 
     HDassert(io_info_md->sel_pieces);
-    #endif
 
     /* We are not using single element mode */
     dinfo->use_single = FALSE;
 
-    #ifndef JK_H5S_SCALAR
     /* Get type of space class on disk */
     if((fsclass_type = H5S_GET_EXTENT_TYPE(file_space)) < H5S_SCALAR)
         HGOTO_ERROR(H5E_FSPACE, H5E_BADTYPE, FAIL, "unable to get fspace class type")
      #ifdef JK_DBG
     printf("JKDBG %s|%d>  fspace class_type:%d (0:SCALAR,1:SIMPLE,2:NULL)\n", __FUNCTION__, __LINE__, fsclass_type);
      #endif
-    #endif
 
     /* Get type of selection on disk & in memory */
     if((fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
@@ -652,7 +638,6 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
     printf("JKDBG %s|%d>  fsel_type:%d (0:NONE,1:POINT,2:HYPERSLABS,3:ALL)\n", __FUNCTION__, __LINE__, fsel_type);
     #endif
 
-    #ifndef JK_H5S_SCALAR
     /* if class type is scalar or null for contiguous dset */
     if(fsclass_type == H5S_SCALAR || fsclass_type == H5S_NULL)
         sel_hyper_flag = FALSE;
@@ -661,13 +646,6 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
         sel_hyper_flag = FALSE;
     else
         sel_hyper_flag = TRUE;
-    #else // ORI
-    /* If the selection is NONE or POINTS, set the flag to FALSE */
-    if(fsel_type == H5S_SEL_POINTS || fsel_type == H5S_SEL_NONE)
-        sel_hyper_flag = FALSE;
-    else
-        sel_hyper_flag = TRUE;
-    #endif
 
     /* Check if file selection is a hyperslab selection */
     if(sel_hyper_flag) {
@@ -675,8 +653,13 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
         printf("JKDBG %s|%d>  HYPER SELECT nelmts:%llu\n", __FUNCTION__, __LINE__, nelmts);
         #endif
         
-       #ifndef JK_MIMIC // H5D__create_piece_file_map_hyper
-       {
+       /*
+        * This section is referred from H5D__create_piece_file_map_hyper
+        * as part of multi-dset work
+        * Note: Someone may merge of make seperate function as seperate 
+        * task later.
+        */
+        {
         unsigned    u;
 
         /* Sanity check */
@@ -686,11 +669,11 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
         if (dinfo->nelmts) {
             H5D_piece_info_t *new_piece_info;   /* piece information to insert into skip list */
 
-        #ifndef JK_MANY_WRITE_B_CLOSE
-        /* get copy of dset file_space, so it can be changed temporarily 
-         * purpose */
+            /* Get copy of dset file_space, so it can be changed temporarily 
+             * purpose 
+             * This tmp_fspace allows multiple write before close dset */
             H5S_t *tmp_fspace;                  /* Temporary file dataspace */
-                        /* Create "temporary" chunk for selection operations (copy file space) */
+            /* Create "temporary" chunk for selection operations (copy file space) */
             if(NULL == (tmp_fspace = H5S_copy(dinfo->file_space, TRUE, FALSE)))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
@@ -699,15 +682,12 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
                 (void)H5S_close(tmp_fspace);
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
             } /* end if */
-        #endif
 
             /* Add temporary chunk to the list of pieces */
             /* collect piece_info into Skip List */
             /* Allocate the file & memory chunk information */
             if (NULL==(new_piece_info = H5FL_MALLOC (H5D_piece_info_t))) {
-                #ifndef JK_MANY_WRITE_B_CLOSE
                 (void)H5S_close(tmp_fspace);
-                #endif
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
             } /* end if */
 
@@ -719,20 +699,14 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
             new_piece_info->fspace_shared = FALSE;
 
             /* Set the memory chunk dataspace */
-            #ifndef JK_PER_DSET
             /* same as one chunk, just use dset mem space */
             new_piece_info->mspace = mem_space;
-            #else
-            new_piece_info->mspace= NULL;
-            #endif
 
-            #ifndef JK_PER_DSET
             /* set true for sharing mem space with dset, which means
              * fspace gets free by applicaton H5Sclose(), and
              * doesn't require providing layout_ops.io_term() for H5D_LOPS_CONTIG.
              */
             new_piece_info->mspace_shared = TRUE;
-            #endif
 
             /* Copy the piece's coordinates */
             for(u = 0; u < dinfo->f_ndims; u++)
@@ -758,17 +732,12 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
 
             H5_ASSIGN_OVERFLOW(new_piece_info->piece_points, nelmts, hssize_t, uint32_t);
         
-            // Only scratch for this dset
-            #ifndef JK_PER_DSET
+            /* only scratch for this dset */
             /* Clean hyperslab span's "scratch" information */
             if(H5S_hyper_reset_scratch(new_piece_info->fspace) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
-            #endif        
         } /* end if */
-
-
-       }
-       #endif // JK_MIMIC // H5D__create_piece_file_map_hyper
+        } /* referred from H5D__create_piece_file_map_hype */
     }
 
 done:
@@ -784,9 +753,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-    //FUNC_LEAVE_NOAPI(SUCCEED) // ORI
 } /* end H5D__contig_io_init_mdset() */
-#endif
 
 
 /*-------------------------------------------------------------------------

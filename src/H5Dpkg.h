@@ -311,15 +311,11 @@ typedef struct H5D_io_info_md_t {
     H5D_dset_info_t *dsets_info; /* multiple dsets info */
     H5SL_t *sel_pieces;         /* Skip list containing information for each piece selected */
 
-    #ifndef JK_MULTI_DSET
-    haddr_t store_faddr;
-    const void * base_maddr_w;
-    void * base_maddr_r;
-    #endif
+    haddr_t store_faddr;        /* lowest file addr for read/write */
+    const void * base_maddr_w;  /* start mem addr for write */
+    void * base_maddr_r;        /* start mem addr for read */
 
-    #ifndef JK_NOCOLLCAUSE
-    hbool_t is_coll_broken;
-    #endif
+    hbool_t is_coll_broken;     /* is collective mode broken? */
 
     #ifdef JK_DBG_SLMEM
     unsigned int mc_cnt; /* sl_create count */
@@ -819,10 +815,8 @@ H5_DLL htri_t H5D__mpio_opt_possible_mdset(const size_t count, H5D_io_info_md_t 
 
 #endif /* H5_HAVE_PARALLEL */
 
-#ifndef JK_SLCLOSE_ISSUE
-/* JK this is needed for CONTIG dset skiplist free (sel_pieces) for layout_ops.io_term_md. Was static in H5Dchunk.c */
+/* for both CHUNK and CONTIG dset skiplist free (sel_pieces) for layout_ops.io_term_md. */
 H5_DLL herr_t H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md);
-#endif
 
 /* Testing functions */
 #ifdef H5D_TESTING
