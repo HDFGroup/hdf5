@@ -102,10 +102,9 @@ H5FL_BLK_EXTERN(sieve_buf);
 
 /* Declare the external free list to manage the H5D_chunk_info_t struct */
 H5FL_EXTERN(H5D_chunk_info_t);
-#ifndef JK_WORK
+
 /* Declare the external free list to manage the H5D_piece_info_t struct */
 H5FL_EXTERN(H5D_piece_info_t);
-#endif
 
 /* Define a static "default" dataset structure to use to initialize new datasets */
 static H5D_shared_t H5D_def_dset;
@@ -1444,13 +1443,12 @@ H5D_close(H5D_t *dataset)
                     dataset->shared->cache.chunk.single_chunk_info = H5FL_FREE(H5D_chunk_info_t, dataset->shared->cache.chunk.single_chunk_info);
                     dataset->shared->cache.chunk.single_chunk_info = NULL;
                 } /* end if */
-                #ifndef JK_WORK
+
                 /* Check for cached single element piece info */
                 if(dataset->shared->cache.chunk.single_piece_info) {
                     dataset->shared->cache.chunk.single_piece_info = H5FL_FREE(H5D_piece_info_t, dataset->shared->cache.chunk.single_piece_info);
                     dataset->shared->cache.chunk.single_piece_info = NULL;
                 } /* end if */
-                #endif
 
                 /* Flush and destroy chunks in the cache. Continue to close even if 
                  * it fails. */

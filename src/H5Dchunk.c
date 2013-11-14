@@ -178,11 +178,9 @@ static herr_t H5D__chunk_construct(H5F_t *f, H5D_t *dset);
 static herr_t H5D__chunk_io_init(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
     const H5S_t *mem_space, H5D_chunk_map_t *fm);
-#ifndef JK_WORK    
 static herr_t H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md,
     const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
     const H5S_t *mem_space, H5D_dset_info_t *dinfo);
-#endif
 static herr_t H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *fm);
@@ -211,39 +209,29 @@ static herr_t H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last,
 static hbool_t H5D__chunk_cinfo_cache_found(const H5D_chunk_cached_t *last,
     H5D_chunk_ud_t *udata);
 static herr_t H5D__free_chunk_info(void *item, void *key, void *opdata);
-#ifndef JK_WORK
 static herr_t H5D__free_piece_info(void *item, void *key, void *opdata);
-#endif
 static herr_t H5D__create_chunk_map_single(H5D_chunk_map_t *fm,
     const H5D_io_info_t *io_info);
-#ifndef JK_WORK
 static herr_t
 H5D__create_piece_map_single(H5D_dset_info_t *di, 
     const H5D_io_info_md_t* io_info_md);
-#endif
 static herr_t H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm,
     const H5D_io_info_t *io_info);
-#ifndef JK_WORK
 static herr_t
 H5D__create_piece_file_map_hyper(H5D_dset_info_t *di, 
     const H5D_io_info_md_t *io_info_md);
 
-#endif
 static herr_t H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm);
-#ifndef JK_WORK
 static herr_t H5D__create_piece_mem_map_hyper(const H5D_io_info_md_t *io_info_md,
     const H5D_dset_info_t *dinfo);
-#endif
 static herr_t H5D__chunk_file_cb(void *elem, hid_t type_id, unsigned ndims,
     const hsize_t *coords, void *fm);
 static herr_t H5D__chunk_mem_cb(void *elem, hid_t type_id, unsigned ndims,
     const hsize_t *coords, void *fm);
-#ifndef JK_WORK    
 static herr_t H5D__piece_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, 
     const hsize_t *coords, void *_opdata);
 static herr_t H5D__piece_mem_cb(void *elem, hid_t type_id, unsigned ndims,
     const hsize_t *coords, void *_opdata);
-#endif
 static herr_t H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id,
     const H5D_dxpl_cache_t *dxpl_cache, H5D_rdcc_ent_t *ent, hbool_t reset);
 static herr_t H5D__chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id,
@@ -263,27 +251,20 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
     H5D__chunk_init,
     H5D__chunk_is_space_alloc,
     H5D__chunk_io_init,
-    #ifndef JK_WORK
     H5D__chunk_io_init_mdset,
-    #endif    
     H5D__chunk_read,
     H5D__chunk_write,
 #ifdef H5_HAVE_PARALLEL
     NULL,
     NULL,
-    #ifndef JK_WORK
     H5D__mdset_collective_read,
     H5D__mdset_collective_write,
-    #endif
 #endif /* H5_HAVE_PARALLEL */
     NULL,
     NULL,
     H5D__chunk_flush,
     H5D__chunk_io_term,
-    #ifndef JK_WORK
     H5D__piece_io_term_mdset
-    #endif
-    
 }};
 
 
@@ -297,26 +278,20 @@ const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {{
     NULL,
     NULL,
     NULL,
-    #ifndef JK_WORK
     NULL,
-    #endif      
     NULL,
     NULL,
 #ifdef H5_HAVE_PARALLEL
     NULL,
     NULL,
-    #ifndef JK_WORK
     NULL,
     NULL,
-    #endif      
 #endif /* H5_HAVE_PARALLEL */
     H5D__nonexistent_readvv,
     NULL,
     NULL,
     NULL,
-    #ifndef JK_WORK
     NULL
-    #endif      
 }};
 
 /* Declare a free list to manage the H5F_rdcc_ent_ptr_t sequence information */
@@ -327,10 +302,8 @@ H5FL_DEFINE_STATIC(H5D_rdcc_ent_t);
 
 /* Declare a free list to manage the H5D_chunk_info_t struct */
 H5FL_DEFINE(H5D_chunk_info_t);
-#ifndef JK_WORK
 /* Declare a free list to manage the H5D_piece_info_t struct */
 H5FL_DEFINE(H5D_piece_info_t);
-#endif
 
 /* Declare a free list to manage the chunk sequence information */
 H5FL_BLK_DEFINE_STATIC(chunk);
@@ -1003,7 +976,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_io_init() */
 
-#ifndef JK_WORK
+/*-------------------------------------------------------------------------
+ * Function:	H5D__chunk_io_init_mdset
+ *
+ * Purpose:	Performs initialization before any sort of I/O on the raw data
+ *          This was derived from H5D__chunk_io_init for multi-dset work.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Jonathan Kim Nov, 2013
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
@@ -1024,9 +1007,7 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
     char bogus;                 /* "bogus" buffer to pass to selection iterator */
     unsigned u;                 /* Local index variable */
     hbool_t sel_hyper_flag;
-    #ifndef JK_WORK_NEW
     H5D_io_info_md_wrap_t io_info_md_wrap;
-    #endif
     herr_t ret_value = SUCCEED;	/* Return value		*/
 
     FUNC_ENTER_STATIC
@@ -1234,11 +1215,9 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
             if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL), FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
 
-            #ifndef JK_WORK_NEW
             /* set opdata for H5D__piece_mem_cb */
             io_info_md_wrap.io_info_md = io_info_md;
             io_info_md_wrap.dinfo = dinfo;
-            #endif
             /* Spaces might not be the same shape, iterate over the file selection directly */
             if(H5S_select_iterate(&bogus, f_tid, file_space, H5D__piece_file_cb, &io_info_md_wrap) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
@@ -1248,7 +1227,6 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
             dinfo->last_piece_info = NULL;
         } /* end else */
 
-    #ifndef JK_TODO_TEST_NOT_SAME_SHAPE 
         /* Build the memory selection for each chunk */
         if(sel_hyper_flag && H5S_select_shape_same(file_space, mem_space) == TRUE) {
             /* Reset chunk template information */
@@ -1264,9 +1242,6 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create memory chunk selections")
         } /* end if */
         else {
-    #else
-    {
-    #endif // JK_TODO_TEST_NOT_SAME_SHAPE
             size_t elmt_size;           /* Memory datatype size */
             #ifdef JK_DBG
             printf ("JKDBG p:%d %s:%d> NOT  SMAE\n", getpid(), __FILE__, __LINE__);
@@ -1296,11 +1271,10 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
             iter_init = TRUE;	/* Selection iteration info has been initialized */
 
-            #ifndef JK_WORK_NEW
             /* set opdata for H5D__piece_mem_cb */
             io_info_md_wrap.io_info_md = io_info_md;
             io_info_md_wrap.dinfo = dinfo;
-            #endif
+
             /* Spaces aren't the same shape, iterate over the memory selection directly */
             if(H5S_select_iterate(&bogus, f_tid, file_space, H5D__piece_mem_cb, &io_info_md_wrap) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create memory chunk selections")
@@ -1362,7 +1336,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_io_init_mdset() */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -1505,7 +1478,24 @@ H5D__free_chunk_info(void *item, void UNUSED *key, void UNUSED *opdata)
     FUNC_LEAVE_NOAPI(0)
 }   /* H5D__free_chunk_info() */
 
-#ifndef JK_WORK
+/*-------------------------------------------------------------------------
+ * Function:	H5D__free_piece_info
+ *
+ * Purpose:	Performs initialization before any sort of I/O on the raw data
+ *          This was derived from H5D__free_chunk_info for multi-dset work.
+ *
+ * PURPOSE
+ *   Releases all the memory for a piece info node.  
+ *
+ * Parameter 
+ *    H5D_piece_info_t *item;    IN: Pointer to piece info to destroy
+ *
+ * RETURNS
+ *   No return value
+ *
+ * Programmer:	Jonathan Kim Nov, 2013
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5D__free_piece_info(void *item, void UNUSED *key, void UNUSED *opdata)
 {
@@ -1530,7 +1520,6 @@ H5D__free_piece_info(void *item, void UNUSED *key, void UNUSED *opdata)
 
     FUNC_LEAVE_NOAPI(0)
 }   /* H5D__free_piece_info() */
-#endif // JK_WORK
 
 
 /*-------------------------------------------------------------------------
@@ -1613,7 +1602,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create_chunk_map_single() */
 
-#ifndef JK_WORK
+/*-------------------------------------------------------------------------
+ * Function:	H5D__create_piece_map_single
+ *
+ * Purpose:	Create piece selections when appending a single record
+ *          This was derived from H5D__create_chunk_map_single for 
+ *          multi-dset work.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Jonathan Kim Nov, 2013
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5D__create_piece_map_single(H5D_dset_info_t *di, const H5D_io_info_md_t
 #ifndef H5_HAVE_PARALLEL
@@ -1679,10 +1679,9 @@ H5D__create_piece_map_single(H5D_dset_info_t *di, const H5D_io_info_md_t
     /* Indicate that the chunk's memory dataspace is shared */
     piece_info->mspace_shared = TRUE;
 
-    #ifndef JK_WORK_NEW
     /* make connection to related dset info from this piece_info */
     piece_info->dset_info = di;
-    #endif
+
     #ifndef JK_SL_P_FADDR
     /* get chunk file address */
     if(H5D__chunk_lookup(piece_info->dset_info->dset, io_info_md->dxpl_id,
@@ -1702,7 +1701,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
     #endif
 } /* end H5D__create_piece_map_single() */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -1882,7 +1880,19 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create_chunk_file_map_hyper() */
 
-#ifndef JK_WORK
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__create_piece_file_map_hyper
+ *
+ * Purpose:	Create all chunk selections in file.
+ *          This was derived from H5D__create_chunk_file_map_hyper for
+ *          multi-dset work.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Jonathan Kim  Nov, 2013
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
 #ifndef H5_HAVE_PARALLEL
@@ -1900,9 +1910,6 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
     int         curr_dim;                   /* Current dimension to increment */
     unsigned    u;                          /* Local index variable */
     herr_t	ret_value = SUCCEED;        /* Return value */
-    #ifndef JK_TEST
-    static unsigned int k = 0;
-    #endif
 
     #ifndef JK_SL_P_FADDR_2
     FUNC_ENTER_STATIC_TAG(io_info_md->dxpl_id, dinfo->dset->oloc.addr, FAIL)
@@ -2000,12 +2007,10 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
                 new_piece_info->coords[u]=coords[u];
             new_piece_info->coords[dinfo->f_ndims]=0;
 
-            #ifndef JK_WORK_NEW
             /* make connection to related dset info from this piece_info */
             new_piece_info->dset_info = dinfo;
-            #endif
 
-            #ifndef JK_SL_P_FADDR // JK_TEST
+            #ifndef JK_SL_P_FADDR
             #ifdef JK_DBG
             printf("JKDBG %s|%d > coord [0]: %llu, [1]: %llu, cindex: %llu\n", __FUNCTION__, __LINE__, new_piece_info->coords[0], new_piece_info->coords[1], new_piece_info->index);
             #endif
@@ -2019,13 +2024,10 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
             new_piece_info->faddr = udata.addr;
             //If CONTIG : new_piece_info->faddr = dinfo->dset->shared->layout.storage.u.contig.addr OR
             //                                    io_info_md->store->contig.dset_addr;
-            #else // JKTEST
-            new_piece_info->faddr = 0xaa2 + (k*8);
-            k++;
             #endif // JK_SL_P_FADDR
 
             #ifdef JK_DBG
-            printf("JKDBG %s|%d> k:%d,  new_piece_info->faddr: 0x%x\n", __FUNCTION__, __LINE__,k, new_piece_info->faddr);
+            printf("JKDBG %s|%d> new_piece_info->faddr: 0x%x\n", __FUNCTION__, __LINE__,new_piece_info->faddr);
             #endif
             
 
@@ -2089,8 +2091,7 @@ done:
     #else
     FUNC_LEAVE_NOAPI(ret_value)
     #endif
-} /* end H5D__create_chunk_file_map_hyper() */
-#endif
+} /* end H5D__create_piece_file_map_hyper() */
 
 
 /*-------------------------------------------------------------------------
@@ -2204,7 +2205,23 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create_chunk_mem_map_hyper() */
 
-#ifndef JK_WORK
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__create_piece_mem_map_hyper
+ *
+ * Purpose:	Create all chunk selections in memory by copying the file
+ *          chunk selections and adjusting their offsets to be correct
+ *          for the memory.
+ *          This was derived from H5D__create_chunk_mem_map_hyper for 
+ *          multi-dset work.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Jonathan Kim  Nov, 2013
+ *
+ * Assumptions: That the file and memory selections are the same shape.
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5D__create_piece_mem_map_hyper(const H5D_io_info_md_t *io_info_md, const H5D_dset_info_t *dinfo)
 {
@@ -2318,7 +2335,6 @@ H5D__create_piece_mem_map_hyper(const H5D_io_info_md_t *io_info_md, const H5D_ds
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create_piece_mem_map_hyper() */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -2432,7 +2448,19 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_file_cb() */
 
-#ifndef JK_WORK
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__piece_file_cb
+ *
+ * Purpose:	Callback routine for file selection iterator.  Used when
+ *          creating selections in file for each point selected.
+ *          This was derived from H5D__chunk_file_cb for multi-dset work.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Jonathan Kim  Nov, 2013
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5D__piece_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_opdata)
 {
@@ -2532,10 +2560,9 @@ H5D__piece_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, cons
             } /* end for */
             piece_info->coords[dinfo->f_ndims] = 0;
 
-            #ifndef JK_WORK_NEW
             /* make connection to related dset info from this piece_info */
             piece_info->dset_info = dinfo;
-            #endif
+
             #ifndef JK_SL_P_FADDR
             /* set metadata tagging with dset oheader addr for H5D__chunk_lookup */
             if(H5AC_tag(io_info_md->dxpl_id, piece_info->dset_info->dset->oloc.addr, &prev_tag) < 0)
@@ -2585,7 +2612,6 @@ H5D__piece_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, cons
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__piece_file_cb */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -2667,7 +2693,18 @@ done:
 } /* end H5D__chunk_mem_cb() */
 
 
-#ifndef JK_WORK
+/*-------------------------------------------------------------------------
+ * Function:	H5D__piece_mem_cb
+ *
+ * Purpose:	Callback routine for file selection iterator.  Used when
+ *          creating selections in memory for each piece.
+ *          This was derived from H5D__chunk_mem_cb for multi-dset work.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Jonathan Kim  Nov, 2013
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5D__piece_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_opdata)
 {
@@ -2756,7 +2793,6 @@ H5D__piece_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__piece_mem_cb() */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -3238,7 +3274,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_io_term() */
 
-#ifndef JK_WORK
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__piece_io_term_mdset
+ *
+ * Purpose:	Destroy I/O operation information.
+ *          This was derived from H5D__chunk_io_term for multi-dset work.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Jonathan Kim  Nov, 2013
+ *-------------------------------------------------------------------------
+ */
  #ifndef JK_SLCLOSE_ISSUE // also use in H5Dcontig.c
  herr_t
  #else
@@ -3279,7 +3326,6 @@ H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__piece_io_term_mdset() */
-#endif
 
 
 /*-------------------------------------------------------------------------

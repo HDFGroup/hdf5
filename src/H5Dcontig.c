@@ -133,10 +133,8 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
 #ifdef H5_HAVE_PARALLEL
     NULL,
     NULL,
-    #ifndef JK_WORK
     H5D__mdset_collective_read,
     H5D__mdset_collective_write,
-    #endif
 #endif /* H5_HAVE_PARALLEL */
     H5D__contig_readvv,
     H5D__contig_writevv,
@@ -772,27 +770,6 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
        }
        #endif // JK_MIMIC // H5D__create_piece_file_map_hyper
     }
-
-    #ifndef JK_TODO_TEST_NOT_SAME_SHAPE
-    /* 
-     * Build the memory selection for each piece 
-     */
-    if(sel_hyper_flag && H5S_select_shape_same(file_space, mem_space) == TRUE) {
-        #ifdef JK_DBG
-        printf ("JKDBG p:%d %s:%d> SHPAE SMAE, dType: %d\n", getpid(), __FUNCTION__, __LINE__,dinfo->layout->type);
-        printf ("JKDBG p:%d %s:%d> num-piece: %d\n", getpid(), __FUNCTION__, __LINE__,H5SL_count(io_info_md->sel_pieces) );
-
-        #endif
-    }
-    else {
-    #else
-    {
-    #endif // JK_TODO_TEST_NOT_SAME_SHAPE
-        #ifdef JK_DBG
-        printf ("JKDBG p:%d %s:%d> NOT  SMAE\n", getpid(), __FUNCTION__, __LINE__);
-        #endif
-    }
-
 
 done:
     if(ret_value < 0) {

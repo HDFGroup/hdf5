@@ -91,26 +91,20 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
     NULL,
     H5D__efl_is_space_alloc,
     H5D__efl_io_init,
-    #ifndef JK_WORK
     NULL,
-    #endif
     H5D__contig_read,
     H5D__contig_write,
 #ifdef H5_HAVE_PARALLEL
     NULL,
     NULL,
-   #ifndef JK_WORK
     NULL,
     NULL,
-   #endif
 #endif /* H5_HAVE_PARALLEL */
     H5D__efl_readvv,
     H5D__efl_writevv,
     NULL,
     NULL,
-   #ifndef JK_WORK
     NULL
-   #endif
 }};
 
 

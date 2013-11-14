@@ -84,32 +84,29 @@
 /******************/
 /* Local Typedefs */
 /******************/
-/* Combine chunk address and chunk info into a struct for better performance. */
+/* Combine chunk/piece address and chunk/piece info into a struct for 
+ * better performance. */
 typedef struct H5D_chunk_addr_info_t {
+  /* chunk for single-dset */
   haddr_t chunk_addr;
   H5D_chunk_info_t chunk_info;
-  #ifndef JK_WORK_TEST
+  /* piece for multi-dset */
   haddr_t piece_addr;
   H5D_piece_info_t piece_info;
-  #endif
 } H5D_chunk_addr_info_t;
 
 
 /********************/
 /* Local Prototypes */
 /********************/
-#ifndef JK_WORK    
+/* multi-dset IO */
 static herr_t H5D__piece_mdset_io(const hid_t file_id, const size_t count, 
     H5D_io_info_md_t *io_info_md);
-#endif
-#ifndef JK_WORK    
-static herr_t H5D__all_piece_collective_io(const hid_t file_id, const size_t count, 
-    H5D_io_info_md_t *io_info_md, H5P_genplist_t *dx_plist);
-#endif
-#ifndef JK_WORK
 static herr_t H5D__final_collective_io_mdset(H5D_io_info_md_t *io_info_md,
     hsize_t mpi_buf_count, MPI_Datatype *mpi_file_type, MPI_Datatype *mpi_buf_type);
-#endif
+
+static herr_t H5D__all_piece_collective_io(const hid_t file_id, const size_t count, 
+    H5D_io_info_md_t *io_info_md, H5P_genplist_t *dx_plist);
 static herr_t H5D__mpio_get_min_chunk(const H5D_io_info_t *io_info,
     const H5D_chunk_map_t *fm, int *min_chunkf);
 
@@ -241,7 +238,22 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__mpio_opt_possible() */
 
-#ifndef JK_WORK
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__mpio_opt_possible_mdset
+ *
+ * Purpose:     Checks if an direct I/O transfer is possible between memory and
+ *              the file.
+ *
+ *              This was derived from H5D__mpio_opt_possible for 
+ *              multi-dset work.
+ *
+ * Return:      Sauccess:   Non-negative: TRUE or FALSE
+ *              Failure:    Negative
+ *
+ * Programmer:  JOnathan Kim
+ *-------------------------------------------------------------------------
+ */
 htri_t
 H5D__mpio_opt_possible_mdset(const size_t count, H5D_io_info_md_t *io_info_md, H5P_genplist_t *dx_plist)
    //(const H5D_io_info_md_t *io_info_md, 
@@ -367,18 +379,18 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__mpio_opt_possible_mdset() */
-#endif
 
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__mpio_select_read_mdset H5D__mpio_select_read
+ * Function:    H5D__mpio_select_read_mdset
  *
  * Purpose:     MPI-IO function to read directly from app buffer to file.
  *
- * Return:      non-negative on success, negative on failure.
+ *              This was referred from H5D__mpio_select_read for 
+ *              multi-dset work.
  *
- * Programmer:
+ * Return:      non-negative on success, negative on failure.
  *
  * Modification: Jonathan Kim  Nov, 2013
  *   Modified from the previous H5D__mpio_select_read.
@@ -386,7 +398,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifndef JK_WORK
 herr_t
 H5D__mpio_select_read_mdset(const H5D_io_info_md_t *io_info_md, hsize_t mpi_buf_count, 
     const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space)
@@ -415,7 +426,6 @@ H5D__mpio_select_read_mdset(const H5D_io_info_md_t *io_info_md, hsize_t mpi_buf_
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mpio_select_read_mdset() */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -423,16 +433,16 @@ done:
  *
  * Purpose:     MPI-IO function to write directly from app buffer to file.
  *
- * Return:      non-negative on success, negative on failure.
+ *              This was referred from H5D__mpio_select_write for 
+ *              multi-dset work.
  *
- * Programmer:
+ * Return:      non-negative on success, negative on failure.
  *
  * Modification: Jonathan Kim  Nov, 2013
  *   Modified from the previous H5D__mpio_select_write.
  *   This is part multi-dset work.
  *-------------------------------------------------------------------------
  */
-#ifndef JK_WORK
 herr_t
 H5D__mpio_select_write_mdset(const H5D_io_info_md_t *io_info_md, hsize_t mpi_buf_count, 
     const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space)
@@ -461,7 +471,6 @@ H5D__mpio_select_write_mdset(const H5D_io_info_md_t *io_info_md, hsize_t mpi_buf
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mpio_select_write_mdset() */
-#endif
 
 
 
@@ -516,7 +525,6 @@ done:
  *   This is part multi-dset work.
  *-------------------------------------------------------------------------
  */
-#ifndef JK_WORK
 static herr_t
 H5D__mpio_get_sum_piece(const H5D_io_info_md_t *io_info_md, size_t *sum_chunkf)
 {
@@ -539,7 +547,6 @@ H5D__mpio_get_sum_piece(const H5D_io_info_md_t *io_info_md, size_t *sum_chunkf)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mpio_get_sum_piece() */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -565,7 +572,6 @@ done:
  * Original Programmer:  Muqun Yang Monday, Feb. 13th, 2006
  *-------------------------------------------------------------------------
  */
-#ifndef JK_WORK
 static herr_t
 H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *io_info_md)
 {
@@ -616,7 +622,6 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__piece_mdset_io */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -636,7 +641,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifndef JK_WORK
 herr_t
 H5D__mdset_collective_read(const hid_t file_id, const size_t count, H5D_io_info_md_t *io_info_md)
 {
@@ -684,7 +688,6 @@ H5D__mdset_collective_write(const hid_t file_id, const size_t count, H5D_io_info
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mdset_collective_write() */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -704,7 +707,6 @@ done:
  *   This is part multi-dset work.
  *-------------------------------------------------------------------------
  */
-#ifndef JK_WORK
 static herr_t
 H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count, 
     H5D_io_info_md_t *io_info_md, H5P_genplist_t *dx_plist)
@@ -714,10 +716,8 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
     MPI_Datatype chunk_final_ftype;         /* Final file MPI datatype for all chunks with seletion */
     hbool_t chunk_final_ftype_is_derived = FALSE;
     H5D_storage_t ctg_store;                /* Storage info for "fake" contiguous dataset */
-    #ifndef JK_WORK_NEW
     size_t              sum_chunk_allproc=0; /* sum of selected chunk from all process */
     size_t              i;
-    #endif
     MPI_Datatype       *chunk_mtype = NULL;
     MPI_Datatype       *chunk_ftype = NULL;
     MPI_Aint           *chunk_file_disp_array = NULL;
@@ -747,11 +747,10 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
             actual_io_mode |= H5D_MPIO_CHUNK_COLLECTIVE;
         else if (io_info_md->dsets_info[i].layout->type == H5D_CONTIGUOUS) {
             actual_io_mode |= H5D_MPIO_CONTIGUOUS_COLLECTIVE;
-            #ifndef JK_TODO_MCHUNK_OPT
+
             /* if only single-dset */
             if (1 == count)
                 actual_chunk_opt_mode = H5D_MPIO_NO_CHUNK_OPTIMIZATION; 
-            #endif
         }
         else
             HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
@@ -1045,7 +1044,6 @@ if(H5DEBUG(D))
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__all_piece_collective_io */
-#endif
 
 
 
@@ -1064,7 +1062,6 @@ if(H5DEBUG(D))
  *   This is part multi-dset work.
  *-------------------------------------------------------------------------
  */
-#ifndef JK_WORK
 static herr_t
 H5D__final_collective_io_mdset(H5D_io_info_md_t *io_info_md,
     hsize_t mpi_buf_count, MPI_Datatype *mpi_file_type, MPI_Datatype *mpi_buf_type)
@@ -1093,7 +1090,6 @@ if(H5DEBUG(D))
 #endif
       FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__final_collective_io_mdset */
-#endif
 
 
 /*-------------------------------------------------------------------------

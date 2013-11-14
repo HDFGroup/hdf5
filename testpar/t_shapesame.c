@@ -1512,7 +1512,6 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                      * need for another inner loop.
                      */
 
-                    #ifndef JK_TEST_MAN_ORI
                     /* zero out this rank's slice of the on disk small data set */
                     ret = H5Dwrite(tv_ptr->small_dataset,
                                    H5T_NATIVE_UINT32,
@@ -1521,7 +1520,6 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                                    tv_ptr->xfer_plist,
                                    tv_ptr->small_ds_buf_2);
                     VRFY((ret >= 0), "H5Dwrite() zero slice to small ds succeeded.");
-                    #endif
 
                     /* select the portion of the in memory large cube from which we
                      * are going to write data.
@@ -1649,10 +1647,8 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                         ptr_1++;
                     }
 
-                    #ifndef JK_TEST_ORI
                     VRFY((mis_match == FALSE), 
                          "small slice write from large ds data good.");
-                    #endif
 
                     (tv_ptr->tests_run)++;
                 }
@@ -2167,14 +2163,12 @@ contig_hs_dr_pio_test__run_test(const int test_num,
      * H5S_select_shape_same() returns true on the memory and file selections.
      */
 
-#ifndef JK_TEST_SKIP_OK1
 #if CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG 
     if ( MAINPROCESS ) {
         HDfprintf(stdout, "test %d: running contig_hs_dr_pio_test__d2m_l2s.\n", test_num);
     }
 #endif /* CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG */
     contig_hs_dr_pio_test__d2m_l2s(tv_ptr);
-#endif
 
 
     /* Second, read slices of the on disk small data set into slices 
@@ -2182,14 +2176,12 @@ contig_hs_dr_pio_test__run_test(const int test_num,
      * data (and only the correct data) is read.
      */
 
-#ifndef JK_TEST_SKIP_OK2
 #if CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG 
     if ( MAINPROCESS ) {
         HDfprintf(stdout, "test %d: running contig_hs_dr_pio_test__d2m_s2l.\n", test_num);
     }
 #endif /* CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG */
     contig_hs_dr_pio_test__d2m_s2l(tv_ptr);
-#endif
 
 
     /* now we go in the opposite direction, verifying that we can write
@@ -2203,14 +2195,12 @@ contig_hs_dr_pio_test__run_test(const int test_num,
      * the memory and file selections.
      */
 
-#ifndef JK_TEST_SKIP_ISSUE1 // OK now
 #if CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG 
     if ( MAINPROCESS ) {
         HDfprintf(stdout, "test %d: running contig_hs_dr_pio_test__m2d_l2s.\n", test_num);
     }
 #endif /* CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG */
     contig_hs_dr_pio_test__m2d_l2s(tv_ptr);
-#endif
 
 
     /* Now write the contents of the process's slice of the in memory 
@@ -2221,14 +2211,12 @@ contig_hs_dr_pio_test__run_test(const int test_num,
      * and file selections.
      */
 
-#ifndef JK_TEST_SKIP_OK
 #if CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG 
     if ( MAINPROCESS ) {
         HDfprintf(stdout, "test %d: running contig_hs_dr_pio_test__m2d_s2l.\n", test_num);
     }
 #endif /* CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG */
     contig_hs_dr_pio_test__m2d_s2l(tv_ptr);
-#endif
 
 #if CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG 
     if ( MAINPROCESS ) {
@@ -4476,7 +4464,6 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num,
      * in memory small small cube
      */
 
-#ifndef JK_TEST_SKIP_OK
     ckrbrd_hs_dr_pio_test__d2m_l2s(tv_ptr);
 
 
@@ -4486,7 +4473,6 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num,
      */
 
     ckrbrd_hs_dr_pio_test__d2m_s2l(tv_ptr);
-#endif // JK_TEST_OK
 
 
     /* now we go in the opposite direction, verifying that we can write
@@ -4500,9 +4486,7 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num,
      * the memory and file selections.
      */
 
-#ifndef JK_TEST_ISSUE1 // OK now
     ckrbrd_hs_dr_pio_test__m2d_l2s(tv_ptr);
-#endif
 
 
     /* Now write the contents of the process's slice of the in memory 
@@ -4513,9 +4497,8 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num,
      * and file selections.
      */
 
-#ifndef JK_TEST_SKIP_OK2
     ckrbrd_hs_dr_pio_test__m2d_s2l(tv_ptr);
-#endif
+
 
 #if CKRBRD_HS_DR_PIO_TEST__RUN_TEST__DEBUG
     if ( MAINPROCESS ) {
@@ -5193,9 +5176,7 @@ int main(int argc, char **argv)
         TestSummary();
 
     /* Clean up test files */
-    #ifndef JK_TEST_SKIP_ORI
     h5_cleanup(FILENAME, fapl);
-    #endif
 
     nerrors += GetTestNumErrs();
 

@@ -2644,30 +2644,26 @@ test_actual_io_mode(int selection_mode) {
     /* Choose a selection method based on the type of I/O we want to occur, 
      * and also set up some selection-dependeent test info. */
     switch(selection_mode) {
-        
-        #ifndef JK_TODO_MCHUNK_OPT
-        /* RESET tests that the properties are properly reset to defaults each time I/O is
-         * performed. To acheive this, we have RESET perform collective I/O (which would change
-         * the values from the defaults) followed by independent I/O (which should report the
-         * default values). RESET doesn't need to have a unique selection, so we just reuse
-         * LINK_CHUNK, The independent section of RESET can be found at the end of this function.
+        /* RESET tests that the properties are properly reset to defaults each
+         * time I/O is performed. To acheive this, we have RESET perform 
+         * collective I/O (which would change the values from the defaults) 
+         * followed by independent I/O (which should report the default 
+         * values). RESET doesn't need to have a unique selection, so we just
+         * reuse LINK_CHUNK, The independent section of RESET can be found at
+         * the end of this function.
          */
         case TEST_ACTUAL_IO_RESET:
-        #endif
+
         /* Linked Chunk I/O */
         case TEST_ACTUAL_IO_LINK_CHUNK:        
             /* Nothing special; link chunk I/O is forced in the dxpl settings. */
             slab_set(mpi_rank, mpi_size, start, count, stride, block, BYROW);
               
-            #ifndef JK_TODO_MCHUNK_OPT
             /* If the testname was not already set by the RESET case */
             if (selection_mode == TEST_ACTUAL_IO_RESET)
                 test_name = "RESET";
             else
                 test_name = "Link Chunk";
-            #else // ORI
-            test_name = "Link Chunk";
-            #endif
             actual_chunk_opt_mode_expected = H5D_MPIO_LINK_CHUNK;
             actual_io_mode_expected = H5D_MPIO_CHUNK_COLLECTIVE;
             break;
