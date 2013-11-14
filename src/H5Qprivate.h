@@ -68,7 +68,7 @@ struct H5Q_select {
         struct H5Q_data_elem data_elem;
         struct H5Q_attr_name attr_name;
         struct H5Q_link_name link_name;
-    };
+    } elem;
 };
 
 /* Query */
@@ -78,7 +78,7 @@ struct H5Q_t {
     union {
         struct H5Q_select select;
         struct H5Q_combine combine;
-    };
+    } query;
 };
 
 /*****************************/

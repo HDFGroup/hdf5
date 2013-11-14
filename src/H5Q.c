@@ -349,8 +349,8 @@ H5Q_create(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
 
     query->is_combined = FALSE;
     query->ref_count = 1;
-    query->select.type = query_type;
-    query->select.match_op = match_op;
+    query->query.select.type = query_type;
+    query->query.select.match_op = match_op;
     switch (query_type) {
         case H5Q_TYPE_DATA_ELEM:
             {
@@ -366,15 +366,15 @@ H5Q_create(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
                 /* Only use native type */
                 if (NULL == (native_datatype = H5T_get_native_type(datatype, H5T_DIR_DEFAULT, NULL, NULL, NULL)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve native type")
-                query->select.data_elem.type = native_datatype;
+                query->query.select.elem.data_elem.type = native_datatype;
                 if (0 == (datatype_size = H5T_get_size(native_datatype)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid size")
-                query->select.data_elem.type_size = datatype_size;
+                query->query.select.elem.data_elem.type_size = datatype_size;
                 if (NULL == (value_buf = H5MM_malloc(datatype_size)))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL,
                             "can't allocate value buffer")
                 HDmemcpy(value_buf, value, datatype_size);
-                query->select.data_elem.value = value_buf;
+                query->query.select.elem.data_elem.value = value_buf;
             }
             break;
         case H5Q_TYPE_ATTR_NAME:
@@ -382,7 +382,7 @@ H5Q_create(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
                 const char *attr_name;
 
                 attr_name = va_arg(ap, const char *);
-                query->select.attr_name.name = H5MM_strdup(attr_name);
+                query->query.select.elem.attr_name.name = H5MM_strdup(attr_name);
             }
             break;
         case H5Q_TYPE_LINK_NAME:
@@ -390,7 +390,7 @@ H5Q_create(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
                 const char *link_name;
 
                 link_name = va_arg(ap, const char *);
-                query->select.link_name.name = H5MM_strdup(link_name);
+                query->query.select.elem.link_name.name = H5MM_strdup(link_name);
             }
             break;
         default:
@@ -459,28 +459,28 @@ H5Q_close(H5Q_t *query)
     if (query->ref_count) HGOTO_DONE(SUCCEED)
 
     if (query->is_combined) {
-        if (FAIL == H5Q_close(query->combine.l_query))
+        if (FAIL == H5Q_close(query->query.combine.l_query))
             HGOTO_ERROR(H5E_QUERY, H5E_CANTFREE, FAIL, "unable to free query")
-            query->combine.l_query = NULL;
-        if (FAIL == H5Q_close(query->combine.r_query))
+            query->query.combine.l_query = NULL;
+        if (FAIL == H5Q_close(query->query.combine.r_query))
             HGOTO_ERROR(H5E_QUERY, H5E_CANTFREE, FAIL, "unable to free query")
-            query->combine.r_query = NULL;
+            query->query.combine.r_query = NULL;
     } else {
-        switch (query->select.type) {
+        switch (query->query.select.type) {
             case H5Q_TYPE_DATA_ELEM:
-                if (FAIL == H5T_close(query->select.data_elem.type))
+                if (FAIL == H5T_close(query->query.select.elem.data_elem.type))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTFREE, FAIL, "unable to free datatype");
-                query->select.data_elem.type = NULL;
-                H5MM_free(query->select.data_elem.value);
-                query->select.data_elem.value = NULL;
+                query->query.select.elem.data_elem.type = NULL;
+                H5MM_free(query->query.select.elem.data_elem.value);
+                query->query.select.elem.data_elem.value = NULL;
                 break;
             case H5Q_TYPE_ATTR_NAME:
-                H5MM_free(query->select.attr_name.name);
-                query->select.attr_name.name = NULL;
+                H5MM_free(query->query.select.elem.attr_name.name);
+                query->query.select.elem.attr_name.name = NULL;
                 break;
             case H5Q_TYPE_LINK_NAME:
-                H5MM_free(query->select.link_name.name);
-                query->select.link_name.name = NULL;
+                H5MM_free(query->query.select.elem.link_name.name);
+                query->query.select.elem.link_name.name = NULL;
                 break;
             default:
                 HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type")
@@ -556,7 +556,7 @@ H5Q_combine(H5Q_t *query1, H5Q_combine_op_t combine_op, H5Q_t *query2)
     switch (combine_op) {
         case H5Q_COMBINE_AND:
         case H5Q_COMBINE_OR:
-            query->combine.op = combine_op;
+            query->query.combine.op = combine_op;
             break;
         default:
             HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, NULL, "unsupported/unrecognized combine op")
@@ -564,9 +564,9 @@ H5Q_combine(H5Q_t *query1, H5Q_combine_op_t combine_op, H5Q_t *query2)
     }
     query->is_combined = TRUE;
     query->ref_count = 1;
-    query->combine.l_query = query1;
+    query->query.combine.l_query = query1;
     query1->ref_count++;
-    query->combine.r_query = query2;
+    query->query.combine.r_query = query2;
     query2->ref_count++;
 
     /* set return value */
@@ -671,12 +671,12 @@ H5Q_apply_combine(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem)
     HDassert(query);
     HDassert(query->is_combined == TRUE);
 
-    if (FAIL == H5Q_apply(query->combine.l_query, &result1, type, elem))
+    if (FAIL == H5Q_apply(query->query.combine.l_query, &result1, type, elem))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
-    if (FAIL == H5Q_apply(query->combine.r_query, &result2, type, elem))
+    if (FAIL == H5Q_apply(query->query.combine.r_query, &result2, type, elem))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
 
-    switch (query->combine.op) {
+    switch (query->query.combine.op) {
         case H5Q_COMBINE_AND:
             *result = result1 && result2;
             break;
@@ -711,7 +711,7 @@ H5Q_apply_select(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem)
     HDassert(query);
     HDassert(query->is_combined == FALSE);
 
-    switch (query->select.type) {
+    switch (query->query.select.type) {
         case H5Q_TYPE_DATA_ELEM:
             if (FAIL == (ret_value = H5Q_apply_data_elem(query, result, type, elem)))
                 HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply data element query")
@@ -836,16 +836,16 @@ H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type, const void *valu
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(query);
-    HDassert(query->select.type == H5Q_TYPE_DATA_ELEM);
+    HDassert(query->query.select.type == H5Q_TYPE_DATA_ELEM);
 
     /* Keep a copy of elem to work on */
     if (0 == (type_size = H5T_get_size(type)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid size")
 
     /* Keep a copy of the query value */
-    query_type = query->select.data_elem.type;
-    query_type_size = query->select.data_elem.type_size;
-    query_op = query->select.match_op;
+    query_type = query->query.select.elem.data_elem.type;
+    query_type_size = query->query.select.elem.data_elem.type_size;
+    query_op = query->query.select.match_op;
 
     /* Promote type to compare elements with query */
     promoted_type = H5Q_promote_type(type, query_type, &match_type);
@@ -860,7 +860,7 @@ H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type, const void *valu
 
     if (NULL == (query_value_buf = H5MM_malloc(promoted_type_size)))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, FAIL, "can't allocate value buffer")
-    HDmemcpy(query_value_buf, query->select.data_elem.value, query_type_size);
+    HDmemcpy(query_value_buf, query->query.select.elem.data_elem.value, query_type_size);
 
     /* Create temporary IDs for H5T_convert */
     type_id = H5I_register(H5I_DATATYPE, type, FALSE);
@@ -937,9 +937,9 @@ H5Q_apply_attr_name(H5Q_t *query, hbool_t *result, const char *name)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(query);
-    HDassert(query->select.type == H5Q_TYPE_ATTR_NAME);
+    HDassert(query->query.select.type == H5Q_TYPE_ATTR_NAME);
 
-    *result = (0 == HDstrcmp(name, query->select.attr_name.name));
+    *result = (0 == HDstrcmp(name, query->query.select.elem.attr_name.name));
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Q_apply_attr_name() */
@@ -961,9 +961,9 @@ H5Q_apply_link_name(H5Q_t *query, hbool_t *result, const char *name)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(query);
-    HDassert(query->select.type == H5Q_TYPE_LINK_NAME);
+    HDassert(query->query.select.type == H5Q_TYPE_LINK_NAME);
 
-    *result = (0 == HDstrcmp(name, query->select.link_name.name));
+    *result = (0 == HDstrcmp(name, query->query.select.elem.link_name.name));
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Q_apply_link_name() */
@@ -1024,23 +1024,23 @@ H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc)
     if (query->is_combined) {
         size_t l_buf_size = 0, r_buf_size = 0;
 
-        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->combine.op, sizeof(H5Q_combine_op_t));
-        H5Q_encode(query->combine.l_query, buf_ptr, &l_buf_size);
+        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.combine.op, sizeof(H5Q_combine_op_t));
+        H5Q_encode(query->query.combine.l_query, buf_ptr, &l_buf_size);
         buf_size += l_buf_size;
         if (buf_ptr) buf_ptr += l_buf_size;
-        H5Q_encode(query->combine.r_query, buf_ptr, &r_buf_size);
+        H5Q_encode(query->query.combine.r_query, buf_ptr, &r_buf_size);
         buf_size += r_buf_size;
         if (buf_ptr) buf_ptr += r_buf_size;
     } else {
-        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->select.type, sizeof(H5Q_type_t));
-        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->select.match_op, sizeof(H5Q_match_op_t));
-        switch (query->select.type) {
+        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.select.type, sizeof(H5Q_type_t));
+        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.select.match_op, sizeof(H5Q_match_op_t));
+        switch (query->query.select.type) {
             case H5Q_TYPE_DATA_ELEM:
             {
                 size_t type_id_nalloc = 0;
-                H5T_t *type = query->select.data_elem.type;
-                size_t type_size = query->select.data_elem.type_size;
-                void *value_buf = query->select.data_elem.value;
+                H5T_t *type = query->query.select.elem.data_elem.type;
+                size_t type_size = query->query.select.elem.data_elem.type_size;
+                void *value_buf = query->query.select.elem.data_elem.value;
 
                 if (FAIL == H5T_encode(type, NULL, &type_id_nalloc))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTENCODE, FAIL, "can't get encoding size for datatype");
@@ -1055,8 +1055,8 @@ H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc)
                 break;
             case H5Q_TYPE_ATTR_NAME:
             {
-                size_t name_len = HDstrlen(query->select.attr_name.name) + 1;
-                char *name = query->select.attr_name.name;
+                size_t name_len = HDstrlen(query->query.select.elem.attr_name.name) + 1;
+                char *name = query->query.select.elem.attr_name.name;
 
                 H5Q_encode_memcpy(&buf_ptr, &buf_size, &name_len, sizeof(size_t));
                 H5Q_encode_memcpy(&buf_ptr, &buf_size, name, name_len);
@@ -1064,8 +1064,8 @@ H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc)
                 break;
             case H5Q_TYPE_LINK_NAME:
             {
-                size_t name_len = HDstrlen(query->select.link_name.name) + 1;
-                char *name = query->select.attr_name.name;
+                size_t name_len = HDstrlen(query->query.select.elem.link_name.name) + 1;
+                char *name = query->query.select.elem.attr_name.name;
 
                 H5Q_encode_memcpy(&buf_ptr, &buf_size, &name_len, sizeof(size_t));
                 H5Q_encode_memcpy(&buf_ptr, &buf_size, name, name_len);
@@ -1147,13 +1147,13 @@ H5Q_decode(const unsigned char **buf_ptr)
 
     H5Q_decode_memcpy(&query->is_combined, sizeof(hbool_t), buf_ptr);
     if (query->is_combined) {
-        H5Q_decode_memcpy(&query->combine.op, sizeof(H5Q_combine_op_t), buf_ptr);
-        query->combine.l_query = H5Q_decode(buf_ptr);
-        query->combine.r_query = H5Q_decode(buf_ptr);
+        H5Q_decode_memcpy(&query->query.combine.op, sizeof(H5Q_combine_op_t), buf_ptr);
+        query->query.combine.l_query = H5Q_decode(buf_ptr);
+        query->query.combine.r_query = H5Q_decode(buf_ptr);
     } else {
-        H5Q_decode_memcpy(&query->select.type, sizeof(H5Q_type_t), buf_ptr);
-        H5Q_decode_memcpy(&query->select.match_op, sizeof(H5Q_match_op_t), buf_ptr);
-        switch (query->select.type) {
+        H5Q_decode_memcpy(&query->query.select.type, sizeof(H5Q_type_t), buf_ptr);
+        H5Q_decode_memcpy(&query->query.select.match_op, sizeof(H5Q_match_op_t), buf_ptr);
+        switch (query->query.select.type) {
             case H5Q_TYPE_DATA_ELEM:
             {
                 size_t type_id_nalloc = 0;
@@ -1164,15 +1164,15 @@ H5Q_decode(const unsigned char **buf_ptr)
                 H5Q_decode_memcpy(&type_id_nalloc, sizeof(size_t), buf_ptr);
                 if (NULL == (type = H5T_decode(*buf_ptr)))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode datatype");
-                query->select.data_elem.type = type;
+                query->query.select.elem.data_elem.type = type;
                 *buf_ptr += type_id_nalloc;
 
                 H5Q_decode_memcpy(&type_size, sizeof(size_t), buf_ptr);
-                query->select.data_elem.type_size = type_size;
+                query->query.select.elem.data_elem.type_size = type_size;
                 if (NULL == (value_buf = H5MM_malloc(type_size)))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL, "can't allocate value buffer")
                 H5Q_decode_memcpy(value_buf, type_size, buf_ptr);
-                query->select.data_elem.value = value_buf;
+                query->query.select.elem.data_elem.value = value_buf;
             }
             break;
             case H5Q_TYPE_ATTR_NAME:
@@ -1185,7 +1185,7 @@ H5Q_decode(const unsigned char **buf_ptr)
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL,
                             "can't allocate value buffer")
                 H5Q_decode_memcpy(name, name_len, buf_ptr);
-                query->select.attr_name.name = name;
+                query->query.select.elem.attr_name.name = name;
             }
             break;
             case H5Q_TYPE_LINK_NAME:
@@ -1198,7 +1198,7 @@ H5Q_decode(const unsigned char **buf_ptr)
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL,
                             "can't allocate value buffer")
                 H5Q_decode_memcpy(name, name_len, buf_ptr);
-                query->select.link_name.name = name;
+                query->query.select.elem.link_name.name = name;
             }
             break;
             default:
