@@ -262,6 +262,7 @@ H5_term_library(void)
 	pending += DOWN(TR);
 	pending += DOWN(RC);
 	pending += DOWN(ES);
+	pending += DOWN(Q);
 
         /* Don't shut down the file code until objects in files are shut down */
         if(pending == 0)

@@ -166,5 +166,9 @@ H5_DLL int H5T_get_offset(const H5T_t *dt);
 /* Fixed-point functions */
 H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
 
+/* Native type function */
+H5_DLL H5T_t *H5T_get_native_type(H5T_t *dt, H5T_direction_t direction,
+        size_t *struct_align, size_t *offset, size_t *comp_size);
+
 #endif /* _H5Tprivate_H */
 

@@ -69,6 +69,7 @@ MAJOR, H5E_EFL, External file list
 MAJOR, H5E_REFERENCE, References
 MAJOR, H5E_VFL, Virtual File Layer
 MAJOR, H5E_VOL, Virtual Object Layer
+MAJOR, H5E_QUERY, Query
 MAJOR, H5E_TST, Ternary Search Trees
 MAJOR, H5E_RS, Reference Counted Strings
 MAJOR, H5E_ERROR, Error API

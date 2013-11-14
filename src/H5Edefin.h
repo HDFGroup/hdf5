@@ -40,6 +40,7 @@ hid_t H5E_ATTR_g           = FAIL;      /* Attribute */
 hid_t H5E_IO_g             = FAIL;      /* Low-level I/O */
 hid_t H5E_EFL_g            = FAIL;      /* External file list */
 hid_t H5E_TST_g            = FAIL;      /* Ternary Search Trees */
+hid_t H5E_QUERY_g          = FAIL;      /* Query */
 hid_t H5E_FSPACE_g         = FAIL;      /* Free Space Manager */
 hid_t H5E_DATASET_g        = FAIL;      /* Dataset */
 hid_t H5E_STORAGE_g        = FAIL;      /* Data storage */

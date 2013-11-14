@@ -49,6 +49,7 @@ typedef enum H5I_type_t {
     H5I_ES,		        /*type ID for Event Queue objects           */
     H5I_RC,		        /*type ID for Read Context objects          */
     H5I_TR,		        /*type ID for Transaction objects           */
+    H5I_QUERY,			/*type ID for Query objects           */
     H5I_GENPROP_CLS,            /*type ID for generic property list classes */
     H5I_GENPROP_LST,            /*type ID for generic property lists        */
     H5I_ERROR_CLASS,            /*type ID for error classes		    */

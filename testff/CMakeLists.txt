@@ -65,6 +65,8 @@ ENDMACRO (ADD_H5FF_DRIVER_TEST)
 BUILD_H5FF_TEST(hello_server)
 BUILD_H5FF_TEST(hello_client)
 
+BUILD_H5FF_TEST(h5ff_query)
+
 # h5ff
 # ADD_H5FF_DRIVER_TEST(<target>)
 BUILD_H5FF_TEST(h5ff_server)

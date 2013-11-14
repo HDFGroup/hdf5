@@ -43,6 +43,7 @@
 #define H5E_IO               (H5OPEN H5E_IO_g)
 #define H5E_EFL              (H5OPEN H5E_EFL_g)
 #define H5E_TST              (H5OPEN H5E_TST_g)
+#define H5E_QUERY            (H5OPEN H5E_QUERY_g)
 #define H5E_FSPACE           (H5OPEN H5E_FSPACE_g)
 #define H5E_DATASET          (H5OPEN H5E_DATASET_g)
 #define H5E_STORAGE          (H5OPEN H5E_STORAGE_g)
@@ -77,6 +78,7 @@ H5_DLLVAR hid_t H5E_ATTR_g;          /* Attribute */
 H5_DLLVAR hid_t H5E_IO_g;            /* Low-level I/O */
 H5_DLLVAR hid_t H5E_EFL_g;           /* External file list */
 H5_DLLVAR hid_t H5E_TST_g;           /* Ternary Search Trees */
+H5_DLLVAR hid_t H5E_QUERY_g;         /* Query */
 H5_DLLVAR hid_t H5E_FSPACE_g;        /* Free Space Manager */
 H5_DLLVAR hid_t H5E_DATASET_g;       /* Dataset */
 H5_DLLVAR hid_t H5E_STORAGE_g;       /* Data storage */

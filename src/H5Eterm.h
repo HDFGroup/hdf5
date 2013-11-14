@@ -41,6 +41,7 @@ H5E_ATTR_g=
 H5E_IO_g=    
 H5E_EFL_g=    
 H5E_TST_g=    
+H5E_QUERY_g=    
 H5E_FSPACE_g=    
 H5E_DATASET_g=    
 H5E_STORAGE_g=    

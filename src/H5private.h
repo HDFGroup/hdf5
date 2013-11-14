@@ -2402,6 +2402,7 @@ H5_DLL int H5L_term_interface(void);
 H5_DLL int H5M_term_interface(void);
 H5_DLL int H5P_term_interface(void);
 H5_DLL int H5PL_term_interface(void);
+H5_DLL int H5Q_term_interface(void);
 H5_DLL int H5R_term_interface(void);
 H5_DLL int H5S_term_interface(void);
 H5_DLL int H5T_term_interface(void);
