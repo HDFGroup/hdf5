@@ -1398,9 +1398,6 @@ H5D_close(H5D_t *dataset)
                 if(dataset->shared->cache.sel_pieces) {
                     size_t cnt=0; 
                     cnt = H5SL_count(dataset->shared->cache.sel_pieces);
-                    #ifdef JK_DBG
-                    printf("JKDBG %s:%d> sel_piece COUNT: %d\n", __FILE__, __LINE__, cnt);
-                    #endif
                     HDassert(H5SL_count(dataset->shared->cache.sel_pieces) == 0);
                     H5SL_close(dataset->shared->cache.sel_pieces);
                     dataset->shared->cache.sel_pieces = NULL;
@@ -1419,16 +1416,9 @@ H5D_close(H5D_t *dataset)
                 if(dataset->shared->cache.sel_pieces) {
                     size_t cnt=0; 
                     cnt = H5SL_count(dataset->shared->cache.sel_pieces);
-                    #ifdef JK_DBG
-                    printf("JKDBG %s:%d> sel_piece COUNT: %d\n", __FILE__, __LINE__, cnt);
-                    #endif
                     HDassert(H5SL_count(dataset->shared->cache.sel_pieces) == 0);
                     H5SL_close(dataset->shared->cache.sel_pieces);
                     dataset->shared->cache.sel_pieces = NULL;
-                    #ifdef JK_DBG_SLMEM
-                    printf("JKDBG %s|%d p:%d>  SL_CLOSE\n", __FUNCTION__, __LINE__, getpid());
-                    fflush (stdout);
-                    #endif
                 } /* end if */
 
                 /* Check for cached single chunk dataspace */

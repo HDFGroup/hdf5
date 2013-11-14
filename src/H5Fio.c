@@ -111,22 +111,6 @@ H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     /* Pass through metadata accumulator layer */
     if(H5F_accum_read(f, dxpl_id, type, addr, size, buf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read through metadata accumulator failed")
-    #ifdef JK_DBG
-    {
-        unsigned char *cp=NULL;
-        cp = (unsigned char*)buf;
-        if(type==H5FD_MEM_DRAW) {
-            printf ("JKDBG p:%d %s:%d> buf ,size:%d sizeof(int):%d \n", getpid(), __FILE__, __LINE__, size, sizeof(int));
-            for (int i=0; i < size; i++)
-            {
-                printf ("%0x ", (unsigned char*)cp[i]);
-                //printf ("BUF=%p ", buf);
-            }
-            printf("\n");
-            fflush(stdout);
-        }
-    }
-    #endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

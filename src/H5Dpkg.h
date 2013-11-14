@@ -246,8 +246,6 @@ typedef struct H5D_piece_info_t {
     unsigned mspace_shared;     /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
 
     struct H5D_dset_info_t *dset_info;  /* Pointer to dset_info */
-    // OR
-    //H5SL_t *dset_info;         /* Skip list containing information for each piece selected */
 } H5D_piece_info_t;
 
 
@@ -316,10 +314,6 @@ typedef struct H5D_io_info_md_t {
     void * base_maddr_r;        /* start mem addr for read */
 
     hbool_t is_coll_broken;     /* is collective mode broken? */
-
-    #ifdef JK_DBG_SLMEM
-    unsigned int mc_cnt; /* sl_create count */
-    #endif
 } H5D_io_info_md_t;
 
 /* created to pass both at once for callback func */

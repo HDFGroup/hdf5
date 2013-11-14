@@ -106,12 +106,6 @@ H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle)
     if ((ret_value=H5FD_get_vfd_handle(f->shared->lf, fapl, f_handle)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file handle")
 
-    #ifdef JK_DBG_COUNT0
-    printf ("JKDBG p:%d %s:%d COUNT=0> MPI_File - fd:%x,  addr fd:%x\n", getpid(), __FUNCTION__,__LINE__, *(MPI_File*)(*f_handle), *f_handle);
-    //printf ("JKDBG p:%d %s:%d COUNT=0> MPI_File - fd:%x,  addr fd:%x\n", getpid(), __FUNCTION__,__LINE__, **file_handle, *file_handle);
-    fflush(stdout);
-    #endif
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_mpi_handle() */

@@ -155,11 +155,6 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     if(NULL == dset->oloc.file)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-    #if 0 // JK_DBG
-    if (dset->shared->layout.ops == H5D_LOPS_EFL)
-        printf("JKDBG %s|%d> EFL layout!  efl.nused:%d (if >0 then EFL)\n", __FILE__, __LINE__, dset->shared->dcpl_cache.efl.nused);
-    #endif
-
     if(mem_space_id < 0 || file_space_id < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
@@ -208,7 +203,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         dset_info[0].file_space_id = file_space_id;
         dset_info[0].rbuf = buf;
         
-        if(H5D__read_mdset((hid_t) NULL, 1, dset_info, plist_id) < 0) // METHOD2
+        if(H5D__read_mdset((hid_t) NULL, 1, dset_info, plist_id) < 0) 
 	        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     }
     else /* COMPACT , EFL */
@@ -268,17 +263,8 @@ H5Dread_multi(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
 
 
-    #ifdef JK_DBG 
-    printf ("JKDBG p:%d %s:%d> xfer_mode: %d\n", getpid(), __FILE__, __LINE__,xfer_mode);
-    if (xfer_mode == H5FD_MPIO_INDEPENDENT)
-        printf ("JKDBG p:%d %s:%d> dxpl: MPIO_INDEPENDENT\n", getpid(), __FILE__, __LINE__);
-    if (xfer_mode == H5FD_MPIO_COLLECTIVE)
-        printf ("JKDBG p:%d %s:%d> dxpl: MPIO_COLLECTIVE\n", getpid(), __FILE__, __LINE__);
-    fflush(stdout);
-    #endif
-
-    if(xfer_mode == H5FD_MPIO_INDEPENDENT)  /* Serial mode */
-    {
+    /* Serial mode */
+    if(xfer_mode == H5FD_MPIO_INDEPENDENT)  {
         for (i=0; i < count; i++)
         {
             /* check arguments */
@@ -319,9 +305,6 @@ HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
             if(!(info[i].rbuf))
                 info[i].rbuf = &fake_char;
 
-            /* erro check for this already done the above */    
-            //dset = (H5D_t *)H5I_object_verify(info[i].dset_id, H5I_DATASET);
-
             /* read raw data */
             if(H5D__read(dset, info[i].mem_type_id, mem_space, file_space, dxpl_id, info[i].rbuf/*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
@@ -329,12 +312,8 @@ HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
     }
     else if (xfer_mode == H5FD_MPIO_COLLECTIVE)  /* Parallel mode */
     {
-        //char fake_char;
         for (i=0;i<count; i++)
         {
-            //const H5S_t *mem_space = NULL;
-            //const H5S_t *file_space = NULL;
-
             if(info[i].mem_space_id < 0 || info[i].file_space_id < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
@@ -382,12 +361,10 @@ HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
             size_t sum_chunkf=0;
             int mpi_code;
             H5F_t *file;
-            //H5FD_mpio_collective_opt_t para_io_mode;
-            H5FD_mpio_chunk_opt_t chunk_opt_mode;
+            H5FD_mpio_collective_opt_t para_io_mode;
 
-            //if(H5P_get(plist, H5D_XFER_IO_XFER_MODE_NAME, &para_io_mode) < 0)
-            //    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
-            if(H5P_get(plist, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, &chunk_opt_mode) < 0)
+            /* get parallel io mode */
+            if(H5P_get(plist, H5D_XFER_IO_XFER_MODE_NAME, &para_io_mode) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
 
             if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -396,10 +373,6 @@ HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
             /* just to match up with MPI_Allreduce from H5D__mpio_opt_possible_mdset() */
             if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 1, MPI_INT, MPI_BOR, H5F_mpi_get_comm(file))))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-            #ifdef JK_DBG
-            printf ("JKDBG p:%d %s:%d COUNT=0> local_cause:%d  global_cause:%d\n", getpid(), __FILE__,__LINE__, local_cause, global_cause );
-            fflush(stdout);
-            #endif
 
             /* if collective mode is not broken according to the
              * H5D__mpio_opt_possible_mdset, since the below MPI funcs will be 
@@ -412,20 +385,10 @@ HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
                 /* just to match up with MPI_Allreduce from H5D__mpio_get_sum_piece() */
                 if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&num_chunkf, &sum_chunkf, 1, MPI_UNSIGNED, MPI_SUM, H5F_mpi_get_comm(file))))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-                #ifdef JK_DBG
-                printf ("JKDBG p:%d %s:%d COUNT=0> num_chunkf:%d  sum_chunkf:%d\n", getpid(), __FILE__,__LINE__, num_chunkf, sum_chunkf);
-                fflush(stdout);
-                #endif
 
                 if (H5F_get_mpi_handle(file, (MPI_File **) &mpi_fh_p) <0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file handle")
                 mpi_fh = *(MPI_File*)mpi_fh_p;
-
-                #ifdef JK_DBG
-                printf ("JKDBG p:%d %s:%d COUNT=0> mpi_fh: %x , mpi_fh addr:%x\n", getpid(), __FILE__,__LINE__, *(MPI_File*)mpi_fh_p, mpi_fh_p);
-                printf ("JKDBG p:%d %s:%d COUNT=0> mpi_fh: %x , mpi_fh addr:%x\n", getpid(), __FILE__,__LINE__, mpi_fh, &mpi_fh);
-                fflush(stdout);
-                #endif
 
                 /* just to match up with the 1st MPI_File_set_view from H5FD_mpio_read() */
                 if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, "native", MPI_INFO_NULL)))
@@ -433,10 +396,7 @@ HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
                 /* just to match up with MPI_File_read_at_all from H5FD_mpio_read() */
 
-                // JK_TODO make this based on the internal H5FD_MPIO_COLLECTIVE_IO 
-                // OR add H5FD_MPIO_CHUNK_MULTI_IO . 
-                //if(para_io_mode == H5FD_MPIO_COLLECTIVE_IO) 
-                if(chunk_opt_mode == H5FD_MPIO_CHUNK_ONE_IO)  {
+                if(para_io_mode == H5FD_MPIO_COLLECTIVE_IO)  {
                     HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
                     if(MPI_SUCCESS != (mpi_code = MPI_File_read_at_all(mpi_fh, 0, NULL, 0, MPI_BYTE, &mpi_stat)))
                         HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code)
@@ -509,11 +469,6 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-
-    #ifdef JK_DBG
-    if (dset->shared->layout.ops == H5D_LOPS_EFL)
-        printf("JKDBG %s|%d> EFL layout!  efl.nused:%d (if >0 then EFL)\n", __FILE__, __LINE__, dset->shared->dcpl_cache.efl.nused);
-    #endif
 
     /* multi-dset support CHUNKED and internal CONTIGUOUS only ,
      * not external CONTIGUOUS (EFL) */
@@ -672,12 +627,10 @@ H5D__pre_write_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dx
             size_t sum_chunkf=0;
             int mpi_code;
             H5F_t *file;
-            //H5FD_mpio_collective_opt_t para_io_mode;
-            H5FD_mpio_chunk_opt_t chunk_opt_mode;
-
-            //if(H5P_get(plist, H5D_XFER_IO_XFER_MODE_NAME, &para_io_mode) < 0)
-            //    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
-            if(H5P_get(plist, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, &chunk_opt_mode) < 0)
+            H5FD_mpio_collective_opt_t para_io_mode;
+            
+            /* get parallel io mode */
+            if(H5P_get(plist, H5D_XFER_IO_XFER_MODE_NAME, &para_io_mode) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
 
             if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -686,10 +639,6 @@ H5D__pre_write_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dx
             /* just to match up with MPI_Allreduce from H5D__mpio_opt_possible_mdset() */
             if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 1, MPI_INT, MPI_BOR, H5F_mpi_get_comm(file))))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-            #ifdef JK_DBG
-            printf ("JKDBG p:%d %s:%d COUNT=0> local_cause:%d  global_cause:%d\n", getpid(), __FILE__,__LINE__, local_cause, global_cause );
-            fflush(stdout);
-            #endif
 
             /* if collective mode is not broken according to the
              * H5D__mpio_opt_possible_mdset, since the below MPI funcs will be 
@@ -702,20 +651,11 @@ H5D__pre_write_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dx
                 /* just to match up with MPI_Allreduce from H5D__mpio_get_sum_piece() */
                 if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&num_chunkf, &sum_chunkf, 1, MPI_UNSIGNED, MPI_SUM, H5F_mpi_get_comm(file))))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-                #ifdef JK_DBG
-                printf ("JKDBG p:%d %s:%d COUNT=0> num_chunkf:%d  sum_chunkf:%d\n", getpid(), __FILE__,__LINE__, num_chunkf, sum_chunkf);
-                fflush(stdout);
-                #endif
 
                 if (H5F_get_mpi_handle(file, (MPI_File **) &mpi_fh_p) <0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file handle")
                 mpi_fh = *(MPI_File*)mpi_fh_p;
 
-                #ifdef JK_DBG
-                printf ("JKDBG p:%d %s:%d COUNT=0> mpi_fh: %x , mpi_fh addr:%x\n", getpid(), __FILE__,__LINE__, *(MPI_File*)mpi_fh_p, mpi_fh_p);
-                printf ("JKDBG p:%d %s:%d COUNT=0> mpi_fh: %x , mpi_fh addr:%x\n", getpid(), __FILE__,__LINE__, mpi_fh, &mpi_fh);
-                fflush(stdout);
-                #endif
 
                 /* just to match up with the 1st MPI_File_set_view from H5FD_mpio_write() */
                 if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, "native", MPI_INFO_NULL)))
@@ -723,10 +663,7 @@ H5D__pre_write_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dx
 
                 /* just to match up with MPI_File_write_at_all from H5FD_mpio_write() */
 
-                // JK_TODO make this based on the internal H5FD_MPIO_COLLECTIVE_IO 
-                // OR add H5FD_MPIO_CHUNK_MULTI_IO .
-                //if(para_io_mode == H5FD_MPIO_COLLECTIVE_IO) 
-                if(chunk_opt_mode == H5FD_MPIO_CHUNK_ONE_IO)  {
+                if(para_io_mode == H5FD_MPIO_COLLECTIVE_IO)  {
                     HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
                     if(MPI_SUCCESS != (mpi_code = MPI_File_write_at_all(mpi_fh, 0, NULL, 0, MPI_BYTE, &mpi_stat)))
                         HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mpi_code)
@@ -1147,9 +1084,6 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
     io_info_md.sel_pieces = NULL;
     io_info_md.store_faddr = 0;
     io_info_md.base_maddr_r = NULL;
-    #ifdef JK_DBG_SLMEM
-    io_info_md.mc_cnt=0;
-    #endif
 
     /* malloc dset_info */
     if(NULL == (io_info_md.dsets_info = (H5D_dset_info_t *)H5MM_calloc(count * sizeof(H5D_dset_info_t))))
@@ -1358,7 +1292,7 @@ H5D__read_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_i
         if(dset_info_array[i].layout_ops.io_init_md && (*dset_info_array[i].layout_ops.io_init_md)(&io_info_md, &(dset_info_array[i].type_info), nelmts, file_space, mem_space, &(dset_info_array[i])) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
         io_op_init = TRUE;
-    } // end of for loop
+    } /* end of for loop */
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
@@ -1557,18 +1491,6 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     if(!mem_space)
         mem_space = file_space;
 
-    #ifdef JK_DBG_SHAPE_SAME_P
-    {
-        int a;
-        printf("JKDBG %s|%d DBG_SHAPE_SAME_P Before - ORI> buf : ", __FUNCTION__, __LINE__);
-        for (a=0; a < 10; a++) {
-            printf("%u ", (uint32_t) ((uint32_t *)buf)[a]);
-        }
-        printf(" \n");
-        printf("JKDBG %s|%d DBG_SHAPE_SAME_P Before - ORI> ShapeSame:%d  Mem Ndims: %u File Ndims: %u \n", __FUNCTION__, __LINE__, H5S_select_shape_same(mem_space, file_space), H5S_GET_EXTENT_NDIMS(mem_space), H5S_GET_EXTENT_NDIMS(file_space));
-    }
-    #endif
-
     /* H5S_select_shape_same() has been modified to accept topologically 
      * identical selections with different rank as having the same shape 
      * (if the most rapidly changing coordinates match up), but the I/O 
@@ -1586,9 +1508,6 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
             H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
         void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
                                 /* to the beginning of the projected mem space.  */
-        #ifdef JK_DBG_SHAPE_SAME_P
-        printf("JKDBG %s|%d DBG_SHAPE_SAME_P> CONTRUCT_PROJECTION! - ORI \n", __FUNCTION__, __LINE__);
-        #endif
 
         /* Attempt to construct projected dataspace for memory dataspace */
         if(H5S_select_construct_projection(mem_space, &projected_mem_space,
@@ -1601,18 +1520,6 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         mem_space = projected_mem_space;
         buf = adj_buf;
     } /* end if */
-    #ifdef JK_DBG_SHAPE_SAME_P
-    {
-        int a;
-        printf("JKDBG %s|%d DBG_SHAPE_SAME_P After> ORI buf : ", __FUNCTION__, __LINE__);
-        for (a=0; a < 10; a++) {
-            printf("%u ", (uint32_t) ((uint32_t *)buf)[a]);
-        }
-        printf(" \n");
-        printf("JKDBG %s|%d DBG_SHAPE_SAME_P After - ORI> ShapeSame:%d  Mem Ndims: %u File Ndims: %u \n", __FUNCTION__, __LINE__, H5S_select_shape_same(mem_space, file_space), H5S_GET_EXTENT_NDIMS(mem_space), H5S_GET_EXTENT_NDIMS(file_space));
-        printf(" \n");
-    }
-    #endif
 
     if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
@@ -1761,9 +1668,9 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
     /* single dset info */
-    H5D_t *dataset=NULL;  // old args
-    const H5S_t *file_space = NULL; // old arg
-    const H5S_t *mem_space = NULL;  // old arg
+    H5D_t *dataset=NULL;
+    const H5S_t *file_space = NULL;
+    const H5S_t *mem_space = NULL;
     size_t i;
 
     /* save original wbuf */
@@ -1775,9 +1682,6 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
     io_info_md.sel_pieces = NULL;
     io_info_md.store_faddr = 0;
     io_info_md.base_maddr_w = NULL;
-    #ifdef JK_DBG_SLMEM
-    io_info_md.mc_cnt=0;
-    #endif
 
     /* malloc dset_info */
     if(NULL == (io_info_md.dsets_info = (H5D_dset_info_t *)H5MM_calloc(count * sizeof(H5D_dset_info_t))))
@@ -1802,9 +1706,6 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
         if(NULL == dataset->oloc.file)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-        #ifdef JK_DBG
-        printf ("JKDBG p:%d %s:%d> dataset%d->oloc.addr: %llu\n", getpid(), __FILE__, __LINE__,i, dataset->oloc.addr);
-        #endif
     
         /* All filters in the DCPL must have encoding enabled. */
         if(!dataset->shared->checked_filters) {
@@ -1882,18 +1783,6 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
         if(!mem_space)
             mem_space = file_space;
     
-        #ifdef JK_DBG_SHAPE_SAME_P
-        {
-            size_t a;
-            printf("\nJKDBG %s|%d DBG_SHAPE_SAME_P Before> buf : ", __FUNCTION__, __LINE__);
-            for (a=0; a < 2; a++) {
-                //printf("%u ", (uint32_t) ((uint32_t *)info[i].wbuf)[a]);
-                printf("%f ", (float) ((float *)info[i].wbuf)[a]);
-            }
-            printf(" \n");
-            printf("JKDBG %s|%d DBG_SHAPE_SAME_P Before> ShapeSame:%d  Mem Ndims: %u File Ndims: %u \n", __FUNCTION__, __LINE__, H5S_select_shape_same(mem_space, file_space), H5S_GET_EXTENT_NDIMS(mem_space), H5S_GET_EXTENT_NDIMS(file_space));
-        }
-        #endif
     
         /* H5S_select_shape_same() has been modified to accept topologically 
          * identical selections with different rank as having the same shape 
@@ -1917,9 +1806,6 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
             const void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
                                     /* to the beginning of the projected mem space.  */
     
-            #ifdef JK_DBG_SHAPE_SAME_P
-            printf("JKDBG %s|%d DBG_SHAPE_SAME_P> CONTRUCT_PROJECTION! \n", __FUNCTION__, __LINE__);
-            #endif
             /* Attempt to construct projected dataspace for memory dataspace */
             if(H5S_select_construct_projection(mem_space, &(projected_mem_space[i]),
                     (unsigned)H5S_GET_EXTENT_NDIMS(file_space), info[i].wbuf, &adj_buf, (hsize_t) dset_info_array[i].type_info.src_type_size) < 0)
@@ -1931,22 +1817,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
             mem_space = projected_mem_space[i];
             info[i].wbuf = adj_buf;
         } /* end if */
-        #ifdef JK_DBG_SHAPE_SAME_P
-        {
-            size_t a;
-            printf("JKDBG %s|%d DBG_SHAPE_SAME_P After> buf : ", __FUNCTION__, __LINE__);
-            for (a=0; a < 10; a++) {
-                printf("%u ", (uint32_t) ((uint32_t *)info[i].wbuf)[a]);
-            }
-            printf(" \n");
-            printf("JKDBG %s|%d DBG_SHAPE_SAME_P After> ShapeSame:%d  Mem Ndims: %u File Ndims: %u \n", __FUNCTION__, __LINE__, H5S_select_shape_same(mem_space, file_space), H5S_GET_EXTENT_NDIMS(mem_space), H5S_GET_EXTENT_NDIMS(file_space));
-            printf(" \n");
-        }
-        #endif
     
-        #ifdef JK_DBG
-        printf("JKDBG %s|%d > ShapeSame:%d  Mem NPnts: %lld File NPnts: %lld \n", __FUNCTION__, __LINE__, H5S_select_shape_same(mem_space, file_space), H5S_GET_SELECT_NPOINTS(mem_space), H5S_GET_SELECT_NPOINTS(file_space));
-        #endif
     
         if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
     	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
@@ -2053,13 +1924,6 @@ done:
 
     /* iterate dsets */
     for (i=0; i < count; i++)  {
-        #ifdef JK_DBG
-        if(dset_info_array[i].layout)
-            printf("JKDBG %s|%d> Dset[%u] , Type: %d\n", __FUNCTION__, __LINE__,i, dset_info_array[i].layout->type);
-        else
-            printf("JKDBG %s|%d> Dset[%u] , Type: N/A\n", __FUNCTION__, __LINE__,i);
-        #endif
-
         /* Shut down the I/O op information */
         if(io_op_init && dset_info_array[i].layout_ops.io_term_md && (*dset_info_array[i].layout_ops.io_term_md)(&(dset_info_array[i]), &io_info_md) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
@@ -2432,10 +2296,6 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
     if(H5P_get(dx_plist, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, &global_no_collective_cause) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get global value")
 
-     #ifdef JK_DBG
-     printf("JKDBG %s|%d> Dset layout:%d, global-cause:%d\n", __FUNCTION__, __LINE__, dset->shared->layout.type, global_no_collective_cause );
-     #endif
-
     /* Reset the actual io mode properties to the default values in case
      * the dxpl was previously used in a collective I/O operation.
      */
@@ -2524,10 +2384,6 @@ H5D__ioinfo_adjust_mdset(const size_t count, H5D_io_info_md_t *io_info_md, hid_t
     HDassert(io_info_md->dsets_info[0].dset);
     dset0 = io_info_md->dsets_info[0].dset;
     HDassert(dset0->oloc.file);
-    //HDassert(mem_space);
-    //HDassert(file_space);
-    //HDassert(type_info);
-    //HDassert(type_info->tpath);
 
     /* Get the dataset transfer property list */
     if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))

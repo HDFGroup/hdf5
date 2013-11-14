@@ -3216,12 +3216,6 @@ test_no_collective_cause_mode(int selection_mode)
     ret = H5Pget_mpio_no_collective_cause (dxpl_read, &no_collective_cause_local_read, &no_collective_cause_global_read);
     VRFY((ret >= 0), "retriving no collective cause succeeded" );
 
-    #ifdef JK_DBG
-    printf ("JKDBG p:%d %s:%d> local_cause_WR:%d , global_cause_WR:%d\n", getpid(), __FUNCTION__,__LINE__, no_collective_cause_local_write, no_collective_cause_global_write );
-    printf ("JKDBG p:%d %s:%d> local_cause_RD:%d , global_cause_RD:%d\n", getpid(), __FUNCTION__,__LINE__, no_collective_cause_local_read, no_collective_cause_global_read );
-        fflush(stdout);
-    #endif
-
     /* Check write vs read */
     VRFY((no_collective_cause_local_read == no_collective_cause_local_write),
         "reading and writing are the same for local cause of Broken Collective I/O");

@@ -571,16 +571,6 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
     if(H5S_get_simple_extent_dims(file_space, dinfo->f_dims, NULL) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality")
 
-    #ifdef JK_DBG
-    printf("JKDBG %s|%d> nelmts: %d\n", __FUNCTION__, __LINE__, nelmts);
-    printf("JKDBG %s|%d> file_ndims: %d\n", __FUNCTION__, __LINE__, sf_ndims);
-    printf("JKDBG %s|%d> mem_ndims: %d\n", __FUNCTION__, __LINE__,sm_ndims);
-    {
-    for (int i=0; i<sf_ndims; i++)
-        printf("JKDBG %s|%d> fdim[%d]: %llu\n", __FUNCTION__, __LINE__, i, dinfo->f_dims[i]);
-    }
-    #endif
-
     /* Normalize hyperslab selections by adjusting them by the offset */
     /* (It might be worthwhile to normalize both the file and memory dataspaces
      * before any (contiguous, chunked, etc) file I/O operation, in order to
@@ -624,19 +614,12 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
     /* Get type of space class on disk */
     if((fsclass_type = H5S_GET_EXTENT_TYPE(file_space)) < H5S_SCALAR)
         HGOTO_ERROR(H5E_FSPACE, H5E_BADTYPE, FAIL, "unable to get fspace class type")
-     #ifdef JK_DBG
-    printf("JKDBG %s|%d>  fspace class_type:%d (0:SCALAR,1:SIMPLE,2:NULL)\n", __FUNCTION__, __LINE__, fsclass_type);
-     #endif
 
     /* Get type of selection on disk & in memory */
     if((fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
         HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
     if((dinfo->msel_type = H5S_GET_SELECT_TYPE(mem_space)) < H5S_SEL_NONE)
         HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
-
-    #ifdef JK_DBG
-    printf("JKDBG %s|%d>  fsel_type:%d (0:NONE,1:POINT,2:HYPERSLABS,3:ALL)\n", __FUNCTION__, __LINE__, fsel_type);
-    #endif
 
     /* if class type is scalar or null for contiguous dset */
     if(fsclass_type == H5S_SCALAR || fsclass_type == H5S_NULL)
@@ -649,14 +632,10 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
 
     /* Check if file selection is a hyperslab selection */
     if(sel_hyper_flag) {
-        #ifdef JK_DBG
-        printf("JKDBG %s|%d>  HYPER SELECT nelmts:%llu\n", __FUNCTION__, __LINE__, nelmts);
-        #endif
-        
        /*
         * This section is referred from H5D__create_piece_file_map_hyper
         * as part of multi-dset work
-        * Note: Someone may merge of make seperate function as seperate 
+        * Note: may be able to make a seperate function as a seperate 
         * task later.
         */
         {
@@ -719,10 +698,7 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
             /* get dset file address for piece */
             new_piece_info->faddr = dinfo->dset->shared->layout.storage.u.contig.addr;
 
-            #ifdef JK_DBG
-            printf("JKDBG %s|%d> new_piece_info->faddr: 0x%x\n", __FUNCTION__, __LINE__,new_piece_info->faddr);
-            #endif
-
+            /* insert piece info */
             if(H5SL_insert(io_info_md->sel_pieces, new_piece_info, &new_piece_info->faddr) < 0) {
                     /* mimic H5D__free_piece_info */
                     H5S_select_all(new_piece_info->fspace, TRUE);
