@@ -325,6 +325,7 @@ H5_term_library(void)
             pending += DOWN(A);
             pending += DOWN(D);
             pending += DOWN(G);
+            pending += DOWN(Q);
             pending += DOWN(R);
             pending += DOWN(S);
             pending += DOWN(T);
