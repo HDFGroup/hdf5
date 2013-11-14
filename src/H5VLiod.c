@@ -6489,7 +6489,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
     hid_t rcxt_id;
     H5RC_t *rc = NULL;
     H5P_genplist_t *plist = NULL;
-    iod_obj_id_t iod_id, mdkv_id;
+    iod_obj_id_t iod_id, mdkv_id, attrkv_id;
     iod_handles_t iod_oh;
     H5VL_iod_request_t **parent_reqs = NULL;
     char *loc_name = NULL;
@@ -6517,7 +6517,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
 
     /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, NULL) < 0)
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
 
     /* MSC - If location object not opened yet, wait for it. */
@@ -6650,6 +6650,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 input.loc_id = iod_id;
                 input.loc_oh = iod_oh;
                 input.loc_mdkv_id = mdkv_id;
+                input.loc_attrkv_id = attrkv_id;
                 input.rcxt_num  = rc->c_version;
                 input.cs_scope = obj->file->md_integrity_scope;
                 input.loc_name = loc_name;

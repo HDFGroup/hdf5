@@ -40,6 +40,7 @@
 #include "H5Ipkg.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 
+#include "H5Qpublic.h"          /* Queries                              */
 #include "H5RCpublic.h" 	/* Read Contexts			*/
 
 #ifdef H5_HAVE_PARALLEL
@@ -1828,6 +1829,92 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                     HDfprintf(out, "Reference Object=%a", ref);
                 } /* end else */
+                break;
+
+            case 'Q':
+                switch(type[1]) {
+                    case 't':
+                        if(ptr) {
+                            if(vp)
+                                fprintf(out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5Q_type_t qtype = (H5Q_type_t)va_arg(ap, int);
+
+                            switch(qtype) {
+                                case H5Q_TYPE_DATA_ELEM:
+                                    fprintf(out, "H5Q_TYPE_DATA_ELEM");
+                                    break;
+                                case H5Q_TYPE_ATTR_NAME:
+                                    fprintf(out, "H5Q_TYPE_ATTR_NAME");
+                                    break;
+                                case H5Q_TYPE_LINK_NAME:
+                                    fprintf(out, "H5Q_TYPE_LINK_NAME");
+                                    break;
+                                default:
+                                    fprintf(out, "BADTYPE(%d)", qtype);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'm':
+                        if(ptr) {
+                            if(vp)
+                                fprintf(out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5Q_match_op_t qmatch = (H5Q_match_op_t)va_arg(ap, int);
+
+                            switch(qmatch) {
+                                case H5Q_MATCH_EQUAL:
+                                    fprintf(out, "H5Q_MATCH_EQUAL");
+                                    break;
+                                case H5Q_MATCH_NOT_EQUAL:
+                                    fprintf(out, "H5Q_MATCH_NOT_EQUAL");
+                                    break;
+                                case H5Q_MATCH_LESS_THAN:
+                                    fprintf(out, "H5Q_MATCH_LESS_THAN");
+                                    break;
+                                case H5Q_MATCH_GREATER_THAN:
+                                    fprintf(out, "H5Q_MATCH_GREATER_THAN");
+                                    break;
+                                default:
+                                    fprintf(out, "BADTYPE(%d)", qmatch);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'c':
+                        if(ptr) {
+                            if(vp)
+                                fprintf(out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5Q_combine_op_t qcomb = (H5Q_combine_op_t)va_arg(ap, int);
+
+                            switch(qcomb) {
+                                case H5Q_COMBINE_AND:
+                                    fprintf(out, "H5Q_COMBINE_AND");
+                                    break;
+                                case H5Q_COMBINE_OR:
+                                    fprintf(out, "H5Q_COMBINE_OR");
+                                    break;
+                                default:
+                                    fprintf(out, "BADTYPE(%d)", qcomb);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    default:
+                        fprintf(out, "BADTYPE(S%c)", type[1]);
+                        goto error;
+                } /* end switch */
                 break;
 
             case 'R':

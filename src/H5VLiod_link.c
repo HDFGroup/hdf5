@@ -69,7 +69,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
        does not exist. */
     if(H5VL_iod_server_traverse(coh, input->loc_id, input->loc_oh, input->loc_name, 
                                 rtid, FALSE, &src_last_comp, &src_id, &src_oh) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "new link name = %s\n", src_last_comp);
@@ -84,60 +84,60 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
         /* Traverse Path and open the target object */
         if(H5VL_iod_server_open_path(coh, input->target_loc_id, input->target_loc_oh, 
                                      input->target_name, rtid, &target_id, &target_oh) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
+            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
         /* add link in parent group to current object */
         if(H5VL_iod_insert_new_link(src_oh.wr_oh, wtid, src_last_comp, 
                                     H5L_TYPE_HARD, &target_id, NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         if(input->target_loc_id != target_id) {
             /* get scratch pad */
             if(iod_obj_get_scratch(target_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+                HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
             if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
                 /* verify scratch pad integrity */
                 if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+                    HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
             }
 
             /* open the metadata KV */
             if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh.rd_oh, NULL) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+                HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
             if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh.wr_oh, NULL) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+                HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
         }
         else {
             /* open the metadata KV */
             if (iod_obj_open_read(coh, input->target_mdkv_id, NULL, &mdkv_oh.rd_oh, NULL) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+                HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
             if (iod_obj_open_write(coh, input->target_mdkv_id, NULL, &mdkv_oh.wr_oh, NULL) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+                HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
         }
 
         if(H5VL_iod_get_metadata(mdkv_oh.rd_oh, rtid, H5VL_IOD_LINK_COUNT, 
                                  H5VL_IOD_KEY_OBJ_LINK_COUNT,
                                  NULL, NULL, &link_count) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
         link_count ++;
 
         /* insert link count metadata */
         if(H5VL_iod_insert_link_count(mdkv_oh.wr_oh, wtid, link_count, 
                                       NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* close the metadata scratch pad */
         if(iod_obj_close(mdkv_oh.rd_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
         if(iod_obj_close(mdkv_oh.wr_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* close the target location */
         if(input->target_loc_oh.rd_oh.cookie != target_oh.rd_oh.cookie) {
             if(iod_obj_close(target_oh.rd_oh, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
         }
     }
     else if(H5VL_LINK_CREATE_SOFT == create_type) {
@@ -145,23 +145,23 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
         if(H5VL_iod_insert_new_link(src_oh.wr_oh, wtid, src_last_comp, 
                                     H5L_TYPE_SOFT, input->link_value, 
                                     NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
 #if H5VL_IOD_DEBUG
         fprintf(stderr, "Soft link Value = %s\n", input->link_value);
 #endif
     }
     else
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Invalid Link type");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Invalid Link type");
 
     /* close the source location */
     if(input->loc_oh.rd_oh.cookie != src_oh.rd_oh.cookie) {
         if(iod_obj_close(src_oh.rd_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
     }
     if(input->loc_oh.wr_oh.cookie != src_oh.wr_oh.cookie) {
         if(iod_obj_close(src_oh.wr_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
     }
 
 done:
@@ -219,52 +219,60 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start link move\n");
+    fprintf(stderr, "Start link move SRC %s DST %s\n",
+            input->src_loc_name, input->dst_loc_name);
 #endif
 
     /* the traversal will retrieve the location where the link needs
        to be moved/copied from. The traversal will fail if an intermediate group
        does not exist. */
-    if(H5VL_iod_server_traverse(coh, input->src_loc_id, input->src_loc_oh, input->src_loc_name, 
+    if(H5VL_iod_server_traverse(coh, input->src_loc_id, input->src_loc_oh, 
+                                input->src_loc_name, 
                                 rtid, FALSE, &src_last_comp, &src_id, &src_oh) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* the traversal will retrieve the location where the link needs
        to be moved/copied to. The traversal will fail if an intermediate group
        does not exist. */
-    if(H5VL_iod_server_traverse(coh, input->dst_loc_id, input->dst_loc_oh, input->dst_loc_name, 
+    if(H5VL_iod_server_traverse(coh, input->dst_loc_id, input->dst_loc_oh, 
+                                input->dst_loc_name, 
                                 rtid, FALSE, &dst_last_comp, &dst_id, &dst_oh) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* get the link value */
     if(H5VL_iod_get_metadata(src_oh.rd_oh, rtid, H5VL_IOD_LINK, 
                              src_last_comp, NULL, NULL, &iod_link) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
     /* Insert object in the destination path */
     if(H5L_TYPE_HARD == iod_link.link_type) {
         if(H5VL_iod_insert_new_link(dst_oh.wr_oh, wtid, dst_last_comp, 
                                     iod_link.link_type, &iod_link.u.iod_id, 
                                     NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     }
     else if(H5L_TYPE_SOFT == iod_link.link_type) {
         if(H5VL_iod_insert_new_link(dst_oh.wr_oh, wtid, dst_last_comp, 
                                     iod_link.link_type, &iod_link.u.symbolic_name, 
                                     NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     }
 
     /* if the operation type is a Move, remove the KV pair from the source object */
     if(!copy_flag) {
         iod_kv_params_t kvs;
+        iod_ret_t ret;
+        iod_checksum_t cs;
 
         kv.key = src_last_comp;
+        kv.key_len = strlen(src_last_comp);
         kvs.kv = &kv;
+        kvs.cs = &cs;
+        kvs.ret = &ret;
 
         /* remove link from source object */
         if(iod_kv_unlink_keys(src_oh.wr_oh, wtid, NULL, 1, &kvs, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
     }
 
     /* adjust link count on target object */
@@ -276,45 +284,45 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
         uint64_t link_count = 0;
 
         /* open the current group */
-        if (iod_obj_open_read(coh, iod_link.iod_id, NULL, &target_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+        if (iod_obj_open_read(coh, iod_link.u.iod_id, NULL, &target_oh, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
         /* get scratch pad */
         if(iod_obj_get_scratch(target_oh, rtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
             /* verify scratch pad integrity */
             if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
         }
 
         /* open the metadata scratch pad */
         if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
         if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh.wr_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
         if(H5VL_iod_get_metadata(mdkv_oh.rd_oh, rtid, H5VL_IOD_LINK_COUNT, 
                                  H5VL_IOD_KEY_OBJ_LINK_COUNT,
                                  NULL, NULL, &link_count) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
         link_count ++;
 
         /* insert link count metadata */
         if(H5VL_iod_insert_link_count(mdkv_oh.wr_oh, wtid, link_count, 
                                       NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* close the metadata scratch pad */
         if(iod_obj_close(mdkv_oh.rd_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
         if(iod_obj_close(mdkv_oh.wr_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* close the target location */
         if(iod_obj_close(target_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
     }
 
     /* close source group if it is not the location we started the
@@ -337,7 +345,8 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Done with link move, sending response to client\n");
+    fprintf(stderr, "Done with link move, sending response %d to client\n",
+            ret_value);
 #endif
 
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
@@ -478,7 +487,7 @@ H5VL_iod_server_link_get_info_cb(AXE_engine_t UNUSED axe_engine,
        to be checked */
     if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, rtid, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Link Get_Info on link %s\n", last_comp);
@@ -487,7 +496,7 @@ H5VL_iod_server_link_get_info_cb(AXE_engine_t UNUSED axe_engine,
     /* lookup link information in the current location */
     if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
                              last_comp, NULL, NULL, &iod_link) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
     /* setup link info */
     linfo.type = iod_link.link_type;
@@ -498,11 +507,12 @@ H5VL_iod_server_link_get_info_cb(AXE_engine_t UNUSED axe_engine,
         break;
     case H5L_TYPE_SOFT:
         linfo.u.val_size = strlen(iod_link.u.symbolic_name) + 1;
+        break;
     case H5L_TYPE_ERROR:
     case H5L_TYPE_EXTERNAL:
     case H5L_TYPE_MAX:
     default:
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unsuppored link type");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "unsuppored link type");
     }
 
 #if H5VL_IOD_DEBUG
@@ -582,7 +592,7 @@ H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine,
        to be checked */
     if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, rtid, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Link Get_val on link %s\n", last_comp);
@@ -591,17 +601,17 @@ H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine,
     /* lookup link information in the current location */
     if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
                              last_comp, NULL, NULL, &iod_link) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
     if(H5L_TYPE_SOFT != iod_link.link_type)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "link is not SOFT");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "link is not SOFT");
 
     output.value.val_size = length;
     output.value.val = NULL;
 
     if(length) {
         if(NULL == (output.value.val = (void *)malloc (length)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
         memcpy(output.value.val, iod_link.u.symbolic_name, length);
     }
 
@@ -679,6 +689,8 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     char *last_comp = NULL;
     iod_kv_params_t kvs;
     iod_kv_t kv;
+    iod_ret_t ret;
+    iod_checksum_t cs;
     H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
@@ -693,18 +705,21 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
        does not exist. */
     if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, rtid, 
                                 FALSE, &last_comp, &cur_id, &cur_oh) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* lookup object ID in the current location */
     if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
                              last_comp, NULL, NULL, &iod_link) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
     /* unlink object from conainer */
     kv.key = last_comp;
+    kv.key_len = strlen(last_comp);
     kvs.kv = &kv;
+    kvs.cs = &cs;
+    kvs.ret = &ret;
     if(iod_kv_unlink_keys(cur_oh.wr_oh, wtid, NULL, 1, &kvs, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
 
     /* check the metadata information for the object and remove
        it from the container if this is the last link to it */
@@ -720,28 +735,28 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
 
         /* open the current group */
         if (iod_obj_open_read(coh, obj_id, NULL, &obj_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
         /* get scratch pad */
         if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
             /* verify scratch pad integrity */
             if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
         }
 
         /* open the metadata scratch pad */
         if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
         if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh.wr_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
         if(H5VL_iod_get_metadata(mdkv_oh.rd_oh, rtid, H5VL_IOD_LINK_COUNT, 
                                  H5VL_IOD_KEY_OBJ_LINK_COUNT,
                                  NULL, NULL, &link_count) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
         link_count --;
 
@@ -750,26 +765,26 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
             /* insert link count metadata */
             if(H5VL_iod_insert_link_count(mdkv_oh.wr_oh, wtid, link_count, 
                                           NULL, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
         }
         /* close the metadata scratch pad */
         if(iod_obj_close(mdkv_oh.rd_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
         if(iod_obj_close(mdkv_oh.wr_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* close the object */
         if(iod_obj_close(obj_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* If this was the only link to the object, remove the object */
         if(0 == link_count) {
             if(iod_obj_unlink(coh, obj_id, wtid, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
             if(iod_obj_unlink(coh, sp[0], wtid, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
             if(iod_obj_unlink(coh, sp[1], wtid, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
         }
     }
 
@@ -785,7 +800,8 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
 done:
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Done with link remove, sending response to client\n");
+    fprintf(stderr, "Done with link remove, sending response %d to client\n",
+            ret_value);
 #endif
 
     HG_Handler_start_output(op_data->hg_handle, &ret_value);

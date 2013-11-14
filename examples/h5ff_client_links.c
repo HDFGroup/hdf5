@@ -10,7 +10,7 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name[]="map_file.h5";
+    const char file_name[]="eff_file_links.h5";
     hid_t file_id;
     hid_t gid1, gid2, gid3, gid4, gid5;
     hid_t did1, did2, did3;
@@ -85,95 +85,91 @@ int main(int argc, char **argv) {
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
     assert(0 == version);
 
-    /* create transaction object */
-    tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
-    assert(tid1);
-
     /* start transaction 1 with default Leader/Delegate model. Leader
        which is rank 0 here starts the transaction. It can be
        asynchronous, but we make it synchronous here so that the
        Leader can tell its delegates that the transaction is
        started. */
     if(0 == my_rank) {
+        /* create transaction object */
+        tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
+        assert(tid1);
+
         ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
-        trans_num = 1;
-    }
+        /* create objects */
+        gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        gid3 = H5Gcreate_ff(gid2, "G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
 
-    /* Tell Delegates that transaction 1 is started */
-    MPI_Ibcast(&trans_num, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD, &mpi_req);
+        did1 = H5Dcreate_ff(gid3, "D1", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        did2 = H5Dcreate_ff(gid3, "D2", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        did3 = H5Dcreate_ff(gid3, "D3", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
 
-    /* Leader can continue writing to transaction 1, 
-       while others wait for the ibcast to complete */
-    if(0 != my_rank)
-        MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
+        gid4 = H5Gcreate_ff(file_id, "G4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        gid5 = H5Gcreate_ff(gid4, "G5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
 
-    assert(1 == trans_num);
-
-    /* 
-       Assume the following object create calls are collective.
-
-       In a real world scenario, the following create calls are
-       independent by default; i.e. only 1 process, typically a leader
-       process, calls them. The user does the local-to-global,
-       global-to-local thing to get the objects accessible to all delegates. 
-
-       This will not fail here because IOD used for now is skeletal,
-       so it does not matter if the calls are collective or
-       independent.
-    */
-
-    /* create objects */
-    gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    gid3 = H5Gcreate_ff(gid2, "G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    did1 = H5Dcreate_ff(gid3, "D1", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    did2 = H5Dcreate_ff(gid3, "D2", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    did3 = H5Dcreate_ff(gid3, "D3", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-
-    gid4 = H5Gcreate_ff(file_id, "G4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    gid5 = H5Gcreate_ff(gid4, "G5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-
-    /* create a hard link to D1 (created previosuly) so that it can be
-       accessed from G5/newD1. */
-    ret = H5Lcreate_hard_ff(did1, ".", gid5, "newD1", H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    assert(ret == 0);
-
-    /* none leader procs have to complete operations before notifying the leader */
-    if(0 != my_rank) {
         /* wait on all requests and print completion status */
         H5ESget_count(e_stack, &num_events);
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
+
+        H5Dclose(did2);
+
+        /* create a hard link to D1 (created previosuly) so that it can be
+           accessed from G5/newD1. */
+        ret = H5Lcreate_hard_ff(did1, ".", gid5, "newD1", H5P_DEFAULT, 
+                                H5P_DEFAULT, tid1, e_stack);
+        assert(ret == 0);
+
+        /* Do more updates on transaction 2 */
+
+        ret = H5Lcreate_soft_ff("/G1/G2/G3/D4", gid4, "G5/newD2", 
+                                H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        assert(ret == 0);
+
+        ret = H5Lmove_ff(gid3, "D3", file_id, "/G4/G5/D3moved", 
+        H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        assert(ret == 0);
+
+        ret = H5Ldelete_ff(file_id, "/G1/G2/G3/D2", H5P_DEFAULT, tid1, e_stack);
+        assert(ret == 0);
     }
+
+    /* wait on all requests and print completion status */
+    H5ESget_count(e_stack, &num_events);
+    H5ESwait_all(e_stack, &status);
+    H5ESclear(e_stack);
+    printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
     /* Barrier to make sure all processes are done writing so Process
        0 can finish transaction 1 and acquire a read context on it. */
     MPI_Barrier(MPI_COMM_WORLD);
 
-    /* Leader process finished the transaction after all clients
-       finish their updates. Leader also asks the library to acquire
-       the committed transaction, that becomes a readable version
-       after the commit completes. */
     if(0 == my_rank) {
-        MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
-
         /* make this synchronous so we know the container version has been acquired */
         ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, H5_EVENT_STACK_NULL);
         assert(0 == ret);
-    }
 
-    /* Close transaction object. Local op */
-    ret = H5TRclose(tid1);
-    assert(0 == ret);
+        assert(H5Gclose_ff(gid1, e_stack) == 0);
+        assert(H5Gclose_ff(gid2, e_stack) == 0);
+        assert(H5Gclose_ff(gid3, e_stack) == 0);
+        assert(H5Gclose_ff(gid4, e_stack) == 0);
+        assert(H5Gclose_ff(gid5, e_stack) == 0);
+        
+        assert(H5Dclose_ff(did1, e_stack) == 0);
+        assert(H5Dclose_ff(did3, e_stack) == 0);
+
+        /* Close transaction object. Local op */
+        ret = H5TRclose(tid1);
+        assert(0 == ret);
+    }
 
     /* release container version 0. This is async. */
     ret = H5RCrelease(rid1, e_stack);
     assert(0 == ret);
-
-    assert(H5Dclose_ff(did2, e_stack) == 0);
 
     /* wait on all requests and print completion status */
     H5ESget_count(e_stack, &num_events);
@@ -196,50 +192,15 @@ int main(int argc, char **argv) {
     did2 = H5Dopen_ff(file_id,"G4/G5/newD1", H5P_DEFAULT, rid2, e_stack);
     assert(did2);
 
-    /* create & start transaction 2 with num_peers = my_size. This
-       means all processes are transaction leaders, and all have to
-       call start and finish on the transaction. */
-    tid2 = H5TRcreate(file_id, rid2, (uint64_t)2);
-    assert(tid2);
-    trspl_id = H5Pcreate (H5P_TR_START);
-    ret = H5Pset_trspl_num_peers(trspl_id, my_size);
-    assert(0 == ret);
-    ret = H5TRstart(tid2, trspl_id, e_stack);
-    assert(0 == ret);
-    ret = H5Pclose(trspl_id);
-    assert(0 == ret);
+    gid4 = H5Gopen_ff(file_id, "G4", H5P_DEFAULT, rid2, e_stack);
+    assert(gid4);
 
-    /* Do more updates on transaction 2 */
-
-    ret = H5Lcreate_soft_ff("/G1/G2/G3/D4", gid4, "G5/newD2", 
-                            H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
-    assert(ret == 0);
-
-    ret = H5Lmove_ff(gid3, "D3", file_id, "/G4/G5/D3moved", 
-                     H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
-    assert(ret == 0);
-
-    ret = H5Ldelete_ff(file_id, "/G1/G2/G3/D2", H5P_DEFAULT, tid2, e_stack);
-    assert(ret == 0);
-
-    /* finish transaction 2 - all have to call */
-    ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, e_stack);
-    assert(0 == ret);
 
     if(my_rank == 0) {
         /* release container version 1. This is async. */
         ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);
     }
-
-    assert(H5Gclose_ff(gid1, e_stack) == 0);
-    assert(H5Gclose_ff(gid2, e_stack) == 0);
-    assert(H5Gclose_ff(gid3, e_stack) == 0);
-    assert(H5Gclose_ff(gid5, e_stack) == 0);
-
-    assert(H5Dclose_ff(did1, e_stack) == 0);
-    assert(H5Dclose_ff(did2, e_stack) == 0);
-    assert(H5Dclose_ff(did3, e_stack) == 0);
 
     /* wait on all requests and print completion status */
     H5ESget_count(e_stack, &num_events);
@@ -251,19 +212,17 @@ int main(int argc, char **argv) {
     assert(0 == ret);
     ret = H5RCclose(rid2);
     assert(0 == ret);
-    ret = H5TRclose(tid2);
-    assert(0 == ret);
 
     /* acquire container version 2 - EXACT */
     version = 2;
     rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(2 == version);
 
     {
         H5L_ff_info_t linfo;
         char *link_buf;
 
-        ret = H5Lget_info_ff(gid4, "G5/newD2", &linfo, H5P_DEFAULT, rid3, H5_EVENT_STACK_NULL);
+        ret = H5Lget_info_ff(gid4, "G5/newD2", &linfo, H5P_DEFAULT, 
+                             rid3, H5_EVENT_STACK_NULL);
         assert(ret == 0);
 
         switch(linfo.type) {
@@ -292,6 +251,7 @@ int main(int argc, char **argv) {
     ret = H5RCrelease(rid3, e_stack);
     assert(0 == ret);
 
+    assert(H5Dclose_ff(did2, e_stack) == 0);
     assert(H5Gclose_ff(gid4, e_stack) == 0);
 
     /* closing the container also acts as a wait all on all pending requests 

@@ -119,13 +119,17 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start Object Open\n");
+    fprintf(stderr, "Start Object Open on %s (OH %"PRIu64" ID %"PRIx64")\n", 
+            input->loc_name, input->loc_oh.rd_oh, input->loc_id);
 #endif
 
     /* Traverse Path and open object */
     if(H5VL_iod_server_open_path(coh, input->loc_id, input->loc_oh, input->loc_name, 
                                  rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
+
+    if (iod_obj_open_write(coh, obj_id, NULL, &obj_oh.wr_oh, NULL) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
     if(obj_id != input->loc_id) {
         /* get scratch pad of the object */
@@ -140,12 +144,12 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
 
         /* open the metadata KV */
         if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
     else {
         /* open the metadata KV */
         if (iod_obj_open_read(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, H5VL_IOD_KEY_OBJ_TYPE,
@@ -172,6 +176,8 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
                                  NULL, NULL, &output.cpl_id) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
+        output.id1 = FAIL;
+        output.id2 = FAIL;
         break;
     case H5I_DATASET:
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
@@ -190,8 +196,8 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
         {
             size_t buf_size; /* size of serialized datatype */
             void *buf = NULL;
-            iod_mem_desc_t mem_desc; /* memory descriptor used for reading */
-            iod_blob_iodesc_t file_desc; /* file descriptor used to write */
+            iod_mem_desc_t *mem_desc = NULL; /* memory descriptor used for reading */
+            iod_blob_iodesc_t *file_desc = NULL; /* file descriptor used to write */
             iod_checksum_t dt_cs = 0, iod_cs = 0;
             iod_size_t key_size, val_size;
 
@@ -206,32 +212,41 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
             if(NULL == (buf = malloc(buf_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate BLOB read buffer");
 
-            /* create memory descriptor for reading */
-            mem_desc.nfrag = 1;
-            mem_desc.frag->addr = buf;
-            mem_desc.frag->len = (iod_size_t)buf_size;
+            /* create memory descriptor for writing */
+            mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + 
+                                                sizeof(iod_mem_frag_t));
+            mem_desc->nfrag = 1;
+            mem_desc->frag[0].addr = buf;
+            mem_desc->frag[0].len = (iod_size_t)buf_size;
 
             /* create file descriptor for writing */
-            file_desc.nfrag = 1;
-            file_desc.frag->offset = 0;
-            file_desc.frag->len = (iod_size_t)buf_size;
+            file_desc = (iod_blob_iodesc_t *)malloc(sizeof(iod_blob_iodesc_t) + 
+                                                    sizeof(iod_blob_iofrag_t));
+            file_desc->nfrag = 1;
+            file_desc->frag[0].offset = 0;
+            file_desc->frag[0].len = (iod_size_t)buf_size;
 
             /* read the serialized type value from the BLOB object */
-            if(iod_blob_read(obj_oh.rd_oh, rtid, NULL, &mem_desc, &file_desc, &iod_cs, NULL) < 0)
+            if(iod_blob_read(obj_oh.rd_oh, rtid, NULL, mem_desc, file_desc, 
+                             &iod_cs, NULL) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
 
             /* calculate a checksum for the datatype */
             dt_cs = H5_checksum_crc64(buf, buf_size);
 
-            /* Verifty checksum against one given by IOD */
-            if(iod_cs != dt_cs)
-                HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
+            /* MSC - Verify checksum against one given by IOD */
+            //if(iod_cs != dt_cs)
+            //HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
 
             /* decode the datatype */
             if((output.id1 = H5Tdecode(buf)) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to decode datatype");
+            output.id2 = FAIL;
 
+            free(mem_desc);
+            free(file_desc);
             free(buf);
+            break;
         }
     default:
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Invalid object type");
@@ -262,17 +277,6 @@ done:
         output.id1 = FAIL;
         output.id2 = FAIL;
         HG_Handler_start_output(op_data->hg_handle, &output);
-    }
-
-    switch(output.obj_type){
-    case H5I_GROUP:
-        break;
-    case H5I_DATASET:
-        break;
-    case H5I_DATATYPE:
-        break;
-    default:
-        HGOTO_ERROR2(H5E_ARGS, H5E_CANTINIT, FAIL, "not a valid object (dataset, group, or datatype)")
     }
 
     input = (object_op_in_t *)H5MM_xfree(input);
@@ -354,7 +358,7 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the metadata scratch pad */
     if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, H5VL_IOD_KEY_OBJ_TYPE,
                              NULL, NULL, &obj_type) < 0)
@@ -503,6 +507,11 @@ H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Start Object Exists on %s (OH %"PRIu64" ID %"PRIx64")\n", 
+            input->loc_name, input->loc_oh.rd_oh, input->loc_id);
+#endif
+
     /* Traverse Path and open object */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, rtid, &obj_id, &obj_oh) < 0) {
         ret = FALSE;
@@ -572,13 +581,19 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Start Object Get Info on %s (OH %"PRIu64" ID %"PRIx64")\n", 
+            input->loc_name, input->loc_oh.rd_oh, input->loc_id);
+#endif
+
     /* Traverse Path and open object */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, rtid, &obj_id, &obj_oh) < 0)
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, 
+                                 rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "object does not exist");
 
     oinfo.addr = obj_id;
 
-    if(obj_id != loc_id) {
+    if(obj_id != loc_id || input->loc_mdkv_id == IOD_OBJ_INVALID) {
         /* get scratch pad of the object */
         if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
@@ -590,18 +605,20 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* open the metadata KV */
-        if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+        if (iod_obj_open_read(coh, sp[0], NULL, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
+        /* open the attribute KV */
+        if (iod_obj_open_read(coh, sp[1], NULL, &attrkv_oh, NULL) < 0)
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open ATTRKV");
     }
     else {
         /* open the metadata KV */
         if (iod_obj_open_read(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
+        /* open the attribute KV */
+        if (iod_obj_open_read(coh, input->loc_attrkv_id, NULL, &attrkv_oh, NULL) < 0)
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
-
-    /* open the attribute scratch pad */
-    if (iod_obj_open_read(coh, sp[1], NULL /*hints*/, &attrkv_oh, NULL) < 0)
-        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, H5VL_IOD_KEY_OBJ_TYPE,
                              NULL, NULL, &obj_type) < 0)
@@ -704,11 +721,17 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Start Object Set comment on %s (OH %"PRIu64" ID %"PRIx64")\n", 
+            input->path, input->loc_oh.rd_oh, input->loc_id);
+#endif
+
     /* Traverse Path and open object */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, rtid, &obj_id, &obj_oh) < 0)
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, rtid, 
+                                 &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
-    if(loc_id != obj_id) {
+    if(loc_id != obj_id || input->loc_mdkv_id == IOD_OBJ_INVALID) {
         /* get scratch pad of the object */
         if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
@@ -721,27 +744,25 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
 
         /* open the metadata scratch pad */
         if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
     else {
         /* open the metadata KV */
         if (iod_obj_open_write(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
 
     {
         iod_kv_t kv;
-        char *key = NULL;
 
-        key = strdup(H5VL_IOD_KEY_OBJ_COMMENT);
-        kv.key = key;
+        kv.key = (void *)H5VL_IOD_KEY_OBJ_COMMENT;
+        kv.key_len = strlen(H5VL_IOD_KEY_OBJ_COMMENT);
         kv.value_len = strlen(comment) + 1;
-        kv.value = &comment;
+        kv.value = comment;
 
         if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set comment in MDKV");
 
-        free(key);
     }
 
     /* close metadata KV and object */
@@ -808,11 +829,17 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Start Object Get comment on %s (OH %"PRIu64" ID %"PRIx64")\n", 
+            input->path, input->loc_oh.rd_oh, input->loc_id);
+#endif
+
     /* Traverse Path and open object */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, rtid, &obj_id, &obj_oh) < 0)
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, 
+                                 rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
-    if(loc_id != obj_id) {
+    if(loc_id != obj_id || input->loc_mdkv_id == IOD_OBJ_INVALID) {
         /* get scratch pad of the object */
         if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
@@ -825,12 +852,12 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
 
         /* open the metadata KV */
         if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
     else {
         /* open the metadata KV */
         if (iod_obj_open_read(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
 
     comment.value_size = (ssize_t *)malloc(sizeof(ssize_t));
@@ -839,16 +866,16 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
 
     key_size = strlen(H5VL_IOD_KEY_OBJ_COMMENT);
 
-    if(iod_kv_get_value(obj_oh.rd_oh, rtid, H5VL_IOD_KEY_OBJ_COMMENT, key_size,
+    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_OBJ_COMMENT, key_size,
                         NULL, &val_size, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "comment size lookup failed");
 
     if(NULL == (value = malloc ((size_t)val_size)))
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 
-    if(iod_kv_get_value(obj_oh.rd_oh, rtid, H5VL_IOD_KEY_OBJ_COMMENT, key_size,
+    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_OBJ_COMMENT, key_size,
                         value, &val_size, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "comment value lookup failed");
 
     if(length) {
         if(NULL == (comment.value = (char *)malloc (length)))

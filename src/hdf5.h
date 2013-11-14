@@ -36,7 +36,7 @@
 #include "H5MMpublic.h"		/* Memory management			*/
 #include "H5Opublic.h"		/* Object headers			*/
 #include "H5Ppublic.h"		/* Property lists			*/
-#include "H5Qpublic.h"      /* Queries           */
+#include "H5Qpublic.h"          /* Queries                              */
 #include "H5Rpublic.h"		/* References				*/
 #include "H5RCpublic.h"		/* Read Contexts			*/
 #include "H5Spublic.h"		/* Dataspaces				*/
