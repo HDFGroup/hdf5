@@ -5122,8 +5122,9 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
 
 /*---------------------------------------------------
  *  Scailable & performance test for Write I/O.
- *  can generate multiple dsets (CONTIG or CHUNKED) and test either H5Dwrite or
- *  H5Dwrite_multi with them.
+ *  All processes write its own portion to all dsets.
+ *  Generate multiple dsets (CONTIG or CHUNKED) either with
+ *  H5Dread or H5Dread_multi.
  */
 void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t chunks, phdf5_mode_t pmode, multi_mode_t multi_mode, mpio_collective_mode_t mpio_opt, sel_mode_t sel_mode )
 {
@@ -5546,8 +5547,9 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
 
 /*-------------------------------------------------------
  *  Scailable & performance test for Read I/O.
- *  can generate multiple dsets (CONTIG or CHUNKED) and test either H5Dread or
- *  H5Dread_multi with them.
+ *  All processes read its own portion from all dsets.
+ *  First generate multiple dsets (CONTIG or CHUNKED) and read them either with
+ *  H5Dread or H5Dread_multi.
  */
 void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t chunks, phdf5_mode_t pmode, multi_mode_t multi_mode, mpio_collective_mode_t mpio_opt, sel_mode_t sel_mode )
 {
