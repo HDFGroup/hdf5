@@ -1,7 +1,7 @@
 #############################
- output for 'h5watch --fields=field1,field2 WATCH1.h5/DSET_CMPD'
+ output for 'h5watch --fields=field1,field2 TEST.h5/DSET_CMPD'
 #############################
-Opened "WATCH1.h5" with sec2 driver.
+Opened "TEST.h5" with sec2 driver.
 Monitoring dataset /DSET_CMPD...
 dimension 0: 10->13 (increases)
     Data:

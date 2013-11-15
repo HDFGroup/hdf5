@@ -1,7 +1,7 @@
 #############################
- output for 'h5watch WATCH3.h5/DSET_ALLOC_LATE'
+ output for 'h5watch TEST.h5/DSET_ALLOC_LATE'
 #############################
-Opened "WATCH3.h5" with sec2 driver.
+Opened "TEST.h5" with sec2 driver.
 Monitoring dataset /DSET_ALLOC_LATE...
 dimension 0: 10->13 (increases)
     Data:

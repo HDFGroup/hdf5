@@ -1,7 +1,7 @@
 #############################
- output for 'h5watch WATCH1.h5/DSET_ONE'
+ output for 'h5watch TEST.h5/DSET_ONE'
 #############################
-Opened "WATCH1.h5" with sec2 driver.
+Opened "TEST.h5" with sec2 driver.
 Monitoring dataset /DSET_ONE...
 dimension 0: 10->13 (increases)
     Data:

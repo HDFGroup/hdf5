@@ -24,9 +24,7 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src
 
 # These are our main targets, the tools
-#TEST_PROG=h5watchgentest
 TEST_SCRIPT=testh5watch.sh
-#check_PROGRAMS=h5watchgentest
 check_SCRIPTS=$(TEST_SCRIPT)
 SCRIPT_DEPEND=h5watch$(EXEEXT)
 
@@ -38,16 +36,14 @@ h5watch_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 h5watch_SOURCES=h5watch.c
 
-#gen_onetwo_test_SOURCES=gen_onetwo_test.c
 h5watchgentest_SOURCES=h5watchgentest.c
 extend_dset_SOURCES=extend_dset.c
-#extend_one_SOURCES=extend_one.c
-#extend_two_SOURCES=extend_two.c
 
 # Programs all depend on the hdf5 library, the tools library, and the HL
 # library.
 LDADD=$(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
-
+#
+CHECK_CLEANFILES+=*.h5
 DISTCLEANFILES=testh5watch.sh
 
 include $(top_srcdir)/config/conclude.am

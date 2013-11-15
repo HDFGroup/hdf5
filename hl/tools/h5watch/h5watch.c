@@ -21,9 +21,6 @@
 
 #include "h5tools.h"
 #include "h5tools_dump.h"
-#include "h5tools_utils.h"
-#include "h5tools_ref.h"
-#include "h5trav.h"
 #include "H5LDprivate.h"
 
 /*
@@ -190,7 +187,7 @@ doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
             info.line_per_line = 1;
         }
         else
-            info.line_ncols = g_display_width;
+            info.line_ncols = (unsigned)g_display_width;
 
         info.line_multi_new = 1;
 
@@ -367,7 +364,7 @@ monitor_dataset(hid_t fid, char *dsetname)
 	if(i != ndims) {
 	    /* Printing changes in dimension sizes */
 	    for(u = 0; u < ndims; u++) {
-		HDfprintf(stdout, "dimension %u: %Hu->%Hu", u, prev_dims[u], cur_dims[u]);
+		HDfprintf(stdout, "dimension %u: %Hu->%Hu", (unsigned)u, prev_dims[u], cur_dims[u]);
 		if(cur_dims[u] > prev_dims[u])
 		    HDfprintf(stdout, " (increases)\n");
 		else if(cur_dims[u] < prev_dims[u])
@@ -404,7 +401,7 @@ monitor_dataset(hid_t fid, char *dsetname)
 	}
 	    
 	/* Save the current dimension sizes */
-	HDmemcpy(prev_dims, cur_dims, ndims * sizeof(hsize_t));
+	HDmemcpy(prev_dims, cur_dims, (size_t)ndims * sizeof(hsize_t));
 
 	/* Sleep before next monitor */
         HDsleep(g_polling_interval);
@@ -434,8 +431,8 @@ done:
 static herr_t
 process_cmpd_fields(hid_t fid, char *dsetname)
 {
-    hid_t did;		/* dataset id */
-    hid_t dtid, tid;	/* dataset's data type id */
+    hid_t did=-1;			/* dataset id */
+    hid_t dtid=-1, tid=-1;	/* dataset's data type id */
     size_t len;		/* number of comma-separated fields in "g_list_of_fields" */
     herr_t ret_value = SUCCEED;	/* Return value */
 
@@ -516,9 +513,9 @@ done:
 static herr_t
 check_dataset(hid_t fid, char *dsetname)
 {
-    hid_t did;		/* Dataset id */
-    hid_t dcp;		/* Dataset creation property */
-    hid_t sid;		/* Dataset's dataspace id */
+    hid_t did=-1;	/* Dataset id */
+    hid_t dcp=-1;	/* Dataset creation property */
+    hid_t sid=-1;	/* Dataset's dataspace id */
     int	  ndims;	/* # of dimensions in the dataspace */
     unsigned u;		/* Local index variable */
     hsize_t cur_dims[H5S_MAX_RANK];	/* size of dataspace dimensions */
@@ -583,14 +580,14 @@ check_dataset(hid_t fid, char *dsetname)
     }
 
 done: 
+    H5Eset_auto2(H5E_DEFAULT, func, edata);
+
     /* Closing */
     H5E_BEGIN_TRY
 	H5Sclose(sid);
 	H5Pclose(dcp);
 	H5Dclose(did);
     H5E_END_TRY
-
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     return(ret_value);
 } /* check_dataset() */
@@ -712,7 +709,7 @@ parse_command_line(int argc, const char *argv[])
             break;
 
         case 'w': /* --width=N */
-	    g_display_width = HDstrtol(opt_arg, NULL, 0);
+	    g_display_width = (int)HDstrtol(opt_arg, NULL, 0);
 	    if(g_display_width < 0) {
 		usage(h5tools_getprogname());
 		leave(EXIT_FAILURE);
@@ -804,6 +801,7 @@ main(int argc, const char *argv[])
     H5E_auto2_t         func;
     char	*x;
     hid_t	fid = -1;
+    hid_t	fapl = -1;
 
     /* Set up tool name and exit status */
     h5tools_setprogname(PROGRAMNAME);
@@ -846,9 +844,17 @@ main(int argc, const char *argv[])
 	h5tools_setstatus(EXIT_FAILURE);
     }
 
+    /* Create a copy of file access property list */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        return -1;
+
+    /* Set to use the latest library format */
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        return -1;
+
     do {
 	while(fname && *fname) {
-	    fid = h5tools_fopen(fname, H5F_ACC_SWMR_READ, H5P_DEFAULT, NULL, drivername, sizeof drivername);
+	    fid = h5tools_fopen(fname, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl, NULL, drivername, sizeof drivername);
 
 	    if(fid >= 0) {
 		HDfprintf(stdout, "Opened \"%s\" with %s driver.\n", fname, drivername);
@@ -869,7 +875,8 @@ main(int argc, const char *argv[])
 
     if(fid < 0) {
 	error_msg("unable to open file \"%s\"\n", fname);
-	HDfree(fname);
+	if(fname) HDfree(fname);
+	if(fapl >= 0) H5Pclose(fapl);
 	leave(EXIT_FAILURE);
     } 
 
@@ -909,6 +916,12 @@ main(int argc, const char *argv[])
 	HDfree(g_listv);
     }
     if(g_dup_fields) HDfree(g_dup_fields);
+
+    /* Close the file access property list */
+    if(fapl >= 0 && H5Pclose(fapl) < 0) {
+	error_msg("unable to close file access property list\n");
+	h5tools_setstatus(EXIT_FAILURE);
+    }
 
     /* Close the file */
     if(H5Fclose(fid) < 0) {

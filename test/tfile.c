@@ -3475,15 +3475,23 @@ static void
 test_swmr_write(void)
 {
     hid_t fid, fid2;    /* File IDs */
+    hid_t fapl;		/* File access property list id */
     unsigned intent;    /* File access flags */
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing H5F_ACC_SWMR_WRITE access flag\n"));
 
+    /* Create a copy of the file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set to use the latest library format */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     /* Create file, without SWMR_WRITE flag */
-    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Get the intent & check that the SWMR_WRITE flag is not set */
@@ -3493,7 +3501,7 @@ test_swmr_write(void)
 
     /* Try to reopen file w/SWMR_WRITE flag */
     H5E_BEGIN_TRY {
-        fid2 = H5Fopen(FILE1, (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE), H5P_DEFAULT);
+        fid2 = H5Fopen(FILE1, (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE), fapl);
     } H5E_END_TRY;
     VERIFY(fid2, FAIL, "H5Fopen");
 
@@ -3503,7 +3511,7 @@ test_swmr_write(void)
 
 
     /* Create file, with  SWMR_WRITE flag */
-    fid = H5Fcreate(FILE1, (H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE), H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE1, (H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE), H5P_DEFAULT, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Get the intent & check that the SWMR_WRITE flag is set */
@@ -3513,12 +3521,12 @@ test_swmr_write(void)
 
     /* Try to reopen file w/o SWMR_WRITE flag */
     H5E_BEGIN_TRY {
-        fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+        fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl);
     } H5E_END_TRY;
     VERIFY(fid2, FAIL, "H5Fopen");
 
     /* Reopen file, with read-write and SWMR_WRITE access */
-    fid2 = H5Fopen(FILE1, (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE), H5P_DEFAULT);
+    fid2 = H5Fopen(FILE1, (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE), fapl);
     CHECK(fid2, FAIL, "H5Fopen");
 
     /* Get the intent & check that the SWMR_WRITE flag is set */
@@ -3537,13 +3545,13 @@ test_swmr_write(void)
 
     /* Try to reopen file read-only w/SWMR_WRITE flag */
     H5E_BEGIN_TRY {
-        fid = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE), H5P_DEFAULT);
+        fid = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE), fapl);
     } H5E_END_TRY;
     VERIFY(fid, FAIL, "H5Fopen");
 
 
     /* Reopen file, with read-write and SWMR_WRITE access */
-    fid = H5Fopen(FILE1, (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE), H5P_DEFAULT);
+    fid = H5Fopen(FILE1, (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE), fapl);
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Get the intent & check that the SWMR_WRITE flag is set */
@@ -3553,12 +3561,12 @@ test_swmr_write(void)
 
     /* Try to reopen file w/o SWMR_WRITE flag */
     H5E_BEGIN_TRY {
-        fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+        fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl);
     } H5E_END_TRY;
     VERIFY(fid2, FAIL, "H5Fopen");
 
     /* Reopen file, with read-write and SWMR_WRITE access */
-    fid2 = H5Fopen(FILE1, (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE), H5P_DEFAULT);
+    fid2 = H5Fopen(FILE1, (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE), fapl);
     CHECK(fid2, FAIL, "H5Fopen");
 
     /* Get the intent & check that the SWMR_WRITE flag is set */
@@ -3573,6 +3581,11 @@ test_swmr_write(void)
     /* Close file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close the property list */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
 } /* end test_swmr_write() */
 
 /****************************************************************
