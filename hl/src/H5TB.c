@@ -15,7 +15,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "H5private.h"
+
 #include "H5LTprivate.h"
 #include "H5TBprivate.h"
 
@@ -196,7 +196,7 @@ herr_t H5TBmake_table( const char *table_title,
         if (H5LTset_attribute_string( loc_id, dset_name, attr_name, member_name ) < 0)
             goto out;
 
-        free( member_name );
+        HDfree( member_name );
 
     }
 
@@ -234,7 +234,7 @@ herr_t H5TBmake_table( const char *table_title,
             if (H5Aclose(attr_id) < 0)
                 goto out;
 
-            free(member_name);
+            HDfree(member_name);
         }
 
         /* terminate access to the data space. */
@@ -570,7 +570,7 @@ herr_t H5TBwrite_fields_name( hid_t loc_id,
                 goto out;
         }
 
-        free( member_name );
+        HDfree( member_name );
 
     }
 
@@ -734,7 +734,7 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
         if(H5Tclose( nmtype_id ) < 0)
             goto out;
 
-        free( member_name );
+        HDfree( member_name );
 
     }
 
@@ -1059,7 +1059,7 @@ herr_t H5TBread_fields_name( hid_t loc_id,
                 goto out;
             j++;
         }
-        free( member_name );
+        HDfree( member_name );
     }
 
     /* get the dataspace handle */
@@ -1221,7 +1221,7 @@ herr_t H5TBread_fields_index( hid_t loc_id,
         if (H5Tclose( nmtype_id ) < 0)
             goto out;
 
-        free( member_name );
+        HDfree( member_name );
     }
 
     /* get the dataspace handle */
@@ -1328,9 +1328,9 @@ herr_t H5TBdelete_record( hid_t loc_id,
     if (H5TBget_table_info ( loc_id, dset_name, &nfields, &ntotal_records ) < 0)
         goto out;
 
-    if(NULL == (src_offset = (size_t *)malloc((size_t)nfields * sizeof(size_t))))
+    if(NULL == (src_offset = (size_t *)HDmalloc((size_t)nfields * sizeof(size_t))))
         goto out;
-    if(NULL == (src_sizes = (size_t *)malloc((size_t)nfields * sizeof(size_t))))
+    if(NULL == (src_sizes = (size_t *)HDmalloc((size_t)nfields * sizeof(size_t))))
         goto out;
 
     /* get field info */
@@ -1351,7 +1351,7 @@ herr_t H5TBdelete_record( hid_t loc_id,
 
     if ( read_nrecords )
     {
-        if(NULL == (tmp_buf = (unsigned char *)calloc((size_t) read_nrecords, src_size )))
+        if(NULL == (tmp_buf = (unsigned char *)HDcalloc((size_t) read_nrecords, src_size )))
             goto out;
 
         /* read the records after the deleted one(s) */
@@ -1415,22 +1415,22 @@ herr_t H5TBdelete_record( hid_t loc_id,
         goto out;
 
     if(tmp_buf)
-        free(tmp_buf);
+        HDfree(tmp_buf);
     if(src_offset)
-        free(src_offset);
+        HDfree(src_offset);
     if(src_sizes)
-        free(src_sizes);
+        HDfree(src_sizes);
 
     return 0;
 
     /* error zone */
 out:
     if(tmp_buf)
-        free(tmp_buf);
+        HDfree(tmp_buf);
     if(src_offset)
-        free(src_offset);
+        HDfree(src_offset);
     if(src_sizes)
-        free(src_sizes);
+        HDfree(src_sizes);
     H5E_BEGIN_TRY
     {
         H5Tclose(mem_type_id);
@@ -1509,7 +1509,7 @@ herr_t H5TBinsert_record( hid_t loc_id,
         goto out;
 
     read_nrecords = ntotal_records - start;
-    tmp_buf = (unsigned char *)calloc((size_t) read_nrecords, type_size);
+    tmp_buf = (unsigned char *)HDcalloc((size_t) read_nrecords, type_size);
 
     /* read the records after the inserted one(s) */
     if (H5TBread_records( loc_id, dset_name, start, read_nrecords, type_size, field_offset, field_sizes, tmp_buf ) < 0)
@@ -1585,7 +1585,7 @@ herr_t H5TBinsert_record( hid_t loc_id,
     if (H5Dclose( did ) < 0)
         return -1;
 
-    free( tmp_buf );
+    HDfree( tmp_buf );
 
     return 0;
 
@@ -1652,9 +1652,9 @@ herr_t H5TBadd_records_from( hid_t loc_id,
     if (H5TBget_table_info ( loc_id, dset_name1, &nfields, &ntotal_records ) < 0)
         goto out;
 
-    if(NULL == (src_offset = (size_t *)malloc((size_t)nfields * sizeof(size_t))))
+    if(NULL == (src_offset = (size_t *)HDmalloc((size_t)nfields * sizeof(size_t))))
         goto out;
-    if(NULL == (src_sizes  = (size_t *)malloc((size_t)nfields * sizeof(size_t))))
+    if(NULL == (src_sizes  = (size_t *)HDmalloc((size_t)nfields * sizeof(size_t))))
         goto out;
 
     /* get field info */
@@ -1682,7 +1682,7 @@ herr_t H5TBadd_records_from( hid_t loc_id,
     if (( type_size1 = H5Tget_size( tid_1 )) == 0 )
         goto out;
 
-    if(NULL == (tmp_buf = (unsigned char *)calloc((size_t)nrecords, type_size1 )))
+    if(NULL == (tmp_buf = (unsigned char *)HDcalloc((size_t)nrecords, type_size1 )))
         goto out;
 
     /* define a hyperslab in the dataset of the size of the records */
@@ -1721,22 +1721,22 @@ herr_t H5TBadd_records_from( hid_t loc_id,
         goto out;
 
     if(tmp_buf)
-        free(tmp_buf);
+        HDfree(tmp_buf);
     if(src_offset)
-        free(src_offset);
+        HDfree(src_offset);
     if(src_sizes)
-        free(src_sizes);
+        HDfree(src_sizes);
 
     return 0;
 
     /* error zone */
 out:
     if(tmp_buf)
-        free(tmp_buf);
+        HDfree(tmp_buf);
     if(src_offset)
-        free(src_offset);
+        HDfree(src_offset);
     if(src_sizes)
-        free(src_sizes);
+        HDfree(src_sizes);
     H5E_BEGIN_TRY
     {
         H5Dclose(did_1);
@@ -1998,7 +1998,7 @@ herr_t H5TBcombine_tables(hid_t loc_id1,
     did_1 = H5I_BADID;
 
     /* Release resources. */
-    free(tmp_buf);
+    HDfree(tmp_buf);
     tmp_buf = NULL;
 
     /*-------------------------------------------------------------------------
@@ -2100,13 +2100,13 @@ herr_t H5TBcombine_tables(hid_t loc_id1,
 
 out:
     if(tmp_buf)
-        free(tmp_buf);
+        HDfree(tmp_buf);
     if(tmp_fill_buf)
-        free(tmp_fill_buf);
+        HDfree(tmp_fill_buf);
     if(src_offset)
-        free(src_offset);
+        HDfree(src_offset);
     if(src_sizes)
-        free(src_sizes);
+        HDfree(src_sizes);
 
     H5E_BEGIN_TRY {
         if(member_type_id > 0)
@@ -2254,7 +2254,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
         goto out;
 
     /* alloc fill value attribute buffer */
-    tmp_fill_buf = (unsigned char *)malloc(total_size );
+    tmp_fill_buf = (unsigned char *)HDmalloc(total_size );
 
     /* get the fill value attributes */
     if ((H5TBAget_fill( loc_id, dset_name, did_1, tmp_fill_buf )) < 0)
@@ -2314,7 +2314,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
 
         curr_offset += member_size;
 
-        free( member_name );
+        HDfree( member_name );
 
         /* close the member type */
         if(H5Tclose( member_type_id ) < 0)
@@ -2349,7 +2349,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
     *-------------------------------------------------------------------------
     */
 
-    tmp_buf = (unsigned char *)calloc((size_t)nrecords, (size_t)total_size);
+    tmp_buf = (unsigned char *)HDcalloc((size_t)nrecords, (size_t)total_size);
 
     /* define a hyperslab in the dataset of the size of the records */
     offset[0] = 0;
@@ -2557,8 +2557,8 @@ herr_t H5TBinsert_field( hid_t loc_id,
         goto out;
 
     /* release resources. */
-    free ( tmp_buf );
-    free ( tmp_fill_buf );
+    HDfree ( tmp_buf );
+    HDfree ( tmp_fill_buf );
 
     return 0;
 
@@ -2694,13 +2694,13 @@ herr_t H5TBdelete_field( hid_t loc_id,
             if (H5Tclose( member_type_id ) < 0)
                 goto out;
 
-            free( member_name );
+            HDfree( member_name );
 
             break;
 
         }
 
-        free( member_name );
+        HDfree( member_name );
 
     } /* i */
 
@@ -2722,7 +2722,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
     curr_offset = 0;
 
     /* alloc fill value attribute buffer */
-    tmp_fill_buf = (unsigned char *)malloc((size_t) type_size2 );
+    tmp_fill_buf = (unsigned char *)HDmalloc((size_t) type_size2 );
 
     /*-------------------------------------------------------------------------
     * get attributes from previous table in the process
@@ -2742,7 +2742,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
         /* we want to skip the field to delete */
         if (H5TB_find_field( member_name, field_name ) > 0 )
         {
-            free( member_name );
+            HDfree( member_name );
             continue;
         }
 
@@ -2780,7 +2780,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
 
         curr_offset += member_size;
 
-        free(member_name);
+        HDfree(member_name);
 
         /* close the member type */
         if (H5Tclose(member_type_id) < 0)
@@ -2821,7 +2821,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
         /* skip the field to delete */
         if (H5TB_find_field(member_name, field_name) > 0)
         {
-            free(member_name);
+            HDfree(member_name);
             continue;
         }
 
@@ -2840,7 +2840,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
         if (H5Tinsert( read_type_id, member_name, (size_t)0, member_type_id ) < 0)
             goto out;
 
-        tmp_buf = (unsigned char *)calloc((size_t) nrecords, member_size );
+        tmp_buf = (unsigned char *)HDcalloc((size_t) nrecords, member_size );
 
         /* read */
         if (H5Dread( did_1, read_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_buf ) < 0)
@@ -2881,8 +2881,8 @@ herr_t H5TBdelete_field( hid_t loc_id,
             goto out;
 
         /* release resources. */
-        free( member_name );
-        free ( tmp_buf );
+        HDfree( member_name );
+        HDfree ( tmp_buf );
 
     } /* i */
 
@@ -3007,7 +3007,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
         goto out;
 
     /* Release resources. */
-    free ( tmp_fill_buf );
+    HDfree ( tmp_fill_buf );
 
     return 0;
 
@@ -3101,7 +3101,7 @@ htri_t H5TBAget_fill(hid_t loc_id,
     if (H5TBget_table_info ( loc_id, dset_name, &nfields, &nrecords ) < 0)
         return -1;
 
-    src_offset = (size_t *)malloc((size_t)nfields * sizeof(size_t));
+    src_offset = (size_t *)HDmalloc((size_t)nfields * sizeof(size_t));
 
     if (src_offset == NULL )
         return -1;
@@ -3130,12 +3130,12 @@ htri_t H5TBAget_fill(hid_t loc_id,
 
     }
 
-    free( src_offset );
+    HDfree( src_offset );
 
     return has_fill;
 
 out:
-    free( src_offset );
+    HDfree( src_offset );
     return -1;
 
 }
@@ -3306,7 +3306,7 @@ herr_t H5TBget_field_info( hid_t loc_id,
 
             member_name = H5Tget_member_name(tid, (unsigned)i);
             strcpy(field_names[i], member_name);
-            free(member_name);
+            HDfree(member_name);
         } /* end if */
 
         /* get the member type */
@@ -3459,7 +3459,7 @@ herr_t H5TB_attach_attributes( const char *table_title,
         if (H5LTset_attribute_string( loc_id, dset_name, attr_name, member_name ) < 0)
             goto out;
 
-        free( member_name );
+        HDfree( member_name );
 
     }
 
@@ -3508,14 +3508,14 @@ hid_t H5TB_create_type(hid_t loc_id,
     if (H5TBget_table_info(loc_id,dset_name,&nfields,NULL) < 0)
         return -1;
 
-    if ((fnames = (char**) malloc(sizeof(char*)*(size_t)nfields))==NULL)
+    if ((fnames = (char**) HDmalloc(sizeof(char*)*(size_t)nfields))==NULL)
         return -1;
 
     for ( i = 0; i < nfields; i++)
     {
-        if ((fnames[i] = (char*) malloc(sizeof(char)*HLTB_MAX_FIELD_LEN))==NULL)
+        if ((fnames[i] = (char*) HDmalloc(sizeof(char)*HLTB_MAX_FIELD_LEN))==NULL)
         {
-            free(fnames);
+            HDfree(fnames);
             return -1;
         }
     }
@@ -3551,9 +3551,9 @@ hid_t H5TB_create_type(hid_t loc_id,
 
     for ( i=0; i<nfields; i++)
     {
-        free (fnames[i]);
+        HDfree (fnames[i]);
     }
-    free (fnames);
+    HDfree (fnames);
 
     return mem_type_id;
 
@@ -3567,10 +3567,10 @@ out:
     for ( i=0; i<nfields; i++)
     {
         if (fnames[i])
-            free (fnames[i]);
+            HDfree (fnames[i]);
     }
     if (fnames)
-        free (fnames);
+        HDfree (fnames);
     return -1;
 
 }

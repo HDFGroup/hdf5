@@ -174,7 +174,7 @@ void parse_command_line(int argc,
             options->exclude_path = 1;
             
             /* create linked list of excluding objects */
-            if( (exclude_node = (struct exclude_path_list*) malloc(sizeof(struct exclude_path_list))) == NULL)
+            if( (exclude_node = (struct exclude_path_list*) HDmalloc(sizeof(struct exclude_path_list))) == NULL)
             {
                 printf("Error: lack of memory!\n");
                 h5diff_exit(EXIT_FAILURE);

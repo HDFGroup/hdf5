@@ -145,7 +145,7 @@ void *tts_cancel_thread(void UNUSED *arg)
     assert(dataset >= 0);
 
     /* If thread is cancelled, make cleanup call */
-    cleanup_structure = (cancel_cleanup_t*)malloc(sizeof(cancel_cleanup_t));
+    cleanup_structure = (cancel_cleanup_t*)HDmalloc(sizeof(cancel_cleanup_t));
     cleanup_structure->dataset = dataset;
     cleanup_structure->datatype = datatype;
     cleanup_structure->dataspace = dataspace;
@@ -156,7 +156,7 @@ void *tts_cancel_thread(void UNUSED *arg)
     ret=H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
     assert(ret>=0);
 
-    buffer = malloc(sizeof(int));
+    buffer = HDmalloc(sizeof(int));
     ret=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
     assert(ret>=0);
     ret=H5Diterate(buffer, H5T_NATIVE_INT, dataspace, tts_cancel_callback, &dataset);

@@ -21,7 +21,7 @@
 namespace H5 {
 #endif
 
-// class for file access properties
+//! Class FileCreatPropList represents the HDF5 file create property list.
 class H5_DLLCPP FileCreatPropList : public PropList {
    public:
 	// Default file creation property list.

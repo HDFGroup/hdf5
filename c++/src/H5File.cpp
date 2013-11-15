@@ -163,7 +163,7 @@ H5File::H5File(const H5File& original) : H5Location(original)
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5File::isHdf5
+// Function:	H5File::isHdf5 (static)
 ///\brief	Determines whether a file in HDF5 format. (Static)
 ///\param	name - IN: Name of the file
 ///\return	true if the file is in HDF5 format, and false, otherwise
@@ -186,7 +186,7 @@ bool H5File::isHdf5(const char* name)
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5File::isHdf5
+// Function:	H5File::isHdf5 (static)
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It takes an \c H5std_string for \a name. (Static)
 ///\param	name - IN: Name of the file - \c H5std_string
@@ -271,19 +271,6 @@ void H5File::reOpen()
    id = H5Freopen( id );
    if( id < 0 ) // Raise exception when H5Freopen returns a neg value
       throw FileIException("H5File::reOpen", "H5Freopen failed");
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5File::reopen
-// Purpose:	Reopens this file.
-// Exception	H5::FileIException
-// Description
-//		This function is replaced by the above function reOpen.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-void H5File::reopen()
-{
-   H5File::reOpen();
 }
 
 //--------------------------------------------------------------------------
@@ -536,6 +523,19 @@ hid_t H5File::getId() const
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:	H5File::reopen
+// Purpose:	Reopens this file.
+// Exception	H5::FileIException
+// Description
+//		This function is replaced by the above function reOpen.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void H5File::reopen()
+{
+   H5File::reOpen();
+}
+
 //--------------------------------------------------------------------------
 // Function:    H5File::p_setId (protected)
 ///\brief       Sets the identifier of this object to a new value.

@@ -6,7 +6,7 @@ PROJECT (HDF5_HL_EXAMPLES )
 #-----------------------------------------------------------------------------
 SET (examples
     ex_lite1
-    ex_lite2
+    ex_lite2    #ex_lite2 PROPERTIES DEPENDS ex_lite1)
     ex_lite3
     ptExampleFL
     ex_image1

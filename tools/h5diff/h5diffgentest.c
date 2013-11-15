@@ -4475,7 +4475,7 @@ static void test_comps_vlen (const char * fname, const char *dset, const char *a
     for(i=0; i<SDIM_DSET; i++)
     {
         wdata[i].i1 = i;
-        wdata[i].vl.p = malloc((i+1)*sizeof(cmpd2_t));
+        wdata[i].vl.p = HDmalloc((i+1)*sizeof(cmpd2_t));
         wdata[i].vl.len = i+1;
         for(j=0; j<(i+1); j++)
         {
@@ -4600,7 +4600,7 @@ static void test_comps_array_vlen (const char * fname, const char *dset,const ch
         for(j=0; j < SDIM_CMPD_ARRAY; j++) 
         {
             wdata[i].cmpd2[j].i2 = j*10;
-            wdata[i].cmpd2[j].vl.p = malloc((j+1)*sizeof(cmpd3_t));
+            wdata[i].cmpd2[j].vl.p = HDmalloc((j+1)*sizeof(cmpd3_t));
             wdata[i].cmpd2[j].vl.len = j+1;
             for(k=0; k<(j+1); k++) 
             {
@@ -4744,7 +4744,7 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
     {
         /* compound 1 data */
         wdata[i].i1 = i;
-        wdata[i].vl.p = malloc((i+1)*sizeof(cmpd2_t));
+        wdata[i].vl.p = HDmalloc((i+1)*sizeof(cmpd2_t));
         wdata[i].vl.len = i+1;
         for(j=0; j<(i+1); j++)
         {
@@ -5456,10 +5456,10 @@ void write_attr_in(hid_t loc_id,
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len = 1;
-    buf5[0].p = malloc( 1 * sizeof(int));
+    buf5[0].p = HDmalloc( 1 * sizeof(int));
     ((int *)buf5[0].p)[0]=1;
     buf5[1].len = 2;
-    buf5[1].p = malloc( 2 * sizeof(int));
+    buf5[1].p = HDmalloc( 2 * sizeof(int));
     ((int *)buf5[1].p)[0]=2;
     ((int *)buf5[1].p)[1]=3;
 
@@ -5743,7 +5743,7 @@ void write_attr_in(hid_t loc_id,
     n=0;
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 2; j++) {
-            buf52[i][j].p = malloc((i + 1) * sizeof(int));
+            buf52[i][j].p = HDmalloc((i + 1) * sizeof(int));
             buf52[i][j].len = i + 1;
             for (l = 0; l < i + 1; l++)
                 if (make_diffs)((int *)buf52[i][j].p)[l] = 0;
@@ -6159,7 +6159,7 @@ void write_attr_in(hid_t loc_id,
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             for (k = 0; k < 2; k++) {
-                buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
+                buf53[i][j][k].p = HDmalloc((i + 1) * sizeof(int));
                 buf53[i][j][k].len = i + 1;
                 for (l = 0; l < i + 1; l++)
                     if (make_diffs)((int *)buf53[i][j][k].p)[l] = 0;
@@ -6490,10 +6490,10 @@ void write_dset_in(hid_t loc_id,
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len = 1;
-    buf5[0].p = malloc( 1 * sizeof(int));
+    buf5[0].p = HDmalloc( 1 * sizeof(int));
     ((int *)buf5[0].p)[0]=1;
     buf5[1].len = 2;
-    buf5[1].p = malloc( 2 * sizeof(int));
+    buf5[1].p = HDmalloc( 2 * sizeof(int));
     ((int *)buf5[1].p)[0]=2;
     ((int *)buf5[1].p)[1]=3;
 
@@ -6703,7 +6703,7 @@ void write_dset_in(hid_t loc_id,
     {
         for(j = 0; j < 2; j++)
         {
-            buf52[i][j].p = malloc((i + 1) * sizeof(int));
+            buf52[i][j].p = HDmalloc((i + 1) * sizeof(int));
             buf52[i][j].len = i + 1;
             for(l = 0; l < i + 1; l++)
             {
@@ -6916,7 +6916,7 @@ void write_dset_in(hid_t loc_id,
         {
             for(k = 0; k < 2; k++)
             {
-                buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
+                buf53[i][j][k].p = HDmalloc((i + 1) * sizeof(int));
                 buf53[i][j][k].len = i + 1;
                 for(l = 0; l < i + 1; l++)
                 {

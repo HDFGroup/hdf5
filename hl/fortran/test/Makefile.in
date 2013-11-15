@@ -436,7 +436,7 @@ TRACE = perl $(top_srcdir)/bin/trace
 # *.clog are from the MPE option.
 
 # Temporary files.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog dsetf[1-4].h5 f1img.h5 \
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog dsetf[1-5].h5 f1img.h5 \
 	f1tab.h5 tstds.h5
 
 # Our main target, the test programs

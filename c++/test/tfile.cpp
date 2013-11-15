@@ -108,16 +108,10 @@ static void test_file_create()
 	// Create file FILE1
 	file1 = new H5File (FILE1, H5F_ACC_EXCL);
 
-	// try to create the same file with H5F_ACC_TRUNC. This should fail
-	// because file1 is the same file and is currently open.
-
-/* These three are failing with new/PGI compiler, HDFFV-8067
-   The line "H5File file2 (FILE1, H5F_ACC_TRUNC);  // should throw E"
-   Results in this message:
-       "terminate called without an active exception
-        Command terminated by signal 6"
-   Commenting it out until it's fixed  LK 20120626. 
-*/
+	// Try to create the same file with H5F_ACC_TRUNC. This should fail
+	// because file1 is the same file and is currently open. Skip it on
+	// OpenVMS because it creates another version of the file.
+#ifndef H5_HAVE_FILE_VERSIONS
 	try {
 	    H5File file2 (FILE1, H5F_ACC_TRUNC);  // should throw E
 
@@ -126,6 +120,7 @@ static void test_file_create()
 	}
 	catch( FileIException E ) // catch truncating existing file
 	{} // do nothing, FAIL expected
+#endif // H5_HAVE_FILE_VERSIONS
 
 	// Close file1
 	delete file1;
@@ -141,11 +136,14 @@ static void test_file_create()
 	}
 	catch( FileIException E ) // catching creating existing file
 	{} // do nothing, FAIL expected
+
     	// Test create with H5F_ACC_TRUNC. This will truncate the existing file.
 	file1 = new H5File (FILE1, H5F_ACC_TRUNC);
 
-	// Try to truncate first file again. This should fail because file1
-	// is the same file and is currently open.
+	// Try to create first file again. This should fail because file1
+	// is the same file and is currently open. Skip it on OpenVMS because
+	// it creates another version of the file.
+#ifndef H5_HAVE_FILE_VERSIONS
     	try {
 	    H5File file2 (FILE1, H5F_ACC_TRUNC);   // should throw E
 
@@ -156,7 +154,7 @@ static void test_file_create()
 	{} // do nothing, FAIL expected
 
      	// Try with H5F_ACC_EXCL. This should fail too because the file already
-     	// exists.
+     	// exists. Skip it on OpenVMS because it creates another version of the file.
     	try {
 	    H5File file3 (FILE1, H5F_ACC_EXCL);  // should throw E
 
@@ -165,6 +163,7 @@ static void test_file_create()
     	}
 	catch( FileIException E ) // catching H5F_ACC_EXCL on existing file
 	{} // do nothing, FAIL expected
+#endif /*H5_HAVE_FILE_VERSIONS*/
 
     	// Get the file-creation template
 	FileCreatPropList tmpl1 = file1->getCreatePlist();
@@ -387,7 +386,7 @@ static void test_file_size()
 
 	// Check if it's reasonable.  It's 0 now.
 	if (free_space < 0 || free_space > 4*KB)
-            issue_fail_msg("test_file_size()", __LINE__, __FILE__, "getFreeSpace returned unreasonable value");
+	    issue_fail_msg("test_file_size()", __LINE__, __FILE__, "getFreeSpace returned unreasonable value");
 
 	PASSED();
     }   // end of try block
@@ -433,54 +432,54 @@ typedef struct s1_t {
 
 static void test_file_name()
 {
-    // Output message about test being performed
+    // Output message about test being performed.
     SUBTEST("File Name");
 
     H5std_string file_name;
     try {
-        // Create a file using default properties
+        // Create a file using default properties.
 	H5File file4(FILE4, H5F_ACC_TRUNC);
 
-        // Get file name from the file instance
+        // Get file name from the file instance.
         file_name = file4.getFileName();
 	verify_val(file_name, FILE4, "H5File::getFileName", __LINE__, __FILE__);
 
-	// Create a group in the root group
+	// Create a group in the root group.
 	Group group(file4.createGroup(GROUPNAME, 0));
 
-	// Get and verify file name via a group
+	// Get and verify file name via a group.
 	file_name = group.getFileName();
 	verify_val(file_name, FILE4, "Group::getFileName", __LINE__, __FILE__);
 
-	// Create the data space
+	// Create the data space.
 	hsize_t dims[RANK] = {NX, NY};
 	DataSpace space(RANK, dims);
 
-	// Create a new dataset
+	// Create a new dataset.
 	DataSet dataset(file4.createDataSet (DSETNAME, PredType::NATIVE_INT, space));
 
-	// Get and verify file name via a dataset
+	// Get and verify file name via a dataset.
 	file_name = dataset.getFileName();
 	verify_val(file_name, FILE4, "DataSet::getFileName", __LINE__, __FILE__);
 
-	// Create an attribute for the dataset
+	// Create an attribute for the dataset.
 	Attribute attr(dataset.createAttribute(DATTRNAME, PredType::NATIVE_INT, space));
 
-	// Get and verify file name
+	// Get and verify file name via an attribute.
 	file_name = attr.getFileName();
 	verify_val(file_name, FILE4, "Attribute::getFileName", __LINE__, __FILE__);
 
-	// Create a compound datatype
+	// Create a compound datatype.
 	CompType comp_type (sizeof(s1_t));
 
-	// Insert fields
+	// Insert fields.
 	comp_type.insertMember("a", HOFFSET(s1_t, a), PredType::NATIVE_INT);
 	comp_type.insertMember("b", HOFFSET(s1_t, b), PredType::NATIVE_FLOAT);
 
-	// Save it on file
+	// Save it on file.
 	comp_type.commit(file4, DTYPENAME);
 
-	// Get and verify file name
+	// Get and verify file name via a committed datatype.
 	comp_type.getFileName();
 	verify_val(file_name, FILE4, "CompType::getFileName", __LINE__, __FILE__);
 	PASSED();

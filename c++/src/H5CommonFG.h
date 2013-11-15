@@ -14,10 +14,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// CommonFG is a protocol class.  Its existence is simply to provide the
-// common services that are provided by H5File and Group.  The file or
-// group in the context of this class is referred to as 'location'.
-
 #ifndef __CommonFG_H
 #define __CommonFG_H
 
@@ -29,6 +25,12 @@ class Group;
 class H5File;
 class ArrayType;
 class VarLenType;
+
+/*! \class CommonFG
+    \brief \i CommonFG is an abstract base class of H5File and H5Group.
+
+    It provides common operations of H5File and H5Group.
+*/
 class H5_DLLCPP CommonFG {
    public:
 	// Creates a new group at this location which can be a file

@@ -19,10 +19,6 @@
 
 #include "H5Classes.h"		// constains forward class declarations
 
-// H5Location is an abstract class.  It provides a collection of wrappers
-// of C functions which take location IDs.  Most of these were in H5Object
-// but are now moved here for H5File's access.
-
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
@@ -34,15 +30,23 @@ typedef void (*attr_operator_t)( H5Location& loc/*in*/,
                                  const H5std_string attr_name/*in*/,
                                  void *operator_data/*in,out*/);
 
-class UserData4Aiterate { // user data for attribute iteration
+//! User data for attribute iteration
+class UserData4Aiterate {
    public:
 	attr_operator_t op;
 	void* opData;
 	H5Location* location;
 };
 
-// An H5Location can be a file, group, dataset, or committed datatype.
+/*! \class H5Location
+    \brief H5Location is an abstract base class, added in version 1.8.12.
 
+    It provides a collection of wrappers for the C functions that take a
+    location identifier to specify the HDF5 object.  The location identifier
+    can be either file, group, dataset, or named datatype.
+*/
+// Most of these methods were in H5Object but are now moved here because
+// a location can be a file, group, dataset, or named datatype. -BMR, 2013-10-1
 class H5_DLLCPP H5Location : public IdComponent {
    public:
 	// Creates an attribute for the specified object at this location
@@ -112,7 +116,7 @@ class H5_DLLCPP H5Location : public IdComponent {
 	void reference(void* ref, const char* name, 
 			H5R_type_t ref_type = H5R_OBJECT) const;
 	void reference(void* ref, const H5std_string& name,
-			H5R_type_t ref_type = H5R_DATASET_REGION) const;
+			H5R_type_t ref_type = H5R_OBJECT) const;
 	void reference(void* ref, const char* name, const DataSpace& dataspace,
 			H5R_type_t ref_type = H5R_DATASET_REGION) const;
 	void reference(void* ref, const H5std_string& name, const DataSpace& dataspace,
@@ -130,8 +134,7 @@ class H5_DLLCPP H5Location : public IdComponent {
 	virtual hid_t getId() const = 0;
 
    protected:
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Default constructor,
+	// Default constructor
 	H5Location();
 
 	// Creates a copy of an existing object giving the location id.
@@ -140,6 +143,7 @@ class H5_DLLCPP H5Location : public IdComponent {
 	// Copy constructor.
 	H5Location(const H5Location& original);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Creates a reference to an HDF5 object or a dataset region.
 	void p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const;
 
@@ -154,10 +158,10 @@ class H5_DLLCPP H5Location : public IdComponent {
 	// Retrieves the type of object that an object reference points to.
 	H5O_type_t p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const;
 
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
 	// Noop destructor.
 	virtual ~H5Location();
-
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; /* end class H5Location */
 

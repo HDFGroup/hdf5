@@ -255,13 +255,13 @@ herr_t test_cmp_scalename(hid_t fid, hid_t did, const char *name, const char *sc
     if((dsid = H5Dopen2(fid, name, H5P_DEFAULT)) >= 0) {
         if(H5DSis_attached(did, dsid, idx) == 1) {
             if((name_len=H5DSget_scale_name(dsid,NULL,(size_t)0)) > 0) {
-                name_out = (char*)malloc((size_t)name_len * sizeof (char));
+                name_out = (char*)HDmalloc((size_t)name_len * sizeof (char));
                 if(name_out != NULL) {
                     if(H5DSget_scale_name(dsid, name_out, (size_t)name_len) >= 0) {
                         if(strcmp(scalename,name_out)==0) {
                             ret_value = SUCCEED;
                         }
-                        free(name_out);
+                        HDfree(name_out);
                         name_out=NULL;
                     }
                 }
