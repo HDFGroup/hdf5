@@ -47,12 +47,15 @@ ADD_TEST (
         test_ds7.h5
         test_ds8.h5
         test_ds9.h5
+        test_ds10.h5
         test_dectris.h5
         test_image1.h5
         test_image2.h5
         test_image3.h5
         test_lite1.h5
         test_lite2.h5
+        test_lite3.h5
+        test_lite4.h5
         test_packet_compress.h5
         test_packet_table.h5
         test_table.h5

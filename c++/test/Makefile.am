@@ -51,5 +51,8 @@ mostlyclean-local:
 	@if test -d ii_files; then                                       \
 	  $(RM) -rf ii_files;                                           \
 	fi
+# Temporary files
+CHECK_CLEANFILES+=tattr_multi.h5 tfattrs.h5 tattr_scalar.h5 tattr_compound.h5 \
+	tattr_dtype.h5 tattr_basic.h5
 
 include $(top_srcdir)/config/conclude.am

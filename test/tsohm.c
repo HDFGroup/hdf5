@@ -3884,7 +3884,7 @@ test_sohm_external_dtype(void)
     CHECK_I(dset1_tid, "H5Dget_type");
 
     /* Allocate space and initialize data */
-    orig = (s1_t*)malloc(NX * NY * sizeof(s1_t));
+    orig = (s1_t*)HDmalloc(NX * NY * sizeof(s1_t));
     for(i=0; i<NX*NY; i++) {
         s_ptr = (s1_t*)orig + i;
         s_ptr->a = i*3 + 1;
@@ -3963,7 +3963,7 @@ test_sohm_external_dtype(void)
     ret = H5Fclose(file2);
     CHECK_I(ret, "H5Fclose");
 
-    free(orig);
+    HDfree(orig);
 }
 
 

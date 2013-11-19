@@ -1044,6 +1044,40 @@ test_get_obj_ids(void)
     H5Fclose(fid);
 
     HDfree(oid_list);
+
+    /* Reopen the file to check whether H5Fget_obj_count and H5Fget_obj_ids still works 
+     * when the file is closed first */ 
+    fid = H5Fopen(FILE7, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open NDSETS datasets under the root group */
+    for(n = 0; n < NDSETS; n++) {
+         sprintf(dname, "dataset%d", n);
+         dset[n] = H5Dopen2(fid, dname, H5P_DEFAULT);
+         CHECK(dset[n], FAIL, "H5Dcreate2");
+    }
+
+    /* Close the file first */
+    H5Fclose(fid);
+
+    /* Get the number of all opened objects */
+    oid_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL);
+    CHECK(oid_count, FAIL, "H5Fget_obj_count");
+    VERIFY(oid_count, NDSETS, "H5Fget_obj_count");
+
+    oid_list = (hid_t *)HDcalloc((size_t)oid_count, sizeof(hid_t));
+    CHECK(oid_list, NULL, "HDcalloc");
+
+    /* Get the list of all opened objects */
+    ret_count = H5Fget_obj_ids(H5F_OBJ_ALL, H5F_OBJ_ALL, (size_t)oid_count, oid_list);
+    CHECK(ret_count, FAIL, "H5Fget_obj_ids");
+    VERIFY(ret_count, NDSETS, "H5Fget_obj_count");
+
+    /* Close all open objects with H5Oclose */
+    for(n = 0; n < oid_count; n++)
+         H5Oclose(oid_list[n]);
+
+    HDfree(oid_list);
 }
 
 /****************************************************************
