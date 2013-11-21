@@ -100,9 +100,9 @@ typedef struct set_t {
 static int
 generate_dset(hid_t fid, const char *dname, int ndims, hsize_t *dims, hsize_t *maxdims, hid_t dtid, void *data)
 {
-    hid_t dcpl;		/* Dataset creation property */
-    hid_t did;		/* Dataset id */
-    hid_t sid;		/* Dataspace id */
+    hid_t dcpl=-1;		/* Dataset creation property */
+    hid_t did=-1;		/* Dataset id */
+    hid_t sid=-1;		/* Dataspace id */
     int i;		/* Local index variable */
     hsize_t chunk_dims[H5S_MAX_RANK];	/* Dimension sizes for chunks */
 
@@ -158,23 +158,31 @@ done:
 int
 main(void)
 {
-    hid_t fid;			/* File id */
-    hsize_t cur_dims[1];	/* Dimension sizes */
-    hsize_t max_dims[1];	/* Maximum dimension sizes */
-    hsize_t cur2_dims[2];	/* Current dimension sizes */
-    hsize_t max2_dims[2];	/* Maximum dimension sizes */
-    hid_t set_tid, esc_set_tid;	/* Compound type id */
-    hid_t sub22_tid;		/* Compound type id */
-    hid_t sub2_tid, esc_sub2_tid;	/* Compound type id */
-    hid_t sub4_tid, esc_sub4_tid;	/* Compound type id */
+    hid_t fid=-1;			/* File id */
+    hid_t fapl=-1;			/* File access property list id */
+    hsize_t cur_dims[1];		/* Dimension sizes */
+    hsize_t max_dims[1];		/* Maximum dimension sizes */
+    hsize_t cur2_dims[2];		/* Current dimension sizes */
+    hsize_t max2_dims[2];		/* Maximum dimension sizes */
+    hid_t set_tid=-1, esc_set_tid=-1;	/* Compound type id */
+    hid_t sub22_tid=-1;			/* Compound type id */
+    hid_t sub2_tid=-1, esc_sub2_tid=-1;	/* Compound type id */
+    hid_t sub4_tid=-1, esc_sub4_tid=-1;	/* Compound type id */
     int one_data[ONE_DIMS0];		/* Buffer for data */
     int two_data[TWO_DIMS0*TWO_DIMS1];	/* Buffer for data */
     set_t one_cbuf[ONE_DIMS0];		/* Buffer for data with compound type */
     set_t two_cbuf[TWO_DIMS0*TWO_DIMS1];	/* Buffer for data with compound type */
-    int i;			/* Local index variable */
+    int i;				/* Local index variable */
 
-    /* Create a file */
-    if((fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    /* Create a copy of file access property list */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        return -1;
+    /* Set to use the latest library format */
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        return -1;
+
+    /* Create a file with the latest format */
+    if((fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	goto done;
 
     /* Initialization for one-dimensional dataset */
@@ -325,6 +333,7 @@ main(void)
     if(H5Tclose(esc_sub2_tid) < 0) goto done;
     if(H5Tclose(esc_sub4_tid) < 0) goto done;
     if(H5Tclose(esc_set_tid) < 0) goto done;
+    if(H5Pclose(fapl) < 0) goto done;
     if(H5Fclose(fid) < 0) goto done;
 
     exit(EXIT_SUCCESS);
@@ -338,6 +347,7 @@ done:
 	H5Tclose(esc_sub2_tid);
 	H5Tclose(esc_sub4_tid);
 	H5Tclose(esc_set_tid);
+	H5Pclose(fapl);
 	H5Fclose(fid);
     H5E_END_TRY
 

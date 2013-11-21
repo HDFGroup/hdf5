@@ -17,7 +17,7 @@
 #
 H5WATCH=h5watch               	# The tool name
 H5WATCH_BIN=`pwd`/$H5WATCH    	# The path of H5WATCH
-EXTEND_DSET=extend_dset 	# Helper to extend the dataset when watching
+EXTEND_DSET=extend_dset 	# Routine to extend the dataset when watching
 EXTEND_BIN=`pwd`/$EXTEND_DSET 	# The path of EXTEND_DSET
 #
 EXIT_SUCCESS=0
@@ -25,13 +25,16 @@ EXIT_FAILURE=1
 #
 GEN_TEST=h5watchgentest	      	# Generate HDF5 file with various datasets
 GEN_TEST_BIN=`pwd`/$GEN_TEST 	# Path of the binary GEN_TEST
+WATCHFILE=`pwd`/WATCH.h5        # The HDF5 file generated to test h5watch
+TESTFILE=TEST.h5                # The temporary file (a copy of WATCH.h5) used by tests
 #
-
-CP='cp'
+# These 3 defines should be the same as the defines in ./extend_dset.c
+WRITER_MESSAGE=writer_message   # The message file created by the "extend" process
+READER_MESSAGE=reader_message   # The message file created by the "watch" process
+MESSAGE_TIMEOUT=300             # Message timeout length in secs
+#
 CMP='cmp -s'
 DIFF='diff -c'
-KILL='kill'
-SLEEP='sleep'
 NLINES=20			# Max. lines of output to display if test fails
 #
 # Mac OS: just to make sure echo "backslash backslash" behaves properly
@@ -40,7 +43,7 @@ if test `uname -s` = 'Darwin'; then
 else
     ECHO='echo'
 fi
-
+#
 # Global variables
 nerrors=0
 verbose=yes
@@ -122,111 +125,101 @@ TOOLTEST() {
 	rm -f $actual $actual_err
     fi
 }
-
 #
-# TEST_WATCH(): TEST_WATCH $1 $2 $3 $4 $5 ...
-# 
+#
+#
+# TEST_WATCH():
+#
 # Arguments:
-#	$1 -- number of objects to watch and to extend
-#	$2 -- the specified file to watch and to extend 
-#	      (filename varies with $1 suffix)
-#	$3 -- the specified dataset to watch and to extend
-#	$4 -- the options to h5watch (can be NULL)
-#	$5 -- expected output from watching the object
-#	($3, $4, $5) can be repeated for $1 times
-#
-# This is done to reduce the sleeping time for testing
+#       $1 -- the specified dataset to watch and to extend
+#       $2 -- the options to h5watch (can be NULL)
+#       $3 -- expected output from watching the object
 #
 TEST_WATCH() {
-    plist="" 	# plist: the list of h5watch process IDs
-    dlist="" 	# dlist: the list of dataset names to watch/extend
-    outlist="" 	# outlist: the list of expected output files with suffix ".ddl" stripped
-    xlist="" 	# xlist: the list of exit codes from extending the dataset
-    NUM=$1	# number of objects to watch/extend
-    shift
-    NFNAME="`basename $1 .h5`"		#the file to watch and to extend stripped of suffix ".h5"
-    shift
-    ctr=1				#counter for tracking the # of objects to test
-    while [ $ctr -le $NUM ] ;		#loop till end of all objects to test
+    cp $WATCHFILE $TESTFILE                             # Copy the file being watched/extended to a temporary file
+    actual="../testfiles/`basename $3 .ddl`.out"        # The actual output
+    expect="$srcdir/../testfiles/$3"                    # The expected output
+    #
+    # Set up options and object to h5watch
+    if test -z "$2"; then
+        OBJ="$TESTFILE/$1"                              # Empty options, just object to h5watch
+    else
+        OBJ="$2 $TESTFILE/$1"                           # Options + object to h5watch
+    fi
+    rm -f $WRITER_MESSAGE                               # Remove the file just to be sure
+    rm -f $READER_MESSAGE                               # Remove the file just to be sure
+    #
+    $EXTEND_BIN $TESTFILE $1 &                          # Extend the dataset; put in background
+    extend_pid=$!                                       # Get "extend" process ID
+    #
+    # Wait for message from "extend_dset" process to start h5watch--
+    # To wait for the writer message file or till the maximum # of seconds is reached
+    # This performs similar function as the routine h5_wait_message() in test/h5test.c
+    mexist=0                                    	# Indicate whether the message file is found
+    t0=`date +%s`                               	# Get current time in seconds
+    difft=0                                     	# Initialize the time difference
+    while [ $difft -lt $MESSAGE_TIMEOUT ] ;     	# Loop till message times out
     do
-	actual="../testfiles/`basename $3 .ddl`.out"	#the actual output
-	outlist="$outlist`basename $3 .ddl` "		#store to the list of output names
-	dlist="$dlist$1 "				#store to the list of datasets
-	#
-	$CP "$NFNAME.h5" "$NFNAME$ctr.h5"		#copy the file to a temporary file
-	#
-	if test -z "$2"; then				#compile options & object to h5watch
-	    OBJ="$NFNAME$ctr.h5/$1"			#no options, just object
-	else 
-	    OBJ="$2 $NFNAME$ctr.h5/$1"			#option and object
-	fi
-	#
-	# Run h5watch and put in background, output to a file
-	#
-	TESTING $H5WATCH $OBJ
-	$ECHO ""
-	$ECHO "#############################" 	> $actual
-	$ECHO " output for '$H5WATCH $OBJ'"  	>>$actual
-	$ECHO "#############################"	>>$actual
-	$RUNSERIAL $H5WATCH_BIN $2 "$NFNAME$ctr.h5/$1" >> $actual &
-	WATCH_PID=$!					#get h5watch process ID
-	plist="$plist$! "				#store to the list of process IDs
-	shift; shift; shift
-	ctr=`expr $ctr + 1` 
+        t1=`date +%s`                           	# Get current time in seconds
+        difft=`expr $t1 - $t0`                  	# Calculate the time difference
+        if [ -e $WRITER_MESSAGE ]; then  		# If message file is found:
+            mexist=1                            	#       indicate the message file is found
+            rm $WRITER_MESSAGE				#       remove the message file
+            break                               	#       get out of the while loop
+        fi
     done;
     #
-    # Extend the list of datasets corresponding to the list of files
-    n=1;
-    for d in $dlist; do	
-	$EXTEND_BIN "$NFNAME$n.h5" $d
-	xlist="$xlist$? "				#store to the list of exit codes from extending the dataset
-	n=`expr $n + 1`
-    done;
+    # If message file from "extend" process is found--
+    #   start h5watch
+    #   send message to "extend" process to start work
+    #   wait for "extend" process to complete, then kill h5watch
+    #   determine test result
+    # If message file from "extend" process is not found--
+    #   there is some problem; the test fails
     #
-    # Sleep to make sure output is flushed out before stopping h5watch
-    $ECHO "Sleeping for 4 seconds..."
-    $SLEEP 4
-    #
-    # Kill the list of h5watch processes
-    $ECHO "Killing h5watch processes..."
-    for p in $plist; do					#kill the list of h5watch processes
-	$KILL $p	
-    done
-    #
-    # Check the list of return codes from extending the dataset
-    # Compare the list of actual output from h5watch with the corresponding expected output
-    n=1
-    for x in $xlist; do
-	outname=`$ECHO $outlist|cut -d' ' -f$n`
-	actual="../testfiles/$outname.out"
-	expect="$srcdir/../testfiles/$outname.ddl"
-	if [ $x -ne 0 ]; then
-	$ECHO "*FAILED*"
-	nerrors="`expr $nerrors + 1`"
-	if [ yes = "$verbose" ]; then
-	    $ECHO "test returned with exit code $exitcode"
-	    $ECHO "test output: (up to $NLINES lines)"
-	    
-	    head -$NLINES $actual
-	    $ECHO "***end of test output***"
-	    $ECHO ""
-	fi
-	elif $CMP $expect $actual; then
-	    $ECHO " PASSED"
-	else
-	    $ECHO "*FAILED*"
-	    $ECHO "    Expected result differs from actual result"
-	    nerrors="`expr $nerrors + 1`"
-	    test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
-	fi
-	#
-	# Cleaning
-	rm -f "$NFNAME$n.h5"
-	if test -z "$HDF5_NOCLEANUP"; then
-	    rm -f $actual
-	fi
-	n="`expr $n + 1`"
-    done;
+    if test $mexist -eq 0; then
+        $ECHO "*FAILED*"
+        $ECHO "Problem with extend_dset...this test failed."
+    else
+        #
+        # Run h5watch; put in background; collect output to a file
+        TESTING $H5WATCH $OBJ
+	head -n 3 $expect > $actual			# copy the first 3 lines from $expect (just the command line)
+        $RUNSERIAL $H5WATCH_BIN $2 "$TESTFILE/$1" >> $actual &
+        watch_pid=$!                                    # Get h5watch process ID
+        cp /dev/null $READER_MESSAGE                    # Send message to "extend" process to start work
+        wait $extend_pid                                # Wait for "extend" process to complete
+        extend_exit=$?                                  # Collect "extend" process' exit code
+        sleep 1                                         # Sleep to make sure output is flushed
+        kill $watch_pid                                 # Kill h5watch
+        #
+        if [ $extend_exit -ne 0 ]; then                 # Error returned from "extend" process
+            $ECHO "*FAILED*"
+            nerrors="`expr $nerrors + 1`"
+            if [ yes = "$verbose" ]; then
+                $ECHO "extend test returned with exit code $extend_exit"
+                $ECHO "test output: (up to $NLINES lines)"
+                head -$NLINES $actual
+                $ECHO "***end of test output***"
+                $ECHO ""
+            fi
+        elif $CMP $expect $actual; then                 # Compare actual output with expected output
+            $ECHO " PASSED"
+        else
+            $ECHO "*FAILED*"                            # Actual and expected outputs are different
+            $ECHO "    Expected result differs from actual result"
+            nerrors="`expr $nerrors + 1`"
+            if test yes = "$verbose"; then
+                        $DIFF $expect $actual |sed 's/^/    /'
+            fi
+        fi
+        #
+        # Cleaning
+        rm -f $TESTFILE
+        if test -z "$HDF5_NOCLEANUP"; then
+            rm -f $actual
+        fi
+    fi
 }
 
 ##############################################################################
@@ -290,76 +283,117 @@ TOOLTEST w-err-cmpd3.ddl 1 --fields=field1,field2, WATCH.h5/DSET_CMPD
 TOOLTEST w-err-cmpd4.ddl 1 --fields=field1,field2.b.k WATCH.h5/DSET_CMPD
 TOOLTEST w-err-cmpd5.ddl 1 --fields=field1 --fields=field2.b.k WATCH.h5/DSET_CMPD
 #
+echo "DONE WITH 1st SET OF TESTS"
 #
-#################################################################################################
-#												#
-# Tests on extending datasets--									#
-#   	DSET_ONE, DSET_CMPD,  DSET_CMPD_ESC							#
-#	DSET_ALLOC_EARLY, DSET_ALLOC_LATE							#
-#   	DSET_TWO, DSET_CMPD_TWO									#
-#											 	#
-#################################################################################################
 #
-# Generate file with various types of datasets
+#
+#################################
+# Tests without options         #
+#################################
+#
+# Generate file WATCH.h5 with various types of datasets,
 $GEN_TEST_BIN
 #
-# Watching and extending: WATCH1.h5/DSET_ONE, WATCH2.h5/DSET_ALLOC_EARLY, WATCH3.h5/DSET_ALLOC_LATE WATCH4.h5/DSET_CMPD
-# 			: WATCH5.h5/DSET_TWO, WATCH6.h5/DSET_CMPD_TWO, WATCH7.h5/DDSET_CMPD_ESC
-TEST_WATCH 7 WATCH.h5 DSET_ONE '' w-ext-one.ddl DSET_ALLOC_EARLY '' w-ext-early.ddl DSET_ALLOC_LATE '' w-ext-late.ddl DSET_CMPD '' w-ext-cmpd.ddl DSET_TWO '' w-ext-two.ddl DSET_CMPD_TWO '' w-ext-cmpd-two.ddl DSET_CMPD_ESC '' w-ext-cmpd-esc.ddl
+# Watching and extending: (TEST.h5 is a copy of WATCH.h5)
+#       TEST.h5/DSET_ONE
+#       TEST.h5/DSET_ALLOC_EARLY
+#       TEST.h5/DSET_ALLOC_LATE
+#       TEST.h5/DSET_CMPD
+#       TEST.h5/DSET_TWO
+#       TEST.h5/DSET_CMPD_TWO
+#       TEST.h5/DSET_CMPD_ESC
 #
-############################
-# Tests on --fields option #
-############################
+TEST_WATCH DSET_ONE '' w-ext-one.ddl
+TEST_WATCH DSET_ALLOC_EARLY '' w-ext-early.ddl
+TEST_WATCH DSET_ALLOC_LATE '' w-ext-late.ddl
+TEST_WATCH DSET_CMPD '' w-ext-cmpd.ddl
+TEST_WATCH DSET_TWO '' w-ext-two.ddl
+TEST_WATCH DSET_CMPD_TWO '' w-ext-cmpd-two.ddl
+TEST_WATCH DSET_CMPD_ESC '' w-ext-cmpd-esc.ddl
 #
-# Watching and extending:
-# 	WATCH1.h5/DSET_CMPD with --fields=field1,field2
-#	WATCH2.h5/DSET_CMP_TWO with --fields=field1,field2
-#	WATCH3.h5/DSET_CMPD_ESC with --fields=field\,1,field2\.
-#	WATCH4.h5/DSET_CMPD with --fields=field1 --fields=field2 
-#	WATCH5.h5/DSET_CMPD_ESC with --fields=field\,1 --fields=field2\.
-#	WATCH6.h5/DSET_CMPD_TWO with --fields=field1 --fields=field2
-#
-TEST_WATCH 6 WATCH.h5 DSET_CMPD --fields=field1,field2 w-ext-cmpd-f1.ddl DSET_CMPD_TWO --fields=field1,field2 w-ext-cmpd-two-f1.ddl DSET_CMPD_ESC '--fields=field\,1,field2\.' w-ext-cmpd-esc-f1.ddl DSET_CMPD '--fields=field1 --fields=field2' w-ext-cmpd-ff1.ddl DSET_CMPD_ESC '--fields=field\,1 --fields=field2\.' w-ext-cmpd-esc-ff1.ddl DSET_CMPD_TWO '--fields=field1 --fields=field2' w-ext-cmpd-two-ff1.ddl
-#
-#
-#
-# Watching and extending: 
-#	WATCH1.h5/DSET_CMPD with --fields=field2.b,field4 
-#	WATCH2.h5/DSET_CMPD_ESC with --fields=field2\..\,b,field4\ 
-#	WATCH3.h5/DSET_CMPD_TWO with --fields=field2.b,field4
-#	WATCH4.h5/DSET_CMPD with --fields=field2.b --fields=field4
-# 	WATCH5.h5/DSET_CMPD_ESC with --fields=field2\..\,b --fields=field4\,
-# 	WATCH6.h5/DSET_CMPD_TWO with --fields=field2.b --fields=field4
-TEST_WATCH 6 WATCH.h5 DSET_CMPD --fields=field2.b,field4 w-ext-cmpd-f2.ddl DSET_CMPD_ESC '--fields=field2\..\,b,field4\,' w-ext-cmpd-esc-f2.ddl DSET_CMPD_TWO --fields=field2.b,field4 w-ext-cmpd-two-f2.ddl DSET_CMPD '--fields=field2.b --fields=field4' w-ext-cmpd-ff2.ddl DSET_CMPD_ESC '--fields=field2\..\,b --fields=field4\,' w-ext-cmpd-esc-ff2.ddl DSET_CMPD_TWO '--fields=field2.b --fields=field4' w-ext-cmpd-two-ff2.ddl 
+echo "DONE WITH 2nd SET OF TESTS"
 #
 #
 #
-# Watching and extending:
-#	WATCH1.h5/DSET_CMPD with --fields=field2.b.a,field2.c
-# 	WATCH2.h5/DSET_CMPD_ESC with --fields=field2\..\,b.a,field2\..\\K
-# 	WATCH3.h5/DSET_CMPD_TWO with --fields=field2.b.a,field2.c
-#	WATCH4.h5/DSET_CMPD with --fields=field2.b.a --fields=field2.c
-# 	WATCH5.h5/DSET_CMPD_ESC with --fields=field2\..\,b.a --fields=field2\..\\K
-# 	WATCH6.h5/DSET_CMPD_TWO with --fields=field2.b.a --fields=field2.c
-TEST_WATCH 6 WATCH.h5 DSET_CMPD --fields=field2.b.a,field2.c w-ext-cmpd-f3.ddl DSET_CMPD_ESC '--fields=field2\..\,b.a,field2\..\\K' w-ext-cmpd-esc-f3.ddl DSET_CMPD_TWO --fields=field2.b.a,field2.c w-ext-cmpd-two-f3.ddl DSET_CMPD '--fields=field2.b.a --fields=field2.c' w-ext-cmpd-ff3.ddl DSET_CMPD_ESC '--fields=field2\..\,b.a --fields=field2\..\\K' w-ext-cmpd-esc-ff3.ddl DSET_CMPD_TWO '--fields=field2.b.a --fields=field2.c' w-ext-cmpd-two-ff3.ddl 
+#################################
+# Tests on --fields option      #
+#################################
+#
+# Watching and extending: (TEST.h5 is a copy of WATCH.h5)
+#       TEST.h5/DSET_CMPD with --fields=field1,field2
+#       TEST.h5/DSET_CMP_TWO with --fields=field1,field2
+#       TEST.h5/DSET_CMPD_ESC with --fields=field\,1,field2\.
+#       TEST.h5/DSET_CMPD with --fields=field1 --fields=field2
+#       TEST.h5/DSET_CMPD_ESC with --fields=field\,1 --fields=field2\.
+#       TEST.h5/DSET_CMPD_TWO with --fields=field1 --fields=field2
+#
+TEST_WATCH DSET_CMPD --fields=field1,field2 w-ext-cmpd-f1.ddl
+TEST_WATCH DSET_CMPD_TWO --fields=field1,field2 w-ext-cmpd-two-f1.ddl
+TEST_WATCH DSET_CMPD_ESC '--fields=field\,1,field2\.' w-ext-cmpd-esc-f1.ddl
+TEST_WATCH DSET_CMPD '--fields=field1 --fields=field2' w-ext-cmpd-ff1.ddl
+TEST_WATCH DSET_CMPD_ESC '--fields=field\,1 --fields=field2\.' w-ext-cmpd-esc-ff1.ddl
+TEST_WATCH DSET_CMPD_TWO '--fields=field1 --fields=field2' w-ext-cmpd-two-ff1.ddl
+#
+echo "DONE WITH 3rd SET OF TESTS"
 #
 #
 #
-#########################################################
-#							#
-# Tests on options:					#
-#	--dim 						#
-#	--width, --label, --simple, --help  		#
-#							#
-#########################################################
+# Watching and extending: (TEST.h5 is a copy of WATCH.h5)
+#       TEST.h5/DSET_CMPD with --fields=field2.b,field4
+#       TEST.h5/DSET_CMPD_ESC with --fields=field2\..\,b,field4\
+#       TEST.h5/DSET_CMPD_TWO with --fields=field2.b,field4
+#       TEST.h5/DSET_CMPD with --fields=field2.b --fields=field4
+#       TEST.h5/DSET_CMPD_ESC with --fields=field2\..\,b --fields=field4\,
+#       TEST.h5/DSET_CMPD_TWO with --fields=field2.b --fields=field4
 #
-# Watching and extending:
-#	WATCH1.h5/DSET_ONE with -d option
-# 	WATCH2.h5/DSET_TWO with --dim option
-#	WATCH3.h5/DSET_TWO with --width=60 option
-# 	WATCH4.h5/DSET_CMPD with --label option
-# 	WATCH5.h5/DSET_ONE with --simple option
-TEST_WATCH 5 WATCH.h5 DSET_ONE --dim w-ext-one-d.ddl DSET_TWO --dim w-ext-two-d.ddl DSET_TWO --width=30 w-ext-two-width.ddl DSET_CMPD --label w-ext-cmpd-label.ddl DSET_ONE --simple w-ext-one-simple.ddl
+TEST_WATCH DSET_CMPD --fields=field2.b,field4 w-ext-cmpd-f2.ddl
+TEST_WATCH DSET_CMPD_ESC '--fields=field2\..\,b,field4\,' w-ext-cmpd-esc-f2.ddl
+TEST_WATCH DSET_CMPD_TWO --fields=field2.b,field4 w-ext-cmpd-two-f2.ddl
+TEST_WATCH DSET_CMPD '--fields=field2.b --fields=field4' w-ext-cmpd-ff2.ddl
+TEST_WATCH DSET_CMPD_ESC '--fields=field2\..\,b --fields=field4\,' w-ext-cmpd-esc-ff2.ddl
+TEST_WATCH DSET_CMPD_TWO '--fields=field2.b --fields=field4' w-ext-cmpd-two-ff2.ddl
+#
+echo "DONE WITH 4th SET OF TESTS"
+#
+#
+#
+# Watching and extending: (TEST.h5 is a copy of WATCH.h5)
+#       TEST.h5/DSET_CMPD with --fields=field2.b.a,field2.c
+#       TEST.h5/DSET_CMPD_ESC with --fields=field2\..\,b.a,field2\..\\K
+#       TEST.h5/DSET_CMPD_TWO with --fields=field2.b.a,field2.c
+#       TEST.h5/DSET_CMPD with --fields=field2.b.a --fields=field2.c
+#       TEST.h5/DSET_CMPD_ESC with --fields=field2\..\,b.a --fields=field2\..\\K
+#       TEST.h5/DSET_CMPD_TWO with --fields=field2.b.a --fields=field2.c
+TEST_WATCH DSET_CMPD --fields=field2.b.a,field2.c w-ext-cmpd-f3.ddl
+TEST_WATCH DSET_CMPD_ESC '--fields=field2\..\,b.a,field2\..\\K' w-ext-cmpd-esc-f3.ddl
+TEST_WATCH DSET_CMPD_TWO --fields=field2.b.a,field2.c w-ext-cmpd-two-f3.ddl
+TEST_WATCH DSET_CMPD '--fields=field2.b.a --fields=field2.c' w-ext-cmpd-ff3.ddl
+TEST_WATCH DSET_CMPD_ESC '--fields=field2\..\,b.a --fields=field2\..\\K' w-ext-cmpd-esc-ff3.ddl
+TEST_WATCH DSET_CMPD_TWO '--fields=field2.b.a --fields=field2.c' w-ext-cmpd-two-ff3.ddl
+#
+echo "DONE WITH 5th SET OF TESTS"
+#
+#
+#
+#################################################
+# Tests on options:                             #
+#       --dim                                   #
+#       --width, --label, --simple, --help      #
+#################################################
+#
+# Watching and extending: (TEST.h5 is a copy of WATCH.h5)
+#       TEST.h5/DSET_ONE with -d option
+#       TEST.h5/DSET_TWO with --dim option
+#       TEST.h5/DSET_TWO with --width=60 option
+#       TEST.h5/DSET_CMPD with --label option
+#       TEST.h5/DSET_ONE with --simple option
+TEST_WATCH DSET_ONE --dim w-ext-one-d.ddl
+TEST_WATCH DSET_TWO --dim w-ext-two-d.ddl
+TEST_WATCH DSET_TWO --width=30 w-ext-two-width.ddl
+TEST_WATCH DSET_CMPD --label w-ext-cmpd-label.ddl
+TEST_WATCH DSET_ONE --simple w-ext-one-simple.ddl
+#
+echo "DONE WITH 6th SET OF TESTS"
 #
 #
 #

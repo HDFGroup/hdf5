@@ -1,7 +1,7 @@
 #############################
- output for 'h5watch WATCH6.h5/DSET_CMPD_TWO'
+ output for 'h5watch TEST.h5/DSET_CMPD_TWO'
 #############################
-Opened "WATCH6.h5" with sec2 driver.
+Opened "TEST.h5" with sec2 driver.
 Monitoring dataset /DSET_CMPD_TWO...
 dimension 0: 4->6 (increases)
 dimension 1: 10->12 (increases)
