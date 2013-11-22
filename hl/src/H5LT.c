@@ -13,13 +13,12 @@
 * access to either file, you may request a copy from help@hdfgroup.org.     *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <string.h>
-#include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "H5LTprivate.h"
-#include "H5private.h"
 
 /* For Lex and Yacc */
 #define         COL             3

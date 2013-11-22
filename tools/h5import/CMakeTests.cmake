@@ -105,7 +105,7 @@
     IF (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
       IF (NOT "${last_test}" STREQUAL "")
-        SET_TESTS_PROPERTIES (H5IMPORT-${testname} PROPERTIES DEPENDS ${last_test})
+        SET_TESTS_PROPERTIES (H5IMPORT-${testname} PROPERTIES DEPENDS H5IMPORT-h5importtest)
       ENDIF (NOT "${last_test}" STREQUAL "")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
@@ -118,6 +118,7 @@
               ${testfile}.out
               ${testfile}.out.err
       )
+      SET_TESTS_PROPERTIES (H5IMPORT-${testname}-clear-objects PROPERTIES DEPENDS H5IMPORT-h5importtest)
 
       ADD_TEST (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
       SET_TESTS_PROPERTIES (H5IMPORT-${testname} PROPERTIES DEPENDS H5IMPORT-${testname}-clear-objects)
@@ -167,6 +168,7 @@
               d${testfile}.dff
               d${testfile}.dff.err
       )
+      SET_TESTS_PROPERTIES (H5IMPORT-DUMP-${testname}-clear-objects PROPERTIES DEPENDS H5IMPORT-h5importtest)
 
       IF ("${ARGN}" STREQUAL "BINARY")
         ADD_TEST (
@@ -407,10 +409,25 @@
     SET (last_test "H5IMPORT-clear-objects")
   ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
-  ADD_TEST (NAME H5IMPORT-h5importtest COMMAND $<TARGET_FILE:h5importtest>)
+  ADD_TEST (
+      NAME H5IMPORT-h5importtest-clear-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove 
+          binfp64.bin
+          binin8.bin
+          binin8w.bin
+          binin16.bin
+          binin32.bin
+          binuin16.bin
+          binuin32.bin
+  )
   IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5IMPORT-h5importtest PROPERTIES DEPENDS ${last_test})
+    SET_TESTS_PROPERTIES (H5IMPORT-h5importtest-clear-objects PROPERTIES DEPENDS ${last_test})
   ENDIF (NOT "${last_test}" STREQUAL "")
+  SET (last_test "H5IMPORT-clear-objects")
+
+  ADD_TEST (NAME H5IMPORT-h5importtest COMMAND $<TARGET_FILE:h5importtest>)
+  SET_TESTS_PROPERTIES (H5IMPORT-h5importtest PROPERTIES DEPENDS H5IMPORT-h5importtest-clear-objects)
 
   # ----- TESTING "ASCII I32 rank 3 - Output BE " ;
   ADD_H5_TEST (ASCII_I32 testfiles/txtin32.txt testfiles/txtin32.conf txtin32.h5)

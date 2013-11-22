@@ -823,7 +823,7 @@ freespace_stats(hid_t fid, iter_t *iter)
     } /* end for */
 
     if(sect_info)
-        free(sect_info);
+        HDfree(sect_info);
 
     return 0;
 } /* end freespace_stats() */
@@ -1756,9 +1756,9 @@ main(int argc, const char *argv[])
             iter.free_hdr = finfo.free.meta_size;
         } /* end else */
 
-	iter.num_small_groups = (unsigned long *)calloc((size_t)sgroups_threshold, sizeof(unsigned long));
-	iter.num_small_attrs = (unsigned long *)calloc((size_t)(sattrs_threshold+1), sizeof(unsigned long));
-	iter.small_dset_dims = (unsigned long *)calloc((size_t)sdsets_threshold, sizeof(unsigned long));
+	iter.num_small_groups = (unsigned long *)HDcalloc((size_t)sgroups_threshold, sizeof(unsigned long));
+	iter.num_small_attrs = (unsigned long *)HDcalloc((size_t)(sattrs_threshold+1), sizeof(unsigned long));
+	iter.small_dset_dims = (unsigned long *)HDcalloc((size_t)sdsets_threshold, sizeof(unsigned long));
 
 	if(iter.num_small_groups == NULL || iter.num_small_attrs == NULL || iter.small_dset_dims == NULL) {
 	    error_msg("Unable to allocate memory for tracking small groups/datasets/attributes\n");

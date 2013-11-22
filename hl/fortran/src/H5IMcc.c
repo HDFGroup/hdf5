@@ -505,7 +505,7 @@ herr_t H5IM_get_palette(hid_t loc_id,
 
    dim_ref = n_refs;
 
-   refbuf = malloc(sizeof(hobj_ref_t) * (int)dim_ref);
+   refbuf = HDmalloc(sizeof(hobj_ref_t) * (int)dim_ref);
 
    if(H5Aread(attr_id, attr_type, refbuf) < 0)
     goto out;
@@ -525,7 +525,7 @@ herr_t H5IM_get_palette(hid_t loc_id,
    if(H5Dclose(pal_id) < 0)
     goto out;
 
-   free(refbuf);
+   HDfree(refbuf);
 
   } /* H5T_REFERENCE */
 
