@@ -1,4 +1,4 @@
-HDF5 version 1.8.12 released on 2013-11-04
+HDF5 version 1.8.12 released on 2013-11-21
 ================================================================================
 
 INTRODUCTION
@@ -126,6 +126,11 @@ Bug Fixes since HDF5-1.8.11
     - HDF5 rpaths are no longer encoded in the library files when configured
       with --disable-sharedlib-rpath. (LRK-2013-09-23 - HDFFV-8276)
 
+    CMake
+    -----
+    - Fixed installation problem for Mac OS X reported on FORUM.
+      (ADB - 2013/11/20)
+ 
     Library
     -------
     - Added const qualifier to source buffer parameters in H5Dgather and
