@@ -364,7 +364,7 @@ H5E_get_stack(void)
 
     if(!estack) {
         /* no associated value with current thread - create one */
-        estack = (H5E_t *)H5FL_MALLOC(H5E_t);
+        estack = (H5E_t *)H5MM_calloc(sizeof(H5E_t));
         HDassert(estack);
 
         /* Set the thread-specific info */
