@@ -17,6 +17,13 @@
 
 srcdir=@srcdir@
 
+USE_FILTER_SZIP="@USE_FILTER_SZIP@"
+USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
+USE_FILTER_SHUFFLE="@USE_FILTER_SHUFFLE@"
+USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
+USE_FILTER_NBIT="@USE_FILTER_NBIT@"
+USE_FILTER_SCALEOFFSET="@USE_FILTER_SCALEOFFSET@"
+
 TESTNAME=h5dump
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
@@ -129,6 +136,7 @@ $SRC_H5DUMP_TESTFILES/tgroup.h5
 $SRC_H5DUMP_TESTFILES/tgrp_comments.h5
 $SRC_H5DUMP_TESTFILES/thlink.h5
 $SRC_H5DUMP_TESTFILES/thyperslab.h5
+$SRC_H5DUMP_TESTFILES/tintsattrs.h5
 $SRC_H5DUMP_TESTFILES/tlarge_objname.h5
 #$SRC_H5DUMP_TESTFILES/tldouble.h5
 $SRC_H5DUMP_TESTFILES/tlonglinks.h5
@@ -148,8 +156,9 @@ $SRC_H5DUMP_TESTFILES/zerodim.h5
 $SRC_H5DUMP_TESTFILES/torderattr.h5
 $SRC_H5DUMP_TESTFILES/tordergr.h5
 $SRC_H5DUMP_TESTFILES/tsaf.h5
-$SRC_H5DUMP_TESTFILES/tscalarintsize.h5
 $SRC_H5DUMP_TESTFILES/tscalarattrintsize.h5
+$SRC_H5DUMP_TESTFILES/tscalarintattrsize.h5
+$SRC_H5DUMP_TESTFILES/tscalarintsize.h5
 $SRC_H5DUMP_TESTFILES/tscalarstring.h5
 $SRC_H5DUMP_TESTFILES/tslink.h5
 $SRC_H5DUMP_TESTFILES/tsplit_file-m.h5
@@ -259,6 +268,7 @@ $SRC_H5DUMP_TESTFILES/tindicessub2.ddl
 $SRC_H5DUMP_TESTFILES/tindicessub3.ddl
 $SRC_H5DUMP_TESTFILES/tindicessub4.ddl
 $SRC_H5DUMP_TESTFILES/tindicesyes.ddl
+$SRC_H5DUMP_TESTFILES/tintsattrs.ddl
 $SRC_H5DUMP_TESTFILES/tlarge_objname.ddl
 #$SRC_H5DUMP_TESTFILES/tldouble.ddl 
 $SRC_H5DUMP_TESTFILES/tlonglinks.ddl
@@ -298,10 +308,13 @@ $SRC_H5DUMP_TESTFILES/tordercontents2.ddl
 $SRC_H5DUMP_TESTFILES/torderlinks1.ddl
 $SRC_H5DUMP_TESTFILES/torderlinks2.ddl
 $SRC_H5DUMP_TESTFILES/tperror.ddl
+$SRC_H5DUMP_TESTFILES/treadfilter.ddl
+$SRC_H5DUMP_TESTFILES/treadintfilter.ddl
 $SRC_H5DUMP_TESTFILES/treference.ddl
 $SRC_H5DUMP_TESTFILES/tsaf.ddl
-$SRC_H5DUMP_TESTFILES/tscalarintsize.ddl
 $SRC_H5DUMP_TESTFILES/tscalarattrintsize.ddl
+$SRC_H5DUMP_TESTFILES/tscalarintattrsize.ddl
+$SRC_H5DUMP_TESTFILES/tscalarintsize.ddl
 $SRC_H5DUMP_TESTFILES/tscalarstring.ddl
 $SRC_H5DUMP_TESTFILES/tscaleoffset.ddl
 $SRC_H5DUMP_TESTFILES/tshuffle.ddl
@@ -359,6 +372,7 @@ ${SRC_H5DUMP_ERRORFILES}/tgroup-2.err
 ${SRC_H5DUMP_ERRORFILES}/torderlinks1.err
 ${SRC_H5DUMP_ERRORFILES}/torderlinks2.err
 ${SRC_H5DUMP_ERRORFILES}/tperror.err
+${SRC_H5DUMP_ERRORFILES}/treadfilter.err
 ${SRC_H5DUMP_ERRORFILES}/tqmarkfile.err
 ${SRC_H5DUMP_ERRORFILES}/tslink-D.err
 "
@@ -947,6 +961,10 @@ TOOLTEST tattrintsize.ddl --enable-error-stack tattrintsize.h5
 TOOLTEST tcmpdattrintsize.ddl --enable-error-stack tcmpdattrintsize.h5
 # test for signed/unsigned scalar attributes
 TOOLTEST tscalarattrintsize.ddl --enable-error-stack tscalarattrintsize.h5
+# test for signed/unsigned scalar datasets with attributes
+TOOLTEST tscalarintattrsize.ddl --enable-error-stack tscalarintattrsize.h5
+# test for signed/unsigned datasets attributes
+TOOLTEST tintsattrs.ddl --enable-error-stack tintsattrs.h5
 # test for string scalar dataset attribute
 TOOLTEST tscalarstring.ddl --enable-error-stack tscalarstring.h5
 # test for displaying groups
@@ -1166,6 +1184,15 @@ TOOLTEST tscaleoffset.ddl --enable-error-stack -H -p -d scaleoffset  tfilters.h5
 TOOLTEST tallfilters.ddl --enable-error-stack -H -p -d all  tfilters.h5
 # user defined
 TOOLTEST tuserfilter.ddl --enable-error-stack -H  -p -d myfilter  tfilters.h5
+
+if test $USE_FILTER_DEFLATE = "yes" -a $USE_FILTER_SHUFFLE = "yes" -a $USE_FILTER_FLETCHER32 = "yes" -a $USE_FILTER_NBIT = "yes" -a $USE_FILTER_SCALEOFFSET = "yes" ; then
+  # data read internal filters
+  TOOLTEST treadintfilter.ddl --enable-error-stack -d deflate -d shuffle -d fletcher32 -d nbit -d scaleoffset tfilters.h5
+  if test $USE_FILTER_SZIP = "yes"; then
+    # data read
+    TOOLTEST4 treadfilter.ddl --enable-error-stack tfilters.h5
+  fi
+fi
 
 # test for displaying objects with very long names
 TOOLTEST tlonglinks.ddl --enable-error-stack tlonglinks.h5

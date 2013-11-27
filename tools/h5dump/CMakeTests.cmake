@@ -101,6 +101,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tindicessub3.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tindicessub4.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tindicesyes.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tintsattrs.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tlarge_objname.ddl
       #${HDF5_TOOLS_SRC_DIR}/testfiles/tldouble.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tlonglinks.ddl
@@ -120,9 +121,6 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnoddlfile.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tno-subset.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnullspace.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/trawdatafile.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/trawssetfile.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/zerodim.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tordergr1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tordergr2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tordergr3.ddl
@@ -137,10 +135,15 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/torderlinks1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/torderlinks2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tperror.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/trawdatafile.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/trawssetfile.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/treadfilter.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/treadintfilter.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/treference.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarintsize.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarattrintsize.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarintattrsize.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarintsize.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarstring.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tscaleoffset.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tshuffle.ddl
@@ -168,6 +171,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/twithddlfile.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/h5dump-help.txt
       ${HDF5_TOOLS_SRC_DIR}/testfiles/out3.h5import
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/zerodim.ddl
   )
   SET (HDF5_REFERENCE_EXP_FILES
       tall-6.exp
@@ -237,6 +241,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tgrp_comments.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/thlink.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/thyperslab.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tintsattrs.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tlarge_objname.h5
       #${HDF5_TOOLS_SRC_DIR}/testfiles/tldouble.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tlonglinks.h5
@@ -252,12 +257,12 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestedcmpddt.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tno-subset.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnullspace.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/zerodim.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tordergr.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarintsize.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarattrintsize.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarintattrsize.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarintsize.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarstring.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tslink.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsplit_file-m.h5
@@ -273,6 +278,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes5.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlstr.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvms.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/zerodim.h5
   )
   SET (HDF5_ERROR_REFERENCE_TEST_FILES
       ${PROJECT_SOURCE_DIR}/errfiles/filter_fail.err
@@ -297,6 +303,7 @@
       ${PROJECT_SOURCE_DIR}/errfiles/torderlinks2.err
       ${PROJECT_SOURCE_DIR}/errfiles/tgroup-2.err
       ${PROJECT_SOURCE_DIR}/errfiles/tperror.err
+      ${PROJECT_SOURCE_DIR}/errfiles/treadfilter.err
       ${PROJECT_SOURCE_DIR}/errfiles/tslink-D.err
   )
 
@@ -901,6 +908,8 @@
           texceedsubblock.out.err
           tindicesyes.out
           tindicesyes.out.err
+          tintsattrs.out
+          tintsattrs.out.err
           tlarge_objname.out
           tlarge_objname.out.err
           tldouble.out
@@ -919,12 +928,12 @@
 #          tstarfile.out.err
           tnamed_dtype_attr.out
           tnamed_dtype_attr.out.err
+          tnbit.out
+          tnbit.out.err
           tnestcomp-1.out
           tnestcomp-1.out.err
           tnestedcmpddt.out
           tnestedcmpddt.out.err
-          tnbit.out
-          tnbit.out.err
           tnoattrdata.out
           tnoattrdata.out.err
           tnoattrddl.out
@@ -935,18 +944,10 @@
           tnoddl.out.err
           tnoddlfile.out
           tnoddlfile.out.err
-          trawdatafile.out
-          trawdatafile.out.err
-          trawdatafile.txt
-          trawssetfile.out
-          trawssetfile.out.err
-          trawssetfile.txt
           tno-subset.out
           tno-subset.out.err
           tnullspace.out
           tnullspace.out.err
-          zerodim.out
-          zerodim.out.err
           tordergr1.out
           tordergr1.out.err
           tordergr2.out
@@ -975,14 +976,26 @@
           torderlinks2.out.err
           tperror.out
           tperror.out.err
+          trawdatafile.out
+          trawdatafile.out.err
+          trawdatafile.txt
+          trawssetfile.out
+          trawssetfile.out.err
+          trawssetfile.txt
+          treadfilter.out
+          treadfilter.out.err
+          treadintfilter.out
+          treadintfilter.out.err
           treference.out
           treference.out.err
           tsaf.out
           tsaf.out.err
-          tscalarintsize.out
-          tscalarintsize.out.err
           tscalarattrintsize.out
           tscalarattrintsize.out.err
+          tscalarintattrsize.out
+          tscalarintattrsize.out.err
+          tscalarintsize.out
+          tscalarintsize.out.err
           tscalarstring.out
           tscalarstring.out.err
           tscaleoffset.out
@@ -1037,6 +1050,8 @@
           twithddlfile.out
           twithddlfile.out.err
           twithddlfile.txt
+          zerodim.out
+          zerodim.out.err
     )
     SET_TESTS_PROPERTIES (H5DUMP-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
     IF (NOT "${last_test}" STREQUAL "")
@@ -1079,6 +1094,10 @@
   ADD_H5_TEST (tscalarattrintsize 0 --enable-error-stack tscalarattrintsize.h5)
   # test for string scalar dataset and attribute
   ADD_H5_TEST (tscalarstring 0 --enable-error-stack tscalarstring.h5)
+  # test for signed/unsigned scalar datasets with attributes
+  ADD_H5_TEST (tscalarintattrsize 0 --enable-error-stack tscalarintattrsize.h5)
+  # test for signed/unsigned datasets attributes
+  ADD_H5_TEST (tintsattrs 0 --enable-error-stack tintsattrs.h5)
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 --enable-error-stack tgroup.h5)
   # test for displaying the selected groups
@@ -1301,6 +1320,45 @@
 
   # user defined
   ADD_H5_TEST (tuserfilter 0 --enable-error-stack -H  -p -d myfilter  tfilters.h5)
+
+
+# See which filters are usable (and skip tests for filters we
+# don't have).  Do this by searching H5pubconf.h to see which
+# filters are defined.
+
+# detect whether the encoder is present. 
+  IF (H5_HAVE_FILTER_DEFLATE)
+    SET (USE_FILTER_DEFLATE "true")
+  ENDIF (H5_HAVE_FILTER_DEFLATE)
+
+  IF (H5_HAVE_FILTER_SZIP)
+    SET (USE_FILTER_SZIP "true")
+  ENDIF (H5_HAVE_FILTER_SZIP)
+
+  IF (H5_HAVE_FILTER_SHUFFLE)
+    SET (USE_FILTER_SHUFFLE "true")
+  ENDIF (H5_HAVE_FILTER_SHUFFLE)
+
+  IF (H5_HAVE_FILTER_FLETCHER32)
+    SET (USE_FILTER_FLETCHER32 "true")
+  ENDIF (H5_HAVE_FILTER_FLETCHER32)
+
+  IF (H5_HAVE_FILTER_NBIT)
+    SET (USE_FILTER_NBIT "true")
+  ENDIF (H5_HAVE_FILTER_NBIT)
+
+  IF (H5_HAVE_FILTER_SCALEOFFSET)
+    SET (USE_FILTER_SCALEOFFSET "true")
+  ENDIF (H5_HAVE_FILTER_SCALEOFFSET)
+
+  IF (USE_FILTER_DEFLATE AND USE_FILTER_SHUFFLE AND USE_FILTER_FLETCHER32 AND USE_FILTER_NBIT AND USE_FILTER_SCALEOFFSET)
+    # data read internal filters
+    ADD_H5_TEST (treadintfilter 0 --enable-error-stack -d deflate -d shuffle -d fletcher32 -d nbit -d scaleoffset tfilters.h5)
+    IF (HDF5_ENABLE_SZIP_SUPPORT)
+      # data read all filters
+      ADD_H5ERR_MASK_TEST (treadfilter 1 --enable-error-stack tfilters.h5)
+    ENDIF (HDF5_ENABLE_SZIP_SUPPORT)
+  ENDIF (USE_FILTER_DEFLATE AND USE_FILTER_SHUFFLE AND USE_FILTER_FLETCHER32 AND USE_FILTER_NBIT AND USE_FILTER_SCALEOFFSET)
 
   # test for displaying objects with very long names
   ADD_H5_TEST (tlonglinks 0 --enable-error-stack tlonglinks.h5)

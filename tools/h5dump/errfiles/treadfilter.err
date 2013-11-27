@@ -1,0 +1,59 @@
+HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+  #000: (file name) line (number) in H5Dread(): can't read data
+    major: Dataset
+    minor: Read failed
+  #001: (file name) line (number) in H5D__read(): can't read data
+    major: Dataset
+    minor: Read failed
+  #002: (file name) line (number) in H5D__contig_read(): contiguous read failed
+    major: Dataset
+    minor: Read failed
+  #003: (file name) line (number) in H5D__select_read(): read error
+    major: Dataspace
+    minor: Read failed
+  #004: (file name) line (number) in H5D__select_io(): read error
+    major: Dataspace
+    minor: Read failed
+  #005: (file name) line (number) in H5D__efl_readvv(): can't perform vectorized EFL read
+    major: Dataset
+    minor: Can't operate on object
+  #006: (file name) line (number) in H5V_opvv(): can't perform operation
+    major: Internal error (too specific to document in detail)
+    minor: Can't operate on object
+  #007: (file name) line (number) in H5D__efl_readvv_cb(): EFL read failed
+    major: Dataset
+    minor: Read failed
+  #008: (file name) line (number) in H5D__efl_read(): unable to open external raw data file
+    major: External file list
+    minor: Unable to open file
+h5dump error: unable to print data
+HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+  #000: (file name) line (number) in H5Dread(): can't read data
+    major: Dataset
+    minor: Read failed
+  #001: (file name) line (number) in H5D__read(): can't read data
+    major: Dataset
+    minor: Read failed
+  #002: (file name) line (number) in H5D__chunk_read(): unable to read raw data chunk
+    major: Low-level I/O
+    minor: Read failed
+  #003: (file name) line (number) in H5D__chunk_lock(): data pipeline read failed
+    major: Data filters
+    minor: Filter operation failed
+  #004: (file name) line (number) in H5Z_pipeline(): required filter 'myfilter' is not registered
+    major: Data filters
+    minor: Read failed
+  #005: (file name) line (number) in H5PL_load(): search in paths failed
+    major: Plugin for dynamically loaded library
+    minor: Can't get value
+  #006: (file name) line (number) in H5PL__find(): can't open directory
+    major: Plugin for dynamically loaded library
+    minor: Can't open directory or file
+h5dump error: unable to print data
+H5tools-DIAG: Error detected in HDF5:tools (version (number)) thread (IDs):
+  #000: (file name) line (number) in h5tools_dump_simple_dset(): H5Dread failed
+    major: Failure in tools library
+    minor: error in function
+  #001: (file name) line (number) in h5tools_dump_simple_dset(): H5Dread failed
+    major: Failure in tools library
+    minor: error in function
