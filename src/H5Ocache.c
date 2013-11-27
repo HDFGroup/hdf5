@@ -38,6 +38,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
@@ -51,6 +52,11 @@
  *      should be larger than the largest object type's default object header
  *      size to save the extra I/O operations) */
 #define H5O_SPEC_READ_SIZE 512
+
+/* Set the estimated size of the chunk to read */
+/* (Avoids an allocation, if we estimate correctly) */
+#define H5O_EST_CHUNK_SIZE 512
+
 
 
 /******************/
@@ -92,7 +98,6 @@ static herr_t H5O_chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno);
 /* Misc. routines */
 static herr_t H5O_add_cont_msg(H5O_cont_msgs_t *cont_msg_info,
     const H5O_cont_t *cont);
-
 static herr_t H5O_decode_prefix(H5F_t *f, H5O_t *oh, const uint8_t *buf, void *_udata);
 
 
@@ -282,7 +287,6 @@ H5O_decode_prefix(H5F_t *f, H5O_t *oh, const uint8_t *buf, void *_udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5O_decode_prefix() */
 
 
@@ -313,10 +317,9 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
     H5O_t	*oh = NULL;     /* Object header read in */
     H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata;       /* User data for callback */
-    H5WB_t      *wb = NULL;     /* Wrapped buffer for prefix data */
     uint8_t     read_buf[H5O_SPEC_READ_SIZE];       /* Buffer for speculative read */
     const uint8_t *p;           /* Pointer into buffer to decode */
-    uint8_t     *buf;           /* Buffer to decode */
+    uint8_t     *buf = NULL;    /* Buffer to decode */
     size_t	spec_read_size; /* Size of buffer to speculatively read in */
     size_t	buf_size;       /* Size of prefix+chunk #0 buffer */
     haddr_t     eoa;		/* Relative end of file address	*/
@@ -364,38 +367,37 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     if(H5O_decode_prefix(f, oh, read_buf, udata) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't decode object header prefix")
 
-    /* Compute the size of the buffer used */
+    /* Compute the size of the buffer required */
     buf_size = oh->chunk0_size + (size_t)H5O_SIZEOF_HDR(oh);
 
     /* Check if the speculative read was large enough to parse the first chunk */
     if(spec_read_size < buf_size) {
-        /* Wrap the local buffer for serialized header info */
-        if(NULL == (wb = H5WB_wrap(read_buf, sizeof(read_buf))))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't wrap buffer")
-
-        /* Get a pointer to a buffer that's large enough for serialized header */
-        if(NULL == (buf = (uint8_t *)H5WB_actual(wb, buf_size)))
-            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "can't get actual buffer")
+        /* Allocate space for a buffer that's large enough for serialized header */
+	if(NULL == (buf = (uint8_t *)H5MM_malloc(buf_size)))
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "can't get actual buffer")
 
 	/* SWMR access */
-        if(H5F_INTENT(f) & H5F_ACC_SWMR_READ || H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
+        if(H5F_INTENT(f) & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE)) {
             /* Read the chunk that is bigger than the speculative read size */
             if(H5F_block_read(f, H5FD_MEM_OHDR, addr, buf_size, dxpl_id, buf) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header")
             /* See if the data read now is the same as what is read initially */
             if(HDmemcmp(buf, read_buf, spec_read_size)) {
-		HDmemset(oh, 0, sizeof(oh));
+		HDmemset(oh, 0, sizeof(*oh));
+
+		/* Decode the prefix again */
                 if(H5O_decode_prefix(f, oh, buf, udata) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't decode object header prefix")
-            }
-        } else {
+            } /* end if */
+        } /* end if */
+	else {
             /* Copy existing raw data into new buffer */
             HDmemcpy(buf, read_buf, spec_read_size);
 
             /* Read rest of the raw data */
             if(H5F_block_read(f, H5FD_MEM_OHDR, (addr + spec_read_size), (buf_size - spec_read_size), dxpl_id, (buf + spec_read_size)) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header data")
-	}
+	} /* end else */
     } else
         buf = read_buf;
 
@@ -411,8 +413,8 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
 done:
     /* Release resources */
-    if(wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
+    if(buf && buf != read_buf)
+        H5MM_free(buf);
 
     /* Release the [possibly partially initialized] object header on errors */
     if(!ret_value && oh)
@@ -753,7 +755,7 @@ H5O_cache_chk_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     H5O_chunk_proxy_t	*chk_proxy = NULL;     /* Chunk proxy object */
     H5O_chk_cache_ud_t *udata = (H5O_chk_cache_ud_t *)_udata;       /* User data for callback */
     H5WB_t      *wb = NULL;             /* Wrapped buffer for prefix data */
-    uint8_t     chunk_buf[H5O_SPEC_READ_SIZE];       /* Buffer for speculative read */
+    uint8_t     chunk_buf[H5O_EST_CHUNK_SIZE];       /* Buffer for estimated chunk size */
     uint8_t     *buf;                   /* Buffer to decode */
     H5O_chunk_proxy_t	*ret_value;     /* Return value */
 
