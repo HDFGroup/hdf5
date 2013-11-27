@@ -1592,7 +1592,6 @@
 ./tools/testfiles/trawssetfile.ddl
 ./tools/testfiles/trawssetfile.exp
 ./tools/testfiles/treadfilter.ddl
-./tools/testfiles/treadfilter.h5
 ./tools/testfiles/treadintfilter.ddl
 ./tools/testfiles/treference.ddl
 ./tools/testfiles/tsaf.ddl
