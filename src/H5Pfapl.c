@@ -161,10 +161,10 @@
 #define H5F_ACS_FILE_IMAGE_INFO_COPY            H5P_file_image_info_copy
 #define H5F_ACS_FILE_IMAGE_INFO_CLOSE           H5P_file_image_info_close
 /* Definition for # of metadata read attempts */
-#define H5F_ACS_METADATA_READ_ATTEMPTS_SIZE		sizeof(unsigned)
-#define H5F_ACS_METADATA_READ_ATTEMPTS_DEF               0
-#define H5F_ACS_METADATA_READ_ATTEMPTS_ENC             	H5P__encode_unsigned
-#define H5F_ACS_METADATA_READ_ATTEMPTS_DEC             	H5P__decode_unsigned
+#define H5F_ACS_METADATA_READ_ATTEMPTS_SIZE	sizeof(unsigned)
+#define H5F_ACS_METADATA_READ_ATTEMPTS_DEF      0
+#define H5F_ACS_METADATA_READ_ATTEMPTS_ENC      H5P__encode_unsigned
+#define H5F_ACS_METADATA_READ_ATTEMPTS_DEC      H5P__decode_unsigned
 
 /******************/
 /* Local Typedefs */
@@ -406,6 +406,7 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, H5F_ACS_METADATA_READ_ATTEMPTS_ENC, H5F_ACS_METADATA_READ_ATTEMPTS_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_facc_reg_prop() */
@@ -3017,7 +3018,7 @@ H5Pset_metadata_read_attempts(hid_t plist_id, unsigned attempts)
     H5TRACE2("e", "iIu", plist_id, attempts);
 
     /* Cannot set the # of attempts to 0 */
-    if(attempts <= 0)
+    if(attempts == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "number of metadatata read attempts must be greater than 0");
 
     /* Get the plist structure */
@@ -3047,26 +3048,29 @@ done:
 herr_t
 H5Pget_metadata_read_attempts(hid_t plist_id, unsigned *attempts/*out*/)
 {
-    H5P_genplist_t *plist;              /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, attempts);
 
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
     /* Get values */
     if(attempts) {
+        H5P_genplist_t *plist;              /* Property list pointer */
+
+        /* Get the plist structure */
+        if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
 	/* Get the # of read attempts set */
         if(H5P_get(plist, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, attempts) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get the number of metadata read attempts")
+
 	/* If not set, return the default value */
-	if(*attempts ==  H5F_ACS_METADATA_READ_ATTEMPTS_DEF)	/* 0 */
+	if(*attempts == H5F_ACS_METADATA_READ_ATTEMPTS_DEF)	/* 0 */
 	    *attempts = H5F_METADATA_READ_ATTEMPTS;
-    }
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_metadata_read_attempts() */
+

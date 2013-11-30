@@ -26,8 +26,8 @@
 #include "H5srcdir.h"
 
 #include "H5Bprivate.h"
-#include "H5Pprivate.h"
 #include "H5Iprivate.h"
+#include "H5Pprivate.h"
 
 /*
  * This file needs to access private information from the H5F package.
@@ -3517,7 +3517,7 @@ test_swmr_write(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing H5F_ACC_SWMR_WRITE access flag\n"));
 
-    /* Create a copy of the file access property list */
+    /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
@@ -3543,6 +3543,13 @@ test_swmr_write(void)
     /* Close file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Attempt to open file, with SWMR_WRITE flag but not latest format */
+    H5E_BEGIN_TRY {
+        fid = H5Fopen(FILE1, (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE), H5P_DEFAULT);
+    } H5E_END_TRY;
+    VERIFY(fid, FAIL, "H5Fopen");
 
 
     /* Create file, with  SWMR_WRITE flag */
@@ -3621,6 +3628,25 @@ test_swmr_write(void)
     ret = H5Pclose(fapl);
     CHECK(ret, FAIL, "H5Pclose");
 
+
+    /* Create a file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set a non-POSIX VFD */
+    ret = H5Pset_fapl_stdio(fapl);
+    CHECK(ret, FAIL, "H5Pset_fapl_stdio");
+
+    /* Try to reopen file w/SWMR_WRITE flag & non-POSIX VFD */
+    H5E_BEGIN_TRY {
+        fid = H5Fopen(FILE1, (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE), fapl);
+    } H5E_END_TRY;
+    VERIFY(fid, FAIL, "H5Fopen");
+
+    /* Close the property list */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
 } /* end test_swmr_write() */
 
 /****************************************************************
@@ -3634,6 +3660,7 @@ static void
 test_swmr_read(void)
 {
     hid_t fid, fid2;    /* File IDs */
+    hid_t fapl;		/* File access property list id */
     unsigned intent;    /* File access flags */
     herr_t ret;         /* Generic return value */
 
@@ -3675,7 +3702,13 @@ test_swmr_read(void)
     VERIFY(fid, FAIL, "H5Fopen");
 
 
-    /* Open file, with SWMR_READ flag */
+    /* Attempt to open file, with SWMR_WRITE flag but not latest format */
+    H5E_BEGIN_TRY {
+        fid = H5Fopen(FILE1, (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE), H5P_DEFAULT);
+    } H5E_END_TRY;
+    VERIFY(fid, FAIL, "H5Fopen");
+
+    /* Open file, with SWMR_READ flag (and non-latest format) */
     fid = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
@@ -3706,6 +3739,26 @@ test_swmr_read(void)
     /* Close file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Create a file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set a non-POSIX VFD */
+    ret = H5Pset_fapl_stdio(fapl);
+    CHECK(ret, FAIL, "H5Pset_fapl_stdio");
+
+    /* Try to reopen file w/SWMR_READ flag & non-POSIX VFD */
+    H5E_BEGIN_TRY {
+        fid = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl);
+    } H5E_END_TRY;
+    VERIFY(fid, FAIL, "H5Fopen");
+
+    /* Close the property list */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
 } /* end test_swmr_read() */
 
 /****************************************************************
@@ -3732,10 +3785,10 @@ test_metadata_read_attempts(void)
     /* 
      * Set A:
      *	Tests on verifying the # of read attempts when:
-     *    --setting/getting read attemps from a copy of the 
+     *    --setting/getting read attempts from a 
      *	    file access property list.
      */
-    /* Create a copy of file access property list */
+    /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
@@ -3808,9 +3861,21 @@ test_metadata_read_attempts(void)
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Test 2 */
-    /* Open the file with SWMR access and default fapl */
-    fid = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), H5P_DEFAULT);
+    /* Create a file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set to use latest library format */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Open the file with SWMR access and default read attempts */
+    fid = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl);
     CHECK(fid, FAIL, "H5Fopen");
+
+    /* Close fapl */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Get file's fapl */
     file_fapl = H5Fget_access_plist(fid);
@@ -3830,9 +3895,13 @@ test_metadata_read_attempts(void)
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Test 3 */
-    /* Create a copy of file access property list */
+    /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set to use latest library format */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     /* Set the # of read attempts */
     ret = H5Pset_metadata_read_attempts(fapl, 9);
@@ -3841,6 +3910,10 @@ test_metadata_read_attempts(void)
     /* Open the file with SWMR access and fapl (non-default & set to 9) */
     fid = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl);
     CHECK(fid, FAIL, "H5Fopen");
+
+    /* Close fapl */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Get file's fapl */
     file_fapl = H5Fget_access_plist(fid);
@@ -3860,9 +3933,13 @@ test_metadata_read_attempts(void)
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Test 4 */
-    /* Create a copy of file access property list */
+    /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set to use latest library format */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     /* Set the # of read attempts */
     ret = H5Pset_metadata_read_attempts(fapl, 1);
@@ -3871,6 +3948,10 @@ test_metadata_read_attempts(void)
     /* Open the file with SWMR access and fapl (non-default & set to 1) */
     fid = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl);
     CHECK(fid, FAIL, "H5Fopen");
+
+    /* Close fapl */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Get file's fapl */
     file_fapl = H5Fget_access_plist(fid);
@@ -3890,13 +3971,21 @@ test_metadata_read_attempts(void)
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Test 5 */
-    /* Create a copy of file access property list */
+    /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
-    /* Open the file with SWMR_READ and fapl (non-default but unset) */
+    /* Set to use latest library format */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Open the file with SWMR_READ and fapl (non-default read attempts but unset) */
     fid = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl);
     CHECK(fid, FAIL, "H5Fopen");
+
+    /* Close fapl */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Get file's fapl */
     file_fapl = H5Fget_access_plist(fid);
@@ -3923,9 +4012,21 @@ test_metadata_read_attempts(void)
      *	  --using default or non-default file access property list
      */
     /* Test 1 */
-    /* Create a file with non-SWMR access and default fapl */
-    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, H5P_DEFAULT);
+    /* Create a file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set to use latest library format */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Create a file with non-SWMR access and default read attempts */
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Close fapl */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Get file's fapl */
     file_fapl = H5Fget_access_plist(fid);
@@ -3967,7 +4068,7 @@ test_metadata_read_attempts(void)
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Test 3 */
-    /* Create a copy of file access property list */
+    /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
@@ -3975,9 +4076,13 @@ test_metadata_read_attempts(void)
     ret = H5Pset_metadata_read_attempts(fapl, 9);
     CHECK(ret, FAIL, "H5Pset_metadata_read_attempts");
 
-    /* Open the file with SWMR access and fapl (non-default & set to 9) */
+    /* Open the file with non-SWMR access and fapl (non-default & set to 9) */
     fid = H5Fopen(FILE1, H5F_ACC_RDONLY, fapl);
     CHECK(fid, FAIL, "H5Fopen");
+
+    /* Close fapl */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Get file's fapl */
     file_fapl = H5Fget_access_plist(fid);
@@ -3997,7 +4102,7 @@ test_metadata_read_attempts(void)
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Test 4 */
-    /* Create a copy of file access property list */
+    /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
@@ -4005,9 +4110,13 @@ test_metadata_read_attempts(void)
     ret = H5Pset_metadata_read_attempts(fapl, 1);
     CHECK(ret, FAIL, "H5Pset_metadata_read_attempts");
 
-    /* Open the file with SWMR access and fapl (non-default & set to 1) */
+    /* Open the file with non-SWMR access and fapl (non-default & set to 1) */
     fid = H5Fopen(FILE1, H5F_ACC_RDONLY, fapl);
     CHECK(fid, FAIL, "H5Fopen");
+
+    /* Close fapl */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Get file's fapl */
     file_fapl = H5Fget_access_plist(fid);
@@ -4027,13 +4136,17 @@ test_metadata_read_attempts(void)
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Test 5 */
-    /* Create a copy of file access property list */
+    /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
-    /* Open the file with SWMR_READ and fapl (non-default but unset) */
+    /* Open the file with non-SWMR_READ and fapl (non-default but unset) */
     fid = H5Fopen(FILE1, H5F_ACC_RDONLY, fapl);
     CHECK(fid, FAIL, "H5Fopen");
+
+    /* Close fapl */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Get file's fapl */
     file_fapl = H5Fget_access_plist(fid);
@@ -4053,9 +4166,13 @@ test_metadata_read_attempts(void)
     CHECK(ret, FAIL, "H5Pclose");
 
 
-    /* Create a copy of file access property list */
+    /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set to use latest library format */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     /* Set the # of read attempts */
     ret = H5Pset_metadata_read_attempts(fapl, 9);
@@ -4065,11 +4182,15 @@ test_metadata_read_attempts(void)
     fid = H5Fcreate(FILE1, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
+    /* Close fapl */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
     /* Close the file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-    /* Open file again with SWMR access and default fapl */
+    /* Open file again with non-SWMR access and default fapl */
     fid = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
@@ -4090,9 +4211,21 @@ test_metadata_read_attempts(void)
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-    /* Open file again with SWMR access and default fapl */
-    fid = H5Fopen(FILE1, H5F_ACC_SWMR_READ, H5P_DEFAULT);
+    /* Create a file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set to use latest library format */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Open file again with SWMR access and default read attempts */
+    fid = H5Fopen(FILE1, H5F_ACC_SWMR_READ, fapl);
     CHECK(fid, FAIL, "H5Fopen");
+
+    /* Close fapl */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Get file's fapl */
     file_fapl = H5Fget_access_plist(fid);
@@ -4127,13 +4260,17 @@ test_metadata_read_attempts(void)
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-    /* Open file again with SWMR access and default fapl */
-    fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, H5P_DEFAULT);
-    CHECK(fid1, FAIL, "H5Fopen");
-
-    /* Create a copy of file access property list */
+    /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set to use latest library format */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Open file again with SWMR access and default read attempts */
+    fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+    CHECK(fid1, FAIL, "H5Fopen");
 
     /* Set the # of read attempts */
     ret = H5Pset_metadata_read_attempts(fapl, 9);
@@ -4142,6 +4279,10 @@ test_metadata_read_attempts(void)
     /* Open file again with SWMR access and fapl (non-default & set to 9) */
     fid2 = H5Fopen(FILE1, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl);
     CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Close fapl */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Re-open fid1 */
     fid = H5Freopen(fid1);
@@ -4154,7 +4295,7 @@ test_metadata_read_attempts(void)
     /* Retrieve the # of read attempts from file fapl -- should be H5F_SWMR_METADATA_READ_ATTEMPTS */
     ret = H5Pget_metadata_read_attempts(file_fapl, &attempts);
     CHECK(ret, FAIL, "H5Pget_metadata_read_attempts");
-    VERIFY(attempts, H5F_SWMR_METADATA_READ_ATTEMPTS, "H5Fget_metadata_read_attempts");
+    VERIFY(attempts, H5F_SWMR_METADATA_READ_ATTEMPTS, "H5Pget_metadata_read_attempts");
 
     /* Close the file's fapl */
     ret = H5Pclose(file_fapl);
@@ -4172,10 +4313,10 @@ test_metadata_read_attempts(void)
     file_fapl = H5Fget_access_plist(fid);
     CHECK(file_fapl, FAIL, "H5Fget_access_plist");
 
-    /* Retrieve the # of read attempts from file fapl -- should be 9 */
+    /* Retrieve the # of read attempts from file fapl -- should be H5F_SWMR_METADATA_READ_ATTEMPTS, not 9 */
     ret = H5Pget_metadata_read_attempts(file_fapl, &attempts);
     CHECK(ret, FAIL, "H5Pget_metadata_read_attempts");
-    VERIFY(attempts, 9, "H5Pget_metadata_read_attempts");
+    VERIFY(attempts, H5F_SWMR_METADATA_READ_ATTEMPTS, "H5Pget_metadata_read_attempts");
 
     /* Close the file's fapl */
     ret = H5Pclose(file_fapl);
@@ -4199,9 +4340,21 @@ test_metadata_read_attempts(void)
      *    --H5reopen the files
      */
 
+    /* Create a file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set to use latest library format */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
     /* Create a file */
-    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl);
     CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Close fapl */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Close the file */
     ret = H5Fclose(fid);
@@ -4211,7 +4364,7 @@ test_metadata_read_attempts(void)
     fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fid2, FAIL, "H5Fopen");
 
-    /* Create a copy of file access property list */
+    /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
@@ -4222,6 +4375,10 @@ test_metadata_read_attempts(void)
     /* Open file again with non-SWMR access and fapl (non-default & set to 9) */
     fid2 = H5Fopen(FILE1, H5F_ACC_RDONLY, fapl);
     CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Close fapl */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Re-open fid1 */
     fid = H5Freopen(fid1);
@@ -4274,17 +4431,17 @@ test_metadata_read_attempts(void)
 
 /****************************************************************
 **
-**  test_metadata_read_retries_info(): 
-**  This test checks whether the public routine H5Fget_metadata_read_retries_info 
+**  test_metadata_read_retry_info(): 
+**  This test checks whether the public routine H5Fget_metadata_read_retry_info 
 **  works as specified in the reference manual.
 **
 *****************************************************************/
 static void
-test_metadata_read_retries_info(void)
+test_metadata_read_retry_info(void)
 {
     hid_t fapl, new_fapl; 		/* File access property list */
     hid_t fid, fid1;   			/* File IDs */
-    H5F_retries_info_t info, info1;	/* The collection of metadata retries */
+    H5F_retry_info_t info, info1;	/* The collection of metadata retries */
     H5F_t *f = NULL, *f1 = NULL; 	/* Internal file object pointers */
     unsigned i, j, n;			/* Local index variables */
     herr_t ret;         		/* Generic return value */
@@ -4299,12 +4456,12 @@ test_metadata_read_retries_info(void)
 
 
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing H5Fget_metadata_read_retries_info()\n"));
+    MESSAGE(5, ("Testing H5Fget_metadata_read_retry_info()\n"));
 
     /*
      * Set up file for testing 
      */
-    /* Create a copy of file access property list */
+    /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
@@ -4374,15 +4531,15 @@ test_metadata_read_retries_info(void)
     CHECK(ret, FAIL, "H5Dopen");
 
     /* Retrieve retries information */
-    ret = H5Fget_metadata_read_retries_info(fid, &info);
-    CHECK(ret, FAIL, "H5Fget_metadata_read_retries_info");
+    ret = H5Fget_metadata_read_retry_info(fid, &info);
+    CHECK(ret, FAIL, "H5Fget_metadata_read_retry_info");
 
     /* Should be 0 */
-    VERIFY(info.nbins, 0, "H5Fget_metadata_read_retries");
+    VERIFY(info.nbins, 0, "H5Fget_metadata_read_retry_info");
 
     /* Should be all NULL */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++)
-	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retries");
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
+	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retry_info");
 
     /* Closing */
     ret=H5Dclose(did1);
@@ -4402,15 +4559,15 @@ test_metadata_read_retries_info(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Retrieve retries information */
-    ret = H5Fget_metadata_read_retries_info(fid, &info);
-    CHECK(ret, FAIL, "H5Fget_metadata_read_retries_info");
+    ret = H5Fget_metadata_read_retry_info(fid, &info);
+    CHECK(ret, FAIL, "H5Fget_metadata_read_retry_info");
 
     /* Should be 2 */
-    VERIFY(info.nbins, 2, "H5Fget_metadata_read_retries");
+    VERIFY(info.nbins, 2, "H5Fget_metadata_read_retry_info");
 
     /* Should be all NULL */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++)
-	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retries");
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
+	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retry_info");
 
     /* Closing */
     ret=H5Fclose(fid);
@@ -4430,16 +4587,16 @@ test_metadata_read_retries_info(void)
     fid = H5Fopen(FILE1, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, new_fapl);
     CHECK(fid, FAIL, "H5Fopen");
 
-    /* Retrieve retries information */
-    ret = H5Fget_metadata_read_retries_info(fid, &info);
-    CHECK(ret, FAIL, "H5Fget_metadata_read_retries_info");
+    /* Retrieve retry information */
+    ret = H5Fget_metadata_read_retry_info(fid, &info);
+    CHECK(ret, FAIL, "H5Fget_metadata_read_retry_info");
 
     /* Should be 1 */
-    VERIFY(info.nbins, 1, "H5Fget_metadata_read_retries");
+    VERIFY(info.nbins, 1, "H5Fget_metadata_read_retry_info");
 
     /* Should be all NULL */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++)
-	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retries");
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
+	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retry_info");
 
     /* Closing */
     ret=H5Pclose(new_fapl);
@@ -4460,16 +4617,16 @@ test_metadata_read_retries_info(void)
     fid = H5Fopen(FILE1, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, new_fapl);
     CHECK(fid, FAIL, "H5Fopen");
 
-    /* Retrieve retries information */
-    ret = H5Fget_metadata_read_retries_info(fid, &info);
-    CHECK(ret, FAIL, "H5Fget_metadata_read_retries_info");
+    /* Retrieve retry information */
+    ret = H5Fget_metadata_read_retry_info(fid, &info);
+    CHECK(ret, FAIL, "H5Fget_metadata_read_retry_info");
 
     /* Should be 3 */
-    VERIFY(info.nbins, 3, "H5Fget_metadata_read_retries");
+    VERIFY(info.nbins, 3, "H5Fget_metadata_read_retry_info");
 
     /* Should be all NULL */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++)
-	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retries");
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
+	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retry_info");
 
     /* Closing */
     ret=H5Pclose(new_fapl);
@@ -4492,16 +4649,16 @@ test_metadata_read_retries_info(void)
     fid = H5Fopen(FILE1, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, new_fapl);
     CHECK(fid, FAIL, "H5Fopen");
 
-    /* Retrieve retries information */
-    ret = H5Fget_metadata_read_retries_info(fid, &info);
-    CHECK(ret, FAIL, "H5Fget_metadata_read_retries_info");
+    /* Retrieve retry information */
+    ret = H5Fget_metadata_read_retry_info(fid, &info);
+    CHECK(ret, FAIL, "H5Fget_metadata_read_retry_info");
 
     /* Should be 4 */
-    VERIFY(info.nbins, 4, "H5Fget_metadata_read_retries");
+    VERIFY(info.nbins, 4, "H5Fget_metadata_read_retry_info");
 
     /* Should be all NULL */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++)
-	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retries");
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
+	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retry_info");
 
     /* Closing */
     ret=H5Pclose(new_fapl);
@@ -4524,23 +4681,22 @@ test_metadata_read_retries_info(void)
     fid = H5Fopen(FILE1, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, new_fapl);
     CHECK(fid, FAIL, "H5Fopen");
 
-    /* Retrieve retries information */
-    ret = H5Fget_metadata_read_retries_info(fid, &info);
-    CHECK(ret, FAIL, "H5Fget_metadata_read_retries_info");
+    /* Retrieve retry information */
+    ret = H5Fget_metadata_read_retry_info(fid, &info);
+    CHECK(ret, FAIL, "H5Fget_metadata_read_retry_info");
 
     /* Should be 0 */
-    VERIFY(info.nbins, 0, "H5Fget_metadata_read_retries");
+    VERIFY(info.nbins, 0, "H5Fget_metadata_read_retry_info");
 
     /* Should be all NULL */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++)
-	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retries");
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
+	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retry_info");
 
     /* Closing */
     ret=H5Pclose(new_fapl);
     CHECK(ret, FAIL, "H5Pclose");
     ret=H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
-
 
 
     /* 
@@ -4567,16 +4723,16 @@ test_metadata_read_retries_info(void)
     ret = H5Dread(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, chkbuf2);
     CHECK(ret, FAIL, "H5Dread");
 
-    /* Retrieve retries information */
-    ret = H5Fget_metadata_read_retries_info(fid, &info);
-    CHECK(ret, FAIL, "H5Fget_metadata_read_retries_info");
+    /* Retrieve retry information */
+    ret = H5Fget_metadata_read_retry_info(fid, &info);
+    CHECK(ret, FAIL, "H5Fget_metadata_read_retry_info");
 
     /* Should be 2 */
-    VERIFY(info.nbins, 2, "H5Fget_metadata_read_retries");
+    VERIFY(info.nbins, 2, "H5Fget_metadata_read_retry_info");
 
     /* Should be all NULL */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++)
-	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retries");
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
+	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retry_info");
 
     /* Get a pointer to the internal file object */
     f = (H5F_t *)H5I_object(fid);
@@ -4606,23 +4762,23 @@ test_metadata_read_retries_info(void)
     CHECK(ret, FAIL, "H5F_track_metadata_read_retries");
 
     /* Retrieve the collection of metadata read retries */
-    ret = H5Fget_metadata_read_retries_info(fid, &info);
-    CHECK(ret, FAIL, "H5Fget_metadata_read_retries_info");
+    ret = H5Fget_metadata_read_retry_info(fid, &info);
+    CHECK(ret, FAIL, "H5Fget_metadata_read_retry_info");
 
     /* Verify retries for v2 B-tree leaf node */
-    VERIFY(info.retries[4][0], 0, "H5Fget_metadata_read_retries");
-    VERIFY(info.retries[4][1], 500, "H5Fget_metadata_read_retries");
+    VERIFY(info.retries[4][0], 0, "H5Fget_metadata_read_retry_info");
+    VERIFY(info.retries[4][1], 500, "H5Fget_metadata_read_retry_info");
 
     /* Verify retries for extensive array data block */
-    VERIFY(info.retries[15][0], 0, "H5Fget_metadata_read_retries");
-    VERIFY(info.retries[15][1], 1000, "H5Fget_metadata_read_retries");
+    VERIFY(info.retries[15][0], 0, "H5Fget_metadata_read_retry_info");
+    VERIFY(info.retries[15][1], 1000, "H5Fget_metadata_read_retry_info");
 
     /* Verify retries for file's superblock */
-    VERIFY(info.retries[20][0], 1, "H5Fget_metadata_read_retries");
-    VERIFY(info.retries[20][1], 0, "H5Fget_metadata_read_retries");
+    VERIFY(info.retries[20][0], 1, "H5Fget_metadata_read_retry_info");
+    VERIFY(info.retries[20][1], 0, "H5Fget_metadata_read_retry_info");
 
     /* Free memory for info.retries */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++) {
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++) {
 	if(info.retries[i] != NULL)
 	    HDfree(info.retries[i]);
     }
@@ -4655,50 +4811,49 @@ test_metadata_read_retries_info(void)
     CHECK(ret, FAIL, "H5F_track_metadata_read_retries");
 
     /* Retrieve the collection of metadata read retries */
-    ret = H5Fget_metadata_read_retries_info(fid, &info);
-    CHECK(ret, FAIL, "H5Fget_metadata_read_retries_info");
+    ret = H5Fget_metadata_read_retry_info(fid, &info);
+    CHECK(ret, FAIL, "H5Fget_metadata_read_retry_info");
 
     /* 
      * Verify info has both previous + current retries information:
      */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++) {
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++) {
 	switch(i) {
 	    case 0: /* Object header */
-		VERIFY(info.retries[i][0], 5, "H5Fget_metadata_read_retries");
-		VERIFY(info.retries[i][1], 0, "H5Fget_metadata_read_retries");
+		VERIFY(info.retries[i][0], 5, "H5Fget_metadata_read_retry_info");
+		VERIFY(info.retries[i][1], 0, "H5Fget_metadata_read_retry_info");
 		break;
 
 	    case 4: /* v2 B-tree leaf node */
-		VERIFY(info.retries[i][0], 0, "H5Fget_metadata_read_retries");
-		VERIFY(info.retries[i][1], 500, "H5Fget_metadata_read_retries");
+		VERIFY(info.retries[i][0], 0, "H5Fget_metadata_read_retry_info");
+		VERIFY(info.retries[i][1], 500, "H5Fget_metadata_read_retry_info");
 		break;
     
 	    case 15: /* Extensive array data block */
-		VERIFY(info.retries[i][0], 1, "H5Fget_metadata_read_retries");
-		VERIFY(info.retries[i][1], 1000, "H5Fget_metadata_read_retries");
+		VERIFY(info.retries[i][0], 1, "H5Fget_metadata_read_retry_info");
+		VERIFY(info.retries[i][1], 1000, "H5Fget_metadata_read_retry_info");
 		break;
 
 	    case 17: /* Fixed array header */
-		VERIFY(info.retries[i][0], 0, "H5Fget_metadata_read_retries");
-		VERIFY(info.retries[i][1], 10000, "H5Fget_metadata_read_retries");
+		VERIFY(info.retries[i][0], 0, "H5Fget_metadata_read_retry_info");
+		VERIFY(info.retries[i][1], 10000, "H5Fget_metadata_read_retry_info");
 		break;
 
 	    case 20: /* File's superblock */
-		VERIFY(info.retries[i][0], 2, "H5Fget_metadata_read_retries");
-		VERIFY(info.retries[i][1], 0, "H5Fget_metadata_read_retries");
+		VERIFY(info.retries[i][0], 2, "H5Fget_metadata_read_retry_info");
+		VERIFY(info.retries[i][1], 0, "H5Fget_metadata_read_retry_info");
 		break;
 
 	    default:
-		VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retries");
+		VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retry_info");
 		break;
 	}
     }
 
     /* Free memory for info.retries */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++) {
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
 	if(info.retries[i] != NULL)
 	    HDfree(info.retries[i]);
-    }
 
     /* Closing */
     ret=H5Dclose(did1);
@@ -4726,32 +4881,31 @@ test_metadata_read_retries_info(void)
     H5F_track_metadata_read_retries(f, H5AC_SUPERBLOCK_ID, 1);
 
     /* Retrieve the collection of metadata read retries */
-    ret = H5Fget_metadata_read_retries_info(fid, &info);
-    CHECK(ret, FAIL, "H5Fget_metadata_read_retries_info");
+    ret = H5Fget_metadata_read_retry_info(fid, &info);
+    CHECK(ret, FAIL, "H5Fget_metadata_read_retry_info");
 
     /* Should be 3 */
-    VERIFY(info.nbins, 3, "H5Fget_metadata_read_retries");
+    VERIFY(info.nbins, 3, "H5Fget_metadata_read_retry_info");
 
     /* Verify retries info */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++) {
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++) {
 	switch(i) {
 	    case 20: /* File's superblock */
-		VERIFY(info.retries[i][0], 1, "H5Fget_metadata_read_retries");
-		VERIFY(info.retries[i][1], 0, "H5Fget_metadata_read_retries");
-		VERIFY(info.retries[i][2], 0, "H5Fget_metadata_read_retries");
+		VERIFY(info.retries[i][0], 1, "H5Fget_metadata_read_retry_info");
+		VERIFY(info.retries[i][1], 0, "H5Fget_metadata_read_retry_info");
+		VERIFY(info.retries[i][2], 0, "H5Fget_metadata_read_retry_info");
 		break;
 
 	    default:
-		VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retries");
+		VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retry_info");
 		break;
 	}
     }
 
     /* Free memory */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++) {
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
 	if(info.retries[i] != NULL)
 	    HDfree(info.retries[i]);
-    }
 
     /* Closing */
     ret=H5Pclose(new_fapl);
@@ -4780,21 +4934,21 @@ test_metadata_read_retries_info(void)
     CHECK(fid, FAIL, "H5Freopen");
 
     /* Retrieve retries information for fid */
-    ret = H5Fget_metadata_read_retries_info(fid, &info);
-    CHECK(ret, FAIL, "H5Fget_metadata_read_retries_info");
+    ret = H5Fget_metadata_read_retry_info(fid, &info);
+    CHECK(ret, FAIL, "H5Fget_metadata_read_retry_info");
 
     /* Retrieve retries information for fid1*/
-    ret = H5Fget_metadata_read_retries_info(fid1, &info1);
-    CHECK(ret, FAIL, "H5Fget_metadata_read_retries_info");
+    ret = H5Fget_metadata_read_retry_info(fid1, &info1);
+    CHECK(ret, FAIL, "H5Fget_metadata_read_retry_info");
 
     /* Should be 0 */
-    VERIFY(info.nbins, 0, "H5Fget_metadata_read_retries");
-    VERIFY(info1.nbins, 0, "H5Fget_metadata_read_retries");
+    VERIFY(info.nbins, 0, "H5Fget_metadata_read_retry_info");
+    VERIFY(info1.nbins, 0, "H5Fget_metadata_read_retry_info");
 
     /* Should be all NULL */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++) {
-	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retries");
-	VERIFY(info1.retries[i], NULL, "H5Fget_metadata_read_retries");
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++) {
+	VERIFY(info.retries[i], NULL, "H5Fget_metadata_read_retry_info");
+	VERIFY(info1.retries[i], NULL, "H5Fget_metadata_read_retry_info");
     }
 
     /* Closing */
@@ -4838,40 +4992,42 @@ test_metadata_read_retries_info(void)
     }
 
     /* Retrieve the collection of metadata read retries for fid */
-    ret = H5Fget_metadata_read_retries_info(fid, &info);
-    CHECK(ret, FAIL, "H5Fget_metadata_read_retries_info");
+    ret = H5Fget_metadata_read_retry_info(fid, &info);
+    CHECK(ret, FAIL, "H5Fget_metadata_read_retry_info");
 
     /* Retrieve the collection of metadata read retries for fid1 */
-    ret = H5Fget_metadata_read_retries_info(fid1, &info1);
-    CHECK(ret, FAIL, "H5Fget_metadata_read_retries_info");
+    ret = H5Fget_metadata_read_retry_info(fid1, &info1);
+    CHECK(ret, FAIL, "H5Fget_metadata_read_retry_info");
 
     /* Verify nbins for fid & fid1: should be 2 */
-    VERIFY(info.nbins, 2, "H5Fget_metadata_read_retries");
-    VERIFY(info1.nbins, 2, "H5Fget_metadata_read_retries");
+    VERIFY(info.nbins, 2, "H5Fget_metadata_read_retry_info");
+    VERIFY(info1.nbins, 2, "H5Fget_metadata_read_retry_info");
 
     /* Verify retries for fid: fixed array data block page */
-    VERIFY(info.retries[19][0], 500, "H5Fget_metadata_read_retries");
-    VERIFY(info.retries[19][1], 0, "H5Fget_metadata_read_retries");
+    VERIFY(info.retries[19][0], 500, "H5Fget_metadata_read_retry_info");
+    VERIFY(info.retries[19][1], 0, "H5Fget_metadata_read_retry_info");
 
-    /* Verify retries for fid: free-space sections should be NULL */
-    VERIFY(info.retries[9], NULL, "H5Fget_metadata_read_retries");
-    VERIFY(info.retries[9], NULL, "H5Fget_metadata_read_retries");
+    /* Verify retries for fid: free-space sections */
+    /* (Since file was re-opened) */
+    VERIFY(info.retries[9][0], 0, "H5Fget_metadata_read_retry_info");
+    VERIFY(info.retries[9][1], 1000, "H5Fget_metadata_read_retry_info");
 
     /* Verify retries for fid1: free-space sections */
-    VERIFY(info1.retries[9][0], 0, "H5Fget_metadata_read_retries");
-    VERIFY(info1.retries[9][1], 1000, "H5Fget_metadata_read_retries");
+    VERIFY(info1.retries[9][0], 0, "H5Fget_metadata_read_retry_info");
+    VERIFY(info1.retries[9][1], 1000, "H5Fget_metadata_read_retry_info");
 
-    /* Verify retries for fid1: fixed array data block page should be NULL */
-    VERIFY(info1.retries[19], NULL, "H5Fget_metadata_read_retries");
-    VERIFY(info1.retries[19], NULL, "H5Fget_metadata_read_retries");
+    /* Verify retries for fid1: fixed array data block page */
+    /* (Since file was re-opened) */
+    VERIFY(info1.retries[19][0], 500, "H5Fget_metadata_read_retry_info");
+    VERIFY(info1.retries[19][1], 0, "H5Fget_metadata_read_retry_info");
 
     /* Free memory for info.retries and info1.retries */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++) {
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++) {
 	if(info.retries[i] != NULL)
 	    HDfree(info.retries[i]);
 	if(info1.retries[i] != NULL)
 	    HDfree(info1.retries[i]);
-    }
+    } /* end for */
 
     /* Closing */
     ret=H5Fclose(fid);
@@ -4881,8 +5037,7 @@ test_metadata_read_retries_info(void)
 
     ret=H5Pclose(fapl);
     CHECK(ret, FAIL, "H5Pclose");
-
-} /* end test_metadata_read_retries_info() */
+} /* end test_metadata_read_retry_info() */
 
 /****************************************************************
 **
@@ -5071,7 +5226,7 @@ test_file(void)
     test_swmr_write();          /* Tests for SWMR write access flag */
     test_swmr_read();           /* Tests for SWMR read access flag */
     test_metadata_read_attempts();    	/* Tests for public routines H5Fget/set_metadata_read_attempts() */
-    test_metadata_read_retries_info();  /* Tests for public routine H5Fget_metadata_read_retries_info() */
+    test_metadata_read_retry_info();    /* Tests for public routine H5Fget_metadata_read_retry_info() */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     test_deprec();              /* Test deprecated routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

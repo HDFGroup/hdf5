@@ -160,8 +160,6 @@ H5B2__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     H5B2_create_t       cparam;         /* B-tree creation parameters */
     H5B2_subid_t        id;		/* ID of B-tree class, as found in file */
     uint16_t            depth;          /* Depth of B-tree */
-    uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
     H5WB_t              *wb = NULL;     /* Wrapped buffer for header data */
     uint8_t             hdr_buf[H5B2_HDR_BUF_SIZE]; /* Buffer for header */
     uint8_t		*buf;           /* Pointer to header buffer */
@@ -188,7 +186,7 @@ H5B2__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
         HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read and validate header from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_BTREE, H5AC_BT2_HDR_ID, addr, hdr->hdr_size, hdr->hdr_size, dxpl_id, buf, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, dxpl_id, H5FD_MEM_BTREE, H5AC_BT2_HDR_ID, addr, hdr->hdr_size, hdr->hdr_size, buf) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 B-tree header")
 
     /* Get temporary pointer to serialized header */
@@ -226,15 +224,10 @@ H5B2__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     UINT16DECODE(p, hdr->root.node_nrec);
     H5F_DECODE_LENGTH(udata->f, p, hdr->root.all_nrec);
 
-    /* Metadata checksum */
-    UINT32DECODE(p, stored_chksum);
+    /* Already decoded and compared stored checksum earlier, when reading */
 
     /* Sanity check */
-    HDassert((size_t)(p - (const uint8_t *)buf) == hdr->hdr_size);
-
-    /* Verify checksum with checksum computed via H5F_read_check_metadata() */
-    if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 B-tree header")
+    HDassert((size_t)(p - (const uint8_t *)buf) == (hdr->hdr_size - H5_SIZEOF_CHKSUM));
 
     /* Initialize B-tree header info */
     cparam.cls = H5B2_client_class_g[id];
@@ -572,8 +565,6 @@ H5B2__cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     const uint8_t	*p;             /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native record info */
     H5B2_node_ptr_t	*int_node_ptr;  /* Pointer to node pointer info */
-    uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned		u;              /* Local index variable */
     size_t 		chk_size;	/* Exact size of the node with checksum at the end */
     H5B2_internal_t	*ret_value;     /* Return value */
@@ -606,7 +597,7 @@ H5B2__cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     /* Internal node prefix header + records + child pointer triplets: size with checksum at the end */
     chk_size = H5B2_INT_PREFIX_SIZE + (udata->nrec * udata->hdr->rrec_size) + ((size_t)(udata->nrec + 1) * H5B2_INT_POINTER_SIZE(udata->hdr, udata->depth));
     /* Read and validate internal node from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_BTREE, H5AC_BT2_INT_ID, addr, (size_t)udata->hdr->node_size, chk_size, dxpl_id, udata->hdr->page, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, dxpl_id, H5FD_MEM_BTREE, H5AC_BT2_INT_ID, addr, (size_t)udata->hdr->node_size, chk_size, udata->hdr->page) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 internal node")
 
     p = udata->hdr->page;
@@ -663,15 +654,10 @@ H5B2__cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
         int_node_ptr++;
     } /* end for */
 
-    /* Metadata checksum */
-    UINT32DECODE(p, stored_chksum);
+    /* Already decoded and compared stored checksum earlier, when reading */
 
     /* Sanity check parsing */
-    HDassert((size_t)(p - (const uint8_t *)udata->hdr->page) <= udata->hdr->node_size);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 internal node")
+    HDassert((size_t)(p - (const uint8_t *)udata->hdr->page) <= (udata->hdr->node_size - H5_SIZEOF_CHKSUM));
 
     /* Set return value */
     ret_value = internal;
@@ -994,8 +980,6 @@ H5B2__cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata
     H5B2_leaf_t		*leaf = NULL;   /* Pointer to lead node loaded */
     const uint8_t	*p;             /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native keys */
-    uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned		u;              /* Local index variable */
     size_t 		chk_size;	/* Exact size of the node with checksum at the end */
     H5B2_leaf_t		*ret_value;     /* Return value */
@@ -1029,7 +1013,7 @@ H5B2__cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata
     chk_size = H5B2_LEAF_PREFIX_SIZE + (udata->nrec * udata->hdr->rrec_size);
 
     /* Read and validate leaf node from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_BTREE, H5AC_BT2_LEAF_ID, addr, (size_t)udata->hdr->node_size, chk_size, dxpl_id, udata->hdr->page, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, dxpl_id, H5FD_MEM_BTREE, H5AC_BT2_LEAF_ID, addr, (size_t)udata->hdr->node_size, chk_size, udata->hdr->page) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 leaf node")
 
     p = udata->hdr->page;
@@ -1066,15 +1050,10 @@ H5B2__cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata
         native += udata->hdr->cls->nrec_size;
     } /* end for */
 
-    /* Metadata checksum */
-    UINT32DECODE(p, stored_chksum);
+    /* Already decoded and compared stored checksum earlier, when reading */
 
     /* Sanity check parsing */
-    HDassert((size_t)(p - (const uint8_t *)udata->hdr->page) <= udata->hdr->node_size);
-
-    /* Verify checksum with checksum computed via H5F_read_check_metadata() */
-    if(stored_chksum != computed_chksum)
-	HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 leaf node")
+    HDassert((size_t)(p - (const uint8_t *)udata->hdr->page) <= (udata->hdr->node_size - H5_SIZEOF_CHKSUM));
 
     /* Set return value */
     ret_value = leaf;

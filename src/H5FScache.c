@@ -156,8 +156,6 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     uint8_t             hdr_buf[H5FS_HDR_BUF_SIZE]; /* Buffer for header */
     uint8_t             *hdr;           /* Pointer to header buffer */
     const uint8_t       *p;             /* Pointer into raw data buffer */
-    uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned            nclasses;       /* Number of section classes */
     H5FS_t              *ret_value;     /* Return value */
 
@@ -183,7 +181,7 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
         HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read and validate header from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_FSPACE_HDR, H5AC_FSPACE_HDR_ID, addr, fspace->hdr_size, fspace->hdr_size, dxpl_id, hdr, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, dxpl_id, H5FD_MEM_FSPACE_HDR, H5AC_FSPACE_HDR_ID, addr, fspace->hdr_size, fspace->hdr_size, hdr) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for free space header")
 
     p = hdr;
@@ -241,14 +239,10 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     /* Allocated size of serialized free space sections */
     H5F_DECODE_LENGTH(udata->f, p, fspace->alloc_sect_size);
 
-    /* Metadata checksum */
-    UINT32DECODE(p, stored_chksum);
+    /* Already decoded and compared stored checksum earlier, when reading */
 
-    HDassert((size_t)(p - (const uint8_t *)hdr) == fspace->hdr_size);
-
-    /* Verify checksum with checksum computed via H5F_read_check_metadata() */
-    if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for free space header")
+    /* Sanity check */
+    HDassert((size_t)(p - (const uint8_t *)hdr) == (fspace->hdr_size - H5_SIZEOF_CHKSUM));
 
     /* Set return value */
     ret_value = fspace;
@@ -555,8 +549,6 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata
     size_t              old_sect_size;  /* Old section size */
     uint8_t             *buf = NULL;    /* Temporary buffer */
     const uint8_t       *p;             /* Pointer into raw data buffer */
-    uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
     H5FS_sinfo_t        *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -575,7 +567,7 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Read and validate free space sections from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_FSPACE_SINFO, H5AC_FSPACE_SINFO_ID, udata->fspace->sect_addr, (size_t)udata->fspace->sect_size, (size_t)udata->fspace->sect_size, dxpl_id, buf, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, dxpl_id, H5FD_MEM_FSPACE_SINFO, H5AC_FSPACE_SINFO_ID, udata->fspace->sect_addr, (size_t)udata->fspace->sect_size, (size_t)udata->fspace->sect_size, buf) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for free space sections")
 
     /* Deserialize free sections from buffer available */
@@ -668,15 +660,10 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata
         HDassert(old_tot_space == udata->fspace->tot_space);
     } /* end if */
 
-    /* Metadata checksum */
-    UINT32DECODE(p, stored_chksum);
-
-    /* Verify checksum with checksum computed via H5F_read_check_metadata() */
-    if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for free space sections")
+    /* Already decoded and compared stored checksum earlier, when reading */
 
     /* Sanity check */
-    HDassert((size_t)(p - (const uint8_t *)buf) == old_sect_size);
+    HDassert((size_t)(p - (const uint8_t *)buf) == (old_sect_size - H5_SIZEOF_CHKSUM));
 
     /* Set return value */
     ret_value = sinfo;

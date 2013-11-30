@@ -145,7 +145,7 @@ HDfprintf(stderr, "%s: write to addr = %a, size = %Zu\n", FUNC, addr, size);
 
     HDassert(f);
     HDassert(f->shared);
-    HDassert(f->intent & H5F_ACC_RDWR);
+    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
     HDassert(buf);
     HDassert(H5F_addr_defined(addr));
 
@@ -243,6 +243,8 @@ done:
  * Purpose:   	Decode checksum stored in the buffer
  *		Calculate checksum for the data in the buffer
  *
+ * Note:	Assumes that the checksum is the last data in the buffer
+ *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Vailin Choi; Sept 2013
@@ -250,34 +252,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_get_checksums(uint8_t *buf, size_t chk_size, uint32_t *s_chksum/*out*/, uint32_t *c_chksum/*out*/)
+H5F_get_checksums(const uint8_t *buf, size_t buf_size, uint32_t *s_chksum/*out*/, uint32_t *c_chksum/*out*/)
 {
-    uint32_t stored_chksum;  	/* Stored metadata checksum value */
-    uint32_t computed_chksum; 	/* Computed metadata checksum value */
-    const uint8_t *chk_p;      	/* Pointer into raw data buffer */
-
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(buf);
-    HDassert(chk_size);
-
-    /* Compute checksum for the buffer */
-    computed_chksum = H5_checksum_metadata(buf, chk_size - H5_SIZEOF_CHKSUM, 0);
-
-    /* Offset to the checksum in the buffer */
-    chk_p = buf + chk_size - H5_SIZEOF_CHKSUM;
-
-    /* Decode the checksum stored in the buffer */
-    UINT32DECODE(chk_p, stored_chksum);
+    HDassert(buf_size);
 
     /* Return the stored checksum */
-    if(s_chksum)
-	*s_chksum = stored_chksum;
+    if(s_chksum) {
+        const uint8_t *chk_p;      	/* Pointer into raw data buffer */
 
-    /* Return the computed checksum */
+        /* Offset to the checksum in the buffer */
+        chk_p = buf + buf_size - H5_SIZEOF_CHKSUM;
+
+        /* Decode the checksum stored in the buffer */
+        UINT32DECODE(chk_p, *s_chksum);
+    } /* end if */
+
+    /* Return the computed checksum for the buffer */
     if(c_chksum)
-	*c_chksum = computed_chksum;
+	*c_chksum = H5_checksum_metadata(buf, buf_size - H5_SIZEOF_CHKSUM, 0);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5F_get_chksums() */
@@ -288,13 +284,14 @@ H5F_get_checksums(uint8_t *buf, size_t chk_size, uint32_t *s_chksum/*out*/, uint
  *
  * Purpose:   	Attempts to read and validate a piece of meatadata that has
  *		checksum as follows:
- * 		a) read the piece of metadata
- * 		b) calculate checksum for the buffer of metadata
- * 		c) decode the checksum stored in the buffer of metadata
- *		d) compare the computed checksum with its stored checksum
+ * 		  a) read the piece of metadata
+ * 		  b) calculate checksum for the buffer of metadata
+ * 		  c) decode the checksum stored in the buffer of metadata
+ *		  d) compare the computed checksum with its stored checksum
+ *
  *	       	The library will perform (a) to (d) above for "f->read_attempts"
  *		times or until the checksum comparison in (d) passes.
- *		This routine also tracks the # of retries via 
+ *		This routine also records the # of retries via 
  *		H5F_track_metadata_read_retries()
  *
  * Return:      Non-negative on success/Negative on failure
@@ -304,8 +301,9 @@ H5F_get_checksums(uint8_t *buf, size_t chk_size, uint32_t *s_chksum/*out*/, uint
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_read_check_metadata(H5F_t *f, H5FD_mem_t type, unsigned actype, haddr_t addr, size_t read_size, size_t chk_size,
-    hid_t dxpl_id, uint8_t *buf/*out*/, uint32_t *chksum/*out*/)
+H5F_read_check_metadata(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
+    unsigned actype, haddr_t addr, size_t read_size, size_t chk_size,
+    uint8_t *buf/*out*/)
 {
     unsigned tries, max_tries;	/* The # of read attempts */
     unsigned retries;		/* The # of retries */
@@ -316,7 +314,7 @@ H5F_read_check_metadata(H5F_t *f, H5FD_mem_t type, unsigned actype, haddr_t addr
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the # of read attempts */
-    max_tries = tries = f->read_attempts;
+    max_tries = tries = H5F_GET_READ_ATTEMPTS(f);
 
     do {
         /* Read header from disk */
@@ -329,25 +327,20 @@ H5F_read_check_metadata(H5F_t *f, H5FD_mem_t type, unsigned actype, haddr_t addr
         /* Verify checksum */
         if(stored_chksum == computed_chksum)
             break;
-
     } while(--tries);
 
+    /* Check for too many tries */
     if(tries == 0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "incorrect metadatda checksum after all read attempts (%u) for %u bytes:c_chksum=%u, s_chkum=%u", 
 	    max_tries, chk_size, computed_chksum, stored_chksum)
 
     /* Calculate and track the # of retries */
     retries = max_tries - tries;
-    if(retries) { /* Does not track 0 retry */
-        HDfprintf(stderr, "%s: SUCCESS after %u retries; actype=%u\n", FUNC, retries, actype);
+    if(retries)         /* Does not track 0 retry */
 	if(H5F_track_metadata_read_retries(f, actype, retries) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "cannot track read tries = %u ", retries)
-    }
-
-    /* Return the computed checksum */
-    if(chksum)
-	*chksum = computed_chksum;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5F_read_check_metadata */
+

@@ -280,7 +280,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5F_PACKAGE
-#define H5F_INTENT(F)           ((F)->intent)
+#define H5F_INTENT(F)           ((F)->shared->flags)
 #define H5F_OPEN_NAME(F)        ((F)->open_name)
 #define H5F_ACTUAL_NAME(F)      ((F)->actual_name)
 #define H5F_EXTPATH(F)          ((F)->extpath)
@@ -292,7 +292,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_FILE_ID(F)          ((F)->file_id)
 #define H5F_PARENT(F)           ((F)->parent)
 #define H5F_NMOUNTS(F)          ((F)->nmounts)
-#define H5F_GET_READ_ATTEMPTS(F)    ((F)->read_attempts)
+#define H5F_GET_READ_ATTEMPTS(F) ((F)->shared->read_attempts)
 #define H5F_DRIVER_ID(F)        ((F)->shared->lf->driver_id)
 #define H5F_GET_FILENO(F,FILENUM) ((FILENUM) = (F)->shared->lf->fileno)
 #define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags & (FL))
@@ -335,7 +335,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_FILE_ID(F)          (H5F_get_file_id(F))
 #define H5F_PARENT(F)           (H5F_get_parent(F))
 #define H5F_NMOUNTS(F)          (H5F_get_nmounts(F))
-#define H5F_GET_READ_ATTEMPTS(F)    (H5F_get_read_attempts(F))
+#define H5F_GET_READ_ATTEMPTS(F) (H5F_get_read_attempts(F))
 #define H5F_DRIVER_ID(F)        (H5F_get_driver_id(F))
 #define H5F_GET_FILENO(F,FILENUM) (H5F_get_fileno((F), &(FILENUM)))
 #define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
@@ -499,16 +499,19 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 /* Default free space section threshold used by free-space managers */
 #define H5F_FREE_SPACE_THRESHOLD_DEF	        1
 
+/* Metadata read attempt values */
+#define H5F_METADATA_READ_ATTEMPTS		1	/* Default # of read attempts for non-SWMR access */
+#define H5F_SWMR_METADATA_READ_ATTEMPTS		100	/* Default # of read attempts for SWMR access */
+
 /* Macros to define signatures of all objects in the file */
 
 /* Size of signature information (on disk) */
 /* (all on-disk signatures should be this length) */
 #define H5_SIZEOF_MAGIC               4
 
+/* Size of checksum information (on disk) */
+/* (all on-disk checksums should be this length) */
 #define H5_SIZEOF_CHKSUM              	4
-
-#define H5F_METADATA_READ_ATTEMPTS		1		/* Default # of read attempts for non-SWMR access */
-#define H5F_SWMR_METADATA_READ_ATTEMPTS		100		/* Default # of read attempts for SWMR access */
 
 /* v1 B-tree node signature */
 #define H5B_MAGIC	                "TREE"
@@ -638,10 +641,12 @@ H5_DLL herr_t H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
 H5_DLL herr_t H5F_flush_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id);
 H5_DLL herr_t H5F_evict_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id);
 
-/* Function that read and verify a piece of metadata with checksum */
-H5_DLL herr_t H5F_read_check_metadata(H5F_t *f, H5FD_mem_t type, unsigned actype, haddr_t addr, size_t read_size, size_t chk_size,
-    hid_t dxpl_id, uint8_t *buf/*out*/, uint32_t *chksum/*out*/);
-H5_DLL herr_t H5F_get_checksums(uint8_t *buf, size_t chk_size, uint32_t *s_chksum, uint32_t *c_chksum);
+/* Functions that read & verify a piece of metadata with checksum */
+H5_DLL herr_t H5F_read_check_metadata(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
+    unsigned actype, haddr_t addr, size_t read_size, size_t chk_size,
+    uint8_t *buf/*out*/);
+H5_DLL herr_t H5F_get_checksums(const uint8_t *buf, size_t chk_size, uint32_t *s_chksum, uint32_t *c_chksum);
+
 /* Routine to track the # of retries */
 H5_DLL herr_t H5F_track_metadata_read_retries(H5F_t *f, unsigned actype, unsigned retries);
 

@@ -1395,9 +1395,10 @@ test_flush_depend_cb(const void *_elmt, size_t nelmts, void *udata)
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tparam)
+test_flush_depend(const char *env_h5_drvr, hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tparam)
 {
     hid_t	file = -1;              /* File ID */
+    hid_t	fapl_copy = -1;         /* Copy of FAPL */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5EA_t      *ea = NULL;             /* Extensible array wrapper */
     haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
@@ -1414,188 +1415,205 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
     uint64_t    welmt;                  /* Element to write */
     hsize_t     idx;                    /* Index value of element */
 
-    /* Create file & retrieve pointer to internal file object */
-    if(create_file(H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, fapl, &file, &f) < 0)
-        TEST_ERROR
-
     /*
      * Display testing message
      */
     TESTING("flush dependencies on array metadata");
 
-    /* Create array */
-    cb.encode = test_flush_depend_cb;
-    HDmemset(&fd_info, 0, sizeof(earray_flush_depend_ctx_t));
-    cb.udata = &fd_info;
-    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr, &cb) < 0)
-        TEST_ERROR
+    /* Can't run this test with multi-file VFDs */
+    if(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
+        /* Copy FAPL and set latest format on it */
+        if((fapl_copy = H5Pcopy(fapl)) < 0)
+            FAIL_STACK_ERROR
+        if(H5Pset_libver_bounds(fapl_copy, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            FAIL_STACK_ERROR
 
-    /* Verify the creation parameters */
-    if(verify_cparam(ea, cparam) < 0)
-        TEST_ERROR
+        /* Create file & retrieve pointer to internal file object */
+        if(create_file(H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, fapl_copy, &file, &f) < 0)
+            TEST_ERROR
 
-    /* Create base entry to insert */
-    if(NULL == (base_entry = (earray_test_t *)HDmalloc(sizeof(earray_test_t))))
-        TEST_ERROR
-    HDmemset(base_entry, 0, sizeof(earray_test_t));
-    base_entry->idx = (uint64_t)-1;
-    base_entry->fd_info = &fd_info;
+        /* Close copy of FAPL */
+        if(H5Pclose(fapl_copy) < 0)
+            FAIL_STACK_ERROR
 
-    /* Insert test entry into cache */
-    base_addr = HADDR_MAX;
-    if(H5AC_insert_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, base_addr, base_entry, H5AC__PIN_ENTRY_FLAG) < 0)
-        TEST_ERROR
+        /* Create array */
+        cb.encode = test_flush_depend_cb;
+        HDmemset(&fd_info, 0, sizeof(earray_flush_depend_ctx_t));
+        cb.udata = &fd_info;
+        if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr, &cb) < 0)
+            TEST_ERROR
 
-    /* Set the base entry as a flush dependency for the array */
-    if(H5EA_depend((H5AC_info_t *)base_entry, ea) < 0)
-        TEST_ERROR
+        /* Verify the creation parameters */
+        if(verify_cparam(ea, cparam) < 0)
+            TEST_ERROR
 
-    /* Create entry #1 to insert */
-    if(NULL == (entry1 = (earray_test_t *)HDmalloc(sizeof(earray_test_t))))
-        TEST_ERROR
-    HDmemset(entry1, 0, sizeof(earray_test_t));
-    entry1->fd_info = &fd_info;
+        /* Create base entry to insert */
+        if(NULL == (base_entry = (earray_test_t *)HDmalloc(sizeof(earray_test_t))))
+            TEST_ERROR
+        HDmemset(base_entry, 0, sizeof(earray_test_t));
+        base_entry->idx = (uint64_t)-1;
+        base_entry->fd_info = &fd_info;
 
-    /* Insert test entry into cache */
-    addr1 = HADDR_MAX - 1;
-    if(H5AC_insert_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr1, entry1, H5AC__PIN_ENTRY_FLAG) < 0)
-        TEST_ERROR
+        /* Insert test entry into cache */
+        base_addr = HADDR_MAX;
+        if(H5AC_insert_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, base_addr, base_entry, H5AC__PIN_ENTRY_FLAG) < 0)
+            TEST_ERROR
 
-    /* Set the test entry as a flush dependency for 0th index in the array */
-    if(H5EA_support(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)0, (H5AC_info_t *)entry1) < 0)
-        TEST_ERROR
+        /* Set the base entry as a flush dependency for the array */
+        if(H5EA_depend((H5AC_info_t *)base_entry, ea) < 0)
+            TEST_ERROR
 
-    /* Set element of array */
-    welmt = (uint64_t)0;
-    idx = 0;
-    if(H5EA_set(ea, H5P_DATASET_XFER_DEFAULT, idx, &welmt) < 0)
-        FAIL_STACK_ERROR
+        /* Create entry #1 to insert */
+        if(NULL == (entry1 = (earray_test_t *)HDmalloc(sizeof(earray_test_t))))
+            TEST_ERROR
+        HDmemset(entry1, 0, sizeof(earray_test_t));
+        entry1->fd_info = &fd_info;
 
-    /* Create entry #2 to insert */
-    if(NULL == (entry2 = (earray_test_t *)HDmalloc(sizeof(earray_test_t))))
-        TEST_ERROR
-    HDmemset(entry2, 0, sizeof(earray_test_t));
-    entry2->idx = (uint64_t)1;
-    entry2->fd_info = &fd_info;
+        /* Insert test entry into cache */
+        addr1 = HADDR_MAX - 1;
+        if(H5AC_insert_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr1, entry1, H5AC__PIN_ENTRY_FLAG) < 0)
+            TEST_ERROR
 
-    /* Insert test entry into cache */
-    addr2 = HADDR_MAX - 2;
-    if(H5AC_insert_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr2, entry2, H5AC__PIN_ENTRY_FLAG) < 0)
-        TEST_ERROR
+        /* Set the test entry as a flush dependency for 0th index in the array */
+        if(H5EA_support(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)0, (H5AC_info_t *)entry1) < 0)
+            TEST_ERROR
 
-    /* Set the test entry as a flush dependency for 1st index in the array */
-    if(H5EA_support(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)1, (H5AC_info_t *)entry2) < 0)
-        TEST_ERROR
+        /* Set element of array */
+        welmt = (uint64_t)0;
+        idx = 0;
+        if(H5EA_set(ea, H5P_DATASET_XFER_DEFAULT, idx, &welmt) < 0)
+            FAIL_STACK_ERROR
 
-    /* Set element of array */
-    welmt = (uint64_t)1;
-    idx = 1;
-    if(H5EA_set(ea, H5P_DATASET_XFER_DEFAULT, idx, &welmt) < 0)
-        FAIL_STACK_ERROR
+        /* Create entry #2 to insert */
+        if(NULL == (entry2 = (earray_test_t *)HDmalloc(sizeof(earray_test_t))))
+            TEST_ERROR
+        HDmemset(entry2, 0, sizeof(earray_test_t));
+        entry2->idx = (uint64_t)1;
+        entry2->fd_info = &fd_info;
 
-    /* Create entry #3 to insert */
-    if(NULL == (entry3 = (earray_test_t *)HDmalloc(sizeof(earray_test_t))))
-        TEST_ERROR
-    HDmemset(entry3, 0, sizeof(earray_test_t));
-    entry3->idx = (uint64_t)10000;
-    entry3->fd_info = &fd_info;
+        /* Insert test entry into cache */
+        addr2 = HADDR_MAX - 2;
+        if(H5AC_insert_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr2, entry2, H5AC__PIN_ENTRY_FLAG) < 0)
+            TEST_ERROR
 
-    /* Insert test entry into cache */
-    addr3 = HADDR_MAX - 3;
-    if(H5AC_insert_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr3, entry3, H5AC__PIN_ENTRY_FLAG) < 0)
-        TEST_ERROR
+        /* Set the test entry as a flush dependency for 1st index in the array */
+        if(H5EA_support(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)1, (H5AC_info_t *)entry2) < 0)
+            TEST_ERROR
 
-    /* Set the test entry as a flush dependency for 10,000th index in the array */
-    if(H5EA_support(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)10000, (H5AC_info_t *)entry3) < 0)
-        TEST_ERROR
+        /* Set element of array */
+        welmt = (uint64_t)1;
+        idx = 1;
+        if(H5EA_set(ea, H5P_DATASET_XFER_DEFAULT, idx, &welmt) < 0)
+            FAIL_STACK_ERROR
 
-    /* Set element of array */
-    welmt = (uint64_t)10000;
-    idx = 10000;
-    if(H5EA_set(ea, H5P_DATASET_XFER_DEFAULT, idx, &welmt) < 0)
-        FAIL_STACK_ERROR
+        /* Create entry #3 to insert */
+        if(NULL == (entry3 = (earray_test_t *)HDmalloc(sizeof(earray_test_t))))
+            TEST_ERROR
+        HDmemset(entry3, 0, sizeof(earray_test_t));
+        entry3->idx = (uint64_t)10000;
+        entry3->fd_info = &fd_info;
 
+        /* Insert test entry into cache */
+        addr3 = HADDR_MAX - 3;
+        if(H5AC_insert_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr3, entry3, H5AC__PIN_ENTRY_FLAG) < 0)
+            TEST_ERROR
 
-    /* Flush the cache */
-    if(H5Fflush(file, H5F_SCOPE_GLOBAL) < 0)
-        TEST_ERROR
+        /* Set the test entry as a flush dependency for 10,000th index in the array */
+        if(H5EA_support(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)10000, (H5AC_info_t *)entry3) < 0)
+            TEST_ERROR
 
-    /* Check that all callback flags have been set */
-    if(!fd_info.base_obj)
-        TEST_ERROR
-    if(!fd_info.idx0_obj)
-        TEST_ERROR
-    if(!fd_info.idx0_elem)
-        TEST_ERROR
-    if(!fd_info.idx1_obj)
-        TEST_ERROR
-    if(!fd_info.idx1_elem)
-        TEST_ERROR
-    if(!fd_info.idx10000_obj)
-        TEST_ERROR
-    if(!fd_info.idx10000_elem)
-        TEST_ERROR
+        /* Set element of array */
+        welmt = (uint64_t)10000;
+        idx = 10000;
+        if(H5EA_set(ea, H5P_DATASET_XFER_DEFAULT, idx, &welmt) < 0)
+            FAIL_STACK_ERROR
 
 
-    /* Remove the base entry as a flush dependency for the array */
-    if(H5EA_undepend((H5AC_info_t *)base_entry, ea) < 0)
-        TEST_ERROR
+        /* Flush the cache */
+        if(H5Fflush(file, H5F_SCOPE_GLOBAL) < 0)
+            TEST_ERROR
 
-    /* Protect the base entry */
-    if(NULL == (base_entry = (earray_test_t *)H5AC_protect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, base_addr, NULL, H5AC_WRITE)))
-        TEST_ERROR
+        /* Check that all callback flags have been set */
+        if(!fd_info.base_obj)
+            TEST_ERROR
+        if(!fd_info.idx0_obj)
+            TEST_ERROR
+        if(!fd_info.idx0_elem)
+            TEST_ERROR
+        if(!fd_info.idx1_obj)
+            TEST_ERROR
+        if(!fd_info.idx1_elem)
+            TEST_ERROR
+        if(!fd_info.idx10000_obj)
+            TEST_ERROR
+        if(!fd_info.idx10000_elem)
+            TEST_ERROR
 
-    /* Unprotect & unpin the base entry */
-    if(H5AC_unprotect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, base_addr, base_entry, (H5AC__UNPIN_ENTRY_FLAG | H5AC__DELETED_FLAG)) < 0)
-        TEST_ERROR
 
-    /* Remove the test entry as a flush dependency for 0th index in the array */
-    if(H5EA_unsupport(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)0, (H5AC_info_t *)entry1) < 0)
-        TEST_ERROR
+        /* Remove the base entry as a flush dependency for the array */
+        if(H5EA_undepend((H5AC_info_t *)base_entry, ea) < 0)
+            TEST_ERROR
 
-    /* Protect the test entry */
-    if(NULL == (entry1 = (earray_test_t *)H5AC_protect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr1, NULL, H5AC_WRITE)))
-        TEST_ERROR
+        /* Protect the base entry */
+        if(NULL == (base_entry = (earray_test_t *)H5AC_protect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, base_addr, NULL, H5AC_WRITE)))
+            TEST_ERROR
 
-    /* Unprotect & unpin the test entry */
-    if(H5AC_unprotect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr1, entry1, (H5AC__UNPIN_ENTRY_FLAG | H5AC__DELETED_FLAG)) < 0)
-        TEST_ERROR
+        /* Unprotect & unpin the base entry */
+        if(H5AC_unprotect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, base_addr, base_entry, (H5AC__UNPIN_ENTRY_FLAG | H5AC__DELETED_FLAG)) < 0)
+            TEST_ERROR
 
-    /* Remove the test entry as a flush dependency for 1st index in the array */
-    if(H5EA_unsupport(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)1, (H5AC_info_t *)entry2) < 0)
-        TEST_ERROR
+        /* Remove the test entry as a flush dependency for 0th index in the array */
+        if(H5EA_unsupport(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)0, (H5AC_info_t *)entry1) < 0)
+            TEST_ERROR
 
-    /* Protect the test entry */
-    if(NULL == (entry2 = (earray_test_t *)H5AC_protect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr2, NULL, H5AC_WRITE)))
-        TEST_ERROR
+        /* Protect the test entry */
+        if(NULL == (entry1 = (earray_test_t *)H5AC_protect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr1, NULL, H5AC_WRITE)))
+            TEST_ERROR
 
-    /* Unprotect & unpin the test entry */
-    if(H5AC_unprotect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr2, entry2, (H5AC__UNPIN_ENTRY_FLAG | H5AC__DELETED_FLAG)) < 0)
-        TEST_ERROR
+        /* Unprotect & unpin the test entry */
+        if(H5AC_unprotect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr1, entry1, (H5AC__UNPIN_ENTRY_FLAG | H5AC__DELETED_FLAG)) < 0)
+            TEST_ERROR
 
-    /* Remove the test entry as a flush dependency for 10,000th index in the array */
-    if(H5EA_unsupport(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)10000, (H5AC_info_t *)entry3) < 0)
-        TEST_ERROR
+        /* Remove the test entry as a flush dependency for 1st index in the array */
+        if(H5EA_unsupport(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)1, (H5AC_info_t *)entry2) < 0)
+            TEST_ERROR
 
-    /* Protect the test entry */
-    if(NULL == (entry3 = (earray_test_t *)H5AC_protect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr3, NULL, H5AC_WRITE)))
-        TEST_ERROR
+        /* Protect the test entry */
+        if(NULL == (entry2 = (earray_test_t *)H5AC_protect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr2, NULL, H5AC_WRITE)))
+            TEST_ERROR
 
-    /* Unprotect & unpin the test entry */
-    if(H5AC_unprotect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr3, entry3, (H5AC__UNPIN_ENTRY_FLAG | H5AC__DELETED_FLAG)) < 0)
-        TEST_ERROR
+        /* Unprotect & unpin the test entry */
+        if(H5AC_unprotect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr2, entry2, (H5AC__UNPIN_ENTRY_FLAG | H5AC__DELETED_FLAG)) < 0)
+            TEST_ERROR
 
-    /* Close the extensible array */
-    if(H5EA_close(ea, H5P_DATASET_XFER_DEFAULT) < 0)
-        FAIL_STACK_ERROR
-    ea = NULL;
+        /* Remove the test entry as a flush dependency for 10,000th index in the array */
+        if(H5EA_unsupport(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)10000, (H5AC_info_t *)entry3) < 0)
+            TEST_ERROR
 
-    /* Close the file */
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        /* Protect the test entry */
+        if(NULL == (entry3 = (earray_test_t *)H5AC_protect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr3, NULL, H5AC_WRITE)))
+            TEST_ERROR
 
-    /* All tests passed */
-    PASSED()
+        /* Unprotect & unpin the test entry */
+        if(H5AC_unprotect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr3, entry3, (H5AC__UNPIN_ENTRY_FLAG | H5AC__DELETED_FLAG)) < 0)
+            TEST_ERROR
+
+        /* Close the extensible array */
+        if(H5EA_close(ea, H5P_DATASET_XFER_DEFAULT) < 0)
+            FAIL_STACK_ERROR
+        ea = NULL;
+
+        /* Close the file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
+
+        /* All tests passed */
+        PASSED()
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD not compatible with SWMR access");
+    } /* end else */
 
     return 0;
 
@@ -1603,6 +1621,7 @@ error:
     H5E_BEGIN_TRY {
         if(ea)
             H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+	H5Pclose(fapl_copy);
 	H5Fclose(file);
     } H5E_END_TRY;
 
@@ -2790,6 +2809,11 @@ main(void)
     unsigned	nerrors = 0;            /* Cumulative error count */
     time_t      curr_time;              /* Current time, for seeding random number generator */
     int		ExpressMode;            /* Test express value */
+    const char  *env_h5_drvr;      /* File Driver value from environment */
+
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if(env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
 
     /* Reset library */
     h5_reset();
@@ -2855,7 +2879,7 @@ main(void)
         nerrors += test_reopen(fapl, &cparam, &tparam);
         nerrors += test_open_twice(fapl, &cparam, &tparam);
         nerrors += test_delete_open(fapl, &cparam, &tparam);
-        nerrors += test_flush_depend(fapl, &cparam, &tparam);
+        nerrors += test_flush_depend(env_h5_drvr, fapl, &cparam, &tparam);
 
         /* Iterate over the type of capacity tests */
         for(curr_iter = EARRAY_ITER_FW; curr_iter < EARRAY_ITER_NITERS; curr_iter++) {

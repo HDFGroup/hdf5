@@ -255,6 +255,11 @@ struct H5F_file_t {
 
     /* Metadata accumulator information */
     H5F_meta_accum_t accum;     /* Metadata accumulator info           	*/
+
+    /* Metadata retry info */
+    unsigned 		read_attempts;	/* The # of reads to try when reading metadata with checksum */
+    unsigned		retries_nbins;		/* # of bins for each retries[] */
+    uint32_t		*retries[H5AC_NTYPES];  /* Track # of read retries for metdata items with checksum */
 };
 
 /*
@@ -263,8 +268,6 @@ struct H5F_file_t {
  * to shared H5F_file_t structs.
  */
 struct H5F_t {
-    unsigned		intent;		/* The flags passed to H5F_open()*/
-    unsigned 		read_attempts;	/* The # of reads to try when reading metadata with checksum */
     char		*open_name;	/* Name used to open file	*/
     char		*actual_name;	/* Actual name of the file, after resolving symlinks, etc. */
     char               	*extpath;       /* Path for searching target external link file */
@@ -275,8 +278,6 @@ struct H5F_t {
     hbool_t             closing;        /* File is in the process of being closed */
     struct H5F_t        *parent;        /* Parent file that this file is mounted to */
     unsigned            nmounts;        /* Number of children mounted to this file */
-    uint32_t		*retries[H5AC_NTYPES]; 		/* Track # of read retries for metdata items with checksum */
-    unsigned		retries_nbins;			/* # of bins for each retries[] */
 };
 
 

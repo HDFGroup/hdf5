@@ -123,17 +123,16 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     haddr_t             eof;                /*end of file address           */
     uint8_t             sizeof_addr;        /* Size of offsets in the file (in bytes) */
     uint8_t             sizeof_size;        /* Size of lengths in the file (in bytes) */
-    const size_t      	fixed_size = H5F_SUPERBLOCK_FIXED_SIZE; /*fixed sizeof superblock   */
+    const size_t        fixed_size = H5F_SUPERBLOCK_FIXED_SIZE; /*fixed sizeof superblock   */
     size_t              variable_size;      /*variable sizeof superblock    */
     uint8_t            *p;                  /* Temporary pointer into encoding buffer */
     unsigned            super_vers;         /* Superblock version          */
-    hbool_t            *dirtied = (hbool_t *)_udata;  	/* Set up dirtied out value */
+    hbool_t            *dirtied = (hbool_t *)_udata;  /* Set up dirtied out value */
     unsigned 		tries, max_tries;   /* The # of read attempts to try */
-    unsigned 		fixed_tries; 	    /* The # of read attempts to try for the fixed-size portion */
     unsigned 		retries; 	    /* The # of retries */
     uint32_t 		computed_chksum;    /* Computed checksum  */
     uint32_t 		stored_chksum;      /* Checksum read from file  */
-    H5F_super_t        	*ret_value;         /* Return value */
+    H5F_super_t        *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -167,36 +166,23 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     H5_CHECK_OVERFLOW(fixed_size, size_t, haddr_t);
 
     /* Get the # of read attempts */
-    tries = max_tries = f->read_attempts;
+    tries = max_tries = H5F_GET_READ_ATTEMPTS(f);
+    retries = 0;
     do {
-	fixed_tries = max_tries;
-	do {
-	    /* Read fixed-size portion of the superblock */
-	    p = sbuf;
-	    if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, (haddr_t)fixed_size) < 0)
-		HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "set end of space allocation request failed")
-	    if(H5FD_read(lf, dxpl_id, H5FD_MEM_SUPER, (haddr_t)0, fixed_size, p) < 0)
-		HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
+        /* Read fixed-size portion of the superblock */
+        p = sbuf;
+        if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, (haddr_t)fixed_size) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "set end of space allocation request failed")
+        if(H5FD_read(lf, dxpl_id, H5FD_MEM_SUPER, (haddr_t)0, fixed_size, p) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
-	    /* Skip over signature (already checked when locating the superblock) */
-	    p += H5F_SIGNATURE_LEN;
+        /* Skip over signature (already checked when locating the superblock) */
+        p += H5F_SIGNATURE_LEN;
 
-	    /* Superblock version */
-	    super_vers = *p++;
-
-	    /* A valid version # */
-	    if(super_vers <= HDF5_SUPERBLOCK_VERSION_LATEST)
-		break;
-
-	} while (--fixed_tries);
-
-	if(fixed_tries == 0)
-	    /* After all tries (for SWMR access) or after 1 try (for non-SWMR) */
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "bad superblock version number after all tries")
-	else if((max_tries - fixed_tries + 1) > 1)
-	    HDfprintf(stderr, "%s: SUCCESS after %u attempts for fixed data\n", FUNC, max_tries - fixed_tries + 1);
-
-	/* Set superblock version in property list */
+        /* Superblock version */
+        super_vers = *p++;
+        if(super_vers > HDF5_SUPERBLOCK_VERSION_LATEST)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad superblock version number")
 	if(H5P_set(c_plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
 	    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set superblock version")
 
@@ -224,7 +210,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
         /* Decode size of file addresses at this point to get the correct H5F_SIZEOF_ADDR(f) for checksum */
         sizeof_addr = *p++;
         if(sizeof_addr == 2 || sizeof_addr == 4 ||
-           sizeof_addr == 8 || sizeof_addr == 16 || sizeof_addr == 32) {
+                sizeof_addr == 8 || sizeof_addr == 16 || sizeof_addr == 32) {
 
 	    if(H5P_set(c_plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &sizeof_addr) < 0)
 		HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set byte number in an address")
@@ -236,19 +222,17 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
 	    /* Verify correct checksum */
 	    if(stored_chksum == computed_chksum)
 		break;
-	}
+	} /* end if */
     } while (--tries);
 
     if(tries == 0)
 	/* After all tries (for SWMR access) or after 1 try (for non-SWMR) */
-	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "bad checksum or bad byte number in superblock")
+	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "bad checksum or bad byte value in superblock")
 
-    retries = max_tries - tries;
-    if(retries) { /* Does not track 0 retry */
-        HDfprintf(stderr, "%s: SUCCESS after %u retries\n", FUNC, retries);
+    retries += (max_tries - tries);
+    if(retries) /* Does not track 0 retry */
 	if(H5F_track_metadata_read_retries(f, H5AC_SUPERBLOCK_ID, retries) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "cannot track read retries = %u ", retries)
-    }
 
     /* Check for older version of superblock format */
     if(super_vers < HDF5_SUPERBLOCK_VERSION_2) {
@@ -443,7 +427,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     } /* end if */
     else {
 
-	/* Already decode sizeof_addr when validating checksum up there */
+	/* Already decoded sizeof_addr (and set property) when validating checksum earlier */
 
         /* Size of file sizes */
         sizeof_size = *p++;
@@ -465,12 +449,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
         H5F_addr_decode(f, (const uint8_t **)&p, &stored_eoa/*out*/);
         H5F_addr_decode(f, (const uint8_t **)&p, &sblock->root_addr/*out*/);
 
-        /* Decode checksum */
-        UINT32DECODE(p, stored_chksum);
-
-        /* Verify correct checksum with checksum computed via H5F_get_checksums() */
-        if(stored_chksum != computed_chksum)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "bad checksum on superblock")
+	/* Already decoded and compared stored checksum earlier, when reading */
 
         /*
          * Check if superblock address is different from base address and
@@ -518,7 +497,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
      * as the file can appear truncated if only part of it has been
      * been flushed to disk by the single writer process.)
      */
-    if (!(f->intent & H5F_ACC_SWMR_READ)) {
+    if (!(H5F_INTENT(f) & H5F_ACC_SWMR_READ)) {
         if(HADDR_UNDEF == (eof = H5FD_get_eof(lf)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to determine file size")
 

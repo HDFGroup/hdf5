@@ -257,17 +257,19 @@ shutdown_symbols(void)
 int
 print_metadata_retries_info(hid_t fid)
 {
-    H5F_retries_info_t info;
-    unsigned power;
-    unsigned i, j;
+    H5F_retry_info_t info;
+    unsigned i;
 
     /* Retrieve the collection of retries */
-    if(H5Fget_metadata_read_retries_info(fid, &info) < 0)
+    if(H5Fget_metadata_read_retry_info(fid, &info) < 0)
 	return (-1);
 
     /* Print information for each non-NULL retries[i] */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++) {
-	if(info.retries[i] == NULL)
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++) {
+        unsigned power;
+        unsigned j;
+
+	if(NULL == info.retries[i])
 	    continue;
 
 	fprintf(stderr, "Metadata read retries for item %u:\n", i);
@@ -277,13 +279,14 @@ print_metadata_retries_info(hid_t fid)
 		fprintf(stderr, "\t# of retries for %u - %u retries: %u\n", 
 		       power, (power * 10) - 1, info.retries[i][j]);
 	    power *= 10;
-	}
-    }
+	} /* end for */
+    } /* end for */
 
     /* Free memory for each non-NULL retries[i] */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++) {
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
         if(info.retries[i] != NULL)
             free(info.retries[i]);
-    }
+
     return 0;
 } /* print_metadata_retries_info() */
+

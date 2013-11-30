@@ -8271,7 +8271,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_chunk_fast(hid_t fapl)
+test_chunk_fast(const char *env_h5_drvr, hid_t fapl)
 {
     char        filename[FILENAME_BUF_SIZE];
     hid_t       fid = -1;       /* File ID */
@@ -8326,6 +8326,11 @@ test_chunk_fast(hid_t fapl)
         /* SWMR is only supported on the latest file format */
         if(swmr && H5F_LIBVER_LATEST != low)
             continue;
+
+        /* SWMR is not compatible with multi-file VFDs */
+        if(swmr && !(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")))
+            continue;
+
 #ifdef H5_HAVE_FILTER_DEFLATE
         /* Loop over compressing chunks */
         for(compress = FALSE; compress <= TRUE; compress++) {
@@ -10031,7 +10036,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_swmr_v1_btree_ci_fail(hid_t fapl)
+test_swmr_v1_btree_ci_fail(const char *env_h5_drvr, hid_t fapl)
 {
     char        filename[FILENAME_BUF_SIZE];
     hid_t       fid = -1;       /* File ID */
@@ -10049,78 +10054,86 @@ test_swmr_v1_btree_ci_fail(hid_t fapl)
 
     TESTING("expected SWMR behavior using v-1 B-trees");
 
-    h5_fixname(FILENAME[16], fapl, filename, sizeof filename);
+    /* Can't run this test with multi-file VFDs */
+    if(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
+        h5_fixname(FILENAME[16], fapl, filename, sizeof filename);
 
-    /* Copy the file access property list */
-    if((v1_fapl = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
-    if((fh_fapl = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
-    if(H5Pset_libver_bounds(fh_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
+        /* Copy the file access property list */
+        if((v1_fapl = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
+        if((fh_fapl = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
+        if(H5Pset_libver_bounds(fh_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
 
-    /* Create the test file, then close and reopen.
-     *
-     * We'll create the file with the file access property list that
-     * uses the latest file format so that the group is indexed with a
-     * fractal heap.  If we don't do this, there can be issues when
-     * opening the file under SWMR since the root group will use a v1
-     * B-tree for the symbol table.
-     *
-     * The close and re-open is so that new datasets are indexed with
-     * the old v1 B-tree scheme.
-     */
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fh_fapl)) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
-    if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, v1_fapl)) < 0) FAIL_STACK_ERROR
+        /* Create the test file, then close and reopen.
+         *
+         * We'll create the file with the file access property list that
+         * uses the latest file format so that the group is indexed with a
+         * fractal heap.  If we don't do this, there can be issues when
+         * opening the file under SWMR since the root group will use a v1
+         * B-tree for the symbol table.
+         *
+         * The close and re-open is so that new datasets are indexed with
+         * the old v1 B-tree scheme.
+         */
+        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fh_fapl)) < 0) FAIL_STACK_ERROR
+        if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+        if((fid = H5Fopen(filename, H5F_ACC_RDWR, v1_fapl)) < 0) FAIL_STACK_ERROR
 
-    /* Create a dataset that uses v1 B-tree chunk indexing */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
-    chunk_dims[0] = 64;
-    if(H5Pset_chunk(dcpl, 1, chunk_dims) < 0) FAIL_STACK_ERROR
-    dims[0] = 1;
-    max_dims[0] = H5S_UNLIMITED;
-    if((sid = H5Screate_simple(1, dims, max_dims)) < 0) FAIL_STACK_ERROR
-    if((did = H5Dcreate2(fid, DSET_DEFAULT_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        /* Create a dataset that uses v1 B-tree chunk indexing */
+        if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+        chunk_dims[0] = 64;
+        if(H5Pset_chunk(dcpl, 1, chunk_dims) < 0) FAIL_STACK_ERROR
+        dims[0] = 1;
+        max_dims[0] = H5S_UNLIMITED;
+        if((sid = H5Screate_simple(1, dims, max_dims)) < 0) FAIL_STACK_ERROR
+        if((did = H5Dcreate2(fid, DSET_DEFAULT_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-    /* Explicitly check that the dataset is using a v-1 B-tree index */
-    if(H5D__layout_idx_type_test(did, &idx_type) < 0) FAIL_STACK_ERROR
-    if(idx_type != H5D_CHUNK_IDX_BTREE) 
-        FAIL_PUTS_ERROR("created dataset not indexed by version 1 B-tree")
+        /* Explicitly check that the dataset is using a v-1 B-tree index */
+        if(H5D__layout_idx_type_test(did, &idx_type) < 0) FAIL_STACK_ERROR
+        if(idx_type != H5D_CHUNK_IDX_BTREE) 
+            FAIL_PUTS_ERROR("created dataset not indexed by version 1 B-tree")
 
-    /* Close the file */
-    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
-
-    /* Reopen the file with SWMR write access */
-    if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, v1_fapl)) < 0) FAIL_STACK_ERROR
-
-    /* Attempt to write to a dataset that uses v-1 B-tree chunk indexing under
-     * SWMR semantics.
-     */
-    did = -1;
-    err = -1;
-    H5E_BEGIN_TRY {
-        did = H5Dopen(fid, DSET_DEFAULT_NAME, H5P_DEFAULT);
-        if(did >= 0) {
-            err = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data);
-        }
-    } H5E_END_TRY;
-
-    /* Fail on successful write */
-    if(did >= 0 && err >= 0) {
-        H5_FAILED();
-        puts("    library allowed writing to a version 1 B-tree indexed dataset under SWMR semantics");
-        goto error;
-    }
-
-    /* Close everything */
-    if(did >= 0)
+        /* Close the file */
         if(H5Dclose(did) < 0) FAIL_STACK_ERROR
-    if(H5Pclose(v1_fapl) < 0) FAIL_STACK_ERROR
-    if(H5Pclose(fh_fapl) < 0) FAIL_STACK_ERROR
-    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
-    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+        if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
-    PASSED();
+        /* Reopen the file with SWMR write access */
+        if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fh_fapl)) < 0) FAIL_STACK_ERROR
+
+        /* Attempt to write to a dataset that uses v-1 B-tree chunk indexing under
+         * SWMR semantics.
+         */
+        did = -1;
+        err = -1;
+        H5E_BEGIN_TRY {
+            did = H5Dopen(fid, DSET_DEFAULT_NAME, H5P_DEFAULT);
+            if(did >= 0) {
+                err = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data);
+            }
+        } H5E_END_TRY;
+
+        /* Fail on successful write */
+        if(did >= 0 && err >= 0) {
+            H5_FAILED();
+            puts("    library allowed writing to a version 1 B-tree indexed dataset under SWMR semantics");
+            goto error;
+        }
+
+        /* Close everything */
+        if(did >= 0)
+            if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+        if(H5Pclose(v1_fapl) < 0) FAIL_STACK_ERROR
+        if(H5Pclose(fh_fapl) < 0) FAIL_STACK_ERROR
+        if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+        if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+        if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+        PASSED();
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD not compatible with SWMR access");
+    } /* end else */
+
     return 0;
 
 error:
@@ -11198,7 +11211,7 @@ main(void)
     fapl = h5_fileaccess();
 
     /* Test that SWMR access fails with version 1 B-tree access */
-    nerrors += (test_swmr_v1_btree_ci_fail(fapl) < 0 ? 1 : 0);
+    nerrors += (test_swmr_v1_btree_ci_fail(envval, fapl) < 0 ? 1 : 0);
 
     /* Turn off the chunk cache, so all the chunks are immediately written to disk */
     if(H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
@@ -11285,7 +11298,7 @@ main(void)
         nerrors += (test_huge_chunks(my_fapl) < 0		? 1 : 0);
         nerrors += (test_chunk_cache(my_fapl) < 0		? 1 : 0);
         nerrors += (test_big_chunks_bypass_cache(my_fapl) < 0   ? 1 : 0);
-        nerrors += (test_chunk_fast(my_fapl) < 0		? 1 : 0);
+        nerrors += (test_chunk_fast(envval, my_fapl) < 0	? 1 : 0);
         nerrors += (test_reopen_chunk_fast(my_fapl) < 0		? 1 : 0);
         nerrors += (test_chunk_fast_bug1(my_fapl) < 0           ? 1 : 0);
         nerrors += (test_chunk_expand(my_fapl) < 0		? 1 : 0);

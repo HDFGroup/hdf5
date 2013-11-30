@@ -122,8 +122,6 @@ H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *udata)
     uint8_t       tbl_buf[H5SM_TBL_BUF_SIZE]; /* Buffer for table */
     uint8_t       *buf;                 /* Reading buffer */
     const uint8_t *p;                   /* Pointer into input buffer */
-    uint32_t      stored_chksum;        /* Stored metadata checksum value */
-    uint32_t      computed_chksum;      /* Computed metadata checksum value */
     size_t        x;                    /* Counter variable for index headers */
     H5SM_master_table_t *ret_value;
 
@@ -159,7 +157,7 @@ H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *udata)
         HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read and validate shared message table from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_SOHM_TABLE, H5AC_SOHM_TABLE_ID, addr, table->table_size, table->table_size, dxpl_id, buf, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, dxpl_id, H5FD_MEM_SOHM_TABLE, H5AC_SOHM_TABLE_ID, addr, table->table_size, table->table_size, buf) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, NULL, "incorrect metadata checksum for shared message table")
 
     /* Get temporary pointer to serialized table */
@@ -208,15 +206,10 @@ H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *udata)
         table->indexes[x].list_size = H5SM_LIST_SIZE(f, table->indexes[x].list_max);
     } /* end for */
 
-    /* Read in checksum */
-    UINT32DECODE(p, stored_chksum);
+    /* Already decoded and compared stored checksum earlier, when reading */
 
     /* Sanity check */
-    HDassert((size_t)(p - (const uint8_t *)buf) == table->table_size);
-
-    /* Verify checksum with checksum computed via H5F_read_check_metadata() */
-    if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, NULL, "incorrect metadata checksum for shared message table")
+    HDassert((size_t)(p - (const uint8_t *)buf) == (table->table_size - H5_SIZEOF_CHKSUM));
 
     /* Set return value */
     ret_value = table;
@@ -460,8 +453,6 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     uint8_t lst_buf[H5SM_LST_BUF_SIZE]; /* Buffer for list index */
     uint8_t *buf;               /* Reading buffer */
     uint8_t *p;                 /* Pointer into input buffer */
-    uint32_t stored_chksum;     /* Stored metadata checksum value */
-    uint32_t computed_chksum;   /* Computed metadata checksum value */
     size_t x;                   /* Counter variable for messages in list */
     size_t chk_size;       	/* Exact size with checksum at the end */
     H5SM_list_t *ret_value;     /* Return value */
@@ -494,9 +485,8 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     chk_size = H5SM_LIST_SIZE(udata->f, udata->header->num_messages);
 
     /* Read and validate shared message list from disk */
-    if(H5F_read_check_metadata(f, H5FD_MEM_SOHM_INDEX, H5AC_SOHM_LIST_ID, addr, udata->header->list_size, chk_size, dxpl_id, buf, &computed_chksum) < 0)
+    if(H5F_read_check_metadata(f, dxpl_id, H5FD_MEM_SOHM_INDEX, H5AC_SOHM_LIST_ID, addr, udata->header->list_size, chk_size, buf) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, NULL, "incorrect metadata checksum for shared message list")
-
 
     /* Get temporary pointer to serialized list index */
     p = buf;
@@ -514,15 +504,10 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
         p += H5SM_SOHM_ENTRY_SIZE(udata->f);
     } /* end for */
 
-    /* Read in checksum */
-    UINT32DECODE(p, stored_chksum);
+    /* Already decoded and compared stored checksum earlier, when reading */
 
     /* Sanity check */
-    HDassert((size_t)(p - buf) <= udata->header->list_size);
-
-    /* Verify checksum with checksum computed via H5F_read_check_metadata() */
-    if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, NULL, "incorrect metadata checksum for shared message list")
+    HDassert((size_t)(p - buf) <= (udata->header->list_size - H5_SIZEOF_CHKSUM));
 
     /* Initialize the rest of the array */
     for(x = udata->header->num_messages; x < udata->header->list_max; x++)

@@ -431,7 +431,7 @@ H5F_accum_write(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
 
     HDassert(f);
     HDassert(f->shared);
-    HDassert(f->intent & H5F_ACC_RDWR);
+    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
     HDassert(buf);
 
     /* Treat global heap as raw data */
@@ -731,7 +731,7 @@ HDmemset(f->shared->accum.buf + size, 0, (f->shared->accum.alloc_size - size));
             } /* end else */
         } /* end if */
         else {
-	    if((f->intent & H5F_ACC_SWMR_WRITE) > 0) {
+	    if((H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) > 0) {
                 /* Flush if dirty and reset accumulator */
                 if(H5F_accum_reset(f, dxpl_id, TRUE) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator")

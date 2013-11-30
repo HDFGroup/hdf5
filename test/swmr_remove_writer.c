@@ -88,6 +88,10 @@ open_skeleton(const char *filename, unsigned verbose)
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         return -1;
 
+    /* Set to use the latest library format */
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        return -1;
+
 #ifdef QAK
 /* Increase the initial size of the metadata cache */
     {

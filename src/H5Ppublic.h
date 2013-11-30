@@ -345,7 +345,7 @@ H5_DLL herr_t H5Pset_file_image_callbacks(hid_t fapl_id,
 H5_DLL herr_t H5Pget_file_image_callbacks(hid_t fapl_id,
        H5FD_file_image_callbacks_t *callbacks_ptr);
 H5_DLL herr_t H5Pset_metadata_read_attempts(hid_t plist_id, unsigned attempts);
-H5_DLL herr_t H5Pget_metadata_read_attempts(hid_t plist_id, unsigned *attempts/*out*/);
+H5_DLL herr_t H5Pget_metadata_read_attempts(hid_t plist_id, unsigned *attempts);
 
 /* Dataset creation property list (DCPL) routines */
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
