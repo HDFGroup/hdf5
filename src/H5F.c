@@ -77,8 +77,8 @@ typedef struct H5F_olist_t {
 /********************/
 static herr_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
-static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id,
-                      H5FD_t *lf);
+static H5F_t *H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id,
+    hid_t fapl_id, H5FD_t *lf);
 static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl,
     const char *name, char ** /*out*/ actual_name);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush);
@@ -884,7 +884,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5F_t *
-H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
+H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 {
     H5F_t	*f = NULL, *ret_value;
 
@@ -907,6 +907,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
         if(NULL == (f->shared = H5FL_CALLOC(H5F_file_t)))
             HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared file structure")
 
+        f->shared->flags = flags;
 	f->shared->sohm_addr = HADDR_UNDEF;
 	f->shared->sohm_vers = HDF5_SHAREDHEADER_VERSION;
         for(u = 0; u < NELMTS(f->shared->fs_addr); u++)
@@ -1019,8 +1020,17 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 
 done:
     if(!ret_value && f) {
-	if(!shared)
+	if(!shared) {
+            /* Attempt to clean up some of the shared file structures */
+            if(f->shared->efc)
+                if(H5F_efc_destroy(f->shared->efc) < 0)
+                    HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, NULL, "can't destroy external file cache")
+            if(f->shared->fcpl_id > 0)
+                if(H5I_dec_ref(f->shared->fcpl_id) < 0)
+                    HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "can't close property list")
+
             f->shared = H5FL_FREE(H5F_file_t, f->shared);
+        } /* end if */
 	f = H5FL_FREE(H5F_t, f);
     } /* end if */
 
@@ -1318,7 +1328,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for read-only")
 
         /* Allocate new "high-level" file struct */
-        if((file = H5F_new(shared, fcpl_id, fapl_id, NULL)) == NULL)
+        if((file = H5F_new(shared, flags, fcpl_id, fapl_id, NULL)) == NULL)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
     } /* end if */
     else {
@@ -1339,23 +1349,16 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
             } /* end if */
         } /* end if */
 
-        if(NULL == (file = H5F_new(NULL, fcpl_id, fapl_id, lf)))
+        if(NULL == (file = H5F_new(NULL, flags, fcpl_id, fapl_id, lf)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
-        file->shared->flags = flags;
     } /* end else */
+
+    /* Retain the name the file was opened with */
+    file->open_name = H5MM_xstrdup(name);
 
     /* Short cuts */
     shared = file->shared;
     lf = shared->lf;
-
-    /*
-     * The intent at the top level file struct are not necessarily the same as
-     * the flags at the bottom.	 The top level describes how the file can be
-     * accessed through the HDF5 library.  The bottom level describes how the
-     * file can be accessed through the C library.
-     */
-    file->intent = flags;
-    file->open_name = H5MM_xstrdup(name);
 
     /*
      * Read or write the file superblock, depending on whether the file is
@@ -2110,11 +2113,8 @@ H5Freopen(hid_t file_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Get a new "top level" file struct, sharing the same "low level" file struct */
-    if(NULL == (new_file = H5F_new(old_file->shared, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, NULL)))
+    if(NULL == (new_file = H5F_new(old_file->shared, 0, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, NULL)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
-
-    /* Keep old file's read/write intent in new file */
-    new_file->intent = old_file->intent;
 
     /* Duplicate old file's names */
     new_file->open_name = H5MM_xstrdup(old_file->open_name);
