@@ -145,7 +145,7 @@ HDfprintf(stderr, "%s: write to addr = %a, size = %Zu\n", FUNC, addr, size);
 
     HDassert(f);
     HDassert(f->shared);
-    HDassert(f->intent & H5F_ACC_RDWR);
+    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
     HDassert(buf);
     HDassert(H5F_addr_defined(addr));
 

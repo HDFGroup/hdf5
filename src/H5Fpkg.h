@@ -263,7 +263,6 @@ struct H5F_file_t {
  * to shared H5F_file_t structs.
  */
 struct H5F_t {
-    unsigned		intent;		/* The flags passed to H5F_open()*/
     char		*open_name;	/* Name used to open file	*/
     char		*actual_name;	/* Actual name of the file, after resolving symlinks, etc. */
     char               	*extpath;       /* Path for searching target external link file */

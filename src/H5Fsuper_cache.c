@@ -474,7 +474,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
      * as the file can appear truncated if only part of it has been
      * been flushed to disk by the single writer process.)
      */
-    if (!(f->intent & H5F_ACC_SWMR_READ)) {
+    if (!(H5F_INTENT(f) & H5F_ACC_SWMR_READ)) {
         if(HADDR_UNDEF == (eof = H5FD_get_eof(lf)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to determine file size")
 
