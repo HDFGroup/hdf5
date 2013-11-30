@@ -4001,6 +4001,9 @@ external_set_elink_acc_flags(hid_t fapl, hbool_t new_format)
     /* Create a group through the external link using gapl (should succeed) */
     if((group = H5Gcreate2(file1, "/ext_link/group", H5P_DEFAULT, H5P_DEFAULT, gapl)) < 0) TEST_ERROR
 
+    /* Close group */
+    if(H5Gclose(group) < 0) TEST_ERROR
+
     /* Unset elink access flags on gapl */
     if(H5Pset_elink_acc_flags(gapl, H5F_ACC_DEFAULT) < 0) TEST_ERROR
 
@@ -4028,8 +4031,7 @@ external_set_elink_acc_flags(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY;
     if(ret != FAIL) TEST_ERROR
 
-    /* Close file1 and group */
-    if(H5Gclose(group) < 0) TEST_ERROR
+    /* Close file1 */
     if(H5Fclose(file1) < 0) TEST_ERROR
 
     /* Verify that H5Fcreate and H5Fopen reject H5F_ACC_DEFAULT */

@@ -98,7 +98,7 @@ H5F_get_intent(const H5F_t *f)
 
     HDassert(f);
 
-    FUNC_LEAVE_NOAPI(f->intent)
+    FUNC_LEAVE_NOAPI(f->shared->flags)
 } /* end H5F_get_intent() */
 
 

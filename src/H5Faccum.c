@@ -426,7 +426,7 @@ H5F_accum_write(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
 
     HDassert(f);
     HDassert(f->shared);
-    HDassert(f->intent & H5F_ACC_RDWR);
+    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
     HDassert(buf);
 
     /* Treat global heap as raw data */
