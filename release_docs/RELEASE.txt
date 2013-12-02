@@ -1312,14 +1312,14 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (SUSE Linux) 4.7.2 
                                   (cmake and autotools)
 
-    Ubuntu 13.04 3.8.0-30-generic #44-Ubuntu SMP i686 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
-                                  GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu1) 4.7.3
+    Ubuntu 13.10 3.11.0-13-generic #20-Ubuntu SMP i686 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.8.1-10ubuntu8) 4.8.1
+                                  GNU Fortran (Ubuntu/Linaro 4.8.1-10ubuntu8) 4.8.1
                                   (cmake and autotools)
 
-    Ubuntu 13.04 3.8.0-30-generic #44-Ubuntu SMP x86_64 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
-                                  GNU Fortran (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
+    Ubuntu 13.10 3.11.0-13-generic #20-Ubuntu SMP x86_64 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.8.1-10ubuntu8) 4.8.1
+                                  GNU Fortran (Ubuntu/Linaro 4.8.1-10ubuntu8) 4.8.1
                                   (cmake and autotools)
     
     Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46
