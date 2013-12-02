@@ -1188,10 +1188,11 @@ TOOLTEST tuserfilter.ddl --enable-error-stack -H  -p -d myfilter  tfilters.h5
 if test $USE_FILTER_DEFLATE = "yes" -a $USE_FILTER_SHUFFLE = "yes" -a $USE_FILTER_FLETCHER32 = "yes" -a $USE_FILTER_NBIT = "yes" -a $USE_FILTER_SCALEOFFSET = "yes" ; then
   # data read internal filters
   TOOLTEST treadintfilter.ddl --enable-error-stack -d deflate -d shuffle -d fletcher32 -d nbit -d scaleoffset tfilters.h5
-  if test $USE_FILTER_SZIP = "yes"; then
-    # data read
-    TOOLTEST4 treadfilter.ddl --enable-error-stack tfilters.h5
-  fi
+#  HDFFV-8635 - disable test
+#  if test $USE_FILTER_SZIP = "yes"; then
+#    # data read
+#    TOOLTEST4 treadfilter.ddl --enable-error-stack tfilters.h5
+#  fi
 fi
 
 # test for displaying objects with very long names
