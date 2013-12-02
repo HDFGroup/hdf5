@@ -17,7 +17,6 @@
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Gprivate.h"		/* IDs			  		*/
-#include "H5RSprivate.h"		/* IDs			  		*/
 
 #include "H5VLiod_server.h"
 

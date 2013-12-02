@@ -279,7 +279,7 @@ typedef struct H5VL_iod_io_info_t {
 
     /* read params */
     void *buf_ptr;
-    size_t nelmts;
+    hssize_t nelmts;
     size_t type_size;
     struct H5S_t *space;
     uint64_t *cs_ptr;

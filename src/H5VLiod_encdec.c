@@ -21,6 +21,7 @@
 #include "H5FFpublic.h"
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppublic.h"
+#include "H5Qpublic.h"
 #include "H5Spublic.h"
 #include "H5VLiod_common.h"     /* IOD Common Header			*/
 
@@ -707,6 +708,86 @@ static int hg_proc_dspace_t(hg_proc_t proc, hid_t *data)
     return ret;
 }
 
+/* Define hg_proc_query_t */
+static int hg_proc_query_t(hg_proc_t proc, hid_t *data)
+{
+    int ret = HG_SUCCESS;
+    size_t query_size = 0;
+    void *buf = NULL;
+    hid_t query_id;
+    hg_proc_op_t op;
+
+    op = hg_proc_get_op(proc);
+
+    switch(op) {
+
+    case HG_ENCODE:
+        query_id = *data;
+        if(H5Qencode(query_id, NULL, &query_size) < 0) {
+            HG_ERROR_DEFAULT("QUERY encode Proc error");
+            return HG_FAIL;
+        }
+        if(query_size) {
+            buf = H5MM_malloc(query_size);
+            if(H5Qencode(query_id, buf, &query_size) < 0) {
+                HG_ERROR_DEFAULT("QUERY encode Proc error");
+                return HG_FAIL;
+            }
+        }
+
+        ret = hg_proc_size_t(proc, &query_size);
+        if (ret != HG_SUCCESS) {
+            HG_ERROR_DEFAULT("Proc error");
+            ret = HG_FAIL;
+            return ret;
+        }
+        if(query_size) {
+            ret = hg_proc_raw(proc, buf, query_size);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+            H5MM_xfree(buf);
+        }
+        break;
+    case HG_DECODE:
+        ret = hg_proc_size_t(proc, &query_size);
+        if (ret != HG_SUCCESS) {
+            HG_ERROR_DEFAULT("Proc error");
+            ret = HG_FAIL;
+            return ret;
+        }
+        if(query_size) {
+            buf = H5MM_malloc(query_size);
+            ret = hg_proc_raw(proc, buf, query_size);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+            if((query_id = H5Qdecode(buf)) < 0) {
+                HG_ERROR_DEFAULT("QUERY decode Proc error");
+                return HG_FAIL;
+            }
+            H5MM_xfree(buf);
+        }
+        *data = query_id;
+        break;
+    case HG_FREE:
+        if(H5Qclose(*data) < 0) {
+            HG_ERROR_DEFAULT("QUERY free Proc error");
+            return HG_FAIL;
+        }
+        break;
+    case HG_INVALID:
+    default:
+        HG_ERROR_DEFAULT("QUERY unsupported op Proc error");
+    }
+
+    return ret;
+}
+
 /* Define hg_proc_hid_t */
 int hg_proc_hid_t(hg_proc_t proc, void *data)
 {
@@ -749,6 +830,14 @@ int hg_proc_hid_t(hg_proc_t proc, void *data)
         break;
     case H5I_GENPROP_LST:
         ret = hg_proc_plist_t(proc, (hid_t *)data);
+        if (ret != HG_SUCCESS) {
+            HG_ERROR_DEFAULT("Proc error");
+            ret = HG_FAIL;
+            return ret;
+        }
+        break;
+    case H5I_QUERY:
+        ret = hg_proc_query_t(proc, (hid_t *)data);
         if (ret != HG_SUCCESS) {
             HG_ERROR_DEFAULT("Proc error");
             ret = HG_FAIL;

@@ -346,8 +346,6 @@ int main(int argc, char **argv) {
                      rid2, e_stack);
     assert(ret == 0);
 
-
-
     /* Raw data read on D1. This is asynchronous.  The read is done into a 
        noncontiguous memory dataspace selection */
     {
@@ -449,6 +447,13 @@ int main(int argc, char **argv) {
     ret = H5Pclose(fapl_id);
     assert(ret == 0);
 
+    ret = H5RCclose(rid1);
+    assert(0 == ret);
+    ret = H5RCclose(rid2);
+    assert(0 == ret);
+    ret = H5TRclose(tid2);
+    assert(0 == ret);
+
     H5Fclose_ff(file_id, e_stack);
 
     H5ESget_count(e_stack, &num_events);
@@ -463,13 +468,6 @@ int main(int argc, char **argv) {
     printf("%d events in event stack. H5EStest_all Completion status = %d\n", num_events, status);
 
     H5ESclear(e_stack);
-
-    ret = H5RCclose(rid1);
-    assert(0 == ret);
-    ret = H5RCclose(rid2);
-    assert(0 == ret);
-    ret = H5TRclose(tid2);
-    assert(0 == ret);
 
     fprintf(stderr, "Read Data1: ");
     for(i=0;i<nelem;++i)

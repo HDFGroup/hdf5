@@ -94,8 +94,7 @@ int main(int argc, char **argv) {
         /* create transaction object */
         tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
         assert(tid1);
-
-        ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        ret = H5TRstart(tid1, H5P_DEFAULT, e_stack);
         assert(0 == ret);
 
         /* create objects */
@@ -116,55 +115,58 @@ int main(int argc, char **argv) {
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
-        H5Dclose(did2);
+        ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, e_stack);
+        assert(0 == ret);
+        /* Close transaction object. Local op */
+        ret = H5TRclose(tid1);
+        assert(0 == ret);
+
+        /* create transaction object */
+        tid2 = H5TRcreate(file_id, rid2, (uint64_t)2);
+        assert(tid2);
+        ret = H5TRstart(tid2, H5P_DEFAULT, e_stack);
+        assert(0 == ret);
 
         /* create a hard link to D1 (created previosuly) so that it can be
            accessed from G5/newD1. */
         ret = H5Lcreate_hard_ff(did1, ".", gid5, "newD1", H5P_DEFAULT, 
-                                H5P_DEFAULT, tid1, e_stack);
+                                H5P_DEFAULT, tid2, e_stack);
         assert(ret == 0);
 
         /* Do more updates on transaction 2 */
 
         ret = H5Lcreate_soft_ff("/G1/G2/G3/D4", gid4, "G5/newD2", 
-                                H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+                                H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
         assert(ret == 0);
 
         ret = H5Lmove_ff(gid3, "D3", file_id, "/G4/G5/D3moved", 
-        H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
         assert(ret == 0);
 
-        ret = H5Ldelete_ff(file_id, "/G1/G2/G3/D2", H5P_DEFAULT, tid1, e_stack);
+        ret = H5Ldelete_ff(file_id, "/G1/G2/G3/D2", H5P_DEFAULT, tid2, e_stack);
         assert(ret == 0);
-    }
-
-    /* wait on all requests and print completion status */
-    H5ESget_count(e_stack, &num_events);
-    H5ESwait_all(e_stack, &status);
-    H5ESclear(e_stack);
-    printf("%d events in event stack. Completion status = %d\n", num_events, status);
-
-    /* Barrier to make sure all processes are done writing so Process
-       0 can finish transaction 1 and acquire a read context on it. */
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    if(0 == my_rank) {
-        /* make this synchronous so we know the container version has been acquired */
-        ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
 
         assert(H5Gclose_ff(gid1, e_stack) == 0);
         assert(H5Gclose_ff(gid2, e_stack) == 0);
         assert(H5Gclose_ff(gid3, e_stack) == 0);
         assert(H5Gclose_ff(gid4, e_stack) == 0);
         assert(H5Gclose_ff(gid5, e_stack) == 0);
-        
         assert(H5Dclose_ff(did1, e_stack) == 0);
+        assert(H5Dclose_ff(did2, e_stack) == 0);
         assert(H5Dclose_ff(did3, e_stack) == 0);
 
-        /* Close transaction object. Local op */
-        ret = H5TRclose(tid1);
+        /* make this synchronous so we know the container version has been acquired */
+        ret = H5TRfinish(tid2, H5P_DEFAULT, &rid3, e_stack);
         assert(0 == ret);
+        /* Close transaction object. Local op */
+        ret = H5TRclose(tid2);
+        assert(0 == ret);
+
+        /* release container version 1. This is async. */
+        ret = H5RCrelease(rid2, e_stack);
+        assert(0 == ret);
+
+        version = 2;
     }
 
     /* release container version 0. This is async. */
@@ -177,45 +179,23 @@ int main(int argc, char **argv) {
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
-    /* Leader tells other procs that container version 1 is acquired */
-    version = 1;
+    /* Leader tells other procs that container version 2 is acquired */
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
 
     /* other processes just create a read context object; no need to
        acquire it */
     if(0 != my_rank) {
-        rid2 = H5RCcreate(file_id, version);
-        assert(rid2 > 0);
+        assert(2 == version);
+        rid3 = H5RCcreate(file_id, version);
+        assert(rid3 > 0);
     }
 
     /* Try and open the dataset. This is asynchronous. */
-    did2 = H5Dopen_ff(file_id,"G4/G5/newD1", H5P_DEFAULT, rid2, e_stack);
+    did2 = H5Dopen_ff(file_id,"G4/G5/newD1", H5P_DEFAULT, rid3, e_stack);
     assert(did2);
 
-    gid4 = H5Gopen_ff(file_id, "G4", H5P_DEFAULT, rid2, e_stack);
+    gid4 = H5Gopen_ff(file_id, "G4", H5P_DEFAULT, rid3, e_stack);
     assert(gid4);
-
-
-    if(my_rank == 0) {
-        /* release container version 1. This is async. */
-        ret = H5RCrelease(rid2, e_stack);
-        assert(0 == ret);
-    }
-
-    /* wait on all requests and print completion status */
-    H5ESget_count(e_stack, &num_events);
-    H5ESwait_all(e_stack, &status);
-    H5ESclear(e_stack);
-    printf("%d events in event stack. Completion status = %d\n", num_events, status);
-
-    ret = H5RCclose(rid1);
-    assert(0 == ret);
-    ret = H5RCclose(rid2);
-    assert(0 == ret);
-
-    /* acquire container version 2 - EXACT */
-    version = 2;
-    rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
 
     {
         H5L_ff_info_t linfo;
@@ -247,8 +227,18 @@ int main(int argc, char **argv) {
         free(link_buf);
     }
 
-    /* release container version 2. This is async. */
-    ret = H5RCrelease(rid3, e_stack);
+    if(0 == my_rank) {
+        /* release container version 1. This is async. */
+        ret = H5RCrelease(rid3, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+
+        ret = H5RCclose(rid2);
+        assert(0 == ret);
+    }
+
+    ret = H5RCclose(rid1);
+    assert(0 == ret);
+    ret = H5RCclose(rid3);
     assert(0 == ret);
 
     assert(H5Dclose_ff(did2, e_stack) == 0);
@@ -264,7 +254,6 @@ int main(int argc, char **argv) {
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
-    ret = H5RCclose(rid3);
     assert(0 == ret);
 
     H5Sclose(sid);

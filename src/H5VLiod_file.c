@@ -234,7 +234,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
-    iod_cont_trans_stat_t *tids;
+    iod_cont_trans_stat_t *tids = NULL;
     iod_trans_id_t rtid;
     iod_size_t key_size = 0, val_size = 0;
     uint32_t cs_scope = 0;
@@ -386,7 +386,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
     /* The root client request will create a transaction and store the
        final indexes for used up IDs */
     if(input->max_kv_index && input->max_array_index && input->max_blob_index) {
-        iod_cont_trans_stat_t *tids;
+        iod_cont_trans_stat_t *tids = NULL;
         iod_trans_id_t trans_num, rtid;
         scratch_pad sp;
         iod_checksum_t sp_cs = 0;
@@ -397,9 +397,8 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
 
-        // NEED IOD Transactions
-        //trans_num = tids->latest_wrting + 1;
-        //rtid = tids->latest_rdable;
+        trans_num = tids->latest_wrting + 1;
+        rtid = tids->latest_rdable;
 
         if(iod_free_cont_trans_stat(coh, tids) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");

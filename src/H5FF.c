@@ -2788,6 +2788,24 @@ H5Oget_token(hid_t obj_id, void *token, size_t *token_size)
 
                 break;
             }
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_ES:
+        case H5I_RC:
+        case H5I_TR:
+        case H5I_QUERY:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad object");
     }
@@ -2838,6 +2856,24 @@ H5Oget_token(hid_t obj_id, void *token, size_t *token_size)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
             buf_ptr += valtype_size;
             break;
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_ES:
+        case H5I_RC:
+        case H5I_TR:
+        case H5I_QUERY:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad object");
         }
@@ -2874,7 +2910,6 @@ H5Oopen_by_token(const void *token, hid_t rcxt_id, hid_t estack_id)
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5I_type_t opened_type;
     void  *opened_obj = NULL;
-    const uint8_t *buf_ptr = (const uint8_t *)token;
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
@@ -3598,6 +3633,7 @@ H5Oclose_ff(hid_t object_id, hid_t estack_id)
         case H5I_ES:
         case H5I_RC:
         case H5I_TR:
+        case H5I_QUERY:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:

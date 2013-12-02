@@ -766,7 +766,7 @@ herr_t
 H5Miterate_ff(hid_t map_id, hid_t key_mem_type_id, hid_t value_mem_type_id, 
               H5M_iterate_func_t callback_func, void *context, hid_t rcxt_id)
 {
-    void   *map = NULL;
+    //void   *map = NULL;
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)

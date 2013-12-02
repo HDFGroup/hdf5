@@ -359,6 +359,9 @@ int main(int argc, char **argv) {
     ret = H5TRclose(tid2);
     assert(0 == ret);
 
+    /* Barrier so all processes are guranteed to have finished transaction 2 */
+    MPI_Barrier(MPI_COMM_WORLD);
+
     /* acquire container version 2 - EXACT */
     version = 2;
     rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
@@ -433,6 +436,8 @@ int main(int argc, char **argv) {
     assert(H5Mclose_ff(map1, e_stack) == 0);
     assert(H5Mclose_ff(map2, e_stack) == 0);
     assert(H5Mclose_ff(map3, e_stack) == 0);
+
+    //MPI_Barrier(MPI_COMM_WORLD);
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */

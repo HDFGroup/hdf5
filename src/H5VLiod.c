@@ -116,7 +116,6 @@ static na_addr_t PEER;
 static na_class_t *network_class = NULL;
 
 static AXE_task_t g_axe_id;
-static AXE_task_t axe_bound;
 static H5VL_iod_axe_list_t axe_list;
 
 /* Prototypes */
@@ -580,7 +579,7 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     hg_request_t hg_req;
     int num_procs, my_rank;
     na_addr_t ion_target;
-    AXE_task_t axe_seed;
+    double axe_seed;
     char addr_name[H5VL_IOD_MAX_ADDR_NAME];
     herr_t ret_value = SUCCEED;
 
@@ -591,8 +590,7 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
        operation. Each process owns a portion of the ID space and uses
        that space incrementally. */
     axe_seed = (pow(2.0,64.0) - 1) / num_procs;
-    g_axe_id = axe_seed * my_rank + 1;
-    axe_bound = axe_seed * (my_rank + 1);
+    g_axe_id = (AXE_task_t)(axe_seed * my_rank + 1);
 
     axe_list.last_released_task = g_axe_id - 1;
     axe_list.head = NULL;
@@ -1533,7 +1531,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
 
     /* set the input structure for the HG encode routine */
     input.name = name;
-    input.num_peers = file->num_procs;
+    input.num_peers = (uint32_t)file->num_procs;
     input.flags = flags;
     input.fcpl_id = fcpl_id;
     input.fapl_id = fapl_id;
@@ -2360,6 +2358,13 @@ H5VL_iod_group_close(void *_grp, hid_t UNUSED dxpl_id, void **req)
             HGOTO_ERROR(H5E_FILE,  H5E_CANTGET, FAIL, "can't wait on all object requests");
     }
 
+    if(IOD_OH_UNDEFINED == grp->remote_group.iod_oh.rd_oh.cookie) {
+        /* Synchronously wait on the request attached to the group */
+        if(H5VL_iod_request_wait(grp->common.file, grp->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on group request");
+        grp->common.request = NULL;
+    }
+
     if(H5VL_iod_get_obj_requests((H5VL_iod_object_t *)grp, &num_parents, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get num requests");
 
@@ -2749,7 +2754,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     const H5S_t *file_space = NULL;
     char fake_char;
     size_t type_size; /* size of mem type */
-    size_t nelmts;    /* num elements in mem dataspace */
+    hssize_t nelmts;    /* num elements in mem dataspace */
     H5VL_iod_io_info_t *info = NULL;
     hbool_t is_vl_data = FALSE;
     hid_t rcxt_id;
@@ -3379,7 +3384,8 @@ H5VL_iod_dataset_close(void *_dset, hid_t UNUSED dxpl_id, void **req)
 
     if(-1 == dset->remote_dset.dcpl_id ||
        -1 == dset->remote_dset.type_id ||
-       -1 == dset->remote_dset.space_id) {
+       -1 == dset->remote_dset.space_id ||
+       IOD_OH_UNDEFINED == dset->remote_dset.iod_oh.rd_oh.cookie) {
         /* Synchronously wait on the request attached to the dataset */
         if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
             HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait dset request");
@@ -3830,6 +3836,13 @@ H5VL_iod_datatype_close(void *obj, hid_t UNUSED dxpl_id, void **req)
             HGOTO_ERROR(H5E_FILE,  H5E_CANTGET, FAIL, "can't wait on all object requests");
     }
 
+    if(IOD_OH_UNDEFINED == dtype->remote_dtype.iod_oh.rd_oh.cookie) {
+        /* Synchronously wait on the request attached to the dtype */
+        if(H5VL_iod_request_wait(dtype->common.file, dtype->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on dtype request");
+        dtype->common.request = NULL;
+    }
+
     if(H5VL_iod_get_obj_requests((H5VL_iod_object_t *)dtype, &num_parents, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get num requests");
 
@@ -4245,19 +4258,27 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
 
     /* MSC - VLEN datatypes for attributes are not supported for now. */
     {
-        H5T_class_t class;
+        H5T_class_t dt_class;
         H5T_t *dt = NULL;
 
         if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
 
-        class = H5T_get_class(dt, FALSE);
-        if(H5T_VLEN == class || (H5T_STRING == class && H5T_is_variable_str(dt)))
+        dt_class = H5T_get_class(dt, FALSE);
+        if(H5T_VLEN == dt_class || (H5T_STRING == dt_class && H5T_is_variable_str(dt)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "VLEN datatypes for attributes not supported");
     }
 
     /* calculate the size of the buffer needed */
-    size = H5Sget_simple_extent_npoints(attr->remote_attr.space_id) * H5Tget_size(type_id);
+    {
+        hsize_t nelmts;
+        size_t elmt_size;
+
+        nelmts = (hsize_t)H5Sget_simple_extent_npoints(attr->remote_attr.space_id);
+        elmt_size = H5Tget_size(type_id);
+
+        size = elmt_size * nelmts;
+    }
 
     /* allocate a bulk data transfer handle */
     if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
@@ -4365,19 +4386,27 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
 
     /* MSC - VLEN datatypes for attributes are not supported for now. */
     {
-        H5T_class_t class;
+        H5T_class_t dt_class;
         H5T_t *dt = NULL;
 
         if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
 
-        class = H5T_get_class(dt, FALSE);
-        if(H5T_VLEN == class || (H5T_STRING == class && H5T_is_variable_str(dt)))
+        dt_class = H5T_get_class(dt, FALSE);
+        if(H5T_VLEN == dt_class || (H5T_STRING == dt_class && H5T_is_variable_str(dt)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "VLEN datatypes for attributes not supported");
     }
 
     /* calculate the size of the buffer needed */
-    size = H5Sget_simple_extent_npoints(attr->remote_attr.space_id) * H5Tget_size(type_id);
+    {
+        hsize_t nelmts;
+        size_t elmt_size;
+
+        nelmts = (hsize_t)H5Sget_simple_extent_npoints(attr->remote_attr.space_id);
+        elmt_size = H5Tget_size(type_id);
+
+        size = elmt_size * nelmts;
+    }
 
     /* calculate a checksum for the data */
     internal_cs = H5_checksum_crc64(buf, size);
@@ -4791,7 +4820,8 @@ H5VL_iod_attribute_close(void *_attr, hid_t UNUSED dxpl_id, void **req)
 
     if(-1 == attr->remote_attr.acpl_id ||
        -1 == attr->remote_attr.type_id ||
-       -1 == attr->remote_attr.space_id) {
+       -1 == attr->remote_attr.space_id ||
+       IOD_OH_UNDEFINED == attr->remote_attr.iod_oh.rd_oh.cookie) {
         /* Synchronously wait on the request attached to the dataset */
         if(H5VL_iod_request_wait(attr->common.file, attr->common.request) < 0)
             HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
@@ -5267,18 +5297,19 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5VL_iod_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
-                                    H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
-                                    H5L_iterate_t op, void *op_data, hid_t dxpl_id, void **req)
+static herr_t H5VL_iod_link_iterate(void UNUSED *_obj, H5VL_loc_params_t UNUSED loc_params, 
+                                    hbool_t UNUSED recursive, 
+                                    H5_index_t UNUSED idx_type, H5_iter_order_t UNUSED order, 
+                                    hsize_t UNUSED *idx, 
+                                    H5L_iterate_t UNUSED op, void UNUSED *op_data, 
+                                    hid_t UNUSED dxpl_id, void UNUSED **req)
 {
-    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
-    herr_t ret_value = SUCCEED;  /* Return value */
+    //H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
+    //herr_t ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_iod_link_iterate() */
 
 
@@ -5893,7 +5924,7 @@ done:
  */
 static void *
 H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params, 
-                     H5I_type_t *opened_type, hid_t dxpl_id, void **req)
+                     H5I_type_t *opened_type, hid_t dxpl_id, void UNUSED **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to open the group */
     H5P_genplist_t *plist = NULL;
@@ -6145,6 +6176,24 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
         ret_value = (void *)map;
         break;
+    case H5I_UNINIT:
+    case H5I_BADID:
+    case H5I_FILE:
+    case H5I_DATASPACE:
+    case H5I_ATTR:
+    case H5I_REFERENCE:
+    case H5I_VFL:
+    case H5I_VOL:
+    case H5I_ES:
+    case H5I_RC:
+    case H5I_TR:
+    case H5I_QUERY:
+    case H5I_GENPROP_CLS:
+    case H5I_GENPROP_LST:
+    case H5I_ERROR_CLASS:
+    case H5I_ERROR_MSG:
+    case H5I_ERROR_STACK:
+    case H5I_NTYPES:
     default:
         HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, NULL, "not a valid file object (dataset, map, group, or datatype)")
             break;
@@ -6174,6 +6223,24 @@ done:
                     map = H5FL_FREE(H5VL_iod_map_t, map);
                 } /* end if */
                 break;
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_ES:
+        case H5I_RC:
+        case H5I_TR:
+        case H5I_QUERY:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
             default:
                 HDONE_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "not a valid object type");
         } /* end switch */
@@ -6279,18 +6346,18 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5VL_iod_object_visit(void *_obj, H5VL_loc_params_t loc_params, H5_index_t idx_type,
-                                    H5_iter_order_t order, H5O_iterate_t op, void *op_data, 
-                                    hid_t dxpl_id, void **req)
+static herr_t H5VL_iod_object_visit(void UNUSED *_obj, H5VL_loc_params_t UNUSED loc_params, 
+                                    H5_index_t UNUSED idx_type,
+                                    H5_iter_order_t UNUSED order, H5O_iterate_t UNUSED op, 
+                                    void UNUSED *op_data, 
+                                    hid_t UNUSED dxpl_id, void UNUSED **req)
 {
-    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
-    herr_t ret_value = SUCCEED;  /* Return value */
+    //H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
+    //herr_t ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_iod_object_visit() */
 
 
@@ -7388,15 +7455,14 @@ done:
 } /* end H5VL_iod_map_exists() */
 
 herr_t 
-H5VL_iod_map_iterate(void *map, hid_t key_mem_type_id, hid_t value_mem_type_id, 
-                     H5M_iterate_func_t callback_func, void *context)
+H5VL_iod_map_iterate(void UNUSED *map, hid_t UNUSED key_mem_type_id, hid_t UNUSED value_mem_type_id, 
+                     H5M_iterate_func_t UNUSED callback_func, void UNUSED *context)
 {
-    herr_t ret_value = SUCCEED;
+    //herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_iod_map_iterate() */
 
 herr_t 
@@ -7475,6 +7541,13 @@ herr_t H5VL_iod_map_close(void *_map, void **req)
     if(NULL == req) {
         if(H5VL_iod_request_wait_some(map->common.file, map) < 0)
             HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on all object requests");
+    }
+
+    if(IOD_OH_UNDEFINED == map->remote_map.iod_oh.rd_oh.cookie) {
+        /* Synchronously wait on the request attached to the map */
+        if(H5VL_iod_request_wait(map->common.file, map->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on map request");
+        map->common.request = NULL;
     }
 
     if(H5VL_iod_get_obj_requests((H5VL_iod_object_t *)map, &num_parents, NULL) < 0)

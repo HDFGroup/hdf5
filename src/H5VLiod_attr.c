@@ -437,7 +437,8 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_read(coh, mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, 
+                             H5VL_IOD_KEY_OBJ_DATASPACE,
                              NULL, NULL, &space_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 

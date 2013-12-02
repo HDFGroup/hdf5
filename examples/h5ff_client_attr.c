@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
     hid_t sid, dtid;
     hid_t did1, map;
     hid_t aid1, aid2, aid3, aid4, aid5;
-    hid_t tid1, rid1, rid2;
+    hid_t tid1, tid2, rid1, rid2, rid3;
     hid_t fapl_id, trspl_id;
     hid_t e_stack;
     hbool_t exists1;
@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
         tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
         assert(tid1);
 
-        ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        ret = H5TRstart(tid1, H5P_DEFAULT, e_stack);
         assert(0 == ret);
 
         /* create group /G1 */
@@ -153,6 +153,16 @@ int main(int argc, char **argv) {
         aid5 = H5Acreate_ff(map, "MAP_ATTR", dtid, sid, 
                             H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         assert(aid5);
+
+        ret = H5Aclose_ff(aid1, e_stack);
+        assert(ret == 0);
+
+        /* make this synchronous so we know the container version has been acquired */
+        ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        /* Local op */
+        ret = H5TRclose(tid1);
+        assert(0 == ret);
     }
 
     /* release container version 0. This is async. */
@@ -165,21 +175,18 @@ int main(int argc, char **argv) {
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
     if(0 == my_rank) {
-        ret = H5Aclose_ff(aid1, H5_EVENT_STACK_NULL);
-        assert(ret == 0);
+        /* create transaction object */
+        tid2 = H5TRcreate(file_id, rid2, (uint64_t)2);
+        assert(tid1);
+        ret = H5TRstart(tid2, H5P_DEFAULT, e_stack);
+        assert(0 == ret);
+
         /* Delete an attribute */
-        ret = H5Adelete_ff(file_id, "ROOT_ATTR", tid1, e_stack);
+        ret = H5Adelete_ff(file_id, "ROOT_ATTR", tid2, e_stack);
         assert(ret == 0);
         /* rename an attribute */
-        ret = H5Arename_ff(gid1, "GROUP_ATTR", "RENAMED_GROUP_ATTR", tid1, e_stack);
+        ret = H5Arename_ff(gid1, "GROUP_ATTR", "RENAMED_GROUP_ATTR", tid2, e_stack);
         assert(ret == 0);
-
-        /* make this synchronous so we know the container version has been acquired */
-        ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-        /* Local op */
-        ret = H5TRclose(tid1);
-        assert(0 == ret);
 
         ret = H5Aclose_ff(aid2, e_stack);
         assert(ret == 0);
@@ -195,32 +202,45 @@ int main(int argc, char **argv) {
         assert(ret == 0);
         ret = H5Gclose_ff(gid1, e_stack);
         assert(ret == 0);
+
+        /* make this synchronous so we know the container version has been acquired */
+        ret = H5TRfinish(tid2, H5P_DEFAULT, &rid3, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        /* Local op */
+        ret = H5TRclose(tid2);
+        assert(0 == ret);
+
+        /* release container version 1. This is async. */
+        ret = H5RCrelease(rid2, e_stack);
+        assert(0 == ret);
+
+        version = 2;
     }
 
-    /* Tell other procs that container version 1 is acquired */
-    version = 1;
+    /* Tell other procs that container version 2 is acquired */
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
 
     /* other processes just create a read context object; no need to
        acquire it */
     if(0 != my_rank) {
-        rid2 = H5RCcreate(file_id, version);
-        assert(rid2 > 0);
+        assert(2 == version);
+        rid3 = H5RCcreate(file_id, version);
+        assert(rid3 > 0);
     }
 
     /* do some reads/gets from container version 1 */
 
-    ret = H5Aexists_ff(file_id, "ROOT_ATTR", &exists1, rid2, e_stack);
+    ret = H5Aexists_ff(file_id, "ROOT_ATTR", &exists1, rid3, e_stack);
     assert(ret == 0);
     ret = H5Aexists_by_name_ff(file_id, "G1", "RENAMED_GROUP_ATTR", H5P_DEFAULT, 
-                               &exists2, rid2, e_stack);
+                               &exists2, rid3, e_stack);
     assert(ret == 0);
 
-    gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, rid2, e_stack);
-    aid2 = H5Aopen_ff(gid1, "RENAMED_GROUP_ATTR", H5P_DEFAULT, rid2, e_stack);
+    gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, rid3, e_stack);
+    aid2 = H5Aopen_ff(gid1, "RENAMED_GROUP_ATTR", H5P_DEFAULT, rid3, e_stack);
     assert(aid2);
 
-    ret = H5Aread_ff(aid2, dtid, rdata2, rid2, e_stack);
+    ret = H5Aread_ff(aid2, dtid, rdata2, rid3, e_stack);
     assert(ret == 0);
 
     ret = H5Aclose_ff(aid2, e_stack);
@@ -235,7 +255,7 @@ int main(int argc, char **argv) {
 
     if(my_rank == 0) {
         /* release container version 1. This is async. */
-        ret = H5RCrelease(rid2, e_stack);
+        ret = H5RCrelease(rid3, e_stack);
         assert(0 == ret);
     }
 
@@ -255,13 +275,17 @@ int main(int argc, char **argv) {
 
     ret = H5RCclose(rid1);
     assert(0 == ret);
-    ret = H5RCclose(rid2);
+    if(0 == my_rank) {
+        ret = H5RCclose(rid2);
+        assert(0 == ret);
+    }
+    ret = H5RCclose(rid3);
     assert(0 == ret);
 
     assert(!exists1);
     assert(exists2);
 
-    fprintf(stderr, "Read Data2: ");
+    fprintf(stderr, "Read Data: ");
     for(i=0;i<nelem;++i)
         fprintf(stderr, "%d ",rdata2[i]);
     fprintf(stderr, "\n");

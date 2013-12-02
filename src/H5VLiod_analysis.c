@@ -116,8 +116,8 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate container handles");
 
     for(i=0 ; i<num_ions_g ; i++) {
-        if(HG_Forward(server_addr_g[i], H5VL_EFF_OPEN_CONTAINER, &file_name, &temp_cohs[i], 
-                      &hg_reqs[i]) < 0)
+        if(HG_Forward(server_addr_g[i], H5VL_EFF_OPEN_CONTAINER, &file_name, 
+                      &temp_cohs[i], &hg_reqs[i]) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
     }
 
@@ -140,6 +140,9 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_container_open(file_name, NULL, IOD_CONT_R, &coh, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
+    /* MSC - Need IOD transactions */
+    rtid = 0;
+#if 0
     if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
 
@@ -147,6 +150,7 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
 
     if(iod_free_cont_trans_stat(coh, tids) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
+#endif
 
     if(iod_trans_start(coh, &rtid, NULL, 0, IOD_TRANS_R, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
@@ -169,11 +173,13 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
 
     /* retrieve datatype and dataspace */
     /* MSC - This applies only to DATASETS for Q6 */
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, H5VL_IOD_KEY_OBJ_DATATYPE,
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
+                             H5VL_IOD_KEY_OBJ_DATATYPE,
                              NULL, NULL, &type_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve datatype");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, 
+                             H5VL_IOD_KEY_OBJ_DATASPACE,
                              NULL, NULL, &space_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
@@ -215,7 +221,8 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
             farm_input.coh = temp_cohs[i];
             farm_input.target_idx = i+layout.target_start;
             /* forward the call to the target server */
-            if(HG_Forward(server_addr_g[i+layout.target_start], H5VL_EFF_ANALYSIS_FARM, &farm_input, 
+            if(HG_Forward(server_addr_g[i+layout.target_start], 
+                          H5VL_EFF_ANALYSIS_FARM, &farm_input, 
                           &farm_output[i], &hg_reqs[i]) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
         }

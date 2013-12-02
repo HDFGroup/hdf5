@@ -49,7 +49,7 @@ typedef struct {
     uint8_t *buf_ptr;
     void **off;
     size_t *len;
-    hsize_t curr_seq;
+    int curr_seq;
     size_t *str_len; /* used only for VL strings */
 } H5VL_iod_pre_write_t;
 
@@ -681,7 +681,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
                     /* calculate a checksum for the data recieved */
                     internal_cs = H5S_checksum(info->buf_ptr, info->type_size, 
-                                               info->nelmts, info->space);
+                                               (size_t)info->nelmts, info->space);
 
                     /* verify data integrity */
                     if((raw_cs_scope & H5_CHECKSUM_TRANSFER) &&
@@ -2014,6 +2014,23 @@ H5VL_iod_get_loc_info(H5VL_iod_object_t *obj, iod_obj_id_t *iod_id,
             md = ((const H5VL_iod_map_t *)obj)->remote_map.mdkv_id;
             at = ((const H5VL_iod_map_t *)obj)->remote_map.attrkv_id;
             break;
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_ES:
+        case H5I_RC:
+        case H5I_TR:
+        case H5I_QUERY:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad location object");
     }
@@ -2077,7 +2094,7 @@ H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index,
 
     /* determine first the rank of the object with the first 59
        bits */
-    tmp_id = myrank + (nranks * cur_index);
+    tmp_id = (uint32_t)myrank + ((uint32_t)nranks * cur_index);
 
     /* toggle the object type bits */
     switch(type) {
@@ -2091,6 +2108,7 @@ H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index,
         IOD_OBJID_SETTYPE(tmp_id, IOD_OBJ_BLOB)
         break;
     case IOD_OBJ_ANY:
+    case IOD_OBJ_INVALID:
     default:
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad object type");
     }
@@ -2234,7 +2252,7 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
     H5S_t *space = NULL;
     H5T_t *dt = NULL;
     size_t nelmts;
-    H5T_class_t class;
+    H5T_class_t dt_class;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2244,11 +2262,11 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
 
-    nelmts = H5S_GET_SELECT_NPOINTS(space);
-    class = H5T_get_class(dt, FALSE);
+    nelmts = (size_t)H5S_GET_SELECT_NPOINTS(space);
+    dt_class = H5T_get_class(dt, FALSE);
     *vl_str_len = NULL;
 
-    switch(class) {
+    switch(dt_class) {
         case H5T_STRING:
             /* If this is a variable length string, serialize it
                through a Mercury Segmented handle */
@@ -2256,7 +2274,7 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
                 char bogus;                 /* bogus value to pass to H5Diterate() */
                 H5VL_iod_pre_write_t udata;
                 hg_bulk_segment_t *bulk_segments = NULL;
-                unsigned u;
+                int u;
 
                 /* allocate array that hold every string's length */
                 udata.str_len = (size_t *)malloc(sizeof(size_t) * nelmts);
@@ -2387,7 +2405,7 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
                 char bogus;                 /* bogus value to pass to H5Diterate() */
                 H5VL_iod_pre_write_t udata;
                 hg_bulk_segment_t *bulk_segments = NULL;
-                unsigned u;
+                int u;
 
                 udata.buf_size = 0;
                 udata.buf_ptr = (uint8_t *)buf;
@@ -2480,7 +2498,7 @@ H5VL_iod_pre_read(hid_t type_id, hid_t space_id, const void *buf,
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
 
-    nelmts = H5S_GET_SELECT_NPOINTS(space);
+    nelmts = (size_t)H5S_GET_SELECT_NPOINTS(space);
 
     switch(H5T_get_class(dt, FALSE)) {
         case H5T_INTEGER:
@@ -2586,7 +2604,7 @@ H5VL__iod_vl_read_finalize(size_t UNUSED buf_size, void *read_buf, void *user_bu
     size_t super_size;
     hsize_t nelmts;
     size_t elmt_size = 0;
-    H5T_class_t class;
+    H5T_class_t dt_class;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2597,8 +2615,8 @@ H5VL__iod_vl_read_finalize(size_t UNUSED buf_size, void *read_buf, void *user_bu
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid super type of VL type");
     
     super_size = H5T_get_size(super);
-    nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
-    class = H5T_get_class(mem_dt, FALSE);
+    nelmts = (hsize_t)H5S_GET_SELECT_NPOINTS(mem_space);
+    dt_class = H5T_get_class(mem_dt, FALSE);
 
     /* If the memory selection is contiguous, simply iterate over
        every element and store the VL data */
@@ -2606,7 +2624,7 @@ H5VL__iod_vl_read_finalize(size_t UNUSED buf_size, void *read_buf, void *user_bu
         uint8_t *buf_ptr = (uint8_t *)read_buf;
         unsigned u;
 
-        if(H5T_VLEN == class) {
+        if(H5T_VLEN == dt_class) {
             size_t seq_len;
             hvl_t *vl = (hvl_t *)user_buf;
 
@@ -2622,7 +2640,7 @@ H5VL__iod_vl_read_finalize(size_t UNUSED buf_size, void *read_buf, void *user_bu
                 buf_ptr += elmt_size;
             }
         }
-        else if(H5T_STRING == class) {
+        else if(H5T_STRING == dt_class) {
             char **buf = (char **)user_buf;
 
             for(u=0 ; u<nelmts ; u++) {
@@ -2686,7 +2704,7 @@ H5VL__iod_vl_map_get_finalize(size_t buf_size, void *read_buf,
     H5T_t *mem_dt = NULL;
     H5T_t *super = NULL;
     size_t super_size;
-    H5T_class_t class;
+    H5T_class_t dt_class;
     uint8_t *buf_ptr = (uint8_t *)read_buf;
     herr_t ret_value = SUCCEED;
 
@@ -2698,15 +2716,15 @@ H5VL__iod_vl_map_get_finalize(size_t buf_size, void *read_buf,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid super type of VL type");
     
     super_size = H5T_get_size(super);
-    class = H5T_get_class(mem_dt, FALSE);
+    dt_class = H5T_get_class(mem_dt, FALSE);
 
 #if 0
     {
         size_t seq_len = buf_size, u;
 
-        if(H5T_STRING == class)
+        if(H5T_STRING == dt_class)
             fprintf(stderr, "String Length %zu: %s\n", buf_size, (char *)read_buf);
-        else if(H5T_VLEN == class) {
+        else if(H5T_VLEN == dt_class) {
             int *ptr = (int *)buf_ptr;
             fprintf(stderr, "Sequence Count %zu: ", buf_size/sizeof(int));
             for(u=0 ; u<buf_size/sizeof(int) ; ++u)
@@ -2716,7 +2734,7 @@ H5VL__iod_vl_map_get_finalize(size_t buf_size, void *read_buf,
     }
 #endif
 
-    if(H5T_VLEN == class) {
+    if(H5T_VLEN == dt_class) {
         hvl_t *vl = (hvl_t *)user_buf;
 
         vl->len = buf_size/super_size;
@@ -2724,7 +2742,7 @@ H5VL__iod_vl_map_get_finalize(size_t buf_size, void *read_buf,
         HDmemcpy(vl->p, buf_ptr, buf_size);
         buf_ptr += buf_size;
     }
-    else if(H5T_STRING == class) {
+    else if(H5T_STRING == dt_class) {
         char **buf = (char **)user_buf;
 
         //elmt_size = *((size_t *)buf_ptr);
@@ -2758,11 +2776,11 @@ done:
 herr_t
 H5VL_iod_map_get_size(hid_t type_id, const void *buf, 
                       /*out*/uint64_t *checksum, 
-                      /*out*/size_t *size, /*out*/H5T_class_t *dt_class)
+                      /*out*/size_t *size, /*out*/H5T_class_t *ret_class)
 {
     size_t buf_size = 0;
     H5T_t *dt = NULL;
-    H5T_class_t class;
+    H5T_class_t dt_class;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2770,9 +2788,9 @@ H5VL_iod_map_get_size(hid_t type_id, const void *buf,
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
 
-    class = H5T_get_class(dt, FALSE);
+    dt_class = H5T_get_class(dt, FALSE);
 
-    switch(class) {
+    switch(dt_class) {
         case H5T_STRING:
             /* If this is a variable length string, get the size using strlen(). */
             if(H5T_is_variable_str(dt)) {
@@ -2825,8 +2843,8 @@ H5VL_iod_map_get_size(hid_t type_id, const void *buf,
             HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "unsupported datatype");
     }
     *size = buf_size;
-    if(dt_class)
-        *dt_class = class;
+    if(ret_class)
+        *ret_class = dt_class;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2853,7 +2871,7 @@ H5VL_iod_map_dtype_info(hid_t type_id, /*out*/ hbool_t *is_vl, /*out*/size_t *si
 {
     size_t buf_size = 0;
     H5T_t *dt = NULL;
-    H5T_class_t class;
+    H5T_class_t dt_class;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2861,9 +2879,9 @@ H5VL_iod_map_dtype_info(hid_t type_id, /*out*/ hbool_t *is_vl, /*out*/size_t *si
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
 
-    class = H5T_get_class(dt, FALSE);
+    dt_class = H5T_get_class(dt, FALSE);
 
-    switch(class) {
+    switch(dt_class) {
         case H5T_STRING:
             /* If this is a variable length string, get the size using strlen(). */
             if(H5T_is_variable_str(dt)) {

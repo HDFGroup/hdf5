@@ -264,11 +264,11 @@ int main(int argc, char **argv) {
         did2 = H5Oopen_by_token(token6, rid2, e_stack);
         */
 
-        gid1 = H5Gopen_ff(fid1, "G1", H5P_DEFAULT, rid2, e_stack);
+        gid1 = H5Gopen_ff(fid1, "G1", H5P_DEFAULT, rid1, e_stack);
         gid2 = H5Gopen_ff(fid2, "G1", H5P_DEFAULT, rid2, e_stack);
-        dtid1 = H5Topen_ff(fid1, "int", H5P_DEFAULT, rid2, e_stack);
+        dtid1 = H5Topen_ff(fid1, "int", H5P_DEFAULT, rid1, e_stack);
         dtid2 = H5Topen_ff(fid2, "int", H5P_DEFAULT, rid2, e_stack);
-        did1 = H5Dopen_ff(gid1, "D1", H5P_DEFAULT, rid2, e_stack);
+        did1 = H5Dopen_ff(gid1, "D1", H5P_DEFAULT, rid1, e_stack);
         did2 = H5Dopen_ff(gid2, "D1", H5P_DEFAULT, rid2, e_stack);
 
         {

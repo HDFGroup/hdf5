@@ -450,7 +450,6 @@ H5TRfinish(hid_t tr_id, hid_t trfpl_id, hid_t *rcxt_id, hid_t estack_id)
 {
     H5TR_t *tr = NULL;
     H5RC_t *rc = NULL;
-    H5P_genplist_t *plist;      /* Property list pointer */
     hbool_t acquire = FALSE;
     H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
@@ -618,7 +617,7 @@ H5TRskip(hid_t file_id, uint64_t start_trans_num, uint64_t count, hid_t estack_i
         vol_plugin->nrefs ++;
     }
 
-    if(H5VL_iod_tr_skip(file, start_trans_num, count, req) < 0)
+    if(H5VL_iod_tr_skip((H5VL_iod_file_t *)file, start_trans_num, count, req) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a transaction skip");
 
     if(request && *req) {
