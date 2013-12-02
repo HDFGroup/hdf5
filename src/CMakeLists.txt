@@ -637,6 +637,7 @@ SET (H5VL_HDRS
 
 IF (HDF5_ENABLE_EFF)
     SET (H5FF_SRCS
+        ${HDF5_SRC_DIR}/H5AS.c
         ${HDF5_SRC_DIR}/H5FF.c
         ${HDF5_SRC_DIR}/H5M.c
         ${HDF5_SRC_DIR}/H5ES.c
@@ -644,6 +645,7 @@ IF (HDF5_ENABLE_EFF)
         ${HDF5_SRC_DIR}/H5TR.c
     )
     SET (H5FF_HDRS
+        ${HDF5_SRC_DIR}/H5ASpublic.h
         ${HDF5_SRC_DIR}/H5FFpublic.h
         ${HDF5_SRC_DIR}/H5Mpublic.h
         ${HDF5_SRC_DIR}/H5ESpublic.h
@@ -851,6 +853,7 @@ SET (H5_PRIVATE_HEADERS
 IF (HDF5_ENABLE_EFF)
   SET (H5_PRIVATE_HEADERS
     ${H5_PRIVATE_HEADERS}
+    ${HDF5_SRC_DIR}/H5ASprivate.h
     ${HDF5_SRC_DIR}/H5FFprivate.h
   )
 ENDIF (HDF5_ENABLE_EFF)
