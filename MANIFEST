@@ -1686,7 +1686,6 @@
 ./tools/h5dump/errfiles/tpbitsOffsetExceeded.err
 ./tools/h5dump/errfiles/tpbitsOffsetNegative.err
 ./tools/h5dump/errfiles/tperror.err
-./tools/h5dump/errfiles/treadfilter.err
 ./tools/h5dump/errfiles/tqmarkfile.err
 ./tools/h5dump/errfiles/tslink-D.err
 

@@ -303,7 +303,6 @@
       ${PROJECT_SOURCE_DIR}/errfiles/torderlinks2.err
       ${PROJECT_SOURCE_DIR}/errfiles/tgroup-2.err
       ${PROJECT_SOURCE_DIR}/errfiles/tperror.err
-      ${PROJECT_SOURCE_DIR}/errfiles/treadfilter.err
       ${PROJECT_SOURCE_DIR}/errfiles/tslink-D.err
   )
 
@@ -1356,7 +1355,7 @@
     ADD_H5_TEST (treadintfilter 0 --enable-error-stack -d deflate -d shuffle -d fletcher32 -d nbit -d scaleoffset tfilters.h5)
     IF (HDF5_ENABLE_SZIP_SUPPORT)
       # data read all filters
-      ADD_H5ERR_MASK_TEST (treadfilter 1 --enable-error-stack tfilters.h5)
+      ADD_H5_TEST (treadfilter 0 --enable-error-stack -d all -d szip tfilters.h5)
     ENDIF (HDF5_ENABLE_SZIP_SUPPORT)
   ENDIF (USE_FILTER_DEFLATE AND USE_FILTER_SHUFFLE AND USE_FILTER_FLETCHER32 AND USE_FILTER_NBIT AND USE_FILTER_SCALEOFFSET)
 
