@@ -183,6 +183,7 @@ AC_SUBST([HDF_CXX]) HDF_CXX=no
 AC_SUBST([CXX]) HDF_CXX=no
 AC_SUBST([HDF5_HL]) HDF5_HL=yes
 AC_SUBST([GPFS]) GPFS=no
+AC_SUBST([PYTHON]) PYTHON=no
 AC_SUBST([EFF]) EFF=no
 AC_SUBST([LARGEFILE]) LARGEFILE=yes
 AC_SUBST([INSTRUMENT])
@@ -2923,6 +2924,38 @@ case "X-$CLEARFILEBUF" in
       AC_MSG_RESULT([no])
     ;;
 esac
+
+## ----------------------------------------------------------------------
+## Check for python devel
+##
+AC_MSG_CHECKING([whether to enable the python scripting environment])
+AC_ARG_ENABLE([python],
+              [AS_HELP_STRING([--enable-python],
+                              [Enable Python environment [default=no]])],,
+              [enableval=no])
+case "X-$enableval" in
+  X-yes)
+    AX_PYTHON_DEVEL
+    CPPFLAGS="$CPPFLAGS $PYTHON_CPPFLAGS"
+    AM_CPPFLAGS="$AM_CPPFLAGS $PYTHON_CPPFLAGS"
+    LDFLAGS="$LDFLAGS $PYTHON_LDFLAGS"
+    AM_LDFLAGS="$AM_LDFLAGS $PYTHON_LDFLAGS"
+
+    AC_CHECK_HEADERS([Python.h], [AC_MSG_CHECKING([for Python support])
+                     AC_TRY_COMPILE([#include <Python.h>],
+                                    [Py_Initialize(); Py_Finalize();],
+                                    [AC_DEFINE([HAVE_PYTHON], [1],
+                                               [Define if we have Python support])
+                                       AC_MSG_RESULT([yes])
+                                       PYTHON="yes"],
+                                    [AC_MSG_RESULT([no])
+                                       PYTHON="no"])])
+    ;;
+  X-no|*)
+    AC_MSG_RESULT([no])
+    ;;
+esac
+AM_CONDITIONAL([BUILD_PYTHON_CONDITIONAL], [test "X-$PYTHON" = "X-yes"])
 
 ## ----------------------------------------------------------------------
 ## Check if they would like to enable building the IOD plugin

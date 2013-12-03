@@ -310,6 +310,12 @@
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H
 
+/* Define if we have Python support */
+#undef HAVE_PYTHON
+
+/* Define to 1 if you have the <Python.h> header file. */
+#undef HAVE_PYTHON_H
+
 /* Define to 1 if you have the `random' function. */
 #undef HAVE_RANDOM
 

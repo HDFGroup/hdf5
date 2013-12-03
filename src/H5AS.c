@@ -79,6 +79,8 @@ H5ASexecute(const char *file_name, const char *obj_name, hid_t query_id,
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "*s*si*s*si", file_name, obj_name, query_id, split_script,
+             combine_script, estack_id);
 
     /* Check argument and retrieve object */
     if(file_name == NULL)
