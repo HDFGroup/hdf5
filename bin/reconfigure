@@ -29,9 +29,9 @@
 
 # HDF5 currently uses the following versions of the autotools:
 AUTOCONF_VERSION="autoconf (GNU Autoconf) 2.69"
-AUTOMAKE_VERSION="automake (GNU automake) 1.13.4"
+AUTOMAKE_VERSION="automake (GNU automake) 1.12.3"
 AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.69"
-ACLOCAL_VERSION="aclocal (GNU automake) 1.13.4"
+ACLOCAL_VERSION="aclocal (GNU automake) 1.12.3"
 LIBTOOL_VERSION="(GNU libtool) 2.4.2"
 M4_VERSION="m4 (GNU M4) 1.4.16"
 
@@ -42,26 +42,23 @@ M4_VERSION="m4 (GNU M4) 1.4.16"
 
 # If paths to autotools are not specified by the user, assume tools are
 # running on jam in /mnt/hdf/packages and set paths accordingly.
-if test -z ${AUTORECONF}; then
-  AUTORECONF=/usr/bin/autoreconf
-fi
 if test -z ${AUTOCONF}; then
-  AUTOCONF=/usr/bin/autoconf
+  AUTOCONF=/mnt/hdf/packages/autoconf/autoconf-2.69/bin/autoconf
 fi
 if test -z ${AUTOMAKE}; then
-  AUTOMAKE=/usr/bin/automake-1.13
+  AUTOMAKE=/mnt/hdf/packages/automake/automake-1.12.3/bin/automake-1.12
 fi
 if test -z ${AUTOHEADER}; then
-  AUTOHEADER=/usr/bin/autoheader
+  AUTOHEADER=/mnt/hdf/packages/autoconf/autoconf-2.69/bin/autoheader
 fi
 if test -z ${ACLOCAL}; then
-  ACLOCAL=/usr/bin/aclocal-1.13
+  ACLOCAL=/mnt/hdf/packages/automake/automake-1.12.3/bin/aclocal-1.12
 fi
 if test -z ${LIBTOOL}; then
-  LIBTOOL=/usr/bin/libtool
+  LIBTOOL=/mnt/hdf/packages/libtool/libtool-2.4.2/bin/libtool
 fi
 if test -z ${M4}; then
-  M4=/usr/bin/m4
+  M4=/mnt/hdf/packages/m4/m4-1.4.16/bin/m4
 fi
 
 # Check version numbers of all autotools against the "correct" versions
@@ -103,20 +100,17 @@ M4_DIR=`dirname ${M4}`
 PATH=${AUTOCONF_DIR}:${M4_DIR}:$PATH
 
 # Run autoconf/automake commands in order
-#  echo ${ACLOCAL} -I ${LIBTOOL_DIR}/../share/aclocal
-#  ${ACLOCAL} -I ${LIBTOOL_DIR}/../share/aclocal || exit 1
-#
-#  echo ${AUTOHEADER}
-#  ${AUTOHEADER} || exit 1
-#
-#  echo ${AUTOMAKE} --add-missing
-#  ${AUTOMAKE} --add-missing || exit 1
-#
-#  echo ${AUTOCONF}
-#  ${AUTOCONF} || exit 1
+  echo ${ACLOCAL} -I ${LIBTOOL_DIR}/../share/aclocal
+  ${ACLOCAL} -I ${LIBTOOL_DIR}/../share/aclocal || exit 1
 
-  echo ${AUTORECONF}
-  ${AUTORECONF} || exit 1
+  echo ${AUTOHEADER}
+  ${AUTOHEADER} || exit 1
+
+  echo ${AUTOMAKE} --add-missing
+  ${AUTOMAKE} --add-missing || exit 1
+
+  echo ${AUTOCONF}
+  ${AUTOCONF} || exit 1
 
 # Clean up top-level Makefile.in
 # pmake wants an argument to be the first non-comment line it encounters
