@@ -143,6 +143,9 @@ int main(int argc, char **argv) {
                          H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
         assert(ret == 0);
 
+        /* need to close object before removing it */
+        assert(H5Dclose_ff(did2, e_stack) == 0);
+
         ret = H5Ldelete_ff(file_id, "/G1/G2/G3/D2", H5P_DEFAULT, tid2, e_stack);
         assert(ret == 0);
 
@@ -157,13 +160,18 @@ int main(int argc, char **argv) {
         ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);
 
+        /* wait on all requests and print completion status */
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
+
         assert(H5Gclose_ff(gid1, e_stack) == 0);
         assert(H5Gclose_ff(gid2, e_stack) == 0);
         assert(H5Gclose_ff(gid3, e_stack) == 0);
         assert(H5Gclose_ff(gid4, e_stack) == 0);
         assert(H5Gclose_ff(gid5, e_stack) == 0);
         assert(H5Dclose_ff(did1, e_stack) == 0);
-        assert(H5Dclose_ff(did2, e_stack) == 0);
         assert(H5Dclose_ff(did3, e_stack) == 0);
         version = 2;
     }

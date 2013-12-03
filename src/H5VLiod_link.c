@@ -699,7 +699,8 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start link Remove\n");
+    fprintf(stderr, "Start link Remove %s at (%"PRIu64", %"PRIu64")\n",
+            loc_name, loc_oh.wr_oh, loc_oh.rd_oh);
 #endif
 
     /* the traversal will retrieve the location where the link needs
