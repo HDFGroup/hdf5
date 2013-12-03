@@ -15,6 +15,10 @@
 
 #include "H5VLiod_server.h"
 
+#ifdef H5_HAVE_PYTHON
+#include <Python.h>
+#endif
+
 #ifdef H5_HAVE_EFF
 
 /*
@@ -274,12 +278,22 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
     if(AXEcreate_engine(&engine, &engine_attr) != AXE_SUCCEED)
         return FAIL;
 
+    /* Initialize Python runtime */
+#ifdef H5_HAVE_PYTHON
+    Py_Initialize();
+#endif
+
     /* Loop to receive requests from clients */
     while(1) {
         HG_Handler_process(0, HG_STATUS_IGNORE);
         if(shutdown)
             break;
     }
+
+    /* Finalize Python runtime */
+#ifdef H5_HAVE_PYTHON
+    Py_Finalize();
+#endif
 
     if(AXE_SUCCEED != AXEterminate_engine(engine, TRUE))
         return FAIL;
