@@ -219,8 +219,10 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start link move SRC %s DST %s\n",
-            input->src_loc_name, input->dst_loc_name);
+    fprintf(stderr, "Start link move SRC %s DST %s (%"PRIu64", %"PRIu64") to (%"PRIu64", %"PRIu64")\n",
+            input->src_loc_name, input->dst_loc_name, 
+            input->src_loc_oh.wr_oh, input->src_loc_oh.rd_oh,
+            input->dst_loc_oh.wr_oh, input->dst_loc_oh.rd_oh);
 #endif
 
     /* the traversal will retrieve the location where the link needs

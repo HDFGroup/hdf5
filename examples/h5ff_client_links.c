@@ -109,17 +109,17 @@ int main(int argc, char **argv) {
         gid4 = H5Gcreate_ff(file_id, "G4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         gid5 = H5Gcreate_ff(gid4, "G5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
 
-        /* wait on all requests and print completion status */
-        H5ESget_count(e_stack, &num_events);
-        H5ESwait_all(e_stack, &status);
-        H5ESclear(e_stack);
-        printf("%d events in event stack. Completion status = %d\n", num_events, status);
-
         ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, e_stack);
         assert(0 == ret);
         /* Close transaction object. Local op */
         ret = H5TRclose(tid1);
         assert(0 == ret);
+
+        /* wait on all requests and print completion status */
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
         /* create transaction object */
         tid2 = H5TRcreate(file_id, rid2, (uint64_t)2);
@@ -140,20 +140,11 @@ int main(int argc, char **argv) {
         assert(ret == 0);
 
         ret = H5Lmove_ff(gid3, "D3", file_id, "/G4/G5/D3moved", 
-        H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
+                         H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
         assert(ret == 0);
 
         ret = H5Ldelete_ff(file_id, "/G1/G2/G3/D2", H5P_DEFAULT, tid2, e_stack);
         assert(ret == 0);
-
-        assert(H5Gclose_ff(gid1, e_stack) == 0);
-        assert(H5Gclose_ff(gid2, e_stack) == 0);
-        assert(H5Gclose_ff(gid3, e_stack) == 0);
-        assert(H5Gclose_ff(gid4, e_stack) == 0);
-        assert(H5Gclose_ff(gid5, e_stack) == 0);
-        assert(H5Dclose_ff(did1, e_stack) == 0);
-        assert(H5Dclose_ff(did2, e_stack) == 0);
-        assert(H5Dclose_ff(did3, e_stack) == 0);
 
         /* make this synchronous so we know the container version has been acquired */
         ret = H5TRfinish(tid2, H5P_DEFAULT, &rid3, e_stack);
@@ -166,6 +157,14 @@ int main(int argc, char **argv) {
         ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);
 
+        assert(H5Gclose_ff(gid1, e_stack) == 0);
+        assert(H5Gclose_ff(gid2, e_stack) == 0);
+        assert(H5Gclose_ff(gid3, e_stack) == 0);
+        assert(H5Gclose_ff(gid4, e_stack) == 0);
+        assert(H5Gclose_ff(gid5, e_stack) == 0);
+        assert(H5Dclose_ff(did1, e_stack) == 0);
+        assert(H5Dclose_ff(did2, e_stack) == 0);
+        assert(H5Dclose_ff(did3, e_stack) == 0);
         version = 2;
     }
 
