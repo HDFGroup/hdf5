@@ -408,7 +408,9 @@ H5_DLL herr_t H5VL_iod_tr_skip(H5VL_iod_file_t *file, uint64_t start_trans_num,
                                uint64_t count, void **req);
 H5_DLL herr_t H5VL_iod_tr_abort(H5TR_t *tr, void **req);
 
-H5_DLL herr_t H5VL_iod_analysis_execute(const char *file_name, const char *obj_name, 
-                                        hid_t query_id, void **req);
+H5_DLL herr_t H5VL_iod_analysis_execute(const char *file_name, const char *obj_name,
+        hid_t query_id, const char *split_script, const char *combine_script,
+        void **req);
+
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_client_H */

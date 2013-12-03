@@ -85,13 +85,15 @@ H5ASexecute(const char *file_name, const char *obj_name, hid_t query_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL file name")
     if(obj_name == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL object name")
+    /*
     if(NULL == (query = (H5Q_t *)H5I_object_verify(query_id, H5I_QUERY)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID")
+    */
 
     /* It is allowed to have split_script and combine_script to be NULL */
 
     /* H5AS_execute */
-    if((ret_value = H5AS_execute(file_name, obj_name, query, split_script,
+    if((ret_value = H5AS_execute(file_name, obj_name, query_id, split_script,
             combine_script, estack_id)) < 0)
         HGOTO_ERROR(H5E_QUERY, H5E_CANTENCODE, FAIL, "can't start analysis"
                 "shipping execution")
@@ -110,7 +112,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AS_execute(const char *file_name, const char *obj_name, H5Q_t *query,
+H5AS_execute(const char *file_name, const char *obj_name, hid_t query_id,
         const char *split_script, const char *combine_script, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
@@ -122,7 +124,6 @@ H5AS_execute(const char *file_name, const char *obj_name, H5Q_t *query,
 
     HDassert(file_name);
     HDassert(obj_name);
-    HDassert(query);
 
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
@@ -137,7 +138,8 @@ H5AS_execute(const char *file_name, const char *obj_name, H5Q_t *query,
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_analysis_execute(file_name, obj_name, query, req)) < 0)
+    if((ret_value = H5VL_iod_analysis_execute(file_name, obj_name, query_id,
+            split_script, combine_script, req)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL,
                 "can't start iod analysis shipping execution")
 

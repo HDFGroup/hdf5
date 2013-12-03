@@ -494,7 +494,8 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
         request->trans_info = req_info;
 
     /* add request to container's linked list */
-    H5VL_iod_request_add(request_obj->file, request);
+    if(HG_ANALYSIS_EXECUTE != op_id)
+        H5VL_iod_request_add(request_obj->file, request);
 
     /* update the parent information in the request */
     request->num_parents = num_parents;
@@ -545,9 +546,29 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
         if(track)
             request_obj->request = NULL;
 
+        if(HG_ANALYSIS_EXECUTE == op_id) {
+            int ret;
+            hg_status_t status;
+
+            /* test the operation status */
+            ret = HG_Wait(*((hg_request_t *)request->req), HG_MAX_IDLE_TIME,
+                    &status);
+            if(HG_FAIL == ret) {
+                fprintf(stderr, "failed to wait on request\n");
+                request->status = H5ES_STATUS_FAIL;
+                request->state = H5VL_IOD_COMPLETED;
+            }
+            else {
+                if(status) {
+                    request->status = H5ES_STATUS_SUCCEED;
+                    request->state = H5VL_IOD_COMPLETED;
+                }
+            }
+        } else {
         /* Synchronously wait on the request */
         if(H5VL_iod_request_wait(request_obj->file, request) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't wait on HG request");
+        }
 
         request->req = H5MM_xfree(request->req);
         H5VL_iod_request_decr_rc(request);
@@ -1427,8 +1448,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_iod_analysis_execute(const char *file_name, const char *obj_name, hid_t query_id,
-                          void **req)
+H5VL_iod_analysis_execute(const char *file_name, const char *obj_name,
+        hid_t query_id, const char *split_script, const char *combine_script,
+        void **req)
 {
     analysis_execute_in_t input;
     analysis_execute_out_t *output;
@@ -1440,6 +1462,8 @@ H5VL_iod_analysis_execute(const char *file_name, const char *obj_name, hid_t que
     input.file_name = file_name;
     input.obj_name = obj_name;
     input.query_id = query_id;
+    input.split_script = split_script;
+    input.combine_script = combine_script;
 
 #if H5VL_IOD_DEBUG
     printf("Analysis Execute on file %s Object %s\n", 

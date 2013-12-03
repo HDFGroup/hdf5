@@ -41,7 +41,7 @@
 /******************************/
 
 H5_DLL herr_t H5AS_execute(const char *file_name, const char *dataset_name,
-        H5Q_t *query, const char *split_script, const char *combine_script,
+        hid_t query_id, const char *split_script, const char *combine_script,
         hid_t estack_id);
 
 #endif /* _H5ASprivate_H */
