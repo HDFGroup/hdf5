@@ -181,7 +181,9 @@ H5FL_BLK_EXTERN(type_conv);
 /***************************/
 
 /* Property value defaults */
+#ifdef H5_HAVE_EFF
 static const hbool_t H5D_def_append_only_g = H5D_CRT_APPEND_ONLY_DEF;
+#endif
 static const H5O_layout_t H5D_def_layout_g = H5D_CRT_LAYOUT_DEF;        /* Default storage layout */
 static const H5O_fill_t H5D_def_fill_g = H5D_CRT_FILL_VALUE_DEF;        /* Default fill value */
 static const unsigned H5D_def_alloc_time_state_g = H5D_CRT_ALLOC_TIME_STATE_DEF;  /* Default allocation time state */
