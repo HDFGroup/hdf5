@@ -1,4 +1,4 @@
-HDF5 version 1.9.169-swmr_chksum1 currently under development
+HDF5 version 1.9.169-swmr_chksum1 released on 2013-12-04
 
 
 INTRODUCTION
