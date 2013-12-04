@@ -238,6 +238,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t rtid;
     iod_size_t key_size = 0, val_size = 0;
     uint32_t cs_scope = 0;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -245,6 +246,13 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start file open %s %d %d\n", input->name, input->flags, input->fapl_id);
 #endif
+
+    if(H5F_ACC_RDWR == mode)
+        mode = IOD_CONT_RW;
+    else if(H5F_ACC_RDONLY == mode)
+        mode = IOD_CONT_R;
+    else
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "invalid mode");
 
     if(H5Pget_metadata_integrity_scope(input->fapl_id, &cs_scope) < 0)
         HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
@@ -265,11 +273,14 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
     /* open the root group */
-    if (iod_obj_open_read(coh, ROOT_ID, NULL /*hints*/, &root_oh.rd_oh, NULL) < 0)
-        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object");
-    if (iod_obj_open_write(coh, ROOT_ID, NULL /*hints*/, &root_oh.wr_oh, NULL) < 0)
-        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object");
-
+    if ((ret = iod_obj_open_read(coh, ROOT_ID, NULL /*hints*/, &root_oh.rd_oh, NULL)) < 0) {
+        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object for read");
+    }
+    if ((ret = iod_obj_open_write(coh, ROOT_ID, NULL /*hints*/, &root_oh.wr_oh, NULL)) < 0) {
+        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object for write");
+    }
     /* get scratch pad of root group */
     if(iod_obj_get_scratch(root_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
@@ -279,8 +290,6 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
         if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
     }
-
-    fprintf(stderr, "Get scratch M: %"PRIu64"  A: %"PRIu64"\n", sp[0], sp[1]);
 
     /* open the metadata scratch pad */
     if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
@@ -385,7 +394,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
 
     /* The root client request will create a transaction and store the
        final indexes for used up IDs */
-    if(input->max_kv_index && input->max_array_index && input->max_blob_index) {
+    if(input->max_kv_index || input->max_array_index || input->max_blob_index) {
         iod_cont_trans_stat_t *tids = NULL;
         iod_trans_id_t trans_num, rtid;
         scratch_pad sp;
@@ -402,6 +411,8 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
 
         if(iod_free_cont_trans_stat(coh, tids) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
+
+        fprintf(stderr, "starting transaction %"PRIu64" rcxt %"PRIu64"\n", trans_num, rtid);
 
         if(iod_trans_start(coh, &trans_num, NULL, 0, IOD_TRANS_W, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");

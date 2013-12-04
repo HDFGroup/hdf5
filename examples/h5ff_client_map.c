@@ -107,20 +107,36 @@ int main(int argc, char **argv) {
     dtid2 = H5Tcopy(H5T_C_S1);
     H5Tset_size(dtid2,H5T_VARIABLE);
 
+    if(0 == my_rank) {
+        hid_t fapl_id2;
 
-    /* create the file. */
-    file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+        fapl_id2 = H5Pcreate (H5P_FILE_ACCESS);
+        H5Pset_fapl_iod(fapl_id2, MPI_COMM_SELF, MPI_INFO_NULL);
+        /* create the file. */
+        file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id2, 
+                               H5_EVENT_STACK_NULL);
+        assert(file_id);
+
+        assert(H5Fclose_ff(file_id, H5_EVENT_STACK_NULL) == 0);
+        H5Pclose(fapl_id2);
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    /* open the file. */
+    file_id = H5Fopen_ff(file_name, H5F_ACC_RDWR, fapl_id, NULL, 
+                         H5_EVENT_STACK_NULL);
     assert(file_id);
 
     /* acquire container version 0 - EXACT.  
        This can be asynchronous, but here we need the acquired ID 
        right after the call to start the transaction so we make synchronous. */
-    version = 0;
+    version = 1;
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(0 == version);
+    assert(1 == version);
 
     /* create transaction object */
-    tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
+    tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
     assert(tid1);
 
     /* start transaction 1 with default Leader/Delegate model. Leader
@@ -129,7 +145,7 @@ int main(int argc, char **argv) {
        Leader can tell its delegates that the transaction is
        started. */
     if(0 == my_rank) {
-        trans_num = 1;
+        trans_num = 2;
         ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
@@ -227,7 +243,7 @@ int main(int argc, char **argv) {
 
         /* this wait if for the transaction start */
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
-        assert(1 == trans_num);
+        assert(2 == trans_num);
 
         /* recieve the token sizes */ 
         MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
@@ -291,7 +307,7 @@ int main(int argc, char **argv) {
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
     /* Leader process tells delegates that container version 1 is acquired */
-    version = 1;
+    version = 2;
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
 
     /* delegates just create a read context object; no need to acquire
@@ -315,7 +331,7 @@ int main(int argc, char **argv) {
     assert(ret == 0);
 
     /* create & start transaction 2 with Multiple Leader - No Delegate Model. */
-    tid2 = H5TRcreate(file_id, rid2, (uint64_t)2);
+    tid2 = H5TRcreate(file_id, rid2, (uint64_t)3);
     assert(tid2);
     trspl_id = H5Pcreate (H5P_TR_START);
     ret = H5Pset_trspl_num_peers(trspl_id, my_size);
@@ -362,10 +378,10 @@ int main(int argc, char **argv) {
     /* Barrier so all processes are guranteed to have finished transaction 2 */
     MPI_Barrier(MPI_COMM_WORLD);
 
-    /* acquire container version 2 - EXACT */
-    version = 2;
+    /* acquire container version 3 - EXACT */
+    version = 3;
     rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(2 == version);
+    assert(3 == version);
 
     /* Now read some data from the container */
 
@@ -408,6 +424,7 @@ int main(int argc, char **argv) {
 
         for(i=0 ; i<5 ; i++) {
             key = i;
+            str_rdata[i] = NULL;
             ret = H5Mget_ff(map3, H5T_STD_I32LE, &key, dtid2, &str_rdata[i],
                             H5P_DEFAULT, rid3, H5_EVENT_STACK_NULL);
             assert(ret == 0);
@@ -416,6 +433,8 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Reading VL Strings: \n");
 
         for(i=0 ; i<5 ; i++) {
+            if(str_rdata[i] == NULL)
+                continue;
             fprintf(stderr, "Key %d:  %s\n", i, str_rdata[i]);
             if(i == 1)
                 assert(0 == strlen(str_rdata[i]));
@@ -429,7 +448,7 @@ int main(int argc, char **argv) {
     ret = H5Tclose(dtid2);
     assert(ret == 0);
 
-    /* release container version 1. This is async. */
+    /* release container version 3. This is async. */
     ret = H5RCrelease(rid3, e_stack);
     assert(0 == ret);
 
