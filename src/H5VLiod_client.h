@@ -143,7 +143,6 @@ typedef struct H5VL_iod_remote_attr_t {
     iod_handles_t iod_oh;
     iod_obj_id_t iod_id;
     iod_obj_id_t mdkv_id;
-    hid_t acpl_id;
     hid_t type_id;
     hid_t space_id;
 } H5VL_iod_remote_attr_t;
@@ -324,6 +323,12 @@ typedef struct H5VL_iod_rc_info_t {
     H5RC_t *read_cxt;
     uint64_t *c_version_ptr;
 } H5VL_iod_rc_info_t;
+
+/* information about a transaction start request*/
+typedef struct H5VL_iod_tr_info_t {
+    int result;
+    H5TR_t *tr;
+} H5VL_iod_tr_info_t;
 
 /* information about an exists request*/
 typedef struct H5VL_iod_exists_info_t {

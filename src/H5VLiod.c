@@ -3973,7 +3973,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
             HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
         obj->request = NULL;
         /* retrieve IOD info of location object */
-        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
     }
 
@@ -4011,7 +4011,6 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     input.loc_oh = iod_oh;
     input.path = loc_name;
     input.attr_name = attr_name;
-    input.acpl_id = acpl_id;
     input.type_id = type_id;
     input.space_id = space_id;
     input.trans_num = tr->trans_num;
@@ -4046,9 +4045,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
            attr_name, input.attr_id, g_axe_id);
 #endif
 
-    /* copy property lists, dtype, and dspace*/
-    if((attr->remote_attr.acpl_id = H5Pcopy(acpl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy acpl");
+    /* copy dtype, and dspace */
     if((attr->remote_attr.type_id = H5Tcopy(type_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dtype");
     if((attr->remote_attr.space_id = H5Scopy(space_id)) < 0)
@@ -4060,9 +4057,9 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     attr->common.file->nopen_objs ++;
 
     if(H5VL__iod_create_and_forward(H5VL_ATTR_CREATE_ID, HG_ATTR_CREATE, 
-                                    (H5VL_iod_object_t *)attr, 1, 
-                                    num_parents, parent_reqs,
-                                    (H5VL_iod_req_info_t *)tr, &input, &attr->remote_attr, attr, req) < 0)
+                                    (H5VL_iod_object_t *)attr, 1, num_parents, parent_reqs,
+                                    (H5VL_iod_req_info_t *)tr, &input, &attr->remote_attr, 
+                                    attr, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship attribute create");
 
     ret_value = (void *)attr;
@@ -4144,7 +4141,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
             HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
         obj->request = NULL;
         /* retrieve IOD info of location object */
-        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location group info");
     }
 
@@ -4156,7 +4153,6 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     attr->remote_attr.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
     attr->remote_attr.iod_id = IOD_OBJ_INVALID;
     attr->remote_attr.mdkv_id = IOD_OBJ_INVALID;
-    attr->remote_attr.acpl_id = -1;
     attr->remote_attr.type_id = -1;
     attr->remote_attr.space_id = -1;
 
@@ -4552,7 +4548,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
             HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
         obj->request = NULL;
         /* retrieve IOD info of location object */
-        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
     }
 
@@ -4674,15 +4670,8 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
                 H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)obj;
 
-                if(-1 == attr->remote_attr.acpl_id) {
-                    /* Synchronously wait on the request attached to the attribute */
-                    if(H5VL_iod_request_wait(attr->common.file, attr->common.request) < 0)
-                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-                    attr->common.request = NULL;
-                }
-
                 /* Retrieve the file's access property list */
-                if((*ret_id = H5Pcopy(attr->remote_attr.acpl_id)) < 0)
+                if((*ret_id = H5Pcopy(H5P_ATTRIBUTE_CREATE_DEFAULT)) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get attr creation property list");
                 break;
             }
@@ -4746,7 +4735,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                         HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
                     obj->request = NULL;
                     /* retrieve IOD info of location object */
-                    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+                    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &input.loc_attrkv_id) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
                 }
 
@@ -4842,8 +4831,7 @@ H5VL_iod_attribute_close(void *_attr, hid_t UNUSED dxpl_id, void **req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(-1 == attr->remote_attr.acpl_id ||
-       -1 == attr->remote_attr.type_id ||
+    if(-1 == attr->remote_attr.type_id ||
        -1 == attr->remote_attr.space_id ||
        IOD_OH_UNDEFINED == attr->remote_attr.iod_oh.rd_oh.cookie) {
         /* Synchronously wait on the request attached to the dataset */
@@ -6446,7 +6434,7 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
             HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
         obj->request = NULL;
         /* retrieve IOD info of location object */
-        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
     }
 
@@ -6618,7 +6606,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
             HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
         obj->request = NULL;
         /* retrieve IOD info of location object */
-        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
     }
 
@@ -7702,10 +7690,19 @@ H5VL_iod_rc_release(H5RC_t *rc, void **req)
         H5VL_iod_request_t *next;
 
         while(cur_req) {
+            /* add a dependency if the current request in the list is pending */
             if(cur_req->state == H5VL_IOD_PENDING) {
-                parent_reqs[num_parents] = cur_req;
-                cur_req->ref_count ++;
-                num_parents ++;
+                /* If this call is not asynchronous, wait on a dependent request */
+                if(NULL == req) {
+                    if(H5VL_iod_request_wait(rc->file, cur_req) < 0)
+                        HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on request");
+                }
+                /* Otherwise, add a dependency */
+                else {
+                    parent_reqs[num_parents] = cur_req;
+                    cur_req->ref_count ++;
+                    num_parents ++;
+                }
             }
 
             next_req = cur_req->trans_next;
@@ -7879,7 +7876,7 @@ herr_t
 H5VL_iod_tr_start(H5TR_t *tr, hid_t trspl_id, void **req)
 {
     tr_start_in_t input;
-    int *status = NULL;
+    H5VL_iod_tr_info_t *tr_info = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -7889,20 +7886,25 @@ H5VL_iod_tr_start(H5TR_t *tr, hid_t trspl_id, void **req)
     input.trans_num = tr->trans_num;
     input.trspl_id = trspl_id;
 
-    status = (int *)malloc(sizeof(int));
-
 #if H5VL_IOD_DEBUG
     printf("Transaction start, number %"PRIu64", axe id %"PRIu64"\n", 
            input.trans_num, g_axe_id);
 #endif
 
+    /* setup the info structure for updating the transaction on completion */
+    if(NULL == (tr_info = (H5VL_iod_tr_info_t *)H5MM_calloc(sizeof(H5VL_iod_tr_info_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate TR info struct");
+
+    tr_info->tr = tr;
+
     if(H5VL__iod_create_and_forward(H5VL_TR_START_ID, HG_TR_START, 
                                     (H5VL_iod_object_t *)tr->file, 0, 0, NULL,
-                                    NULL, &input, status, status, req) < 0)
+                                    NULL, &input, &tr_info->result, tr_info, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship VOL op");
 
     if(NULL != req) {
         H5VL_iod_request_t *request = (H5VL_iod_request_t *)(*req);
+
         tr->req_info.request = request;
     }
 
@@ -7952,9 +7954,17 @@ H5VL_iod_tr_finish(H5TR_t *tr, hbool_t acquire, hid_t trfpl_id, void **req)
         while(cur_req) {
             /* add a dependency if the current request in the list is pending */
             if(cur_req->state == H5VL_IOD_PENDING) {
-                parent_reqs[num_parents] = cur_req;
-                cur_req->ref_count ++;
-                num_parents ++;
+                /* If this call is not asynchronous, wait on a dependent request */
+                if(NULL == req) {
+                    if(H5VL_iod_request_wait(tr->file, cur_req) < 0)
+                        HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on request");
+                }
+                /* Otherwise, add a dependency */
+                else {
+                    parent_reqs[num_parents] = cur_req;
+                    cur_req->ref_count ++;
+                    num_parents ++;
+                }
             }
 
             next_req = cur_req->trans_next;

@@ -12,8 +12,8 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name1[]="/eff_file_1";
-    const char file_name2[]="/eff_file_2";
+    const char file_name1[]="eff_file_1";
+    const char file_name2[]="eff_file_2";
     hid_t fid1, fid2;
     hid_t gid1, gid2;
     hid_t did1, did2;
@@ -74,9 +74,9 @@ int main(int argc, char **argv) {
     rdata2 = malloc (sizeof(int)*nelem);
     for(i=0;i<nelem;++i) {
         rdata1[i] = 0;
-        wdata1[i]=i;
+        wdata1[i]=my_rank+1;
         rdata2[i] = 0;
-        wdata2[i]=i;
+        wdata2[i]=my_rank+1;
     }
 
     /* create a 32 bit integer LE datatype. This is a local operation
@@ -129,10 +129,9 @@ int main(int argc, char **argv) {
        Leader can tell its delegates that the transaction is
        started. */
     if(0 == my_rank) {
-        trans_num = 1;
-        ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        ret = H5TRstart(tid1, H5P_DEFAULT, e_stack);
         assert(0 == ret);
-        ret = H5TRstart(tid2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        ret = H5TRstart(tid2, H5P_DEFAULT, e_stack);
         assert(0 == ret);
 
         /* create groups */
@@ -154,6 +153,8 @@ int main(int argc, char **argv) {
         /* Raw data write on D1. */
         H5Dwrite_ff(did1, dtid1, sid, sid, H5P_DEFAULT, wdata1, tid1, e_stack);
         H5Dwrite_ff(did2, dtid2, sid, sid, H5P_DEFAULT, wdata2, tid2, e_stack);
+
+        trans_num = 1;
     }
 
     /* Tell other procs that transaction 1 is started */
@@ -255,42 +256,82 @@ int main(int argc, char **argv) {
         MPI_Ibcast(token6, token_size6, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[5]);
         MPI_Waitall(6, mpi_reqs, MPI_STATUS_IGNORE);
 
-        /*
         gid1 = H5Oopen_by_token(token1, rid1, e_stack);
         gid2 = H5Oopen_by_token(token2, rid2, e_stack);
         dtid1 = H5Oopen_by_token(token3, rid1, e_stack);
         dtid2 = H5Oopen_by_token(token4, rid2, e_stack);
         did1 = H5Oopen_by_token(token5, rid1, e_stack);
         did2 = H5Oopen_by_token(token6, rid2, e_stack);
-        */
 
-        gid1 = H5Gopen_ff(fid1, "G1", H5P_DEFAULT, rid1, e_stack);
-        gid2 = H5Gopen_ff(fid2, "G1", H5P_DEFAULT, rid2, e_stack);
-        dtid1 = H5Topen_ff(fid1, "int", H5P_DEFAULT, rid1, e_stack);
-        dtid2 = H5Topen_ff(fid2, "int", H5P_DEFAULT, rid2, e_stack);
-        did1 = H5Dopen_ff(gid1, "D1", H5P_DEFAULT, rid1, e_stack);
-        did2 = H5Dopen_ff(gid2, "D1", H5P_DEFAULT, rid2, e_stack);
+        /* Raw data write on D1. */
+        H5Dwrite_ff(did1, dtid1, sid, sid, H5P_DEFAULT, wdata1, tid1, e_stack);
+        H5Dwrite_ff(did2, dtid2, sid, sid, H5P_DEFAULT, wdata2, tid2, e_stack);
 
-        {
-            hid_t dxpl_id;
-            uint64_t cs_scope;
-            dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-            /* tell HDF5 to disable all data integrity checks for this write */
-            cs_scope = 0;
-            ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
-            assert(ret == 0);
-
-            ret = H5Dread_ff(did1, dtid1, sid, sid, dxpl_id, rdata1, rid1, e_stack);
-            assert(ret == 0);
-            ret = H5Dread_ff(did2, dtid2, sid, sid, dxpl_id, rdata2, rid2, e_stack);
-            assert(ret == 0);
-
-            H5Pclose(dxpl_id);
-        }
+        /* none leader procs have to complete operations before notifying the leader */
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
     }
 
-    /* none leader procs have to complete operations before notifying the leader */
-    if(0 != my_rank) {
+    /* Barrier to make sure all processes are done writing so Process
+       0 can finish transaction 1 and acquire a read context on it. */
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    /* Leader process finishes/commits the transaction and acquires a
+       read context on it */
+    if(0 == my_rank) {
+        MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
+        MPI_Waitall(12, mpi_reqs, MPI_STATUS_IGNORE);
+
+        ret = H5TRfinish(tid1, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    /* Close the first transaction object. Local op */
+    ret = H5TRclose(tid1);
+    assert(0 == ret);
+    ret = H5TRclose(tid2);
+    assert(0 == ret);
+
+    /* release container version 0. This is async. */
+    ret = H5RCrelease(rid1, H5_EVENT_STACK_NULL);
+    assert(0 == ret);
+    ret = H5RCrelease(rid2, H5_EVENT_STACK_NULL);
+    assert(0 == ret);
+
+    ret = H5RCclose(rid1);
+    assert(0 == ret);
+    ret = H5RCclose(rid2);
+    assert(0 == ret);
+
+    version = 1;
+    rid1 = H5RCacquire(fid1, &version, H5P_DEFAULT, e_stack);
+    assert(1 == version);
+    rid2 = H5RCacquire(fid2, &version, H5P_DEFAULT, e_stack);
+    assert(1 == version);
+
+    {
+        hid_t dxpl_id;
+        uint64_t cs_scope;
+
+        dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+        /* tell HDF5 to disable all data integrity checks for this write */
+        cs_scope = 0;
+        ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
+        assert(ret == 0);
+
+        ret = H5Dread_ff(did1, dtid1, sid, sid, dxpl_id, rdata1, rid1, e_stack);
+        assert(ret == 0);
+        ret = H5Dread_ff(did2, dtid2, sid, sid, dxpl_id, rdata2, rid2, e_stack);
+        assert(ret == 0);
+
+        H5Pclose(dxpl_id);
+
         H5ESget_count(e_stack, &num_events);
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
@@ -306,31 +347,6 @@ int main(int argc, char **argv) {
             fprintf(stderr, "%d ",rdata2[i]);
         fprintf(stderr, "\n");
     }
-
-    /* Barrier to make sure all processes are done writing so Process
-       0 can finish transaction 1 and acquire a read context on it. */
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    /* Leader process finishes/commits the transaction and acquires a
-       read context on it */
-    if(0 == my_rank) {
-        MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
-        MPI_Waitall(8, mpi_reqs, MPI_STATUS_IGNORE);
-
-        ret = H5TRfinish(tid1, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-        ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-    }
-
-    /* another barrier so other processes know that container version is acquried */
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    /* Close the first transaction object. Local op */
-    ret = H5TRclose(tid1);
-    assert(0 == ret);
-    ret = H5TRclose(tid2);
-    assert(0 == ret);
 
     /* release container version 0. This is async. */
     ret = H5RCrelease(rid1, e_stack);

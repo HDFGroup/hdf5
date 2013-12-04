@@ -345,7 +345,6 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
 
     output.iod_id = attr_id;
     output.mdkv_id = sp[0];
-    output.acpl_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
     output.iod_oh.rd_oh.cookie = attr_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = attr_oh.wr_oh.cookie;
 

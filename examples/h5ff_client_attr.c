@@ -99,7 +99,6 @@ int main(int argc, char **argv) {
         /* create transaction object */
         tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
         assert(tid1);
-
         ret = H5TRstart(tid1, H5P_DEFAULT, e_stack);
         assert(0 == ret);
 
@@ -216,6 +215,11 @@ int main(int argc, char **argv) {
 
         version = 2;
     }
+
+    H5ESget_count(e_stack, &num_events);
+    H5ESwait_all(e_stack, &status);
+    H5ESclear(e_stack);
+    printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
     /* Tell other procs that container version 2 is acquired */
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
