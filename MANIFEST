@@ -961,6 +961,8 @@
 ./test/H5srcdir_str.h.in
 ./test/Makefile.am
 ./test/Makefile.in
+./test/POSIX_Order_Write_Test_Report.docx
+./test/POSIX_Order_Write_Test_Report.pdf
 ./test/SWMR_POSIX_Order_UG.txt
 ./test/SWMR_UseCase_UG.txt
 ./test/accum.c
