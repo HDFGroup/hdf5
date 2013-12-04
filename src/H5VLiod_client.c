@@ -1267,26 +1267,28 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 req->state = H5VL_IOD_COMPLETED;
             }
 
-            free(status);
-            req->data = NULL;
-            dset->common.request = NULL;
-            H5VL_iod_request_delete(file, req);
-
             /* free dset components */
             if(dset->common.obj_name)
                 free(dset->common.obj_name);
             if(dset->common.comment)
                 HDfree(dset->common.comment);
-            if(dset->remote_dset.dcpl_id != H5P_DATASET_CREATE_DEFAULT &&
-               H5Pclose(dset->remote_dset.dcpl_id) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
-            if(dset->dapl_id != H5P_DATASET_ACCESS_DEFAULT &&
-               H5Pclose(dset->dapl_id) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
             if(H5Tclose(dset->remote_dset.type_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
             if(H5Sclose(dset->remote_dset.space_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dspace");
+            if(dset->remote_dset.dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
+                if(H5Pclose(dset->remote_dset.dcpl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            }
+            if(dset->dapl_id != H5P_DATASET_ACCESS_DEFAULT) {
+                if(H5Pclose(dset->dapl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            }
+
+            free(status);
+            req->data = NULL;
+            dset->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
             dset = H5FL_FREE(H5VL_iod_dset_t, dset);
             break;
         }

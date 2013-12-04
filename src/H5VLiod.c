@@ -5021,6 +5021,9 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 link_value = strdup("\0");
                 input.link_value = link_value;
 
+#if H5VL_IOD_DEBUG
+                printf("Link Create Hard axe id %"PRIu64"\n", g_axe_id);
+#endif
                 break;
             }
         case H5VL_LINK_CREATE_SOFT:
@@ -5103,6 +5106,9 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 input.lapl_id = lapl_id;
                 input.link_value = link_value;
 
+#if H5VL_IOD_DEBUG
+                printf("Link Create Soft axe id %"PRIu64"\n", g_axe_id);
+#endif
                 break;
             }
         /* MSC - not supported now */
@@ -5663,7 +5669,7 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         dset->remote_dset.attrkv_id = attrkv_id;
 
         dset->dapl_id = H5P_DATASET_ACCESS_DEFAULT;
-        dset->remote_dset.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
+        dset->remote_dset.dcpl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT);
 
         /* decode dtype */
         {
@@ -5731,7 +5737,7 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         dtype->remote_dtype.attrkv_id = attrkv_id;
 
         dtype->tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
-        dtype->remote_dtype.tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
+        dtype->remote_dtype.tcpl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT);
 
         /* decode dtype */
         {
@@ -5784,7 +5790,7 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         grp->remote_group.mdkv_id = mdkv_id;
         grp->remote_group.attrkv_id = attrkv_id;
 
-        grp->remote_group.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+        grp->remote_group.gcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
         grp->gapl_id = H5P_GROUP_ACCESS_DEFAULT;
 
         /* set the input structure for the HG encode routine */
@@ -5822,7 +5828,7 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         map->remote_map.mdkv_id = mdkv_id;
         map->remote_map.attrkv_id = attrkv_id;
 
-        map->remote_map.mcpl_id = H5P_GROUP_CREATE_DEFAULT;
+        map->remote_map.mcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
         map->mapl_id = H5P_GROUP_ACCESS_DEFAULT;
 
         /* decode key_type */

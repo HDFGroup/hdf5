@@ -308,7 +308,7 @@ int main(int argc, char **argv) {
         assert(ret == 0);
     }
 
-    ret = H5Dclose_ff(did1, e_stack);
+    ret = H5Dclose_ff(did1, H5_EVENT_STACK_NULL);
     assert(ret == 0);
 
     /* Open objects closed before */
@@ -440,6 +440,19 @@ int main(int argc, char **argv) {
     ret = H5Gclose_ff(gid1, e_stack);
     assert(ret == 0);
 
+    H5Fclose_ff(file_id, e_stack);
+
+    H5ESget_count(e_stack, &num_events);
+
+    H5EStest_all(e_stack, &status);
+    printf("%d events in event stack. H5EStest_all Completion status = %d\n", num_events, status);
+
+    H5ESwait_all(e_stack, &status);
+    printf("%d events in event stack. H5ESwait_all Completion status = %d\n", num_events, status);
+
+    H5EStest_all(e_stack, &status);
+    printf("%d events in event stack. H5EStest_all Completion status = %d\n", num_events, status);
+
     ret = H5Sclose(sid);
     assert(ret == 0);
     ret = H5Tclose(dtid);
@@ -453,19 +466,6 @@ int main(int argc, char **argv) {
     assert(0 == ret);
     ret = H5TRclose(tid2);
     assert(0 == ret);
-
-    H5Fclose_ff(file_id, e_stack);
-
-    H5ESget_count(e_stack, &num_events);
-
-    H5EStest_all(e_stack, &status);
-    printf("%d events in event stack. H5EStest_all Completion status = %d\n", num_events, status);
-
-    H5ESwait_all(e_stack, &status);
-    printf("%d events in event stack. H5ESwait_all Completion status = %d\n", num_events, status);
-
-    H5EStest_all(e_stack, &status);
-    printf("%d events in event stack. H5EStest_all Completion status = %d\n", num_events, status);
 
     H5ESclear(e_stack);
 

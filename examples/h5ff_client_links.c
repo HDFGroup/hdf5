@@ -111,15 +111,16 @@ int main(int argc, char **argv) {
 
         ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, e_stack);
         assert(0 == ret);
-        /* Close transaction object. Local op */
-        ret = H5TRclose(tid1);
-        assert(0 == ret);
 
         /* wait on all requests and print completion status */
         H5ESget_count(e_stack, &num_events);
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
+
+        /* Close transaction object. Local op */
+        ret = H5TRclose(tid1);
+        assert(0 == ret);
 
         /* create transaction object */
         tid2 = H5TRcreate(file_id, rid2, (uint64_t)2);
@@ -152,9 +153,6 @@ int main(int argc, char **argv) {
         /* make this synchronous so we know the container version has been acquired */
         ret = H5TRfinish(tid2, H5P_DEFAULT, &rid3, e_stack);
         assert(0 == ret);
-        /* Close transaction object. Local op */
-        ret = H5TRclose(tid2);
-        assert(0 == ret);
 
         /* release container version 1. This is async. */
         ret = H5RCrelease(rid2, e_stack);
@@ -165,6 +163,10 @@ int main(int argc, char **argv) {
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
+
+        /* Close transaction object. Local op */
+        ret = H5TRclose(tid2);
+        assert(0 == ret);
 
         assert(H5Gclose_ff(gid1, e_stack) == 0);
         assert(H5Gclose_ff(gid2, e_stack) == 0);
