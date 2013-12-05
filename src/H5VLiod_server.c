@@ -340,7 +340,7 @@ H5VL__iod_server_finish_axe_tasks(AXE_engine_t axe_engine, AXE_task_t start_rang
 
     for(u=start_range ; u<count+start_range ; u++) {
         if(AXE_SUCCEED != AXEfinish(axe_engine, u))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE task %"PRIu64"", u);
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE task");
     }
 
 done:
@@ -372,11 +372,11 @@ H5VL_iod_server_eff_init(hg_handle_t handle)
 
     /* get the input from the client connecting */
     if(HG_FAIL == HG_Handler_get_input(handle, &num_procs))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     /* initialize the IOD library */
     if(iod_initialize(iod_comm, NULL, num_procs, num_procs) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't initialize");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't initialize");
 
     /* set the root ID */
     IOD_OBJID_SETOWNER_APP(ROOT_ID)
