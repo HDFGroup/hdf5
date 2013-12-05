@@ -1066,7 +1066,7 @@ ADD_H5_VERIFY_TEST (ckdim_smaller "TEST" 0 h5repack_layout3.h5 chunk_unlimit3 CO
 ##############################################################################
 IF (BUILD_SHARED_LIBS)
   ADD_H5_UD_TEST (plugin_test 0 h5repack_layout.h5 -v -f UD=257,1,9)
-  ADD_H5_UD_TEST (plugin_none 0 h5repack_layout.UD.h5 -v -f NONE)
+#  ADD_H5_UD_TEST (plugin_none 0 h5repack_layout.UD.h5 -v -f NONE)
 ELSE (BUILD_SHARED_LIBS)
   MESSAGE (STATUS " **** Plugins libraries must be built as shared libraries **** ")
   ADD_TEST (
