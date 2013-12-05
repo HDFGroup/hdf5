@@ -375,7 +375,7 @@ H5VL_iod_server_eff_init(hg_handle_t handle)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     /* initialize the IOD library */
-    if(iod_initialize(iod_comm, NULL, num_procs, num_procs) < 0 )
+    if(iod_initialize(iod_comm, NULL, num_procs, num_procs) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't initialize");
 
     /* set the root ID */
@@ -453,31 +453,31 @@ H5VL_iod_server_analysis_execute(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (analysis_execute_in_t *)H5MM_malloc(sizeof(analysis_execute_in_t))))
-	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range, 
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     //if(AXE_SUCCEED != AXEgenerate_task_id(engine, &axe_id))
-    //HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to generate ID for AXE task");
+    //HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to generate ID for AXE task");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
                                       H5VL_iod_server_analysis_execute_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -509,19 +509,19 @@ H5VL_iod_server_analysis_farm(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (analysis_farm_in_t *)H5MM_malloc(sizeof(analysis_farm_in_t))))
-	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(AXE_SUCCEED != AXEgenerate_task_id(engine, &axe_id))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to generate ID for AXE task");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to generate ID for AXE task");
 
     op_data->hg_handle = handle;
     op_data->axe_id = axe_id;
@@ -529,7 +529,7 @@ H5VL_iod_server_analysis_farm(hg_handle_t handle)
 
     if (AXE_SUCCEED != AXEcreate_task(engine, axe_id, 0, NULL, 0, NULL, 
                                       H5VL_iod_server_analysis_farm_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -561,26 +561,26 @@ H5VL_iod_server_analysis_farm_free(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (AXE_task_t *)H5MM_malloc(sizeof(AXE_task_t))))
-	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
     if(AXE_SUCCEED != AXEgenerate_task_id(engine, &axe_id))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to generate ID for AXE task");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to generate ID for AXE task");
 
     if (AXE_SUCCEED != AXEcreate_task(engine, axe_id, 0, NULL, 0, NULL, 
                                       H5VL_iod_server_analysis_farm_free_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -596,11 +596,11 @@ H5VL_iod_server_container_open(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(HG_FAIL == HG_Handler_get_input(handle, &file_name))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     /* open the container */
     if(iod_container_open(file_name, NULL, IOD_CONT_R, &coh, NULL))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
     HG_Handler_start_output(handle, &coh);
 
@@ -622,11 +622,11 @@ H5VL_iod_server_container_close(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(HG_FAIL == HG_Handler_get_input(handle, &coh))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     /* open the container */
     if(iod_container_close(coh, NULL, NULL))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
 done:
     HG_Handler_start_output(handle, &ret_value);
@@ -660,11 +660,11 @@ H5VL_iod_server_cancel_op(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(HG_FAIL == HG_Handler_get_input(handle, &axe_id))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     /* Try to remove the task. */
     if(AXEremove(engine, axe_id, &remove_status) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, HG_FAIL, "can't remove AXE task; it has children");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTREMOVE, HG_FAIL, "can't remove AXE task; it has children");
 
     if(remove_status == AXE_CANCELED)
         HGOTO_DONE(H5VL_IOD_CANCELLED)
@@ -675,7 +675,7 @@ H5VL_iod_server_cancel_op(hg_handle_t handle)
 
         fprintf(stderr, "Task is running. Attempting to cancel Manually\n");
         if(AXEget_op_data(engine, axe_id, &op_data) != AXE_SUCCEED)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get op data");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get op data");
         /* Attempt to cancel the task manually */
     }
 done:
@@ -708,28 +708,28 @@ H5VL_iod_server_file_create(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (file_create_in_t *)H5MM_malloc(sizeof(file_create_in_t))))
-	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range, 
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
                                       H5VL_iod_server_file_create_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -760,28 +760,28 @@ H5VL_iod_server_file_open(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (file_open_in_t *) H5MM_malloc(sizeof(file_open_in_t))))
-	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 0, NULL, 0, NULL, 
                                       H5VL_iod_server_file_open_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -812,29 +812,29 @@ H5VL_iod_server_file_close(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (file_close_in_t *)
                 H5MM_malloc(sizeof(file_close_in_t))))
-	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
     if (AXE_SUCCEED != AXEcreate_barrier_task(engine, input->axe_info.axe_id,
                                               H5VL_iod_server_file_close_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -865,22 +865,22 @@ H5VL_iod_server_attr_create(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (attr_create_in_t *)
                 H5MM_malloc(sizeof(attr_create_in_t))))
-	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -888,7 +888,7 @@ H5VL_iod_server_attr_create(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_attr_create_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -919,22 +919,22 @@ H5VL_iod_server_attr_open(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (attr_open_in_t *)
                 H5MM_malloc(sizeof(attr_open_in_t))))
-	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -942,7 +942,7 @@ H5VL_iod_server_attr_open(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_attr_open_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -973,22 +973,22 @@ H5VL_iod_server_attr_read(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (attr_io_in_t *)
                 H5MM_malloc(sizeof(attr_io_in_t))))
-	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -996,7 +996,7 @@ H5VL_iod_server_attr_read(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_attr_read_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1027,22 +1027,22 @@ H5VL_iod_server_attr_write(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (attr_io_in_t *)
                 H5MM_malloc(sizeof(attr_io_in_t))))
-	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1050,7 +1050,7 @@ H5VL_iod_server_attr_write(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_attr_write_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1081,22 +1081,22 @@ H5VL_iod_server_attr_exists(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (attr_op_in_t *)
                 H5MM_malloc(sizeof(attr_op_in_t))))
-	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1104,7 +1104,7 @@ H5VL_iod_server_attr_exists(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_attr_exists_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1135,22 +1135,22 @@ H5VL_iod_server_attr_rename(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (attr_rename_in_t *)
                 H5MM_malloc(sizeof(attr_rename_in_t))))
-	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1158,7 +1158,7 @@ H5VL_iod_server_attr_rename(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_attr_rename_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1189,22 +1189,22 @@ H5VL_iod_server_attr_remove(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (attr_op_in_t *)
                 H5MM_malloc(sizeof(attr_op_in_t))))
-	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1212,7 +1212,7 @@ H5VL_iod_server_attr_remove(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_attr_remove_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1243,22 +1243,22 @@ H5VL_iod_server_attr_close(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (attr_close_in_t *)
                 H5MM_malloc(sizeof(attr_close_in_t))))
-	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1266,7 +1266,7 @@ H5VL_iod_server_attr_close(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_attr_close_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1297,21 +1297,21 @@ H5VL_iod_server_group_create(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (group_create_in_t *)H5MM_malloc(sizeof(group_create_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1319,7 +1319,7 @@ H5VL_iod_server_group_create(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_group_create_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1350,21 +1350,21 @@ H5VL_iod_server_group_open(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (group_open_in_t *)H5MM_malloc(sizeof(group_open_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1372,7 +1372,7 @@ H5VL_iod_server_group_open(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_group_open_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1403,21 +1403,21 @@ H5VL_iod_server_group_close(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (group_close_in_t *)H5MM_malloc(sizeof(group_close_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1425,7 +1425,7 @@ H5VL_iod_server_group_close(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_group_close_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_group_close() */
@@ -1455,22 +1455,22 @@ H5VL_iod_server_dset_create(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (dset_create_in_t *)
                 H5MM_malloc(sizeof(dset_create_in_t))))
-	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1478,7 +1478,7 @@ H5VL_iod_server_dset_create(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_dset_create_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1509,22 +1509,22 @@ H5VL_iod_server_dset_open(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (dset_open_in_t *)
                 H5MM_malloc(sizeof(dset_open_in_t))))
-	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1532,7 +1532,7 @@ H5VL_iod_server_dset_open(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_dset_open_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1563,22 +1563,22 @@ H5VL_iod_server_dset_read(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (dset_io_in_t *)
                 H5MM_malloc(sizeof(dset_io_in_t))))
-	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1586,7 +1586,7 @@ H5VL_iod_server_dset_read(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_dset_read_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1617,22 +1617,22 @@ H5VL_iod_server_dset_get_vl_size(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (dset_get_vl_size_in_t *)
                 H5MM_malloc(sizeof(dset_get_vl_size_in_t))))
-	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1640,7 +1640,7 @@ H5VL_iod_server_dset_get_vl_size(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_dset_get_vl_size_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1671,22 +1671,22 @@ H5VL_iod_server_dset_write(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (dset_io_in_t *)
                 H5MM_malloc(sizeof(dset_io_in_t))))
-	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1694,7 +1694,7 @@ H5VL_iod_server_dset_write(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_dset_write_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1725,22 +1725,22 @@ H5VL_iod_server_dset_set_extent(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (dset_set_extent_in_t *)
                 H5MM_malloc(sizeof(dset_set_extent_in_t))))
-	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1748,7 +1748,7 @@ H5VL_iod_server_dset_set_extent(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_dset_set_extent_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1779,22 +1779,22 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (dset_close_in_t *)
                 H5MM_malloc(sizeof(dset_close_in_t))))
-	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1802,7 +1802,7 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_dset_close_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1833,22 +1833,22 @@ H5VL_iod_server_dtype_commit(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (dtype_commit_in_t *)
                 H5MM_malloc(sizeof(dtype_commit_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1856,7 +1856,7 @@ H5VL_iod_server_dtype_commit(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_dtype_commit_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1887,22 +1887,22 @@ H5VL_iod_server_dtype_open(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (dtype_open_in_t *)
                 H5MM_malloc(sizeof(dtype_open_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1910,7 +1910,7 @@ H5VL_iod_server_dtype_open(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_dtype_open_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1941,22 +1941,22 @@ H5VL_iod_server_dtype_close(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (dtype_close_in_t *)
                 H5MM_malloc(sizeof(dtype_close_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1964,7 +1964,7 @@ H5VL_iod_server_dtype_close(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_dtype_close_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1995,22 +1995,22 @@ H5VL_iod_server_link_create(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (link_create_in_t *)
                 H5MM_malloc(sizeof(link_create_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2018,7 +2018,7 @@ H5VL_iod_server_link_create(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_link_create_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2049,22 +2049,22 @@ H5VL_iod_server_link_move(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (link_move_in_t *)
                 H5MM_malloc(sizeof(link_move_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2072,7 +2072,7 @@ H5VL_iod_server_link_move(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_link_move_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2103,22 +2103,22 @@ H5VL_iod_server_link_iterate(hg_handle_t handle)
 
 #if 0
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (link_iterate_in_t *)
                 H5MM_malloc(sizeof(link_iterate_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2153,22 +2153,22 @@ H5VL_iod_server_link_exists(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (link_op_in_t *)
                 H5MM_malloc(sizeof(link_op_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2176,7 +2176,7 @@ H5VL_iod_server_link_exists(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_link_exists_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2207,22 +2207,22 @@ H5VL_iod_server_link_get_info(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (link_op_in_t *)
                 H5MM_malloc(sizeof(link_op_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2230,7 +2230,7 @@ H5VL_iod_server_link_get_info(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_link_get_info_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2261,22 +2261,22 @@ H5VL_iod_server_link_get_val(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (link_get_val_in_t *)
                 H5MM_malloc(sizeof(link_get_val_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2284,7 +2284,7 @@ H5VL_iod_server_link_get_val(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_link_get_val_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2315,22 +2315,22 @@ H5VL_iod_server_link_remove(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (link_op_in_t *)
                 H5MM_malloc(sizeof(link_op_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2338,7 +2338,7 @@ H5VL_iod_server_link_remove(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_link_remove_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2369,22 +2369,22 @@ H5VL_iod_server_object_open_by_token(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (object_token_in_t *)
                 H5MM_malloc(sizeof(object_token_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2392,7 +2392,7 @@ H5VL_iod_server_object_open_by_token(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_object_open_by_token_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2423,22 +2423,22 @@ H5VL_iod_server_object_open(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (object_op_in_t *)
                 H5MM_malloc(sizeof(object_op_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2446,7 +2446,7 @@ H5VL_iod_server_object_open(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_object_open_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2477,22 +2477,22 @@ H5VL_iod_server_object_copy(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (object_copy_in_t *)
                 H5MM_malloc(sizeof(object_copy_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2500,7 +2500,7 @@ H5VL_iod_server_object_copy(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_object_copy_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2558,22 +2558,22 @@ H5VL_iod_server_object_exists(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (object_op_in_t *)
                 H5MM_malloc(sizeof(object_op_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2581,7 +2581,7 @@ H5VL_iod_server_object_exists(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_object_exists_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2612,22 +2612,22 @@ H5VL_iod_server_object_set_comment(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (object_set_comment_in_t *)
                 H5MM_malloc(sizeof(object_set_comment_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2635,7 +2635,7 @@ H5VL_iod_server_object_set_comment(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_object_set_comment_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2666,22 +2666,22 @@ H5VL_iod_server_object_get_comment(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (object_get_comment_in_t *)
                 H5MM_malloc(sizeof(object_get_comment_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2689,7 +2689,7 @@ H5VL_iod_server_object_get_comment(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_object_get_comment_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2720,22 +2720,22 @@ H5VL_iod_server_object_get_info(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (object_op_in_t *)
                 H5MM_malloc(sizeof(object_op_in_t))))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2743,7 +2743,7 @@ H5VL_iod_server_object_get_info(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_object_get_info_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2774,21 +2774,21 @@ H5VL_iod_server_map_create(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (map_create_in_t *)H5MM_malloc(sizeof(map_create_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2796,7 +2796,7 @@ H5VL_iod_server_map_create(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_map_create_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2827,21 +2827,21 @@ H5VL_iod_server_map_open(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (map_open_in_t *)H5MM_malloc(sizeof(map_open_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2849,7 +2849,7 @@ H5VL_iod_server_map_open(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_map_open_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2880,21 +2880,21 @@ H5VL_iod_server_map_set(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (map_set_in_t *)H5MM_malloc(sizeof(map_set_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2902,7 +2902,7 @@ H5VL_iod_server_map_set(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_map_set_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2933,21 +2933,21 @@ H5VL_iod_server_map_get(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (map_get_in_t *)H5MM_malloc(sizeof(map_get_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2955,7 +2955,7 @@ H5VL_iod_server_map_get(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_map_get_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2986,21 +2986,21 @@ H5VL_iod_server_map_get_count(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (map_get_count_in_t *)H5MM_malloc(sizeof(map_get_count_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -3008,7 +3008,7 @@ H5VL_iod_server_map_get_count(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_map_get_count_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3039,21 +3039,21 @@ H5VL_iod_server_map_exists(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (map_op_in_t *)H5MM_malloc(sizeof(map_op_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -3061,7 +3061,7 @@ H5VL_iod_server_map_exists(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_map_exists_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3092,21 +3092,21 @@ H5VL_iod_server_map_delete(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (map_op_in_t *)H5MM_malloc(sizeof(map_op_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -3114,7 +3114,7 @@ H5VL_iod_server_map_delete(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_map_delete_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3145,21 +3145,21 @@ H5VL_iod_server_map_close(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (map_close_in_t *)H5MM_malloc(sizeof(map_close_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -3167,7 +3167,7 @@ H5VL_iod_server_map_close(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_map_close_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3198,21 +3198,21 @@ H5VL_iod_server_rcxt_acquire(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (rc_acquire_in_t *)H5MM_malloc(sizeof(rc_acquire_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -3220,7 +3220,7 @@ H5VL_iod_server_rcxt_acquire(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_rcxt_acquire_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3251,21 +3251,21 @@ H5VL_iod_server_rcxt_release(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (rc_release_in_t *)H5MM_malloc(sizeof(rc_release_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -3273,7 +3273,7 @@ H5VL_iod_server_rcxt_release(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_rcxt_release_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3304,21 +3304,21 @@ H5VL_iod_server_rcxt_persist(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (rc_persist_in_t *)H5MM_malloc(sizeof(rc_persist_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -3326,7 +3326,7 @@ H5VL_iod_server_rcxt_persist(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_rcxt_persist_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3357,21 +3357,21 @@ H5VL_iod_server_rcxt_snapshot(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (rc_snapshot_in_t *)H5MM_malloc(sizeof(rc_snapshot_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -3379,7 +3379,7 @@ H5VL_iod_server_rcxt_snapshot(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_rcxt_snapshot_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3410,21 +3410,21 @@ H5VL_iod_server_trans_start(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (tr_start_in_t *)H5MM_malloc(sizeof(tr_start_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -3432,7 +3432,7 @@ H5VL_iod_server_trans_start(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_trans_start_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3463,21 +3463,21 @@ H5VL_iod_server_trans_finish(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (tr_finish_in_t *)H5MM_malloc(sizeof(tr_finish_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -3485,7 +3485,7 @@ H5VL_iod_server_trans_finish(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_trans_finish_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3516,21 +3516,21 @@ H5VL_iod_server_trans_set_dependency(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (tr_set_depend_in_t *)H5MM_malloc(sizeof(tr_set_depend_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -3538,7 +3538,7 @@ H5VL_iod_server_trans_set_dependency(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_trans_set_dependency_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3569,21 +3569,21 @@ H5VL_iod_server_trans_skip(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (tr_skip_in_t *)H5MM_malloc(sizeof(tr_skip_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -3591,7 +3591,7 @@ H5VL_iod_server_trans_skip(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_trans_skip_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3622,21 +3622,21 @@ H5VL_iod_server_trans_abort(hg_handle_t handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(NULL == (input = (tr_abort_in_t *)H5MM_malloc(sizeof(tr_abort_in_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     if(NULL == engine)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
     if(input->axe_info.count && 
        H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
                                          input->axe_info.count) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -3644,7 +3644,7 @@ H5VL_iod_server_trans_abort(hg_handle_t handle)
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                       input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
                                       0, NULL, H5VL_iod_server_trans_abort_cb, op_data, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
