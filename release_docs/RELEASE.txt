@@ -129,7 +129,8 @@ Bug Fixes since HDF5-1.8.12
 
     Testing
     -------
-    - None
+    - The big test now pays attention to the HDF5_DRIVER environment variable
+      so it doesn't waste time when make check-vfd is run. (HDFFV-8554)
 
 Supported Platforms
 ===================
