@@ -7878,13 +7878,6 @@ H5VL_iod_rc_acquire(H5VL_iod_file_t *file, H5RC_t *rc, uint64_t *c_version,
     }
 
 done:
-    /* If the operation is synchronous and it failed at the server, or
-       it failed locally, then cleanup and return fail */
-    if(FAIL == ret_value) {
-        if(rc_info)
-            rc_info = (H5VL_iod_rc_info_t *)H5MM_xfree(rc_info);
-    } /* end if */
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_rc_acquire() */
 
@@ -8147,12 +8140,6 @@ H5VL_iod_tr_start(H5TR_t *tr, hid_t trspl_id, void **req)
     }
 
 done:
-    /* If the operation is synchronous and it failed at the server, or
-       it failed locally, then cleanup and return fail */
-    if(FAIL == ret_value) {
-        if(tr_info)
-            tr_info = (H5VL_iod_tr_info_t *)H5MM_xfree(tr_info);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_tr_start() */
