@@ -53,6 +53,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t c_version = input->c_version;
     iod_trans_id_t acquired_version;
     hid_t rcapl_id;
+    iod_ret_t ret;
     H5RC_request_t acquire_req;
     herr_t ret_value = SUCCEED;
 
@@ -71,8 +72,10 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
         fprintf(stderr, "Exact Acquire Read Context %"PRIu64"\n", input->c_version);
 #endif
-        if(iod_trans_start(coh, &c_version, NULL, 0, IOD_TRANS_R, NULL) < 0)
+        if((ret = iod_trans_start(coh, &c_version, NULL, 0, IOD_TRANS_R, NULL)) < 0) {
+            fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't acquire read context");
+        }
         acquired_version = c_version;
         break;
     case H5RC_LAST:
@@ -200,7 +203,7 @@ H5VL_iod_server_rcxt_release_cb(AXE_engine_t UNUSED axe_engine,
 {
     op_data_t *op_data = (op_data_t *)_op_data;
     rc_release_in_t *input = (rc_release_in_t *)op_data->input;
-    iod_handle_t coh = input->coh; /* the container handle */    
+    iod_handle_t coh = input->coh; /* the container handle */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT

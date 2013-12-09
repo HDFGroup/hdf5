@@ -48,11 +48,14 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     file_create_in_t *input = (file_create_in_t *)op_data->input;
     file_create_out_t output;
     unsigned num_peers = input->num_peers; /* the number of peers participating in creation */
+    iod_obj_id_t root_id = input->root_id;
+    iod_obj_id_t mdkv_id = input->mdkv_id;
+    iod_obj_id_t attrkv_id = input->attrkv_id;
     unsigned int mode; /* create mode */
     iod_handle_t coh; /* container handle */
     iod_handles_t root_oh; /* root object handle */
     iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
-    iod_ret_t ret;
+    iod_ret_t ret, root_ret;
     iod_trans_id_t first_tid = 0;
     uint32_t cs_scope = 0;
     herr_t ret_value = SUCCEED;
@@ -72,47 +75,57 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 
     /* Create the Container */
-    if(iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/) < 0)
+    if((ret = iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/)) < 0) {
+        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't create container");
+    }
 
     if(iod_trans_start(coh, &first_tid, NULL, num_peers, IOD_TRANS_W, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
     /* create the root group */
-    ret = iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, NULL, NULL, 
-                         &input->root_id, NULL);
-    if(0 == ret || -EEXIST == ret) {
+    root_ret = iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, NULL, NULL, 
+                         &root_id, NULL);
+    if(0 == root_ret || -EEXIST == root_ret) {
+        //fprintf(stderr, "created Root group %"PRIx64"\n", root_id);
         /* root group has been created, open it */
-        if (iod_obj_open_read(coh, input->root_id, NULL, &root_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open root group");
-        if (iod_obj_open_write(coh, input->root_id, NULL, &root_oh.wr_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open root group");
+        if ((ret = iod_obj_open_write(coh, root_id, NULL, &root_oh.wr_oh, NULL)) < 0) {
+            fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open root group for write");
+        }
+        if ((ret = iod_obj_open_read(coh, root_id, NULL, &root_oh.rd_oh, NULL)) < 0) {
+            fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open root group for read");
+        }
     }
     else {
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create root group");
     }
 
     /* for the process that succeeded in creating the group, create
-       the scratch pad for it too */
-    if(0 == ret) {
+       the scratch pad for it too. */
+    if(0 == root_ret) {
         scratch_pad sp;
         iod_kv_t kv;
         uint64_t value = 1;
         hid_t fcpl_id;
 
+        //fprintf(stderr, "created MDKV and ATTRKV %"PRIx64"  %"PRIx64"\n", 
+        //mdkv_id, attrkv_id);
         /* create the metadata KV object for the root group */
-        if(iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, 
-                          NULL, NULL, &input->mdkv_id, NULL) < 0)
+        if((ret = iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, 
+                                 NULL, NULL, &mdkv_id, NULL)) < 0) {
+            fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
-
+        }
         /* create the attribute KV object for the root group */
         if(iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, 
-                          NULL, NULL, &input->attrkv_id, NULL) < 0)
+                          NULL, NULL, &attrkv_id, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create attribute KV object");
 
         /* set values for the scratch pad object */
-        sp[0] = input->mdkv_id;
-        sp[1] = input->attrkv_id;
+        sp[0] = mdkv_id;
+        sp[1] = attrkv_id;
         sp[2] = IOD_OBJ_INVALID;
         sp[3] = IOD_OBJ_INVALID;
 
@@ -131,8 +144,6 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
             if (iod_obj_set_scratch(root_oh.wr_oh, first_tid, &sp, NULL, NULL) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
         }
-
-        fprintf(stderr, "Set scratch M: %"PRIx64"  A: %"PRIx64"\n", sp[0], sp[1]);
 
         /* Store Metadata in scratch pad */
         if (iod_obj_open_write(coh, input->mdkv_id, NULL, &mdkv_oh, NULL) < 0)
@@ -384,6 +395,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
     file_close_in_t *input = (file_close_in_t *)op_data->input;
     iod_handle_t coh = input->coh;
     iod_handles_t root_oh = input->root_oh;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -412,10 +424,20 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         if(iod_free_cont_trans_stat(coh, tids) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
 
-        fprintf(stderr, "starting transaction %"PRIu64" rcxt %"PRIu64"\n", trans_num, rtid);
+#if H5VL_IOD_DEBUG
+        fprintf(stderr, "File Close starting transaction %"PRIu64" rcxt %"PRIu64"\n", 
+                trans_num, rtid);
+#endif
 
-        if(iod_trans_start(coh, &trans_num, NULL, 0, IOD_TRANS_W, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
+        if((ret = iod_trans_start(coh, &rtid, NULL, 1, IOD_TRANS_R, NULL)) < 0) {
+            fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start READ transaction");
+        }
+
+        if((ret = iod_trans_start(coh, &trans_num, NULL, 1, IOD_TRANS_W, NULL)) < 0) {
+            fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start WRITE transaction");
+        }
 
         /* get scratch pad of root group */
         if(iod_obj_get_scratch(root_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
@@ -460,11 +482,17 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
 
         /* finish the transaction */
+        if(iod_trans_finish(coh, rtid, NULL, 0, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction");
+
+        /* finish the transaction */
         if(iod_trans_finish(coh, trans_num, NULL, 0, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction");
     }
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Closing ROOT Group: R: %"PRIu64"  W: %"PRIu64"\n", root_oh.rd_oh, root_oh.wr_oh);
+#endif
 
     /* close the root group */
     if(iod_obj_close(root_oh.rd_oh, NULL, NULL) < 0)
@@ -472,14 +500,20 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_close(root_oh.wr_oh, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "can't close root object handle");
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Closing Container: %"PRIu64"\n", coh);
+#endif
 
     /* close the container */
-    if(iod_container_close(coh, NULL, NULL) < 0)
+    if((ret = iod_container_close(coh, NULL, NULL)) < 0) {
+        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_FILE, H5E_CANTDEC, FAIL, "can't close container");
+    }
 
 done:
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with file close, sending response to client\n");
+#endif
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "can't send result of file close to client");
 

@@ -414,6 +414,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     hssize_t num_descriptors = 0; /* number of IOD file descriptors needed to describe filespace selection */
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the attribute here or if it was already open */
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -424,6 +425,11 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");        
         opened_locally = TRUE;
     }
+
+#if H5VL_IOD_DEBUG 
+    fprintf(stderr, "Start Attribute Read on OH %"PRIu64" OID %"PRIx64"\n", 
+            iod_oh, iod_id);
+#endif
 
     size = HG_Bulk_handle_get_size(bulk_handle);
 
@@ -471,8 +477,11 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     file_desc = hslabs;
 
     /* read from array object */
-    if(iod_array_read(iod_oh, rtid, NULL, mem_desc, &file_desc, &iod_cs, NULL) < 0)
+    ret = iod_array_read(iod_oh, rtid, NULL, mem_desc, &file_desc, &iod_cs, NULL);
+    if(ret < 0) {
+        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+    }
 
     /* MSC - NEED IOD Checksums
     if(cs_scope & H5_CHECKSUM_MEMORY) {
@@ -488,10 +497,10 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Write bulk data here and wait for the data to be there  */
     if(HG_SUCCESS != HG_Bulk_write_all(dest, bulk_handle, bulk_block_handle, &bulk_request))
-        HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+        HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't start Mercury Bulk Data write");
     /* wait for it to complete */
     if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-        HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+        HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Failed to wait on Mercury Bulk data write");
 
 done:
 #if H5VL_IOD_DEBUG
@@ -579,6 +588,11 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
         opened_locally = TRUE;
     }
+
+#if H5VL_IOD_DEBUG 
+    fprintf(stderr, "Start Attribute Write on OH %"PRIu64" OID %"PRIx64"\n", 
+            iod_oh, iod_id);
+#endif
 
     /* Read bulk data here and wait for the data to be here  */
     size = HG_Bulk_handle_get_size(bulk_handle);

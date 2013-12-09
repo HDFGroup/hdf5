@@ -446,6 +446,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             req->state = H5VL_IOD_COMPLETED;
         }
 
+        MPI_Barrier (file->comm);
         H5VL_iod_request_delete(file, req);
         break;
     case HG_FILE_OPEN:
@@ -1106,6 +1107,9 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
+
+            if(0 == file->my_rank)
+                MPI_Barrier (file->comm);
 
             free(status);
             req->data = NULL;

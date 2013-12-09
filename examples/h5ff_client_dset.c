@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
     assert(ret == 0);
 
     /* create the file. */
-    file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, H5_EVENT_STACK_NULL);
     assert(file_id > 0);
 
     /* create 1-D dataspace with 60 elements */
@@ -440,7 +440,7 @@ int main(int argc, char **argv) {
     ret = H5Gclose_ff(gid1, e_stack);
     assert(ret == 0);
 
-    H5Fclose_ff(file_id, e_stack);
+    H5Fclose_ff(file_id, H5_EVENT_STACK_NULL);
 
     H5ESget_count(e_stack, &num_events);
 

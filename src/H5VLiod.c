@@ -1965,9 +1965,6 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED dxpl_id, void **req)
             input.max_kv_index = object_indexes[0];
             input.max_array_index = object_indexes[1];
             input.max_blob_index = object_indexes[2];
-
-            printf("File Close MAXs: %"PRIu64" %"PRIu64" %"PRIu64"\n", 
-                   input.max_kv_index, input.max_array_index, input.max_blob_index);
         }
         else {
             input.max_kv_index = 0;
@@ -2002,6 +1999,8 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED dxpl_id, void **req)
     printf("File Close Root ID %"PRIu64" axe id %"PRIu64"\n", input.root_id, g_axe_id);
 #endif
 
+    if(0 != file->my_rank)
+        MPI_Barrier (file->comm);
     if(H5VL__iod_create_and_forward(H5VL_FILE_CLOSE_ID, HG_FILE_CLOSE, 
                                     (H5VL_iod_object_t *)file, 1,
                                     num_parents, parent_reqs,

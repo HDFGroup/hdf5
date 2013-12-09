@@ -14,7 +14,8 @@ int main(int argc, char **argv) {
 
     hid_t file_id;
     hid_t gid1;
-    hid_t sid, dtid;
+    hid_t sid, dtid, stype_id;
+    hid_t sid2;
     hid_t did1, map;
     hid_t aid1, aid2, aid3, aid4, aid5;
     hid_t tid1, tid2, rid1, rid2, rid3;
@@ -28,6 +29,7 @@ int main(int argc, char **argv) {
 
     int *wdata1 = NULL, *wdata2 = NULL;
     int *rdata1 = NULL, *rdata2 = NULL;
+    char str_data[14];
     const unsigned int nelem=60;
     hsize_t dims[1];
 
@@ -82,6 +84,10 @@ int main(int argc, char **argv) {
     sid = H5Screate_simple(1, dims, NULL);
 
     dtid = H5Tcopy(H5T_STD_I32LE);
+
+    stype_id = H5Tcopy(H5T_C_S1 ); assert( stype_id );
+    ret = H5Tset_strpad(stype_id, H5T_STR_NULLTERM ); assert( ret == 0 );
+    ret = H5Tset_size(stype_id, 14); assert( ret == 0 );
 
     /* acquire container version 0 - EXACT.  
        This can be asynchronous, but here we need the acquired ID 
@@ -148,10 +154,19 @@ int main(int argc, char **argv) {
                             H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         assert(aid4);
 
-        /* create an attribute on dataset */
-        aid5 = H5Acreate_ff(map, "MAP_ATTR", dtid, sid, 
-                            H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        dims [0] = 1;
+        sid2 = H5Screate_simple(1, dims, NULL);
+        dims [0] = nelem;
+        //sid2 = H5Screate(H5S_SCALAR); assert( sid2 );
+
+        fprintf( stderr, "M6.2: create attribute AA from rank %d\n", my_rank );
+        aid5 = H5Acreate_ff(map, "MAP_ATTR", stype_id, sid2, H5P_DEFAULT, 
+                            H5P_DEFAULT, tid1, H5_EVENT_STACK_NULL );
         assert(aid5);
+        ret = H5Awrite_ff(aid5, stype_id, "/AA by rank 0", tid1, H5_EVENT_STACK_NULL ); 
+        assert( ret == 0 );
+
+        H5Sclose(sid2);
 
         ret = H5Aclose_ff(aid1, e_stack);
         assert(ret == 0);
@@ -241,13 +256,21 @@ int main(int argc, char **argv) {
     assert(ret == 0);
 
     gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, rid3, e_stack);
+
     aid2 = H5Aopen_ff(gid1, "RENAMED_GROUP_ATTR", H5P_DEFAULT, rid3, e_stack);
     assert(aid2);
-
     ret = H5Aread_ff(aid2, dtid, rdata2, rid3, e_stack);
     assert(ret == 0);
 
+    aid5 = H5Aopen_by_name_ff(file_id, "MAP1", "MAP_ATTR", H5P_DEFAULT, 
+                              H5P_DEFAULT, rid3, e_stack);
+    assert(aid5);
+    ret = H5Aread_ff(aid5, stype_id, str_data, rid3, e_stack);
+    assert(ret == 0);
+
     ret = H5Aclose_ff(aid2, e_stack);
+    assert(ret == 0);
+    ret = H5Aclose_ff(aid5, e_stack);
     assert(ret == 0);
     ret = H5Gclose_ff(gid1, e_stack);
     assert(ret == 0);
@@ -256,6 +279,9 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
+
+    /* barrier so root knows all are done reading */
+    MPI_Barrier(MPI_COMM_WORLD);
 
     if(my_rank == 0) {
         /* release container version 1. This is async. */
@@ -267,10 +293,12 @@ int main(int argc, char **argv) {
     assert(ret == 0);
     ret = H5Tclose(dtid);
     assert(ret == 0);
+    ret = H5Tclose(stype_id);
+    assert(ret == 0);
     ret = H5Pclose(fapl_id);
     assert(ret == 0);
 
-    H5Fclose_ff(file_id, e_stack);
+    H5Fclose_ff(file_id, H5_EVENT_STACK_NULL);
 
     H5ESget_count(e_stack, &num_events);
     H5ESwait_all(e_stack, &status);
@@ -289,10 +317,12 @@ int main(int argc, char **argv) {
     assert(!exists1);
     assert(exists2);
 
-    fprintf(stderr, "Read Data: ");
+    fprintf(stderr, "RENAMED_GROUP_ATTR value: ");
     for(i=0;i<nelem;++i)
         fprintf(stderr, "%d ",rdata2[i]);
     fprintf(stderr, "\n");
+
+    fprintf(stderr, "MAP_ATTR value: %s\n", str_data);
 
     ret = H5ESclose(e_stack);
     assert(ret == 0);
