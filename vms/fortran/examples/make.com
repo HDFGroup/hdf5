@@ -17,7 +17,7 @@ $!
 $! Make HDF5 Fortran examples
 $!
 $ fcopt = "/float=ieee_float/define=H5_VMS"
-$ define zlib_dir disk$user:[hdfgroup.zlib-1_2_5_ieee]
+$ define zlib_dir SYS$SYSUSERS:[lu.zlib-1_2_5]
 $ fff := fortran 'fcopt /module=[-.-.include]
 $
 $ type sys$input
