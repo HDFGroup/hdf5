@@ -443,9 +443,10 @@ H5RCacquire(hid_t file_id, uint64_t *c_version,
     ret_value = rc_id;
 
 done:
-    if(ret_value < 0 && rc_id)
+    if(ret_value < 0 && rc_id) {
         if(H5I_dec_app_ref(rc_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close read context")
+    }
         
     FUNC_LEAVE_API(ret_value)
 } /* end H5RCacquire() */

@@ -330,19 +330,17 @@ int main(int argc, char **argv) {
        (my_size == 1 && 0 == my_rank)) {
         /* modify container contents using transaction started. */
         key = 1;
-        ret = H5Mdelete_ff(map3, H5T_STD_I32LE, &key, tid2, e_stack);
-        assert(ret == 0);
+        ret = H5Mdelete_ff(map3, H5T_STD_I32LE, &key, tid2, H5_EVENT_STACK_NULL);
     }
 
     /* finish transaction 2 */
-    ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, e_stack);
-    assert(0 == ret);
-
+    //ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, e_stack);
     if(my_rank == 0) {
-        /* release container version 1. This is async. */
-        ret = H5RCrelease(rid2, e_stack);
+        ret = H5TRabort(tid2, e_stack);
         assert(0 == ret);
     }
+
+    MPI_Barrier(MPI_COMM_WORLD);
 
     assert(H5Mclose_ff(map1, e_stack) == 0);
     assert(H5Mclose_ff(map2, e_stack) == 0);
@@ -355,24 +353,22 @@ int main(int argc, char **argv) {
 
     ret = H5RCclose(rid1);
     assert(0 == ret);
-    ret = H5RCclose(rid2);
-    assert(0 == ret);
     ret = H5TRclose(tid2);
     assert(0 == ret);
 
-    /* Barrier so all processes are guranteed to have finished transaction 2 */
+    /* Barrier so all processes are guranteed to have finished/aborted transaction 2 */
     MPI_Barrier(MPI_COMM_WORLD);
 
-    /* acquire container version 3 - EXACT */
+    /* acquire container version 2 - EXACT  (Should Fail since 2 is aborted) */
     version = 2;
     rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(2 == version);
+    assert(rid3 < 0);
 
-    /* Now read some data from the container */
+    /* Now read some data from the container at version 1*/
 
-    map1 = H5Mopen_ff(file_id, "MAP_1", H5P_DEFAULT, rid3, e_stack);
-    map2 = H5Mopen_ff(file_id, "G1/MAP_2", H5P_DEFAULT, rid3, e_stack);
-    map3 = H5Mopen_ff(file_id, "G1/G2/MAP_3", H5P_DEFAULT, rid3, e_stack);
+    map1 = H5Mopen_ff(file_id, "MAP_1", H5P_DEFAULT, rid2, e_stack);
+    map2 = H5Mopen_ff(file_id, "G1/MAP_2", H5P_DEFAULT, rid2, e_stack);
+    map3 = H5Mopen_ff(file_id, "G1/G2/MAP_3", H5P_DEFAULT, rid2, e_stack);
 
     {
         int key, value;
@@ -381,7 +377,7 @@ int main(int argc, char **argv) {
         key = 1;
         value = -1;
         ret = H5Mget_ff(map1, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, rid3, e_stack);
+                        H5P_DEFAULT, rid2, e_stack);
 
         H5ESwait(e_stack, 0, &status);
         printf("H5Mget Completion status = %d\n", status);
@@ -392,7 +388,7 @@ int main(int argc, char **argv) {
         for(i=0 ; i<5 ; i++) {
             key = i;
             ret = H5Mget_ff(map2, H5T_STD_I32LE, &key, dtid1, &rdata[i],
-                            H5P_DEFAULT, rid3, H5_EVENT_STACK_NULL);
+                            H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
             assert(ret == 0);
         }
 
@@ -405,29 +401,22 @@ int main(int argc, char **argv) {
             for(j = 0; j < temp; j++)
                 fprintf(stderr, "%d ",((unsigned int *)rdata[i].p)[j]);
             fprintf(stderr, "\n");
+            free(rdata[i].p);
         } /* end for */
 
         for(i=0 ; i<5 ; i++) {
             key = i;
             str_rdata[i] = NULL;
             ret = H5Mget_ff(map3, H5T_STD_I32LE, &key, dtid2, &str_rdata[i],
-                            H5P_DEFAULT, rid3, H5_EVENT_STACK_NULL);
-            if(key == 1)
-                assert(ret < 0);
-            else
-                assert(ret == 0);
+                            H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+            assert(ret == 0);
         }
 
         fprintf(stderr, "Reading VL Strings: \n");
 
         for(i=0 ; i<5 ; i++) {
-            if(str_rdata[i] == NULL)
-                continue;
             fprintf(stderr, "Key %d:  %s\n", i, str_rdata[i]);
-            if(i == 1)
-                assert(0 == strlen(str_rdata[i]));
-            else
-                free(str_rdata[i]);
+            free(str_rdata[i]);
         }
     }
 
@@ -436,21 +425,22 @@ int main(int argc, char **argv) {
     ret = H5Tclose(dtid2);
     assert(ret == 0);
 
-    /* release container version 2. This is async. */
-    ret = H5RCrelease(rid3, e_stack);
-    assert(0 == ret);
-
     assert(H5Mclose_ff(map1, e_stack) == 0);
     assert(H5Mclose_ff(map2, e_stack) == 0);
     assert(H5Mclose_ff(map3, e_stack) == 0);
 
-#if 1
+    if(my_rank == 0) {
+        /* release container version 1. This is async. */
+        ret = H5RCrelease(rid2, e_stack);
+        assert(0 == ret);
+    }
+    ret = H5RCclose(rid2);
+    assert(0 == ret);
+
     H5ESget_count(e_stack, &num_events);
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
-    MPI_Barrier(MPI_COMM_WORLD);
-#endif
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
@@ -475,9 +465,6 @@ int main(int argc, char **argv) {
 
     assert (count == 5);
     assert (exists > 0);
-
-    ret = H5RCclose(rid3);
-    assert(0 == ret);
 
     fprintf(stderr, "\n*****************************************************************************************************************\n");
     fprintf(stderr, "Finalize EFF stack\n");

@@ -172,6 +172,7 @@ done:
     if(ret_value < 0) {
         fprintf(stderr, "Failed to Acquire Read context\n");
         output.ret = FAIL;
+        output.c_version = c_version;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
@@ -563,17 +564,21 @@ H5VL_iod_server_trans_abort_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     tr_abort_in_t *input = (tr_abort_in_t *)op_data->input;
     iod_handle_t coh = input->coh; /* the container handle */
-    iod_trans_id_t trans_num = input->trans_num;    
+    iod_trans_id_t trans_num = input->trans_num;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Transaction Abort %"PRIu64"\n", input->trans_num);
+    fprintf(stderr, "Aborting Transaction %"PRIu64"\n", input->trans_num);
 #endif
 
-    if(iod_trans_finish(coh, trans_num, NULL, IOD_TRANS_ABORT_DEPENDENT, NULL) < 0)
+    ret = iod_trans_finish(coh, trans_num, NULL, IOD_TRANS_ABORT_DEPENDENT, NULL);
+    if(ret < 0) {
+        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't abort transaction");
+    }
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with Transaction Abort\n");
