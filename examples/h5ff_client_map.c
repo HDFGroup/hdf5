@@ -412,7 +412,10 @@ int main(int argc, char **argv) {
             str_rdata[i] = NULL;
             ret = H5Mget_ff(map3, H5T_STD_I32LE, &key, dtid2, &str_rdata[i],
                             H5P_DEFAULT, rid3, H5_EVENT_STACK_NULL);
-            assert(ret == 0);
+            if(key == 1)
+                assert(ret < 0);
+            else
+                assert(ret == 0);
         }
 
         fprintf(stderr, "Reading VL Strings: \n");

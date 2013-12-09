@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 
     int *wdata1 = NULL, *wdata2 = NULL;
     int *rdata1 = NULL, *rdata2 = NULL;
-    char str_data[14];
+    char str_data[128];
     const unsigned int nelem=60;
     hsize_t dims[1];
 
@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 
     stype_id = H5Tcopy(H5T_C_S1 ); assert( stype_id );
     ret = H5Tset_strpad(stype_id, H5T_STR_NULLTERM ); assert( ret == 0 );
-    ret = H5Tset_size(stype_id, 14); assert( ret == 0 );
+    ret = H5Tset_size(stype_id, 128); assert( ret == 0 );
 
     /* acquire container version 0 - EXACT.  
        This can be asynchronous, but here we need the acquired ID 

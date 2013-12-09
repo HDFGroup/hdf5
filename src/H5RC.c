@@ -392,6 +392,7 @@ H5RCacquire(hid_t file_id, uint64_t *c_version,
     H5RC_t *rc = NULL;
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    hid_t rc_id = FAIL;
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
@@ -417,7 +418,7 @@ H5RCacquire(hid_t file_id, uint64_t *c_version,
     if(NULL == (rc = H5RC_create(file, *c_version)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create read context")
     /* Get an atom for the event queue with the VOL information as the auxilary struct*/
-    if((ret_value = H5I_register2(H5I_RC, rc, vol_plugin, TRUE)) < 0)
+    if((rc_id = H5I_register2(H5I_RC, rc, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize read context handle")
 
     if(estack_id != H5_EVENT_STACK_NULL) {
@@ -439,7 +440,13 @@ H5RCacquire(hid_t file_id, uint64_t *c_version,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
     }
 
+    ret_value = rc_id;
+
 done:
+    if(ret_value < 0 && rc_id)
+        if(H5I_dec_app_ref(rc_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close read context")
+        
     FUNC_LEAVE_API(ret_value)
 } /* end H5RCacquire() */
 
