@@ -22,7 +22,46 @@
 
 #include "H5VLiod_server.h"
 
+#ifdef H5_HAVE_PYTHON
+#include "H5Iprivate.h"
+#include "H5Tprivate.h"
+
+#include <Python.h>
+#include <numpy/ndarrayobject.h>
+#endif
+
 #ifdef H5_HAVE_EFF
+
+#ifdef H5_HAVE_PYTHON
+
+static hbool_t numpy_initialized = FALSE;
+static void H5VL__iod_numpy_init(void);
+
+static PyObject *H5VL__iod_load_script(const char *script, const char *func_name);
+
+static herr_t H5VL__iod_translate_h5_type(hid_t data_type_id,
+        enum NPY_TYPES *npy_type);
+
+static herr_t H5VL__iod_translate_numpy_type(enum NPY_TYPES npy_type,
+        hid_t *data_type_id, size_t *data_type_size);
+
+static PyObject *H5VL__iod_create_numpy_array(size_t data_size, hid_t data_type_id,
+        void *data);
+
+static herr_t H5VL__iod_extract_numpy_array(PyObject *numpy_array, void **data,
+        size_t *data_size, hid_t *data_type_id);
+
+/* TODO define as static but leave it like this for testing */
+herr_t H5VL__iod_split(const char *split_script, void *data,
+        size_t data_size, hid_t data_type_id, void **split_data,
+        size_t *split_data_size, hid_t *split_data_type_id);
+
+herr_t H5VL__iod_combine(const char *combine_script, void *data[],
+        size_t data_size[], size_t count, hid_t data_type_id,
+        void **combine_data, size_t *combine_data_size,
+        hid_t *combine_data_type_id);
+
+#endif
 
 static hid_t H5VL__iod_get_space_layout(iod_layout_t layout, hid_t space, 
                                         uint32_t target_index);
@@ -61,6 +100,419 @@ typedef struct {
     void *buf;
 } H5VLiod_analysis_data_t;
 
+#ifdef H5_HAVE_PYTHON
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_numpy_init
+ *
+ * Purpose:
+ *
+ * Return:  Success:    SUCCEED
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5VL__iod_numpy_init(void)
+{
+    /* Needed for numpy stuff */
+    /* Note: This function must be called in the initialization section of a
+     * module that will make use of the C-API. It imports the module where the
+     * function-pointer table is stored and points the correct variable to it.
+     * If, however, the extension module involves multiple files where the C-API
+     * is needed then some additional steps must be taken. */
+    import_array();
+    numpy_initialized = TRUE;
+} /* end H5VL__iod_numpy_init() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_load_script
+ *
+ * Purpose:
+ *
+ * Return:  Success:    SUCCEED
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static PyObject *
+H5VL__iod_load_script(const char *script, const char *func_name)
+{
+    PyObject *po_func = NULL, *ret_value = NULL; /* Return value */
+    PyObject *po_main = NULL, *po_main_dict = NULL, *po_rstring = NULL;
+    /* for reference in case we need it
+        PyObject *main = PyImport_AddModule("__main__");
+        PyObject *dlfl = PyImport_AddModule("dlfl");
+        PyObject* main_dict = PyModule_GetDict( main );
+        PyObject* dlfl_dict = PyModule_GetDict( dlfl );
+    */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get reference to main */
+    if(NULL == (po_main = PyImport_AddModule("__main__")))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get reference to main module");
+
+    if(NULL == (po_main_dict = PyModule_GetDict(po_main)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get dictionary from main module");
+
+    /* Load script */
+    if(NULL == (po_rstring = PyRun_String(script, Py_file_input, po_main_dict, po_main_dict)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "can't load script into main module");
+
+    /* Get reference to function name */
+    if(NULL == (po_func = PyObject_GetAttrString(po_main, func_name)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get reference to function");
+
+    ret_value = po_func;
+
+done:
+    Py_DECREF(po_rstring);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_load_script() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_translate_h5_type
+ *
+ * Purpose:
+ *
+ * Return:  Success:    SUCCEED
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__iod_translate_h5_type(hid_t data_type_id, enum NPY_TYPES *npy_type)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    enum NPY_TYPES translated_type;
+    H5T_t *data_type = NULL, *native_datatype = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (data_type = (H5T_t *) H5I_object_verify(data_type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
+    if(NULL == (native_datatype = H5T_get_native_type(data_type, H5T_DIR_DEFAULT, NULL, NULL, NULL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot retrieve native type")
+
+    if(0 == H5T_cmp(native_datatype, (H5T_t *)H5I_object(H5T_NATIVE_LLONG_g), FALSE)) {
+        translated_type = NPY_LONGLONG;
+    }
+    else if(0 == H5T_cmp(native_datatype, (H5T_t *)H5I_object(H5T_NATIVE_LONG_g), FALSE)) {
+        translated_type = NPY_LONG;
+    }
+    else if(0 == H5T_cmp(native_datatype, (H5T_t *)H5I_object(H5T_NATIVE_INT_g), FALSE)) {
+        translated_type = NPY_INT;
+    }
+    else if(0 == H5T_cmp(native_datatype, (H5T_t *)H5I_object(H5T_NATIVE_SHORT_g), FALSE)) {
+        translated_type = NPY_SHORT;
+    }
+    else if(0 == H5T_cmp(native_datatype, (H5T_t *)H5I_object(H5T_NATIVE_SCHAR_g), FALSE)) {
+        translated_type = NPY_BYTE;
+    }
+    else if(0 == H5T_cmp(native_datatype, (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE_g), FALSE)) {
+        translated_type = NPY_DOUBLE;
+    }
+    else if(0 == H5T_cmp(native_datatype, (H5T_t *)H5I_object(H5T_NATIVE_FLOAT_g), FALSE)) {
+        translated_type = NPY_FLOAT;
+    }
+    else {
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid type")
+    }
+
+    if(FAIL == H5T_close(native_datatype))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype");
+
+    *npy_type = translated_type;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_translate_h5_type() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_translate_numpy_type
+ *
+ * Purpose:
+ *
+ * Return:  Success:    SUCCEED
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__iod_translate_numpy_type(enum NPY_TYPES npy_type, hid_t *data_type_id,
+        size_t *data_type_size)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    hid_t translated_type_id;
+    H5T_t *native_type = NULL;
+    size_t translated_type_size;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (npy_type) {
+        case NPY_LONGLONG:
+            translated_type_id = H5T_NATIVE_LLONG_g;
+            break;
+        case NPY_LONG:
+            translated_type_id = H5T_NATIVE_LONG_g;
+            break;
+        case NPY_INT:
+            translated_type_id = H5T_NATIVE_INT_g;
+            break;
+        case NPY_SHORT:
+            translated_type_id = H5T_NATIVE_SHORT_g;
+            break;
+        case NPY_BYTE:
+            translated_type_id = H5T_NATIVE_SCHAR_g;
+            break;
+        case NPY_DOUBLE:
+            translated_type_id = H5T_NATIVE_DOUBLE_g;
+            break;
+        case NPY_FLOAT:
+            translated_type_id = H5T_NATIVE_FLOAT_g;
+            break;
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid type")
+            break;
+    }
+
+    native_type = (H5T_t *)H5I_object(translated_type_id);
+    if (0 == (translated_type_size = H5T_get_size(native_type)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid size")
+
+    *data_type_id = translated_type_id;
+    *data_type_size = translated_type_size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_translate_numpy_type() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_create_numpy_array
+ *
+ * Purpose:
+ *
+ * Return:  Success:    SUCCEED
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static PyObject *
+H5VL__iod_create_numpy_array(size_t data_size, hid_t data_type_id, void *data)
+{
+    PyObject *ret_value = NULL; /* Return value */
+    npy_intp dim[1] = {(npy_intp) data_size};
+    enum NPY_TYPES npy_type;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(data);
+
+    /* Convert data_type to numpy type */
+    if(FAIL == H5VL__iod_translate_h5_type(data_type_id, &npy_type))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, NULL, "unable to translate datatype to NPY type");
+
+    ret_value = PyArray_SimpleNewFromData(1, dim, npy_type, data);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_create_numpy_array() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_extract_numpy_array
+ *
+ * Purpose:
+ *
+ * Return:  Success:    SUCCEED
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__iod_extract_numpy_array(PyObject *numpy_array, void **data,
+        size_t *data_size, hid_t *data_type_id)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    void *numpy_data = NULL, *extracted_data = NULL;
+    hid_t extracted_datatype_id;
+    npy_intp *numpy_dims;
+    int numpy_datatype;
+    size_t numpy_data_size, extracted_datatype_size;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(numpy_array);
+    HDassert(data);
+    HDassert(data_size);
+    HDassert(data_type_id);
+
+    /* Input array should be 1D */
+    if(PyArray_NDIM(numpy_array) > 1)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "was expecting 1-dimensional array")
+
+    if(NULL == (numpy_data = PyArray_DATA(numpy_array)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get data from numpy array")
+
+    if(NULL == (numpy_dims = PyArray_DIMS(numpy_array)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get dimensions from numpy array")
+     numpy_data_size = (size_t) numpy_dims[0];
+
+    if(0 == (numpy_datatype = PyArray_TYPE(numpy_array)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get type from numpy array")
+
+    /* Translate NPY type to hid_t */
+    if(FAIL == H5VL__iod_translate_numpy_type(numpy_datatype, &extracted_datatype_id,
+            &extracted_datatype_size))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, FAIL, "can't translate NPY type")
+
+    /* Copy data from NPY array */
+    if(NULL == (extracted_data = H5MM_malloc(numpy_data_size * extracted_datatype_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, FAIL, "can't allocate extracted data")
+    HDmemcpy(extracted_data, numpy_data, numpy_data_size * extracted_datatype_size);
+
+    *data = extracted_data;
+    *data_size = numpy_data_size;
+    *data_type_id = extracted_datatype_id;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__iod_extract_numpy_array */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_split
+ *
+ * Purpose:
+ *
+ * Return:  Success:    SUCCEED
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL__iod_split(const char *split_script, void *data, size_t data_size,
+        hid_t data_type_id, void **split_data, size_t *split_data_size,
+        hid_t *split_data_type_id)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    PyObject *po_func = NULL, *po_numpy_array = NULL, *po_args_tup = NULL;
+    PyObject *po_numpy_array_split = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(!numpy_initialized) H5VL__iod_numpy_init();
+
+    /* Create numpy array */
+    if(NULL == (po_numpy_array = H5VL__iod_create_numpy_array(data_size, data_type_id, data)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create numpy array from data")
+
+    /* Load script */
+    if(NULL == (po_func = H5VL__iod_load_script(split_script, "split")))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "can't load split script")
+
+    /* Check whether split is defined as function in given script */
+    if(0 == PyCallable_Check(po_func))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "can't find split function")
+
+    /* Get the input to function */
+    if(NULL == (po_args_tup = PyTuple_Pack(1, po_numpy_array)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "can't set input to split function")
+
+    /* Invoke the split function */
+    if(NULL == (po_numpy_array_split = PyObject_CallObject(po_func, po_args_tup)))
+        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "returned NULL python object")
+
+    /* Extract data from numpy array */
+    if(FAIL == H5VL__iod_extract_numpy_array(po_numpy_array_split, split_data,
+            split_data_size, split_data_type_id))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't extract data from numpy array")
+
+done:
+    /* Cleanup */
+    Py_XDECREF(po_func);
+    Py_XDECREF(po_args_tup);
+    Py_XDECREF(po_numpy_array);
+    Py_XDECREF(po_numpy_array_split);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_split() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_combine
+ *
+ * Purpose:
+ *
+ * Return:  Success:    SUCCEED
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL__iod_combine(const char *combine_script, void *data[], size_t data_size[],
+        size_t count, hid_t data_type_id, void **combine_data,
+        size_t *combine_data_size, hid_t *combine_data_type_id)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    PyObject *po_func = NULL, *po_numpy_arrays = NULL, *po_args_tup = NULL;
+    PyObject *po_numpy_array_combine = NULL;
+    size_t i;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(!numpy_initialized) H5VL__iod_numpy_init();
+
+    /* Create numpy arrays */
+    if(NULL == (po_numpy_arrays = PyList_New((Py_ssize_t) count)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create list of arrays")
+    for(i = 0; i < count; i++) {
+        PyObject *po_numpy_array = NULL;
+        int py_ret = 0;
+
+        if(NULL == (po_numpy_array = H5VL__iod_create_numpy_array(data_size[i], data_type_id, data[i])))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create numpy array from data")
+
+        if(0 != (py_ret = PyList_SetItem(po_numpy_arrays, (Py_ssize_t) i, po_numpy_array)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set item to array list")
+    }
+
+    /* Load script */
+    if(NULL == (po_func = H5VL__iod_load_script(combine_script, "combine")))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "can't load combine script")
+
+    /* Check whether split is defined as function in given script */
+    if(0 == PyCallable_Check(po_func))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "can't find combine function")
+
+    /* Get the input to function */
+    if(NULL == (po_args_tup = PyTuple_Pack(1, po_numpy_arrays)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "can't set input to combine function")
+
+    /* Invoke the split function */
+    if(NULL == (po_numpy_array_combine = PyObject_CallObject(po_func, po_args_tup)))
+        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "returned NULL python object")
+
+    /* Extract data from numpy array */
+    if(FAIL == H5VL__iod_extract_numpy_array(po_numpy_array_combine, combine_data,
+            combine_data_size, combine_data_type_id))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't extract data from numpy array")
+
+done:
+    /* Cleanup */
+    Py_XDECREF(po_func);
+    Py_XDECREF(po_args_tup);
+    for(i = 0; i < count; i++) {
+        Py_XDECREF(po_numpy_arrays + i);
+    }
+    Py_XDECREF(po_numpy_array_combine);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+#endif /* H5_HAVE_PYTHON */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_analysis_execute_cb
@@ -87,6 +539,8 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     const char *file_name = input->file_name;
     const char *obj_name = input->obj_name;
     hid_t query_id = input->query_id;
+    const char *split_script = input->split_script;
+    const char *combine_script = input->combine_script;
     hid_t space_id = FAIL, type_id = FAIL;
     iod_cont_trans_stat_t *tids;
     iod_trans_id_t rtid;
@@ -215,7 +669,7 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
         farm_input.space_id = space_id;
         farm_input.type_id = type_id;
         farm_input.query_id = query_id;
-        /* MSC - add python stuff ... */
+        farm_input.split_script = split_script;
 
         for(i=0 ; i<layout.target_num ; i++) {
             farm_input.coh = temp_cohs[i];
@@ -292,7 +746,16 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
         if(farm_output)
             free(farm_output);
 
+#ifdef H5_HAVE_PYTHON
         /* MSC - All data is gathered in farm data. Do Python Aggregation step */
+        /* must reogrnize data for array list */
+        /*
+        H5VL__iod_combine(combine_script, farm_data[i].buf, farm_data[i].buf_size,
+                layout.target_num, data_type, &combine_data, &combine_data_size,
+                &combine_type_id);
+        */
+        /* TODO */
+#endif
 
         /* free farm data */
         for(i=0 ; i<layout.target_num ; i++) {
@@ -387,9 +850,11 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t obj_id = input->obj_id; /* The ID of the object */
     iod_layout_t layout = input->layout;
     uint32_t target_index = input->target_idx;
+    const char *split_script = input->split_script;
     hid_t space_layout;
-    void *data = NULL;
-    size_t data_size;
+    void *data = NULL, *split_data = NULL;
+    size_t data_size, split_data_size;
+    hid_t split_type_id;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -401,21 +866,30 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
                                 type_id, &data_size, &data) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read local data");
 
-    /* MSC - Apply split python on query */
+    /* Apply split python script on data from query */
+#ifdef H5_HAVE_PYTHON
+    if(FAIL == H5VL__iod_split(split_script, data, data_size, type_id,
+            &split_data, &split_data_size, &split_type_id))
+        HGOTO_ERROR(H5E_SYM, H5E_CANAPPLY, FAIL, "can't apply split script to data")
+#endif
+
+    /* Free the data after split operation */
+    H5MM_free(data);
+    data = NULL;
 
     /* allocate output struct */
     if(NULL == (output = (H5VLiod_farm_data_t *)H5MM_malloc(sizeof(H5VLiod_farm_data_t))))
         HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "No Space");
 
     /* Register memory */
-    if(HG_SUCCESS != HG_Bulk_handle_create(data, data_size, HG_BULK_READ_ONLY, 
-                                           &output->bulk_handle))
+    if(HG_SUCCESS != HG_Bulk_handle_create(split_data, split_data_size,
+            HG_BULK_READ_ONLY, &output->bulk_handle))
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't create Bulk Data Handle");
 
     /* set output, and return to AS client */
     output->ret = ret_value;
     output->axe_id = op_data->axe_id;
-    output->data = data;
+    output->data = split_data;
     op_data->output = output;
     HG_Handler_start_output(op_data->hg_handle, output);
 
@@ -432,9 +906,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_server_analysis_farm_cb
+ * Function:	H5VL_iod_server_analysis_farm_free_cb
  *
- * Purpose:	Retrieves layout of object
+ * Purpose:	Frees the output from the split operation
  *
  * Return:	Success:	SUCCEED 
  *		Failure:	Negative
@@ -584,6 +1058,7 @@ H5VL__iod_get_query_data_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned nd
     HDassert(ndim == 1);
 
     /* MSC - NEED H5Q iterface */
+    /* TODO */
     //if(H5Qmatch(udata->query_id, elem, type_id)) {
     if (1) {
         udata->num_elmts ++;

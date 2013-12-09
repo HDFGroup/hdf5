@@ -80,6 +80,9 @@ BUILD_H5FF_TEST(h5ff_client_open)
 BUILD_H5FF_TEST(h5ff_client_paths)
 BUILD_H5FF_TEST(h5ff_client_trans)
 
+IF (HDF5_ENABLE_PYTHON)
+  BUILD_H5FF_TEST(h5ff_python_exec)
+ENDIF (HDF5_ENABLE_PYTHON)
 # BUILD_H5FF_TEST(h5ff_client_container_open)
 
 #-----------------------------------------------------------------------------
