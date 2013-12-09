@@ -15,7 +15,7 @@ $!#
 $!
 $! Make HDF5 C++ examples
 $!
-$ define zlib_dir disk$user:[hdfgroup.zlib-1_2_5_ieee]
+$ define zlib_dir SYS$SYSUSERS:[lu.zlib-1_2_5]
 $ cxxopt = "/float=ieee_float/standard=strict_ansi/define=H5_VMS/include=zlib_dir"
 $ ccc := cxx 'cxxopt /include=([-.-.include])
 $!
