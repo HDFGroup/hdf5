@@ -71,6 +71,8 @@ typedef struct H5E_t H5E_t;
 
 #define HGOTO_ERROR2(maj, min, ret_val, string) {			      \
    fprintf(stderr, "%s\n", string);                                           \
+   err_occurred = TRUE;                                                       \
+   err_occurred = err_occurred;         /* Shut GCC warnings up! */ \
    HGOTO_DONE(ret_val)						              \
 }
 
