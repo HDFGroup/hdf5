@@ -4852,7 +4852,8 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                     HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
 
                 /* retrieve parent requests */
-                if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)rc, parent_reqs, &num_parents) < 0)
+                if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)rc, 
+                                                parent_reqs, &num_parents) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
 
                 /* retrieve IOD info of location object */

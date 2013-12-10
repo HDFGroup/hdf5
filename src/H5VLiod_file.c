@@ -334,6 +334,8 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 
     output.coh.cookie = coh.cookie;
     output.root_id = ROOT_ID;
+    output.mdkv_id = sp[0];
+    output.attrkv_id = sp[1];
     output.root_oh.rd_oh = root_oh.rd_oh;
     output.root_oh.wr_oh = root_oh.wr_oh;
     output.c_version = rtid;
@@ -346,7 +348,8 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Done with file open, sending response to client\n");
+    fprintf(stderr, "Done with file open coh: %"PRIu64" root rd: %"PRIu64"  wr: %"PRIu64" CV: %"PRIu64"\n",
+            coh.cookie, root_oh.rd_oh.cookie, root_oh.wr_oh.cookie, rtid);
 #endif
 
     HG_Handler_start_output(op_data->hg_handle, &output);

@@ -244,7 +244,31 @@ MPI_Barrier( MPI_COMM_WORLD );
    ret = H5RCrelease( rc_id2, H5_EVENT_STACK_NULL ); assert( ret == 0 );
    ret = H5RCclose( rc_id2 ); assert( ret == 0 );
 
+   /* Close the file, then barrier to make sure all have closed it. */
+   fprintf( stderr, "M6.2-r%d: close the container\n", my_rank );
    ret = H5Fclose( file_id ); assert( ret == 0 );
+
+   MPI_Barrier( MPI_COMM_WORLD );
+
+   /* Reopen the file Read/Write, asking to acquire the latest readable version */
+   fprintf( stderr, "M6.2-r%d: open the container\n", my_rank );
+
+   file_id = H5Fopen_ff( file_name, H5F_ACC_RDWR, fapl_id, &rc_id0, H5_EVENT_STACK_NULL ); assert( file_id );
+   H5RCget_version( rc_id0, &version );
+   fprintf( stderr, "M6.2-r%d: Acquired container version %d\n", my_rank, (int)version );
+
+   /* Print container contents at this point */
+   fprintf( stderr, "M6.2-r%d: 6th call to print container contents\n", my_rank );
+   print_container_contents( file_id, rc_id0, "/", my_rank );
+
+   /* Release the read handle and close read context on cv obtained from H5Fopen (# 3) */
+   fprintf( stderr, "M6.2-r%d: Release read handle on version %d\n", my_rank, (int)version );
+   ret = H5RCrelease( rc_id0, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+   ret = H5RCclose( rc_id0 ); assert( ret == 0 );
+
+   /* Close H5 Objects that are still open */
+   fprintf( stderr, "M6.2-r%d: close all h5 objects that are still open\n", my_rank );
+   ret = H5Fclose_ff( file_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
    ret = H5Pclose( fapl_id ); assert( ret == 0 );
 
    fprintf( stderr, "M6.2-r%d: Finalize EFF stack\n", my_rank );

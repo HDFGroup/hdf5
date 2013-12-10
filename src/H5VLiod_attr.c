@@ -754,7 +754,7 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
                                  &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
-    if(obj_id != loc_id) {
+    if(loc_id != obj_id || IOD_OBJ_INVALID == input->loc_attrkv_id) {
         /* get scratch pad of the parent */
         if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
