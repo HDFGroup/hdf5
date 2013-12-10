@@ -22,12 +22,30 @@
 
 #include "H5VLiod_server.h"
 
+#include "H5Qpublic.h"
+
 #ifdef H5_HAVE_PYTHON
 #include <Python.h>
 #include <numpy/ndarrayobject.h>
 #endif
 
 #ifdef H5_HAVE_EFF
+
+/* User data for dataspace iteration to query elements. */
+typedef struct {
+    size_t num_elmts;
+    hid_t query_id;
+    hid_t space_query;
+} H5VL__iod_get_query_data_t;
+
+/* do not change order */
+typedef struct {
+    int32_t ret;
+    uint64_t axe_id;
+    hg_bulk_t bulk_handle;
+    hid_t type_id;
+    void *data;
+} H5VLiod_farm_data_t;
 
 #ifdef H5_HAVE_PYTHON
 
@@ -54,7 +72,7 @@ herr_t H5VL__iod_split(const char *split_script, void *data,
                        size_t *split_num_elmts, hid_t *split_data_type_id);
 
 herr_t H5VL__iod_combine(const char *combine_script, 
-                         H5VLiod_analysis_data_t split_data,
+                         void **split_data, size_t *split_num_elmts,
                          size_t num_targets, hid_t data_type_id,
                          void **combine_data, size_t *combine_num_elmts,
                          hid_t *combine_data_type_id);
@@ -75,28 +93,6 @@ static herr_t H5VL__iod_get_query_data(iod_handle_t coh, iod_obj_id_t dset_id,
 static herr_t H5VL__iod_read_selection(iod_handle_t coh, iod_obj_id_t obj_id, 
                                        iod_trans_id_t rtid, hid_t space_id,
                                        hid_t type_id, void *buf);
-
-
-/* User data for dataspace iteration to query elements. */
-typedef struct {
-    size_t num_elmts;
-    hid_t query_id;
-    hid_t space_query;
-} H5VL__iod_get_query_data_t;
-
-/* do not change order */
-typedef struct {
-    int32_t ret;
-    uint64_t axe_id;
-    hg_bulk_t bulk_handle;
-    void *data;
-} H5VLiod_farm_data_t;
-
-/* size/buf for analysis data */
-typedef struct {
-    size_t buf_size;
-    void *buf;
-} H5VLiod_analysis_data_t;
 
 #ifdef H5_HAVE_PYTHON
 
@@ -185,31 +181,31 @@ H5VL__iod_translate_h5_type(hid_t data_type_id, enum NPY_TYPES *npy_type)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     enum NPY_TYPES translated_type;
-    hid_t data_type, native_datatype;
+    hid_t native_datatype_id;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if((native_datatype = H5Tget_native_type(data_type_id, H5T_DIR_DEFAULT)) < 0)
+    if((native_datatype_id = H5Tget_native_type(data_type_id, H5T_DIR_DEFAULT)) < 0)
         HGOTO_ERROR2(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot retrieve native type");
 
-    if(H5Tequal(native_datatype, H5T_NATIVE_LLONG_g))
+    if(H5Tequal(native_datatype_id, H5T_NATIVE_LLONG_g))
         translated_type = NPY_LONGLONG;
-    else if(H5Tequal(native_datatype, H5T_NATIVE_LONG_g))
+    else if(H5Tequal(native_datatype_id, H5T_NATIVE_LONG_g))
         translated_type = NPY_LONG;
-    else if(H5Tequal(native_datatype, H5T_NATIVE_INT_g))
+    else if(H5Tequal(native_datatype_id, H5T_NATIVE_INT_g))
         translated_type = NPY_INT;
-    else if(H5Tequal(native_datatype, H5T_NATIVE_SHORT_g))
+    else if(H5Tequal(native_datatype_id, H5T_NATIVE_SHORT_g))
         translated_type = NPY_SHORT;
-    else if(H5Tequal(native_datatype, H5T_NATIVE_SCHAR_g))
+    else if(H5Tequal(native_datatype_id, H5T_NATIVE_SCHAR_g))
         translated_type = NPY_BYTE;
-    else if(H5Tequal(native_datatype, H5T_NATIVE_DOUBLE_g))
+    else if(H5Tequal(native_datatype_id, H5T_NATIVE_DOUBLE_g))
         translated_type = NPY_DOUBLE;
-    else if(H5Tequal(native_datatype, H5T_NATIVE_FLOAT_g))
+    else if(H5Tequal(native_datatype_id, H5T_NATIVE_FLOAT_g))
         translated_type = NPY_FLOAT;
     else 
         HGOTO_ERROR2(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid type")
 
-    if(FAIL == H5Tclose(native_datatype))
+    if(FAIL == H5Tclose(native_datatype_id))
         HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype");
 
     *npy_type = translated_type;
@@ -436,7 +432,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__iod_combine(const char *combine_script, H5VLiod_analysis_data_t split_data,
+H5VL__iod_combine(const char *combine_script, void **split_data, size_t *split_num_elmts,
         size_t num_targets, hid_t data_type_id, void **combine_data,
         size_t *combine_num_elmts, hid_t *combine_data_type_id)
 {
@@ -456,13 +452,11 @@ H5VL__iod_combine(const char *combine_script, H5VLiod_analysis_data_t split_data
     for(i = 0; i < num_targets; i++) {
         PyObject *po_numpy_array = NULL;
         int py_ret = 0;
-        size_t split_num_elmts;
 
-        split_num_elmts = split_data[i].buf_size/H5Tget_size(data_type_id);
         if(NULL == (po_numpy_array = 
-                    H5VL__iod_create_numpy_array(split_num_elmts, 
+                    H5VL__iod_create_numpy_array(split_num_elmts[i],
                                                  data_type_id, 
-                                                 split_data[i].buf)))
+                                                 split_data[i])))
             HGOTO_ERROR2(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create numpy array from data")
 
         if(0 != (py_ret = PyList_SetItem(po_numpy_arrays, (Py_ssize_t) i, po_numpy_array)))
@@ -532,7 +526,11 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     hid_t query_id = input->query_id;
     const char *split_script = input->split_script;
     const char *combine_script = input->combine_script;
-    hid_t space_id = FAIL, type_id = FAIL;
+    hid_t space_id = FAIL, type_id = FAIL, split_type_id = FAIL, combine_type_id = FAIL;
+    void **split_data;
+    size_t *split_num_elmts;
+    void *combine_data;
+    size_t combine_num_elmts;
     iod_cont_trans_stat_t *tids;
     iod_trans_id_t rtid;
     iod_handle_t coh; /* the container handle */
@@ -639,7 +637,6 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     {
         analysis_farm_in_t farm_input;
         analysis_farm_out_t *farm_output = NULL;
-        H5VLiod_analysis_data_t *farm_data = NULL;
 
         /* function shipper requests */
         if(NULL == (hg_reqs = (hg_request_t *)malloc
@@ -650,9 +647,13 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
                     (sizeof(analysis_farm_out_t) * layout.target_num)))
             HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
 
-        if(NULL == (farm_data = (H5VLiod_analysis_data_t *)malloc
-                    (sizeof(H5VLiod_analysis_data_t) * layout.target_num)))
-            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
+        if(NULL == (split_data = (void **)malloc
+                    (sizeof(void *) * layout.target_num)))
+            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for split data");
+
+        if(NULL == (split_num_elmts = (size_t *)malloc
+                    (sizeof(size_t) * layout.target_num)))
+            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for num elmts");
 
         farm_input.obj_id = obj_id;
         farm_input.rtid = rtid;
@@ -675,6 +676,7 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
         for(i=0 ; i<layout.target_num ; i++) {
             hg_bulk_block_t bulk_block_handle; /* HG block handle */
             hg_bulk_request_t bulk_request; /* HG request */
+            size_t split_data_size;
 
             /* Wait for the farmed work to complete */
             if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, &status) < 0)
@@ -685,12 +687,16 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
                 goto done;
             }
 
-            farm_data[i].buf_size = HG_Bulk_handle_get_size(farm_output[i].bulk_handle);
+            split_data_size = HG_Bulk_handle_get_size(farm_output[i].bulk_handle);
 
-            if(NULL == (farm_data[i].buf = malloc(farm_data[i].buf_size)))
+            /* Get split type ID and num_elemts (all the arrays should have the same native type id) */
+            split_type_id = farm_output[i].type_id;
+            split_num_elmts[i] = split_data_size / H5Tget_size(split_type_id);
+
+            if(NULL == (split_data[i] = malloc(split_data_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate farm buffer");
 
-            HG_Bulk_block_handle_create(farm_data[i].buf, farm_data[i].buf_size, 
+            HG_Bulk_block_handle_create(split_data[i], split_data_size,
                                         HG_BULK_READWRITE, &bulk_block_handle);
 
             /* Write bulk data here and wait for the data to be there  */
@@ -738,19 +744,20 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
             free(farm_output);
 
 #ifdef H5_HAVE_PYTHON
-        if(H5VL__iod_combine(combine_script, farm_data, layout.target_num, 
-                             data_type, &combine_data, &combine_num_elmts,
-                             &combine_type_id) < 0)
+        if (H5VL__iod_combine(combine_script, split_data, split_num_elmts,
+                layout.target_num, split_type_id, &combine_data,
+                &combine_num_elmts, &combine_type_id) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't combine split data");
 #endif
 
         /* free farm data */
-        for(i=0 ; i<layout.target_num ; i++) {
-            if(farm_data[i].buf)
-                free(farm_data[i].buf);
+        if (split_data) {
+            for(i=0 ; i<layout.target_num ; i++) {
+                free(split_data[i]);
+            }
+            free(split_data);
         }
-        if(farm_data)
-            free(farm_data);
+        free(split_num_elmts);
     }
     if(iod_trans_finish(coh, rtid, NULL, 0, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction 0");
@@ -877,6 +884,7 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
     output->ret = ret_value;
     output->axe_id = op_data->axe_id;
     output->data = split_data;
+    output->type_id = split_type_id;
     op_data->output = output;
     HG_Handler_start_output(op_data->hg_handle, output);
 
