@@ -20,7 +20,7 @@ void create_committed_datatype( hid_t, const char*, hid_t, const char*, int, uin
 void print_container_contents( hid_t, hid_t, const char*, int );
 
 int main( int argc, char **argv ) {
-   const char file_name[]="eff_file_m6.h5";
+   const char file_name[]="m6.2-eff_container.h5";
 
    int my_rank, comm_size;
    int provided;
@@ -54,7 +54,7 @@ int main( int argc, char **argv ) {
 
    /* Acquire a read handle for container version 0 and create a read context. */
    version = 0;
-   fprintf( stderr, "M6.2-r%d: get read context for container version %d\n", my_rank, (int)version );
+   fprintf( stderr, "M6.2-r%d: Acquire read context for container version %d\n", my_rank, (int)version );
    rc_id0 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); assert( rc_id0 ); assert( version == 0 );
 
    /* Print container contents at this point */
@@ -112,26 +112,15 @@ int main( int argc, char **argv ) {
 
    /* Acquire a read handle for container version 1 and create a read context. */
    version = 1;
-   fprintf( stderr, "M6.2-r%d: Acquire read context for cv %d\n", my_rank, (int)version );
+   fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d\n", my_rank, (int)version );
    rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
-#define WORKS_AS_DOCUMENTED
-#ifdef WORKS_AS_DOCUMENTED
    while ( rc_id1 < 0 ) {
-      fprintf( stderr, "M6.2-r%d: DEBUG: RC ID is %d\n", my_rank, (int) rc_id1 );
       fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv %d - sleep then retry\n", my_rank, (int)version );
       sleep( 1 );
-      version = 1;      // DON't think I should have to do this... but...
+      version = 1;      
       rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
    }
-#else
-   while ( version != 1 ) {
-      fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv 1 - sleep then retry\n", my_rank );
-      sleep( 1 );
-      version = 1;
-      rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
-   }
-#endif
-   fprintf( stderr, "M6.2-r%d: DEBUG: before assert RC ID is %d and version is %d\n", my_rank, (int) rc_id1, version );
+
    assert( rc_id1 > 0 ); assert ( version == 1 );
    fprintf( stderr, "M6.2-r%d: Acquired read context for cv 1\n", my_rank );
    fprintf( stderr, "M6.2-r%d: 3rd call to print container contents\n", my_rank );
@@ -354,7 +343,7 @@ create_dataset( hid_t obj_id, const char* dset_name, hid_t tr_id, const char* ob
    dtype_id = H5Tcopy( H5T_NATIVE_INT ); assert( dtype_id );
 
    fprintf( stderr, "M6.2-r%d: Create %s in %s in tr %d; ordinal is %d; ", my_rank, dset_name, obj_path, (int)tr_num, ordinal );
-   fprintf( stderr, "data values are %d %d %d %d\n", my_rank, data[0], data[1], data[2], data[3] );
+   fprintf( stderr, "data values are %d %d %d %d\n", data[0], data[1], data[2], data[3] );
 
    dset_id = H5Dcreate_ff( obj_id, dset_name, dtype_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tr_id, 
                           H5_EVENT_STACK_NULL );
@@ -405,6 +394,8 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
    hbool_t exists;
    char path_to_object[1024];
    hid_t obj_id;
+   char name[3];
+   int i;
 
    static int lvl = 0;     /* level in recursion - used to format printing */
    int s;
@@ -423,89 +414,115 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
    ret = H5RCget_version( rc_id, &cv ); assert( ret == 0 );
    if ( lvl == 0 ) {
       fprintf( stderr, "%s -----------------\n", preface );
-      fprintf( stderr, "%s Contents for container version %d and group %s\n", preface, (int)cv, grp_path );
+      fprintf( stderr, "%s Contents for container version %d\n", preface, (int)cv );
    } 
 
    /* Attributes */
-   sprintf( path_to_object, "%s @ %s", "AA", grp_path );
-   ret = H5Aexists_by_name_ff( file_id, grp_path, "AA", H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
-   if ( exists ) { 
-      hid_t attr_id, atype_id;
-      char attr_val[ATTR_STR_LEN];
+   for ( i = 1; i < 3; i++ ) {
+      if ( i == 1 ) { 
+         strcpy( name, "AA" );
+      } else if ( i == 2 ) { 
+         strcpy( name, "AB" ); 
+      } else { 
+         strcpy( name, "XX" ); 
+      }
+      sprintf( path_to_object, "%s @ %s", name, grp_path );
+      ret = H5Aexists_by_name_ff( file_id, grp_path, name, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+      if ( exists ) { 
+         hid_t attr_id, atype_id;
+         char attr_val[ATTR_STR_LEN];
 
-      attr_id = H5Aopen_by_name_ff( file_id, grp_path, "AA", H5P_DEFAULT, H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
-      assert( attr_id );
+         attr_id = H5Aopen_by_name_ff( file_id, grp_path, name, H5P_DEFAULT, H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
+         assert( attr_id );
    
-      atype_id = H5Tcopy( H5T_C_S1 ); assert( atype_id );
-      ret = H5Tset_size( atype_id, ATTR_STR_LEN ); assert( ret == 0 );
+         atype_id = H5Tcopy( H5T_C_S1 ); assert( atype_id );
+         ret = H5Tset_size( atype_id, ATTR_STR_LEN ); assert( ret == 0 );
 
-      ret = H5Aread_ff( attr_id, atype_id, attr_val, rc_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
-      fprintf( stderr, "%s %s exists for cv %d and has value %s.\n", preface, path_to_object, (int) cv, attr_val );
+         ret = H5Aread_ff( attr_id, atype_id, attr_val, rc_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+         fprintf( stderr, "%s %s exists for cv %d and has value %s.\n", preface, path_to_object, (int) cv, attr_val );
 
-      ret = H5Tclose( atype_id ); assert( ret == 0 );
-      ret = H5Aclose_ff( attr_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+         ret = H5Tclose( atype_id ); assert( ret == 0 );
+         ret = H5Aclose_ff( attr_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+      }
    }
 
-   sprintf( path_to_object, "%s @ %s", "AB", grp_path );
-   ret = H5Aexists_by_name_ff( file_id, grp_path, "AB", H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
-   if ( exists ) { 
-      hid_t attr_id, atype_id;
-      char attr_val[ATTR_STR_LEN];
+   /* Groups - if found, descend */
+   for ( i = 1; i < 3; i++ ) {
+      if ( i == 1 ) { 
+         strcpy( name, "GA" );
+      } else if ( i == 2 ) { 
+         strcpy( name, "GB" ); 
+      } else { 
+         strcpy( name, "XX" ); 
+      }
 
-      attr_id = H5Aopen_by_name_ff( file_id, grp_path, "AA", H5P_DEFAULT, H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
-      assert( attr_id );
-
-      atype_id = H5Tcopy( H5T_C_S1 ); assert( atype_id );
-      ret = H5Tset_size( atype_id, ATTR_STR_LEN ); assert( ret == 0 );
-
-      ret = H5Aread_ff( attr_id, atype_id, attr_val, rc_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
-      fprintf( stderr, "%s %s exists for cv %d and has value %s.\n", preface, path_to_object, (int) cv, attr_val );
-
-      ret = H5Tclose( atype_id ); assert( ret == 0 );
-      ret = H5Aclose_ff( attr_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
-   } 
-
-   /* Groups - if yes, descend */
-   sprintf( path_to_object, "%s%s/", grp_path, "GA" );
-   ret = H5Lexists_ff( file_id, path_to_object, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL );
-   if ( exists ) { 
-      fprintf( stderr, "%s %s exists in cv %d.\n", preface, path_to_object, (int) cv );
-      lvl++;
-      print_container_contents( file_id, rc_id, path_to_object, my_rank );
-      lvl--;
-   } 
-   sprintf( path_to_object, "%s%s/", grp_path, "GB" );
-   ret = H5Lexists_ff( file_id, path_to_object, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL );
-   if ( exists ) { 
-      fprintf( stderr, "%s %s exists in cv %d.\n", preface, path_to_object, (int) cv );
-      lvl++;
-      print_container_contents( file_id, rc_id, path_to_object, my_rank );
-      lvl--;
-   } 
+      sprintf( path_to_object, "%s%s/", grp_path, name );
+      ret = H5Lexists_ff( file_id, path_to_object, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL );
+      if ( exists ) { 
+         fprintf( stderr, "%s %s exists in cv %d.\n", preface, path_to_object, (int) cv );
+         lvl++;
+         print_container_contents( file_id, rc_id, path_to_object, my_rank );
+         lvl--;
+      } 
+   }
 
    /* Datasets */
-   sprintf( path_to_object, "%s%s", grp_path, "DA" );
-   ret = H5Lexists_ff( file_id, path_to_object, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL );
-   if ( exists ) { 
-      fprintf( stderr, "%s %s exists in cv %d.\n", preface, path_to_object, (int) cv );
-   } 
-   sprintf( path_to_object, "%s%s", grp_path, "DB" );
-   ret = H5Lexists_ff( file_id, path_to_object, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL );
-   if ( exists ) { 
-      fprintf( stderr, "%s %s exists in cv %d.\n", preface, path_to_object, (int) cv );
-   } 
+   for ( i = 1; i < 3; i++ ) {
+      if ( i == 1 ) { 
+         strcpy( name, "DA" );
+      } else if ( i == 2 ) { 
+         strcpy( name, "DB" ); 
+      } else { 
+         strcpy( name, "XX" ); 
+      }
+
+      sprintf( path_to_object, "%s%s", grp_path, name );
+      ret = H5Lexists_ff( file_id, path_to_object, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL );
+      if ( exists ) { 
+         hsize_t current_size = 4;
+         hsize_t max_size = 10;
+         int data[4];              /* sized to accomodate current_size elements */
+         hid_t space_id;
+         hid_t dtype_id;
+         hid_t dset_id;
+         int i;
+
+         dset_id = H5Dopen_ff( file_id, path_to_object, H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
+         assert( dset_id );
+
+         space_id = H5Screate_simple( 1, &current_size, &max_size ); assert( space_id );
+         dtype_id = H5Tcopy( H5T_NATIVE_INT ); assert( dtype_id );
+   
+         ret = H5Dread_ff( dset_id, dtype_id, space_id, space_id, H5P_DEFAULT, data, rc_id, H5_EVENT_STACK_NULL ); 
+         assert( ret == 0 );
+
+         fprintf( stderr, "%s %s exists in cv %d and has values ", preface, path_to_object, cv );
+         fprintf( stderr, "%d %d %d %d\n", data[0], data[1], data[2], data[3] );
+
+         ret = H5Dclose_ff( dset_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+         ret = H5Tclose( dtype_id ); assert( ret == 0 );
+         ret = H5Sclose( space_id ); assert( ret == 0 );
+      } 
+   }
 
    /* Committed datatypes */
-   sprintf( path_to_object, "%s%s", grp_path, "TA" );
-   ret = H5Lexists_ff( file_id, path_to_object, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL );
-   if ( exists ) { 
-      fprintf( stderr, "%s %s exists in cv %d.\n", preface, path_to_object, (int) cv );
-   } 
-   sprintf( path_to_object, "%s%s", grp_path, "TB" );
-   ret = H5Lexists_ff( file_id, path_to_object, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL );
-   if ( exists ) { 
-      fprintf( stderr, "%s %s exists in cv %d.\n", preface, path_to_object, (int) cv );
-   } 
+   for ( i = 1; i < 3; i++ ) {
+      if ( i == 1 ) { 
+         strcpy( name, "TA" );
+      } else if ( i == 2 ) { 
+         strcpy( name, "TB" ); 
+      } else { 
+         strcpy( name, "XX" ); 
+      }
+
+      sprintf( path_to_object, "%s%s", grp_path, name );
+      ret = H5Lexists_ff( file_id, path_to_object, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL );
+      if ( exists ) { 
+         fprintf( stderr, "%s %s exists in cv %d.\n", preface, path_to_object, (int) cv );
+      } 
+   }
+
+   /* End printing */
    if ( lvl == 0 ) {
       fprintf( stderr, "%s -----------------\n", preface );
    }
