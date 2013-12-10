@@ -221,13 +221,13 @@ MPI_Barrier( MPI_COMM_WORLD );
    version = 2;
    fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d\n", my_rank, (int)version );
    rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
-   while ( version != 2 ) {
+   while ( rc_id2 < 0 ) {
       fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv 2 - sleep then retry\n", my_rank );
       sleep( 1 );
       version = 2;
       rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
    }
-   assert( rc_id2 > 0 ); assert ( version == 2 );
+   assert( rc_id2 >= 0 ); assert ( version == 2 );
    fprintf( stderr, "M6.2-r%d: Acquired read context for cv 2\n", my_rank );
    fprintf( stderr, "M6.2-r%d: 5th call to print container contents\n", my_rank );
    print_container_contents( file_id, rc_id2, "/", my_rank ); assert( ret == 0 );
