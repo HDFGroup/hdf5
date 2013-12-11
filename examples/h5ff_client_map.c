@@ -328,15 +328,21 @@ int main(int argc, char **argv) {
 
     if((my_size > 1 && 1 == my_rank) || 
        (my_size == 1 && 0 == my_rank)) {
+        hid_t temp_id;
+
         /* modify container contents using transaction started. */
         key = 1;
         ret = H5Mdelete_ff(map3, H5T_STD_I32LE, &key, tid2, H5_EVENT_STACK_NULL);
+
+        temp_id = H5Gcreate_ff(file_id, "temp_group", H5P_DEFAULT, H5P_DEFAULT, 
+                               H5P_DEFAULT, tid2, H5_EVENT_STACK_NULL);
+        assert(H5Gclose_ff(temp_id, H5_EVENT_STACK_NULL) == 0);
     }
 
     /* finish transaction 2 */
     //ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, e_stack);
     if(my_rank == 0) {
-        ret = H5TRabort(tid2, e_stack);
+        ret = H5TRabort(tid2, H5_EVENT_STACK_NULL);
         assert(0 == ret);
     }
 
@@ -401,7 +407,6 @@ int main(int argc, char **argv) {
             for(j = 0; j < temp; j++)
                 fprintf(stderr, "%d ",((unsigned int *)rdata[i].p)[j]);
             fprintf(stderr, "\n");
-            free(rdata[i].p);
         } /* end for */
 
         for(i=0 ; i<5 ; i++) {
@@ -475,8 +480,7 @@ int main(int argc, char **argv) {
 
     for(i=0 ; i<5 ; i++) {
         free(wdata[i].p);
-        if(my_size == 1)
-            free(rdata[i].p);
+        free(rdata[i].p);
     }
 
     free(map_token1);
