@@ -4,6 +4,8 @@
  * The Function Shipper server should be running before this demo program is started.
  */
 
+// TODO:  Close up trspl objects
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -30,7 +32,7 @@ int main( int argc, char **argv ) {
    herr_t ret;
 
    uint64_t version;
-   hid_t rc_id0, rc_id1, rc_id2;
+   hid_t rc_id, rc_id0, rc_id1, rc_id2, rc_id3, rc_id4;
 
    /* Check for MPI multi-thread support */
    MPI_Init_thread( &argc, &argv, MPI_THREAD_MULTIPLE, &provided );
@@ -43,22 +45,22 @@ int main( int argc, char **argv ) {
    fprintf( stderr, "M6.2-r%d: Number of MPI processes = %d\n", my_rank, comm_size );
 
    /* Initialize the EFF stack. */
-   fprintf( stderr, "M6.2-r%d: Initialize EFF stack\n", my_rank );
+   fprintf( stderr, "M6.2-r%d: Initialize EFF stack (Step 1)\n", my_rank );
    EFF_init( MPI_COMM_WORLD, MPI_INFO_NULL );
 
    /* Specify that the IOD VOL plugin should be used and create H5File (EFF container) */
-   fprintf( stderr, "M6.2-r%d: Create the container %s\n", my_rank, file_name );
+   fprintf( stderr, "M6.2-r%d: Create the container %s (Step 2)\n", my_rank, file_name );
    fapl_id = H5Pcreate( H5P_FILE_ACCESS ); assert( fapl_id );
    ret = H5Pset_fapl_iod( fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL ); assert( ret == 0 );
    file_id = H5Fcreate_ff( file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, H5_EVENT_STACK_NULL ); assert( file_id );
 
    /* Acquire a read handle for container version 0 and create a read context. */
    version = 0;
-   fprintf( stderr, "M6.2-r%d: Acquire read context for container version %d\n", my_rank, (int)version );
+   fprintf( stderr, "M6.2-r%d: Acquire read context for container version %d (Step 3)\n", my_rank, (int)version );
    rc_id0 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); assert( rc_id0 ); assert( version == 0 );
 
    /* Print container contents at this point */
-   fprintf( stderr, "M6.2-r%d: 1st call to print container contents\n", my_rank );
+   fprintf( stderr, "M6.2-r%d: 1st call to print container contents (Step 4)\n", my_rank );
    print_container_contents( file_id, rc_id0, "/", my_rank );
 
    /* 
@@ -74,7 +76,7 @@ int main( int argc, char **argv ) {
       hid_t tr_id;
 
       /* Create a local transaction for transaction number. */
-      fprintf( stderr, "M6.2-r%d: create transaction %d\n", my_rank, (int)tr_num );
+      fprintf( stderr, "M6.2-r%d: create transaction %d (Step 5 - begin) \n", my_rank, (int)tr_num );
       tr_id = H5TRcreate( file_id, rc_id0, (uint64_t)tr_num ); assert( tr_id );
 
       /* Start transaction 1 with single transaction leader (the default) */
@@ -100,6 +102,7 @@ int main( int argc, char **argv ) {
       create_committed_datatype( file_id, "TB", tr_id, "/", my_rank, tr_num );
 
       /* Finish (and commit) transaction 1, causing the updates to appear in container version 1. */
+      fprintf( stderr, "M6.2-r%d: finish (and commit) transaction %d (Step 5 - end)\n", my_rank, (int)tr_num );
       ret = H5TRfinish( tr_id, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); assert( ret == 0 );
 
       /* Close the local transaction. */
@@ -107,12 +110,12 @@ int main( int argc, char **argv ) {
    }
 
    /* Print container contents at this point */
-   fprintf( stderr, "M6.2-r%d: 2nd call to print container contents\n", my_rank );
+   fprintf( stderr, "M6.2-r%d: 2nd call to print container contents (Step 6)\n", my_rank );
    print_container_contents( file_id, rc_id0, "/", my_rank );
 
    /* Acquire a read handle for container version 1 and create a read context. */
    version = 1;
-   fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d\n", my_rank, (int)version );
+   fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 7)\n", my_rank, (int)version );
    rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
    while ( rc_id1 < 0 ) {
       fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv %d - sleep then retry\n", my_rank, (int)version );
@@ -121,13 +124,13 @@ int main( int argc, char **argv ) {
       rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
    }
 
-   assert( rc_id1 > 0 ); assert ( version == 1 );
+   assert( rc_id1 >= 0 ); assert ( version == 1 );
    fprintf( stderr, "M6.2-r%d: Acquired read context for cv 1\n", my_rank );
-   fprintf( stderr, "M6.2-r%d: 3rd call to print container contents\n", my_rank );
+   fprintf( stderr, "M6.2-r%d: 3rd call to print container contents (Step 8)\n", my_rank );
    print_container_contents( file_id, rc_id1, "/", my_rank ); assert( ret == 0 );
 
    /* Release the read handle and close read context on cv 0 */
-   fprintf( stderr, "M6.2-r%d: Release read handle on cv 0\n", my_rank );
+   fprintf( stderr, "M6.2-r%d: Release read handle on cv 0 (Step 9)\n", my_rank );
    ret = H5RCrelease( rc_id0, H5_EVENT_STACK_NULL); assert( ret == 0 );
    ret = H5RCclose( rc_id0 ); assert( ret == 0 );
 
@@ -147,7 +150,6 @@ int main( int argc, char **argv ) {
       uint64_t tr_num = 2;
       hid_t tr_id;
       hid_t trspl_id;
-
       hid_t gr_id;
       char gr_path[128];
 
@@ -155,6 +157,7 @@ int main( int argc, char **argv ) {
       tr_id = H5TRcreate( file_id, rc_id1, tr_num ); assert( tr_id );
 
       /* Start transaction 2 with two transaction leaders (unless there is only 1 MPI process) */
+      fprintf( stderr, "M6.2-r%d: start transaction %d (Step 10 - begin)\n", my_rank, (int)tr_num );
       trspl_id = H5Pcreate( H5P_TR_START );  assert( trspl_id );
       if ( comm_size >= 2 ) {
          ret = H5Pset_trspl_num_peers( trspl_id, 2 ); assert( ret == 0 ) ;
@@ -191,35 +194,20 @@ int main( int argc, char **argv ) {
       /* Close the group */
       ret = H5Gclose_ff ( gr_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
 
-#ifdef ABORT_WORKING 
-// MOHAMAD - Here's where I tried the abort.
-// in server output, saw message like 
-// Transaction Abort 2
-// h5ff_server: mdhim_kv.c:223: _mdhim_kv_update_record_cb_fn: Assertion `rc == 0 && oh.cookie != 0' failed.
-//
-
-MPI_Barrier( MPI_COMM_WORLD );
-if ( my_rank == 1 ) {
-   ret = H5TRabort( tr_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
-} else {
       /* Finish (and commit) transaction 2, causing the updates to appear in container version 2. */
-//      ret = H5TRfinish( tr_id, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); assert( ret == 0 );
-}
-MPI_Barrier( MPI_COMM_WORLD );
-#endif
-
-      /* Finish (and commit) transaction 2, causing the updates to appear in container version 2. */
+      fprintf( stderr, "M6.2-r%d: finish (and commit) transaction %d (Step 10 - end)\n", my_rank, (int)tr_num );
       ret = H5TRfinish( tr_id, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); assert( ret == 0 );
 
-      /* Close the local transaction. */
+      /* Close the local transaction and transaction start property list. */
       ret = H5TRclose( tr_id ); assert( ret == 0 );
+      ret = H5Pclose( trspl_id ); assert( ret == 0 );
    }
 
-   fprintf( stderr, "M6.2-r%d: 4th call to print container contents\n", my_rank );
+   fprintf( stderr, "M6.2-r%d: 4th call to print container contents (Step 11)\n", my_rank );
    print_container_contents( file_id, rc_id1, "/", my_rank ); assert( ret == 0 );
 
    version = 2;
-   fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d\n", my_rank, (int)version );
+   fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 12)\n", my_rank, (int)version );
    rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
    while ( rc_id2 < 0 ) {
       fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv 2 - sleep then retry\n", my_rank );
@@ -229,44 +217,209 @@ MPI_Barrier( MPI_COMM_WORLD );
    }
    assert( rc_id2 >= 0 ); assert ( version == 2 );
    fprintf( stderr, "M6.2-r%d: Acquired read context for cv 2\n", my_rank );
-   fprintf( stderr, "M6.2-r%d: 5th call to print container contents\n", my_rank );
+   fprintf( stderr, "M6.2-r%d: 5th call to print container contents (Step 13)\n", my_rank );
    print_container_contents( file_id, rc_id2, "/", my_rank ); assert( ret == 0 );
 
    /* Release the read handle and close read context on cv 1 */
-   fprintf( stderr, "M6.2-r%d: Release read handle on cv 1\n", my_rank );
+   fprintf( stderr, "M6.2-r%d: Release read handle on cv 1 (Step 14)\n", my_rank );
    ret = H5RCrelease( rc_id1, H5_EVENT_STACK_NULL); assert( ret == 0 );
    ret = H5RCclose( rc_id1 ); assert( ret == 0 );
 
-/* ADD MORE THINGS HERE */
+   /* 
+    * Transaction 4 is created and started by all MPI processes.
+    * Transaction 3 is created and started by all MPI processes.
+    * Updates are added to the transactions in an interleaved manner, 
+    * with the ranks progressing independent of each other.  
+    * The sequence of operations in the code is:
+    *    1) /GA/GA/GB added to Tr 4 by rank 0
+    *    2) /GB/GB/GB added to Tr 4 by rank 1
+    *    3) AA@/ deleted in Tr 3 by rank 0
+    *    4) /GA/DA deleted in Tr 3 by rank 1
+    *    5) /GA/TB deleted in Tr 4 by rank 0
+    *    6) /DB deleted in Tr 4 by rank 1
+    *    7) /GB/GA deleted in Tr 3 by rank 0
+    *    8) /GA/TA deleted in Tr 3 by rank 1
+    *    9) /GA/GA/GA added in Tr 3 by rank 0
+    *    10) /GB/TA deleted in Tr 3 by rank 1
+    *    11) /GB/GB/DB added in Tr 3 by rank 1
+    * Transaction 3 is finished and committed.
+    * Transaction 4 is finished and committed.
+    *
+    * Bracket in {}'s to localize variables, and to later make it easier to restrict ranks participating if desired.
+    */
+   {
+      uint64_t tr_num3 = 3;
+      uint64_t tr_num4 = 4;
+      hid_t tr_id3, tr_id4;
+      hid_t trspl_id;
+   
+      /* Set up transaction start property list with the number of transaction leaders */
+      trspl_id = H5Pcreate( H5P_TR_START );  assert( trspl_id );
+      ret = H5Pset_trspl_num_peers( trspl_id, comm_size ); assert( ret == 0 ) ;
+   
+      /* Create & start transaction 4, based on cv 2  */
+      fprintf( stderr, "M6.2-r%d: start transaction %d (Step XX - begin)\n", my_rank, (int)tr_num4 );
+      tr_id4 = H5TRcreate( file_id, rc_id2, tr_num4 ); assert( tr_id4 );
+      ret = H5TRstart( tr_id4, trspl_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+   
+      /* Create & start transaction 3, based on cv 2  */
+      fprintf( stderr, "M6.2-r%d: start transaction %d (Step XX - begin)\n", my_rank, (int)tr_num3 );
+      tr_id3 = H5TRcreate( file_id, rc_id2, tr_num3 ); assert( tr_id3 );
+      ret = H5TRstart( tr_id3, trspl_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+   
+      /* Add updates to the transactions */
+      /*    1) /GA/GA/GB added to Tr 4 by rank 0   */
+      if ( my_rank == 0 ) {
+         create_group( file_id, "/GA/GA/GB", tr_id4, "/", my_rank, tr_num4 );
+      } 
+      /*    2) /GB/GB/GB added to Tr 4 by rank 1   */
+      if ( my_rank == 1 ) {
+         create_group( file_id, "/GB/GB/GB", tr_id4, "/", my_rank, tr_num4 );
+      }
+      /*    3) AA@/ deleted in Tr 3 by rank 0      */
+      if ( my_rank == 0 ) {
+         fprintf( stderr, "M6.2-r%d: delete AA @ / in tr %d \n", my_rank, (int)tr_num3 );
+         ret = H5Adelete_by_name_ff( file_id, ".", "AA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); assert( ret == 0  );
+      }
+      /*    4) /GA/DA deleted in Tr 3 by rank 1    */
+      if ( my_rank == 1 ) {
+         // FOR NOW DELETE /DA not /GA/DA so I can use file_id.  FIX LATER
+         fprintf( stderr, "M6.2-r%d: delete /DA (RUTH: later do /GA/DA) in tr %d \n", my_rank, (int)tr_num3 );
+         ret = H5Ldelete_ff( file_id, "DA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); assert( ret == 0  );
+      }
+      /*    5) /GA/TB deleted in Tr 4 by rank 0    */
+      if ( my_rank == 0 ) {
+         // FOR NOW DELETE /TB not /GA/TB so I can use file_id.  FIX LATER
+         fprintf( stderr, "M6.2-r%d: delete /TB (RUTH: later do /GA/TB) in tr %d \n", my_rank, (int)tr_num4 );
+         ret = H5Ldelete_ff( file_id, "TB", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); assert( ret == 0  );
+      }
+      /*    6) /DB deleted in Tr 4 by rank 1       */
+      if ( my_rank == 1 ) {
+         fprintf( stderr, "M6.2-r%d: delete /DB in tr %d \n", my_rank, (int)tr_num4 );
+         ret = H5Ldelete_ff( file_id, "DB", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); assert( ret == 0  );
+      }
+      /*    7) /GB/GA deleted in Tr 3 by rank 0    */
+      if ( my_rank == 0  && comm_size > 1 ) {
+         //fprintf( stderr, "M6.2-r%d: delete /GB/GA (RUTH: FIX) in tr %d \n", my_rank, (int)tr_num3 );
+         //ret = H5Ldelete_ff( file_id, "GB/GA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); assert( ret == 0  );
+      }
+      /*    8) /GA/TA deleted in Tr 3 by rank 1    */
+      if ( my_rank == 1  ) {
+         //fprintf( stderr, "M6.2-r%d: delete /GA/TA (RUTH: FIX) in tr %d \n", my_rank, (int)tr_num3 );
+         //ret = H5Ldelete_ff( file_id, "GA/TA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); assert( ret == 0  );
+      }
+      /*    9) /GA/GA/GA added in Tr 3 by rank 0   */
+      if ( my_rank == 0 ) {
+         create_group( file_id, "/GA/GA/GA", tr_id3, "/", my_rank, tr_num3 );
+      } 
+      /*    10) /GB/TA deleted in Tr 3 by rank 1   */
+      if ( my_rank == 1 ) {
+         //fprintf( stderr, "M6.2-r%d: delete /GB/TA (RUTH: FIX) in tr %d \n", my_rank, (int)tr_num3 );
+         //ret = H5Ldelete_ff( file_id, "GB/TA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); assert( ret == 0  );
+      }
+      /*    11) /GB/GB/DB added in Tr 3 by rank 1  */
+      if ( my_rank == 1 ) {
+         // RUTH FIX - need groupid, not file 
+         //create_dataset( file_id, "/GB/GB/DB", tr_id3, "/", my_rank, tr_num3, 2 );
+      } 
 
-   /* Release the read handle and close read context on cv 2 */
+      /* Finish (and commit) transaction 3, causing the updates to appear in container version 3. */
+      fprintf( stderr, "M6.2-r%d: finish (and commit) transaction %d (Step XX - end)\n", my_rank, (int)tr_num3 );
+      ret = H5TRfinish( tr_id3, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+   
+      /* Finish (and commit) transaction 4, causing the updates to appear in container version 4. */
+      fprintf( stderr, "M6.2-r%d: finish (and commit) transaction %d (Step XX - end)\n", my_rank, (int)tr_num4 );
+      ret = H5TRfinish( tr_id4, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+   
+      /* Close the local transactions and transaction start property list. */
+      ret = H5TRclose( tr_id3 ); assert( ret == 0 );
+      ret = H5TRclose( tr_id4 ); assert( ret == 0 );
+      ret = H5Pclose( trspl_id ); assert( ret == 0 );
+   }
+   
+   version = 4;
+   fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step XX)\n", my_rank, (int)version );
+   rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+   while ( rc_id4 < 0 ) {
+      fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv 4 - sleep then retry\n", my_rank );
+      sleep( 1 );
+      version = 4;
+      rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+   }
+   assert( rc_id4 >= 0 ); assert ( version == 4 );
+   fprintf( stderr, "M6.2-r%d: Acquired read context for cv 4\n", my_rank );
+   fprintf( stderr, "M6.2-r%d: Xth call to print container contents (Step XX)\n", my_rank );
+   print_container_contents( file_id, rc_id4, "/", my_rank ); assert( ret == 0 );
+   
+   version = 3;
+   fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step XX)\n", my_rank, (int)version );
+   rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+   while ( rc_id3 < 0 ) {
+      fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv 3 - sleep then retry\n", my_rank );
+      sleep( 1 );
+      version = 3;
+      rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+   }
+   assert( rc_id3 >= 0 ); assert ( version == 3 );
+   fprintf( stderr, "M6.2-r%d: Acquired read context for cv 3\n", my_rank );
+   fprintf( stderr, "M6.2-r%d: Xth call to print container contents (Step XX)\n", my_rank );
+   print_container_contents( file_id, rc_id3, "/", my_rank ); assert( ret == 0 );
+   
+   /* Release the read handle and close read context on open CVs */
    fprintf( stderr, "M6.2-r%d: Release read handle on cv 2\n", my_rank );
    ret = H5RCrelease( rc_id2, H5_EVENT_STACK_NULL ); assert( ret == 0 );
    ret = H5RCclose( rc_id2 ); assert( ret == 0 );
+   
+   fprintf( stderr, "M6.2-r%d: Release read handle on cv 3\n", my_rank );
+   ret = H5RCrelease( rc_id3, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+   ret = H5RCclose( rc_id3 ); assert( ret == 0 );
+   
+   fprintf( stderr, "M6.2-r%d: Release read handle on cv 4\n", my_rank );
+   ret = H5RCrelease( rc_id4, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+   ret = H5RCclose( rc_id4 ); assert( ret == 0 );
 
    /* Close the file, then barrier to make sure all have closed it. */
    fprintf( stderr, "M6.2-r%d: close the container\n", my_rank );
-   ret = H5Fclose( file_id ); assert( ret == 0 );
+   ret = H5Fclose_ff( file_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
 
    MPI_Barrier( MPI_COMM_WORLD );
 
-   /* Reopen the file Read/Write, asking to acquire the latest readable version */
+   /* Reopen the file Read/Write */
    fprintf( stderr, "M6.2-r%d: open the container\n", my_rank );
 
-   file_id = H5Fopen_ff( file_name, H5F_ACC_RDWR, fapl_id, &rc_id0, H5_EVENT_STACK_NULL ); assert( file_id );
-   H5RCget_version( rc_id0, &version );
-   fprintf( stderr, "M6.2-r%d: Acquired container version %d\n", my_rank, (int)version );
+#ifdef PRINT_LATEST
+   /* Get latest CV on open */
+   file_id = H5Fopen_ff( file_name, H5F_ACC_RDWR, fapl_id, &rc_id, H5_EVENT_STACK_NULL ); assert( file_id );
+
+#else
+   /* Ask for explicit CV - 4 in this case */
+   file_id = H5Fopen_ff( file_name, H5F_ACC_RDWR, fapl_id, NULL, H5_EVENT_STACK_NULL ); assert( file_id );
+
+   version = 4;
+   fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d\n", my_rank, (int)version );
+   rc_id = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+   while ( rc_id < 0 ) {
+      fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv - sleep then retry\n", my_rank );
+      sleep( 1 );
+      version = 4;
+      rc_id = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+   }
+   assert( rc_id >= 0 ); assert ( version == 4 );
+#endif
+
+   H5RCget_version( rc_id, &version );
+   fprintf( stderr, "M6.2-r%d: Acquired read context for cv %d\n", my_rank, (int)version );
 
    /* Print container contents at this point */
-   fprintf( stderr, "M6.2-r%d: 6th call to print container contents\n", my_rank );
-   print_container_contents( file_id, rc_id0, "/", my_rank );
+   fprintf( stderr, "M6.2-r%d: XXth call to print container contents\n", my_rank );
+   print_container_contents( file_id, rc_id, "/", my_rank );
 
-   /* Release the read handle and close read context on cv obtained from H5Fopen (# 3) */
+   /* Release the read handle and close read context on cv obtained from H5Fopen_ff */
    fprintf( stderr, "M6.2-r%d: Release read handle on version %d\n", my_rank, (int)version );
-   ret = H5RCrelease( rc_id0, H5_EVENT_STACK_NULL ); assert( ret == 0 );
-   ret = H5RCclose( rc_id0 ); assert( ret == 0 );
+   ret = H5RCrelease( rc_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+   ret = H5RCclose( rc_id ); assert( ret == 0 );
 
-   /* Close H5 Objects that are still open */
+   /* Close 2 H5 Objects that are still open */
    fprintf( stderr, "M6.2-r%d: close all h5 objects that are still open\n", my_rank );
    ret = H5Fclose_ff( file_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
    ret = H5Pclose( fapl_id ); assert( ret == 0 );
@@ -553,4 +706,22 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
 
    return;
 }
+
+// COME BACK TO THIS AND FIND A PLACE FOR IT WHEN BUG FIXED.
+#ifdef ABORT_WORKING 
+// MOHAMAD - Here's where I tried the abort.
+// in server output, saw message like 
+// Transaction Abort 2
+// h5ff_server: mdhim_kv.c:223: _mdhim_kv_update_record_cb_fn: Assertion `rc == 0 && oh.cookie != 0' failed.
+//
+
+MPI_Barrier( MPI_COMM_WORLD );
+if ( my_rank == 1 ) {
+   ret = H5TRabort( tr_id, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+} else {
+      /* Finish (and commit) transaction 2, causing the updates to appear in container version 2. */
+//      ret = H5TRfinish( tr_id, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+}
+MPI_Barrier( MPI_COMM_WORLD );
+#endif
 

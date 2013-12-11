@@ -633,7 +633,7 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
         config = fopen("port.cfg", "r");
 
         fscanf(config, "%d\n", &num_ions);
-        fprintf(stderr, "Found %d servers\n", num_ions);
+        printf("Found %d servers\n", num_ions);
 
         /* read a line */
         if(fgets(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, config) != NULL) {
@@ -663,7 +663,7 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
                  0, tag, comm, MPI_STATUS_IGNORE);
     }
 
-    fprintf(stderr, "CN %d Connecting to ION %s\n", my_rank, addr_name);
+    printf("CN %d Connecting to ION %s\n", my_rank, addr_name);
 
     /* initialize Mercury stuff */
     network_class = NA_MPI_Init(NULL, 0);
