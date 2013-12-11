@@ -1951,11 +1951,11 @@ case $withval in
       *)
         if test -n "$withval"; then
           iod_inc="$withval/include"
-          iod_lib="$withval/src"
-          pbl_inc="$withval/src/dep/pbl/src"
-          pbl_lib="$withval/src/dep/pbl/src"
-          mdhim_inc="$withval/src/dep/mdhim/src"
-          mdhim_lib="$withval/src/dep/mdhim/src"
+          iod_lib="$withval/lib"
+          pbl_inc="$withval/include"
+          pbl_lib="$withval/lib"
+          mdhim_inc="$withval/include"
+          mdhim_lib="$withval/lib"
         fi
         ;;
     esac
