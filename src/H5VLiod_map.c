@@ -303,13 +303,10 @@ done:
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_id = IOD_OBJ_INVALID;
+        output.keytype_id = FAIL;
+        output.valtype_id = FAIL;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
-
-    if(output.keytype_id)
-        H5Tclose(output.keytype_id);
-    if(output.valtype_id)
-        H5Tclose(output.valtype_id);
 
     input = (map_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);

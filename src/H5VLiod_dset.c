@@ -357,11 +357,11 @@ done:
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_id = IOD_OBJ_INVALID;
+        output.space_id = FAIL;
+        output.type_id = FAIL;
+        output.dcpl_id = FAIL;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
-
-    H5Tclose(output.type_id);
-    H5Sclose(output.space_id);
 
     input = (dset_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -1320,7 +1320,7 @@ H5VL__iod_server_vl_data_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_i
 {
     char bogus;                 /* bogus value to pass to H5Diterate() */
     H5VL_iod_server_vl_io_t udata;
-    H5T_class_t class;
+    H5T_class_t dt_class;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1336,9 +1336,9 @@ H5VL__iod_server_vl_data_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_i
     udata.buf_size = buf_size;
     udata.tid = tid;
 
-    class = H5Tget_class(mem_type_id);
+    dt_class = H5Tget_class(mem_type_id);
 
-    if(H5T_VLEN == class) {
+    if(H5T_VLEN == dt_class) {
         if((udata.mem_super_type = H5Tget_super(mem_type_id)) < 0)
             HGOTO_ERROR2(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid super type of VL type");
         if((udata.dset_super_type = H5Tget_super(dset_type_id)) < 0)
@@ -1347,7 +1347,7 @@ H5VL__iod_server_vl_data_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_i
         udata.mem_type_size = H5Tget_size(udata.mem_super_type);
         udata.dset_type_size = H5Tget_size(udata.dset_super_type);
     }
-    else if(H5T_STRING == class) {
+    else if(H5T_STRING == dt_class) {
         assert(H5Tis_variable_str(mem_type_id));
 
         udata.mem_type_size = 1;
@@ -1358,7 +1358,7 @@ H5VL__iod_server_vl_data_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_i
     if(H5Diterate(&bogus, mem_type_id, space_id, H5VL__iod_server_vl_data_io_cb, &udata) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to compute buffer size");
 
-    if(H5T_VLEN == class) {
+    if(H5T_VLEN == dt_class) {
         if(H5Tclose(udata.mem_super_type) < 0)
             HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "Can't close mem super type");
         if(H5Tclose(udata.dset_super_type) < 0)
@@ -1473,13 +1473,13 @@ H5VL__iod_server_vl_data_io_cb(void UNUSED *elem, hid_t type_id, unsigned ndims,
 
 #if H5VL_IOD_DEBUG 
         {
-            H5T_class_t class;
+            H5T_class_t dt_class;
 
-            class = H5Tget_class(type_id);
+            dt_class = H5Tget_class(type_id);
 
-            if(H5T_STRING == class)
+            if(H5T_STRING == dt_class)
                 fprintf(stderr, "String Length %zu: %s\n", seq_len, (char *)udata->buf_ptr);
-            else if(H5T_VLEN == class) {
+            else if(H5T_VLEN == dt_class) {
                 int *ptr = (int *)udata->buf_ptr;
 
                 fprintf(stderr, "Sequence Count %zu: ", seq_len);

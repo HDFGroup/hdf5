@@ -785,9 +785,9 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
             if(iod_obj_unlink(coh, obj_id, wtid, NULL) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
             if(iod_obj_unlink(coh, sp[0], wtid, NULL) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink MDKV object");
             if(iod_obj_unlink(coh, sp[1], wtid, NULL) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink ATTRKV object");
         }
     }
 

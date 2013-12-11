@@ -154,6 +154,15 @@ int main(int argc, char **argv) {
         ret = H5TRfinish(tid2, H5P_DEFAULT, &rid3, e_stack);
         assert(0 == ret);
 
+        H5ESwait_all(e_stack, &status);
+
+        did2 = H5Dopen_ff(file_id,"/G1/G2/G3/D2", H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+        assert(did2);
+        H5Dclose_ff(did2, H5_EVENT_STACK_NULL);
+        did2 = H5Dopen_ff(file_id,"/G1/G2/G3/D2", H5P_DEFAULT, rid3, H5_EVENT_STACK_NULL);
+        assert(did3 < 0);
+
+
         /* release container version 1. This is async. */
         ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);

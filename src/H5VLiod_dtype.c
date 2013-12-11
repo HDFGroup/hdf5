@@ -380,6 +380,8 @@ done:
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_id = IOD_OBJ_INVALID;
+        output.type_id = FAIL;
+        output.tcpl_id = FAIL;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 

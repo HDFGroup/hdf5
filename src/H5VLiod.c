@@ -1612,10 +1612,10 @@ done:
                 HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, NULL, "Communicator/Info free failed")
         if(file->common.comment)
             HDfree(file->common.comment);
-        if(file->fapl_id && H5Pclose(file->fapl_id) < 0)
+        if(file->fapl_id != FAIL && H5I_dec_ref(file->fapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-        if(file->remote_file.fcpl_id && 
-           H5Pclose(file->remote_file.fcpl_id) < 0)
+        if(file->remote_file.fcpl_id != FAIL && 
+           H5I_dec_ref(file->remote_file.fcpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
         if(file != NULL) {
             file = H5FL_FREE(H5VL_iod_file_t, file);
@@ -1743,10 +1743,10 @@ done:
                 HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, NULL, "Communicator/Info free failed")
         if(file->common.comment)
             HDfree(file->common.comment);
-        if(file->fapl_id && H5Pclose(file->fapl_id) < 0)
+        if(file->fapl_id != FAIL && H5I_dec_ref(file->fapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-        if(file->remote_file.fcpl_id && 
-           H5Pclose(file->remote_file.fcpl_id) < 0)
+        if(file->remote_file.fcpl_id != FAIL && 
+           H5I_dec_ref(file->remote_file.fcpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
         if(file != NULL) {
             file = H5FL_FREE(H5VL_iod_file_t, file);
@@ -2209,10 +2209,10 @@ done:
             HDfree(grp->common.obj_name);
         if(grp->common.comment)
             HDfree(grp->common.comment);
-        if(grp->gapl_id && H5Pclose(grp->gapl_id) < 0)
+        if(grp->gapl_id != FAIL && H5I_dec_ref(grp->gapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-        if(grp->remote_group.gcpl_id && 
-           H5Pclose(grp->remote_group.gcpl_id) < 0)
+        if(grp->remote_group.gcpl_id != FAIL && 
+           H5I_dec_ref(grp->remote_group.gcpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
         if(grp)
             grp = H5FL_FREE(H5VL_iod_group_t, grp);
@@ -2348,10 +2348,10 @@ done:
             HDfree(grp->common.obj_name);
         if(grp->common.comment)
             HDfree(grp->common.comment);
-        if(grp->gapl_id && H5Pclose(grp->gapl_id) < 0)
+        if(grp->gapl_id != FAIL && H5I_dec_ref(grp->gapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-        if(grp->remote_group.gcpl_id && 
-           H5Pclose(grp->remote_group.gcpl_id) < 0)
+        if(grp->remote_group.gcpl_id != FAIL && 
+           H5I_dec_ref(grp->remote_group.gcpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
         if(grp)
             grp = H5FL_FREE(H5VL_iod_group_t, grp);
@@ -2673,13 +2673,13 @@ done:
             HDfree(dset->common.obj_name);
         if(dset->common.comment)
             HDfree(dset->common.comment);
-        if(dset->remote_dset.type_id && H5Tclose(dset->remote_dset.type_id) < 0)
+        if(dset->remote_dset.type_id != FAIL && H5I_dec_ref(dset->remote_dset.type_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
-        if(dset->remote_dset.space_id && H5Sclose(dset->remote_dset.space_id) < 0)
+        if(dset->remote_dset.space_id != FAIL && H5I_dec_ref(dset->remote_dset.space_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dspace");
-        if(dset->remote_dset.dcpl_id && H5Pclose(dset->remote_dset.dcpl_id) < 0)
+        if(dset->remote_dset.dcpl_id != FAIL && H5I_dec_ref(dset->remote_dset.dcpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-        if(dset->dapl_id && H5Pclose(dset->dapl_id) < 0)
+        if(dset->dapl_id != FAIL && H5I_dec_ref(dset->dapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
         if(dset)
             dset = H5FL_FREE(H5VL_iod_dset_t, dset);
@@ -2819,13 +2819,13 @@ done:
             HDfree(dset->common.obj_name);
         if(dset->common.comment)
             HDfree(dset->common.comment);
-        if(dset->remote_dset.type_id && H5Tclose(dset->remote_dset.type_id) < 0)
+        if(dset->remote_dset.type_id != FAIL && H5I_dec_ref(dset->remote_dset.type_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
-        if(dset->remote_dset.space_id && H5Sclose(dset->remote_dset.space_id) < 0)
+        if(dset->remote_dset.space_id != FAIL && H5I_dec_ref(dset->remote_dset.space_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dspace");
-        if(dset->remote_dset.dcpl_id && H5Pclose(dset->remote_dset.dcpl_id) < 0)
+        if(dset->remote_dset.dcpl_id != FAIL && H5I_dec_ref(dset->remote_dset.dcpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-        if(dset->dapl_id && H5Pclose(dset->dapl_id) < 0)
+        if(dset->dapl_id != FAIL && H5I_dec_ref(dset->dapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
         if(dset)
             dset = H5FL_FREE(H5VL_iod_dset_t, dset);
@@ -3697,11 +3697,11 @@ done:
             HDfree(dtype->common.obj_name);
         if(dtype->common.comment)
             HDfree(dtype->common.comment);
-        if(dtype->remote_dtype.tcpl_id && H5Pclose(dtype->remote_dtype.tcpl_id) < 0)
+        if(dtype->remote_dtype.tcpl_id != FAIL && H5I_dec_ref(dtype->remote_dtype.tcpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-        if(dtype->tapl_id && H5Pclose(dtype->tapl_id) < 0)
+        if(dtype->tapl_id != FAIL && H5I_dec_ref(dtype->tapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-        if(dtype->remote_dtype.type_id && H5Tclose(dtype->remote_dtype.type_id) < 0)
+        if(dtype->remote_dtype.type_id != FAIL && H5I_dec_ref(dtype->remote_dtype.type_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
         if(dtype)
             dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
@@ -3841,11 +3841,11 @@ done:
             HDfree(dtype->common.obj_name);
         if(dtype->common.comment)
             HDfree(dtype->common.comment);
-        if(dtype->remote_dtype.tcpl_id && H5Pclose(dtype->remote_dtype.tcpl_id) < 0)
+        if(dtype->remote_dtype.tcpl_id != FAIL && H5I_dec_ref(dtype->remote_dtype.tcpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-        if(dtype->tapl_id && H5Pclose(dtype->tapl_id) < 0)
+        if(dtype->tapl_id != FAIL && H5I_dec_ref(dtype->tapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-        if(dtype->remote_dtype.type_id && H5Tclose(dtype->remote_dtype.type_id) < 0)
+        if(dtype->remote_dtype.type_id != FAIL && H5I_dec_ref(dtype->remote_dtype.type_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
         if(dtype)
             dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
@@ -4185,9 +4185,9 @@ done:
             HDfree(attr->loc_name);
         if(attr->common.comment)
             HDfree(attr->common.comment);
-        if(attr->remote_attr.type_id && H5Tclose(attr->remote_attr.type_id) < 0)
+        if(attr->remote_attr.type_id != FAIL && H5I_dec_ref(attr->remote_attr.type_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
-        if(attr->remote_attr.space_id && H5Sclose(attr->remote_attr.space_id) < 0)
+        if(attr->remote_attr.space_id != FAIL && H5I_dec_ref(attr->remote_attr.space_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dspace");
         if(attr)
             attr = H5FL_FREE(H5VL_iod_attr_t, attr);
@@ -4346,9 +4346,9 @@ done:
             HDfree(attr->loc_name);
         if(attr->common.comment)
             HDfree(attr->common.comment);
-        if(attr->remote_attr.type_id && H5Tclose(attr->remote_attr.type_id) < 0)
+        if(attr->remote_attr.type_id != FAIL && H5I_dec_ref(attr->remote_attr.type_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
-        if(attr->remote_attr.space_id && H5Sclose(attr->remote_attr.space_id) < 0)
+        if(attr->remote_attr.space_id != FAIL && H5I_dec_ref(attr->remote_attr.space_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dspace");
         if(attr)
             attr = H5FL_FREE(H5VL_iod_attr_t, attr);
@@ -6033,13 +6033,13 @@ done:
                     HDfree(dset->common.obj_name);
                 if(dset->common.comment)
                     HDfree(dset->common.comment);
-                if(dset->remote_dset.type_id && H5Tclose(dset->remote_dset.type_id) < 0)
+                if(dset->remote_dset.type_id != FAIL && H5I_dec_ref(dset->remote_dset.type_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
-                if(dset->remote_dset.space_id && H5Sclose(dset->remote_dset.space_id) < 0)
+                if(dset->remote_dset.space_id != FAIL && H5I_dec_ref(dset->remote_dset.space_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dspace");
-                if(dset->remote_dset.dcpl_id && H5Pclose(dset->remote_dset.dcpl_id) < 0)
+                if(dset->remote_dset.dcpl_id != FAIL && H5I_dec_ref(dset->remote_dset.dcpl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-                if(dset->dapl_id && H5Pclose(dset->dapl_id) < 0)
+                if(dset->dapl_id != FAIL && H5I_dec_ref(dset->dapl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
                 if(dset)
                     dset = H5FL_FREE(H5VL_iod_dset_t, dset);
@@ -6050,11 +6050,11 @@ done:
                     HDfree(dtype->common.obj_name);
                 if(dtype->common.comment)
                     HDfree(dtype->common.comment);
-                if(dtype->remote_dtype.tcpl_id && H5Pclose(dtype->remote_dtype.tcpl_id) < 0)
+                if(dtype->remote_dtype.tcpl_id != FAIL && H5I_dec_ref(dtype->remote_dtype.tcpl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-                if(dtype->tapl_id && H5Pclose(dtype->tapl_id) < 0)
+                if(dtype->tapl_id != FAIL && H5I_dec_ref(dtype->tapl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-                if(dtype->remote_dtype.type_id && H5Tclose(dtype->remote_dtype.type_id) < 0)
+                if(dtype->remote_dtype.type_id != FAIL && H5I_dec_ref(dtype->remote_dtype.type_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
                 if(dtype)
                     dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
@@ -6064,10 +6064,10 @@ done:
                     HDfree(grp->common.obj_name);
                 if(grp->common.comment)
                     HDfree(grp->common.comment);
-                if(grp->gapl_id && H5Pclose(grp->gapl_id) < 0)
+                if(grp->gapl_id != FAIL && H5I_dec_ref(grp->gapl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-                if(grp->remote_group.gcpl_id && 
-                   H5Pclose(grp->remote_group.gcpl_id) < 0)
+                if(grp->remote_group.gcpl_id != FAIL && 
+                   H5I_dec_ref(grp->remote_group.gcpl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
                 if(grp)
                     grp = H5FL_FREE(H5VL_iod_group_t, grp);
@@ -6078,9 +6078,9 @@ done:
                     HDfree(map->common.obj_name);
                 if(map->common.comment)
                     HDfree(map->common.comment);
-                if(map->remote_map.keytype_id && H5Tclose(map->remote_map.keytype_id) < 0)
+                if(map->remote_map.keytype_id != FAIL && H5I_dec_ref(map->remote_map.keytype_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
-                if(map->remote_map.valtype_id && H5Tclose(map->remote_map.valtype_id) < 0)
+                if(map->remote_map.valtype_id != FAIL && H5I_dec_ref(map->remote_map.valtype_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
                 if(map)
                     map = H5FL_FREE(H5VL_iod_map_t, map);
@@ -6395,13 +6395,13 @@ done:
                     HDfree(dset->common.obj_name);
                 if(dset->common.comment)
                     HDfree(dset->common.comment);
-                if(dset->remote_dset.type_id && H5Tclose(dset->remote_dset.type_id) < 0)
+                if(dset->remote_dset.type_id != FAIL && H5I_dec_ref(dset->remote_dset.type_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
-                if(dset->remote_dset.space_id && H5Sclose(dset->remote_dset.space_id) < 0)
+                if(dset->remote_dset.space_id != FAIL && H5I_dec_ref(dset->remote_dset.space_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dspace");
-                if(dset->remote_dset.dcpl_id && H5Pclose(dset->remote_dset.dcpl_id) < 0)
+                if(dset->remote_dset.dcpl_id != FAIL && H5I_dec_ref(dset->remote_dset.dcpl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-                if(dset->dapl_id && H5Pclose(dset->dapl_id) < 0)
+                if(dset->dapl_id != FAIL && H5I_dec_ref(dset->dapl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
                 if(dset)
                     dset = H5FL_FREE(H5VL_iod_dset_t, dset);
@@ -6412,11 +6412,11 @@ done:
                     HDfree(dtype->common.obj_name);
                 if(dtype->common.comment)
                     HDfree(dtype->common.comment);
-                if(dtype->remote_dtype.tcpl_id && H5Pclose(dtype->remote_dtype.tcpl_id) < 0)
+                if(dtype->remote_dtype.tcpl_id != FAIL && H5I_dec_ref(dtype->remote_dtype.tcpl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-                if(dtype->tapl_id && H5Pclose(dtype->tapl_id) < 0)
+                if(dtype->tapl_id != FAIL && H5I_dec_ref(dtype->tapl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-                if(dtype->remote_dtype.type_id && H5Tclose(dtype->remote_dtype.type_id) < 0)
+                if(dtype->remote_dtype.type_id != FAIL && H5I_dec_ref(dtype->remote_dtype.type_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
                 if(dtype)
                     dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
@@ -6426,10 +6426,10 @@ done:
                     HDfree(grp->common.obj_name);
                 if(grp->common.comment)
                     HDfree(grp->common.comment);
-                if(grp->gapl_id && H5Pclose(grp->gapl_id) < 0)
+                if(grp->gapl_id != FAIL && H5I_dec_ref(grp->gapl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-                if(grp->remote_group.gcpl_id && 
-                   H5Pclose(grp->remote_group.gcpl_id) < 0)
+                if(grp->remote_group.gcpl_id != FAIL && 
+                   H5I_dec_ref(grp->remote_group.gcpl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
                 if(grp)
                     grp = H5FL_FREE(H5VL_iod_group_t, grp);
@@ -6440,9 +6440,9 @@ done:
                     HDfree(map->common.obj_name);
                 if(map->common.comment)
                     HDfree(map->common.comment);
-                if(map->remote_map.keytype_id && H5Tclose(map->remote_map.keytype_id) < 0)
+                if(map->remote_map.keytype_id != FAIL && H5I_dec_ref(map->remote_map.keytype_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
-                if(map->remote_map.valtype_id && H5Tclose(map->remote_map.valtype_id) < 0)
+                if(map->remote_map.valtype_id != FAIL && H5I_dec_ref(map->remote_map.valtype_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
                 if(map)
                     map = H5FL_FREE(H5VL_iod_map_t, map);
@@ -7131,9 +7131,9 @@ done:
             HDfree(map->common.obj_name);
         if(map->common.comment)
             HDfree(map->common.comment);
-        if(map->remote_map.keytype_id && H5Tclose(map->remote_map.keytype_id) < 0)
+        if(map->remote_map.keytype_id != FAIL && H5I_dec_ref(map->remote_map.keytype_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
-        if(map->remote_map.valtype_id && H5Tclose(map->remote_map.valtype_id) < 0)
+        if(map->remote_map.valtype_id != FAIL && H5I_dec_ref(map->remote_map.valtype_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
         if(map)
             map = H5FL_FREE(H5VL_iod_map_t, map);
@@ -7250,9 +7250,9 @@ done:
             HDfree(map->common.obj_name);
         if(map->common.comment)
             HDfree(map->common.comment);
-        if(map->remote_map.keytype_id && H5Tclose(map->remote_map.keytype_id) < 0)
+        if(map->remote_map.keytype_id != FAIL && H5I_dec_ref(map->remote_map.keytype_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
-        if(map->remote_map.valtype_id && H5Tclose(map->remote_map.valtype_id) < 0)
+        if(map->remote_map.valtype_id != FAIL && H5I_dec_ref(map->remote_map.valtype_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
         if(map)
             map = H5FL_FREE(H5VL_iod_map_t, map);

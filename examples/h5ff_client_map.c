@@ -336,7 +336,8 @@ int main(int argc, char **argv) {
 
         temp_id = H5Gcreate_ff(file_id, "temp_group", H5P_DEFAULT, H5P_DEFAULT, 
                                H5P_DEFAULT, tid2, H5_EVENT_STACK_NULL);
-        assert(H5Gclose_ff(temp_id, H5_EVENT_STACK_NULL) == 0);
+        if(temp_id > 0)
+            assert(H5Gclose_ff(temp_id, H5_EVENT_STACK_NULL) ==0);
     }
 
     /* finish transaction 2 */

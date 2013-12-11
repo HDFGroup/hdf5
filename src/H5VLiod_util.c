@@ -267,7 +267,7 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
 
         /* open the current group */
         if (iod_obj_open_read(coh, cur_id, NULL, &cur_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current object");
 
 	/* Advance to next component in string */
 	path += nchars;

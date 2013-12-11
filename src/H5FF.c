@@ -683,7 +683,7 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
     /* Create the dataset through the VOL */
     if(NULL == (dset = H5VL_dataset_open(obj, loc_params, vol_plugin, name, 
                                          dapl_id, dxpl_id, estack_id)))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open dataset")
 
     /* Get an atom for the dataset */
     if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
