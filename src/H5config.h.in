@@ -301,6 +301,9 @@
 /* Define if `MPI_Info_c2f' and `MPI_Info_f2c' exists */
 #undef HAVE_MPI_MULTI_LANG_Info
 
+/* Define to 1 if you have the <numpy/ndarrayobject.h> header file. */
+#undef HAVE_NUMPY_NDARRAYOBJECT_H
+
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL
 
@@ -315,6 +318,9 @@
 
 /* Define to 1 if you have the <Python.h> header file. */
 #undef HAVE_PYTHON_H
+
+/* Define if we have Python NumPy support */
+#undef HAVE_PYTHON_NUMPY
 
 /* Define to 1 if you have the `random' function. */
 #undef HAVE_RANDOM

@@ -2935,6 +2935,7 @@ AC_ARG_ENABLE([python],
               [enableval=no])
 case "X-$enableval" in
   X-yes)
+    AX_PYTHON
     AX_PYTHON_DEVEL
     CPPFLAGS="$CPPFLAGS $PYTHON_CPPFLAGS"
     AM_CPPFLAGS="$AM_CPPFLAGS $PYTHON_CPPFLAGS"
@@ -2942,7 +2943,8 @@ case "X-$enableval" in
     AM_LDFLAGS="$AM_LDFLAGS $PYTHON_LDFLAGS"
 
     AC_CHECK_HEADERS([Python.h], [AC_MSG_CHECKING([for Python support])
-                     AC_TRY_COMPILE([#include <Python.h>],
+                     AC_TRY_COMPILE([#include <Python.h>
+                                    ],
                                     [Py_Initialize(); Py_Finalize();],
                                     [AC_DEFINE([HAVE_PYTHON], [1],
                                                [Define if we have Python support])
@@ -2950,6 +2952,24 @@ case "X-$enableval" in
                                        PYTHON="yes"],
                                     [AC_MSG_RESULT([no])
                                        PYTHON="no"])])
+    # Get NumPy header
+    PYTHON_NUMPY_INCLUDE_DIR=`$PYTHON_BIN -c 'import numpy; print numpy.get_include()'`
+    CPPFLAGS="$CPPFLAGS -I$PYTHON_NUMPY_INCLUDE_DIR"
+    AM_CPPFLAGS="$AM_CPPFLAGS -I$PYTHON_NUMPY_INCLUDE_DIR"
+    AC_CHECK_HEADERS([numpy/ndarrayobject.h], [AC_MSG_CHECKING([for Python NumPy support])
+                     AC_TRY_COMPILE([#include <Python.h>
+                                     #include <numpy/ndarrayobject.h>
+                                    ],
+                                    [Py_Initialize(); import_array(); Py_Finalize();],
+                                    [AC_DEFINE([HAVE_PYTHON_NUMPY], [1],
+                                               [Define if we have Python NumPy support])
+                                       AC_MSG_RESULT([yes])
+                                       PYTHON_NUMPY="yes"],
+                                    [AC_MSG_RESULT([no])
+                                       PYTHON_NUMPY="no"])],
+                     [AC_MSG_ERROR([Could not find or include numpy/ndarrayobject.h])],
+                                    [#include <Python.h>
+                                    ])
     ;;
   X-no|*)
     AC_MSG_RESULT([no])
