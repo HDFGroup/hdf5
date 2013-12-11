@@ -120,7 +120,6 @@ int hg_proc_axe_t(hg_proc_t proc, void *data)
         if(struct_data->num_parents)
             free(struct_data->parent_axe_ids);
         break;
-    case HG_INVALID:
     default:
         return HG_FAIL;
     }
@@ -253,7 +252,6 @@ int hg_proc_dims_t(hg_proc_t proc, void *data)
         if(struct_data->rank)
             free(struct_data->size);
         break;
-    case HG_INVALID:
     default:
         return HG_FAIL;
     }
@@ -336,7 +334,6 @@ int hg_proc_binary_buf_t(hg_proc_t proc, void *data)
             free(struct_data->buf);
         }
         break;
-    case HG_INVALID:
     default:
         return HG_FAIL;
     }
@@ -541,7 +538,6 @@ static int hg_proc_plist_t(hg_proc_t proc, hid_t *data)
             }
         }
         break;
-    case HG_INVALID:
     default:
         HG_ERROR_DEFAULT("PLIST unsupported op Proc error");
     }
@@ -620,7 +616,6 @@ static int hg_proc_dtype_t(hg_proc_t proc, hid_t *data)
             return HG_FAIL;
         }
         break;
-    case HG_INVALID:
     default:
         HG_ERROR_DEFAULT("DTYPE unsupported op Proc error");
     }
@@ -700,7 +695,6 @@ static int hg_proc_dspace_t(hg_proc_t proc, hid_t *data)
             return HG_FAIL;
         }
         break;
-    case HG_INVALID:
     default:
         HG_ERROR_DEFAULT("DSPACE unsupported op Proc error");
     }
@@ -780,7 +774,6 @@ static int hg_proc_query_t(hg_proc_t proc, hid_t *data)
             return HG_FAIL;
         }
         break;
-    case HG_INVALID:
     default:
         HG_ERROR_DEFAULT("QUERY unsupported op Proc error");
     }
