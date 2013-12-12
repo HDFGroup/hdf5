@@ -256,12 +256,12 @@ int main(int argc, char **argv) {
         MPI_Ibcast(token6, token_size6, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[5]);
         MPI_Waitall(6, mpi_reqs, MPI_STATUS_IGNORE);
 
-        gid1 = H5Oopen_by_token(token1, rid1, e_stack);
-        gid2 = H5Oopen_by_token(token2, rid2, e_stack);
-        dtid1 = H5Oopen_by_token(token3, rid1, e_stack);
-        dtid2 = H5Oopen_by_token(token4, rid2, e_stack);
-        did1 = H5Oopen_by_token(token5, rid1, e_stack);
-        did2 = H5Oopen_by_token(token6, rid2, e_stack);
+        gid1 = H5Oopen_by_token(token1, tid1, e_stack);
+        gid2 = H5Oopen_by_token(token2, tid2, e_stack);
+        dtid1 = H5Oopen_by_token(token3, tid1, e_stack);
+        dtid2 = H5Oopen_by_token(token4, tid2, e_stack);
+        did1 = H5Oopen_by_token(token5, tid1, e_stack);
+        did2 = H5Oopen_by_token(token6, tid2, e_stack);
 
         /* Raw data write on D1. */
         H5Dwrite_ff(did1, dtid1, sid, sid, H5P_DEFAULT, wdata1, tid1, e_stack);

@@ -49,7 +49,8 @@
  */
 herr_t 
 H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t loc_handle, 
-                         const char *path, iod_trans_id_t rtid, hbool_t create_interm_grps,
+                         const char *path, iod_trans_id_t wtid, iod_trans_id_t rtid, 
+                         hbool_t create_interm_grps,
                          /* out */char **last_comp, /* out */iod_obj_id_t *iod_id, 
                          /* out */iod_handles_t *iod_oh)
 {
@@ -73,7 +74,7 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
 
     /* open the current group */
     if(cur_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_read(coh, loc_id, NULL /*hints*/, &cur_oh.rd_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, loc_id, wtid, NULL /*hints*/, &cur_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
     }
 
@@ -142,7 +143,7 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
         }
 
         /* open the current group */
-        if (iod_obj_open_read(coh, cur_id, NULL, &cur_oh.rd_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, cur_id, rtid, NULL, &cur_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
 	/* Advance to next component in string */
@@ -159,7 +160,7 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
     if(cur_id != loc_id ||
        loc_handle.wr_oh.cookie == IOD_OH_UNDEFINED) {
         /* open a write handle on the ID. */
-        if (iod_obj_open_write(coh, cur_id, NULL, &cur_oh.wr_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, cur_id, wtid, NULL, &cur_oh.wr_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
     }
         
@@ -207,7 +208,7 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
 
     if(cur_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
         /* open the current group */
-        if (iod_obj_open_read(coh, loc_id, NULL, &cur_oh.rd_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, loc_id, rtid, NULL, &cur_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open start location");
     }
 
@@ -241,8 +242,13 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
 
         /* lookup next object in the current group */
         if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
-                                 comp, NULL, NULL, &value) < 0)
+                                 comp, NULL, NULL, &value) < 0) {
+            /* Close previous handle unless it is the original one */
+            if(loc_handle.rd_oh.cookie != prev_oh.cookie && 
+               iod_obj_close(prev_oh, NULL, NULL) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
+        }
 
         /* if this a soft link, traverse the link value if the ID is undefined */
         if(H5L_TYPE_SOFT == value.link_type) {
@@ -266,7 +272,7 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
 
         /* open the current group */
-        if (iod_obj_open_read(coh, cur_id, NULL, &cur_oh.rd_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, cur_id, rtid, NULL, &cur_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current object");
 
 	/* Advance to next component in string */

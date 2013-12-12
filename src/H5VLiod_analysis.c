@@ -1175,7 +1175,7 @@ H5VL__iod_read_selection(iod_handle_t coh, iod_obj_id_t obj_id,
     FUNC_ENTER_NOAPI_NOINIT
 
     /* open the array object */
-    if (iod_obj_open_read(coh, obj_id, NULL /*hints*/, &obj_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, obj_id, rtid, NULL /*hints*/, &obj_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
     /* read the data selection from IOD. */

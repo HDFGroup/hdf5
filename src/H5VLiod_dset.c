@@ -107,7 +107,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the dataset needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, rtid, FALSE, 
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
@@ -147,9 +147,9 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create Array object");
     }
 
-    if (iod_obj_open_write(coh, dset_id, NULL, &dset_oh.wr_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, dset_id, wtid, NULL, &dset_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Dataset for Write");
-    if (iod_obj_open_read(coh, dset_id, NULL, &dset_oh.rd_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, dset_id, wtid, NULL, &dset_oh.rd_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Dataset for Read");
 
     /* create the attribute KV object for the dataset */
@@ -180,7 +180,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* Open Metadata KV object for write */
-    if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
     if(H5P_DEFAULT == input->dcpl_id)
@@ -306,7 +306,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* open a write handle on the ID. */
-    if (iod_obj_open_write(coh, dset_id, NULL, &dset_oh.wr_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, dset_id, rtid, NULL, &dset_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current dset");
 
     /* get scratch pad of the dataset */
@@ -320,7 +320,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
@@ -418,7 +418,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_read(coh, iod_id, NULL /*hints*/, &iod_oh.rd_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, iod_id, rtid, NULL /*hints*/, &iod_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
         opened_locally = TRUE;
     }
@@ -593,7 +593,7 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh.rd_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, iod_id, rtid, NULL /*hints*/, &iod_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
         opened_locally = TRUE;
     }
@@ -811,7 +811,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.wr_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh.wr_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, iod_id, wtid, NULL /*hints*/, &iod_oh.wr_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
         opened_locally = TRUE;
     }
@@ -977,7 +977,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.wr_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh.wr_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, iod_id, wtid, NULL /*hints*/, &iod_oh.wr_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");        
         opened_locally = TRUE;
     }
@@ -993,7 +993,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
         iod_handle_t mdkv_oh;
 
         /* open the metadata scratch pad */
-        if (iod_obj_open_write(coh, mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, mdkv_id, wtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
         /* get the stored dataset dataspace */
@@ -1463,7 +1463,7 @@ H5VL__iod_server_vl_data_io_cb(void UNUSED *elem, hid_t type_id, unsigned ndims,
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to create BLOB object");
         }
         /* Open blob object */
-        if (iod_obj_open_write(coh, blob_id, NULL, &blob_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, blob_id, tid, NULL, &blob_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Datatype");
 
         seq_len = *((size_t *)(udata->buf_ptr));
@@ -1554,7 +1554,7 @@ H5VL__iod_server_vl_data_io_cb(void UNUSED *elem, hid_t type_id, unsigned ndims,
         udata->buf_ptr += sizeof(size_t);
 
         /* Open blob object */
-        if (iod_obj_open_write(coh, blob_id, NULL, &blob_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, blob_id, tid, NULL, &blob_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Datatype");
 
         /* create memory descriptor for reading */

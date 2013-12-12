@@ -395,7 +395,7 @@ H5_DLL herr_t H5VL_iod_map_delete(void *map, hid_t key_mem_type_id, const void *
                                   hid_t trans_id, void **req);
 H5_DLL herr_t H5VL_iod_map_close(void *map, void **req);
 
-H5_DLL void * H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, 
+H5_DLL void * H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, 
                                       H5I_type_t *opened_type, void **req);
 
 /* private routines for RC */

@@ -383,7 +383,8 @@ H5_DLL void H5VL_iod_server_trans_abort_cb(AXE_engine_t axe_engine,
 
 /* Helper routines used several times in different places */
 H5_DLL herr_t H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t loc_handle, 
-                                       const char *path, iod_trans_id_t tid, hbool_t create_interm_grps,
+                                       const char *path, iod_trans_id_t wtid, iod_trans_id_t rtid, 
+                                       hbool_t create_interm_grps,
                                        char **last_comp, iod_obj_id_t *iod_id, iod_handles_t *iod_oh);
 H5_DLL herr_t H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, 
                                         iod_handles_t loc_handle, const char *path, 

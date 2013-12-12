@@ -78,7 +78,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the datatype needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, rtid, FALSE, 
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
@@ -89,9 +89,9 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_BLOB, NULL, NULL, &dtype_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create BLOB");
 
-    if (iod_obj_open_read(coh, dtype_id, NULL, &dtype_oh.rd_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, dtype_id, wtid, NULL, &dtype_oh.rd_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open BLOB");
-    if (iod_obj_open_write(coh, dtype_id, NULL, &dtype_oh.wr_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, dtype_id, wtid, NULL, &dtype_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open BLOB");
 
     /* create the metadata KV object for the datatype */
@@ -122,7 +122,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* Store Metadata in scratch pad */
-    if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open metadata KV object");
 
     /* determine the buffer size needed to store the encoded type of the datatype */ 
@@ -293,7 +293,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* open a write handle on the ID. */
-    if (iod_obj_open_write(coh, dtype_id, NULL, &dtype_oh.wr_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, dtype_id, rtid, NULL, &dtype_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current datatype");
 
     /* get scratch pad of the datatype */
@@ -307,7 +307,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,

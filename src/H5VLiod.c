@@ -571,12 +571,12 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
         }
 
         /* Since the operation is synchronous, return FAIL if the status failed */
-        if(H5ES_STATUS_FAIL == request->status)
+        if(H5ES_STATUS_FAIL == request->status) {
             ret_value = FAIL;
+        }
 
         request->req = H5MM_xfree(request->req);
         H5VL_iod_request_decr_rc(request);
-        
     } /* end else */
 
 done:
@@ -5765,7 +5765,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, void **req)
+H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, H5I_type_t *opened_type, void **req)
 {
     object_token_in_t input;
     const uint8_t *buf_ptr = (const uint8_t *)token;
@@ -5834,12 +5834,13 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
             buf_ptr += space_size;
         }
 
-        input.coh = rc->file->remote_file.coh;
+        input.coh = tr->file->remote_file.coh;
         input.iod_id = iod_id;
+        input.trans_num = tr->trans_num;
 
         /* set common object parameters */
         dset->common.obj_type = H5I_DATASET;
-        dset->common.file = rc->file;
+        dset->common.file = tr->file;
         dset->common.file->nopen_objs ++;
         dset->common.obj_name = NULL;
 
@@ -5850,7 +5851,7 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
 
         if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
                                         (H5VL_iod_object_t *)dset, 1, 0, NULL,
-                                        (H5VL_iod_req_info_t *)rc, &input, 
+                                        (H5VL_iod_req_info_t *)tr, &input, 
                                         &dset->remote_dset.iod_oh, dset, req) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship dataset open_by_token");
 
@@ -5888,12 +5889,13 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         }
 
         /* set the input structure for the HG encode routine */
-        input.coh = rc->file->remote_file.coh;
+        input.coh = tr->file->remote_file.coh;
         input.iod_id = iod_id;
+        input.trans_num = tr->trans_num;
 
         /* set common object parameters */
         dtype->common.obj_type = H5I_DATATYPE;
-        dtype->common.file = rc->file;
+        dtype->common.file = tr->file;
         dtype->common.file->nopen_objs ++;
         dtype->common.obj_name = NULL;
 
@@ -5904,7 +5906,7 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
 
         if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
                                         (H5VL_iod_object_t *)dtype, 1, 0, NULL,
-                                        (H5VL_iod_req_info_t *)rc, &input, 
+                                        (H5VL_iod_req_info_t *)tr, &input, 
                                         &dtype->remote_dtype.iod_oh, dtype, req) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship datatype open_by_token");
 
@@ -5926,12 +5928,13 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         grp->gapl_id = H5Pcopy(H5P_GROUP_ACCESS_DEFAULT);
 
         /* set the input structure for the HG encode routine */
-        input.coh = rc->file->remote_file.coh;
+        input.coh = tr->file->remote_file.coh;
         input.iod_id = iod_id;
+        input.trans_num = tr->trans_num;
 
         /* set common object parameters */
         grp->common.obj_type = H5I_GROUP;
-        grp->common.file = rc->file;
+        grp->common.file = tr->file;
         grp->common.file->nopen_objs ++;
         grp->common.obj_name = NULL;
 
@@ -5942,7 +5945,7 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
 
         if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
                                         (H5VL_iod_object_t *)grp, 1, 0, NULL,
-                                        (H5VL_iod_req_info_t *)rc, &input, 
+                                        (H5VL_iod_req_info_t *)tr, &input, 
                                         &grp->remote_group.iod_oh, grp, req) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship group open_by_token");
 
@@ -5995,12 +5998,13 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
         }
 
         /* set the input structure for the HG encode routine */
-        input.coh = rc->file->remote_file.coh;
+        input.coh = tr->file->remote_file.coh;
         input.iod_id = iod_id;
+        input.trans_num = tr->trans_num;
 
         /* set common object parameters */
         map->common.obj_type = H5I_MAP;
-        map->common.file = rc->file;
+        map->common.file = tr->file;
         map->common.file->nopen_objs ++;
         map->common.obj_name = NULL;
 
@@ -6011,7 +6015,7 @@ H5VL_iod_obj_open_token(const void *token, H5RC_t *rc, H5I_type_t *opened_type, 
 
         if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
                                         (H5VL_iod_object_t *)map, 1, 0, NULL, 
-                                        (H5VL_iod_req_info_t *)rc, &input, 
+                                        (H5VL_iod_req_info_t *)tr, &input, 
                                         &map->remote_map, map, req) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship map open");
 

@@ -551,7 +551,8 @@ MERCURY_GEN_PROC(object_token_in_t,
                  ((axe_t)(axe_info))
                  ((uint32_t)(cs_scope)) 
                  ((iod_handle_t)(coh))
-                 ((iod_obj_id_t)(iod_id)))
+                 ((iod_obj_id_t)(iod_id))
+                 ((uint64_t)(trans_num)))
 MERCURY_GEN_PROC(object_op_in_t, 
                  ((axe_t)(axe_info))
                  ((uint32_t)(cs_scope)) 

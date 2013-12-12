@@ -2902,9 +2902,9 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Oopen_by_token(const void *token, hid_t rcxt_id, hid_t estack_id)
+H5Oopen_by_token(const void *token, hid_t trans_id, hid_t estack_id)
 {
-    H5RC_t *rc = NULL;
+    H5TR_t *tr = NULL;
     H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -2913,17 +2913,17 @@ H5Oopen_by_token(const void *token, hid_t rcxt_id, hid_t estack_id)
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("i", "*xii", token, rcxt_id, estack_id);
+    H5TRACE3("i", "*xii", token, trans_id, estack_id);
 
     if(NULL == token)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no token")
 
-    /* get the RC object */
-    if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Read Context ID")
+    /* get the TR object */
+    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
 
     /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(rcxt_id)))
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(trans_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     if(estack_id != H5_EVENT_STACK_NULL) {
@@ -2937,7 +2937,7 @@ H5Oopen_by_token(const void *token, hid_t rcxt_id, hid_t estack_id)
         vol_plugin->nrefs ++;
     }
 
-    if(NULL == (opened_obj = H5VL_iod_obj_open_token(token, rc, &opened_type, req)))
+    if(NULL == (opened_obj = H5VL_iod_obj_open_token(token, tr, &opened_type, req)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object");
 
     if(request && *req) {

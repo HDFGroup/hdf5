@@ -247,9 +247,9 @@ int main(int argc, char **argv) {
         MPI_Ibcast(map_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[2]);
         MPI_Waitall(3, mpi_reqs, MPI_STATUS_IGNORE);
 
-        map1 = H5Oopen_by_token(map_token1, rid1, e_stack);
-        map2 = H5Oopen_by_token(map_token2, rid1, e_stack);
-        map3 = H5Oopen_by_token(map_token3, rid1, e_stack);
+        map1 = H5Oopen_by_token(map_token1, tid1, e_stack);
+        map2 = H5Oopen_by_token(map_token2, tid1, e_stack);
+        map3 = H5Oopen_by_token(map_token3, tid1, e_stack);
     }
 
 
@@ -341,10 +341,14 @@ int main(int argc, char **argv) {
     }
 
     /* finish transaction 2 */
-    //ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, e_stack);
     if(my_rank == 0) {
         ret = H5TRabort(tid2, H5_EVENT_STACK_NULL);
         assert(0 == ret);
+    }
+    else {
+        ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
+        if(ret < 0)
+            fprintf(stderr, "Transaction finish failed (aborted)\n");
     }
 
     MPI_Barrier(MPI_COMM_WORLD);

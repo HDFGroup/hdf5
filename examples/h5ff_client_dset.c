@@ -204,9 +204,9 @@ int main(int argc, char **argv) {
         MPI_Ibcast(dset_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[2]);
         MPI_Waitall(3, mpi_reqs, MPI_STATUS_IGNORE);
 
-        did1 = H5Oopen_by_token(dset_token1, rid1, e_stack);
-        did2 = H5Oopen_by_token(dset_token2, rid1, e_stack);
-        did3 = H5Oopen_by_token(dset_token3, rid1, e_stack);
+        did1 = H5Oopen_by_token(dset_token1, tid1, e_stack);
+        did2 = H5Oopen_by_token(dset_token2, tid1, e_stack);
+        did3 = H5Oopen_by_token(dset_token3, tid1, e_stack);
     }
 
     /* write data to datasets */

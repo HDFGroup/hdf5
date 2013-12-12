@@ -48,7 +48,7 @@ H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine,
     object_token_in_t *input = (object_token_in_t *)op_data->input;
     iod_handle_t coh = input->coh; /* the container handle */
     iod_obj_id_t obj_id = input->iod_id; /* The ID of the object */
-    //iod_trans_id_t rtid = input->rcxt_num;
+    iod_trans_id_t tid = input->trans_num;
     //uint32_t cs_scope = input->cs_scope;
     iod_handles_t obj_oh; /* The handle for object */
     herr_t ret_value = SUCCEED;
@@ -59,9 +59,9 @@ H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start Object Open by token = %"PRIx64"\n", obj_id);
 #endif
 
-    if (iod_obj_open_read(coh, obj_id, NULL /*hints*/, &obj_oh.rd_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, obj_id, tid, NULL /*hints*/, &obj_oh.rd_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
-    if (iod_obj_open_write(coh, obj_id, NULL /*hints*/, &obj_oh.wr_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, obj_id, tid, NULL /*hints*/, &obj_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
 #if H5VL_IOD_DEBUG
@@ -128,7 +128,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
                                  rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
-    if (iod_obj_open_write(coh, obj_id, NULL, &obj_oh.wr_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, obj_id, rtid, NULL, &obj_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
     if(obj_id != input->loc_id) {
@@ -143,12 +143,12 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* open the metadata KV */
-        if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
     else {
         /* open the metadata KV */
-        if (iod_obj_open_read(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, input->loc_mdkv_id, rtid, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
 
@@ -357,7 +357,7 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, H5VL_IOD_KEY_OBJ_TYPE,
@@ -605,18 +605,18 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* open the metadata KV */
-        if (iod_obj_open_read(coh, sp[0], NULL, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[0], rtid, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
         /* open the attribute KV */
-        if (iod_obj_open_read(coh, sp[1], NULL, &attrkv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[1], rtid, NULL, &attrkv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open ATTRKV");
     }
     else {
         /* open the metadata KV */
-        if (iod_obj_open_read(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, input->loc_mdkv_id, rtid, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
         /* open the attribute KV */
-        if (iod_obj_open_read(coh, input->loc_attrkv_id, NULL, &attrkv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, input->loc_attrkv_id, rtid, NULL, &attrkv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
 
@@ -743,12 +743,12 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* open the metadata scratch pad */
-        if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
     else {
         /* open the metadata KV */
-        if (iod_obj_open_write(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, input->loc_mdkv_id, rtid, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
 
@@ -851,12 +851,12 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* open the metadata KV */
-        if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
     else {
         /* open the metadata KV */
-        if (iod_obj_open_read(coh, input->loc_mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, input->loc_mdkv_id, rtid, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
 

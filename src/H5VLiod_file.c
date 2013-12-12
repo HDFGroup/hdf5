@@ -89,11 +89,11 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     if(0 == root_ret || -EEXIST == root_ret) {
         //fprintf(stderr, "created Root group %"PRIx64"\n", root_id);
         /* root group has been created, open it */
-        if ((ret = iod_obj_open_write(coh, root_id, NULL, &root_oh.wr_oh, NULL)) < 0) {
+        if ((ret = iod_obj_open_write(coh, root_id, first_tid, NULL, &root_oh.wr_oh, NULL)) < 0) {
             fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open root group for write");
         }
-        if ((ret = iod_obj_open_read(coh, root_id, NULL, &root_oh.rd_oh, NULL)) < 0) {
+        if ((ret = iod_obj_open_read(coh, root_id, first_tid, NULL, &root_oh.rd_oh, NULL)) < 0) {
             fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open root group for read");
         }
@@ -146,7 +146,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* Store Metadata in scratch pad */
-        if (iod_obj_open_write(coh, input->mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, input->mdkv_id, first_tid, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open metadata KV");
 
         /* store metadata */
@@ -284,11 +284,11 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
     /* open the root group */
-    if ((ret = iod_obj_open_read(coh, ROOT_ID, NULL /*hints*/, &root_oh.rd_oh, NULL)) < 0) {
+    if ((ret = iod_obj_open_read(coh, ROOT_ID, rtid, NULL /*hints*/, &root_oh.rd_oh, NULL)) < 0) {
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object for read");
     }
-    if ((ret = iod_obj_open_write(coh, ROOT_ID, NULL /*hints*/, &root_oh.wr_oh, NULL)) < 0) {
+    if ((ret = iod_obj_open_write(coh, ROOT_ID, rtid, NULL /*hints*/, &root_oh.wr_oh, NULL)) < 0) {
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object for write");
     }
@@ -303,7 +303,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* retrieve all metadata from scratch pad */
@@ -456,7 +456,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* open the metadata scratch pad */
-        if (iod_obj_open_write(coh, sp[0], NULL, &mdkv_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, sp[0], rtid, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open metadata KV");
 
         /* insert current indexes in the metadata KV object */

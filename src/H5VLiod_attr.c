@@ -66,6 +66,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
     iod_size_t array_dims[H5S_MAX_RANK], current_dims[H5S_MAX_RANK];
+    hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -74,6 +75,13 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start attribute create %s at %"PRIu64" with ID %"PRIx64"\n", 
             attr_name, loc_handle.wr_oh, attr_id);
 #endif
+
+    if(loc_handle.rd_oh.cookie == IOD_OH_UNDEFINED) {
+        /* Try and open the starting location */
+        if (iod_obj_open_read(coh, loc_id, wtid, NULL, &loc_handle.rd_oh, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open start location");
+        opened_locally = TRUE;
+    }
 
     /* Open the object where the attribute needs to be created. */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, rtid, 
@@ -94,9 +102,9 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
                       &array, &attr_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create Attribute");
 
-    if (iod_obj_open_read(coh, attr_id, NULL, &attr_oh.rd_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, attr_id, wtid, NULL, &attr_oh.rd_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open attribute");
-    if (iod_obj_open_write(coh, attr_id, NULL, &attr_oh.wr_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, attr_id, wtid, NULL, &attr_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open attribute");
 
     /* create the metadata KV object for the attribute */
@@ -121,7 +129,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* Open Metadata KV object for write */
-    if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
     /* insert object type metadata */
@@ -158,12 +166,12 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* open the attribute KV in scratch pad */
-        if (iod_obj_open_write(coh, sp[1], NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, sp[1], wtid, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
     else {
         /* open the attribute KV */
-        if (iod_obj_open_write(coh, loc_attrkv_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, loc_attrkv_id, wtid, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
 
@@ -178,7 +186,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
 
     /* close parent group if it is not the location we started the
        traversal into */
-    if(loc_handle.rd_oh.cookie != obj_oh.rd_oh.cookie) {
+    if(TRUE == opened_locally || loc_handle.rd_oh.cookie != obj_oh.rd_oh.cookie) {
         iod_obj_close(obj_oh.rd_oh, NULL, NULL);
     }
 
@@ -284,12 +292,12 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "Object has no attributes");
 
         /* open the attribute KV in scratch pad */
-        if (iod_obj_open_read(coh, sp[1], NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[1], rtid, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
     else {
         /* open the attribute KV */
-        if (iod_obj_open_read(coh, loc_attrkv_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, loc_attrkv_id, rtid, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
 
@@ -310,9 +318,9 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_close(attr_kv_oh, NULL, NULL);
 
     /* open the attribute */
-    if (iod_obj_open_read(coh, attr_id, NULL /*hints*/, &attr_oh.rd_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, attr_id, rtid, NULL /*hints*/, &attr_oh.rd_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
-    if (iod_obj_open_write(coh, attr_id, NULL /*hints*/, &attr_oh.wr_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, attr_id, rtid, NULL /*hints*/, &attr_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
     /* get scratch pad of the attribute */
@@ -326,7 +334,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* open the metadata scratch pad of the attribute */
-    if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
@@ -420,7 +428,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the attribute if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_read(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, iod_id, rtid, NULL /*hints*/, &iod_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");        
         opened_locally = TRUE;
     }
@@ -438,7 +446,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - Not needed if dataspace is available */
 #if 0
     /* open the metadata scratch pad of the attribute */
-    if (iod_obj_open_read(coh, mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, mdkv_id, rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, 
@@ -563,7 +571,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     //hid_t type_id = input->type_id; /* datatype ID of data */
     hid_t space_id = input->space_id; /* dataspace of attribute */
     iod_trans_id_t wtid = input->trans_num;
-    //iod_trans_id_t rtid = input->rcxt_num;
+    iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
     hg_bulk_block_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
@@ -583,7 +591,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the attribute if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, iod_id, wtid, NULL /*hints*/, &iod_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
         opened_locally = TRUE;
     }
@@ -626,7 +634,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - Not needed if dataspace is available */
 #if 0
     /* open the metadata scratch pad of the attribute */
-    if (iod_obj_open_read(coh, mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, mdkv_id, wtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
@@ -771,12 +779,12 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* open the attribute KV in scratch pad */
-        if (iod_obj_open_read(coh, sp[1], NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[1], rtid, NULL, &attr_kv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
     else {
         /* open the attribute KV  */
-        if (iod_obj_open_read(coh, input->loc_attrkv_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, input->loc_attrkv_id, rtid, NULL, &attr_kv_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
 
@@ -880,16 +888,16 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "Object has no attributes");
 
         /* open the attribute KV in scratch pad */
-        if (iod_obj_open_read(coh, sp[1], NULL /*hints*/, &attr_kv_oh.rd_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[1], wtid, NULL /*hints*/, &attr_kv_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
-        if (iod_obj_open_write(coh, sp[1], NULL /*hints*/, &attr_kv_oh.wr_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, sp[1], wtid, NULL /*hints*/, &attr_kv_oh.wr_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
     else {
         /* open the attribute KV  */
-        if (iod_obj_open_read(coh, input->loc_attrkv_id, NULL /*hints*/, &attr_kv_oh.rd_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, input->loc_attrkv_id, wtid, NULL /*hints*/, &attr_kv_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
-        if (iod_obj_open_write(coh, input->loc_attrkv_id, NULL /*hints*/, &attr_kv_oh.wr_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, input->loc_attrkv_id, wtid, NULL /*hints*/, &attr_kv_oh.wr_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
 
@@ -1011,16 +1019,16 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "Object has no attributes");
 
         /* open the attribute KV in scratch pad */
-        if (iod_obj_open_read(coh, sp[1], NULL /*hints*/, &attr_kv_oh.rd_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, sp[1], wtid, NULL /*hints*/, &attr_kv_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
-        if (iod_obj_open_write(coh, sp[1], NULL /*hints*/, &attr_kv_oh.wr_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, sp[1], wtid, NULL /*hints*/, &attr_kv_oh.wr_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
     else {
         /* open the attribute KV  */
-        if (iod_obj_open_read(coh, input->loc_attrkv_id, NULL /*hints*/, &attr_kv_oh.rd_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, input->loc_attrkv_id, wtid, NULL /*hints*/, &attr_kv_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
-        if (iod_obj_open_write(coh, input->loc_attrkv_id, NULL /*hints*/, &attr_kv_oh.wr_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, input->loc_attrkv_id, wtid, NULL /*hints*/, &attr_kv_oh.wr_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
 
@@ -1040,7 +1048,7 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
 
     /* remove metadata KV of attribute */
     /* open the attribute */
-    if (iod_obj_open_read(coh, attr_id, NULL /*hints*/, &attr_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, attr_id, wtid, NULL /*hints*/, &attr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
     /* get scratch pad of the attribute */

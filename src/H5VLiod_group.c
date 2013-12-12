@@ -63,6 +63,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     char *last_comp = NULL; /* the name of the group obtained from traversal function */
     hid_t gcpl_id;
     scratch_pad sp;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -74,21 +75,27 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the group needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, rtid, FALSE, 
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-    fprintf(stderr, "Creating Group ID %"PRIx64") ", grp_id);
+    fprintf(stderr, "Creating Group ID %"PRIx64" (CV %"PRIu64", TR %"PRIu64") ", 
+            grp_id, rtid, wtid);
     fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64")\n", cur_oh.wr_oh, cur_id);
 
     /* create the group */
     if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &grp_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create Group");
 
-    if (iod_obj_open_read(coh, grp_id, NULL, &grp_oh.rd_oh, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Group");
-    if (iod_obj_open_write(coh, grp_id, NULL, &grp_oh.wr_oh, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Group");
+    if((ret = iod_obj_open_read(coh, grp_id, wtid, NULL, &grp_oh.rd_oh, NULL)) < 0) {
+        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Group for read");
+    }
+
+    if((ret = iod_obj_open_write(coh, grp_id, wtid, NULL, &grp_oh.wr_oh, NULL)) < 0) {
+        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Group for write");
+    }
 
     /* create the metadata KV object for the group */
     if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL) < 0)
@@ -119,7 +126,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
 
     /* store metadata */
     /* Open Metadata KV object for write */
-    if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
     if(H5P_DEFAULT == input->gcpl_id)
@@ -237,7 +244,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* open a write handle on the ID. */
-    if(iod_obj_open_write(coh, grp_id, NULL, &grp_oh.wr_oh, NULL) < 0)
+    if(iod_obj_open_write(coh, grp_id, rtid, NULL, &grp_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
     /* get scratch pad of group */
@@ -251,7 +258,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, sp[0], rtid, NULL, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, 

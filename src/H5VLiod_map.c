@@ -80,7 +80,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the map needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, rtid, FALSE, 
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
@@ -91,9 +91,9 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &map_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create Map");
 
-    if (iod_obj_open_read(coh, map_id, NULL, &map_oh.rd_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, map_id, wtid, NULL, &map_oh.rd_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Map");
-    if (iod_obj_open_write(coh, map_id, NULL, &map_oh.wr_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, map_id, wtid, NULL, &map_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Map");
 
     /* create the metadata KV object for the map */
@@ -124,7 +124,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* Open Metadata KV object for write */
-    if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
     if(H5P_DEFAULT == input->mcpl_id)
@@ -251,7 +251,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* open a write handle on the ID. */
-    if (iod_obj_open_write(coh, map_id, NULL, &map_oh.wr_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, map_id, rtid, NULL, &map_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current map");
 
     /* get scratch pad of map */
@@ -265,7 +265,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_read(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
+    if (iod_obj_open_read(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, 
@@ -370,7 +370,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the map if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, iod_id, wtid, NULL /*hints*/, &iod_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
         opened_locally = TRUE;
     }
@@ -558,7 +558,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the map if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_read(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, iod_id, rtid, NULL /*hints*/, &iod_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
         opened_locally = TRUE;
     }
@@ -737,7 +737,7 @@ H5VL_iod_server_map_get_count_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the map if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_read(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, iod_id, rtid, NULL /*hints*/, &iod_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
         opened_locally = TRUE;
     }
@@ -819,7 +819,7 @@ H5VL_iod_server_map_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the map if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_read(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, iod_id, rtid, NULL /*hints*/, &iod_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
         opened_locally = TRUE;
     }
@@ -909,7 +909,7 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the map if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+        if (iod_obj_open_write(coh, iod_id, rtid, NULL /*hints*/, &iod_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
         opened_locally = TRUE;
     }
