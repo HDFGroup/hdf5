@@ -575,7 +575,9 @@ H5VL_iod_server_trans_abort_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     ret = iod_trans_finish(coh, trans_num, NULL, IOD_TRANS_ABORT_DEPENDENT, NULL);
-    if(ret < 0) {
+    if(ret == -IOD_EC_TRANS_DISCARDED)
+        fprintf(stderr, "Transaction %"PRIu64" already discarded\n", input->trans_num);
+    else if(ret < 0) {
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't abort transaction");
     }
