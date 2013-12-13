@@ -34,7 +34,7 @@ if BUILD_EFF_CONDITIONAL
                 h5ff_client_M6.2_demo h5ff_client_multiple_cont h5ff_client_trans \
                 h5ff_client_dset h5ff_client_attr h5ff_client_links \
                 h5ff_client_obj h5ff_client_paths h5ff_client_open \
-                h5ff_python_exec.c h5ff_client_analysis.c
+                h5ff_python_exec h5ff_client_analysis
 endif
 
 # Example programs.
