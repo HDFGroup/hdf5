@@ -79,6 +79,7 @@ write_dataset(const char *file_name, const char *dataset_name,
 
     /* Create the data space for the first dataset. */
     file_space_id = H5Screate_simple(rank, dims, NULL);
+    assert(file_space_id);
 
     if(0 == my_rank) {
         /* Create a dataset. */
@@ -124,7 +125,7 @@ write_dataset(const char *file_name, const char *dataset_name,
     free(dset_token1);
 
     mem_space_id = H5Screate_simple(rank, count, NULL);
-    assert(0 == mem_space_id);
+    assert(mem_space_id);
 
     /* write data to datasets */
     ret = H5Sselect_hyperslab(file_space_id, H5S_SELECT_SET, offset,
@@ -192,7 +193,7 @@ ship_analysis(const char *file_name, const char *dataset_name)
 int
 main(int argc, char **argv)
 {
-    const char *file_name="eff_file.h5";
+    const char *file_name="eff_analysis_file.h5";
     const char *dataset_name="D1";
     hsize_t ntuples = NTUPLES;
     hsize_t ncomponents = 3;
