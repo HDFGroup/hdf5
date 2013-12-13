@@ -234,9 +234,11 @@ main(int argc, char **argv)
 
     free(data);
 
+#ifdef H5_HAVE_PYTHON
     if(0 == my_rank) {
         ship_analysis(file_name, dataset_name);
     }
+#endif
 
     EFF_finalize();
     MPI_Finalize();
