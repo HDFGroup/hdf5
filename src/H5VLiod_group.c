@@ -91,7 +91,6 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Group for read");
     }
-
     if((ret = iod_obj_open_write(coh, grp_id, wtid, NULL, &grp_oh.wr_oh, NULL)) < 0) {
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Group for write");

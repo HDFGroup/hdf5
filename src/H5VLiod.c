@@ -6889,9 +6889,9 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 /* Otherwise Go to the server */
 
                 if(H5VL_OBJECT_BY_SELF == loc_params.type)
-                    loc_name = strdup(".");
+                    loc_name = HDstrdup(".");
                 else if(H5VL_OBJECT_BY_NAME == loc_params.type)
-                    loc_name = strdup(loc_params.loc_data.loc_by_name.name);
+                    loc_name = HDstrdup(loc_params.loc_data.loc_by_name.name);
 
                 /* set the input structure for the HG encode routine */
                 input.coh = obj->file->remote_file.coh;

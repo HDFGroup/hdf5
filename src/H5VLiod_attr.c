@@ -753,7 +753,7 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start attribute Exists %s\n", attr_name);
+    fprintf(stderr, "Start attribute Exists %s/%s on CV %d\n", loc_name, attr_name, (int)rtid);
 #endif
 
     /* Open the object where the attribute needs to be checked. */
@@ -807,7 +807,7 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Done with attr exists, sending response to client\n");
+    fprintf(stderr, "Done with attr exists, sending %d to client\n", ret);
 #endif
 
     HG_Handler_start_output(op_data->hg_handle, &ret);

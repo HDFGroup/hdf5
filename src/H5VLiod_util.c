@@ -74,7 +74,7 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
 
     /* open the current group */
     if(cur_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_read(coh, loc_id, wtid, NULL /*hints*/, &cur_oh.rd_oh, NULL) < 0)
+        if (iod_obj_open_read(coh, loc_id, wtid, NULL, &cur_oh.rd_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
     }
 

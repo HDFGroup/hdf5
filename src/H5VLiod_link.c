@@ -410,10 +410,10 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
     iod_size_t val_size = 0;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start link Exists\n");
+    fprintf(stderr, "Start link Exists for %s on CV %d\n", loc_name, (int)rtid);
 #endif
 
     /* the traversal will retrieve the location where the link needs
@@ -430,7 +430,24 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
         ret = FALSE;
     } /* end if */
     else {
-        ret = TRUE;
+        H5VL_iod_link_t iod_link;
+
+        if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
+                                 last_comp, NULL, NULL, &iod_link) < 0) {
+            ret = FALSE;
+        }
+        else {
+            iod_handle_t rd_oh;
+
+            if (iod_obj_open_read(coh, iod_link.u.iod_id, rtid, NULL, &rd_oh, NULL) < 0) {
+                ret = FALSE;
+            }
+            else {
+                if(iod_obj_close(rd_oh, NULL, NULL) < 0)
+                    HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+                ret = TRUE;
+            }
+        }
     }
 
 done:
@@ -445,7 +462,7 @@ done:
     }
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Done with link exists, sending response to client\n");
+    fprintf(stderr, "Done with link exists, sending %d to client\n", ret);
 #endif
 
     HG_Handler_start_output(op_data->hg_handle, &ret);
