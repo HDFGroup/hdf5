@@ -3358,17 +3358,11 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[],
 
     /* modify the local dataspace of the dataset */
     {
-        int     rank;                       /* Dataspace # of dimensions */
         H5S_t   *space;                     /* Dataset's dataspace */
-        hsize_t curr_dims[H5O_LAYOUT_NDIMS];/* Current dimension sizes */
 
 	if(NULL == (space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
                                                        H5I_DATASPACE)))
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-
-        /* Check if we are shrinking or expanding any of the dimensions */
-        if((rank = H5S_get_simple_extent_dims(space, curr_dims, NULL)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions");
 
         /* Modify the size of the data space */
         if(H5S_set_extent(space, size) < 0)

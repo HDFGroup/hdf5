@@ -16,15 +16,17 @@ int main(int argc, char **argv) {
     hid_t gid1, gid2, gid3;
     hid_t sid, dtid;
     hid_t did1, did2, did3;
-    hid_t tid1, tid2, rid1, rid2;
+    hid_t tid1, tid2, tid3, rid1, rid2, rid3, rid4;
     hid_t fapl_id, trspl_id, dxpl_id;
     hid_t e_stack;
+    hid_t esid;
 
     uint64_t version;
     uint64_t trans_num;
 
     int32_t *wdata1 = NULL, *wdata2 = NULL;
     int16_t *wdata3 = NULL;
+    int32_t *ex_wdata = NULL, *ex_rdata = NULL;
     int32_t *rdata1 = NULL, *rdata2 = NULL;
     int16_t *rdata3 = NULL;
     const unsigned int nelem=60;
@@ -401,7 +403,8 @@ int main(int argc, char **argv) {
     /* Do more updates on transaction 2 */
 
     if(0 == my_rank) {
-        extent = 10;
+        extent = nelem+10;
+
         ret = H5Dset_extent_ff(did1, &extent, tid2, e_stack);
         assert(ret == 0);
     }
@@ -421,7 +424,7 @@ int main(int argc, char **argv) {
     }
 
     /* finish transaction 2 - all have to call */
-    ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, e_stack);
+    ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 
     if(my_rank == 0) {
@@ -429,6 +432,78 @@ int main(int argc, char **argv) {
         ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);
     }
+
+    H5ESget_count(e_stack, &num_events);
+    H5ESwait_all(e_stack, &status);
+    printf("%d events in event stack. H5ESwait_all Completion status = %d\n", num_events, status);
+    H5ESclear(e_stack);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    version = 2;
+    rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    assert(2 == version);
+
+    tid3 = H5TRcreate(file_id, rid3, (uint64_t)3);
+    assert(tid3);
+    trspl_id = H5Pcreate (H5P_TR_START);
+    ret = H5Pset_trspl_num_peers(trspl_id, my_size);
+    assert(0 == ret);
+    ret = H5TRstart(tid3, trspl_id, e_stack);
+    assert(0 == ret);
+    ret = H5Pclose(trspl_id);
+    assert(0 == ret);
+
+    esid = H5Dget_space(did1);
+
+    ex_wdata = malloc (sizeof(int32_t)*(nelem+10));
+    ex_rdata = malloc (sizeof(int32_t)*(nelem+10));
+
+    if(0 == my_rank) {
+        for(i=0;i<extent;++i) {
+            ex_wdata[i] = i;
+            ex_rdata[i] = 0;
+        }
+
+        ret = H5Dwrite_ff(did1, dtid, esid, esid, H5P_DEFAULT, 
+                          ex_wdata, tid3, e_stack);
+        assert(ret == 0);
+    }
+
+    /* finish transaction 3 */
+    ret = H5TRfinish(tid3, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
+    assert(0 == ret);
+
+    H5ESget_count(e_stack, &num_events);
+    H5ESwait_all(e_stack, &status);
+    printf("%d events in event stack. H5ESwait_all Completion status = %d\n", 
+           num_events, status);
+    H5ESclear(e_stack);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    version = 3;
+    rid4 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    assert(3 == version);
+
+    {
+        esid = H5Dget_space(did1);
+
+        ret = H5Dread_ff(did1, dtid, esid, esid, H5P_DEFAULT, ex_rdata, 
+                         rid4, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+
+        fprintf(stderr, "Printing all Extended Dataset values: ");
+        for(i=0 ; i<nelem+10 ; ++i)
+            fprintf(stderr, "%d ", ex_rdata[i]);
+        fprintf(stderr, "\n");
+
+        H5Sclose(esid);
+    }
+
+    /* release container version 3. This is async. */
+    ret = H5RCrelease(rid3, e_stack);
+    assert(0 == ret);
+    ret = H5RCrelease(rid4, e_stack);
+    assert(0 == ret);
 
     /* close objects */
     ret = H5Dclose_ff(did1, e_stack);
@@ -464,7 +539,13 @@ int main(int argc, char **argv) {
     assert(0 == ret);
     ret = H5RCclose(rid2);
     assert(0 == ret);
+    ret = H5RCclose(rid3);
+    assert(0 == ret);
+    ret = H5RCclose(rid4);
+    assert(0 == ret);
     ret = H5TRclose(tid2);
+    assert(0 == ret);
+    ret = H5TRclose(tid3);
     assert(0 == ret);
 
     H5ESclear(e_stack);
@@ -502,6 +583,8 @@ int main(int argc, char **argv) {
     free(rdata1);
     free(rdata2);
     free(rdata3);
+    free(ex_wdata);
+    free(ex_rdata);
 
     free(dset_token1);
     free(dset_token2);

@@ -972,7 +972,8 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG 
-        fprintf(stderr, "Start dataset Set Extent\n");
+        fprintf(stderr, "Start dataset Set Extent first dim to %zu\n", 
+                (iod_size_t)input->dims.size[0]);
 #endif
 
     /* open the dataset if we don't have the handle yet */
@@ -991,6 +992,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
         int rank;
         hid_t space_id;
         iod_handle_t mdkv_oh;
+        iod_size_t array_dims[H5S_MAX_RANK], current_dims[H5S_MAX_RANK];
 
         /* open the metadata scratch pad */
         if (iod_obj_open_write(coh, mdkv_id, wtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
@@ -1001,12 +1003,11 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
                                  NULL, NULL, &space_id) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
-        /* Check if we are shrinking or expanding any of the dimensions */
-        if((rank = H5Sget_simple_extent_ndims(space_id)) < 0)
-            HGOTO_ERROR2(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions");
+        if(rank = H5Sget_simple_extent_dims(space_id, current_dims, array_dims) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get dimentions' sizes");
 
         /* Modify the size of the data space */
-        if(H5Sset_extent_simple(space_id, rank, input->dims.size, NULL) < 0)
+        if(H5Sset_extent_simple(space_id, rank, input->dims.size, array_dims) < 0)
             HGOTO_ERROR2(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space");
 
         /* insert dataspace metadata */
