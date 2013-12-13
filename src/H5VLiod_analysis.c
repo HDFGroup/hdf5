@@ -531,7 +531,7 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     size_t *split_num_elmts;
     void *combine_data;
     size_t combine_num_elmts;
-    iod_cont_trans_stat_t *tids;
+    iod_cont_trans_stat_t *tids = NULL;
     iod_trans_id_t rtid;
     iod_handle_t coh; /* the container handle */
     iod_handles_t root_handle; /* root handle */
@@ -583,9 +583,6 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_container_open(file_name, NULL, IOD_CONT_R, &coh, NULL))
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
-    /* MSC - Need IOD transactions */
-    rtid = 0;
-#if 0
     if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
 
@@ -593,7 +590,6 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
 
     if(iod_free_cont_trans_stat(coh, tids) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
-#endif
 
     if(iod_trans_start(coh, &rtid, NULL, 0, IOD_TRANS_R, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
