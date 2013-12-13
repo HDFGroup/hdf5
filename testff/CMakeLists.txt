@@ -79,6 +79,7 @@ BUILD_H5FF_TEST(h5ff_client_obj)
 BUILD_H5FF_TEST(h5ff_client_open)
 BUILD_H5FF_TEST(h5ff_client_paths)
 BUILD_H5FF_TEST(h5ff_client_trans)
+BUILD_H5FF_TEST(h5ff_client_analysis)
 
 IF (HDF5_ENABLE_PYTHON)
   BUILD_H5FF_TEST(h5ff_python_exec)

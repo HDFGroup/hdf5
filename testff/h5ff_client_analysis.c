@@ -15,13 +15,13 @@
 static int my_rank = 0, my_size = 1;
 
 /* Local sum and global sum */
-const char *split_sum_script =
+const char *split_script =
         "import numpy as np\n"
         "def split(array):\n"
         "  print 'Split sum: ' + str(array.sum())\n"
         "  return np.array([array.sum(), array.size])\n";
 
-const char *combine_sum_script =
+const char *combine_script =
         "import numpy as np\n"
         "def combine(arrays):\n"
         "  global_sum = 0\n"
@@ -30,10 +30,10 @@ const char *combine_sum_script =
         "  print 'Combined sum: ' + str(global_sum)\n"
         "  return np.array([global_sum, len(arrays)])\n";
 
-void
+static void
 write_dataset(const char *file_name, const char *dataset_name,
         hsize_t total, hsize_t ncomponents, hid_t datatype_id,
-        hsize_t ntuples, hsize_t startl, void *buf)
+        hsize_t ntuples, hsize_t start, void *buf)
 {
     hid_t       file_id, dataset_id;
     hid_t       file_space_id, mem_space_id;
@@ -44,7 +44,6 @@ write_dataset(const char *file_name, const char *dataset_name,
     hsize_t     count[2] = {ntuples, ncomponents};
     int         rank = (ncomponents == 1) ? 1 : 2;
     uint64_t    version;
-    uint64_t    trans_num;
     herr_t      ret;
     void       *dset_token1;
     size_t      token_size1;
@@ -71,7 +70,7 @@ write_dataset(const char *file_name, const char *dataset_name,
     assert(tid1);
 
     trspl_id = H5Pcreate(H5P_TR_START);
-    ret = H5Pset_trspl_num_peers(trspl_id, my_size);
+    ret = H5Pset_trspl_num_peers(trspl_id, (unsigned int) my_size);
     assert(0 == ret);
     ret = H5TRstart(tid1, trspl_id, H5_EVENT_STACK_NULL);
     assert(0 == ret);
@@ -169,7 +168,8 @@ write_dataset(const char *file_name, const char *dataset_name,
     assert(0 == ret);
 }
 
-void ship_analysis(const char *file_name, const char *dataset_name)
+static void
+ship_analysis(const char *file_name, const char *dataset_name)
 {
     double query_limit = 39.1;
     hid_t  query_id;
@@ -198,7 +198,7 @@ main(int argc, char **argv)
     hsize_t ncomponents = 3;
     hsize_t start, total;
     int *data;
-    int i, j;
+    hsize_t i, j;
 
     int provided;
 
@@ -215,8 +215,8 @@ main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
     fprintf(stderr, "APP processes = %d, my rank is %d\n", my_size, my_rank);
 
-    start = ntuples * my_rank;
-    total = ntuples * my_size;
+    start = ntuples * (hsize_t) my_rank;
+    total = ntuples * (hsize_t) my_size;
 
     /* Initialize the dataset. */
     data = (int *) malloc(sizeof(int) * ncomponents * ntuples);
@@ -226,8 +226,8 @@ main(int argc, char **argv)
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    write_dataset(file_name, dataset_name, total, ncomponents, ntuples,
-            start, data);
+    write_dataset(file_name, dataset_name, total, ncomponents, H5T_NATIVE_INT,
+            ntuples, start, data);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
