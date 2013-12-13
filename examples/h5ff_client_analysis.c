@@ -119,7 +119,7 @@ write_dataset(const char *file_name, const char *dataset_name,
                 &mpi_reqs[0]);
         MPI_Waitall(1, mpi_reqs, MPI_STATUS_IGNORE);
 
-        dataset_id = H5Oopen_by_token(dset_token1, rid1, H5_EVENT_STACK_NULL);
+        dataset_id = H5Oopen_by_token(dset_token1, tid1, H5_EVENT_STACK_NULL);
     }
 
     free(dset_token1);
