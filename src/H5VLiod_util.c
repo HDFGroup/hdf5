@@ -394,6 +394,9 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                                                    hslabs[0].count,
                                                    hslabs[0].block) < 0)
                         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "Failed to retrieve hyperslab selection");
+                    for(i=0 ; i<ndims ; i++) {
+                        hslabs[0].stride[i] = hslabs[0].block[i] * hslabs[0].stride[i];
+                    }
                 }
             }
             /* Otherwise populate the hslabs by getting every block */
