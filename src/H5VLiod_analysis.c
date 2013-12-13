@@ -558,13 +558,13 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
                 (sizeof(iod_handle_t) * num_ions_g)))
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate container handles");
 
-    for(i=0 ; i<num_ions_g ; i++) {
+    for(i=1 ; i<num_ions_g ; i++) {
         if(HG_Forward(server_addr_g[i], H5VL_EFF_OPEN_CONTAINER, &file_name, 
                       &temp_cohs[i], &hg_reqs[i]) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
     }
 
-    for(i=0 ; i<num_ions_g ; i++) {
+    for(i=1 ; i<num_ions_g ; i++) {
         if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, &status) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
         if(!status) {
@@ -767,13 +767,13 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
 
     /* *********************** TEMP THING */
-    for(i=0 ; i<num_ions_g ; i++) {
+    for(i=1 ; i<num_ions_g ; i++) {
         if(HG_Forward(server_addr_g[i], H5VL_EFF_CLOSE_CONTAINER, &temp_cohs[i], &ret_value, 
                       &hg_reqs[i]) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
     }
 
-    for(i=0 ; i<num_ions_g ; i++) {
+    for(i=1 ; i<num_ions_g ; i++) {
         if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, &status) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
         if(!status) {
