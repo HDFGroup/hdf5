@@ -494,7 +494,7 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
         request->trans_info = req_info;
 
     /* add request to container's linked list */
-    if(HG_ANALYSIS_EXECUTE != op_id)
+    if(HG_ANALYSIS_EXECUTE != op_type)
         H5VL_iod_request_add(request_obj->file, request);
 
     /* update the parent information in the request */
@@ -546,7 +546,7 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
         if(track)
             request_obj->request = NULL;
 
-        if(HG_ANALYSIS_EXECUTE == op_id) {
+        if(HG_ANALYSIS_EXECUTE == op_type) {
             int ret;
             hg_status_t status;
 
