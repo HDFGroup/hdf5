@@ -3,9 +3,41 @@
  * This program runs on one or more compute nodes and makes calls to the HDF5 API.
  * The Function Shipper server should be running before this demo program is started.
  */
+/* NOTE FROM RUTH TO MOHAMAD:  This version is currently failing. 
+ * Updates added to transaction 3 that should not be committed when transaction 3 is aborted are showing up in the
+ *   printed output for CV 4.  And, when the output gets to /GA/GA/GA, it thinks the directory is there -- it should not be.
+ *   Then, it seems to think /GA/GA/GA has an attribute "AA" but none was never added in any transcation.  And, things fail.
+ *   
+ *   Here's the client-side output from that when run with 1 MPI process:
+ *   Link Exists axe 260: /GA/GA/GA/ ID 3458764513820540928
+ *   Operation 260 Dependencies:
+ *   Operation 260 will finish tasks 259 through 259
+ *       M6.2-r0: /GA/GA/GA/ exists in cv 4.
+ *       Attribute Exists loc /GA/GA/GA/ name AA, axe id 261
+ *       Operation 261 Dependencies:
+ *       Operation 261 will finish tasks 260 through 260
+ *       EXIST OP failed at the server
+ *       HDF5-DIAG: Error detected in HDF5 (1.9.167) MPI-process 0:
+ *         #000: H5FF.c line 1898 in H5Aexists_by_name_ff(): unable to get attribute info
+ *             major: Internal error (too specific to document in detail)
+ *                 minor: Can't get value
+ *                   #001: H5VLint.c line 758 in H5VL_attr_get(): get failed
+ *                       major: Virtual Object Layer
+ *                           minor: Can't get value
+ *                             #002: H5VLiod.c line 4898 in H5VL_iod_attribute_get(): failed to create and ship attribute exists
+ *                                 major: Symbol table
+ *                                     minor: Unable to initialize object
+ *                                     h5ff_client_M6.2_demo: ./h5ff_client_M6.2_demo.c:714: print_container_contents: Assertion `ret == 0' failed.
+ *
+ *
+ * To see what happens when transaction 3 is not aborted, comment out the define ABORT3 line and rebuild.
+ * It can also be run with 2 MPI processes (and I think more).  It fails then too.
+ * This failure did not occur prior to the changes made 12/12.
+ */
+#define ABORT3
 
 /*
- * TODO:  Remove comments that include the word BUG when lower layers working
+ * TODO:  Edit to address issue that tr_start may occur after tr_abort for tid_3 when laggard nodes.
  */
 
 #include <stdio.h>
@@ -16,12 +48,12 @@
 #include "hdf5.h"
 
 #define ATTR_STR_LEN 128
-//#define ABORT3
 
 void create_string_attribute( hid_t, const char*, hid_t, const char*, int, uint64_t );
 void create_group( hid_t, const char*, hid_t, const char*, int, uint64_t );
 void create_dataset( hid_t, const char*, hid_t, const char*, int, uint64_t, int );
 void create_committed_datatype( hid_t, const char*, hid_t, const char*, int, uint64_t );
+void update_dataset( hid_t, const char*, hid_t, hid_t, const char*, int, uint64_t, int );
 void print_container_contents( hid_t, hid_t, const char*, int );
 
 int main( int argc, char **argv ) {
@@ -291,27 +323,27 @@ int main( int argc, char **argv ) {
       /*    4) /GA/DA deleted in Tr 3 by rank 1    */
       if ( my_rank == 1 ) {
          fprintf( stderr, "M6.2-r%d: delete /GA/DA in tr %d \n", my_rank, (int)tr_num3 );
-         //BUG ret = H5Ldelete_ff( file_id, "/GA/DA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); assert( ret == 0  );
+         ret = H5Ldelete_ff( file_id, "/GA/DA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); assert( ret == 0  );
       }
       /*    5) /GA/TB deleted in Tr 4 by rank 0    */
       if ( my_rank == 0 ) {
          fprintf( stderr, "M6.2-r%d: delete /GA/TB in tr %d \n", my_rank, (int)tr_num4 );
-         //BUG ret = H5Ldelete_ff( file_id, "/GA/TB", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); assert( ret == 0  );
+         ret = H5Ldelete_ff( file_id, "/GA/TB", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); assert( ret == 0  );
       }
       /*    6) /DB deleted in Tr 4 by rank 1       */
       if ( my_rank == 1 ) {
          fprintf( stderr, "M6.2-r%d: delete /DB in tr %d \n", my_rank, (int)tr_num4 );
-         //BUG ret = H5Ldelete_ff( file_id, "/DB", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); assert( ret == 0  );
+         ret = H5Ldelete_ff( file_id, "/DB", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); assert( ret == 0  );
       }
       /*    7) /GB/GA deleted in Tr 3 by rank 0    */
       if ( my_rank == 0  && comm_size > 1 ) {
          fprintf( stderr, "M6.2-r%d: delete /GB/GA in tr %d \n", my_rank, (int)tr_num3 );
-         //BUG ret = H5Ldelete_ff( file_id, "/GB/GA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); assert( ret == 0  );
+         ret = H5Ldelete_ff( file_id, "/GB/GA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); assert( ret == 0  );
       }
       /*    8) /GA/TA deleted in Tr 3 by rank 1    */
       if ( my_rank == 1  ) {
          fprintf( stderr, "M6.2-r%d: delete /GA/TA in tr %d \n", my_rank, (int)tr_num3 );
-         //BUG ret = H5Ldelete_ff( file_id, "/GA/TA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); assert( ret == 0  );
+         ret = H5Ldelete_ff( file_id, "/GA/TA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); assert( ret == 0  );
       }
       /*    9) /GA/GA/GA added in Tr 3 by rank 0   */
       if ( my_rank == 0 ) {
@@ -320,7 +352,7 @@ int main( int argc, char **argv ) {
       /*    10) /GB/TA deleted in Tr 3 by rank 1   */
       if ( my_rank == 1 ) {
          fprintf( stderr, "M6.2-r%d: delete /GB/TA in tr %d \n", my_rank, (int)tr_num3 );
-         //BUG ret = H5Ldelete_ff( file_id, "/GB/TA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); assert( ret == 0  );
+         ret = H5Ldelete_ff( file_id, "/GB/TA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); assert( ret == 0  );
       }
       /*    11) /GB/GB/DB added in Tr 3 by rank 1  */
       if ( my_rank == 1 ) {
@@ -328,11 +360,11 @@ int main( int argc, char **argv ) {
       } 
 
 #ifdef ABORT3
-      /*    Abort from one rank;  */
-      if ( my_rank == 0 ) {
-         fprintf( stderr, "M6.2-r%d: ABORT transaction %d (Step 15b - abort)\n", my_rank, (int)tr_num3 );
-         ret = H5TRabort( tr_id3, H5_EVENT_STACK_NULL ); assert( ret == 0 );
-      }
+      /*    Abort   */
+      MPI_Barrier( MPI_COMM_WORLD );         // TEMPORARY BARRIER UNTIL OTHER EDITS MADE BY RUTH
+      fprintf( stderr, "M6.2-r%d: ABORT transaction %d (Step 15b - abort)\n", my_rank, (int)tr_num3 );
+      ret = H5TRabort( tr_id3, H5_EVENT_STACK_NULL ); assert( ret == 0 );
+
       MPI_Barrier( MPI_COMM_WORLD );
       ret = H5TRclose( tr_id3 ); assert( ret == 0 );
 #else
@@ -366,6 +398,7 @@ int main( int argc, char **argv ) {
       if ( my_rank == 1 ) {
          create_group( file_id, "/GB/GB/GA", tr_id4, "/", my_rank, tr_num4 );
       }
+      update_dataset( file_id, "/DA", tr_id4, rc_id2, "/", my_rank, tr_num4, 1 );
 
       /* Finish and commit transaction 4, causing the updates to appear in container version 4. */
       fprintf( stderr, "M6.2-r%d: finish and commit transaction %d (Step 15a - end)\n", my_rank, (int)tr_num4 );
@@ -601,6 +634,62 @@ create_committed_datatype( hid_t obj_id, const char* type_name, hid_t tr_id, con
    assert( ret == 0 );
 
    ret = H5Tclose( dtype_id ); assert ( ret == 0 );
+
+   return;
+}
+
+/*
+ * Helper function used to update raw data in dataset "dset_name" 
+ * in object identified by "obj_id" 
+ * in transaction identified by "tr_id".
+ * "rc_id" for "tr_id" passed in explicitly for now - later add H5 function to extract it from tr_id.
+ * cell[my_rank] will be updated, using the formula
+ *    value  = ordinal*1000 + tr_num*100 + my_rank*10 + my_rank;
+ * "obj_path" and "my_rank" and "tr_num" and "ordinal" are used in the status output.
+ */
+void
+update_dataset( hid_t obj_id, const char* dset_name, hid_t tr_id, hid_t rc_id, const char* obj_path, int my_rank, 
+                uint64_t tr_num, int ordinal ){
+   herr_t ret;
+   hid_t dset_id;
+   hid_t file_space_id;
+   int nDims;
+   hsize_t current_size, max_size;
+
+   /* Open the dataset, confirm number of dimensions, get current & max size */
+   dset_id = H5Dopen_ff( obj_id, dset_name, H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); assert( dset_id );
+
+   file_space_id = H5Dget_space( dset_id ); assert ( file_space_id );
+   nDims = H5Sget_simple_extent_dims( file_space_id, &current_size, &max_size );
+   assert( nDims == 1 );
+
+   if ( my_rank < current_size ) {
+      int cell_data;              /* sized to hold data for a single cell in the dataset*/
+      hsize_t mem_size = 1;
+      hid_t mem_space_id;
+
+      /* set data value, create memory data space, then select the element to update */
+      cell_data = ordinal*1000 + tr_num*100 + my_rank*10 + my_rank;
+      mem_space_id = H5Screate_simple( 1, &mem_size, &mem_size ); assert( mem_space_id );
+
+      hsize_t start, stride, count, block;
+      start = (hsize_t)my_rank;
+      stride = count = block = 1;
+      
+      ret = H5Sselect_hyperslab( file_space_id, H5S_SELECT_SET, &start, &stride, &count, &block ); assert( ret == 0 );
+
+      fprintf( stderr, "M6.2-r%d: Update %s[%d] in %s in tr %d to have value %d\n", 
+                       my_rank, dset_name, my_rank, obj_path, (int)tr_num, cell_data );
+      ret = H5Dwrite_ff( dset_id, H5T_NATIVE_INT, mem_space_id, file_space_id, H5P_DEFAULT, &cell_data, tr_id, H5_EVENT_STACK_NULL );
+      assert( ret == 0 ); 
+      ret = H5Sclose( mem_space_id ); assert( ret == 0 );
+
+   } else {
+      fprintf( stderr, "M6.2-r%d: No update to %s in %s in tr %d for this rank.\n", my_rank, dset_name, obj_path, (int)tr_num );
+   }
+
+   ret = H5Sclose( file_space_id ); assert( ret == 0 );
+   ret = H5Dclose_ff( dset_id, H5_EVENT_STACK_NULL ); assert( ret == 0 ); 
 
    return;
 }
