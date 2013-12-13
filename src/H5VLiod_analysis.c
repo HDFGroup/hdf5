@@ -545,6 +545,7 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     hg_status_t status;
     scratch_pad sp;
     herr_t ret_value = SUCCEED;
+    iod_ret_t ret;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -602,9 +603,14 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
                                  rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
+    printf("coh %"PRIu64" objoh %"PRIu64" objid %"PRIx64" rtid %"PRIu64"\n",
+            coh, obj_oh.rd_oh.cookie, obj_id, rtid);
+
     /* retrieve layout of object */
-    if(iod_obj_get_layout(obj_oh.rd_oh, rtid, &layout, NULL) < 0)
+    if((ret = iod_obj_get_layout(obj_oh.rd_oh, rtid, &layout, NULL)) < 0) {
+        fprintf(stderr, "IOD lqyout failed with: %d, %s\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get object layout");
+    }
 
     /* get scratch pad */
     if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, NULL, NULL) < 0)
