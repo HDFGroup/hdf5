@@ -14,9 +14,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
- *              October, 2013
- *
  * Purpose:	Routines to support Analysis Shipping.
  */
 
@@ -78,6 +75,11 @@ herr_t H5VL__iod_combine(const char *combine_script,
                          hid_t *combine_data_type_id);
 
 #endif
+
+static herr_t H5VL__iod_farm_split(iod_layout_t layout, uint32_t target_index /* Remove that */,
+        iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
+        hid_t space_id, hid_t type_id, hid_t query_id, const char *split_script,
+        void **split_data, size_t *split_num_elmts, hid_t *split_type_id);
 
 static hid_t H5VL__iod_get_space_layout(iod_layout_t layout, hid_t space, 
                                         uint32_t target_index);
@@ -650,18 +652,26 @@ H5VL__iod_farm_work(iod_layout_t layout, iod_handle_t *cohs,
     farm_input.query_id = query_id;
     farm_input.split_script = split_script;
 
-    for (i = 0; i < layout.target_num; i++) {
+    for (i = 1; i < layout.target_num; i++) {
         farm_input.coh = cohs[i];
         farm_input.target_idx = i + layout.target_start;
 
         /* forward the call to the target server */
-        if(HG_Forward(server_addr_g[i+layout.target_start],
-                H5VL_EFF_ANALYSIS_FARM, &farm_input,
-                &farm_output[i], &hg_reqs[i]) < 0)
+        if(HG_Forward(server_addr_g[i + layout.target_start],
+                H5VL_EFF_ANALYSIS_FARM, &farm_input, &farm_output[i],
+                &hg_reqs[i]) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
     }
 
-    for (i = 0; i < layout.target_num; i++) {
+    if (layout.target_start == 0) {
+        /* Do a local split */
+        if(FAIL == H5VL__iod_farm_split(layout, 0, cohs[0], obj_id, rtid, space_id,
+                type_id, query_id, split_script,
+                &split_data[0], &split_num_elmts[0], &split_type_id))
+            HGOTO_ERROR2(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't split in farmed job");
+    }
+
+    for (i = 1; i < layout.target_num; i++) {
         hg_bulk_block_t bulk_block_handle; /* HG block handle */
         hg_bulk_request_t bulk_request; /* HG request */
         size_t split_data_size;
@@ -700,13 +710,13 @@ H5VL__iod_farm_work(iod_layout_t layout, iod_handle_t *cohs,
             HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
 
         /* forward a free call to the target server */
-        if(HG_Forward(server_addr_g[i+layout.target_start], H5VL_EFF_ANALYSIS_FARM_FREE,
+        if(HG_Forward(server_addr_g[i + layout.target_start], H5VL_EFF_ANALYSIS_FARM_FREE,
                       &farm_output[i].axe_id, &farm_output[i], &hg_reqs[i]) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
     }
 
     /* Wait for the free calls to complete. */
-    for (i = 0; i < layout.target_num; i++) {
+    for (i = 1; i < layout.target_num; i++) {
         /* Wait for the farmed work to complete */
         if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
@@ -741,7 +751,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__iod_farm_work */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_analysis_execute_cb
  *
@@ -749,9 +758,6 @@ done:
  *
  * Return:	Success:	SUCCEED 
  *		Failure:	Negative
- *
- * Programmer:  Mohamad Chaarawi
- *              September, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -845,6 +851,12 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
                     obj_map->u_map.array_map.array_range[i].loc);
         }
 
+        /* Fake layout for now */
+        layout.target_num = obj_map->u_map.array_map.n_range;
+        layout.target_start = 0;
+        layout.stripe_size = obj_map->u_map.array_map.array_range[i].start_cell[0] -
+                obj_map->u_map.array_map.array_range[i].end_cell[1] + 1;
+
         iod_obj_free_map(obj_oh.rd_oh, obj_map);
     }
 
@@ -876,10 +888,13 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
 
+    /*******************************************/
     /* Farm work */
     if(FAIL == H5VL__iod_farm_work(layout, cohs, obj_id, rtid, space_id, type_id,
             query_id, split_script, combine_script))
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't farm work");
+
+    /********************************************/
 
     if(iod_trans_finish(cohs[0], rtid, NULL, 0, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction 0");
@@ -910,7 +925,54 @@ done:
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_analysis_execute_cb() */
 
-
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_farm_split
+ *
+ * Purpose:
+ *
+ * Return:  Success:    SUCCEED
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__iod_farm_split(iod_layout_t layout, uint32_t target_index /* Remove that */,
+        iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
+        hid_t space_id, hid_t type_id, hid_t query_id, const char *split_script,
+        void **split_data, size_t *split_num_elmts, hid_t *split_type_id)
+{
+    void *data = NULL;
+    size_t num_elmts;
+    herr_t ret_value = SUCCEED;
+    hid_t space_layout;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(FAIL == (space_layout = H5VL__iod_get_space_layout(layout, space_id, target_index)))
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't generate local dataspace selection");
+
+    if(H5VL__iod_get_query_data(coh, obj_id, rtid, query_id, space_layout,
+            type_id, &num_elmts, &data) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read local data");
+
+    /* Apply split python script on data from query */
+#ifdef H5_HAVE_PYTHON
+    if(FAIL == H5VL__iod_split(split_script, data, num_elmts, type_id,
+            split_data, split_num_elmts, split_type_id))
+        HGOTO_ERROR2(H5E_SYM, H5E_CANAPPLY, FAIL, "can't apply split script to data");
+#endif
+
+    /* Free the data after split operation */
+    H5MM_free(data);
+    data = NULL;
+
+done:
+    if(space_layout)
+        H5Sclose(space_layout);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_farm_work */
+
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_analysis_farm_cb
  *
@@ -918,9 +980,6 @@ done:
  *
  * Return:	Success:	SUCCEED 
  *		Failure:	Negative
- *
- * Programmer:  Mohamad Chaarawi
- *              September, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -942,38 +1001,25 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
     iod_layout_t layout = input->layout;
     uint32_t target_index = (uint32_t) input->target_idx;
     const char *split_script = input->split_script;
-    hid_t space_layout;
-    void *data = NULL, *split_data = NULL;
-    size_t num_elmts, split_num_elmts;
+    void *split_data = NULL;
+    size_t split_num_elmts;
     hid_t split_type_id;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(FAIL == (space_layout = H5VL__iod_get_space_layout(layout, space_id, target_index)))
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't generate local dataspace selection");
-
-    if(H5VL__iod_get_query_data(coh, obj_id, rtid, query_id, space_layout, 
-                                type_id, &num_elmts, &data) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read local data");
-
-    /* Apply split python script on data from query */
-#ifdef H5_HAVE_PYTHON
-    if(FAIL == H5VL__iod_split(split_script, data, num_elmts, type_id,
+    if(FAIL == H5VL__iod_farm_split(layout, target_index, coh, obj_id, rtid, space_id,
+            type_id, query_id, split_script,
             &split_data, &split_num_elmts, &split_type_id))
-        HGOTO_ERROR2(H5E_SYM, H5E_CANAPPLY, FAIL, "can't apply split script to data")
-#endif
-
-    /* Free the data after split operation */
-    H5MM_free(data);
-    data = NULL;
+        HGOTO_ERROR2(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't split in farmed job");
 
     /* allocate output struct */
     if(NULL == (output = (H5VLiod_farm_data_t *)H5MM_malloc(sizeof(H5VLiod_farm_data_t))))
         HGOTO_ERROR2(H5E_DATASET, H5E_NOSPACE, FAIL, "No Space");
 
     /* Register memory */
-    if(HG_SUCCESS != HG_Bulk_handle_create(split_data, split_num_elmts*H5Tget_size(split_type_id),
+    if(HG_SUCCESS != HG_Bulk_handle_create(split_data,
+            split_num_elmts * H5Tget_size(split_type_id),
             HG_BULK_READ_ONLY, &output->bulk_handle))
         HGOTO_ERROR2(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't create Bulk Data Handle");
 
@@ -989,14 +1035,11 @@ done:
     if(ret_value < 0)
         HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
-    if(space_layout)
-        H5Sclose(space_layout);
     input = (analysis_farm_in_t *)H5MM_xfree(input);
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_analysis_farm_cb() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_analysis_farm_free_cb
  *
@@ -1004,9 +1047,6 @@ done:
  *
  * Return:	Success:	SUCCEED 
  *		Failure:	Negative
- *
- * Programmer:  Mohamad Chaarawi
- *              September, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1047,7 +1087,6 @@ done:
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_analysis_farm_cb() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5VL__iod_get_space_layout
  *
@@ -1056,9 +1095,6 @@ done:
  *
  * Return:	Success:	space id
  *		Failure:	FAIL
- *
- * Programmer:  Mohamad Chaarawi
- *              October, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1125,16 +1161,12 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__iod_get_space_layout() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5VL__iod_get_query_data_cb
  *
  *
  * Return:	Success:	SUCCEED 
  *		Failure:	Negative
- *
- * Programmer:  Mohamad Chaarawi
- *              August, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1165,7 +1197,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__iod_get_query_data_cb */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5VL__iod_get_query_data
  *
@@ -1174,9 +1205,6 @@ done:
  *
  * Return:	Success:	space id
  *		Failure:	FAIL
- *
- * Programmer:  Mohamad Chaarawi
- *              October, 2013
  *
  *-------------------------------------------------------------------------
  */
