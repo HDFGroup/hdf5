@@ -113,7 +113,7 @@ MERCURY_GEN_PROC(analysis_farm_in_t,
                  ((uint64_t)(rtid)) 
                  ((iod_obj_id_t)(obj_id))
                  ((iod_layout_t)(layout)) 
-                 ((int32_t)(target_idx))
+                 ((uint32_t)(target_idx))
                  ((hg_const_string_t)(split_script)))
 MERCURY_GEN_PROC(analysis_farm_out_t, 
                  ((int32_t)(ret)) 

@@ -498,6 +498,249 @@ done:
 
 #endif /* H5_HAVE_PYTHON */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_request_container_open
+ *
+ * Purpose:
+ *
+ * Return:  Success:    SUCCEED
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    hg_request_t *hg_reqs = NULL;
+    iod_handle_t *temp_cohs = NULL;
+    int i;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (hg_reqs = (hg_request_t *)malloc(sizeof(hg_request_t) * (unsigned int) num_ions_g)))
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
+
+    if(NULL == (temp_cohs = (iod_handle_t *)malloc(sizeof(iod_handle_t) * (unsigned int) num_ions_g)))
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate container handles");
+
+    /* forward a call to every ION to open the container */
+    for(i = 1; i < num_ions_g; i++) {
+        if(HG_Forward(server_addr_g[i], H5VL_EFF_OPEN_CONTAINER, &file_name,
+                      &temp_cohs[i], &hg_reqs[i]) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
+    }
+
+    /* open the container */
+    if(iod_container_open(file_name, NULL, IOD_CONT_R, &temp_cohs[0], NULL))
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
+
+    for(i = 1; i < num_ions_g; i++) {
+        if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
+
+        /* Free Mercury request */
+        if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
+    }
+    free(hg_reqs);
+
+    *cohs = temp_cohs;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_request_container_open */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_request_container_close
+ *
+ * Purpose:
+ *
+ * Return:  Success:    SUCCEED
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__iod_request_container_close(iod_handle_t *cohs)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    hg_request_t *hg_reqs = NULL;
+    int i;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (hg_reqs = (hg_request_t *)malloc(sizeof(hg_request_t) * (unsigned int) num_ions_g)))
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
+
+    /* forward a call to every ION to close the container */
+    for(i = 1; i < num_ions_g; i++) {
+        if(HG_Forward(server_addr_g[i], H5VL_EFF_CLOSE_CONTAINER, &cohs[i],
+                &ret_value, &hg_reqs[i]) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
+    }
+
+    /* close the container */
+    if(iod_container_close(cohs[0], NULL, NULL) < 0)
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTDEC, FAIL, "can't close container");
+
+    for(i = 1; i < num_ions_g; i++) {
+        if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
+
+        /* Free Mercury request */
+        if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
+    }
+    free(hg_reqs);
+    free(cohs);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_request_container_close */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_farm_work
+ *
+ * Purpose:
+ *
+ * Return:  Success:    SUCCEED
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__iod_farm_work(iod_layout_t layout, iod_handle_t *cohs,
+        iod_obj_id_t obj_id, iod_trans_id_t rtid,
+        hid_t space_id, hid_t type_id, hid_t query_id,
+        const char *split_script, const char *combine_script)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    void **split_data;
+    size_t *split_num_elmts;
+    void *combine_data;
+    size_t combine_num_elmts;
+    hid_t split_type_id = FAIL, combine_type_id = FAIL;
+    hg_request_t *hg_reqs = NULL;
+    unsigned int i;
+
+    analysis_farm_in_t farm_input;
+    analysis_farm_out_t *farm_output = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* function shipper requests */
+    if(NULL == (hg_reqs = (hg_request_t *) malloc(sizeof(hg_request_t) * layout.target_num)))
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
+
+    if(NULL == (farm_output = (analysis_farm_out_t *) malloc(sizeof(analysis_farm_out_t) * layout.target_num)))
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
+
+    if(NULL == (split_data = (void **) malloc(sizeof(void *) * layout.target_num)))
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for split data");
+
+    if(NULL == (split_num_elmts = (size_t *) malloc(sizeof(size_t) * layout.target_num)))
+        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for num elmts");
+
+    farm_input.obj_id = obj_id;
+    farm_input.rtid = rtid;
+    farm_input.layout = layout;
+    farm_input.space_id = space_id;
+    farm_input.type_id = type_id;
+    farm_input.query_id = query_id;
+    farm_input.split_script = split_script;
+
+    for (i = 0; i < layout.target_num; i++) {
+        farm_input.coh = cohs[i];
+        farm_input.target_idx = i + layout.target_start;
+
+        /* forward the call to the target server */
+        if(HG_Forward(server_addr_g[i+layout.target_start],
+                H5VL_EFF_ANALYSIS_FARM, &farm_input,
+                &farm_output[i], &hg_reqs[i]) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
+    }
+
+    for (i = 0; i < layout.target_num; i++) {
+        hg_bulk_block_t bulk_block_handle; /* HG block handle */
+        hg_bulk_request_t bulk_request; /* HG request */
+        size_t split_data_size;
+
+        /* Wait for the farmed work to complete */
+        if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
+
+        split_data_size = HG_Bulk_handle_get_size(farm_output[i].bulk_handle);
+
+        /* Get split type ID and num_elemts (all the arrays should have the same native type id) */
+        split_type_id = farm_output[i].type_id;
+        split_num_elmts[i] = split_data_size / H5Tget_size(split_type_id);
+
+        if(NULL == (split_data[i] = malloc(split_data_size)))
+            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate farm buffer");
+
+        HG_Bulk_block_handle_create(split_data[i], split_data_size,
+                                    HG_BULK_READWRITE, &bulk_block_handle);
+
+        /* Write bulk data here and wait for the data to be there  */
+        if(HG_SUCCESS != HG_Bulk_read_all(server_addr_g[i+layout.target_start],
+                                          farm_output[i].bulk_handle,
+                                          bulk_block_handle, &bulk_request))
+            HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
+        /* wait for it to complete */
+        if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
+            HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
+
+        /* free the bds block handle */
+        if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+            HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
+
+        /* Free Mercury request */
+        if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
+
+        /* forward a free call to the target server */
+        if(HG_Forward(server_addr_g[i+layout.target_start], H5VL_EFF_ANALYSIS_FARM_FREE,
+                      &farm_output[i].axe_id, &farm_output[i], &hg_reqs[i]) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
+    }
+
+    /* Wait for the free calls to complete. */
+    for (i = 0; i < layout.target_num; i++) {
+        /* Wait for the farmed work to complete */
+        if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
+
+        /* Free Mercury request */
+        if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
+    }
+
+    if(hg_reqs)
+        free(hg_reqs);
+    if(farm_output)
+        free(farm_output);
+
+#ifdef H5_HAVE_PYTHON
+    if (H5VL__iod_combine(combine_script, split_data, split_num_elmts,
+            layout.target_num, split_type_id, &combine_data,
+            &combine_num_elmts, &combine_type_id) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't combine split data");
+#endif
+
+    /* free farm data */
+    if (split_data) {
+        for (i = 0; i < layout.target_num; i++) {
+            free(split_data[i]);
+        }
+        free(split_data);
+    }
+    free(split_num_elmts);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_farm_work */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_analysis_execute_cb
@@ -526,98 +769,96 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     hid_t query_id = input->query_id;
     const char *split_script = input->split_script;
     const char *combine_script = input->combine_script;
-    hid_t space_id = FAIL, type_id = FAIL, split_type_id = FAIL, combine_type_id = FAIL;
-    void **split_data;
-    size_t *split_num_elmts;
-    void *combine_data;
-    size_t combine_num_elmts;
+    hid_t space_id = FAIL, type_id = FAIL;
     iod_cont_trans_stat_t *tids = NULL;
     iod_trans_id_t rtid;
-    iod_handle_t coh; /* the container handle */
+    iod_handle_t *cohs; /* the container handle */
     iod_handles_t root_handle; /* root handle */
     iod_obj_id_t obj_id; /* The ID of the object */
     iod_handles_t obj_oh; /* object handle */
     iod_handle_t mdkv_oh;
     iod_layout_t layout;
-    int i;
-    hg_request_t *hg_reqs = NULL;
-    iod_handle_t *temp_cohs;
-    hg_status_t status;
     scratch_pad sp;
     herr_t ret_value = SUCCEED;
     iod_ret_t ret;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* *********************** TEMP THING */
-    /* forward a call to every ION to open the container */
-    if(NULL == (hg_reqs = (hg_request_t *)malloc
-                (sizeof(hg_request_t) * num_ions_g)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
+    /* ****************** TEMP THING (as IOD requires collective container open) */
 
-    if(NULL == (temp_cohs = (iod_handle_t *)malloc
-                (sizeof(iod_handle_t) * num_ions_g)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate container handles");
+    if(FAIL == H5VL__iod_request_container_open(file_name, &cohs))
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't request container open");
 
-    for(i=1 ; i<num_ions_g ; i++) {
-        if(HG_Forward(server_addr_g[i], H5VL_EFF_OPEN_CONTAINER, &file_name, 
-                      &temp_cohs[i], &hg_reqs[i]) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
-    }
+    /* ***************** END TEMP THING */
 
-    for(i=1 ; i<num_ions_g ; i++) {
-        if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, &status) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
-        if(!status) {
-            fprintf(stderr, "Wait timeout reached\n");
-            ret_value = FAIL;
-            goto done;
-        }
-        /* Free Mercury request */
-        if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
-    }
-    free(hg_reqs);
-    /* *********************** END TEMP THING */
-
-    /* open the container */
-    if(iod_container_open(file_name, NULL, IOD_CONT_R, &coh, NULL))
-        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
-
-    if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
+    if(iod_query_cont_trans_stat(cohs[0], &tids, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
 
     rtid = tids->latest_rdable;
 
-    if(iod_free_cont_trans_stat(coh, tids) < 0)
+    if(iod_free_cont_trans_stat(cohs[0], tids) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
 
-    if(iod_trans_start(coh, &rtid, NULL, 0, IOD_TRANS_R, NULL) < 0)
+    if(iod_trans_start(cohs[0], &rtid, NULL, 0, IOD_TRANS_R, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
     root_handle.rd_oh.cookie = IOD_OH_UNDEFINED;
     root_handle.wr_oh.cookie = IOD_OH_UNDEFINED;
 
     /* Traverse Path to retrieve object ID, and open object */
-    if(H5VL_iod_server_open_path(coh, ROOT_ID, root_handle, obj_name, 
+    if(H5VL_iod_server_open_path(cohs[0], ROOT_ID, root_handle, obj_name,
                                  rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     printf("coh %"PRIu64" objoh %"PRIu64" objid %"PRIx64" rtid %"PRIu64"\n",
-            coh, obj_oh.rd_oh.cookie, obj_id, rtid);
+            cohs[0], obj_oh.rd_oh.cookie, obj_id, rtid);
 
     /* retrieve layout of object */
+    /* not using that after all...
     if((ret = iod_obj_get_layout(obj_oh.rd_oh, rtid, &layout, NULL)) < 0) {
         fprintf(stderr, "IOD lqyout failed with: %d, %s\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get object layout");
     }
+    */
+
+    /* TODO */
+    {
+        iod_obj_map_t *obj_map = NULL;
+        unsigned int i;
+
+        ret = iod_obj_query_map(obj_oh.rd_oh, rtid, &obj_map, NULL);
+        if (ret != 0) {
+            printf("iod_obj_query_map failed, ret: %d (%s).\n", ret, strerror(-ret));
+            assert(0);
+        }
+
+        printf("%-10d\n", obj_map->u_map.array_map.n_range);
+        for (i = 0; i < obj_map->u_map.array_map.n_range; i++) {
+            printf("range: %d, start: %zu %zu, "
+                    "end: %zu %zu, n_cell: %zu, "
+                    "loc: %s\n", i,
+                    obj_map->u_map.array_map.array_range[i].start_cell[0],
+                    obj_map->u_map.array_map.array_range[i].start_cell[1],
+                    obj_map->u_map.array_map.array_range[i].end_cell[0],
+                    obj_map->u_map.array_map.array_range[i].end_cell[1],
+                    obj_map->u_map.array_map.array_range[i].n_cell,
+                    obj_map->u_map.array_map.array_range[i].loc);
+        }
+
+        iod_obj_free_map(obj_oh.rd_oh, obj_map);
+    }
 
     /* get scratch pad */
-    if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, (char *) &sp, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* retrieve datatype and dataspace */
     /* MSC - This applies only to DATASETS for Q6 */
+
+    /* open the metadata scratch pad */
+    if (iod_obj_open_read(cohs[0], sp[0], rtid, NULL, &mdkv_oh, NULL) < 0)
+        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
                              H5VL_IOD_KEY_OBJ_DATATYPE,
                              NULL, NULL, &type_id) < 0)
@@ -636,164 +877,19 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
 
     /* Farm work */
-    {
-        analysis_farm_in_t farm_input;
-        analysis_farm_out_t *farm_output = NULL;
+    if(FAIL == H5VL__iod_farm_work(layout, cohs, obj_id, rtid, space_id, type_id,
+            query_id, split_script, combine_script))
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't farm work");
 
-        /* function shipper requests */
-        if(NULL == (hg_reqs = (hg_request_t *)malloc
-                    (sizeof(hg_request_t) * layout.target_num)))
-            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
-
-        if(NULL == (farm_output = (analysis_farm_out_t *)malloc
-                    (sizeof(analysis_farm_out_t) * layout.target_num)))
-            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
-
-        if(NULL == (split_data = (void **)malloc
-                    (sizeof(void *) * layout.target_num)))
-            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for split data");
-
-        if(NULL == (split_num_elmts = (size_t *)malloc
-                    (sizeof(size_t) * layout.target_num)))
-            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for num elmts");
-
-        farm_input.obj_id = obj_id;
-        farm_input.rtid = rtid;
-        farm_input.layout = layout;
-        farm_input.space_id = space_id;
-        farm_input.type_id = type_id;
-        farm_input.query_id = query_id;
-        farm_input.split_script = split_script;
-
-        for(i=0 ; i<layout.target_num ; i++) {
-            farm_input.coh = temp_cohs[i];
-            farm_input.target_idx = i+layout.target_start;
-            /* forward the call to the target server */
-            if(HG_Forward(server_addr_g[i+layout.target_start], 
-                          H5VL_EFF_ANALYSIS_FARM, &farm_input, 
-                          &farm_output[i], &hg_reqs[i]) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
-        }
-
-        for(i=0 ; i<layout.target_num ; i++) {
-            hg_bulk_block_t bulk_block_handle; /* HG block handle */
-            hg_bulk_request_t bulk_request; /* HG request */
-            size_t split_data_size;
-
-            /* Wait for the farmed work to complete */
-            if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, &status) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
-            if(!status) {
-                fprintf(stderr, "Wait timeout reached\n");
-                ret_value = FAIL;
-                goto done;
-            }
-
-            split_data_size = HG_Bulk_handle_get_size(farm_output[i].bulk_handle);
-
-            /* Get split type ID and num_elemts (all the arrays should have the same native type id) */
-            split_type_id = farm_output[i].type_id;
-            split_num_elmts[i] = split_data_size / H5Tget_size(split_type_id);
-
-            if(NULL == (split_data[i] = malloc(split_data_size)))
-                HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate farm buffer");
-
-            HG_Bulk_block_handle_create(split_data[i], split_data_size,
-                                        HG_BULK_READWRITE, &bulk_block_handle);
-
-            /* Write bulk data here and wait for the data to be there  */
-            if(HG_SUCCESS != HG_Bulk_read_all(server_addr_g[i+layout.target_start], 
-                                              farm_output[i].bulk_handle, 
-                                              bulk_block_handle, &bulk_request))
-                HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
-            /* wait for it to complete */
-            if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-                HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
-
-            /* free the bds block handle */
-            if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
-                HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
-
-            /* Free Mercury request */
-            if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
-
-            /* forward a free call to the target server */
-            if(HG_Forward(server_addr_g[i+layout.target_start], H5VL_EFF_ANALYSIS_FARM_FREE, 
-                          &farm_output[i].axe_id, &farm_output[i], &hg_reqs[i]) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
-        }
-
-        /* Wait for the free calls to complete. */
-        for(i=0 ; i<layout.target_num ; i++) {
-            /* Wait for the farmed work to complete */
-            if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, &status) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
-            if(!status) {
-                fprintf(stderr, "Wait timeout reached\n");
-                ret_value = FAIL;
-                goto done;
-            }
-
-            /* Free Mercury request */
-            if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
-        }
-
-        if(hg_reqs)
-            free(hg_reqs);
-        if(farm_output)
-            free(farm_output);
-
-#ifdef H5_HAVE_PYTHON
-        if (H5VL__iod_combine(combine_script, split_data, split_num_elmts,
-                layout.target_num, split_type_id, &combine_data,
-                &combine_num_elmts, &combine_type_id) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't combine split data");
-#endif
-
-        /* free farm data */
-        if (split_data) {
-            for(i=0 ; i<layout.target_num ; i++) {
-                free(split_data[i]);
-            }
-            free(split_data);
-        }
-        free(split_num_elmts);
-    }
-    if(iod_trans_finish(coh, rtid, NULL, 0, NULL) < 0)
+    if(iod_trans_finish(cohs[0], rtid, NULL, 0, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction 0");
 
-    if(NULL == (hg_reqs = (hg_request_t *)malloc
-                (sizeof(hg_request_t) * num_ions_g)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
+    /* ****************** TEMP THING (as IOD requires collective container open) */
 
-    /* *********************** TEMP THING */
-    for(i=1 ; i<num_ions_g ; i++) {
-        if(HG_Forward(server_addr_g[i], H5VL_EFF_CLOSE_CONTAINER, &temp_cohs[i], &ret_value, 
-                      &hg_reqs[i]) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
-    }
+    if(FAIL == H5VL__iod_request_container_close(cohs))
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't request container close");
 
-    for(i=1 ; i<num_ions_g ; i++) {
-        if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, &status) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
-        if(!status) {
-            fprintf(stderr, "Wait timeout reached\n");
-            ret_value = FAIL;
-            goto done;
-        }
-        /* Free Mercury request */
-        if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
-    }
-    free(hg_reqs);
-    free(temp_cohs);
-    /* *********************** END TEMP THING */
-
-    /* close the container */
-    if(iod_container_close(coh, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_FILE, H5E_CANTDEC, FAIL, "can't close container");
+    /* ***************** END TEMP THING */
 
     /* set output, and return to AS client */
     output.ret = ret_value;
@@ -810,7 +906,6 @@ done:
 
     input = (analysis_execute_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
-
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_analysis_execute_cb() */
@@ -845,7 +940,7 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t rtid = input->rtid;
     iod_obj_id_t obj_id = input->obj_id; /* The ID of the object */
     iod_layout_t layout = input->layout;
-    uint32_t target_index = input->target_idx;
+    uint32_t target_index = (uint32_t) input->target_idx;
     const char *split_script = input->split_script;
     hid_t space_layout;
     void *data = NULL, *split_data = NULL;
@@ -983,9 +1078,9 @@ H5VL__iod_get_space_layout(iod_layout_t layout, hid_t space_id, uint32_t target_
     /* number of elements striped on every ION. If the target ION is
        that last ION, special processing is required. */
     if((layout.target_start+layout.target_num-1) == target_index) {
-        hssize_t npoints;
+        size_t npoints;
 
-        npoints = H5Sget_simple_extent_npoints(space_id);
+        npoints = (size_t) H5Sget_simple_extent_npoints(space_id);
         nelmts = npoints % layout.stripe_size;
     }
     else {
@@ -1092,7 +1187,7 @@ H5VL__iod_get_query_data(iod_handle_t coh, iod_obj_id_t dset_id,
                          size_t *num_elmts, void **data)
 {
     hsize_t dims[1];
-    hssize_t nelmts;
+    size_t nelmts;
     size_t elmt_size=0, buf_size=0;
     H5VL__iod_get_query_data_t udata;
     void *buf = NULL;
@@ -1101,7 +1196,7 @@ H5VL__iod_get_query_data(iod_handle_t coh, iod_obj_id_t dset_id,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    nelmts = (size_t)H5Sget_select_npoints(space_id);
+    nelmts = (size_t) H5Sget_select_npoints(space_id);
     elmt_size = H5Tget_size(type_id);
     buf_size = nelmts * elmt_size;
 
