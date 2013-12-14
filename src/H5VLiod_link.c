@@ -713,6 +713,8 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     uint32_t cs_scope = input->cs_scope;
     iod_handles_t cur_oh;
     iod_obj_id_t cur_id;
+    iod_handle_t obj_oh;
+    iod_handles_t mdkv_oh;
     const char *loc_name = input->path;
     char *last_comp = NULL;
     iod_kv_params_t kvs;
@@ -753,8 +755,6 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     /* check the metadata information for the object and remove
        it from the container if this is the last link to it */
     if(iod_link.link_type == H5L_TYPE_HARD) {
-        iod_handle_t obj_oh;
-        iod_handles_t mdkv_oh;
         scratch_pad sp;
         iod_checksum_t sp_cs = 0;
         uint64_t link_count = 0;
@@ -796,15 +796,6 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
                                           NULL, NULL, NULL) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
         }
-        /* close the metadata scratch pad */
-        if(iod_obj_close(mdkv_oh.rd_oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-        if(iod_obj_close(mdkv_oh.wr_oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-
-        /* close the object */
-        if(iod_obj_close(obj_oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* If this was the only link to the object, remove the object */
         if(0 == link_count) {
@@ -817,6 +808,8 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
         }
     }
 
+done:
+
     /* close parent group if it is not the location we started the
        traversal into */
     if(input->loc_oh.rd_oh.cookie != cur_oh.rd_oh.cookie) {
@@ -826,7 +819,10 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
         iod_obj_close(cur_oh.wr_oh, NULL, NULL);
     }
 
-done:
+    /* close the metadata scratch pad */
+    iod_obj_close(mdkv_oh.rd_oh, NULL, NULL);
+    iod_obj_close(mdkv_oh.wr_oh, NULL, NULL);
+    iod_obj_close(obj_oh, NULL, NULL);
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with link remove, sending response %d to client\n",

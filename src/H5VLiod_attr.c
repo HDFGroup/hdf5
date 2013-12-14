@@ -76,6 +76,11 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
             attr_name, loc_handle.wr_oh, attr_id);
 #endif
 
+    attr_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
+    attr_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+    mdkv_oh.cookie = IOD_OH_UNDEFINED;
+    attr_kv_oh.cookie = IOD_OH_UNDEFINED;
+
     if(loc_handle.rd_oh.cookie == IOD_OH_UNDEFINED) {
         /* Try and open the starting location */
         if (iod_obj_open_read(coh, loc_id, wtid, NULL, &loc_handle.rd_oh, NULL) < 0)
@@ -147,10 +152,6 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     if(H5VL_iod_insert_dataspace(mdkv_oh, wtid, input->space_id, NULL, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
-    /* close the Metadata KV object */
-    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-
     /* if the starting location is not the last component, need to
        read the attrkv_id of the last object where attribute needs
        to be created */
@@ -180,16 +181,6 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
                                 H5L_TYPE_HARD, &attr_id, NULL, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
-    /* close the Attribute KV object */
-    if(iod_obj_close(attr_kv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-
-    /* close parent group if it is not the location we started the
-       traversal into */
-    if(TRUE == opened_locally || loc_handle.rd_oh.cookie != obj_oh.rd_oh.cookie) {
-        iod_obj_close(obj_oh.rd_oh, NULL, NULL);
-    }
-
     output.iod_oh.rd_oh.cookie = attr_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = attr_oh.wr_oh.cookie;
 
@@ -199,11 +190,35 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
 
     HG_Handler_start_output(op_data->hg_handle, &output);
 
- done:
+done:
+
+    /* close parent group if it is not the location we started the
+       traversal into */
+    if(TRUE == opened_locally || loc_handle.rd_oh.cookie != obj_oh.rd_oh.cookie) {
+        iod_obj_close(obj_oh.rd_oh, NULL, NULL);
+    }
+
+    /* close the Metadata KV object */
+    if(mdkv_oh.cookie != IOD_OH_UNDEFINED &&
+       iod_obj_close(mdkv_oh, NULL, NULL) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+
+    /* close the Attribute KV object */
+    if(attr_kv_oh.cookie != IOD_OH_UNDEFINED &&
+       iod_obj_close(attr_kv_oh, NULL, NULL) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
         fprintf(stderr, "Failed Attribute Create\n");
+
+        if(attr_oh.rd_oh.cookie != IOD_OH_UNDEFINED &&
+           iod_obj_close(attr_oh.rd_oh, NULL, NULL) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        if(attr_oh.wr_oh.cookie != IOD_OH_UNDEFINED &&
+           iod_obj_close(attr_oh.wr_oh, NULL, NULL) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);
@@ -1032,12 +1047,6 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
 
-    /* close parent group if it is not the location we started the
-       traversal into */
-    if(loc_handle.rd_oh.cookie != obj_oh.rd_oh.cookie) {
-        iod_obj_close(obj_oh.rd_oh, NULL, NULL);
-    }
-
     /* get attribute ID */
     if(H5VL_iod_get_metadata(attr_kv_oh.rd_oh, rtid, H5VL_IOD_LINK, 
                              attr_name, NULL, NULL, &iod_link) < 0)
@@ -1067,10 +1076,6 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink MDKV of attribute object");
     }
 
-    /* close the attribute oh */
-    if(iod_obj_close(attr_oh, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-
     /* remove attribute */
     kv.key = (void *)attr_name;
     kv.key_len = strlen(attr_name);
@@ -1086,16 +1091,23 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
     }
 
-    /* close the Attribute KV object */
-    if(iod_obj_close(attr_kv_oh.rd_oh, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "can't close object");
-    if(iod_obj_close(attr_kv_oh.wr_oh, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "can't close object");
-
 done:
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with attr remove, sending response to client\n");
 #endif
+
+    /* close parent group if it is not the location we started the
+       traversal into */
+    if(loc_handle.rd_oh.cookie != obj_oh.rd_oh.cookie) {
+        iod_obj_close(obj_oh.rd_oh, NULL, NULL);
+    }
+
+    /* close the attribute oh */
+    iod_obj_close(attr_oh, NULL, NULL);
+
+    /* close the Attribute KV object */
+    iod_obj_close(attr_kv_oh.rd_oh, NULL, NULL);
+    iod_obj_close(attr_kv_oh.wr_oh, NULL, NULL);
 
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 

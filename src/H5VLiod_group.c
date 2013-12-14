@@ -64,12 +64,13 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     hid_t gcpl_id;
     scratch_pad sp;
     iod_ret_t ret;
+    int step = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-        fprintf(stderr, "Start group create %s at %"PRIu64"\n", name, loc_handle.wr_oh);
+    fprintf(stderr, "Start group create %s at %"PRIu64"\n", name, loc_handle.wr_oh);
 #endif
 
     /* the traversal will retrieve the location where the group needs
@@ -95,6 +96,8 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Group for write");
     }
+
+    step += 1;
 
     /* create the metadata KV object for the group */
     if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL) < 0)
@@ -128,6 +131,8 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
+    step ++;
+
     if(H5P_DEFAULT == input->gcpl_id)
         input->gcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
     gcpl_id = input->gcpl_id;
@@ -151,21 +156,12 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
+    step --;
+
     /* add link in parent group to current object */
     if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
                                 H5L_TYPE_HARD, &grp_id, NULL, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
-
-    /* close parent group if it is not the location we started the
-       traversal into */
-    if(loc_handle.rd_oh.cookie != cur_oh.rd_oh.cookie) {
-        if(iod_obj_close(cur_oh.rd_oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
-    }
-    if(loc_handle.wr_oh.cookie != cur_oh.wr_oh.cookie) {
-        if(iod_obj_close(cur_oh.wr_oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
-    }
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with group create, sending response to client\n");
@@ -179,10 +175,35 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Created group RD_OH %"PRIu64" WR_OH %"PRIu64"\n", 
             grp_oh.rd_oh.cookie, grp_oh.wr_oh.cookie);
 
- done:
+done:
+
+    /* close parent group if it is not the location we started the
+       traversal into */
+    if(loc_handle.rd_oh.cookie != cur_oh.rd_oh.cookie) {
+        if(iod_obj_close(cur_oh.rd_oh, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+    }
+    if(loc_handle.wr_oh.cookie != cur_oh.wr_oh.cookie) {
+        if(iod_obj_close(cur_oh.wr_oh, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+    }
+
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
         fprintf(stderr, "Failed Group Create\n");
+
+        if(step == 2) {
+            if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            step --;
+        }
+        if(step == 1) {
+            if(iod_obj_close(grp_oh.rd_oh, NULL, NULL) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            if(iod_obj_close(grp_oh.wr_oh, NULL, NULL) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        }
+
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);

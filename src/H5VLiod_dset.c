@@ -95,6 +95,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_array_struct_t array; /* IOD array struct describing the dataset's dimensions */
     scratch_pad sp;
     iod_ret_t ret = 0;
+    int step = 0;
     iod_size_t array_dims[H5S_MAX_RANK], current_dims[H5S_MAX_RANK];
     herr_t ret_value = SUCCEED;
 
@@ -152,6 +153,8 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_read(coh, dset_id, wtid, NULL, &dset_oh.rd_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Dataset for Read");
 
+    step ++;
+
     /* create the attribute KV object for the dataset */
     if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &attrkv_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create attribute KV object");
@@ -182,6 +185,8 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     /* Open Metadata KV object for write */
     if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
+
+    step ++;
 
     if(H5P_DEFAULT == input->dcpl_id)
         input->dcpl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT);
@@ -219,19 +224,13 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
+    step --;
+
     /* add link in parent group to current object */
     if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
                                 H5L_TYPE_HARD, &dset_id, NULL, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
-    /* close parent group if it is not the location we started the
-       traversal into */
-    if(loc_handle.rd_oh.cookie != cur_oh.rd_oh.cookie) {
-        iod_obj_close(cur_oh.rd_oh, NULL, NULL);
-    }
-    if(loc_handle.wr_oh.cookie != cur_oh.wr_oh.cookie) {
-        iod_obj_close(cur_oh.wr_oh, NULL, NULL);
-    }
 
     output.iod_oh.rd_oh.cookie = dset_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = dset_oh.wr_oh.cookie;
@@ -243,9 +242,32 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
+    /* close parent group if it is not the location we started the
+       traversal into */
+    if(loc_handle.rd_oh.cookie != cur_oh.rd_oh.cookie) {
+        if(iod_obj_close(cur_oh.rd_oh, NULL, NULL) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+    }
+    if(loc_handle.wr_oh.cookie != cur_oh.wr_oh.cookie) {
+        if(iod_obj_close(cur_oh.wr_oh, NULL, NULL) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+    }
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
-        fprintf(stderr, "failed to create/open Dataset\n");
+        fprintf(stderr, "failed to create Dataset\n");
+
+        if(step == 2) {
+            if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            step --;
+        }
+        if(step == 1) {
+            if(iod_obj_close(dset_oh.rd_oh, NULL, NULL) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            if(iod_obj_close(dset_oh.wr_oh, NULL, NULL) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        }
+
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);

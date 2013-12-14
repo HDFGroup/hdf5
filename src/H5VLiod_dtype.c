@@ -67,6 +67,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     iod_mem_desc_t *mem_desc = NULL; /* memory descriptor used for writing */
     iod_blob_iodesc_t *file_desc = NULL; /* file descriptor used to write */
     scratch_pad sp;
+    int step = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -93,6 +94,8 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open BLOB");
     if (iod_obj_open_write(coh, dtype_id, wtid, NULL, &dtype_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open BLOB");
+
+    step ++;
 
     /* create the metadata KV object for the datatype */
     if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL) < 0)
@@ -124,6 +127,8 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     /* Store Metadata in scratch pad */
     if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open metadata KV object");
+
+    step ++;
 
     /* determine the buffer size needed to store the encoded type of the datatype */ 
     if(H5Tencode(input->type_id, NULL, &buf_size) < 0)
@@ -201,19 +206,12 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_close(mdkv_oh, NULL, NULL))
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
+    step --;
+
     /* add link in parent group to current object */
     if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
                                 H5L_TYPE_HARD, &dtype_id, NULL, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
-
-    /* close parent group and its scratch pad if it is not the
-       location we started the traversal into */
-    if(loc_handle.rd_oh.cookie != cur_oh.rd_oh.cookie) {
-        iod_obj_close(cur_oh.rd_oh, NULL, NULL);
-    }
-    if(loc_handle.wr_oh.cookie != cur_oh.wr_oh.cookie) {
-        iod_obj_close(cur_oh.wr_oh, NULL, NULL);
-    }
 
     output.iod_oh.rd_oh.cookie = dtype_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = dtype_oh.wr_oh.cookie;
@@ -225,7 +223,30 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
+    /* close parent group if it is not the location we started the
+       traversal into */
+    if(loc_handle.rd_oh.cookie != cur_oh.rd_oh.cookie) {
+        if(iod_obj_close(cur_oh.rd_oh, NULL, NULL) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+    }
+    if(loc_handle.wr_oh.cookie != cur_oh.wr_oh.cookie) {
+        if(iod_obj_close(cur_oh.wr_oh, NULL, NULL) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+    }
+
     if(ret_value < 0) {
+        if(step == 2) {
+            if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            step --;
+        }
+        if(step == 1) {
+            if(iod_obj_close(dtype_oh.rd_oh, NULL, NULL) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            if(iod_obj_close(dtype_oh.wr_oh, NULL, NULL) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        }
+
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);

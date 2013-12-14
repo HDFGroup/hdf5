@@ -67,6 +67,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t cur_id;
     char *last_comp; /* the name of the group obtained from traversal function */
     hid_t mcpl_id;
+    int step = 0;
     scratch_pad sp;
     herr_t ret_value = SUCCEED;
 
@@ -95,6 +96,8 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Map");
     if (iod_obj_open_write(coh, map_id, wtid, NULL, &map_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Map");
+
+    step ++;
 
     /* create the metadata KV object for the map */
     if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL) < 0)
@@ -126,6 +129,8 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     /* Open Metadata KV object for write */
     if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
+
+    step ++;
 
     if(H5P_DEFAULT == input->mcpl_id)
         input->mcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
@@ -160,19 +165,12 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
+    step --;
+
     /* add link in parent group to current object */
     if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
                                 H5L_TYPE_HARD, &map_id, NULL, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
-
-    /* close parent group if it is not the location we started the
-       traversal into */
-    if(loc_handle.rd_oh.cookie != cur_oh.rd_oh.cookie) {
-        iod_obj_close(cur_oh.rd_oh, NULL, NULL);
-    }
-    if(loc_handle.wr_oh.cookie != cur_oh.wr_oh.cookie) {
-        iod_obj_close(cur_oh.wr_oh, NULL, NULL);
-    }
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with map create, sending response to client\n");
@@ -184,9 +182,33 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
+    /* close parent group if it is not the location we started the
+       traversal into */
+    if(loc_handle.rd_oh.cookie != cur_oh.rd_oh.cookie) {
+        if(iod_obj_close(cur_oh.rd_oh, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+    }
+    if(loc_handle.wr_oh.cookie != cur_oh.wr_oh.cookie) {
+        if(iod_obj_close(cur_oh.wr_oh, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+    }
+
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
         fprintf(stderr, "Failed Map Create\n");
+
+        if(step == 2) {
+            if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            step --;
+        }
+        if(step == 1) {
+            if(iod_obj_close(map_oh.rd_oh, NULL, NULL) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            if(iod_obj_close(map_oh.wr_oh, NULL, NULL) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        }
+
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);

@@ -386,7 +386,7 @@ int main(int argc, char **argv) {
         free(buf);
     }
 
-
+#if 0
     /* create & start transaction 2 with num_peers = my_size. This
        means all processes are transaction leaders, and all have to
        call start and finish on the transaction. */
@@ -426,12 +426,6 @@ int main(int argc, char **argv) {
     /* finish transaction 2 - all have to call */
     ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
     assert(0 == ret);
-
-    if(my_rank == 0) {
-        /* release container version 1. This is async. */
-        ret = H5RCrelease(rid2, e_stack);
-        assert(0 == ret);
-    }
 
     H5ESget_count(e_stack, &num_events);
     H5ESwait_all(e_stack, &status);
@@ -505,6 +499,14 @@ int main(int argc, char **argv) {
     ret = H5RCrelease(rid4, e_stack);
     assert(0 == ret);
 
+#endif
+
+    if(my_rank == 0) {
+        /* release container version 1. This is async. */
+        ret = H5RCrelease(rid2, e_stack);
+        assert(0 == ret);
+    }
+
     /* close objects */
     ret = H5Dclose_ff(did1, e_stack);
     assert(ret == 0);
@@ -538,14 +540,6 @@ int main(int argc, char **argv) {
     ret = H5RCclose(rid1);
     assert(0 == ret);
     ret = H5RCclose(rid2);
-    assert(0 == ret);
-    ret = H5RCclose(rid3);
-    assert(0 == ret);
-    ret = H5RCclose(rid4);
-    assert(0 == ret);
-    ret = H5TRclose(tid2);
-    assert(0 == ret);
-    ret = H5TRclose(tid3);
     assert(0 == ret);
 
     H5ESclear(e_stack);
