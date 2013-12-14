@@ -276,6 +276,8 @@ main(int argc, char **argv)
         ship_analysis(file_name, dataset_name);
     }
 
+    MPI_Barrier(MPI_COMM_WORLD);
+
     EFF_finalize();
 #endif
     MPI_Finalize();
