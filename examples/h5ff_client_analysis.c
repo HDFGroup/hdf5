@@ -10,6 +10,8 @@
 #include <assert.h>
 #include <string.h>
 
+/* #define USE_NATIVE */
+
 #define NTUPLES 256
 
 static int my_rank = 0, my_size = 1;
@@ -51,15 +53,24 @@ write_dataset(const char *file_name, const char *dataset_name,
 
     /* Choose the IOD VOL plugin to use with this file. */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+#ifdef USE_NATIVE
+    H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);
+#else
     H5Pset_fapl_iod(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);
+#endif
 
     /* Open an existing file. */
+#ifdef USE_NATIVE
+    file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+#else
     file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id,
             H5_EVENT_STACK_NULL);
+#endif
 
     ret = H5Pclose(fapl_id);
     assert(0 == ret);
 
+#ifndef USE_NATIVE
     /* acquire container version 0 - EXACT. */
     version = 0;
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
@@ -76,11 +87,17 @@ write_dataset(const char *file_name, const char *dataset_name,
     assert(0 == ret);
     ret = H5Pclose(trspl_id);
     assert(0 == ret);
+#endif
 
     /* Create the data space for the first dataset. */
     file_space_id = H5Screate_simple(rank, dims, NULL);
     assert(file_space_id);
 
+#ifdef USE_NATIVE
+    dataset_id = H5Dcreate(file_id, dataset_name, datatype_id, file_space_id,
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    assert(dataset_id);
+#else
     if(0 == my_rank) {
         /* Create a dataset. */
         dataset_id = H5Dcreate_ff(file_id, dataset_name, datatype_id, file_space_id,
@@ -119,10 +136,10 @@ write_dataset(const char *file_name, const char *dataset_name,
                 &mpi_reqs[0]);
         MPI_Waitall(1, mpi_reqs, MPI_STATUS_IGNORE);
 
-        dataset_id = H5Oopen_by_token(dset_token1, tid1, H5_EVENT_STACK_NULL);
+        dataset_id = H5Oopen_by_token(dset_token1, rid1, H5_EVENT_STACK_NULL);
     }
-
     free(dset_token1);
+#endif
 
     mem_space_id = H5Screate_simple(rank, count, NULL);
     assert(mem_space_id);
@@ -133,21 +150,33 @@ write_dataset(const char *file_name, const char *dataset_name,
     assert(0 == ret);
 
     /* Write the first dataset. */
+#ifdef USE_NATIVE
+    ret = H5Dwrite(dataset_id, datatype_id, mem_space_id, file_space_id,
+            H5P_DEFAULT, buf);
+    assert(0 == ret);
+#else
     ret = H5Dwrite_ff(dataset_id, datatype_id, mem_space_id, file_space_id,
             H5P_DEFAULT, buf, tid1, H5_EVENT_STACK_NULL);
     assert(0 == ret);
+#endif
 
     /* Close the data space for the first dataset. */
     ret = H5Sclose(mem_space_id);
     assert(0 == ret);
 
     /* Close the first dataset. */
+#ifdef USE_NATIVE
+    ret = H5Dclose(dataset_id);
+    assert(0 == ret);
+#else
     ret = H5Dclose_ff(dataset_id, H5_EVENT_STACK_NULL);
     assert(0 == ret);
+#endif
 
     ret = H5Sclose(file_space_id);
     assert(0 == ret);
 
+#ifndef USE_NATIVE
     /* Finish transaction 1. */
     ret = H5TRfinish(tid1, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
     assert(0 == ret);
@@ -161,12 +190,18 @@ write_dataset(const char *file_name, const char *dataset_name,
 
     ret = H5TRclose(tid1);
     assert(0 == ret);
+#endif
 
     MPI_Barrier(MPI_COMM_WORLD);
 
     /* Close the file. */
+#ifdef USE_NATIVE
+    ret = H5Fclose(file_id);
+    assert(0 == ret);
+#else
     ret = H5Fclose_ff(file_id, H5_EVENT_STACK_NULL);
     assert(0 == ret);
+#endif
 }
 
 static void
@@ -209,8 +244,10 @@ main(int argc, char **argv)
         exit(1);
     }
 
+#ifndef USE_NATIVE
     /* Call EFF_init to initialize the EFF stack. */
     EFF_init(MPI_COMM_WORLD, MPI_INFO_NULL);
+#endif
 
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
@@ -234,13 +271,15 @@ main(int argc, char **argv)
 
     free(data);
 
-#ifdef H5_HAVE_PYTHON
+#ifndef USE_NATIVE
     if(0 == my_rank) {
         ship_analysis(file_name, dataset_name);
     }
-#endif
+
+    MPI_Barrier(MPI_COMM_WORLD);
 
     EFF_finalize();
+#endif
     MPI_Finalize();
 
     return 0;
