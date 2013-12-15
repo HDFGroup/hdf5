@@ -599,6 +599,7 @@ H5VL_iod_server_container_open(hg_handle_t handle)
 	HGOTO_ERROR2(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
     /* open the container */
+    printf("Calling iod_container_open on %s\n", file_name);
     if(iod_container_open(file_name, NULL, IOD_CONT_R, &coh, NULL))
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 

@@ -534,6 +534,7 @@ H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs)
     }
 
     /* open the container */
+    printf("Calling iod_container_open on %s\n", file_name);
     if(iod_container_open(file_name, NULL, IOD_CONT_R, &temp_cohs[0], NULL))
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
@@ -652,7 +653,8 @@ H5VL__iod_farm_work(iod_layout_t layout, iod_handle_t *cohs,
     farm_input.query_id = query_id;
     farm_input.split_script = split_script;
 
-    for (i = 1; i < layout.target_num; i++) {
+    /* TODO re-enable shipping to farming server */
+    for (i = 3; i < layout.target_num; i++) {
         farm_input.coh = cohs[i];
         farm_input.target_idx = i + layout.target_start;
 
@@ -671,7 +673,8 @@ H5VL__iod_farm_work(iod_layout_t layout, iod_handle_t *cohs,
             HGOTO_ERROR2(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't split in farmed job");
     }
 
-    for (i = 1; i < layout.target_num; i++) {
+    /* TODO re-enable shipping to farming server */
+    for (i = 3; i < layout.target_num; i++) {
         hg_bulk_block_t bulk_block_handle; /* HG block handle */
         hg_bulk_request_t bulk_request; /* HG request */
         size_t split_data_size;
@@ -715,8 +718,9 @@ H5VL__iod_farm_work(iod_layout_t layout, iod_handle_t *cohs,
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
     }
 
+    /* TODO re-enable shipping to farming server */
     /* Wait for the free calls to complete. */
-    for (i = 1; i < layout.target_num; i++) {
+    for (i = 3; i < layout.target_num; i++) {
         /* Wait for the farmed work to complete */
         if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
@@ -854,8 +858,8 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
         /* Fake layout for now */
         layout.target_num = obj_map->u_map.array_map.n_range;
         layout.target_start = 0;
-        layout.stripe_size = obj_map->u_map.array_map.array_range[i].start_cell[0] -
-                obj_map->u_map.array_map.array_range[i].end_cell[1] + 1;
+        layout.stripe_size = obj_map->u_map.array_map.array_range[0].end_cell[0] -
+                obj_map->u_map.array_map.array_range[0].start_cell[0] + 1;
 
         iod_obj_free_map(obj_oh.rd_oh, obj_map);
     }
@@ -1110,6 +1114,7 @@ H5VL__iod_get_space_layout(iod_layout_t layout, hid_t space_id, uint32_t target_
 
     /* retrieve number of dimensions and dimensions. */
     ndims = H5Sget_simple_extent_dims(space_id, dims, NULL);
+    printf("Retrieved number of dimensions: %d\n", ndims);
 
     /* number of elements striped on every ION. If the target ION is
        that last ION, special processing is required. */
@@ -1117,10 +1122,13 @@ H5VL__iod_get_space_layout(iod_layout_t layout, hid_t space_id, uint32_t target_
         size_t npoints;
 
         npoints = (size_t) H5Sget_simple_extent_npoints(space_id);
+        printf("npoints: %lu\n", npoints);
         nelmts = npoints % layout.stripe_size;
+        printf("nelmts: %lu\n", nelmts);
     }
     else {
         nelmts = layout.stripe_size;
+        printf("nelmts: %lu\n", nelmts);
     }
 
     /* copy the original dataspace and reset selection to NONE */
@@ -1134,10 +1142,8 @@ H5VL__iod_get_space_layout(iod_layout_t layout, hid_t space_id, uint32_t target_
     for(u=0 ; u<nelmts ; u++) {
         hsize_t start[H5S_MAX_RANK];
         hsize_t cur;
+        hsize_t count[2] = {1, 0};
 
-        /* generate hyperslab stuff for each point. only start is
-           required; the stride, block, count are 1, i.e. can be
-           NULL */
         cur = dims[0];
         start[0] = start_elmt % dims[0];
 
@@ -1146,7 +1152,7 @@ H5VL__iod_get_space_layout(iod_layout_t layout, hid_t space_id, uint32_t target_
             cur *= dims[i];
         }
 
-        if(H5Sselect_hyperslab(space_layout, H5S_SELECT_OR, start, NULL, NULL, NULL))
+        if(H5Sselect_hyperslab(space_layout, H5S_SELECT_OR, start, NULL, count, NULL))
             HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTSET, FAIL, "unable to add point to selection")
     }
 
@@ -1277,7 +1283,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__iod_get_query_data() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5VL__iod_read_selection
  *
