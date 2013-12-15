@@ -37,11 +37,7 @@ typedef struct {
 
 /* do not change order */
 typedef struct {
-    int32_t ret;
-    uint64_t axe_id;
-    uint32_t server_idx;
-    hg_bulk_t bulk_handle;
-    hid_t type_id;
+    analysis_farm_out_t farm_out;
     void *data;
 } H5VLiod_farm_data_t;
 
@@ -693,8 +689,9 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
         if (hg_reqs[i] == HG_REQUEST_NULL) {
             /* No request / was local */
         } else {
-            hg_bulk_block_t bulk_block_handle; /* HG block handle */
-            hg_bulk_request_t bulk_request; /* HG request */
+            analysis_transfer_in_t transfer_input;
+            analysis_transfer_out_t transfer_output;
+            hg_bulk_t bulk_handle;
             size_t split_data_size;
             unsigned int server_idx;
 
@@ -702,53 +699,38 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
             if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
 
-            server_idx = farm_output[i].server_idx;
-            split_data_size = HG_Bulk_handle_get_size(farm_output[i].bulk_handle);
-
             /* Get split type ID and num_elemts (all the arrays should have the same native type id) */
+            server_idx = farm_output[i].server_idx;
             split_type_id = farm_output[i].type_id;
-            split_num_elmts[i] = split_data_size / H5Tget_size(split_type_id);
+            split_num_elmts[i] = farm_output[i].num_elmts;
+            split_data_size = split_num_elmts[i] * H5Tget_size(split_type_id);
+            printf("Getting %d elements of size %zu from server %zu\n",
+                    split_num_elmts[i], H5Tget_size(split_type_id), server_idx);
 
             if(NULL == (split_data[i] = malloc(split_data_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate farm buffer");
 
-            HG_Bulk_block_handle_create(split_data[i], split_data_size,
-                    HG_BULK_READWRITE, &bulk_block_handle);
+            HG_Bulk_handle_create(split_data[i], split_data_size,
+                    HG_BULK_READWRITE, &bulk_handle);
 
-            /* Write bulk data here and wait for the data to be there  */
-            if(HG_SUCCESS != HG_Bulk_read_all(server_addr_g[server_idx],
-                    farm_output[i].bulk_handle, bulk_block_handle, &bulk_request))
-                HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
+            transfer_input.axe_id = farm_output[i].axe_id;
+            transfer_input.bulk_handle = bulk_handle;
 
-            /* wait for it to complete */
-            if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-                HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
+            /* forward a free call to the target server */
+            if(HG_Forward(server_addr_g[server_idx], H5VL_EFF_ANALYSIS_FARM_TRANSFER,
+                    &transfer_input, &transfer_output, &hg_reqs[i]) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
 
-            /* free the bds block handle */
-            if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
-                HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
+            /* Wait for the farmed work to complete */
+            if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
+
+            /* Free bulk handle */
+            HG_Bulk_handle_free(bulk_handle);
 
             /* Free Mercury request */
             if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
-
-            /* forward a free call to the target server */
-            if(HG_Forward(server_addr_g[server_idx], H5VL_EFF_ANALYSIS_FARM_FREE,
-                    &farm_output[i].axe_id, &farm_output[i], &hg_reqs[i]) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
-        }
-    }
-
-    /* Wait for the free calls to complete. */
-    for (i = 0; i < num_targets; i++) {
-        if (hg_reqs[i] != HG_REQUEST_NULL) {
-        /* Wait for the farmed work to complete */
-        if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
-
-        /* Free Mercury request */
-        if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
         }
     }
 
@@ -1025,32 +1007,25 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
     if(NULL == (output = (H5VLiod_farm_data_t *)H5MM_malloc(sizeof(H5VLiod_farm_data_t))))
         HGOTO_ERROR2(H5E_DATASET, H5E_NOSPACE, FAIL, "No Space");
 
-    /* Register memory */
-    if(HG_SUCCESS != HG_Bulk_handle_create(split_data,
-            split_num_elmts * H5Tget_size(split_type_id), HG_BULK_READ_ONLY,
-            &output->bulk_handle))
-        HGOTO_ERROR2(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't create Bulk Data Handle");
-
-    /* set output, and return to AS client */
-    output->ret = ret_value;
-    output->axe_id = op_data->axe_id;
-    output->server_idx = input->server_idx;
+    /* set output, and return to master */
+    output->farm_out.ret = ret_value;
+    output->farm_out.axe_id = op_data->axe_id;
+    output->farm_out.server_idx = input->server_idx;
+    output->farm_out.num_elmts = split_num_elmts;
+    output->farm_out.type_id = split_type_id;
     output->data = split_data;
-    output->type_id = split_type_id;
     op_data->output = output;
-    HG_Handler_start_output(op_data->hg_handle, output);
+
+    HG_Handler_start_output(op_data->hg_handle, &output->farm_out);
 
 done:
-    if(ret_value < 0)
-        HG_Handler_start_output(op_data->hg_handle, &ret_value);
-
     input = (analysis_farm_in_t *)H5MM_xfree(input);
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_analysis_farm_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_server_analysis_farm_free_cb
+ * Function:	H5VL_iod_server_analysis_farm_transfer_cb
  *
  * Purpose:	Frees the output from the split operation
  *
@@ -1060,29 +1035,49 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5VL_iod_server_analysis_farm_free_cb(AXE_engine_t axe_engine, 
-                                      size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                                      size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
-                                      void *_op_data)
+H5VL_iod_server_analysis_transfer_cb(AXE_engine_t axe_engine,
+        size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[],
+        size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[],
+        void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;
-    AXE_task_t *farm_id = (AXE_task_t *)op_data->input;
+    analysis_transfer_in_t *input = (analysis_transfer_in_t *)op_data->input;
     op_data_t *farm_op_data = NULL;
     void *farm_op_data_ptr = NULL;
     H5VLiod_farm_data_t *farm_output = NULL;
     herr_t ret_value = SUCCEED;
+    hg_bulk_block_t bulk_block_handle;
+    size_t data_size;
+    hg_bulk_request_t bulk_request;
+    na_addr_t source = HG_Handler_get_addr(op_data->hg_handle);
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(AXE_SUCCEED != AXEget_op_data(axe_engine, *farm_id, &farm_op_data_ptr))
+    if(AXE_SUCCEED != AXEget_op_data(axe_engine, input->axe_id, &farm_op_data_ptr))
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to get farm op_data");
 
     farm_op_data = (op_data_t *)farm_op_data_ptr;
     farm_output = (H5VLiod_farm_data_t *)farm_op_data->output;
 
-    /* Free memory handle */
-    if(HG_SUCCESS != HG_Bulk_handle_free(farm_output->bulk_handle))
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to free Bulk handle");
+    printf("Data num elemts is %zu\n", farm_output->farm_out.num_elmts);
+    data_size = HG_Bulk_handle_get_size(input->bulk_handle);
+    printf("Transferring %zu bytes\n", data_size);
+
+    HG_Bulk_block_handle_create(farm_output->data, data_size, HG_BULK_READ_ONLY,
+            &bulk_block_handle);
+
+    /* Write bulk data here and wait for the data to be there  */
+    if(HG_SUCCESS != HG_Bulk_write_all(source,
+            input->bulk_handle, bulk_block_handle, &bulk_request))
+        HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
+
+    /* wait for it to complete */
+    if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
+        HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
+
+    /* free the bds block handle */
+    if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+        HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     free(farm_output->data);
     farm_op_data = (op_data_t *)H5MM_xfree(farm_op_data);
@@ -1090,7 +1085,7 @@ H5VL_iod_server_analysis_farm_free_cb(AXE_engine_t axe_engine,
 done:
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
-    farm_id = (AXE_task_t *)H5MM_xfree(farm_id);
+    input = (analysis_transfer_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
     FUNC_LEAVE_NOAPI_VOID

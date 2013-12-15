@@ -126,7 +126,15 @@ MERCURY_GEN_PROC(analysis_farm_out_t,
                  ((uint64_t)(axe_id))
                  ((uint32_t)(server_idx))
                  ((hg_bulk_t)(bulk_handle))
-                 ((hid_t)(type_id)))
+                 ((hid_t)(type_id))
+                 ((size_t)(num_elmts)))
+MERCURY_GEN_PROC(analysis_transfer_in_t,
+        ((hg_bulk_t)(bulk_handle))
+        ((uint64_t)(axe_id))
+        )
+MERCURY_GEN_PROC(analysis_transfer_out_t,
+        ((int32_t)(ret))
+        )
 
 MERCURY_GEN_PROC(eff_init_in_t, 
                  ((uint32_t)(proc_num)))

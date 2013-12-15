@@ -80,13 +80,13 @@ extern char **server_loc_g;
 extern hg_id_t H5VL_EFF_OPEN_CONTAINER;
 extern hg_id_t H5VL_EFF_CLOSE_CONTAINER;
 extern hg_id_t H5VL_EFF_ANALYSIS_FARM;
-extern hg_id_t H5VL_EFF_ANALYSIS_FARM_FREE;
+extern hg_id_t H5VL_EFF_ANALYSIS_FARM_TRANSFER;
 
 H5_DLL void EFF__mercury_register_callbacks(void);
 
 H5_DLL int H5VL_iod_server_analysis_execute(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_analysis_farm(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_analysis_farm_free(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_analysis_transfer(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_container_open(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_container_close(hg_handle_t handle);
 
@@ -158,10 +158,10 @@ H5_DLL void H5VL_iod_server_analysis_farm_cb(AXE_engine_t axe_engine,
                                              size_t num_n_parents, AXE_task_t n_parents[], 
                                              size_t num_s_parents, AXE_task_t s_parents[], 
                                              void *_op_data);
-H5_DLL void H5VL_iod_server_analysis_farm_free_cb(AXE_engine_t axe_engine, 
-                                                  size_t num_n_parents, AXE_task_t n_parents[], 
-                                                  size_t num_s_parents, AXE_task_t s_parents[], 
-                                                  void *_op_data);
+H5_DLL void H5VL_iod_server_analysis_transfer_cb(AXE_engine_t axe_engine,
+        size_t num_n_parents, AXE_task_t n_parents[],
+        size_t num_s_parents, AXE_task_t s_parents[],
+        void *_op_data);
 
 H5_DLL void H5VL_iod_server_file_create_cb(AXE_engine_t axe_engine, 
                                            size_t num_n_parents, AXE_task_t n_parents[], 

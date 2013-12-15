@@ -44,7 +44,7 @@ char **server_loc_g = NULL;
 hg_id_t H5VL_EFF_OPEN_CONTAINER;
 hg_id_t H5VL_EFF_CLOSE_CONTAINER;
 hg_id_t H5VL_EFF_ANALYSIS_FARM;
-hg_id_t H5VL_EFF_ANALYSIS_FARM_FREE;
+hg_id_t H5VL_EFF_ANALYSIS_FARM_TRANSFER;
 
 void 
 EFF__mercury_register_callbacks(void)
@@ -66,9 +66,10 @@ EFF__mercury_register_callbacks(void)
     MERCURY_HANDLER_REGISTER("analysis_farm", H5VL_iod_server_analysis_farm, 
                              analysis_farm_in_t, analysis_farm_out_t);
 
-    H5VL_EFF_ANALYSIS_FARM_FREE = MERCURY_REGISTER("analysis_farm_free", uint64_t, ret_t);
-    MERCURY_HANDLER_REGISTER("analysis_farm_free", H5VL_iod_server_analysis_farm_free, 
-                             uint64_t, ret_t);
+    H5VL_EFF_ANALYSIS_FARM_TRANSFER = MERCURY_REGISTER("analysis_transfer",
+            analysis_transfer_in_t, analysis_transfer_out_t);
+    MERCURY_HANDLER_REGISTER("analysis_transfer", H5VL_iod_server_analysis_transfer,
+            analysis_transfer_in_t, analysis_transfer_out_t);
 
     /* Register function and encoding/decoding functions */
     MERCURY_HANDLER_REGISTER("eff_init", H5VL_iod_server_eff_init, 
@@ -569,7 +570,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_server_analysis_farm_free
+ * Function:	H5VL_iod_server_analysis_transfer
  *
  * Purpose:	Function shipper registered call for Analysis Farming.
  *              Inserts the real worker routine into the Async Engine.
@@ -583,7 +584,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5VL_iod_server_analysis_farm_free(hg_handle_t handle)
+H5VL_iod_server_analysis_transfer(hg_handle_t handle)
 {
     op_data_t *op_data = NULL;
     AXE_task_t *input = NULL;
@@ -611,12 +612,12 @@ H5VL_iod_server_analysis_farm_free(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to generate ID for AXE task");
 
     if (AXE_SUCCEED != AXEcreate_task(engine, axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_analysis_farm_free_cb, op_data, NULL))
+                                      H5VL_iod_server_analysis_transfer_cb, op_data, NULL))
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_server_analysis_farm_free() */
+} /* end H5VL_iod_server_analysis_transfer() */
 
 int
 H5VL_iod_server_container_open(hg_handle_t handle)
