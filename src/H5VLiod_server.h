@@ -76,6 +76,7 @@ typedef struct H5VL_iod_link_t {
 extern iod_obj_id_t ROOT_ID;
 extern int num_ions_g;
 extern na_addr_t *server_addr_g;
+extern char **server_loc_g;
 extern hg_id_t H5VL_EFF_OPEN_CONTAINER;
 extern hg_id_t H5VL_EFF_CLOSE_CONTAINER;
 extern hg_id_t H5VL_EFF_ANALYSIS_FARM;

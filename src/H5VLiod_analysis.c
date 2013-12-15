@@ -626,7 +626,7 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
     hid_t split_type_id = FAIL, combine_type_id = FAIL;
     hg_request_t *hg_reqs = NULL;
     unsigned int i;
-    int num_targets = obj_map->u_map.array_map.n_range;
+    unsigned int num_targets = obj_map->u_map.array_map.n_range;
     analysis_farm_in_t farm_input;
     analysis_farm_out_t *farm_output = NULL;
 
@@ -652,84 +652,92 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
     farm_input.query_id = query_id;
     farm_input.split_script = split_script;
 
-    /* TODO re-enable shipping to farming server */
     for (i = 0; i < obj_map->u_map.array_map.n_range; i++) {
-        farm_input.coh = cohs[i];
+        unsigned int j;
+        unsigned int index = 0;
         farm_input.num_cells =  obj_map->u_map.array_map.array_range[i].n_cell;
         farm_input.coords.rank = H5Sget_simple_extent_ndims(space_id);
         farm_input.coords.start_cell = obj_map->u_map.array_map.array_range[i].start_cell;
         farm_input.coords.end_cell = obj_map->u_map.array_map.array_range[i].end_cell;
 
-        /* MSC - TODO, Jerome, translate the location name to the mercury address.
-           obj_map->u_map.array_map.array_range[i].loc */
+        for (j = 0; j < (unsigned int) num_ions_g; j++) {
+            if (0 == strcmp(obj_map->u_map.array_map.array_range[i].loc,
+                    server_loc_g[j])) {
+                index = j;
+                printf("Server index: %d owns the data\n", index);
+                break;
+            }
+        }
+
+        farm_input.coh = cohs[index];
 
         /* forward the call to the target server */
-        if(HG_Forward(server_addr_g[i],
-                H5VL_EFF_ANALYSIS_FARM, &farm_input, &farm_output[i],
-                &hg_reqs[i]) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
+        if (index == 0) {
+            hg_reqs[i] = HG_REQUEST_NULL;
+            /* Do a local split */
+            if(FAIL == H5VL__iod_farm_split(cohs[index], obj_id, rtid, space_id,
+                    farm_input.coords, farm_input.num_cells, type_id, query_id, split_script,
+                    &split_data[i], &split_num_elmts[i], &split_type_id))
+                HGOTO_ERROR2(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't split in farmed job");
+        } else {
+            if(HG_Forward(server_addr_g[index],
+                    H5VL_EFF_ANALYSIS_FARM, &farm_input, &farm_output[i],
+                    &hg_reqs[i]) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
+        }
     }
 
-    /* MSC - need to revise that to deal with map locations; 
-       maybe add if in the loop above to check for local server */
-#if 0
-    if (layout.target_start == 0) {
-        /* Do a local split */
-        if(FAIL == H5VL__iod_farm_split(layout, 0, cohs[0], obj_id, rtid, space_id,
-                type_id, query_id, split_script,
-                &split_data[0], &split_num_elmts[0], &split_type_id))
-            HGOTO_ERROR2(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't split in farmed job");
-    }
-#endif
+    for (i = 0; i < num_targets; i++) {
+        if (hg_reqs[i] == HG_REQUEST_NULL) {
+            /* No request so was local */
+        } else {
+            hg_bulk_block_t bulk_block_handle; /* HG block handle */
+            hg_bulk_request_t bulk_request; /* HG request */
+            size_t split_data_size;
 
-    /* TODO re-enable shipping to farming server */
-    for (i = 3; i < num_targets; i++) {
-        hg_bulk_block_t bulk_block_handle; /* HG block handle */
-        hg_bulk_request_t bulk_request; /* HG request */
-        size_t split_data_size;
+            /* Wait for the farmed work to complete */
+            if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
 
-        /* Wait for the farmed work to complete */
-        if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
+            split_data_size = HG_Bulk_handle_get_size(farm_output[i].bulk_handle);
 
-        split_data_size = HG_Bulk_handle_get_size(farm_output[i].bulk_handle);
+            /* Get split type ID and num_elemts (all the arrays should have the same native type id) */
+            split_type_id = farm_output[i].type_id;
+            split_num_elmts[i] = split_data_size / H5Tget_size(split_type_id);
 
-        /* Get split type ID and num_elemts (all the arrays should have the same native type id) */
-        split_type_id = farm_output[i].type_id;
-        split_num_elmts[i] = split_data_size / H5Tget_size(split_type_id);
+            if(NULL == (split_data[i] = malloc(split_data_size)))
+                HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate farm buffer");
 
-        if(NULL == (split_data[i] = malloc(split_data_size)))
-            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate farm buffer");
+            HG_Bulk_block_handle_create(split_data[i], split_data_size,
+                    HG_BULK_READWRITE, &bulk_block_handle);
 
-        HG_Bulk_block_handle_create(split_data[i], split_data_size,
-                                    HG_BULK_READWRITE, &bulk_block_handle);
+            /* Write bulk data here and wait for the data to be there  */
+            if(HG_SUCCESS != HG_Bulk_read_all(server_addr_g[i],
+                    farm_output[i].bulk_handle,
+                    bulk_block_handle, &bulk_request))
+                HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
+            /* wait for it to complete */
+            if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
+                HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
 
-        /* Write bulk data here and wait for the data to be there  */
-        if(HG_SUCCESS != HG_Bulk_read_all(server_addr_g[i],
-                                          farm_output[i].bulk_handle,
-                                          bulk_block_handle, &bulk_request))
-            HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
-        /* wait for it to complete */
-        if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-            HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
+            /* free the bds block handle */
+            if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+                HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
-        /* free the bds block handle */
-        if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
-            HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
+            /* Free Mercury request */
+            if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
 
-        /* Free Mercury request */
-        if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
-
-        /* forward a free call to the target server */
-        if(HG_Forward(server_addr_g[i], H5VL_EFF_ANALYSIS_FARM_FREE,
-                      &farm_output[i].axe_id, &farm_output[i], &hg_reqs[i]) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
+            /* forward a free call to the target server */
+            if(HG_Forward(server_addr_g[i], H5VL_EFF_ANALYSIS_FARM_FREE,
+                    &farm_output[i].axe_id, &farm_output[i], &hg_reqs[i]) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
+        }
     }
 
     /* TODO re-enable shipping to farming server */
     /* Wait for the free calls to complete. */
-    for (i = 3; i < num_targets; i++) {
+    for (i = 0; i < num_targets; i++) {
         /* Wait for the farmed work to complete */
         if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "HG_Wait Failed");
