@@ -1128,7 +1128,7 @@ H5VL__iod_get_space_layout(coords_t coords, iod_size_t num_cells, hid_t space_id
 
     for(i=0 ; i<ndims ; i++) {
         start[i] = coords.start_cell[i];
-        block[i] = coords.end_cell[i];
+        block[i] = coords.end_cell[i] + 1;
         count[i] = 1;
     }
 
@@ -1284,8 +1284,8 @@ H5VL__iod_read_selection(iod_handle_t coh, iod_obj_id_t obj_id,
     FUNC_ENTER_NOAPI_NOINIT
 
     /* open the array object */
-        if (iod_obj_open_read(coh, obj_id, rtid, NULL /*hints*/, &obj_oh, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+    if (iod_obj_open_read(coh, obj_id, rtid, NULL, &obj_oh, NULL) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open array object fo read");
 
     /* read the data selection from IOD. */
     /* MSC - will need to do it in pieces, not it one shot. */
@@ -1294,7 +1294,8 @@ H5VL__iod_read_selection(iod_handle_t coh, iod_obj_id_t obj_id,
         HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
 done:
-    if(obj_oh.cookie != IOD_OH_UNDEFINED && iod_obj_close(obj_oh, NULL, NULL) < 0)
+    if(obj_oh.cookie != IOD_OH_UNDEFINED && 
+       iod_obj_close(obj_oh, NULL, NULL) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
 
     FUNC_LEAVE_NOAPI(ret_value)
