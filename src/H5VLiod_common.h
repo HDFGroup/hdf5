@@ -49,6 +49,12 @@ typedef struct dims_t {
     hsize_t *size;
 } dims_t;
 
+typedef struct coords_t {
+    int rank;
+    uint64_t *start_cell;
+    uint64_t *end_cell;
+} coords_t;
+
 typedef struct name_t {
     size_t size;
     ssize_t *value_size;
@@ -94,7 +100,7 @@ H5_DLL int hg_proc_value_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_binary_buf_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_linfo_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_oinfo_t(hg_proc_t proc, void *data);
-H5_DLL int hg_proc_iod_layout_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_coords_t(hg_proc_t proc, void *data);
 
 MERCURY_GEN_PROC(analysis_execute_in_t, 
                  ((axe_t)(axe_info))
@@ -112,8 +118,8 @@ MERCURY_GEN_PROC(analysis_farm_in_t,
                  ((hid_t)(type_id)) 
                  ((uint64_t)(rtid)) 
                  ((iod_obj_id_t)(obj_id))
-                 ((iod_layout_t)(layout)) 
-                 ((uint32_t)(target_idx))
+                 ((size_t)(num_cells))
+                 ((coords_t)(coords))
                  ((hg_const_string_t)(split_script)))
 MERCURY_GEN_PROC(analysis_farm_out_t, 
                  ((int32_t)(ret)) 

@@ -853,44 +853,68 @@ int hg_proc_hid_t(hg_proc_t proc, void *data)
     return ret;
 }
 
-int hg_proc_iod_layout_t(hg_proc_t proc, void *data)
+int hg_proc_coords_t(hg_proc_t proc, void *data)
 {
     int ret = HG_SUCCESS;
-    iod_layout_t *layout = (iod_layout_t *)data;
+    int i;
+    hg_proc_op_t op;
+    coords_t *struct_data = (coords_t *) data;
 
-    ret = hg_proc_int32_t(proc, (int32_t *)layout->loc);
+    ret = hg_proc_int32_t(proc, &struct_data->rank);
     if (ret != HG_SUCCESS) {
         HG_ERROR_DEFAULT("Proc error");
         ret = HG_FAIL;
         return ret;
     }
 
-    ret = hg_proc_int32_t(proc, (int32_t *)layout->type);
-    if (ret != HG_SUCCESS) {
-        HG_ERROR_DEFAULT("Proc error");
-        ret = HG_FAIL;
-        return ret;
-    }
+    op = hg_proc_get_op(proc);
 
-    ret = hg_proc_uint32_t(proc, &layout->target_start);
-    if (ret != HG_SUCCESS) {
-        HG_ERROR_DEFAULT("Proc error");
-        ret = HG_FAIL;
-        return ret;
-    }
+    switch(op) {
+    case HG_ENCODE:
+        for(i=0 ; i<struct_data->rank ; i++) {
+            ret = hg_proc_uint64_t(proc, &struct_data->start_cell[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+            ret = hg_proc_uint64_t(proc, &struct_data->end_cell[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_DECODE:
+        if(struct_data->rank) {
+            struct_data->start_cell = (uint64_t *)malloc (sizeof(uint64_t) * struct_data->rank);
+            struct_data->end_cell = (uint64_t *)malloc (sizeof(uint64_t) * struct_data->rank);
+        }
 
-    ret = hg_proc_uint32_t(proc, &layout->target_num);
-    if (ret != HG_SUCCESS) {
-        HG_ERROR_DEFAULT("Proc error");
-        ret = HG_FAIL;
-        return ret;
-    }
-
-    ret = hg_proc_size_t(proc, &layout->stripe_size);
-    if (ret != HG_SUCCESS) {
-        HG_ERROR_DEFAULT("Proc error");
-        ret = HG_FAIL;
-        return ret;
+        for(i=0 ; i<struct_data->rank ; i++) {
+            ret = hg_proc_uint64_t(proc, &struct_data->start_cell[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+            ret = hg_proc_uint64_t(proc, &struct_data->end_cell[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_FREE:
+        if(struct_data->rank) {
+            free(struct_data->start_cell);
+            free(struct_data->end_cell);
+        }
+        break;
+    default:
+        return HG_FAIL;
     }
 
     return ret;

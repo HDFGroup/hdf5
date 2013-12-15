@@ -279,6 +279,10 @@ main(int argc, char **argv)
     }
 #endif
 
+    if(0 == my_rank) {
+        ship_analysis(file_name, dataset_name);
+    }
+
     MPI_Barrier(MPI_COMM_WORLD);
 
     EFF_finalize();
