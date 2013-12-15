@@ -6,9 +6,11 @@
 
 /*
  * DEFINES that affect behavior
+ * SHOW_H5A_DELETE_BY_NAME_ISSUE - define this if you want to debug the issue with H5Adelete_by_name when -a flag used.
  * - EXTEND_WORKING   If defined, datasets are extended.  If not defined, only a message it printed.
  */
 
+#define SHOW_H5A_DELETE_BY_NAME_ISSUE
 //#define EXTEND_WORKING
 
 #include <stdio.h>
@@ -292,6 +294,9 @@ int main( int argc, char **argv ) {
       fprintf( stderr, "M6.2-r%d: Start tr %d (Step 15a - begin) - %s\n", my_rank, (int)tr_num4, STATUS );
    
       /* Create & start transaction 3, based on cv 2  */
+#ifdef SHOW_H5A_DELETE_BY_NAME_ISSUE
+if (my_rank == 0 ) sleep (5);
+#endif
       tr_id3 = H5TRcreate( file_id, rc_id2, tr_num3 ); assert( tr_id3 >= 0 );
       ret = H5TRstart( tr_id3, trspl_id, H5_EVENT_STACK_NULL ); 
       fprintf( stderr, "M6.2-r%d: Start tr %d (Step 15b - begin) - %s\n", my_rank, (int)tr_num3, STATUS );
@@ -310,8 +315,19 @@ int main( int argc, char **argv ) {
       }
       /*    3) AA@/ deleted in Tr 3 by rank 0      */
       if ( my_rank == 0 ) {
-         ret = H5Adelete_by_name_ff( file_id, ".", "AA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
-         fprintf( stderr, "M6.2-r%d: delete AA @ / in tr %d - %s\n", my_rank, (int)tr_num3, STATUS );
+         // ISSUE:  When you run with -a and another rank aborts transaction 3 before H5Adelete_by_name_ff is called 
+         // here by rank 0, the file close will fail because not all objects are closed.
+         // Coded here so that call won't be made if running with -a unless we're in debug mode and 
+         // SHOW_H5A_DELETE_BY_NAME_ISSUE is defined.  Clean up once issue fixed in lower layers.
+         if ( abort3 == 0 ) {
+            ret = H5Adelete_by_name_ff( file_id, ".", "AA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
+            fprintf( stderr, "M6.2-r%d: delete AA @ / in tr %d - %s\n", my_rank, (int)tr_num3, STATUS );
+         } else {
+#ifdef SHOW_H5A_DELETE_BY_NAME_ISSUE
+            ret = H5Adelete_by_name_ff( file_id, ".", "AA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
+            fprintf( stderr, "M6.2-r%d: delete AA @ / in tr %d - %s\n", my_rank, (int)tr_num3, STATUS );
+#endif
+         }
       }
       /*    4) /GA/DA deleted in Tr 3 by rank 1    */
       if ( my_rank == 1 ) {
