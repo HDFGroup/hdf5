@@ -252,6 +252,7 @@ done:
         if(iod_obj_close(cur_oh.wr_oh, NULL, NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
     }
+
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
         fprintf(stderr, "failed to create Dataset\n");
@@ -266,6 +267,7 @@ done:
                 HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
             if(iod_obj_close(dset_oh.wr_oh, NULL, NULL) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            step --;
         }
 
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
@@ -826,10 +828,6 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-#if H5VL_IOD_DEBUG 
-    fprintf(stderr, "Start dataset Write on OH %"PRIu64" OID %"PRIx64"\n", iod_oh.wr_oh, iod_id);
-#endif
 
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.wr_oh.cookie == IOD_OH_UNDEFINED) {
