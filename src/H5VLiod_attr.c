@@ -1005,6 +1005,7 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     iod_checksum_t sp_cs = 0;
     iod_ret_t ret;
     iod_checksum_t cs;
+    int step;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1047,6 +1048,8 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
     }
 
+    step ++;
+
     /* get attribute ID */
     if(H5VL_iod_get_metadata(attr_kv_oh.rd_oh, rtid, H5VL_IOD_LINK, 
                              attr_name, NULL, NULL, &iod_link) < 0)
@@ -1060,9 +1063,16 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_read(coh, attr_id, wtid, NULL /*hints*/, &attr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
+    step ++;
+
     /* get scratch pad of the attribute */
     if(iod_obj_get_scratch(attr_oh, rtid, &sp, &sp_cs, NULL) < 0)
         HGOTO_ERROR2(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+    /* close the attribute oh */
+    iod_obj_close(attr_oh, NULL, NULL);
+
+    step --;
 
     if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
@@ -1085,8 +1095,14 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_kv_unlink_keys(attr_kv_oh.wr_oh, wtid, NULL, 1, &kvs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
 
+    /* close the Attribute KV object */
+    iod_obj_close(attr_kv_oh.rd_oh, NULL, NULL);
+    iod_obj_close(attr_kv_oh.wr_oh, NULL, NULL);
+
+    step --;
+
     ret = iod_obj_unlink(coh, attr_id, wtid, NULL);
-    if(ret < 0) {
+    if(ret != 0) {
         fprintf(stderr, "ret %d error %s\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
     }
@@ -1102,12 +1118,17 @@ done:
         iod_obj_close(obj_oh.rd_oh, NULL, NULL);
     }
 
-    /* close the attribute oh */
-    iod_obj_close(attr_oh, NULL, NULL);
-
-    /* close the Attribute KV object */
-    iod_obj_close(attr_kv_oh.rd_oh, NULL, NULL);
-    iod_obj_close(attr_kv_oh.wr_oh, NULL, NULL);
+    if(step == 2) {
+        /* close the Attribute KV object */
+        iod_obj_close(attr_kv_oh.rd_oh, NULL, NULL);
+        iod_obj_close(attr_kv_oh.wr_oh, NULL, NULL);
+        step --;
+    }
+    if(step == 1) {
+        /* close the attribute oh */
+        iod_obj_close(attr_oh, NULL, NULL);
+        step --;
+    }
 
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 

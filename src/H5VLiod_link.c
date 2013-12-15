@@ -722,6 +722,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     iod_ret_t ret;
     iod_checksum_t cs;
     H5VL_iod_link_t iod_link;
+    int step;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -766,6 +767,8 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
         if (iod_obj_open_read(coh, obj_id, rtid, NULL, &obj_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
+        step ++;
+
         /* get scratch pad */
         if(iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
@@ -782,6 +785,8 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
         if (iod_obj_open_write(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh.wr_oh, NULL) < 0)
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
+        step ++;
+
         if(H5VL_iod_get_metadata(mdkv_oh.rd_oh, rtid, H5VL_IOD_LINK_COUNT, 
                                  H5VL_IOD_KEY_OBJ_LINK_COUNT,
                                  NULL, NULL, &link_count) < 0)
@@ -796,6 +801,15 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
                                           NULL, NULL, NULL) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
         }
+
+        iod_obj_close(mdkv_oh.rd_oh, NULL, NULL);
+        iod_obj_close(mdkv_oh.wr_oh, NULL, NULL);
+
+        step --;
+
+        iod_obj_close(obj_oh, NULL, NULL);
+
+        step --;
 
         /* If this was the only link to the object, remove the object */
         if(0 == link_count) {
@@ -819,10 +833,16 @@ done:
         iod_obj_close(cur_oh.wr_oh, NULL, NULL);
     }
 
-    /* close the metadata scratch pad */
-    iod_obj_close(mdkv_oh.rd_oh, NULL, NULL);
-    iod_obj_close(mdkv_oh.wr_oh, NULL, NULL);
-    iod_obj_close(obj_oh, NULL, NULL);
+    if(step == 2) {
+        /* close the metadata scratch pad */
+        iod_obj_close(mdkv_oh.rd_oh, NULL, NULL);
+        iod_obj_close(mdkv_oh.wr_oh, NULL, NULL);
+        step --;
+    }
+    if(step == 1) {
+        iod_obj_close(obj_oh, NULL, NULL);
+        step --;
+    }
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with link remove, sending response %d to client\n",
