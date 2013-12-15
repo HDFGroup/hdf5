@@ -111,7 +111,6 @@ MERCURY_GEN_PROC(analysis_execute_in_t,
                  ((hg_const_string_t)(combine_script)))
 MERCURY_GEN_PROC(analysis_execute_out_t, ((int32_t)(ret)))
 MERCURY_GEN_PROC(analysis_farm_in_t, 
-                 ((axe_t)(axe_info))
                  ((iod_handle_t)(coh)) 
                  ((hid_t)(query_id)) 
                  ((hid_t)(space_id))
@@ -120,10 +119,12 @@ MERCURY_GEN_PROC(analysis_farm_in_t,
                  ((iod_obj_id_t)(obj_id))
                  ((size_t)(num_cells))
                  ((coords_t)(coords))
+                 ((uint32_t)(server_idx))
                  ((hg_const_string_t)(split_script)))
 MERCURY_GEN_PROC(analysis_farm_out_t, 
                  ((int32_t)(ret)) 
                  ((uint64_t)(axe_id))
+                 ((uint32_t)(server_idx))
                  ((hg_bulk_t)(bulk_handle))
                  ((hid_t)(type_id)))
 
