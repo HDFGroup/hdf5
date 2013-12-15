@@ -6,11 +6,9 @@
 
 /*
  * DEFINES that affect behavior
- * SHOW_H5A_DELETE_BY_NAME_ISSUE - define this if you want to debug the issue with H5Adelete_by_name when -a flag used.
  * - EXTEND_WORKING   If defined, datasets are extended.  If not defined, only a message it printed.
  */
 
-#define SHOW_H5A_DELETE_BY_NAME_ISSUE
 //#define EXTEND_WORKING
 
 #include <stdio.h>
@@ -27,7 +25,8 @@
 
 /* option flags */
 int verbose = 0;     // Verbose defaults to no
-int abort3 = 0;      // Abort Transaction 3 defaults to no
+int abort3 = 0;      // Abort transaction 3 defaults to no
+int workaround = 0;  // Workaround to abort transaction 3 only from rank 0 to avoid (occasional) issue with object staying open
 
 /* prototypes for helper functions */
 void create_string_attribute( hid_t, const char*, hid_t, const char*, int, uint64_t );
@@ -37,7 +36,7 @@ void create_committed_datatype( hid_t, const char*, hid_t, const char*, int, uin
 void update_dataset( hid_t, const char*, hid_t, hid_t, const char*, int, uint64_t, int );
 void extend_dataset( hid_t, const char*, hid_t, hid_t, const char*, int, uint64_t, int );
 void print_container_contents( hid_t, hid_t, const char*, int );
-int  parse_options( int argc, char** argv);
+int  parse_options( int, char**, int );
 
 int main( int argc, char **argv ) {
    const char file_name[]="m6.2-eff_container.h5";
@@ -59,14 +58,15 @@ int main( int argc, char **argv ) {
       exit( 1 );
    }
 
-   /* Parse command-line options controlling behavior */
-   if ( parse_options( argc, argv ) != 0 ) {
-      exit( 1 );
-   }
-
    MPI_Comm_rank( MPI_COMM_WORLD, &my_rank );
    MPI_Comm_size( MPI_COMM_WORLD, &comm_size );
    fprintf( stderr, "M6.2-r%d: Number of MPI processes = %d\n", my_rank, comm_size );
+
+   /* Parse command-line options controlling behavior */
+   if ( parse_options( argc, argv, my_rank ) != 0 ) {
+      exit( 1 );
+   }
+
 
    
 
@@ -294,9 +294,6 @@ int main( int argc, char **argv ) {
       fprintf( stderr, "M6.2-r%d: Start tr %d (Step 15a - begin) - %s\n", my_rank, (int)tr_num4, STATUS );
    
       /* Create & start transaction 3, based on cv 2  */
-#ifdef SHOW_H5A_DELETE_BY_NAME_ISSUE
-if (my_rank == 0 ) sleep (5);
-#endif
       tr_id3 = H5TRcreate( file_id, rc_id2, tr_num3 ); assert( tr_id3 >= 0 );
       ret = H5TRstart( tr_id3, trspl_id, H5_EVENT_STACK_NULL ); 
       fprintf( stderr, "M6.2-r%d: Start tr %d (Step 15b - begin) - %s\n", my_rank, (int)tr_num3, STATUS );
@@ -315,19 +312,8 @@ if (my_rank == 0 ) sleep (5);
       }
       /*    3) AA@/ deleted in Tr 3 by rank 0      */
       if ( my_rank == 0 ) {
-         // ISSUE:  When you run with -a and another rank aborts transaction 3 before H5Adelete_by_name_ff is called 
-         // here by rank 0, the file close will fail because not all objects are closed.
-         // Coded here so that call won't be made if running with -a unless we're in debug mode and 
-         // SHOW_H5A_DELETE_BY_NAME_ISSUE is defined.  Clean up once issue fixed in lower layers.
-         if ( abort3 == 0 ) {
-            ret = H5Adelete_by_name_ff( file_id, ".", "AA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
-            fprintf( stderr, "M6.2-r%d: delete AA @ / in tr %d - %s\n", my_rank, (int)tr_num3, STATUS );
-         } else {
-#ifdef SHOW_H5A_DELETE_BY_NAME_ISSUE
-            ret = H5Adelete_by_name_ff( file_id, ".", "AA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
-            fprintf( stderr, "M6.2-r%d: delete AA @ / in tr %d - %s\n", my_rank, (int)tr_num3, STATUS );
-#endif
-         }
+         ret = H5Adelete_by_name_ff( file_id, ".", "AA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
+         fprintf( stderr, "M6.2-r%d: delete AA @ / in tr %d - %s\n", my_rank, (int)tr_num3, STATUS );
       }
       /*    4) /GA/DA deleted in Tr 3 by rank 1    */
       if ( my_rank == 1 ) {
@@ -380,16 +366,25 @@ if (my_rank == 0 ) sleep (5);
          extend_dataset( file_id, "/GA/DB", tr_id3, rc_id2, "/", my_rank, tr_num3, 1 );
       }
 
-      /*    Abort - we show all ranks calling abort, but a single rank can make the call and have the same effect   */
+      /*    Abort - one or more processes should be able to abort the Transaction with the same effect. */
       if ( abort3 ) {
-         ret = H5TRabort( tr_id3, H5_EVENT_STACK_NULL ); 
-         fprintf( stderr, "M6.2-r%d: ABORT tr %d (Step 15b - abort) - %s\n", my_rank, (int)tr_num3, STATUS );
+         if ( workaround && ( my_rank != 0 ) ) {
+            /* If not rank 0 when workaround enabled, don't call H5TRabort 
+             * When it's called by all, *sometimes* objects are left open and the file close fails.
+             * The transaction updates are discarded correctly, there's just some object that isn't getting closes properly.
+             * Depends on order-of-execution of multiple threads, and unable to resolve before demo.
+             */
+         } else {
+            /* All ranks should be able to call without objects being left open */
+            ret = H5TRabort( tr_id3, H5_EVENT_STACK_NULL ); 
+            fprintf( stderr, "M6.2-r%d: ABORT tr %d (Step 15b - abort) - %s\n", my_rank, (int)tr_num3, STATUS );
+         }
       }
 
       /* Finish and commit transaction 3, causing the updates to appear in container version 3. */
       ret = H5TRfinish( tr_id3, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); 
       fprintf( stderr, "M6.2-r%d: Finish and commit tr %d (Step 15b - end) - %s\n", my_rank, (int)tr_num3, STATUS );
-   
+
       ret = H5TRclose( tr_id3 ); ASSERT_RET;
 
       /* Get read context for CV 3, then print the contents of container */
@@ -937,7 +932,7 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
  * parse_options - helper function to parse the command line options.
  */
 int
-parse_options( int argc, char** argv ) {
+parse_options( int argc, char** argv, int my_rank ) {
    int i, n;
 
    while ( --argc ) {
@@ -951,8 +946,16 @@ parse_options( int argc, char** argv ) {
             case 'a':
                abort3 = 1;
                break;
+            case 'w':
+               workaround = 1;
+               break;
             default: 
-               printf( "Usage: h5ff_client_M6.2_demo [-av] \n\ta: abort transaction 3\n\tv: verbose printing\n" );
+               if ( my_rank == 0 ) {
+                  printf( "Usage: h5ff_client_M6.2_demo [-avw]\n" );
+                  printf( "\ta: abort transaction 3\n" );
+                  printf( "\tv: verbose printing\n" );
+                  printf( "\tw: workaround - force abort to be done by rank 0, not all ranks\n" );
+               }
                return( 1 );
          }
       }
