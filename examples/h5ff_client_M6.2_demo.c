@@ -303,37 +303,31 @@ int main( int argc, char **argv ) {
       /*    3) AA@/ deleted in Tr 3 by rank 0      */
       if ( my_rank == 0 ) {
          ret = H5Adelete_by_name_ff( file_id, ".", "AA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
-fprintf( stderr, "M6.2-r%d: DEBUG: delete of /AA in tr %d returned %d\n", my_rank, (int)tr_num3, ret );
          fprintf( stderr, "M6.2-r%d: delete AA @ / in tr %d - %s\n", my_rank, (int)tr_num3, STATUS );
       }
       /*    4) /GA/DA deleted in Tr 3 by rank 1    */
       if ( my_rank == 1 ) {
          ret = H5Ldelete_ff( file_id, "/GA/DA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
-fprintf( stderr, "M6.2-r%d: DEBUG: delete of /GA/DA in tr %d returned %d\n", my_rank, (int)tr_num3, ret );
          fprintf( stderr, "M6.2-r%d: delete /GA/DA in tr %d - %s\n", my_rank, (int)tr_num3, STATUS);
       }
       /*    5) /GA/TB deleted in Tr 4 by rank 0    */
       if ( my_rank == 0 ) {
          ret = H5Ldelete_ff( file_id, "/GA/TB", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); 
-fprintf( stderr, "M6.2-r%d: DEBUG: delete of /GA/TB in tr %d returned %d\n", my_rank, (int)tr_num3, ret );
          fprintf( stderr, "M6.2-r%d: delete /GA/TB in tr %d - %s\n", my_rank, (int)tr_num4, STATUS );
       }
       /*    6) /DB deleted in Tr 4 by rank 1       */
       if ( my_rank == 1 ) {
          ret = H5Ldelete_ff( file_id, "/DB", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); 
-fprintf( stderr, "M6.2-r%d: DEBUG: delete of /DB in tr %d returned %d\n", my_rank, (int)tr_num3, ret );
          fprintf( stderr, "M6.2-r%d: delete /DB in tr %d - %s \n", my_rank, (int)tr_num4, STATUS );
       }
       /*    7) /GB/GA deleted in Tr 3 by rank 0    */
       if ( my_rank == 0 ) {
          ret = H5Ldelete_ff( file_id, "/GB/GA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
-fprintf( stderr, "M6.2-r%d: DEBUG: delete of /GB/GA in tr %d returned %d\n", my_rank, (int)tr_num3, ret );
          fprintf( stderr, "M6.2-r%d: delete /GB/GA in tr %d - %s\n", my_rank, (int)tr_num3, STATUS );
       }
       /*    8) /GA/TA deleted in Tr 3 by rank 1    */
       if ( my_rank == 1  ) {
          ret = H5Ldelete_ff( file_id, "/GA/TA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
-fprintf( stderr, "M6.2-r%d: DEBUG: delete of /GA/TA in tr %d returned %d\n", my_rank, (int)tr_num3, ret );
          fprintf( stderr, "M6.2-r%d: delete /GA/TA in tr %d - %s\n", my_rank, (int)tr_num3, STATUS );
       }
       /*    9) /GA/GA/GA added in Tr 3 by rank 0   */
@@ -343,7 +337,6 @@ fprintf( stderr, "M6.2-r%d: DEBUG: delete of /GA/TA in tr %d returned %d\n", my_
       /*    10) /GB/TA deleted in Tr 3 by rank 1   */
       if ( my_rank == 1 ) {
          ret = H5Ldelete_ff( file_id, "/GB/TA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
-fprintf( stderr, "M6.2-r%d: DEBUG: delete of /GB/TA in tr %d returned %d\n", my_rank, (int)tr_num3, ret );
          fprintf( stderr, "M6.2-r%d: delete /GB/TA in tr %d - %s\n", my_rank, (int)tr_num3, STATUS );
       }
       /*    11) /GB/GB/DB added in Tr 3 by rank 1  */
@@ -454,7 +447,7 @@ fprintf( stderr, "M6.2-r%d: DEBUG: delete of /GB/TA in tr %d returned %d\n", my_
       }
 
       /* 
-       * Note that rc_id4 was obtained in this bracket code, but we aren't releasing it until later.
+       * Note that rc_id4 was obtained in this bracketed code, but we aren't releasing it until later.
        * Inelegant but I want it again & don't want to have to acquire again. 
        * Wanted to use it in print above (15f) before 2nd print of CV3 (15g), so didn't wait until
        * bracket closed to acquire. 
@@ -851,11 +844,9 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
          dset_id = H5Dopen_ff( file_id, path_to_object, H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
          assert( dset_id >= 0 );
 
-// Here's what fails
          space_id = H5Dget_space( dset_id ); assert ( space_id >= 0 );
          nDims = H5Sget_simple_extent_dims( space_id, &current_size, &max_size ); 
-         if (nDims != 1) fprintf( stderr, "nDims is %d\n", nDims );
-         //assert( nDims == 1 );
+         assert( nDims == 1 );
 
          data = (int *)calloc( current_size, sizeof(int) ); 
 
