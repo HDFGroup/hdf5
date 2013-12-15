@@ -6,14 +6,9 @@
 
 /*
  * DEFINES that affect behavior
- * - VERBOSE:  If set to 0, contents of container versions only printed at end, after container closed & re-opened.
- *             If set to 1, contents printed out along the way as transactions are committed
- * - ABORT3:  If defined, transaction 3 will be aborted
  * - EXTEND_WORKING   If defined, datasets are extended.  If not defined, only a message it printed.
  */
 
-#define VERBOSE 1
-//#define ABORT3
 //#define EXTEND_WORKING
 
 #include <stdio.h>
@@ -28,6 +23,11 @@
 #define STATUS (ret >= 0) ? "OK" : "FAILED"
 #define ASSERT_RET assert( ret >= 0 )
 
+/* option flags */
+int verbose = 0;     // Verbose defaults to no
+int abort3 = 0;      // Abort Transaction 3 defaults to no
+
+/* prototypes for helper functions */
 void create_string_attribute( hid_t, const char*, hid_t, const char*, int, uint64_t );
 void create_group( hid_t, const char*, hid_t, const char*, int, uint64_t );
 void create_dataset( hid_t, const char*, hid_t, const char*, int, uint64_t, int );
@@ -35,10 +35,10 @@ void create_committed_datatype( hid_t, const char*, hid_t, const char*, int, uin
 void update_dataset( hid_t, const char*, hid_t, hid_t, const char*, int, uint64_t, int );
 void extend_dataset( hid_t, const char*, hid_t, hid_t, const char*, int, uint64_t, int );
 void print_container_contents( hid_t, hid_t, const char*, int );
+int  parse_options( int argc, char** argv);
 
 int main( int argc, char **argv ) {
    const char file_name[]="m6.2-eff_container.h5";
-   int verbose = VERBOSE;
 
    int my_rank, comm_size;
    int provided;
@@ -56,9 +56,17 @@ int main( int argc, char **argv ) {
       fprintf( stderr, "M6.2: ERROR: MPI does not have MPI_THREAD_MULTIPLE support\n" );
       exit( 1 );
    }
+
+   /* Parse command-line options controlling behavior */
+   if ( parse_options( argc, argv ) != 0 ) {
+      exit( 1 );
+   }
+
    MPI_Comm_rank( MPI_COMM_WORLD, &my_rank );
    MPI_Comm_size( MPI_COMM_WORLD, &comm_size );
    fprintf( stderr, "M6.2-r%d: Number of MPI processes = %d\n", my_rank, comm_size );
+
+   
 
    /* Initialize the EFF stack. */
    fprintf( stderr, "M6.2-r%d: Initialize EFF stack (Step 1)\n", my_rank );
@@ -356,11 +364,11 @@ int main( int argc, char **argv ) {
          extend_dataset( file_id, "/GA/DB", tr_id3, rc_id2, "/", my_rank, tr_num3, 1 );
       }
 
-#ifdef ABORT3
       /*    Abort - we show all ranks calling abort, but a single rank can make the call and have the same effect   */
-      ret = H5TRabort( tr_id3, H5_EVENT_STACK_NULL ); 
-      fprintf( stderr, "M6.2-r%d: ABORT tr %d (Step 15b - abort) - %s\n", my_rank, (int)tr_num3, STATUS );
-#endif
+      if ( abort3 ) {
+         ret = H5TRabort( tr_id3, H5_EVENT_STACK_NULL ); 
+         fprintf( stderr, "M6.2-r%d: ABORT tr %d (Step 15b - abort) - %s\n", my_rank, (int)tr_num3, STATUS );
+      }
 
       /* Finish and commit transaction 3, causing the updates to appear in container version 3. */
       ret = H5TRfinish( tr_id3, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); 
@@ -909,4 +917,29 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
    return;
 }
 
+/*
+ * parse_options - helper function to parse the command line options.
+ */
+int
+parse_options( int argc, char** argv ) {
+   int i, n;
 
+   while ( --argc ) {
+      if ( **(++argv) != '-' ) {
+         break;
+      } else {
+         switch( *(*argv+1) ) {
+            case 'v':   
+               verbose = 1;
+               break;
+            case 'a':
+               abort3 = 1;
+               break;
+            default: 
+               printf( "Usage: h5ff_client_M6.2_demo [-av] \n\ta: abort transaction 3\n\tv: verbose printing\n" );
+               return( 1 );
+         }
+      }
+   }
+   return( 0 );
+}
