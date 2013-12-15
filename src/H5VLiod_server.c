@@ -19,6 +19,8 @@
 #include <Python.h>
 #endif
 
+#define MAX_LOC_NAME 256
+
 #ifdef H5_HAVE_EFF
 
 /*
@@ -38,6 +40,7 @@ iod_obj_id_t ROOT_ID = 0;
 
 int num_ions_g = 0;
 na_addr_t *server_addr_g = NULL;
+char **server_loc_g = NULL;
 hg_id_t H5VL_EFF_OPEN_CONTAINER;
 hg_id_t H5VL_EFF_CLOSE_CONTAINER;
 hg_id_t H5VL_EFF_ANALYSIS_FARM;
@@ -262,6 +265,30 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
             return FAIL;
         }
     }
+
+    /* Get array of loc string */
+    server_loc_g = (char **) malloc((unsigned int) num_ions_g * sizeof(char *));
+    for (i = 0; i < num_ions_g; i++) {
+        server_loc_g[i] = (char *) malloc(MAX_LOC_NAME);
+    }
+
+    /* Only rank 0 read loc file */
+    if (my_rank == 0) {
+        config = fopen("loc.cfg", "r+");
+        if (!config) {
+            fprintf(stderr, "Warning, no loc config was found\n");
+        } else {
+            for (i = 0; i < num_ions_g; i++) {
+                fscanf(config, "%s\n", server_loc_g[i]);
+            }
+            fclose(config);
+        }
+    }
+    /* TODO may not be necessary to do a broadcast here */
+    for (i = 0; i < num_ions_g; i++)
+        MPI_Bcast(server_loc_g[i], MAX_LOC_NAME, MPI_BYTE, 0, comm);
+
+
     /***************** END Initialize mercury *******************/
 
     EFF__mercury_register_callbacks();
@@ -302,6 +329,11 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
         return FAIL;
 
     /******************* Finalize mercury ********************/
+    for (i = 0; i < num_ions_g; i++) {
+        free(server_loc_g[i]);
+    }
+    free(server_loc_g);
+
     for (i = 0; i < num_ions_g; i++) {
         NA_Addr_free(network_class, server_addr_g[i]);
     }
