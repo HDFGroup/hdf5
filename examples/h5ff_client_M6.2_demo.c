@@ -6,10 +6,9 @@
 
 /*
  * DEFINES that affect behavior
- * - EXTEND_WORKING   If defined, datasets are extended.  If not defined, only a message it printed.
+ *  LAST_CV_ONLY - if set, after file is closed & re-opened, only the data from the last CV is printed. Saves runtime.
  */
-
-//#define EXTEND_WORKING
+//#define LAST_CV_ONLY
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,14 +26,16 @@
 int verbose = 0;     // Verbose defaults to no
 int abort3 = 0;      // Abort transaction 3 defaults to no
 int workaround = 0;  // Workaround to abort transaction 3 only from rank 0 to avoid (occasional) issue with object staying open
+int init2D = 0;      // Initialize cells in 2D arrays to -1 
 
 /* prototypes for helper functions */
 void create_string_attribute( hid_t, const char*, hid_t, const char*, int, uint64_t );
 void create_group( hid_t, const char*, hid_t, const char*, int, uint64_t );
 void create_dataset( hid_t, const char*, hid_t, const char*, int, uint64_t, int );
+void create_dataset2( hid_t, const char*, hid_t, const char*, int, uint64_t );
 void create_committed_datatype( hid_t, const char*, hid_t, const char*, int, uint64_t );
 void update_dataset( hid_t, const char*, hid_t, hid_t, const char*, int, uint64_t, int );
-void extend_dataset( hid_t, const char*, hid_t, hid_t, const char*, int, uint64_t, int );
+void append_dataset2( hid_t, const char*, hid_t, hid_t, const char*, int, uint64_t );
 void print_container_contents( hid_t, hid_t, const char*, int );
 int  parse_options( int, char**, int );
 
@@ -67,9 +68,6 @@ int main( int argc, char **argv ) {
       exit( 1 );
    }
 
-
-   
-
    /* Initialize the EFF stack. */
    fprintf( stderr, "M6.2-r%d: Initialize EFF stack (Step 1)\n", my_rank );
    EFF_init( MPI_COMM_WORLD, MPI_INFO_NULL );
@@ -94,6 +92,7 @@ int main( int argc, char **argv ) {
     * Root group attributes AA and AB are created and populated.
     * Groups /GA and /GB are created.
     * Datasets /DA and /DB are created and populated.
+    * Dataset /DC (2-d) and attribute AC@/DC are created & initialized.
     * Committed datatypes /TA and /TB are created.
     */
    if ( my_rank == 0 ) {
@@ -115,9 +114,10 @@ int main( int argc, char **argv ) {
       create_string_attribute( file_id, "AA", tr_id, "/", my_rank, tr_num );
       create_string_attribute( file_id, "AB", tr_id, "/", my_rank, tr_num );
     
-      /* 2 Datasets */
+      /* 3 Datasets */
       create_dataset( file_id, "DA", tr_id, "/", my_rank, tr_num, 1 );
       create_dataset( file_id, "DB", tr_id, "/", my_rank, tr_num, 2 );
+      create_dataset2( file_id, "DC", tr_id, "/", my_rank, tr_num );
 
       /* 2 committed datatypes */
       create_committed_datatype( file_id, "TA", tr_id, "/", my_rank, tr_num );
@@ -170,6 +170,7 @@ int main( int argc, char **argv ) {
     * Datasets /GB/DA and /GB/DB are created and populated by rank 1.
     * Committed Datatypes /GA/AA and /GA/TB are created by rank 0.
     * Committed Datatypes /GB/AA and /GB/TB are created by rank 1.
+    * Dataset /DC is appended to by rank 0.
     */
    if ( (my_rank == 0) || (my_rank == 1) ) {
 
@@ -217,6 +218,11 @@ int main( int argc, char **argv ) {
       create_group( gr_id, "GA", tr_id, gr_path, my_rank, tr_num );
       create_group( gr_id, "GB", tr_id, gr_path, my_rank, tr_num );
 
+      /* Append to dataset /DC */
+      if ( my_rank == 0 ) {
+         append_dataset2( file_id, "/DC", tr_id, rc_id1, "/", my_rank, tr_num );
+      }
+
       /* Close the group */
       ret = H5Gclose_ff ( gr_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
@@ -255,30 +261,12 @@ int main( int argc, char **argv ) {
     * Transaction 4 is created and started by all MPI processes.
     * Transaction 3 is created and started by all MPI processes.
     * Updates are added to the transactions in an interleaved manner, 
-    * with the ranks progressing independent of each other.  
-    * The sequence of operations in the code is:
-    *    1) /GA/GA/GB added to Tr 4 by rank 0
-    *    2) /GB/GB/GB added to Tr 4 by rank 1
-    *    3) AA@/ deleted in Tr 3 by rank 0
-    *    4) /GA/DA deleted in Tr 3 by rank 1
-    *    5) /GA/TB deleted in Tr 4 by rank 0
-    *    6) /DB deleted in Tr 4 by rank 1
-    *    7) /GB/GA deleted in Tr 3 by rank 0
-    *    8) /GA/TA deleted in Tr 3 by rank 1
-    *    9) /GA/GA/GA added in Tr 3 by rank 0
-    *    10) /GB/TA deleted in Tr 3 by rank 1
-    *    11) /GB/GB/DB added in Tr 3 by rank 1
-    * Transaction 3 is finished and committed.
-    *    12) /GB/GB/GA added in Tr 4 by rank 1
-    * Transaction 4 is finished and committed.
-    *
-    * Bracket in {}'s to localize variables, and to later make it easier to restrict ranks participating if desired.
-    * 
-    * Transaction 3 may be aborted by on process before it's started on others.  
-    * We switch to printing the status of the calls that start and add updates to transactions rather than assert they
-    * are successful.
+    * with the ranks progressing independent of each other, and 
+    * additional updates to transaction 14 after transaction 13 
+    * is finished and committed.
+    * Transaction 3 may be aborted 
     */
-   {
+   {           /* Bracket to localize variables, and to later make it easier to restrict ranks participating if desired. */
       uint64_t tr_num3 = 3;
       uint64_t tr_num4 = 4;
       hid_t tr_id3, tr_id4;
@@ -356,14 +344,14 @@ int main( int argc, char **argv ) {
       /*    12) /DA updated in Tr 3 by all ranks   */
       update_dataset( file_id, "/DA", tr_id3, rc_id2, "/", my_rank, tr_num3, 1 );
 
-      /*    13) /GB/DA updated in Tr 3 by rank 0 if > 1 process   */
+      /*    13) /GB/DA updated in Tr 3 by rank 0  */
       if ( my_rank == 0 ) {
          update_dataset( file_id, "/GB/DA", tr_id3, rc_id2, "/", my_rank, tr_num3, 1 );
       }
 
-      /*    14) /GA/DB extended in Tr 3 by rank 0  */
+      /*    14) Append to dataset /DC in Tr 3 by rank 0 */
       if ( my_rank == 0 ) {
-         extend_dataset( file_id, "/GA/DB", tr_id3, rc_id2, "/", my_rank, tr_num3, 1 );
+         append_dataset2( file_id, "/DC", tr_id3, rc_id2, "/", my_rank, tr_num3 );
       }
 
       /*    Abort - one or more processes should be able to abort the Transaction with the same effect. */
@@ -415,13 +403,18 @@ int main( int argc, char **argv ) {
          fprintf( stderr, "M6.2-r%d: Failed %d times to aquire read context for cv 3 - continuing\n", my_rank, max_tries );
       }
          
-      /*    16) /GB/GB/GA added in Tr 4 by rank 1  */
+      /*    15) /GB/GB/GA added in Tr 4 by rank 1  */
       if ( my_rank == 1 ) {
          create_group( file_id, "/GB/GB/GA", tr_id4, "/", my_rank, tr_num4 );
       }
 
-      /*    17) /DA updated in Tr 4 by all ranks */
+      /*    16) /DA updated in Tr 4 by all ranks */
       update_dataset( file_id, "/DA", tr_id4, rc_id2, "/", my_rank, tr_num4, 1 );
+
+      /*    17) Append to dataset /DC in Tr 4 by rank 0*/
+      if ( my_rank == 0 ) {
+         append_dataset2( file_id, "/DC", tr_id4, rc_id2, "/", my_rank, tr_num4 );
+      }
 
       /* Finish and commit transaction 4, causing the updates to appear in container version 4. */
       fprintf( stderr, "M6.2-r%d: Finish and commit tr %d (Step 15a - end)\n", my_rank, (int)tr_num4 );
@@ -506,7 +499,11 @@ int main( int argc, char **argv ) {
    H5RCget_version( last_rc_id, &last_version );
    fprintf( stderr, "M6.2-r%d: Latest CV in file is cv %d\n", my_rank, (int)last_version );
 
+#ifdef LAST_CV_ONLY
+   for ( v = last_version; v <= last_version; v++ ) {
+#else
    for ( v = 0; v <= last_version; v++ ) {
+#endif
       version = v;
       fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d\n", my_rank, (int)version );
       rc_id = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
@@ -650,6 +647,48 @@ create_dataset( hid_t obj_id, const char* dset_name, hid_t tr_id, const char* ob
 }
 
 /*
+ * Helper function used to create 6x4 2D dataset "dset_name" 
+ * in object identified by "obj_id"
+ * in transaction identified by "tr_id".
+ * "obj_path" and "my_rank" and "tr_num" are used in the status output.
+ */
+void
+create_dataset2( hid_t obj_id, const char* dset_name, hid_t tr_id, const char* obj_path, int my_rank, uint64_t tr_num ){
+   herr_t ret;
+   hsize_t current_sizes[2] = {6, 4};
+   hsize_t max_sizes[2] = {6, 4};
+   hid_t space_id;
+   hid_t dset_id;
+
+   space_id = H5Screate_simple( 2, current_sizes, max_sizes ); assert( space_id >= 0 );
+
+   dset_id = H5Dcreate_ff( obj_id, dset_name, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tr_id,
+                          H5_EVENT_STACK_NULL );
+   if ( dset_id >= 0 ) {
+      fprintf( stderr, "M6.2-r%d: Create %s in %s in tr %d - %s\n",
+               my_rank, dset_name, obj_path, (int)tr_num, "OK" );
+      if ( init2D ) {
+         int data[24];
+         int i;
+         for ( i = 0; i < 24; i++ ) {
+            data[i] = -1;
+         }
+         ret = H5Dwrite_ff( dset_id, H5T_NATIVE_INT, space_id, space_id, H5P_DEFAULT, data, tr_id, H5_EVENT_STACK_NULL ); 
+         ASSERT_RET;
+      }
+      ret = H5Dclose_ff( dset_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
+   } else {
+      fprintf( stderr, "M6.2-r%d: Create %s in %s in tr %d - %s\n",
+               my_rank, dset_name, obj_path, (int)tr_num, "FAILED" );
+   }
+
+   ret = H5Sclose( space_id ); ASSERT_RET;
+
+   return;
+}
+
+
+/*
  * Helper function used to create committed datatype "type_name" 
  * in group identified by "obj_id" 
  * in transaction identified by "tr_id".
@@ -711,7 +750,8 @@ update_dataset( hid_t obj_id, const char* dset_name, hid_t tr_id, hid_t rc_id, c
       
          ret = H5Sselect_hyperslab( filespace_id, H5S_SELECT_SET, &start, &stride, &count, &block ); ASSERT_RET;
 
-         ret = H5Dwrite_ff( dset_id, H5T_NATIVE_INT, memspace_id, filespace_id, H5P_DEFAULT, &cell_data, tr_id, H5_EVENT_STACK_NULL );
+         ret = H5Dwrite_ff( dset_id, H5T_NATIVE_INT, memspace_id, filespace_id, H5P_DEFAULT, &cell_data, tr_id, 
+                            H5_EVENT_STACK_NULL );
          fprintf( stderr, "M6.2-r%d: Update %s[%d] in %s in tr %d to have value %d - %s\n", 
                         my_rank, dset_name, my_rank, obj_path, (int)tr_num, cell_data, STATUS );
          ret = H5Sclose( memspace_id ); ASSERT_RET;
@@ -724,56 +764,84 @@ update_dataset( hid_t obj_id, const char* dset_name, hid_t tr_id, hid_t rc_id, c
       ret = H5Dclose_ff( dset_id, H5_EVENT_STACK_NULL ); ASSERT_RET; 
 
    } else {
-      fprintf( stderr, "M6.2-r%d: Update %s[%d] in %s in tr %d - %s\n", my_rank, dset_name, my_rank, obj_path, (int)tr_num, "FAILED" );
+      fprintf( stderr, "M6.2-r%d: Update %s[%d] in %s in tr %d - %s\n", 
+               my_rank, dset_name, my_rank, obj_path, (int)tr_num, "FAILED" );
    }
 
    return;
 }
 
 /*
- * Helper function used to extend dataset "dset_name" 
+ * Helper function used to append data at end of 2D dataset "dset_name" 
  * in object identified by "obj_id" 
  * in transaction identified by "tr_id".
  * "rc_id" for "tr_id" passed in explicitly for now - later add H5 function to extract it from tr_id.
- * Dataset will be extended by 1 and value of new cell wil be updated using the formula
- *    data[i] = ordinal*1000 + tr_num*100 + my_rank*10 + i;
- * "obj_path" and "my_rank" and "tr_num" and "ordinal" are used in the status output.
+ * cell[tr_num][my_rank] will be updated, using the formula
+ *    value  = ordinal*1000 + tr_num*100 + my_rank*10 + my_rank;
+ * "obj_path" and "my_rank" and "tr_num" are used in the status output.
  */
 void
-extend_dataset( hid_t obj_id, const char* dset_name, hid_t tr_id, hid_t rc_id, const char* obj_path, int my_rank, 
-                uint64_t tr_num, int ordinal ){
+append_dataset2( hid_t obj_id, const char* dset_name, hid_t tr_id, hid_t rc_id, const char* obj_path, int my_rank, 
+                uint64_t tr_num ){
    herr_t ret;
    hid_t dset_id;
-   hid_t file_space_id;
-   int nDims;
-   hsize_t current_size, max_size, new_size;
 
    /* Open the dataset, confirm number of dimensions, get current & max size */
-   dset_id = H5Dopen_ff( obj_id, dset_name, H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); assert( dset_id >= 0 );
+   dset_id = H5Dopen_ff( obj_id, dset_name, H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
 
-   file_space_id = H5Dget_space( dset_id ); assert ( file_space_id >= 0 );
-   nDims = H5Sget_simple_extent_dims( file_space_id, &current_size, &max_size );
-#ifdef EXTEND_WORKING
-   assert( nDims == 1 );
+   if ( dset_id >= 0 ) {
+      hid_t filespace_id;
+      int nDims;
+      hsize_t current_size[2]; 
+      hsize_t max_size[2];
 
-   if ( current_size < max_size) {
-      new_size = current_size + 1;
+      filespace_id = H5Dget_space( dset_id ); assert ( filespace_id >= 0 );
+      nDims = H5Sget_simple_extent_dims( filespace_id, current_size, max_size );
+      assert( nDims == 2 );
 
-      ret = H5Dset_extent_ff( dset_id, &new_size, tr_id, H5_EVENT_STACK_NULL ); 
-      fprintf( stderr, "M6.2-r%d: Extend %s in %s in tr %d to have size %d - %s\n", 
-                       my_rank, dset_name, obj_path, (int)tr_num, new_size, STATUS );
+      if ( (int)tr_num < current_size[0] ) {
+         hsize_t nCols;
+         int* data;              
+         int i;
+         hid_t memspace_id;
+         
+         nCols = current_size[1];
+         data = (int *)calloc( nCols, sizeof(int) );    // Write 1 column
+
+         /* set data value, create memory data space, then select the element to update */
+         for ( i = 0; i < nCols; i++ ) {
+            data[i] = 10*tr_num + i;
+         }
+         memspace_id = H5Screate_simple( 1, &nCols, &nCols ); assert( memspace_id >= 0 );
+
+         hsize_t start[2], stride[2], count[2], block[2];
+         start[0] = tr_num;
+         start[1] = 0;
+         stride[0] = 1;
+         stride[1] = 1;
+         count[0] = 1;
+         count[1] = nCols;
+         block[0] = 1;
+         block[1] = 1;
+
+         ret = H5Sselect_hyperslab( filespace_id, H5S_SELECT_SET, start, stride, count, block ); ASSERT_RET;
+
+         ret = H5Dwrite_ff( dset_id, H5T_NATIVE_INT, memspace_id, filespace_id, H5P_DEFAULT, data, tr_id, H5_EVENT_STACK_NULL );
+         fprintf( stderr, "M6.2-r%d: Update %s[%d][*] in %s in tr %d to have values %d %d %d %d - %s\n", 
+                        my_rank, dset_name, (int)tr_num, obj_path, (int)tr_num, data[0], data[1], data[2], data[3], STATUS );
+         ret = H5Sclose( memspace_id ); ASSERT_RET;
+
+      } else {
+         fprintf( stderr, "M6.2-r%d: No update to %s in %s in tr %d for this rank.\n", my_rank, dset_name, obj_path, (int)tr_num );
+      }
+
+      ret = H5Sclose( filespace_id ); ASSERT_RET;
+      ret = H5Dclose_ff( dset_id, H5_EVENT_STACK_NULL ); ASSERT_RET; 
 
    } else {
-      fprintf( stderr, "M6.2-r%d: No extend to %s in %s in tr %d as max_size already .\n", 
-            my_rank, dset_name, obj_path, (int)tr_num );
+      fprintf( stderr, "M6.2-r%d: Update %s[%d] in %s in tr %d - %s\n", 
+                       my_rank, dset_name, my_rank, obj_path, (int)tr_num, "FAILED" );
    }
-   ret = H5Sclose( file_space_id ); ASSERT_RET;
-#else
-   fprintf( stderr, "M6.2-r%d: Not yet able to extend %s in %s in tr %d to have size %d\n", 
-                       my_rank, dset_name, obj_path, (int)tr_num, current_size+1 );
-#endif
-
-   ret = H5Dclose_ff( dset_id, H5_EVENT_STACK_NULL ); ASSERT_RET; 
 
    return;
 }
@@ -815,10 +883,8 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
    for ( i = 1; i < 3; i++ ) {
       if ( i == 1 ) { 
          strcpy( name, "AA" );
-      } else if ( i == 2 ) { 
-         strcpy( name, "AB" ); 
       } else { 
-         strcpy( name, "XX" ); 
+         strcpy( name, "AB" ); 
       }
       ret = H5Aexists_by_name_ff( file_id, grp_path, name, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
       if ( exists ) { 
@@ -840,23 +906,25 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
    }
 
    /* Datasets */
-   for ( i = 1; i < 3; i++ ) {
+   for ( i = 1; i < 4; i++ ) {
       if ( i == 1 ) { 
          strcpy( name, "DA" );
-      } else if ( i == 2 ) { 
+      } else if ( i == 2 ){ 
          strcpy( name, "DB" ); 
-      } else { 
-         strcpy( name, "XX" ); 
+      } else {
+         strcpy( name, "DC" );
       }
 
       sprintf( path_to_object, "%s%s", grp_path, name );
       ret = H5Lexists_ff( file_id, path_to_object, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL );
+
       if ( exists ) { 
          hid_t dset_id;
          hid_t space_id;
          int nDims;
-         hsize_t current_size;
-         hsize_t max_size;
+         hsize_t current_size[2];
+         hsize_t max_size[2];
+         hsize_t totalSize;
          int *data;              
          int i;
 
@@ -864,17 +932,35 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
          assert( dset_id >= 0 );
 
          space_id = H5Dget_space( dset_id ); assert ( space_id >= 0 );
-         nDims = H5Sget_simple_extent_dims( space_id, &current_size, &max_size ); 
-         assert( nDims == 1 );
+         nDims = H5Sget_simple_extent_dims( space_id, current_size, max_size ); 
+         assert( ( nDims == 1 ) || ( nDims == 2 ) );
 
-         data = (int *)calloc( current_size, sizeof(int) ); 
+         if ( nDims == 1 ) {
+            totalSize = current_size[0];
+         } else {
+            totalSize = current_size[0] * current_size[1];
+         }
+         data = (int *)calloc( totalSize, sizeof(int) ); 
 
          ret = H5Dread_ff( dset_id, H5T_NATIVE_INT, space_id, space_id, H5P_DEFAULT, data, rc_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
          sprintf( line, "%s %s   values: ", preface, path_to_object, cv );
-         for ( i = 0; i < current_size; i++ ) {
-            sprintf( line, "%s%d ", line, data[i] );
+         if ( nDims == 1 ) {
+            for ( i = 0; i < totalSize; i++ ) {
+               sprintf( line, "%s%d ", line, data[i] );
+            }
+         } else {
+            int r, c;
+            i = 0;
+            for ( r = 0; r < current_size[0]; r++ ) {
+               sprintf( line, "%sr%d: ", line, r );
+               for ( c = 0; c < current_size[1]; c++ ) {
+                  sprintf( line, "%s%d ", line, data[i] );
+                  i++;
+               }
+            }
          }
+                  
          fprintf( stderr, "%s\n", line );
          free( data );
 
@@ -887,10 +973,8 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
    for ( i = 1; i < 3; i++ ) {
       if ( i == 1 ) { 
          strcpy( name, "TA" );
-      } else if ( i == 2 ) { 
-         strcpy( name, "TB" ); 
       } else { 
-         strcpy( name, "XX" ); 
+         strcpy( name, "TB" ); 
       }
 
       sprintf( path_to_object, "%s%s", grp_path, name );
@@ -904,10 +988,8 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
    for ( i = 1; i < 3; i++ ) {
       if ( i == 1 ) { 
          strcpy( name, "GA" );
-      } else if ( i == 2 ) { 
-         strcpy( name, "GB" ); 
       } else { 
-         strcpy( name, "XX" ); 
+         strcpy( name, "GB" ); 
       }
 
       sprintf( path_to_object, "%s%s/", grp_path, name );
@@ -940,19 +1022,23 @@ parse_options( int argc, char** argv, int my_rank ) {
          break;
       } else {
          switch( *(*argv+1) ) {
-            case 'v':   
-               verbose = 1;
-               break;
             case 'a':
                abort3 = 1;
+               break;
+            case 'i':   
+               init2D = 1;
+               break;
+            case 'v':   
+               verbose = 1;
                break;
             case 'w':
                workaround = 1;
                break;
             default: 
                if ( my_rank == 0 ) {
-                  printf( "Usage: h5ff_client_M6.2_demo [-avw]\n" );
+                  printf( "Usage: h5ff_client_M6.2_demo [-aivw]\n" );
                   printf( "\ta: abort transaction 3\n" );
+                  printf( "\ti: initialize cells in 2D arrays to -1\n" );
                   printf( "\tv: verbose printing\n" );
                   printf( "\tw: workaround - force abort to be done by rank 0, not all ranks\n" );
                }
