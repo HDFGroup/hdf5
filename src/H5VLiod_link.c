@@ -722,7 +722,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     iod_ret_t ret;
     iod_checksum_t cs;
     H5VL_iod_link_t iod_link;
-    int step;
+    int step = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT

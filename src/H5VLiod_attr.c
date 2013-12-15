@@ -1005,7 +1005,7 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     iod_checksum_t sp_cs = 0;
     iod_ret_t ret;
     iod_checksum_t cs;
-    int step;
+    int step = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
