@@ -1128,7 +1128,7 @@ H5VL__iod_get_space_layout(coords_t coords, iod_size_t num_cells, hid_t space_id
 
     for(i=0 ; i<ndims ; i++) {
         start[i] = coords.start_cell[i];
-        block[i] = coords.end_cell[i] + 1;
+        block[i] = (coords.end_cell[i] - coords.start_cell[i]) + 1;
         count[i] = 1;
     }
 
