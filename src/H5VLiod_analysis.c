@@ -739,6 +739,7 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
     if(farm_output)
         free(farm_output);
 
+    printf("(%d) Applying combine on data\n", my_rank_g);
 #ifdef H5_HAVE_PYTHON
     if (H5VL__iod_combine(combine_script, split_data, split_num_elmts,
             num_targets, split_type_id, &combine_data,
@@ -828,6 +829,7 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     printf("(%d) coh %"PRIu64" objoh %"PRIu64" objid %"PRIx64" rtid %"PRIu64"\n",
             my_rank_g, cohs[0], obj_oh.rd_oh.cookie, obj_id, rtid);
 
+    printf("(%d) Calling  iod_obj_query_map\n");
     ret = iod_obj_query_map(obj_oh.rd_oh, rtid, &obj_map, NULL);
     if (ret != 0) {
         printf("iod_obj_query_map failed, ret: %d (%s).\n", ret, strerror(-ret));
@@ -890,11 +892,13 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
 
     /* ****************** TEMP THING (as IOD requires collective container open) */
 
+    printf("(%d) Closing container\n");
     if(FAIL == H5VL__iod_request_container_close(cohs))
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't request container close");
 
     /* ***************** END TEMP THING */
 
+    printf("(%d) Analysis DONE\n");
     /* set output, and return to AS client */
     output.ret = ret_value;
     HG_Handler_start_output(op_data->hg_handle, &output);
@@ -945,6 +949,7 @@ H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
                                 type_id, &num_elmts, &data) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read local data");
 
+    printf("(%d) Applying split on data\n", my_rank_g);
     /* Apply split python script on data from query */
 #ifdef H5_HAVE_PYTHON
     if(FAIL == H5VL__iod_split(split_script, data, num_elmts, type_id,
@@ -1060,7 +1065,7 @@ H5VL_iod_server_analysis_transfer_cb(AXE_engine_t axe_engine,
     farm_output = (H5VLiod_farm_data_t *)farm_op_data->output;
 
     data_size = HG_Bulk_handle_get_size(input->bulk_handle);
-    printf("(%d) Transferring split data\n", my_rank_g);
+    printf("(%d) Transferring split data back to master\n", my_rank_g);
 
     HG_Bulk_block_handle_create(farm_output->data, data_size, HG_BULK_READ_ONLY,
             &bulk_block_handle);
@@ -1168,7 +1173,7 @@ H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim,
     /* If element satisfies query, add it to the selection */
     if (result) {
         /* TODO remove that after demo */
-        printf("(%d) Element |%d| matches query\n", my_rank_g, (int) elem);
+        printf("(%d) Element |%d| matches query\n", my_rank_g, *((int *) elem));
         udata->num_elmts ++;
         if(H5Sselect_elements(udata->space_query, H5S_SELECT_APPEND, 1, point))
             HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTSET, FAIL, "unable to add point to selection")
