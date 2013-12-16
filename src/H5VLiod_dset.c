@@ -267,7 +267,6 @@ done:
                 HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
             if(iod_obj_close(dset_oh.wr_oh, NULL, NULL) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-            step --;
         }
 
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
