@@ -1,0 +1,6 @@
+mpiexec -n 2 ./h5ff_client_M6.2_demo -v -i >& output
+grep M6.2 output > demooutput
+sed s/^.*M6/M6/ < demooutput > demooutput1
+mv demooutput1 demooutput
+grep r0: demooutput > rank0output
+grep r1: demooutput > rank1output

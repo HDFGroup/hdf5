@@ -4,12 +4,6 @@
  * The Function Shipper server should be running before this demo program is started.
  */
 
-/*
- * DEFINES that affect behavior
- *  LAST_CV_ONLY - if set, after file is closed & re-opened, only the data from the last CV is printed. Saves runtime.
- */
-//#define LAST_CV_ONLY
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -23,10 +17,11 @@
 #define ASSERT_RET assert( ret >= 0 )
 
 /* option flags */
-int verbose = 0;     // Verbose defaults to no
-int abort3 = 0;      // Abort transaction 3 defaults to no
-int workaround = 0;  // Workaround to abort transaction 3 only from rank 0 to avoid (occasional) issue with object staying open
-int init2D = 0;      // Initialize cells in 2D arrays to -1 
+int verbose = 0;        // Verbose (print CV contents between every transaction) defaults to no
+int last_cv_only = 0;   // Only print contents of last container version when file re-opened  - defaults to no
+int abort3 = 0;         // Abort transaction 3 defaults to no
+int workaround = 1;     // Workaround to abort transaction 3 only from rank 0 to avoid (occasional) issue with object staying open
+int init2D = 0;         // Initialize cells in 2D arrays to -1 - defaults to no
 
 /* prototypes for helper functions */
 void create_string_attribute( hid_t, const char*, hid_t, const char*, int, uint64_t );
@@ -477,7 +472,7 @@ int main( int argc, char **argv ) {
    ret = H5RCclose( rc_id4 ); ASSERT_RET;
 
    /* Close the file, then barrier to make sure all have closed it. */
-   fprintf( stderr, "M6.2-r%d: close the container\n", my_rank );
+   fprintf( stderr, "M6.2-r%d: close the container (Step 17)\n", my_rank );
    ret = H5Fclose_ff( file_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
    MPI_Barrier( MPI_COMM_WORLD );
@@ -499,11 +494,12 @@ int main( int argc, char **argv ) {
    H5RCget_version( last_rc_id, &last_version );
    fprintf( stderr, "M6.2-r%d: Latest CV in file is cv %d\n", my_rank, (int)last_version );
 
-#ifdef LAST_CV_ONLY
-   for ( v = last_version; v <= last_version; v++ ) {
-#else
-   for ( v = 0; v <= last_version; v++ ) {
-#endif
+   if ( last_cv_only ) {
+      v = last_version;
+   } else {
+      v = 0;
+   }
+   for ( v; v <= last_version; v++ ) {
       version = v;
       fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d\n", my_rank, (int)version );
       rc_id = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
@@ -944,7 +940,7 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
 
          ret = H5Dread_ff( dset_id, H5T_NATIVE_INT, space_id, space_id, H5P_DEFAULT, data, rc_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
-         sprintf( line, "%s %s   values: ", preface, path_to_object, cv );
+         sprintf( line, "%s %s values: ", preface, path_to_object );
          if ( nDims == 1 ) {
             for ( i = 0; i < totalSize; i++ ) {
                sprintf( line, "%s%d ", line, data[i] );
@@ -1028,19 +1024,23 @@ parse_options( int argc, char** argv, int my_rank ) {
             case 'i':   
                init2D = 1;
                break;
+            case 'l':   
+               last_cv_only = 1;
+               break;
             case 'v':   
                verbose = 1;
                break;
             case 'w':
-               workaround = 1;
+               workaround = 0;
                break;
             default: 
                if ( my_rank == 0 ) {
                   printf( "Usage: h5ff_client_M6.2_demo [-aivw]\n" );
                   printf( "\ta: abort transaction 3\n" );
                   printf( "\ti: initialize cells in 2D arrays to -1\n" );
+                  printf( "\tl: last container version contents are the only ones printed on reopen\n" );
                   printf( "\tv: verbose printing\n" );
-                  printf( "\tw: workaround - force abort to be done by rank 0, not all ranks\n" );
+                  printf( "\tw: disable workaround that forces abort to be done by rank 0, not all ranks\n" );
                }
                return( 1 );
          }
