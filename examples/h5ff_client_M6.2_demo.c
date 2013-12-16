@@ -21,7 +21,6 @@ int verbose = 0;        // Verbose (print CV contents between every transaction)
 int last_cv_only = 0;   // Only print contents of last container version when file re-opened  - defaults to no
 int abort3 = 0;         // Abort transaction 3 defaults to no
 int workaround = 1;     // Workaround to abort transaction 3 only from rank 0 to avoid (occasional) issue with object staying open
-int init2D = 0;         // Initialize cells in 2D arrays to -1 - defaults to no
 
 /* prototypes for helper functions */
 void create_string_attribute( hid_t, const char*, hid_t, const char*, int, uint64_t );
@@ -663,15 +662,6 @@ create_dataset2( hid_t obj_id, const char* dset_name, hid_t tr_id, const char* o
    if ( dset_id >= 0 ) {
       fprintf( stderr, "M6.2-r%d: Create %s in %s in tr %d - %s\n",
                my_rank, dset_name, obj_path, (int)tr_num, "OK" );
-      if ( init2D ) {
-         int data[24];
-         int i;
-         for ( i = 0; i < 24; i++ ) {
-            data[i] = -1;
-         }
-         ret = H5Dwrite_ff( dset_id, H5T_NATIVE_INT, space_id, space_id, H5P_DEFAULT, data, tr_id, H5_EVENT_STACK_NULL ); 
-         ASSERT_RET;
-      }
       ret = H5Dclose_ff( dset_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
    } else {
       fprintf( stderr, "M6.2-r%d: Create %s in %s in tr %d - %s\n",
@@ -1021,9 +1011,6 @@ parse_options( int argc, char** argv, int my_rank ) {
             case 'a':
                abort3 = 1;
                break;
-            case 'i':   
-               init2D = 1;
-               break;
             case 'l':   
                last_cv_only = 1;
                break;
@@ -1037,7 +1024,6 @@ parse_options( int argc, char** argv, int my_rank ) {
                if ( my_rank == 0 ) {
                   printf( "Usage: h5ff_client_M6.2_demo [-aivw]\n" );
                   printf( "\ta: abort transaction 3\n" );
-                  printf( "\ti: initialize cells in 2D arrays to -1\n" );
                   printf( "\tl: last container version contents are the only ones printed on reopen\n" );
                   printf( "\tv: verbose printing\n" );
                   printf( "\tw: disable workaround that forces abort to be done by rank 0, not all ranks\n" );
