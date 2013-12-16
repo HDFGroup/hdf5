@@ -20,8 +20,10 @@ static int my_rank = 0, my_size = 1;
 const char *split_script =
         "import numpy as np\n"
         "def split(array):\n"
+        "  print '--------------------'\n"
         "  print 'Split sum: ' + str(array.sum())\n"
         "  print 'Split average: ' + str(np.average(array))\n"
+        "  print '--------------------'\n"
         "  return np.array([array.sum(), np.average(array)])\n";
 
 const char *combine_script =
@@ -33,8 +35,10 @@ const char *combine_script =
         "    global_sum += a[0]\n"
         "    global_average += a[1]\n"
         "  global_average /= len(arrays)\n"
+        "  print '--------------------'\n"
         "  print 'Combined sum: ' + str(global_sum)\n"
         "  print 'Combined average: ' + str(global_average)\n"
+        "  print '--------------------'\n"
         "  return np.array([global_sum, global_average])\n";
 
 static void
@@ -294,8 +298,7 @@ main(int argc, char **argv)
     data = (int *) malloc(sizeof(int) * ncomponents * ntuples);
     for (i = 0; i < ntuples; i++) {
        for (j = 0; j < ncomponents; j++) {
-          data[ncomponents * i + j] = my_rank * ncomponents * ntuples +
-                  ncomponents * i + j;
+          data[ncomponents * i + j] = my_rank * ntuples + i;
        }
     }
 

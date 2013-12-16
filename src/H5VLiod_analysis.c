@@ -531,7 +531,7 @@ H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs)
     }
 
     /* open the container */
-    printf("Calling iod_container_open on %s\n", file_name);
+    printf("(%d) Calling iod_container_open on %s\n", my_rank_g, file_name);
     if(iod_container_open(file_name, NULL, IOD_CONT_R, &temp_cohs[0], NULL))
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
@@ -661,7 +661,7 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
             if (0 == strcmp(obj_map->u_map.array_map.array_range[i].loc,
                     server_loc_g[j])) {
                 server_idx = j;
-                printf("Server index: %d owns the data\n", server_idx);
+                printf("(%d) Server %d owns this object\n", my_rank_g, server_idx);
                 break;
             }
         }
@@ -704,8 +704,8 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
             split_type_id = farm_output[i].type_id;
             split_num_elmts[i] = farm_output[i].num_elmts;
             split_data_size = split_num_elmts[i] * H5Tget_size(split_type_id);
-            printf("Getting %d elements of size %zu from server %zu\n",
-                    split_num_elmts[i], H5Tget_size(split_type_id), server_idx);
+//            printf("Getting %d elements of size %zu from server %zu\n",
+//                    split_num_elmts[i], H5Tget_size(split_type_id), server_idx);
 
             if(NULL == (split_data[i] = malloc(split_data_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate farm buffer");
@@ -825,8 +825,8 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
                                  rtid, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
-    printf("coh %"PRIu64" objoh %"PRIu64" objid %"PRIx64" rtid %"PRIu64"\n",
-            cohs[0], obj_oh.rd_oh.cookie, obj_id, rtid);
+    printf("(%d) coh %"PRIu64" objoh %"PRIu64" objid %"PRIx64" rtid %"PRIu64"\n",
+            my_rank_g, cohs[0], obj_oh.rd_oh.cookie, obj_id, rtid);
 
     ret = iod_obj_query_map(obj_oh.rd_oh, rtid, &obj_map, NULL);
     if (ret != 0) {
@@ -834,11 +834,11 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
         assert(0);
     }
 
-    printf("%-10d\n", obj_map->u_map.array_map.n_range);
+    printf("(%d) %-10d\n", my_rank_g, obj_map->u_map.array_map.n_range);
     for (i = 0; i < obj_map->u_map.array_map.n_range; i++) {
-        printf("range: %d, start: %zu %zu, "
+        printf("(%d) range: %d, start: %zu %zu, "
                "end: %zu %zu, n_cell: %zu, "
-               "loc: %s\n", i,
+               "loc: %s\n", my_rank_g, i,
                obj_map->u_map.array_map.array_range[i].start_cell[0],
                obj_map->u_map.array_map.array_range[i].start_cell[1],
                obj_map->u_map.array_map.array_range[i].end_cell[0],
@@ -1059,9 +1059,8 @@ H5VL_iod_server_analysis_transfer_cb(AXE_engine_t axe_engine,
     farm_op_data = (op_data_t *)farm_op_data_ptr;
     farm_output = (H5VLiod_farm_data_t *)farm_op_data->output;
 
-    printf("Data num elemts is %zu\n", farm_output->farm_out.num_elmts);
     data_size = HG_Bulk_handle_get_size(input->bulk_handle);
-    printf("Transferring %zu bytes\n", data_size);
+    printf("(%d) Transferring split data\n", my_rank_g);
 
     HG_Bulk_block_handle_create(farm_output->data, data_size, HG_BULK_READ_ONLY,
             &bulk_block_handle);
@@ -1168,6 +1167,8 @@ H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim,
 
     /* If element satisfies query, add it to the selection */
     if (result) {
+        /* TODO remove that after demo */
+        printf("(%d) Element |%d| matches query\n", my_rank_g, (int) elem);
         udata->num_elmts ++;
         if(H5Sselect_elements(udata->space_query, H5S_SELECT_APPEND, 1, point))
             HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTSET, FAIL, "unable to add point to selection")

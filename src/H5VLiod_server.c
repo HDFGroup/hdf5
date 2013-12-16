@@ -39,6 +39,7 @@ static hbool_t shutdown = FALSE;
 iod_obj_id_t ROOT_ID = 0;
 
 int num_ions_g = 0;
+int my_rank_g = 0;
 na_addr_t *server_addr_g = NULL;
 char **server_loc_g = NULL;
 hg_id_t H5VL_EFF_OPEN_CONTAINER;
@@ -207,14 +208,14 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
 {
     na_class_t *network_class = NULL;
     AXE_engine_attr_t engine_attr;
-    int my_rank = 0, i;
+    int i;
     const char *addr_name;
     char **na_addr_table = NULL;
     FILE *config = NULL;
     herr_t ret_value = SUCCEED;
 
     MPI_Comm_size(comm, &num_ions_g);
-    MPI_Comm_rank(comm, &my_rank);
+    MPI_Comm_rank(comm, &my_rank_g);
 
     /******************* Initialize mercury ********************/
     /* initialize the netwrok class */
@@ -227,7 +228,7 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
     }
 
     addr_name = NA_MPI_Get_port_name(network_class);
-    strcpy(na_addr_table[my_rank], addr_name);
+    strcpy(na_addr_table[my_rank_g], addr_name);
 
 #ifdef NA_HAS_MPI
     for (i = 0; i < num_ions_g; i++) {
@@ -237,7 +238,7 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
 #endif
 
     /* Only rank 0 writes file */
-    if (my_rank == 0) {
+    if (my_rank_g == 0) {
         config = fopen("port.cfg", "w+");
         if (config != NULL) {
             fprintf(config, "%d\n", num_ions_g);
@@ -274,7 +275,7 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
     }
 
     /* Only rank 0 read loc file */
-    if (my_rank == 0) {
+    if (my_rank_g == 0) {
         config = fopen("loc.cfg", "r+");
         if (!config) {
             fprintf(stderr, "Warning, no loc config was found\n");
