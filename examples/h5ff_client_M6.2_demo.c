@@ -20,7 +20,6 @@
 int verbose = 0;        // Verbose (print CV contents between every transaction) defaults to no
 int last_cv_only = 0;   // Only print contents of last container version when file re-opened  - defaults to no
 int abort3 = 0;         // Abort transaction 3 defaults to no
-int workaround = 1;     // Workaround to abort transaction 3 only from rank 0 to avoid (occasional) issue with object staying open
 
 /* prototypes for helper functions */
 void create_string_attribute( hid_t, const char*, hid_t, const char*, int, uint64_t );
@@ -350,17 +349,10 @@ int main( int argc, char **argv ) {
 
       /*    Abort - one or more processes should be able to abort the Transaction with the same effect. */
       if ( abort3 ) {
-         if ( workaround && ( my_rank != 0 ) ) {
-            /* If not rank 0 when workaround enabled, don't call H5TRabort 
-             * When it's called by all, *sometimes* objects are left open and the file close fails.
-             * The transaction updates are discarded correctly, there's just some object that isn't getting closes properly.
-             * Depends on order-of-execution of multiple threads, and unable to resolve before demo.
-             */
-         } else {
-            /* All ranks should be able to call without objects being left open */
-            ret = H5TRabort( tr_id3, H5_EVENT_STACK_NULL ); 
-            fprintf( stderr, "M6.2-r%d: ABORT tr %d (Step 15b - abort) - %s\n", my_rank, (int)tr_num3, STATUS );
-         }
+         /* All ranks call TRabort; the order of actual calls is not determined by the code. 
+          * The first abort to reach IOD is the one that aborts the transaction, and abort need not be called by all ranks. */
+         ret = H5TRabort( tr_id3, H5_EVENT_STACK_NULL ); 
+         fprintf( stderr, "M6.2-r%d: ABORT tr %d (Step 15b - abort) - %s\n", my_rank, (int)tr_num3, STATUS );
       }
 
       /* Finish and commit transaction 3, causing the updates to appear in container version 3. */
@@ -940,7 +932,7 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
             int r, c;
             i = 0;
             for ( r = 0; r < current_size[0]; r++ ) {
-               sprintf( line, "%sr%d: ", line, r );
+               sprintf( line, "%srow %d: ", line, r );
                for ( c = 0; c < current_size[1]; c++ ) {
                   sprintf( line, "%s%d ", line, data[i] );
                   i++;
@@ -1018,16 +1010,12 @@ parse_options( int argc, char** argv, int my_rank ) {
             case 'v':   
                verbose = 1;
                break;
-            case 'w':
-               workaround = 0;
-               break;
             default: 
                if ( my_rank == 0 ) {
                   printf( "Usage: h5ff_client_M6.2_demo [-aivw]\n" );
                   printf( "\ta: abort transaction 3\n" );
                   printf( "\tl: last container version contents are the only ones printed on reopen\n" );
                   printf( "\tv: verbose printing\n" );
-                  printf( "\tw: disable workaround that forces abort to be done by rank 0, not all ranks\n" );
                }
                return( 1 );
          }
