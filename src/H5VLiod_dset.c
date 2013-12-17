@@ -112,8 +112,10 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-    fprintf(stderr, "Creating Dataset ID %"PRIx64" ", dset_id);
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Creating Dataset ID %"PRIx64" ",dset_id);
     fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64")\n", cur_oh.wr_oh, cur_id);
+#endif
 
     /* Set the IOD array creation parameters */
     array.cell_size = (uint32_t)H5Tget_size(input->type_id);

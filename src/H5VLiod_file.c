@@ -63,7 +63,9 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start file create %s\n", input->name);
+    fprintf(stderr, "Start file create %s ", input->name);
+    fprintf(stderr, "with MDKV %"PRIx64" ", mdkv_id), 
+    fprintf(stderr, "with attrKV %"PRIx64"\n", attrkv_id), 
 #endif
 
     /* convert HDF5 flags to IOD flags */

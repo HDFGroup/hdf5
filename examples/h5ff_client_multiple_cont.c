@@ -278,8 +278,7 @@ int main(int argc, char **argv) {
        0 can finish transaction 1 and acquire a read context on it. */
     MPI_Barrier(MPI_COMM_WORLD);
 
-    /* Leader process finishes/commits the transaction and acquires a
-       read context on it */
+    /* Leader process finishes/commits the transaction */
     if(0 == my_rank) {
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
         MPI_Waitall(12, mpi_reqs, MPI_STATUS_IGNORE);

@@ -72,8 +72,8 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start attribute create %s at %"PRIu64" with ID %"PRIx64"\n", 
-            attr_name, loc_handle.wr_oh, attr_id);
+    fprintf(stderr, "Start attribute create %s at %"PRIu64" with ID %"PRIx64" %"PRIx64"",
+            attr_name, loc_handle.wr_oh, attr_id, loc_attrkv_id);
 #endif
 
     attr_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
@@ -198,15 +198,8 @@ done:
         iod_obj_close(obj_oh.rd_oh, NULL, NULL);
     }
 
-    /* close the Metadata KV object */
-    if(mdkv_oh.cookie != IOD_OH_UNDEFINED &&
-       iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-
-    /* close the Attribute KV object */
-    if(attr_kv_oh.cookie != IOD_OH_UNDEFINED &&
-       iod_obj_close(attr_kv_oh, NULL, NULL) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+    iod_obj_close(mdkv_oh, NULL, NULL);
+    iod_obj_close(attr_kv_oh, NULL, NULL);
 
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
@@ -223,6 +216,18 @@ done:
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
+
+#if 0
+    /* close the Metadata KV object */
+    if(mdkv_oh.cookie != IOD_OH_UNDEFINED &&
+       iod_obj_close(mdkv_oh, NULL, NULL) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+
+    /* close the Attribute KV object */
+    if(attr_kv_oh.cookie != IOD_OH_UNDEFINED &&
+       iod_obj_close(attr_kv_oh, NULL, NULL) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+#endif
 
     input = (attr_create_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -1119,14 +1124,14 @@ done:
     }
 
     if(step == 2) {
-        /* close the Attribute KV object */
-        iod_obj_close(attr_kv_oh.rd_oh, NULL, NULL);
-        iod_obj_close(attr_kv_oh.wr_oh, NULL, NULL);
+        /* close the attribute oh */
+        iod_obj_close(attr_oh, NULL, NULL);
         step --;
     }
     if(step == 1) {
-        /* close the attribute oh */
-        iod_obj_close(attr_oh, NULL, NULL);
+        /* close the Attribute KV object */
+        iod_obj_close(attr_kv_oh.rd_oh, NULL, NULL);
+        iod_obj_close(attr_kv_oh.wr_oh, NULL, NULL);
         step --;
     }
 
