@@ -577,6 +577,7 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
     H5I_type_t obj_type;
     int num_attrs = 0;
     const char *loc_name = input->loc_name;
+    uint64_t link_count = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -620,9 +621,10 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
     }
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, H5VL_IOD_KEY_OBJ_TYPE,
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, 
+                             H5VL_IOD_KEY_OBJ_TYPE,
                              NULL, NULL, &obj_type) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve object type");
 
     switch(obj_type) {
     case H5I_GROUP:
@@ -638,12 +640,16 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
         oinfo.type = H5O_TYPE_MAP;
         break;
     default:
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "unsupported object type for H5Oget_info");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, 
+                     "unsupported object type for H5Oget_info");
     }
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, H5VL_IOD_KEY_OBJ_LINK_COUNT,
-                             NULL, NULL, &oinfo.rc) < 0)
+    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
+                             H5VL_IOD_KEY_OBJ_LINK_COUNT,
+                             NULL, NULL, &link_count) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
+
+    oinfo.rc = (unsigned) link_count;
 
     if(iod_kv_get_num(attrkv_oh, rtid, &num_attrs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve attribute count");
