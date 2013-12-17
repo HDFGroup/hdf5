@@ -524,6 +524,7 @@ int main( int argc, char **argv ) {
    fprintf( stderr, "M6.2-r%d: Finalize EFF stack\n", my_rank );
 
    /* Perform wrap-up operations */
+   MPI_Barrier( MPI_COMM_WORLD );
    EFF_finalize();
    MPI_Finalize();
 
