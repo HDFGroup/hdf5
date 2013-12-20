@@ -63,23 +63,5 @@ echo "Finished object test-----------------------------------------------"
 [ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
 sleep 2
 
-echo "Starting open/read test-----------------------------------------------"
-mpiexec -np $1 ./h5ff_server &> ff_output/server_open &
-sleep 2 &&
-mpiexec -np $2 ./h5ff_client_open
-RETVAL=$?
-echo "Finished open/read test-----------------------------------------------"
-[ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
-sleep 2
-
-echo "Starting paths test-----------------------------------------------"
-mpiexec -np $1 ./h5ff_server &> ff_output/server_paths &
-sleep 2 &&
-mpiexec -np $2 ./h5ff_client_paths
-RETVAL=$?
-echo "Finished paths test-----------------------------------------------"
-[ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
-sleep 2
-
 echo "FF tests DONE ---------------------------------------------------"
 exit
