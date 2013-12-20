@@ -417,9 +417,8 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog $(EXTLINK_DIRS) *.h5
 @BUILD_PARALLEL_CONDITIONAL_TRUE@LDADD = $(LIBH5TEST) $(LIBHDF5)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@EXAMPLE_PROG_PARA = ph5example
 @BUILD_EFF_CONDITIONAL_TRUE@EXAMPLE_PROG_EFF = h5ff_server h5ff_client_map \
-@BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_M6.2_demo h5ff_client_multiple_cont h5ff_client_trans \
+@BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_M6.2_demo h5ff_client_multiple_cont h5ff_client_obj \
 @BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_dset h5ff_client_attr h5ff_client_links \
-@BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_obj h5ff_client_paths h5ff_client_open \
 @BUILD_EFF_CONDITIONAL_TRUE@                h5ff_python_exec h5ff_client_analysis
 
 

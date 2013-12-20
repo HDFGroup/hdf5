@@ -261,17 +261,17 @@ int main(int argc, char **argv) {
     ret = H5RCclose(rid2);
     assert(0 == ret);
 
-    /* closing the container also acts as a wait all on all pending requests 
-       on the container. */
-    assert(H5Fclose_ff(file_id, H5_EVENT_STACK_NULL) == 0);
-
-    assert(exists);
-
     /* wait on all requests and print completion status */
     H5ESget_count(e_stack, &num_events);
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
+
+    /* closing the container also acts as a wait all on all pending requests 
+       on the container. */
+    assert(H5Fclose_ff(file_id, H5_EVENT_STACK_NULL) == 0);
+
+    assert(exists);
 
     H5Sclose(sid);
     H5Pclose(fapl_id);
@@ -281,7 +281,8 @@ int main(int argc, char **argv) {
        and shutsdown the FS server (when all clients send the terminate request) 
        and client */
     MPI_Barrier(MPI_COMM_WORLD);
-    EFF_finalize();
+    ret = EFF_finalize();
+    assert(ret >= 0);
 
     MPI_Finalize();
     return 0;

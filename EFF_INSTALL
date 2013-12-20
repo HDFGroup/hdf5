@@ -1,6 +1,6 @@
 System pre-requisites: 
 	An MPI3 implementation that supports MPI_THREAD_MULTIPLE
-            [i.e. MPICH3 or later - we built with MPICH 3.0.4 in Q5]
+            [i.e. MPICH3 or later - we built with MPICH 3.0.4 in Q6]
 	Pthread
 	BOOST
 
@@ -24,18 +24,8 @@ build AXE:
 	make install
 
 
-build Skeletal IOD:
-	It is located in the tarball in the 'iod' subdirectory.
-
-	Copy the 'iodrc' file from the top level iod directory to /etc/iodrc or
-        the top-level build directory for your HDF5 build. (e.g. hdf5_ff, if you are
-        building "in-place" from the tarball).
-
-	make
-
-	Note the path to the IOD install (for the HDF5 build, below) is
-        actually just the path to the top source directory where you build
-        IOD (i.e. /path/to/your/copy/of/fastforward/iod).
+build DAOS_POSIX, PLFS, and IOD:
+        Please refer to the IOD tarball for instruction on how to build and setup the three libraries.
 
 
 build Mercury (Function Shipper)
@@ -44,17 +34,18 @@ build Mercury (Function Shipper)
 	refer to the mercury build recipe in:
 	mercury/README
 
-	Note that static building and the BOOST library are both prerequisites for mercury to work in the HDF5_ff branch.
-	Make sure to include the path to BOOST include dir, and enable the one library build option.
-	All of those are specific options that pop up when you run ccmake to build Mercury.
-
 build HDF5 IOD VOL plugin:
         The code is located in the tarball in the 'hdf5_ff' subdirectory, OR
         get it from here:
             svn checkout http://svn.hdfgroup.uiuc.edu/hdf5/features/hdf5_ff
 
-	./configure --with-iod=/path/to/iod/install/directory --with-axe=/path/to/axe/install/directory PKG_CONFIG_PATH=/path/to/mercury/install/directory/lib/pkgconfig/ --enable-parallel --enable-debug --enable-trace --enable-threadsafe --enable-unsupported --with-pthread=/usr --enable-eff
-		You should see in the configure summary at the end if the EFF plugin in HDF5 was successfully configured.
+	./configure --with-daos-posix=/path/to/daos/posix --with-plfs=/path/to/plfs --with-iod=/path/to/iod/ --with-axe=/path/to/axe/install/directory PKG_CONFIG_PATH=/path/to/mercury/install/directory/lib/pkgconfig/ --enable-parallel --enable-debug --enable-trace --enable-threadsafe --enable-unsupported --with-pthread=/usr --enable-eff 
+
+	If you wise to build the analysis shipping with python scripts, add --enable-shared --enable-python to the configure script. 
+	Note in that case all 3rd party libraries have to be build shared or with -fPIC. You should also have devel python libraries and numpy installed on your system.
+
+	You should see in the configure summary at the end if the EFF plugin in HDF5 was successfully configured.
+
 	make
         make check
 	make install
@@ -70,20 +61,21 @@ build the example programs:
 	- h5ff_client_map.c : This tests the new Map routines (H5M) added this quarter to support Dynamic Data Structures.
 	- h5ff_client_multiple_cont.c : This tests access to multiple containers.
 	- h5ff_client_obj.c : This tests generic object routines (H5O).
-	- h5ff_client_open.c : This tests open/read routines.
-	- h5ff_client_paths.c : This tests and shows how paths can/should be used when the EFF plugin is used with the new transactional semantics.
-	- h5ff_client_trans.c : This tests the new transaction and read context routines (H5TR & H5RC).
+        - h5ff_client_analysis.c : This tests the analysis shipping functionality (H5AS).
+	- h5ff_client_M6.2_demo.c: HDF5 and I/O Dispatcher Container Versioning Demonstration
 
 	cd path/where/hdf5_ff/is/built/examples/
 	make
 	chmod 775 run_ff_tests.sh
-	./run_ff_tests.sh num_client_procs
+	./run_ff_tests.sh num_server_procs num_client_procs
 
 	Or you can run each test manually:
 		The client and server need to be launched from the same directory for now.
 		Launch the server first:
- 		mpiexec -n 1 ./h5ff_server
+ 		mpiexec -n <x> ./h5ff_server
 		then launch one of the clients
  		mpiexec -n <x> ./h5ff_client_xx
+
+	Note, for now, the number of clients must be greater than or equal to the number of servers.
 
 END

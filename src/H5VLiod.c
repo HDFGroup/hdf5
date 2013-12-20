@@ -828,18 +828,21 @@ EFF_finalize(void)
     if(HG_Request_free(hg_req) != HG_SUCCESS)
         return FAIL;
 
+    //fprintf(stderr, "NOWWWWWWWWW000000\n");
     /* Free addr id */
-    if (HG_SUCCESS != NA_Addr_free(network_class, PEER))
+    if (NA_SUCCESS != NA_Addr_free(network_class, PEER))
         return FAIL;
-
+    //fprintf(stderr, "NOWWWWWWWWW11111\n");
     /* Finalize interface */
     if (HG_SUCCESS != HG_Bulk_finalize())
         return FAIL;
+    //fprintf(stderr, "NOWWWWWWWWW2222\n");
     if (HG_SUCCESS != HG_Finalize())
         return FAIL;
+    //fprintf(stderr, "NOWWWWWWWWW33333\n");
     if(NA_SUCCESS != NA_Finalize(network_class))
         return FAIL;
-
+    //fprintf(stderr, "NOWWWWWWWWW44444\n");
     return ret_value;
 } /* end EFF_finalize() */
 
