@@ -24,6 +24,7 @@ EXIT_FAILURE=1
 H5LS=h5ls               # The tool name
 H5LS_BIN=`pwd`/$H5LS    # The path of the tool binary
 
+RM='rm -rf'
 CMP='cmp -s'
 DIFF='diff -c'
 CP='cp'
@@ -187,6 +188,19 @@ COPY_TESTFILES_TO_TESTDIR()
             fi
         fi
     done
+}
+
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=`$DIRNAME $tstfile`
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $TESTDIR
+    fi
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -404,6 +418,8 @@ else
  TOOLTEST tdataregbe.ls 0 -v tdatareg.h5
 fi 
 
+# Clean up temporary files/directories
+CLEAN_TESTFILES_AND_TESTDIR
 
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."

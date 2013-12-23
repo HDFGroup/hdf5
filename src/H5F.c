@@ -268,6 +268,32 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_get_all_count_cb
+ *
+ * Purpose:     Get counter of all object types currently open.
+ *
+ * Return:	Non-negative on success; negative on failure.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5F_get_all_count_cb(void UNUSED *obj_ptr, hid_t UNUSED obj_id, void *key)
+{
+    H5F_trav_obj_cnt_t *udata = (H5F_trav_obj_cnt_t *)key;
+    int                ret_value = H5_ITER_CONT;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    *(udata->obj_count) = *(udata->obj_count)+1; 
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_get_all_count_cb */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Fget_obj_count
  *
  * Purpose:	Public function returning the number of opened object IDs
@@ -288,21 +314,19 @@ H5Fget_obj_count(hid_t file_id, unsigned types)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("Zs", "iIu", file_id, types);
 
-    if(0 == (types & H5F_OBJ_ALL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type")
-
     if(file_id != (hid_t)H5F_OBJ_ALL) {
         H5VL_t     *vol_plugin;
         void       *obj;
 
         /* get the file object */
-        if(NULL == (obj = (void *)H5I_object(file_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        if(NULL == (obj = (void *)H5I_object_verify(file_id, H5I_FILE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file id")
         /* get the plugin pointer */
         if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-        if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_OBJ_COUNT, H5AC_dxpl_id, H5_EVENT_STACK_NULL, types, &ret_value) < 0)
+        if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_OBJ_COUNT, H5AC_dxpl_id, 
+                         H5_EVENT_STACK_NULL, types, &ret_value) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object count in file(s)")
     }
     /* iterate over all open files and get the obj count for each */
@@ -312,13 +336,62 @@ H5Fget_obj_count(hid_t file_id, unsigned types)
         udata.obj_count = &ret_value;
         udata.types = types | H5F_OBJ_LOCAL;
 
-        if(H5I_iterate(H5I_FILE, H5F_get_obj_count_cb, &udata, TRUE) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)")        
+        if(types & H5F_OBJ_FILE) {
+            if(H5I_iterate(H5I_FILE, H5F_get_all_count_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)");
+        }
+        if(types & H5F_OBJ_DATASET) {
+            if(H5I_iterate(H5I_DATASET, H5F_get_all_count_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)");
+        }
+        if(types & H5F_OBJ_GROUP) {
+            if(H5I_iterate(H5I_GROUP, H5F_get_all_count_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)");
+        }
+        if(types & H5F_OBJ_DATATYPE) {
+            if(H5I_iterate(H5I_DATATYPE, H5F_get_all_count_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)");
+        }
+        if(types & H5F_OBJ_ATTR) {
+            if(H5I_iterate(H5I_ATTR, H5F_get_all_count_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)");
+        }
     }
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_obj_count() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_all_ids_cb
+ *
+ * Purpose:     Get ids of all object types currently open.
+ *
+ * Return:	Non-negative on success; negative on failure.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5F_get_all_ids_cb(void UNUSED *obj_ptr, hid_t obj_id, void *key)
+{
+    H5F_trav_obj_ids_t *udata = (H5F_trav_obj_ids_t *)key;
+    int                ret_value = H5_ITER_CONT;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(*udata->obj_count >= udata->max_objs)
+        HGOTO_DONE(H5_ITER_STOP);
+
+    udata->oid_list[*udata->obj_count] = obj_id;
+    *(udata->obj_count) = *(udata->obj_count)+1; 
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_get_all_ids_cb */
 
 
 /*-------------------------------------------------------------------------
@@ -349,7 +422,8 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
 
     if(0 == (types & H5F_OBJ_ALL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type")
-    HDassert(oid_list);
+    if(!oid_list)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "object ID list is NULL")
 
     /* Check arguments */
     if(file_id != (hid_t)H5F_OBJ_ALL) {
@@ -367,16 +441,34 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object count in file(s)")
     }
     /* iterate over all open files and get the obj count for each */
-    else {
+    else if (oid_list && max_objs){
         H5F_trav_obj_ids_t udata;
 
-        udata.types = types | H5F_OBJ_LOCAL;
+        //udata.types = types | H5F_OBJ_LOCAL;
         udata.max_objs = max_objs;
         udata.oid_list = oid_list;
         udata.obj_count = &ret_value;
 
-        if(H5I_iterate(H5I_FILE, H5F_get_obj_ids_cb, &udata, TRUE) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)")
+        if(types & H5F_OBJ_FILE) {
+            if(H5I_iterate(H5I_FILE, H5F_get_all_ids_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)");
+        }
+        if(types & H5F_OBJ_DATASET) {
+            if(H5I_iterate(H5I_DATASET, H5F_get_all_ids_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)");
+        }
+        if(types & H5F_OBJ_GROUP) {
+            if(H5I_iterate(H5I_GROUP, H5F_get_all_ids_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)");
+        }
+        if(types & H5F_OBJ_DATATYPE) {
+            if(H5I_iterate(H5I_DATATYPE, H5F_get_all_ids_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)");
+        }
+        if(types & H5F_OBJ_ATTR) {
+            if(H5I_iterate(H5I_ATTR, H5F_get_all_ids_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)");
+        }
     }
 
 done:

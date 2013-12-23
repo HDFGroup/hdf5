@@ -255,8 +255,8 @@ dataset_writeInd(void)
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
-    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
+    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
 
     /* ----------------------------------------
      * CREATE AN HDF5 FILE WITH PARALLEL ACCESS
@@ -365,7 +365,7 @@ MPI_Barrier(MPI_COMM_WORLD);
     H5Fclose(fid);
 
     /* release data buffers */
-    if(data_array1) free(data_array1);
+    if(data_array1) HDfree(data_array1);
 }
 
 /* Example of using the parallel HDF5 library to read a dataset */
@@ -401,10 +401,10 @@ dataset_readInd(void)
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
-    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
-    data_origin1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
-    VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
+    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
+    data_origin1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_origin1 != NULL), "data_origin1 HDmalloc succeeded");
 
     /* setup file access template */
     acc_tpl = create_faccess_plist(comm, info, facc_type, use_gpfs);
@@ -474,8 +474,8 @@ dataset_readInd(void)
     H5Fclose(fid);
 
     /* release data buffers */
-    if(data_array1) free(data_array1);
-    if(data_origin1) free(data_origin1);
+    if(data_array1) HDfree(data_array1);
+    if(data_origin1) HDfree(data_origin1);
 }
 
 
@@ -527,8 +527,8 @@ dataset_writeAll(void)
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
-    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
+    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
 
     /* -------------------
      * START AN HDF5 FILE
@@ -862,7 +862,7 @@ dataset_writeAll(void)
     H5Fclose(fid);
 
     /* release data buffers */
-    if(data_array1) free(data_array1);
+    if(data_array1) HDfree(data_array1);
 }
 
 /*
@@ -907,10 +907,10 @@ dataset_readAll(void)
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
-    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
-    data_origin1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
-    VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
+    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
+    data_origin1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_origin1 != NULL), "data_origin1 HDmalloc succeeded");
 
     /* -------------------
      * OPEN AN HDF5 FILE
@@ -1090,8 +1090,8 @@ dataset_readAll(void)
     H5Fclose(fid);
 
     /* release data buffers */
-    if(data_array1) free(data_array1);
-    if(data_origin1) free(data_origin1);
+    if(data_array1) HDfree(data_array1);
+    if(data_origin1) HDfree(data_origin1);
 }
 
 
@@ -1149,8 +1149,8 @@ extend_writeInd(void)
     chunk_dims[1] = chunkdim1;
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
-    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
+    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
 
     /* -------------------
      * START AN HDF5 FILE
@@ -1329,7 +1329,7 @@ extend_writeInd(void)
     H5Fclose(fid);
 
     /* release data buffers */
-    if(data_array1) free(data_array1);
+    if(data_array1) HDfree(data_array1);
 }
 
 /*
@@ -1535,12 +1535,12 @@ extend_readInd(void)
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
-    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
-    data_array2 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
-    VRFY((data_array2 != NULL), "data_array2 malloc succeeded");
-    data_origin1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
-    VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
+    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
+    data_array2 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array2 != NULL), "data_array2 HDmalloc succeeded");
+    data_origin1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_origin1 != NULL), "data_origin1 HDmalloc succeeded");
 
     /* -------------------
      * OPEN AN HDF5 FILE
@@ -1663,9 +1663,9 @@ extend_readInd(void)
     H5Fclose(fid);
 
     /* release data buffers */
-    if(data_array1) free(data_array1);
-    if(data_array2) free(data_array2);
-    if(data_origin1) free(data_origin1);
+    if(data_array1) HDfree(data_array1);
+    if(data_array2) HDfree(data_array2);
+    if(data_origin1) HDfree(data_origin1);
 }
 
 /*
@@ -1723,8 +1723,8 @@ extend_writeAll(void)
     chunk_dims[1] = chunkdim1;
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
-    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
+    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
 
     /* -------------------
      * START AN HDF5 FILE
@@ -1928,7 +1928,7 @@ extend_writeAll(void)
     H5Fclose(fid);
 
     /* release data buffers */
-    if(data_array1) free(data_array1);
+    if(data_array1) HDfree(data_array1);
 }
 
 /* Example of using the parallel HDF5 library to read an extendible dataset */
@@ -1967,12 +1967,12 @@ extend_readAll(void)
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
-    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
-    data_array2 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
-    VRFY((data_array2 != NULL), "data_array2 malloc succeeded");
-    data_origin1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
-    VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
+    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
+    data_array2 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array2 != NULL), "data_array2 HDmalloc succeeded");
+    data_origin1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_origin1 != NULL), "data_origin1 HDmalloc succeeded");
 
     /* -------------------
      * OPEN AN HDF5 FILE
@@ -2119,9 +2119,9 @@ extend_readAll(void)
     H5Fclose(fid);
 
     /* release data buffers */
-    if(data_array1) free(data_array1);
-    if(data_array2) free(data_array2);
-    if(data_origin1) free(data_origin1);
+    if(data_array1) HDfree(data_array1);
+    if(data_array2) HDfree(data_array2);
+    if(data_origin1) HDfree(data_origin1);
 }
 
 /*
@@ -2161,9 +2161,9 @@ compress_readAll(void)
 
     /* Allocate data buffer */
     data_orig = (DATATYPE *)HDmalloc((size_t)dim*sizeof(DATATYPE));
-    VRFY((data_orig != NULL), "data_origin1 malloc succeeded");
+    VRFY((data_orig != NULL), "data_origin1 HDmalloc succeeded");
     data_read = (DATATYPE *)HDmalloc((size_t)dim*sizeof(DATATYPE));
-    VRFY((data_read != NULL), "data_array1 malloc succeeded");
+    VRFY((data_read != NULL), "data_array1 HDmalloc succeeded");
 
     /* Initialize data buffers */
     for(u=0; u<dim;u++)
@@ -2394,11 +2394,11 @@ none_selection_chunk(void)
     /* allocate memory for data buffer. Only allocate enough buffer for
      * each processor's data. */
     if(mpi_rank) {
-        data_origin = (DATATYPE *)malloc(block[0]*block[1]*sizeof(DATATYPE));
-        VRFY((data_origin != NULL), "data_origin malloc succeeded");
+        data_origin = (DATATYPE *)HDmalloc(block[0]*block[1]*sizeof(DATATYPE));
+        VRFY((data_origin != NULL), "data_origin HDmalloc succeeded");
 
-        data_array = (DATATYPE *)malloc(block[0]*block[1]*sizeof(DATATYPE));
-        VRFY((data_array != NULL), "data_array malloc succeeded");
+        data_array = (DATATYPE *)HDmalloc(block[0]*block[1]*sizeof(DATATYPE));
+        VRFY((data_array != NULL), "data_array HDmalloc succeeded");
 
         /* put some trivial data in the data_array */
         mstart[0] = mstart[1] = 0;
@@ -2495,8 +2495,8 @@ none_selection_chunk(void)
     H5Fclose(fid);
 
     /* release data buffers */
-    if(data_origin) free(data_origin);
-    if(data_array) free(data_array);
+    if(data_origin) HDfree(data_origin);
+    if(data_array) HDfree(data_array);
 }
 
 
@@ -2849,7 +2849,7 @@ test_actual_io_mode(int selection_mode) {
 
     /* Allocate and initialize the buffer */
     buffer = (int *)HDmalloc(sizeof(int) * length);
-    VRFY((buffer != NULL), "malloc of buffer succeeded"); 
+    VRFY((buffer != NULL), "HDmalloc of buffer succeeded"); 
     for(i = 0; i < length; i++) 
         buffer[i] = i;
 
@@ -3323,7 +3323,7 @@ test_no_collective_cause_mode(int selection_mode)
 
     /* Allocate and initialize the buffer */
     buffer = (int *)HDmalloc(sizeof(int) * length);
-    VRFY((buffer != NULL), "malloc of buffer succeeded"); 
+    VRFY((buffer != NULL), "HDmalloc of buffer succeeded"); 
     for(i = 0; i < length; i++) 
         buffer[i] = i;
 
@@ -3571,7 +3571,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
 
     /* Allocate and initialize the buffer */
     buffer = (int *)HDmalloc(sizeof(int) * length);
-    VRFY((buffer != NULL), "malloc of buffer succeeded"); 
+    VRFY((buffer != NULL), "HDmalloc of buffer succeeded"); 
     for(i = 0; i < length; i++) 
         buffer[i] = i;
 
@@ -3763,11 +3763,11 @@ dataset_atomicity(void)
 
     buf_size = dim0 * dim1;
     /* allocate memory for data buffer */
-    write_buf = (int *)calloc(buf_size, sizeof(int));
-    VRFY((write_buf != NULL), "write_buf malloc succeeded");
+    write_buf = (int *)HDcalloc(buf_size, sizeof(int));
+    VRFY((write_buf != NULL), "write_buf HDcalloc succeeded");
     /* allocate memory for data buffer */
-    read_buf = (int *)calloc(buf_size, sizeof(int));
-    VRFY((read_buf != NULL), "read_buf malloc succeeded");
+    read_buf = (int *)HDcalloc(buf_size, sizeof(int));
+    VRFY((read_buf != NULL), "read_buf HDcalloc succeeded");
 
     /* setup file access template */
     acc_tpl = create_faccess_plist(comm, info, facc_type, use_gpfs);
@@ -3909,19 +3909,19 @@ dataset_atomicity(void)
     VRFY((ret >= 0), "H5D close succeeded");
 
     /* release data buffers */
-    if(write_buf) free(write_buf);
-    if(read_buf) free(read_buf);
+    if(write_buf) HDfree(write_buf);
+    if(read_buf) HDfree(read_buf);
 
     /* open dataset2 (non-contiguous case) */
     dataset2 = H5Dopen2(fid, DATASETNAME6, H5P_DEFAULT);
     VRFY((dataset2 >= 0), "H5Dopen2 succeeded");
 
     /* allocate memory for data buffer */
-    write_buf = (int *)calloc(buf_size, sizeof(int));
-    VRFY((write_buf != NULL), "write_buf malloc succeeded");
+    write_buf = (int *)HDcalloc(buf_size, sizeof(int));
+    VRFY((write_buf != NULL), "write_buf HDcalloc succeeded");
     /* allocate memory for data buffer */
-    read_buf = (int *)calloc(buf_size, sizeof(int));
-    VRFY((read_buf != NULL), "read_buf malloc succeeded");
+    read_buf = (int *)HDcalloc(buf_size, sizeof(int));
+    VRFY((read_buf != NULL), "read_buf HDcalloc succeeded");
 
     for (i=0 ; i<buf_size ; i++) {
         write_buf[i] = 5;
@@ -4031,8 +4031,8 @@ dataset_atomicity(void)
     VRFY((ret >= 0), "H5Sclose succeeded");
 
     /* release data buffers */
-    if(write_buf) free(write_buf);
-    if(read_buf) free(read_buf);
+    if(write_buf) HDfree(write_buf);
+    if(read_buf) HDfree(read_buf);
 
     ret = H5Fclose(fid);
     VRFY((ret >= 0), "H5Fclose succeeded");

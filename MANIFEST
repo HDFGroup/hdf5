@@ -540,11 +540,11 @@
 ./perform/sio_timer.h
 ./perform/zip_perf.c
 
-./release_docs/INSTALL_CMake.txt
 ./release_docs/COPYING
 ./release_docs/HISTORY-1_0-1_8_0_rc3.txt
 ./release_docs/HISTORY-1_9.txt
 ./release_docs/INSTALL
+./release_docs/INSTALL_CMake.txt
 ./release_docs/INSTALL_Cygwin.txt
 ./release_docs/INSTALL_parallel
 ./release_docs/INSTALL_VMS.txt
@@ -1476,8 +1476,12 @@
 ./tools/testfiles/tcontents.ddl
 ./tools/testfiles/tcontiguos.ddl
 ./tools/testfiles/tcmpdattrintsize.ddl
+./tools/testfiles/tcmpdintarray.ddl
+./tools/testfiles/tcmpdints.ddl
 ./tools/testfiles/tcmpdintsize.ddl
 ./tools/testfiles/tcmpdattrintsize.h5
+./tools/testfiles/tcmpdintarray.h5
+./tools/testfiles/tcmpdints.h5
 ./tools/testfiles/tcmpdintsize.h5
 ./tools/testfiles/tcomp-1.ddl
 ./tools/testfiles/tcomp-2.ddl
@@ -1549,6 +1553,8 @@
 ./tools/testfiles/tindicessub3.ddl
 ./tools/testfiles/tindicessub4.ddl
 ./tools/testfiles/tindicessub1.ddl
+./tools/testfiles/tintsattrs.ddl
+./tools/testfiles/tintsattrs.h5
 ./tools/testfiles/tlarge_objname.ddl
 ./tools/testfiles/tlarge_objname.h5
 ./tools/testfiles/tldouble.h5
@@ -1594,11 +1600,15 @@
 ./tools/testfiles/trawdatafile.exp
 ./tools/testfiles/trawssetfile.ddl
 ./tools/testfiles/trawssetfile.exp
+./tools/testfiles/treadfilter.ddl
+./tools/testfiles/treadintfilter.ddl
 ./tools/testfiles/treference.ddl
 ./tools/testfiles/tsaf.ddl
 ./tools/testfiles/tsaf.h5
 ./tools/testfiles/tscalarattrintsize.ddl
 ./tools/testfiles/tscalarattrintsize.h5
+./tools/testfiles/tscalarintattrsize.ddl
+./tools/testfiles/tscalarintattrsize.h5
 ./tools/testfiles/tscalarintsize.ddl
 ./tools/testfiles/tscalarintsize.h5
 ./tools/testfiles/tscalarstring.ddl
@@ -2146,6 +2156,7 @@
 ./tools/h5repack/testfiles/h5repack_layouto.h5
 ./tools/h5repack/testfiles/h5repack_layout2.h5
 ./tools/h5repack/testfiles/h5repack_layout3.h5
+./tools/h5repack/testfiles/h5repack_layout.UD.h5
 ./tools/h5repack/testfiles/h5repack_named_dtypes.h5
 ./tools/h5repack/testfiles/h5repack_nbit.h5
 ./tools/h5repack/testfiles/h5repack_objs.h5
@@ -2155,10 +2166,12 @@
 ./tools/h5repack/testfiles/h5repack_szip.h5
 ./tools/h5repack/testfiles/ublock.bin
 ./tools/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
+./tools/h5repack/testfiles/plugin_none.h5repack_layout.UD.h5.tst
 ./tools/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst
 ./tools/h5repack/testfiles/h5repack-help.txt
 ./tools/h5repack/testfiles/h5repack_filters.h5.tst
 ./tools/h5repack/testfiles/h5repack_layout.h5.ddl
+./tools/h5repack/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
 
 # jam utility and tests

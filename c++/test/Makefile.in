@@ -424,7 +424,10 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
 # *.clog are from the MPE option.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog
+# Temporary files
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog tattr_multi.h5 tfattrs.h5 \
+	tattr_scalar.h5 tattr_compound.h5 tattr_dtype.h5 \
+	tattr_basic.h5
 
 # Include src, test, and c++/src directories
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/c++/src

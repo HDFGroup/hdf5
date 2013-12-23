@@ -60,9 +60,9 @@ static const char *FileHeader = "\n\
 
 #define MAXDETECT 64
 
-/* The ALIGNMENT test code may generate the SIGBUS or SIGSEGV signals. We use
- * setjmp/longjmp in the signal handlers for recovery. But setjmp/longjmp do
- * not necessary restore the signal blocking status while sigsetjmp/siglongjmp
+/* The ALIGNMENT test code may generate the SIGBUS, SIGSEGV, or SIGILL signals. 
+ * We use setjmp/longjmp in the signal handlers for recovery. But setjmp/longjmp
+ * do not necessary restore the signal blocking status while sigsetjmp/siglongjmp
  * do. If sigsetjmp/siglongjmp are not supported, need to use sigprocmask to
  * unblock the signal before doing longjmp.
  */
@@ -124,7 +124,7 @@ static int bit_cmp(int, int *, volatile void *, volatile void *,
 static void fix_order(int, int, int *, const char **);
 static int imp_bit(int, int *, volatile void *, volatile void *,
     const unsigned char *);
-static unsigned long find_bias(int, int, int *, void *);
+static unsigned long find_bias(int, int, int *, volatile void *);
 static void precision (detected_t*);
 static void print_header(void);
 static void detect_C89_integers(void);
@@ -139,7 +139,8 @@ static void detect_alignments(void);
 static size_t align_g[] = {1, 2, 4, 8, 16};
 static int align_status_g = 0;		/* ALIGNMENT Signal Status */
 static int sigbus_handler_called_g = 0;	/* how many times called */
-static int sigsegv_handler_called_g = 0;	/* how many times called */
+static int sigsegv_handler_called_g = 0;/* how many times called */
+static int sigill_handler_called_g = 0;	/* how many times called */
 static int signal_handler_tested_g = 0;	/* how many times tested */
 #if defined(H5SETJMP) && defined(H5_HAVE_SIGNAL)
 static int verify_signal_handlers(int signum, void (*handler)(int));
@@ -425,6 +426,7 @@ precision (detected_t *d)
     volatile size_t	_ano = 0;					      \
     void		(*_handler)(int) = HDsignal(SIGBUS, sigbus_handler);  \
     void		(*_handler2)(int) = HDsignal(SIGSEGV, sigsegv_handler);\
+    void		(*_handler3)(int) = HDsignal(SIGILL, sigill_handler);  \
 									      \
     _buf = (char*)HDmalloc(sizeof(TYPE) + align_g[NELMTS(align_g) - 1]);	      \
     if(H5SETJMP(jbuf_g)) _ano++;					      \
@@ -454,6 +456,7 @@ precision (detected_t *d)
     HDfree(_buf);								      \
     HDsignal(SIGBUS, _handler); /*restore original handler*/		      \
     HDsignal(SIGSEGV, _handler2); /*restore original handler*/		      \
+    HDsignal(SIGILL, _handler3); /*restore original handler*/		      \
 }
 #else
 #define ALIGNMENT(TYPE,INFO) {						      \
@@ -535,6 +538,42 @@ sigbus_handler(int UNUSED signo)
     sigbus_handler_called_g++;
     HDsignal(SIGBUS, sigbus_handler);
     H5LONGJMP(jbuf_g, SIGBUS);
+}
+#endif
+
+
+#if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
+/*-------------------------------------------------------------------------
+ * Function:	sigill_handler
+ *
+ * Purpose:	Handler for SIGILL. We use signal() instead of sigaction()
+ *		because it's more portable to non-Posix systems. Although
+ *		it's not nearly as nice to work with, it does the job for
+ *		this simple stuff.
+ *
+ * Return:	Returns via H5LONGJMP to jbuf_g.
+ *
+ * Programmer:	Raymond Lu
+ *		28 October 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+sigill_handler(int UNUSED signo)
+{
+#if !defined(H5HAVE_SIGJMP) && defined(H5_HAVE_SIGPROCMASK)
+    /* Use sigprocmask to unblock the signal if sigsetjmp/siglongjmp are not */
+    /* supported. */
+    sigset_t set;
+
+    HDsigemptyset(&set);
+    HDsigaddset(&set, SIGILL);
+    HDsigprocmask(SIG_UNBLOCK, &set, NULL);
+#endif
+
+    sigill_handler_called_g++;
+    HDsignal(SIGILL, sigill_handler);
+    H5LONGJMP(jbuf_g, SIGILL);
 }
 #endif
 
@@ -1135,7 +1174,7 @@ imp_bit(int n, int *perm, volatile void *_a, volatile void *_b,
  *-------------------------------------------------------------------------
  */
 static unsigned long
-find_bias(int epos, int esize, int *perm, void *_a)
+find_bias(int epos, int esize, int *perm, volatile void *_a)
 {
     unsigned char	*a = (unsigned char *) _a;
     unsigned char	mask;

@@ -45,7 +45,7 @@ tstimage_SOURCES=tstimage.f90
 tsttable_SOURCES=tsttable.f90
 
 # Temporary files.
-CHECK_CLEANFILES+=dsetf[1-4].h5 f1img.h5 f1tab.h5 tstds.h5
+CHECK_CLEANFILES+=dsetf[1-5].h5 f1img.h5 f1tab.h5 tstds.h5
 
 # Mark this directory as part of the Fortran API (this affects output
 # from tests in conclude.am)

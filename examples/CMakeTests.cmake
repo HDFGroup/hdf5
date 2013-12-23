@@ -39,6 +39,9 @@
           soft_link.h5
           subset.h5
           unix2win.h5
+          blue/prefix_target.h5
+          red/prefix_target.h5
+          u2w/u2w_target.h5
   )
   IF (NOT "${last_test}" STREQUAL "")
     SET_TESTS_PROPERTIES (EXAMPLES-clear-objects PROPERTIES DEPENDS ${last_test})
