@@ -1677,7 +1677,7 @@ test_misc8(void)
     /* Free the read & write buffers */
     HDfree(wdata);
 #ifdef VERIFY_DATA
-    free(rdata);
+    HDfree(rdata);
 #endif /* VERIFY_DATA */
 } /* end test_misc8() */
 

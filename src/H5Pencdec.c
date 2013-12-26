@@ -184,6 +184,42 @@ H5P__encode_hsize_t(const void *value, void **_pp, size_t *size)
 
 
 /*-------------------------------------------------------------------------
+ * Function:       H5P__encode_uint32_t
+ *
+ * Purpose:        Generic encoding callback routine for 'uint32_t' properties.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 August 07, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P__encode_uint32_t(const void *value, void **_pp, size_t *size)
+{
+    uint8_t **pp = (uint8_t **)_pp;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDassert(value);
+    HDassert(size);
+
+    if(NULL != *pp) {
+        /* Encode the value */
+        UINT32ENCODE(*pp, *(const uint32_t *)value);
+    } /* end if */
+
+    /* Set size needed for encoding */
+    *size += sizeof(uint32_t);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__encode_uint32_t() */
+
+
+/*-------------------------------------------------------------------------
  * Function:       H5P__encode_uint64_t
  *
  * Purpose:        Generic encoding callback routine for 'uint64_t' properties.
@@ -584,6 +620,40 @@ H5P__decode_hsize_t(const void **_pp, void *_value)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__decode_hsize_t() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__decode_uint32_t
+ *
+ * Purpose:        Generic encoding callback routine for 'uint32_t' properties.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 August 07, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P__decode_uint32_t(const void **_pp, void *_value)
+{
+    uint32_t *value = (uint32_t *)_value; /* Property value to return */
+    const uint8_t **pp = (const uint8_t **)_pp;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(value);
+
+    UINT32DECODE(*pp, *value)
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__decode_uint32_t() */
 
 
 /*-------------------------------------------------------------------------

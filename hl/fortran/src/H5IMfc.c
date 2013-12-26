@@ -75,7 +75,7 @@ nh5immake_image_8bit_c (hid_t_f *loc_id,
 
 done:
     if(c_name!=NULL)
-        free(c_name);
+        HDfree(c_name);
 
     return ret_value;
 
@@ -135,7 +135,7 @@ nh5imread_image_c (hid_t_f *loc_id,
 
 done:
     if(c_name!=NULL)
-        free(c_name);
+        HDfree(c_name);
 
     return ret_value;
 }
@@ -206,9 +206,9 @@ nh5immake_image_24bit_c (hid_t_f *loc_id,
 
 done:
     if(c_name!=NULL)
-        free(c_name);
+        HDfree(c_name);
     if(c_il!=NULL)
-        free(c_il);
+        HDfree(c_il);
 
     return ret_value;
 }
@@ -265,7 +265,7 @@ nh5imget_image_info_c(hid_t_f *loc_id,
     /*
     * allocate buffer to hold name of an attribute
     */
-    if ((c_buf = malloc((size_t)*ilen +1)) == NULL)
+    if ((c_buf = HDmalloc((size_t)*ilen +1)) == NULL)
         goto done;
 
     /*
@@ -292,9 +292,9 @@ nh5imget_image_info_c(hid_t_f *loc_id,
 
 done:
     if(c_name!=NULL)
-        free(c_name);
+        HDfree(c_name);
     if(c_buf!=NULL)
-        free(c_buf);
+        HDfree(c_buf);
 
     return ret_value;
 }
@@ -344,7 +344,7 @@ nh5imis_image_c(hid_t_f *loc_id,
     ret = H5IMis_image(c_loc_id, c_name);
 
     if(c_name!=NULL)
-        free(c_name);
+        HDfree(c_name);
 
     return ret;
 
@@ -467,9 +467,9 @@ nh5imlink_palette_c (hid_t_f *loc_id,
 
 done:
     if(c_name!=NULL)
-        free(c_name);
+        HDfree(c_name);
     if(c_namepal!=NULL)
-        free(c_namepal);
+        HDfree(c_namepal);
 
     return ret_value;
 }
@@ -537,9 +537,9 @@ nh5imunlink_palette_c (hid_t_f *loc_id,
 
 done:
     if(c_name!=NULL)
-        free(c_name);
+        HDfree(c_name);
     if(c_namepal!=NULL)
-        free(c_namepal);
+        HDfree(c_namepal);
 
     return ret_value;
 }
@@ -602,7 +602,7 @@ nh5imget_npalettes_c(hid_t_f *loc_id,
 
 done:
     if(c_name!=NULL)
-        free(c_name);
+        HDfree(c_name);
 
     return ret_value;
 }
@@ -672,7 +672,7 @@ nh5imget_palette_info_c(hid_t_f *loc_id,
 
 done:
     if(c_name!=NULL)
-        free(c_name);
+        HDfree(c_name);
 
     return ret_value;
 }
@@ -733,7 +733,7 @@ nh5imget_palette_c(hid_t_f *loc_id,
 
 done:
     if(c_name!=NULL)
-        free(c_name);
+        HDfree(c_name);
 
     return ret_value;
 }
@@ -783,7 +783,7 @@ nh5imis_palette_c(hid_t_f *loc_id,
     ret = H5IMis_palette(c_loc_id, c_name);
 
     if(c_name!=NULL)
-        free(c_name);
+        HDfree(c_name);
 
     return ret;
 

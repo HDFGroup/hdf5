@@ -38,6 +38,7 @@ EXIT_FAILURE=1
 H5DIFF=h5diff               # The tool name
 H5DIFF_BIN=`pwd`/$H5DIFF    # The path of the tool binary
 
+RM='rm -rf'
 CMP='cmp -s'
 DIFF='diff -c'
 CP='cp'
@@ -334,6 +335,19 @@ COPY_TESTFILES_TO_TESTDIR()
             fi
         fi
     done
+}
+
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=`$DIRNAME $tstfile`
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $TESTDIR
+    fi
 }
 
 # Parse option
@@ -1095,6 +1109,9 @@ TOOLTEST h5diff_646.txt -v --use-system-epsilon -p 0.05 h5diff_basic1.h5 h5diff_
 # ##############################################################################
 # # END
 # ##############################################################################
+
+# Clean up temporary files/directories
+CLEAN_TESTFILES_AND_TESTDIR
 
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."

@@ -200,11 +200,11 @@ ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 IF (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
   SET (CPACK_PACKAGE_VENDOR "HDF_Group")
   SET (CPACK_PACKAGE_NAME "${HDF5_PACKAGE_NAME}")
-  SET (CPACK_PACKAGE_INSTALL_DIRECTORY "${HDF5_PACKAGE_NAME}")
   SET (CPACK_PACKAGE_VERSION "${HDF5_PACKAGE_VERSION}")
   SET (CPACK_PACKAGE_VERSION_MAJOR "${HDF5_PACKAGE_VERSION_MAJOR}")
   SET (CPACK_PACKAGE_VERSION_MINOR "${HDF5_PACKAGE_VERSION_MINOR}")
   SET (CPACK_PACKAGE_VERSION_PATCH "")
+  SET (CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_VENDOR}/${HDF5_PACKAGE_NAME}/${CPACK_PACKAGE_VERSION}")
   IF (EXISTS "${HDF5_SOURCE_DIR}/release_docs")
     SET (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/release_docs/RELEASE.txt")
     SET (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/release_docs/COPYING")
@@ -215,6 +215,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
   SET (CPACK_GENERATOR "TGZ") 
   IF (WIN32)
     LIST (APPEND CPACK_GENERATOR "NSIS") 
+    SET (CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_VENDOR}\\\\${HDF5_PACKAGE_NAME}\\\\${CPACK_PACKAGE_VERSION}")
     SET (CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${LIB_TYPE}")
     SET (CPACK_MONOLITHIC_INSTALL ON)
     SET (CPACK_NSIS_CONTACT "${HDF5_PACKAGE_BUGREPORT}")
@@ -229,23 +230,24 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     SET (CPACK_PACKAGE_ICON "${HDF5_RESOURCES_DIR}/hdf.gif")
     SET (CPACK_SET_DESTDIR TRUE) # Required when packaging, and set CMAKE_INSTALL_PREFIX to "/".
     
-#    LIST (APPEND CPACK_GENERATOR "Bundle")
-    SET (CPACK_BUNDLE_NAME "${HDF5_PACKAGE_STRING}")
-    SET (CPACK_BUNDLE_LOCATION "/")    # make sure CMAKE_INSTALL_PREFIX ends in /
-    SET (CMAKE_INSTALL_PREFIX "/${CPACK_BUNDLE_NAME}.framework/Versions/${CPACK_PACKAGE_VERSION}/${CPACK_PACKAGE_NAME}/")
-    SET (CPACK_BUNDLE_ICON "${HDF5_RESOURCES_DIR}/hdf.gif")
-    SET (CPACK_BUNDLE_PLIST "${HDF5_BINARY_DIR}/CMakeFiles/Info.plist")
-#    SET (CPACK_BUNDLE_STARTUP_COMMAND "${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-startup.sh")
-    SET (CPACK_APPLE_GUI_INFO_STRING "HDF5 (Hierarchical Data Format 5) Software Library and Utilities")
-    SET (CPACK_APPLE_GUI_COPYRIGHT "Copyright © 2006-2013 by The HDF Group. All rights reserved.")
-    SET (CPACK_SHORT_VERSION_STRING "${CPACK_PACKAGE_VERSION}")
-    #-----------------------------------------------------------------------------
-    # Configure the Info.plist file for the install bundle
-    #-----------------------------------------------------------------------------
-    CONFIGURE_FILE (
-        ${HDF5_RESOURCES_DIR}/CPack.Info.plist.in
-        ${HDF5_BINARY_DIR}/CMakeFiles/Info.plist @ONLY
-    )
+    IF (HDF5_PACK_MACOSX_BUNDLE)
+      LIST (APPEND CPACK_GENERATOR "Bundle")
+      SET (CPACK_BUNDLE_NAME "${HDF5_PACKAGE_STRING}")
+      SET (CPACK_BUNDLE_LOCATION "/")    # make sure CMAKE_INSTALL_PREFIX ends in /
+      SET (CMAKE_INSTALL_PREFIX "/${CPACK_BUNDLE_NAME}.framework/Versions/${CPACK_PACKAGE_VERSION}/${CPACK_PACKAGE_NAME}/")
+      SET (CPACK_BUNDLE_ICON "${HDF5_RESOURCES_DIR}/hdf.gif")
+      SET (CPACK_BUNDLE_PLIST "${HDF5_BINARY_DIR}/CMakeFiles/Info.plist")
+      SET (CPACK_APPLE_GUI_INFO_STRING "HDF5 (Hierarchical Data Format 5) Software Library and Utilities")
+      SET (CPACK_APPLE_GUI_COPYRIGHT "Copyright © 2006-2013 by The HDF Group. All rights reserved.")
+      SET (CPACK_SHORT_VERSION_STRING "${CPACK_PACKAGE_VERSION}")
+      #-----------------------------------------------------------------------------
+      # Configure the Info.plist file for the install bundle
+      #-----------------------------------------------------------------------------
+      CONFIGURE_FILE (
+          ${HDF5_RESOURCES_DIR}/CPack.Info.plist.in
+          ${HDF5_BINARY_DIR}/CMakeFiles/Info.plist @ONLY
+      )
+    ENDIF(HDF5_PACK_MACOSX_BUNDLE)
   ELSE (WIN32)
     LIST (APPEND CPACK_GENERATOR "STGZ") 
     SET (CPACK_PACKAGING_INSTALL_PREFIX "/usr")
@@ -253,7 +255,9 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
 
     SET (CPACK_DEBIAN_PACKAGE_SECTION "Libraries")
     SET (CPACK_DEBIAN_PACKAGE_MAINTAINER "${HDF5_PACKAGE_BUGREPORT}")
-    
+
+#    LIST (APPEND CPACK_GENERATOR "RPM") 
+    SET (CPACK_RPM_PACKAGE_RELEASE "1")
     SET (CPACK_RPM_COMPONENT_INSTALL ON)
     SET (CPACK_RPM_PACKAGE_RELOCATABLE ON)
     SET (CPACK_RPM_PACKAGE_LICENSE "BSD-style")
@@ -276,6 +280,12 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
 The HDF5 data model, file format, API, library, and tools are open and distributed without charge.
 "
     )
+    
+    #-----------------------------------------------------------------------------
+    # Configure the spec file for the install RPM
+    #-----------------------------------------------------------------------------
+#    CONFIGURE_FILE ("${HDF5_RESOURCES_DIR}/hdf5.spec.in" "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_PACKAGE_NAME}.spec" @ONLY IMMEDIATE)
+#    SET (CPACK_RPM_USER_BINARY_SPECFILE "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_PACKAGE_NAME}.spec")
   ENDIF (WIN32)
   
   INCLUDE(InstallRequiredSystemLibraries)

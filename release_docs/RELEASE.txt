@@ -1,4 +1,4 @@
-HDF5 version 1.9.167 currently under development
+HDF5 version 1.9.170 currently under development
 ================================================================================
 
 
@@ -1312,14 +1312,14 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (SUSE Linux) 4.7.2 
                                   (cmake and autotools)
 
-    Ubuntu 13.04 3.8.0-30-generic #44-Ubuntu SMP i686 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
-                                  GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu1) 4.7.3
+    Ubuntu 13.10 3.11.0-13-generic #20-Ubuntu SMP i686 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.8.1-10ubuntu8) 4.8.1
+                                  GNU Fortran (Ubuntu/Linaro 4.8.1-10ubuntu8) 4.8.1
                                   (cmake and autotools)
 
-    Ubuntu 13.04 3.8.0-30-generic #44-Ubuntu SMP x86_64 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
-                                  GNU Fortran (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
+    Ubuntu 13.10 3.11.0-13-generic #20-Ubuntu SMP x86_64 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.8.1-10ubuntu8) 4.8.1
+                                  GNU Fortran (Ubuntu/Linaro 4.8.1-10ubuntu8) 4.8.1
                                   (cmake and autotools)
     
     Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46
@@ -1330,6 +1330,13 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
+  catches some undefined behavior in the alignment algorithm of the macro DETECT_I
+  in H5detect.c (Issue 8147).  Since the algorithm is trying to detect the alignment 
+  of integers, ideally the flag -fcatch-undefined-behavior shouldn't to be used for 
+  H5detect.c. In the future, we can separate flags for H5detect.c from the rest of 
+  the library. (SLU - 2013/10/16)
+
 * The 5.9 C++ compiler on Sun failed to compile a C++ test ttypes.cpp.  It
   complains with this message:
       "/home/hdf5/src/H5Vprivate.h", line 130: Error: __func__ is not defined.

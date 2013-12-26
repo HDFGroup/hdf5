@@ -614,7 +614,7 @@ test_compound (char *filename, hid_t fapl)
     if ((s8_m_sid = H5Screate_simple (2, h_size, NULL)) < 0) goto error;
 
     /* Read the dataset */
-    s8 = (s1_t *) calloc ((size_t)(h_size[0]*h_size[1]), sizeof(s1_t));
+    s8 = (s1_t *) HDcalloc ((size_t)(h_size[0]*h_size[1]), sizeof(s1_t));
     assert (s8);
     if (H5Dread (dataset, s1_tid, s8_m_sid, s8_f_sid, H5P_DEFAULT, s8) < 0) {
 	goto error;
@@ -641,7 +641,7 @@ test_compound (char *filename, hid_t fapl)
 	}
     }
 
-    free (s8);
+    HDfree (s8);
     s8 = NULL;
     PASSED();
 
@@ -781,7 +781,7 @@ test_compound (char *filename, hid_t fapl)
     f_offset[1] = NY/3;
     h_size[0] = 2*NX/3 - f_offset[0];
     h_size[1] = 2*NY/3 - f_offset[1];
-    s11 = (s4_t *) malloc ((size_t)h_size[0]*(size_t)h_size[1]*sizeof(s4_t));
+    s11 = (s4_t *) HDmalloc ((size_t)h_size[0]*(size_t)h_size[1]*sizeof(s4_t));
     assert (s11);
 
     /* Initialize */
@@ -793,7 +793,7 @@ test_compound (char *filename, hid_t fapl)
     if (H5Dwrite (dataset, s4_tid, s8_m_sid, s8_f_sid, PRESERVE, s11) < 0) {
 	goto error;
     }
-    free (s11);
+    HDfree (s11);
     s11=NULL;
 
     /* Read the whole thing */
@@ -1380,12 +1380,12 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
 	goto error;
 
     /* Allocate space and initialize data */
-    orig = (unsigned char*)malloc(NX * NY * sizeof(stype1));
+    orig = (unsigned char*)HDmalloc(NX * NY * sizeof(stype1));
     initialize_stype1(orig, (size_t)NX*NY);
 
-    rbuf = (unsigned char*)malloc(NX * NY * sizeof(stype2));
+    rbuf = (unsigned char*)HDmalloc(NX * NY * sizeof(stype2));
 
-    rew_buf = (unsigned char*)malloc(NX * NY * sizeof(stype3));
+    rew_buf = (unsigned char*)HDmalloc(NX * NY * sizeof(stype3));
     initialize_stype3(rew_buf, (size_t)NX*NY);
 
 
@@ -1515,9 +1515,9 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    free(orig);
-    free(rbuf);
-    free(rew_buf);
+    HDfree(orig);
+    HDfree(rbuf);
+    HDfree(rew_buf);
 
     PASSED();
     return 0;
@@ -1585,12 +1585,12 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
 	goto error;
 
     /* Allocate space and initialize data */
-    orig = (unsigned char*)malloc(NX * NY * sizeof(stype2));
+    orig = (unsigned char*)HDmalloc(NX * NY * sizeof(stype2));
     initialize_stype2(orig, (size_t)NX*NY);
 
-    rbuf = (unsigned char*)malloc(NX * NY * sizeof(stype1));
+    rbuf = (unsigned char*)HDmalloc(NX * NY * sizeof(stype1));
 
-    rew_buf = (unsigned char*)malloc(NX * NY * sizeof(stype4));
+    rew_buf = (unsigned char*)HDmalloc(NX * NY * sizeof(stype4));
     initialize_stype4(rew_buf, (size_t)NX*NY);
 
     /* Create dataset creation property list */
@@ -1719,9 +1719,9 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     if(H5Fclose(file) < 0)
         goto error;
 
-    free(orig);
-    free(rbuf);
-    free(rew_buf);
+    HDfree(orig);
+    HDfree(rbuf);
+    HDfree(rew_buf);
 
     PASSED();
     return 0;

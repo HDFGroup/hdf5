@@ -76,8 +76,6 @@
  * NOFILE stands for "no file" to be tested.
  */
 typedef enum fsizes_t { SFILE, LFILE, XLFILE, HUGEFILE, NOFILE} fsizes_t;
-/* Lists of vfd to test */
-typedef enum vfd_t { SEC2_VFD, STDIO_VFD, FAMILY_VFD } vfd_t;
 fsizes_t file_size= NOFILE;
 
 const char *FILENAME[] = {
@@ -91,9 +89,11 @@ int  sparse_support=0;  /* sparse file supported, default false */
 int  have_space=0;    /* enough space for huge file test, default false */
 hsize_t  family_size_def=FAMILY_SIZE;  /* default family file size */
 
-/* Protocols */
+/* Prototypes */
 static void usage(void);
-int testvfd(vfd_t vfd);
+static int test_sec2(hid_t fapl);
+static int test_stdio(hid_t fapl);
+static int test_family(hid_t fapl);
 
 /* Array used to record all addresses at which data has been written */
 /* so far.  Used to prevent overlapping writes. */
@@ -207,66 +207,55 @@ is_sparse(void)
  *-------------------------------------------------------------------------
  */
 static fsizes_t
-supports_big(vfd_t vfd)
+supports_big(void)
 {
     int		fd = -1;
     fsizes_t    fsize = NOFILE;
 
-    switch (vfd){
-    case FAMILY_VFD:
-    case SEC2_VFD:
-    case STDIO_VFD:
-        if ((fd=HDopen("y.h5", O_RDWR|O_TRUNC|O_CREAT, 0666)) < 0)
-            goto error;
-
-        /* Write a few byte at the beginning */
-        if (5!=HDwrite(fd, "hello", (size_t)5))
-            goto quit;
-        fsize = SFILE;
-
-        /* Write a few bytes at 2GB */
-        if (HDlseek(fd, 2*GB, SEEK_SET)!=2*GB)
-            goto quit;
-        if (5!=HDwrite(fd, "hello", (size_t)5))
-            goto quit;
-        fsize = LFILE;
-
-        /* Write a few bytes at 4GB */
-        if (HDlseek(fd, 4*GB, SEEK_SET) != 4*GB)
-            goto quit;
-        if (5!=HDwrite(fd, "hello", (size_t)5))
-            goto quit;
-        fsize = XLFILE;
-
-        /* If this supports sparse_file, write a few bytes at 32GB */
-        if (!sparse_support)
-            goto quit;
-        if (HDlseek(fd, 32*GB, SEEK_SET) != 32*GB)
-            goto quit;
-        if (5!=HDwrite(fd, "hello", (size_t)5))
-            goto quit;
-        fsize = HUGEFILE;
-
-        break;
-    default:
-        /* unknown or unsupported VFD */
+    if((fd=HDopen("y.h5", O_RDWR|O_TRUNC|O_CREAT, 0666)) < 0)
         goto error;
-        break;
-    }
+
+    /* Write a few byte at the beginning */
+    if(5!=HDwrite(fd, "hello", (size_t)5))
+        goto quit;
+    fsize = SFILE;
+
+    /* Write a few bytes at 2GB */
+    if(HDlseek(fd, 2*GB, SEEK_SET)!=2*GB)
+        goto quit;
+    if(5!=HDwrite(fd, "hello", (size_t)5))
+        goto quit;
+    fsize = LFILE;
+
+    /* Write a few bytes at 4GB */
+    if(HDlseek(fd, 4*GB, SEEK_SET) != 4*GB)
+        goto quit;
+    if(5!=HDwrite(fd, "hello", (size_t)5))
+        goto quit;
+    fsize = XLFILE;
+
+    /* If this supports sparse_file, write a few bytes at 32GB */
+    if(!sparse_support)
+        goto quit;
+    if(HDlseek(fd, 32*GB, SEEK_SET) != 32*GB)
+        goto quit;
+    if(5!=HDwrite(fd, "hello", (size_t)5))
+        goto quit;
+    fsize = HUGEFILE;
 
 quit:
-    if (HDclose(fd) < 0)
+    if(HDclose(fd) < 0)
         goto error;
-    if (HDremove("y.h5") < 0)
+    if(HDremove("y.h5") < 0)
         goto error;
-    return(fsize);
+    return fsize;
 
 error:
-    if (fd >= 0){
+    if(fd >= 0){
         HDclose(fd);
         HDremove("y.h5");
     }
-    return (fsize);
+    return fsize;
 }
 
 
@@ -301,11 +290,11 @@ enough_room(hid_t fapl)
 
     /* Get file name template */
     HDassert(H5FD_FAMILY==H5Pget_driver(fapl));
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Create files */
     for (i=0; i<NELMTS(fd); i++) {
-        HDsnprintf(name, sizeof name, filename, i);
+        HDsnprintf(name, sizeof(name), filename, i);
         if ((fd[i]=HDopen(name, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0) {
             goto done;
         }
@@ -320,7 +309,7 @@ enough_room(hid_t fapl)
 
 done:
     for (i=0; i<NELMTS(fd) && fd[i]>=0; i++) {
-        HDsnprintf(name, sizeof name, filename, i);
+        HDsnprintf(name, sizeof(name), filename, i);
         if(HDclose(fd[i]) < 0)
             ret_value=0;
         HDremove(name);
@@ -603,123 +592,138 @@ usage(void)
             , (hsize_t)FAMILY_SIZE);
 }
 
-
-
-/* Flush stdout at the end of this test routine to ensure later output to */
-/* stderr will not come out before it.*/
-int testvfd(vfd_t vfd)
+static int
+test_sec2(hid_t fapl)
 {
-    hid_t	fapl=-1;
     char	filename[1024];
     fsizes_t	testsize;
 
+    testsize = supports_big();
+    if(testsize == NOFILE) {
+        HDfprintf(stdout, "Test for sec2 is skipped because file system does not support big files.\n");
+        goto quit;
+    }
+    /* Test big file with the SEC2 driver */
+    HDputs("Testing big file with the SEC2 Driver ");
 
-    switch(vfd){
-    case FAMILY_VFD:
-        /* Test huge file with the family driver */
-        HDputs("Testing big file with the Family Driver ");
-        if ((fapl=H5Pcreate(H5P_FILE_ACCESS)) < 0)
-            goto error;
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
-        if (H5Pset_fapl_family(fapl, family_size_def, H5P_DEFAULT) < 0)
-            goto error;
+    if(writer(filename, fapl, testsize, WRT_N))
+        goto error;
+    if(reader(filename, fapl))
+        goto error;
 
-        if (cflag){
-            /*
-             * We shouldn't run this test if the file system doesn't support holes
-             * because we would generate multi-gigabyte files.
-             */
-            HDputs("Checking if file system is adequate for this test...");
-            if (sizeof(long long)<8 || 0==GB8LL) {
-                HDputs("Test skipped because sizeof(long long) is too small. This");
-                HDputs("hardware apparently doesn't support 64-bit integer types.");
-                usage();
-                goto quit;
-            }
-            if (!sparse_support) {
-                HDputs("Test skipped because file system does not support holes.");
-                usage();
-                goto quit;
-            }
-            if (!enough_room(fapl)) {
-                HDputs("Test skipped because of quota (file size or num open files).");
-                usage();
-                goto quit;
-            }
-        }
-
-        /* Do the test with the Family Driver */
-        h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-
-        if (writer(filename, fapl, HUGEFILE, WRT_N)) goto error;
-        if (reader(filename, fapl)) goto error;
-
-        HDputs("Test passed with the Family Driver.");
-        break;
-
-    case SEC2_VFD:
-        testsize = supports_big(SEC2_VFD);
-        if (testsize == NOFILE) {
-            HDfprintf(stdout, "Test for sec2 is skipped because file system does not support big files.\n");
-            goto quit;
-        }
-        /* Test big file with the SEC2 driver */
-        HDputs("Testing big file with the SEC2 Driver ");
-
-        if ((fapl=H5Pcreate(H5P_FILE_ACCESS)) < 0)
-            goto error;
-        if(H5Pset_fapl_sec2(fapl) < 0)
-            goto error;
-
-        h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-
-        if (writer(filename, fapl, testsize, WRT_N)) goto error;
-        if (reader(filename, fapl)) goto error;
-
-        HDputs("Test passed with the SEC2 Driver.");
-        break;
-
-    case STDIO_VFD:
-        testsize = supports_big(STDIO_VFD);
-        if (testsize == NOFILE) {
-            HDfprintf(stdout, "Test for stdio is skipped because file system does not support big files.\n");
-            goto quit;
-        }
-        HDputs("\nTesting big file with the STDIO Driver ");
-
-        if ((fapl=H5Pcreate(H5P_FILE_ACCESS)) < 0)
-            goto error;
-        if(H5Pset_fapl_stdio(fapl) < 0)
-            goto error;
-
-        h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
-
-        if (writer(filename, fapl, testsize, WRT_N)) goto error;
-        if (reader(filename, fapl)) goto error;
-        HDputs("Test passed with the STDIO Driver.");
-        break;
-
-    default:
-        HDputs("Unsupprted VFD");
-        usage();
-        goto error;;
-    } /* end of switch (vfd) */
+    HDputs("Test passed with the SEC2 Driver.");
 
 quit:
     /* End with normal return code */
     /* Clean up the test file */
-    if (h5_cleanup(FILENAME, fapl)) HDremove(DNAME);
+    if(h5_cleanup(FILENAME, fapl))
+        HDremove(DNAME);
+    return 0;
+
+error:
+    HDputs("*** TEST FAILED ***");
+    return 1;
+} /* end test_sec2() */
+
+static int 
+test_stdio(hid_t fapl)
+{
+    char	filename[1024];
+    fsizes_t	testsize;
+
+    testsize = supports_big();
+    if(testsize == NOFILE) {
+        HDfprintf(stdout, "Test for stdio is skipped because file system does not support big files.\n");
+        goto quit;
+    }
+    HDputs("\nTesting big file with the STDIO Driver ");
+
+    h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
+
+    if(writer(filename, fapl, testsize, WRT_N))
+        goto error;
+    if(reader(filename, fapl))
+        goto error;
+    HDputs("Test passed with the STDIO Driver.");
+
+    /* Flush stdout at the end of this test routine to ensure later
+     * output to stderr will not come out before it.
+     */
+
+quit:
+    /* End with normal return code */
+    /* Clean up the test file */
+    if(h5_cleanup(FILENAME, fapl))
+        HDremove(DNAME);
     HDfflush(stdout);
     return 0;
 
-
 error:
-    if (fapl>=0) H5Pclose(fapl);
     HDputs("*** TEST FAILED ***");
     HDfflush(stdout);
     return 1;
-}
+} /* end test_stdio() */
 
+static int
+test_family(hid_t fapl)
+{
+    char	filename[1024];
+
+    /* Test huge file with the family driver */
+    HDputs("Testing big file with the Family Driver ");
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
+
+    if(H5Pset_fapl_family(fapl, family_size_def, H5P_DEFAULT) < 0)
+        goto error;
+
+    if(cflag){
+        /*
+         * We shouldn't run this test if the file system doesn't support holes
+         * because we would generate multi-gigabyte files.
+         */
+        HDputs("Checking if file system is adequate for this test...");
+        if(sizeof(long long) < 8 || 0 == GB8LL) {
+            HDputs("Test skipped because sizeof(long long) is too small. This");
+            HDputs("hardware apparently doesn't support 64-bit integer types.");
+            usage();
+            goto quit;
+        }
+        if(!sparse_support) {
+            HDputs("Test skipped because file system does not support holes.");
+            usage();
+            goto quit;
+        }
+        if(!enough_room(fapl)) {
+            HDputs("Test skipped because of quota (file size or num open files).");
+            usage();
+            goto quit;
+        }
+    }
+
+    /* Do the test with the Family Driver */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    if(writer(filename, fapl, HUGEFILE, WRT_N))
+        goto error;
+    if(reader(filename, fapl))
+        goto error;
+
+    HDputs("Test passed with the Family Driver.");
+
+quit:
+    /* End with normal return code */
+    /* Clean up the test file */
+    if(h5_cleanup(FILENAME, fapl))
+        HDremove(DNAME);
+    return 0;
+
+error:
+    HDputs("*** TEST FAILED ***");
+    return 1;
+} /* end test_family() */
 
 
 /*-------------------------------------------------------------------------
@@ -749,6 +753,8 @@ int
 main (int ac, char **av)
 {
     unsigned long seed = 0;             /* Random # seed */
+    hid_t fapl = -1;
+    hid_t driver = -1;
 
     /* parameters setup */
 
@@ -779,10 +785,15 @@ main (int ac, char **av)
         }
     }
 
-    /* check sparse file support unless cflag is not set. */
-    if (cflag)
-        sparse_support = is_sparse();
+    /* check VFD to see if this is one we test */
+    if((fapl = h5_fileaccess()) < 0)
+        goto error;
+    if((driver = H5Pget_driver(fapl)) < 0)
+        goto error;
 
+    /* check sparse file support unless cflag is not set. */
+    if(cflag)
+        sparse_support = is_sparse();
 
     /* Choose random # seed */
     seed = (unsigned long)HDtime(NULL);
@@ -792,19 +803,30 @@ main (int ac, char **av)
 #endif /* QAK */
     HDsrandom(seed);
 
-    /*=================================================*/
-    if (testvfd(FAMILY_VFD) != 0)
-        goto error;
-    if (testvfd(SEC2_VFD) != 0)
-        goto error;
-    if (testvfd(STDIO_VFD) != 0)
-        goto error;
+    /* run VFD-specific test */
+    if(H5FD_SEC2 == driver) {
+        if(test_sec2(fapl) != 0)
+            goto error;
+    }
+    else if(H5FD_STDIO == driver) {
+        if(test_stdio(fapl) != 0)
+            goto error;
+    }
+    else if(H5FD_FAMILY == driver) {
+        if(test_family(fapl) != 0)
+            goto error;
+    }
+    else
+        HDputs("This VFD is not supported");
 
     /* End with normal exit code */
+    /* fapls are cleaned up in the vfd test code */
     return 0;
 
 error:
     HDputs("*** TEST FAILED ***");
+    if(fapl > 0)
+        H5Pclose(fapl);
     return 1;
 }
 

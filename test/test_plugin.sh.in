@@ -89,5 +89,6 @@ else
 fi
 
 # Clean up temporary files/directories and leave
-$RM $PLUGIN_LIBDIR2
+$RM $PLUGIN_LIBDIR1 $PLUGIN_LIBDIR2
+
 exit $exit_code

@@ -105,8 +105,8 @@ static int allwrite_allread_blocks(int numprocs, int rank, int write_size)
     int		amode, i;
     MPI_Offset	offset = rank*write_size*sizeof(int);
     MPI_Status	Status;
-    int* writebuf = (int*)malloc(write_size*sizeof(int));
-    int* readbuf = (int*)malloc (write_size*sizeof(int));
+    int* writebuf = (int*)HDmalloc(write_size*sizeof(int));
+    int* readbuf = (int*)HDmalloc (write_size*sizeof(int));
 
     for(i=0; i<write_size; i++)
 	writebuf[i] = i;
@@ -143,8 +143,8 @@ static int posix_allwrite_allread_blocks(int numprocs, int rank, int write_size)
     int		ret;
     int		i;
     int	offset = rank*write_size*sizeof(int);
-    int* writebuf = (int*)malloc(write_size*sizeof(int));
-    int* readbuf = (int*)malloc (write_size*sizeof(int));
+    int* writebuf = (int*)HDmalloc(write_size*sizeof(int));
+    int* readbuf = (int*)HDmalloc (write_size*sizeof(int));
     FILE*	file = NULL;
 
     for(i=0; i<write_size; i++)
@@ -216,8 +216,8 @@ static int posix_onewrite_allread_blocks(int numprocs, int rank, int write_size)
     int		ret;
     int		i;
     int	offset = rank*write_size*sizeof(int);
-    int* writebuf = (int*)malloc(write_size*sizeof(int));
-    int* readbuf = (int*)malloc (write_size*sizeof(int));
+    int* writebuf = (int*)HDmalloc(write_size*sizeof(int));
+    int* readbuf = (int*)HDmalloc (write_size*sizeof(int));
     FILE*	file = NULL;
 
     for(i=0; i<write_size; i++)
@@ -295,8 +295,8 @@ static int posix_onewrite_allread_interlaced(int numprocs, int rank, int write_s
     int		ret;
     int		i, fill, index;
     int	offset = rank*write_size*sizeof(int);
-    int* writebuf = (int*)malloc(write_size*sizeof(int));
-    int* readbuf = (int*)malloc (write_size*sizeof(int));
+    int* writebuf = (int*)HDmalloc(write_size*sizeof(int));
+    int* readbuf = (int*)HDmalloc (write_size*sizeof(int));
     FILE*	file = NULL;
 
     if(rank==0)
@@ -389,8 +389,8 @@ static int allwrite_allread_interlaced(int numprocs, int rank, int write_size)
     int		amode, i, counter = 0;
     MPI_Datatype filetype;
     MPI_Status	Status;
-    int* writebuf = (int*)malloc(write_size*sizeof(int));
-    int*	readbuf = (int*) malloc(numprocs*sizeof(int));
+    int* writebuf = (int*)HDmalloc(write_size*sizeof(int));
+    int*	readbuf = (int*) HDmalloc(numprocs*sizeof(int));
     int		offset=0;
 
     for(i=0; i<write_size; i++)
@@ -488,8 +488,8 @@ static int allwrite_allread_overlap(int numprocs, int rank, int write_size)
     int		amode, i, counter = 0;
     MPI_Datatype filetype;
     MPI_Status	Status;
-    int*	writebuf = (int*) malloc(write_size*(numprocs-1)*sizeof(int)); /* An upper bound...not all the elements will be written */
-    int*	readbuf = (int*) malloc(write_size*(numprocs-1)*sizeof(int));
+    int*	writebuf = (int*) HDmalloc(write_size*(numprocs-1)*sizeof(int)); /* An upper bound...not all the elements will be written */
+    int*	readbuf = (int*) HDmalloc(write_size*(numprocs-1)*sizeof(int));
 
     if(numprocs < 2)
     {
@@ -581,8 +581,8 @@ static int onewrite_allread_blocks(int numprocs, int rank, int write_size)
     int		mpio_result;
     int		amode, i;
     MPI_Status	Status;
-    int* writebuf = (int*)malloc(write_size*sizeof(int));
-    int* readbuf = (int*)malloc (write_size*sizeof(int));
+    int* writebuf = (int*)HDmalloc(write_size*sizeof(int));
+    int* readbuf = (int*)HDmalloc (write_size*sizeof(int));
 
     for(i=0; i<write_size; i++)
 	writebuf[i] = i;
@@ -632,8 +632,8 @@ static int onewrite_allread_interlaced(int numprocs, int rank, int write_size)
     int		amode, i;
     MPI_Datatype filetype;
     MPI_Status	Status;
-    int*	writebuf = (int*) malloc(numprocs*write_size*sizeof(int)); /* Upper bound, not all used */
-    int* readbuf = (int*)malloc (write_size*sizeof(int));
+    int*	writebuf = (int*) HDmalloc(numprocs*write_size*sizeof(int)); /* Upper bound, not all used */
+    int* readbuf = (int*)HDmalloc (write_size*sizeof(int));
 
 
     amode = MPI_MODE_CREATE | MPI_MODE_RDWR;
