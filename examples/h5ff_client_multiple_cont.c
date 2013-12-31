@@ -347,7 +347,8 @@ int main(int argc, char **argv) {
         fprintf(stderr, "\n");
     }
 
-    /* release container version 0. This is async. */
+    MPI_Barrier(MPI_COMM_WORLD);
+    /* release container version 1. This is async. */
     ret = H5RCrelease(rid1, e_stack);
     assert(0 == ret);
     ret = H5RCrelease(rid2, e_stack);

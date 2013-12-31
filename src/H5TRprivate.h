@@ -24,12 +24,12 @@
 /* Private headers needed by this file */
 #include "H5RCprivate.h"	/* Read Contexts			*/
 
-#ifdef H5_HAVE_EFF
-
 /**************************/
 /* Library Private Macros */
 /**************************/
 #define H5TR_FINISH_ACQUIRE_NAME "acquire_after_finishing"
+
+#ifdef H5_HAVE_EFF
 
 /****************************/
 /* Library Private Typedefs */

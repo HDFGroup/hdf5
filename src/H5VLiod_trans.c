@@ -400,13 +400,46 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
     hid_t trfpl_id;
     iod_trans_id_t trans_num = input->trans_num;
     hbool_t acquire = input->acquire;
+    uint32_t client_rank = input->client_rank;
+    uint64_t oid_index[3];
+    iod_obj_id_t oidkv_id = input->oidkv_id;
+    iod_handle_t oidkv_oh;
+    iod_kv_t kv;
+    iod_ret_t ret;
+    int step = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Transaction Finish %"PRIu64"\n", input->trans_num);
+    fprintf(stderr, "Transaction Finish %"PRIu64"\n", trans_num);
 #endif
+
+    IOD_OBJID_SETTYPE(oidkv_id, IOD_OBJ_KV)
+    IOD_OBJID_SETOWNER_APP(oidkv_id)
+
+    oid_index[0] = input->kv_oid_index;
+    oid_index[1] = input->array_oid_index;
+    oid_index[2] = input->blob_oid_index;
+
+    ret = iod_obj_open_write(coh, oidkv_id, trans_num, NULL, &oidkv_oh, NULL);
+    if(ret != 0)
+        HGOTO_ERROR_IOD(ret, FAIL, "can't open oid KV");
+
+    step ++;
+
+    kv.value = &oid_index;
+    kv.value_len = sizeof(iod_obj_id_t) * 3;
+    kv.key = &client_rank;
+    kv.key_len = sizeof(uint32_t);
+
+    if (iod_kv_set(oidkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in oid KV");
+
+    if(iod_obj_close(oidkv_oh, NULL, NULL) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object handle");
+
+    step --;
 
     /* Finish  the transaction */
     if(iod_trans_finish(coh, trans_num, NULL, 0, NULL) < 0)
@@ -429,6 +462,11 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
 done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         fprintf(stderr, "Failed to Finish Transaction\n");
+
+    if(step == 1) {
+        if(iod_obj_close(oidkv_oh, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object handle");
+    }
 
     input = (tr_finish_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);

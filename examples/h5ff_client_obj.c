@@ -141,9 +141,6 @@ int main(int argc, char **argv) {
 
         ret = H5TRfinish(tid2, H5P_DEFAULT, &rid2, e_stack);
         assert(0 == ret);
-        /* Close transaction object. Local op */
-        ret = H5TRclose(tid2);
-        assert(0 == ret);
 
         /* release container version 2. This is async. */
         ret = H5RCrelease(rid_temp, e_stack);
@@ -168,6 +165,12 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
+
+    if(0 == my_rank) {
+        /* Close transaction object. Local op */
+        ret = H5TRclose(tid2);
+        assert(0 == ret);
+    }
 
     MPI_Barrier(MPI_COMM_WORLD);
 

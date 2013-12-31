@@ -1498,6 +1498,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
             rc_info->read_cxt->c_version = rc_info->result.c_version;
             *rc_info->c_version_ptr = rc_info->result.c_version;
+            rc_info->read_cxt->req_info.request = NULL;
             rc_info = (H5VL_iod_rc_info_t *)H5MM_xfree(rc_info);
             req->data = NULL;
             H5VL_iod_request_delete(file, req);
@@ -2084,7 +2085,9 @@ H5VL_iod_get_parent_requests(H5VL_iod_object_t *obj, H5VL_iod_req_info_t *req_in
         count ++;
     }
 
-    if(req_info && req_info->request && req_info->request->status == H5ES_STATUS_IN_PROGRESS) {
+    if(req_info && 
+       req_info->request && 
+       req_info->request->status == H5ES_STATUS_IN_PROGRESS) {
         parent_reqs[count] = req_info->request;
         req_info->request->ref_count ++;
         count ++;
@@ -2104,8 +2107,7 @@ H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* determine first the rank of the object with the first 59
-       bits */
+    /* determine first the rank of the object with the first 59 bits */
     tmp_id = (uint32_t)myrank + ((uint32_t)nranks * cur_index);
 
     /* toggle the object type bits */

@@ -8183,6 +8183,8 @@ error:
     return -1;
 } /* end test_large_chunk_shrink() */
 
+/* MSC - support removed in FF */
+#if 0
 
 /*-------------------------------------------------------------------------
 * Function: test_append_sequence_1d
@@ -8609,6 +8611,8 @@ error:
     } H5E_END_TRY;
     return -1;
 } /* end test_set_get() */
+
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -9761,9 +9765,12 @@ main(void)
 	nerrors += (test_layout_extend(my_fapl) < 0		? 1 : 0);
 	nerrors += (test_large_chunk_shrink(my_fapl) < 0        ? 1 : 0);
 #endif
+/* MSC - support removed in FF */
+#if 0
 	nerrors += (test_append_sequence_1d(my_fapl) < 0        ? 1 : 0);
 	nerrors += (test_append_sequence_2d(my_fapl) < 0        ? 1 : 0);
 	nerrors += (test_set_get(my_fapl) < 0        ? 1 : 0);
+#endif
 
         if(H5Fclose(file) < 0)
             goto error;

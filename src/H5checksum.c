@@ -33,7 +33,9 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#ifdef H5_HAVE_EFF
 #include "mchecksum.h"          /* Mercury Checksum library             */
+#endif /* H5_HAVE_EFF */
 
 /****************/
 /* Local Macros */
@@ -664,6 +666,7 @@ H5_hash_string(const char *str)
     FUNC_LEAVE_NOAPI(hash)
 } /* end H5_hash_string() */
 
+#ifdef H5_HAVE_EFF
 uint64_t 
 H5_checksum_crc64(const void *buf, size_t buf_size)
 {
@@ -722,3 +725,4 @@ H5_checksum_crc64_fragments(void **buf, size_t *buf_size, size_t count)
 
     return hash;
 }
+#endif /* H5_HAVE_EFF */

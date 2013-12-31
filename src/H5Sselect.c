@@ -31,7 +31,9 @@
 #include "H5Spkg.h"		/* Dataspaces 				*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
+#ifdef H5_HAVE_EFF
 #include "mchecksum.h"          /* Mercury Checksum library             */
+#endif /* H5_HAVE_EFF */
 
 /* Local functions */
 #ifdef LATER
@@ -2145,6 +2147,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_get_offsets() */
 
+#ifdef H5_HAVE_EFF
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_checksum
@@ -2237,3 +2240,4 @@ done:
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, 0, "unable to release selection iterator")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_checksum */
+#endif /* H5_HAVE_EFF */

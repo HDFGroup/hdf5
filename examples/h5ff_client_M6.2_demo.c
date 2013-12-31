@@ -810,6 +810,8 @@ append_dataset2( hid_t obj_id, const char* dset_name, hid_t tr_id, hid_t rc_id, 
                         my_rank, dset_name, (int)tr_num, obj_path, (int)tr_num, data[0], data[1], data[2], data[3], STATUS );
          ret = H5Sclose( memspace_id ); ASSERT_RET;
 
+         free(data);
+
       } else {
          fprintf( stderr, "M6.2-r%d: No update to %s in %s in tr %d for this rank.\n", my_rank, dset_name, obj_path, (int)tr_num );
       }

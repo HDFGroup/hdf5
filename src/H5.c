@@ -255,12 +255,16 @@ H5_term_library(void)
 	pending += DOWN(D);
 	pending += DOWN(L);
 	pending += DOWN(G);
+#ifdef H5_HAVE_EFF
 	pending += DOWN(M);
+#endif /* H5_HAVE_EFF */
 	pending += DOWN(A);
 	pending += DOWN(S);
 	pending += DOWN(T);
+#ifdef H5_HAVE_EFF
 	pending += DOWN(TR);
 	pending += DOWN(RC);
+#endif /* H5_HAVE_EFF */
 	pending += DOWN(ES);
 	pending += DOWN(Q);
 

@@ -146,15 +146,13 @@ MERCURY_GEN_PROC(file_create_in_t,
                  ((iod_obj_id_t)(root_id))
                  ((iod_obj_id_t)(mdkv_id)) 
                  ((iod_obj_id_t)(attrkv_id)) 
+                 ((iod_obj_id_t)(oidkv_id)) 
                  ((uint32_t)(num_peers))
                  ((hid_t)(fapl_id)) 
                  ((hid_t)(fcpl_id)))
 MERCURY_GEN_PROC(file_create_out_t, 
-                 ((iod_handle_t)(coh)) 
-                 ((iod_handles_t)(root_oh))
-                 ((uint64_t)(kv_oid_index)) 
-                 ((uint64_t)(array_oid_index))
-                 ((uint64_t)(blob_oid_index)))
+                 ((iod_handle_t)(coh))
+                 ((iod_handles_t)(root_oh)))
 MERCURY_GEN_PROC(file_open_in_t, 
                  ((axe_t)(axe_info)) 
                  ((hg_const_string_t)(name)) 
@@ -170,6 +168,7 @@ MERCURY_GEN_PROC(file_open_out_t,
                  ((iod_obj_id_t)(root_id)) 
                  ((iod_obj_id_t)(mdkv_id)) 
                  ((iod_obj_id_t)(attrkv_id)) 
+                 ((iod_obj_id_t)(oidkv_id)) 
                  ((uint64_t)(c_version)) 
                  ((hid_t)(fcpl_id)))
 MERCURY_GEN_PROC(file_close_in_t, 
@@ -178,9 +177,9 @@ MERCURY_GEN_PROC(file_close_in_t,
                  ((iod_handle_t)(coh)) 
                  ((iod_handles_t)(root_oh))
                  ((iod_obj_id_t)(root_id)) 
-                 ((uint64_t)(max_kv_index)) 
-                 ((uint64_t)(max_array_index)) 
-                 ((uint64_t)(max_blob_index)))
+                 ((iod_obj_id_t)(max_kv_index)) 
+                 ((iod_obj_id_t)(max_array_index)) 
+                 ((iod_obj_id_t)(max_blob_index)))
 
 MERCURY_GEN_PROC(attr_create_in_t, 
                  ((axe_t)(axe_info)) 
@@ -658,6 +657,11 @@ MERCURY_GEN_PROC(tr_finish_in_t,
                  ((iod_handle_t)(coh))
                  ((uint64_t)(trans_num))
                  ((hbool_t)(acquire))
+                 ((uint32_t)(client_rank))
+                 ((iod_obj_id_t)(oidkv_id))
+                 ((iod_obj_id_t)(kv_oid_index)) 
+                 ((iod_obj_id_t)(array_oid_index)) 
+                 ((iod_obj_id_t)(blob_oid_index))
                  ((hid_t)(trfpl_id)))
 MERCURY_GEN_PROC(tr_set_depend_in_t, 
                  ((axe_t)(axe_info))

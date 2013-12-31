@@ -33,6 +33,8 @@
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod_client.h"	/* IOD VOL plugin			*/
 
+#ifdef H5_HAVE_EFF
+
 /****************/
 /* Local Macros */
 /****************/
@@ -944,3 +946,5 @@ H5M_close_map(void *map, H5VL_t *vol_plugin)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5M_close_map() */
+
+#endif /* H5_HAVE_EFF */

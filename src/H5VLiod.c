@@ -1542,8 +1542,21 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     file->remote_file.root_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
     file->remote_file.root_id = IOD_OBJ_INVALID;
     file->remote_file.c_version = 0;
+
     MPI_Comm_rank(fa->comm, &file->my_rank);
     MPI_Comm_size(fa->comm, &file->num_procs);
+
+    if(0 == file->my_rank) {
+        file->remote_file.kv_oid_index = 4;
+        file->remote_file.array_oid_index = 0;
+        file->remote_file.blob_oid_index = 0;
+    }
+    else {
+        file->remote_file.kv_oid_index = 0;
+        file->remote_file.array_oid_index = 0;
+        file->remote_file.blob_oid_index = 0;
+    }
+
     /* Duplicate communicator and Info object. */
     if(FAIL == H5FD_mpi_comm_info_dup(fa->comm, fa->info, &file->comm, &file->info))
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed");
@@ -1559,6 +1572,10 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     /* Generate an IOD ID for the root group ATTR KV to be created */
     H5VL_iod_gen_obj_id(0, file->num_procs, (uint64_t)2, IOD_OBJ_KV, &input.attrkv_id);
     file->remote_file.attrkv_id = input.attrkv_id;
+
+    /* Generate an IOD ID for the OID index array to be created */
+    H5VL_iod_gen_obj_id(0, file->num_procs, (uint64_t)3, IOD_OBJ_KV, &input.oidkv_id);
+    file->remote_file.oidkv_id = input.oidkv_id;
 
     /* set the input structure for the HG encode routine */
     input.name = name;
@@ -1687,8 +1704,12 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
     file->remote_file.root_id = IOD_OBJ_INVALID;
     file->remote_file.mdkv_id = IOD_OBJ_INVALID;
     file->remote_file.attrkv_id = IOD_OBJ_INVALID;
+    file->remote_file.oidkv_id = IOD_OBJ_INVALID;
     file->remote_file.fcpl_id = -1;
     file->remote_file.c_version = IOD_TID_UNKNOWN;
+    file->remote_file.kv_oid_index = 0;
+    file->remote_file.array_oid_index = 0;
+    file->remote_file.blob_oid_index = 0;
 
     /* set input paramters in struct to give to the function shipper */
     input.name = name;
@@ -2040,8 +2061,17 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED dxpl_id, void **req)
     printf("File Close Root ID %"PRIu64" axe id %"PRIu64"\n", input.root_id, g_axe_id);
 #endif
 
+    /* 
+     * All ranks must wait for rank 0 to go close the file and write
+     * out the metadata before going on an closing the file. Rank 0
+     * calls the barrier on request completion in
+     * H5VLiod_client.c. 
+
+     * (This is an IOD limitation.) 
+     */
     if(0 != file->my_rank)
         MPI_Barrier (file->comm);
+
     if(H5VL__iod_create_and_forward(H5VL_FILE_CLOSE_ID, HG_FILE_CLOSE, 
                                     (H5VL_iod_object_t *)file, 1,
                                     num_parents, parent_reqs,
@@ -2860,8 +2890,8 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     H5P_genplist_t *plist = NULL;
     hg_bulk_t *bulk_handle = NULL;
     H5VL_iod_read_status_t *status = NULL;
-    const H5S_t *mem_space = NULL;
-    const H5S_t *file_space = NULL;
+    H5S_t *mem_space = NULL;
+    H5S_t *file_space = NULL;
     char fake_char;
     size_t type_size; /* size of mem type */
     hssize_t nelmts;    /* num elements in mem dataspace */
@@ -2875,16 +2905,6 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* get the context ID */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-    if(H5P_get(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
-
-    /* get the RC object */
-    if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID")
-
     /* If there is information needed about the dataset that is not present locally, wait */
     if(-1 == dset->remote_dset.dcpl_id ||
        -1 == dset->remote_dset.type_id ||
@@ -2894,6 +2914,57 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
             HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
         dset->common.request = NULL;
     }
+
+    /* check arguments */
+    if(H5S_ALL != mem_space_id) {
+	if(NULL == (mem_space = (H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(mem_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+    }
+    else {
+	if(NULL == (mem_space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
+                                                                 H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+        if(H5S_select_all(mem_space, TRUE) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+    }
+
+    if(H5S_ALL != file_space_id) {
+	if(NULL == (file_space = (H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(file_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+    }
+    else {
+	if(NULL == (file_space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
+                                                                  H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+        if(H5S_select_all(file_space, TRUE) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+    }
+
+    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
+
+    if(!buf)
+        buf = &fake_char;
+
+    /* get the context ID */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+    if(H5P_get(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
+
+    /* get the RC object */
+    if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID")
 
     /* At the IOD server, the array object is actually created with
        MAX dims, not current dims. So here we need to range check the
@@ -2924,30 +2995,6 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection Out of range");
         }
     }
-
-    /* check arguments */
-    if(H5S_ALL != mem_space_id) {
-	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(mem_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
-    } /* end if */
-    if(H5S_ALL != file_space_id) {
-	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(file_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
-    } /* end if */
-
-    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
-
-    if(!buf)
-        buf = &fake_char;
 
     /* get the memory type size */
     {
@@ -3099,8 +3146,8 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     dset_io_in_t input;
     H5P_genplist_t *plist = NULL;
     hg_bulk_t *bulk_handle = NULL;
-    const H5S_t *mem_space = NULL;
-    const H5S_t *file_space = NULL;
+    H5S_t *mem_space = NULL;
+    H5S_t *file_space = NULL;
     char fake_char;
     int *status = NULL;
     H5VL_iod_io_info_t *info; /* info struct used to manage I/O parameters once the operation completes*/
@@ -3125,6 +3172,47 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
             HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
         dset->common.request = NULL;
     }
+
+    /* check arguments */
+    if(H5S_ALL != mem_space_id) {
+	if(NULL == (mem_space = (H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(mem_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+    }
+    else {
+	if(NULL == (mem_space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
+                                                           H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+        if(H5S_select_all(mem_space, TRUE) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+    }
+
+    if(H5S_ALL != file_space_id) {
+	if(NULL == (file_space = (H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(file_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+    }
+    else {
+	if(NULL == (file_space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
+                                                                  H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+        if(H5S_select_all(file_space, TRUE) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+    }
+
+    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
+
+    if(!buf)
+        buf = &fake_char;
 
     /* At the IOD server, the array object is actually created with
        MAX dims, not current dims. So here we need to range check the
@@ -3155,30 +3243,6 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection Out of range");
         }
     }
-
-    /* check arguments */
-    if(H5S_ALL != mem_space_id) {
-	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(mem_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
-    } /* end if */
-    if(H5S_ALL != file_space_id) {
-	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(file_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
-    } /* end if */
-
-    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
-
-    if(!buf)
-        buf = &fake_char;
 
     /* get the plist pointer */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -7886,7 +7950,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_rc_release
  *
- * Purpose:	Forwards an release on an acquired read context to IOD
+ * Purpose:	Forwards a release on an acquired read context to IOD
  *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
@@ -8138,6 +8202,7 @@ H5VL_iod_tr_start(H5TR_t *tr, hid_t trspl_id, void **req)
         H5VL_iod_request_t *request = (H5VL_iod_request_t *)(*req);
 
         tr->req_info.request = request;
+        //request->ref_count ++;
     }
 
 done:
@@ -8243,6 +8308,11 @@ H5VL_iod_tr_finish(H5TR_t *tr, hbool_t acquire, hid_t trfpl_id, void **req)
     input.trans_num = tr->trans_num;
     input.trfpl_id = trfpl_id;
     input.acquire = acquire;
+    input.client_rank = tr->file->my_rank;
+    input.oidkv_id = tr->file->num_procs * 3;
+    input.kv_oid_index = tr->file->remote_file.kv_oid_index;
+    input.array_oid_index = tr->file->remote_file.array_oid_index;
+    input.blob_oid_index = tr->file->remote_file.blob_oid_index;
 
     status = (int *)malloc(sizeof(int));
 

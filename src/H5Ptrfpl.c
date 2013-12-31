@@ -129,3 +129,4 @@ H5P__trfcc_reg_prop(H5P_genclass_t *pclass)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__trfcc_reg_prop() */
+
