@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <time.h>
+#include <unistd.h>
 
 
 /* Swtich Test type between 'Feature test = 1' or 'Performance test = 0' */
@@ -356,14 +357,14 @@ dataset_fill_2d(hsize_t start[], hsize_t count[], hsize_t stride[], DTYPE_INT * 
     DTYPE_INT *dataptr = dataset;
     hsize_t i, j, v=1;
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu)\n",
         __FUNCTION__, mpi_rank, 
 	    (unsigned long)start[0], (unsigned long)start[1],
         (unsigned long)count[0], (unsigned long)count[1],
         (unsigned long)stride[0],(unsigned long)stride[1]);
     fflush(stdout);
-    #endif
+#endif
 
     /* put some trivial data in the data_array */
     for (i=0; i < count[0]; i++){
@@ -378,12 +379,12 @@ dataset_fill_1d(hsize_t start[], hsize_t count[], hsize_t stride[], DTYPE_INT * 
     DTYPE_INT *dataptr = dataset;
     hsize_t i, j, v=1;
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start[]=(%lu), count[]=(%lu), stride[]=(%lu)\n",
         __FUNCTION__, mpi_rank, 
 	    (unsigned long)start[0], (unsigned long)count[0], (unsigned long)stride[0]);
     fflush(stdout);
-    #endif
+#endif
 
     /* put some trivial data in the data_array */
     for (i=0; i < count[0]; i++){
@@ -401,7 +402,7 @@ dataset_fill2_1d(hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t blo
 
     dataptr = dataset;
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start[]=(%lu), stride[]=(%lu), count[]=(%lu), block[]=(%lu)\n",
         __FUNCTION__, mpi_rank, 
 	    (unsigned long)start[0],
@@ -409,7 +410,7 @@ dataset_fill2_1d(hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t blo
         (unsigned long)count[0],
         (unsigned long)block[0]);
     fflush(stdout);
-    #endif
+#endif
 
     /* put some trivial data in the data_array */
     for (y=0; y< count[0]; y++)
@@ -432,7 +433,7 @@ dataset_fill2_2d(hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t blo
 
     dataptr = dataset;
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start[]=(%lu,%lu), stride[]=(%lu,%lu), count[]=(%lu,%lu), block[]=(%lu,%lu)\n",
         __FUNCTION__, mpi_rank, 
 	    (unsigned long)start[0], (unsigned long)start[1],
@@ -440,7 +441,7 @@ dataset_fill2_2d(hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t blo
         (unsigned long)count[0], (unsigned long)count[1],
         (unsigned long)block[0],(unsigned long)block[1]);
     fflush(stdout);
-    #endif
+#endif
 
     /* put some trivial data in the data_array */
     for (y=0; y< count[0]; y++)
@@ -466,7 +467,7 @@ dataset_fill3_2d(hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t blo
 
     dataptr = dataset;
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start[]=(%lu,%lu), stride[]=(%lu,%lu), count[]=(%lu,%lu), block[]=(%lu,%lu)\n",
         __FUNCTION__, mpi_rank, 
 	    (unsigned long)start[0], (unsigned long)start[1],
@@ -474,7 +475,7 @@ dataset_fill3_2d(hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t blo
         (unsigned long)count[0], (unsigned long)count[1],
         (unsigned long)block[0],(unsigned long)block[1]);
     fflush(stdout);
-    #endif
+#endif
 
     /* put some trivial data in the data_array */
 
@@ -536,9 +537,9 @@ void dset_select_display(hsize_t start[], hsize_t count[], hsize_t stride[], DTY
     DTYPE_INT *dataptr = dataset;
     hsize_t i, j;
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("JKDBG P%d(%d) select display> dset%d \n",mpi_rank, getpid(), dnum);
-    #endif
+#endif
 
     /* print the slab read */
     for (i=0; i < count[0]; i++){
@@ -561,9 +562,9 @@ void dset_display(hsize_t dim1, hsize_t dim2, DTYPE_INT * dataset, int dnum)
     DTYPE_INT *dataptr = dataset;
     hsize_t i, j;
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("JKDBG P%d dset_display> dset %d \n",mpi_rank, dnum);
-    #endif
+#endif
 
     /* print the slab read */
     for (i=0; i < dim1; i++){
@@ -586,16 +587,16 @@ void data_array1d_init(hsize_t dim0, int * dataset, int val)
     int *dataptr = dataset;
     hsize_t i, j;
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("JKDBG P%d data_array1d_init> val %d \n",mpi_rank, val);
-    #endif
+#endif
 
     // print buffer 
     for (i=0; i < dim0; i++){
         *dataptr = val;
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
 	    printf("%d ", *dataptr);
-        #endif
+#endif
         dataptr++;
     }
     printf("\n");
@@ -612,23 +613,23 @@ void data_array2d_init(hsize_t dim1, hsize_t dim2, DTYPE_INT * dataset, int val)
     DTYPE_INT *dataptr = dataset;
     hsize_t i, j;
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("JKDBG P%d data_array2d_init> val %d \n",mpi_rank, val);
-    #endif
+#endif
 
     // print buffer 
     for (i=0; i < dim1; i++){
     	for (j=0; j < dim2; j++){
             *dataptr = val;
-            #if 0 // JK_DBG
+#if 0 // JK_DBG
 	        printf("%d ", *dataptr);
-            #endif
+#endif
             dataptr++;
     	}
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
 	    printf("\n");
         fflush(stdout);
-        #endif
+#endif
     }
     printf("\n");
     fflush(stdout);
@@ -666,17 +667,17 @@ int dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], DTYPE_INT *
     /* print it if verbose */
     if (verbose)
 	    dataset_print(start, count, stride, dataset);
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("JKDBG P%d dataset_vrfy> c0:%lu c1:%lu\n", mpi_rank, (unsigned long) count[0], (unsigned long)count[1]);
 	dataset_print(start, count, stride, dataset);
-    #endif
+#endif
 
     nerr = 0;
     for (i=0; i < count[0]; i++) {
 	    for (j=0; j < count[1]; j++) {
-            #if 0 // JK_DBG
+#if 0 // JK_DBG
             printf("<o:%d v:%d> ", (int) *original, (int) *dataset);
-            #endif
+#endif
 	        if ((int)*dataset != (int)*original) {
     		    nerr++;
 	    	    if (nerr <= MAX_ERR_REPORT) {
@@ -688,10 +689,10 @@ int dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], DTYPE_INT *
 	        }
 	    }
     }
-            #if 0 // JK_DBG
+#if 0 // JK_DBG
             printf("\n");
             fflush(stdout);
-            #endif
+#endif
     if (nerr > MAX_ERR_REPORT)
 	    printf("[more errors ...]\n");
     if (nerr)
@@ -716,7 +717,7 @@ int dataset_vrfy2(hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t bl
     if (verbose)
         print_dsets_2d(SPACE1_DIM1, SPACE1_DIM2, original, dataset);
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start[]=(%lu,%lu), stride[]=(%lu,%lu), count[]=(%lu,%lu), block[]=(%lu,%lu)\n",
         __FUNCTION__, mpi_rank, 
 	    (unsigned long)start[0], (unsigned long)start[1],
@@ -724,12 +725,12 @@ int dataset_vrfy2(hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t bl
         (unsigned long)count[0], (unsigned long)count[1],
         (unsigned long)block[0],(unsigned long)block[1]);
     fflush(stdout);
-    #endif
+#endif
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("JKDBG P%d dataset_vrfy> c0:%lu c1:%lu\n", mpi_rank, (unsigned long) count[0], (unsigned long)count[1]);
 	dataset_print(start, count, stride, dataset);
-    #endif
+#endif
 
     nerr = 0;
     for (y=0; y < count[0]; y++) {
@@ -741,9 +742,9 @@ int dataset_vrfy2(hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t bl
                 for (j=0; j < block[1]; j++) {
                     dataptr1 = original + (begin[0]+i)*SPACE1_DIM2 + (begin[1]+j);
                     dataptr2 = dataset + (begin[0]+i)*SPACE1_DIM2 + (begin[1]+j);
-                    #if 0 // JK_DBG
+#if 0 // JK_DBG
                     printf("<o:%d v:%d> ", (int) *dataptr1, (int) *dataptr2);
-                    #endif
+#endif
 	                if ((int)*dataptr1 != (int)*dataptr2) {
     		            nerr++;
 	    	            if (nerr <= MAX_ERR_REPORT) {
@@ -755,10 +756,10 @@ int dataset_vrfy2(hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t bl
 	    } // z loop
     } // y loop
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("\n");
     fflush(stdout);
-    #endif
+#endif
 
     if (nerr > MAX_ERR_REPORT)
 	    printf("[more errors ...]\n");
@@ -774,21 +775,21 @@ int diff_datasets(hsize_t dim1, hsize_t dim2, DTYPE_INT *original, DTYPE_INT *da
     hsize_t i, j;
     int nerr=0;
 
-    #if 0  // JK_DBG
+#if 0  // JK_DBG
     printf("JKDBG P%d diff_datasets> DSET%d: dim1:%d, dim2:%d \n",mpi_rank, dnum, dim1,dim2);
-    #endif
+#endif
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     print_dsets_2d(SPACE1_DIM1, SPACE1_DIM2, original, dataset);
-    #endif
+#endif
 
     
     // print buffer 
     for (i=0; i < dim1; i++){
     	for (j=0; j < dim2; j++){
-            #if 0 // JK_DBG
+#if 0 // JK_DBG
 	        printf("%d=%d ", *dataptr1, *dataptr2);
-            #endif
+#endif
             if (*dataptr1 != *dataptr2) {
                 nerr++;
 	            printf("DIFF! <o:%d, n:%d> \n", *dataptr1, *dataptr2);
@@ -796,10 +797,10 @@ int diff_datasets(hsize_t dim1, hsize_t dim2, DTYPE_INT *original, DTYPE_INT *da
             dataptr1++;
             dataptr2++;
     	}
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
 	    printf("\n");
         fflush(stdout);
-        #endif
+#endif
     }
     printf("\n");
     fflush(stdout);
@@ -815,23 +816,23 @@ int diff_dset_points(int pnt_num, hsize_t pcoords[][2], DTYPE_INT *wbuf, DTYPE_I
     DTYPE_INT *dataptr2;
 
     for (i=0; i< pnt_num; i++) {
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("p%d_col: %llu, p%d_row: %llu \n", i, pcoords[i][0], i, pcoords[i][1]);
-        #endif
+#endif
         dataptr1 = wbuf + i*pcoords[i][0] + pcoords[i][1];
         dataptr2 = rbuf + i*pcoords[i][0] + pcoords[i][1];
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> %d=%d \n", mpi_rank, *dataptr1, *dataptr2);
-        #endif
+#endif
         if(*dataptr1 != *dataptr2) {
             nerr++;
 	        printf("DIFF! <o:%d, n:%d> \n", *dataptr1, *dataptr2);
         }
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     print_dsets_2d(SPACE1_DIM1, SPACE1_DIM2,wbuf, rbuf);
-    #endif
+#endif
     return nerr;
 }
 
@@ -899,10 +900,10 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
 
     herr_t ret;         	/* Generic return value */
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
-    #endif
+#endif
 
     if (verbose)
 	printf("Collective write test on file %s\n", filename);
@@ -925,12 +926,12 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl != FAIL);
     MESG("H5Pcreate access succeed");
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     /* set Parallel access with communicator */
     ret = H5Pset_fapl_mpio(acc_tpl, comm, info);
     assert(ret != FAIL);
     MESG("H5Pset_fapl_mpio succeed");
-    #endif
+#endif
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -1008,9 +1009,9 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
      * Set up dimensions of the slab this process accesses.
      */
 
-    #if 1 // JK_DBG
+#if 1 // JK_DBG
 	printf("== Write DSET 1 =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
@@ -1025,14 +1026,14 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
         slab_set(start1, stride1, count1, block1, BYCOL_M);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start1[]=(%lu,%lu), stride1[]=(%lu,%lu), count1[]=(%lu,%lu), block1[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start1[0], (unsigned long)start1[1],
        (unsigned long)stride1[0], (unsigned long)stride1[1],
        (unsigned long)count1[0], (unsigned long)count1[1],
        (unsigned long)block1[0], (unsigned long)block1[1]);
-    #endif
+#endif
     
     /* create a file dataspace independently */
     file_dataspace1 = H5Dget_space (dataset1);
@@ -1075,9 +1076,9 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
         count1[0] = 1; count1[1] = 2;
         block1[0] = 1; block1[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace1, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -1101,9 +1102,9 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
         count1[0] = 1; count1[1] = 1;
         block1[0] = 1; block1[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
         ret = H5Sselect_elements (file_dataspace1, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
         MESG("H5Sselect_elements fspace succeed");
@@ -1127,12 +1128,12 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
 	    MESG("data_array created");
     	dataset_print(start1, count1, stride1, &data_array1[0][0]);
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset1 Write Data ---\n");
     //dset_select_display(start1, count1, stride1, &data_array1[0][0],1);
     dataset_print(start1, count1, stride1, &data_array1[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array1[0][0], 1);
-    #endif
+#endif
 
 
     /* write data collectively */
@@ -1143,9 +1144,9 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
 
 
 
-    #if 1 // JK_DBG
+#if 1 // JK_DBG
 	printf("== Write DSET 2 =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
@@ -1160,14 +1161,14 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
         slab_set(start2, stride2, count2, block2, BYCOL_M);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start2[]=(%lu,%lu), stride2[]=(%lu,%lu), count2[]=(%lu,%lu), block2[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start2[0], (unsigned long)start2[1],
        (unsigned long)stride2[0], (unsigned long)stride2[1],
        (unsigned long)count2[0], (unsigned long)count2[1],
        (unsigned long)block2[0], (unsigned long)block2[1]);
-    #endif
+#endif
 
     /* create a file dataspace independently */
     file_dataspace2 = H5Dget_space (dataset2);
@@ -1209,9 +1210,9 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
         count2[0] = 1; count2[1] = 2;
         block2[0] = 1; block2[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
         ret = H5Sselect_elements (file_dataspace2, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
         MESG("H5Sselect_elements fspace succeed");
@@ -1234,9 +1235,9 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
         count2[0] = 1; count2[1] = 1;
         block2[0] = 1; block2[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
         ret = H5Sselect_elements (file_dataspace2, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
         MESG("H5Sselect_elements fspace succeed");
@@ -1260,17 +1261,17 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
 	    MESG("data_array created");
     	dataset_print(start2, count2, stride2, &data_array2[0][0]);
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset2 Write Data ---\n");
     //dset_select_display(start2, count2, stride2, &data_array2[0][0],2);
     dataset_print(start2, count2, stride2, &data_array2[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array2[0][0], 2);
-    #endif
+#endif
 
 
-    #if 1 // JK_DBG
+#if 1 // JK_DBG
 	printf("== Write DSET 3 =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
@@ -1287,14 +1288,14 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
     }
 
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start3[]=(%lu,%lu), stride3[]=(%lu,%lu), count3[]=(%lu,%lu), block3[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start3[0], (unsigned long)start3[1],
        (unsigned long)stride3[0], (unsigned long)stride3[1],
        (unsigned long)count3[0], (unsigned long)count3[1],
        (unsigned long)block3[0], (unsigned long)block3[1]);
-    #endif
+#endif
 
     /* create a file dataspace independently */
     file_dataspace3 = H5Dget_space (dataset3);
@@ -1336,9 +1337,9 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
         count3[0] = 1; count3[1] = 2;
         block3[0] = 1; block3[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
         ret = H5Sselect_elements (file_dataspace3, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
         MESG("H5Sselect_elements fspace succeed");
@@ -1361,9 +1362,9 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
         count3[0] = 1; count3[1] = 1;
         block3[0] = 1; block3[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
         ret = H5Sselect_elements (file_dataspace3, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
         MESG("H5Sselect_elements fspace succeed");
@@ -1387,16 +1388,16 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
 	    MESG("data_array created");
     	dataset_print(start3, count3, stride3, &data_array3[0][0]);
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset3 Write Data ---\n");
     //dset_select_display(start3, count3, stride3, &data_array3[0][0],0);
    	dataset_print(start3, count3, stride3, &data_array3[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array3[0][0], 0);
-    #endif
+#endif
 
-    #if 1 // JK_DBG
+#if 1 // JK_DBG
 	printf("== Write DSET 4 =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
@@ -1411,14 +1412,14 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
         slab_set(start4, stride4, count4, block4, BYCOL_M);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start4[]=(%lu,%lu), stride4[]=(%lu,%lu), count4[]=(%lu,%lu), block4[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start4[0], (unsigned long)start4[1],
        (unsigned long)stride4[0], (unsigned long)stride4[1],
        (unsigned long)count4[0], (unsigned long)count4[1],
        (unsigned long)block4[0], (unsigned long)block4[1]);
-    #endif
+#endif
 
     /* create a file dataspace independently */
     file_dataspace4 = H5Dget_space (dataset4);
@@ -1460,9 +1461,9 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
         count4[0] = 1; count4[1] = 2;
         block4[0] = 1; block4[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
         ret = H5Sselect_elements (file_dataspace4, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
         MESG("H5Sselect_elements fspace succeed");
@@ -1485,9 +1486,9 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
         count4[0] = 1; count4[1] = 1;
         block4[0] = 1; block4[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
         ret = H5Sselect_elements (file_dataspace4, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
         MESG("H5Sselect_elements fspace succeed");
@@ -1511,12 +1512,12 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
 	    MESG("data_array created");
     	dataset_print(start4, count4, stride4, &data_array4[0][0]);
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset4 Write Data ---\n");
     //dset_select_display(start4, count4, stride4, &data_array4[0][0],0);
     dataset_print(start4, count4, stride4, &data_array4[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array4[0][0], 0);
-    #endif
+#endif
 
 
 
@@ -1527,7 +1528,7 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
     assert(xfer_plist != FAIL);
     MESG("H5Pcreate xfer succeed");
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     if (pmode == PHDF5_PARALLEL)
     {
         ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
@@ -1552,185 +1553,184 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
             assert(ret >= 0);
         }
     }
-    #endif
+#endif
 
     /*
      * Set up dset info structure 
      * HDF5 lib will handle by order of dset_info[X] X
      */
-   #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
     if (mpi_rank == 0) {
-    #if 1 // USE_DSET1
+#if 1 // USE_DSET1
     // init H5D_rw_multi_t for write DSET1 (CHUNKED)
     dset_info[0].dset_id = dataset1;
     dset_info[0].mem_type_id = H5T_NATIVE_INT;
     dset_info[0].mem_space_id = mem_dataspace1;
-    dset_info[0].file_space_id = file_dataspace1;
-    dset_info[0].wbuf = &data_array1[0][0];
-    #else
+    dset_info[0].dset_space_id = file_dataspace1;
+    dset_info[0].u.wbuf = &data_array1[0][0];
+#else
     /* free before rewrite DSET1 */
     if(mem_dataspace1)  { ret = H5Sclose(mem_dataspace1); assert(ret != FAIL); }
     if(file_dataspace1) { ret = H5Sclose(file_dataspace1); assert(ret != FAIL); }
     if(dataset1) { ret = H5Dclose(dataset1); assert(ret != FAIL); }
-    #endif
+#endif
 
-    #if 1 // USE_DSET2
+#if 1 // USE_DSET2
     // init H5D_rw_multi_t for write DSET2 (CHUNKED)
     dset_info[1].dset_id = dataset2;
     dset_info[1].mem_type_id = H5T_NATIVE_INT;
     dset_info[1].mem_space_id = mem_dataspace2;
-    dset_info[1].file_space_id = file_dataspace2;
-    dset_info[1].wbuf = &data_array2[0][0];
-    #else
+    dset_info[1].dset_space_id = file_dataspace2;
+    dset_info[1].u.wbuf = &data_array2[0][0];
+#else
     /* free before rewrite DSET2 */
     if(mem_dataspace2)  { ret = H5Sclose(mem_dataspace2); assert(ret != FAIL); }
     if(file_dataspace2) { ret = H5Sclose(file_dataspace2); assert(ret != FAIL); }
     if(dataset2) { ret = H5Dclose(dataset2); assert(ret != FAIL); }
-    #endif
+#endif
 
-    #if 1 // USE_DSET3
+#if 1 // USE_DSET3
     // init H5D_rw_multi_t for write DSET3 (CONTIG)
     dset_info[2].dset_id = dataset3;
     dset_info[2].mem_type_id = H5T_NATIVE_INT;
     dset_info[2].mem_space_id = mem_dataspace3;
-    dset_info[2].file_space_id = file_dataspace3;
-    dset_info[2].wbuf = &data_array3[0][0];
-    #else
+    dset_info[2].dset_space_id = file_dataspace3;
+    dset_info[2].u.wbuf = &data_array3[0][0];
+#else
     /* free before rewrite DSET3 */
     if(mem_dataspace3)  { ret = H5Sclose(mem_dataspace3); assert(ret != FAIL); }
     if(file_dataspace3) { ret = H5Sclose(file_dataspace3); assert(ret != FAIL); }
     if(dataset3) { ret = H5Dclose(dataset3); assert(ret != FAIL); }
-    #endif
+#endif
     
-    #if 1 // USE_DSET4
+#if 1 // USE_DSET4
     // init H5D_rw_multi_t for write DSET4 (CONTIG)
     dset_info[3].dset_id = dataset4;
     dset_info[3].mem_type_id = H5T_NATIVE_INT;
     dset_info[3].mem_space_id = mem_dataspace4;
-    dset_info[3].file_space_id = file_dataspace4;
-    dset_info[3].wbuf = &data_array4[0][0];
-    #else
+    dset_info[3].dset_space_id = file_dataspace4;
+    dset_info[3].u.wbuf = &data_array4[0][0];
+#else
     /* free before rewrite DSET4 */
     if(mem_dataspace4)  { ret = H5Sclose(mem_dataspace4); assert(ret != FAIL); }
     if(file_dataspace4) { ret = H5Sclose(file_dataspace4); assert(ret != FAIL); }
     if(dataset4) { ret = H5Dclose(dataset4); assert(ret != FAIL); }
-    #endif
+#endif
     }
 
     if (mpi_rank == 1) {
-    #if 1 // USE_DSET1
+#if 1 // USE_DSET1
     // init H5D_rw_multi_t for write DSET1 (CHUNKED)
     dset_info[0].dset_id = dataset1;
     dset_info[0].mem_type_id = H5T_NATIVE_INT;
     dset_info[0].mem_space_id = mem_dataspace1;
-    dset_info[0].file_space_id = file_dataspace1;
-    dset_info[0].wbuf = &data_array1[0][0];
-    #else
+    dset_info[0].dset_space_id = file_dataspace1;
+    dset_info[0].u.wbuf = &data_array1[0][0];
+#else
     /* free before rewrite DSET1 */
     if(mem_dataspace1)  { ret = H5Sclose(mem_dataspace1); assert(ret != FAIL); }
     if(file_dataspace1) { ret = H5Sclose(file_dataspace1); assert(ret != FAIL); }
     if(dataset1) { ret = H5Dclose(dataset1); assert(ret != FAIL); }
-    #endif
+#endif
 
-    #if 1 // USE_DSET2
+#if 1 // USE_DSET2
     // init H5D_rw_multi_t for write DSET2 (CHUNKED)
     dset_info[1].dset_id = dataset2;
     dset_info[1].mem_type_id = H5T_NATIVE_INT;
     dset_info[1].mem_space_id = mem_dataspace2;
-    dset_info[1].file_space_id = file_dataspace2;
-    dset_info[1].wbuf = &data_array2[0][0];
-    #else
+    dset_info[1].dset_space_id = file_dataspace2;
+    dset_info[1].u.wbuf = &data_array2[0][0];
+#else
     /* free before rewrite DSET2 */
     if(mem_dataspace2)  { ret = H5Sclose(mem_dataspace2); assert(ret != FAIL); }
     if(file_dataspace2) { ret = H5Sclose(file_dataspace2); assert(ret != FAIL); }
     if(dataset2) { ret = H5Dclose(dataset2); assert(ret != FAIL); }
-    #endif
+#endif
 
-    #if 1 // USE_DSET3
+#if 1 // USE_DSET3
     // init H5D_rw_multi_t for write DSET3 (CONTIG)
     dset_info[2].dset_id = dataset3;
     dset_info[2].mem_type_id = H5T_NATIVE_INT;
     dset_info[2].mem_space_id = mem_dataspace3;
-    dset_info[2].file_space_id = file_dataspace3;
-    dset_info[2].wbuf = &data_array3[0][0];
-    #else
+    dset_info[2].dset_space_id = file_dataspace3;
+    dset_info[2].u.wbuf = &data_array3[0][0];
+#else
     /* free before rewrite DSET3 */
     if(mem_dataspace3)  { ret = H5Sclose(mem_dataspace3); assert(ret != FAIL); }
     if(file_dataspace3) { ret = H5Sclose(file_dataspace3); assert(ret != FAIL); }
     if(dataset3) { ret = H5Dclose(dataset3); assert(ret != FAIL); }
-    #endif
+#endif
     
-    #if 0 // USE_DSET4
+#if 0 // USE_DSET4
     // init H5D_rw_multi_t for write DSET4 (CONTIG)
     dset_info[3].dset_id = dataset4;
     dset_info[3].mem_type_id = H5T_NATIVE_INT;
     dset_info[3].mem_space_id = mem_dataspace4;
-    dset_info[3].file_space_id = file_dataspace4;
-    dset_info[3].wbuf = &data_array4[0][0];
-    #else
+    dset_info[3].dset_space_id = file_dataspace4;
+    dset_info[3].u.wbuf = &data_array4[0][0];
+#else
     /* free before rewrite DSET4 */
     if(mem_dataspace4)  { ret = H5Sclose(mem_dataspace4); assert(ret != FAIL); }
     if(file_dataspace4) { ret = H5Sclose(file_dataspace4); assert(ret != FAIL); }
     if(dataset4) { ret = H5Dclose(dataset4); assert(ret != FAIL); }
-    #endif
+#endif
     }
 
-   #else  // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------
+#else  // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------
     // init H5D_rw_multi_t for write DSET1 (CHUNKED)
     dset_info[0].dset_id = dataset1;
     dset_info[0].mem_type_id = H5T_NATIVE_INT;
     dset_info[0].mem_space_id = mem_dataspace1;
-    dset_info[0].file_space_id = file_dataspace1;
-    dset_info[0].wbuf = &data_array1[0][0];
+    dset_info[0].dset_space_id = file_dataspace1;
+    dset_info[0].u.wbuf = &data_array1[0][0];
 
     // init H5D_rw_multi_t for write DSET2 (CHUNKED)
     dset_info[1].dset_id = dataset2;
     dset_info[1].mem_type_id = H5T_NATIVE_INT;
     dset_info[1].mem_space_id = mem_dataspace2;
-    dset_info[1].file_space_id = file_dataspace2;
-    dset_info[1].wbuf = &data_array2[0][0];
+    dset_info[1].dset_space_id = file_dataspace2;
+    dset_info[1].u.wbuf = &data_array2[0][0];
 
     // init H5D_rw_multi_t for write DSET3 (CONTIG)
     dset_info[2].dset_id = dataset3;
     dset_info[2].mem_type_id = H5T_NATIVE_INT;
     dset_info[2].mem_space_id = mem_dataspace3;
-    dset_info[2].file_space_id = file_dataspace3;
-    dset_info[2].wbuf = &data_array3[0][0];
+    dset_info[2].dset_space_id = file_dataspace3;
+    dset_info[2].u.wbuf = &data_array3[0][0];
 
     // init H5D_rw_multi_t for write DSET4 (CONTIG)
     dset_info[3].dset_id = dataset4;
     dset_info[3].mem_type_id = H5T_NATIVE_INT;
     dset_info[3].mem_space_id = mem_dataspace4;
-    dset_info[3].file_space_id = file_dataspace4;
-    dset_info[3].wbuf = &data_array4[0][0];
-   #endif // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------O
+    dset_info[3].dset_space_id = file_dataspace4;
+    dset_info[3].u.wbuf = &data_array4[0][0];
+#endif // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------O
 
-    #if 0 // JK_DBG
-    for (i=0; i< NDSET ; i++) {
-        printf("%s P%d > dset_info[%d].wbuf addr: %x\n", __FUNCTION__, mpi_rank, i, dset_info[i].wbuf);
-    }
-    #endif
+#if 0 // JK_DBG
+    for (i=0; i< NDSET ; i++)
+        printf("%s P%d > dset_info[%d].u.wbuf addr: %x\n", __FUNCTION__, mpi_rank, i, dset_info[i].u.wbuf);
+#endif
 
-  #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
-  if (mpi_rank == 0)      Count = 4;
-  if (mpi_rank == 1)      Count = 3;
-  #else
-  Count = NDSET;
-  #endif
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
+    if (mpi_rank == 0)      Count = 4;
+    if (mpi_rank == 1)      Count = 3;
+#else
+    Count = NDSET;
+#endif
 
     if(multi_mode==MULTI_DSET) {
-        ret = H5Dwrite_multi(fid, Count, dset_info, xfer_plist) < 0;
+        ret = H5Dwrite_multi(fid, xfer_plist, Count, dset_info);
         assert(ret != FAIL);
-        #ifdef TEST_DOUBLE_WR_BEFORE_CLOSE
+#ifdef TEST_DOUBLE_WR_BEFORE_CLOSE
         /* test multiple write before close */
-        sync();
-        ret = H5Dwrite_multi(fid, Count, dset_info, xfer_plist) < 0;
+sync();
+        ret = H5Dwrite_multi(fid, xfer_plist, Count, dset_info);
         assert(ret != FAIL);
-        #endif
+#endif
     }
     else if(multi_mode==SINGLE_DSET) {
         for (i=0; i<Count; i++)
-            ret = H5Dwrite(dset_info[i].dset_id, dset_info[i].mem_type_id, dset_info[i].mem_space_id, dset_info[i].file_space_id, xfer_plist, dset_info[i].wbuf);
+            ret = H5Dwrite(dset_info[i].dset_id, dset_info[i].mem_type_id, dset_info[i].mem_space_id, dset_info[i].dset_space_id, xfer_plist, dset_info[i].u.wbuf);
     }
 
     MESG("H5Dwrite succeed");
@@ -1747,8 +1747,8 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
             ret = H5Sclose(dset_info[i].mem_space_id);
             assert(ret != FAIL);
         }
-        if(dset_info[i].file_space_id > 0) {
-            ret = H5Sclose(dset_info[i].file_space_id);
+        if(dset_info[i].dset_space_id > 0) {
+            ret = H5Sclose(dset_info[i].dset_space_id);
             assert(ret != FAIL);
         }
         if(dset_info[i].dset_id > 0) {
@@ -1779,7 +1779,8 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
     hsize_t dims[SPACE1_RANK] = {SPACE1_DIM1,SPACE1_DIM2};	/* dataspace dim sizes */
     hid_t acc_tpl;		/* File access templates */
     hid_t xfer_plist;		/* Dataset transfer properties list */
-    H5D_rw_multi_t dset_info[NDSET];
+    H5D_rw_multi_t w_dset_info[NDSET];
+    H5D_rw_multi_t r_dset_info[NDSET];
     hid_t crp_plist1, crp_plist2;
     hid_t file_dataspace1, file_dataspace2;	/* File dataspace ID */
     hid_t file_dataspace3, file_dataspace4;	/* File dataspace ID */
@@ -1826,17 +1827,18 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
 
     herr_t ret;         	/* Generic return value */
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
-    #endif
+#endif
 
     if (verbose)
 	printf("Collective write test on file %s\n", filename);
 
-    // init dset_info[]
+    // init [w/r]_dset_info[]
     for (i=0; i< NDSET ; i++) {
-        memset(&dset_info[i], 0, sizeof(H5D_rw_multi_t));
+        memset(&w_dset_info[i], 0, sizeof(H5D_rw_multi_t));
+        memset(&r_dset_info[i], 0, sizeof(H5D_rw_multi_t));
     }
 
     // Init data_array
@@ -1859,12 +1861,12 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl != FAIL);
     MESG("H5Pcreate access succeed");
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     /* set Parallel access with communicator */
     ret = H5Pset_fapl_mpio(acc_tpl, comm, info);
     assert(ret != FAIL);
     MESG("H5Pset_fapl_mpio succeed");
-    #endif
+#endif
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -1942,9 +1944,9 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
      * Set up dimensions of the slab this process accesses.
      */
 
-    #if 1 // JK_DBG
+#if 1 // JK_DBG
 	printf("== Write DSET 1 =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
@@ -1959,14 +1961,14 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
         slab_set(start1, stride1, count1, block1, BYCOL_M);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start1[]=(%lu,%lu), stride1[]=(%lu,%lu), count1[]=(%lu,%lu), block1[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start1[0], (unsigned long)start1[1],
        (unsigned long)stride1[0], (unsigned long)stride1[1],
        (unsigned long)count1[0], (unsigned long)count1[1],
        (unsigned long)block1[0], (unsigned long)block1[1]);
-    #endif
+#endif
     
     /* create a file dataspace independently */
     file_dataspace1 = H5Dget_space (dataset1);
@@ -2011,9 +2013,9 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
         count1[0] = 1; count1[1] = 2;
         block1[0] = 1; block1[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace1, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -2037,9 +2039,9 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
         count1[0] = 1; count1[1] = 1;
         block1[0] = 1; block1[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
         ret = H5Sselect_elements (file_dataspace1, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
         MESG("H5Sselect_elements fspace succeed");
@@ -2063,12 +2065,12 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
 	    MESG("data_array created");
     	dataset_print(start1, count1, stride1, &data_array1_w[0][0]);
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset1 Write Data ---\n");
     //dset_select_display(start1, count1, stride1, &data_array1_w[0][0],1);
     dataset_print(start1, count1, stride1, &data_array1_w[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array1_w[0][0], 1);
-    #endif
+#endif
 
 
     /* write data collectively */
@@ -2079,9 +2081,9 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
 
 
 
-    #if 1 // JK_DBG
+#if 1 // JK_DBG
 	printf("== Write DSET 2 =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
@@ -2096,14 +2098,14 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
         slab_set(start2, stride2, count2, block2, BYCOL_M);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start2[]=(%lu,%lu), stride2[]=(%lu,%lu), count2[]=(%lu,%lu), block2[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start2[0], (unsigned long)start2[1],
        (unsigned long)stride2[0], (unsigned long)stride2[1],
        (unsigned long)count2[0], (unsigned long)count2[1],
        (unsigned long)block2[0], (unsigned long)block2[1]);
-    #endif
+#endif
 
     /* create a file dataspace independently */
     file_dataspace2 = H5Dget_space (dataset2);
@@ -2149,9 +2151,9 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
         count2[0] = 1; count2[1] = 2;
         block2[0] = 1; block2[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
         ret = H5Sselect_elements (file_dataspace2, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
         MESG("H5Sselect_elements fspace succeed");
@@ -2174,9 +2176,9 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
         count2[0] = 1; count2[1] = 1;
         block2[0] = 1; block2[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
         ret = H5Sselect_elements (file_dataspace2, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
         MESG("H5Sselect_elements fspace succeed");
@@ -2200,12 +2202,12 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
 	    MESG("data_array created");
     	dataset_print(start2, count2, stride2, &data_array2_w[0][0]);
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset2 Write Data ---\n");
     //dset_select_display(start2, count2, stride2, &data_array2_w[0][0],2);
     dataset_print(start2, count2, stride2, &data_array2_w[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array2_w[0][0], 2);
-    #endif
+#endif
 
     /* write data independently */
     //ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace2, file_dataspace2,
@@ -2213,9 +2215,9 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
     //assert(ret != FAIL);
     //MESG("H5Dwrite succeed");
 
-    #if 1 // JK_DBG
+#if 1 // JK_DBG
 	printf("== Write DSET 3 =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
@@ -2230,14 +2232,14 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
         slab_set(start3, stride3, count3, block3, BYCOL_M);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start3[]=(%lu,%lu), stride3[]=(%lu,%lu), count3[]=(%lu,%lu), block3[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start3[0], (unsigned long)start3[1],
        (unsigned long)stride3[0], (unsigned long)stride3[1],
        (unsigned long)count3[0], (unsigned long)count3[1],
        (unsigned long)block3[0], (unsigned long)block3[1]);
-    #endif
+#endif
 
     /* create a file dataspace independently */
     file_dataspace3 = H5Dget_space (dataset3);
@@ -2282,9 +2284,9 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
         count3[0] = 1; count3[1] = 2;
         block3[0] = 1; block3[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
         ret = H5Sselect_elements (file_dataspace3, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
         MESG("H5Sselect_elements fspace succeed");
@@ -2307,9 +2309,9 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
         count3[0] = 1; count3[1] = 1;
         block3[0] = 1; block3[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
         ret = H5Sselect_elements (file_dataspace3, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
         MESG("H5Sselect_elements fspace succeed");
@@ -2333,16 +2335,16 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
 	    MESG("data_array created");
     	dataset_print(start3, count3, stride3, &data_array3_w[0][0]);
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset3 Write Data ---\n");
     //dset_select_display(start3, count3, stride3, &data_array3_w[0][0],0);
    	dataset_print(start3, count3, stride3, &data_array3_w[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array3_w[0][0], 0);
-    #endif
+#endif
 
-    #if 1 // JK_DBG
+#if 1 // JK_DBG
 	printf("== Write DSET 4 =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
@@ -2357,14 +2359,14 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
         slab_set(start4, stride4, count4, block4, BYCOL_M);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start4[]=(%lu,%lu), stride4[]=(%lu,%lu), count4[]=(%lu,%lu), block4[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start4[0], (unsigned long)start4[1],
        (unsigned long)stride4[0], (unsigned long)stride4[1],
        (unsigned long)count4[0], (unsigned long)count4[1],
        (unsigned long)block4[0], (unsigned long)block4[1]);
-    #endif
+#endif
 
     /* create a file dataspace independently */
     file_dataspace4 = H5Dget_space (dataset4);
@@ -2409,9 +2411,9 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
         count4[0] = 1; count4[1] = 2;
         block4[0] = 1; block4[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
         ret = H5Sselect_elements (file_dataspace4, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
         MESG("H5Sselect_elements fspace succeed");
@@ -2434,9 +2436,9 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
         count4[0] = 1; count4[1] = 1;
         block4[0] = 1; block4[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
         ret = H5Sselect_elements (file_dataspace4, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
         MESG("H5Sselect_elements fspace succeed");
@@ -2460,12 +2462,12 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
 	    MESG("data_array created");
     	dataset_print(start4, count4, stride4, &data_array4_w[0][0]);
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset4 Write Data ---\n");
     //dset_select_display(start4, count4, stride4, &data_array4_w[0][0],0);
     dataset_print(start4, count4, stride4, &data_array4_w[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array4_w[0][0], 0);
-    #endif
+#endif
 
 
 
@@ -2476,7 +2478,7 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
     assert(xfer_plist != FAIL);
     MESG("H5Pcreate xfer succeed");
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     if (pmode == PHDF5_PARALLEL)
     {
         ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
@@ -2501,226 +2503,284 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
             assert(ret >= 0);
         }
     }
-    #endif
+#endif
 
     /*
      * Set up dset info structure 
-     * HDF5 lib will handle by order of dset_info[X] X
+     * HDF5 lib will handle by order of [w/r]_dset_info[X] X
      */
-   #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
     if (mpi_rank == 0) {
-    #if 1 // USE_DSET1
-    // init H5D_rw_multi_t for write DSET1 (CHUNKED)
-    dset_info[0].dset_id = dataset1;
-    dset_info[0].mem_type_id = H5T_NATIVE_INT;
-    dset_info[0].mem_space_id = mem_dataspace1;
-    dset_info[0].file_space_id = file_dataspace1;
-    dset_info[0].wbuf = &data_array1_w[0][0];
-    dset_info[0].rbuf = &data_array1_r[0][0];
-    #else
-    /* free before rewrite DSET1 */
-    if(mem_dataspace1)  { ret = H5Sclose(mem_dataspace1); assert(ret != FAIL); }
-    if(file_dataspace1) { ret = H5Sclose(file_dataspace1); assert(ret != FAIL); }
-    if(dataset1) { ret = H5Dclose(dataset1); assert(ret != FAIL); }
-    #endif
+#if 1 // USE_DSET1
+        // init H5D_rw_multi_t for write DSET1 (CHUNKED)
+        w_dset_info[0].dset_id = dataset1;
+        w_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[0].mem_space_id = mem_dataspace1;
+        w_dset_info[0].dset_space_id = file_dataspace1;
+        w_dset_info[0].u.wbuf = &data_array1_w[0][0];
 
-    #if 1 // USE_DSET2
-    // init H5D_rw_multi_t for write DSET2 (CHUNKED)
-    dset_info[1].dset_id = dataset2;
-    dset_info[1].mem_type_id = H5T_NATIVE_INT;
-    dset_info[1].mem_space_id = mem_dataspace2;
-    dset_info[1].file_space_id = file_dataspace2;
-    dset_info[1].wbuf = &data_array2_w[0][0];
-    dset_info[1].rbuf = &data_array2_r[0][0];
-    #else
-    /* free before rewrite DSET2 */
-    if(mem_dataspace2)  { ret = H5Sclose(mem_dataspace2); assert(ret != FAIL); }
-    if(file_dataspace2) { ret = H5Sclose(file_dataspace2); assert(ret != FAIL); }
-    if(dataset2) { ret = H5Dclose(dataset2); assert(ret != FAIL); }
-    #endif
+        r_dset_info[0].dset_id = dataset1;
+        r_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[0].mem_space_id = mem_dataspace1;
+        r_dset_info[0].dset_space_id = file_dataspace1;
+        r_dset_info[0].u.rbuf = &data_array1_r[0][0];
+#else
+        /* free before rewrite DSET1 */
+        if(mem_dataspace1)  { ret = H5Sclose(mem_dataspace1); assert(ret != FAIL); }
+        if(file_dataspace1) { ret = H5Sclose(file_dataspace1); assert(ret != FAIL); }
+        if(dataset1) { ret = H5Dclose(dataset1); assert(ret != FAIL); }
+#endif
 
-    #if 1 // USE_DSET3
-    // init H5D_rw_multi_t for write DSET3 (CONTIG)
-    dset_info[2].dset_id = dataset3;
-    dset_info[2].mem_type_id = H5T_NATIVE_INT;
-    dset_info[2].mem_space_id = mem_dataspace3;
-    dset_info[2].file_space_id = file_dataspace3;
-    dset_info[2].wbuf = &data_array3_w[0][0];
-    dset_info[2].rbuf = &data_array3_r[0][0];
-    #else
-    /* free before rewrite DSET3 */
-    if(mem_dataspace3)  { ret = H5Sclose(mem_dataspace3); assert(ret != FAIL); }
-    if(file_dataspace3) { ret = H5Sclose(file_dataspace3); assert(ret != FAIL); }
-    if(dataset3) { ret = H5Dclose(dataset3); assert(ret != FAIL); }
-    #endif
-    
-    #if 1 // USE_DSET4
-    // init H5D_rw_multi_t for write DSET4 (CONTIG)
-    dset_info[3].dset_id = dataset4;
-    dset_info[3].mem_type_id = H5T_NATIVE_INT;
-    dset_info[3].mem_space_id = mem_dataspace4;
-    dset_info[3].file_space_id = file_dataspace4;
-    dset_info[3].wbuf = &data_array4_w[0][0];
-    dset_info[3].rbuf = &data_array4_r[0][0];
-    #else
-    /* free before rewrite DSET4 */
-    if(mem_dataspace4)  { ret = H5Sclose(mem_dataspace4); assert(ret != FAIL); }
-    if(file_dataspace4) { ret = H5Sclose(file_dataspace4); assert(ret != FAIL); }
-    if(dataset4) { ret = H5Dclose(dataset4); assert(ret != FAIL); }
-    #endif
+#if 1 // USE_DSET2
+        // init H5D_rw_multi_t for write DSET2 (CHUNKED)
+        w_dset_info[1].dset_id = dataset2;
+        w_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[1].mem_space_id = mem_dataspace2;
+        w_dset_info[1].dset_space_id = file_dataspace2;
+        w_dset_info[1].u.wbuf = &data_array2_w[0][0];
+
+        r_dset_info[1].dset_id = dataset2;
+        r_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[1].mem_space_id = mem_dataspace2;
+        r_dset_info[1].dset_space_id = file_dataspace2;
+        r_dset_info[1].u.rbuf = &data_array2_r[0][0];
+#else
+        /* free before rewrite DSET2 */
+        if(mem_dataspace2)  { ret = H5Sclose(mem_dataspace2); assert(ret != FAIL); }
+        if(file_dataspace2) { ret = H5Sclose(file_dataspace2); assert(ret != FAIL); }
+        if(dataset2) { ret = H5Dclose(dataset2); assert(ret != FAIL); }
+#endif
+
+#if 1 // USE_DSET3
+        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+        w_dset_info[2].dset_id = dataset3;
+        w_dset_info[2].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[2].mem_space_id = mem_dataspace3;
+        w_dset_info[2].dset_space_id = file_dataspace3;
+        w_dset_info[2].u.wbuf = &data_array3_w[0][0];
+
+        r_dset_info[2].dset_id = dataset3;
+        r_dset_info[2].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[2].mem_space_id = mem_dataspace3;
+        r_dset_info[2].dset_space_id = file_dataspace3;
+        r_dset_info[2].u.rbuf = &data_array3_r[0][0];
+#else
+        /* free before rewrite DSET3 */
+        if(mem_dataspace3)  { ret = H5Sclose(mem_dataspace3); assert(ret != FAIL); }
+        if(file_dataspace3) { ret = H5Sclose(file_dataspace3); assert(ret != FAIL); }
+        if(dataset3) { ret = H5Dclose(dataset3); assert(ret != FAIL); }
+#endif
+        
+#if 1 // USE_DSET4
+        // init H5D_rw_multi_t for write DSET4 (CONTIG)
+        w_dset_info[3].dset_id = dataset4;
+        w_dset_info[3].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[3].mem_space_id = mem_dataspace4;
+        w_dset_info[3].dset_space_id = file_dataspace4;
+        w_dset_info[3].u.wbuf = &data_array4_w[0][0];
+
+        r_dset_info[3].dset_id = dataset4;
+        r_dset_info[3].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[3].mem_space_id = mem_dataspace4;
+        r_dset_info[3].dset_space_id = file_dataspace4;
+        r_dset_info[3].u.rbuf = &data_array4_r[0][0];
+#else
+        /* free before rewrite DSET4 */
+        if(mem_dataspace4)  { ret = H5Sclose(mem_dataspace4); assert(ret != FAIL); }
+        if(file_dataspace4) { ret = H5Sclose(file_dataspace4); assert(ret != FAIL); }
+        if(dataset4) { ret = H5Dclose(dataset4); assert(ret != FAIL); }
+#endif
     }
 
     if (mpi_rank == 1) {
-    #if 1 // USE_DSET1
-    // init H5D_rw_multi_t for write DSET1 (CHUNKED)
-    dset_info[0].dset_id = dataset1;
-    dset_info[0].mem_type_id = H5T_NATIVE_INT;
-    dset_info[0].mem_space_id = mem_dataspace1;
-    dset_info[0].file_space_id = file_dataspace1;
-    dset_info[0].wbuf = &data_array1_w[0][0];
-    dset_info[0].rbuf = &data_array1_r[0][0];
-    #else
-    /* free before rewrite DSET1 */
-    if(mem_dataspace1)  { ret = H5Sclose(mem_dataspace1); assert(ret != FAIL); }
-    if(file_dataspace1) { ret = H5Sclose(file_dataspace1); assert(ret != FAIL); }
-    if(dataset1) { ret = H5Dclose(dataset1); assert(ret != FAIL); }
-    #endif
+#if 1 // USE_DSET1
+        // init H5D_rw_multi_t for write DSET1 (CHUNKED)
+        w_dset_info[0].dset_id = dataset1;
+        w_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[0].mem_space_id = mem_dataspace1;
+        w_dset_info[0].dset_space_id = file_dataspace1;
+        w_dset_info[0].u.wbuf = &data_array1_w[0][0];
 
-    #if 1 // USE_DSET2
-    // init H5D_rw_multi_t for write DSET2 (CHUNKED)
-    dset_info[1].dset_id = dataset2;
-    dset_info[1].mem_type_id = H5T_NATIVE_INT;
-    dset_info[1].mem_space_id = mem_dataspace2;
-    dset_info[1].file_space_id = file_dataspace2;
-    dset_info[1].wbuf = &data_array2_w[0][0];
-    dset_info[1].rbuf = &data_array2_r[0][0];
-    #else
-    /* free before rewrite DSET2 */
-    if(mem_dataspace2)  { ret = H5Sclose(mem_dataspace2); assert(ret != FAIL); }
-    if(file_dataspace2) { ret = H5Sclose(file_dataspace2); assert(ret != FAIL); }
-    if(dataset2) { ret = H5Dclose(dataset2); assert(ret != FAIL); }
-    #endif
+        r_dset_info[0].dset_id = dataset1;
+        r_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[0].mem_space_id = mem_dataspace1;
+        r_dset_info[0].dset_space_id = file_dataspace1;
+        r_dset_info[0].u.rbuf = &data_array1_r[0][0];
+#else
+        /* free before rewrite DSET1 */
+        if(mem_dataspace1)  { ret = H5Sclose(mem_dataspace1); assert(ret != FAIL); }
+        if(file_dataspace1) { ret = H5Sclose(file_dataspace1); assert(ret != FAIL); }
+        if(dataset1) { ret = H5Dclose(dataset1); assert(ret != FAIL); }
+#endif
 
-    #if 1 // USE_DSET3
-    // init H5D_rw_multi_t for write DSET3 (CONTIG)
-    dset_info[2].dset_id = dataset3;
-    dset_info[2].mem_type_id = H5T_NATIVE_INT;
-    dset_info[2].mem_space_id = mem_dataspace3;
-    dset_info[2].file_space_id = file_dataspace3;
-    dset_info[2].wbuf = &data_array3_w[0][0];
-    dset_info[2].rbuf = &data_array3_r[0][0];
-    #else
-    /* free before rewrite DSET3 */
-    if(mem_dataspace3)  { ret = H5Sclose(mem_dataspace3); assert(ret != FAIL); }
-    if(file_dataspace3) { ret = H5Sclose(file_dataspace3); assert(ret != FAIL); }
-    if(dataset3) { ret = H5Dclose(dataset3); assert(ret != FAIL); }
-    #endif
-    
-    #if 0 // USE_DSET4
-    // init H5D_rw_multi_t for write DSET4 (CONTIG)
-    dset_info[3].dset_id = dataset4;
-    dset_info[3].mem_type_id = H5T_NATIVE_INT;
-    dset_info[3].mem_space_id = mem_dataspace4;
-    dset_info[3].file_space_id = file_dataspace4;
-    dset_info[3].wbuf = &data_array4_w[0][0];
-    dset_info[3].rbuf = &data_array4_r[0][0];
-    #else
-    /* free before rewrite DSET4 */
-    if(mem_dataspace4)  { ret = H5Sclose(mem_dataspace4); assert(ret != FAIL); }
-    if(file_dataspace4) { ret = H5Sclose(file_dataspace4); assert(ret != FAIL); }
-    if(dataset4) { ret = H5Dclose(dataset4); assert(ret != FAIL); }
-    #endif
+#if 1 // USE_DSET2
+        // init H5D_rw_multi_t for write DSET2 (CHUNKED)
+        w_dset_info[1].dset_id = dataset2;
+        w_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[1].mem_space_id = mem_dataspace2;
+        w_dset_info[1].dset_space_id = file_dataspace2;
+        w_dset_info[1].u.wbuf = &data_array2_w[0][0];
+
+        r_dset_info[1].dset_id = dataset2;
+        r_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[1].mem_space_id = mem_dataspace2;
+        r_dset_info[1].dset_space_id = file_dataspace2;
+        r_dset_info[1].u.rbuf = &data_array2_r[0][0];
+#else
+        /* free before rewrite DSET2 */
+        if(mem_dataspace2)  { ret = H5Sclose(mem_dataspace2); assert(ret != FAIL); }
+        if(file_dataspace2) { ret = H5Sclose(file_dataspace2); assert(ret != FAIL); }
+        if(dataset2) { ret = H5Dclose(dataset2); assert(ret != FAIL); }
+#endif
+
+#if 1 // USE_DSET3
+        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+        w_dset_info[2].dset_id = dataset3;
+        w_dset_info[2].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[2].mem_space_id = mem_dataspace3;
+        w_dset_info[2].dset_space_id = file_dataspace3;
+        w_dset_info[2].u.wbuf = &data_array3_w[0][0];
+
+        r_dset_info[2].dset_id = dataset3;
+        r_dset_info[2].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[2].mem_space_id = mem_dataspace3;
+        r_dset_info[2].dset_space_id = file_dataspace3;
+        r_dset_info[2].u.rbuf = &data_array3_r[0][0];
+#else
+        /* free before rewrite DSET3 */
+        if(mem_dataspace3)  { ret = H5Sclose(mem_dataspace3); assert(ret != FAIL); }
+        if(file_dataspace3) { ret = H5Sclose(file_dataspace3); assert(ret != FAIL); }
+        if(dataset3) { ret = H5Dclose(dataset3); assert(ret != FAIL); }
+#endif
+        
+#if 0 // USE_DSET4
+        // init H5D_rw_multi_t for write DSET4 (CONTIG)
+        w_dset_info[3].dset_id = dataset4;
+        w_dset_info[3].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[3].mem_space_id = mem_dataspace4;
+        w_dset_info[3].dset_space_id = file_dataspace4;
+        w_dset_info[3].u.wbuf = &data_array4_w[0][0];
+
+        r_dset_info[3].dset_id = dataset4;
+        r_dset_info[3].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[3].mem_space_id = mem_dataspace4;
+        r_dset_info[3].dset_space_id = file_dataspace4;
+        r_dset_info[3].u.rbuf = &data_array4_r[0][0];
+#else
+        /* free before rewrite DSET4 */
+        if(mem_dataspace4)  { ret = H5Sclose(mem_dataspace4); assert(ret != FAIL); }
+        if(file_dataspace4) { ret = H5Sclose(file_dataspace4); assert(ret != FAIL); }
+        if(dataset4) { ret = H5Dclose(dataset4); assert(ret != FAIL); }
+#endif
     }
 
-   #else  // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------
+#else  // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------
     // init H5D_rw_multi_t for write DSET1 (CHUNKED)
-    dset_info[0].dset_id = dataset1;
-    dset_info[0].mem_type_id = H5T_NATIVE_INT;
-    dset_info[0].mem_space_id = mem_dataspace1;
-    dset_info[0].file_space_id = file_dataspace1;
-    dset_info[0].wbuf = &data_array1_w[0][0];
-    dset_info[0].rbuf = &data_array1_r[0][0];
+    w_dset_info[0].dset_id = dataset1;
+    w_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+    w_dset_info[0].mem_space_id = mem_dataspace1;
+    w_dset_info[0].dset_space_id = file_dataspace1;
+    w_dset_info[0].u.wbuf = &data_array1_w[0][0];
+
+    r_dset_info[0].dset_id = dataset1;
+    r_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+    r_dset_info[0].mem_space_id = mem_dataspace1;
+    r_dset_info[0].dset_space_id = file_dataspace1;
+    r_dset_info[0].u.rbuf = &data_array1_r[0][0];
 
     // init H5D_rw_multi_t for write DSET2 (CHUNKED)
-    dset_info[1].dset_id = dataset2;
-    dset_info[1].mem_type_id = H5T_NATIVE_INT;
-    dset_info[1].mem_space_id = mem_dataspace2;
-    dset_info[1].file_space_id = file_dataspace2;
-    dset_info[1].wbuf = &data_array2_w[0][0];
-    dset_info[1].rbuf = &data_array2_r[0][0];
+    w_dset_info[1].dset_id = dataset2;
+    w_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+    w_dset_info[1].mem_space_id = mem_dataspace2;
+    w_dset_info[1].dset_space_id = file_dataspace2;
+    w_dset_info[1].u.wbuf = &data_array2_w[0][0];
+
+    r_dset_info[1].dset_id = dataset2;
+    r_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+    r_dset_info[1].mem_space_id = mem_dataspace2;
+    r_dset_info[1].dset_space_id = file_dataspace2;
+    r_dset_info[1].u.rbuf = &data_array2_r[0][0];
 
     // init H5D_rw_multi_t for write DSET3 (CONTIG)
-    dset_info[2].dset_id = dataset3;
-    dset_info[2].mem_type_id = H5T_NATIVE_INT;
-    dset_info[2].mem_space_id = mem_dataspace3;
-    dset_info[2].file_space_id = file_dataspace3;
-    dset_info[2].wbuf = &data_array3_w[0][0];
-    dset_info[2].rbuf = &data_array3_r[0][0];
+    w_dset_info[2].dset_id = dataset3;
+    w_dset_info[2].mem_type_id = H5T_NATIVE_INT;
+    w_dset_info[2].mem_space_id = mem_dataspace3;
+    w_dset_info[2].dset_space_id = file_dataspace3;
+    w_dset_info[2].u.wbuf = &data_array3_w[0][0];
+
+    r_dset_info[2].dset_id = dataset3;
+    r_dset_info[2].mem_type_id = H5T_NATIVE_INT;
+    r_dset_info[2].mem_space_id = mem_dataspace3;
+    r_dset_info[2].dset_space_id = file_dataspace3;
+    r_dset_info[2].u.rbuf = &data_array3_r[0][0];
 
     // init H5D_rw_multi_t for write DSET4 (CONTIG)
-    dset_info[3].dset_id = dataset4;
-    dset_info[3].mem_type_id = H5T_NATIVE_INT;
-    dset_info[3].mem_space_id = mem_dataspace4;
-    dset_info[3].file_space_id = file_dataspace4;
-    dset_info[3].wbuf = &data_array4_w[0][0];
-    dset_info[3].rbuf = &data_array4_r[0][0];
-   #endif // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------O
+    w_dset_info[3].dset_id = dataset4;
+    w_dset_info[3].mem_type_id = H5T_NATIVE_INT;
+    w_dset_info[3].mem_space_id = mem_dataspace4;
+    w_dset_info[3].dset_space_id = file_dataspace4;
+    w_dset_info[3].u.wbuf = &data_array4_w[0][0];
 
-    #if 0 // JK_DBG
-    for (i=0; i< NDSET ; i++) {
-        printf("%s P%d > dset_info[%d].wbuf addr: %x\n", __FUNCTION__, mpi_rank, i, dset_info[i].wbuf);
-    }
-    #endif
+    r_dset_info[3].dset_id = dataset4;
+    r_dset_info[3].mem_type_id = H5T_NATIVE_INT;
+    r_dset_info[3].mem_space_id = mem_dataspace4;
+    r_dset_info[3].dset_space_id = file_dataspace4;
+    r_dset_info[3].u.rbuf = &data_array4_r[0][0];
+#endif // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------O
 
-  #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
-  if (mpi_rank == 0)      Count = 4;
-  if (mpi_rank == 1)      Count = 3;
-  #else
-  Count = NDSET;
-  #endif
+#if 0 // JK_DBG
+    for (i=0; i< NDSET ; i++)
+        printf("%s P%d > w_dset_info[%d].u.wbuf addr: %p\n", __FUNCTION__, mpi_rank, i, w_dset_info[i].u.wbuf);
+#endif
+
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
+    if (mpi_rank == 0)      Count = 4;
+    if (mpi_rank == 1)      Count = 3;
+#else
+    Count = NDSET;
+#endif
 
     if(multi_mode==MULTI_DSET) {
-        ret = H5Dwrite_multi(fid, Count, dset_info, xfer_plist) < 0;
+        ret = H5Dwrite_multi(fid, xfer_plist, Count, w_dset_info);
         assert(ret != FAIL);
-        #ifdef TEST_DOUBLE_WR_BEFORE_CLOSE
+#ifdef TEST_DOUBLE_WR_BEFORE_CLOSE
         /* test multiple write before close */
-        sync();
-        ret = H5Dwrite_multi(fid, Count, dset_info, xfer_plist) < 0;
+sync();
+        ret = H5Dwrite_multi(fid, xfer_plist, Count, w_dset_info);
         assert(ret != FAIL);
-        #endif
+#endif
         
         // Read
-        ret = H5Dread_multi(fid, Count, dset_info, xfer_plist) < 0;
+        ret = H5Dread_multi(fid, xfer_plist, Count, r_dset_info);
         assert(ret != FAIL);
 
-        #ifdef TEST_DOUBLE_RD_BEFORE_CLOSE
+#ifdef TEST_DOUBLE_RD_BEFORE_CLOSE
         /* test multiple read before close */
-        sync();
-        ret = H5Dread_multi(fid, Count, dset_info, xfer_plist) < 0;
+sync();
+        ret = H5Dread_multi(fid, xfer_plist, Count, r_dset_info);
         assert(ret != FAIL);
-        #endif
+#endif
     }
     else if(multi_mode==SINGLE_DSET) {
         // Write
         for (i=0; i<Count; i++)
-            ret = H5Dwrite(dset_info[i].dset_id, dset_info[i].mem_type_id, dset_info[i].mem_space_id, dset_info[i].file_space_id, xfer_plist, dset_info[i].wbuf);
+            ret = H5Dwrite(w_dset_info[i].dset_id, w_dset_info[i].mem_type_id, w_dset_info[i].mem_space_id, w_dset_info[i].dset_space_id, xfer_plist, w_dset_info[i].u.wbuf);
 
         // Read
-        for (i=0; i<Count; i++) {
-            ret = H5Dread(dset_info[i].dset_id, dset_info[i].mem_type_id, dset_info[i].mem_space_id, dset_info[i].file_space_id, xfer_plist, dset_info[i].rbuf ) < 0;
-        }
+        for (i=0; i<Count; i++)
+            ret = H5Dread(r_dset_info[i].dset_id, r_dset_info[i].mem_type_id, r_dset_info[i].mem_space_id, r_dset_info[i].dset_space_id, xfer_plist, r_dset_info[i].u.rbuf);
     }
 
     // Verify Read buffer with Write buffer
     if(sel_mode == SEL_HYPER_1BLOCK || sel_mode == SEL_POINTS || sel_mode == SEL_1POINT) {
         if(Count >=1)  // relate to TEST_MDSET_NO_LAST_DSET_2ND_PROC
-            ret = dataset_vrfy2(start1, stride1, count1, block1, (DTYPE_INT *)dset_info[0].wbuf, (DTYPE_INT *)dset_info[0].rbuf,1);
+            ret = dataset_vrfy2(start1, stride1, count1, block1, (DTYPE_INT *)w_dset_info[0].u.wbuf, (DTYPE_INT *)r_dset_info[0].u.rbuf,1);
         if(Count >=2)   // relate to TEST_MDSET_NO_LAST_DSET_2ND_PROC 
-            ret = dataset_vrfy2(start2, stride2, count2, block2, (DTYPE_INT *)dset_info[1].wbuf, (DTYPE_INT *)dset_info[1].rbuf,2);
+            ret = dataset_vrfy2(start2, stride2, count2, block2, (DTYPE_INT *)w_dset_info[1].u.wbuf, (DTYPE_INT *)r_dset_info[1].u.rbuf,2);
         if(Count >=3)  // relate to TEST_MDSET_NO_LAST_DSET_2ND_PROC
-            ret = dataset_vrfy2(start3, stride3, count3, block3, (DTYPE_INT *)dset_info[2].wbuf, (DTYPE_INT *)dset_info[2].rbuf,3);
+            ret = dataset_vrfy2(start3, stride3, count3, block3, (DTYPE_INT *)w_dset_info[2].u.wbuf, (DTYPE_INT *)r_dset_info[2].u.rbuf,3);
         if(Count >=4)   // relate to TEST_MDSET_NO_LAST_DSET_2ND_PROC 
-            ret = dataset_vrfy2(start4, stride4, count4, block4, (DTYPE_INT *)dset_info[3].wbuf, (DTYPE_INT *)dset_info[3].rbuf,4);
+            ret = dataset_vrfy2(start4, stride4, count4, block4, (DTYPE_INT *)w_dset_info[3].u.wbuf, (DTYPE_INT *)r_dset_info[3].u.rbuf,4);
     }
     else if (sel_mode == SEL_NONE) {
         // init the wbuf, as rbuf shouldn't read any 
@@ -2729,13 +2789,13 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
         data_array2d_init(SPACE1_DIM1,SPACE1_DIM2, &data_array3_w[0][0],INIT_VAL);
         data_array2d_init(SPACE1_DIM1,SPACE1_DIM2, &data_array4_w[0][0],INIT_VAL);
         if(Count >= 1)
-            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)dset_info[0].wbuf, (DTYPE_INT *)dset_info[0].rbuf,1);
+            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)w_dset_info[0].u.wbuf, (DTYPE_INT *)r_dset_info[0].u.rbuf,1);
         if(Count >= 2) 
-            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)dset_info[1].wbuf, (DTYPE_INT *)dset_info[1].rbuf,2);
+            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)w_dset_info[1].u.wbuf, (DTYPE_INT *)r_dset_info[1].u.rbuf,2);
         if(Count >= 3)
-            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)dset_info[2].wbuf, (DTYPE_INT *)dset_info[2].rbuf,3);
+            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)w_dset_info[2].u.wbuf, (DTYPE_INT *)r_dset_info[2].u.rbuf,3);
         if(Count > 4) 
-            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)dset_info[3].wbuf, (DTYPE_INT *)dset_info[3].rbuf,4);         
+            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)w_dset_info[3].u.wbuf, (DTYPE_INT *)r_dset_info[3].u.rbuf,4);         
     }
 
     MESG("H5Dwrite succeed");
@@ -2748,16 +2808,28 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
     /* release all temporary handles. */
     for (i=0;i< Count;i++)
     {
-        if(dset_info[i].mem_space_id > 0) {
-            ret = H5Sclose(dset_info[i].mem_space_id);
+        if(w_dset_info[i].mem_space_id > 0) {
+            ret = H5Sclose(w_dset_info[i].mem_space_id);
             assert(ret != FAIL);
         }
-        if(dset_info[i].file_space_id > 0) {
-            ret = H5Sclose(dset_info[i].file_space_id);
+        if(r_dset_info[i].mem_space_id > 0) {
+            ret = H5Sclose(r_dset_info[i].mem_space_id);
             assert(ret != FAIL);
         }
-        if(dset_info[i].dset_id > 0) {
-            ret = H5Dclose(dset_info[i].dset_id);
+        if(w_dset_info[i].dset_space_id > 0) {
+            ret = H5Sclose(w_dset_info[i].dset_space_id);
+            assert(ret != FAIL);
+        }
+        if(r_dset_info[i].dset_space_id > 0) {
+            ret = H5Sclose(r_dset_info[i].dset_space_id);
+            assert(ret != FAIL);
+        }
+        if(w_dset_info[i].dset_id > 0) {
+            ret = H5Dclose(w_dset_info[i].dset_id);
+            assert(ret != FAIL);
+        }
+        if(r_dset_info[i].dset_id > 0) {
+            ret = H5Dclose(r_dset_info[i].dset_id);
             assert(ret != FAIL);
         }
         MESG("H5Dclose succeed");
@@ -2807,10 +2879,10 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
 
     herr_t ret;         	/* Generic return value */
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
-    #endif
+#endif
 
     if (verbose)
 	printf("Collective write test on file %s\n", filename);
@@ -2832,12 +2904,12 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl != FAIL);
     MESG("H5Pcreate access succeed");
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     /* set Parallel access with communicator */
     ret = H5Pset_fapl_mpio(acc_tpl, comm, info);
     assert(ret != FAIL);
     MESG("H5Pset_fapl_mpio succeed");
-    #endif
+#endif
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -2878,7 +2950,7 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
     ret = H5Pclose(crp_plist1);
     assert (ret != FAIL);
 
-    #ifdef TEST_TWO_CHUNK
+#ifdef TEST_TWO_CHUNK
     /* ----------------------------------------
      * set up for chunked Dset2 */
     crp_plist2 = H5Pcreate(H5P_DATASET_CREATE);
@@ -2896,14 +2968,14 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
     // can close chunk prop
     ret = H5Pclose(crp_plist2);
     assert (ret != FAIL);
-    #endif 
+#endif 
 
     /*
      * Set up dimensions of the slab this process accesses.
      */
-    #if 1 // JK_DBG
+#if 1 // JK_DBG
 	printf("== Write DSET 1 =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
@@ -2918,14 +2990,14 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
         slab_set(start1, stride1, count1, block1, BYCOL_M);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start1[]=(%lu,%lu), stride1[]=(%lu,%lu), count1[]=(%lu,%lu), block1[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start1[0], (unsigned long)start1[1],
        (unsigned long)stride1[0], (unsigned long)stride1[1],
        (unsigned long)count1[0], (unsigned long)count1[1],
        (unsigned long)block1[0], (unsigned long)block1[1]);
-    #endif
+#endif
 
     
     /* create a file dataspace independently */
@@ -2970,9 +3042,9 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
         count1[0] = 1; count1[1] = 2;
         block1[0] = 1; block1[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace1, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -2996,9 +3068,9 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
         count1[0] = 1; count1[1] = 1;
         block1[0] = 1; block1[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace1, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -3024,17 +3096,17 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
     	dataset_print(start1, count1, stride1, &data_array1[0][0]);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset1 Write Data ---\n");
     //dset_select_display(start1, count1, stride1, &data_array1[0][0],1);
     dataset_print(start1, count1, stride1, &data_array1[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array1[0][0], 1);
-    #endif
+#endif
 
-   #ifdef TEST_TWO_CHUNK
-    #if 1 // JK_DBG
+#ifdef TEST_TWO_CHUNK
+#if 1 // JK_DBG
 	printf("== Write DSET 2 =============================\n");
-    #endif
+#endif
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
         //slab_set(start2, stride2, count2, block2, BYROW);
@@ -3048,14 +3120,14 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
         slab_set(start2, stride2, count2, block2, BYCOL_M);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start2[]=(%lu,%lu), stride2[]=(%lu,%lu), count2[]=(%lu,%lu), block2[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start2[0], (unsigned long)start2[1],
        (unsigned long)stride2[0], (unsigned long)stride2[1],
        (unsigned long)count2[0], (unsigned long)count2[1],
        (unsigned long)block2[0], (unsigned long)block2[1]);
-    #endif
+#endif
 
 
     /* create a file dataspace independently */
@@ -3100,9 +3172,9 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
         count2[0] = 1; count2[1] = 2;
         block2[0] = 1; block2[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace2, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -3126,9 +3198,9 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
         count2[0] = 1; count2[1] = 1;
         block2[0] = 1; block2[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace2, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -3154,14 +3226,14 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
     	dataset_print(start2, count2, stride2, &data_array2[0][0]);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset2 Write Data ---\n");
     //dset_select_display(start2, count2, stride2, &data_array2[0][0],2);
     dataset_print(start2, count2, stride2, &data_array2[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array2[0][0], 2);
-    #endif
+#endif
 
-   #endif // TEST_TWO_CHUNK
+#endif // TEST_TWO_CHUNK
 
 
     /*==================================================
@@ -3171,7 +3243,7 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
     assert(xfer_plist != FAIL);
     MESG("H5Pcreate xfer succeed");
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     if (pmode == PHDF5_PARALLEL)
     {
         ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
@@ -3196,118 +3268,116 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
             assert(ret >= 0);
         }
     }
-    #endif
+#endif
 
     /*
      * Set up dset info structure 
      * HDF5 lib will handle by order of dset_info[X] X
      */
-   #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
    if (mpi_rank == 0) {
-    #if 1 // USE_DSET1
-    // init H5D_rw_multi_t for write DSET1 (CHUNKED)
-    dset_info[0].dset_id = dataset1;
-    dset_info[0].mem_type_id = H5T_NATIVE_INT;
-    dset_info[0].mem_space_id = mem_dataspace1;
-    dset_info[0].file_space_id = file_dataspace1;
-    dset_info[0].wbuf = &data_array1[0][0];
-    #else
-    /* free before rewrite DSET1 */
-    if(mem_dataspace1)  { ret = H5Sclose(mem_dataspace1); assert(ret != FAIL); }
-    if(file_dataspace1) { ret = H5Sclose(file_dataspace1); assert(ret != FAIL); }
-    if(dataset1) { ret = H5Dclose(dataset1); assert(ret != FAIL); }
-    #endif
+#if 1 // USE_DSET1
+        // init H5D_rw_multi_t for write DSET1 (CHUNKED)
+        dset_info[0].dset_id = dataset1;
+        dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        dset_info[0].mem_space_id = mem_dataspace1;
+        dset_info[0].dset_space_id = file_dataspace1;
+        dset_info[0].u.wbuf = &data_array1[0][0];
+#else
+        /* free before rewrite DSET1 */
+        if(mem_dataspace1)  { ret = H5Sclose(mem_dataspace1); assert(ret != FAIL); }
+        if(file_dataspace1) { ret = H5Sclose(file_dataspace1); assert(ret != FAIL); }
+        if(dataset1) { ret = H5Dclose(dataset1); assert(ret != FAIL); }
+#endif
 
-    #if 1 // USE_DSET2
-    // init H5D_rw_multi_t for write DSET2 (CHUNKED)
-    dset_info[1].dset_id = dataset2;
-    dset_info[1].mem_type_id = H5T_NATIVE_INT;
-    dset_info[1].mem_space_id = mem_dataspace2;
-    dset_info[1].file_space_id = file_dataspace2;
-    dset_info[1].wbuf = &data_array2[0][0];
-    #else
-    /* free before rewrite DSET2 */
-    if(mem_dataspace2)  { ret = H5Sclose(mem_dataspace2); assert(ret != FAIL); }
-    if(file_dataspace2) { ret = H5Sclose(file_dataspace2); assert(ret != FAIL); }
-    if(dataset2) { ret = H5Dclose(dataset2); assert(ret != FAIL); }
-    #endif
+#if 1 // USE_DSET2
+        // init H5D_rw_multi_t for write DSET2 (CHUNKED)
+        dset_info[1].dset_id = dataset2;
+        dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        dset_info[1].mem_space_id = mem_dataspace2;
+        dset_info[1].dset_space_id = file_dataspace2;
+        dset_info[1].u.wbuf = &data_array2[0][0];
+#else
+        /* free before rewrite DSET2 */
+        if(mem_dataspace2)  { ret = H5Sclose(mem_dataspace2); assert(ret != FAIL); }
+        if(file_dataspace2) { ret = H5Sclose(file_dataspace2); assert(ret != FAIL); }
+        if(dataset2) { ret = H5Dclose(dataset2); assert(ret != FAIL); }
+#endif
    } // mpi_rank == 0
 
    if (mpi_rank == 1) {
-    #if 1 // USE_DSET1
-    // init H5D_rw_multi_t for write DSET1 (CHUNKED)
-    dset_info[0].dset_id = dataset1;
-    dset_info[0].mem_type_id = H5T_NATIVE_INT;
-    dset_info[0].mem_space_id = mem_dataspace1;
-    dset_info[0].file_space_id = file_dataspace1;
-    dset_info[0].wbuf = &data_array1[0][0];
-    #else
-    /* free before rewrite DSET1 */
-    if(mem_dataspace1)  { ret = H5Sclose(mem_dataspace1); assert(ret != FAIL); }
-    if(file_dataspace1) { ret = H5Sclose(file_dataspace1); assert(ret != FAIL); }
-    if(dataset1) { ret = H5Dclose(dataset1); assert(ret != FAIL); }
-    #endif
+#if 1 // USE_DSET1
+        // init H5D_rw_multi_t for write DSET1 (CHUNKED)
+        dset_info[0].dset_id = dataset1;
+        dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        dset_info[0].mem_space_id = mem_dataspace1;
+        dset_info[0].dset_space_id = file_dataspace1;
+        dset_info[0].u.wbuf = &data_array1[0][0];
+#else
+        /* free before rewrite DSET1 */
+        if(mem_dataspace1)  { ret = H5Sclose(mem_dataspace1); assert(ret != FAIL); }
+        if(file_dataspace1) { ret = H5Sclose(file_dataspace1); assert(ret != FAIL); }
+        if(dataset1) { ret = H5Dclose(dataset1); assert(ret != FAIL); }
+#endif
 
-    #if 0 // USE_DSET2
-    // init H5D_rw_multi_t for write DSET2 (CHUNKED)
-    dset_info[1].dset_id = dataset2;
-    dset_info[1].mem_type_id = H5T_NATIVE_INT;
-    dset_info[1].mem_space_id = mem_dataspace2;
-    dset_info[1].file_space_id = file_dataspace2;
-    dset_info[1].wbuf = &data_array2[0][0];
-    #else
-    /* free before rewrite DSET2 */
-    if(mem_dataspace2)  { ret = H5Sclose(mem_dataspace2); assert(ret != FAIL); }
-    if(file_dataspace2) { ret = H5Sclose(file_dataspace2); assert(ret != FAIL); }
-    if(dataset2) { ret = H5Dclose(dataset2); assert(ret != FAIL); }
-    #endif
+#if 0 // USE_DSET2
+        // init H5D_rw_multi_t for write DSET2 (CHUNKED)
+        dset_info[1].dset_id = dataset2;
+        dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        dset_info[1].mem_space_id = mem_dataspace2;
+        dset_info[1].dset_space_id = file_dataspace2;
+        dset_info[1].u.wbuf = &data_array2[0][0];
+#else
+        /* free before rewrite DSET2 */
+        if(mem_dataspace2)  { ret = H5Sclose(mem_dataspace2); assert(ret != FAIL); }
+        if(file_dataspace2) { ret = H5Sclose(file_dataspace2); assert(ret != FAIL); }
+        if(dataset2) { ret = H5Dclose(dataset2); assert(ret != FAIL); }
+#endif
    } // mpi_rank == 1
 
-   #else // TEST_MDSET_NO_LAST_DSET_2ND_PROC ---------
+#else // TEST_MDSET_NO_LAST_DSET_2ND_PROC ---------
     // init H5D_rw_multi_t for write DSET1 (CHUNKED)
     dset_info[0].dset_id = dataset1;
     dset_info[0].mem_type_id = H5T_NATIVE_INT;
     dset_info[0].mem_space_id = mem_dataspace1;
-    dset_info[0].file_space_id = file_dataspace1;
-    dset_info[0].wbuf = &data_array1[0][0];
+    dset_info[0].dset_space_id = file_dataspace1;
+    dset_info[0].u.wbuf = &data_array1[0][0];
 
-    #ifdef TEST_TWO_CHUNK
+#ifdef TEST_TWO_CHUNK
     // init H5D_rw_multi_t for write DSET2 (CHUNKED)
     dset_info[1].dset_id = dataset2;
     dset_info[1].mem_type_id = H5T_NATIVE_INT;
     dset_info[1].mem_space_id = mem_dataspace2;
-    dset_info[1].file_space_id = file_dataspace2;
-    dset_info[1].wbuf = &data_array2[0][0];
-    #endif
-   #endif //TEST_MDSET_NO_LAST_DSET_2ND_PROC --------------O
+    dset_info[1].dset_space_id = file_dataspace2;
+    dset_info[1].u.wbuf = &data_array2[0][0];
+#endif
+#endif //TEST_MDSET_NO_LAST_DSET_2ND_PROC --------------O
 
-    #if 0 // JK_DBG
-    for (i=0; i< NDSET_CHUNK ; i++) {
-        printf("%s P%d > dset_info[%d].wbuf addr: %x\n", __FUNCTION__, mpi_rank, i, dset_info[i].wbuf);
-    }
-    #endif
+#if 0 // JK_DBG
+    for (i=0; i< NDSET_CHUNK ; i++)
+        printf("%s P%d > dset_info[%d].u.wbuf addr: %x\n", __FUNCTION__, mpi_rank, i, dset_info[i].u.wbuf);
+#endif
 
-  #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
-  if (mpi_rank == 0)      Count = 2;
-  if (mpi_rank == 1)      Count = 1;
-  #else
-  Count = NDSET_CHUNK;
-  #endif
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
+    if (mpi_rank == 0)      Count = 2;
+    if (mpi_rank == 1)      Count = 1;
+#else
+    Count = NDSET_CHUNK;
+#endif
 
     if(multi_mode==MULTI_DSET) {
-        ret = H5Dwrite_multi(fid, Count, dset_info, xfer_plist) < 0;
+        ret = H5Dwrite_multi(fid, xfer_plist, Count, dset_info);
         assert(ret != FAIL);
-        #ifdef TEST_DOUBLE_WR_BEFORE_CLOSE
+#ifdef TEST_DOUBLE_WR_BEFORE_CLOSE
         /* test multiple write before close */
-        sync();
-        ret = H5Dwrite_multi(fid, Count, dset_info, xfer_plist) < 0;
+sync();
+        ret = H5Dwrite_multi(fid, xfer_plist, Count, dset_info);
         assert(ret != FAIL);
-        #endif
+#endif
     }
     else if(multi_mode==SINGLE_DSET) {
-        for (i=0; i<Count; i++) {
-            ret = H5Dwrite(dset_info[i].dset_id, dset_info[i].mem_type_id, dset_info[i].mem_space_id, dset_info[i].file_space_id, xfer_plist, dset_info[i].wbuf ) < 0;
-        }
+        for (i=0; i<Count; i++)
+            ret = H5Dwrite(dset_info[i].dset_id, dset_info[i].mem_type_id, dset_info[i].mem_space_id, dset_info[i].dset_space_id, xfer_plist, dset_info[i].u.wbuf );
     }
 
     MESG("H5Dwrite succeed");
@@ -3325,9 +3395,9 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
             ret = H5Sclose(dset_info[i].mem_space_id);
             assert(ret != FAIL);
         }
-        if(dset_info[i].file_space_id > 0)
+        if(dset_info[i].dset_space_id > 0)
         {
-            ret = H5Sclose(dset_info[i].file_space_id);
+            ret = H5Sclose(dset_info[i].dset_space_id);
             assert(ret != FAIL);
         }
         if(dset_info[i].dset_id > 0)
@@ -3356,7 +3426,8 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
     hsize_t dims[SPACE1_RANK] = {SPACE1_DIM1,SPACE1_DIM2};	/* dataspace dim sizes */
     hid_t acc_tpl;		/* File access templates */
     hid_t xfer_plist;		/* Dataset transfer properties list */
-    H5D_rw_multi_t dset_info[NDSET_CHUNK];
+    H5D_rw_multi_t w_dset_info[NDSET_CHUNK];
+    H5D_rw_multi_t r_dset_info[NDSET_CHUNK];
     hid_t crp_plist1, crp_plist2;
     hid_t file_dataspace1, file_dataspace2;	/* File dataspace ID */
     hid_t mem_dataspace1=-1, mem_dataspace2=-1;	/* memory dataspace ID */
@@ -3386,17 +3457,18 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
 
     herr_t ret;         	/* Generic return value */
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
-    #endif
+#endif
 
     if (verbose)
 	printf("Collective write test on file %s\n", filename);
 
-    // init dset_info[]
+    // init [w/r]_dset_info[]
     for (i=0; i< NDSET_CHUNK ; i++) {
-        memset(&dset_info[i], 0, sizeof(H5D_rw_multi_t));
+        memset(&w_dset_info[i], 0, sizeof(H5D_rw_multi_t));
+        memset(&r_dset_info[i], 0, sizeof(H5D_rw_multi_t));
     }
 
     // Init data_array
@@ -3415,12 +3487,12 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl != FAIL);
     MESG("H5Pcreate access succeed");
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     /* set Parallel access with communicator */
     ret = H5Pset_fapl_mpio(acc_tpl, comm, info);
     assert(ret != FAIL);
     MESG("H5Pset_fapl_mpio succeed");
-    #endif
+#endif
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -3461,7 +3533,7 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
     ret = H5Pclose(crp_plist1);
     assert (ret != FAIL);
 
-    #ifdef TEST_TWO_CHUNK
+#ifdef TEST_TWO_CHUNK
     /* ----------------------------------------
      * set up for chunked Dset2 */
     crp_plist2 = H5Pcreate(H5P_DATASET_CREATE);
@@ -3479,14 +3551,14 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
     // can close chunk prop
     ret = H5Pclose(crp_plist2);
     assert (ret != FAIL);
-    #endif 
+#endif 
 
     /*
      * Set up dimensions of the slab this process accesses.
      */
-    #if 1 // JK_DBG
+#if 1 // JK_DBG
 	printf("== Write DSET 1 =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block. */
@@ -3502,14 +3574,14 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
     }
 
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start1[]=(%lu,%lu), stride1[]=(%lu,%lu), count1[]=(%lu,%lu), block1[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start1[0], (unsigned long)start1[1],
        (unsigned long)stride1[0], (unsigned long)stride1[1],
        (unsigned long)count1[0], (unsigned long)count1[1],
        (unsigned long)block1[0], (unsigned long)block1[1]);
-    #endif
+#endif
 
     /* create a file dataspace independently */
     file_dataspace1 = H5Dget_space (dataset1);
@@ -3551,9 +3623,9 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
         count1[0] = 1; count1[1] = 2;
         block1[0] = 1; block1[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace1, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -3577,9 +3649,9 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
         count1[0] = 1; count1[1] = 1;
         block1[0] = 1; block1[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace1, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -3605,17 +3677,17 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
     	dataset_print(start1, count1, stride1, &data_array1_w[0][0]);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset1 Write Data ---\n");
     //dset_select_display(start1, count1, stride1, &data_array1_w[0][0],1);
     dataset_print(start1, count1, stride1, &data_array1_w[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array1_w[0][0], 1);
-    #endif
+#endif
 
-   #ifdef TEST_TWO_CHUNK
-    #if 1 // JK_DBG
+#ifdef TEST_TWO_CHUNK
+#if 1 // JK_DBG
 	printf("== Write DSET 2 =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
@@ -3631,14 +3703,14 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
     }
 
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start2[]=(%lu,%lu), stride2[]=(%lu,%lu), count2[]=(%lu,%lu), block2[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start2[0], (unsigned long)start2[1],
        (unsigned long)stride2[0], (unsigned long)stride2[1],
        (unsigned long)count2[0], (unsigned long)count2[1],
        (unsigned long)block2[0], (unsigned long)block2[1]);
-    #endif
+#endif
 
     /* create a file dataspace independently */
     file_dataspace2 = H5Dget_space (dataset2);
@@ -3683,9 +3755,9 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
         count2[0] = 1; count2[1] = 2;
         block2[0] = 1; block2[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace2, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -3709,9 +3781,9 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
         count2[0] = 1; count2[1] = 1;
         block2[0] = 1; block2[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace2, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -3736,14 +3808,14 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
 	    MESG("data_array created");
     	dataset_print(start2, count2, stride2, &data_array2_w[0][0]);
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset2 Write Data ---\n");
     //dset_select_display(start2, count2, stride2, &data_array2_w[0][0],2);
     dataset_print(start2, count2, stride2, &data_array2_w[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array2_w[0][0], 2);
-    #endif
+#endif
 
-   #endif // TEST_TWO_CHUNK
+#endif // TEST_TWO_CHUNK
 
 
     /*==================================================
@@ -3753,7 +3825,7 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
     assert(xfer_plist != FAIL);
     MESG("H5Pcreate xfer succeed");
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     if (pmode == PHDF5_PARALLEL)
     {
         ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
@@ -3778,142 +3850,171 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
             assert(ret >= 0);
         }
     }
-    #endif
+#endif
 
     /*
      * Set up dset info structure 
-     * HDF5 lib will handle by order of dset_info[X] X
+     * HDF5 lib will handle by order of [w/r]_dset_info[X] X
      */
-   #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
    if (mpi_rank == 0) {
-    #if 1 // USE_DSET1
-    // init H5D_rw_multi_t for write DSET1 (CHUNKED)
-    dset_info[0].dset_id = dataset1;
-    dset_info[0].mem_type_id = H5T_NATIVE_INT;
-    dset_info[0].mem_space_id = mem_dataspace1;
-    dset_info[0].file_space_id = file_dataspace1;
-    dset_info[0].wbuf = &data_array1_w[0][0];
-    dset_info[0].rbuf = &data_array1_r[0][0];
-    #else
-    /* free before rewrite DSET1 */
-    if(mem_dataspace1)  { ret = H5Sclose(mem_dataspace1); assert(ret != FAIL); }
-    if(file_dataspace1) { ret = H5Sclose(file_dataspace1); assert(ret != FAIL); }
-    if(dataset1) { ret = H5Dclose(dataset1); assert(ret != FAIL); }
-    #endif
+#if 1 // USE_DSET1
+        // init H5D_rw_multi_t for write DSET1 (CHUNKED)
+        w_dset_info[0].dset_id = dataset1;
+        w_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[0].mem_space_id = mem_dataspace1;
+        w_dset_info[0].dset_space_id = file_dataspace1;
+        w_dset_info[0].u.wbuf = &data_array1_w[0][0];
 
-    #if 1 // USE_DSET2
-    // init H5D_rw_multi_t for write DSET2 (CHUNKED)
-    dset_info[1].dset_id = dataset2;
-    dset_info[1].mem_type_id = H5T_NATIVE_INT;
-    dset_info[1].mem_space_id = mem_dataspace2;
-    dset_info[1].file_space_id = file_dataspace2;
-    dset_info[1].wbuf = &data_array2_w[0][0];
-    dset_info[1].rbuf = &data_array2_r[0][0];
-    #else
-    /* free before rewrite DSET2 */
-    if(mem_dataspace2)  { ret = H5Sclose(mem_dataspace2); assert(ret != FAIL); }
-    if(file_dataspace2) { ret = H5Sclose(file_dataspace2); assert(ret != FAIL); }
-    if(dataset2) { ret = H5Dclose(dataset2); assert(ret != FAIL); }
-    #endif
+        r_dset_info[0].dset_id = dataset1;
+        r_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[0].mem_space_id = mem_dataspace1;
+        r_dset_info[0].dset_space_id = file_dataspace1;
+        r_dset_info[0].u.rbuf = &data_array1_r[0][0];
+#else
+        /* free before rewrite DSET1 */
+        if(mem_dataspace1)  { ret = H5Sclose(mem_dataspace1); assert(ret != FAIL); }
+        if(file_dataspace1) { ret = H5Sclose(file_dataspace1); assert(ret != FAIL); }
+        if(dataset1) { ret = H5Dclose(dataset1); assert(ret != FAIL); }
+#endif
+
+#if 1 // USE_DSET2
+        // init H5D_rw_multi_t for write DSET2 (CHUNKED)
+        w_dset_info[1].dset_id = dataset2;
+        w_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[1].mem_space_id = mem_dataspace2;
+        w_dset_info[1].dset_space_id = file_dataspace2;
+        w_dset_info[1].u.wbuf = &data_array2_w[0][0];
+
+        r_dset_info[1].dset_id = dataset2;
+        r_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[1].mem_space_id = mem_dataspace2;
+        r_dset_info[1].dset_space_id = file_dataspace2;
+        r_dset_info[1].u.rbuf = &data_array2_r[0][0];
+#else
+        /* free before rewrite DSET2 */
+        if(mem_dataspace2)  { ret = H5Sclose(mem_dataspace2); assert(ret != FAIL); }
+        if(file_dataspace2) { ret = H5Sclose(file_dataspace2); assert(ret != FAIL); }
+        if(dataset2) { ret = H5Dclose(dataset2); assert(ret != FAIL); }
+#endif
    } // mpi_rank == 0
 
    if (mpi_rank == 1) {
-    #if 1 // USE_DSET1
-    // init H5D_rw_multi_t for write DSET1 (CHUNKED)
-    dset_info[0].dset_id = dataset1;
-    dset_info[0].mem_type_id = H5T_NATIVE_INT;
-    dset_info[0].mem_space_id = mem_dataspace1;
-    dset_info[0].file_space_id = file_dataspace1;
-    dset_info[0].wbuf = &data_array1_w[0][0];
-    dset_info[0].rbuf = &data_array1_r[0][0];
-    #else
-    /* free before rewrite DSET1 */
-    if(mem_dataspace1)  { ret = H5Sclose(mem_dataspace1); assert(ret != FAIL); }
-    if(file_dataspace1) { ret = H5Sclose(file_dataspace1); assert(ret != FAIL); }
-    if(dataset1) { ret = H5Dclose(dataset1); assert(ret != FAIL); }
-    #endif
+#if 1 // USE_DSET1
+        // init H5D_rw_multi_t for write DSET1 (CHUNKED)
+        w_dset_info[0].dset_id = dataset1;
+        w_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[0].mem_space_id = mem_dataspace1;
+        w_dset_info[0].dset_space_id = file_dataspace1;
+        w_dset_info[0].u.wbuf = &data_array1_w[0][0];
 
-    #if 0 // USE_DSET2
-    // init H5D_rw_multi_t for write DSET2 (CHUNKED)
-    dset_info[1].dset_id = dataset2;
-    dset_info[1].mem_type_id = H5T_NATIVE_INT;
-    dset_info[1].mem_space_id = mem_dataspace2;
-    dset_info[1].file_space_id = file_dataspace2;
-    dset_info[1].wbuf = &data_array2_w[0][0];
-    dset_info[1].rbuf = &data_array2_r[0][0];
-    #else
-    /* free before rewrite DSET2 */
-    if(mem_dataspace2)  { ret = H5Sclose(mem_dataspace2); assert(ret != FAIL); }
-    if(file_dataspace2) { ret = H5Sclose(file_dataspace2); assert(ret != FAIL); }
-    if(dataset2) { ret = H5Dclose(dataset2); assert(ret != FAIL); }
-    #endif
+        r_dset_info[0].dset_id = dataset1;
+        r_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[0].mem_space_id = mem_dataspace1;
+        r_dset_info[0].dset_space_id = file_dataspace1;
+        r_dset_info[0].u.rbuf = &data_array1_r[0][0];
+#else
+        /* free before rewrite DSET1 */
+        if(mem_dataspace1)  { ret = H5Sclose(mem_dataspace1); assert(ret != FAIL); }
+        if(file_dataspace1) { ret = H5Sclose(file_dataspace1); assert(ret != FAIL); }
+        if(dataset1) { ret = H5Dclose(dataset1); assert(ret != FAIL); }
+#endif
+
+#if 0 // USE_DSET2
+        // init H5D_rw_multi_t for write DSET2 (CHUNKED)
+        w_dset_info[1].dset_id = dataset2;
+        w_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[1].mem_space_id = mem_dataspace2;
+        w_dset_info[1].dset_space_id = file_dataspace2;
+        w_dset_info[1].u.wbuf = &data_array2_w[0][0];
+
+        r_dset_info[1].dset_id = dataset2;
+        r_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[1].mem_space_id = mem_dataspace2;
+        r_dset_info[1].dset_space_id = file_dataspace2;
+        r_dset_info[1].u.rbuf = &data_array2_r[0][0];
+#else
+        /* free before rewrite DSET2 */
+        if(mem_dataspace2)  { ret = H5Sclose(mem_dataspace2); assert(ret != FAIL); }
+        if(file_dataspace2) { ret = H5Sclose(file_dataspace2); assert(ret != FAIL); }
+        if(dataset2) { ret = H5Dclose(dataset2); assert(ret != FAIL); }
+#endif
    } // mpi_rank == 1
 
-   #else // TEST_MDSET_NO_LAST_DSET_2ND_PROC ---------
+#else // TEST_MDSET_NO_LAST_DSET_2ND_PROC ---------
     // init H5D_rw_multi_t for write DSET1 (CHUNKED)
-    dset_info[0].dset_id = dataset1;
-    dset_info[0].mem_type_id = H5T_NATIVE_INT;
-    dset_info[0].mem_space_id = mem_dataspace1;
-    dset_info[0].file_space_id = file_dataspace1;
-    dset_info[0].wbuf = &data_array1_w[0][0];
-    dset_info[0].rbuf = &data_array1_r[0][0];
+    w_dset_info[0].dset_id = dataset1;
+    w_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+    w_dset_info[0].mem_space_id = mem_dataspace1;
+    w_dset_info[0].dset_space_id = file_dataspace1;
+    w_dset_info[0].u.wbuf = &data_array1_w[0][0];
 
-    #ifdef TEST_TWO_CHUNK
+    r_dset_info[0].dset_id = dataset1;
+    r_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+    r_dset_info[0].mem_space_id = mem_dataspace1;
+    r_dset_info[0].dset_space_id = file_dataspace1;
+    r_dset_info[0].u.rbuf = &data_array1_r[0][0];
+
+#ifdef TEST_TWO_CHUNK
     // init H5D_rw_multi_t for write DSET2 (CHUNKED)
-    dset_info[1].dset_id = dataset2;
-    dset_info[1].mem_type_id = H5T_NATIVE_INT;
-    dset_info[1].mem_space_id = mem_dataspace2;
-    dset_info[1].file_space_id = file_dataspace2;
-    dset_info[1].wbuf = &data_array2_w[0][0];
-    dset_info[1].rbuf = &data_array2_r[0][0];
-    #endif
-   #endif //TEST_MDSET_NO_LAST_DSET_2ND_PROC --------------O
+    w_dset_info[1].dset_id = dataset2;
+    w_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+    w_dset_info[1].mem_space_id = mem_dataspace2;
+    w_dset_info[1].dset_space_id = file_dataspace2;
+    w_dset_info[1].u.wbuf = &data_array2_w[0][0];
 
-    #if 0 // JK_DBG
-    for (i=0; i< NDSET_CHUNK ; i++) {
-        printf("%s P%d > dset_info[%d].wbuf addr: %x\n", __FUNCTION__, mpi_rank, i, dset_info[i].wbuf);
-    }
-    #endif
+    r_dset_info[1].dset_id = dataset2;
+    r_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+    r_dset_info[1].mem_space_id = mem_dataspace2;
+    r_dset_info[1].dset_space_id = file_dataspace2;
+    r_dset_info[1].u.rbuf = &data_array2_r[0][0];
+#endif
+#endif //TEST_MDSET_NO_LAST_DSET_2ND_PROC --------------O
 
-  #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
-  if (mpi_rank == 0)      Count = 2;
-  if (mpi_rank == 1)      Count = 1;
-  #else
-  Count = NDSET_CHUNK;
-  #endif
+#if 0 // JK_DBG
+    for (i=0; i< NDSET_CHUNK ; i++)
+        printf("%s P%d > w_dset_info[%d].u.wbuf addr: %x\n", __FUNCTION__, mpi_rank, i, w_dset_info[i].u.wbuf);
+#endif
+
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
+    if (mpi_rank == 0)      Count = 2;
+    if (mpi_rank == 1)      Count = 1;
+#else
+    Count = NDSET_CHUNK;
+#endif
 
     if(multi_mode==MULTI_DSET) {
         // Write
-        ret = H5Dwrite_multi(fid, Count, dset_info, xfer_plist) < 0;
+        ret = H5Dwrite_multi(fid, xfer_plist, Count, w_dset_info);
         assert(ret != FAIL);
-        #ifdef TEST_DOUBLE_WR_BEFORE_CLOSE
+#ifdef TEST_DOUBLE_WR_BEFORE_CLOSE
         /* test multiple write before close */
-        sync();
-        ret = H5Dwrite_multi(fid, Count, dset_info, xfer_plist) < 0;
+sync();
+        ret = H5Dwrite_multi(fid, xfer_plist, Count, w_dset_info);
         assert(ret != FAIL);
-        #endif
+#endif
 
         // Read
-        ret = H5Dread_multi(fid, Count, dset_info, xfer_plist) < 0;
+        ret = H5Dread_multi(fid, xfer_plist, Count, r_dset_info);
         assert(ret != FAIL);
 
-        #ifdef TEST_DOUBLE_RD_BEFORE_CLOSE
+#ifdef TEST_DOUBLE_RD_BEFORE_CLOSE
         /* test multiple read before close */
-        sync();
-        ret = H5Dread_multi(fid, Count, dset_info, xfer_plist) < 0;
+sync();
+        ret = H5Dread_multi(fid, xfer_plist, Count, r_dset_info);
         assert(ret != FAIL);
-        #endif
+#endif
     }
     else if(multi_mode==SINGLE_DSET) {
         // Write
         for (i=0; i<Count; i++) {
-            ret = H5Dwrite(dset_info[i].dset_id, dset_info[i].mem_type_id, dset_info[i].mem_space_id, dset_info[i].file_space_id, xfer_plist, dset_info[i].wbuf ) < 0;
+            ret = H5Dwrite(w_dset_info[i].dset_id, w_dset_info[i].mem_type_id, w_dset_info[i].mem_space_id, w_dset_info[i].dset_space_id, xfer_plist, w_dset_info[i].u.wbuf );
             assert(ret != FAIL);
         }
 
         // Read
         for (i=0; i<Count; i++) {
-            ret = H5Dread(dset_info[i].dset_id, dset_info[i].mem_type_id, dset_info[i].mem_space_id, dset_info[i].file_space_id, xfer_plist, dset_info[i].rbuf ) < 0;
+            ret = H5Dread(r_dset_info[i].dset_id, r_dset_info[i].mem_type_id, r_dset_info[i].mem_space_id, r_dset_info[i].dset_space_id, xfer_plist, r_dset_info[i].u.rbuf );
             assert(ret != FAIL);
         }
     }
@@ -3923,18 +4024,18 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
         block1[0] = 1; block1[1] = 1;
         block2[0] = 1; block2[1] = 1;
         if(Count >=1)  // relate to TEST_MDSET_NO_LAST_DSET_2ND_PROC
-            ret = dataset_vrfy2(start1, stride1, count1, block1, (DTYPE_INT *)dset_info[0].wbuf, (DTYPE_INT *)dset_info[0].rbuf,1);
+            ret = dataset_vrfy2(start1, stride1, count1, block1, (DTYPE_INT *)w_dset_info[0].u.wbuf, (DTYPE_INT *)r_dset_info[0].u.rbuf,1);
         if(Count > 1)   // relate to TEST_MDSET_NO_LAST_DSET_2ND_PROC 
-            ret = dataset_vrfy2(start2, stride2, count2, block2, (DTYPE_INT *)dset_info[1].wbuf, (DTYPE_INT *)dset_info[1].rbuf,2);
+            ret = dataset_vrfy2(start2, stride2, count2, block2, (DTYPE_INT *)w_dset_info[1].u.wbuf, (DTYPE_INT *)r_dset_info[1].u.rbuf,2);
     }
     else if (sel_mode == SEL_NONE) {
         // init the wbuf, as rbuf shouldn't read any 
         data_array2d_init(SPACE1_DIM1,SPACE1_DIM2, &data_array1_w[0][0],INIT_VAL);
         data_array2d_init(SPACE1_DIM1,SPACE1_DIM2, &data_array2_w[0][0],INIT_VAL);
         if(Count >= 1)
-            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)dset_info[0].wbuf, (DTYPE_INT *)dset_info[0].rbuf,1);
+            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)w_dset_info[0].u.wbuf, (DTYPE_INT *)r_dset_info[0].u.rbuf,1);
         if(Count > 1) 
-            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)dset_info[1].wbuf, (DTYPE_INT *)dset_info[1].rbuf,2);
+            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)w_dset_info[1].u.wbuf, (DTYPE_INT *)r_dset_info[1].u.rbuf,2);
     }
 
     MESG("H5Dwrite succeed");
@@ -3947,19 +4048,34 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
     /* release all temporary handles. */
     for (i=0;i< Count;i++)
     {
-        if(dset_info[i].mem_space_id > 0)
+        if(w_dset_info[i].mem_space_id > 0)
         {
-            ret = H5Sclose(dset_info[i].mem_space_id);
+            ret = H5Sclose(w_dset_info[i].mem_space_id);
             assert(ret != FAIL);
         }
-        if(dset_info[i].file_space_id > 0)
+        if(r_dset_info[i].mem_space_id > 0)
         {
-            ret = H5Sclose(dset_info[i].file_space_id);
+            ret = H5Sclose(r_dset_info[i].mem_space_id);
             assert(ret != FAIL);
         }
-        if(dset_info[i].dset_id > 0)
+        if(w_dset_info[i].dset_space_id > 0)
         {
-            ret = H5Dclose(dset_info[i].dset_id);
+            ret = H5Sclose(w_dset_info[i].dset_space_id);
+            assert(ret != FAIL);
+        }
+        if(r_dset_info[i].dset_space_id > 0)
+        {
+            ret = H5Sclose(r_dset_info[i].dset_space_id);
+            assert(ret != FAIL);
+        }
+        if(w_dset_info[i].dset_id > 0)
+        {
+            ret = H5Dclose(w_dset_info[i].dset_id);
+            assert(ret != FAIL);
+        }
+        if(r_dset_info[i].dset_id > 0)
+        {
+            ret = H5Dclose(r_dset_info[i].dset_id);
             assert(ret != FAIL);
         }
         MESG("H5Dclose succeed");
@@ -4008,18 +4124,17 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
 
     herr_t ret;         	/* Generic return value */
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
-    #endif
+#endif
 
     if (verbose)
 	printf("Collective write test on file %s\n", filename);
 
     // init dset_info[]
-    for (i=0; i< NDSET_CONTIG ; i++) {
+    for (i=0; i< NDSET_CONTIG ; i++)
         memset(&dset_info[i], 0, sizeof(H5D_rw_multi_t));
-    }
 
     // Init data_array
     // Wbuf (init all 9)
@@ -4033,12 +4148,12 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl != FAIL);
     MESG("H5Pcreate access succeed");
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     /* set Parallel access with communicator */
     ret = H5Pset_fapl_mpio(acc_tpl, comm, info);
     assert(ret != FAIL);
     MESG("H5Pset_fapl_mpio succeed");
-    #endif
+#endif
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -4067,22 +4182,22 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
     assert(dataset3 != FAIL);
     MESG("H5Dcreate2 succeed");
 
-   #ifdef TEST_TWO_CONTIG
+#ifdef TEST_TWO_CONTIG
     /* ==========================================
      * set up for contig Dset4 */
     /* create a dataset collectively */
     dataset4 = H5Dcreate2(fid, DATASETNAME4, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     assert(dataset4 != FAIL);
     MESG("H5Dcreate2 succeed");
-   #endif // TEST_TWO_CONTIG
+#endif // TEST_TWO_CONTIG
 
 
     /*
      * Set up dimensions of the slab this process accesses.
      */
-    #if 1 // JK_DBG
+#if 1 // JK_DBG
 	printf("== Write DSET 3 =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
@@ -4097,14 +4212,14 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
         slab_set(start3, stride3, count3, block3, BYCOL_M);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start3[]=(%lu,%lu), stride3[]=(%lu,%lu), count3[]=(%lu,%lu), block3[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start3[0], (unsigned long)start3[1],
        (unsigned long)stride3[0], (unsigned long)stride3[1],
        (unsigned long)count3[0], (unsigned long)count3[1],
        (unsigned long)block3[0], (unsigned long)block3[1]);
-    #endif
+#endif
 
     /* create a file dataspace independently */
     file_dataspace3 = H5Dget_space (dataset3);
@@ -4147,9 +4262,9 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
         count3[0] = 1; count3[1] = 2;
         block3[0] = 1; block3[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace3, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -4173,9 +4288,9 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
         count3[0] = 1; count3[1] = 1;
         block3[0] = 1; block3[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace3, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -4200,17 +4315,17 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
 	    MESG("data_array created");
     	dataset_print(start3, count3, stride3, &data_array3[0][0]);
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset3 Write Data ---\n");
     //dset_select_display(start3, count3, stride3, &data_array3[0][0],0);
     dataset_print(start3, count3, stride3, &data_array3[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array3[0][0], 0);
-    #endif
+#endif
 
-   #ifdef TEST_TWO_CONTIG
-    #if 1 // JK_DBG
+#ifdef TEST_TWO_CONTIG
+#if 1 // JK_DBG
 	printf("== Write DSET 4 =============================\n");
-    #endif
+#endif
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
         //slab_set(start4, stride4, count4, block4, BYROW);
@@ -4224,14 +4339,14 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
         slab_set(start4, stride4, count4, block4, BYCOL_M);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start4[]=(%lu,%lu), stride4[]=(%lu,%lu), count4[]=(%lu,%lu), block4[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start4[0], (unsigned long)start4[1],
        (unsigned long)stride4[0], (unsigned long)stride4[1],
        (unsigned long)count4[0], (unsigned long)count4[1],
        (unsigned long)block4[0], (unsigned long)block4[1]);
-    #endif
+#endif
 
     /* create a file dataspace independently */
     file_dataspace4 = H5Dget_space (dataset4);
@@ -4273,9 +4388,9 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
         count4[0] = 1; count4[1] = 2;
         block4[0] = 1; block4[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace4, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -4299,9 +4414,9 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
         count4[0] = 1; count4[1] = 1;
         block4[0] = 1; block4[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace4, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -4326,14 +4441,14 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
 	    MESG("data_array created");
     	dataset_print(start4, count4, stride4, &data_array4[0][0]);
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset4 Write Data ---\n");
     //dset_select_display(start4, count4, stride4, &data_array4[0][0],0);
     dataset_print(start4, count4, stride4, &data_array4[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array4[0][0], 0);
-    #endif
+#endif
 
-   #endif // TEST_TWO_CONTIG
+#endif // TEST_TWO_CONTIG
 
 
     /*==================================================
@@ -4343,7 +4458,7 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
     assert(xfer_plist != FAIL);
     MESG("H5Pcreate xfer succeed");
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     if (pmode == PHDF5_PARALLEL)
     {
         ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
@@ -4368,119 +4483,117 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
             assert(ret >= 0);
         }
     }
-    #endif
+#endif
 
     /*
      * Set up dset info structure 
      * HDF5 lib will handle by order of dset_info[X] X
      */
-   #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
    if (mpi_rank == 0) {
-    #if 1 // USE_DSET3
-    // init H5D_rw_multi_t for write DSET3 (CONTIG)
-    dset_info[0].dset_id = dataset3;
-    dset_info[0].mem_type_id = H5T_NATIVE_INT;
-    dset_info[0].mem_space_id = mem_dataspace3;
-    dset_info[0].file_space_id = file_dataspace3;
-    dset_info[0].wbuf = &data_array3[0][0];
-    #else
-    /* free before rewrite DSET3 */
-    if(mem_dataspace3)  { ret = H5Sclose(mem_dataspace3); assert(ret != FAIL); }
-    if(file_dataspace3) { ret = H5Sclose(file_dataspace3); assert(ret != FAIL); }
-    if(dataset3) { ret = H5Dclose(dataset3); assert(ret != FAIL); }
-    #endif
-    
-    #if 1 // USE_DSET4
-    // init H5D_rw_multi_t for write DSET4 (CONTIG)
-    dset_info[1].dset_id = dataset4;
-    dset_info[1].mem_type_id = H5T_NATIVE_INT;
-    dset_info[1].mem_space_id = mem_dataspace4;
-    dset_info[1].file_space_id = file_dataspace4;
-    dset_info[1].wbuf = &data_array4[0][0];
-    #else
-    /* free before rewrite DSET4 */
-    if(mem_dataspace4)  { ret = H5Sclose(mem_dataspace4); assert(ret != FAIL); }
-    if(file_dataspace4) { ret = H5Sclose(file_dataspace4); assert(ret != FAIL); }
-    if(dataset4) { ret = H5Dclose(dataset4); assert(ret != FAIL); }
-    #endif
+#if 1 // USE_DSET3
+        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+        dset_info[0].dset_id = dataset3;
+        dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        dset_info[0].mem_space_id = mem_dataspace3;
+        dset_info[0].dset_space_id = file_dataspace3;
+        dset_info[0].u.wbuf = &data_array3[0][0];
+#else
+        /* free before rewrite DSET3 */
+        if(mem_dataspace3)  { ret = H5Sclose(mem_dataspace3); assert(ret != FAIL); }
+        if(file_dataspace3) { ret = H5Sclose(file_dataspace3); assert(ret != FAIL); }
+        if(dataset3) { ret = H5Dclose(dataset3); assert(ret != FAIL); }
+#endif
+        
+#if 1 // USE_DSET4
+        // init H5D_rw_multi_t for write DSET4 (CONTIG)
+        dset_info[1].dset_id = dataset4;
+        dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        dset_info[1].mem_space_id = mem_dataspace4;
+        dset_info[1].dset_space_id = file_dataspace4;
+        dset_info[1].u.wbuf = &data_array4[0][0];
+#else
+        /* free before rewrite DSET4 */
+        if(mem_dataspace4)  { ret = H5Sclose(mem_dataspace4); assert(ret != FAIL); }
+        if(file_dataspace4) { ret = H5Sclose(file_dataspace4); assert(ret != FAIL); }
+        if(dataset4) { ret = H5Dclose(dataset4); assert(ret != FAIL); }
+#endif
    } // mpi_rank == 0
 
    if (mpi_rank == 1) {
-    #if 1 // USE_DSET3
-    // init H5D_rw_multi_t for write DSET3 (CONTIG)
-    dset_info[0].dset_id = dataset3;
-    dset_info[0].mem_type_id = H5T_NATIVE_INT;
-    dset_info[0].mem_space_id = mem_dataspace3;
-    dset_info[0].file_space_id = file_dataspace3;
-    dset_info[0].wbuf = &data_array3[0][0];
-    #else
-    /* free before rewrite DSET3 */
-    if(mem_dataspace3)  { ret = H5Sclose(mem_dataspace3); assert(ret != FAIL); }
-    if(file_dataspace3) { ret = H5Sclose(file_dataspace3); assert(ret != FAIL); }
-    if(dataset3) { ret = H5Dclose(dataset3); assert(ret != FAIL); }
-    #endif
-    
-    #if 0 // USE_DSET4
-    // init H5D_rw_multi_t for write DSET4 (CONTIG)
-    dset_info[1].dset_id = dataset4;
-    dset_info[1].mem_type_id = H5T_NATIVE_INT;
-    dset_info[1].mem_space_id = mem_dataspace4;
-    dset_info[1].file_space_id = file_dataspace4;
-    dset_info[1].wbuf = &data_array4[0][0];
-    #else
-    /* free before rewrite DSET4 */
-    if(mem_dataspace4)  { ret = H5Sclose(mem_dataspace4); assert(ret != FAIL); }
-    if(file_dataspace4) { ret = H5Sclose(file_dataspace4); assert(ret != FAIL); }
-    if(dataset4) { ret = H5Dclose(dataset4); assert(ret != FAIL); }
-    #endif
+#if 1 // USE_DSET3
+        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+        dset_info[0].dset_id = dataset3;
+        dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        dset_info[0].mem_space_id = mem_dataspace3;
+        dset_info[0].dset_space_id = file_dataspace3;
+        dset_info[0].u.wbuf = &data_array3[0][0];
+#else
+        /* free before rewrite DSET3 */
+        if(mem_dataspace3)  { ret = H5Sclose(mem_dataspace3); assert(ret != FAIL); }
+        if(file_dataspace3) { ret = H5Sclose(file_dataspace3); assert(ret != FAIL); }
+        if(dataset3) { ret = H5Dclose(dataset3); assert(ret != FAIL); }
+#endif
+        
+#if 0 // USE_DSET4
+        // init H5D_rw_multi_t for write DSET4 (CONTIG)
+        dset_info[1].dset_id = dataset4;
+        dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        dset_info[1].mem_space_id = mem_dataspace4;
+        dset_info[1].dset_space_id = file_dataspace4;
+        dset_info[1].u.wbuf = &data_array4[0][0];
+#else
+        /* free before rewrite DSET4 */
+        if(mem_dataspace4)  { ret = H5Sclose(mem_dataspace4); assert(ret != FAIL); }
+        if(file_dataspace4) { ret = H5Sclose(file_dataspace4); assert(ret != FAIL); }
+        if(dataset4) { ret = H5Dclose(dataset4); assert(ret != FAIL); }
+#endif
    } // mpi_rank == 1
 
-   #else // TEST_MDSET_NO_LAST_DSET_2ND_PROC ---------
+#else // TEST_MDSET_NO_LAST_DSET_2ND_PROC ---------
     // init H5D_rw_multi_t for write DSET3 (CONTIG)
     dset_info[0].dset_id = dataset3;
     dset_info[0].mem_type_id = H5T_NATIVE_INT;
     dset_info[0].mem_space_id = mem_dataspace3;
-    dset_info[0].file_space_id = file_dataspace3;
-    dset_info[0].wbuf = &data_array3[0][0];
+    dset_info[0].dset_space_id = file_dataspace3;
+    dset_info[0].u.wbuf = &data_array3[0][0];
 
 
-   #ifdef TEST_TWO_CONTIG
+#ifdef TEST_TWO_CONTIG
     // init H5D_rw_multi_t for write DSET4 (CONTIG)
     dset_info[1].dset_id = dataset4;
     dset_info[1].mem_type_id = H5T_NATIVE_INT;
     dset_info[1].mem_space_id = mem_dataspace4;
-    dset_info[1].file_space_id = file_dataspace4;
-    dset_info[1].wbuf = &data_array4[0][0];
-   #endif
-   #endif // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------O
+    dset_info[1].dset_space_id = file_dataspace4;
+    dset_info[1].u.wbuf = &data_array4[0][0];
+#endif
+#endif // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------O
 
-    #if 0 // JK_DBG
-    for (i=0; i< NDSET_CONTIG ; i++) {
-        printf("%s P%d > dset_info[%d].wbuf addr: %x\n", __FUNCTION__, mpi_rank, i, dset_info[i].wbuf);
-    }
-    #endif
+#if 0 // JK_DBG
+    for (i=0; i< NDSET_CONTIG ; i++)
+        printf("%s P%d > dset_info[%d].u.wbuf addr: %x\n", __FUNCTION__, mpi_rank, i, dset_info[i].u.wbuf);
+#endif
 
-  #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
   if (mpi_rank == 0)      Count = 2;
   if (mpi_rank == 1)      Count = 1;
-  #else
+#else
   Count = NDSET_CONTIG;
-  #endif
+#endif
 
     if(multi_mode==MULTI_DSET) {
-        ret = H5Dwrite_multi(fid, Count, dset_info, xfer_plist) < 0;
+        ret = H5Dwrite_multi(fid, xfer_plist, Count, dset_info);
         assert(ret != FAIL);
-        #ifdef TEST_DOUBLE_WR_BEFORE_CLOSE
+#ifdef TEST_DOUBLE_WR_BEFORE_CLOSE
         /* test multiple write before close */
-        sync();
-        ret = H5Dwrite_multi(fid, Count, dset_info, xfer_plist) < 0;
+sync();
+        ret = H5Dwrite_multi(fid, xfer_plist, Count, dset_info);
         assert(ret != FAIL);
-        #endif
+#endif
     }
     else if(multi_mode==SINGLE_DSET) {
-        for (i=0; i<Count; i++) {
-            ret = H5Dwrite(dset_info[i].dset_id, dset_info[i].mem_type_id, dset_info[i].mem_space_id, dset_info[i].file_space_id, xfer_plist, dset_info[i].wbuf ) < 0;
-        }
+        for (i=0; i<Count; i++)
+            ret = H5Dwrite(dset_info[i].dset_id, dset_info[i].mem_type_id, dset_info[i].mem_space_id, dset_info[i].dset_space_id, xfer_plist, dset_info[i].u.wbuf );
     }
 
     MESG("H5Dwrite succeed");
@@ -4498,9 +4611,9 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
             ret = H5Sclose(dset_info[i].mem_space_id);
             assert(ret != FAIL);
         }
-        if(dset_info[i].file_space_id > 0)
+        if(dset_info[i].dset_space_id > 0)
         {
-            ret = H5Sclose(dset_info[i].file_space_id);
+            ret = H5Sclose(dset_info[i].dset_space_id);
             assert(ret != FAIL);
         }
         if(dset_info[i].dset_id > 0)
@@ -4529,7 +4642,8 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
     hsize_t dims[SPACE1_RANK] = {SPACE1_DIM1,SPACE1_DIM2};	/* dataspace dim sizes */
     hid_t acc_tpl;		/* File access templates */
     hid_t xfer_plist;		/* Dataset transfer properties list */
-    H5D_rw_multi_t dset_info[NDSET_CONTIG];
+    H5D_rw_multi_t w_dset_info[NDSET_CONTIG];
+    H5D_rw_multi_t r_dset_info[NDSET_CONTIG];
     hid_t file_dataspace3, file_dataspace4;	/* File dataspace ID */
     hid_t mem_dataspace3=-1, mem_dataspace4=-1;	/* memory dataspace ID */
     hid_t dataset3, dataset4;	/* Dataset ID */
@@ -4558,17 +4672,18 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
 
     herr_t ret;         	/* Generic return value */
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
-    #endif
+#endif
 
     if (verbose)
 	printf("Collective write test on file %s\n", filename);
 
-    // init dset_info[]
+    // init [w/r]_dset_info[]
     for (i=0; i< NDSET_CONTIG ; i++) {
-        memset(&dset_info[i], 0, sizeof(H5D_rw_multi_t));
+        memset(&w_dset_info[i], 0, sizeof(H5D_rw_multi_t));
+        memset(&r_dset_info[i], 0, sizeof(H5D_rw_multi_t));
     }
 
     // Init data_array
@@ -4587,12 +4702,12 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl != FAIL);
     MESG("H5Pcreate access succeed");
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     /* set Parallel access with communicator */
     ret = H5Pset_fapl_mpio(acc_tpl, comm, info);
     assert(ret != FAIL);
     MESG("H5Pset_fapl_mpio succeed");
-    #endif
+#endif
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -4621,22 +4736,22 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
     assert(dataset3 != FAIL);
     MESG("H5Dcreate2 succeed");
 
-   #ifdef TEST_TWO_CONTIG
+#ifdef TEST_TWO_CONTIG
     /* ==========================================
      * set up for contig Dset4 */
     /* create a dataset collectively */
     dataset4 = H5Dcreate2(fid, DATASETNAME4, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     assert(dataset4 != FAIL);
     MESG("H5Dcreate2 succeed");
-   #endif // TEST_TWO_CONTIG
+#endif // TEST_TWO_CONTIG
 
 
     /*
      * Set up dimensions of the slab this process accesses.
      */
-    #if 1 // JK_DBG
+#if 1 // JK_DBG
 	printf("== Write DSET 3 =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
@@ -4651,14 +4766,14 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
         slab_set(start3, stride3, count3, block3, BYCOL_M);
     }
      
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start3[]=(%lu,%lu), stride3[]=(%lu,%lu), count3[]=(%lu,%lu), block3[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start3[0], (unsigned long)start3[1],
        (unsigned long)stride3[0], (unsigned long)stride3[1],
        (unsigned long)count3[0], (unsigned long)count3[1],
        (unsigned long)block3[0], (unsigned long)block3[1]);
-    #endif
+#endif
 
     /* create a file dataspace independently */
     file_dataspace3 = H5Dget_space (dataset3);
@@ -4703,9 +4818,9 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
         count3[0] = 1; count3[1] = 2;
         block3[0] = 1; block3[1] = 1;
        
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace3, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -4729,9 +4844,9 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
         count3[0] = 1; count3[1] = 1;
         block3[0] = 1; block3[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace3, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -4756,17 +4871,17 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
 	    MESG("data_array created");
     	dataset_print(start3, count3, stride3, &data_array3_w[0][0]);
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset3 Write Data ---\n");
     //dset_select_display(start3, count3, stride3, &data_array3_w[0][0],0);
     dataset_print(start3, count3, stride3, &data_array3_w[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array3_w[0][0], 0);
-    #endif
+#endif
 
-   #ifdef TEST_TWO_CONTIG
-    #if 1 // JK_DBG
+#ifdef TEST_TWO_CONTIG
+#if 1 // JK_DBG
 	printf("== Write DSET 4 =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
@@ -4781,14 +4896,14 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
         slab_set(start4, stride4, count4, block4, BYCOL_M);
     }
 
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d > start4[]=(%lu,%lu), stride4[]=(%lu,%lu), count4[]=(%lu,%lu), block4[]=(%lu,%lu),\n",
        __FUNCTION__, mpi_rank, 
 	   (unsigned long)start4[0], (unsigned long)start4[1],
        (unsigned long)stride4[0], (unsigned long)stride4[1],
        (unsigned long)count4[0], (unsigned long)count4[1],
        (unsigned long)block4[0], (unsigned long)block4[1]);
-    #endif
+#endif
 
     /* create a file dataspace independently */
     file_dataspace4 = H5Dget_space (dataset4);
@@ -4833,9 +4948,9 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
         count4[0] = 1; count4[1] = 2;
         block4[0] = 1; block4[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]  p2[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1], pcoord[1][0], pcoord[1][1] );
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace4, H5S_SELECT_SET, NPOINT, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -4859,9 +4974,9 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
         count4[0] = 1; count4[1] = 1;
         block4[0] = 1; block4[1] = 1;
 
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("JKDBG P%d> p1[%llu,%llu]\n",mpi_rank, pcoord[0][0], pcoord[0][1]);
-        #endif
+#endif
 
         ret = H5Sselect_elements (file_dataspace4, H5S_SELECT_SET, 1, (const hsize_t *)pcoord);
         assert(ret != FAIL);
@@ -4886,14 +5001,14 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
 	    MESG("data_array created");
     	dataset_print(start4, count4, stride4, &data_array4_w[0][0]);
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset4 Write Data ---\n");
     //dset_select_display(start4, count4, stride4, &data_array4_w[0][0],0);
     dataset_print(start4, count4, stride4, &data_array4_w[0][0]);
     //dset_display(SPACE1_DIM1, SPACE1_DIM2, &data_array4_w[0][0], 0);
-    #endif
+#endif
 
-   #endif // TEST_TWO_CONTIG
+#endif // TEST_TWO_CONTIG
 
 
     /*==================================================
@@ -4903,7 +5018,7 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
     assert(xfer_plist != FAIL);
     MESG("H5Pcreate xfer succeed");
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     if (pmode == PHDF5_PARALLEL)
     {
         ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
@@ -4928,142 +5043,172 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
             assert(ret >= 0);
         }
     }
-    #endif
+#endif
 
     /*
      * Set up dset info structure 
-     * HDF5 lib will handle by order of dset_info[X] X
+     * HDF5 lib will handle by order of [w/r]_dset_info[X] X
      */
-   #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
    if (mpi_rank == 0) {
-    #if 1 // USE_DSET3
-    // init H5D_rw_multi_t for write DSET3 (CONTIG)
-    dset_info[0].dset_id = dataset3;
-    dset_info[0].mem_type_id = H5T_NATIVE_INT;
-    dset_info[0].mem_space_id = mem_dataspace3;
-    dset_info[0].file_space_id = file_dataspace3;
-    dset_info[0].wbuf = &data_array3_w[0][0];
-    dset_info[0].rbuf = &data_array3_r[0][0];
-    #else
-    /* free before rewrite DSET3 */
-    if(mem_dataspace3)  { ret = H5Sclose(mem_dataspace3); assert(ret != FAIL); }
-    if(file_dataspace3) { ret = H5Sclose(file_dataspace3); assert(ret != FAIL); }
-    if(dataset3) { ret = H5Dclose(dataset3); assert(ret != FAIL); }
-    #endif
-    
-    #if 1 // USE_DSET4
-    // init H5D_rw_multi_t for write DSET4 (CONTIG)
-    dset_info[1].dset_id = dataset4;
-    dset_info[1].mem_type_id = H5T_NATIVE_INT;
-    dset_info[1].mem_space_id = mem_dataspace4;
-    dset_info[1].file_space_id = file_dataspace4;
-    dset_info[1].wbuf = &data_array4_w[0][0];
-    dset_info[1].rbuf = &data_array4_r[0][0];
-    #else
-    /* free before rewrite DSET4 */
-    if(mem_dataspace4)  { ret = H5Sclose(mem_dataspace4); assert(ret != FAIL); }
-    if(file_dataspace4) { ret = H5Sclose(file_dataspace4); assert(ret != FAIL); }
-    if(dataset4) { ret = H5Dclose(dataset4); assert(ret != FAIL); }
-    #endif
+#if 1 // USE_DSET3
+        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+        w_dset_info[0].dset_id = dataset3;
+        w_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[0].mem_space_id = mem_dataspace3;
+        w_dset_info[0].dset_space_id = file_dataspace3;
+        w_dset_info[0].u.wbuf = &data_array3_w[0][0];
+
+        r_dset_info[0].dset_id = dataset3;
+        r_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[0].mem_space_id = mem_dataspace3;
+        r_dset_info[0].dset_space_id = file_dataspace3;
+        r_dset_info[0].u.rbuf = &data_array3_r[0][0];
+#else
+        /* free before rewrite DSET3 */
+        if(mem_dataspace3)  { ret = H5Sclose(mem_dataspace3); assert(ret != FAIL); }
+        if(file_dataspace3) { ret = H5Sclose(file_dataspace3); assert(ret != FAIL); }
+        if(dataset3) { ret = H5Dclose(dataset3); assert(ret != FAIL); }
+#endif
+
+#if 1 // USE_DSET4
+        // init H5D_rw_multi_t for write DSET4 (CONTIG)
+        w_dset_info[1].dset_id = dataset4;
+        w_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[1].mem_space_id = mem_dataspace4;
+        w_dset_info[1].dset_space_id = file_dataspace4;
+        w_dset_info[1].u.wbuf = &data_array4_w[0][0];
+
+        r_dset_info[1].dset_id = dataset4;
+        r_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[1].mem_space_id = mem_dataspace4;
+        r_dset_info[1].dset_space_id = file_dataspace4;
+        r_dset_info[1].u.rbuf = &data_array4_r[0][0];
+#else
+        /* free before rewrite DSET4 */
+        if(mem_dataspace4)  { ret = H5Sclose(mem_dataspace4); assert(ret != FAIL); }
+        if(file_dataspace4) { ret = H5Sclose(file_dataspace4); assert(ret != FAIL); }
+        if(dataset4) { ret = H5Dclose(dataset4); assert(ret != FAIL); }
+#endif
    } // mpi_rank == 0
 
    if (mpi_rank == 1) {
-    #if 1 // USE_DSET3
+#if 1 // USE_DSET3
+        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+        w_dset_info[0].dset_id = dataset3;
+        w_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[0].mem_space_id = mem_dataspace3;
+        w_dset_info[0].dset_space_id = file_dataspace3;
+        w_dset_info[0].u.wbuf = &data_array3_w[0][0];
+
+        r_dset_info[0].dset_id = dataset3;
+        r_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[0].mem_space_id = mem_dataspace3;
+        r_dset_info[0].dset_space_id = file_dataspace3;
+        r_dset_info[0].u.rbuf = &data_array3_r[0][0];
+#else
+        /* free before rewrite DSET3 */
+        if(mem_dataspace3)  { ret = H5Sclose(mem_dataspace3); assert(ret != FAIL); }
+        if(file_dataspace3) { ret = H5Sclose(file_dataspace3); assert(ret != FAIL); }
+        if(dataset3) { ret = H5Dclose(dataset3); assert(ret != FAIL); }
+#endif
+
+#if 0 // USE_DSET4
+        // init H5D_rw_multi_t for write DSET4 (CONTIG)
+        w_dset_info[1].dset_id = dataset4;
+        w_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[1].mem_space_id = mem_dataspace4;
+        w_dset_info[1].dset_space_id = file_dataspace4;
+        w_dset_info[1].u.wbuf = &data_array4_w[0][0];
+
+        r_dset_info[1].dset_id = dataset4;
+        r_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[1].mem_space_id = mem_dataspace4;
+        r_dset_info[1].dset_space_id = file_dataspace4;
+        r_dset_info[1].u.rbuf = &data_array4_r[0][0];
+#else
+        /* free before rewrite DSET4 */
+        if(mem_dataspace4)  { ret = H5Sclose(mem_dataspace4); assert(ret != FAIL); }
+        if(file_dataspace4) { ret = H5Sclose(file_dataspace4); assert(ret != FAIL); }
+        if(dataset4) { ret = H5Dclose(dataset4); assert(ret != FAIL); }
+#endif
+    } // mpi_rank == 1
+
+#else // TEST_MDSET_NO_LAST_DSET_2ND_PROC ---------
     // init H5D_rw_multi_t for write DSET3 (CONTIG)
-    dset_info[0].dset_id = dataset3;
-    dset_info[0].mem_type_id = H5T_NATIVE_INT;
-    dset_info[0].mem_space_id = mem_dataspace3;
-    dset_info[0].file_space_id = file_dataspace3;
-    dset_info[0].wbuf = &data_array3_w[0][0];
-    dset_info[0].rbuf = &data_array3_r[0][0];
-    #else
-    /* free before rewrite DSET3 */
-    if(mem_dataspace3)  { ret = H5Sclose(mem_dataspace3); assert(ret != FAIL); }
-    if(file_dataspace3) { ret = H5Sclose(file_dataspace3); assert(ret != FAIL); }
-    if(dataset3) { ret = H5Dclose(dataset3); assert(ret != FAIL); }
-    #endif
-    
-    #if 0 // USE_DSET4
+    w_dset_info[0].dset_id = dataset3;
+    w_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+    w_dset_info[0].mem_space_id = mem_dataspace3;
+    w_dset_info[0].dset_space_id = file_dataspace3;
+    w_dset_info[0].u.wbuf = &data_array3_w[0][0];
+
+    r_dset_info[0].dset_id = dataset3;
+    r_dset_info[0].mem_type_id = H5T_NATIVE_INT;
+    r_dset_info[0].mem_space_id = mem_dataspace3;
+    r_dset_info[0].dset_space_id = file_dataspace3;
+    r_dset_info[0].u.rbuf = &data_array3_r[0][0];
+
+#ifdef TEST_TWO_CONTIG
     // init H5D_rw_multi_t for write DSET4 (CONTIG)
-    dset_info[1].dset_id = dataset4;
-    dset_info[1].mem_type_id = H5T_NATIVE_INT;
-    dset_info[1].mem_space_id = mem_dataspace4;
-    dset_info[1].file_space_id = file_dataspace4;
-    dset_info[1].wbuf = &data_array4_w[0][0];
-    dset_info[1].rbuf = &data_array4_r[0][0];
-    #else
-    /* free before rewrite DSET4 */
-    if(mem_dataspace4)  { ret = H5Sclose(mem_dataspace4); assert(ret != FAIL); }
-    if(file_dataspace4) { ret = H5Sclose(file_dataspace4); assert(ret != FAIL); }
-    if(dataset4) { ret = H5Dclose(dataset4); assert(ret != FAIL); }
-    #endif
-   } // mpi_rank == 1
+    w_dset_info[1].dset_id = dataset4;
+    w_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+    w_dset_info[1].mem_space_id = mem_dataspace4;
+    w_dset_info[1].dset_space_id = file_dataspace4;
+    w_dset_info[1].u.wbuf = &data_array4_w[0][0];
 
-   #else // TEST_MDSET_NO_LAST_DSET_2ND_PROC ---------
-    // init H5D_rw_multi_t for write DSET3 (CONTIG)
-    dset_info[0].dset_id = dataset3;
-    dset_info[0].mem_type_id = H5T_NATIVE_INT;
-    dset_info[0].mem_space_id = mem_dataspace3;
-    dset_info[0].file_space_id = file_dataspace3;
-    dset_info[0].wbuf = &data_array3_w[0][0];
-    dset_info[0].rbuf = &data_array3_r[0][0];
+    r_dset_info[1].dset_id = dataset4;
+    r_dset_info[1].mem_type_id = H5T_NATIVE_INT;
+    r_dset_info[1].mem_space_id = mem_dataspace4;
+    r_dset_info[1].dset_space_id = file_dataspace4;
+    r_dset_info[1].u.rbuf = &data_array4_r[0][0];
+#endif
+#endif // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------O
 
-   #ifdef TEST_TWO_CONTIG
-    // init H5D_rw_multi_t for write DSET4 (CONTIG)
-    dset_info[1].dset_id = dataset4;
-    dset_info[1].mem_type_id = H5T_NATIVE_INT;
-    dset_info[1].mem_space_id = mem_dataspace4;
-    dset_info[1].file_space_id = file_dataspace4;
-    dset_info[1].wbuf = &data_array4_w[0][0];
-    dset_info[1].rbuf = &data_array4_r[0][0];
-   #endif
-   #endif // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------O
-
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     for (i=0; i< NDSET_CONTIG ; i++) {
-        printf("%s P%d > dset_info[%d].wbuf addr: %x\n", __FUNCTION__, mpi_rank, i, dset_info[i].wbuf);
-        printf("%s P%d > dset_info[%d].rbuf addr: %x\n", __FUNCTION__, mpi_rank, i, dset_info[i].rbuf);
+        printf("%s P%d > w_dset_info[%d].u.wbuf addr: %x\n", __FUNCTION__, mpi_rank, i, w_dset_info[i].u.wbuf);
+        printf("%s P%d > r_dset_info[%d].u.rbuf addr: %x\n", __FUNCTION__, mpi_rank, i, r_dset_info[i].u.rbuf);
     }
-    #endif
+#endif
 
-  #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
-  if (mpi_rank == 0)      Count = 2;
-  if (mpi_rank == 1)      Count = 1;
-  #else
-  Count = NDSET_CONTIG;
-  #endif
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
+    if (mpi_rank == 0)      Count = 2;
+    if (mpi_rank == 1)      Count = 1;
+#else
+    Count = NDSET_CONTIG;
+#endif
 
     if(multi_mode==MULTI_DSET) {
-        ret = H5Dwrite_multi(fid, Count, dset_info, xfer_plist) < 0;
+        ret = H5Dwrite_multi(fid, xfer_plist, Count, w_dset_info);
         assert(ret != FAIL);
-        #ifdef TEST_DOUBLE_WR_BEFORE_CLOSE
+#ifdef TEST_DOUBLE_WR_BEFORE_CLOSE
         /* test multiple write before close */
-        sync();
-        ret = H5Dwrite_multi(fid, Count, dset_info, xfer_plist) < 0;
+sync();
+        ret = H5Dwrite_multi(fid, xfer_plist, Count, w_dset_info);
         assert(ret != FAIL);
-        #endif
+#endif
         
         // Read
-        ret = H5Dread_multi(fid, Count, dset_info, xfer_plist) < 0;
+        ret = H5Dread_multi(fid, xfer_plist, Count, r_dset_info);
         assert(ret != FAIL);
 
-        #ifdef TEST_DOUBLE_RD_BEFORE_CLOSE
+#ifdef TEST_DOUBLE_RD_BEFORE_CLOSE
         /* test multiple read before close */
-        sync();
-        ret = H5Dread_multi(fid, Count, dset_info, xfer_plist) < 0;
+sync();
+        ret = H5Dread_multi(fid, xfer_plist, Count, r_dset_info);
         assert(ret != FAIL);
-        #endif
+#endif
     }
     else if(multi_mode==SINGLE_DSET) {
         // Write
         for (i=0; i<Count; i++) {
-            ret = H5Dwrite(dset_info[i].dset_id, dset_info[i].mem_type_id, dset_info[i].mem_space_id, dset_info[i].file_space_id, xfer_plist, dset_info[i].wbuf ) < 0;
+            ret = H5Dwrite(w_dset_info[i].dset_id, w_dset_info[i].mem_type_id, w_dset_info[i].mem_space_id, w_dset_info[i].dset_space_id, xfer_plist, w_dset_info[i].u.wbuf);
             assert(ret != FAIL);
         }
 
         // Read
         for (i=0; i<Count; i++) {
-            ret = H5Dread(dset_info[i].dset_id, dset_info[i].mem_type_id, dset_info[i].mem_space_id, dset_info[i].file_space_id, xfer_plist, dset_info[i].rbuf ) < 0;
+            ret = H5Dread(r_dset_info[i].dset_id, r_dset_info[i].mem_type_id, r_dset_info[i].mem_space_id, r_dset_info[i].dset_space_id, xfer_plist, r_dset_info[i].u.rbuf);
             assert(ret != FAIL);
         }
     }
@@ -5071,18 +5216,18 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
     // Verify Read buffer with Write buffer 
     if(sel_mode == SEL_HYPER_1BLOCK || sel_mode == SEL_POINTS || sel_mode == SEL_1POINT) {
         if(Count >=1)  // relate to TEST_MDSET_NO_LAST_DSET_2ND_PROC
-            ret = dataset_vrfy2(start3, stride3, count3, block3, (DTYPE_INT *)dset_info[0].wbuf, (DTYPE_INT *)dset_info[0].rbuf,1);
+            ret = dataset_vrfy2(start3, stride3, count3, block3, (DTYPE_INT *)w_dset_info[0].u.wbuf, (DTYPE_INT *)r_dset_info[0].u.rbuf,1);
         if(Count > 1)   // relate to TEST_MDSET_NO_LAST_DSET_2ND_PROC 
-            ret = dataset_vrfy2(start4, stride4, count4, block4, (DTYPE_INT *)dset_info[1].wbuf, (DTYPE_INT *)dset_info[1].rbuf,2);
+            ret = dataset_vrfy2(start4, stride4, count4, block4, (DTYPE_INT *)w_dset_info[1].u.wbuf, (DTYPE_INT *)r_dset_info[1].u.rbuf,2);
     }
     else if (sel_mode == SEL_NONE) {
         // init the wbuf, as rbuf shouldn't read any 
         data_array2d_init(SPACE1_DIM1,SPACE1_DIM2, &data_array3_w[0][0],INIT_VAL);
         data_array2d_init(SPACE1_DIM1,SPACE1_DIM2, &data_array4_w[0][0],INIT_VAL);
         if(Count >= 1)
-            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)dset_info[0].wbuf, (DTYPE_INT *)dset_info[0].rbuf,1);
+            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)w_dset_info[0].u.wbuf, (DTYPE_INT *)r_dset_info[0].u.rbuf,1);
         if(Count > 1) 
-            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)dset_info[1].wbuf, (DTYPE_INT *)dset_info[1].rbuf,2);
+            ret = diff_datasets(SPACE1_DIM1,SPACE1_DIM2, (DTYPE_INT *)w_dset_info[1].u.wbuf, (DTYPE_INT *)r_dset_info[1].u.rbuf,2);
     }
 
     MESG("H5Dwrite succeed");
@@ -5095,19 +5240,34 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
     /* release all temporary handles. */
     for (i=0;i< Count;i++)
     {
-        if(dset_info[i].mem_space_id > 0)
+        if(w_dset_info[i].mem_space_id > 0)
         {
-            ret = H5Sclose(dset_info[i].mem_space_id);
+            ret = H5Sclose(w_dset_info[i].mem_space_id);
             assert(ret != FAIL);
         }
-        if(dset_info[i].file_space_id > 0)
+        if(r_dset_info[i].mem_space_id > 0)
         {
-            ret = H5Sclose(dset_info[i].file_space_id);
+            ret = H5Sclose(r_dset_info[i].mem_space_id);
             assert(ret != FAIL);
         }
-        if(dset_info[i].dset_id > 0)
+        if(w_dset_info[i].dset_space_id > 0)
         {
-            ret = H5Dclose(dset_info[i].dset_id);
+            ret = H5Sclose(w_dset_info[i].dset_space_id);
+            assert(ret != FAIL);
+        }
+        if(r_dset_info[i].dset_space_id > 0)
+        {
+            ret = H5Sclose(r_dset_info[i].dset_space_id);
+            assert(ret != FAIL);
+        }
+        if(w_dset_info[i].dset_id > 0)
+        {
+            ret = H5Dclose(w_dset_info[i].dset_id);
+            assert(ret != FAIL);
+        }
+        if(r_dset_info[i].dset_id > 0)
+        {
+            ret = H5Dclose(r_dset_info[i].dset_id);
             assert(ret != FAIL);
         }
         MESG("H5Dclose succeed");
@@ -5156,10 +5316,10 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
 
     herr_t ret;         	/* Generic return value */
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
-    #endif
+#endif
 
     timerclear(&tv_sub);
     timerclear(&tv_add);
@@ -5169,21 +5329,21 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
 
     if (verbose)
      if(mpi_rank==0) {
-         printf("INFO - P%d > fname: %s, #dset: %u, dim-size:%u\n",
-                mpi_rank, filename,  ndsets, dim0);
+         printf("INFO - P%d > fname: %s, #dset: %zu, dim-size:%llu\n",
+                mpi_rank, filename,  ndsets, (unsigned long long)dim0);
          if(multi_mode==MULTI_DSET)
              printf("> multi mode: H5Dwrite_multi Test\n");
          else if(multi_mode==SINGLE_DSET)
              printf("> multi mode: H5Dwrite Test\n");
-         #ifdef TEST_NO_MPI
+#ifdef TEST_NO_MPI
              printf("> NO MPI!\n");
-         #endif
+#endif
          fflush(stdout);
      }
     
 
     if(NULL == (dset_info = (H5D_rw_multi_t*) calloc( ndsets , sizeof(H5D_rw_multi_t)))) {
-        printf("Error: faile malloc");
+        printf("Error: failed malloc");
         assert(0);
     }
 
@@ -5199,12 +5359,12 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl != FAIL);
     MESG("H5Pcreate access succeed");
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     /* set Parallel access with communicator */
     ret = H5Pset_fapl_mpio(acc_tpl, comm, info);
     assert(ret != FAIL);
     MESG("H5Pset_fapl_mpio succeed");
-    #endif
+#endif
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -5222,7 +5382,7 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
     assert(xfer_plist != FAIL);
     MESG("H5Pcreate xfer succeed");
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     if (pmode == PHDF5_PARALLEL)
     {
         ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
@@ -5247,7 +5407,7 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
             assert(ret >= 0);
         }
     }
-    #endif
+#endif
 
 
     /* --------------------------
@@ -5275,15 +5435,15 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
         }
         
         if(verbose && mpi_rank==0) {
-            printf("INFO - chunk-size: %u\n",
-                mpi_rank, chunk_dims[0]);
+            printf("INFO - %d: chunk-size: %llu\n",
+                mpi_rank, (unsigned long long)chunk_dims[0]);
             if(multi_mode==MULTI_DSET)
                  printf("> multi mode: H5Dwrite_multi Test\n");
             else if(multi_mode==SINGLE_DSET)
                  printf("> multi mode: H5Dwrite Test\n");
-            #ifdef TEST_NO_MPI
+#ifdef TEST_NO_MPI
                 printf("> NO MPI!\n");
-            #endif
+#endif
             fflush(stdout);
         }
 
@@ -5294,165 +5454,162 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
 
 
    for (j=0; j<ndsets; j++)
-   {
-    /* Dset name */
-    sprintf(Dname, "%05d_dset", j+1);
+       {
+        /* Dset name */
+        sprintf(Dname, "%05d_dset", j+1);
 
-    /* ==========================================
-     * set up for chunked Dset3 */
-    /* create a dataset collectively */
-    did = H5Dcreate2(fid, Dname, H5T_NATIVE_INT, sid, H5P_DEFAULT, crp_plist1, H5P_DEFAULT);
-    assert(did != FAIL);
-    MESG("H5Dcreate2 succeed");
+        /* ==========================================
+         * set up for chunked Dset3 */
+        /* create a dataset collectively */
+        did = H5Dcreate2(fid, Dname, H5T_NATIVE_INT, sid, H5P_DEFAULT, crp_plist1, H5P_DEFAULT);
+        assert(did != FAIL);
+        MESG("H5Dcreate2 succeed");
 
-    /*
-     * Set up dimensions of the slab this process accesses.
-     */
-    #if 0 // JK_DBG
-	printf("== Write DSET  =============================\n");
-    #endif
+        /*
+         * Set up dimensions of the slab this process accesses.
+         */
+#if 0 // JK_DBG
+            printf("== Write DSET  =============================\n");
+#endif
 
-    if (sel_mode == SEL_HYPER_1BLOCK) {
-        /* each process takes a block */
-        slab_set_1d(dims, start, stride, count, block, BYROW);
-        #if 1 // JK_DBG
-        printf("%s P%d > start[]=%lu, count[]=%lu, stride[]=%lu, total datapoints=%lu\n", __FUNCTION__, mpi_rank, 
-    	    (unsigned long)start[0], 
-            (unsigned long)count[0], 
-            (unsigned long)stride[0],
-            (unsigned long)count[0]);
-         #endif
-    }
-    else {
-        /* each process takes a block */
-        slab_set_1d(dims, start, stride, count, block, BYROW_M); // for 1D
-        #if 0 // JK_DBG
-        printf("%s P%d > start[]=%lu, stride[]=%lu, count[]=%lu, block[]=%lu,\n", __FUNCTION__, mpi_rank, 
-    	    (unsigned long)start[0],
-            (unsigned long)stride[0],
-            (unsigned long)count[0], 
-            (unsigned long)block[0]);
-        #endif
-    }
+        if (sel_mode == SEL_HYPER_1BLOCK) {
+            /* each process takes a block */
+            slab_set_1d(dims, start, stride, count, block, BYROW);
+#if 1 // JK_DBG
+            printf("%s P%d > start[]=%lu, count[]=%lu, stride[]=%lu, total datapoints=%lu\n", __FUNCTION__, mpi_rank, 
+                (unsigned long)start[0], 
+                (unsigned long)count[0], 
+                (unsigned long)stride[0],
+                (unsigned long)count[0]);
+#endif
+        }
+        else {
+            /* each process takes a block */
+            slab_set_1d(dims, start, stride, count, block, BYROW_M); // for 1D
+#if 0 // JK_DBG
+            printf("%s P%d > start[]=%lu, stride[]=%lu, count[]=%lu, block[]=%lu,\n", __FUNCTION__, mpi_rank, 
+                (unsigned long)start[0],
+                (unsigned long)stride[0],
+                (unsigned long)count[0], 
+                (unsigned long)block[0]);
+#endif
+        }
 
-    if (count[0] <= 0)
-        assert(0 && "-n Number should be bigger than process#. Multiple to process# is ideal.");
+        if (count[0] <= 0)
+            assert(0 && "-n Number should be bigger than process#. Multiple to process# is ideal.");
 
-    /* create a file dataspace independently */
-    f_sid = H5Dget_space (did);
-    assert(f_sid != FAIL);
-    MESG("H5Dget_space succeed");
+        /* create a file dataspace independently */
+        f_sid = H5Dget_space (did);
+        assert(f_sid != FAIL);
+        MESG("H5Dget_space succeed");
 
-    if (sel_mode == SEL_HYPER_1BLOCK)
-    {
-        /* create a memory dataspace independently */
-        m_sid = H5Screate_simple (RANK_PERF, count, NULL);
+        if (sel_mode == SEL_HYPER_1BLOCK)
+        {
+            /* create a memory dataspace independently */
+            m_sid = H5Screate_simple (RANK_PERF, count, NULL);
 
-        ret=H5Sselect_hyperslab(f_sid, H5S_SELECT_SET, start, stride, count, NULL);
-        assert(ret != FAIL);
-        MESG("H5Sset_hyperslab succeed");
-    }
-    else if (sel_mode == SEL_HYPER_BLOCKS)
-    {
-        m_sid = H5S_ALL;
+            ret=H5Sselect_hyperslab(f_sid, H5S_SELECT_SET, start, stride, count, NULL);
+            assert(ret != FAIL);
+            MESG("H5Sset_hyperslab succeed");
+        }
+        else if (sel_mode == SEL_HYPER_BLOCKS)
+        {
+            m_sid = H5S_ALL;
 
-        ret=H5Sselect_hyperslab(f_sid, H5S_SELECT_SET, start, stride, count, block);
-        assert(ret != FAIL);
-        MESG("H5Sset_hyperslab succeed");
-    }
+            ret=H5Sselect_hyperslab(f_sid, H5S_SELECT_SET, start, stride, count, block);
+            assert(ret != FAIL);
+            MESG("H5Sset_hyperslab succeed");
+        }
 
-    /* fill the local slab with some trivial data */
-    if (sel_mode == SEL_HYPER_1BLOCK)
-        dataset_fill_1d(start, count, stride, &data_array[0],1);
-    else {
-        dataset_fill2_1d(start, stride, count, block, &data_array[0],0);
-        //dataset_fill3_2d(start, stride, count, block, &data_array[0][0],0,BYROW_M);
-    }
+        /* fill the local slab with some trivial data */
+        if (sel_mode == SEL_HYPER_1BLOCK)
+            dataset_fill_1d(start, count, stride, &data_array[0],1);
+        else {
+            dataset_fill2_1d(start, stride, count, block, &data_array[0],0);
+            //dataset_fill3_2d(start, stride, count, block, &data_array[0][0],0,BYROW_M);
+        }
 
-    MESG("data_array initialized");
-    if (verbose){
-	    MESG("data_array created");
-    	dataset_print_1d(start, count, stride, &data_array[0]);
-    }
-    #if 0 // JK_DBG
-	printf("--- dset3 Write Data ---\n");
-    //dset_select_display(start, count, stride, &data_array[0][0],0);
-    dataset_print_1d(start, count, stride, &data_array[0]);
-    #endif
+        MESG("data_array initialized");
+        if (verbose){
+                MESG("data_array created");
+            dataset_print_1d(start, count, stride, &data_array[0]);
+        }
+#if 0 // JK_DBG
+            printf("--- dset3 Write Data ---\n");
+        //dset_select_display(start, count, stride, &data_array[0][0],0);
+        dataset_print_1d(start, count, stride, &data_array[0]);
+#endif
 
 
-    /*
-     * Set up dset info structure 
-     * HDF5 lib will handle by order of dset_info[X] X
-     */
-   #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
-    if (mpi_rank == 0) {
-    #if 1 // USE_DSET3
-    // init H5D_rw_multi_t for write DSET3 (CONTIG)
-    dset_info[j].dset_id = did;
-    dset_info[j].mem_type_id = H5T_NATIVE_INT;
-    dset_info[j].mem_space_id = m_sid;
-    dset_info[j].file_space_id = f_sid;
-    dset_info[j].wbuf = &data_array[0];
-    #else
-    /* free before rewrite DSET3 */
-    if(m_sid)  { ret = H5Sclose(m_sid); assert(ret != FAIL); }
-    if(f_sid) { ret = H5Sclose(f_sid); assert(ret != FAIL); }
-    if(did) { ret = H5Dclose(did); assert(ret != FAIL); }
-    #endif
-    }
+        /*
+         * Set up dset info structure 
+         * HDF5 lib will handle by order of dset_info[X] X
+         */
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
+        if (mpi_rank == 0) {
+#if 1 // USE_DSET3
+            // init H5D_rw_multi_t for write DSET3 (CONTIG)
+            dset_info[j].dset_id = did;
+            dset_info[j].mem_type_id = H5T_NATIVE_INT;
+            dset_info[j].mem_space_id = m_sid;
+            dset_info[j].dset_space_id = f_sid;
+            dset_info[j].u.wbuf = &data_array[0];
+#else
+            /* free before rewrite DSET3 */
+            if(m_sid)  { ret = H5Sclose(m_sid); assert(ret != FAIL); }
+            if(f_sid) { ret = H5Sclose(f_sid); assert(ret != FAIL); }
+            if(did) { ret = H5Dclose(did); assert(ret != FAIL); }
+#endif
+        }
 
-    if (mpi_rank == 1) {
-    #if 1 // USE_DSET3
-    // init H5D_rw_multi_t for write DSET3 (CONTIG)
-    dset_info[j].dset_id = did;
-    dset_info[j].mem_type_id = H5T_NATIVE_INT;
-    dset_info[j].mem_space_id = m_sid;
-    dset_info[j].file_space_id = f_sid;
-    dset_info[j].wbuf = &data_array[0];
-    #else
-    /* free before rewrite DSET3 */
-    if(m_sid)  { ret = H5Sclose(m_sid); assert(ret != FAIL); }
-    if(f_sid) { ret = H5Sclose(f_sid); assert(ret != FAIL); }
-    if(did) { ret = H5Dclose(did); assert(ret != FAIL); }
-    #endif
-    
-    }
+        if (mpi_rank == 1) {
+#if 1 // USE_DSET3
+            // init H5D_rw_multi_t for write DSET3 (CONTIG)
+            dset_info[j].dset_id = did;
+            dset_info[j].mem_type_id = H5T_NATIVE_INT;
+            dset_info[j].mem_space_id = m_sid;
+            dset_info[j].dset_space_id = f_sid;
+            dset_info[j].u.wbuf = &data_array[0];
+#else
+            /* free before rewrite DSET3 */
+            if(m_sid)  { ret = H5Sclose(m_sid); assert(ret != FAIL); }
+            if(f_sid) { ret = H5Sclose(f_sid); assert(ret != FAIL); }
+            if(did) { ret = H5Dclose(did); assert(ret != FAIL); }
+#endif
+        }
 
-   #else  // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------
-    // init H5D_rw_multi_t for write DSET3 (CONTIG)
-    dset_info[j].dset_id = did;
-    dset_info[j].mem_type_id = H5T_NATIVE_INT;
-    dset_info[j].mem_space_id = m_sid;
-    dset_info[j].file_space_id = f_sid;
-    dset_info[j].wbuf = &data_array[0];
-   #endif // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------O
-
-  } // end of for loop #dsets
+#else  // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------
+        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+        dset_info[j].dset_id = did;
+        dset_info[j].mem_type_id = H5T_NATIVE_INT;
+        dset_info[j].mem_space_id = m_sid;
+        dset_info[j].dset_space_id = f_sid;
+        dset_info[j].u.wbuf = &data_array[0];
+#endif // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------O
+    } // end of for loop #dsets
 
   // can close chunk prop
   ret = H5Pclose(crp_plist1);
   assert (ret != FAIL);
 
-  #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
-  if (mpi_rank == 0)      Count = ndsets;
-  if (mpi_rank == 1)      Count = ndsets;
-  #else
-  Count = ndsets;
-  #endif
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
+    if (mpi_rank == 0)      Count = ndsets;
+    if (mpi_rank == 1)      Count = ndsets;
+#else
+    Count = ndsets;
+#endif
 
-    #if 0 // JK_DBG
-    for (i=0; i< Count ; i++) {
-        printf("%s:%d P%d > dset_info[%d].wbuf addr: %x\n", __FUNCTION__,__LINE__, mpi_rank, i, dset_info[i].wbuf);
-    }
-    #endif
+#if 0 // JK_DBG
+    for (i=0; i< Count ; i++)
+        printf("%s:%d P%d > dset_info[%d].u.wbuf addr: %x\n", __FUNCTION__,__LINE__, mpi_rank, i, dset_info[i].u.wbuf);
+#endif
 
     if(multi_mode == SINGLE_DSET) {
         for(j=0; j< Count; j++) {
             gettimeofday (&tv1, NULL); 
-            ret = H5Dwrite(dset_info[j].dset_id, dset_info[j].mem_type_id, dset_info[j].mem_space_id, dset_info[j].file_space_id, xfer_plist, dset_info[j].wbuf );
+            ret = H5Dwrite(dset_info[j].dset_id, dset_info[j].mem_type_id, dset_info[j].mem_space_id, dset_info[j].dset_space_id, xfer_plist, dset_info[j].u.wbuf);
             assert(ret != FAIL);
-            sync();
+sync();
             gettimeofday (&tv2, NULL);
             timersub(&tv2, &tv1, &tv_sub);
             timeradd(&tv_sub, &tv_add, &tv_add);
@@ -5467,24 +5624,23 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
     }
     else if (multi_mode == MULTI_DSET) { 
         gettimeofday (&tv1, NULL);
-        ret = H5Dwrite_multi(fid, Count, dset_info, xfer_plist);
+        ret = H5Dwrite_multi(fid, xfer_plist, Count, dset_info);
         assert(ret != FAIL);
-        sync();
+sync();
         gettimeofday (&tv2, NULL);
         timersub(&tv2, &tv1, &tv_sub);
         time_f = timeval2float(&tv_sub);
-       #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
         if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemax_f, 1, MPI_FLOAT, MPI_MAX, MPI_COMM_WORLD))
             printf("Error: MPI_Allreduce MAX\n");
 
         if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemin_f, 1, MPI_FLOAT, MPI_MIN, MPI_COMM_WORLD))
             printf("Error: MPI_Allreduce MIN\n");
-       #endif
+#endif
 
         /* Display raw data write time */
-        if(mpi_rank == (mpi_size-1)) {
+        if(mpi_rank == (mpi_size-1))
             printf("%s:%d p%d> H5Dwrite_multi DONE Elapsed time: %fsec (MIN) - %fsec (MAX)\n", __FUNCTION__, __LINE__, mpi_rank, timemin_f, timemax_f);
-        }
         fflush(stdout);
     }
 
@@ -5502,8 +5658,8 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
             ret = H5Sclose(dset_info[i].mem_space_id);
             assert(ret != FAIL);
         }
-        if(dset_info[i].file_space_id > 0) {
-            ret = H5Sclose(dset_info[i].file_space_id);
+        if(dset_info[i].dset_space_id > 0) {
+            ret = H5Sclose(dset_info[i].dset_space_id);
             assert(ret != FAIL);
         }
         if(dset_info[i].dset_id > 0) {
@@ -5522,27 +5678,25 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
     gettimeofday (&tv2, NULL);
     timersub(&tv2, &tv1, &tv_sub);
     time_f = timeval2float(&tv_sub);
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemax_f, 1, MPI_FLOAT, MPI_MAX, MPI_COMM_WORLD))
         printf("Error: MPI_Allreduce MAX\n");
 
     if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemin_f, 1, MPI_FLOAT, MPI_MIN, MPI_COMM_WORLD))
         printf("Error: MPI_Allreduce MIN\n");
-    #endif
+#endif
 
-    #if 1 // JK_DBG
+#if 1 // JK_DBG
     if(mpi_rank == (mpi_size-1)) {
         printf("%s:%d p%d> H5Fclose DONE Elapsed time: %f (MIN) - %f (MAX)\n", __FUNCTION__, __LINE__, mpi_rank, timemin_f, timemax_f);
     }
     fflush(stdout);
-    #endif
+#endif
 
     free(data_array);
     if(dset_info)  
         free(dset_info);
 }
-
-
 
 
 /*-------------------------------------------------------
@@ -5560,7 +5714,8 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
     hsize_t dims[RANK_PERF] = {dim0};	/* dataspace dim sizes */
     hid_t acc_tpl;		/* File access templates */
     hid_t xfer_plist;		/* Dataset transfer properties list */
-    H5D_rw_multi_t *dset_info=NULL;
+    H5D_rw_multi_t *w_dset_info=NULL;
+    H5D_rw_multi_t *r_dset_info=NULL;
     hid_t crp_plist1;
     hid_t f_sid;	/* File dataspace ID */
     hid_t m_sid=-1;	/* memory dataspace ID */
@@ -5582,10 +5737,10 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
 
     herr_t ret;         	/* Generic return value */
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
-    #endif
+#endif
 
     timerclear(&tv_sub);
     timerclear(&tv_add);
@@ -5594,21 +5749,25 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
 	printf("Collective read test on file %s\n", filename);
 
      if(verbose && mpi_rank==0) {
-         printf("INFO - P%d > fname: %s, #dset: %u, dim-size:%u\n",
-                mpi_rank, filename,  ndsets, dim0);
+         printf("INFO - P%d > fname: %s, #dset: %zu, dim-size:%llu\n",
+                mpi_rank, filename,  ndsets, (unsigned long long)dim0);
          if(multi_mode==MULTI_DSET)
              printf("> multi mode: H5Dread_multi Test\n");
          else if(multi_mode==SINGLE_DSET)
              printf("> multi mode: H5Dread Test\n");
-         #ifdef TEST_NO_MPI
+#ifdef TEST_NO_MPI
              printf("> NO MPI!\n");
-         #endif
+#endif
          fflush(stdout);
      }
     
 
-    if(NULL == (dset_info = (H5D_rw_multi_t*) calloc( ndsets , sizeof(H5D_rw_multi_t)))) {
-        printf("Error: faile malloc");
+    if(NULL == (w_dset_info = (H5D_rw_multi_t*) calloc( ndsets , sizeof(H5D_rw_multi_t)))) {
+        printf("Error: failed malloc");
+        assert(0);
+    }
+    if(NULL == (r_dset_info = (H5D_rw_multi_t*) calloc( ndsets , sizeof(H5D_rw_multi_t)))) {
+        printf("Error: failed malloc");
         assert(0);
     }
 
@@ -5626,12 +5785,12 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl != FAIL);
     MESG("H5Pcreate access succeed");
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     /* set Parallel access with communicator */
     ret = H5Pset_fapl_mpio(acc_tpl, comm, info);
     assert(ret != FAIL);
     MESG("H5Pset_fapl_mpio succeed");
-    #endif
+#endif
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -5649,7 +5808,7 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
     assert(xfer_plist != FAIL);
     MESG("H5Pcreate xfer succeed");
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     if (pmode == PHDF5_PARALLEL)
     {
         ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
@@ -5674,7 +5833,7 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
             assert(ret >= 0);
         }
     }
-    #endif
+#endif
 
 
     /* --------------------------
@@ -5702,15 +5861,15 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
         }
 
         if(verbose && mpi_rank==0) {
-            printf("INFO - chunk-size: %u\n",
-                mpi_rank, chunk_dims[0]);
+            printf("INFO - %d: chunk-size: %llu\n",
+                mpi_rank, (unsigned long long)chunk_dims[0]);
             if(multi_mode==MULTI_DSET)
                  printf("> multi mode: H5Dread_multi Test\n");
             else if(multi_mode==SINGLE_DSET)
                  printf("> multi mode: H5Dread Test\n");
-            #ifdef TEST_NO_MPI
+#ifdef TEST_NO_MPI
                 printf("> NO MPI!\n");
-            #endif
+#endif
             fflush(stdout);
         }
 
@@ -5735,31 +5894,31 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
     /*
      * Set up dimensions of the slab this process accesses.
      */
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("== Write DSET  =============================\n");
-    #endif
+#endif
 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
         slab_set_1d(dims, start, stride, count, block, BYROW);
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("%s P%d > start[]=%lu, count[]=%lu, stride[]=%lu, total datapoints=%lu\n", __FUNCTION__, mpi_rank, 
     	    (unsigned long)start[0], 
             (unsigned long)count[0], 
             (unsigned long)stride[0],
             (unsigned long)count[0]);
-        #endif
+#endif
     }
     else {
         /* each process takes a block */
         slab_set_1d(dims, start, stride, count, block, BYROW_M); // for 1D
-        #if 0 // JK_DBG
+#if 0 // JK_DBG
         printf("%s P%d > start[]=%lu, stride[]=%lu, count[]=%lu, block[]=%lu,\n", __FUNCTION__, mpi_rank, 
             (unsigned long)start[0],
             (unsigned long)stride[0],
             (unsigned long)count[0], 
             (unsigned long)block[0]);
-        #endif
+#endif
     }
 
     if (count[0] <= 0)
@@ -5802,62 +5961,76 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
 	    MESG("data_array_w created");
     	dataset_print_1d(start, count, stride, &data_array_w[0]);
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
 	printf("--- dset3 Write Data ---\n");
     //dset_select_display(start, count, stride, &data_array_w[0][0],0);
     dataset_print_1d(start, count, stride, &data_array_w[0]);
-    #endif
+#endif
 
 
     /*
      * Set up dset info structure 
-     * HDF5 lib will handle by order of dset_info[X] X
+     * HDF5 lib will handle by order of [w/r]_dset_info[X] X
      */
-   #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
     if (mpi_rank == 0) {
-    #if 1 // USE_DSET3
-    // init H5D_rw_multi_t for write DSET3 (CONTIG)
-    dset_info[j].dset_id = did;
-    dset_info[j].mem_type_id = H5T_NATIVE_INT;
-    dset_info[j].mem_space_id = m_sid;
-    dset_info[j].file_space_id = f_sid;
-    dset_info[j].wbuf = &data_array_w[0];
-    dset_info[j].rbuf = &data_array_r[0];
-    #else
-    /* free before rewrite DSET3 */
-    if(m_sid)  { ret = H5Sclose(m_sid); assert(ret != FAIL); }
-    if(f_sid) { ret = H5Sclose(f_sid); assert(ret != FAIL); }
-    if(did) { ret = H5Dclose(did); assert(ret != FAIL); }
-    #endif
+#if 1 // USE_DSET3
+        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+        w_dset_info[j].dset_id = did;
+        w_dset_info[j].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[j].mem_space_id = m_sid;
+        w_dset_info[j].dset_space_id = f_sid;
+        w_dset_info[j].u.wbuf = &data_array_w[0];
+
+        r_dset_info[j].dset_id = did;
+        r_dset_info[j].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[j].mem_space_id = m_sid;
+        r_dset_info[j].dset_space_id = f_sid;
+        r_dset_info[j].u.rbuf = &data_array_r[0];
+#else
+        /* free before rewrite DSET3 */
+        if(m_sid)  { ret = H5Sclose(m_sid); assert(ret != FAIL); }
+        if(f_sid) { ret = H5Sclose(f_sid); assert(ret != FAIL); }
+        if(did) { ret = H5Dclose(did); assert(ret != FAIL); }
+#endif
     }
 
     if (mpi_rank == 1) {
-    #if 1 // USE_DSET3
-    // init H5D_rw_multi_t for write DSET3 (CONTIG)
-    dset_info[j].dset_id = did;
-    dset_info[j].mem_type_id = H5T_NATIVE_INT;
-    dset_info[j].mem_space_id = m_sid;
-    dset_info[j].file_space_id = f_sid;
-    dset_info[j].wbuf = &data_array_w[0];
-    dset_info[j].rbuf = &data_array_r[0];
-    #else
-    /* free before rewrite DSET3 */
-    if(m_sid)  { ret = H5Sclose(m_sid); assert(ret != FAIL); }
-    if(f_sid) { ret = H5Sclose(f_sid); assert(ret != FAIL); }
-    if(did) { ret = H5Dclose(did); assert(ret != FAIL); }
-    #endif
-    
+#if 1 // USE_DSET3
+        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+        w_dset_info[j].dset_id = did;
+        w_dset_info[j].mem_type_id = H5T_NATIVE_INT;
+        w_dset_info[j].mem_space_id = m_sid;
+        w_dset_info[j].dset_space_id = f_sid;
+        w_dset_info[j].u.wbuf = &data_array_w[0];
+
+        r_dset_info[j].dset_id = did;
+        r_dset_info[j].mem_type_id = H5T_NATIVE_INT;
+        r_dset_info[j].mem_space_id = m_sid;
+        r_dset_info[j].dset_space_id = f_sid;
+        r_dset_info[j].u.rbuf = &data_array_r[0];
+#else
+        /* free before rewrite DSET3 */
+        if(m_sid)  { ret = H5Sclose(m_sid); assert(ret != FAIL); }
+        if(f_sid) { ret = H5Sclose(f_sid); assert(ret != FAIL); }
+        if(did) { ret = H5Dclose(did); assert(ret != FAIL); }
+#endif
     }
 
-   #else  // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------
+#else  // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------
     // init H5D_rw_multi_t for write DSET3 (CONTIG)
-    dset_info[j].dset_id = did;
-    dset_info[j].mem_type_id = H5T_NATIVE_INT;
-    dset_info[j].mem_space_id = m_sid;
-    dset_info[j].file_space_id = f_sid;
-    dset_info[j].wbuf = &data_array_w[0];
-    dset_info[j].rbuf = &data_array_r[0];
-   #endif // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------O
+    w_dset_info[j].dset_id = did;
+    w_dset_info[j].mem_type_id = H5T_NATIVE_INT;
+    w_dset_info[j].mem_space_id = m_sid;
+    w_dset_info[j].dset_space_id = f_sid;
+    w_dset_info[j].u.wbuf = &data_array_w[0];
+
+    r_dset_info[j].dset_id = did;
+    r_dset_info[j].mem_type_id = H5T_NATIVE_INT;
+    r_dset_info[j].mem_space_id = m_sid;
+    r_dset_info[j].dset_space_id = f_sid;
+    r_dset_info[j].u.rbuf = &data_array_r[0];
+#endif // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------O
 
   } // end of for loop #dsets
 
@@ -5865,29 +6038,28 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
   ret = H5Pclose(crp_plist1);
   assert (ret != FAIL);
 
-  #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
+#ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC
   if (mpi_rank == 0)      Count = ndsets;
   if (mpi_rank == 1)      Count = ndsets;
-  #else
+#else
   Count = ndsets;
-  #endif
+#endif
 
-    #if 0 // JK_DBG
-    for (i=0; i< Count ; i++) {
-        printf("%s:%d P%d > dset_info[%d].wbuf addr: %x\n", __FUNCTION__,__LINE__, mpi_rank, i, dset_info[i].wbuf);
-    }
-    #endif
+#if 0 // JK_DBG
+    for (i=0; i< Count ; i++)
+        printf("%s:%d P%d > w_dset_info[%d].u.wbuf addr: %x\n", __FUNCTION__,__LINE__, mpi_rank, i, w_dset_info[i].u.wbuf);
+#endif
 
     if(multi_mode == SINGLE_DSET) {
         for(j=0; j< Count; j++) {
-            ret = H5Dwrite(dset_info[j].dset_id, dset_info[j].mem_type_id, dset_info[j].mem_space_id, dset_info[j].file_space_id, xfer_plist, dset_info[j].wbuf );
+            ret = H5Dwrite(w_dset_info[j].dset_id, w_dset_info[j].mem_type_id, w_dset_info[j].mem_space_id, w_dset_info[j].dset_space_id, xfer_plist, w_dset_info[j].u.wbuf);
             assert(ret != FAIL);
 
             gettimeofday (&tv1, NULL); 
             /* Read Now */
-            ret = H5Dread(dset_info[j].dset_id, dset_info[j].mem_type_id, dset_info[j].mem_space_id, dset_info[j].file_space_id, xfer_plist, dset_info[j].rbuf );
+            ret = H5Dread(r_dset_info[j].dset_id, r_dset_info[j].mem_type_id, r_dset_info[j].mem_space_id, r_dset_info[j].dset_space_id, xfer_plist, r_dset_info[j].u.rbuf);
             assert(ret != FAIL);
-            sync();
+sync();
             gettimeofday (&tv2, NULL);
             timersub(&tv2, &tv1, &tv_sub);
             timeradd(&tv_sub, &tv_add, &tv_add);
@@ -5901,23 +6073,23 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
         }
     }
     else if (multi_mode == MULTI_DSET) { 
-        ret = H5Dwrite_multi(fid, Count, dset_info, xfer_plist);
+        ret = H5Dwrite_multi(fid, xfer_plist, Count, w_dset_info);
         assert(ret != FAIL);
 
         gettimeofday (&tv1, NULL);
         /* Read Now */
-        ret = H5Dread_multi(fid, Count, dset_info, xfer_plist);
+        ret = H5Dread_multi(fid, xfer_plist, Count, r_dset_info);
         assert(ret != FAIL);
-        sync();
+sync();
         gettimeofday (&tv2, NULL);
         timersub(&tv2, &tv1, &tv_sub);
         time_f = timeval2float(&tv_sub);
-       #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
         if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemax_f, 1, MPI_FLOAT, MPI_MAX, MPI_COMM_WORLD))
             printf("Error: MPI_Allreduce MAX\n");
         if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemin_f, 1, MPI_FLOAT, MPI_MIN, MPI_COMM_WORLD))
             printf("Error: MPI_Allreduce MIN\n");
-       #endif
+#endif
 
         /* Display raw data read time */
         if(mpi_rank == (mpi_size-1)) {
@@ -5928,7 +6100,7 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
 
     // Verify Read buffers with Write buffers
     for(i=0; i< Count; i++) {
-        diff_datasets(dim0,1,(DTYPE_INT *)dset_info[i].wbuf, (DTYPE_INT *)dset_info[i].rbuf, i);
+        diff_datasets(dim0,1,(DTYPE_INT *)w_dset_info[i].u.wbuf, (DTYPE_INT *)r_dset_info[i].u.rbuf, i);
     }
 
 
@@ -5942,16 +6114,28 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
     /* release all temporary handles. */
     for (i=0;i< Count;i++)
     {
-        if(dset_info[i].mem_space_id > 0) {
-            ret = H5Sclose(dset_info[i].mem_space_id);
+        if(w_dset_info[i].mem_space_id > 0) {
+            ret = H5Sclose(w_dset_info[i].mem_space_id);
             assert(ret != FAIL);
         }
-        if(dset_info[i].file_space_id > 0) {
-            ret = H5Sclose(dset_info[i].file_space_id);
+        if(r_dset_info[i].mem_space_id > 0) {
+            ret = H5Sclose(r_dset_info[i].mem_space_id);
             assert(ret != FAIL);
         }
-        if(dset_info[i].dset_id > 0) {
-            ret = H5Dclose(dset_info[i].dset_id);
+        if(w_dset_info[i].dset_space_id > 0) {
+            ret = H5Sclose(w_dset_info[i].dset_space_id);
+            assert(ret != FAIL);
+        }
+        if(r_dset_info[i].dset_space_id > 0) {
+            ret = H5Sclose(r_dset_info[i].dset_space_id);
+            assert(ret != FAIL);
+        }
+        if(w_dset_info[i].dset_id > 0) {
+            ret = H5Dclose(w_dset_info[i].dset_id);
+            assert(ret != FAIL);
+        }
+        if(r_dset_info[i].dset_id > 0) {
+            ret = H5Dclose(r_dset_info[i].dset_id);
             assert(ret != FAIL);
         }
         MESG("H5Dclose succeed");
@@ -5966,19 +6150,18 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
     gettimeofday (&tv2, NULL);
     timersub(&tv2, &tv1, &tv_sub);
     time_f = timeval2float(&tv_sub);
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemax_f, 1, MPI_FLOAT, MPI_MAX, MPI_COMM_WORLD))
         printf("Error: MPI_Allreduce MAX\n");
     if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemin_f, 1, MPI_FLOAT, MPI_MIN, MPI_COMM_WORLD))
         printf("Error: MPI_Allreduce MIN\n");
-    #endif
+#endif
 
-    #if 1 // JK_DBG
-    if(mpi_rank == (mpi_size-1)) {
+#if 1 // JK_DBG
+    if(mpi_rank == (mpi_size-1))
         printf("JKDBG %s:%d p%d> H5Fclose DONE Elapsed time: %f (MIN) - %f (MAX)\n", __FUNCTION__, __LINE__, mpi_rank, timemin_f, timemax_f);
-    }
     fflush(stdout);
-    #endif
+#endif
 
     /* free buffers */
     if(data_array_w)
@@ -5986,12 +6169,11 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
     if(data_array_r)
         free(data_array_r);
 
-    if(dset_info)  
-        free(dset_info);
+    if(w_dset_info)  
+        free(w_dset_info);
+    if(r_dset_info)  
+        free(r_dset_info);
 }
-
-
-
 
 
 /*
@@ -6174,7 +6356,7 @@ parse_options(int argc, char **argv)
 	    env = env_default;
 	}
     if(fname_g[0]==0)
-        sprintf(fname_g,"mdset_perf.h5",*argv);
+        strcpy(fname_g, "mdset_perf.h5");
     	mkfilenames(env);
     }
     return(0);
@@ -6190,11 +6372,10 @@ cleanup(void)
     int i, n;
 
     n = sizeof(testfiles)/sizeof(testfiles[0]);
-    for (i=0; i<n; i++){
-        #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
+    for (i=0; i<n; i++)
 	    MPI_File_delete(testfiles[i], MPI_INFO_NULL);
-        #endif
-    }
+#endif
 }
 
 
@@ -6203,7 +6384,7 @@ int
 main(int argc, char **argv)
 {
     int i, n;
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     int mpi_namelen;
     char mpi_name[MPI_MAX_PROCESSOR_NAME];
 
@@ -6211,10 +6392,10 @@ main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
     MPI_Get_processor_name(mpi_name,&mpi_namelen);
-    #else
+#else
     mpi_size=1; // serial mode , just single process
     mpi_rank=0;
-    #endif
+#endif
 
 
     if (parse_options(argc, argv) != 0)
@@ -6238,11 +6419,11 @@ main(int argc, char **argv)
     	    printf("   %s\n", testfiles[i]);
     	}
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d> pid=%d -- START -- \n", __FUNCTION__, mpi_rank, getpid());
     printf("%s P%d> multi_mode_g: %d\n", __FUNCTION__, mpi_rank, multi_mode_g);
     fflush(stdout);
-    #endif
+#endif
 
     if (doread) {
         if(doCOLL) {
@@ -6458,10 +6639,10 @@ main(int argc, char **argv)
             }
         }
     }
-    #if 0 // JK_DBG
+#if 0 // JK_DBG
     printf("%s P%d> pid=%d -- END -- \n", __FUNCTION__, mpi_rank, getpid());
     fflush(stdout);
-    #endif
+#endif
 
     if (!(dowrite || doread)){
 	    usage();
@@ -6483,9 +6664,9 @@ finish:
     if (docleanup)
 	    cleanup();
 
-    #ifndef TEST_NO_MPI
+#ifndef TEST_NO_MPI
     MPI_Finalize();
-    #endif
+#endif
 
     return(nerrors);
 }

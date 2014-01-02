@@ -1357,8 +1357,6 @@ done:
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
  *
- * Modification: Jonathan Kim  Nov, 2013
- *   Add for close piece info in skiplist for CONTIG/CHUNK for multi-dset work.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1396,8 +1394,6 @@ H5D_close(H5D_t *dataset)
             case H5D_CONTIGUOUS:
                 /* Check for skip list for iterating over pieces during I/O to close */
                 if(dataset->shared->cache.sel_pieces) {
-                    size_t cnt=0; 
-                    cnt = H5SL_count(dataset->shared->cache.sel_pieces);
                     HDassert(H5SL_count(dataset->shared->cache.sel_pieces) == 0);
                     H5SL_close(dataset->shared->cache.sel_pieces);
                     dataset->shared->cache.sel_pieces = NULL;
@@ -1414,8 +1410,6 @@ H5D_close(H5D_t *dataset)
 
                 /* Check for skip list for iterating over pieces during I/O to close */
                 if(dataset->shared->cache.sel_pieces) {
-                    size_t cnt=0; 
-                    cnt = H5SL_count(dataset->shared->cache.sel_pieces);
                     HDassert(H5SL_count(dataset->shared->cache.sel_pieces) == 0);
                     H5SL_close(dataset->shared->cache.sel_pieces);
                     dataset->shared->cache.sel_pieces = NULL;
@@ -1428,16 +1422,12 @@ H5D_close(H5D_t *dataset)
                 } /* end if */
 
                 /* Check for cached single element chunk info */
-                if(dataset->shared->cache.chunk.single_chunk_info) {
+                if(dataset->shared->cache.chunk.single_chunk_info)
                     dataset->shared->cache.chunk.single_chunk_info = H5FL_FREE(H5D_chunk_info_t, dataset->shared->cache.chunk.single_chunk_info);
-                    dataset->shared->cache.chunk.single_chunk_info = NULL;
-                } /* end if */
 
                 /* Check for cached single element piece info */
-                if(dataset->shared->cache.chunk.single_piece_info) {
+                if(dataset->shared->cache.chunk.single_piece_info)
                     dataset->shared->cache.chunk.single_piece_info = H5FL_FREE(H5D_piece_info_t, dataset->shared->cache.chunk.single_piece_info);
-                    dataset->shared->cache.chunk.single_piece_info = NULL;
-                } /* end if */
 
                 /* Flush and destroy chunks in the cache. Continue to close even if 
                  * it fails. */

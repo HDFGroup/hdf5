@@ -25,6 +25,7 @@
 #include "H5public.h"
 #include "H5Ipublic.h"
 
+
 /*****************/
 /* Public Macros */
 /*****************/
@@ -40,6 +41,7 @@
 #define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME		"direct_chunk_offset"
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME	"direct_chunk_datasize"
  
+
 /*******************/
 /* Public Typedefs */
 /*******************/
@@ -95,17 +97,21 @@ typedef enum H5D_fill_value_t {
 /* parameter sturct for multi-dset Read/Write */
 typedef struct H5D_rw_multi_t
 {
-    hid_t dset_id;          /* dstaset id */
-    hid_t file_space_id;    
-    void *rbuf;             /* read buffer */
-    const void *wbuf;       /* write buffer */
-    hid_t mem_type_id;      /* memory type id */
-    hid_t mem_space_id;
+    hid_t dset_id;          /* dstaset ID */
+    hid_t dset_space_id;    /* dataset selection dataspace ID */
+    hid_t mem_type_id;      /* memory datatype ID */
+    hid_t mem_space_id;     /* memory selection dataspace ID */
+    union {
+        void *rbuf;         /* pointer to read buffer */
+        const void *wbuf;   /* pointer to write buffer */
+    } u;
 } H5D_rw_multi_t;
+
 
 /********************/
 /* Public Variables */
 /********************/
+
 
 /*********************/
 /* Public Prototypes */
@@ -140,20 +146,18 @@ H5_DLL hid_t H5Dget_create_plist(hid_t dset_id);
 H5_DLL hid_t H5Dget_access_plist(hid_t dset_id);
 H5_DLL hsize_t H5Dget_storage_size(hid_t dset_id);
 H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
-/* single-dset Read/Write */
 H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-			hid_t file_space_id, hid_t plist_id, void *buf/*out*/);
+    hid_t file_space_id, hid_t plist_id, void *buf/*out*/);
+H5_DLL herr_t H5Dread_multi(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info);
 H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-			 hid_t file_space_id, hid_t plist_id, const void *buf);
-/* multi-dset Read/Write */             
-H5_DLL herr_t H5Dread_multi(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id);
-H5_DLL herr_t H5Dwrite_multi(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id);
+    hid_t file_space_id, hid_t plist_id, const void *buf);
+H5_DLL herr_t H5Dwrite_multi(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info);
 H5_DLL herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id,
-            H5D_operator_t op, void *operator_data);
+    H5D_operator_t op, void *operator_data);
 H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);
 H5_DLL herr_t H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size);
 H5_DLL herr_t H5Dfill(const void *fill, hid_t fill_type, void *buf,
-        hid_t buf_type, hid_t space);
+    hid_t buf_type, hid_t space);
 H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[]);
 H5_DLL herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
     hid_t dst_space_id, void *dst_buf);

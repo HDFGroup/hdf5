@@ -220,7 +220,6 @@ static herr_t H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm,
 static herr_t
 H5D__create_piece_file_map_hyper(H5D_dset_info_t *di, 
     const H5D_io_info_md_t *io_info_md);
-
 static herr_t H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm);
 static herr_t H5D__create_piece_mem_map_hyper(const H5D_io_info_md_t *io_info_md,
     const H5D_dset_info_t *dinfo);
@@ -302,6 +301,7 @@ H5FL_DEFINE_STATIC(H5D_rdcc_ent_t);
 
 /* Declare a free list to manage the H5D_chunk_info_t struct */
 H5FL_DEFINE(H5D_chunk_info_t);
+
 /* Declare a free list to manage the H5D_piece_info_t struct */
 H5FL_DEFINE(H5D_piece_info_t);
 
@@ -993,7 +993,6 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
     H5D_dset_info_t *dinfo)
 {
     H5D_t *dataset = dinfo->dset;     /* Local pointer to dataset info */
-
     const H5T_t *mem_type = type_info->mem_type;        /* Local pointer to memory datatype */
     H5S_t *tmp_mspace = NULL;   /* Temporary memory dataspace */
     hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
@@ -1038,11 +1037,9 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
         HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
 
     /* Decide the number of chunks in each dimension*/
-    for(u = 0; u < f_ndims; u++) {
+    for(u = 0; u < f_ndims; u++)
         /* Keep the size of the chunk dimensions as hsize_t for various routines */
         dinfo->chunk_dim[u] = dinfo->layout->u.chunk.dim[u];
-    } /* end for */
-
 
     /* Initialize "last chunk" information */
     dinfo->last_index = (hsize_t)-1;
@@ -1095,18 +1092,15 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
         if(H5D__create_piece_map_single(dinfo, io_info_md) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create chunk selections for single element")
     } /* end if */
-
     else {
         /* Initialize skip list for piece selections */
         /* Only need single skip list point over multiple read/write IO 
          * and multiple dsets until H5D_close. Thus check both 
          * since io_info_md->sel_pieces only lives single write/read IO, 
          * even cache.sel_pieces lives until Dclose */
-        if(NULL == dataset->shared->cache.sel_pieces && 
-           NULL == io_info_md->sel_pieces) {
+        if(NULL == dataset->shared->cache.sel_pieces && NULL == io_info_md->sel_pieces) {
             if(NULL == (dataset->shared->cache.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for piece selections")
-
 
             /* keep the skip list in cache, so do not need to recreate until close */
             io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
@@ -1151,19 +1145,17 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
                 HDassert(piece_info);
                 
                 /* only for current dset */
-                if (piece_info->dset_info == dinfo)
-                {
+                if (piece_info->dset_info == dinfo) {
                     /* Clean hyperslab span's "scratch" information */
                     if(H5S_hyper_reset_scratch(piece_info->fspace) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
-                }
+                } /* end if */
 
                 /* Get the next piece node in the skip list */
                 curr_node = H5SL_next(curr_node);
             } /* end while */
         } /* end if */
         else {
-
             /* Create temporary datatypes for selection iteration */
             if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL), FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
@@ -1238,13 +1230,12 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
                     HDassert(piece_info);
 
                     /* only for current dset */
-                    if (piece_info->dset_info == dinfo)
-                    {
+                    if(piece_info->dset_info == dinfo) {
                         /* Clean hyperslab span's "scratch" information */
                         if(H5S_hyper_reset_scratch(piece_info->mspace) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
 
-                    }
+                    } /* end if */
 
                     /* Get the next piece node in the skip list */
                     curr_node = H5SL_next(curr_node);
@@ -1253,14 +1244,12 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
         } /* end else */
     } /* end else */
 
-
 done:
     /* Release the [potentially partially built] chunk mapping information if an error occurs */
     if(ret_value < 0) {
-        if(tmp_mspace && !dinfo->mchunk_tmpl) {
+        if(tmp_mspace && !dinfo->mchunk_tmpl)
             if(H5S_close(tmp_mspace) < 0)
                 HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template")
-        } /* end if */
 
         if(H5D__piece_io_term_mdset(dinfo, io_info_md) < 0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping")
@@ -1271,11 +1260,10 @@ done:
     if(f_tid != (-1) && H5I_dec_ref(f_tid) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
 
-    if(file_space_normalized) {
+    if(file_space_normalized)
         /* (Casting away const OK -QAK) */
         if(H5S_hyper_denormalize_offset((H5S_t *)file_space, old_offset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_io_init_mdset() */

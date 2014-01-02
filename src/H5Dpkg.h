@@ -323,7 +323,6 @@ typedef struct H5D_io_info_md_wrap_t {
 } H5D_io_info_md_wrap_t;
 
 
-
 /******************/
 /* Chunk typedefs */
 /******************/

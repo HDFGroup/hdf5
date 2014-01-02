@@ -327,9 +327,7 @@ do_pio(parameters param)
 
     set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
     hrc = do_write(&res, &fd, &param, ndsets, nbytes, buf_size, buffer);
-    hrc == SUCCESS;
     set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
-
     VRFY((hrc == SUCCESS), "do_write failed");
 
     /* Close file for write */

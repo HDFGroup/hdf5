@@ -150,10 +150,7 @@ H5FL_BLK_DEFINE(sieve_buf);
 /* Declare extern the free list to manage blocks of type conversion data */
 H5FL_BLK_EXTERN(type_conv);
 
-/*******************/
-/* Externs         */
-/*******************/
-/* Declare a free list to manage the H5D_piece_info_t struct */
+/* Declare extern the free list to manage the H5D_piece_info_t struct */
 H5FL_EXTERN(H5D_piece_info_t);
 
 

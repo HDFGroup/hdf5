@@ -1061,8 +1061,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     /*OKAY: CAST DISCARDS CONST*/
     if(MPI_SUCCESS != (mpi_code = MPI_File_open(comm_dup, (char*)name, mpi_amode, info_dup, &fh)))
         HMPI_GOTO_ERROR(NULL, "MPI_File_open failed", mpi_code)
-
-    file_opened=1;
+    file_opened = 1;
 
     /* Get the MPI rank of this process and the total number of processes */
     if (MPI_SUCCESS != (mpi_code=MPI_Comm_rank (comm_dup, &mpi_rank)))
@@ -1579,7 +1578,6 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
         if(MPI_SUCCESS != (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
     }
-
 
     /* How many bytes were actually read? */
     /* [This works because the "basic elements" we use for all our MPI derived
