@@ -2972,23 +2972,21 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
        sure that the I/O happens in the current range and not the
        extensible one. */
     {
-        H5S_t *dset_space, *io_space;
+        H5S_t *dset_space;
         hsize_t dset_dims[H5S_MAX_RANK], io_dims[H5S_MAX_RANK];
         int dset_ndims, io_ndims, i;
 
         if(NULL == (dset_space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, H5I_DATASPACE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
-        if(NULL == (io_space = (H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
         dset_ndims = (int)H5S_GET_EXTENT_NDIMS(dset_space);
-        io_ndims = (int)H5S_GET_EXTENT_NDIMS(io_space);
+        io_ndims = (int)H5S_GET_EXTENT_NDIMS(file_space);
 
         if(dset_ndims < io_ndims)
 	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection not within dataset's dataspace");
 
         H5S_get_simple_extent_dims(dset_space, dset_dims, NULL);
-        H5S_get_simple_extent_dims(io_space, io_dims, NULL);
+        H5S_get_simple_extent_dims(file_space, io_dims, NULL);
 
         for(i=0 ; i<io_ndims ; i++) {
             if(dset_dims[i] < io_dims[i])
@@ -3014,7 +3012,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
 
     /* compute checksum and create bulk handle */
-    if(H5VL_iod_pre_read(mem_type_id, mem_space_id, buf, 
+    if(H5VL_iod_pre_read(mem_type_id, mem_space, buf, 
                          bulk_handle, &is_vl_data) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't generate read parameters");
 
@@ -3036,7 +3034,10 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         input.bulk_handle = *bulk_handle;
         input.checksum = 0;
         input.dxpl_id = dxpl_id;
-        input.space_id = file_space_id;
+        if(H5S_ALL == file_space_id)
+            input.space_id = dset->remote_dset.space_id;
+        else
+            input.space_id = file_space_id;
         input.dset_type_id = dset->remote_dset.type_id;
         input.mem_type_id = mem_type_id;
         input.rcxt_num  = rc->c_version;
@@ -3050,7 +3051,10 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         input_vl.iod_id = dset->remote_dset.iod_id;
         input_vl.mdkv_id = dset->remote_dset.mdkv_id;
         input_vl.dxpl_id = dxpl_id;
-        input_vl.space_id = file_space_id;
+        if(H5S_ALL == file_space_id)
+            input_vl.space_id = dset->remote_dset.space_id;
+        else
+            input_vl.space_id = file_space_id;
         input_vl.mem_type_id = mem_type_id;
         input_vl.rcxt_num  = rc->c_version;
         input_vl.cs_scope = dset->common.file->md_integrity_scope;
@@ -3086,7 +3090,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
        perform the actual read when the wait is called (i.e. when we
        retrieve the buffer size) */
     if(is_vl_data) {
-        if((info->file_space_id = H5Scopy(file_space_id)) < 0)
+        if((info->file_space_id = H5Scopy(input_vl.space_id)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace");
         if((info->mem_type_id = H5Tcopy(mem_type_id)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype");
@@ -3201,7 +3205,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     }
     else {
 	if(NULL == (file_space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
-                                                                  H5I_DATASPACE)))
+                                                            H5I_DATASPACE)))
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
         if(H5S_select_all(file_space, TRUE) < 0)
@@ -3220,23 +3224,21 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
        sure that the I/O happens in the current range and not the
        extensible one. */
     {
-        H5S_t *dset_space, *io_space;
+        H5S_t *dset_space;
         hsize_t dset_dims[H5S_MAX_RANK], io_dims[H5S_MAX_RANK];
         int dset_ndims, io_ndims, i;
 
         if(NULL == (dset_space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, H5I_DATASPACE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
-        if(NULL == (io_space = (H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
         dset_ndims = (int)H5S_GET_EXTENT_NDIMS(dset_space);
-        io_ndims = (int)H5S_GET_EXTENT_NDIMS(io_space);
+        io_ndims = (int)H5S_GET_EXTENT_NDIMS(file_space);
 
         if(dset_ndims < io_ndims)
 	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection not within dataset's dataspace");
 
         H5S_get_simple_extent_dims(dset_space, dset_dims, NULL);
-        H5S_get_simple_extent_dims(io_space, io_dims, NULL);
+        H5S_get_simple_extent_dims(file_space, io_dims, NULL);
 
         for(i=0 ; i<io_ndims ; i++) {
             if(dset_dims[i] < io_dims[i])
@@ -3264,7 +3266,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     if(raw_cs_scope) {
         /* compute checksum and create bulk handle */
-        if(H5VL_iod_pre_write(mem_type_id, mem_space_id, buf, 
+        if(H5VL_iod_pre_write(mem_type_id, mem_space, buf, 
                               &internal_cs, bulk_handle, &vl_string_len) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't generate write parameters");
     }
@@ -3273,7 +3275,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         printf("NO DATA INTEGRITY CHECKS ON RAW DATA WRITTEN\n");
 #endif
         /* compute checksum and create bulk handle */
-        if(H5VL_iod_pre_write(mem_type_id, mem_space_id, buf, 
+        if(H5VL_iod_pre_write(mem_type_id, mem_space, buf, 
                               NULL, bulk_handle, &vl_string_len) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't generate write parameters");
         internal_cs = 0;
@@ -3307,7 +3309,10 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     input.bulk_handle = *bulk_handle;
     input.checksum = internal_cs;
     input.dxpl_id = dxpl_id;
-    input.space_id = file_space_id;
+    if(H5S_ALL == file_space_id)
+        input.space_id = dset->remote_dset.space_id;
+    else
+        input.space_id = file_space_id;
     input.dset_type_id = dset->remote_dset.type_id;
     input.mem_type_id = mem_type_id;
     input.trans_num = tr->trans_num;
@@ -8308,8 +8313,8 @@ H5VL_iod_tr_finish(H5TR_t *tr, hbool_t acquire, hid_t trfpl_id, void **req)
     input.trans_num = tr->trans_num;
     input.trfpl_id = trfpl_id;
     input.acquire = acquire;
-    input.client_rank = tr->file->my_rank;
-    input.oidkv_id = tr->file->num_procs * 3;
+    input.client_rank = (uint32_t)tr->file->my_rank;
+    input.oidkv_id = (iod_obj_id_t)(tr->file->num_procs * 3);
     input.kv_oid_index = tr->file->remote_file.kv_oid_index;
     input.array_oid_index = tr->file->remote_file.array_oid_index;
     input.blob_oid_index = tr->file->remote_file.blob_oid_index;

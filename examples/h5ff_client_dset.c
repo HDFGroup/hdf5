@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
 
     hid_t file_id;
     hid_t gid1, gid2, gid3;
-    hid_t sid, dtid;
+    hid_t sid, scalar, dtid;
     hid_t did1, did2, did3;
     hid_t tid1, tid2, tid3, rid1, rid2, rid3, rid4;
     hid_t fapl_id, trspl_id, dxpl_id;
@@ -29,6 +29,7 @@ int main(int argc, char **argv) {
     int32_t *ex_wdata = NULL, *ex_rdata = NULL;
     int32_t *rdata1 = NULL, *rdata2 = NULL;
     int16_t *rdata3 = NULL;
+    int32_t element = 0;
     const unsigned int nelem=60;
     hsize_t dims[1], max_dims[1];
     hsize_t extent;
@@ -97,6 +98,8 @@ int main(int argc, char **argv) {
     max_dims [0] = H5S_UNLIMITED;
     sid = H5Screate_simple(1, dims, max_dims);
 
+    scalar = H5Screate(H5S_SCALAR);
+
     dtid = H5Tcopy(H5T_STD_I32LE);
 
     /* acquire container version 0 - EXACT.  
@@ -133,7 +136,7 @@ int main(int argc, char **argv) {
         /* create datasets */
         did1 = H5Dcreate_ff(gid1, "D1", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         assert(did1 > 0);
-        did2 = H5Dcreate_ff(gid2, "D2", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        did2 = H5Dcreate_ff(gid2, "D2", dtid, scalar, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         assert(did2 > 0);
         did3 = H5Dcreate_ff(gid3, "D3", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         assert(did3 > 0);
@@ -224,7 +227,7 @@ int main(int argc, char **argv) {
     ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
     assert(ret == 0);
 
-    ret = H5Dwrite_ff(did1, dtid, sid, sid, dxpl_id, wdata1, tid1, e_stack);
+    ret = H5Dwrite_ff(did1, dtid, H5S_ALL, H5S_ALL, dxpl_id, wdata1, tid1, e_stack);
     assert(ret == 0);
 
     /* Raw data write on D2. same as previous, but here we indicate
@@ -232,7 +235,7 @@ int main(int argc, char **argv) {
        corruption. */
     cs = H5_checksum_crc64(wdata2, sizeof(int32_t) * nelem);
     H5Pset_dxpl_checksum(dxpl_id, cs);
-    H5Pset_dxpl_inject_corruption(dxpl_id, 1);
+    //H5Pset_dxpl_inject_corruption(dxpl_id, 1);
 
     /* tell HDF5 to disable data integrity checks stored at IOD for this write;
        The transfer checksum will still capture the corruption. */
@@ -240,7 +243,8 @@ int main(int argc, char **argv) {
     ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
     assert(ret == 0);
 
-    ret = H5Dwrite_ff(did2, dtid, sid, sid, dxpl_id, wdata2, tid1, e_stack);
+    element = 450;
+    ret = H5Dwrite_ff(did2, dtid, scalar, scalar, dxpl_id, &element, tid1, e_stack);
     assert(ret == 0);
 
     /* Raw data write on D3. Same as previous; however we specify that
@@ -322,7 +326,7 @@ int main(int argc, char **argv) {
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
     /* Give a location to the DXPL to store the checksum once the read has completed */
     H5Pset_dxpl_checksum_ptr(dxpl_id, &read1_cs);
-    ret = H5Dread_ff(did1, dtid, sid, sid, dxpl_id, rdata1, rid2, e_stack);
+    ret = H5Dread_ff(did1, dtid, H5S_ALL, H5S_ALL, dxpl_id, rdata1, rid2, e_stack);
     assert(ret == 0);
     H5Pclose(dxpl_id);
 
@@ -338,13 +342,13 @@ int main(int argc, char **argv) {
     /* Give a location to the DXPL to store the checksum once the read has completed */
     H5Pset_dxpl_checksum_ptr(dxpl_id, &read2_cs);
 
-    ret = H5Dread_ff(did1, dtid, sid, sid, dxpl_id, rdata2, rid2, e_stack);
+    ret = H5Dread_ff(did1, dtid, H5S_ALL, H5S_ALL, dxpl_id, rdata2, rid2, e_stack);
     assert(ret == 0);
     H5Pclose(dxpl_id);
 
     /* Raw data read on D3. This is asynchronous.  Note that the type
        is different than the dataset type. */
-    ret = H5Dread_ff(did3, H5T_STD_I16BE, sid, sid, H5P_DEFAULT, rdata3, 
+    ret = H5Dread_ff(did3, H5T_STD_I16BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata3, 
                      rid2, e_stack);
     assert(ret == 0);
 
@@ -366,7 +370,7 @@ int main(int argc, char **argv) {
         mem_space = H5Screate_simple(1, dims, NULL);
         H5Sselect_hyperslab(mem_space, H5S_SELECT_SET, &start,&stride,&count,&block);
 
-        ret = H5Dread_ff(did1, H5T_STD_I32LE, mem_space, sid, H5P_DEFAULT, buf, 
+        ret = H5Dread_ff(did1, H5T_STD_I32LE, mem_space, H5S_ALL, H5P_DEFAULT, buf, 
                          rid2, e_stack);
         assert(ret == 0);
         H5Sclose(mem_space);
@@ -385,6 +389,17 @@ int main(int argc, char **argv) {
 
         free(buf);
     }
+
+    element = 0;
+    ret = H5Dread_ff(did2, dtid, scalar, scalar, H5P_DEFAULT, &element, rid2, e_stack);
+    assert(ret == 0);
+
+    H5ESwait(e_stack, 0, &status);
+    printf("ESWait H5Dread Completion status = %d\n", status);
+    assert (status);
+
+    fprintf(stderr, "Rank %d read value %d\n", my_rank, element);
+    assert(element == 450);
 
 #if 0
     /* create & start transaction 2 with num_peers = my_size. This
@@ -501,6 +516,7 @@ int main(int argc, char **argv) {
 
 #endif
 
+    MPI_Barrier(MPI_COMM_WORLD);    
     if(my_rank == 0) {
         /* release container version 1. This is async. */
         ret = H5RCrelease(rid2, e_stack);
@@ -531,6 +547,8 @@ int main(int argc, char **argv) {
     printf("%d events in event stack. H5EStest_all Completion status = %d\n", num_events, status);
 
     ret = H5Sclose(sid);
+    assert(ret == 0);
+    ret = H5Sclose(scalar);
     assert(ret == 0);
     ret = H5Tclose(dtid);
     assert(ret == 0);
@@ -584,6 +602,7 @@ int main(int argc, char **argv) {
     free(dset_token2);
     free(dset_token3);
 
+    MPI_Barrier(MPI_COMM_WORLD);
     EFF_finalize();
     MPI_Finalize();
 

@@ -108,13 +108,15 @@ int main(int argc, char **argv) {
         ret = H5TRstart(tid1, H5P_DEFAULT, e_stack);
         assert(0 == ret);
 
+        sid2 = H5Screate(H5S_SCALAR); assert( sid2 );
+
         /* create group /G1 */
         gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, 
                             H5P_DEFAULT, tid1, e_stack);
         assert(gid1 > 0);
 
         /* create dataset /G1/D1 */
-        did1 = H5Dcreate_ff(gid1, "D1", dtid, sid, H5P_DEFAULT, 
+        did1 = H5Dcreate_ff(gid1, "D1", dtid, sid2, H5P_DEFAULT, 
                             H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         assert(did1 > 0);
 
@@ -154,12 +156,7 @@ int main(int argc, char **argv) {
                             H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         assert(aid4);
 
-        dims [0] = 1;
-        sid2 = H5Screate_simple(1, dims, NULL);
-        dims [0] = nelem;
-        //sid2 = H5Screate(H5S_SCALAR); assert( sid2 );
 
-        fprintf( stderr, "M6.2: create attribute AA from rank %d\n", my_rank );
         aid5 = H5Acreate_ff(map, "MAP_ATTR", stype_id, sid2, H5P_DEFAULT, 
                             H5P_DEFAULT, tid1, H5_EVENT_STACK_NULL );
         assert(aid5);

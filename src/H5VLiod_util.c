@@ -370,7 +370,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                     for(i=0 ; i<ndims ; i++) {
                         hslabs[n].start[i] = *(cur_ptr+i);
                         hslabs[n].count[i] = 1;
-                        hslabs[n].block[i] = *(cur_ptr+ndims+i) + 1 - hslabs[n].start[i];
+                        hslabs[n].block[i] = 1;
                         hslabs[n].stride[i] = hslabs[n].block[i];
                     }
                 }
@@ -428,7 +428,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                         for(i=0 ; i<ndims ; i++) {
                             hslabs[n].start[i] = *(cur_ptr+i);
                             hslabs[n].count[i] = 1;
-                            hslabs[n].block[i] = *(cur_ptr+ndims+i) + 1 - hslabs[n].start[i];
+                            hslabs[n].block[i] = *(cur_ptr+ndims+i) - hslabs[n].start[i];
                             hslabs[n].stride[i] = hslabs[n].block[i];
                         }
                     }
@@ -446,9 +446,9 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
 
     *count = num_descriptors;
 
-done:
+ done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+        }
 
 
 /*-------------------------------------------------------------------------

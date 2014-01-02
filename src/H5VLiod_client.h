@@ -365,11 +365,11 @@ H5_DLL herr_t H5VL_iod_map_get_size(hid_t type_id, const void *buf,
                                     /*out*/size_t *size, /*out*/H5T_class_t *dt_class);
 H5_DLL herr_t H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index, 
                                   iod_obj_type_t type, uint64_t *id);
-H5_DLL herr_t H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf, 
+H5_DLL herr_t H5VL_iod_pre_write(hid_t type_id, struct H5S_t *space, const void *buf, 
                                  /*out*/uint64_t *_checksum, 
                                  /*out*/hg_bulk_t *bulk_handle,
                                  /*out*/size_t **vl_str_len);
-H5_DLL herr_t H5VL_iod_pre_read(hid_t type_id, hid_t space_id, const void *buf, 
+H5_DLL herr_t H5VL_iod_pre_read(hid_t type_id, struct H5S_t *space, const void *buf, 
                                 /*out*/hg_bulk_t *bulk_handle, hbool_t *is_vl_data);
 
 /* private routines for map objects */

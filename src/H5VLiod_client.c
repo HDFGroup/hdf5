@@ -2256,14 +2256,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf, 
+H5VL_iod_pre_write(hid_t type_id, H5S_t *space, const void *buf, 
                    /*out*/uint64_t *_checksum, 
                    /*out*/hg_bulk_t *bulk_handle,
                    /*out*/size_t **vl_str_len)
 {
     hsize_t buf_size = 0;
     uint64_t checksum = 0;
-    H5S_t *space = NULL;
     H5T_t *dt = NULL;
     size_t nelmts;
     H5T_class_t dt_class;
@@ -2271,8 +2270,6 @@ H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
 
@@ -2496,19 +2493,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_iod_pre_read(hid_t type_id, hid_t space_id, const void *buf, 
+H5VL_iod_pre_read(hid_t type_id, H5S_t *space, const void *buf, 
                   /*out*/hg_bulk_t *bulk_handle, hbool_t *is_vl_data)
 {
     size_t buf_size = 0;
-    H5S_t *space = NULL;
     H5T_t *dt = NULL;
     size_t nelmts;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
 

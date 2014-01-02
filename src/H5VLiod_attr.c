@@ -96,9 +96,19 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     /* Set the IOD array creation parameters */
     array.cell_size = (uint32_t)H5Tget_size(input->type_id);
     array.num_dims = (uint32_t)H5Sget_simple_extent_ndims(input->space_id);
-    if(H5Sget_simple_extent_dims(input->space_id, current_dims, array_dims) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get dimentions' sizes");
-    array.firstdim_max = array_dims[0];
+
+    /* Handle Scalar Dataspaces (set rank and current dims size to 1) */
+    if(0 == array.num_dims) {
+        array.num_dims = 1;
+        array.firstdim_max = 1;
+        current_dims[0] = 1;
+    }
+    else {
+        if(H5Sget_simple_extent_dims(input->space_id, current_dims, array_dims) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get dimentions' sizes");
+        array.firstdim_max = array_dims[0];
+    }
+
     array.current_dims = current_dims;
     array.chunk_dims = NULL;
 
@@ -491,14 +501,31 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
         HGOTO_ERROR2(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion");
 
-    hslabs.start = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-    hslabs.stride = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-    hslabs.block = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-    hslabs.count = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+    /* handle scalar dataspace */
+    if(0 == ndims) {
+        ndims = 1;
 
-    /* generate the descriptor */
-    if(H5VL_iod_get_file_desc(space_id, &num_descriptors, &hslabs) < 0)
-        HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
+        hslabs.start = (iod_size_t *)malloc(sizeof(iod_size_t));
+        hslabs.stride = (iod_size_t *)malloc(sizeof(iod_size_t));
+        hslabs.block = (iod_size_t *)malloc(sizeof(iod_size_t));
+        hslabs.count = (iod_size_t *)malloc(sizeof(iod_size_t));
+
+        num_descriptors = 1;
+        hslabs.start[0] = 0;
+        hslabs.count[0] = 1;
+        hslabs.block[0] = 1;
+        hslabs.stride[0] = 1;
+    }
+    else {
+        hslabs.start = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+        hslabs.stride = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+        hslabs.block = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+        hslabs.count = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+
+        /* generate the descriptor */
+        if(H5VL_iod_get_file_desc(space_id, &num_descriptors, &hslabs) < 0)
+            HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
+    }
 
     /* set the file descriptor */
     file_desc = hslabs;
@@ -678,14 +705,31 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
         HGOTO_ERROR2(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion");
 
-    hslabs.start = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-    hslabs.stride = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-    hslabs.block = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-    hslabs.count = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+    /* handle scalar dataspace */
+    if(0 == ndims) {
+        ndims = 1;
 
-    /* generate the descriptor */
-    if(H5VL_iod_get_file_desc(space_id, &num_descriptors, &hslabs) < 0)
-        HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
+        hslabs.start = (iod_size_t *)malloc(sizeof(iod_size_t));
+        hslabs.stride = (iod_size_t *)malloc(sizeof(iod_size_t));
+        hslabs.block = (iod_size_t *)malloc(sizeof(iod_size_t));
+        hslabs.count = (iod_size_t *)malloc(sizeof(iod_size_t));
+
+        num_descriptors = 1;
+        hslabs.start[0] = 0;
+        hslabs.count[0] = 1;
+        hslabs.block[0] = 1;
+        hslabs.stride[0] = 1;
+    }
+    else {
+        hslabs.start = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+        hslabs.stride = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+        hslabs.block = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+        hslabs.count = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+
+        /* generate the descriptor */
+        if(H5VL_iod_get_file_desc(space_id, &num_descriptors, &hslabs) < 0)
+            HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
+    }
 
     /* set the file descriptor */
     file_desc = hslabs;
