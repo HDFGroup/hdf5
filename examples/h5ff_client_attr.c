@@ -329,6 +329,7 @@ int main(int argc, char **argv) {
     free(rdata1);
     free(rdata2);
 
+    MPI_Barrier(MPI_COMM_WORLD);
     EFF_finalize();
     MPI_Finalize();
 
