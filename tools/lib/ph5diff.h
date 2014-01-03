@@ -17,18 +17,18 @@
 #define _PH5DIFF_H__
 
 /* Send from manager to workers */
-#define MPI_TAG_ARGS    1
-#define MPI_TAG_PRINT_TOK  2
+#define MPI_TAG_ARGS            1
+#define MPI_TAG_PRINT_TOK       2
 
 /*Sent from workers to manager */
-#define MPI_TAG_TOK_REQUEST  3
-#define MPI_TAG_DONE    4
-#define MPI_TAG_TOK_RETURN  5
-#define MPI_TAG_PRINT_DATA  6
+#define MPI_TAG_TOK_REQUEST     3
+#define MPI_TAG_DONE            4
+#define MPI_TAG_TOK_RETURN      5
+#define MPI_TAG_PRINT_DATA      6
 
 /* Operational tags used to init and complete diff */
-#define MPI_TAG_END    7
-#define MPI_TAG_PARALLEL  8
+#define MPI_TAG_END             7
+#define MPI_TAG_PARALLEL        8
 
 struct diff_mpi_args
 {

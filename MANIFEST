@@ -961,6 +961,8 @@
 ./test/H5srcdir_str.h.in
 ./test/Makefile.am
 ./test/Makefile.in
+./test/POSIX_Order_Write_Test_Report.docx
+./test/POSIX_Order_Write_Test_Report.pdf
 ./test/SWMR_POSIX_Order_UG.txt
 ./test/SWMR_UseCase_UG.txt
 ./test/accum.c
@@ -1590,6 +1592,8 @@
 ./tools/testfiles/tindicessub3.ddl
 ./tools/testfiles/tindicessub4.ddl
 ./tools/testfiles/tindicessub1.ddl
+./tools/testfiles/tintsattrs.ddl
+./tools/testfiles/tintsattrs.h5
 ./tools/testfiles/tlarge_objname.ddl
 ./tools/testfiles/tlarge_objname.h5
 ./tools/testfiles/tldouble.h5
@@ -1635,11 +1639,15 @@
 ./tools/testfiles/trawdatafile.exp
 ./tools/testfiles/trawssetfile.ddl
 ./tools/testfiles/trawssetfile.exp
+./tools/testfiles/treadfilter.ddl
+./tools/testfiles/treadintfilter.ddl
 ./tools/testfiles/treference.ddl
 ./tools/testfiles/tsaf.ddl
 ./tools/testfiles/tsaf.h5
 ./tools/testfiles/tscalarattrintsize.ddl
 ./tools/testfiles/tscalarattrintsize.h5
+./tools/testfiles/tscalarintattrsize.ddl
+./tools/testfiles/tscalarintattrsize.h5
 ./tools/testfiles/tscalarintsize.ddl
 ./tools/testfiles/tscalarintsize.h5
 ./tools/testfiles/tscalarstring.ddl
@@ -1726,6 +1734,7 @@
 ./tools/h5dump/errfiles/tpbitsOffsetExceeded.err
 ./tools/h5dump/errfiles/tpbitsOffsetNegative.err
 ./tools/h5dump/errfiles/tperror.err
+./tools/h5dump/errfiles/treadfilter.err
 ./tools/h5dump/errfiles/tqmarkfile.err
 ./tools/h5dump/errfiles/tslink-D.err
 

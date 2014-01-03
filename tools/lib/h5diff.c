@@ -106,47 +106,6 @@ void phdiff_dismiss_workers(void)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_manager_output
- *
- * Purpose: special function that prints any output accumulated by the
- *      manager task.
- *
- * Return: none
- *
- * Programmer: Leon Arber
- *
- * Date: Feb 7, 2005
- *
- *-------------------------------------------------------------------------
- */
-void print_manager_output(void)
-{
-    /* If there was something we buffered, let's print it now */
-    if( (outBuffOffset>0) && g_Parallel)
-    {
-        printf("%s", outBuff);
-
-        if(overflow_file)
-        {
-            int     tmp;
-            rewind(overflow_file);
-            while((tmp = getc(overflow_file)) >= 0)
-                putchar(tmp);
-            fclose(overflow_file);
-            overflow_file = NULL;
-        }
-
-        HDfflush(stdout);
-        HDmemset(outBuff, 0, OUTBUFF_SIZE);
-        outBuffOffset = 0;
-    }
-    else if( (outBuffOffset>0) && !g_Parallel)
-    {
-        HDfprintf(stderr, "h5diff error: outBuffOffset>0, but we're not in parallel!\n");
-    }
-}
-
-/*-------------------------------------------------------------------------
  * Function: print_incoming_data
  *
  * Purpose: special function that prints any output that has been sent to the manager
