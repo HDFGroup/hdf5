@@ -526,7 +526,7 @@ H5O_sdspace_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg,
             HDfprintf (stream, "{");
             for(u = 0; u < sdim->rank; u++) {
                 if(H5S_UNLIMITED==sdim->max[u])
-                    HDfprintf (stream, "%sINF", u?", ":"");
+                    HDfprintf (stream, "%sUNLIM", u?", ":"");
                 else
                     HDfprintf (stream, "%s%Hu", u?", ":"", sdim->max[u]);
             } /* end for */
