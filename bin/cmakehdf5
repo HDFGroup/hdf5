@@ -3,12 +3,126 @@
 # Author: Allen Byrne
 #         Albert Cheng
 # Creation Date: Nov 2012
+# Modified:
+#	Changed to use the quick steps described in INSTALL_CMake.txt. (AKC 2014/1/1)
 
-# Copyright: The HDF Group, 2012
+# Copyright: The HDF Group, 2012-14
 
-# Debug: remove the comment hash if you want DPRINT to do echo
+# Debug Print: remove the comment hash if you want DPRINT to do echo
 DPRINT=:
 #DPRINT=echo
+
+# use previous old version if --old is given
+if [ "$1" != "--old" ]; then
+# variable names
+# The "extra" number is the step number and easier to see all logfiles in
+# the sorted order of steps
+progname=`basename $0`	# program name
+configlog="#${progname}_1config.log"
+makelog="#${progname}_2build.log"
+testlog="#${progname}_3test.log"
+packlog="#${progname}_4pack.log"
+installlog="#${progname}_5install.log"
+srcdir="../hdf5"	# expected source directory
+exit_code=0
+
+#=============
+# Function definitions
+#=============
+
+# Show user help page
+HELP()
+{
+    echo "Usage: $progname [--old]"
+    echo "  --old: use the older version of $progname"
+    echo ""
+}
+
+# Display a time stamp
+TIMESTAMP()
+{
+    echo "=====" "`date`" "====="
+}
+
+
+# Do one step bracketed with time stamps
+# The '< /dev/null' is needed to prevent some applications like MPI
+# jobs blocked for reading when they read stdin unnecessary.
+# $1 is banner message to be displayed.
+# $2 is command to run
+# $3 is logfile name for saving output from the command
+STEP()
+{
+    banner="$1"
+    command="$2"
+    logfile="$3"
+
+    echo "$banner" with output saved in $logfile
+    (TIMESTAMP; nerror=0 ;
+	echo "eval $command"
+	eval $command || nerror=1 ;
+	TIMESTAMP; exit $nerror) < /dev/null >> "$logfile" 2>&1
+    if [ $? -ne 0 ]; then
+	echo "error in '$banner'.  $progname aborted."
+	exit 1
+    fi
+}
+
+
+#==========
+# main
+#==========
+
+# Show a start time stamp
+TIMESTAMP
+
+# Always display the help page
+HELP
+
+# Verify there is a valid hdf5 source directory present
+if [ ! -d $srcdir ]; then
+    echo $srcdir not found. Aborted.
+    exit 1
+fi
+
+# figure out version information
+vers=bin/h5vers
+if [ ! -x $srcdir/$vers ]; then
+    echo $srcdir/$vers not found or not executable. Aborted.
+    exit 1
+fi
+version=`cd $srcdir; $vers`
+if [ $? != 0 ]; then
+    echo $vers failed. Aborted.
+    exit 1
+fi
+echo Running Cmake for HDF5-${version} ...
+
+#      4. Configure the C library, tools and tests with this command:
+STEP "Configure..." "cmake -G 'Unix Makefiles' -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ../hdf5" $configlog
+      
+#      3. Build the C library, tools and tests with this command:
+STEP "Build the library, tools and tests, ..." "cmake --build . --config Release" $makelog
+      
+#      4. Test the C library and tools with this command:
+STEP "Test the library and tools..." "ctest . -C Release" $testlog
+      
+#      5. Create an install image with this command:
+STEP "Create an install image..." "cpack -C Release CPackConfig.cmake" $packlog
+      
+#      6. Install with this command:
+STEP "Install..." "./HDF5-${version}-Linux.sh --skip-license" $installlog
+# save the last exit code
+exit_code=$?
+
+# Show a closing time stamp
+TIMESTAMP
+exit $exit_code
+
+else
+# ---------------
+# older version
+# ---------------
 
 # variable names
 progname=`basename $0`	# program name
@@ -260,3 +374,6 @@ else
 fi
 TIMESTAMP
 exit $exit_code
+
+fi
+
