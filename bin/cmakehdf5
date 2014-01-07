@@ -12,8 +12,8 @@
 DPRINT=:
 #DPRINT=echo
 
-# use previous old version if --old is given
-if [ "$1" != "--old" ]; then
+# use the ctest scripting method if --script is given
+if [ "$1" != "--script" ]; then
 # variable names
 # The "extra" number is the step number and easier to see all logfiles in
 # the sorted order of steps
@@ -33,8 +33,8 @@ exit_code=0
 # Show user help page
 HELP()
 {
-    echo "Usage: $progname [--old]"
-    echo "  --old: use the older version of $progname"
+    echo "Usage: $progname [--script]"
+    echo "  --script: Use the ctest scripting method of $progname"
     echo ""
 }
 
