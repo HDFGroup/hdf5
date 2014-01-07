@@ -96,6 +96,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     scratch_pad sp;
     iod_ret_t ret = 0;
     int step = 0;
+    H5T_class_t dt_class;
     iod_size_t array_dims[H5S_MAX_RANK], current_dims[H5S_MAX_RANK];
     herr_t ret_value = SUCCEED;
 
@@ -117,8 +118,14 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64")\n", cur_oh.wr_oh, cur_id);
 #endif
 
+    dt_class = H5Tget_class(input->type_id);
     /* Set the IOD array creation parameters */
-    array.cell_size = (uint32_t)H5Tget_size(input->type_id);
+    if(dt_class == H5T_VLEN || 
+       (dt_class == H5T_STRING && H5Tis_variable_str(input->type_id)) )
+        array.cell_size = sizeof(iod_obj_id_t) + sizeof(iod_size_t);
+    else
+        array.cell_size = (uint32_t)H5Tget_size(input->type_id);
+
     array.num_dims = (uint32_t)H5Sget_simple_extent_ndims(space_id);
 
     /* Handle Scalar Dataspaces (set rank and current dims size to 1) */
@@ -147,7 +154,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     array.chunk_dims = NULL;
 
 #if H5VL_IOD_DEBUG 
-    fprintf(stderr, "now creating the dataset %s cellsize %d num dimenstions %d\n",
+    fprintf(stderr, "now creating the dataset %s cellsize %d num dimensions %d\n",
             last_comp, array.cell_size, array.num_dims);
 #endif
 
@@ -1518,7 +1525,7 @@ H5VL__iod_server_vl_data_io_cb(void UNUSED *elem, hid_t type_id, unsigned ndims,
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open Datatype");
 
         seq_len = *((size_t *)(udata->buf_ptr));
-        udata->buf_ptr += sizeof(size_t);
+        udata->buf_ptr += sizeof(iod_size_t);
 
         buf_size = seq_len * udata->mem_type_size;
 

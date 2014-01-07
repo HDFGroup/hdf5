@@ -419,7 +419,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog $(EXTLINK_DIRS) *.h5
 @BUILD_EFF_CONDITIONAL_TRUE@EXAMPLE_PROG_EFF = h5ff_server h5ff_client_map \
 @BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_M6.2_demo h5ff_client_multiple_cont h5ff_client_obj \
 @BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_dset h5ff_client_attr h5ff_client_links \
-@BUILD_EFF_CONDITIONAL_TRUE@                h5ff_python_exec h5ff_client_analysis
+@BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_vl_data h5ff_python_exec h5ff_client_analysis
 
 
 # Example programs.
