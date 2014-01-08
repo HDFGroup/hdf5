@@ -1909,6 +1909,64 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_lock
+ *
+ * Purpose:	Private version of H5FDlock()
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Vailin Choi; May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_lock(H5FD_t *file, hbool_t rw)
+{
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(file && file->cls);
+
+    if(file->cls->lock && (file->cls->lock)(file, rw) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "driver lock request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_lock() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_unlock
+ *
+ * Purpose:	Private version of H5FDunlock()
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Vailin Choi; May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_unlock(H5FD_t *file)
+{
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(file && file->cls);
+
+    if(file->cls->unlock && (file->cls->unlock)(file) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "driver unlock request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_unlock() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_get_fileno
  *
  * Purpose:	Quick and dirty routine to retrieve the file's 'fileno' value

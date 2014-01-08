@@ -193,6 +193,10 @@ typedef struct H5F_retry_info_t {
     uint32_t *retries[H5F_NUM_METADATA_READ_RETRY_TYPES];
 } H5F_retry_info_t;
 
+/* Callback for H5Pset_object_flush_cb() in a file access property list */
+typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -231,6 +235,7 @@ H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
 H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
 H5_DLL herr_t H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo);
 H5_DLL herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info);
+H5_DLL herr_t H5Fstart_swmr_write(hid_t file_id);
 H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type,
     size_t nsects, H5F_sect_info_t *sect_info/*out*/);
 H5_DLL herr_t H5Fclear_elink_file_cache(hid_t file_id);

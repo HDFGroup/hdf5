@@ -184,7 +184,7 @@ H5LD_construct_vector(char *fields, H5LD_memb_t *listv[]/*OUT*/, hid_t par_tid)
 	len = HDstrlen(fields_ptr)/2 + 2;
 
 	/* Allocate memory for an H5LD_memb_t for storing a field's info */
-	if((memb = (H5LD_memb_t *)HDcalloc(1, sizeof(H5LD_memb_t))) == NULL) {
+	if((memb = (H5LD_memb_t *)HDcalloc((size_t)1, sizeof(H5LD_memb_t))) == NULL) {
 	    ret_value = FAIL;
 	    break;
 	} 

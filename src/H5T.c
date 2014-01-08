@@ -5419,9 +5419,9 @@ H5Tflush(hid_t type_id)
     if(!H5T_is_named(dt))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
 
-    /* Call private function to flush datatype object */
-    if (H5O_flush_metadata(&dt->oloc, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFLUSH, FAIL, "unable to flush datatype")
+    /* To flush metadata and invoke flush callback if there is */
+    if(H5O_flush_common(&dt->oloc, type_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFLUSH, FAIL, "unable to flush datatype and object flush callback")
 
 done:
     FUNC_LEAVE_API(ret_value)

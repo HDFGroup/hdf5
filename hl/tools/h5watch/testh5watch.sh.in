@@ -191,7 +191,7 @@ TEST_WATCH() {
         wait $extend_pid                                # Wait for "extend" process to complete
         extend_exit=$?                                  # Collect "extend" process' exit code
         sleep 1                                         # Sleep to make sure output is flushed
-        kill $watch_pid                                 # Kill h5watch
+        kill $watch_pid                              	# Kill h5watch
         #
         if [ $extend_exit -ne 0 ]; then                 # Error returned from "extend" process
             $ECHO "*FAILED*"

@@ -41,6 +41,11 @@ typedef struct H5F_file_t H5F_file_t;
 /* Block aggregation structure */
 typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 
+/* Structure for object flush callback property (H5Pset_object_flush_cb)*/
+typedef struct H5F_object_flush_t {
+    H5F_flush_cb_t func;	/* The callback function */
+    void *udata;		/* User data */
+} H5F_object_flush_t;
 
 /*
  * Encode and decode macros for file meta-data.
@@ -463,8 +468,10 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_ACS_LATEST_FORMAT_NAME              "latest_format" /* 'Use latest format version' flag */
 #define H5F_ACS_WANT_POSIX_FD_NAME              "want_posix_fd" /* Internal: query the file descriptor from the core VFD, instead of the memory address */
 #define H5F_ACS_METADATA_READ_ATTEMPTS_NAME     "metadata_read_attempts" /* # of metadata read attempts */
+#define H5F_ACS_OBJECT_FLUSH_CB_NAME     	"object_flush_cb" 	 /* Object flush callback */
 #define H5F_ACS_EFC_SIZE_NAME                   "efc_size"      /* Size of external file cache */
 #define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
+#define H5F_ACS_CLEAR_STATUS_FLAGS_NAME         "clear_status_flags" /* Whether to clear superblock status_flags (private property only used by h5clear) */
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME 		"local"                 /* Whether absolute symlinks local to file. */
@@ -640,6 +647,8 @@ H5_DLL herr_t H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
 /* Functions that flush or evict */
 H5_DLL herr_t H5F_flush_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id);
 H5_DLL herr_t H5F_evict_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id);
+H5_DLL herr_t H5F_evict_cache_entries(H5F_t *f, hid_t dxpl_id);
+
 
 /* Functions that read & verify a piece of metadata with checksum */
 H5_DLL herr_t H5F_read_check_metadata(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
@@ -649,6 +658,10 @@ H5_DLL herr_t H5F_get_checksums(const uint8_t *buf, size_t chk_size, uint32_t *s
 
 /* Routine to track the # of retries */
 H5_DLL herr_t H5F_track_metadata_read_retries(H5F_t *f, unsigned actype, unsigned retries);
+
+/* Routine to invoke callback function upon object flush */
+H5_DLL herr_t H5F_object_flush_cb(H5F_t *f, hid_t obj_id);
+
 
 /* Address-related functions */
 H5_DLL void H5F_addr_encode(const H5F_t *f, uint8_t **pp, haddr_t addr);

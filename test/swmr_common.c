@@ -125,7 +125,7 @@ create_symbol_datatype(void)
     hid_t opaq_type_id;         /* Datatype ID for opaque part of record */
 
     /* Create opaque datatype to represent other information for this record */
-    if((opaq_type_id = H5Tcreate(H5T_OPAQUE, DTYPE_SIZE)) < 0)
+    if((opaq_type_id = H5Tcreate(H5T_OPAQUE, (size_t)DTYPE_SIZE)) < 0)
         return -1;
 
     /* Create compound datatype for symbol */

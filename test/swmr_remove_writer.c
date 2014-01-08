@@ -340,6 +340,9 @@ int main(int argc, const char *argv[])
         exit(1);
     } /* end if */
 
+    /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
+    h5_send_message(WRITER_MESSAGE);
+
     /* Emit informational message */
     if(verbose)
         fprintf(stderr, "Removing records\n");

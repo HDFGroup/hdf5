@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "hdf5.h"
+#include "h5test.h"
 
 /* Macro definitions */
 #define Hgoto_error(val)	{ret_value=val; goto done;}
@@ -32,6 +32,9 @@
 #define UC_DATATYPE		H5T_NATIVE_SHORT    /* use case HDF5 data type */
 #define UC_CTYPE		short		    /* use case C data type */
 #define UC_RANK			3		    /* use case dataset rank */
+
+/* Name of message file that is sent by the writer */
+#define WRITER_MESSAGE          "USE_WRITER_MESSAGE"
 
 /* type declarations */
 typedef enum part_t {
@@ -62,23 +65,5 @@ int setup_parameters(int argc, char * const argv[]);
 void show_parameters(void);
 void usage(const char *prog);
 int create_uc_file(void);
-int write_uc_file(void);
-int read_uc_file(void);
-
-/* private definitions of Standard functions */
-
-/* Standard POSIX functions */
-#define HDassert(s)		assert(s)
-#define HDfree(s)		free(s)
-#define HDgetenv(s)		getenv(s)
-#define HDmalloc(s)		malloc(s)
-#define HDmemcpy(X,C,Z)		memcpy(X,C,Z)
-#define HDmemset(X,C,Z)		memset(X,C,Z)
-#define HDperror(s)		perror(s)
-#define HDstrcat(s1, s2)	strcat(s1, s2)
-#define HDstrcmp(s1, s2)	strcmp(s1, s2)
-#define HDstrcpy(s1, s2)	strcpy(s1, s2)
-#define HDstrdup(s)		strdup(s)
-#define HDstrlen(s)		strlen(s)
-#define HDstrncpy(s1, s2, N)	strncpy(s1, s2, N)
-#define HDstrrchr(s, c)		strrchr(s, c)
+int write_uc_file(hbool_t tosend);
+int read_uc_file(hbool_t towait);

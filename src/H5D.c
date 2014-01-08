@@ -766,12 +766,21 @@ H5Dget_access_plist(hid_t dset_id)
 
     /* If the dataset is chunked then copy the rdcc parameters */
     if (dset->shared->layout.type == H5D_CHUNKED) {
+	H5D_append_flush_t info;
+
         if (H5P_set(new_plist, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &(dset->shared->cache.chunk.nslots)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data cache number of slots")
         if (H5P_set(new_plist, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(dset->shared->cache.chunk.nbytes_max)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data cache byte size")
         if (H5P_set(new_plist, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, &(dset->shared->cache.chunk.w0)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set preempt read chunks")
+
+	info.ndims = dset->shared->append_flush.ndims;
+	info.func = dset->shared->append_flush.func;
+	info.udata = dset->shared->append_flush.udata;
+	HDmemcpy(info.boundary, dset->shared->append_flush.boundary, sizeof(dset->shared->append_flush.boundary));
+        if(H5P_set(new_plist, H5D_ACS_APPEND_FLUSH_NAME, &info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set append flush property")
     } /* end if */
 
     /* Set the return value */
@@ -1176,9 +1185,8 @@ H5Dflush(hid_t dset_id)
     if(H5D__flush_real(dset, H5AC_dxpl_id) < 0)
 	HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
 
-    /* Call private function to flush dataset object */
-    if (H5O_flush_metadata(&dset->oloc, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush dataset")
+    if(H5O_flush_common(&dset->oloc, dset_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush dataset and object flush callback")
 
 done:
     FUNC_LEAVE_API(ret_value)

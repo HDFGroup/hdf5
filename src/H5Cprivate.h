@@ -1069,6 +1069,7 @@ typedef struct H5C_auto_size_ctl_t
 #define H5C__TAKE_OWNERSHIP_FLAG		0x1000
 #define H5C__FLUSH_LAST_FLAG			0x2000
 #define H5C__FLUSH_COLLECTIVELY_FLAG		0x4000
+#define H5C__EVICT_ALLOW_LAST_PINS_FLAG		0x8000
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5C_apply_candidate_list(H5F_t * f,
@@ -1104,6 +1105,9 @@ H5_DLL void H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
                                         size_t new_min_clean_size);
 
 H5_DLL herr_t H5C_dest(H5F_t * f,
+                       hid_t   primary_dxpl_id,
+                       hid_t   secondary_dxpl_id);
+H5_DLL herr_t H5C_evict(H5F_t * f,
                        hid_t   primary_dxpl_id,
                        hid_t   secondary_dxpl_id);
 

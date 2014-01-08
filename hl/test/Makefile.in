@@ -73,8 +73,7 @@ DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/mkinstalldirs \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
-check_PROGRAMS = $(am__EXEEXT_1) ld_monitor$(EXEEXT) \
-	ld_extend$(EXEEXT)
+check_PROGRAMS = $(am__EXEEXT_1) ld_mx$(EXEEXT)
 @BUILD_ALL_CONDITIONAL_TRUE@noinst_PROGRAMS = $(am__EXEEXT_2)
 TESTS = $(am__EXEEXT_1) $(TEST_SCRIPT)
 subdir = hl/test
@@ -88,7 +87,8 @@ CONFIG_CLEAN_FILES = H5srcdir_str.h test_ld.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = test_lite$(EXEEXT) test_image$(EXEEXT) \
 	test_file_image$(EXEEXT) test_table$(EXEEXT) test_ds$(EXEEXT) \
-	test_packet$(EXEEXT) test_dset_opt$(EXEEXT)
+	test_packet$(EXEEXT) test_dset_opt$(EXEEXT) test_ld$(EXEEXT) \
+	test_dset_append$(EXEEXT)
 am__EXEEXT_2 = gen_test_ds$(EXEEXT) gen_test_ld$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 gen_test_ds_SOURCES = gen_test_ds.c
@@ -103,18 +103,18 @@ gen_test_ld_SOURCES = gen_test_ld.c
 gen_test_ld_OBJECTS = gen_test_ld.$(OBJEXT)
 gen_test_ld_LDADD = $(LDADD)
 gen_test_ld_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
-ld_extend_SOURCES = ld_extend.c
-ld_extend_OBJECTS = ld_extend.$(OBJEXT)
-ld_extend_LDADD = $(LDADD)
-ld_extend_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
-ld_monitor_SOURCES = ld_monitor.c
-ld_monitor_OBJECTS = ld_monitor.$(OBJEXT)
-ld_monitor_LDADD = $(LDADD)
-ld_monitor_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
+ld_mx_SOURCES = ld_mx.c
+ld_mx_OBJECTS = ld_mx.$(OBJEXT)
+ld_mx_LDADD = $(LDADD)
+ld_mx_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 test_ds_SOURCES = test_ds.c
 test_ds_OBJECTS = test_ds.$(OBJEXT)
 test_ds_LDADD = $(LDADD)
 test_ds_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
+test_dset_append_SOURCES = test_dset_append.c
+test_dset_append_OBJECTS = test_dset_append.$(OBJEXT)
+test_dset_append_LDADD = $(LDADD)
+test_dset_append_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 test_dset_opt_SOURCES = test_dset_opt.c
 test_dset_opt_OBJECTS = test_dset_opt.$(OBJEXT)
 test_dset_opt_LDADD = $(LDADD)
@@ -127,6 +127,10 @@ test_image_SOURCES = test_image.c
 test_image_OBJECTS = test_image.$(OBJEXT)
 test_image_LDADD = $(LDADD)
 test_image_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
+test_ld_SOURCES = test_ld.c
+test_ld_OBJECTS = test_ld.$(OBJEXT)
+test_ld_LDADD = $(LDADD)
+test_ld_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 test_lite_SOURCES = test_lite.c
 test_lite_OBJECTS = test_lite.$(OBJEXT)
 test_lite_LDADD = $(LDADD)
@@ -173,12 +177,12 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = gen_test_ds.c gen_test_ld.c ld_extend.c ld_monitor.c \
-	test_ds.c test_dset_opt.c test_file_image.c test_image.c \
-	test_lite.c test_packet.c test_table.c
-DIST_SOURCES = gen_test_ds.c gen_test_ld.c ld_extend.c ld_monitor.c \
-	test_ds.c test_dset_opt.c test_file_image.c test_image.c \
-	test_lite.c test_packet.c test_table.c
+SOURCES = gen_test_ds.c gen_test_ld.c ld_mx.c test_ds.c \
+	test_dset_append.c test_dset_opt.c test_file_image.c \
+	test_image.c test_ld.c test_lite.c test_packet.c test_table.c
+DIST_SOURCES = gen_test_ds.c gen_test_ld.c ld_mx.c test_ds.c \
+	test_dset_append.c test_dset_opt.c test_file_image.c \
+	test_image.c test_ld.c test_lite.c test_packet.c test_table.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -485,14 +489,16 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog combine_tables[1-2].h5 \
 # Test script
 TEST_SCRIPT = test_ld.sh
 check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = ld_monitor$(EXEEXT) ld_extend$(EXEEXT)
+SCRIPT_DEPEND = ld_mx$(EXEEXT)
 
 # The tests depend on the hdf5, hdf5 test,  and hdf5_hl libraries
 LDADD = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 
 # Test programs.  These are our main targets.  They should be listed in the
 # order to be executed, generally most specific tests to least specific tests.
-TEST_PROG = test_lite test_image test_file_image test_table test_ds test_packet test_dset_opt
+TEST_PROG = test_lite test_image test_file_image test_table test_ds test_packet test_dset_opt \
+	test_ld test_dset_append
+
 
 # These programs generate test files for the tests.  They don't need to be
 # compiled every time we want to test the library.  However, putting
@@ -584,15 +590,15 @@ gen_test_ds$(EXEEXT): $(gen_test_ds_OBJECTS) $(gen_test_ds_DEPENDENCIES) $(EXTRA
 gen_test_ld$(EXEEXT): $(gen_test_ld_OBJECTS) $(gen_test_ld_DEPENDENCIES) $(EXTRA_gen_test_ld_DEPENDENCIES) 
 	@rm -f gen_test_ld$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(gen_test_ld_OBJECTS) $(gen_test_ld_LDADD) $(LIBS)
-ld_extend$(EXEEXT): $(ld_extend_OBJECTS) $(ld_extend_DEPENDENCIES) $(EXTRA_ld_extend_DEPENDENCIES) 
-	@rm -f ld_extend$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(ld_extend_OBJECTS) $(ld_extend_LDADD) $(LIBS)
-ld_monitor$(EXEEXT): $(ld_monitor_OBJECTS) $(ld_monitor_DEPENDENCIES) $(EXTRA_ld_monitor_DEPENDENCIES) 
-	@rm -f ld_monitor$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(ld_monitor_OBJECTS) $(ld_monitor_LDADD) $(LIBS)
+ld_mx$(EXEEXT): $(ld_mx_OBJECTS) $(ld_mx_DEPENDENCIES) $(EXTRA_ld_mx_DEPENDENCIES) 
+	@rm -f ld_mx$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(ld_mx_OBJECTS) $(ld_mx_LDADD) $(LIBS)
 test_ds$(EXEEXT): $(test_ds_OBJECTS) $(test_ds_DEPENDENCIES) $(EXTRA_test_ds_DEPENDENCIES) 
 	@rm -f test_ds$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_ds_OBJECTS) $(test_ds_LDADD) $(LIBS)
+test_dset_append$(EXEEXT): $(test_dset_append_OBJECTS) $(test_dset_append_DEPENDENCIES) $(EXTRA_test_dset_append_DEPENDENCIES) 
+	@rm -f test_dset_append$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_dset_append_OBJECTS) $(test_dset_append_LDADD) $(LIBS)
 test_dset_opt$(EXEEXT): $(test_dset_opt_OBJECTS) $(test_dset_opt_DEPENDENCIES) $(EXTRA_test_dset_opt_DEPENDENCIES) 
 	@rm -f test_dset_opt$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_dset_opt_OBJECTS) $(test_dset_opt_LDADD) $(LIBS)
@@ -602,6 +608,9 @@ test_file_image$(EXEEXT): $(test_file_image_OBJECTS) $(test_file_image_DEPENDENC
 test_image$(EXEEXT): $(test_image_OBJECTS) $(test_image_DEPENDENCIES) $(EXTRA_test_image_DEPENDENCIES) 
 	@rm -f test_image$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_image_OBJECTS) $(test_image_LDADD) $(LIBS)
+test_ld$(EXEEXT): $(test_ld_OBJECTS) $(test_ld_DEPENDENCIES) $(EXTRA_test_ld_DEPENDENCIES) 
+	@rm -f test_ld$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_ld_OBJECTS) $(test_ld_LDADD) $(LIBS)
 test_lite$(EXEEXT): $(test_lite_OBJECTS) $(test_lite_DEPENDENCIES) $(EXTRA_test_lite_DEPENDENCIES) 
 	@rm -f test_lite$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_lite_OBJECTS) $(test_lite_LDADD) $(LIBS)
@@ -620,12 +629,13 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_test_ds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_test_ld.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ld_extend.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ld_monitor.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ld_mx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_ds.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dset_append.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dset_opt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_file_image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_image.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_ld.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_lite.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_table.Po@am__quote@
@@ -889,7 +899,6 @@ uninstall-am:
 
 help:
 	@$(top_srcdir)/bin/makehelp
-	test_ld
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

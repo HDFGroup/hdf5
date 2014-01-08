@@ -1561,7 +1561,41 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C_evict
  *
+ * Purpose:     Evict all except pinned entries in the cache
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; Dec 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_evict(H5F_t * f,
+         hid_t	 primary_dxpl_id,
+         hid_t	 secondary_dxpl_id)
+{
+    H5C_t *cache_ptr = f->shared->cache;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    /* Flush and invalidate all cache entries except the pinned entries */
+    if(H5C_flush_invalidate_cache(f, primary_dxpl_id, secondary_dxpl_id,
+                H5C__EVICT_ALLOW_LAST_PINS_FLAG) < 0 )
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict entries in the cache")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_evict() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_expunge_entry
  *
  * Purpose:     Use this function to tell the cache to expunge an entry
@@ -7534,6 +7568,7 @@ H5C_flush_invalidate_cache(H5F_t * f,
     int32_t		cur_pel_len;
     int32_t		old_pel_len;
     unsigned		cooked_flags;
+    unsigned		evict_flags;
     H5SL_node_t * 	node_ptr = NULL;
     H5C_cache_entry_t *	entry_ptr = NULL;
     H5C_cache_entry_t *	next_entry_ptr = NULL;
@@ -7556,6 +7591,7 @@ H5C_flush_invalidate_cache(H5F_t * f,
      * At present, only the H5C__FLUSH_CLEAR_ONLY_FLAG is kept.
      */
     cooked_flags = flags & H5C__FLUSH_CLEAR_ONLY_FLAG;
+    evict_flags = flags & H5C__EVICT_ALLOW_LAST_PINS_FLAG;
 
     /* remove ageout markers if present */
     if ( cache_ptr->epoch_markers_active > 0 ) {
@@ -7931,6 +7967,8 @@ end_of_inner_loop:
         cur_pel_len = cache_ptr->pel_len;
 
         if ( ( cur_pel_len > 0 ) && ( cur_pel_len >= old_pel_len ) ) {
+
+	    if(evict_flags) HGOTO_DONE(TRUE)
 
            /* The number of pinned entries is positive, and it is not
             * declining.  Scream and die.
@@ -9663,7 +9701,6 @@ H5C__mark_flush_dep_clean(H5C_cache_entry_t * entry)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__mark_flush_dep_clean() */
-
 
 #ifndef NDEBUG
 

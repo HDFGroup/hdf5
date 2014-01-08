@@ -70,7 +70,7 @@ static herr_t H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset,
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
 static herr_t H5D__init_storage(H5D_t *dataset, hbool_t full_overwrite,
     hsize_t old_dim[], hid_t dxpl_id);
-
+static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
 
 /*********************/
 /* Package Variables */
@@ -1163,6 +1163,9 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     /* Indicate that the layout information was initialized */
     layout_init = TRUE;
 
+    if(H5D__append_flush_setup(new_dset, dapl_id) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "unable to set up flush append property")
+
     /* Add the dataset to the list of opened objects in the file */
     if(H5FO_top_incr(new_dset->oloc.file, new_dset->oloc.addr) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't incr object ref. count")
@@ -1264,6 +1267,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id)
 
         /* We're the first dataset to use the the shared info */
         dataset->shared->fo_count = 1;
+
     } /* end if */
     else {
         /* Point to shared info */
@@ -1282,6 +1286,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id)
         /* Increment object count for the object in the top file */
         if(H5FO_top_incr(dataset->oloc.file, dataset->oloc.addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't increment object count")
+
     } /* end else */
 
     ret_value = dataset;
@@ -1306,6 +1311,84 @@ done:
 } /* end H5D_open() */
 
 
+/*
+ *-------------------------------------------------------------------------
+ * Function:	H5D__flush_append_setup
+ *
+ * Purpose:	
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id) 
+{
+    H5P_genplist_t *dapl;               /* data access property list object pointer */
+    hsize_t curr_dims[H5S_MAX_RANK];	/* current dimension sizes */
+    hsize_t max_dims[H5S_MAX_RANK];	/* current dimension sizes */
+    int rank;                       	/* dataspace # of dimensions */
+    int i;				/* local index variable */
+    H5D_append_flush_t info;
+    herr_t ret_value = SUCCEED;         /* return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* check args */
+    HDassert(dset);
+    HDassert(dset->shared);
+
+    dset->shared->append_flush.ndims = 0;
+    dset->shared->append_flush.func = NULL;
+    dset->shared->append_flush.udata = NULL;
+    HDmemset(dset->shared->append_flush.boundary,  0, sizeof(dset->shared->append_flush.boundary));
+
+    if(dapl_id != H5P_DATASET_ACCESS_DEFAULT && dset->shared->layout.type == H5D_CHUNKED) {
+	/* Get dataset access property list */
+	if(NULL == (dapl = (H5P_genplist_t *)H5I_object(dapl_id)))
+	    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for dapl ID");
+
+	/* Check if append flush property exists */
+	if(H5P_exist_plist(dapl, H5D_ACS_APPEND_FLUSH_NAME) > 0) {
+
+	    /* Get append flush property */
+	    if(H5P_get(dapl, H5D_ACS_APPEND_FLUSH_NAME, &info) < 0)
+		HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get append flush info")
+	    else if(info.ndims > 0) {
+
+		/* Get dataset rank */
+		if((rank = H5S_get_simple_extent_dims(dset->shared->space, curr_dims, max_dims)) < 0)
+		    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
+
+		if(info.ndims != rank)
+		    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "boundary dimension rank does not match dataset rank")
+
+		/* Validate boundary sizes */
+		for(i = 0; i < info.ndims; i++) {
+		    if(info.boundary[i] != 0) /* when a non-zero boundary is set */
+			/* the dimension is extendible? */
+			if(max_dims[i] != H5S_UNLIMITED && max_dims[i] == curr_dims[i])
+			    break;
+		}
+
+		if(i != info.ndims) /* at least one boundary dimension is not extendible */
+		    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "boundary dimension is not valid")
+
+		dset->shared->append_flush.ndims = info.ndims;
+		dset->shared->append_flush.func = info.func;
+		dset->shared->append_flush.udata = info.udata;
+		HDmemcpy(dset->shared->append_flush.boundary, info.boundary, sizeof(info.boundary));
+	    }
+	}
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__append_flush_setup() */
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5D__open_oid
  *
@@ -1325,6 +1408,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
     H5O_fill_t *fill_prop;              /* Pointer to dataset's fill value info */
     unsigned alloc_time_state;          /* Allocation time state */
     htri_t msg_exists;                  /* Whether a particular type of message exists */
+    hbool_t layout_init = FALSE;    	/* Flag to indicate that chunk information was initialized */
     herr_t ret_value = SUCCEED;		/* Return value */
 
     FUNC_ENTER_STATIC_TAG(dxpl_id, dataset->oloc.addr, FAIL)
@@ -1361,6 +1445,13 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
     /* Get the layout/pline/efl message information */
     if(H5D__layout_oh_read(dataset, dxpl_id, dapl_id, plist) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get layout/pline/efl info")
+
+    /* Indicate that the layout information was initialized */
+    layout_init = TRUE;
+
+    /* Set up flush append property */
+    if(H5D__append_flush_setup(dataset, dapl_id))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, FAIL, "unable to set up flush append property")
 
     /* Point at dataset's copy, to cache it for later */
     fill_prop = &dataset->shared->dcpl_cache.fill;
@@ -1441,6 +1532,10 @@ done:
         if(H5F_addr_defined(dataset->oloc.addr) && H5O_close(&(dataset->oloc)) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
         if(dataset->shared) {
+	    if(dataset->shared->layout.type == H5D_CHUNKED && layout_init) {
+                if(H5D__chunk_dest(dataset->oloc.file, dxpl_id, dataset) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy chunk cache")
+            } /* end if */
             if(dataset->shared->space && H5S_close(dataset->shared->space) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
             if(dataset->shared->type) {

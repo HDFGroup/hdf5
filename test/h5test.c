@@ -1231,3 +1231,56 @@ error:
     return -1;
 }
 
+/*
+ * To send a message by creating the file.
+ * This is a helper routine used in:
+ *	1) tfile.c: test_file_lock_concur() and test_file_lock_swmr_concur()
+ *	2) use_common.c
+ *	3) swmr_addrme_writer.c, swmr_remove_writer.c, swmr_sparse_writer.c, swmr_writer.c
+ */
+void
+h5_send_message(const char *file)
+{
+    FILE *id;
+
+    id = HDfopen(file, "w+");
+    HDfclose(id);
+} /* h5_send_message() */
+
+/*
+ * Repeatedly check for the message file.
+ * It will stop when the file exists or exceeds the timeout limit.
+ * This is a helper routine used in:
+ *	1) tfile.c: test_file_lock_concur() and test_file_lock_swmr_concur()
+ *	2) use_common.c
+ */
+int
+h5_wait_message(const char *file)
+{
+    FILE *id;           /* File pointer */
+    time_t t0, t1;      /* Time info */
+
+    /* Start timer */
+    HDtime(&t0);
+
+    /* Repeatedly check whether the file exists */
+    while((id = HDfopen(file, "r")) == NULL) {
+        /* Get current time */
+        HDtime(&t1);
+        /*
+         * Determine time difference--
+         *   if waiting too long for the message, then it is
+         *   unlikely the message will get sent, then fail rather
+         *   than loop forever.
+         */
+        if(HDdifftime(t1, t0) > MESSAGE_TIMEOUT)
+            goto done;
+    }
+
+    if(id != NULL) HDfclose(id);
+    HDunlink(file);
+    return(1);
+
+done:
+    return(-1);
+} /* h5_wait_message() */

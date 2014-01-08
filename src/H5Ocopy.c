@@ -362,20 +362,33 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     /* Check if the object at the address is already open in the file */
     if(H5FO_opened(oloc_src->file, oloc_src->addr) != NULL) {
 	
-	H5G_loc_t   tmp_loc; 	/* Location of object */
-	H5O_loc_t   tmp_oloc; 	/* Location of object */
-	H5G_name_t  tmp_path;	/* Object's path */
+	H5G_loc_t tmp_loc; 	/* Location of object */
+	H5O_loc_t tmp_oloc; 	/* Location of object */
+	H5G_name_t tmp_path;	/* Object's path */
+	void *obj_ptr = NULL;	/* Object pointer */
+	hid_t tmp_id = -1;	/* Object ID */
 
 	tmp_loc.oloc = &tmp_oloc;
 	tmp_loc.path = &tmp_path;
 	tmp_oloc.file = oloc_src->file;
 	tmp_oloc.addr = oloc_src->addr;
-	tmp_oloc.holding_file = oloc_src->holding_file;
+	tmp_oloc.holding_file = FALSE;
 	H5G_name_reset(tmp_loc.path);
 
-	/* Flush the object of this class */
-        if(obj_class->flush && obj_class->flush(&tmp_loc, dxpl_id) < 0)
+	/* Get a temporary ID */
+	if((tmp_id = obj_class->open(&tmp_loc, H5P_DEFAULT, dxpl_id, FALSE)) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to open object")
+
+	/* Get object pointer */
+	obj_ptr = H5I_object(tmp_id);
+
+	/* Flush the object */
+        if(obj_class->flush && obj_class->flush(obj_ptr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
+
+	/* Release the temporary ID */
+	if(tmp_id != -1 && H5I_dec_app_ref(tmp_id))
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close temporary ID")
     }
 
     /* Get source object header */
@@ -476,7 +489,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     oh_dst->alloc_nchunks = oh_dst->nchunks = 0;
 
     /* Allocate memory for the chunk array - always start with 1 chunk */
-    if(NULL == (oh_dst->chunk = H5FL_SEQ_MALLOC(H5O_chunk_t, 1)))
+    if(NULL == (oh_dst->chunk = H5FL_SEQ_MALLOC(H5O_chunk_t, (size_t)1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Update number of allocated chunks.  There are still no chunks used. */
@@ -1665,7 +1678,7 @@ H5O_copy_search_comm_dt_check(H5O_loc_t *obj_oloc,
     attr_op.u.lib_op = H5O_copy_search_comm_dt_attr_cb;
     udata->obj_oloc.file = obj_oloc->file;
     udata->obj_oloc.addr = obj_oloc->addr;
-    if(H5O_attr_iterate_real((hid_t)-1, obj_oloc, udata->dxpl_id, H5_INDEX_NAME, H5_ITER_NATIVE, 0, NULL, &attr_op, udata) < 0)
+    if(H5O_attr_iterate_real((hid_t)-1, obj_oloc, udata->dxpl_id, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op, udata) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "error iterating over attributes");
 
 done:

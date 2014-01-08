@@ -238,6 +238,55 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F_evict_cache_entries
+ *
+ * Purpose:     To revict all cache entries except the pinned superblock entry
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; Dec 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_evict_cache_entries(H5F_t *f, hid_t dxpl_id)
+{
+    unsigned status = 0;
+    int32_t    cur_num_entries;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Evict all except pinned entries in the cache */
+    if(H5AC_evict(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "unable to evict all except pinned entries")
+
+    /* Retrieve status of the superblock */
+    if(H5AC_get_entry_status(f, (haddr_t)0, &status) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to get entry status")
+
+    /* Verify status of the superblock entry in the cache */
+    if(!(status & H5AC_ES__IN_CACHE) || !(status & H5AC_ES__IS_PINNED) ||
+        (status & H5AC_ES__IS_DIRTY) || (status & H5AC_ES__IS_PROTECTED))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to get entry status")
+
+    /* Get the number of cache entries */
+    if(H5AC_get_cache_size(f->shared->cache, NULL, NULL, NULL, &cur_num_entries) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_size() failed.")
+
+    /* Should be the only one left in the cache */
+    if(cur_num_entries != 1)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "number of cache entries is not correct")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5F_evict_cache_entries() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5F_get_checksums
  *
  * Purpose:   	Decode checksum stored in the buffer

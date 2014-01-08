@@ -119,6 +119,13 @@
 #endif
 
 /*
+ * flock() in sys/file.h is used for the implemention of file locking.
+ */
+#ifdef H5_HAVE_SYS_FILE_H
+#   include <sys/file.h>
+#endif
+
+/*
  * Resource usage is not Posix.1 but HDF5 uses it anyway for some performance
  * and debugging code if available.
  */
@@ -704,6 +711,9 @@ typedef struct {
 #ifndef HDfileno
     #define HDfileno(F)    fileno(F)
 #endif /* HDfileno */
+#ifndef HDflock
+    #define HDflock(F,L)    flock(F,L)
+#endif /* HDflock */
 #ifndef HDfloor
     #define HDfloor(X)    floor(X)
 #endif /* HDfloor */

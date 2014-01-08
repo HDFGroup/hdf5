@@ -330,7 +330,7 @@ typedef struct H5O_obj_class_t {
     void	*(*create)(H5F_t *, void *, H5G_loc_t *, hid_t );	/*create an object of this class */
     H5O_loc_t	*(*get_oloc)(hid_t );		/*get the object header location for an object */
     herr_t      (*bh_info)(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info); /*get the index & heap info for an object */
-    herr_t      (*flush)(H5G_loc_t *loc, hid_t dxpl_id); 		/*flush an opened object of this class */
+    herr_t      (*flush)(void *obj_ptr, hid_t dxpl_id); /*flush an opened object of this class */
 } H5O_obj_class_t;
 
 /* Node in skip list to map addresses from one file to another during object header copy */

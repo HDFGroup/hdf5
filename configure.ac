@@ -1277,7 +1277,7 @@ AC_CHECK_FUNCS([clock_gettime],[have_clock_gettime="yes"],[have_clock_gettime="n
 
 ## Unix
 AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
-AC_CHECK_HEADERS([sys/socket.h sys/types.h])
+AC_CHECK_HEADERS([sys/socket.h sys/types.h sys/file.h])
 AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
 AC_CHECK_HEADERS([dirent.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
@@ -4556,6 +4556,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/lib/Makefile
                  tools/misc/Makefile
                  tools/misc/h5cc
+		 tools/misc/testh5clear.sh
                  tools/misc/testh5mkgrp.sh
                  tools/misc/testh5repart.sh
                  tools/h5stat/testh5stat.sh

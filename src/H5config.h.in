@@ -346,6 +346,9 @@
 /* Define to 1 if you have the `system' function. */
 #undef HAVE_SYSTEM
 
+/* Define to 1 if you have the <sys/file.h> header file. */
+#undef HAVE_SYS_FILE_H
+
 /* Define to 1 if you have the <sys/fpu.h> header file. */
 #undef HAVE_SYS_FPU_H
 

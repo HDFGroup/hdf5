@@ -22,7 +22,7 @@ extern "C" {
 
 /*-------------------------------------------------------------------------
  *
- * Direct chunk write function
+ * Direct chunk write function, Dataset append operation
  *
  *-------------------------------------------------------------------------
  */
@@ -33,6 +33,11 @@ H5_HLDLL herr_t H5DOwrite_chunk(hid_t dset_id,
 			const hsize_t *offset, 
          		size_t data_size, 
 			const void *buf);
+
+herr_t
+H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
+           hid_t memtype, const void *buf);
+
 
 #ifdef __cplusplus
 }

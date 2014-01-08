@@ -144,6 +144,7 @@ int
 main(void)
 {
     hid_t fid;			/* File id */
+    hid_t fapl;			/* File access property list */
     hsize_t cur_dims[1];	/* Dimension sizes */
     hsize_t max_dims[1];	/* Maximum dimension sizes */
     hsize_t cur2_dims[2];	/* Current dimension sizes */
@@ -160,8 +161,16 @@ main(void)
     set_t two_cbuf[TWO_DIMS0*TWO_DIMS1];	/* Buffer for data with compound type */
     int i;			/* Local index variable */
 
+    /* Create a file access property list */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto done;
+
+    /* Set to use latest library format */
+    if((H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST)) < 0)
+        goto done;
+
     /* Create a file */
-    if((fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if((fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	goto done;
 
     /* Initialization for one-dimensional dataset */
@@ -334,6 +343,8 @@ main(void)
     if(H5Tclose(esc_sub2_tid) < 0) goto done;
     if(H5Tclose(esc_sub4_tid) < 0) goto done;
     if(H5Tclose(esc_set_tid) < 0) goto done;
+
+    if(H5Pclose(fapl) < 0) goto done;
     if(H5Fclose(fid) < 0) goto done;
 
     exit(EXIT_SUCCESS);
@@ -353,6 +364,7 @@ done:
 	H5Dclose(scalar_did);
 	H5Sclose(scalar_sid);
 
+	H5Pclose(fapl);
 	H5Fclose(fid);
     H5E_END_TRY
 

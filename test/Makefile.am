@@ -23,10 +23,21 @@ include $(top_srcdir)/config/commence.am
 
 INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 
-# Test script for error_test and err_compat
+# Test scripts--
+#       testerror.sh: err_compat, error_test
+#       testlibinfo.sh:
+#       testcheck_version.sh: tcheck_version
+#       tetlinks_env.sh: links_env
+#       testflushrefresh.sh: flushrefresh
+#       test_usecases.sh: use_append_chunk, use_append_mchunks
+#       testswmr.sh: swmr*
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh \
-    $(srcdir)/testswmr.sh testflushrefresh.sh test_usecases.sh
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
+	testflushrefresh.sh test_usecases.sh $(srcdir)/testswmr.sh
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
+    flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) \
+    swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) swmr_writer$(EXEEXT) \
+    swmr_remove_reader$(EXEEXT) swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
+    swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) swmr_start_write$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
   TEST_SCRIPT += test_plugin.sh
   SCRIPT_DEPEND += plugin$(EXEEXT)
@@ -43,25 +54,33 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # other current library code tests.
 TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            pool accum hyperslab istore bittests dt_arith \
-           dtypes dsets cmpd_dset filter_fail extend external efc objcopy\
-	   links twriteorder unlink \
-           big mtime fillval mount flush1 flush2 app_ref enum \
+           dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
+           twriteorder big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_with_endianess\
            getname vfd ntypes dangle dtransform reserved cross_read \
-           freespace mf farray earray btree2 fheap file_image unregister
+           freespace mf farray earray btree2 fheap file_image unregister test_swmr
 
-bin_PROGRAMS=swmr_generator swmr_reader swmr_writer swmr_remove_reader \
+bin_PROGRAMS=swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
     use_append_chunk use_append_mchunks atomic_writer atomic_reader accum_swmr_reader
 
-# List programs to be built when testing here. error_test and err_compat are
-# built at the same time as the other tests, but executed by testerror.sh.
+# List programs to be built when testing here.
+# error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
 # tcheck_version is used by testcheck_version.sh.
+# accum_swmr_reader is used by accum.c.
+# atomic_writer and atomic_reader are standalone programs.
+# links_env is used by testlinks_env.sh
+# flushrefresh is used by testflushrefresh.sh.
+# use_append_chunk and use_append_mchunks are used by test_usecases.sh
+# swmr* files are used by testswmr.sh.
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
-check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_env \
-    flushrefresh
+check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
+    testmeta accum_swmr_reader atomic_writer atomic_reader \
+    links_env flushrefresh use_append_chunk use_append_mchunks \
+    swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
+    swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= plugin
 endif
@@ -160,10 +179,10 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
     new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
-    swmr_data.h5 use_append_chunk.h5 use_append_mchunks.h5           \
+    swmr_data.h5 use_use_append_chunk.h5 use_append_mchunks.h5           \
     flushrefresh.h5 flushrefresh_VERIFICATION_START                  \
     flushrefresh_VERIFICATION_CHECKPOINT1 flushrefresh_VERIFICATION_CHECKPOINT2 \
-    flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 ohdr_swmr.h5
+    flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 ohdr_swmr.h5 test_swmr.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \

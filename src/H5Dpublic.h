@@ -100,6 +100,9 @@ typedef enum H5D_fill_value_t {
     H5D_FILL_VALUE_USER_DEFINED =2
 } H5D_fill_value_t;
 
+/* Callback for H5Pset_append_flush() in a dataset access property list */
+typedef herr_t (*H5D_append_cb_t)(hid_t dataset_id, hsize_t *cur_dims, void *op_data);
+
 /********************/
 /* Public Variables */
 /********************/

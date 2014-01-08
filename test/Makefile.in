@@ -79,16 +79,24 @@ DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/config/conclude.am COPYING
 @HAVE_SHARED_CONDITIONAL_TRUE@am__append_1 = test_plugin.sh
 @HAVE_SHARED_CONDITIONAL_TRUE@am__append_2 = plugin$(EXEEXT)
-bin_PROGRAMS = swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) \
+bin_PROGRAMS = swmr_generator$(EXEEXT) swmr_start_write$(EXEEXT) \
+	swmr_reader$(EXEEXT) swmr_writer$(EXEEXT) \
+	swmr_remove_reader$(EXEEXT) swmr_remove_writer$(EXEEXT) \
+	swmr_addrem_writer$(EXEEXT) swmr_sparse_reader$(EXEEXT) \
+	swmr_sparse_writer$(EXEEXT) use_append_chunk$(EXEEXT) \
+	use_append_mchunks$(EXEEXT) atomic_writer$(EXEEXT) \
+	atomic_reader$(EXEEXT) accum_swmr_reader$(EXEEXT)
+check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
+	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT) \
+	accum_swmr_reader$(EXEEXT) atomic_writer$(EXEEXT) \
+	atomic_reader$(EXEEXT) links_env$(EXEEXT) \
+	flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) \
+	use_append_mchunks$(EXEEXT) swmr_generator$(EXEEXT) \
+	swmr_start_write$(EXEEXT) swmr_reader$(EXEEXT) \
 	swmr_writer$(EXEEXT) swmr_remove_reader$(EXEEXT) \
 	swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
 	swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) \
-	use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) \
-	atomic_writer$(EXEEXT) atomic_reader$(EXEEXT) \
-	accum_swmr_reader$(EXEEXT)
-check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
-	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT) \
-	links_env$(EXEEXT) flushrefresh$(EXEEXT) $(am__EXEEXT_2)
+	$(am__EXEEXT_2)
 @HAVE_SHARED_CONDITIONAL_TRUE@am__append_3 = plugin
 @BUILD_ALL_CONDITIONAL_TRUE@noinst_PROGRAMS = $(am__EXEEXT_3)
 @DIRECT_VFD_CONDITIONAL_TRUE@am__append_4 = direct
@@ -168,7 +176,7 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	dt_arith$(EXEEXT) dtypes$(EXEEXT) dsets$(EXEEXT) \
 	cmpd_dset$(EXEEXT) filter_fail$(EXEEXT) extend$(EXEEXT) \
 	external$(EXEEXT) efc$(EXEEXT) objcopy$(EXEEXT) links$(EXEEXT) \
-	twriteorder$(EXEEXT) unlink$(EXEEXT) big$(EXEEXT) \
+	unlink$(EXEEXT) twriteorder$(EXEEXT) big$(EXEEXT) \
 	mtime$(EXEEXT) fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
 	flush2$(EXEEXT) app_ref$(EXEEXT) enum$(EXEEXT) \
 	set_extent$(EXEEXT) ttsafe$(EXEEXT) enc_dec_plist$(EXEEXT) \
@@ -177,7 +185,7 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
 	freespace$(EXEEXT) mf$(EXEEXT) farray$(EXEEXT) earray$(EXEEXT) \
 	btree2$(EXEEXT) fheap$(EXEEXT) file_image$(EXEEXT) \
-	unregister$(EXEEXT)
+	unregister$(EXEEXT) test_swmr$(EXEEXT)
 @HAVE_SHARED_CONDITIONAL_TRUE@am__EXEEXT_2 = plugin$(EXEEXT)
 am__EXEEXT_3 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_cross$(EXEEXT) gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
@@ -514,6 +522,10 @@ swmr_sparse_writer_SOURCES = swmr_sparse_writer.c
 swmr_sparse_writer_OBJECTS = swmr_sparse_writer.$(OBJEXT)
 swmr_sparse_writer_LDADD = $(LDADD)
 swmr_sparse_writer_DEPENDENCIES = libh5test.la $(LIBHDF5)
+swmr_start_write_SOURCES = swmr_start_write.c
+swmr_start_write_OBJECTS = swmr_start_write.$(OBJEXT)
+swmr_start_write_LDADD = $(LDADD)
+swmr_start_write_DEPENDENCIES = libh5test.la $(LIBHDF5)
 swmr_writer_SOURCES = swmr_writer.c
 swmr_writer_OBJECTS = swmr_writer.$(OBJEXT)
 swmr_writer_LDADD = $(LDADD)
@@ -522,6 +534,10 @@ tcheck_version_SOURCES = tcheck_version.c
 tcheck_version_OBJECTS = tcheck_version.$(OBJEXT)
 tcheck_version_LDADD = $(LDADD)
 tcheck_version_DEPENDENCIES = libh5test.la $(LIBHDF5)
+test_swmr_SOURCES = test_swmr.c
+test_swmr_OBJECTS = test_swmr.$(OBJEXT)
+test_swmr_LDADD = $(LDADD)
+test_swmr_DEPENDENCIES = libh5test.la $(LIBHDF5)
 am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) tarray.$(OBJEXT) \
 	tattr.$(OBJEXT) tchecksum.$(OBJEXT) tconfig.$(OBJEXT) \
 	tfile.$(OBJEXT) tgenprop.$(OBJEXT) th5o.$(OBJEXT) \
@@ -624,10 +640,10 @@ SOURCES = $(libdynlib1_la_SOURCES) $(libdynlib2_la_SOURCES) \
 	set_extent.c space_overflow.c stab.c swmr_addrem_writer.c \
 	swmr_generator.c swmr_reader.c swmr_remove_reader.c \
 	swmr_remove_writer.c swmr_sparse_reader.c swmr_sparse_writer.c \
-	swmr_writer.c tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) twriteorder.c unlink.c unregister.c \
-	$(use_append_chunk_SOURCES) $(use_append_mchunks_SOURCES) \
-	vfd.c
+	swmr_start_write.c swmr_writer.c tcheck_version.c test_swmr.c \
+	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) twriteorder.c \
+	unlink.c unregister.c $(use_append_chunk_SOURCES) \
+	$(use_append_mchunks_SOURCES) vfd.c
 DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
 	$(am__libdynlib2_la_SOURCES_DIST) \
 	$(am__libdynlib3_la_SOURCES_DIST) $(libh5test_la_SOURCES) \
@@ -649,10 +665,10 @@ DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
 	set_extent.c space_overflow.c stab.c swmr_addrem_writer.c \
 	swmr_generator.c swmr_reader.c swmr_remove_reader.c \
 	swmr_remove_writer.c swmr_sparse_reader.c swmr_sparse_writer.c \
-	swmr_writer.c tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) twriteorder.c unlink.c unregister.c \
-	$(use_append_chunk_SOURCES) $(use_append_mchunks_SOURCES) \
-	vfd.c
+	swmr_start_write.c swmr_writer.c tcheck_version.c test_swmr.c \
+	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) twriteorder.c \
+	unlink.c unregister.c $(use_append_chunk_SOURCES) \
+	$(use_append_mchunks_SOURCES) vfd.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -977,21 +993,34 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
 	new_multi_file_v16-r.h5 new_multi_file_v16-s.h5 \
 	split_get_file_image_test-m.h5 split_get_file_image_test-r.h5 \
 	file_image_core_test.h5.copy unregister_filter_1.h5 \
-	unregister_filter_2.h5 swmr_data.h5 use_append_chunk.h5 \
+	unregister_filter_2.h5 swmr_data.h5 use_use_append_chunk.h5 \
 	use_append_mchunks.h5 flushrefresh.h5 \
 	flushrefresh_VERIFICATION_START \
 	flushrefresh_VERIFICATION_CHECKPOINT1 \
 	flushrefresh_VERIFICATION_CHECKPOINT2 \
 	flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 \
-	ohdr_swmr.h5
+	ohdr_swmr.h5 test_swmr.h5
 INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 
-# Test script for error_test and err_compat
+# Test scripts--
+#       testerror.sh: err_compat, error_test
+#       testlibinfo.sh:
+#       testcheck_version.sh: tcheck_version
+#       tetlinks_env.sh: links_env
+#       testflushrefresh.sh: flushrefresh
+#       test_usecases.sh: use_append_chunk, use_append_mchunks
+#       testswmr.sh: swmr*
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh \
-	testlinks_env.sh $(srcdir)/testswmr.sh testflushrefresh.sh \
-	test_usecases.sh $(am__append_1)
+	testlinks_env.sh testflushrefresh.sh test_usecases.sh \
+	$(srcdir)/testswmr.sh $(am__append_1)
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) \
-	links_env$(EXEEXT) $(am__append_2)
+	links_env$(EXEEXT) flushrefresh$(EXEEXT) \
+	use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) \
+	swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) \
+	swmr_writer$(EXEEXT) swmr_remove_reader$(EXEEXT) \
+	swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
+	swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) \
+	swmr_start_write$(EXEEXT) $(am__append_2)
 check_SCRIPTS = $(TEST_SCRIPT)
 
 # These are our main targets. They should be listed in the order to be
@@ -1003,12 +1032,11 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # other current library code tests.
 TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            pool accum hyperslab istore bittests dt_arith \
-           dtypes dsets cmpd_dset filter_fail extend external efc objcopy\
-	   links twriteorder unlink \
-           big mtime fillval mount flush1 flush2 app_ref enum \
+           dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
+           twriteorder big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_with_endianess\
            getname vfd ntypes dangle dtransform reserved cross_read \
-           freespace mf farray earray btree2 fheap file_image unregister
+           freespace mf farray earray btree2 fheap file_image unregister test_swmr
 
 
 # These programs generate test files for the tests.  They don't need to be
@@ -1486,12 +1514,18 @@ swmr_sparse_reader$(EXEEXT): $(swmr_sparse_reader_OBJECTS) $(swmr_sparse_reader_
 swmr_sparse_writer$(EXEEXT): $(swmr_sparse_writer_OBJECTS) $(swmr_sparse_writer_DEPENDENCIES) $(EXTRA_swmr_sparse_writer_DEPENDENCIES) 
 	@rm -f swmr_sparse_writer$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(swmr_sparse_writer_OBJECTS) $(swmr_sparse_writer_LDADD) $(LIBS)
+swmr_start_write$(EXEEXT): $(swmr_start_write_OBJECTS) $(swmr_start_write_DEPENDENCIES) $(EXTRA_swmr_start_write_DEPENDENCIES) 
+	@rm -f swmr_start_write$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(swmr_start_write_OBJECTS) $(swmr_start_write_LDADD) $(LIBS)
 swmr_writer$(EXEEXT): $(swmr_writer_OBJECTS) $(swmr_writer_DEPENDENCIES) $(EXTRA_swmr_writer_DEPENDENCIES) 
 	@rm -f swmr_writer$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(swmr_writer_OBJECTS) $(swmr_writer_LDADD) $(LIBS)
 tcheck_version$(EXEEXT): $(tcheck_version_OBJECTS) $(tcheck_version_DEPENDENCIES) $(EXTRA_tcheck_version_DEPENDENCIES) 
 	@rm -f tcheck_version$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(tcheck_version_OBJECTS) $(tcheck_version_LDADD) $(LIBS)
+test_swmr$(EXEEXT): $(test_swmr_OBJECTS) $(test_swmr_DEPENDENCIES) $(EXTRA_test_swmr_DEPENDENCIES) 
+	@rm -f test_swmr$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_swmr_OBJECTS) $(test_swmr_LDADD) $(LIBS)
 testhdf5$(EXEEXT): $(testhdf5_OBJECTS) $(testhdf5_DEPENDENCIES) $(EXTRA_testhdf5_DEPENDENCIES) 
 	@rm -f testhdf5$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(testhdf5_OBJECTS) $(testhdf5_LDADD) $(LIBS)
@@ -1613,6 +1647,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_remove_writer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_sparse_reader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_sparse_writer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_start_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_writer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tarray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tattr.Po@am__quote@
@@ -1620,6 +1655,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tchecksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tconfig.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcoords.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_swmr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testframe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testhdf5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testmeta.Po@am__quote@

@@ -111,10 +111,17 @@ main(int argc, char *argv[])
     int child_wait_option=0;
     int ret_value = 0;
     int child_ret_value;
+    hbool_t send_wait = 0;
 
     /* initialization */
     if (setup_parameters(argc, argv) < 0){
 	Hgoto_error(1);
+    }
+
+    /* Determine the need to send/wait message file*/
+    if(UC_opts.launch == UC_READWRITE) {
+        HDunlink(WRITER_MESSAGE);
+        send_wait = 1;
     }
 
     /* ==============================================================*/
@@ -150,7 +157,7 @@ main(int argc, char *argv[])
 	/* child process launch the reader */
 	if(0 == childpid) {
 	    printf("%d: launch reader process\n", mypid);
-	    if (read_uc_file() < 0){
+	    if (read_uc_file(send_wait) < 0){
 		fprintf(stderr, "read_uc_file encountered error\n");
 		exit(1);
 	    }
@@ -163,7 +170,7 @@ main(int argc, char *argv[])
     /* ============= */
     /* this process continues to launch the writer */
     printf("%d: continue as the writer process\n", mypid);
-    if (write_uc_file() < 0){
+    if (write_uc_file(send_wait) < 0){
 	fprintf(stderr, "write_uc_file encountered error\n");
 	Hgoto_error(1);
     }

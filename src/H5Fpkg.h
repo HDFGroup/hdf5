@@ -60,7 +60,9 @@
 /* Superblock status flags */
 #define H5F_SUPER_WRITE_ACCESS          0x01
 #define H5F_SUPER_FILE_OK               0x02
-#define H5F_SUPER_ALL_FLAGS             (H5F_SUPER_WRITE_ACCESS | H5F_SUPER_FILE_OK)
+#define H5F_SUPER_SWMR_WRITE_ACCESS     0x04
+#define H5F_SUPER_ALL_FLAGS             (H5F_SUPER_WRITE_ACCESS | H5F_SUPER_FILE_OK | H5F_SUPER_SWMR_WRITE_ACCESS)
+
 
 /* Mask for removing private file access flags */
 #define H5F_ACC_PUBLIC_FLAGS 	        0x007fu
@@ -126,6 +128,22 @@
 #define H5F_SUPERBLOCK_SIZE(v, f) ( H5F_SUPERBLOCK_FIXED_SIZE           \
         + H5F_SUPERBLOCK_VARLEN_SIZE(v, f))
 
+/* For superblock version 0 & 1:
+   Offset to the file consistency flags (status_flags) in the superblock (excluding H5F_SUPERBLOCK_FIXED_SIZE) */
+#define H5F_SUPER_STATUS_OFF_V01                                                \
+        (2  /* freespace, and root group versions */                    \
+        + 1 /* reserved */                                              \
+        + 3 /* shared header vers, size of address, size of lengths */  \
+        + 1 /* reserved */                                              \
+        + 4) /* group leaf k, group internal k */
+
+#define H5F_SUPER_STATUS_OFF(v)   (v >= 2 ? 2 : H5F_SUPER_STATUS_OFF_V01)
+
+/* Offset to the file consistency flags (status_flags) in the superblock */
+#define H5F_SUPER_STATUS_FLAGS_OFF(v) (H5F_SUPERBLOCK_FIXED_SIZE + H5F_SUPER_STATUS_OFF(v))
+
+/* Size of file consistency flags (status_flags) in the superblock */
+#define H5F_SUPER_STATUS_FLAGS_SIZE(v)        (v >= 2 ? 1 : 4)
 
 /* Forward declaration external file cache struct used below (defined in
  * H5Fefc.c) */
@@ -260,6 +278,7 @@ struct H5F_file_t {
     unsigned 		read_attempts;	/* The # of reads to try when reading metadata with checksum */
     unsigned		retries_nbins;		/* # of bins for each retries[] */
     uint32_t		*retries[H5AC_NTYPES];  /* Track # of read retries for metdata items with checksum */
+    H5F_object_flush_t 	object_flush;		/* Information for object flush callback */
 };
 
 /*

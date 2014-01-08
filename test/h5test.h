@@ -136,6 +136,9 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #define DBL_REL_EQUAL(X,Y,M)    (fabs((Y-X)/X)<M)
 #define LDBL_REL_EQUAL(X,Y,M)    (fabsl((Y-X)/X)<M)
 
+/* The # of seconds to wait for the message file--used by h5_wait_message() */
+#define MESSAGE_TIMEOUT         300             /* Timeout in seconds */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -193,6 +196,9 @@ H5TEST_DLL char* getenv_all(MPI_Comm comm, int root, const char* name);
 
 /* Extern global variables */
 H5TEST_DLLVAR int TestVerbosity;
+
+H5TEST_DLL void h5_send_message(const char *file);
+H5TEST_DLL int h5_wait_message(const char *file);
 
 #ifdef __cplusplus
 }

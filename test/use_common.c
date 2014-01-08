@@ -241,7 +241,7 @@ int create_uc_file(void)
  *
  * Return: 0 succeed; -1 fail.
  */
-int write_uc_file(void)
+int write_uc_file(hbool_t tosend)
 {
     hid_t	fid;          /* File ID for new HDF5 file */
     hid_t	dsid;         /* dataset ID */
@@ -271,6 +271,10 @@ int write_uc_file(void)
 	fprintf(stderr, "H5Fopen failed\n");
         return -1;
     }
+
+    if(tosend)
+        /* Send a message that H5Fopen is complete--releasing the file lock */
+        h5_send_message(WRITER_MESSAGE);
 
     /* Open the dataset of the program name */
     if((dsid = H5Dopen2(fid, progname_g, H5P_DEFAULT)) < 0){
@@ -424,7 +428,7 @@ int write_uc_file(void)
  *
  * Return: 0 succeed; -1 fail.
  */
-int read_uc_file(void)
+int read_uc_file(hbool_t towait)
 {
     hid_t	fid;          /* File ID for new HDF5 file */
     hid_t	dsid;         /* dataset ID */
@@ -441,6 +445,12 @@ int read_uc_file(void)
     int		nreadererr=0;
     int		nerrs;
     int		nonewplane;
+
+    /* Before reading, wait for the message that H5Fopen is complete--file lock is released */
+    if(towait && h5_wait_message(WRITER_MESSAGE) < 0) {
+        fprintf(stderr, "Cannot find writer message file...failed\n");
+        return -1;
+    }
 
     name = UC_opts.filename;
 

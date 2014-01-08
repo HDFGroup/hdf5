@@ -61,6 +61,11 @@
 #define H5D_ACS_PREEMPT_READ_CHUNKS_DEF         H5D_CHUNK_CACHE_W0_DEFAULT
 #define H5D_ACS_PREEMPT_READ_CHUNKS_ENC         H5P__encode_double
 #define H5D_ACS_PREEMPT_READ_CHUNKS_DEC         H5P__decode_double
+/* Definition for append flush */
+#define H5D_ACS_APPEND_FLUSH_SIZE            	sizeof(H5D_append_flush_t)
+#define H5D_ACS_APPEND_FLUSH_DEF             	{0,{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},NULL,NULL}
+
+
 
 /******************/
 /* Local Typedefs */
@@ -109,7 +114,7 @@ const H5P_libclass_t H5P_CLS_DACC[1] = {{
 /*******************/
 /* Local Variables */
 /*******************/
-
+static const H5D_append_flush_t H5D_def_append_flush_g = H5D_ACS_APPEND_FLUSH_DEF;       /* Default setting for append flush */
 
 
 /*-------------------------------------------------------------------------
@@ -149,6 +154,10 @@ H5P__dacc_reg_prop(H5P_genclass_t *pclass)
              NULL, NULL, NULL, H5D_ACS_PREEMPT_READ_CHUNKS_ENC, H5D_ACS_PREEMPT_READ_CHUNKS_DEC, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+    /* Register info for append flush */
+    if(H5P_register_real(pclass, H5D_ACS_APPEND_FLUSH_NAME, H5D_ACS_APPEND_FLUSH_SIZE, &H5D_def_append_flush_g, 
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__dacc_reg_prop() */
@@ -281,3 +290,122 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_append_flush
+ *
+ * Purpose:	Sets the boundary, callback function, and user data in the
+ *		property list.
+ *		"ndims": number of array elements for boundary
+ *		"boundary": used to determine whether the current dimension hits 
+ *			  a boundary; if so, invoke the callback function and
+ *			  flush the dataset.
+ *		"func": the callback function to invoke when the boundary is hit
+ *		"udata": the user data to pass as parameter with the callback function
+ *	
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; Dec 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_append_flush(hid_t plist_id, int ndims, const hsize_t *boundary, H5D_append_cb_t func, void *udata)
+{
+    H5P_genplist_t *plist;      	/* property list pointer */
+    H5D_append_flush_t info;
+    unsigned u;				/* local index variable */
+    herr_t ret_value = SUCCEED;   	/* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "iIs*hx*x", plist_id, ndims, boundary, func, udata);
+
+    /* Check arguments */
+    if(ndims <= 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimensionality cannot be negative or zero")
+    if(ndims > H5S_MAX_RANK)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimensionality is too large")
+    if(!boundary)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no boundary dimensions specified")
+
+    /* Check if the callback function is NULL and the user data is non-NULL.
+     * This is almost certainly an error as the user data will not be used. */
+    if(!func && udata)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback is NULL while user data is not")
+ 
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set up values */
+    info.ndims = ndims;
+    info.func = func;
+    info.udata = udata;
+
+    HDmemset(info.boundary, 0, sizeof(info.boundary));
+    /* boundary can be 0 to indicate no boundary is set */
+    for(u = 0; u < (unsigned)ndims; u++) {
+        if(boundary[u] != (boundary[u] & 0xffffffff)) /* negative value (including H5S_UNLIMITED) */
+            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all boundary dimensions must be less than 2^32")
+        info.boundary[u] = boundary[u]; /* Store user's boundary dimensions */
+    }
+
+    /* Set values */
+    if(H5P_set(plist, H5D_ACS_APPEND_FLUSH_NAME, &info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set append flush")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pset_append_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_append_flush()
+ *
+ * Purpose:	Retrieves the boundary, callback function and user data set in 
+ *		property list.
+ *		Note that the # of boundary sizes to retrieve will not exceed
+ *		the parameter "ndims" and the ndims set previously via 
+ *		H5Pset_append_flush().
+ *	
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; Dec 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_append_flush(hid_t plist_id, int ndims, hsize_t boundary[], H5D_append_cb_t *func, void **udata)
+{
+    H5P_genplist_t *plist;      /* property list pointer */
+    H5D_append_flush_t  info;
+    int i;			/* local index variable */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "iIs*h*x**x", plist_id, ndims, boundary, func, udata);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Retrieve info for append flush */
+    if(H5P_get(plist, H5D_ACS_APPEND_FLUSH_NAME, &info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object flush callback")
+
+    /* Assign return values */
+    if(boundary) {
+	HDmemset(boundary, 0, ndims * sizeof(hsize_t));
+	if(info.ndims > 0) {
+	    for(i = 0; i < info.ndims && i < ndims; i++)
+		boundary[i] = info.boundary[i];
+	}
+    }
+    if(func)
+	*func = info.func;
+    if(udata)
+	*udata = info.udata;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pget_append_flush() */

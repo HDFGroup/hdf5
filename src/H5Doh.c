@@ -55,7 +55,7 @@ static void *H5O__dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc,
 static H5O_loc_t *H5O__dset_get_oloc(hid_t obj_id);
 static herr_t H5O__dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     H5_ih_info_t *bh_info);
-static herr_t H5O__dset_flush(H5G_loc_t *obj_loc, hid_t dxpl_id);
+static herr_t H5O__dset_flush(void *_obj_ptr, hid_t dxpl_id);
 
 
 /*********************/
@@ -457,34 +457,25 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__dset_flush(H5G_loc_t *obj_loc, hid_t dxpl_id)
+H5O__dset_flush(void *_obj_ptr, hid_t dxpl_id)
 {
-    H5D_t       *dset = NULL;          /* Dataset opened */
-    H5O_type_t 	obj_type;              /* Type of object at location */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5D_t *dset = (H5D_t *)_obj_ptr;	/* Pointer to dataset object */
+    H5O_type_t obj_type;              	/* Type of object at location */
+    herr_t ret_value = SUCCEED;   	/* Return value */
 
     FUNC_ENTER_STATIC
 
-    HDassert(obj_loc);
-    HDassert(obj_loc->oloc);
+    HDassert(dset);
+    HDassert(&dset->oloc);
 
     /* Check that the object found is the correct type */
-    if(H5O_obj_type(obj_loc->oloc, &obj_type, dxpl_id) < 0)
+    if(H5O_obj_type(&dset->oloc, &obj_type, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get object type")
-
     if(obj_type != H5O_TYPE_DATASET)
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
-    /* Open the dataset */
-    if(NULL == (dset = H5D_open(obj_loc, H5P_DATASET_ACCESS_DEFAULT, dxpl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
-    
     if(H5D__flush_real(dset, dxpl_id) < 0)
 	HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
-
 done:
-    if(dset && H5D_close(dset) < 0)
-	HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dset_flush() */
-

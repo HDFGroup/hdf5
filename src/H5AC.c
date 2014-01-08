@@ -730,6 +730,39 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5AC_evict
+ *
+ * Purpose:     Evict all entries except the pinned entries
+ *		in the cache.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; Dec 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_evict(H5F_t *f, hid_t dxpl_id)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    /* Evict all entries in the cache except the pinned superblock entry */
+    if(H5C_evict(f, dxpl_id, H5AC_noblock_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't evict cache")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_evict() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC_expunge_entry
  *
  * Purpose:	Expunge the target entry from the cache without writing it

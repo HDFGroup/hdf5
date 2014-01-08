@@ -48,7 +48,7 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Oflush
+ * Function:   H5Oflush
  *
  * Purpose:    Flushes all buffers associated with an object to disk.
  *
@@ -63,6 +63,8 @@ herr_t
 H5Oflush(hid_t obj_id)
 {
     H5O_loc_t *oloc;            /* object location */
+    void *obj_ptr;		/* Pointer to object */
+    const H5O_obj_class_t  *obj_class = NULL;       /* Class of object */
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -71,14 +73,56 @@ H5Oflush(hid_t obj_id)
     /* Check args */
     if((oloc = H5O_get_loc(obj_id)) == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object")
- 
-    /* Private function */
-    if (H5O_flush_metadata(oloc, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to flush object")
+
+    /* Get the object pointer */
+    if((obj_ptr = H5I_object(obj_id)) == NULL)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
+    /* Get the object class */
+    if((obj_class = H5O_obj_class(oloc, H5AC_dxpl_id)) == NULL)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object class")
+
+    /* Flush the object of this class */
+    if(obj_class->flush && obj_class->flush(obj_ptr, H5AC_dxpl_id) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
+
+    /* Flush the object metadata and invoke flush callback */
+    if(H5O_flush_common(oloc, obj_id) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object and object flush callback")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Oflush */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_flush_common
+ *
+ * Purpose:    	Flushes the object's metadata
+ *		Invokes the user-defined callback if there is one.
+ *
+ * Return:  	Non-negative on success, negative on failure
+ *
+ * Programmer:  Vailin Choi; Dec 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id)
+{
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Private function */
+    if(H5O_flush_metadata(oloc, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object metadata")
+
+    /* Check to invoke callback */
+    if(H5F_object_flush_cb(oloc->file, obj_id) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to do object flush callback")
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 
 /*-------------------------------------------------------------------------
