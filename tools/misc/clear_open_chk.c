@@ -56,13 +56,13 @@ main(int argc, char *argv[])
 
     /* Try opening the file */
     if((fid = h5tools_fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) {
-	HDfprintf(stdout, "\nclear_open_chk: cannot open the file\n");
+	HDfprintf(stderr, "clear_open_chk: unable to open the file\n");
 	return EXIT_FAILURE;
     }
 
     /* Close the file */
     if(H5Fclose(fid) < 0) {
-	HDfprintf(stdout, "\nclear_open_chk: cannot close the file\n");
+	HDfprintf(stderr, "clear_open_chk: cannot close the file\n");
 	return EXIT_FAILURE;
     }
 

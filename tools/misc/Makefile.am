@@ -24,7 +24,7 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 #test script and program
-TEST_PROG=h5repart_gentest talign h5clear_gentest
+TEST_PROG=h5repart_gentest talign
 TEST_SCRIPT=testh5repart.sh testh5mkgrp.sh testh5clear.sh
 
 
@@ -36,6 +36,7 @@ SCRIPT_DEPEND=h5repart$(EXEEXT) h5mkgrp$(EXEEXT) h5clear$(EXEEXT)
 # These are our main targets, the tools
 bin_PROGRAMS=h5debug h5repart h5mkgrp h5clear
 bin_SCRIPTS=h5redeploy
+noinst_PROGRAMS=h5clear_gentest
 
 # Add h5debug, h5repart, and h5mkgrp specific linker flags here
 h5debug_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)

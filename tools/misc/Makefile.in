@@ -78,6 +78,7 @@ check_PROGRAMS = $(am__EXEEXT_1) repart_test$(EXEEXT) \
 	clear_open_chk$(EXEEXT)
 bin_PROGRAMS = h5debug$(EXEEXT) h5repart$(EXEEXT) h5mkgrp$(EXEEXT) \
 	h5clear$(EXEEXT)
+noinst_PROGRAMS = h5clear_gentest$(EXEEXT)
 TESTS = $(am__EXEEXT_1) $(TEST_SCRIPT)
 subdir = tools/misc
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -90,9 +91,8 @@ CONFIG_CLEAN_FILES = h5cc testh5clear.sh testh5mkgrp.sh \
 	testh5repart.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
-am__EXEEXT_1 = h5repart_gentest$(EXEEXT) talign$(EXEEXT) \
-	h5clear_gentest$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS)
+am__EXEEXT_1 = h5repart_gentest$(EXEEXT) talign$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 clear_open_chk_SOURCES = clear_open_chk.c
 clear_open_chk_OBJECTS = clear_open_chk.$(OBJEXT)
 clear_open_chk_LDADD = $(LDADD)
@@ -512,7 +512,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 \
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 #test script and program
-TEST_PROG = h5repart_gentest talign h5clear_gentest
+TEST_PROG = h5repart_gentest talign
 TEST_SCRIPT = testh5repart.sh testh5mkgrp.sh testh5clear.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5repart$(EXEEXT) h5mkgrp$(EXEEXT) h5clear$(EXEEXT)
@@ -649,6 +649,15 @@ clean-binPROGRAMS:
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
+
+clean-noinstPROGRAMS:
+	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
 	echo " rm -f" $$list; \
 	rm -f $$list || exit $$?; \
 	test -n "$(EXEEXT)" || exit 0; \
@@ -901,7 +910,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libtool mostlyclean-am
+	clean-libtool clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -975,12 +984,12 @@ uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
 
 .PHONY: CTAGS GTAGS all all-am all-local check check-TESTS check-am \
 	clean clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libtool cscopelist ctags distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-binSCRIPTS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-exec-local install-html \
+	clean-libtool clean-noinstPROGRAMS cscopelist ctags distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-binPROGRAMS install-binSCRIPTS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-exec-local install-html \
 	install-html-am install-info install-info-am install-man \
 	install-pdf install-pdf-am install-ps install-ps-am \
 	install-strip installcheck installcheck-am installdirs \

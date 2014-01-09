@@ -1090,6 +1090,7 @@
 ./test/swmr_remove_writer.c
 ./test/swmr_sparse_reader.c
 ./test/swmr_sparse_writer.c
+./test/swmr_start_write.c
 ./test/swmr_writer.c
 ./test/tarray.c
 ./test/tarrold.h5
@@ -1112,6 +1113,7 @@
 ./test/test_usecases.sh.in
 ./test/testmeta.c
 ./test/testswmr.sh
+./test/test_swmr.c
 ./test/tfile.c
 ./test/tgenprop.c
 ./test/th5o.c
@@ -1358,6 +1360,10 @@
 ./tools/misc/Makefile.am
 ./tools/misc/Makefile.in
 ./tools/misc/h5cc.in
+./tools/misc/h5clear.c
+./tools/misc/h5clear_gentest.c
+./tools/misc/clear_open_chk.c
+./tools/misc/testh5clear.sh.in
 ./tools/misc/h5debug.c
 ./tools/misc/h5mkgrp.c
 ./tools/misc/h5redeploy.in
@@ -2341,14 +2347,14 @@
 ./hl/test/image24pixel.txt
 ./hl/test/image24plane.txt
 ./hl/test/image8.txt
-./hl/test/ld_extend.c
-./hl/test/ld_monitor.c
+./hl/test/ld_mx.c
 ./hl/test/Makefile.am
 ./hl/test/Makefile.in
 ./hl/test/pal_rgb.h
 ./hl/test/sepia.pal
 ./hl/test/test_ds_be.h5
 ./hl/test/test_ds.c
+./hl/test/test_dset_append.c
 ./hl/test/test_dset_opt.c
 ./hl/test/test_ds_le.h5
 ./hl/test/test_file_image.c
