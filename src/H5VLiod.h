@@ -30,13 +30,8 @@
 #include "mercury.h"
 #include "mercury_handler.h"
 #include "mercury_macros.h"
-//#include "mercury_proc.h"
 #include "mercury_proc_string.h"
-//#include "mercury_error.h"
-//#include "mercury_bulk.h"
-//#include "mercury_config.h"
 #include "na_mpi.h"
-//#include "na.h"
 
 #define H5VL_IOD	(H5VL_iod_init())
 #else
