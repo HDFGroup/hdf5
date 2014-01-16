@@ -2211,7 +2211,7 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
 
     /* setup the local group struct */
     /* store the entire path of the group locally */
-    {
+    if(obj->obj_name) {
         size_t obj_name_len = HDstrlen(obj->obj_name);
         size_t name_len = HDstrlen(name);
 
@@ -2361,7 +2361,7 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
 
     /* setup the local group struct */
     /* store the entire path of the group locally */
-    {
+    if(obj->obj_name) {
         size_t obj_name_len = HDstrlen(obj->obj_name);
         size_t name_len = HDstrlen(name);
 
@@ -2678,7 +2678,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t UNUSED loc_params,
 
     /* setup the local dataset struct */
     /* store the entire path of the dataset locally */
-    {
+    if(obj->obj_name) {
         size_t obj_name_len = HDstrlen(obj->obj_name);
         size_t name_len = HDstrlen(name);
 
@@ -2835,7 +2835,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
 
     /* setup the local dataset struct */
     /* store the entire path of the dataset locally */
-    {
+    if(obj->obj_name) {
         size_t obj_name_len = HDstrlen(obj->obj_name);
         size_t name_len = HDstrlen(name);
 
@@ -3749,7 +3749,7 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t UNUSED loc_params, const 
 
     /* setup the local datatype struct */
     /* store the entire path of the datatype locally */
-    {
+    if(obj->obj_name) {
         size_t obj_name_len = HDstrlen(obj->obj_name);
         size_t name_len = HDstrlen(name);
 
@@ -3901,7 +3901,7 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const ch
 
     /* setup the local datatype struct */
     /* store the entire path of the datatype locally */
-    {
+    if(obj->obj_name) {
         size_t obj_name_len = HDstrlen(obj->obj_name);
         size_t name_len = HDstrlen(name);
 
@@ -4230,7 +4230,8 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
         path = NULL;
         attr->loc_name = HDstrdup(obj->obj_name);
     }
-    else if (loc_params.type == H5VL_OBJECT_BY_NAME) {
+    else if (loc_params.type == H5VL_OBJECT_BY_NAME &&
+             (NULL != obj->obj_name)) {
         size_t obj_name_len = HDstrlen(obj->obj_name);
         size_t name_len;
 
@@ -4408,7 +4409,8 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
         path = NULL;
         attr->loc_name = HDstrdup(obj->obj_name);
     }
-    else if (loc_params.type == H5VL_OBJECT_BY_NAME) {
+    else if (loc_params.type == H5VL_OBJECT_BY_NAME &&
+             NULL != obj->obj_name) {
         size_t obj_name_len = HDstrlen(obj->obj_name);
         size_t name_len;
 
@@ -6344,7 +6346,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
         /* setup the local dataset struct */
         /* store the entire path of the dataset locally */
-        {
+        if(obj->obj_name) {
             size_t obj_name_len = HDstrlen(obj->obj_name);
             size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
 
@@ -6388,7 +6390,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
         /* setup the local dataset struct */
         /* store the entire path of the dataset locally */
-        {
+        if(obj->obj_name) {
             size_t obj_name_len = HDstrlen(obj->obj_name);
             size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
 
@@ -6431,7 +6433,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
         /* setup the local dataset struct */
         /* store the entire path of the dataset locally */
-        {
+        if(obj->obj_name) {
             size_t obj_name_len = HDstrlen(obj->obj_name);
             size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
 
@@ -6473,7 +6475,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
         /* setup the local dataset struct */
         /* store the entire path of the dataset locally */
-        {
+        if(obj->obj_name) {
             size_t obj_name_len = HDstrlen(obj->obj_name);
             size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
 
@@ -7235,7 +7237,7 @@ H5VL_iod_map_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char 
 
     /* setup the local map struct */
     /* store the entire path of the map locally */
-    {
+    if(obj->obj_name) {
         size_t obj_name_len = HDstrlen(obj->obj_name);
         size_t name_len = HDstrlen(name);
 
@@ -7365,7 +7367,7 @@ H5VL_iod_map_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char *n
 
     /* setup the local map struct */
     /* store the entire path of the map locally */
-    {
+    if(obj->obj_name) {
         size_t obj_name_len = HDstrlen(obj->obj_name);
         size_t name_len = HDstrlen(name);
 

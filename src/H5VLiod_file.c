@@ -512,8 +512,10 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* get scratch pad of root group */
-        if(iod_obj_get_scratch(root_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
+        if((ret = iod_obj_get_scratch(root_oh.rd_oh, rtid, &sp, &sp_cs, NULL)) < 0) {
+            fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
+        }
 
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
             /* verify scratch pad integrity */

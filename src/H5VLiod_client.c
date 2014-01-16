@@ -229,7 +229,7 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
         /* test the operation status */
         ret = HG_Wait(*((hg_request_t *)request->req), 0, &status);
         if(HG_FAIL == ret) {
-            fprintf(stderr, "failed to wait on request\n");
+            HERROR(H5E_FUNC, H5E_CANTINIT, "failed to wait on request\n");
             request->status = H5ES_STATUS_FAIL;
             request->state = H5VL_IOD_COMPLETED;
             H5VL_iod_request_delete(file, request);
@@ -256,7 +256,7 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
                     HDassert(cur_req->state == H5VL_IOD_PENDING);
                     ret = HG_Wait(*((hg_request_t *)cur_req->req), 0, &tmp_status);
                     if(HG_FAIL == ret) {
-                        fprintf(stderr, "failed to wait on request\n");
+                        HERROR(H5E_FUNC, H5E_CANTINIT, "failed to wait on request\n");
                         cur_req->status = H5ES_STATUS_FAIL;
                         cur_req->state = H5VL_IOD_COMPLETED;
                         H5VL_iod_request_delete(file, cur_req);
@@ -266,7 +266,7 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
                             cur_req->status = H5ES_STATUS_SUCCEED;
                             cur_req->state = H5VL_IOD_COMPLETED;
                             if(H5VL_iod_request_complete(file, cur_req) < 0) {
-                                fprintf(stderr, "Operation %"PRIu64" Failed!\n", cur_req->axe_id);
+                                HERROR(H5E_FUNC, H5E_CANTINIT, "Operation %"PRIu64" Failed!\n", cur_req->axe_id);
                             }
                         }
                     }
@@ -278,7 +278,7 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
         /* request complete, remove it from list & break */
         else {
             if(H5VL_iod_request_complete(file, request) < 0) {
-                fprintf(stderr, "Operation %"PRIu64" Failed!\n", request->axe_id);
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Operation %"PRIu64" Failed!\n", request->axe_id);
             }
             break;
         }
@@ -316,13 +316,13 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
         HDassert(cur_req->state == H5VL_IOD_PENDING);
         ret = HG_Wait(*((hg_request_t *)cur_req->req), HG_MAX_IDLE_TIME, &status);
         if(HG_FAIL == ret) {
-            fprintf(stderr, "failed to wait on request\n");
+            HERROR(H5E_FUNC, H5E_CANTINIT, "failed to wait on request\n");
             cur_req->status = H5ES_STATUS_FAIL;
             cur_req->state = H5VL_IOD_COMPLETED;
         }
         else {
             if(!status) {
-                fprintf(stderr, "Wait timeout reached\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Wait timeout reached\n");
                 cur_req->status = H5ES_STATUS_FAIL;
                 cur_req->state = H5VL_IOD_COMPLETED;
                 H5VL_iod_request_delete(file, cur_req);
@@ -335,7 +335,7 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
         }
 
         if(H5VL_iod_request_complete(file, cur_req) < 0)
-            fprintf(stderr, "Operation %"PRIu64" Failed!\n", cur_req->axe_id);
+            HERROR(H5E_FUNC, H5E_CANTINIT, "Operation %"PRIu64" Failed!\n", cur_req->axe_id);
 
         cur_req = tmp_req;
     }
@@ -377,14 +377,14 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
             ret = HG_Wait(*((hg_request_t *)cur_req->req), HG_MAX_IDLE_TIME, 
                           &status);
             if(HG_FAIL == ret) {
-                fprintf(stderr, "failed to wait on request\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to wait on request\n");
                 cur_req->status = H5ES_STATUS_FAIL;
                 cur_req->state = H5VL_IOD_COMPLETED;
                 H5VL_iod_request_delete(file, cur_req);
             }
             else {
                 if(!status) {
-                    fprintf(stderr, "Wait timeout reached\n");
+                    HERROR(H5E_FUNC, H5E_CANTINIT, "Wait timeout reached\n");
                     cur_req->status = H5ES_STATUS_FAIL;
                     cur_req->state = H5VL_IOD_COMPLETED;
                     H5VL_iod_request_delete(file, cur_req);
@@ -393,7 +393,7 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
                     cur_req->status = H5ES_STATUS_SUCCEED;
                     cur_req->state = H5VL_IOD_COMPLETED;
                     if(H5VL_iod_request_complete(file, cur_req) < 0)
-                        fprintf(stderr, "Operation %"PRIu64" Failed!\n", cur_req->axe_id);
+                        HERROR(H5E_FUNC, H5E_CANTINIT, "Operation %"PRIu64" Failed!\n", cur_req->axe_id);
                 }
             }
         }
@@ -430,7 +430,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             analysis_execute_out_t *output = (analysis_execute_out_t *)req->data;
 
             if(SUCCEED != output->ret) {
-                fprintf(stderr, "Analysis Execute failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Analysis Execute failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -441,7 +441,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         }
     case HG_FILE_CREATE:
         if(IOD_OH_UNDEFINED == req->obj->file->remote_file.coh.cookie) {
-            fprintf(stderr, "failed to create file\n");
+            HERROR(H5E_FUNC, H5E_CANTINIT, "failed to create file\n");
             req->status = H5ES_STATUS_FAIL;
             req->state = H5VL_IOD_COMPLETED;
         }
@@ -451,7 +451,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         break;
     case HG_FILE_OPEN:
         if(IOD_OH_UNDEFINED == req->obj->file->remote_file.coh.cookie) {
-            fprintf(stderr, "failed to open file\n");
+            HERROR(H5E_FUNC, H5E_CANTINIT, "failed to open file\n");
             req->status = H5ES_STATUS_FAIL;
             req->state = H5VL_IOD_COMPLETED;
         }
@@ -489,7 +489,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)req->obj;
 
             if(IOD_OH_UNDEFINED == attr->remote_attr.iod_oh.rd_oh.cookie) {
-                fprintf(stderr, "failed to create Attribute\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to create Attribute\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -502,7 +502,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)req->obj;
 
             if(IOD_OH_UNDEFINED == attr->remote_attr.iod_oh.rd_oh.cookie) {
-                fprintf(stderr, "failed to open Attribute\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to open Attribute\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -521,7 +521,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_group_t *group = (H5VL_iod_group_t *)req->obj;
 
             if(IOD_OH_UNDEFINED == group->remote_group.iod_oh.rd_oh.cookie) {
-                fprintf(stderr, "failed to create Group\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to create Group\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -534,7 +534,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_group_t *group = (H5VL_iod_group_t *)req->obj;
 
             if(IOD_OH_UNDEFINED == group->remote_group.iod_oh.rd_oh.cookie) {
-                fprintf(stderr, "failed to open Group\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to open Group\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -552,7 +552,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_map_t *map = (H5VL_iod_map_t *)req->obj;
 
             if(IOD_OH_UNDEFINED == map->remote_map.iod_oh.rd_oh.cookie) {
-                fprintf(stderr, "failed to create Map\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to create Map\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -565,7 +565,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_map_t *map = (H5VL_iod_map_t *)req->obj;
 
             if(IOD_OH_UNDEFINED == map->remote_map.iod_oh.rd_oh.cookie) {
-                fprintf(stderr, "failed to open Map\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to open Map\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -587,7 +587,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
 
             if(IOD_OH_UNDEFINED == dset->remote_dset.iod_oh.rd_oh.cookie) {
-                fprintf(stderr, "failed to create Dataset\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to create Dataset\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -600,7 +600,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
 
             if(IOD_OH_UNDEFINED == dset->remote_dset.iod_oh.rd_oh.cookie) {
-                fprintf(stderr, "failed to open Dataset\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to open Dataset\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -622,7 +622,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)req->obj;
 
             if(IOD_OH_UNDEFINED == dtype->remote_dtype.iod_oh.rd_oh.cookie) {
-                fprintf(stderr, "failed to commit Datatype\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to commit Datatype\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -635,7 +635,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)req->obj;
 
             if(IOD_OH_UNDEFINED == dtype->remote_dtype.iod_oh.rd_oh.cookie) {
-                fprintf(stderr, "failed to open Datatype\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to open Datatype\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -657,12 +657,12 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
             /* Free memory handle */
             if(HG_SUCCESS != HG_Bulk_handle_free(*info->bulk_handle)) {
-                fprintf(stderr, "failed to free dataset bulk handle\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to free dataset bulk handle\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
             if(HG_DSET_WRITE == req->type && SUCCEED != *((int *)info->status)) {
-                fprintf(stderr, "Errrr! Dataset Write Failure Reported from Server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Errrr! Dataset Write Failure Reported from Server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -670,7 +670,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 H5VL_iod_read_status_t *read_status = (H5VL_iod_read_status_t *)info->status;
 
                 if(SUCCEED != read_status->ret) {
-                    fprintf(stderr, "Errrrr!  Dataset Read Failure Reported from Server\n");
+                    HERROR(H5E_FUNC, H5E_CANTINIT, "Errrrr!  Dataset Read Failure Reported from Server\n");
                     req->status = H5ES_STATUS_FAIL;
                     req->state = H5VL_IOD_COMPLETED;
                 }
@@ -685,7 +685,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                     /* verify data integrity */
                     if((raw_cs_scope & H5_CHECKSUM_TRANSFER) &&
                        internal_cs != read_status->cs) {
-                        fprintf(stderr, 
+                        HERROR(H5E_FUNC, H5E_CANTINIT, 
                                 "Errrrr!  Dataset Read integrity failure (expecting %"PRIu64" got %"PRIu64").\n",
                                 read_status->cs, internal_cs);
                         req->status = H5ES_STATUS_FAIL;
@@ -723,7 +723,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_read_status_t *status = (H5VL_iod_read_status_t *)info->status;
 
             if(SUCCEED != status->ret) {
-                fprintf(stderr, "Errrrr!  Dataset Read Failure Reported from Server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Errrrr!  Dataset Read Failure Reported from Server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -775,13 +775,13 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
                 /* Free memory handle */
                 if(HG_SUCCESS != HG_Bulk_handle_free(*info->bulk_handle)) {
-                    fprintf(stderr, "failed to free dataset bulk handle\n");
+                    HERROR(H5E_FUNC, H5E_CANTINIT, "failed to free dataset bulk handle\n");
                     req->status = H5ES_STATUS_FAIL;
                     req->state = H5VL_IOD_COMPLETED;
                 }
 
                 if(SUCCEED != vl_status.ret) {
-                    fprintf(stderr, "Errrrr!  Dataset Read Failure Reported from Server\n");
+                    HERROR(H5E_FUNC, H5E_CANTINIT, "Errrrr!  Dataset Read Failure Reported from Server\n");
                     req->status = H5ES_STATUS_FAIL;
                     req->state = H5VL_IOD_COMPLETED;
                 }
@@ -799,7 +799,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
                 /* verify data integrity */
                 if(internal_cs != vl_status.cs) {
-                    fprintf(stderr, 
+                    HERROR(H5E_FUNC, H5E_CANTINIT, 
                             "Errrrr!  Dataset Read integrity failure (expecting %"PRIu64" got %"PRIu64").\n",
                             internal_cs, status->cs);
                     req->status = H5ES_STATUS_FAIL;
@@ -835,12 +835,12 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
             /* Free memory handle */
             if(HG_SUCCESS != HG_Bulk_handle_free(*info->bulk_handle)) {
-                fprintf(stderr, "failed to free attribute bulk handle\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to free attribute bulk handle\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
             if(SUCCEED != *((int *)info->status)) {
-                fprintf(stderr, "Attribute I/O Failure Reported from Server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Attribute I/O Failure Reported from Server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -859,13 +859,13 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
             /* Free memory handle */
             if(HG_SUCCESS != HG_Bulk_handle_free(*info->value_handle)) {
-                fprintf(stderr, "failed to free Map Value bulk handle\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to free Map Value bulk handle\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
 
             if(SUCCEED != *((int *)info->status)) {
-                fprintf(stderr, "Errrr! MAP set Failure Reported from Server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Errrr! MAP set Failure Reported from Server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -883,7 +883,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             int *status = (int *)req->data;
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "MAP delete failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "MAP delete failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -899,7 +899,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             map_get_out_t *output = info->output;
 
             if(SUCCEED != output->ret) {
-                fprintf(stderr, "MAP get failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "MAP get failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
 
@@ -927,7 +927,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 if(!info->val_is_vl) {
                     /* Free memory handle */
                     if(HG_SUCCESS != HG_Bulk_handle_free(*info->value_handle)) {
-                        fprintf(stderr, "failed to free value bulk handle\n");
+                        HERROR(H5E_FUNC, H5E_CANTINIT, "failed to free value bulk handle\n");
                         req->status = H5ES_STATUS_FAIL;
                         req->state = H5VL_IOD_COMPLETED;
                     }
@@ -941,7 +941,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                         /* verify data integrity */
                         if((raw_cs_scope & H5_CHECKSUM_TRANSFER) &&
                            internal_cs != output->val_cs) {
-                            fprintf(stderr, 
+                            HERROR(H5E_FUNC, H5E_CANTINIT, 
                                     "Errrrr!  MAP Get integrity failure (expecting %"PRIu64" got %"PRIu64").\n",
                                     output->val_cs, internal_cs);
                             req->status = H5ES_STATUS_FAIL;
@@ -1039,7 +1039,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
                         /* Free memory handle */
                         if(HG_SUCCESS != HG_Bulk_handle_free(*info->value_handle)) {
-                            fprintf(stderr, "failed to free value bulk handle\n");
+                            HERROR(H5E_FUNC, H5E_CANTINIT, "failed to free value bulk handle\n");
                             req->status = H5ES_STATUS_FAIL;
                             req->state = H5VL_IOD_COMPLETED;
                         }
@@ -1068,7 +1068,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             hsize_t *count = (hsize_t *)req->data;
 
             if(*count == IOD_COUNT_UNDEFINED) {
-                fprintf(stderr, "MAP get_count failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "MAP get_count failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1083,7 +1083,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
 
             if(info->server_ret < 0) {
-                fprintf(stderr, "MAP exists failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "MAP exists failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1103,7 +1103,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             int *status = (int *)req->data;
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "FILE close failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "FILE close failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1137,7 +1137,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "ATTR rename failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "ATTR rename failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1154,7 +1154,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "ATTR remove failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "ATTR remove failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1173,7 +1173,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
 
             if(*ret < 0) {
-                fprintf(stderr, "EXIST OP failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "EXIST OP failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1189,7 +1189,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)req->obj;
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "ATTR close failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "ATTR close failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1219,7 +1219,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_group_t *grp = (H5VL_iod_group_t *)req->obj;
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "GROUP CLOSE failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "GROUP CLOSE failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1248,7 +1248,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "DATASET set extent failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "DATASET set extent failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1265,7 +1265,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "DATASET %s CLOSE failed at the server\n",
+                HERROR(H5E_FUNC, H5E_CANTINIT, "DATASET %s CLOSE failed at the server\n",
                         dset->common.obj_name);
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
@@ -1305,7 +1305,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on all object requests");
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "MAP close failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "MAP close failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1333,7 +1333,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)req->obj;
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "datatype close failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "datatype close failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1368,7 +1368,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             int *status = (int *)req->data;
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "Link operation failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Link operation failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1383,7 +1383,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5L_ff_info_t *linfo = (H5L_ff_info_t *)req->data;
 
             if(linfo->type == H5L_TYPE_ERROR) {
-                fprintf(stderr, "Link get_info failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Link get_info failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1397,7 +1397,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5O_ff_info_t *oinfo = (H5O_ff_info_t *)req->data;
 
             if(oinfo->type == H5O_TYPE_UNKNOWN) {
-                fprintf(stderr, "OBJECT get_info failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "OBJECT get_info failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1411,7 +1411,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             link_get_val_out_t *result = (link_get_val_out_t *)req->data;
 
             if(SUCCEED != result->ret) {
-                fprintf(stderr, "get comment failed\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "get comment failed\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1431,7 +1431,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             iod_handles_t *oh = (iod_handles_t *)req->data;
 
             if(IOD_OH_UNDEFINED == (*oh).rd_oh.cookie) {
-                fprintf(stderr, "failed to Open object by token\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to Open object by token\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1445,7 +1445,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_remote_object_t *obj = (H5VL_iod_remote_object_t *)req->data;
 
             if(IOD_OH_UNDEFINED == obj->iod_oh.rd_oh.cookie) {
-                fprintf(stderr, "failed to open Object\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to open Object\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1472,7 +1472,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             object_get_comment_out_t *result = (object_get_comment_out_t *)req->data;
 
             if(SUCCEED != result->ret) {
-                fprintf(stderr, "get comment failed\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "get comment failed\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1491,7 +1491,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_rc_info_t *rc_info = (H5VL_iod_rc_info_t *)req->data;
 
             if(SUCCEED != rc_info->result.ret) {
-                fprintf(stderr, "Failed to Acquire Read Context %"PRIu64"\n", *(rc_info->c_version_ptr));
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Failed to Acquire Read Context %"PRIu64"\n", *(rc_info->c_version_ptr));
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1511,7 +1511,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             int *status = (int *)req->data;
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "Failed to Read Context OP\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Failed to Read Context OP\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1526,7 +1526,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_tr_info_t *tr_info = (H5VL_iod_tr_info_t *)req->data;
 
             if(SUCCEED != tr_info->result) {
-                fprintf(stderr, "Failed to start transaction  %"PRIu64"\n", tr_info->tr->trans_num);
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Failed to start transaction  %"PRIu64"\n", tr_info->tr->trans_num);
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1545,7 +1545,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             int *status = (int *)req->data;
 
             if(SUCCEED != *status) {
-                fprintf(stderr, "Failed transaction OP\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Failed transaction OP\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1614,7 +1614,7 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
             /* Free memory handle */
             if(HG_SUCCESS != HG_Bulk_handle_free(*info->bulk_handle)) {
-                fprintf(stderr, "failed to free bulk handle\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "failed to free bulk handle\n");
             }
             free(info->status);
             info->status = NULL;

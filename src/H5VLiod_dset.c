@@ -933,7 +933,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
                                      TRUE, buf, buf_size, cs, raw_cs_scope, wtid) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
 
-#if H5VL_IOD_DEBUG 
+#if 0
         { 
             int *ptr = (int *)buf;
  
