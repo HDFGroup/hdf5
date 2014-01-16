@@ -1634,16 +1634,15 @@ done:
         }
         if(file->comm || file->info)
             if(H5FD_mpi_comm_info_free(&file->comm, &file->info) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, NULL, "Communicator/Info free failed")
+                HDONE_ERROR(H5E_INTERNAL, H5E_CANTFREE, NULL, "Communicator/Info free failed")
         if(file->fapl_id != FAIL && H5I_dec_ref(file->fapl_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
+            HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
         if(file->remote_file.fcpl_id != FAIL && 
            H5I_dec_ref(file->remote_file.fcpl_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
+            HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
         if(file != NULL) {
             file = H5FL_FREE(H5VL_iod_file_t, file);
         } /* end if */
-        HGOTO_DONE(NULL);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1783,7 +1782,6 @@ done:
         if(file != NULL) {
             file = H5FL_FREE(H5VL_iod_file_t, file);
         } /* end if */
-        HGOTO_DONE(NULL);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
