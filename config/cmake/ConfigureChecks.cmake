@@ -33,6 +33,11 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     SET (H5_HAVE_DARWIN 1) 
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
+# Check for Solaris
+IF(${CMAKE_SYSTEM_NAME} MATCHES "SunOS") 
+    SET (H5_HAVE_SOLARIS 1) 
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
+
 #-----------------------------------------------------------------------------
 # Option to Clear File Buffers before write --enable-clear-file-buffers
 #-----------------------------------------------------------------------------
@@ -433,6 +438,7 @@ SET (LINUX_LFS 0)
 SET (HDF5_EXTRA_C_FLAGS)
 SET (HDF5_EXTRA_FLAGS)
 IF (NOT WINDOWS)
+  IF(NOT H5_HAVE_SOLARIS)
   # Linux Specific flags
   # This was originally defined as _POSIX_SOURCE which was updated to
   # _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
@@ -474,6 +480,7 @@ IF (NOT WINDOWS)
     ENDIF (TEST_LFS_WORKS_COMPILE)
   ENDIF (HDF5_ENABLE_LARGE_FILE)
   SET (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${HDF5_EXTRA_FLAGS})
+  ENDIF(NOT H5_HAVE_SOLARIS)
 ENDIF (NOT WINDOWS)
 
 ADD_DEFINITIONS (${HDF5_EXTRA_FLAGS})
