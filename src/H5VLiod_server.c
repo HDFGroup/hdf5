@@ -133,7 +133,7 @@ EFF__mercury_register_callbacks(void)
     MERCURY_HANDLER_REGISTER("dset_read", H5VL_iod_server_dset_read, 
                              dset_io_in_t, dset_read_out_t);
     MERCURY_HANDLER_REGISTER("dset_get_vl_size", H5VL_iod_server_dset_get_vl_size, 
-                             dset_get_vl_size_in_t, dset_read_out_t);
+                             dset_io_in_t, dset_read_out_t);
     MERCURY_HANDLER_REGISTER("dset_write", H5VL_iod_server_dset_write, 
                              dset_io_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("dset_set_extent", H5VL_iod_server_dset_set_extent, 
@@ -1646,7 +1646,7 @@ int
 H5VL_iod_server_dset_get_vl_size(hg_handle_t handle)
 {
     op_data_t *op_data = NULL;
-    dset_get_vl_size_in_t *input = NULL;
+    dset_io_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1654,8 +1654,8 @@ H5VL_iod_server_dset_get_vl_size(hg_handle_t handle)
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
-    if(NULL == (input = (dset_get_vl_size_in_t *)
-                H5MM_malloc(sizeof(dset_get_vl_size_in_t))))
+    if(NULL == (input = (dset_io_in_t *)
+                H5MM_malloc(sizeof(dset_io_in_t))))
 	HGOTO_ERROR2(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))

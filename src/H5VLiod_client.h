@@ -21,6 +21,7 @@
 
 #include "H5FFprivate.h"     /* FastForward wrappers            */
 #include "H5Mpublic.h"
+#include "H5Sprivate.h"
 #include "H5RCprivate.h"     /* Read contexts */
 #include "H5TRprivate.h"     /* Transactions */
 #include "H5VLiod_common.h"
@@ -268,17 +269,36 @@ typedef struct H5VL_iod_dtype_t {
     hid_t tapl_id;
 } H5VL_iod_dtype_t;
 
-/* information about a dataset read/write request */
-typedef struct H5VL_iod_io_info_t {
-    /* read & write params */
+/* information about an attr IO request */
+typedef struct H5VL_iod_attr_io_info_t {
+    int *status;
+    hg_bulk_t *bulk_handle;
+} H5VL_iod_attr_io_info_t;
+
+/* information about a dataset write request */
+typedef struct H5VL_iod_write_info_t {
     void *status;
     hg_bulk_t *bulk_handle;
+    hg_bulk_t *vl_len_bulk_handle;
+    hg_bulk_segment_t *vl_segments;
+    char *vl_lengths;
+} H5VL_iod_write_info_t;
 
-    /* write params */
-    size_t *vl_string_len;
+/* status of a read operation after it completes */
+typedef struct H5VL_iod_read_status_t {
+    int ret;
+    uint64_t cs;
+    size_t buf_size;
+} H5VL_iod_read_status_t;
 
-    /* read params */
+/* information about a dataset read request */
+typedef struct H5VL_iod_read_info_t {
+    void *status;
+    hg_bulk_t *bulk_handle;
     void *buf_ptr;
+    char *vl_lengths;
+    size_t vl_lengths_size;
+    H5VL_iod_type_info_t *type_info;
     hssize_t nelmts;
     size_t type_size;
     struct H5S_t *space;
@@ -288,10 +308,9 @@ typedef struct H5VL_iod_io_info_t {
     hid_t mem_type_id;
     hid_t dxpl_id;
     uint64_t axe_id;
-    na_addr_t peer;
+    na_addr_t ion_target;
     hg_id_t read_id;
-
-} H5VL_iod_io_info_t;
+} H5VL_iod_read_info_t;
 
 typedef struct H5VL_iod_map_set_info_t {
     void *status;
@@ -365,12 +384,15 @@ H5_DLL herr_t H5VL_iod_map_get_size(hid_t type_id, const void *buf,
                                     /*out*/size_t *size, /*out*/H5T_class_t *dt_class);
 H5_DLL herr_t H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index, 
                                   iod_obj_type_t type, uint64_t *id);
-H5_DLL herr_t H5VL_iod_pre_write(hid_t type_id, struct H5S_t *space, const void *buf, 
+H5_DLL herr_t H5VL_iod_pre_write(hid_t type_id, H5S_t *space, const void *buf, 
                                  /*out*/uint64_t *_checksum, 
+                                 /*out*/uint64_t *_vlen_checksum, 
                                  /*out*/hg_bulk_t *bulk_handle,
-                                 /*out*/size_t **vl_str_len);
+                                 /*out*/hg_bulk_t *vl_len_bulk_handle,
+                                 /*out*/hg_bulk_segment_t **_vl_segments,
+                                 /*out*/char **_vl_lengths);
 H5_DLL herr_t H5VL_iod_pre_read(hid_t type_id, struct H5S_t *space, const void *buf, 
-                                /*out*/hg_bulk_t *bulk_handle, hbool_t *is_vl_data);
+                                hssize_t nelmts, /*out*/hg_bulk_t *bulk_handle);
 
 /* private routines for map objects */
 H5_DLL herr_t H5M_init(void);

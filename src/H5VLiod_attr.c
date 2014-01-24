@@ -531,7 +531,8 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     file_desc = hslabs;
 
     /* read from array object */
-    ret = iod_array_read(iod_oh, rtid, NULL, mem_desc, &file_desc, &iod_cs, NULL);
+    ret = iod_array_read(iod_oh, rtid, NULL, mem_desc, &file_desc, 
+                         NULL/* MSC - need IOD -&iod_cs*/, NULL);
     if(ret < 0) {
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
@@ -734,7 +735,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     /* set the file descriptor */
     file_desc = hslabs;
 
-    if(cs_scope & H5_CHECKSUM_IOD) {
+    if(0) {// MSC - IOD fix - cs_scope & H5_CHECKSUM_IOD) {
         attr_cs = H5_checksum_crc64(buf, size);
 
         /* write from array object */
@@ -983,7 +984,7 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
     kv.key = (void *)old_name;
     kv.key_len = strlen(old_name);
     kvs.kv = &kv;
-    kvs.cs = &cs;
+    kvs.cs = NULL; //MSC - need IOD - &cs;
     kvs.ret = &ret;
     if(iod_kv_unlink_keys(attr_kv_oh.wr_oh, wtid, NULL, 1, &kvs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
@@ -1139,7 +1140,7 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     kv.key = (void *)attr_name;
     kv.key_len = strlen(attr_name);
     kvs.kv = &kv;
-    kvs.cs = &cs;
+    kvs.cs = NULL; //MSC - need IOD - &cs;
     kvs.ret = &ret;
     if(iod_kv_unlink_keys(attr_kv_oh.wr_oh, wtid, NULL, 1, &kvs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");

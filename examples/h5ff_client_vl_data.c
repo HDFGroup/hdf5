@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
         "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
         "conceived in liberty and dedicated to the proposition that all men are created equal.",
         "Now we are engaged in a great civil war,",
-        "testing whether that nation or any nation so conceived and so dedicated can long endure."
+        "testing whether that nation or any nation so conceived and so dedicated can long endure.",
         "Abraham Lincoln"
     };   /* Information to write */
     char *str_rdata[5];
@@ -287,7 +287,7 @@ int main(int argc, char **argv) {
     H5Dvlen_reclaim(vl_dtid, sid, H5P_DEFAULT, wdata);
 
     fprintf(stderr, "Reading VL Strings: \n");
-    for(i=0 ; i<4 ; i++) {
+    for(i=0 ; i<5 ; i++) {
         fprintf(stderr, "%s\n", str_rdata[i]);
     }
 

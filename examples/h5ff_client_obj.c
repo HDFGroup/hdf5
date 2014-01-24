@@ -142,16 +142,16 @@ int main(int argc, char **argv) {
         ret = H5TRfinish(tid2, H5P_DEFAULT, &rid2, e_stack);
         assert(0 == ret);
 
+        assert(H5Gclose_ff(gid, e_stack) == 0);
+        assert(H5Mclose_ff(map, e_stack) == 0);
+        assert(H5Tclose_ff(dtid, e_stack) == 0);
+        assert(H5Dclose_ff(did, e_stack) == 0);
+
         /* release container version 2. This is async. */
         ret = H5RCrelease(rid_temp, e_stack);
         assert(0 == ret);
         ret = H5RCclose(rid_temp);
         assert(0 == ret);
-
-        assert(H5Gclose_ff(gid, e_stack) == 0);
-        assert(H5Dclose_ff(did, e_stack) == 0);
-        assert(H5Tclose_ff(dtid, e_stack) == 0);
-        assert(H5Mclose_ff(map, e_stack) == 0);
 
         version = 2;
     }

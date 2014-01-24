@@ -162,7 +162,8 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         dt_cs = H5_checksum_crc64(buf, buf_size);
 
         /* write the serialized type value to the BLOB object */
-        if(iod_blob_write(dtype_oh.wr_oh, wtid, NULL, mem_desc, file_desc, &dt_cs, NULL) < 0)
+        if(iod_blob_write(dtype_oh.wr_oh, wtid, NULL, mem_desc, file_desc, NULL 
+                          /*MSC - IOD fix - &dt_cs*/, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
     }
     else {
@@ -366,7 +367,8 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     file_desc->frag[0].len = (iod_size_t)buf_size;
 
     /* read the serialized type value from the BLOB object */
-    if(iod_blob_read(dtype_oh.rd_oh, rtid, NULL, mem_desc, file_desc, &iod_cs, NULL) < 0)
+    if(iod_blob_read(dtype_oh.rd_oh, rtid, NULL, mem_desc, file_desc, NULL
+                     /*MSC - IOD fix - &iod_cs*/, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read from BLOB object");
 
     if(iod_cs && (cs_scope & H5_CHECKSUM_IOD)) {

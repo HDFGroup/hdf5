@@ -323,9 +323,6 @@ H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
 			       unsigned relnum);
 H5_DLL uint32_t H5checksum(const void *key, size_t length, H5_checksum_seed_t *cs);
 
-H5_DLL uint64_t H5_checksum_crc64(const void *buf, size_t buf_size);
-H5_DLL uint64_t H5_checksum_crc64_fragments(void **buf, size_t *buf_size, size_t count);
-
 #ifdef __cplusplus
 }
 #endif

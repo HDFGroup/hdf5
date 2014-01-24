@@ -32,17 +32,33 @@
 #define IOD_COUNT_UNDEFINED ((uint64_t)(-1))//(pow(2.0,64.0) - 1)
 #define H5VL_IOD_DEBUG 1
 
+/* Structure for a span of fixed-length data in a type */
+ typedef struct H5VL_iod_fl_span_t {
+    size_t offset;          /* Offset of start of span in type */
+    size_t size;            /* Size of span */
+} H5VL_iod_fl_span_t;
+
+/* Structure for a variable-length type in a type */
+typedef struct H5VL_iod_vl_info_t {
+    size_t offset;          /* Offset of vlen in type */
+    struct H5VL_iod_type_info_t *base_type; /* Type info for vlen base type.  Set to NULL if this vlen is a vl string. */
+} H5VL_iod_vl_info_t;
+
+/* Structure containing information about a type to use during I/O */
+typedef struct H5VL_iod_type_info_t {
+    size_t size;            /* Size of one element of this type */
+    size_t num_fl_spans;    /* Size of fl_spans array */
+    H5VL_iod_fl_span_t *fl_spans; /* Array of spans of fixed-length data in type */
+    size_t num_vls;         /* Size of vls array */
+    H5VL_iod_vl_info_t *vls; /* Array of variable-length types in type */
+    size_t rc;              /* Number of references to this struct */
+} H5VL_iod_type_info_t;
+
 typedef enum H5VL_iod_state_t {
     H5VL_IOD_PENDING,
     H5VL_IOD_COMPLETED,
     H5VL_IOD_CANCELLED
 } H5VL_iod_state_t;
-
-typedef struct H5VL_iod_read_status_t {
-    int ret;
-    uint64_t cs;
-    size_t buf_size;
-} H5VL_iod_read_status_t;
 
 typedef struct dims_t {
     int rank;
@@ -83,6 +99,22 @@ typedef struct iod_handles_t {
     iod_handle_t rd_oh;
     iod_handle_t wr_oh;
 } iod_handles_t;
+
+H5_DLL int H5VL_iod_get_type_info(hid_t type_id, H5VL_iod_type_info_t *type_info);
+H5_DLL void H5VL_iod_type_info_reset(H5VL_iod_type_info_t *type_info);
+H5_DLL int H5VL_iod_create_segments_send(char *buf, H5VL_iod_type_info_t *type_info,
+           size_t nelem, hg_bulk_segment_t **segments, size_t *num_segments,
+           char **vl_lengths, size_t *vl_lengths_nused, void ***free_list,
+           size_t *free_list_len);
+H5_DLL int H5VL_iod_create_segments_recv(char *buf, H5VL_iod_type_info_t *type_info,
+           size_t nelem, hg_bulk_segment_t **segments, size_t *num_segments,
+           char *vl_lengths, size_t vl_lengths_nused, void ***free_list,
+           size_t *free_list_len);
+H5_DLL void H5VL_iod_free_list_free(void **free_list, size_t free_list_len);
+
+H5_DLL uint64_t H5_checksum_crc64(const void *buf, size_t buf_size);
+H5_DLL uint64_t H5_checksum_crc64_segments(hg_bulk_segment_t *segments, size_t count);
+H5_DLL uint64_t H5_checksum_crc64_fragments(void **buf, size_t *buf_size, size_t count);
 
 H5_DLL int hg_proc_ret_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_axe_t(hg_proc_t proc, void *data);
@@ -447,18 +479,9 @@ MERCURY_GEN_PROC(dset_io_in_t,
                  ((hid_t)(space_id))
                  ((hid_t)(dxpl_id))
                  ((uint64_t)(checksum))
-                 ((hg_bulk_t)(bulk_handle)))
-MERCURY_GEN_PROC(dset_get_vl_size_in_t, 
-                 ((axe_t)(axe_info))
-                 ((uint32_t)(cs_scope))
-                 ((uint64_t)(rcxt_num))
-                 ((iod_handle_t)(coh))
-                 ((iod_handles_t)(iod_oh)) 
-                 ((iod_obj_id_t)(iod_id))
-                 ((iod_obj_id_t)(mdkv_id))
-                 ((hid_t)(mem_type_id))
-                 ((hid_t)(space_id))
-                 ((hid_t)(dxpl_id)))
+                 ((hg_bulk_t)(bulk_handle))
+                 ((hg_bulk_t)(vl_len_bulk_handle))
+                 ((uint64_t)(axe_id)))
 MERCURY_GEN_PROC(dset_read_out_t, 
                  ((int32_t)(ret))
                  ((uint64_t)(cs))

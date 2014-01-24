@@ -63,5 +63,13 @@ echo "Finished object test-----------------------------------------------"
 [ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
 sleep 2
 
+echo "Starting VL datatypes for datasets test-----------------------------------------------"
+mpiexec -np $1 ./h5ff_server &> ff_output/server_obj &
+sleep 2 &&
+mpiexec -np $2 ./h5ff_client_vl_data
+RETVAL=$?
+echo "Finished object test-----------------------------------------------"
+[ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
+
 echo "FF tests DONE ---------------------------------------------------"
 exit
