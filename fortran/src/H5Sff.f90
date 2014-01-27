@@ -1323,8 +1323,8 @@ CONTAINS
               INTEGER, INTENT(IN) :: operator
               INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: start
               INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: count
-              INTEGER(HSIZE_T), DIMENSION(*), OPTIONAL, INTENT(IN) :: stride
-              INTEGER(HSIZE_T), DIMENSION(*), OPTIONAL, INTENT(IN) :: block
+              INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: stride
+              INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: block
               END FUNCTION h5sselect_hyperslab_c
             END INTERFACE
 

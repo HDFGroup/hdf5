@@ -298,7 +298,7 @@ nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock,
   if (rank < 0 ) return ret_value;
   c_startblock = (hsize_t)*startblock;
 
-  c_buf = (hsize_t*)malloc(sizeof(hsize_t)*(size_t)(c_num_blocks*2*rank));
+  c_buf = (hsize_t*)HDmalloc(sizeof(hsize_t)*(size_t)(c_num_blocks*2*rank));
   if (!c_buf) return ret_value;
 
   ret_value = H5Sget_select_hyper_blocklist(c_space_id, c_startblock,
@@ -425,7 +425,7 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
   if (rank < 0 ) return ret_value;
 
   c_startpoint = (hsize_t)*startpoint;
-  c_buf = (hsize_t*)malloc(sizeof(hsize_t)*(size_t)(c_num_points*rank));
+  c_buf = (hsize_t*)HDmalloc(sizeof(hsize_t)*(size_t)(c_num_points*rank));
   if (!c_buf) return ret_value;
   ret_value = H5Sget_select_elem_pointlist(c_space_id, c_startpoint,
                                             c_num_points, c_buf);
