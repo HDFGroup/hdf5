@@ -51,6 +51,8 @@ extern "C" {
 
 /* API wrappers */
 H5_DLL hid_t H5TRcreate(hid_t file_id, hid_t rc_id, uint64_t trans_num);
+H5_DLL herr_t H5TRget_trans_num(hid_t trans_id, uint64_t *trans_num);
+H5_DLL herr_t H5TRget_version_num(hid_t trans_id, uint64_t *version);
 H5_DLL herr_t H5TRstart(hid_t trans_id, hid_t trspl_id, hid_t estack_id);
 H5_DLL herr_t H5TRfinish(hid_t trans_id, hid_t trfpl_id, hid_t *rcntxt_id, hid_t estack_id);
 H5_DLL herr_t H5TRskip(hid_t file_id, uint64_t start_trans_num, uint64_t count, hid_t estack_id);

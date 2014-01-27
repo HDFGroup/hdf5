@@ -361,6 +361,44 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5TR_create() */
 
+herr_t
+H5TRget_trans_num(hid_t trans_id, uint64_t *trans_num)
+{
+    H5TR_t *tr = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Il", trans_id, trans_num);
+
+    /* get the TR object */
+    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a transaction ID")
+
+    *trans_num = tr->trans_num;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5TRget_trans_num */
+
+herr_t
+H5TRget_version_num(hid_t trans_id, uint64_t *version)
+{
+    H5TR_t *tr = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Il", trans_id, version);
+
+    /* get the TR object */
+    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a transaction ID")
+
+    *version = tr->c_version;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5TRget_version_num */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5TRstart
