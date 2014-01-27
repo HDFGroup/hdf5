@@ -2422,7 +2422,6 @@
 ./config/cmake/GetTimeOfDayTest.cpp
 ./config/cmake/HDF5CXXTests.cpp
 ./config/cmake/HDF5Tests.c
-./config/cmake/xlatefile.c
 ./config/cmake/CheckTypeSize.cmake
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in

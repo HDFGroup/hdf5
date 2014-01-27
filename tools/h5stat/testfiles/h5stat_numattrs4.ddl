@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5stat -A -a 100 h5stat_newgrat.h5'
-#############################
 Filename: h5stat_newgrat.h5
 Small # of attributes (objects with 1 to 100 attributes):
 	# of objects with 100 attributes: 1

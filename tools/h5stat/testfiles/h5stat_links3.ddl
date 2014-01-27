@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5stat --links=20 -g h5stat_threshold.h5'
-#############################
 Filename: h5stat_threshold.h5
 Small groups (with 0 to 19 links):
 	# of groups with 0 link(s): 1

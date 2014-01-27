@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5stat -A h5stat_newgrat.h5'
-#############################
 Filename: h5stat_newgrat.h5
 Small # of attributes (objects with 1 to 10 attributes):
 	Total # of objects with small # of attributes: 0

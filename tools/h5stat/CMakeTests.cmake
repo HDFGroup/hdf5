@@ -54,8 +54,8 @@
     ADD_CUSTOM_COMMAND (
         TARGET     h5stat
         POST_BUILD
-        COMMAND    ${XLATE_UTILITY}
-        ARGS       ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/testfiles/${ddl_file} ${ddldest} -l3
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/testfiles/${ddl_file} ${ddldest}
     )
   ENDFOREACH (ddl_file ${HDF5_REFERENCE_FILES})
 
