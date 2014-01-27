@@ -381,23 +381,23 @@ done:
 } /* H5TRget_trans_num */
 
 herr_t
-H5TRget_version_num(hid_t trans_id, uint64_t *version)
+H5TRget_version(hid_t trans_id, uint64_t *c_version)
 {
     H5TR_t *tr = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Il", trans_id, version);
+    H5TRACE2("e", "i*Il", trans_id, c_version);
 
     /* get the TR object */
     if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a transaction ID")
 
-    *version = tr->c_version;
+    *c_version = tr->c_version;
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5TRget_version_num */
+} /* H5TRget_version */
 
 
 /*-------------------------------------------------------------------------

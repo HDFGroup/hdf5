@@ -348,19 +348,19 @@ done:
 } /* end H5RC_create() */
 
 herr_t
-H5RCget_version(hid_t rc_id, uint64_t *version)
+H5RCget_version(hid_t rc_id, uint64_t *c_version)
 {
     H5RC_t *rc = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Il", rc_id, version);
+    H5TRACE2("e", "i*Il", rc_id, c_version);
 
     /* get the RC object */
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rc_id, H5I_RC)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Read Context ID")
 
-    *version = rc->c_version;
+    *c_version = rc->c_version;
 
 done:
     FUNC_LEAVE_API(ret_value)
