@@ -6099,8 +6099,8 @@ H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, H5I_type_t *opened_type, 
         map->remote_map.mdkv_id = mdkv_id;
         map->remote_map.attrkv_id = attrkv_id;
 
-        map->remote_map.mcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
-        map->mapl_id = H5Pcopy(H5P_GROUP_ACCESS_DEFAULT);
+        map->remote_map.mcpl_id = H5Pcopy(H5P_MAP_CREATE_DEFAULT);
+        map->mapl_id = H5Pcopy(H5P_MAP_ACCESS_DEFAULT);
 
         /* decode key_type */
         {
@@ -6491,7 +6491,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
         map->remote_map.valtype_id = remote_obj.id2;
 
         if(map->remote_map.mcpl_id == H5P_DEFAULT){
-            map->remote_map.mcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
+            map->remote_map.mcpl_id = H5Pcopy(H5P_MAP_CREATE_DEFAULT);
         }
 
         /* setup the local dataset struct */
@@ -6508,7 +6508,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
             map->common.obj_name[obj_name_len+name_len] = '\0';
         }
 
-        if((map->mapl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT)) < 0)
+        if((map->mapl_id = H5Pcopy(H5P_MAP_ACCESS_DEFAULT)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy mapl");
 
         /* set common object parameters */

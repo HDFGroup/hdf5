@@ -463,6 +463,8 @@ SET (H5P_SRCS
     ${HDF5_SRC_DIR}/H5Pfcpl.c
     ${HDF5_SRC_DIR}/H5Pfmpl.c
     ${HDF5_SRC_DIR}/H5Pgcpl.c
+    ${HDF5_SRC_DIR}/H5Pmcpl.c
+    ${HDF5_SRC_DIR}/H5Pmapl.c
     ${HDF5_SRC_DIR}/H5Pint.c
     ${HDF5_SRC_DIR}/H5Plapl.c
     ${HDF5_SRC_DIR}/H5Plcpl.c

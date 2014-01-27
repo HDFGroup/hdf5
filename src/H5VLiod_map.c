@@ -135,7 +135,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     step ++;
 
     if(H5P_DEFAULT == input->mcpl_id)
-        input->mcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
+        input->mcpl_id = H5Pcopy(H5P_MAP_CREATE_DEFAULT);
     mcpl_id = input->mcpl_id;
 
     /* insert plist metadata */

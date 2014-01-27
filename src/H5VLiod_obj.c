@@ -366,11 +366,14 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
 
     switch(obj_type) {
     case H5I_MAP:
+        if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
+                                 NULL, NULL, &output.cpl_id) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve mcpl");
         break;
     case H5I_GROUP:
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
                                  NULL, NULL, &output.cpl_id) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve gcpl");
         break;
     case H5I_DATASET:
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,

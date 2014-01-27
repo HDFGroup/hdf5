@@ -116,6 +116,8 @@ hid_t H5P_CLS_DATASET_XFER_g        = FAIL;
 hid_t H5P_CLS_FILE_MOUNT_g          = FAIL;
 hid_t H5P_CLS_GROUP_CREATE_g        = FAIL;
 hid_t H5P_CLS_GROUP_ACCESS_g        = FAIL;
+hid_t H5P_CLS_MAP_CREATE_g        = FAIL;
+hid_t H5P_CLS_MAP_ACCESS_g        = FAIL;
 hid_t H5P_CLS_DATATYPE_CREATE_g     = FAIL;
 hid_t H5P_CLS_DATATYPE_ACCESS_g     = FAIL;
 hid_t H5P_CLS_ATTRIBUTE_CREATE_g    = FAIL;
@@ -139,6 +141,8 @@ hid_t H5P_LST_DATASET_XFER_g        = FAIL;
 hid_t H5P_LST_FILE_MOUNT_g          = FAIL;
 hid_t H5P_LST_GROUP_CREATE_g        = FAIL;
 hid_t H5P_LST_GROUP_ACCESS_g        = FAIL;
+hid_t H5P_LST_MAP_CREATE_g        = FAIL;
+hid_t H5P_LST_MAP_ACCESS_g        = FAIL;
 hid_t H5P_LST_DATATYPE_CREATE_g     = FAIL;
 hid_t H5P_LST_DATATYPE_ACCESS_g     = FAIL;
 hid_t H5P_LST_ATTRIBUTE_CREATE_g    = FAIL;
@@ -221,6 +225,8 @@ H5_DLLVAR const H5P_libclass_t H5P_CLS_OCRT[1];         /* Object creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_STRCRT[1];       /* String create */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_LACC[1];         /* Link access */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_GCRT[1];         /* Group create */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_MCRT[1];         /* Map create */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_MACC[1];         /* Map access */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_OCPY[1];         /* Object copy */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FCRT[1];         /* File creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FACC[1];         /* File access */
@@ -259,6 +265,8 @@ static H5P_libclass_t const * const init_class[] = {
     H5P_CLS_GCRT,       /* Group create */
     H5P_CLS_OCPY,       /* Object copy */
     H5P_CLS_GACC,       /* Group access */
+    H5P_CLS_MCRT,       /* Map create */
+    H5P_CLS_MACC,       /* Map access */
     H5P_CLS_FCRT,       /* File creation */
     H5P_CLS_FACC,       /* File access */
     H5P_CLS_DCRT,       /* Dataset creation */
@@ -584,6 +592,8 @@ H5P_term_interface(void)
                         H5P_LST_DATASET_XFER_g =
                         H5P_LST_GROUP_CREATE_g =
                         H5P_LST_GROUP_ACCESS_g =
+                        H5P_LST_MAP_CREATE_g =
+                        H5P_LST_MAP_ACCESS_g =
                         H5P_LST_DATATYPE_CREATE_g =
                         H5P_LST_DATATYPE_ACCESS_g =
                         H5P_LST_ATTRIBUTE_CREATE_g =
@@ -612,6 +622,8 @@ H5P_term_interface(void)
                         H5P_CLS_DATASET_XFER_g =
                         H5P_CLS_GROUP_CREATE_g =
                         H5P_CLS_GROUP_ACCESS_g =
+                        H5P_CLS_MAP_CREATE_g =
+                        H5P_CLS_MAP_ACCESS_g =
                         H5P_CLS_DATATYPE_CREATE_g =
                         H5P_CLS_DATATYPE_ACCESS_g =
                         H5P_CLS_STRING_CREATE_g =
@@ -5115,6 +5127,14 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
 
         case H5P_TYPE_GROUP_ACCESS:
             class_id = H5P_CLS_GROUP_ACCESS_g;
+            break;
+
+        case H5P_TYPE_MAP_CREATE:
+            class_id = H5P_CLS_MAP_CREATE_g;
+            break;
+
+        case H5P_TYPE_MAP_ACCESS:
+            class_id = H5P_CLS_MAP_ACCESS_g;
             break;
 
         case H5P_TYPE_DATATYPE_CREATE:
