@@ -1280,6 +1280,7 @@ H5VL__iod_read_selection(iod_handle_t coh, iod_obj_id_t obj_id,
 {
     iod_handle_t obj_oh;
     size_t buf_size=0;
+    size_t elmt_size;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1290,8 +1291,9 @@ H5VL__iod_read_selection(iod_handle_t coh, iod_obj_id_t obj_id,
 
     /* read the data selection from IOD. */
     /* MSC - will need to do it in pieces, not it one shot. */
-    if(H5VL__iod_server_final_io(coh, obj_oh, space_id, type_id, 
-                                 FALSE, buf, buf_size, (uint64_t)0, 0, rtid) < 0)
+    elmt_size = H5Tget_size(type_id);
+    if(H5VL__iod_server_final_io(obj_oh, space_id, elmt_size, FALSE, 
+                                 buf, buf_size, (uint64_t)0, 0, rtid) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
 done:

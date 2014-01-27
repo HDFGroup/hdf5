@@ -484,7 +484,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     hid_t src_id = input->dset_type_id; /* the datatype of the dataset's element */
     hid_t dst_id = input->mem_type_id; /* the memory type of the elements */
     iod_trans_id_t rtid = input->rcxt_num;
-    uint32_t cs_scope = input->cs_scope;
+    //uint32_t cs_scope = input->cs_scope;
     hg_bulk_block_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     size_t size, buf_size = 0;
@@ -539,9 +539,12 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     }
 
     if(!is_vl_data) {
+        size_t elmt_size;
+
         /* If the data is not VL, we can read the data from the array the normal way */
-        if(H5VL__iod_server_final_io(coh, iod_oh.rd_oh, space_id, src_id, 
-                                     FALSE, buf, buf_size, (uint64_t)0, raw_cs_scope, rtid) < 0) {
+        elmt_size = H5Tget_size(src_id);
+        if(H5VL__iod_server_final_io(iod_oh.rd_oh, space_id, elmt_size, FALSE, 
+                                     buf, buf_size, (uint64_t)0, raw_cs_scope, rtid) < 0) {
             fprintf(stderr, "can't read from array object\n");
             ret_value = FAIL;
             goto done;
@@ -650,7 +653,7 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t iod_id = input->iod_id; /* dset ID */
     hid_t type_id = input->mem_type_id; /* the datatype of the dataset's element */
     hid_t space_id = input->space_id; /* file space selection */
-    hid_t dxpl_id = input->dxpl_id; /* transfer property list */
+    //hid_t dxpl_id = input->dxpl_id; /* transfer property list */
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
@@ -659,15 +662,7 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
     size_t buf_size, elmt_size;
     void *buf = NULL; /* buffer to hold blob IDs and sizes */
     size_t nelmts; /* number of elements selected to read */
-    hssize_t num_descriptors = 0, n; /* number of IOD file descriptors needed to describe filespace selection */
-    iod_mem_desc_t *mem_desc; /* memory descriptor used for reading array */
-    iod_array_iodesc_t file_desc; /* file descriptor used to read array */
-    iod_hyperslab_t *hslabs = NULL; /* IOD hyperslab generated from HDF5 filespace */
-    iod_checksum_t *cs_list = NULL;
-    iod_ret_t *ret_list = NULL;
-    iod_array_io_t *io_array = NULL; /* arary for list I/O */
     uint8_t *buf_ptr = NULL;
-    int ndims, i; /* dataset's rank/number of dimensions */
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the dset here or if it was already open */
     herr_t ret_value = SUCCEED;
@@ -683,11 +678,6 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
 
     /* get the number of points selected */
     nelmts = (size_t)H5Sget_select_npoints(space_id);
-
-    /* get the rank of the dataspace */
-    if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
-        HGOTO_ERROR2(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion");
-
     elmt_size = sizeof(iod_obj_id_t) + sizeof(iod_size_t);
 
     /* allocate buffer to hold blob IDs */
@@ -698,116 +688,10 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
        initialize it to the size required to store those lengths */
     buf_size = nelmts * 8;//sizeof(size_t);
 
-    /* handle scalar dataspace */
-    if(0 == ndims) {
-        ndims = 1;
-        /* allocate the IOD hyperslab descriptors needed */
-        if(NULL == (hslabs = (iod_hyperslab_t *)malloc(sizeof(iod_hyperslab_t))))
-            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate iod array descriptors");
-
-        hslabs[0].start = (iod_size_t *)malloc(sizeof(iod_size_t));
-        hslabs[0].stride = (iod_size_t *)malloc(sizeof(iod_size_t));
-        hslabs[0].block = (iod_size_t *)malloc(sizeof(iod_size_t));
-        hslabs[0].count = (iod_size_t *)malloc(sizeof(iod_size_t));
-
-        num_descriptors = 1;
-        hslabs[0].start[0] = 0;
-        hslabs[0].count[0] = 1;
-        hslabs[0].block[0] = 1;
-        hslabs[0].stride[0] = 1;
-    }
-    else {
-        /* get the number of decriptors required, i.e. the numbers of iod
-           I/O operations needed */
-        if(H5VL_iod_get_file_desc(space_id, &num_descriptors, NULL) < 0)
-        HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
-
-        /* allocate the IOD hyperslab descriptors needed */
-        if(NULL == (hslabs = (iod_hyperslab_t *)malloc
-                    (sizeof(iod_hyperslab_t) * (size_t)num_descriptors)))
-            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate iod array descriptors");
-
-        for(n=0 ; n<num_descriptors ; n++) {
-            hslabs[n].start = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-            hslabs[n].stride = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-            hslabs[n].block = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-            hslabs[n].count = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-        }
-
-        /* generate the descriptors after allocating the array */
-        if(H5VL_iod_get_file_desc(space_id, &num_descriptors, hslabs) < 0)
-            HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
-    }
-
-    buf_ptr = (uint8_t *)buf;
-
-    /* allocate the IOD array parameters for reading */
-    if(NULL == (io_array = (iod_array_io_t *)malloc
-                (sizeof(iod_array_io_t) * (size_t)num_descriptors)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate iod array");
-
-    /* allocate cs array */
-    if(NULL == (cs_list = (iod_checksum_t *)calloc
-                (sizeof(iod_checksum_t), (size_t)num_descriptors)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate checksum array");
-
-    /* allocate return array */
-    if(NULL == (ret_list = (iod_ret_t *)calloc
-                (sizeof(iod_ret_t), (size_t)num_descriptors)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate iod array");
-
-    /* read each descriptore from the IOD container */
-    for(n=0 ; n<num_descriptors ; n++) {
-        hsize_t num_bytes = 0;
-        hsize_t num_elems = 1;
-
-        /* determine how many bytes the current descriptor holds */
-        for(i=0 ; i<ndims ; i++)
-            num_elems *= (hslabs[n].count[i] * hslabs[n].block[i]);
-        num_bytes = num_elems * elmt_size;
-
-        /* set the memory descriptor */
-        mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
-        mem_desc->nfrag = 1;
-        mem_desc->frag[0].addr = (void *)buf_ptr;
-        mem_desc->frag[0].len = (iod_size_t)num_bytes;
-
-        buf_ptr += num_bytes;
-
-        /* set the file descriptor */
-        file_desc = hslabs[n];
-
-        /* setup list I/O parameters */
-        io_array[n].oh = iod_oh.rd_oh;
-        io_array[n].hints = NULL;
-        io_array[n].mem_desc = mem_desc;
-        io_array[n].io_desc = &file_desc;
-        io_array[n].cs = NULL; //MSC - need IOD - &cs_list[n];
-        io_array[n].ret = &ret_list[n];
-    }
-
-    /* Read list IO */
-    if(iod_array_read_list(coh, rtid, (int)num_descriptors, io_array, NULL) < 0)
+    /* read the array values containing the BLOB IDs and lengths */
+    if(H5VL__iod_server_final_io(iod_oh.rd_oh, space_id, elmt_size, FALSE, 
+                                 buf, buf_size, (uint64_t)0, cs_scope, rtid) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
-
-    /* verify return values */
-    for(n=0 ; n<num_descriptors ; n++) {
-        iod_checksum_t entry_cs = 0;
-
-        if(ret_list[n] < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
-#if 0
-        /* Verify checksum for that entry */
-        buf_ptr = (uint8_t *)buf;
-        entry_cs = H5_checksum_crc64(buf_ptr, sizeof(iod_size_t) + sizeof(iod_obj_id_t));
-        /* MSC - no CS from IOD */
-        //if(entry_cs != *(io_array[n].cs))
-        //HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading");
-        buf_ptr += elmt_size;
-#endif
-
-        free(io_array[n].mem_desc);
-    }
 
     /* MSC - create a bulk block handle. Mercury does not support
        segmented handles yet, so we need a temporrary buffer. */
@@ -818,7 +702,7 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
         unsigned u;
         H5VL_iod_type_info_t type_info;
 
-        if(NULL == (temp_buf = malloc(buf_size)))
+        if(NULL == (temp_buf = (size_t *)malloc(buf_size)))
             HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate size buffer");
 
         buf_ptr = (uint8_t *)buf;
@@ -891,23 +775,6 @@ done:
 #endif
 
     input = (dset_io_in_t *)H5MM_xfree(input);
-    //op_data = (op_data_t *)H5MM_xfree(op_data);
-
-    /* free allocated descriptors */
-    for(n=0 ; n<num_descriptors ; n++) {
-        free(hslabs[n].start);
-        free(hslabs[n].stride);
-        free(hslabs[n].block);
-        free(hslabs[n].count);
-    }
-    if(hslabs)
-        free(hslabs);
-    if(io_array)
-        free(io_array);
-    if(cs_list)
-        free(cs_list);
-    if(ret_list)
-        free(ret_list);
 
     /* close the dataset if we opened it in this routine */
     if(TRUE == opened_locally) {
@@ -950,7 +817,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     hid_t dst_id = input->dset_type_id; /* the datatype of the dataset's element */
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
-    uint32_t cs_scope = input->cs_scope;
+    //uint32_t cs_scope = input->cs_scope;
     hid_t dxpl_id;
     hg_bulk_block_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
@@ -958,7 +825,6 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     hbool_t is_vl_data;
     iod_checksum_t data_cs = 0;
     uint32_t raw_cs_scope;
-    unsigned u;
     H5VL_iod_type_info_t type_info;
     void *buf = NULL;
     size_t nelmts; /* number of elements selected to read */
@@ -1108,6 +974,8 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
         }
     }
     else {
+        size_t elmt_size;
+
         /* retrieve size of incoming bulk data */
         size = HG_Bulk_handle_get_size(bulk_handle);
 
@@ -1183,8 +1051,10 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
             fprintf(stderr, "\n");
         }
 #endif
-        if(H5VL__iod_server_final_io(coh, iod_oh.wr_oh, space_id, dst_id, 
-                                     TRUE, buf, buf_size, cs, raw_cs_scope, wtid) < 0)
+
+        elmt_size = H5Tget_size(dst_id);
+        if(H5VL__iod_server_final_io(iod_oh.wr_oh, space_id, elmt_size, TRUE, 
+                                     buf, buf_size, cs, raw_cs_scope, wtid) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
     }
 
@@ -1238,7 +1108,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t iod_id = input->iod_id; 
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
-    uint32_t cs_scope = input->cs_scope;
+    //uint32_t cs_scope = input->cs_scope;
     iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV object */
     /* int rank = input->dims.rank;  rank of dataset */
     hbool_t opened_locally = FALSE;
@@ -1382,27 +1252,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id, 
-                          hid_t type_id, hbool_t write_op, void *buf, 
+H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
+                          hbool_t write_op, void *buf, 
                           size_t UNUSED buf_size, iod_checksum_t UNUSED cs, 
                           uint32_t cs_scope, iod_trans_id_t tid)
 {
     int ndims, i; /* dataset's rank/number of dimensions */
     hssize_t num_descriptors = 0, n; /* number of IOD file descriptors needed to describe filespace selection */
     iod_mem_desc_t *mem_desc; /* memory descriptor used for reading array */
-    iod_array_iodesc_t file_desc; /* file descriptor used to read array */
+    iod_array_iodesc_t *file_desc; /* file descriptor used to do IO */
     iod_hyperslab_t *hslabs = NULL; /* IOD hyperslab generated from HDF5 filespace */
     iod_checksum_t *cs_list = NULL;
-    iod_ret_t *ret_list = NULL;
-    iod_array_io_t *io_array = NULL; /* arary for list I/O */
     uint8_t *buf_ptr = NULL;
-    size_t elmt_size;
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    elmt_size = H5Tget_size(type_id);
 
     /* get the rank of the dataspace */
     if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
@@ -1449,12 +1314,8 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
             HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
     }
 
+    file_desc = (iod_array_iodesc_t *)hslabs;
     buf_ptr = (uint8_t *)buf;
-
-    /* allocate the IOD array parameters for writing */
-    if(NULL == (io_array = (iod_array_io_t *)malloc
-                (sizeof(iod_array_io_t) * (size_t)num_descriptors)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate iod array");
 
     if(cs_scope & H5_CHECKSUM_IOD) {
         /* allocate cs array */
@@ -1468,12 +1329,10 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
     }
 #endif
 
-    /* allocate return array */
-    if(NULL == (ret_list = (iod_ret_t *)calloc
-                (sizeof(iod_ret_t), (size_t)num_descriptors)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate iod array");
-
-    /* write each descriptore to the IOD container */
+    /* set the memory descriptor */
+    mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + 
+                                        (int)num_descriptors * sizeof(iod_mem_frag_t));
+    mem_desc->nfrag = (int)num_descriptors;
     for(n=0 ; n<num_descriptors ; n++) {
         hsize_t num_bytes = 0;
         hsize_t num_elems = 1;
@@ -1484,44 +1343,24 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
         }
         num_bytes = num_elems * elmt_size;
 
-        /* set the memory descriptor */
-        mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
-        mem_desc->nfrag = 1;
-        mem_desc->frag[0].addr = (void *)buf_ptr;
-        mem_desc->frag[0].len = (iod_size_t)num_bytes;
+        mem_desc->frag[n].addr = (void *)buf_ptr;
+        mem_desc->frag[n].len = (iod_size_t)num_bytes;
 
-        /* If this is a write op, compute the checksum for each memory fragment */
         if(write_op && (cs_scope & H5_CHECKSUM_IOD))
             cs_list[n] = H5_checksum_crc64(buf_ptr, (size_t)num_bytes);
-
-        buf_ptr += num_bytes;
-
-        /* set the file descriptor */
-        file_desc = hslabs[n];
 
 #if H5VL_IOD_DEBUG 
         for(i=0 ; i<ndims ; i++) {
             fprintf(stderr, "Dim %d:  start %zu   stride %zu   block %zu   count %zu\n", 
-                    i, (size_t)file_desc.start[i], (size_t)file_desc.stride[i], 
-                    (size_t)file_desc.block[i], (size_t)file_desc.count[i]);
+                    i, (size_t)file_desc->start[i], (size_t)file_desc->stride[i], 
+                    (size_t)file_desc->block[i], (size_t)file_desc->count[i]);
         }
 #endif
-
-        /* setup list I/O parameters */
-        io_array[n].oh = iod_oh;
-        io_array[n].hints = NULL;
-        io_array[n].mem_desc = mem_desc;
-        io_array[n].io_desc = &file_desc;
-        if(cs_scope & H5_CHECKSUM_IOD)
-            io_array[n].cs = NULL;// MSC - need IOD - &cs_list[n];
-        else
-            io_array[n].cs = NULL;
-        io_array[n].ret = &ret_list[n];
     }
 
     if(write_op) {
         /* Write list IO */
-        ret = iod_array_write_list(coh, tid, (int)num_descriptors, io_array, NULL);
+        ret = iod_array_write(iod_oh, tid, NULL, mem_desc, file_desc, NULL, NULL);
         if(ret != 0) {
             fprintf(stderr, "ret: %d error: %s\n", ret, strerror(-ret));
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't write to array object");
@@ -1529,19 +1368,11 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
     }
     else {
         /* Read list IO */
-        ret = iod_array_read_list(coh, tid, (int)num_descriptors, io_array, NULL);
+        ret = iod_array_read(iod_oh, tid, NULL, mem_desc, file_desc, NULL, NULL);
         if(ret != 0) {
             fprintf(stderr, "ret: %d error: %s\n", ret, strerror(-ret));
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
         }
-    }
-
-    /* verify return values */
-    for(n=0 ; n<num_descriptors ; n++) {
-        if(ret_list[n] < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
-
-        free(io_array[n].mem_desc);
     }
 
     /* If this is a read operation, compute checksum for each IOD
@@ -1581,14 +1412,18 @@ done:
         free(hslabs[n].block);
         free(hslabs[n].count);
     }
-    if(hslabs)
+    if(hslabs) {
         free(hslabs);
-    if(io_array)
-        free(io_array);
-    if(cs_list)
+        hslabs = NULL;
+    }
+    if(cs_list) {
         free(cs_list);
-    if(ret_list)
-        free(ret_list);
+        cs_list = NULL;
+    }
+    if(mem_desc) {
+        free(mem_desc);
+        mem_desc = NULL;
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_final_io() */
@@ -1838,9 +1673,9 @@ H5VL__iod_server_vl_data_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndi
 {
     H5VL_iod_server_vl_write_t *udata = (H5VL_iod_server_vl_write_t *)_udata;
     iod_handle_t coh = udata->coh; /* container handle */
-    size_t nelmts = udata->nelmts;
+    //size_t nelmts = udata->nelmts;
     iod_trans_id_t wtid = udata->wtid;
-    iod_trans_id_t rtid = udata->rtid;
+    //iod_trans_id_t rtid = udata->rtid;
     iod_handles_t iod_oh = udata->iod_oh;
     iod_obj_id_t iod_id = udata->iod_id;
     iod_obj_id_t blob_id = 0;
@@ -1850,10 +1685,7 @@ H5VL__iod_server_vl_data_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndi
     iod_array_iodesc_t file_desc; /* file descriptor used to read array */
     iod_blob_iodesc_t *blob_desc; /* blob descriptor */
     size_t buf_size;
-    size_t old_seq_len = 0;
     unsigned u;
-    int i;
-    iod_checksum_t entry_cs = 0, read_cs = 0;
     hbool_t created = FALSE;
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
