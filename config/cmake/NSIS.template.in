@@ -37,9 +37,6 @@
   ;Set compression
   SetCompressor @CPACK_NSIS_COMPRESSOR@
 
-  ;Require administrator access
-  RequestExecutionLevel admin
-
 @CPACK_NSIS_DEFINES@
 
   !include Sections.nsh
@@ -916,7 +913,9 @@ Function .onInit
 ;Run the uninstaller
 uninst:
   ClearErrors
-  ExecWait '$0 _?=$INSTDIR' ;Do not copy the uninstaller to a temp file
+  StrLen $2 "\Uninstall.exe"
+  StrCpy $3 $0 -$2 # remove "\Uninstall.exe" from UninstallString to get path
+  ExecWait '$0 _?=$3' ;Do not copy the uninstaller to a temp file
 
   IfErrors uninst_failed inst
 uninst_failed:
