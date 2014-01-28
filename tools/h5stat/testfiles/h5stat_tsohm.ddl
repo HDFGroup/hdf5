@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5stat h5stat_tsohm.h5'
-#############################
 Filename: h5stat_tsohm.h5
 File information
 	# of unique groups: 1

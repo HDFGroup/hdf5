@@ -1320,8 +1320,12 @@
 ./tools/testfiles/tcontents.ddl
 ./tools/testfiles/tcontiguos.ddl
 ./tools/testfiles/tcmpdattrintsize.ddl
+./tools/testfiles/tcmpdintarray.ddl
+./tools/testfiles/tcmpdints.ddl
 ./tools/testfiles/tcmpdintsize.ddl
 ./tools/testfiles/tcmpdattrintsize.h5
+./tools/testfiles/tcmpdintarray.h5
+./tools/testfiles/tcmpdints.h5
 ./tools/testfiles/tcmpdintsize.h5
 ./tools/testfiles/tcomp-1.ddl
 ./tools/testfiles/tcomp-2.ddl
@@ -1393,6 +1397,8 @@
 ./tools/testfiles/tindicessub3.ddl
 ./tools/testfiles/tindicessub4.ddl
 ./tools/testfiles/tindicessub1.ddl
+./tools/testfiles/tintsattrs.ddl
+./tools/testfiles/tintsattrs.h5
 ./tools/testfiles/tlarge_objname.ddl
 ./tools/testfiles/tlarge_objname.h5
 ./tools/testfiles/tldouble.h5
@@ -1438,11 +1444,15 @@
 ./tools/testfiles/trawdatafile.exp
 ./tools/testfiles/trawssetfile.ddl
 ./tools/testfiles/trawssetfile.exp
+./tools/testfiles/treadfilter.ddl
+./tools/testfiles/treadintfilter.ddl
 ./tools/testfiles/treference.ddl
 ./tools/testfiles/tsaf.ddl
 ./tools/testfiles/tsaf.h5
 ./tools/testfiles/tscalarattrintsize.ddl
 ./tools/testfiles/tscalarattrintsize.h5
+./tools/testfiles/tscalarintattrsize.ddl
+./tools/testfiles/tscalarintattrsize.h5
 ./tools/testfiles/tscalarintsize.ddl
 ./tools/testfiles/tscalarintsize.h5
 ./tools/testfiles/tscalarstring.ddl
@@ -2262,7 +2272,6 @@
 ./config/cmake/GetTimeOfDayTest.cpp
 ./config/cmake/HDF5CXXTests.cpp
 ./config/cmake/HDF5Tests.c
-./config/cmake/xlatefile.c
 ./config/cmake/CheckTypeSize.cmake
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in

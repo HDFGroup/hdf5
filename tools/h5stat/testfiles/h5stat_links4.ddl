@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5stat -g h5stat_newgrat.h5'
-#############################
 Filename: h5stat_newgrat.h5
 Small groups (with 0 to 9 links):
 	# of groups with 0 link(s): 35000

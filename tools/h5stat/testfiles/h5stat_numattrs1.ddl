@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5stat -AS -a 10 h5stat_threshold.h5'
-#############################
 Filename: h5stat_threshold.h5
 Small # of attributes (objects with 1 to 10 attributes):
 	# of objects with 1 attributes: 2

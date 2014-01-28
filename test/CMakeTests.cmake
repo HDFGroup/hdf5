@@ -40,8 +40,8 @@ FOREACH (ref_file ${HDF5_REFERENCE_FILES})
   ADD_CUSTOM_COMMAND (
       TARGET     ${HDF5_TEST_LIB_TARGET}
       POST_BUILD
-      COMMAND    ${XLATE_UTILITY}
-      ARGS       ${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file} ${dest} -l3
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different ${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file} ${dest}
   )
 ENDFOREACH (ref_file ${HDF5_REFERENCE_FILES})
 
