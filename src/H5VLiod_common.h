@@ -24,6 +24,8 @@
 #include "H5VLpublic.h"
 #include "H5VLiod.h"            /* Iod VOL plugin			*/
 
+#ifdef H5_HAVE_EFF
+
 #define NA_UNDEFINED NULL
 #define IOD_OH_UNDEFINED ((uint64_t)0)//(pow(2.0,64.0) - 1)
 #define IOD_ID_UNDEFINED ((uint64_t)(-1))//(pow(2.0,64.0) - 1)
@@ -97,6 +99,8 @@ typedef struct iod_handles_t {
     iod_handle_t rd_oh;
     iod_handle_t wr_oh;
 } iod_handles_t;
+
+#endif /* H5_HAVE_EFF */
 
 H5_DLL int H5VL_iod_get_type_info(hid_t type_id, H5VL_iod_type_info_t *type_info);
 H5_DLL void H5VL_iod_type_info_reset(H5VL_iod_type_info_t *type_info);
