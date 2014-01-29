@@ -24,8 +24,6 @@
 #include "H5VLpublic.h"
 #include "H5VLiod.h"            /* Iod VOL plugin			*/
 
-#ifdef H5_HAVE_EFF
-
 #define NA_UNDEFINED NULL
 #define IOD_OH_UNDEFINED ((uint64_t)0)//(pow(2.0,64.0) - 1)
 #define IOD_ID_UNDEFINED ((uint64_t)(-1))//(pow(2.0,64.0) - 1)
@@ -111,6 +109,8 @@ H5_DLL int H5VL_iod_create_segments_recv(char *buf, H5VL_iod_type_info_t *type_i
            char *vl_lengths, size_t vl_lengths_nused, void ***free_list,
            size_t *free_list_len);
 H5_DLL void H5VL_iod_free_list_free(void **free_list, size_t free_list_len);
+
+#ifdef H5_HAVE_EFF
 
 H5_DLL uint64_t H5_checksum_crc64(const void *buf, size_t buf_size);
 H5_DLL uint64_t H5_checksum_crc64_segments(hg_bulk_segment_t *segments, size_t count);

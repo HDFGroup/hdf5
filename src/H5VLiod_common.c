@@ -12,8 +12,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <assert.h>
-#include <mchecksum.h>          /* Mercury Checksum library             */
 #include "H5VLiod_common.h"
+#ifdef H5_HAVE_EFF
+#include <mchecksum.h>          /* Mercury Checksum library             */
+#endif /* H5_HAVE_EFF */
 
 /*
  * Local typedefs
@@ -925,6 +927,8 @@ H5VL_iod_free_list_free(void **free_list, size_t free_list_len)
     free(free_list);
 } /* end H5VL_iod_free_list_free() */
 
+#ifdef H5_HAVE_EFF
+
 uint64_t 
 H5_checksum_crc64(const void *buf, size_t buf_size)
 {
@@ -1014,3 +1018,4 @@ H5_checksum_crc64_fragments(void **buf, size_t *buf_size, size_t count)
 
     return ret_value;
 }
+#endif /* H5_HAVE_EFF */
