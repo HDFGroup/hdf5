@@ -1087,6 +1087,116 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Ocork
+ *
+ * Purpose:	To "cork" an object:
+ *		--keep dirty entries assoicated with the object in the metadata cache
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Vailin Choi; January 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Ocork(hid_t object_id)
+{
+    H5O_loc_t  *oloc;			/* Object location */
+    herr_t      ret_value = SUCCEED;	/* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", object_id);
+
+    /* Get the object's oloc */
+    if((oloc = H5O_get_loc(object_id)) == NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
+
+    if(H5AC_cork(oloc->file, oloc->addr, H5AC__SET_CORK, NULL) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unable to cork an object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Ocork() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Ouncork
+ *
+ * Purpose:	To "uncork" an object
+ *		--release keeping dirty entries associated with the object 
+ *		  in the metadata cache
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Vailin Choi; January 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Ouncork(hid_t object_id)
+{
+    H5O_loc_t  *oloc;			/* Object location */
+    herr_t      ret_value = SUCCEED;	/* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", object_id);
+
+    /* Get the object's oloc */
+    if((oloc = H5O_get_loc(object_id)) == NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
+
+    /* Set the value */
+    if(H5AC_cork(oloc->file, oloc->addr, H5AC__UNCORK, NULL) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unable to uncork an object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Ouncork() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Ois_corked
+ *
+ * Purpose:	Retrieve the object's "cork" status in the parameter "corked":
+ *		  TRUE if the object is "corked"
+ *		  FALSE if the object is not "corked"
+ *		Return error if the parameter "corked" is not supplied
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Vailin Choi; January 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Ois_corked(hid_t object_id, hbool_t *corked)
+{
+    H5O_loc_t  *oloc;			/* Object location */
+    herr_t      ret_value = SUCCEED;	/* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*b", object_id, corked);
+
+    /* Check args */
+
+    /* Get the object's oloc */
+    if((oloc = H5O_get_loc(object_id)) == NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
+    if(!corked)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
+
+    /* Get the cork status */
+    if(H5AC_cork(oloc->file, oloc->addr, H5AC__GET_CORKED, corked) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to retrieve an object's cork status")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Ois_corked() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_create
  *
  * Purpose:	Creates a new object header. Allocates space for it and
@@ -1439,6 +1549,7 @@ done:
 herr_t
 H5O_close(H5O_loc_t *loc)
 {
+    hbool_t corked;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1461,6 +1572,14 @@ H5O_close(H5O_loc_t *loc)
 	    HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
     } /* end if */
 #endif
+
+    /* Uncork cache entries with tag: addr */
+    if(H5AC_cork(loc->file, loc->addr, H5AC__GET_CORKED, &corked) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to retrieve an object's cork status")
+    else if(corked) {
+	if(H5AC_cork(loc->file, loc->addr, H5AC__UNCORK, NULL) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "unable to uncork an object")
+    }
 
     /*
      * If the file open object count has reached the number of open mount points
@@ -2207,6 +2326,7 @@ H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     H5O_t *oh = NULL;           /* Object header information */
     H5O_loc_t loc;              /* Object location for object to delete */
     unsigned oh_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting object header */
+    hbool_t corked;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, addr, FAIL)
@@ -2228,6 +2348,14 @@ H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     if(H5O_delete_oh(f, dxpl_id, oh) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file")
 
+    /* Uncork cache entries with tag: addr */
+    if(H5AC_cork(f, addr, H5AC__GET_CORKED, &corked) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to retrieve an object's cork status")
+    else if(corked) {
+	if(H5AC_cork(f, addr, H5AC__UNCORK, NULL) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "unable to uncork an object")
+    }
+    
     /* Mark object header as deleted */
     oh_flags = H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
 

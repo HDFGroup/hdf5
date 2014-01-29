@@ -29,6 +29,10 @@
 #define DIM0 5
 #define DIM1 10
 
+/* For test: test_h5o_cork_dataset() */
+#define DIMS0	50
+#define DIMS1	100
+
 #define TEST6_DIM1 100
 #define TEST6_DIM2 100
 
@@ -1335,6 +1339,359 @@ test_h5o_getinfo_same_file(void)
 
 } /* test_h5o_getinfo_same_file() */
 
+/* 
+ * Test H5Ocork/H5Ouncork/H5Ois_corked public routines:
+ *	cork objects: group, dataset, named datatype
+ *	cork a corked object
+ *	uncork a non-corked object
+ *	cork a non-object
+ */
+static void
+test_h5o_cork(void)
+{
+    hid_t       fid;                    /* HDF5 File ID      */
+    hid_t       grp, dset, dtype;   	/* Object identifiers */
+    hid_t 	dspace;			/* Dataspace ID */
+    hsize_t     dims[RANK];		/* Dataset dimension sizes */
+    hbool_t 	corked;			/* Cork status of an object */
+    herr_t      ret;                    /* Return value */
+
+    /* Create a new HDF5 file */
+    fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create a group, dataset, and committed datatype within the file */
+    /* Create the group */
+    grp = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(grp, FAIL, "H5Gcreate2");
+    ret = H5Gclose(grp);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Commit the type inside the group */
+    dtype = H5Tcopy(H5T_NATIVE_INT);
+    CHECK(dtype, FAIL, "H5Tcopy");
+    ret = H5Tcommit2(fid, "group/datatype", dtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
+    ret = H5Tclose(dtype);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Create the data space for the dataset. */
+    dims[0] = DIM0;
+    dims[1] = DIM1;
+    dspace = H5Screate_simple(RANK, dims, NULL);
+    CHECK(dspace, FAIL, "H5Screate_simple");
+
+    /* Cork the dataspace: should fail */
+    ret = H5Ocork(dspace);
+    VERIFY(ret, FAIL, "H5Ocork");
+
+    /* Create the dataset. */
+    dset = H5Dcreate2(fid, "dataset", H5T_NATIVE_INT, dspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dcreate2");
+    ret = H5Dclose(dset);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Sclose(dspace);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Open the group */
+    grp = H5Oopen(fid, "group", H5P_DEFAULT);
+    CHECK(grp, FAIL, "H5Oopen");
+
+    /* Open the datatype */
+    dtype = H5Oopen(fid, "group/datatype", H5P_DEFAULT);
+    CHECK(dtype, FAIL, "H5Oopen");
+
+    /* Open the dataset */
+    dset = H5Oopen(fid, "/dataset", H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Oopen");
+
+    /* Check cork status of dataset */
+    ret = H5Ois_corked(dset, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, FALSE, "H5Ois_corked");
+
+    /* Cork the dataset */
+    ret = H5Ocork(dset);
+    CHECK(ret, FAIL, "H5Ocork");
+
+    /* Check cork status of dataset */
+    ret = H5Ois_corked(dset, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, TRUE, "H5Ois_corked");
+
+    /* Check cork status of group */
+    ret = H5Ois_corked(grp, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, FALSE, "H5Ois_corked");
+
+    /* Cork the group */
+    ret = H5Ocork(grp);
+    CHECK(ret, FAIL, "H5Ocork");
+
+    /* Check cork status of group */
+    ret = H5Ois_corked(grp, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, TRUE, "H5Ois_corked");
+
+    /* Cork the group again: should fail */
+    ret = H5Ocork(grp);
+    VERIFY(ret, FAIL, "H5Ois_corked");
+
+    /* Uncork the group */
+    ret = H5Ouncork(grp);
+    CHECK(ret, FAIL, "H5Ocork");
+
+    /* Check cork status of group */
+    ret = H5Ois_corked(grp, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, FALSE, "H5Ois_corked");
+
+    /* Check cork status of datatype */
+    ret = H5Ois_corked(dtype, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, FALSE, "H5Ois_corked");
+
+    /* Cork the datatype */
+    ret = H5Ocork(dtype);
+    CHECK(ret, FAIL, "H5Ocork");
+
+    /* Check cork status of datatype*/
+    ret = H5Ois_corked(dtype, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, TRUE, "H5Ois_corked");
+
+    /* Uncork the datatype */
+    ret = H5Ouncork(dtype);
+    CHECK(ret, FAIL, "H5Ocork");
+
+    /* Check cork status of datatype*/
+    ret = H5Ois_corked(dtype, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, FALSE, "H5Ois_corked");
+
+    /* Uncork the datatype that is not corked */
+    ret = H5Ouncork(dtype);
+    VERIFY(ret, FAIL, "H5Ois_corked");
+
+    ret = H5Oclose(dtype);
+    CHECK(ret, FAIL, "H5Oclose");
+    ret = H5Oclose(grp);
+    CHECK(ret, FAIL, "H5Oclose");
+    ret = H5Oclose(dset);
+    CHECK(ret, FAIL, "H5Oclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+} /* test_h5o_cork() */
+
+/* 
+ * Test H5Ocork/H5Ouncork/H5Ois_corked with dataset activities:
+ *		H5Oflush, H5Orefresh
+ *		H5Ldelete
+ *		H5Dread/H5Dwrite
+ *		H5Dopen the dataset twice
+ */
+static void
+test_h5o_cork_dataset(void)
+{
+    hid_t       fid;                        	/* File ID */
+    hid_t       grp, dset, dset2, dtype;   	/* Object IDs */
+    hid_t	sid;				/* Dataspace ID */
+    hid_t	dcpl;				/* Dataset creation property list */
+    hsize_t     dims[RANK];					/* Dataset dimensions */
+    hsize_t 	maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; 	/* Maximum dataset dimensions */
+    hsize_t 	cdims[RANK] = {2,2};       			/* Chunk dimensions */
+    int 	fillval = 0;			/* Fill value */
+    int 	i, j, k = 0;			/* Local index variables */
+    int 	data[DIMS0][DIMS1];		/* Data buffer */
+    int 	rbuf[DIMS0][DIMS1];		/* Data buffer */
+    hbool_t 	corked;				/* Cork status of an object */
+    herr_t      ret;                        	/* Value returned from API calls */
+
+    /* Create a new HDF5 file */
+    fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create a group */
+    grp = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(grp, FAIL, "H5Gcreate2");
+    ret = H5Gclose(grp);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Commit the type inside the group */
+    dtype = H5Tcopy(H5T_NATIVE_INT);
+    CHECK(dtype, FAIL, "H5Tcopy");
+    ret = H5Tcommit2(fid, "group/datatype", dtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
+    ret = H5Tclose(dtype);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Set up dataset creation property list */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+    
+    /* Enable chunking */
+    ret = H5Pset_chunk(dcpl, RANK, cdims);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+
+    /* Set up a fill value */
+    ret = H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
+    CHECK(ret, FAIL, "H5Pset_fill_value");
+
+    /* Create the data space for the dataset. */
+    dims[0] = DIMS0;
+    dims[1] = DIMS1;
+    sid = H5Screate_simple(RANK, dims, maxdims);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create the dataset. */
+    dset = H5Dcreate2(fid, "dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dcreate2");
+
+    /* Open group */
+    grp = H5Oopen(fid, "group", H5P_DEFAULT);
+    CHECK(grp, FAIL, "H5Oopen");
+
+    /* Open the datatype */
+    dtype = H5Oopen(fid, "group/datatype", H5P_DEFAULT);
+    CHECK(dtype, FAIL, "H5Oopen");
+
+    /* Check cork status of dataset */
+    ret = H5Ois_corked(dset, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, FALSE, "H5Ois_corked");
+
+    /* Cork the dataset */
+    ret = H5Ocork(dset);
+    CHECK(ret, FAIL, "H5Ocork");
+
+    /* Check cork status of dataset */
+    ret = H5Ois_corked(dset, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, TRUE, "H5Ois_corked");
+
+    /* Initialize the buffer */
+    for(i = 0; i < DIMS0;i++)
+	for(j = 0;j < DIMS1;j++)
+            data[i][j] = k++;
+
+    /* Write to the dataset */
+    ret = H5Dwrite(dset, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Flush the dataset */
+    ret = H5Oflush(dset);
+    CHECK(ret, FAIL, "H5Oflush");
+
+    /* Close the dataset */
+    ret = H5Oclose(dset);
+    CHECK(ret, FAIL, "H5Oclose");
+
+    /* Open the dataset again */
+    dset = H5Dopen2(fid, "dataset", H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dopen2");
+
+    /* Check cork status of dataset */
+    ret = H5Ois_corked(dset, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, FALSE, "H5Ois_corked");
+
+    /* Cork the dataset */
+    ret = H5Ocork(dset);
+    CHECK(ret, FAIL, "H5Ocork");
+
+    /* Delete the dataset */
+    ret = H5Ldelete(fid, "dataset", H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
+
+    /* Check cork status of dataset */
+    ret = H5Ois_corked(dset, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, TRUE, "H5Ois_corked");
+
+    /* Close the dataset */
+    ret = H5Oclose(dset);
+    CHECK(ret, FAIL, "H5Oclose");
+
+    /* Create the dataset. */
+    dset = H5Dcreate2(fid, "dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dcreate2");
+
+    /* Cork the dataset */
+    ret = H5Ocork(dset);
+    CHECK(ret, FAIL, "H5Ocork");
+
+    /* Write to the dataset */
+    ret = H5Dwrite(dset, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Refresh the dataset */
+    ret = H5Drefresh(dset);
+    CHECK(ret, FAIL, "H5Drefresh");
+
+    /* Check cork status of dataset */
+    ret = H5Ois_corked(dset, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, TRUE, "H5Ois_corked");
+    
+    /* Close the dataset */
+    ret = H5Dclose(dset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Open the dataset */
+    dset = H5Dopen2(fid, "dataset", H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dopen2");
+
+    /* Read from the dataset */
+    ret = H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Re-open the dataset */
+    dset2 = H5Dopen2(fid, "dataset", H5P_DEFAULT);
+    CHECK(dset2, FAIL, "H5Dopen2");
+
+    /* Cork the dataset of the first open */
+    ret = H5Ocork(dset);
+    CHECK(ret, FAIL, "H5Ocork");
+
+    /* Check cork status of the first open */
+    ret = H5Ois_corked(dset, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, TRUE, "H5Ois_corked");
+
+    /* Check cork status of the second open */
+    ret = H5Ois_corked(dset2, &corked);
+    CHECK(ret, FAIL, "H5Ocork");
+    VERIFY(corked, TRUE, "H5Ois_corked");
+
+    /* Close the dataset of the second open */
+    ret = H5Dclose(dset2);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close the dastaset */
+    ret = H5Dclose(dset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close the datatype */
+    ret = H5Oclose(dtype);
+    CHECK(ret, FAIL, "H5Oclose");
+
+    /* Close the group */
+    ret = H5Oclose(grp);
+    CHECK(ret, FAIL, "H5Oclose");
+
+    /* Close the dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Oclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+} /* test_h5o_cork_dataset() */
+
 
 /****************************************************************
 **
@@ -1358,6 +1715,13 @@ test_h5o(void)
 #ifndef  H5_CANNOT_OPEN_TWICE   /* OpenVMS can't open a file twice */
     test_h5o_getinfo_same_file(); /* Test info for objects in the same file */
 #endif /* H5_CANNOT_OPEN_TWICE */
+    /* 
+     * NEED: more work on tests for corking/uncorking objects such as:
+     *		verify cache entries are corked/uncorked
+     *		object data are correct
+     */
+    test_h5o_cork();		/* Test H5Ocork/H5Ouncork/H5Ois_corked public routines */
+    test_h5o_cork_dataset();	/* Test H5Ocork/H5Ouncork/H5Ois_corked public routines */
 } /* test_h5o() */
 
 

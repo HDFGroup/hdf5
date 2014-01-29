@@ -148,6 +148,12 @@ typedef enum {
 #define H5AC_CALLBACK__SIZE_CHANGED_FLAG	H5C_CALLBACK__SIZE_CHANGED_FLAG
 #define H5AC_CALLBACK__MOVED_FLAG             H5C_CALLBACK__MOVED_FLAG
 
+
+/* Cork actions: cork/uncork/get cork status of an object */
+#define H5AC__SET_CORK             	H5C__SET_CORK
+#define H5AC__UNCORK             	H5C__UNCORK
+#define H5AC__GET_CORKED             	H5C__GET_CORKED
+
 /* Aliases for 'notify action' type & values */
 typedef H5C_notify_action_t     H5AC_notify_action_t;
 #define H5AC_NOTIFY_ACTION_AFTER_INSERT H5C_NOTIFY_ACTION_AFTER_INSERT
@@ -420,6 +426,8 @@ H5_DLL herr_t H5AC_ignore_tags(H5F_t * f);
 H5_DLL herr_t H5AC_flush_tagged_metadata(H5F_t * f, haddr_t metadata_tag, hid_t dxpl_id);
 
 H5_DLL herr_t H5AC_evict_tagged_metadata(H5F_t * f, haddr_t metadata_tag, hid_t dxpl_id);
+
+H5_DLL herr_t H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);

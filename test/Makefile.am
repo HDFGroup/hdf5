@@ -55,7 +55,7 @@ check_SCRIPTS = $(TEST_SCRIPT)
 TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            pool accum hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
-           twriteorder big mtime fillval mount flush1 flush2 app_ref enum \
+           use_cork twriteorder big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_with_endianess\
            getname vfd ntypes dangle dtransform reserved cross_read \
            freespace mf farray earray btree2 fheap file_image unregister test_swmr
@@ -165,7 +165,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
     stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
     tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
     fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 ttime.h5 \
-    trefer[1-3].h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 twriteorder.dat flush.h5 \
+    trefer[1-3].h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 use_cork.h5 twriteorder.dat flush.h5 \
     enum1.h5 titerate.h5 ttsafe.h5 tarray1.h5 tgenprop.h5            \
     tmisc[0-9]*.h5 set_extent[1-5].h5 ext[12].bin           \
     getname.h5 getname[1-3].h5 sec2_file.h5 direct_file.h5           \

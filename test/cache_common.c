@@ -22,6 +22,7 @@
 #include "H5private.h"          /* Put this first, so H5open() isn't invoked in public macros */
 #include "h5test.h"
 #include "H5Cprivate.h"
+#include "H5ACprivate.h"
 #include "H5Iprivate.h"
 #include "H5MFprivate.h"
 #include "cache_common.h"
@@ -1806,6 +1807,8 @@ reset_entries(void)
                 base_addr[j].is_read_only = FALSE;
                 base_addr[j].ro_ref_count = FALSE;
 
+                base_addr[j].is_corked = FALSE;
+
                 base_addr[j].is_pinned = FALSE;
                 base_addr[j].pinning_ref_count = 0;
                 base_addr[j].num_pins = 0;
@@ -2213,6 +2216,22 @@ verify_entry_status(H5C_t * cache_ptr,
 		      (int)expected[i].entry_index,
 		      (int)(entry_ptr->is_pinned),
 		      (int)expected[i].is_pinned);
+	        failure_mssg = msg;
+	    }
+	}
+
+	if ( pass ) {
+
+	    if ( entry_ptr->is_corked != expected[i].is_corked) {
+
+	        pass = FALSE;
+	        sprintf(msg,
+                      "%d entry (%d, %d) is_corked actual/expected = %d/%d.\n",
+		      tag,
+		      (int)expected[i].entry_type,
+		      (int)expected[i].entry_index,
+		      (int)(entry_ptr->is_corked),
+		      (int)expected[i].is_corked);
 	        failure_mssg = msg;
 	    }
 	}
@@ -2974,6 +2993,45 @@ flush_cache(H5F_t * file_ptr,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	cork_entry_type()
+ *
+ * Purpose:	To "cork" an object:
+ *		--insert the base address of an entry type into
+ *		  the cache's list of corked object addresses
+ *
+ * Return:	void
+ *
+ * Programmer:	Vailin Choi; Jan 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+cork_entry_type(H5F_t * file_ptr, int32_t type)
+{
+    H5C_t * cache_ptr;
+    haddr_t baddrs;
+    herr_t result;
+
+    if(pass) {
+        cache_ptr = file_ptr->shared->cache;
+
+        HDassert( cache_ptr );
+        HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
+
+        baddrs = base_addrs[type];
+
+	result = H5C_cork(cache_ptr, baddrs, H5C__SET_CORK, NULL);
+        if(result < 0) {
+
+            pass = FALSE;
+            failure_mssg = "error in H5C_cork().";
+        }
+    }
+    return;
+} /* cork_entry_type() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	insert_entry()
  *
  * Purpose:	Insert the entry indicated by the type and index.
@@ -2996,9 +3054,11 @@ insert_entry(H5F_t * file_ptr,
 {
     H5C_t * cache_ptr;
     herr_t result;
+    hid_t xfer = H5AC_ind_dxpl_id;
     hbool_t insert_pinned;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
+    haddr_t baddrs;
 
     if ( pass ) {
 
@@ -3010,6 +3070,7 @@ insert_entry(H5F_t * file_ptr,
 
         base_addr = entries[type];
         entry_ptr = &(base_addr[idx]);
+	baddrs = base_addrs[type];
 
         HDassert( entry_ptr->index == idx );
         HDassert( entry_ptr->type == type );
@@ -3022,7 +3083,13 @@ insert_entry(H5F_t * file_ptr,
 
 	entry_ptr->is_dirty = TRUE;
 
-        result = H5C_insert_entry(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
+	/* Set the base address of the entry type into the property list as tag */
+	if(H5AC_tag(xfer, baddrs, NULL) < 0) {
+	    pass = FALSE;
+	    failure_mssg = "error in H5P_set().";
+	}
+
+        result = H5C_insert_entry(file_ptr, xfer, H5P_DATASET_XFER_DEFAULT,
                 &(types[type]), entry_ptr->addr, (void *)entry_ptr, flags);
 
         if ( ( result < 0 ) ||
@@ -3065,6 +3132,9 @@ insert_entry(H5F_t * file_ptr,
 	}
         entry_ptr->is_pinned = insert_pinned;
         entry_ptr->pinned_from_client = insert_pinned;
+
+	if(entry_ptr->header.is_corked)
+	    entry_ptr->is_corked = TRUE;
 
         HDassert( entry_ptr->header.is_dirty );
         HDassert( ((entry_ptr->header).type)->id == type );
@@ -3273,6 +3343,8 @@ protect_entry(H5F_t * file_ptr,
     H5C_t * cache_ptr;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
+    haddr_t baddrs;
+    hid_t xfer = H5AC_ind_dxpl_id;
     H5C_cache_entry_t * cache_entry_ptr;
 
     if ( pass ) {
@@ -3285,13 +3357,20 @@ protect_entry(H5F_t * file_ptr,
 
         base_addr = entries[type];
         entry_ptr = &(base_addr[idx]);
+	baddrs = base_addrs[type];
 
         HDassert( entry_ptr->index == idx );
         HDassert( entry_ptr->type == type );
         HDassert( entry_ptr == entry_ptr->self );
         HDassert( !(entry_ptr->is_protected) );
 
-        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
+	/* Set the base address of the entry type into the property list as tag */
+	if(H5AC_tag(xfer, baddrs, NULL) < 0) {
+	    pass = FALSE;
+	    failure_mssg = "error in H5P_set().";
+	}
+
+        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, xfer, H5P_DATASET_XFER_DEFAULT,
                 &(types[type]), entry_ptr->addr, NULL, H5C__NO_FLAGS_SET);
 
         if ( ( cache_entry_ptr != (void *)entry_ptr ) ||
@@ -3334,6 +3413,8 @@ protect_entry(H5F_t * file_ptr,
             entry_ptr->is_protected = TRUE;
 
         }
+	if(entry_ptr->header.is_corked)
+	    entry_ptr->is_corked = TRUE;
 
         HDassert( ((entry_ptr->header).type)->id == type );
     }

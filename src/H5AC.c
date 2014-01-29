@@ -912,6 +912,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_flush() */
 
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5AC_get_entry_status
@@ -5444,6 +5445,42 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC_evict_tagged_metadata */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_cork
+ *
+ * Purpose:     To cork/uncork/get cork status for an object
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; Jan 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+    HDassert(H5F_addr_defined(obj_addr));
+    HDassert(action == H5AC__SET_CORK || action == H5AC__UNCORK || action == H5AC__GET_CORKED);
+
+    if(action == H5AC__GET_CORKED)
+	HDassert(corked);
+
+    if(H5C_cork(f->shared->cache, obj_addr, action, corked) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Cannot perform the cork action")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_cork() */
 
 #if H5AC_DO_TAGGING_SANITY_CHECKS
 

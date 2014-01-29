@@ -263,6 +263,8 @@ typedef struct test_entry_t
     hbool_t		  is_pinned;	/* entry is currently pinned in
 					 * the cache.
                                          */
+    haddr_t		  tag;          /* the base_addr as tag for corking entries */
+    hbool_t		  is_corked;	/* entry is currently corked or not */
     int			  pinning_ref_count; /* Number of entries that
 					 * pin this entry in the cache.
 					 * When this count drops to zero,
@@ -508,6 +510,7 @@ struct expected_entry_status
     unsigned            flush_dep_nchd; /* Number of flush dependency children */
     unsigned            flush_dep_ndirty_chd; /* Number of dirty flush dependency children */
     int                 flush_order;    /* flush order of entry */
+    unsigned char	is_corked;	/* cork status of entry */
 };
 
 
@@ -608,6 +611,9 @@ void create_pinned_entry_dependency(H5F_t * file_ptr,
 		                    int pinned_idx);
 
 void reset_entries(void);
+
+void cork_entry_type(H5F_t * file_ptr, int32_t type);
+
 
 void resize_entry(H5F_t * file_ptr,
                   int32_t type,

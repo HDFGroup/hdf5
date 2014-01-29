@@ -98,6 +98,14 @@ TOOLTEST() {
     fi
 }
 
+# run tests for H5Ocork/H5Ouncork/H5Oiscork here temporary
+USECORK=use_cork
+for p in $USECORK; do
+    TOOLTEST $p
+    TOOLTEST $p -y 3
+    TOOLTEST $p -n 3000
+    TOOLTEST $p -n 5000
+done
 
 # run write order test here temporary
 WRITEORDER=twriteorder

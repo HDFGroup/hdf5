@@ -1150,6 +1150,7 @@
 ./test/use_append_chunk.c
 ./test/use_append_mchunks.c
 ./test/use_common.c
+./test/use_cork.c
 ./test/use.h
 ./test/vfd.c
 ./test/test_filters_le.h5
