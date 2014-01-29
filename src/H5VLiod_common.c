@@ -930,8 +930,8 @@ H5_checksum_crc64(const void *buf, size_t buf_size)
 {
     const char *hash_method = "crc64";
     size_t hash_size;
-    uint64_t hash;
     mchecksum_object_t checksum;
+    uint64_t ret_value = 0;
 
     /* Initialize checksum */
     mchecksum_init(hash_method, &checksum);
@@ -945,12 +945,12 @@ H5_checksum_crc64(const void *buf, size_t buf_size)
     assert(hash_size == sizeof(uint64_t));
 
     /* get checksum value */
-    mchecksum_get(checksum, &hash, hash_size, 1);
+    mchecksum_get(checksum, &ret_value, hash_size, 1);
 
     /* Destroy checksum */
     mchecksum_destroy(checksum);
 
-    return hash;
+    return ret_value;
 }
 
 uint64_t 
@@ -958,9 +958,9 @@ H5_checksum_crc64_segments(hg_bulk_segment_t *segments, size_t count)
 {
     const char *hash_method = "crc64";
     size_t hash_size;
-    uint64_t hash;
     size_t i;
     mchecksum_object_t checksum;
+    uint64_t ret_value;
 
     /* Initialize checksum */
     mchecksum_init(hash_method, &checksum);
@@ -976,12 +976,12 @@ H5_checksum_crc64_segments(hg_bulk_segment_t *segments, size_t count)
     assert(hash_size == sizeof(uint64_t));
 
     /* get checksum value */
-    mchecksum_get(checksum, &hash, hash_size, 1);
+    mchecksum_get(checksum, &ret_value, hash_size, 1);
 
     /* Destroy checksum */
     mchecksum_destroy(checksum);
 
-    return hash;
+    return ret_value;
 }
 
 uint64_t 
@@ -989,9 +989,9 @@ H5_checksum_crc64_fragments(void **buf, size_t *buf_size, size_t count)
 {
     const char *hash_method = "crc64";
     size_t hash_size;
-    uint64_t hash;
     size_t i;
     mchecksum_object_t checksum;
+    uint64_t ret_value;
 
     /* Initialize checksum */
     mchecksum_init(hash_method, &checksum);
@@ -1007,10 +1007,10 @@ H5_checksum_crc64_fragments(void **buf, size_t *buf_size, size_t count)
     assert(hash_size == sizeof(uint64_t));
 
     /* get checksum value */
-    mchecksum_get(checksum, &hash, hash_size, 1);
+    mchecksum_get(checksum, &ret_value, hash_size, 1);
 
     /* Destroy checksum */
     mchecksum_destroy(checksum);
 
-    return hash;
+    return ret_value;
 }

@@ -1060,17 +1060,17 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_iod_verify_scratch_pad(scratch_pad sp, iod_checksum_t iod_cs)
+H5VL_iod_verify_scratch_pad(scratch_pad *sp, iod_checksum_t iod_cs)
 {
     iod_checksum_t computed_cs = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    computed_cs = H5_checksum_crc64(&sp, sizeof(sp));
+    computed_cs = H5_checksum_crc64(sp, sizeof(scratch_pad));
 
     if(computed_cs != iod_cs) {
-        fprintf(stderr, "Scratch pad integrity check failed. IOD cs = %"PRIu64", Computed cs = %"PRIu64"",
+        fprintf(stderr, "Scratch pad integrity check failed. IOD cs = %"PRIu64", Computed cs = %"PRIu64"\n",
                 iod_cs, computed_cs);
         ret_value = FAIL;
     }

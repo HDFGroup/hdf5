@@ -284,7 +284,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
 
     if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
-        if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+        if(H5VL_iod_verify_scratch_pad(&sp, sp_cs) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
     }
 

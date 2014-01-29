@@ -2148,32 +2148,22 @@ done:
 } /* end H5S_get_offsets() */
 
 #ifdef H5_HAVE_EFF
-
-/*-------------------------------------------------------------------------
- * Function:	H5S_checksum
- *
- * Purpose:	Computes a checksum for a buffer with a dataspace 
- *              selection using the HDF5 fletcher checksume routines.
- *
- * Return:	Returns a 32-bit value.  Every bit of the key affects every bit of
- *              the return value.  Two keys differing by one or two bits will have
- *              totally different hash values.
- *
- * Programmer:	Mohamad Chaarawi
- *              June 2013
- *
- *-------------------------------------------------------------------------
- */
 uint64_t
 H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, const H5S_t *space)
 {
+    H5S_sel_iter_t iter;    /* Memory selection iteration info */
+    hbool_t iter_init = 0;  /* Memory selection iteration info has been initialized */
     hsize_t _off[H5D_IO_VECTOR_SIZE];      /* Array to store sequence offsets in memory */
     hsize_t *off = NULL;    /* Pointer to sequence offsets in memory */
     size_t _len[H5D_IO_VECTOR_SIZE];       /* Array to store sequence lengths in memory */
     size_t *len = NULL;     /* Pointer to sequence lengths in memory */
-    H5S_sel_iter_t iter;    /* Memory selection iteration info */
-    hbool_t iter_init = 0;  /* Memory selection iteration info has been initialized */
     size_t nseq;            /* Number of sequences generated */
+    size_t nelem;           /* Number of elements used in sequences */
+    size_t i;
+    const uint8_t *p = (const uint8_t *)buf;
+    const char *hash_method = "crc64";
+    size_t hash_size;
+    mchecksum_object_t checksum;
     uint64_t ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2181,57 +2171,39 @@ H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, const H5S_t *spac
     len = _len;
     off = _off;
 
-    /* Check for only one element in selection */
-    if(nelmts == 1) {
-        size_t buf_size = elmt_size * nelmts;
+    /* Initialize iterator */
+    if(H5S_select_iter_init(&iter, space, elmt_size) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, 0, "unable to initialize selection iterator")
+            iter_init = 1;
 
-        if(H5S_SELECT_OFFSET(space, off) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "can't retrieve memory selection offset");
+    nseq = 0;
 
-        ret_value = H5_checksum_crc64(buf, buf_size);
-    } /* end if */
-    else {
-        size_t nelem;           /* Number of elements used in sequences */
-        size_t i;
-        const uint8_t *p = (const uint8_t *)buf;
-        const char *hash_method = "crc64";
-        size_t hash_size;
-        mchecksum_object_t checksum;
+    /* Initialize checksum */
+    mchecksum_init(hash_method, &checksum);
 
-        /* Initialize iterator */
-        if(H5S_select_iter_init(&iter, space, elmt_size) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, 0, "unable to initialize selection iterator")
-        iter_init = 1;
+    /* Loop, until all bytes are processed */
+    while(nelmts > 0) {
+        /* Get sequences for selection */
+        if(H5S_SELECT_GET_SEQ_LIST(space, 0, &iter, H5D_IO_VECTOR_SIZE, nelmts, &nseq, 
+                                   &nelem, off, len) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
-        nseq = 0;
+        for(i=0 ; i<nseq ; i++) {
+            mchecksum_update(checksum, p+off[i], len[i]);
+        }
+        nelmts -= nelem;
+    } /* end while */
 
-        /* Initialize checksum */
-        mchecksum_init(hash_method, &checksum);
+    /* Get size of checksum */
+    hash_size = mchecksum_get_size(checksum);
 
-        /* Loop, until all bytes are processed */
-        while(nelmts > 0) {
-            /* Get sequences for selection */
-            if(H5S_SELECT_GET_SEQ_LIST(space, 0, &iter, H5D_IO_VECTOR_SIZE, nelmts, &nseq, 
-                                       &nelem, off, len) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
+    assert(hash_size == sizeof(uint64_t));
 
-            for(i=0 ; i<nseq ; i++) {
-                mchecksum_update(checksum, p+off[i], len[i]);
-            }
-            nelmts -= nelem;
-        } /* end while */
+    /* get checksum value */
+    mchecksum_get(checksum, &ret_value, hash_size, 1);
 
-        /* Get size of checksum */
-        hash_size = mchecksum_get_size(checksum);
-
-        assert(hash_size == sizeof(uint64_t));
-
-        /* get checksum value */
-        mchecksum_get(checksum, &ret_value, hash_size, 1);
-
-        /* Destroy checksum */
-        mchecksum_destroy(checksum);
-    } /* end else */
+    /* Destroy checksum */
+    mchecksum_destroy(checksum);
 
 done:
     /* Release memory selection iterator */

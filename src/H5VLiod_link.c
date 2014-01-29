@@ -106,7 +106,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 
             if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
                 /* verify scratch pad integrity */
-                if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+                if(H5VL_iod_verify_scratch_pad(&sp, sp_cs) < 0)
                     HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
             }
 
@@ -303,7 +303,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
             /* verify scratch pad integrity */
-            if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+            if(H5VL_iod_verify_scratch_pad(&sp, sp_cs) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
         }
 
@@ -775,7 +775,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
 
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
             /* verify scratch pad integrity */
-            if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+            if(H5VL_iod_verify_scratch_pad(&sp, sp_cs) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
         }
 

@@ -6,8 +6,37 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include "mchecksum.h"
 #include "mpi.h"
 #include "hdf5.h"
+
+static uint64_t
+checksum_crc64(const void *buf, size_t buf_size)
+{
+    const char *hash_method = "crc64";
+    size_t hash_size;
+    mchecksum_object_t checksum;
+    uint64_t ret_value = 0;
+
+    /* Initialize checksum */
+    mchecksum_init(hash_method, &checksum);
+
+    /* Update checksum */
+    mchecksum_update(checksum, buf, buf_size);
+
+    /* Get size of checksum */
+    hash_size = mchecksum_get_size(checksum);
+
+    assert(hash_size == sizeof(uint64_t));
+
+    /* get checksum value */
+    mchecksum_get(checksum, &ret_value, hash_size, 1);
+
+    /* Destroy checksum */
+    mchecksum_destroy(checksum);
+
+    return ret_value;
+}
 
 int main(int argc, char **argv) {
     const char file_name[]="eff_file_dset.h5";
@@ -85,9 +114,9 @@ int main(int argc, char **argv) {
     assert(e_stack);
 
     /* set the metada data integrity checks to happend at transfer through mercury */
-    cs_scope |= H5_CHECKSUM_TRANSFER;
-    ret = H5Pset_metadata_integrity_scope(fapl_id, cs_scope);
-    assert(ret == 0);
+    //cs_scope |= H5_CHECKSUM_TRANSFER;
+    //ret = H5Pset_metadata_integrity_scope(fapl_id, cs_scope);
+    //assert(ret == 0);
 
     /* create the file. */
     file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, H5_EVENT_STACK_NULL);
@@ -219,7 +248,7 @@ int main(int argc, char **argv) {
     /* Attach a checksum to the dxpl which is verified all the way
        down at the server */
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-    cs = H5_checksum_crc64(wdata1, sizeof(int32_t) * nelem);
+    cs = checksum_crc64(wdata1, sizeof(int32_t) * nelem);
     H5Pset_dxpl_checksum(dxpl_id, cs);
 
     /* tell HDF5 to disable all data integrity checks for this write */
@@ -233,8 +262,8 @@ int main(int argc, char **argv) {
     /* Raw data write on D2. same as previous, but here we indicate
        through the property list that we want to inject a
        corruption. */
-    cs = H5_checksum_crc64(wdata2, sizeof(int32_t) * nelem);
-    H5Pset_dxpl_checksum(dxpl_id, cs);
+    //cs = checksum_crc64(wdata2, sizeof(int32_t) * nelem);
+    //H5Pset_dxpl_checksum(dxpl_id, cs);
     //H5Pset_dxpl_inject_corruption(dxpl_id, 1);
 
     /* tell HDF5 to disable data integrity checks stored at IOD for this write;

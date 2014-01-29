@@ -59,6 +59,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_ret_t ret, root_ret;
     iod_trans_id_t first_tid = 0;
     uint32_t cs_scope = 0;
+    iod_hint_list_t *con_open_hint = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -78,8 +79,14 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     if(H5Pget_metadata_integrity_scope(input->fapl_id, &cs_scope) < 0)
         HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        con_open_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
+        con_open_hint->num_hint = 1;
+        con_open_hint->hint[0].key = "iod_con_scratch_cksum";
+    }
+
     /* Create the Container */
-    ret = iod_container_open(input->name, NULL, mode, &coh, NULL);
+    ret = iod_container_open(input->name, con_open_hint, mode, &coh, NULL);
     if(ret < 0)
         HGOTO_ERROR_IOD(ret, FAIL, "can't create container");
 
@@ -137,6 +144,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
             iod_checksum_t sp_cs;
 
             sp_cs = H5_checksum_crc64(&sp, sizeof(sp));
+
             /* set scratch pad in root group */
             ret = iod_obj_set_scratch(root_oh.wr_oh, first_tid, &sp, &sp_cs, NULL);
             if(ret < 0)
@@ -213,6 +221,11 @@ done:
 
     input = (file_create_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
+
+    if(con_open_hint) {
+        free(con_open_hint);
+        con_open_hint = NULL;
+    }
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_file_create_cb() */
@@ -302,7 +315,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 
     if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
-        if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+        if(H5VL_iod_verify_scratch_pad(&sp, sp_cs) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
     }
 
@@ -519,7 +532,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
 
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
             /* verify scratch pad integrity */
-            if(H5VL_iod_verify_scratch_pad(sp, sp_cs) < 0)
+            if(H5VL_iod_verify_scratch_pad(&sp, sp_cs) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
         }
 

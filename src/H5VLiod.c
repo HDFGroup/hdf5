@@ -973,6 +973,81 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Pset_ocpl_enable_checksum
+ *
+ * Purpose:     Set a boolean flag on the object creation property list 
+ *              to indicate to the VOL plugin to enable checksum on the 
+ *              object to be created.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_ocpl_enable_checksum(hid_t ocpl_id, hbool_t flag)
+{
+    H5P_genplist_t *plist = NULL;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", ocpl_id, flag);
+
+    if(ocpl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+
+    /* Check arguments */
+    if(NULL == (plist = H5P_object_verify(ocpl_id, H5P_OBJECT_CREATE)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a ocpl")
+
+    /* Set the transfer mode */
+    if(H5P_set(plist, H5O_CRT_ENABLE_CHECKSUM_NAME, &flag) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_ocpl_enable_checksum() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_ocpl_enable_checksum
+ *
+ * Purpose:     Retrieve a boolean flag on the object creation property 
+ *              list that indicates whether checksuming on this object 
+ *              is enabled or not.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_ocpl_enable_checksum(hid_t ocpl_id, hbool_t *flag/*out*/)
+{
+    H5P_genplist_t *plist = NULL;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", ocpl_id, flag);
+
+    if(NULL == (plist = H5P_object_verify(ocpl_id, H5P_OBJECT_CREATE)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a ocpl")
+
+    /* Get the transfer mode */
+    if(flag)
+        if(H5P_get(plist, H5O_CRT_ENABLE_CHECKSUM_NAME, flag) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_ocpl_enable_checksum() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_dxpl_checksum
  *
  * Purpose:     Modify the dataset transfer property list to set a
@@ -3202,7 +3277,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     char fake_char;
     int *status = NULL;
     H5VL_iod_write_info_t *info; /* info struct used to manage I/O parameters once the operation completes*/
-    uint64_t internal_cs; /* internal checksum calculated in this function */
+    uint64_t internal_cs = 0; /* internal checksum calculated in this function */
     H5VL_iod_request_t **parent_reqs = NULL;
     size_t num_parents = 0;
     hid_t trans_id;
@@ -3367,6 +3442,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
     input.cs_scope = dset->common.file->md_integrity_scope;
+    input.axe_id = g_axe_id;
 
     status = (int *)malloc(sizeof(int));
 
@@ -3374,7 +3450,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     printf("Dataset Write, axe id %"PRIu64"\n", g_axe_id);
 #endif
 
-    /* setup info struct for I/O request 
+    /* setup info struct for I/O request
        This is to manage the I/O operation once the wait is called. */
     if(NULL == (info = (H5VL_iod_write_info_t *)H5MM_calloc(sizeof(H5VL_iod_write_info_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");

@@ -49,6 +49,13 @@
 /****************/
 
 /* ========= Object Creation properties ============ */
+#ifdef H5_HAVE_EFF
+/* hint for IOD to enable checksums on an object */
+#define H5O_CRT_ENABLE_CHECKSUM_SIZE    sizeof(hbool_t)
+#define H5O_CRT_ENABLE_CHECKSUM_DEF     FALSE
+#define H5O_CRT_ENABLE_CHECKSUM_ENC     H5P__encode_hbool_t
+#define H5O_CRT_ENABLE_CHECKSUM_DEC     H5P__decode_hbool_t
+#endif
 /* Definitions for the max. # of attributes to store compactly */
 #define H5O_CRT_ATTR_MAX_COMPACT_SIZE   sizeof(unsigned)
 #define H5O_CRT_ATTR_MAX_COMPACT_ENC    H5P__encode_unsigned
@@ -132,7 +139,9 @@ static const unsigned H5O_def_attr_max_compact_g = H5O_CRT_ATTR_MAX_COMPACT_DEF;
 static const unsigned H5O_def_attr_min_dense_g = H5O_CRT_ATTR_MIN_DENSE_DEF;       /* Default min. dense attribute storage settings */
 static const uint8_t H5O_def_ohdr_flags_g = H5O_CRT_OHDR_FLAGS_DEF;        /* Default object header flag settings */
 static const H5O_pline_t H5O_def_pline_g = H5O_CRT_PIPELINE_DEF;           /* Default I/O pipeline setting */
-
+#ifdef H5_HAVE_EFF
+static const hbool_t H5O_def_enable_checksum_g = H5O_CRT_ENABLE_CHECKSUM_DEF;
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -153,6 +162,14 @@ H5P__ocrt_reg_prop(H5P_genclass_t *pclass)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
+
+#ifdef H5_HAVE_EFF
+    if(H5P_register_real(pclass, H5O_CRT_ENABLE_CHECKSUM_NAME, H5O_CRT_ENABLE_CHECKSUM_SIZE, 
+                         &H5O_def_enable_checksum_g,
+                         NULL, NULL, NULL, H5O_CRT_ENABLE_CHECKSUM_ENC, H5O_CRT_ENABLE_CHECKSUM_DEC, 
+                         NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+#endif
 
     /* Register max. compact attribute storage property */
     if(H5P_register_real(pclass, H5O_CRT_ATTR_MAX_COMPACT_NAME, H5O_CRT_ATTR_MAX_COMPACT_SIZE, &H5O_def_attr_max_compact_g, 
