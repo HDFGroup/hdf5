@@ -49,7 +49,7 @@ SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 # testfiles source dirs for tools
 SRC_H5MKGRP_TESTFILES="$SRC_TOOLS/misc/testfiles"
 
-TESTDIR=./testfiles
+TESTDIR=./testgrp
 test -d $TESTDIR || mkdir -p $TESTDIR
 
 ######################################################################
