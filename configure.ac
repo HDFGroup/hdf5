@@ -2994,6 +2994,13 @@ case "X-$enableval" in
     PKG_CHECK_MODULES(MERCURY, mercury)
     AM_CFLAGS="$AM_CFLAGS $MERCURY_CFLAGS"
     AM_LDFLAGS="$AM_LDFLAGS $MERCURY_LIBS"
+
+    # Check mchecksum (--enable-parallel requires static linking)
+    PKG_PROG_PKG_CONFIG
+    PKG_CONFIG="$PKG_CONFIG --static"
+    PKG_CHECK_MODULES(MCHECKSUM, mchecksum)
+    AM_CFLAGS="$AM_CFLAGS $MCHECKSUM_CFLAGS"
+    AM_LDFLAGS="$AM_LDFLAGS $MCHECKSUM_LIBS"
     
     AC_CHECK_HEADERS([axe.h iod_api.h iod_types.h],
                      [AC_MSG_CHECKING([for EFF support])

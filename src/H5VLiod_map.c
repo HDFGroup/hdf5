@@ -67,6 +67,8 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t cur_id;
     char *last_comp; /* the name of the group obtained from traversal function */
     hid_t mcpl_id;
+    iod_hint_list_t *obj_create_hint = NULL;
+    hbool_t enable_checksum = FALSE;
     int step = 0;
     scratch_pad sp;
     herr_t ret_value = SUCCEED;
@@ -78,6 +80,21 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
                 name, loc_handle.wr_oh);
 #endif
 
+    if(H5P_DEFAULT == input->mcpl_id)
+        input->mcpl_id = H5Pcopy(H5P_MAP_CREATE_DEFAULT);
+    mcpl_id = input->mcpl_id;
+
+    /* get the scope for data integrity checks for raw data */
+    if(H5Pget_ocpl_enable_checksum(mcpl_id, &enable_checksum) < 0)
+        HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+
+    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
+        obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
+        obj_create_hint->num_hint = 1;
+        obj_create_hint->hint[0].key = "iod_obj_enable_checksum";
+        obj_create_hint->hint[0].value = "iod_obj_enable_checksum";
+    }
+
     /* the traversal will retrieve the location where the map needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
@@ -87,11 +104,16 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Creating Map ID %"PRIx64") ", map_id);
-    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64")\n", cur_oh.wr_oh, cur_id);
+    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh, cur_id);
+    if(enable_checksum)
+        fprintf(stderr, "with Data integrity ENABLED\n");
+    else
+        fprintf(stderr, "with Data integrity DISABLED\n");
 #endif
 
     /* create the map */
-    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &map_id, NULL) < 0)
+    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                      NULL, NULL, &map_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create Map");
 
     if (iod_obj_open_read(coh, map_id, wtid, NULL, &map_oh.rd_oh, NULL) < 0)
@@ -102,11 +124,13 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     step ++;
 
     /* create the metadata KV object for the map */
-    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL) < 0)
+    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                      NULL, NULL, &mdkv_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
     /* create the attribute KV object for the root group */
-    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &attr_id, NULL) < 0)
+    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                      NULL, NULL, &attr_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
     /* set values for the scratch pad object */
@@ -133,10 +157,6 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
     step ++;
-
-    if(H5P_DEFAULT == input->mcpl_id)
-        input->mcpl_id = H5Pcopy(H5P_MAP_CREATE_DEFAULT);
-    mcpl_id = input->mcpl_id;
 
     /* insert plist metadata */
     if(H5VL_iod_insert_plist(mdkv_oh, wtid, mcpl_id, 
@@ -187,12 +207,10 @@ done:
     /* close parent group if it is not the location we started the
        traversal into */
     if(loc_handle.rd_oh.cookie != cur_oh.rd_oh.cookie) {
-        if(iod_obj_close(cur_oh.rd_oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+        iod_obj_close(cur_oh.rd_oh, NULL, NULL);
     }
     if(loc_handle.wr_oh.cookie != cur_oh.wr_oh.cookie) {
-        if(iod_obj_close(cur_oh.wr_oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+        iod_obj_close(cur_oh.wr_oh, NULL, NULL);
     }
 
     /* return an UNDEFINED oh to the client if the operation failed */
@@ -200,20 +218,22 @@ done:
         fprintf(stderr, "Failed Map Create\n");
 
         if(step == 2) {
-            if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            iod_obj_close(mdkv_oh, NULL, NULL);
             step --;
         }
         if(step == 1) {
-            if(iod_obj_close(map_oh.rd_oh, NULL, NULL) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-            if(iod_obj_close(map_oh.wr_oh, NULL, NULL) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            iod_obj_close(map_oh.rd_oh, NULL, NULL);
+            iod_obj_close(map_oh.wr_oh, NULL, NULL);
         }
 
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);
+    }
+
+    if(obj_create_hint) {
+        free(obj_create_hint);
+        obj_create_hint = NULL;
     }
 
     last_comp = (char *)H5MM_xfree(last_comp);

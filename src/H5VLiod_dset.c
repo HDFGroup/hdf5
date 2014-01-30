@@ -174,7 +174,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
         fprintf(stderr, "with Data integrity DISABLED\n");
 #endif
 
-    if(enable_checksum) {
+    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
         obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
         obj_create_hint->num_hint = 1;
         obj_create_hint->hint[0].key = "iod_obj_enable_checksum";
@@ -237,11 +237,11 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     step ++;
 
     /* create the attribute KV object for the dataset */
-    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &attrkv_id, NULL) < 0)
+    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, NULL, NULL, &attrkv_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create attribute KV object");
 
     /* create the metadata KV object for the dataset */
-    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL) < 0)
+    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
     /* set values for the scratch pad object */
@@ -269,10 +269,6 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
     step ++;
-
-    if(H5P_DEFAULT == input->dcpl_id)
-        input->dcpl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT);
-    dcpl_id = input->dcpl_id;
 
     /* insert plist metadata */
     if(H5VL_iod_insert_plist(mdkv_oh, wtid, dcpl_id, 
@@ -327,22 +323,15 @@ done:
     /* close parent group if it is not the location we started the
        traversal into */
     if(loc_handle.rd_oh.cookie != cur_oh.rd_oh.cookie) {
-        if(iod_obj_close(cur_oh.rd_oh, NULL, NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+        iod_obj_close(cur_oh.rd_oh, NULL, NULL);
     }
     if(loc_handle.wr_oh.cookie != cur_oh.wr_oh.cookie) {
-        if(iod_obj_close(cur_oh.wr_oh, NULL, NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+        iod_obj_close(cur_oh.wr_oh, NULL, NULL);
     }
 
     /* return an UNDEFINED oh to the client if the operation failed */
     if(ret_value < 0) {
         fprintf(stderr, "failed to create Dataset\n");
-
-        if(obj_create_hint) {
-            free(obj_create_hint);
-            obj_create_hint = NULL;
-        }
 
         if(step == 2) {
             iod_obj_close(mdkv_oh, NULL, NULL);
@@ -356,6 +345,11 @@ done:
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);
+    }
+
+    if(obj_create_hint) {
+        free(obj_create_hint);
+        obj_create_hint = NULL;
     }
 
     last_comp = (char *)H5MM_xfree(last_comp);

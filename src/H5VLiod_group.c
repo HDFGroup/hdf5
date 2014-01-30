@@ -61,6 +61,8 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t mdkv_oh;
     iod_obj_id_t cur_id;
     char *last_comp = NULL; /* the name of the group obtained from traversal function */
+    iod_hint_list_t *obj_create_hint = NULL;
+    hbool_t enable_checksum = FALSE;
     hid_t gcpl_id;
     scratch_pad sp;
     iod_ret_t ret;
@@ -73,6 +75,21 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start group create %s at %"PRIu64"\n", name, loc_handle.wr_oh);
 #endif
 
+    if(H5P_DEFAULT == input->gcpl_id)
+        input->gcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
+    gcpl_id = input->gcpl_id;
+
+    /* get the scope for data integrity checks */
+    if(H5Pget_ocpl_enable_checksum(gcpl_id, &enable_checksum) < 0)
+        HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+
+    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
+        obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
+        obj_create_hint->num_hint = 1;
+        obj_create_hint->hint[0].key = "iod_obj_enable_checksum";
+        obj_create_hint->hint[0].value = "iod_obj_enable_checksum";
+    }
+
     /* the traversal will retrieve the location where the group needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
@@ -83,11 +100,16 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Creating Group ID %"PRIx64" (CV %"PRIu64", TR %"PRIu64") ", 
             grp_id, rtid, wtid);
-    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64")\n", cur_oh.wr_oh, cur_id);
+    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh, cur_id);
+    if(enable_checksum)
+        fprintf(stderr, "with Data integrity ENABLED\n");
+    else
+        fprintf(stderr, "with Data integrity DISABLED\n");
 #endif
 
     /* create the group */
-    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &grp_id, NULL) < 0)
+    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                      NULL, NULL, &grp_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create Group");
 
     if((ret = iod_obj_open_read(coh, grp_id, wtid, NULL, &grp_oh.rd_oh, NULL)) < 0) {
@@ -102,11 +124,13 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     step += 1;
 
     /* create the metadata KV object for the group */
-    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL) < 0)
+    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                      NULL, NULL, &mdkv_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
     /* create the attribute KV object for the group */
-    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &attrkv_id, NULL) < 0)
+    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                      NULL, NULL, &attrkv_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
     /* set values for the scratch pad object */
@@ -134,10 +158,6 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
     step ++;
-
-    if(H5P_DEFAULT == input->gcpl_id)
-        input->gcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
-    gcpl_id = input->gcpl_id;
 
     /* insert plist metadata */
     if(H5VL_iod_insert_plist(mdkv_oh, wtid, gcpl_id, 
@@ -182,12 +202,10 @@ done:
     /* close parent group if it is not the location we started the
        traversal into */
     if(loc_handle.rd_oh.cookie != cur_oh.rd_oh.cookie) {
-        if(iod_obj_close(cur_oh.rd_oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+        iod_obj_close(cur_oh.rd_oh, NULL, NULL);
     }
     if(loc_handle.wr_oh.cookie != cur_oh.wr_oh.cookie) {
-        if(iod_obj_close(cur_oh.wr_oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+        iod_obj_close(cur_oh.wr_oh, NULL, NULL);
     }
 
     /* return an UNDEFINED oh to the client if the operation failed */
@@ -195,20 +213,22 @@ done:
         fprintf(stderr, "Failed Group Create\n");
 
         if(step == 2) {
-            if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            iod_obj_close(mdkv_oh, NULL, NULL);
             step --;
         }
         if(step == 1) {
-            if(iod_obj_close(grp_oh.rd_oh, NULL, NULL) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-            if(iod_obj_close(grp_oh.wr_oh, NULL, NULL) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            iod_obj_close(grp_oh.rd_oh, NULL, NULL);
+            iod_obj_close(grp_oh.wr_oh, NULL, NULL);
         }
 
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);
+    }
+
+    if(obj_create_hint) {
+        free(obj_create_hint);
+        obj_create_hint = NULL;
     }
 
     last_comp = (char *)H5MM_xfree(last_comp);

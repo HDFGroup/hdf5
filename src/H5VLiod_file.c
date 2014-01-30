@@ -52,6 +52,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t mdkv_id = input->mdkv_id;
     iod_obj_id_t attrkv_id = input->attrkv_id;
     iod_obj_id_t oidkv_id = input->oidkv_id;
+    hid_t fcpl_id;
     unsigned int mode; /* create mode */
     iod_handle_t coh; /* container handle */
     iod_handles_t root_oh; /* root object handle */
@@ -60,9 +61,26 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t first_tid = 0;
     uint32_t cs_scope = 0;
     iod_hint_list_t *con_open_hint = NULL;
+    iod_hint_list_t *obj_create_hint = NULL;
+    hbool_t enable_checksum = FALSE;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5P_DEFAULT == input->fcpl_id)
+        input->fcpl_id = H5Pcopy(H5P_FILE_CREATE_DEFAULT);
+    fcpl_id = input->fcpl_id;
+
+    /* get the scope for data integrity checks */
+    if(H5Pget_ocpl_enable_checksum(fcpl_id, &enable_checksum) < 0)
+        HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+
+    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
+        obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
+        obj_create_hint->num_hint = 1;
+        obj_create_hint->hint[0].key = "iod_obj_enable_checksum";
+        obj_create_hint->hint[0].value = "iod_obj_enable_checksum";
+    }
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start file create %s ", input->name);
@@ -95,8 +113,8 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR_IOD(ret, FAIL, "can't start transaction");
 
     /* create the root group */
-    root_ret = iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, NULL, NULL, 
-                         &root_id, NULL);
+    root_ret = iod_obj_create(coh, first_tid, obj_create_hint, IOD_OBJ_KV, 
+                              NULL, NULL, &root_id, NULL);
     if(0 == root_ret || -EEXIST == root_ret) {
         /* root group has been created, open it */
         ret = iod_obj_open_write(coh, root_id, first_tid, NULL, &root_oh.wr_oh, NULL);
@@ -116,15 +134,16 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         scratch_pad sp;
         iod_kv_t kv;
         uint64_t value = 1;
-        hid_t fcpl_id;
 
         /* create the metadata KV object for the root group */
-        ret = iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL);
+        ret = iod_obj_create(coh, first_tid, obj_create_hint, IOD_OBJ_KV, 
+                             NULL, NULL, &mdkv_id, NULL);
         if(ret < 0)
             HGOTO_ERROR_IOD(ret, FAIL, "can't create metadata KV object");
 
         /* create the attribute KV object for the root group */
-        ret = iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, NULL, NULL, &attrkv_id, NULL);
+        ret = iod_obj_create(coh, first_tid, obj_create_hint, IOD_OBJ_KV, 
+                             NULL, NULL, &attrkv_id, NULL);
         if(ret < 0)
             HGOTO_ERROR_IOD(ret, FAIL, "can't create attribute KV object");
 
@@ -161,10 +180,6 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         if(ret < 0)
             HGOTO_ERROR_IOD(ret, FAIL, "can't open metadata KV");
 
-        /* store metadata */
-        if(H5P_DEFAULT == input->fcpl_id)
-            input->fcpl_id = H5Pcopy(H5P_FILE_CREATE_DEFAULT);
-        fcpl_id = input->fcpl_id;
         /* insert plist metadata */
         if(H5VL_iod_insert_plist(mdkv_oh, first_tid, fcpl_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't insert link count KV value");

@@ -68,6 +68,8 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     iod_blob_iodesc_t *file_desc = NULL; /* file descriptor used to write */
     scratch_pad sp;
     int step = 0;
+    iod_hint_list_t *obj_create_hint = NULL;
+    hbool_t enable_checksum = FALSE;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -75,6 +77,21 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
         fprintf(stderr, "Start datatype commit %s at %"PRIu64"\n", name, loc_handle.wr_oh);
 #endif
+
+    if(H5P_DEFAULT == input->tcpl_id)
+        input->tcpl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT);
+    tcpl_id = input->tcpl_id;
+
+    /* get the scope for data integrity checks for raw data */
+    if(H5Pget_ocpl_enable_checksum(tcpl_id, &enable_checksum) < 0)
+        HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+
+    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
+        obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
+        obj_create_hint->num_hint = 1;
+        obj_create_hint->hint[0].key = "iod_obj_enable_checksum";
+        obj_create_hint->hint[0].value = "iod_obj_enable_checksum";
+    }
 
     /* the traversal will retrieve the location where the datatype needs
        to be created. The traversal will fail if an intermediate group
@@ -85,11 +102,16 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Creating Datatype ID %"PRIx64" ", dtype_id);
-    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64")\n", cur_oh.wr_oh, cur_id);
+    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh, cur_id);
+    if(enable_checksum)
+        fprintf(stderr, "with Data integrity ENABLED\n");
+    else
+        fprintf(stderr, "with Data integrity DISABLED\n");
 #endif
 
     /* create the datatype */
-    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_BLOB, NULL, NULL, &dtype_id, NULL) < 0)
+    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_BLOB, 
+                      NULL, NULL, &dtype_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create BLOB");
 
     if (iod_obj_open_read(coh, dtype_id, wtid, NULL, &dtype_oh.rd_oh, NULL) < 0)
@@ -100,11 +122,13 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     step ++;
 
     /* create the metadata KV object for the datatype */
-    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL) < 0)
+    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                      NULL, NULL, &mdkv_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
     /* create the attribute KV object for the datatype */
-    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &attr_id, NULL) < 0)
+    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                      NULL, NULL, &attr_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create attribute KV object");
 
     /* set values for the scratch pad object */
@@ -162,8 +186,8 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         dt_cs = H5_checksum_crc64(buf, buf_size);
 
         /* write the serialized type value to the BLOB object */
-        if(iod_blob_write(dtype_oh.wr_oh, wtid, NULL, mem_desc, file_desc, NULL 
-                          /*MSC - IOD fix - &dt_cs*/, NULL) < 0)
+        if(iod_blob_write(dtype_oh.wr_oh, wtid, NULL, mem_desc, file_desc,
+                          &dt_cs, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
     }
     else {
@@ -174,10 +198,6 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 
     free(mem_desc);
     free(file_desc);
-
-    if(H5P_DEFAULT == input->tcpl_id)
-        input->tcpl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT);
-    tcpl_id = input->tcpl_id;
 
     /* insert plist metadata */
     if(H5VL_iod_insert_plist(mdkv_oh, wtid, tcpl_id, NULL, NULL, NULL) < 0)
@@ -229,30 +249,30 @@ done:
     /* close parent group if it is not the location we started the
        traversal into */
     if(loc_handle.rd_oh.cookie != cur_oh.rd_oh.cookie) {
-        if(iod_obj_close(cur_oh.rd_oh, NULL, NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+        iod_obj_close(cur_oh.rd_oh, NULL, NULL);
     }
     if(loc_handle.wr_oh.cookie != cur_oh.wr_oh.cookie) {
-        if(iod_obj_close(cur_oh.wr_oh, NULL, NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+        iod_obj_close(cur_oh.wr_oh, NULL, NULL);
     }
 
     if(ret_value < 0) {
         if(step == 2) {
-            if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            iod_obj_close(mdkv_oh, NULL, NULL);
             step --;
         }
         if(step == 1) {
-            if(iod_obj_close(dtype_oh.rd_oh, NULL, NULL) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-            if(iod_obj_close(dtype_oh.wr_oh, NULL, NULL) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            iod_obj_close(dtype_oh.rd_oh, NULL, NULL);
+            iod_obj_close(dtype_oh.wr_oh, NULL, NULL);
         }
 
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);
+    }
+
+    if(obj_create_hint) {
+        free(obj_create_hint);
+        obj_create_hint = NULL;
     }
 
     input = (dtype_commit_in_t *)H5MM_xfree(input);
@@ -367,14 +387,17 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     file_desc->frag[0].len = (iod_size_t)buf_size;
 
     /* read the serialized type value from the BLOB object */
-    if(iod_blob_read(dtype_oh.rd_oh, rtid, NULL, mem_desc, file_desc, NULL
-                     /*MSC - IOD fix - &iod_cs*/, NULL) < 0)
+    if(iod_blob_read(dtype_oh.rd_oh, rtid, NULL, mem_desc, file_desc, &iod_cs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read from BLOB object");
 
     if(iod_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* calculate a checksum for the datatype */
         dt_cs = H5_checksum_crc64(buf, buf_size);
 
+#if H5VL_IOD_DEBUG 
+        fprintf(stderr, "IOD BLOB checksum  = %016lX  Checksum Computed = %016lX\n",
+                iod_cs, dt_cs);
+#endif
         /* Verifty checksum against one given by IOD */
         if(iod_cs != dt_cs)
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
