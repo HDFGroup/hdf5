@@ -321,10 +321,12 @@ int main(int argc, char **argv) {
     trspl_id = H5Pcreate (H5P_TR_START);
     ret = H5Pset_trspl_num_peers(trspl_id, my_size);
     assert(0 == ret);
-    ret = H5TRstart(tid2, trspl_id, e_stack);
+    ret = H5TRstart(tid2, trspl_id, H5_EVENT_STACK_NULL);
     assert(0 == ret);
     ret = H5Pclose(trspl_id);
     assert(0 == ret);
+
+    MPI_Barrier(MPI_COMM_WORLD);
 
     if((my_size > 1 && 1 == my_rank) || 
        (my_size == 1 && 0 == my_rank)) {

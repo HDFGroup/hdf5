@@ -3410,7 +3410,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     if((raw_cs_scope & H5_CHECKSUM_MEMORY) && user_cs && 
        user_cs != internal_cs) {
-        fprintf(stderr, "Errrr.. In memory Data corruption. expecting %"PRIu64", got %"PRIu64"\n",
+        fprintf(stderr, "Errrr.. In memory Data corruption. expecting %016lX, got %016lX\n",
                 user_cs, internal_cs);
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "Checksum verification failed");
     }

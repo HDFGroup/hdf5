@@ -52,7 +52,7 @@
 #ifdef H5_HAVE_EFF
 /* hint for IOD to enable checksums on an object */
 #define H5O_CRT_ENABLE_CHECKSUM_SIZE    sizeof(hbool_t)
-#define H5O_CRT_ENABLE_CHECKSUM_DEF     FALSE
+#define H5O_CRT_ENABLE_CHECKSUM_DEF     TRUE
 #define H5O_CRT_ENABLE_CHECKSUM_ENC     H5P__encode_hbool_t
 #define H5O_CRT_ENABLE_CHECKSUM_DEC     H5P__decode_hbool_t
 #endif

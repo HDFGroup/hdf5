@@ -928,7 +928,6 @@ H5VL_iod_free_list_free(void **free_list, size_t free_list_len)
 } /* end H5VL_iod_free_list_free() */
 
 #ifdef H5_HAVE_EFF
-
 uint64_t 
 H5_checksum_crc64(const void *buf, size_t buf_size)
 {

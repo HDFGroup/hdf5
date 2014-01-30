@@ -128,17 +128,19 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
     hid_t space_id = input->space_id;
+    hid_t dcpl_id;
     iod_handles_t dset_oh, cur_oh;
     iod_handle_t mdkv_oh;
     iod_obj_id_t cur_id;
     const char *name = input->name; /* name of dset including path to create */
     char *last_comp; /* the name of the dataset obtained from the last component in the path */
-    hid_t dcpl_id;
     iod_array_struct_t array; /* IOD array struct describing the dataset's dimensions */
     scratch_pad sp;
     iod_ret_t ret = 0;
     int step = 0;
+    hbool_t enable_checksum = FALSE;
     H5T_class_t dt_class;
+    iod_hint_list_t *obj_create_hint = NULL;
     iod_size_t array_dims[H5S_MAX_RANK], current_dims[H5S_MAX_RANK];
     herr_t ret_value = SUCCEED;
 
@@ -147,6 +149,14 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start dataset create %s at %"PRIu64"\n", name, loc_handle.wr_oh);
 #endif
+
+    if(H5P_DEFAULT == input->dcpl_id)
+        input->dcpl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT);
+    dcpl_id = input->dcpl_id;
+
+    /* get the scope for data integrity checks for raw data */
+    if(H5Pget_ocpl_enable_checksum(dcpl_id, &enable_checksum) < 0)
+        HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 
     /* the traversal will retrieve the location where the dataset needs
        to be created. The traversal will fail if an intermediate group
@@ -157,8 +167,19 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Creating Dataset ID %"PRIx64" ",dset_id);
-    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64")\n", cur_oh.wr_oh, cur_id);
+    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh, cur_id);
+    if(enable_checksum)
+        fprintf(stderr, "with Data integrity ENABLED\n");
+    else
+        fprintf(stderr, "with Data integrity DISABLED\n");
 #endif
+
+    if(enable_checksum) {
+        obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
+        obj_create_hint->num_hint = 1;
+        obj_create_hint->hint[0].key = "iod_obj_enable_checksum";
+        obj_create_hint->hint[0].value = "iod_obj_enable_checksum";
+    }
 
     dt_class = H5Tget_class(input->type_id);
     /* Set the IOD array creation parameters */
@@ -201,7 +222,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* create the dataset */
-    ret = iod_obj_create(coh, wtid, NULL, IOD_OBJ_ARRAY, NULL, 
+    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_ARRAY, NULL, 
                          &array, &dset_id, NULL);
     if(ret != 0) {
         fprintf(stderr, "ret: %d error: %s\n", ret, strerror(-ret));
@@ -318,16 +339,18 @@ done:
     if(ret_value < 0) {
         fprintf(stderr, "failed to create Dataset\n");
 
+        if(obj_create_hint) {
+            free(obj_create_hint);
+            obj_create_hint = NULL;
+        }
+
         if(step == 2) {
-            if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            iod_obj_close(mdkv_oh, NULL, NULL);
             step --;
         }
         if(step == 1) {
-            if(iod_obj_close(dset_oh.rd_oh, NULL, NULL) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-            if(iod_obj_close(dset_oh.wr_oh, NULL, NULL) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            iod_obj_close(dset_oh.rd_oh, NULL, NULL);
+            iod_obj_close(dset_oh.wr_oh, NULL, NULL);
         }
 
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
@@ -606,7 +629,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
 #if H5VL_IOD_DEBUG 
-    fprintf(stderr, "Done with dset read, checksum %"PRIu64", sending response to client\n", cs);
+    fprintf(stderr, "Done with dset read, checksum %016lX, sending response to client\n", cs);
 #endif
 
     input = (dset_io_in_t *)H5MM_xfree(input);
@@ -646,7 +669,6 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
                                     void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;
-    //dset_get_vl_size_in_t *input = (dset_get_vl_size_in_t *)op_data->input;
     dset_io_in_t *input = (dset_io_in_t *)op_data->input;
     dset_read_out_t output;
     iod_handle_t coh = input->coh; /* container handle */
@@ -1255,7 +1277,7 @@ done:
 herr_t 
 H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
                           hbool_t write_op, void *buf, 
-                          size_t UNUSED buf_size, iod_checksum_t UNUSED cs, 
+                          size_t UNUSED buf_size, iod_checksum_t cs, 
                           uint32_t cs_scope, iod_trans_id_t tid)
 {
     int ndims, i; /* dataset's rank/number of dimensions */
@@ -1360,16 +1382,16 @@ H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
     }
 
     if(write_op) {
-        /* Write list IO */
-        ret = iod_array_write(iod_oh, tid, NULL, mem_desc, file_desc, NULL, NULL);
+        /* write to array */
+        ret = iod_array_write(iod_oh, tid, NULL, mem_desc, file_desc, cs_list, NULL);
         if(ret != 0) {
             fprintf(stderr, "ret: %d error: %s\n", ret, strerror(-ret));
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't write to array object");
         }
     }
     else {
-        /* Read list IO */
-        ret = iod_array_read(iod_oh, tid, NULL, mem_desc, file_desc, NULL, NULL);
+        /* Read from array */
+        ret = iod_array_read(iod_oh, tid, NULL, mem_desc, file_desc, cs_list, NULL);
         if(ret != 0) {
             fprintf(stderr, "ret: %d error: %s\n", ret, strerror(-ret));
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
@@ -1392,14 +1414,15 @@ H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
             num_bytes = num_elems * elmt_size;
 
             checksum = H5_checksum_crc64(buf_ptr, (size_t)num_bytes);
-
-            /* MSC - No CS from IOD yet
+#if H5VL_IOD_DEBUG 
+            fprintf(stderr, "IOD checksum  = %016lX  Checksum Computed = %016lX\n",
+                    cs_list[n], checksum);
+#endif
             if(checksum != cs_list[n]) {
                 fprintf(stderr, "Data Corruption detected when reading\n");
                 ret_value = FAIL;
                 goto done;
             }
-            */
             buf_ptr += num_bytes;
         }
     }

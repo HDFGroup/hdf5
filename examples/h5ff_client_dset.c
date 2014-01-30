@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
     H5ES_status_t status;
     size_t num_events = 0;
     unsigned int i = 0;
-    uint64_t cs = 0,read1_cs = 0, read2_cs = 0;
+    uint64_t array_cs = 0, elmt_cs = 0, read1_cs = 0, read2_cs = 0;
     uint32_t cs_scope = 0;
     herr_t ret;
 
@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
-    fprintf(stderr, "APP processes = %d, my rank is %d\n", my_size, my_rank);
+    printf("APP processes = %d, my rank is %d\n", my_size, my_rank);
 
     /* Choose the IOD VOL plugin to use with this file. */
     fapl_id = H5Pcreate (H5P_FILE_ACCESS);
@@ -248,39 +248,42 @@ int main(int argc, char **argv) {
     /* Attach a checksum to the dxpl which is verified all the way
        down at the server */
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-    cs = checksum_crc64(wdata1, sizeof(int32_t) * nelem);
-    H5Pset_dxpl_checksum(dxpl_id, cs);
-
-    /* tell HDF5 to disable all data integrity checks for this write */
-    cs_scope = 0;
-    ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
-    assert(ret == 0);
-
+    array_cs = checksum_crc64(wdata1, sizeof(int32_t) * nelem);
+    H5Pset_dxpl_checksum(dxpl_id, array_cs);
+    printf("Checksum computed for raw data: %016lX\n", array_cs);
     ret = H5Dwrite_ff(did1, dtid, H5S_ALL, H5S_ALL, dxpl_id, wdata1, tid1, e_stack);
     assert(ret == 0);
 
     /* Raw data write on D2. same as previous, but here we indicate
        through the property list that we want to inject a
        corruption. */
-    //cs = checksum_crc64(wdata2, sizeof(int32_t) * nelem);
-    //H5Pset_dxpl_checksum(dxpl_id, cs);
+    //array_cs = checksum_crc64(wdata2, sizeof(int32_t) * nelem);
+    //H5Pset_dxpl_checksum(dxpl_id, array_cs);
     //H5Pset_dxpl_inject_corruption(dxpl_id, 1);
 
     /* tell HDF5 to disable data integrity checks stored at IOD for this write;
        The transfer checksum will still capture the corruption. */
-    cs_scope |= H5_CHECKSUM_TRANSFER;
-    ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
-    assert(ret == 0);
+    //cs_scope |= H5_CHECKSUM_TRANSFER;
+    //ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
+    //assert(ret == 0);
 
     element = 450;
+    elmt_cs = checksum_crc64(&element, sizeof(int32_t));
+    H5Pset_dxpl_checksum(dxpl_id, elmt_cs);
+
     ret = H5Dwrite_ff(did2, dtid, scalar, scalar, dxpl_id, &element, tid1, e_stack);
+    assert(ret == 0);
+
+    /* tell HDF5 to disable all data integrity checks for this write */
+    cs_scope = 0;
+    ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
     assert(ret == 0);
 
     /* Raw data write on D3. Same as previous; however we specify that
        the data in the buffer is in BE byte order. Type conversion will
        happen at the server when we detect that the dataset type is of
        LE order and the datatype here is in BE order. */
-    ret = H5Dwrite_ff(did3, H5T_STD_I16BE, sid, sid, H5P_DEFAULT, wdata3, tid1, e_stack);
+    ret = H5Dwrite_ff(did3, H5T_STD_I16BE, sid, sid, dxpl_id, wdata3, tid1, e_stack);
     assert(ret == 0);
 
     H5Pclose(dxpl_id);
@@ -373,13 +376,18 @@ int main(int argc, char **argv) {
 
     ret = H5Dread_ff(did1, dtid, H5S_ALL, H5S_ALL, dxpl_id, rdata2, rid2, e_stack);
     assert(ret == 0);
-    H5Pclose(dxpl_id);
+
+    /* tell HDF5 to disable all data integrity checks for this write */
+    cs_scope = 0;
+    ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
+    assert(ret == 0);
 
     /* Raw data read on D3. This is asynchronous.  Note that the type
        is different than the dataset type. */
-    ret = H5Dread_ff(did3, H5T_STD_I16BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata3, 
-                     rid2, e_stack);
+    ret = H5Dread_ff(did3, H5T_STD_I16BE, H5S_ALL, H5S_ALL, dxpl_id, rdata3, rid2, e_stack);
     assert(ret == 0);
+
+    H5Pclose(dxpl_id);
 
     /* Raw data read on D1. This is asynchronous.  The read is done into a 
        noncontiguous memory dataspace selection */
@@ -411,10 +419,10 @@ int main(int argc, char **argv) {
         printf("ESWait H5Dread Completion status = %d\n", status);
         assert (status);
 
-        fprintf(stderr, "Printing all Dataset values. We should have a 0 after each element: ");
+        printf("Printing all Dataset values. We should have a 0 after each element: ");
         for(i=0;i<120;++i)
-            fprintf(stderr, "%d ", buf[i]);
-        fprintf(stderr, "\n");
+            printf("%d ", buf[i]);
+        printf("\n");
 
         free(buf);
     }
@@ -427,7 +435,7 @@ int main(int argc, char **argv) {
     printf("ESWait H5Dread Completion status = %d\n", status);
     assert (status);
 
-    fprintf(stderr, "Rank %d read value %d\n", my_rank, element);
+    printf("Rank %d read value %d\n", my_rank, element);
     assert(element == 450);
 
 #if 0
@@ -529,10 +537,10 @@ int main(int argc, char **argv) {
                          rid4, H5_EVENT_STACK_NULL);
         assert(ret == 0);
 
-        fprintf(stderr, "Printing all Extended Dataset values: ");
+        printf("Printing all Extended Dataset values: ");
         for(i=0 ; i<nelem+10 ; ++i)
-            fprintf(stderr, "%d ", ex_rdata[i]);
-        fprintf(stderr, "\n");
+            printf("%d ", ex_rdata[i]);
+        printf("\n");
 
         H5Sclose(esid);
     }
@@ -591,29 +599,27 @@ int main(int argc, char **argv) {
 
     H5ESclear(e_stack);
 
-    fprintf(stderr, "Read Data1: ");
+    printf("Read Data1: ");
     for(i=0;i<nelem;++i)
-        fprintf(stderr, "%d ",rdata1[i]);
-    fprintf(stderr, "\n");
-    fprintf(stderr, 
-            "Checksum Receieved = %llu  Checksum Computed = %llu (Should be Equal)\n", 
-            read1_cs, cs);
+        printf("%d ",rdata1[i]);
+    printf("\n");
+    printf("Checksum Receieved = %016lX  Checksum Computed = %016lX (Should be Equal)\n", 
+            read1_cs, array_cs);
 
-    fprintf(stderr, "Read Data2 (corrupted): ");
+    printf("Read Data2 (corrupted): ");
     for(i=0;i<nelem;++i)
-        fprintf(stderr, "%d ",rdata2[i]);
-    fprintf(stderr, "\n");
-    fprintf(stderr, 
-            "Checksum Receieved = %llu  Checksum Computed = %llu (Should NOT be Equal)\n", 
-            read2_cs, cs);
+        printf("%d ",rdata2[i]);
+    printf("\n");
+    printf("Checksum Receieved = %016lX  Checksum Computed = %016lX (Should NOT be Equal)\n", 
+            read2_cs, array_cs);
 
-    assert(read1_cs == cs);
-    assert(read2_cs != cs);
+    assert(read1_cs == array_cs);
+    assert(read2_cs != array_cs);
 
-    fprintf(stderr, "Read Data3 (32 LE converted to 16 bit BE order): ");
+    printf("Read Data3 (32 LE converted to 16 bit BE order): ");
     for(i=0;i<nelem;++i)
-        fprintf(stderr, "%d ",rdata3[i]);
-    fprintf(stderr, "\n");
+        printf("%d ",rdata3[i]);
+    printf("\n");
 
     ret = H5ESclose(e_stack);
     assert(ret == 0);
