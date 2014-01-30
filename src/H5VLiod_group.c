@@ -161,17 +161,17 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
 
     /* insert plist metadata */
     if(H5VL_iod_insert_plist(mdkv_oh, wtid, gcpl_id, 
-                             NULL, NULL, NULL) < 0)
+                             cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* insert link count metadata */
     if(H5VL_iod_insert_link_count(mdkv_oh, wtid, (uint64_t)1, 
-                                  NULL, NULL, NULL) < 0)
+                                  cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* insert object type metadata */
     if(H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_GROUP, 
-                                   NULL, NULL, NULL) < 0)
+                                   cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* close Metadata KV object */
@@ -181,8 +181,8 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     step --;
 
     /* add link in parent group to current object */
-    if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
-                                H5L_TYPE_HARD, &grp_id, NULL, NULL, NULL) < 0)
+    if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, H5L_TYPE_HARD, 
+                                &grp_id, cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
 #if H5VL_IOD_DEBUG

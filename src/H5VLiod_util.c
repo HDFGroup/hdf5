@@ -464,7 +464,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
  */
 herr_t 
 H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
-                      iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+                      uint32_t cs_scope, iod_hint_list_t *hints, iod_event_t *event)
 {
     char *key = NULL;
     void *value = NULL;
@@ -490,8 +490,24 @@ H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
     kv.key_len = (iod_size_t)strlen(key);
     kv.value = value;
     kv.value_len = (iod_size_t)buf_size;
-    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        iod_checksum_t cs[2];
+
+        cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+        cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+
+#if H5VL_IOD_DEBUG 
+        fprintf(stderr, "PLIST Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
+#endif
+
+        if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
+    else {
+        if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
 
 done:
     if(key) {
@@ -520,7 +536,7 @@ done:
  */
 herr_t 
 H5VL_iod_insert_link_count(iod_handle_t oh, iod_trans_id_t tid, uint64_t count,
-                           iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+                           uint32_t cs_scope, iod_hint_list_t *hints, iod_event_t *event)
 {
     char *key = NULL;
     iod_kv_t kv;
@@ -535,8 +551,23 @@ H5VL_iod_insert_link_count(iod_handle_t oh, iod_trans_id_t tid, uint64_t count,
     kv.value = &count;
     kv.value_len = sizeof(uint64_t);
 
-    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        iod_checksum_t cs[2];
+
+        cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+        cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+
+#if H5VL_IOD_DEBUG 
+        fprintf(stderr, "Link Count Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
+#endif
+
+        if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
+    else {
+        if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
 
 done:
     if(key) {
@@ -560,7 +591,7 @@ done:
  */
 herr_t 
 H5VL_iod_insert_object_type(iod_handle_t oh, iod_trans_id_t tid, H5I_type_t obj_type,
-                            iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+                            uint32_t cs_scope, iod_hint_list_t *hints, iod_event_t *event)
 {
     char *key = NULL;
     iod_kv_t kv;
@@ -575,8 +606,23 @@ H5VL_iod_insert_object_type(iod_handle_t oh, iod_trans_id_t tid, H5I_type_t obj_
     kv.value = &obj_type;
     kv.value_len = sizeof(int32_t);
 
-    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        iod_checksum_t cs[2];
+
+        cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+        cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+
+#if H5VL_IOD_DEBUG 
+        fprintf(stderr, "Object Type Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
+#endif
+
+        if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
+    else {
+        if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
 
 done:
     if(key) {
@@ -600,7 +646,7 @@ done:
  */
 herr_t 
 H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
-                         iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+                         uint32_t cs_scope, iod_hint_list_t *hints, iod_event_t *event)
 {
     char *key = NULL;
     void *value = NULL;
@@ -626,9 +672,24 @@ H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
     kv.key_len = (iod_size_t)strlen(key);
     kv.value = value;
     kv.value_len = (iod_size_t)buf_size;
-    /* insert kv pair into KV */
-    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        iod_checksum_t cs[2];
+
+        cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+        cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+
+#if H5VL_IOD_DEBUG 
+        fprintf(stderr, "Datatype Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
+#endif
+
+        if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
+    else {
+        if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
 
 done:
     if(key) {
@@ -657,8 +718,8 @@ done:
  */
 herr_t 
 H5VL_iod_insert_datatype_with_key(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id, 
-                                  const char *key, iod_hint_list_t *hints, 
-                                  iod_checksum_t *cs, iod_event_t *event)
+                                  const char *key, uint32_t cs_scope, iod_hint_list_t *hints, 
+                                  iod_event_t *event)
 {
     void *value = NULL;
     iod_kv_t kv;
@@ -680,9 +741,24 @@ H5VL_iod_insert_datatype_with_key(iod_handle_t oh, iod_trans_id_t tid, hid_t typ
     kv.key_len = (iod_size_t)strlen(key);
     kv.value = value;
     kv.value_len = (iod_size_t)buf_size;
-    /* insert kv pair into KV */
-    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        iod_checksum_t cs[2];
+
+        cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+        cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+
+#if H5VL_IOD_DEBUG 
+        fprintf(stderr, "Map Datatype Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
+#endif
+
+        if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
+    else {
+        if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
 
 done:
     if(value) {
@@ -707,7 +783,7 @@ done:
  */
 herr_t 
 H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
-                         iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+                          uint32_t cs_scope, iod_hint_list_t *hints, iod_event_t *event)
 {
     char *key = NULL;
     void *value = NULL;
@@ -733,9 +809,24 @@ H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
     kv.key_len = (iod_size_t)strlen(key);
     kv.value = value;
     kv.value_len = (iod_size_t)buf_size;
-    /* insert kv pair into KV */
-    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        iod_checksum_t cs[2];
+
+        cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+        cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+
+#if H5VL_IOD_DEBUG 
+        fprintf(stderr, "Dataspace Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
+#endif
+
+        if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
+    else {
+        if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
 
 done:
     if(key) {
@@ -764,8 +855,8 @@ done:
  */
 herr_t 
 H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_name,
-                         H5L_type_t link_type, const void *link_val, iod_hint_list_t *hints, 
-                         iod_checksum_t *cs, iod_event_t *event)
+                         H5L_type_t link_type, const void *link_val, uint32_t cs_scope, 
+                         iod_hint_list_t *hints, iod_event_t *event)
 {
     iod_kv_t kv;
     void  *value = NULL;
@@ -812,8 +903,23 @@ H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_n
     kv.value = value;
     kv.value_len = value_len;
 
-    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        iod_checksum_t cs[2];
+
+        cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+        cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+
+#if H5VL_IOD_DEBUG 
+        fprintf(stderr, "Link Type Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
+#endif
+
+        if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
+    else {
+        if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
 
 done:
 
@@ -953,6 +1059,7 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
     default:
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "invalide metadata type");
     }
+
 done:
     if(value) {
         free(value); 

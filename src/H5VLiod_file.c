@@ -67,21 +67,6 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5P_DEFAULT == input->fcpl_id)
-        input->fcpl_id = H5Pcopy(H5P_FILE_CREATE_DEFAULT);
-    fcpl_id = input->fcpl_id;
-
-    /* get the scope for data integrity checks */
-    if(H5Pget_ocpl_enable_checksum(fcpl_id, &enable_checksum) < 0)
-        HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
-
-    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
-        obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
-        obj_create_hint->num_hint = 1;
-        obj_create_hint->hint[0].key = "iod_obj_enable_checksum";
-        obj_create_hint->hint[0].value = "iod_obj_enable_checksum";
-    }
-
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start file create %s ", input->name);
     fprintf(stderr, "with MDKV %"PRIx64" ", mdkv_id), 
@@ -94,13 +79,29 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     if (input->flags&H5F_ACC_CREAT) 
         mode |= IOD_CONT_CREATE;
 
+    if(H5P_DEFAULT == input->fcpl_id)
+        input->fcpl_id = H5Pcopy(H5P_FILE_CREATE_DEFAULT);
+    fcpl_id = input->fcpl_id;
+
     if(H5Pget_metadata_integrity_scope(input->fapl_id, &cs_scope) < 0)
         HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 
+    if(H5Pget_ocpl_enable_checksum(fcpl_id, &enable_checksum) < 0)
+        HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+
+    /* scratch pad integrity in the container */
     if(cs_scope & H5_CHECKSUM_IOD) {
         con_open_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
         con_open_hint->num_hint = 1;
         con_open_hint->hint[0].key = "iod_con_scratch_cksum";
+    }
+
+    /* root group integrity */
+    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
+        obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
+        obj_create_hint->num_hint = 1;
+        obj_create_hint->hint[0].key = "iod_obj_enable_checksum";
+        obj_create_hint->hint[0].value = "iod_obj_enable_checksum";
     }
 
     /* Create the Container */
@@ -181,7 +182,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR_IOD(ret, FAIL, "can't open metadata KV");
 
         /* insert plist metadata */
-        if(H5VL_iod_insert_plist(mdkv_oh, first_tid, fcpl_id, NULL, NULL, NULL) < 0)
+        if(H5VL_iod_insert_plist(mdkv_oh, first_tid, fcpl_id, cs_scope, NULL, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't insert link count KV value");
 
         kv.value = &value;

@@ -96,7 +96,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 
         /* add link in parent group to current object */
         if(H5VL_iod_insert_new_link(src_oh.wr_oh, wtid, src_last_comp, 
-                                    H5L_TYPE_HARD, &target_id, NULL, NULL, NULL) < 0)
+                                    H5L_TYPE_HARD, &target_id, cs_scope, NULL, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         if(input->target_loc_id != target_id) {
@@ -133,7 +133,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 
         /* insert link count metadata */
         if(H5VL_iod_insert_link_count(mdkv_oh.wr_oh, wtid, link_count, 
-                                      NULL, NULL, NULL) < 0)
+                                      cs_scope, NULL, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* close the metadata scratch pad */
@@ -153,7 +153,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
         /* add link in parent group to the source location */
         if(H5VL_iod_insert_new_link(src_oh.wr_oh, wtid, src_last_comp, 
                                     H5L_TYPE_SOFT, input->link_value, 
-                                    NULL, NULL, NULL) < 0)
+                                    cs_scope, NULL, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
 #if H5VL_IOD_DEBUG
@@ -259,13 +259,13 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
     if(H5L_TYPE_HARD == iod_link.link_type) {
         if(H5VL_iod_insert_new_link(dst_oh.wr_oh, wtid, dst_last_comp, 
                                     iod_link.link_type, &iod_link.u.iod_id, 
-                                    NULL, NULL, NULL) < 0)
+                                    cs_scope, NULL, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     }
     else if(H5L_TYPE_SOFT == iod_link.link_type) {
         if(H5VL_iod_insert_new_link(dst_oh.wr_oh, wtid, dst_last_comp, 
                                     iod_link.link_type, &iod_link.u.symbolic_name, 
-                                    NULL, NULL, NULL) < 0)
+                                    cs_scope, NULL, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     }
 
@@ -322,7 +322,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
 
         /* insert link count metadata */
         if(H5VL_iod_insert_link_count(mdkv_oh.wr_oh, wtid, link_count, 
-                                      NULL, NULL, NULL) < 0)
+                                      cs_scope, NULL, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* close the metadata scratch pad */
@@ -798,7 +798,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
         if(0 != link_count) {
             /* insert link count metadata */
             if(H5VL_iod_insert_link_count(mdkv_oh.wr_oh, wtid, link_count, 
-                                          NULL, NULL, NULL) < 0)
+                                          cs_scope, NULL, NULL) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
         }
 

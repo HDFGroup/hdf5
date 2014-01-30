@@ -449,7 +449,7 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Insert object in the destination path */
     if(H5VL_iod_insert_new_link(dst_oh, wtid, new_name, 
-                                H5L_TYPE_HARD, &obj_id, NULL, NULL, NULL) < 0)
+                                H5L_TYPE_HARD, &obj_id, cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* close dst group if it is not the location we started the

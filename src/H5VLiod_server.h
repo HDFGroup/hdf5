@@ -394,21 +394,21 @@ H5_DLL herr_t H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id,
                                         /*out*/iod_handles_t *iod_oh);
 H5_DLL herr_t H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs);
 H5_DLL herr_t H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
-                                    iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
+                                    uint32_t cs_scope, iod_hint_list_t *hints, iod_event_t *event);
 H5_DLL herr_t H5VL_iod_insert_link_count(iod_handle_t oh, iod_trans_id_t tid, uint64_t count,
-                                         iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
+                                         uint32_t cs_scope, iod_hint_list_t *hints, iod_event_t *event);
 H5_DLL herr_t H5VL_iod_insert_object_type(iod_handle_t oh, iod_trans_id_t tid, H5I_type_t obj_type,
-                                          iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
+                                          uint32_t cs_scope, iod_hint_list_t *hints, iod_event_t *event);
 H5_DLL herr_t H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
-                                       iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
+                                       uint32_t cs_scope, iod_hint_list_t *hints, iod_event_t *event);
 H5_DLL herr_t  H5VL_iod_insert_datatype_with_key(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id, 
-                                                 const char *key, iod_hint_list_t *hints, 
-                                                 iod_checksum_t *cs, iod_event_t *event);
+                                                 const char *key, uint32_t cs_scope,
+                                                 iod_hint_list_t *hints, iod_event_t *event);
 H5_DLL herr_t H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
-                                        iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
+                                        uint32_t cs_scope, iod_hint_list_t *hints, iod_event_t *event);
 H5_DLL herr_t H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_name,
                                        H5L_type_t link_type, const void *link_val, 
-                                       iod_hint_list_t *hints, iod_checksum_t *cs, 
+                                       uint32_t cs_scope, iod_hint_list_t *hints, 
                                        iod_event_t *event);
 H5_DLL herr_t H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t md_type,
                                     const char *key, iod_checksum_t *cs, iod_event_t *event, void *ret);

@@ -272,17 +272,17 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 
     /* insert plist metadata */
     if(H5VL_iod_insert_plist(mdkv_oh, wtid, dcpl_id, 
-                             NULL, NULL, NULL) < 0)
+                             cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* insert link count metadata */
     if(H5VL_iod_insert_link_count(mdkv_oh, wtid, (uint64_t)1, 
-                                  NULL, NULL, NULL) < 0)
+                                  cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* insert object type metadata */
     if(H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_DATASET, 
-                                   NULL, NULL, NULL) < 0)
+                                   cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* MSC - need to check size of datatype if it fits in
@@ -290,12 +290,12 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 
     /* insert datatype metadata */
     if(H5VL_iod_insert_datatype(mdkv_oh, wtid, input->type_id, 
-                                NULL, NULL, NULL) < 0)
+                                cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* insert dataspace metadata */
     if(H5VL_iod_insert_dataspace(mdkv_oh, wtid, space_id, 
-                                 NULL, NULL, NULL) < 0)
+                                 cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* close the Metadata KV object */
@@ -306,7 +306,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 
     /* add link in parent group to current object */
     if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
-                                H5L_TYPE_HARD, &dset_id, NULL, NULL, NULL) < 0)
+                                H5L_TYPE_HARD, &dset_id, cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
 
@@ -1125,7 +1125,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t iod_id = input->iod_id; 
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
-    //uint32_t cs_scope = input->cs_scope;
+    uint32_t cs_scope = input->cs_scope;
     iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV object */
     /* int rank = input->dims.rank;  rank of dataset */
     hbool_t opened_locally = FALSE;
@@ -1174,7 +1174,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
 
         /* insert dataspace metadata */
         if(H5VL_iod_insert_dataspace(mdkv_oh, wtid, space_id, 
-                                     NULL, NULL, NULL) < 0)
+                                     cs_scope, NULL, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* close the metadata scratch pad */

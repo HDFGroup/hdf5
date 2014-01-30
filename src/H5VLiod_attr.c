@@ -148,18 +148,18 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
     /* insert object type metadata */
-    if(H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_ATTR, NULL, NULL, NULL) < 0)
+    if(H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_ATTR, cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* MSC - need to check size of datatype if it fits in
        entry otherwise create a BLOB */
 
     /* insert datatype metadata */
-    if(H5VL_iod_insert_datatype(mdkv_oh, wtid, input->type_id, NULL, NULL, NULL) < 0)
+    if(H5VL_iod_insert_datatype(mdkv_oh, wtid, input->type_id, cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* insert dataspace metadata */
-    if(H5VL_iod_insert_dataspace(mdkv_oh, wtid, input->space_id, NULL, NULL, NULL) < 0)
+    if(H5VL_iod_insert_dataspace(mdkv_oh, wtid, input->space_id, cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* if the starting location is not the last component, need to
@@ -188,7 +188,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
 
     /* insert new attribute in scratch pad of current object */
     if(H5VL_iod_insert_new_link(attr_kv_oh, wtid, attr_name, 
-                                H5L_TYPE_HARD, &attr_id, NULL, NULL, NULL) < 0)
+                                H5L_TYPE_HARD, &attr_id, cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     output.iod_oh.rd_oh.cookie = attr_oh.rd_oh.cookie;
@@ -991,7 +991,7 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
 
     /* insert attribute with new name */
     if(H5VL_iod_insert_new_link(attr_kv_oh.wr_oh, wtid, new_name, 
-                                H5L_TYPE_HARD, &attr_id, NULL, NULL, NULL) < 0)
+                                H5L_TYPE_HARD, &attr_id, cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* close the Attribute KV object */
