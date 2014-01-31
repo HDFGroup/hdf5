@@ -438,7 +438,7 @@ write_file(void)
 	}
 
 	/* Flush the dataset for every "chunkplanes_g" planes */
-	if(!((i + 1) % chunkplanes_g)) {
+	if(!((i + 1) % (hsize_t)chunkplanes_g)) {
 	    if(H5Dflush(dsid) < 0) {
 		fprintf(stderr, "Failed to H5Dflush dataset\n");
 		return -1;

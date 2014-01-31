@@ -29,12 +29,12 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       testcheck_version.sh: tcheck_version
 #       tetlinks_env.sh: links_env
 #       testflushrefresh.sh: flushrefresh
-#       test_usecases.sh: use_append_chunk, use_append_mchunks
+#       test_usecases.sh: use_append_chunk, use_append_mchunks, use_cork
 #       testswmr.sh: swmr*
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh \
 	testflushrefresh.sh test_usecases.sh $(srcdir)/testswmr.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
-    flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) \
+    flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_cork$(EXEEXT) \
     swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) swmr_writer$(EXEEXT) \
     swmr_remove_reader$(EXEEXT) swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
     swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) swmr_start_write$(EXEEXT)
@@ -55,14 +55,14 @@ check_SCRIPTS = $(TEST_SCRIPT)
 TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            pool accum hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
-           use_cork twriteorder big mtime fillval mount flush1 flush2 app_ref enum \
+           twriteorder big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_with_endianess\
            getname vfd ntypes dangle dtransform reserved cross_read \
            freespace mf farray earray btree2 fheap file_image unregister test_swmr
 
 bin_PROGRAMS=swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
-    use_append_chunk use_append_mchunks atomic_writer atomic_reader accum_swmr_reader
+    use_append_chunk use_append_mchunks use_cork atomic_writer atomic_reader accum_swmr_reader
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
@@ -71,14 +71,14 @@ bin_PROGRAMS=swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove
 # atomic_writer and atomic_reader are standalone programs.
 # links_env is used by testlinks_env.sh
 # flushrefresh is used by testflushrefresh.sh.
-# use_append_chunk and use_append_mchunks are used by test_usecases.sh
+# use_append_chunk, use_append_mchunks and use_cork are used by test_usecases.sh
 # swmr* files are used by testswmr.sh.
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
 check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     testmeta accum_swmr_reader atomic_writer atomic_reader \
-    links_env flushrefresh use_append_chunk use_append_mchunks \
+    links_env flushrefresh use_append_chunk use_append_mchunks use_cork \
     swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer
 if HAVE_SHARED_CONDITIONAL
@@ -165,7 +165,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
     stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
     tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
     fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 ttime.h5 \
-    trefer[1-3].h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 use_cork.h5 twriteorder.dat flush.h5 \
+    trefer[1-3].h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 twriteorder.dat flush.h5 \
     enum1.h5 titerate.h5 ttsafe.h5 tarray1.h5 tgenprop.h5            \
     tmisc[0-9]*.h5 set_extent[1-5].h5 ext[12].bin           \
     getname.h5 getname[1-3].h5 sec2_file.h5 direct_file.h5           \
@@ -179,7 +179,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
     new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
-    swmr_data.h5 use_use_append_chunk.h5 use_append_mchunks.h5           \
+    swmr_data.h5 use_use_append_chunk.h5 use_append_mchunks.h5 use_cork.h5     \
     flushrefresh.h5 flushrefresh_VERIFICATION_START                  \
     flushrefresh_VERIFICATION_CHECKPOINT1 flushrefresh_VERIFICATION_CHECKPOINT2 \
     flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 ohdr_swmr.h5 test_swmr.h5
@@ -193,6 +193,7 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
 # Sources for Use Cases
 use_append_chunk_SOURCES=use_append_chunk.c use_common.c
 use_append_mchunks_SOURCES=use_append_mchunks.c use_common.c
+use_cork_SOURCES=use_cork.c
 
 # Temporary files.
 DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh \
