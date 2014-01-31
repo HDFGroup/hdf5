@@ -3032,6 +3032,45 @@ cork_entry_type(H5F_t * file_ptr, int32_t type)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	uncork_entry_type()
+ *
+ * Purpose:	To "uncork" an object:
+ *		--insert the base address of an entry type into
+ *		  the cache's list of corked object addresses
+ *
+ * Return:	void
+ *
+ * Programmer:	Vailin Choi; Jan 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+uncork_entry_type(H5F_t * file_ptr, int32_t type)
+{
+    H5C_t * cache_ptr;
+    haddr_t baddrs;
+    herr_t result;
+
+    if(pass) {
+        cache_ptr = file_ptr->shared->cache;
+
+        HDassert( cache_ptr );
+        HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
+
+        baddrs = base_addrs[type];
+
+	result = H5C_cork(cache_ptr, baddrs, H5C__UNCORK, NULL);
+        if(result < 0) {
+
+            pass = FALSE;
+            failure_mssg = "error in H5C_cork().";
+        }
+    }
+    return;
+} /* uncork_entry_type() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	insert_entry()
  *
  * Purpose:	Insert the entry indicated by the type and index.

@@ -352,6 +352,7 @@ H5_DLLVAR hid_t H5AC_ind_dxpl_id;
 #define H5AC_ES__IS_PINNED	0x0008
 #define H5AC_ES__IS_FLUSH_DEP_PARENT	0x0010
 #define H5AC_ES__IS_FLUSH_DEP_CHILD	0x0020
+#define H5AC_ES__IS_CORKED	0x0040
 
 
 /* external function declarations: */

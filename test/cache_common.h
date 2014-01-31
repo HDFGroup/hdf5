@@ -613,6 +613,8 @@ void create_pinned_entry_dependency(H5F_t * file_ptr,
 void reset_entries(void);
 
 void cork_entry_type(H5F_t * file_ptr, int32_t type);
+void uncork_entry_type(H5F_t * file_ptr, int32_t type);
+
 
 
 void resize_entry(H5F_t * file_ptr,

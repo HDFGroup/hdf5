@@ -1166,6 +1166,7 @@ H5_DLL herr_t H5C_get_entry_status(const H5F_t *f,
                                    hbool_t * is_dirty_ptr,
                                    hbool_t * is_protected_ptr,
 				   hbool_t * is_pinned_ptr,
+				   hbool_t * is_corked_ptr,
 				   hbool_t * is_flush_dep_parent_ptr,
 				   hbool_t * is_flush_dep_child_ptr);
 

@@ -2469,6 +2469,7 @@ H5C_get_entry_status(const H5F_t *f,
                      hbool_t * is_dirty_ptr,
                      hbool_t * is_protected_ptr,
 		     hbool_t * is_pinned_ptr,
+		     hbool_t * is_corked_ptr,
 		     hbool_t * is_flush_dep_parent_ptr,
                      hbool_t * is_flush_dep_child_ptr)
 {
@@ -2527,6 +2528,11 @@ H5C_get_entry_status(const H5F_t *f,
         if ( is_pinned_ptr != NULL ) {
 
             *is_pinned_ptr = entry_ptr->is_pinned;
+        }
+
+        if ( is_corked_ptr != NULL ) {
+
+            *is_corked_ptr = entry_ptr->is_corked;
         }
 
         if ( is_flush_dep_parent_ptr != NULL ) {
@@ -7008,6 +7014,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                 ( (entry_ptr->type)->id != H5C__EPOCH_MARKER_TYPE ) &&
                 ( bytes_evicted < eviction_size_limit ) )
         {
+	    hbool_t		corked = FALSE;
             HDassert( ! (entry_ptr->is_protected) );
 
 	    next_ptr = entry_ptr->next;
@@ -7018,7 +7025,11 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                 prev_is_dirty = prev_ptr->is_dirty;
             }
 
-            if ( entry_ptr->is_dirty ) {
+	    /* dirty corked entry is skipped */
+	    if(entry_ptr->is_corked && entry_ptr->is_dirty) {
+		corked = TRUE;
+		result = TRUE;
+            } else if ( entry_ptr->is_dirty ) {
 
                 result = H5C_flush_single_entry(f,
                                                 primary_dxpl_id,
@@ -7058,9 +7069,11 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                                 "*prev_ptr corrupt")
 
-                } else
+                }
 #endif /* NDEBUG */
-		if ( ( prev_ptr->is_dirty != prev_is_dirty )
+		if(corked) { /* dirty corked entry is skipped */
+                    entry_ptr = prev_ptr;
+		} else if ( ( prev_ptr->is_dirty != prev_is_dirty )
                          ||
                          ( prev_ptr->next != next_ptr )
                          ||

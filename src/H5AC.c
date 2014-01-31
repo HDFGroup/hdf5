@@ -944,6 +944,7 @@ H5AC_get_entry_status(const H5F_t *f,
     hbool_t	is_dirty;
     hbool_t	is_protected;
     hbool_t	is_pinned;
+    hbool_t	is_corked;
     hbool_t	is_flush_dep_child;
     hbool_t	is_flush_dep_parent;
     size_t	entry_size;
@@ -956,7 +957,7 @@ H5AC_get_entry_status(const H5F_t *f,
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry.")
 
     if(H5C_get_entry_status(f, addr, &entry_size, &in_cache, &is_dirty,
-            &is_protected, &is_pinned, &is_flush_dep_parent, &is_flush_dep_child) < 0)
+            &is_protected, &is_pinned, &is_corked, &is_flush_dep_parent, &is_flush_dep_child) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_entry_status() failed.")
 
     if(in_cache) {
@@ -967,6 +968,8 @@ H5AC_get_entry_status(const H5F_t *f,
 	    status |= H5AC_ES__IS_PROTECTED;
 	if(is_pinned)
 	    status |= H5AC_ES__IS_PINNED;
+	if(is_corked)
+	    status |= H5AC_ES__IS_CORKED;
 	if(is_flush_dep_parent)
 	    status |= H5AC_ES__IS_FLUSH_DEP_PARENT;
 	if(is_flush_dep_child)
