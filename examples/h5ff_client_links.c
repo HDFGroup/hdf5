@@ -30,6 +30,7 @@ int main(int argc, char **argv) {
     MPI_Request mpi_req;
 
     H5ES_status_t status;
+    uint32_t cs_scope = 0;
     size_t num_events = 0;
     herr_t ret;
 
@@ -56,6 +57,11 @@ int main(int argc, char **argv) {
        the IOD plugin to use with this fapl */
     fapl_id = H5Pcreate (H5P_FILE_ACCESS);
     H5Pset_fapl_iod(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);
+
+    /* set no metadata integrity */
+    cs_scope = 0;
+    ret = H5Pset_metadata_integrity_scope(fapl_id, cs_scope);
+    assert(ret == 0);
 
     /* create an event Queue for managing asynchronous requests.
 

@@ -681,6 +681,7 @@ MERCURY_GEN_PROC(tr_start_in_t,
                  ((hid_t)(trspl_id)))
 MERCURY_GEN_PROC(tr_finish_in_t, 
                  ((axe_t)(axe_info))
+                 ((uint32_t)(cs_scope))
                  ((iod_handle_t)(coh))
                  ((uint64_t)(trans_num))
                  ((hbool_t)(acquire))

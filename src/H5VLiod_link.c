@@ -126,7 +126,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 
         if(H5VL_iod_get_metadata(mdkv_oh.rd_oh, rtid, H5VL_IOD_LINK_COUNT, 
                                  H5VL_IOD_KEY_OBJ_LINK_COUNT,
-                                 NULL, NULL, &link_count) < 0)
+                                 cs_scope, NULL, &link_count) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
         link_count ++;
@@ -252,7 +252,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
 
     /* get the link value */
     if(H5VL_iod_get_metadata(src_oh.rd_oh, rtid, H5VL_IOD_LINK, 
-                             src_last_comp, NULL, NULL, &iod_link) < 0)
+                             src_last_comp, cs_scope, NULL, &iod_link) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
     /* Insert object in the destination path */
@@ -315,7 +315,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
 
         if(H5VL_iod_get_metadata(mdkv_oh.rd_oh, rtid, H5VL_IOD_LINK_COUNT, 
                                  H5VL_IOD_KEY_OBJ_LINK_COUNT,
-                                 NULL, NULL, &link_count) < 0)
+                                 cs_scope, NULL, &link_count) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
         link_count ++;
@@ -433,7 +433,7 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
         H5VL_iod_link_t iod_link;
 
         if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
-                                 last_comp, NULL, NULL, &iod_link) < 0) {
+                                 last_comp, cs_scope, NULL, &iod_link) < 0) {
             ret = FALSE;
         }
         else {
@@ -523,7 +523,7 @@ H5VL_iod_server_link_get_info_cb(AXE_engine_t UNUSED axe_engine,
     
     /* lookup link information in the current location */
     if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
-                             last_comp, NULL, NULL, &iod_link) < 0)
+                             last_comp, cs_scope, NULL, &iod_link) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
     /* setup link info */
@@ -628,7 +628,7 @@ H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine,
     
     /* lookup link information in the current location */
     if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
-                             last_comp, NULL, NULL, &iod_link) < 0)
+                             last_comp, cs_scope, NULL, &iod_link) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
     if(H5L_TYPE_SOFT != iod_link.link_type)
@@ -741,7 +741,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
 
     /* lookup object ID in the current location */
     if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
-                             last_comp, NULL, NULL, &iod_link) < 0)
+                             last_comp, cs_scope, NULL, &iod_link) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
     /* unlink object from conainer */
@@ -789,7 +789,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
 
         if(H5VL_iod_get_metadata(mdkv_oh.rd_oh, rtid, H5VL_IOD_LINK_COUNT, 
                                  H5VL_IOD_KEY_OBJ_LINK_COUNT,
-                                 NULL, NULL, &link_count) < 0)
+                                 cs_scope, NULL, &link_count) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
         link_count --;

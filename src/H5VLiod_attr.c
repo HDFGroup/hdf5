@@ -66,13 +66,14 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
     iod_size_t array_dims[H5S_MAX_RANK], current_dims[H5S_MAX_RANK];
+    iod_hint_list_t *obj_create_hint = NULL;
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start attribute create %s at %"PRIu64" with ID %"PRIx64" %"PRIx64"",
+    fprintf(stderr, "Start attribute create %s at %"PRIu64" with ID %"PRIx64" %"PRIx64"\n",
             attr_name, loc_handle.wr_oh, attr_id, loc_attrkv_id);
 #endif
 
@@ -80,6 +81,13 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     attr_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
     mdkv_oh.cookie = IOD_OH_UNDEFINED;
     attr_kv_oh.cookie = IOD_OH_UNDEFINED;
+
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
+        obj_create_hint->num_hint = 1;
+        obj_create_hint->hint[0].key = "iod_obj_enable_checksum";
+        obj_create_hint->hint[0].value = "iod_obj_enable_checksum";
+    }
 
     if(loc_handle.rd_oh.cookie == IOD_OH_UNDEFINED) {
         /* Try and open the starting location */
@@ -113,7 +121,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     array.chunk_dims = NULL;
 
     /* create the attribute */
-    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_ARRAY, NULL, 
+    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_ARRAY, NULL, 
                       &array, &attr_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create Attribute");
 
@@ -123,7 +131,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open attribute");
 
     /* create the metadata KV object for the attribute */
-    if(iod_obj_create(coh, wtid, NULL, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL) < 0)
+    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
     /* set values for the scratch pad object */
@@ -225,6 +233,11 @@ done:
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(op_data->hg_handle, &output);
+    }
+
+    if(obj_create_hint) {
+        free(obj_create_hint);
+        obj_create_hint = NULL;
     }
 
 #if 0
@@ -333,7 +346,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* get attribute ID */
     if(H5VL_iod_get_metadata(attr_kv_oh, rtid, H5VL_IOD_LINK, 
-                             attr_name, NULL, NULL, &iod_link) < 0)
+                             attr_name, cs_scope, NULL, &iod_link) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Attribute ID from parent KV store");
 
     HDassert(iod_link.link_type == H5L_TYPE_HARD);
@@ -369,12 +382,12 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
                              H5VL_IOD_KEY_OBJ_DATATYPE,
-                             NULL, NULL, &output.type_id) < 0)
+                             cs_scope, NULL, &output.type_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve datatype");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, 
                              H5VL_IOD_KEY_OBJ_DATASPACE,
-                             NULL, NULL, &output.space_id) < 0)
+                             cs_scope, NULL, &output.space_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
     /* close the metadata scratch pad */
@@ -481,7 +494,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, 
                              H5VL_IOD_KEY_OBJ_DATASPACE,
-                             NULL, NULL, &space_id) < 0)
+                             cs_scope, NULL, &space_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
     /* close the metadata scratch pad */
@@ -686,7 +699,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
-                             NULL, NULL, &space_id) < 0)
+                             cs_scope, NULL, &space_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
     /* close the metadata scratch pad */
@@ -974,7 +987,7 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
 
     /* get attribute ID */
     if(H5VL_iod_get_metadata(attr_kv_oh.rd_oh, rtid, H5VL_IOD_LINK, 
-                             old_name, NULL, NULL, &iod_link) < 0)
+                             old_name, cs_scope, NULL, &iod_link) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Attribute ID from parent KV store");
 
     HDassert(iod_link.link_type == H5L_TYPE_HARD);
@@ -1102,7 +1115,7 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
 
     /* get attribute ID */
     if(H5VL_iod_get_metadata(attr_kv_oh.rd_oh, rtid, H5VL_IOD_LINK, 
-                             attr_name, NULL, NULL, &iod_link) < 0)
+                             attr_name, cs_scope, NULL, &iod_link) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Attribute ID from parent KV store");
 
     HDassert(iod_link.link_type == H5L_TYPE_HARD);

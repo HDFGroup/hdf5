@@ -86,7 +86,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     if(H5Pget_ocpl_enable_checksum(tcpl_id, &enable_checksum) < 0)
         HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 
-    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
+   if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
         obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
         obj_create_hint->num_hint = 1;
         obj_create_hint->hint[0].key = "iod_obj_enable_checksum";
@@ -103,7 +103,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Creating Datatype ID %"PRIx64" ", dtype_id);
     fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh, cur_id);
-    if(enable_checksum)
+    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum)
         fprintf(stderr, "with Data integrity ENABLED\n");
     else
         fprintf(stderr, "with Data integrity DISABLED\n");
@@ -220,8 +220,18 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         kv.value_len = sizeof(iod_size_t);
         kv.value = &buf_size;
 
-        if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t cs[2];
+
+            cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+            cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+            if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, cs, NULL) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        }
+        else {
+            if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        }
 
     }
 
@@ -321,8 +331,9 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_blob_iodesc_t *file_desc = NULL; /* file descriptor used to write */
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
-    iod_checksum_t dt_cs = 0, iod_cs = 0;
+    iod_checksum_t dt_cs = 0, blob_cs = 0;
     iod_size_t key_size=0, val_size=0;
+    iod_checksum_t iod_cs[2];
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -355,7 +366,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
-                             NULL, NULL, &output.tcpl_id) < 0)
+                             cs_scope, NULL, &output.tcpl_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve tcpl");
 
     val_size = sizeof(iod_size_t);
@@ -363,8 +374,14 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* retrieve blob size metadata from scratch pad */
     if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, key_size,
-                        &buf_size, &val_size, NULL, NULL) < 0)
+                        &buf_size, &val_size, iod_cs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "datatype size lookup failed");
+
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        if(H5VL_iod_verify_kv_pair(H5VL_IOD_KEY_DTYPE_SIZE, key_size, 
+                                   &buf_size, val_size, iod_cs) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected when reading metadata from IOD");
+    }
 
     if(NULL == (buf = malloc(buf_size)))
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate BLOB read buffer");
@@ -387,19 +404,19 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     file_desc->frag[0].len = (iod_size_t)buf_size;
 
     /* read the serialized type value from the BLOB object */
-    if(iod_blob_read(dtype_oh.rd_oh, rtid, NULL, mem_desc, file_desc, &iod_cs, NULL) < 0)
+    if(iod_blob_read(dtype_oh.rd_oh, rtid, NULL, mem_desc, file_desc, &blob_cs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read from BLOB object");
 
-    if(iod_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+    if(blob_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* calculate a checksum for the datatype */
         dt_cs = H5_checksum_crc64(buf, buf_size);
 
 #if H5VL_IOD_DEBUG 
         fprintf(stderr, "IOD BLOB checksum  = %016lX  Checksum Computed = %016lX\n",
-                iod_cs, dt_cs);
+                blob_cs, dt_cs);
 #endif
         /* Verifty checksum against one given by IOD */
-        if(iod_cs != dt_cs)
+        if(blob_cs != dt_cs)
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
     }
 

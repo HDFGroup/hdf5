@@ -943,27 +943,32 @@ done:
  */
 herr_t 
 H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t md_type,
-                      const char *key, iod_checksum_t *cs, iod_event_t *event, void *ret)
+                      const char *key, uint32_t cs_scope, iod_event_t *event, void *ret)
 {
     iod_size_t key_size = strlen(key);
     iod_size_t val_size = 0;
     void *value = NULL;
+    iod_checksum_t *iod_cs = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        iod_cs = (iod_checksum_t *)malloc(sizeof(iod_checksum_t) * 2);
+    }
 
     switch(md_type) {
     case H5VL_IOD_PLIST:
         {
             hid_t plist_id;
 
-            if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, cs, event) < 0)
+            if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 
-            if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, cs, event) < 0)
+            if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, iod_cs, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
             if((plist_id = H5Pdecode(value)) < 0)
@@ -974,20 +979,25 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         }
     case H5VL_IOD_LINK_COUNT:
         val_size = sizeof(uint64_t);
-        if(iod_kv_get_value(oh, tid, key, key_size, ret, &val_size, cs, event) < 0)
+        if(NULL == (value = malloc((size_t)val_size)))
+            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+
+        if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, iod_cs, event) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "link_count lookup failed");
+
+        memcpy(ret, value, val_size);
         break;
     case H5VL_IOD_DATATYPE:
         {
             hid_t type_id;
 
-            if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, cs, event) < 0)
+            if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 
-            if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, cs, event) < 0)
+            if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, iod_cs, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
             if((type_id = H5Tdecode(value)) < 0)
@@ -1000,13 +1010,13 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         {
             hid_t space_id;
 
-            if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, cs, event) < 0)
+            if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 
-            if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, cs, event) < 0)
+            if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, iod_cs, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
             if((space_id = H5Sdecode(value)) < 0)
@@ -1017,8 +1027,13 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         }
     case H5VL_IOD_OBJECT_TYPE:
         val_size = sizeof(int32_t);
-        if(iod_kv_get_value(oh, tid, key, key_size, ret, &val_size, cs, event) < 0)
+        if(NULL == (value = malloc((size_t)val_size)))
+            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+
+        if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, iod_cs, event) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "link_count lookup failed");
+
+        memcpy(ret, value, val_size);
         break;
     case H5VL_IOD_LINK:
         {
@@ -1026,14 +1041,14 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
             uint8_t *val_ptr;
             iod_ret_t ret; 
 
-            if((ret = iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, cs, event)) < 0) {
+            if((ret = iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event)) < 0) {
                 fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
             }
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 
-            if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, cs, event) < 0)
+            if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, iod_cs, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
             val_ptr = (uint8_t *)value;
@@ -1060,10 +1075,29 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "invalide metadata type");
     }
 
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        iod_checksum_t cs[2];
+
+        cs[0] = H5_checksum_crc64(key, key_size);
+        cs[1] = H5_checksum_crc64(value, val_size);
+
+#if H5VL_IOD_DEBUG 
+        fprintf(stderr, "Key CS iod = %016lX computed = %016lX\n", iod_cs[0], cs[0]);
+        fprintf(stderr, "Value CS iod = %016lX computed = %016lX\n", iod_cs[1], cs[1]);
+#endif
+        if(iod_cs[0] != cs[0] && iod_cs[1] != cs[1])
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected when reading metadata from IOD");
+    }
+
 done:
     if(value) {
         free(value); 
         value = NULL;
+    }
+
+    if(iod_cs) {
+        free(iod_cs);
+        iod_cs = NULL;
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1184,6 +1218,30 @@ H5VL_iod_verify_scratch_pad(scratch_pad *sp, iod_checksum_t iod_cs)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_verify_scratch_pad() */
+
+herr_t
+H5VL_iod_verify_kv_pair(void *key, iod_size_t key_size, void *value, iod_size_t val_size, 
+                        iod_checksum_t *iod_cs)
+{
+    iod_checksum_t cs[2];
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    cs[0] = H5_checksum_crc64(key, key_size);
+    cs[1] = H5_checksum_crc64(value, val_size);
+
+#if H5VL_IOD_DEBUG 
+    fprintf(stderr, "Key CS iod = %016lX computed = %016lX\n", iod_cs[0], cs[0]);
+    fprintf(stderr, "Value CS iod = %016lX computed = %016lX\n", iod_cs[1], cs[1]);
+#endif
+
+    if(iod_cs[0] != cs[0] && iod_cs[1] != cs[1])
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected in IOD KV pair");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL_iod_verify_kv_pair */
 
 #if 0
 herr_t

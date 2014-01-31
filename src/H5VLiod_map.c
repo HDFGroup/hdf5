@@ -105,7 +105,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Creating Map ID %"PRIx64") ", map_id);
     fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh, cur_id);
-    if(enable_checksum)
+    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum)
         fprintf(stderr, "with Data integrity ENABLED\n");
     else
         fprintf(stderr, "with Data integrity DISABLED\n");
@@ -313,17 +313,17 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, 
-                             H5VL_IOD_KEY_OBJ_CPL, NULL, NULL, &output.mcpl_id) < 0)
+                             H5VL_IOD_KEY_OBJ_CPL, cs_scope, NULL, &output.mcpl_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve gcpl");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
                              H5VL_IOD_KEY_MAP_KEY_TYPE,
-                             NULL, NULL, &output.keytype_id) < 0)
+                             cs_scope, NULL, &output.keytype_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
                              H5VL_IOD_KEY_MAP_VALUE_TYPE,
-                             NULL, NULL, &output.valtype_id) < 0)
+                             cs_scope, NULL, &output.valtype_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
     /* close the metadata scratch pad */
@@ -478,15 +478,15 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
     /* fake debugging */
     if(val_is_vl_data) {
-        H5T_class_t class;
+        H5T_class_t dt_class;
         size_t seq_len = val_size, u;
         uint8_t *buf_ptr = (uint8_t *)val_buf;
 
-        class = H5Tget_class(val_memtype_id);
+        dt_class = H5Tget_class(val_memtype_id);
 
-        if(H5T_STRING == class)
+        if(H5T_STRING == dt_class)
             fprintf(stderr, "String Length %zu: %s\n", seq_len, (char *)buf_ptr);
-        else if(H5T_VLEN == class) {
+        else if(H5T_VLEN == dt_class) {
             int *ptr = (int *)buf_ptr;
 
             fprintf(stderr, "Sequence Count %zu: ", seq_len);
@@ -518,8 +518,18 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     kv.value_len = (iod_size_t)new_val_size;
 
     /* insert kv pair into MAP */
-    if (iod_kv_set(iod_oh, wtid, NULL, &kv, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    if(raw_cs_scope & H5_CHECKSUM_IOD) {
+        iod_checksum_t cs[2];
+
+        cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+        cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+        if (iod_kv_set(iod_oh, wtid, NULL, &kv, cs, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in Map");
+    }
+    else {
+        if (iod_kv_set(iod_oh, wtid, NULL, &kv, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in Map");
+    }
 
 done:
 
@@ -591,6 +601,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
     hg_bulk_request_t bulk_request; /* HG request */
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
     hbool_t opened_locally = FALSE;
+    iod_checksum_t kv_cs[2];
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -633,12 +644,20 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
 
             if(iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, val_buf, 
-                                &src_size, NULL, NULL) < 0)
+                                &src_size, kv_cs, NULL) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
 
             if(raw_cs_scope) {
-                /* calculate a checksum for the data to be sent */
-                output.val_cs = H5_checksum_crc64(val_buf, (size_t)src_size);
+                iod_checksum_t cs[2];
+
+                cs[0] = H5_checksum_crc64(key.buf, key.buf_size);
+                cs[1] = H5_checksum_crc64(val_buf, src_size);
+
+                if(kv_cs[0] != cs[0] && kv_cs[1] != cs[1])
+                    HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected in IOD KV pair");
+
+                /* set checksum for the data to be sent */
+                output.val_cs = kv_cs[1];
             }
 #if H5VL_IOD_DEBUG
             else {
@@ -669,8 +688,21 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
 
         if(iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, val_buf, 
-                            &src_size, NULL, NULL) < 0)
+                            &src_size, kv_cs, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
+
+        if(raw_cs_scope) {
+            iod_checksum_t cs[2];
+
+            cs[0] = H5_checksum_crc64(key.buf, key.buf_size);
+            cs[1] = H5_checksum_crc64(val_buf, src_size);
+
+            if(kv_cs[0] != cs[0] && kv_cs[1] != cs[1])
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected in IOD KV pair");
+
+            /* set checksum for the data to be sent */
+            output.val_cs = kv_cs[1];
+        }
 
         /* adjust buffers for datatype conversion */
         if(H5VL__iod_server_adjust_buffer(val_memtype_id, val_maptype_id, 1, dxpl_id, 

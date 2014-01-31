@@ -190,21 +190,54 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 
         kv.key = (void *)H5VL_IOD_KEY_KV_IDS_INDEX;
         kv.key_len = strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
-        ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL);
-        if(ret < 0)
-            HGOTO_ERROR_IOD(ret, FAIL, "can't set KV pair in parent");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t cs[2];
+
+            cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+            cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+            ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, cs, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_IOD(ret, FAIL, "can't set KV pair in parent");
+        }
+        else {
+            ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_IOD(ret, FAIL, "can't set KV pair in parent");
+        }
 
         kv.key = (void *)H5VL_IOD_KEY_ARRAY_IDS_INDEX;
         kv.key_len = strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
-        ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL);
-        if(ret < 0)
-            HGOTO_ERROR_IOD(ret, FAIL, "can't set KV pair in parent");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t cs[2];
+
+            cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+            cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+            ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, cs, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_IOD(ret, FAIL, "can't set KV pair in parent");
+        }
+        else {
+            ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_IOD(ret, FAIL, "can't set KV pair in parent");
+        }
 
         kv.key = (void *)H5VL_IOD_KEY_BLOB_IDS_INDEX;
         kv.key_len = strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
-        ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL);
-        if(ret < 0)
-            HGOTO_ERROR_IOD(ret, FAIL, "can't set KV pair in parent");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t cs[2];
+
+            cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+            cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+            ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, cs, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_IOD(ret, FAIL, "can't set KV pair in parent");
+        }
+        else {
+            ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_IOD(ret, FAIL, "can't set KV pair in parent");
+        }
 
         ret = iod_obj_close(mdkv_oh, NULL, NULL);
         if(ret < 0)
@@ -341,7 +374,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* retrieve all metadata from scratch pad */
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
-                             NULL, NULL, &output.fcpl_id) < 0)
+                             cs_scope, NULL, &output.fcpl_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve fcpl");
 
     /* open the OID indexes KV object */
@@ -406,20 +439,46 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     /* This was a clean shutdown, so the maximum is already computed
        and stored in the metadata KV */
     else {
+        iod_checksum_t *iod_cs = NULL;
+
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_cs = (iod_checksum_t *)malloc(sizeof(iod_checksum_t) * 2);
+        }
+
         key_size = strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
         if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_KV_IDS_INDEX, key_size,
-                            &output.kv_oid_index, &val_size, NULL, NULL) < 0)
+                            &output.kv_oid_index, &val_size, iod_cs, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "KV index lookup failed");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            if(H5VL_iod_verify_kv_pair(H5VL_IOD_KEY_KV_IDS_INDEX, key_size, 
+                                       &output.kv_oid_index, val_size, iod_cs) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected when reading metadata from IOD");
+        }
 
         key_size = strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
         if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_ARRAY_IDS_INDEX, key_size,
-                            &output.array_oid_index, &val_size, NULL, NULL) < 0)
+                            &output.array_oid_index, &val_size, iod_cs, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Array index lookup failed");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            if(H5VL_iod_verify_kv_pair(H5VL_IOD_KEY_ARRAY_IDS_INDEX, key_size, 
+                                       &output.array_oid_index, val_size, iod_cs) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected when reading metadata from IOD");
+        }
 
         key_size = strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
         if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_BLOB_IDS_INDEX, key_size,
-                            &output.blob_oid_index, &val_size, NULL, NULL) < 0)
+                            &output.blob_oid_index, &val_size, iod_cs, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "BLOB index lookup failed");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            if(H5VL_iod_verify_kv_pair(H5VL_IOD_KEY_BLOB_IDS_INDEX, key_size, 
+                                       &output.blob_oid_index, val_size, iod_cs) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected when reading metadata from IOD");
+        }
+
+        if(iod_cs) {
+            free(iod_cs);
+            iod_cs = NULL;
+        }
     }
 
     /* close the oid KV */
@@ -561,22 +620,56 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         kv.value_len = sizeof(iod_obj_id_t);
         kv.key = (void *)H5VL_IOD_KEY_KV_IDS_INDEX;
         kv.key_len = strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
-        if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t cs[2];
+
+            cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+            cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+
+            if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, cs, NULL) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        }
+        else {
+            if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        }
+
 
         kv.value = &input->max_array_index;
         kv.value_len = sizeof(iod_obj_id_t);
         kv.key = (void *)H5VL_IOD_KEY_ARRAY_IDS_INDEX;
         kv.key_len = strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
-        if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t cs[2];
+
+            cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+            cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+
+            if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, cs, NULL) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        }
+        else {
+            if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        }
 
         kv.value = &input->max_blob_index;
         kv.value_len = sizeof(iod_obj_id_t);
         kv.key = (void *)H5VL_IOD_KEY_BLOB_IDS_INDEX;
         kv.key_len = strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
-        if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t cs[2];
+
+            cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+            cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+
+            if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, cs, NULL) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        }
+        else {
+            if (iod_kv_set(mdkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        }
 
         if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");

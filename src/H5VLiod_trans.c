@@ -397,6 +397,7 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     tr_finish_in_t *input = (tr_finish_in_t *)op_data->input;
     iod_handle_t coh = input->coh; /* the container handle */
+    uint32_t cs_scope = input->cs_scope;
     hid_t trfpl_id;
     iod_trans_id_t trans_num = input->trans_num;
     hbool_t acquire = input->acquire;
@@ -433,8 +434,18 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
     kv.key = &client_rank;
     kv.key_len = sizeof(uint32_t);
 
-    if (iod_kv_set(oidkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in oid KV");
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        iod_checksum_t cs[2];
+
+        cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+        cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+        if (iod_kv_set(oidkv_oh, trans_num, NULL, &kv, cs, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    }
+    else {
+        if (iod_kv_set(oidkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in oid KV");
+    }
 
     if(iod_obj_close(oidkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object handle");

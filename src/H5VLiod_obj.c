@@ -153,43 +153,43 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, H5VL_IOD_KEY_OBJ_TYPE,
-                             NULL, NULL, &output.obj_type) < 0)
+                             cs_scope, NULL, &output.obj_type) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
     switch(output.obj_type) {
     case H5I_MAP:
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
-                                 NULL, NULL, &output.cpl_id) < 0)
+                                 cs_scope, NULL, &output.cpl_id) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve mcpl");
 
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
                                  H5VL_IOD_KEY_MAP_KEY_TYPE,
-                                 NULL, NULL, &output.id1) < 0)
+                                 cs_scope, NULL, &output.id1) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
                                  H5VL_IOD_KEY_MAP_VALUE_TYPE,
-                                 NULL, NULL, &output.id2) < 0)
+                                 cs_scope, NULL, &output.id2) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
         break;
     case H5I_GROUP:
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
-                                 NULL, NULL, &output.cpl_id) < 0)
+                                 cs_scope, NULL, &output.cpl_id) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
         output.id1 = FAIL;
         output.id2 = FAIL;
         break;
     case H5I_DATASET:
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
-                                 NULL, NULL, &output.cpl_id) < 0)
+                                 cs_scope, NULL, &output.cpl_id) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
 
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, H5VL_IOD_KEY_OBJ_DATATYPE,
-                                 NULL, NULL, &output.id1) < 0)
+                                 cs_scope, NULL, &output.id1) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve datatype");
 
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
-                                 NULL, NULL, &output.id2) < 0)
+                                 cs_scope, NULL, &output.id2) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
         break;
     case H5I_DATATYPE:
@@ -198,16 +198,23 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
             void *buf = NULL;
             iod_mem_desc_t *mem_desc = NULL; /* memory descriptor used for reading */
             iod_blob_iodesc_t *file_desc = NULL; /* file descriptor used to write */
-            iod_checksum_t dt_cs = 0, iod_cs = 0;
+            iod_checksum_t dt_cs = 0, blob_cs = 0;
             iod_size_t key_size, val_size;
+            iod_checksum_t iod_cs[2];
 
             key_size = strlen(H5VL_IOD_KEY_DTYPE_SIZE);
             val_size = sizeof(iod_size_t);
 
             /* retrieve blob size metadata from scratch pad */
             if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, key_size,
-                                &buf_size, &val_size, NULL, NULL) < 0)
+                                &buf_size, &val_size, iod_cs, NULL) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "datatype size lookup failed");
+
+            if(cs_scope & H5_CHECKSUM_IOD) {
+                if(H5VL_iod_verify_kv_pair(H5VL_IOD_KEY_DTYPE_SIZE, key_size, 
+                                           &buf_size, val_size, iod_cs) < 0)
+                    HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected when reading metadata from IOD");
+            }
 
             if(NULL == (buf = malloc(buf_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate BLOB read buffer");
@@ -228,15 +235,17 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
 
             /* read the serialized type value from the BLOB object */
             if(iod_blob_read(obj_oh.rd_oh, rtid, NULL, mem_desc, file_desc, 
-                             NULL /* MSC - IOD fix - &iod_cs*/, NULL) < 0)
+                             &blob_cs, NULL) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
 
-            /* calculate a checksum for the datatype */
-            dt_cs = H5_checksum_crc64(buf, buf_size);
+            if(blob_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+                /* calculate a checksum for the datatype */
+                dt_cs = H5_checksum_crc64(buf, buf_size);
 
-            /* MSC - Verify checksum against one given by IOD */
-            //if(iod_cs != dt_cs)
-            //HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
+                /* Verify checksum against one given by IOD */
+                if(blob_cs != dt_cs)
+                    HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
+            }
 
             /* decode the datatype */
             if((output.id1 = H5Tdecode(buf)) < 0)
@@ -361,31 +370,31 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, H5VL_IOD_KEY_OBJ_TYPE,
-                             NULL, NULL, &obj_type) < 0)
+                             cs_scope, NULL, &obj_type) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
     switch(obj_type) {
     case H5I_MAP:
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
-                                 NULL, NULL, &output.cpl_id) < 0)
+                                 cs_scope, NULL, &output.cpl_id) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve mcpl");
         break;
     case H5I_GROUP:
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
-                                 NULL, NULL, &output.cpl_id) < 0)
+                                 cs_scope, NULL, &output.cpl_id) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve gcpl");
         break;
     case H5I_DATASET:
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
-                                 NULL, NULL, &output.cpl_id) < 0)
+                                 cs_scope, NULL, &output.cpl_id) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
 
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, H5VL_IOD_KEY_OBJ_DATATYPE,
-                                 NULL, NULL, &output.type_id) < 0)
+                                 cs_scope, NULL, &output.type_id) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve datatype");
 
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
-                                 NULL, NULL, &output.space_id) < 0)
+                                 cs_scope, NULL, &output.space_id) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
         break;
     case H5I_DATATYPE:
@@ -394,12 +403,19 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
             void *buf = NULL;
             iod_mem_desc_t mem_desc; /* memory descriptor used for reading */
             iod_blob_iodesc_t file_desc; /* file descriptor used to write */
-            iod_checksum_t dt_cs = 0, iod_cs = 0;
+            iod_checksum_t dt_cs = 0, blob_cs = 0;
+            iod_checksum_t iod_cs[2];
 
             /* retrieve blob size metadata from scratch pad */
-            if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, &buf_size, 
-                                sizeof(iod_size_t), NULL, NULL) < 0)
+            if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, key_size,
+                                &buf_size, &val_size, iod_cs, NULL) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "datatype size lookup failed");
+
+            if(cs_scope & H5_CHECKSUM_IOD) {
+                if(H5VL_iod_verify_kv_pair(H5VL_IOD_KEY_DTYPE_SIZE, key_size, 
+                                           &buf_size, val_size, iod_cs) < 0)
+                    HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected when reading metadata from IOD");
+            }
 
             if(NULL == (buf = malloc(buf_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate BLOB read buffer");
@@ -415,16 +431,18 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
             file_desc.frag->len = (iod_size_t)buf_size;
 
             /* read the serialized type value from the BLOB object */
-            if(iod_blob_read(obj_oh, rtid, NULL, &mem_desc, &file_desc, NULL /* MSC - IOD fix - &iod_cs*/, NULL) < 0)
+            if(iod_blob_read(obj_oh, rtid, NULL, &mem_desc, &file_desc, NULL,
+                             &blob_cs, NULL) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
 
-            /* MSC - NEED IOD */
-            /* calculate a checksum for the datatype */
-            dt_cs = H5_checksum_crc64(buf, buf_size);
+            if(blob_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+                /* calculate a checksum for the datatype */
+                dt_cs = H5_checksum_crc64(buf, buf_size);
 
-            /* Verifty checksum against one given by IOD */
-            if(iod_cs != dt_cs)
-                HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
+                /* Verify checksum against one given by IOD */
+                if(blob_cs != dt_cs)
+                    HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data Corruption detected when reading datatype");
+            }
 
             /* decode the datatype */
             if((output.type_id = H5Tdecode(buf)) < 0)
@@ -626,7 +644,7 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, 
                              H5VL_IOD_KEY_OBJ_TYPE,
-                             NULL, NULL, &obj_type) < 0)
+                             cs_scope, NULL, &obj_type) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve object type");
 
     switch(obj_type) {
@@ -649,7 +667,7 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
                              H5VL_IOD_KEY_OBJ_LINK_COUNT,
-                             NULL, NULL, &link_count) < 0)
+                             cs_scope, NULL, &link_count) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
     oinfo.rc = (unsigned) link_count;
@@ -769,8 +787,18 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
         kv.value_len = strlen(comment) + 1;
         kv.value = comment;
 
-        if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set comment in MDKV");
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t cs[2];
+
+            cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+            cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+            if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, cs, NULL) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        }
+        else {
+            if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set comment in MDKV");
+        }
 
     }
 
@@ -834,6 +862,7 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     iod_checksum_t sp_cs = 0;
     iod_size_t key_size, val_size = 0;
     void *value = NULL;
+    iod_checksum_t *iod_cs = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -875,6 +904,10 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
 
     key_size = strlen(H5VL_IOD_KEY_OBJ_COMMENT);
 
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        iod_cs = (iod_checksum_t *)malloc(sizeof(iod_checksum_t) * 2);
+    }
+
     if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_OBJ_COMMENT, key_size,
                         NULL, &val_size, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "comment size lookup failed");
@@ -883,8 +916,14 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 
     if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_OBJ_COMMENT, key_size,
-                        value, &val_size, NULL, NULL) < 0)
+                        value, &val_size, iod_cs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "comment value lookup failed");
+
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        if(H5VL_iod_verify_kv_pair(H5VL_IOD_KEY_OBJ_COMMENT, key_size, 
+                                   value, val_size, iod_cs) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected when reading metadata from IOD");
+    }
 
     if(length) {
         if(NULL == (comment.value = (char *)malloc (length)))
@@ -914,9 +953,20 @@ done:
 
     HG_Handler_start_output(op_data->hg_handle, &output);
 
-    if(comment.value)
+    if(comment.value) {
         free(comment.value);
-    free(comment.value_size);
+        comment.value = NULL;
+    }
+
+    if(comment.value_size) {
+        free(comment.value_size);
+        comment.value_size = NULL;
+    }
+
+    if(iod_cs) {
+        free(iod_cs);
+        iod_cs = NULL;
+    }
 
     input = (object_get_comment_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);

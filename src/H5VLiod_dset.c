@@ -168,7 +168,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Creating Dataset ID %"PRIx64" ",dset_id);
     fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh, cur_id);
-    if(enable_checksum)
+    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum)
         fprintf(stderr, "with Data integrity ENABLED\n");
     else
         fprintf(stderr, "with Data integrity DISABLED\n");
@@ -425,15 +425,15 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
-                             NULL, NULL, &output.dcpl_id) < 0)
+                             cs_scope, NULL, &output.dcpl_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, H5VL_IOD_KEY_OBJ_DATATYPE,
-                             NULL, NULL, &output.type_id) < 0)
+                             cs_scope, NULL, &output.type_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve datatype");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
-                             NULL, NULL, &output.space_id) < 0)
+                             cs_scope, NULL, &output.space_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
     /* close the metadata scratch pad */
@@ -1162,7 +1162,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
 
         /* get the stored dataset dataspace */
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
-                                 NULL, NULL, &space_id) < 0)
+                                 cs_scope, NULL, &space_id) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
         if(rank = H5Sget_simple_extent_dims(space_id, current_dims, array_dims) < 0)

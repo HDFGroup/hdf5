@@ -8495,6 +8495,7 @@ H5VL_iod_tr_finish(H5TR_t *tr, hbool_t acquire, hid_t trfpl_id, void **req)
 
     /* set the input structure for the HG encode routine */
     input.coh = tr->file->remote_file.coh;
+    input.cs_scope = tr->file->md_integrity_scope;
     input.trans_num = tr->trans_num;
     input.trfpl_id = trfpl_id;
     input.acquire = acquire;

@@ -37,6 +37,7 @@ int main(int argc, char **argv) {
     int provided;
     MPI_Request mpi_req;
 
+    uint32_t cs_scope = 0;
     size_t num_events = 0;
     H5ES_status_t status;
     unsigned int i = 0;
@@ -58,6 +59,11 @@ int main(int argc, char **argv) {
     /* Choose the IOD VOL plugin to use with this file. */
     fapl_id = H5Pcreate (H5P_FILE_ACCESS);
     H5Pset_fapl_iod(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);
+
+    /* set the metada data integrity checks to happend at transfer through mercury */
+    cs_scope |= H5_CHECKSUM_TRANSFER;
+    ret = H5Pset_metadata_integrity_scope(fapl_id, cs_scope);
+    assert(ret == 0);
 
     /* allocate and initialize arrays for dataset I/O */
     wdata1 = malloc (sizeof(int32_t)*nelem);
