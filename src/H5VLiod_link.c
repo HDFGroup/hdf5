@@ -68,7 +68,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
        to be created from. The traversal will fail if an intermediate group
        does not exist. */
     if(H5VL_iod_server_traverse(coh, input->loc_id, input->loc_oh, input->loc_name, 
-                                wtid, rtid, FALSE, &src_last_comp, &src_id, &src_oh) < 0)
+                                wtid, rtid, FALSE, cs_scope, &src_last_comp, &src_id, &src_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
 #if H5VL_IOD_DEBUG
@@ -91,7 +91,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
         }
         /* Traverse Path and open the target object */
         if(H5VL_iod_server_open_path(coh, input->target_loc_id, input->target_loc_oh, 
-                                     input->target_name, rtid, &target_id, &target_oh) < 0)
+                                     input->target_name, rtid, cs_scope, &target_id, &target_oh) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
         /* add link in parent group to current object */
@@ -230,15 +230,15 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start link move SRC %s DST %s (%"PRIu64", %"PRIu64") to (%"PRIu64", %"PRIu64")\n",
             input->src_loc_name, input->dst_loc_name, 
-            input->src_loc_oh.wr_oh, input->src_loc_oh.rd_oh,
-            input->dst_loc_oh.wr_oh, input->dst_loc_oh.rd_oh);
+            input->src_loc_oh.wr_oh.cookie, input->src_loc_oh.rd_oh.cookie,
+            input->dst_loc_oh.wr_oh.cookie, input->dst_loc_oh.rd_oh.cookie);
 #endif
 
     /* the traversal will retrieve the location where the link needs
        to be moved/copied from. The traversal will fail if an intermediate group
        does not exist. */
     if(H5VL_iod_server_traverse(coh, input->src_loc_id, input->src_loc_oh, 
-                                input->src_loc_name, wtid, rtid, FALSE, 
+                                input->src_loc_name, wtid, rtid, FALSE, cs_scope, 
                                 &src_last_comp, &src_id, &src_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
@@ -246,7 +246,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
        to be moved/copied to. The traversal will fail if an intermediate group
        does not exist. */
     if(H5VL_iod_server_traverse(coh, input->dst_loc_id, input->dst_loc_oh, 
-                                input->dst_loc_name, wtid, rtid, FALSE, 
+                                input->dst_loc_name, wtid, rtid, FALSE, cs_scope, 
                                 &dst_last_comp, &dst_id, &dst_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
@@ -419,7 +419,7 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the link needs
        to be checked */
     if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, rtid, rtid, FALSE, 
-                                &last_comp, &cur_id, &cur_oh) < 0) {
+                                cs_scope, &last_comp, &cur_id, &cur_oh) < 0) {
         ret = FALSE;
         HGOTO_DONE(SUCCEED);
     }
@@ -514,7 +514,7 @@ H5VL_iod_server_link_get_info_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the link needs
        to be checked */
     if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, rtid, rtid, FALSE, 
-                                &last_comp, &cur_id, &cur_oh) < 0)
+                                cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
 #if H5VL_IOD_DEBUG
@@ -619,7 +619,7 @@ H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the link needs
        to be checked */
     if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, rtid, rtid, FALSE, 
-                                &last_comp, &cur_id, &cur_oh) < 0)
+                                cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
 #if H5VL_IOD_DEBUG
@@ -729,14 +729,14 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start link Remove %s at (%"PRIu64", %"PRIu64")\n",
-            loc_name, loc_oh.wr_oh, loc_oh.rd_oh);
+            loc_name, loc_oh.wr_oh.cookie, loc_oh.rd_oh.cookie);
 #endif
 
     /* the traversal will retrieve the location where the link needs
        to be removed. The traversal will fail if an intermediate group
        does not exist. */
     if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, wtid, rtid, 
-                                FALSE, &last_comp, &cur_id, &cur_oh) < 0)
+                                FALSE, cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* lookup object ID in the current location */

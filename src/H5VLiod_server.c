@@ -222,7 +222,7 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
     network_class = NA_MPI_Init(NULL, MPI_INIT_SERVER);
 
     /* Allocate table addrs */
-    na_addr_table = (char**) malloc(num_ions_g * sizeof(char*));
+    na_addr_table = (char**) malloc((size_t)num_ions_g * sizeof(char*));
     for (i = 0; i < num_ions_g; i++) {
         na_addr_table[i] = (char*) malloc(MPI_MAX_PORT_NAME);
     }
@@ -255,14 +255,12 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
         return FAIL;
     if(HG_SUCCESS != HG_Handler_init(network_class))
         return FAIL;
-    if(HG_SUCCESS != HG_Bulk_init(network_class))
-        return FAIL;
 
     /* Look up addr id */
     /* We do the lookup here but this may not be optimal */
-    server_addr_g = (na_addr_t *) malloc(num_ions_g * sizeof(na_addr_t));
+    server_addr_g = (na_addr_t *) malloc((size_t)num_ions_g * sizeof(na_addr_t));
     for (i = 0; i < num_ions_g; i++) {
-        if(NA_SUCCESS != NA_Addr_lookup(network_class, na_addr_table[i], &server_addr_g[i])) {
+        if(NA_SUCCESS != NA_Addr_lookup_wait(network_class, na_addr_table[i], &server_addr_g[i])) {
             fprintf(stderr, "Could not find addr\n");
             return FAIL;
         }
@@ -341,8 +339,6 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
     }
     free(server_addr_g);
 
-    if(HG_SUCCESS != HG_Bulk_finalize())
-        return FAIL;
     if(HG_SUCCESS != HG_Handler_finalize())
         return FAIL;
     if(HG_SUCCESS != HG_Finalize())
@@ -2129,12 +2125,12 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5VL_iod_server_link_iterate(hg_handle_t handle)
+H5VL_iod_server_link_iterate(hg_handle_t UNUSED handle)
 {
-    op_data_t *op_data = NULL;
+    //op_data_t *op_data = NULL;
     int ret_value = HG_SUCCESS;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #if 0
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
@@ -2159,7 +2155,7 @@ H5VL_iod_server_link_iterate(hg_handle_t handle)
     op_data->input = (void *)input;
 #endif
 
-done:
+    //done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_link_iterate() */
 
@@ -2557,14 +2553,14 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5VL_iod_server_object_visit(hg_handle_t handle)
+H5VL_iod_server_object_visit(hg_handle_t UNUSED handle)
 {
-    op_data_t *op_data = NULL;
+    //op_data_t *op_data = NULL;
     int ret_value = HG_SUCCESS;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-done:
+        //done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_object_visit() */
 

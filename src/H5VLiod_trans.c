@@ -398,7 +398,7 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
     tr_finish_in_t *input = (tr_finish_in_t *)op_data->input;
     iod_handle_t coh = input->coh; /* the container handle */
     uint32_t cs_scope = input->cs_scope;
-    hid_t trfpl_id;
+    //hid_t trfpl_id;
     iod_trans_id_t trans_num = input->trans_num;
     hbool_t acquire = input->acquire;
     uint32_t client_rank = input->client_rank;

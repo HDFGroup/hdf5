@@ -147,7 +147,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start dataset create %s at %"PRIu64"\n", name, loc_handle.wr_oh);
+    fprintf(stderr, "Start dataset create %s at %"PRIu64"\n", name, loc_handle.wr_oh.cookie);
 #endif
 
     if(H5P_DEFAULT == input->dcpl_id)
@@ -162,12 +162,12 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
        to be created. The traversal will fail if an intermediate group
        does not exist. */
     if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
-                                &last_comp, &cur_id, &cur_oh) < 0)
+                                cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Creating Dataset ID %"PRIx64" ",dset_id);
-    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh, cur_id);
+    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh.cookie, cur_id);
     if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum)
         fprintf(stderr, "with Data integrity ENABLED\n");
     else
@@ -403,7 +403,8 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* Traverse Path and open dset */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, &dset_id, &dset_oh) < 0)
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, 
+                                 cs_scope, &dset_id, &dset_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* open a write handle on the ID. */
@@ -503,7 +504,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     hid_t dst_id = input->mem_type_id; /* the memory type of the elements */
     iod_trans_id_t rtid = input->rcxt_num;
     //uint32_t cs_scope = input->cs_scope;
-    hg_bulk_block_t bulk_block_handle; /* HG block handle */
+    hg_bulk_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     size_t size, buf_size = 0;
     void *buf = NULL; /* buffer to hold outgoing data */
@@ -525,7 +526,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     }
 
 #if H5VL_IOD_DEBUG 
-    fprintf(stderr, "Start dataset Read on OH %"PRIu64" OID %"PRIx64"\n", iod_oh.rd_oh, iod_id);
+    fprintf(stderr, "Start dataset Read on OH %"PRIu64" OID %"PRIx64"\n", iod_oh.rd_oh.cookie, iod_id);
 #endif
 
     if(H5P_DEFAULT == input->dxpl_id)
@@ -601,7 +602,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     }
 
     /* Create a new block handle to write the data */
-    HG_Bulk_block_handle_create(buf, size, HG_BULK_READ_ONLY, &bulk_block_handle);
+    HG_Bulk_handle_create(buf, size, HG_BULK_READ_ONLY, &bulk_block_handle);
 
     /* Write bulk data here and wait for the data to be there  */
     if(HG_SUCCESS != HG_Bulk_write_all(dest, bulk_handle, bulk_block_handle, &bulk_request))
@@ -611,7 +612,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
     /* free block handle */
-    if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+    if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
         HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't free bds block handle");
 done:
 
@@ -674,7 +675,7 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
-    hg_bulk_block_t bulk_block_handle; /* HG block handle */
+    hg_bulk_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     size_t buf_size, elmt_size;
     void *buf = NULL; /* buffer to hold blob IDs and sizes */
@@ -756,7 +757,7 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
         H5VL_iod_type_info_reset(&type_info);
 
         /* Create a new block handle to write the data */
-        HG_Bulk_block_handle_create(temp_buf, buf_size, HG_BULK_READ_ONLY, &bulk_block_handle);
+        HG_Bulk_handle_create(temp_buf, buf_size, HG_BULK_READ_ONLY, &bulk_block_handle);
 
         /* Write bulk data here and wait for the data to be there  */
         if(HG_SUCCESS != HG_Bulk_write_all(dest, bulk_handle, bulk_block_handle, &bulk_request))
@@ -767,7 +768,7 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
         /* free block handle */
-        if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+        if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't free bds block handle");
 
         if(temp_buf) {
@@ -836,7 +837,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t rtid = input->rcxt_num;
     //uint32_t cs_scope = input->cs_scope;
     hid_t dxpl_id;
-    hg_bulk_block_t bulk_block_handle; /* HG block handle */
+    hg_bulk_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     size_t size, buf_size;
     hbool_t is_vl_data;
@@ -860,7 +861,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     }
 
 #if H5VL_IOD_DEBUG 
-    fprintf(stderr, "Start dataset Write on OH %"PRIu64" OID %"PRIx64"\n", iod_oh.wr_oh, iod_id);
+    fprintf(stderr, "Start dataset Write on OH %"PRIu64" OID %"PRIx64"\n", iod_oh.wr_oh.cookie, iod_id);
 #endif
 
     if(H5P_DEFAULT == input->dxpl_id)
@@ -880,7 +881,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
         size_t vl_lengths_size = 0;
         void **free_list = NULL;
         size_t free_list_len = 0;
-        hg_bulk_block_t vl_len_handle;
+        hg_bulk_t vl_len_handle;
 
         /* Get size of vl_lengths array and allocate local buffer */
         vl_lengths_size = HG_Bulk_handle_get_size(vl_len_bulk_handle);
@@ -890,7 +891,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate vlen lengths buffer");
 
         /* Register local memory buffer */
-        if(HG_SUCCESS != HG_Bulk_block_handle_create(vl_lengths, vl_lengths_size, 
+        if(HG_SUCCESS != HG_Bulk_handle_create(vl_lengths, vl_lengths_size, 
                                                      HG_BULK_READWRITE, &vl_len_handle))
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "create vlen bulk handle");
 
@@ -904,7 +905,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait for vlen lengths bulk data operation");
 
         /* Free the bulk handle */
-        if(HG_SUCCESS != HG_Bulk_block_handle_free(vl_len_handle))
+        if(HG_SUCCESS != HG_Bulk_handle_free(vl_len_handle))
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't free vlen bulk handle");
 
         if(NULL == (buf = malloc(nelmts * type_info.size)))
@@ -1001,7 +1002,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
 
         /* create a Mercury block handle for transfer */
-        HG_Bulk_block_handle_create(buf, size, HG_BULK_READWRITE, &bulk_block_handle);
+        HG_Bulk_handle_create(buf, size, HG_BULK_READWRITE, &bulk_block_handle);
 
         /* Write bulk data here and wait for the data to be there  */
         if(HG_SUCCESS != HG_Bulk_read_all(source, bulk_handle, bulk_block_handle, &bulk_request))
@@ -1011,7 +1012,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
 
         /* free the bds block handle */
-        if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+        if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
             HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
         /* MSC - check if client requested to corrupt data */
@@ -1165,7 +1166,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
                                  cs_scope, NULL, &space_id) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
-        if(rank = H5Sget_simple_extent_dims(space_id, current_dims, array_dims) < 0)
+        if((rank = H5Sget_simple_extent_dims(space_id, current_dims, array_dims)) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get dimentions' sizes");
 
         /* Modify the size of the data space */
@@ -1231,7 +1232,7 @@ H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start dataset Close %"PRIu64" %"PRIu64"\n",
-            iod_oh.rd_oh, iod_oh.wr_oh);
+            iod_oh.rd_oh.cookie, iod_oh.wr_oh.cookie);
 #endif
 
     if(iod_obj_close(iod_oh.rd_oh, NULL, NULL) < 0)
@@ -1320,10 +1321,10 @@ H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
             HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate iod array descriptors");
 
         for(n=0 ; n<num_descriptors ; n++) {
-            hslabs[n].start = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-            hslabs[n].stride = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-            hslabs[n].block = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-            hslabs[n].count = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+            hslabs[n].start = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
+            hslabs[n].stride = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
+            hslabs[n].block = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
+            hslabs[n].count = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
         }
 
         /* generate the descriptors after allocating the array */
@@ -1348,8 +1349,8 @@ H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
 
     /* set the memory descriptor */
     mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + 
-                                        (int)num_descriptors * sizeof(iod_mem_frag_t));
-    mem_desc->nfrag = (int)num_descriptors;
+                                        (size_t)num_descriptors * sizeof(iod_mem_frag_t));
+    mem_desc->nfrag = (long unsigned)num_descriptors;
     for(n=0 ; n<num_descriptors ; n++) {
         hsize_t num_bytes = 0;
         hsize_t num_elems = 1;
@@ -1608,7 +1609,7 @@ H5VL__iod_server_vl_data_write(iod_handle_t coh, iod_obj_id_t iod_id, iod_handle
 {
     char bogus;                 /* bogus value to pass to H5Diterate() */
     H5VL_iod_server_vl_write_t udata;
-    hg_bulk_block_t vl_data_handle;
+    hg_bulk_t vl_data_handle;
     hg_bulk_request_t bulk_request;
     size_t buf_size = 0, u;
     void *buf = NULL;
@@ -1628,7 +1629,7 @@ H5VL__iod_server_vl_data_write(iod_handle_t coh, iod_obj_id_t iod_id, iod_handle
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate data buffer");
 
     /* Register local memory buffer */
-    if(HG_SUCCESS != HG_Bulk_block_handle_create(buf, buf_size, HG_BULK_READWRITE, &vl_data_handle))
+    if(HG_SUCCESS != HG_Bulk_handle_create(buf, buf_size, HG_BULK_READWRITE, &vl_data_handle))
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "create vlen bulk handle");
 
     /* Receive vl length data from client  */
@@ -1640,7 +1641,7 @@ H5VL__iod_server_vl_data_write(iod_handle_t coh, iod_obj_id_t iod_id, iod_handle
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait for vlen lengths bulk data operation");
 
     /* Free the bulk handle */
-    if(HG_SUCCESS != HG_Bulk_block_handle_free(vl_data_handle))
+    if(HG_SUCCESS != HG_Bulk_handle_free(vl_data_handle))
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't free vlen bulk handle");
 
     /* set other parameters needed to do IO */

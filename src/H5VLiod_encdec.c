@@ -237,7 +237,7 @@ int hg_proc_dims_t(hg_proc_t proc, void *data)
         break;
     case HG_DECODE:
         if(struct_data->rank)
-            struct_data->size = (hsize_t *)malloc (sizeof(hsize_t) * struct_data->rank);
+            struct_data->size = (hsize_t *)malloc (sizeof(hsize_t) * (size_t)struct_data->rank);
 
         for(i=0 ; i<struct_data->rank ; i++) {
             ret = hg_proc_uint64_t(proc, &struct_data->size[i]);
@@ -888,8 +888,8 @@ int hg_proc_coords_t(hg_proc_t proc, void *data)
         break;
     case HG_DECODE:
         if(struct_data->rank) {
-            struct_data->start_cell = (uint64_t *)malloc (sizeof(uint64_t) * struct_data->rank);
-            struct_data->end_cell = (uint64_t *)malloc (sizeof(uint64_t) * struct_data->rank);
+            struct_data->start_cell = (uint64_t *)malloc (sizeof(uint64_t) * (size_t)struct_data->rank);
+            struct_data->end_cell = (uint64_t *)malloc (sizeof(uint64_t) * (size_t)struct_data->rank);
         }
 
         for(i=0 ; i<struct_data->rank ; i++) {

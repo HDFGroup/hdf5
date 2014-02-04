@@ -677,7 +677,7 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
         fprintf(stderr, "Failed to initialize Mercury\n");
         return FAIL;
     }
-    if (NA_SUCCESS !=  NA_Addr_lookup(network_class, addr_name, &ion_target))  {
+    if (NA_SUCCESS !=  NA_Addr_lookup_wait(network_class, addr_name, &ion_target))  {
         fprintf(stderr, "Server lookup failed\n");
         return FAIL;
     }
@@ -837,8 +837,8 @@ EFF_finalize(void)
         return FAIL;
 
     /* Finalize interface */
-    if (HG_SUCCESS != HG_Bulk_finalize())
-        return FAIL;
+    //if (HG_SUCCESS != HG_Bulk_finalize())
+    //return FAIL;
 
     if (HG_SUCCESS != HG_Finalize())
         return FAIL;
@@ -3127,7 +3127,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
      * register data buffer. */
     if(type_info->vls) {
         /* For now, just guess one segment for each vl in top level */
-        vl_lengths_size = 8 * nelmts * type_info->num_vls;
+        vl_lengths_size = 8 * (size_t)nelmts * type_info->num_vls;
 
         /* Allocate vl_lengths */
         if(NULL == (vl_lengths = (char *)HDmalloc(vl_lengths_size)))
@@ -5012,7 +5012,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
         case H5VL_ATTR_GET_ACPL:
             {
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
-                H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)obj;
+                //H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)obj;
 
                 /* Retrieve the file's access property list */
                 if((*ret_id = H5Pcopy(H5P_ATTRIBUTE_CREATE_DEFAULT)) < 0)

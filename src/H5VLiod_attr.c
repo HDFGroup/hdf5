@@ -74,7 +74,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start attribute create %s at %"PRIu64" with ID %"PRIx64" %"PRIx64"\n",
-            attr_name, loc_handle.wr_oh, attr_id, loc_attrkv_id);
+            attr_name, loc_handle.wr_oh.cookie, attr_id, loc_attrkv_id);
 #endif
 
     attr_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
@@ -98,7 +98,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Open the object where the attribute needs to be created. */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, rtid, 
-                                 &obj_id, &obj_oh) < 0)
+                                 cs_scope, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* Set the IOD array creation parameters */
@@ -308,7 +308,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Open the object where the attribute needs to be opened. */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, 
-                                 rtid, &obj_id, &obj_oh) < 0)
+                                 rtid, cs_scope, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
 #if H5VL_IOD_DEBUG
@@ -446,13 +446,14 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* container handle */
     iod_handle_t iod_oh = input->iod_oh.rd_oh; /* attribute's object handle */
     iod_obj_id_t iod_id = input->iod_id; /* attribute's ID */
-    //iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV */
+    iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV */
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
     //hid_t type_id = input->type_id; /* datatype ID of data */
     hid_t space_id = input->space_id; /* dataspace of attribute */
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
-    hg_bulk_block_t bulk_block_handle; /* HG block handle */
+    iod_handle_t mdkv_oh;
+    hg_bulk_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     iod_mem_desc_t *mem_desc = NULL; /* memory descriptor used for reading array */
     iod_array_iodesc_t file_desc; /* file descriptor used to read array */
@@ -478,7 +479,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG 
     fprintf(stderr, "Start Attribute Read on OH %"PRIu64" OID %"PRIx64"\n", 
-            iod_oh, iod_id);
+            iod_oh.cookie, iod_id);
 #endif
 
     size = HG_Bulk_handle_get_size(bulk_handle);
@@ -486,21 +487,21 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     if(NULL == (buf = malloc(size)))
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
 
-    /* MSC - Not needed if dataspace is available */
-#if 0
-    /* open the metadata scratch pad of the attribute */
-    if (iod_obj_open_read(coh, mdkv_id, rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    /* Get dataspace if it is not available */
+    if(H5I_UNINIT == space_id) {
+        /* open the metadata scratch pad of the attribute */
+        if (iod_obj_open_read(coh, mdkv_id, rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, 
-                             H5VL_IOD_KEY_OBJ_DATASPACE,
-                             cs_scope, NULL, &space_id) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
+        if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, 
+                                 H5VL_IOD_KEY_OBJ_DATASPACE,
+                                 cs_scope, NULL, &space_id) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
-    /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-#endif
+        /* close the metadata scratch pad */
+        if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+    }
 
     /* set the memory descriptor */
     mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
@@ -530,10 +531,10 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
         hslabs.stride[0] = 1;
     }
     else {
-        hslabs.start = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-        hslabs.stride = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-        hslabs.block = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-        hslabs.count = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+        hslabs.start = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
+        hslabs.stride = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
+        hslabs.block = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
+        hslabs.count = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
 
         /* generate the descriptor */
         if(H5VL_iod_get_file_desc(space_id, &num_descriptors, &hslabs) < 0)
@@ -545,23 +546,21 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
 
     /* read from array object */
     ret = iod_array_read(iod_oh, rtid, NULL, mem_desc, &file_desc, 
-                         NULL/* MSC - need IOD -&iod_cs*/, NULL);
+                         &iod_cs, NULL);
     if(ret < 0) {
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
     }
 
-    /* MSC - NEED IOD Checksums
-    if(cs_scope & H5_CHECKSUM_MEMORY) {
+    if(cs_scope & H5_CHECKSUM_IOD) {
         attr_cs = H5_checksum_crc64(buf, size);
 
         if(attr_cs != iod_cs)
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data corruption detected when reading attribute");
     }
-    */
 
     /* Create a new block handle to write the data */
-    HG_Bulk_block_handle_create(buf, size, HG_BULK_READ_ONLY, &bulk_block_handle);
+    HG_Bulk_handle_create(buf, size, HG_BULK_READ_ONLY, &bulk_block_handle);
 
     /* Write bulk data here and wait for the data to be there  */
     if(HG_SUCCESS != HG_Bulk_write_all(dest, bulk_handle, bulk_block_handle, &bulk_request))
@@ -577,7 +576,7 @@ done:
 
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
-    if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+    if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     input = (attr_io_in_t *)H5MM_xfree(input);
@@ -627,14 +626,15 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* container handle */
     iod_handle_t iod_oh = input->iod_oh.wr_oh; /* attribute's object handle */
     iod_obj_id_t iod_id = input->iod_id; /* attribute's ID */
-    //iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV */
+    iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV */
     hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
     //hid_t type_id = input->type_id; /* datatype ID of data */
     hid_t space_id = input->space_id; /* dataspace of attribute */
     iod_trans_id_t wtid = input->trans_num;
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
-    hg_bulk_block_t bulk_block_handle; /* HG block handle */
+    iod_handle_t mdkv_oh;
+    hg_bulk_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     iod_mem_desc_t *mem_desc; /* memory descriptor used for writing array */
     iod_array_iodesc_t file_desc; /* file descriptor used to write array */
@@ -659,7 +659,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG 
     fprintf(stderr, "Start Attribute Write on OH %"PRIu64" OID %"PRIx64"\n", 
-            iod_oh, iod_id);
+            iod_oh.cookie, iod_id);
 #endif
 
     /* Read bulk data here and wait for the data to be here  */
@@ -667,7 +667,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     if(NULL == (buf = malloc(size)))
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
 
-    HG_Bulk_block_handle_create(buf, size, HG_BULK_READWRITE, &bulk_block_handle);
+    HG_Bulk_handle_create(buf, size, HG_BULK_READWRITE, &bulk_block_handle);
 
     /* Write bulk data here and wait for the data to be there  */
     if(HG_SUCCESS != HG_Bulk_read_all(source, bulk_handle, bulk_block_handle, &bulk_request))
@@ -677,7 +677,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
 
     /* free the bds block handle */
-    if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+    if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
         HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
 #if H5VL_IOD_DEBUG 
@@ -685,27 +685,27 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
         int i;
         int *buf_ptr = (int *)buf;
 
-        fprintf(stderr, "AWRITE Received a buffer of size %d with values: ", size);
+        fprintf(stderr, "AWRITE Received a buffer of size %zu with values: ", size);
         for(i=0;i<60;++i)
             fprintf(stderr, "%d ", buf_ptr[i]);
         fprintf(stderr, "\n");
     }
 #endif
 
-    /* MSC - Not needed if dataspace is available */
-#if 0
-    /* open the metadata scratch pad of the attribute */
-    if (iod_obj_open_read(coh, mdkv_id, wtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    /* Get dataspace if it is not available */
+    if(H5I_UNINIT == space_id) {
+        /* open the metadata scratch pad of the attribute */
+        if (iod_obj_open_read(coh, mdkv_id, wtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
-                             cs_scope, NULL, &space_id) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
+        if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
+                                 cs_scope, NULL, &space_id) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
-    /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-#endif
+        /* close the metadata scratch pad */
+        if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+    }
 
     /* set the memory descriptor */
     mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
@@ -735,10 +735,10 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
         hslabs.stride[0] = 1;
     }
     else {
-        hslabs.start = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-        hslabs.stride = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-        hslabs.block = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
-        hslabs.count = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+        hslabs.start = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
+        hslabs.stride = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
+        hslabs.block = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
+        hslabs.count = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
 
         /* generate the descriptor */
         if(H5VL_iod_get_file_desc(space_id, &num_descriptors, &hslabs) < 0)
@@ -748,7 +748,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     /* set the file descriptor */
     file_desc = hslabs;
 
-    if(0) {// MSC - IOD fix - cs_scope & H5_CHECKSUM_IOD) {
+    if(cs_scope & H5_CHECKSUM_IOD) {
         attr_cs = H5_checksum_crc64(buf, size);
 
         /* write from array object */
@@ -836,7 +836,7 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Open the object where the attribute needs to be checked. */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, rtid, 
-                                 &obj_id, &obj_oh) < 0)
+                                 cs_scope, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     if(loc_id != obj_id || IOD_OBJ_INVALID == input->loc_attrkv_id) {
@@ -947,7 +947,7 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Open the object where the attribute needs to be checked. */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, 
-                                 rtid, &obj_id, &obj_oh) < 0)
+                                 rtid, cs_scope, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     if(loc_id != obj_id || IOD_OBJ_INVALID == input->loc_attrkv_id) {
@@ -997,7 +997,7 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
     kv.key = (void *)old_name;
     kv.key_len = strlen(old_name);
     kvs.kv = &kv;
-    kvs.cs = NULL; //MSC - need IOD - &cs;
+    kvs.cs = NULL;
     kvs.ret = &ret;
     if(iod_kv_unlink_keys(attr_kv_oh.wr_oh, wtid, NULL, 1, &kvs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
@@ -1079,7 +1079,7 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Open the object where the attribute needs to be removed. */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, rtid, 
-                                 &obj_id, &obj_oh) < 0)
+                                 cs_scope, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     if(loc_id != obj_id) {
@@ -1153,7 +1153,7 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     kv.key = (void *)attr_name;
     kv.key_len = strlen(attr_name);
     kvs.kv = &kv;
-    kvs.cs = NULL; //MSC - need IOD - &cs;
+    kvs.cs = NULL;
     kvs.ret = &ret;
     if(iod_kv_unlink_keys(attr_kv_oh.wr_oh, wtid, NULL, 1, &kvs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
@@ -1231,7 +1231,7 @@ H5VL_iod_server_attr_close_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start attribute Close %"PRIu64" %"PRIu64"\n",
-            iod_oh.rd_oh, iod_oh.wr_oh);
+            iod_oh.rd_oh.cookie, iod_oh.wr_oh.cookie);
 #endif
 
     if((iod_obj_close(iod_oh.rd_oh, NULL, NULL)) < 0)

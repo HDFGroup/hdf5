@@ -2403,7 +2403,7 @@ H5VL_iod_pre_read(hid_t type_id, H5S_t *space, const void *buf, hssize_t nelmts,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
 
     type_size = H5T_get_size(dt);
-    buf_size = type_size * nelmts;
+    buf_size = type_size * (size_t)nelmts;
 
     /* If the memory selection is contiguous, create simple HG Bulk Handle */
     if(H5S_select_is_contiguous(space)) {
@@ -2423,7 +2423,7 @@ H5VL_iod_pre_read(hid_t type_id, H5S_t *space, const void *buf, hssize_t nelmts,
         uint8_t *start_offset = (uint8_t *) buf;
 
         /* generate the offsets/lengths pair arrays from the memory dataspace selection */
-        if(H5S_get_offsets(space, type_size, nelmts, &off, &len, &count) < 0)
+        if(H5S_get_offsets(space, type_size, (size_t)nelmts, &off, &len, &count) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't retrieve offets/lengths of memory space");
 
         /* Register memory with segmented HG handle */

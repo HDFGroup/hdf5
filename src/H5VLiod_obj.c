@@ -120,12 +120,12 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start Object Open on %s (OH %"PRIu64" ID %"PRIx64")\n", 
-            input->loc_name, input->loc_oh.rd_oh, input->loc_id);
+            input->loc_name, input->loc_oh.rd_oh.cookie, input->loc_id);
 #endif
 
     /* Traverse Path and open object */
     if(H5VL_iod_server_open_path(coh, input->loc_id, input->loc_oh, input->loc_name, 
-                                 rtid, &obj_id, &obj_oh) < 0)
+                                 rtid, cs_scope, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     if (iod_obj_open_write(coh, obj_id, rtid, NULL, &obj_oh.wr_oh, NULL) < 0)
@@ -345,7 +345,7 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Traverse Path and open object */
     if(H5VL_iod_server_open_path(coh, input->src_loc_id, input->src_loc_oh, input->src_loc_name, 
-                                 rtid, &obj_id, &obj_oh) < 0)
+                                 rtid, cs_scope, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* the traversal will retrieve the location where the objects
@@ -530,11 +530,12 @@ H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start Object Exists on %s (OH %"PRIu64" ID %"PRIx64")\n", 
-            input->loc_name, input->loc_oh.rd_oh, input->loc_id);
+            input->loc_name, input->loc_oh.rd_oh.cookie, input->loc_id);
 #endif
 
     /* Traverse Path and open object */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, rtid, &obj_id, &obj_oh) < 0) {
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, rtid, 
+                                 cs_scope, &obj_id, &obj_oh) < 0) {
         ret = FALSE;
         HGOTO_DONE(SUCCEED);
     }
@@ -605,12 +606,12 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start Object Get Info on %s (OH %"PRIu64" ID %"PRIx64")\n", 
-            input->loc_name, input->loc_oh.rd_oh, input->loc_id);
+            input->loc_name, input->loc_oh.rd_oh.cookie, input->loc_id);
 #endif
 
     /* Traverse Path and open object */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, 
-                                 rtid, &obj_id, &obj_oh) < 0)
+                                 rtid, cs_scope, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "object does not exist");
 
     oinfo.addr = obj_id;
@@ -675,7 +676,7 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_kv_get_num(attrkv_oh, rtid, &num_attrs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve attribute count");
 
-    oinfo.num_attrs = num_attrs;
+    oinfo.num_attrs = (hsize_t)num_attrs;
 
     /* close the metadata KV */
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
@@ -750,12 +751,12 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start Object Set comment on %s (OH %"PRIu64" ID %"PRIx64")\n", 
-            input->path, input->loc_oh.rd_oh, input->loc_id);
+            input->path, input->loc_oh.rd_oh.cookie, input->loc_id);
 #endif
 
     /* Traverse Path and open object */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, rtid, 
-                                 &obj_id, &obj_oh) < 0)
+                                 cs_scope, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     if(loc_id != obj_id || input->loc_mdkv_id == IOD_OBJ_INVALID) {
@@ -782,7 +783,7 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     {
         iod_kv_t kv;
 
-        kv.key = (void *)H5VL_IOD_KEY_OBJ_COMMENT;
+        kv.key = H5VL_IOD_KEY_OBJ_COMMENT;
         kv.key_len = strlen(H5VL_IOD_KEY_OBJ_COMMENT);
         kv.value_len = strlen(comment) + 1;
         kv.value = comment;
@@ -869,12 +870,12 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start Object Get comment on %s (OH %"PRIu64" ID %"PRIx64")\n", 
-            input->path, input->loc_oh.rd_oh, input->loc_id);
+            input->path, input->loc_oh.rd_oh.cookie, input->loc_id);
 #endif
 
     /* Traverse Path and open object */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, 
-                                 rtid, &obj_id, &obj_oh) < 0)
+                                 rtid, cs_scope, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     if(loc_id != obj_id || input->loc_mdkv_id == IOD_OBJ_INVALID) {
@@ -941,7 +942,7 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
        iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-    *comment.value_size = val_size;
+    *comment.value_size = (ssize_t)val_size;
 
 done:
     output.ret = ret_value;

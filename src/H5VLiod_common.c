@@ -178,7 +178,7 @@ H5VL_iod_get_type_info_helper(hid_t type_id, H5VL_iod_type_info_t *type_info,
                     ERROR("failed to get number of compound datatype members");
 
                 /* Allocate array of members */
-                if(NULL == (cmpd_membs = (H5VL_iod_cmpd_info_t *)malloc(nmemb * sizeof(H5VL_iod_cmpd_info_t))))
+                if(NULL == (cmpd_membs = (H5VL_iod_cmpd_info_t *)malloc((size_t)nmemb * sizeof(H5VL_iod_cmpd_info_t))))
                     ERROR("failed ot allocate array of compound type members");
 
                 /* Get offset and type for all members */
@@ -239,7 +239,7 @@ H5VL_iod_get_type_info_helper(hid_t type_id, H5VL_iod_type_info_t *type_info,
                         ERROR("failed to get array datatype number of dimensions");
 
                     /* Allocate array of dimensions */
-                    if(NULL == (dims = (hsize_t *)malloc(ndims * sizeof(hsize_t))))
+                    if(NULL == (dims = (hsize_t *)malloc((size_t)ndims * sizeof(hsize_t))))
                         ERROR("failed to allocate array of dimensions");
 
                     /* Get array dimensions */
@@ -579,7 +579,7 @@ H5VL_iod_cs_send_helper(char *buf, H5VL_iod_type_info_t *type_info,
                         } /* end if */
 
                         /* Recurse into vlen data */
-                        if(H5VL_iod_cs_send_helper(vl.p, type_info->vls[j].base_type, vl.len, segments, num_segments, segments_nalloc, vl_lengths, vl_lengths_nused, vl_lengths_nalloc, free_list, free_list_len, free_list_nalloc) < 0)
+                        if(H5VL_iod_cs_send_helper((char *)vl.p, type_info->vls[j].base_type, vl.len, segments, num_segments, segments_nalloc, vl_lengths, vl_lengths_nused, vl_lengths_nalloc, free_list, free_list_len, free_list_nalloc) < 0)
                             ERROR("failed to build segments");
                     } /* end if */
                 } /* end if */

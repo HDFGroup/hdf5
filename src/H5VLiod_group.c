@@ -72,7 +72,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start group create %s at %"PRIu64"\n", name, loc_handle.wr_oh);
+    fprintf(stderr, "Start group create %s at %"PRIu64"\n", name, loc_handle.wr_oh.cookie);
 #endif
 
     if(H5P_DEFAULT == input->gcpl_id)
@@ -93,14 +93,14 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the group needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, cs_scope,
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Creating Group ID %"PRIx64" (CV %"PRIu64", TR %"PRIu64") ", 
             grp_id, rtid, wtid);
-    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh, cur_id);
+    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh.cookie, cur_id);
     if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum)
         fprintf(stderr, "with Data integrity ENABLED\n");
     else
@@ -290,7 +290,8 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     }
     else {
         /* Traverse Path and open group */
-        if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, &grp_id, &grp_oh) < 0)
+        if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, 
+                                     cs_scope, &grp_id, &grp_oh) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
     }
 

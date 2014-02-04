@@ -50,7 +50,7 @@
 herr_t 
 H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t loc_handle, 
                          const char *path, iod_trans_id_t wtid, iod_trans_id_t rtid, 
-                         hbool_t create_interm_grps,
+                         hbool_t create_interm_grps, uint32_t cs_scope,
                          /* out */char **last_comp, /* out */iod_obj_id_t *iod_id, 
                          /* out */iod_handles_t *iod_oh)
 {
@@ -117,7 +117,7 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
 
         /* lookup next object in the current group */
         if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
-                                 comp, NULL, NULL, &value) < 0)
+                                 comp, cs_scope, NULL, &value) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
         /* if this a soft link, traverse the link value if the ID is undefined */
@@ -128,7 +128,7 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
 
             /* Traverse Path and open the target object */
             if(H5VL_iod_server_open_path(coh, cur_id, cur_oh, value.u.symbolic_name, 
-                                         rtid, &cur_id, &cur_oh) < 0)
+                                         rtid, cs_scope, &cur_id, &cur_oh) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
             free(value.u.symbolic_name);
@@ -188,7 +188,7 @@ done:
  */
 herr_t 
 H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t loc_handle, 
-                          const char *path, iod_trans_id_t rtid,
+                          const char *path, iod_trans_id_t rtid, uint32_t cs_scope,
                           /*out*/iod_obj_id_t *iod_id, /*out*/iod_handles_t *iod_oh)
 {
     char comp_buf[1024];     /* Temporary buffer for path components */
@@ -242,7 +242,7 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
 
         /* lookup next object in the current group */
         if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
-                                 comp, NULL, NULL, &value) < 0) {
+                                 comp, cs_scope, NULL, &value) < 0) {
             /* Close previous handle unless it is the original one */
             if(loc_handle.rd_oh.cookie != prev_oh.cookie && 
                iod_obj_close(prev_oh, NULL, NULL) < 0)
@@ -258,7 +258,7 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
 
             /* Traverse Path and open the target object */
             if(H5VL_iod_server_open_path(coh, cur_id, cur_oh, value.u.symbolic_name, 
-                                         rtid, &cur_id, &cur_oh) < 0)
+                                         rtid, cs_scope, &cur_id, &cur_oh) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
             free(value.u.symbolic_name);
@@ -408,7 +408,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                     hsize_t *blocks = NULL;
                     size_t block_count = 0;
 
-                    block_count = ndims * num_descriptors * sizeof(hsize_t) * 2;
+                    block_count = ndims * (size_t)num_descriptors * sizeof(hsize_t) * 2;
 
                     if(NULL == (blocks = (hsize_t *)malloc(block_count)))
                         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for points coords");
@@ -1039,10 +1039,10 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         {
             H5VL_iod_link_t *iod_link = (H5VL_iod_link_t *)ret;
             uint8_t *val_ptr;
-            iod_ret_t ret; 
+            iod_ret_t iod_ret; 
 
-            if((ret = iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event)) < 0) {
-                fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+            if((iod_ret = iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event)) < 0) {
+                fprintf(stderr, "%d (%s).\n", iod_ret, strerror(-iod_ret));
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
             }
             if(NULL == (value = malloc((size_t)val_size)))

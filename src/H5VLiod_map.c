@@ -77,7 +77,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
         fprintf(stderr, "Start map create %s at %"PRIu64"\n", 
-                name, loc_handle.wr_oh);
+                name, loc_handle.wr_oh.cookie);
 #endif
 
     if(H5P_DEFAULT == input->mcpl_id)
@@ -99,12 +99,12 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
        to be created. The traversal will fail if an intermediate group
        does not exist. */
     if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
-                                &last_comp, &cur_id, &cur_oh) < 0)
+                                cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Creating Map ID %"PRIx64") ", map_id);
-    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh, cur_id);
+    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh.cookie, cur_id);
     if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum)
         fprintf(stderr, "with Data integrity ENABLED\n");
     else
@@ -291,7 +291,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Traverse Path and open map */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, 
-                                 &map_id, &map_oh) < 0)
+                                 cs_scope, &map_id, &map_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* open a write handle on the ID. */
@@ -395,7 +395,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
     na_addr_t source = HG_Handler_get_addr(op_data->hg_handle); /* source address to pull data from */
-    hg_bulk_block_t bulk_block_handle; /* HG block handle */
+    hg_bulk_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     size_t key_size, val_size, new_val_size;
     void *val_buf = NULL;
@@ -409,7 +409,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG 
     fprintf(stderr, "Start Map Set Key %d on OH %"PRIu64" OID %"PRIx64"\n", 
-            *((int *)key.buf), iod_oh, iod_id);
+            *((int *)key.buf), iod_oh.cookie, iod_id);
 #endif
 
     /* open the map if we don't have the handle yet */
@@ -431,7 +431,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
 
     /* create a Mercury block handle for transfer */
-    HG_Bulk_block_handle_create(val_buf, val_size, HG_BULK_READWRITE, &bulk_block_handle);
+    HG_Bulk_handle_create(val_buf, val_size, HG_BULK_READWRITE, &bulk_block_handle);
 
     /* Write bulk data here and wait for the data to be there  */
     if(HG_SUCCESS != HG_Bulk_read_all(source, value_handle, bulk_block_handle, &bulk_request))
@@ -441,7 +441,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
 
     /* free the bds block handle */
-    if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+    if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
         HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     /* get the scope for data integrity checks for raw data */
@@ -597,7 +597,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
     size_t key_size, val_size;
     iod_size_t src_size;
     void *val_buf = NULL;
-    hg_bulk_block_t bulk_block_handle; /* HG block handle */
+    hg_bulk_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
     hbool_t opened_locally = FALSE;
@@ -608,7 +608,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG 
     fprintf(stderr, "Start Map Get Key %d on OH %"PRIu64" OID %"PRIx64"\n", 
-            *((int *)key.buf), iod_oh, iod_id);
+            *((int *)key.buf), iod_oh.cookie, iod_id);
 #endif
 
     /* open the map if we don't have the handle yet */
@@ -666,7 +666,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
             /* Create a new block handle to write the data */
-            HG_Bulk_block_handle_create(val_buf, (size_t)src_size, HG_BULK_READ_ONLY, &bulk_block_handle);
+            HG_Bulk_handle_create(val_buf, (size_t)src_size, HG_BULK_READ_ONLY, &bulk_block_handle);
 
             /* Write bulk data here and wait for the data to be there  */
             if(HG_SUCCESS != HG_Bulk_write_all(dest, value_handle, bulk_block_handle, &bulk_request))
@@ -676,7 +676,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
             /* free block handle */
-            if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+            if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
                 HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't free bds block handle");
         }
     }
@@ -727,7 +727,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
         output.ret = ret_value;
 
         /* Create a new block handle to write the data */
-        HG_Bulk_block_handle_create(val_buf, val_size, HG_BULK_READ_ONLY, &bulk_block_handle);
+        HG_Bulk_handle_create(val_buf, val_size, HG_BULK_READ_ONLY, &bulk_block_handle);
 
         /* Write bulk data here and wait for the data to be there  */
         if(HG_SUCCESS != HG_Bulk_write_all(dest, value_handle, bulk_block_handle, &bulk_request))
@@ -737,7 +737,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
         /* free block handle */
-        if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+        if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't free bds block handle");
     }
 
@@ -821,7 +821,7 @@ H5VL_iod_server_map_get_count_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_kv_get_num(iod_oh, rtid, &num, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Number of KV pairs in MAP");
 
-    output = num;
+    output = (hsize_t)num;
 
 #if H5VL_IOD_DEBUG 
     fprintf(stderr, "Done with map get_count, sending %d response to client\n", ret_value);
@@ -1056,7 +1056,7 @@ H5VL_iod_server_map_close_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start map Close %"PRIu64" %"PRIu64"\n",
-            iod_oh.rd_oh, iod_oh.wr_oh);
+            iod_oh.rd_oh.cookie, iod_oh.wr_oh.cookie);
 #endif
 
     if((iod_obj_close(iod_oh.rd_oh, NULL, NULL)) < 0)

@@ -75,7 +75,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-        fprintf(stderr, "Start datatype commit %s at %"PRIu64"\n", name, loc_handle.wr_oh);
+    fprintf(stderr, "Start datatype commit %s at %"PRIu64"\n", name, loc_handle.wr_oh.cookie);
 #endif
 
     if(H5P_DEFAULT == input->tcpl_id)
@@ -97,12 +97,12 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
        to be created. The traversal will fail if an intermediate group
        does not exist. */
     if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
-                                &last_comp, &cur_id, &cur_oh) < 0)
+                                cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Creating Datatype ID %"PRIx64" ", dtype_id);
-    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh, cur_id);
+    fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh.cookie, cur_id);
     if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum)
         fprintf(stderr, "with Data integrity ENABLED\n");
     else
@@ -344,7 +344,8 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* Traverse Path and open dtype */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, &dtype_id, &dtype_oh) < 0)
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, 
+                                 cs_scope, &dtype_id, &dtype_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* open a write handle on the ID. */

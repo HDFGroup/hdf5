@@ -823,13 +823,13 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Traverse Path to retrieve object ID, and open object */
     if(H5VL_iod_server_open_path(cohs[0], ROOT_ID, root_handle, obj_name,
-                                 rtid, &obj_id, &obj_oh) < 0)
+                                 rtid, 7, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     printf("(%d) coh %"PRIu64" objoh %"PRIu64" objid %"PRIx64" rtid %"PRIu64"\n",
-            my_rank_g, cohs[0], obj_oh.rd_oh.cookie, obj_id, rtid);
+           my_rank_g, cohs[0].cookie, obj_oh.rd_oh.cookie, obj_id, rtid);
 
-    printf("(%d) Calling  iod_obj_query_map\n");
+    printf("Calling  iod_obj_query_map\n");
     ret = iod_obj_query_map(obj_oh.rd_oh, rtid, &obj_map, NULL);
     if (ret != 0) {
         printf("iod_obj_query_map failed, ret: %d (%s).\n", ret, strerror(-ret));
@@ -892,13 +892,13 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
 
     /* ****************** TEMP THING (as IOD requires collective container open) */
 
-    printf("(%d) Closing container\n");
+    printf("Closing container\n");
     if(FAIL == H5VL__iod_request_container_close(cohs))
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't request container close");
 
     /* ***************** END TEMP THING */
 
-    printf("(%d) Analysis DONE\n");
+    printf("Analysis DONE\n");
     /* set output, and return to AS client */
     output.ret = ret_value;
     HG_Handler_start_output(op_data->hg_handle, &output);
@@ -1051,7 +1051,7 @@ H5VL_iod_server_analysis_transfer_cb(AXE_engine_t axe_engine,
     void *farm_op_data_ptr = NULL;
     H5VLiod_farm_data_t *farm_output = NULL;
     herr_t ret_value = SUCCEED;
-    hg_bulk_block_t bulk_block_handle;
+    hg_bulk_t bulk_block_handle;
     size_t data_size;
     hg_bulk_request_t bulk_request;
     na_addr_t source = HG_Handler_get_addr(op_data->hg_handle);
@@ -1067,7 +1067,7 @@ H5VL_iod_server_analysis_transfer_cb(AXE_engine_t axe_engine,
     data_size = HG_Bulk_handle_get_size(input->bulk_handle);
     printf("(%d) Transferring split data back to master\n", my_rank_g);
 
-    HG_Bulk_block_handle_create(farm_output->data, data_size, HG_BULK_READ_ONLY,
+    HG_Bulk_handle_create(farm_output->data, data_size, HG_BULK_READ_ONLY,
             &bulk_block_handle);
 
     /* Write bulk data here and wait for the data to be there  */
@@ -1080,7 +1080,7 @@ H5VL_iod_server_analysis_transfer_cb(AXE_engine_t axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
 
     /* free the bds block handle */
-    if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+    if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
         HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     free(farm_output->data);
