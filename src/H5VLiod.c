@@ -4901,6 +4901,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
 
     /* set the input structure for the HG encode routine */
     input.coh = obj->file->remote_file.coh;
+    input.cs_scope = obj->file->md_integrity_scope;
     input.loc_id = iod_id;
     input.loc_attrkv_id = attrkv_id;
     input.loc_oh = iod_oh;
@@ -4908,7 +4909,6 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
     input.attr_name = attr_name;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
-    input.cs_scope = obj->file->md_integrity_scope;
 
     status = (int *)malloc(sizeof(int));
 

@@ -545,18 +545,25 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     file_desc = hslabs;
 
     /* read from array object */
-    ret = iod_array_read(iod_oh, rtid, NULL, mem_desc, &file_desc, 
-                         &iod_cs, NULL);
-    if(ret < 0) {
-        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
-        HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
-    }
-
     if(cs_scope & H5_CHECKSUM_IOD) {
+        ret = iod_array_read(iod_oh, rtid, NULL, mem_desc, &file_desc, 
+                             &iod_cs, NULL);
+        if(ret < 0) {
+            fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+            HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+        }
+
         attr_cs = H5_checksum_crc64(buf, size);
 
         if(attr_cs != iod_cs)
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Data corruption detected when reading attribute");
+    }
+    else {
+        ret = iod_array_read(iod_oh, rtid, NULL, mem_desc, &file_desc, NULL, NULL);
+        if(ret < 0) {
+            fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+            HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+        }
     }
 
     /* Create a new block handle to write the data */
@@ -750,7 +757,6 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
 
     if(cs_scope & H5_CHECKSUM_IOD) {
         attr_cs = H5_checksum_crc64(buf, size);
-
         /* write from array object */
         if(iod_array_write(iod_oh, wtid, NULL, mem_desc, &file_desc, &attr_cs, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
