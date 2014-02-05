@@ -205,6 +205,10 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
             key_size = strlen(H5VL_IOD_KEY_DTYPE_SIZE);
             val_size = sizeof(iod_size_t);
 
+            if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
+                                     cs_scope, NULL, &output.cpl_id) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
+
             /* retrieve blob size metadata from scratch pad */
             if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, key_size,
                                 &buf_size, &val_size, iod_cs, NULL) < 0)
@@ -236,7 +240,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
             /* read the serialized type value from the BLOB object */
             if(iod_blob_read(obj_oh.rd_oh, rtid, NULL, mem_desc, file_desc, 
                              &blob_cs, NULL) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read BLOB object");
 
             if(blob_cs && (cs_scope & H5_CHECKSUM_IOD)) {
                 /* calculate a checksum for the datatype */

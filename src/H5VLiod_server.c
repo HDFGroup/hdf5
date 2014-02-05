@@ -298,7 +298,7 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
         return FAIL;
 
     /* Set number of threads in AXE engine */
-    if(AXEset_num_threads(&engine_attr, 1) != AXE_SUCCEED)
+    if(AXEset_num_threads(&engine_attr, 4) != AXE_SUCCEED)
         return FAIL;
 
     /* Create AXE engine */
