@@ -20,17 +20,26 @@ static int my_rank = 0, my_size = 1;
 const char *split_script =
         "import numpy as np\n"
         "def split(array):\n"
+        "  print '--------------------'\n"
         "  print 'Split sum: ' + str(array.sum())\n"
-        "  return np.array([array.sum(), array.size])\n";
+        "  print 'Split average: ' + str(np.average(array))\n"
+        "  print '--------------------'\n"
+        "  return np.array([array.sum(), np.average(array)])\n";
 
 const char *combine_script =
         "import numpy as np\n"
         "def combine(arrays):\n"
         "  global_sum = 0\n"
+        "  global_average = 0\n"
         "  for a in arrays:\n"
         "    global_sum += a[0]\n"
+        "    global_average += a[1]\n"
+        "  global_average /= len(arrays)\n"
+        "  print '--------------------'\n"
         "  print 'Combined sum: ' + str(global_sum)\n"
-        "  return np.array([global_sum, len(arrays)])\n";
+        "  print 'Combined average: ' + str(global_average)\n"
+        "  print '--------------------'\n"
+        "  return np.array([global_sum, global_average])\n";
 
 static void
 write_dataset(const char *file_name, const char *dataset_name,
@@ -207,13 +216,37 @@ write_dataset(const char *file_name, const char *dataset_name,
 static void
 ship_analysis(const char *file_name, const char *dataset_name)
 {
-    double query_limit = 39.1;
-    hid_t  query_id;
+    double lower_bound1 = 39.1, upper_bound1 = 42.1;
+    int lower_bound2 = 295, upper_bound2 = 298;
+    hid_t  query_id1, query_id2, query_id3, query_id4, query_id5, query_id6;
+    hid_t query_id;
     herr_t ret;
 
     /* Create a simple query */
-    query_id = H5Qcreate(H5Q_TYPE_DATA_ELEM, H5Q_MATCH_GREATER_THAN,
-            H5T_NATIVE_DOUBLE, &query_limit);
+    /* query = (39.1 < x < 42.1) || (295 < x < 298) */
+    query_id1 = H5Qcreate(H5Q_TYPE_DATA_ELEM, H5Q_MATCH_GREATER_THAN,
+            H5T_NATIVE_DOUBLE, &lower_bound1);
+    assert(query_id1);
+
+    query_id2 = H5Qcreate(H5Q_TYPE_DATA_ELEM, H5Q_MATCH_LESS_THAN,
+            H5T_NATIVE_DOUBLE, &upper_bound1);
+    assert(query_id2);
+
+    query_id3 = H5Qcombine(query_id1, H5Q_COMBINE_AND, query_id2);
+    assert(query_id3);
+
+    query_id4 = H5Qcreate(H5Q_TYPE_DATA_ELEM, H5Q_MATCH_GREATER_THAN,
+            H5T_NATIVE_INT, &lower_bound2);
+    assert(query_id4);
+
+    query_id5 = H5Qcreate(H5Q_TYPE_DATA_ELEM, H5Q_MATCH_LESS_THAN,
+            H5T_NATIVE_INT, &upper_bound2);
+    assert(query_id5);
+
+    query_id6 = H5Qcombine(query_id4, H5Q_COMBINE_AND, query_id5);
+    assert(query_id6);
+
+    query_id = H5Qcombine(query_id3, H5Q_COMBINE_OR, query_id6);
     assert(query_id);
 
     /* Issue an anlysis shipping request */
@@ -221,8 +254,13 @@ ship_analysis(const char *file_name, const char *dataset_name)
             H5_EVENT_STACK_NULL);
     assert(0 == ret);
 
-    ret = H5Qclose(query_id);
-    assert(0 == ret);
+    H5Qclose(query_id);
+    H5Qclose(query_id6);
+    H5Qclose(query_id5);
+    H5Qclose(query_id4);
+    H5Qclose(query_id3);
+    H5Qclose(query_id2);
+    H5Qclose(query_id1);
 }
 
 int
@@ -258,9 +296,11 @@ main(int argc, char **argv)
 
     /* Initialize the dataset. */
     data = (int *) malloc(sizeof(int) * ncomponents * ntuples);
-    for (i = 0; i < ntuples; i++)
-       for (j = 0; j < ncomponents; j++)
-          data[ncomponents * i + j] = ncomponents * i + j;
+    for (i = 0; i < ntuples; i++) {
+       for (j = 0; j < ncomponents; j++) {
+          data[ncomponents * i + j] = my_rank * ntuples + i;
+       }
+    }
 
     MPI_Barrier(MPI_COMM_WORLD);
 

@@ -10,15 +10,15 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name[]="map_file.h5";
+    const char file_name[]="eff_file_obj.h5";
     hid_t file_id;
     hid_t gid;
     hid_t did, map;
     hid_t sid, dtid;
-    hid_t tid1, rid1, rid2;
+    hid_t tid1, tid2, rid1, rid2;
     hid_t fapl_id, dxpl_id;
     hid_t e_stack;
-    hbool_t exists;
+    hbool_t exists = -1;
 
     const unsigned int nelem=60;
     hsize_t dims[1];
@@ -70,9 +70,9 @@ int main(int argc, char **argv) {
     e_stack = H5EScreate();
     assert(e_stack);
 
-    /* create the file. This is asynchronous, but the file_id can be used. */
-    file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-    assert(file_id);
+    /* create the file. */
+    file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, H5_EVENT_STACK_NULL);
+    assert(file_id > 0);
 
     /* create 1-D dataspace with 60 elements */
     dims [0] = nelem;
@@ -86,92 +86,79 @@ int main(int argc, char **argv) {
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
     assert(0 == version);
 
-    /* create transaction object */
-    tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
-    assert(tid1);
-
     /* start transaction 1 with default Leader/Delegate model. Leader
        which is rank 0 here starts the transaction. It can be
        asynchronous, but we make it synchronous here so that the
        Leader can tell its delegates that the transaction is
        started. */
     if(0 == my_rank) {
-        ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        hid_t rid_temp;
+
+        /* create transaction object */
+        tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
+        assert(tid1);
+        ret = H5TRstart(tid1, H5P_DEFAULT, e_stack);
         assert(0 == ret);
 
-        trans_num = 1;
-    }
+        /* create objects */
+        gid = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, 
+                           H5P_DEFAULT, tid1, e_stack);
+        assert(gid >= 0);
 
-    /* Tell other procs that transaction 1 is started */
-    MPI_Ibcast(&trans_num, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD, &mpi_req);
+        did = H5Dcreate_ff(gid, "D1", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, 
+                           H5P_DEFAULT, tid1, e_stack);
+        assert(did >= 0);
 
-    /* Process 0 can continue writing to transaction 1, 
-       while others wait for the bcast to complete */
-    if(0 != my_rank)
-        MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
+        ret = H5Tcommit_ff(file_id, "DT1", dtid, H5P_DEFAULT, H5P_DEFAULT, 
+                           H5P_DEFAULT, tid1, e_stack);
+        assert(ret == 0);
 
-    assert(1 == trans_num);
+        map = H5Mcreate_ff(file_id, "MAP1", H5T_STD_I32LE, H5T_STD_I32LE, 
+                           H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
+        assert(map >= 0);
 
-    /* 
-       Assume the following object create calls are collective.
+        ret = H5TRfinish(tid1, H5P_DEFAULT, &rid_temp, e_stack);
+        assert(0 == ret);
 
-       In a real world scenario, the following create calls are
-       independent by default; i.e. only 1 process, typically a leader
-       process, calls them. The user does the local-to-global,
-       global-to-local thing to get the objects accessible to all delegates. 
-
-       This will not fail here because IOD used for now is skeletal,
-       so it does not matter if the calls are collective or
-       independent.
-    */
-
-    /* create objects */
-    gid = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    ret = H5Oset_comment_ff(gid, "Testing Object Comment", tid1, e_stack);
-    assert(ret == 0);
-    did = H5Dcreate_ff(gid, "D1", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    ret = H5Tcommit_ff(file_id, "DT1", dtid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
-    assert(ret == 0);
-    map = H5Mcreate_ff(file_id, "MAP1", H5T_STD_I32LE, H5T_STD_I32LE, 
-                       H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
-    assert(map > 0);
-
-    /* none leader procs have to complete operations before notifying the leader */
-    if(0 != my_rank) {
         /* wait on all requests and print completion status */
         H5ESget_count(e_stack, &num_events);
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
-    }
 
-    /* Barrier to make sure all processes are done writing so Process
-       0 can finish transaction 1 and acquire a read context on it. */
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    /* Leader process finished the transaction after all clients
-       finish their updates. Leader also asks the library to acquire
-       the committed transaction, that becomes a readable version
-       after the commit completes. */
-    if(0 == my_rank) {
-        MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
-
-        ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, H5_EVENT_STACK_NULL);
+        /* Close transaction object. Local op */
+        ret = H5TRclose(tid1);
         assert(0 == ret);
-    }
 
-    /* Close transaction object. Local op */
-    ret = H5TRclose(tid1);
-    assert(0 == ret);
+        /* create transaction object */
+        tid2 = H5TRcreate(file_id, rid_temp, (uint64_t)2);
+        assert(tid2);
+        ret = H5TRstart(tid2, H5P_DEFAULT, e_stack);
+        assert(0 == ret);
+
+        ret = H5Oset_comment_ff(gid, "Testing Object Comment", tid2, e_stack);
+        assert(ret == 0);
+
+        ret = H5TRfinish(tid2, H5P_DEFAULT, &rid2, e_stack);
+        assert(0 == ret);
+
+        assert(H5Gclose_ff(gid, e_stack) == 0);
+        assert(H5Mclose_ff(map, e_stack) == 0);
+        assert(H5Tclose_ff(dtid, e_stack) == 0);
+        assert(H5Dclose_ff(did, e_stack) == 0);
+
+        /* release container version 2. This is async. */
+        ret = H5RCrelease(rid_temp, e_stack);
+        assert(0 == ret);
+        ret = H5RCclose(rid_temp);
+        assert(0 == ret);
+
+        version = 2;
+    }
 
     /* release container version 0. This is async. */
     ret = H5RCrelease(rid1, e_stack);
     assert(0 == ret);
-
-    assert(H5Gclose_ff(gid, e_stack) == 0);
-    assert(H5Dclose_ff(did, e_stack) == 0);
-    assert(H5Tclose_ff(dtid, e_stack) == 0);
-    assert(H5Mclose_ff(map, e_stack) == 0);
 
     /* wait on all requests and print completion status */
     H5ESget_count(e_stack, &num_events);
@@ -179,9 +166,17 @@ int main(int argc, char **argv) {
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
+    if(0 == my_rank) {
+        /* Close transaction object. Local op */
+        ret = H5TRclose(tid2);
+        assert(0 == ret);
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
     /* Process 0 tells other procs that container version 1 is acquired */
-    version = 1;
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
+    assert(2 == version);
 
     /* other processes just create a read context object; no need to
        acquire it */
@@ -220,22 +215,36 @@ int main(int argc, char **argv) {
 
         ret = H5Oget_info_ff(gid, &oinfo, rid2, H5_EVENT_STACK_NULL);
         assert(ret == 0);
+        assert(H5O_TYPE_GROUP == oinfo.type);
+        fprintf(stderr, 
+                "get_info: Group with OID: %"PRIx64", num attrs = %zu, ref count = %u\n", 
+                oinfo.addr, oinfo.num_attrs, oinfo.rc);
 
-        switch(oinfo.type) {
-        case H5O_TYPE_GROUP:
-            fprintf(stderr, 
-                    "OBJECT GET INFO return a GROUP TYPE with IOD ID: %llu, num attrs = %llu, reference count = %d\n", 
-                    oinfo.addr, oinfo.num_attrs, oinfo.rc);
-            break;
-        default:
-            fprintf(stderr, "Unexpected result from oget_info\n");
-            exit(1);
-        }
+        ret = H5Oget_info_ff(did, &oinfo, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        assert(H5O_TYPE_DATASET == oinfo.type);
+        fprintf(stderr, 
+                "get_info: Dataset with OID: %"PRIx64", num attrs = %zu, ref count = %u\n", 
+                oinfo.addr, oinfo.num_attrs, oinfo.rc);
+
+        ret = H5Oget_info_ff(dtid, &oinfo, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        assert(H5O_TYPE_NAMED_DATATYPE == oinfo.type);
+        fprintf(stderr, 
+                "get_info: Named Datatype with OID: %"PRIx64", num attrs = %zu, ref count = %u\n", 
+                oinfo.addr, oinfo.num_attrs, oinfo.rc);
+
+        ret = H5Oget_info_ff(map, &oinfo, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        assert(H5O_TYPE_MAP == oinfo.type);
+        fprintf(stderr, 
+                "get_info: MAP with OID: %"PRIx64", num attrs = %zu, ref count = %u\n", 
+                oinfo.addr, oinfo.num_attrs, oinfo.rc);
     }
 
     /* check if an object exists. This is asynchronous, so checking
        the value should be done after the wait */
-    ret = H5Oexists_by_name_ff(file_id, "G1_COPY", &exists, 
+    ret = H5Oexists_by_name_ff(file_id, "G1", &exists, 
                                H5P_DEFAULT, rid2, e_stack);
     assert(ret == 0);
 
@@ -255,15 +264,17 @@ int main(int argc, char **argv) {
     ret = H5RCclose(rid2);
     assert(0 == ret);
 
-    /* closing the container also acts as a wait all on all pending requests 
-       on the container. */
-    assert(H5Fclose_ff(file_id, e_stack) == 0);
-
     /* wait on all requests and print completion status */
     H5ESget_count(e_stack, &num_events);
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
+
+    /* closing the container also acts as a wait all on all pending requests 
+       on the container. */
+    assert(H5Fclose_ff(file_id, H5_EVENT_STACK_NULL) == 0);
+
+    assert(exists);
 
     H5Sclose(sid);
     H5Pclose(fapl_id);
@@ -272,7 +283,9 @@ int main(int argc, char **argv) {
     /* This finalizes the EFF stack. ships a terminate and IOD finalize to the server 
        and shutsdown the FS server (when all clients send the terminate request) 
        and client */
-    EFF_finalize();
+    MPI_Barrier(MPI_COMM_WORLD);
+    ret = EFF_finalize();
+    assert(ret >= 0);
 
     MPI_Finalize();
     return 0;

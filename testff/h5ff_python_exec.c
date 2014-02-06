@@ -1,6 +1,7 @@
 #include "hdf5.h"
+#ifdef H5_HAVE_PYTHON
 #include <Python.h>
-
+#endif
 #include <stdio.h>
 #include <assert.h>
 
@@ -58,7 +59,7 @@ main(int argc, char *argv[])
     hid_t *combine_data_type_id;
     int i;
     int ret = EXIT_SUCCESS;
-
+#ifdef H5_HAVE_PYTHON
     Py_Initialize();
 
     for (i = 0; i < SPLIT_COUNT; i++) {
@@ -85,5 +86,6 @@ main(int argc, char *argv[])
 
 done:
     Py_Finalize();
+#endif
     return ret;
 }

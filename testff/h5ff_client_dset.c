@@ -6,29 +6,61 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include "mchecksum.h"
 #include "mpi.h"
 #include "hdf5.h"
 
+static uint64_t
+checksum_crc64(const void *buf, size_t buf_size)
+{
+    const char *hash_method = "crc64";
+    size_t hash_size;
+    mchecksum_object_t checksum;
+    uint64_t ret_value = 0;
+
+    /* Initialize checksum */
+    mchecksum_init(hash_method, &checksum);
+
+    /* Update checksum */
+    mchecksum_update(checksum, buf, buf_size);
+
+    /* Get size of checksum */
+    hash_size = mchecksum_get_size(checksum);
+
+    assert(hash_size == sizeof(uint64_t));
+
+    /* get checksum value */
+    mchecksum_get(checksum, &ret_value, hash_size, 1);
+
+    /* Destroy checksum */
+    mchecksum_destroy(checksum);
+
+    return ret_value;
+}
+
 int main(int argc, char **argv) {
-    const char file_name[]="eff_file.h5";
+    const char file_name[]="eff_file_dset.h5";
 
     hid_t file_id;
     hid_t gid1, gid2, gid3;
-    hid_t sid, dtid;
+    hid_t sid, scalar, dtid;
     hid_t did1, did2, did3;
-    hid_t tid1, tid2, rid1, rid2;
+    hid_t tid1, tid2, tid3, rid1, rid2, rid3, rid4;
     hid_t fapl_id, trspl_id, dxpl_id;
     hid_t e_stack;
+    hid_t esid;
 
     uint64_t version;
     uint64_t trans_num;
 
     int32_t *wdata1 = NULL, *wdata2 = NULL;
     int16_t *wdata3 = NULL;
+    int32_t *ex_wdata = NULL, *ex_rdata = NULL;
     int32_t *rdata1 = NULL, *rdata2 = NULL;
     int16_t *rdata3 = NULL;
+    int32_t element = 0;
     const unsigned int nelem=60;
-    hsize_t dims[1];
+    hsize_t dims[1], max_dims[1];
     hsize_t extent;
 
     void *dset_token1, *dset_token2, *dset_token3;
@@ -40,7 +72,7 @@ int main(int argc, char **argv) {
     H5ES_status_t status;
     size_t num_events = 0;
     unsigned int i = 0;
-    uint32_t cs = 0,read1_cs = 0, read2_cs = 0;
+    uint64_t array_cs = 0, elmt_cs = 0, read1_cs = 0, read2_cs = 0;
     uint32_t cs_scope = 0;
     herr_t ret;
 
@@ -55,7 +87,7 @@ int main(int argc, char **argv) {
 
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
-    fprintf(stderr, "APP processes = %d, my rank is %d\n", my_size, my_rank);
+    printf("APP processes = %d, my rank is %d\n", my_size, my_rank);
 
     /* Choose the IOD VOL plugin to use with this file. */
     fapl_id = H5Pcreate (H5P_FILE_ACCESS);
@@ -82,17 +114,20 @@ int main(int argc, char **argv) {
     assert(e_stack);
 
     /* set the metada data integrity checks to happend at transfer through mercury */
-    cs_scope |= H5_CHECKSUM_TRANSFER;
-    ret = H5Pset_metadata_integrity_scope(fapl_id, cs_scope);
-    assert(ret == 0);
+    //cs_scope |= H5_CHECKSUM_TRANSFER;
+    //ret = H5Pset_metadata_integrity_scope(fapl_id, cs_scope);
+    //assert(ret == 0);
 
     /* create the file. */
-    file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, H5_EVENT_STACK_NULL);
     assert(file_id > 0);
 
     /* create 1-D dataspace with 60 elements */
     dims [0] = nelem;
-    sid = H5Screate_simple(1, dims, NULL);
+    max_dims [0] = H5S_UNLIMITED;
+    sid = H5Screate_simple(1, dims, max_dims);
+
+    scalar = H5Screate(H5S_SCALAR);
 
     dtid = H5Tcopy(H5T_STD_I32LE);
 
@@ -130,17 +165,10 @@ int main(int argc, char **argv) {
         /* create datasets */
         did1 = H5Dcreate_ff(gid1, "D1", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         assert(did1 > 0);
-        did2 = H5Dcreate_ff(gid2, "D2", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        did2 = H5Dcreate_ff(gid2, "D2", dtid, scalar, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         assert(did2 > 0);
         did3 = H5Dcreate_ff(gid3, "D3", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         assert(did3 > 0);
-
-        ret = H5Gclose_ff(gid1, e_stack);
-        assert(ret == 0);
-        ret = H5Gclose_ff(gid2, e_stack);
-        assert(ret == 0);
-        ret = H5Gclose_ff(gid3, e_stack);
-        assert(ret == 0);
     }
 
     /* Tell Delegates that transaction 1 is started */
@@ -170,6 +198,13 @@ int main(int argc, char **argv) {
         assert(0 == ret);
         ret = H5Oget_token(did3, dset_token3, &token_size3);
         assert(0 == ret);
+
+        /* make sure the create operations have completed before
+           telling the delegates to open them */
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
         /* bcast the token sizes and the tokens */ 
         MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
@@ -203,9 +238,9 @@ int main(int argc, char **argv) {
         MPI_Ibcast(dset_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[2]);
         MPI_Waitall(3, mpi_reqs, MPI_STATUS_IGNORE);
 
-        did1 = H5Oopen_by_token(dset_token1, rid1, e_stack);
-        did2 = H5Oopen_by_token(dset_token2, rid1, e_stack);
-        did3 = H5Oopen_by_token(dset_token3, rid1, e_stack);
+        did1 = H5Oopen_by_token(dset_token1, tid1, e_stack);
+        did2 = H5Oopen_by_token(dset_token2, tid1, e_stack);
+        did3 = H5Oopen_by_token(dset_token3, tid1, e_stack);
     }
 
     /* write data to datasets */
@@ -213,38 +248,42 @@ int main(int argc, char **argv) {
     /* Attach a checksum to the dxpl which is verified all the way
        down at the server */
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-    cs = H5checksum(wdata1, sizeof(int32_t) * nelem, NULL);
-    H5Pset_dxpl_checksum(dxpl_id, cs);
+    array_cs = checksum_crc64(wdata1, sizeof(int32_t) * nelem);
+    H5Pset_dxpl_checksum(dxpl_id, array_cs);
+    printf("Checksum computed for raw data: %016lX\n", array_cs);
+    ret = H5Dwrite_ff(did1, dtid, H5S_ALL, H5S_ALL, dxpl_id, wdata1, tid1, e_stack);
+    assert(ret == 0);
+
+    /* Raw data write on D2. same as previous, but here we indicate
+       through the property list that we want to inject a
+       corruption. */
+    //array_cs = checksum_crc64(wdata2, sizeof(int32_t) * nelem);
+    //H5Pset_dxpl_checksum(dxpl_id, array_cs);
+    //H5Pset_dxpl_inject_corruption(dxpl_id, 1);
+
+    /* tell HDF5 to disable data integrity checks stored at IOD for this write;
+       The transfer checksum will still capture the corruption. */
+    //cs_scope |= H5_CHECKSUM_TRANSFER;
+    //ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
+    //assert(ret == 0);
+
+    element = 450;
+    elmt_cs = checksum_crc64(&element, sizeof(int32_t));
+    H5Pset_dxpl_checksum(dxpl_id, elmt_cs);
+
+    ret = H5Dwrite_ff(did2, dtid, scalar, scalar, dxpl_id, &element, tid1, e_stack);
+    assert(ret == 0);
 
     /* tell HDF5 to disable all data integrity checks for this write */
     cs_scope = 0;
     ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
     assert(ret == 0);
 
-    ret = H5Dwrite_ff(did1, dtid, sid, sid, dxpl_id, wdata1, tid1, e_stack);
-    assert(ret == 0);
-
-    /* Raw data write on D2. same as previous, but here we indicate
-       through the property list that we want to inject a
-       corruption. */
-    cs = H5checksum(wdata2, sizeof(int32_t) * nelem, NULL);
-    H5Pset_dxpl_checksum(dxpl_id, cs);
-    H5Pset_dxpl_inject_corruption(dxpl_id, 1);
-
-    /* tell HDF5 to disable data integrity checks stored at IOD for this write;
-       The transfer checksum will still capture the corruption. */
-    cs_scope |= H5_CHECKSUM_TRANSFER;
-    ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
-    assert(ret == 0);
-
-    ret = H5Dwrite_ff(did2, dtid, sid, sid, dxpl_id, wdata2, tid1, e_stack);
-    assert(ret == 0);
-
     /* Raw data write on D3. Same as previous; however we specify that
        the data in the buffer is in BE byte order. Type conversion will
        happen at the server when we detect that the dataset type is of
        LE order and the datatype here is in BE order. */
-    ret = H5Dwrite_ff(did3, H5T_STD_I16BE, sid, sid, H5P_DEFAULT, wdata3, tid1, e_stack);
+    ret = H5Dwrite_ff(did3, H5T_STD_I16BE, sid, sid, dxpl_id, wdata3, tid1, e_stack);
     assert(ret == 0);
 
     H5Pclose(dxpl_id);
@@ -277,10 +316,6 @@ int main(int argc, char **argv) {
     ret = H5TRclose(tid1);
     assert(0 == ret);
 
-    /* close some objects */
-    ret = H5Dclose_ff(did1, e_stack);
-    assert(ret == 0);
-
     /* release container version 0. This is async. */
     ret = H5RCrelease(rid1, e_stack);
     assert(0 == ret);
@@ -301,6 +336,19 @@ int main(int argc, char **argv) {
         assert(rid2 > 0);
     }
 
+    /* close some objects */
+    if(0 == my_rank) {
+        ret = H5Gclose_ff(gid1, e_stack);
+        assert(ret == 0);
+        ret = H5Gclose_ff(gid2, e_stack);
+        assert(ret == 0);
+        ret = H5Gclose_ff(gid3, e_stack);
+        assert(ret == 0);
+    }
+
+    ret = H5Dclose_ff(did1, H5_EVENT_STACK_NULL);
+    assert(ret == 0);
+
     /* Open objects closed before */
     gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, rid2, e_stack);
     did1 = H5Dopen_ff(file_id, "G1/D1", H5P_DEFAULT, rid2, e_stack);
@@ -310,7 +358,7 @@ int main(int argc, char **argv) {
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
     /* Give a location to the DXPL to store the checksum once the read has completed */
     H5Pset_dxpl_checksum_ptr(dxpl_id, &read1_cs);
-    ret = H5Dread_ff(did1, dtid, sid, sid, dxpl_id, rdata1, rid2, e_stack);
+    ret = H5Dread_ff(did1, dtid, H5S_ALL, H5S_ALL, dxpl_id, rdata1, rid2, e_stack);
     assert(ret == 0);
     H5Pclose(dxpl_id);
 
@@ -326,16 +374,20 @@ int main(int argc, char **argv) {
     /* Give a location to the DXPL to store the checksum once the read has completed */
     H5Pset_dxpl_checksum_ptr(dxpl_id, &read2_cs);
 
-    ret = H5Dread_ff(did2, dtid, sid, sid, dxpl_id, rdata2, rid2, e_stack);
+    ret = H5Dread_ff(did1, dtid, H5S_ALL, H5S_ALL, dxpl_id, rdata2, rid2, e_stack);
     assert(ret == 0);
-    H5Pclose(dxpl_id);
+
+    /* tell HDF5 to disable all data integrity checks for this write */
+    cs_scope = 0;
+    ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
+    assert(ret == 0);
 
     /* Raw data read on D3. This is asynchronous.  Note that the type
        is different than the dataset type. */
-    ret = H5Dread_ff(did3, H5T_STD_I16BE, sid, sid, H5P_DEFAULT, rdata3, rid2, e_stack);
+    ret = H5Dread_ff(did3, H5T_STD_I16BE, H5S_ALL, H5S_ALL, dxpl_id, rdata3, rid2, e_stack);
     assert(ret == 0);
 
-
+    H5Pclose(dxpl_id);
 
     /* Raw data read on D1. This is asynchronous.  The read is done into a 
        noncontiguous memory dataspace selection */
@@ -355,7 +407,7 @@ int main(int argc, char **argv) {
         mem_space = H5Screate_simple(1, dims, NULL);
         H5Sselect_hyperslab(mem_space, H5S_SELECT_SET, &start,&stride,&count,&block);
 
-        ret = H5Dread_ff(did1, H5T_STD_I32LE, mem_space, sid, H5P_DEFAULT, buf, 
+        ret = H5Dread_ff(did1, H5T_STD_I32LE, mem_space, H5S_ALL, H5P_DEFAULT, buf, 
                          rid2, e_stack);
         assert(ret == 0);
         H5Sclose(mem_space);
@@ -367,15 +419,26 @@ int main(int argc, char **argv) {
         printf("ESWait H5Dread Completion status = %d\n", status);
         assert (status);
 
-        fprintf(stderr, "Printing all Dataset values. We should have a 0 after each element: ");
+        printf("Printing all Dataset values. We should have a 0 after each element: ");
         for(i=0;i<120;++i)
-            fprintf(stderr, "%d ", buf[i]);
-        fprintf(stderr, "\n");
+            printf("%d ", buf[i]);
+        printf("\n");
 
         free(buf);
     }
 
+    element = 0;
+    ret = H5Dread_ff(did2, dtid, scalar, scalar, H5P_DEFAULT, &element, rid2, e_stack);
+    assert(ret == 0);
 
+    H5ESwait(e_stack, 0, &status);
+    printf("ESWait H5Dread Completion status = %d\n", status);
+    assert (status);
+
+    printf("Rank %d read value %d\n", my_rank, element);
+    assert(element == 450);
+
+#if 0
     /* create & start transaction 2 with num_peers = my_size. This
        means all processes are transaction leaders, and all have to
        call start and finish on the transaction. */
@@ -392,7 +455,8 @@ int main(int argc, char **argv) {
     /* Do more updates on transaction 2 */
 
     if(0 == my_rank) {
-        extent = 10;
+        extent = nelem+10;
+
         ret = H5Dset_extent_ff(did1, &extent, tid2, e_stack);
         assert(ret == 0);
     }
@@ -412,9 +476,84 @@ int main(int argc, char **argv) {
     }
 
     /* finish transaction 2 - all have to call */
-    ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, e_stack);
+    ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 
+    H5ESget_count(e_stack, &num_events);
+    H5ESwait_all(e_stack, &status);
+    printf("%d events in event stack. H5ESwait_all Completion status = %d\n", num_events, status);
+    H5ESclear(e_stack);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    version = 2;
+    rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    assert(2 == version);
+
+    tid3 = H5TRcreate(file_id, rid3, (uint64_t)3);
+    assert(tid3);
+    trspl_id = H5Pcreate (H5P_TR_START);
+    ret = H5Pset_trspl_num_peers(trspl_id, my_size);
+    assert(0 == ret);
+    ret = H5TRstart(tid3, trspl_id, e_stack);
+    assert(0 == ret);
+    ret = H5Pclose(trspl_id);
+    assert(0 == ret);
+
+    esid = H5Dget_space(did1);
+
+    ex_wdata = malloc (sizeof(int32_t)*(nelem+10));
+    ex_rdata = malloc (sizeof(int32_t)*(nelem+10));
+
+    if(0 == my_rank) {
+        for(i=0;i<extent;++i) {
+            ex_wdata[i] = i;
+            ex_rdata[i] = 0;
+        }
+
+        ret = H5Dwrite_ff(did1, dtid, esid, esid, H5P_DEFAULT, 
+                          ex_wdata, tid3, e_stack);
+        assert(ret == 0);
+    }
+
+    /* finish transaction 3 */
+    ret = H5TRfinish(tid3, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
+    assert(0 == ret);
+
+    H5ESget_count(e_stack, &num_events);
+    H5ESwait_all(e_stack, &status);
+    printf("%d events in event stack. H5ESwait_all Completion status = %d\n", 
+           num_events, status);
+    H5ESclear(e_stack);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    version = 3;
+    rid4 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    assert(3 == version);
+
+    {
+        esid = H5Dget_space(did1);
+
+        ret = H5Dread_ff(did1, dtid, esid, esid, H5P_DEFAULT, ex_rdata, 
+                         rid4, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+
+        printf("Printing all Extended Dataset values: ");
+        for(i=0 ; i<nelem+10 ; ++i)
+            printf("%d ", ex_rdata[i]);
+        printf("\n");
+
+        H5Sclose(esid);
+    }
+
+    /* release container version 3. This is async. */
+    ret = H5RCrelease(rid3, e_stack);
+    assert(0 == ret);
+    ret = H5RCrelease(rid4, e_stack);
+    assert(0 == ret);
+
+#endif
+
+    MPI_Barrier(MPI_COMM_WORLD);    
     if(my_rank == 0) {
         /* release container version 1. This is async. */
         ret = H5RCrelease(rid2, e_stack);
@@ -431,14 +570,7 @@ int main(int argc, char **argv) {
     ret = H5Gclose_ff(gid1, e_stack);
     assert(ret == 0);
 
-    ret = H5Sclose(sid);
-    assert(ret == 0);
-    ret = H5Tclose(dtid);
-    assert(ret == 0);
-    ret = H5Pclose(fapl_id);
-    assert(ret == 0);
-
-    H5Fclose_ff(file_id, e_stack);
+    H5Fclose_ff(file_id, H5_EVENT_STACK_NULL);
 
     H5ESget_count(e_stack, &num_events);
 
@@ -451,38 +583,43 @@ int main(int argc, char **argv) {
     H5EStest_all(e_stack, &status);
     printf("%d events in event stack. H5EStest_all Completion status = %d\n", num_events, status);
 
-    H5ESclear(e_stack);
+    ret = H5Sclose(sid);
+    assert(ret == 0);
+    ret = H5Sclose(scalar);
+    assert(ret == 0);
+    ret = H5Tclose(dtid);
+    assert(ret == 0);
+    ret = H5Pclose(fapl_id);
+    assert(ret == 0);
 
     ret = H5RCclose(rid1);
     assert(0 == ret);
     ret = H5RCclose(rid2);
     assert(0 == ret);
-    ret = H5TRclose(tid2);
-    assert(0 == ret);
 
-    fprintf(stderr, "Read Data1: ");
+    H5ESclear(e_stack);
+
+    printf("Read Data1: ");
     for(i=0;i<nelem;++i)
-        fprintf(stderr, "%d ",rdata1[i]);
-    fprintf(stderr, "\n");
-    fprintf(stderr, 
-            "Checksum Receieved = %u  Checksum Computed = %u (Should be Equal)\n", 
-            read1_cs, cs);
+        printf("%d ",rdata1[i]);
+    printf("\n");
+    printf("Checksum Receieved = %016lX  Checksum Computed = %016lX (Should be Equal)\n", 
+            read1_cs, array_cs);
 
-    fprintf(stderr, "Read Data2 (corrupted): ");
+    printf("Read Data2 (corrupted): ");
     for(i=0;i<nelem;++i)
-        fprintf(stderr, "%d ",rdata2[i]);
-    fprintf(stderr, "\n");
-    fprintf(stderr, 
-            "Checksum Receieved = %u  Checksum Computed = %u (Should NOT be Equal)\n", 
-            read2_cs, cs);
+        printf("%d ",rdata2[i]);
+    printf("\n");
+    printf("Checksum Receieved = %016lX  Checksum Computed = %016lX (Should NOT be Equal)\n", 
+            read2_cs, array_cs);
 
-    assert(read1_cs == cs);
-    assert(read2_cs != cs);
+    assert(read1_cs == array_cs);
+    assert(read2_cs != array_cs);
 
-    fprintf(stderr, "Read Data3 (32 LE converted to 16 bit BE order): ");
+    printf("Read Data3 (32 LE converted to 16 bit BE order): ");
     for(i=0;i<nelem;++i)
-        fprintf(stderr, "%d ",rdata3[i]);
-    fprintf(stderr, "\n");
+        printf("%d ",rdata3[i]);
+    printf("\n");
 
     ret = H5ESclose(e_stack);
     assert(ret == 0);
@@ -493,7 +630,14 @@ int main(int argc, char **argv) {
     free(rdata1);
     free(rdata2);
     free(rdata3);
+    free(ex_wdata);
+    free(ex_rdata);
 
+    free(dset_token1);
+    free(dset_token2);
+    free(dset_token3);
+
+    MPI_Barrier(MPI_COMM_WORLD);
     EFF_finalize();
     MPI_Finalize();
 
