@@ -29890,6 +29890,7 @@ $as_echo "yes" >&6; }
 
 fi
     AM_CFLAGS="$AM_CFLAGS $MERCURY_CFLAGS"
+    AM_CPPFLAGS="$AM_CPPFLAGS $MERCURY_CFLAGS"
     AM_LDFLAGS="$AM_LDFLAGS $MERCURY_LIBS"
 
     # Check mchecksum (--enable-parallel requires static linking)
@@ -30106,6 +30107,7 @@ $as_echo "yes" >&6; }
 
 fi
     AM_CFLAGS="$AM_CFLAGS $MCHECKSUM_CFLAGS"
+    AM_CPPFLAGS="$AM_CPPFLAGS $MCHECKSUM_CFLAGS"
     AM_LDFLAGS="$AM_LDFLAGS $MCHECKSUM_LIBS"
 
     for ac_header in axe.h iod_api.h iod_types.h
