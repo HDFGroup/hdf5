@@ -402,9 +402,9 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t trans_num = input->trans_num;
     hbool_t acquire = input->acquire;
     uint32_t client_rank = input->client_rank;
-    uint64_t oid_index[3];
     iod_obj_id_t oidkv_id = input->oidkv_id;
     iod_handle_t oidkv_oh;
+    uint64_t oid_index[3];
     iod_kv_t kv;
     iod_ret_t ret;
     int step = 0;
@@ -475,8 +475,7 @@ done:
         fprintf(stderr, "Failed to Finish Transaction\n");
 
     if(step == 1) {
-        if(iod_obj_close(oidkv_oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object handle");
+        iod_obj_close(oidkv_oh, NULL, NULL);
     }
 
     input = (tr_finish_in_t *)H5MM_xfree(input);
