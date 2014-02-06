@@ -331,6 +331,11 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     else
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "invalid mode");
 
+    /* MSC - can't open file read only since IOD will fail when object
+       are opened for write */
+    if(mode == IOD_CONT_R)
+        mode = IOD_CONT_RW;
+
     if(H5Pget_metadata_integrity_scope(input->fapl_id, &cs_scope) < 0)
         HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 

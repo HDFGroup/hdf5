@@ -2100,7 +2100,7 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED dxpl_id, void **req)
 
     /* determine the max indexes for the KV, Array, and BLOB IDs used
        up by all the processes */
-    {
+    if(file->flags != H5F_ACC_RDONLY) {
         uint64_t input_indexes[3] = {file->remote_file.kv_oid_index, 
                                       file->remote_file.array_oid_index, 
                                       file->remote_file.blob_oid_index};
@@ -2120,6 +2120,11 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED dxpl_id, void **req)
             input.max_array_index = 0;
             input.max_blob_index = 0;
         }
+    }
+    else {
+        input.max_kv_index = 0;
+        input.max_array_index = 0;
+        input.max_blob_index = 0;
     }
 
     input.coh = file->remote_file.coh;
