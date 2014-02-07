@@ -177,8 +177,8 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
         obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
         obj_create_hint->num_hint = 1;
-        obj_create_hint->hint[0].key = "iod_obj_enable_checksum";
-        obj_create_hint->hint[0].value = "iod_obj_enable_checksum";
+        obj_create_hint->hint[0].key = "iod_hint_obj_enable_cksum";
+        obj_create_hint->hint[0].value = "iod_hint_obj_enable_cksum";
     }
 
     dt_class = H5Tget_class(input->type_id);

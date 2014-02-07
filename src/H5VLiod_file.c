@@ -93,15 +93,15 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     if(cs_scope & H5_CHECKSUM_IOD) {
         con_open_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
         con_open_hint->num_hint = 1;
-        con_open_hint->hint[0].key = "iod_con_scratch_cksum";
+        con_open_hint->hint[0].key = "iod_hint_co_scratch_cksum";
     }
 
     /* root group integrity */
     if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
         obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
         obj_create_hint->num_hint = 1;
-        obj_create_hint->hint[0].key = "iod_obj_enable_checksum";
-        obj_create_hint->hint[0].value = "iod_obj_enable_checksum";
+        obj_create_hint->hint[0].key = "iod_hint_obj_enable_cksum";
+        obj_create_hint->hint[0].value = "iod_hint_obj_enable_cksum";
     }
 
     /* Create the Container */
