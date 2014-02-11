@@ -213,6 +213,22 @@ SET (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
 SET (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 
 #-----------------------------------------------------------------------------
+# Set Install folder value
+#-----------------------------------------------------------------------------
+IF (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  IF(CMAKE_HOST_UNIX)
+    SET(CMAKE_INSTALL_PREFIX "/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
+      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+  ELSE(CMAKE_HOST_UNIX)
+    GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
+    SET(CMAKE_INSTALL_PREFIX
+      "${CMAKE_GENERIC_PROGRAM_FILES}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
+      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+    SET(CMAKE_GENERIC_PROGRAM_FILES)
+  ENDIF(CMAKE_HOST_UNIX)
+ENDIF (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
+#-----------------------------------------------------------------------------
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
 INCLUDE (${HDF5_RESOURCES_DIR}/HDFMacros.cmake)
