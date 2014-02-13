@@ -205,9 +205,9 @@ test_reference_params(void)
     name_size = H5Rget_name(-1, H5R_DATASET_REGION, &rbuf[0], NULL, 0);
     VERIFY(name_size, FAIL, "H5Rget_name loc_id");
     name_size = H5Rget_name(fid1, H5R_DATASET_REGION, NULL, NULL, 0);
-    VERIFY(ret, FAIL, "H5Rget_name ref");
+    VERIFY(name_size, FAIL, "H5Rget_name ref");
     name_size = H5Rget_name(fid1, H5R_MAXTYPE, &rbuf[0], NULL, 0);
-    VERIFY(ret, FAIL, "H5Rget_name type");
+    VERIFY(name_size, FAIL, "H5Rget_name type");
 
     /* Test parameters to H5Rget_region */
     ret = H5Rget_region(-1, H5R_OBJECT, &rbuf[0]);

@@ -49,7 +49,7 @@ SRC_TOOLS="$srcdir/.."
 # testfiles source dirs for tools
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/h5repack/testfiles"
 
-TESTDIR=testfiles
+TESTDIR=testplug
 test -d $TESTDIR || mkdir $TESTDIR
 
 ######################################################################
@@ -66,6 +66,10 @@ $SRC_H5REPACK_TESTFILES/h5repack_layout.h5
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5-plugin_test.ddl
 $SRC_H5REPACK_TESTFILES/plugin_test.h5repack_layout.h5.tst
 "
+#$SRC_H5REPACK_TESTFILES/h5repack_layout.UD.h5
+#$SRC_H5REPACK_TESTFILES/h5repack_layout.UD.h5-plugin_none.ddl
+#$SRC_H5REPACK_TESTFILES/plugin_none.h5repack_layout.UD.h5.tst
+#"
 
 #
 # copy test files and expected output files from source dirs to test dir
@@ -88,7 +92,7 @@ if [ $? != 0 ]; then
 fi
 
 # setup plugin path
-ENVCMD="env HDF5_PLUGIN_PATH=${PLUGIN_LIBDIR}"
+ENVCMD="env HDF5_PLUGIN_PATH=../${PLUGIN_LIBDIR}"
 
 COPY_TESTFILES_TO_TESTDIR()
 {
@@ -171,8 +175,8 @@ STDOUT_FILTER() {
 TOOLTEST_DUMP() 
 {
     echo $@
-    infile=$TESTDIR/$2
-    outfile=$TESTDIR/out-$1.$2
+    infile=$2
+    outfile=out-$1.$2
     expect1="$TESTDIR/$1.$2.tst"
     actual1="$TESTDIR/$1.$2.out"
     actual1_err="$TESTDIR/$1.$2.err"
@@ -186,35 +190,37 @@ TOOLTEST_DUMP()
     # Run test.
     TESTING $H5REPACK $@
     (
-        $ENVCMD $H5REPACK_BIN "$@" $infile $outfile
+      cd $TESTDIR
+      $ENVCMD $H5REPACK_BIN "$@" $infile $outfile
     ) >$actual1 2>$actual1_err
     RET=$?
     STDOUT_FILTER $actual1
     cat $actual1_err >> $actual1
     if [ $RET != 0 ] ; then
-     echo "*FAILED*"
-     nerrors="`expr $nerrors + 1`"
-    else
-     echo " PASSED"
-     if cmp -s $expect1 $actual1; then
-      echo " PASSED"
-     else
       echo "*FAILED*"
-      echo "    Expected result (*.tst) differs from actual result (*.out)"
       nerrors="`expr $nerrors + 1`"
-      test yes = "$verbose" && diff -c $expect1 $actual1 |sed 's/^/    /'
-     fi
-     VERIFY h5dump output -pH $outfile 
-     (
-        $ENVCMD $H5DUMP_BIN -pH $outfile 
-     ) >$actual2 2>$actual2_err
-     RET=$?
-     cat $actual2_err >> $actual2
-
-     if cmp -s $expect2 $actual2; then
+    else
       echo " PASSED"
-     else
-      echo "*FAILED*"
+      if cmp -s $expect1 $actual1; then
+        echo " PASSED"
+      else
+        echo "*FAILED*"
+        echo "    Expected result (*.tst) differs from actual result (*.out)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && diff -c $expect1 $actual1 |sed 's/^/    /'
+      fi
+      VERIFY h5dump output -pH $outfile 
+      (
+        cd $TESTDIR
+        $ENVCMD $H5DUMP_BIN -pH $outfile 
+      ) >$actual2 2>$actual2_err
+      RET=$?
+      cat $actual2_err >> $actual2
+
+      if cmp -s $expect2 $actual2; then
+        echo " PASSED"
+      else
+        echo "*FAILED*"
       echo "    Expected result (*.ddl) differs from actual result (*.out)"
       nerrors="`expr $nerrors + 1`"
       test yes = "$verbose" && diff -c $expect2 $actual2 |sed 's/^/    /'
@@ -236,6 +242,9 @@ COPY_TESTFILES_TO_TESTDIR
 # Run the test
 arg="h5repack_layout.h5 -v -f UD=257,1,9"
 TOOLTEST_DUMP plugin_test $arg 
+
+#arg="h5repack_layout.UD.h5 -v -f NONE"
+#TOOLTEST_DUMP plugin_none $arg 
 
 # print results
 if test $nerrors -ne 0 ; then

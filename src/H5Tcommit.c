@@ -661,7 +661,7 @@ H5Tget_create_plist(hid_t dtype_id)
 {
     H5T_t	        *type;          /* Datatype object for ID */
     H5P_genplist_t      *tcpl_plist;    /* Existing datatype creation propertty list */
-    herr_t              status;         /* Generic status value */
+    htri_t              status;         /* Generic status value */
     hid_t		ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)

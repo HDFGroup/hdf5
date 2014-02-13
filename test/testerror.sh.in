@@ -61,10 +61,6 @@ TEST() {
    # Run test.
    TESTING $TEST_ERR
    (
-      echo "#############################"
-      echo "Expected output for $TEST_ERR" 
-      echo "#############################"
-
       # Skip the plugin for testing missing filter.
       $ENVCMD $RUNSERIAL $TEST_ERR_BIN 
    ) >$actual 2>$actual_err

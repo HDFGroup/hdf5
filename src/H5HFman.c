@@ -554,12 +554,14 @@ H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
     /* Decode the object offset within the heap & it's length */
     UINT64DECODE_VAR(id, obj_off, hdr->heap_off_size);
     UINT64DECODE_VAR(id, obj_len, hdr->heap_len_size);
-    HDassert(obj_off > 0);
-    HDassert(obj_len > 0);
 
     /* Check for bad offset or length */
+    if(obj_off == 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "invalid fractal heap offset")
     if(obj_off > hdr->man_size)
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object offset too large")
+    if(obj_len == 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "invalid fractal heap object size")
     if(obj_len > hdr->man_dtable.cparam.max_direct_size)
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object size too large for direct block")
     if(obj_len > hdr->max_man_size)

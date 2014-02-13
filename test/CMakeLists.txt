@@ -178,6 +178,7 @@ SET (H5_TESTS
     bittests
     dt_arith
     dtypes
+    dsets
     cmpd_dset
     filter_fail
     extend

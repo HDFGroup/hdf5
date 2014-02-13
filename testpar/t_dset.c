@@ -2703,7 +2703,10 @@ test_actual_io_mode(int selection_mode) {
             
             test_name = "Multi Chunk - Collective";
             actual_chunk_opt_mode_expected = H5D_MPIO_MULTI_CHUNK;
-            actual_io_mode_expected = H5D_MPIO_CHUNK_COLLECTIVE;
+            if(mpi_size > 1)
+                actual_io_mode_expected = H5D_MPIO_CHUNK_COLLECTIVE;
+            else
+                actual_io_mode_expected = H5D_MPIO_CHUNK_INDEPENDENT;
             break;
         
         /* Mixed I/O with optimization */
@@ -2780,11 +2783,14 @@ test_actual_io_mode(int selection_mode) {
                 test_name = "Multi Chunk - Mixed (Disagreement)";
             
             actual_chunk_opt_mode_expected = H5D_MPIO_MULTI_CHUNK;
-               
-            if(mpi_rank == 0)
-                actual_io_mode_expected = H5D_MPIO_CHUNK_COLLECTIVE;
+            if(mpi_size > 1) {
+                if(mpi_rank == 0)
+                    actual_io_mode_expected = H5D_MPIO_CHUNK_COLLECTIVE;
+                else
+                    actual_io_mode_expected = H5D_MPIO_CHUNK_MIXED;
+            }
             else
-                actual_io_mode_expected = H5D_MPIO_CHUNK_MIXED;
+                actual_io_mode_expected = H5D_MPIO_CHUNK_INDEPENDENT;
             
             break; 
 
@@ -2842,7 +2848,6 @@ test_actual_io_mode(int selection_mode) {
     
     ret = H5Sselect_hyperslab(mem_space, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
-
 
     /* Get the number of elements in the selection */
     length = dim0 * dim1;
@@ -2921,7 +2926,6 @@ test_actual_io_mode(int selection_mode) {
     VRFY((actual_chunk_opt_mode_read == actual_chunk_opt_mode_write),
         "reading and writing are the same for actual_chunk_opt_mode");
 
-    
     /* Test values */
     if(actual_chunk_opt_mode_expected != (unsigned) -1 && actual_io_mode_expected != (unsigned) -1) {
         sprintf(message, "Actual Chunk Opt Mode has the correct value for %s.\n",test_name);
@@ -3012,7 +3016,7 @@ actual_io_mode_tests(void) {
      */
     test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_IND);
     test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_COL);
-    
+
     /* The Multi Chunk Mixed test requires atleast three processes. */
     if (mpi_size > 2)
         test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX);
@@ -3110,8 +3114,8 @@ test_no_collective_cause_mode(int selection_mode)
     int         length;
     int         * buffer;
     int         i;
-    MPI_Comm    mpi_comm = MPI_COMM_NULL;
-    MPI_Info    mpi_info = MPI_INFO_NULL;
+    MPI_Comm    mpi_comm;
+    MPI_Info    mpi_info;
     hid_t       fid = -1;
     hid_t       sid = -1;
     hid_t       dataset = -1;
@@ -3138,7 +3142,7 @@ test_no_collective_cause_mode(int selection_mode)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     MPI_Barrier(MPI_COMM_WORLD);
-    
+
     HDassert(mpi_size >= 1);
 
     mpi_comm = MPI_COMM_WORLD;
@@ -3675,11 +3679,6 @@ test_no_collective_cause_mode_filter(int selection_mode)
 void 
 no_collective_cause_tests(void) 
 {
-    int mpi_size = -1;
-    int mpi_rank = -1;
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_rank);
-
     /* 
      * Test individual cause 
      */

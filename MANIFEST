@@ -2431,7 +2431,6 @@
 ./config/cmake/GetTimeOfDayTest.cpp
 ./config/cmake/HDF5CXXTests.cpp
 ./config/cmake/HDF5Tests.c
-./config/cmake/xlatefile.c
 ./config/cmake/CheckTypeSize.cmake
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
@@ -2454,7 +2453,6 @@
 ./config/cmake/vfdTest.cmake
 ./config/cmake/CTestCustom.cmake
 ./config/cmake/ConfigureChecks.cmake
-./config/cmake/CPack.cmake
 ./config/cmake/CPack.Info.plist.in
 ./config/cmake/hdf.gif
 ./config/cmake/NSIS.template.in
