@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5stat -g -l 8 h5stat_threshold.h5'
-#############################
 Filename: h5stat_threshold.h5
 Small groups (with 0 to 7 links):
 	# of groups with 0 link(s): 1

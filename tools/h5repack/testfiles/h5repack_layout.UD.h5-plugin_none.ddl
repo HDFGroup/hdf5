@@ -1,4 +1,4 @@
-HDF5 "testfiles/out-plugin_none.h5repack_layout.UD.h5" {
+HDF5 "out-plugin_none.h5repack_layout.UD.h5" {
 GROUP "/" {
    DATASET "dset1" {
       DATATYPE  H5T_STD_I32LE

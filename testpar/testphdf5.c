@@ -342,7 +342,7 @@ int main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0){
-	printf("Failed to turn off atexit processing. Continue.\n", mpi_rank);
+	printf("Failed to turn off atexit processing. Continue.\n");
     };
     H5open();
     h5_show_hostname();
@@ -486,11 +486,17 @@ int main(int argc, char **argv)
 	    "I/O mode confusion test -- hangs quickly on failure",
             &io_mode_confusion_params);
 
-    rr_obj_flush_confusion_params.name = PARATESTFILE;
-    rr_obj_flush_confusion_params.count = 0; /* value not used */
-    AddTest("rrobjflushconf", rr_obj_hdr_flush_confusion, NULL,
-	    "round robin object header flush confusion test",
-            &rr_obj_flush_confusion_params);
+    if((mpi_size < 3) && MAINPROCESS) {
+        printf("rr_obj_hdr_flush_confusion test needs at least 3 processes.\n");
+        printf("rr_obj_hdr_flush_confusion test will be skipped \n");
+    }
+    if(mpi_size > 2) {
+        rr_obj_flush_confusion_params.name = PARATESTFILE;
+        rr_obj_flush_confusion_params.count = 0; /* value not used */
+        AddTest("rrobjflushconf", rr_obj_hdr_flush_confusion, NULL,
+                "round robin object header flush confusion test",
+                &rr_obj_flush_confusion_params);
+    }
 
     AddTest("tldsc",
             lower_dim_size_comp_test, NULL,

@@ -512,57 +512,51 @@ H5AC_create(const H5F_t *f,
         if((mpi_size = H5F_mpi_get_size(f)) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get mpi size")
 
-        /* There is no point in setting up the auxilary structure if size
-         * is less than or equal to 1, as there will never be any processes
-         * to broadcast the clean lists to.
-         */
-        if(mpi_size > 1) {
-            if(NULL == (aux_ptr = H5FL_CALLOC(H5AC_aux_t)))
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "Can't allocate H5AC auxilary structure.")
+        if(NULL == (aux_ptr = H5FL_CALLOC(H5AC_aux_t)))
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "Can't allocate H5AC auxilary structure.")
 
-            aux_ptr->magic = H5AC__H5AC_AUX_T_MAGIC;
-            aux_ptr->mpi_comm = mpi_comm;
-            aux_ptr->mpi_rank = mpi_rank;
-            aux_ptr->mpi_size = mpi_size;
-            aux_ptr->write_permitted = FALSE;
-            aux_ptr->dirty_bytes_threshold = H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD;
-            aux_ptr->dirty_bytes = 0;
-            aux_ptr->metadata_write_strategy = H5AC__DEFAULT_METADATA_WRITE_STRATEGY;
+        aux_ptr->magic = H5AC__H5AC_AUX_T_MAGIC;
+        aux_ptr->mpi_comm = mpi_comm;
+        aux_ptr->mpi_rank = mpi_rank;
+        aux_ptr->mpi_size = mpi_size;
+        aux_ptr->write_permitted = FALSE;
+        aux_ptr->dirty_bytes_threshold = H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD;
+        aux_ptr->dirty_bytes = 0;
+        aux_ptr->metadata_write_strategy = H5AC__DEFAULT_METADATA_WRITE_STRATEGY;
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
-            aux_ptr->dirty_bytes_propagations = 0;
-            aux_ptr->unprotect_dirty_bytes = 0;
-            aux_ptr->unprotect_dirty_bytes_updates = 0;
-            aux_ptr->insert_dirty_bytes = 0;
-            aux_ptr->insert_dirty_bytes_updates = 0;
-            aux_ptr->move_dirty_bytes = 0;
-            aux_ptr->move_dirty_bytes_updates = 0;
+        aux_ptr->dirty_bytes_propagations = 0;
+        aux_ptr->unprotect_dirty_bytes = 0;
+        aux_ptr->unprotect_dirty_bytes_updates = 0;
+        aux_ptr->insert_dirty_bytes = 0;
+        aux_ptr->insert_dirty_bytes_updates = 0;
+        aux_ptr->move_dirty_bytes = 0;
+        aux_ptr->move_dirty_bytes_updates = 0;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
-            aux_ptr->d_slist_ptr = NULL;
-            aux_ptr->d_slist_len = 0;
-            aux_ptr->c_slist_ptr = NULL;
-            aux_ptr->c_slist_len = 0;
-            aux_ptr->candidate_slist_ptr = NULL;
-            aux_ptr->candidate_slist_len = 0;
-            aux_ptr->write_done = NULL;
-            aux_ptr->sync_point_done = NULL;
+        aux_ptr->d_slist_ptr = NULL;
+        aux_ptr->d_slist_len = 0;
+        aux_ptr->c_slist_ptr = NULL;
+        aux_ptr->c_slist_len = 0;
+        aux_ptr->candidate_slist_ptr = NULL;
+        aux_ptr->candidate_slist_len = 0;
+        aux_ptr->write_done = NULL;
+        aux_ptr->sync_point_done = NULL;
 
-            sprintf(prefix, "%d:", mpi_rank);
+        sprintf(prefix, "%d:", mpi_rank);
 
-            if(mpi_rank == 0) {
-                if(NULL == (aux_ptr->d_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create dirtied entry list.")
+        if(mpi_rank == 0) {
+            if(NULL == (aux_ptr->d_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create dirtied entry list.")
 
-                if(NULL == (aux_ptr->c_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create cleaned entry list.")
-            } /* end if */
-
-            /* construct the candidate slist for all processes.
- 	     * when the distributed strategy is selected as all processes
- 	     * will use it in the case of a flush.
-             */
-            if(NULL == (aux_ptr->candidate_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create candidate entry list.")
+            if(NULL == (aux_ptr->c_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create cleaned entry list.")
         } /* end if */
+
+        /* construct the candidate slist for all processes.
+         * when the distributed strategy is selected as all processes
+         * will use it in the case of a flush.
+         */
+        if(NULL == (aux_ptr->candidate_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create candidate entry list.")
 
         if(aux_ptr != NULL) {
             if(aux_ptr->mpi_rank == 0) {

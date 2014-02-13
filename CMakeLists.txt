@@ -213,6 +213,22 @@ SET (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
 SET (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 
 #-----------------------------------------------------------------------------
+# Set Install folder value
+#-----------------------------------------------------------------------------
+IF (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  IF(CMAKE_HOST_UNIX)
+    SET(CMAKE_INSTALL_PREFIX "/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
+      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+  ELSE(CMAKE_HOST_UNIX)
+    GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
+    SET(CMAKE_INSTALL_PREFIX
+      "${CMAKE_GENERIC_PROGRAM_FILES}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
+      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+    SET(CMAKE_GENERIC_PROGRAM_FILES)
+  ENDIF(CMAKE_HOST_UNIX)
+ENDIF (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
+#-----------------------------------------------------------------------------
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
 INCLUDE (${HDF5_RESOURCES_DIR}/HDFMacros.cmake)
@@ -815,14 +831,6 @@ IF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT MAT
     ADD_DEPENDENCIES (${HDF5_LIB_TARGET} SZIP)
   ENDIF (SZIP_FOUND AND SZIP_USE_EXTERNAL)
 ENDIF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
-
-#-----------------------------------------------------------------------------
-# Build utility to copy and strip X lines of file
-#-----------------------------------------------------------------------------
-IF (HDF5_BUILD_TOOLS AND BUILD_TESTING)
-  SET (XLATE_UTILITY "xlatefile")
-  ADD_EXECUTABLE(${XLATE_UTILITY} ${HDF5_RESOURCES_DIR}/xlatefile.c)
-ENDIF (HDF5_BUILD_TOOLS AND BUILD_TESTING)
 
 #-----------------------------------------------------------------------------
 # Dashboard and Testing Settings
