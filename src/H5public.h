@@ -94,6 +94,10 @@ extern "C" {
         ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR<Min)) || \
         (H5_VERS_MAJOR<Maj))
 
+#ifdef H5_HAVE_EFF
+typedef uint64_t hrpl_t;
+#endif /* H5_HAVE_EFF */
+
 /*
  * Status return values.  Failed integer functions in HDF5 result almost
  * always in a negative value (unsigned failing functions sometimes return

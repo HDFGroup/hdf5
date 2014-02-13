@@ -1582,6 +1582,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     case HG_TR_SET_DEPEND:
     case HG_TR_SKIP:
     case HG_TR_ABORT:
+    case HG_EVICT:
         {
             int *status = (int *)req->data;
 
@@ -1592,6 +1593,20 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             }
 
             free(status);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_PREFETCH:
+        {
+            hrpl_t *replica_id = (hrpl_t *)req->data;
+
+            if(0 == *replica_id) {
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Failed transaction OP\n");
+                req->status = H5ES_STATUS_FAIL;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+
             req->data = NULL;
             H5VL_iod_request_delete(file, req);
             break;
@@ -2010,6 +2025,7 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     case HG_TR_SET_DEPEND:
     case HG_TR_SKIP:
     case HG_TR_ABORT:
+    case HG_EVICT:
         {
             int *status = (int *)req->data;
 
@@ -2018,6 +2034,10 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
             break;
         }
+    case HG_PREFETCH:
+        req->data = NULL;
+        H5VL_iod_request_delete(file, req);
+        break;
     case HG_LINK_ITERATE:
     case HG_OBJECT_VISIT:
     case HG_MAP_ITERATE:

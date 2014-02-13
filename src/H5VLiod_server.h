@@ -150,6 +150,8 @@ H5_DLL int H5VL_iod_server_trans_finish(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_trans_set_dependency(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_trans_skip(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_trans_abort(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_prefetch(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_evict(hg_handle_t handle);
 
 H5_DLL void H5VL_iod_server_analysis_execute_cb(AXE_engine_t axe_engine, 
                                                 size_t num_n_parents, AXE_task_t n_parents[], 
@@ -382,6 +384,14 @@ H5_DLL void H5VL_iod_server_trans_abort_cb(AXE_engine_t axe_engine,
                                            size_t num_n_parents, AXE_task_t n_parents[], 
                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
+H5_DLL void H5VL_iod_server_prefetch_cb(AXE_engine_t axe_engine, 
+                                        size_t num_n_parents, AXE_task_t n_parents[], 
+                                        size_t num_s_parents, AXE_task_t s_parents[], 
+                                        void *op_data);
+H5_DLL void H5VL_iod_server_evict_cb(AXE_engine_t axe_engine, 
+                                     size_t num_n_parents, AXE_task_t n_parents[], 
+                                     size_t num_s_parents, AXE_task_t s_parents[], 
+                                     void *op_data);
 
 /* Helper routines used several times in different places */
 H5_DLL herr_t H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t loc_handle, 

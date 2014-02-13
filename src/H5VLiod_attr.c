@@ -86,7 +86,6 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
         obj_create_hint->num_hint = 1;
         obj_create_hint->hint[0].key = "iod_hint_obj_enable_cksum";
-        obj_create_hint->hint[0].value = "iod_hint_obj_enable_cksum";
     }
 
     if(loc_handle.rd_oh.cookie == IOD_OH_UNDEFINED) {

@@ -644,4 +644,130 @@ done:
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_trans_abort_cb() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_prefetch_cb
+ *
+ * Purpose:	prefetch an object from central storage to BB.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              February 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VL_iod_server_prefetch_cb(AXE_engine_t UNUSED axe_engine, 
+                            size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                            size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                            void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    prefetch_in_t *input = (prefetch_in_t *)op_data->input;
+    //iod_handle_t coh = input->coh; /* the container handle */
+    iod_trans_id_t tid = input->rcxt_num;
+    iod_handles_t iod_oh = input->iod_oh; /* object handle */
+    iod_obj_id_t iod_id = input->iod_id; /* OID */
+    //H5I_type_t obj_type = input->obj_type;
+    //hid_t apl_id = input->apl_id;
+    iod_trans_id_t replica_id;
+    iod_ret_t ret;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Prefetch Object (OID %"PRIx64" OH %"PRIu64") at Version %"PRIu64"\n", 
+            iod_id, iod_oh.rd_oh.cookie, tid);
+#endif
+
+    ret = iod_obj_fetch(iod_oh.rd_oh, tid, NULL, NULL, NULL, &replica_id, NULL);
+    if(ret != 0) {
+        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch object");
+    }
+
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Done with Prefetch\n");
+#endif
+
+done:
+    if(SUCCEED != ret_value)
+        replica_id = 0;
+
+    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &replica_id))
+        fprintf(stderr, "Failed to Prefetch Object\n");
+
+    input = (prefetch_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5VL_iod_server_prefetch_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_evict_cb
+ *
+ * Purpose:	evicts an object from BB.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              February 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VL_iod_server_evict_cb(AXE_engine_t UNUSED axe_engine, 
+                            size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                            size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                            void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    evict_in_t *input = (evict_in_t *)op_data->input;
+    //iod_handle_t coh = input->coh; /* the container handle */
+    iod_trans_id_t tid = input->rcxt_num;
+    iod_handles_t iod_oh = input->iod_oh; /* object handle */
+    iod_obj_id_t iod_id = input->iod_id; /* OID */
+    //H5I_type_t obj_type = input->obj_type;
+    //hid_t apl_id = input->apl_id;
+    iod_trans_id_t replica_id = input->replica_id;
+    iod_ret_t ret;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(replica_id) {
+        fprintf(stderr, "Evict Object (OID %"PRIx64" OH %"PRIu64") replica tag %"PRIx64"\n", 
+                iod_id, iod_oh.rd_oh.cookie, replica_id);
+        ret = iod_obj_purge(iod_oh.rd_oh, replica_id, NULL, NULL);
+    }
+    else {
+        fprintf(stderr, "Evict Object (OID %"PRIx64" OH %"PRIu64") at Version %"PRIu64"\n", 
+                iod_id, iod_oh.rd_oh.cookie, tid);
+        ret = iod_obj_purge(iod_oh.rd_oh, tid, NULL, NULL);
+    }
+
+    if(ret < 0) {
+        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't evict object");
+    }
+
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Done with Evict\n");
+#endif
+
+done:
+    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
+        fprintf(stderr, "Failed to Evict Object\n");
+
+    input = (evict_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5VL_iod_server_evict_cb() */
+
 #endif /* H5_HAVE_EFF */

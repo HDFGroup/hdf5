@@ -177,6 +177,26 @@ H5_DLL herr_t H5Oget_info_by_name_ff(hid_t loc_id, const char *object_name,
                                      hid_t rcxt_id, hid_t estack_id);
 H5_DLL herr_t H5Oclose_ff(hid_t object_id, hid_t estack_id);
 
+#if 0
+H5_DLL herr_t H5Aprefetch(hid_t attr_id, hid_t rcxt_id, hrpl_t *replica_id,
+                          hid_t aapl_id, hid_t estack_id);
+H5_DLL herr_t H5Aevict(hid_t attr_id, uint64_t c_version, hid_t aapl_id, hid_t estack_id);
+#endif
+
+H5_DLL herr_t H5Gprefetch(hid_t grp_id, hid_t rcxt_id, hrpl_t *replica_id,
+                          hid_t gapl_id, hid_t estack_id);
+H5_DLL herr_t H5Tprefetch(hid_t type_id, hid_t rcxt_id, hrpl_t *replica_id,
+                          hid_t tapl_id, hid_t estack_id);
+H5_DLL herr_t H5Dprefetch(hid_t dset_id, hid_t rcxt_id, hrpl_t *replica_id,
+                          hid_t dapl_id, hid_t estack_id);
+H5_DLL herr_t H5Mprefetch(hid_t map_id, hid_t rcxt_id, hrpl_t *replica_id,
+                          hid_t mapl_id, hid_t estack_id);
+
+H5_DLL herr_t H5Devict(hid_t dset_id, uint64_t c_version, hid_t dapl_id, hid_t estack_id);
+H5_DLL herr_t H5Mevict(hid_t map_id, uint64_t c_version, hid_t mapl_id, hid_t estack_id);
+H5_DLL herr_t H5Gevict(hid_t grp_id, uint64_t c_version, hid_t gapl_id, hid_t estack_id);
+H5_DLL herr_t H5Tevict(hid_t type_id, uint64_t c_version, hid_t tapl_id, hid_t estack_id);
+
 /* New Routines for Dynamic Data Structures Use Case (ACG) */
 H5_DLL herr_t H5DOappend(hid_t dataset_id, hid_t dxpl_id, unsigned axis, size_t extension, 
                          hid_t memtype, const void *buffer);

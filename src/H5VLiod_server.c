@@ -200,6 +200,11 @@ EFF__mercury_register_callbacks(void)
     MERCURY_HANDLER_REGISTER("transaction_abort", H5VL_iod_server_trans_abort, 
                              tr_abort_in_t, ret_t);
 
+    MERCURY_HANDLER_REGISTER("prefetch", H5VL_iod_server_prefetch, 
+                             prefetch_in_t, hrpl_t);
+    MERCURY_HANDLER_REGISTER("evict", H5VL_iod_server_evict, 
+                             evict_in_t, ret_t);
+
     MERCURY_HANDLER_REGISTER("cancel_op", H5VL_iod_server_cancel_op, uint64_t, uint8_t);
 }
 
@@ -3680,5 +3685,111 @@ H5VL_iod_server_trans_abort(hg_handle_t handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_trans_abort() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_prefetch
+ *
+ * Purpose:	Function shipper registered call for object prefetch.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              February, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+int 
+H5VL_iod_server_prefetch(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    prefetch_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (prefetch_in_t *)H5MM_malloc(sizeof(prefetch_in_t))))
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_prefetch_cb, op_data, NULL))
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_prefetch() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_evict
+ *
+ * Purpose:	Function shipper registered call for object evict.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              February, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+int 
+H5VL_iod_server_evict(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    evict_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (evict_in_t *)H5MM_malloc(sizeof(evict_in_t))))
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_evict_cb, op_data, NULL))
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_evict() */
 
 #endif /* H5_HAVE_EFF */

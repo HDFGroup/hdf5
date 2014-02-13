@@ -137,6 +137,7 @@ H5_DLL int hg_proc_binary_buf_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_linfo_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_oinfo_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_coords_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_hrpl_t(hg_proc_t proc, void *data);
 
 MERCURY_GEN_PROC(analysis_execute_in_t, 
                  ((axe_t)(axe_info))
@@ -705,6 +706,26 @@ MERCURY_GEN_PROC(tr_abort_in_t,
                  ((axe_t)(axe_info))
                  ((iod_handle_t)(coh))
                  ((uint64_t)(trans_num)))
+
+MERCURY_GEN_PROC(prefetch_in_t, 
+                 ((axe_t)(axe_info))
+                 ((iod_handle_t)(coh))
+                 ((uint32_t)(cs_scope))  
+                 ((uint64_t)(rcxt_num))
+                 ((hid_t)(apl_id))
+                 ((int32_t)(obj_type))
+                 ((iod_handles_t)(iod_oh))
+                 ((iod_obj_id_t)(iod_id)))
+MERCURY_GEN_PROC(evict_in_t, 
+                 ((axe_t)(axe_info))
+                 ((iod_handle_t)(coh))
+                 ((uint32_t)(cs_scope))  
+                 ((uint64_t)(rcxt_num))
+                 ((hrpl_t)(replica_id))
+                 ((hid_t)(apl_id))
+                 ((int32_t)(obj_type))
+                 ((iod_handles_t)(iod_oh))
+                 ((iod_obj_id_t)(iod_id)))
 
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_common_H */

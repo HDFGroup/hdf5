@@ -102,6 +102,8 @@ static hg_id_t H5VL_TR_FINISH_ID;
 static hg_id_t H5VL_TR_SET_DEPEND_ID;
 static hg_id_t H5VL_TR_SKIP_ID;
 static hg_id_t H5VL_TR_ABORT_ID;
+static hg_id_t H5VL_PREFETCH_ID;
+static hg_id_t H5VL_EVICT_ID;
 static hg_id_t H5VL_CANCEL_OP_ID;
 
 
@@ -765,6 +767,9 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     H5VL_TR_SKIP_ID         = MERCURY_REGISTER("transaction_skip", tr_skip_in_t, ret_t);
     H5VL_TR_ABORT_ID        = MERCURY_REGISTER("transaction_abort",tr_abort_in_t, ret_t);
 
+    H5VL_PREFETCH_ID = MERCURY_REGISTER("prefetch", prefetch_in_t, hrpl_t);
+    H5VL_EVICT_ID    = MERCURY_REGISTER("evict", evict_in_t, ret_t);
+
     H5VL_CANCEL_OP_ID = MERCURY_REGISTER("cancel_op", uint64_t, uint8_t);
 
     /* forward the init call to the ION and wait for its completion */
@@ -1045,6 +1050,76 @@ H5Pget_ocpl_enable_checksum(hid_t ocpl_id, hbool_t *flag/*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_ocpl_enable_checksum() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_lapl_replica_id
+ *
+ * Purpose:     Set the replica ID to be used when accessing an object 
+ *              using this access plist.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              February, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_lapl_replica_id(hid_t lapl_id, hrpl_t replica_id)
+{
+    H5P_genplist_t *plist = NULL;    /* Property list pointer */
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(lapl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+
+    /* Check arguments */
+    if(NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a lapl")
+
+    /* Set the transfer mode */
+    if(H5P_set(plist, H5O_ACS_REPLICA_ID_NAME, &replica_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_lapl_replica_id() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_lapl_replica_id
+ *
+ * Purpose:     Retrieve the replica ID from this access plist.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              February, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_lapl_replica_id(hid_t lapl_id, hrpl_t *replica_id/*out*/)
+{
+    H5P_genplist_t *plist = NULL;       /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a lapl")
+
+    /* Get the transfer mode */
+    if(replica_id)
+        if(H5P_get(plist, H5O_ACS_REPLICA_ID_NAME, replica_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_lapl_replica_id() */
 
 
 /*-------------------------------------------------------------------------
@@ -8728,6 +8803,234 @@ H5VL_iod_tr_abort(H5TR_t *tr, void **req)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_tr_abort() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_prefetch
+ *
+ * Purpose:	prefetched an object from BB to Central storage and returns
+ *              a replica ID for access to the prefetched object.
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		February 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_prefetch(void *_obj, hid_t rcxt_id, hrpl_t *replica_id, hid_t apl_id, void **req)
+{
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
+    prefetch_in_t input;
+    H5RC_t *rc = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* If this call is not asynchronous, complete and remove all
+       requests that are associated with this object from the List */
+    if(NULL == req) {
+        if(H5VL_iod_request_wait_some(obj->file, obj) < 0)
+            HGOTO_ERROR(H5E_FILE,  H5E_CANTGET, FAIL, "can't wait on all object requests");
+    }
+
+    if(obj->request && H5VL_IOD_PENDING == obj->request->state) {
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
+    }
+
+    /* get the RC object */
+    if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID");
+
+    input.coh = obj->file->remote_file.coh;
+    input.rcxt_num  = rc->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
+    input.apl_id = apl_id;
+    input.obj_type = obj->obj_type;
+
+    switch(obj->obj_type) {
+    case H5I_DATASET:
+        {
+            H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)obj;
+            input.iod_id = dset->remote_dset.iod_id;
+            input.iod_oh = dset->remote_dset.iod_oh;
+            break;
+        }
+    case H5I_DATATYPE:
+        {
+            H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)obj;
+            input.iod_id = dtype->remote_dtype.iod_id;
+            input.iod_oh = dtype->remote_dtype.iod_oh;
+            break;
+        }
+    case H5I_GROUP:
+        {
+            H5VL_iod_group_t *group = (H5VL_iod_group_t *)obj;
+            input.iod_id = group->remote_group.iod_id;
+            input.iod_oh = group->remote_group.iod_oh;
+            break;
+        }
+    case H5I_MAP:
+        {
+            H5VL_iod_map_t *map = (H5VL_iod_map_t *)obj;
+            input.iod_id = map->remote_map.iod_id;
+            input.iod_oh = map->remote_map.iod_oh;
+            break;
+        }
+    case H5I_ATTR:
+        {
+            H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)obj;
+            input.iod_id = attr->remote_attr.iod_id;
+            input.iod_oh = attr->remote_attr.iod_oh;
+            break;
+        }
+    case H5I_UNINIT:
+    case H5I_BADID:
+    case H5I_FILE:
+    case H5I_DATASPACE:
+    case H5I_REFERENCE:
+    case H5I_VFL:
+    case H5I_VOL:
+    case H5I_ES:
+    case H5I_RC:
+    case H5I_TR:
+    case H5I_QUERY:
+    case H5I_GENPROP_CLS:
+    case H5I_GENPROP_LST:
+    case H5I_ERROR_CLASS:
+    case H5I_ERROR_MSG:
+    case H5I_ERROR_STACK:
+    case H5I_NTYPES:
+    default:
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "not a valid object to prefetch");
+    }
+
+    if(H5VL__iod_create_and_forward(H5VL_PREFETCH_ID, HG_PREFETCH, 
+                                    obj, 1, 0, NULL, NULL, 
+                                    &input, replica_id, replica_id, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship VOL op");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_prefetch() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_evict
+ *
+ * Purpose:	evicts an object from BB.
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		February 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_evict(void *_obj, uint64_t c_version, hid_t apl_id, void **req)
+{
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
+    evict_in_t input;
+    H5P_genplist_t *plist = NULL;              /* Property list pointer */
+    int *status = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* If this call is not asynchronous, complete and remove all
+       requests that are associated with this object from the List */
+    if(NULL == req) {
+        if(H5VL_iod_request_wait_some(obj->file, obj) < 0)
+            HGOTO_ERROR(H5E_FILE,  H5E_CANTGET, FAIL, "can't wait on all object requests");
+    }
+
+    if(obj->request && H5VL_IOD_PENDING == obj->request->state) {
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
+    }
+
+    if(NULL == (plist = H5P_object_verify(apl_id, H5P_LINK_ACCESS)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not an access plist");
+    if(H5P_get(plist, H5O_ACS_REPLICA_ID_NAME, &input.replica_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value");
+
+    input.coh = obj->file->remote_file.coh;
+    input.rcxt_num = c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
+    input.apl_id = apl_id;
+
+    switch(obj->obj_type) {
+    case H5I_DATASET:
+        {
+            H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)obj;
+            input.iod_id = dset->remote_dset.iod_id;
+            input.iod_oh = dset->remote_dset.iod_oh;
+            break;
+        }
+    case H5I_DATATYPE:
+        {
+            H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)obj;
+            input.iod_id = dtype->remote_dtype.iod_id;
+            input.iod_oh = dtype->remote_dtype.iod_oh;
+            break;
+        }
+    case H5I_GROUP:
+        {
+            H5VL_iod_group_t *group = (H5VL_iod_group_t *)obj;
+            input.iod_id = group->remote_group.iod_id;
+            input.iod_oh = group->remote_group.iod_oh;
+            break;
+        }
+    case H5I_MAP:
+        {
+            H5VL_iod_map_t *map = (H5VL_iod_map_t *)obj;
+            input.iod_id = map->remote_map.iod_id;
+            input.iod_oh = map->remote_map.iod_oh;
+            break;
+        }
+    case H5I_ATTR:
+        {
+            H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)obj;
+            input.iod_id = attr->remote_attr.iod_id;
+            input.iod_oh = attr->remote_attr.iod_oh;
+            break;
+        }
+    case H5I_UNINIT:
+    case H5I_BADID:
+    case H5I_FILE:
+    case H5I_DATASPACE:
+    case H5I_REFERENCE:
+    case H5I_VFL:
+    case H5I_VOL:
+    case H5I_ES:
+    case H5I_RC:
+    case H5I_TR:
+    case H5I_QUERY:
+    case H5I_GENPROP_CLS:
+    case H5I_GENPROP_LST:
+    case H5I_ERROR_CLASS:
+    case H5I_ERROR_MSG:
+    case H5I_ERROR_STACK:
+    case H5I_NTYPES:
+    default:
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "not a valid object to evict");
+    }
+
+    status = (int *)malloc(sizeof(int));
+
+    if(H5VL__iod_create_and_forward(H5VL_EVICT_ID, HG_EVICT, 
+                                    obj, 1, 0, NULL, NULL, 
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship VOL op");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_evict() */
 
 
 /*-------------------------------------------------------------------------

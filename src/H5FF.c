@@ -4225,4 +4225,399 @@ done:
     FUNC_LEAVE_API(ret_value)
 }/* end H5DOget_ff */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dprefetch
+ *
+ * Purpose:	Prefetched a Dataset from Central Storage to Burst Buffer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              February 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Dprefetch(hid_t dset_id, hid_t rcxt_id, hrpl_t *replica_id,
+                          hid_t dapl_id, hid_t estack_id)
+{
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void    *dset = NULL;        /* pointer to dset object */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* get the map object */
+    if(NULL == (dset = (void *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == dapl_id)
+        dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dapl_id, H5P_DATASET_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
+    }
+
+    /* Get the data through the IOD VOL */
+    if((ret_value = H5VL_iod_prefetch(dset, rcxt_id, replica_id, dapl_id, req)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch dataset")
+
+    if(request && *req) {
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dprefetch() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Devict
+ *
+ * Purpose:	Evicts a Dataset from Burst Buffer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              February 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Devict(hid_t dset_id, uint64_t c_version, hid_t dapl_id, hid_t estack_id)
+{
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void    **req = NULL;       /* pointer to plugin generated request pointer */
+    void    *dset = NULL;       /* pointer to dset object */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* get the map object */
+    if(NULL == (dset = (void *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == dapl_id)
+        dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dapl_id, H5P_DATASET_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
+    }
+
+    /* Get the data through the IOD VOL */
+    if((ret_value = H5VL_iod_evict(dset, c_version, dapl_id, req)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict dataset")
+
+    if(request && *req) {
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Devict() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gprefetch
+ *
+ * Purpose:	Prefetched a Group from Central Storage to Burst Buffer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              February 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Gprefetch(hid_t grp_id, hid_t rcxt_id, hrpl_t *replica_id,
+                          hid_t gapl_id, hid_t estack_id)
+{
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void    *grp = NULL;        /* pointer to grp object */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* get the map object */
+    if(NULL == (grp = (void *)H5I_object_verify(grp_id, H5I_GROUP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(grp_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == gapl_id)
+        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
+    }
+
+    /* Get the data through the IOD VOL */
+    if((ret_value = H5VL_iod_prefetch(grp, rcxt_id, replica_id, gapl_id, req)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch group")
+
+    if(request && *req) {
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gprefetch() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gevict
+ *
+ * Purpose:	Evicts a Group from Burst Buffer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              February 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Gevict(hid_t grp_id, uint64_t c_version, hid_t gapl_id, hid_t estack_id)
+{
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void    **req = NULL;       /* pointer to plugin generated request pointer */
+    void    *grp = NULL;       /* pointer to grp object */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* get the map object */
+    if(NULL == (grp = (void *)H5I_object_verify(grp_id, H5I_GROUP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(grp_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == gapl_id)
+        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
+    }
+
+    /* Get the data through the IOD VOL */
+    if((ret_value = H5VL_iod_evict(grp, c_version, gapl_id, req)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict group")
+
+    if(request && *req) {
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gevict() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tprefetch
+ *
+ * Purpose:	Prefetched a Datatype from Central Storage to Burst Buffer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              February 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Tprefetch(hid_t dtype_id, hid_t rcxt_id, hrpl_t *replica_id,
+                          hid_t tapl_id, hid_t estack_id)
+{
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void    **req = NULL;  /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void    *dtype = NULL; /* pointer to dtype object */
+    H5VL_t  *vol_plugin;   /* VOL plugin information */
+    H5T_t   *type;         /* Datatype object for ID */
+    htri_t   status;       /* Generic status value */
+    herr_t   ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if(NULL == (type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    /* Check if the datatype is committed */
+    if((status = H5T_committed(type)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check whether datatype is committed")
+
+    if(FALSE == status) {
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't prefetch a non committed datatype");
+    }
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == tapl_id)
+        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dtype_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+    /* get the named datatype object */
+    if(NULL == (dtype = H5VL_get_object(dtype_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
+    }
+
+    /* Get the data through the IOD VOL */
+    if((ret_value = H5VL_iod_prefetch(dtype, rcxt_id, replica_id, tapl_id, req)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch datatype")
+
+    if(request && *req) {
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Tprefetch() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tevict
+ *
+ * Purpose:	Evicts a Datatype from Burst Buffer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              February 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Tevict(hid_t dtype_id, uint64_t c_version, hid_t tapl_id, hid_t estack_id)
+{
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void    **req = NULL;  /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void    *dtype = NULL; /* pointer to dtype object */
+    H5VL_t  *vol_plugin;   /* VOL plugin information */
+    H5T_t   *type;         /* Datatype object for ID */
+    htri_t   status;       /* Generic status value */
+    herr_t   ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if(NULL == (type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    /* Check if the datatype is committed */
+    if((status = H5T_committed(type)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check whether datatype is committed")
+
+    if(FALSE == status) {
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't prefetch a non committed datatype");
+    }
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == tapl_id)
+        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dtype_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+    /* get the named datatype object */
+    if(NULL == (dtype = H5VL_get_object(dtype_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
+    }
+
+    /* Get the data through the IOD VOL */
+    if((ret_value = H5VL_iod_evict(dtype, c_version, tapl_id, req)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict datatype")
+
+    if(request && *req) {
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Tevict() */
+
 #endif /* H5_HAVE_EFF */

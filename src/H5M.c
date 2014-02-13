@@ -947,4 +947,127 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5M_close_map() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Mprefetch
+ *
+ * Purpose:	Prefetched a Map from Central Storage to Burst Buffer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              February 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Mprefetch(hid_t map_id, hid_t rcxt_id, hrpl_t *replica_id,
+                          hid_t mapl_id, hid_t estack_id)
+{
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void    *map = NULL;        /* pointer to map object */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* get the map object */
+    if(NULL == (map = (void *)H5I_object_verify(map_id, H5I_MAP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid map identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(map_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == mapl_id)
+        mapl_id = H5P_MAP_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(mapl_id, H5P_MAP_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not map access property list")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
+    }
+
+    /* Get the data through the IOD VOL */
+    if((ret_value = H5VL_iod_prefetch(map, rcxt_id, replica_id, mapl_id, req)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch map")
+
+    if(request && *req) {
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Mprefetch() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Mevict
+ *
+ * Purpose:	Evicts a Map from Burst Buffer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              February 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Mevict(hid_t map_id, uint64_t c_version, hid_t mapl_id, hid_t estack_id)
+{
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void    **req = NULL;       /* pointer to plugin generated request pointer */
+    void    *map = NULL;       /* pointer to map object */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* get the map object */
+    if(NULL == (map = (void *)H5I_object_verify(map_id, H5I_MAP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid map identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(map_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == mapl_id)
+        mapl_id = H5P_MAP_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(mapl_id, H5P_MAP_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not map access property list")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
+    }
+
+    /* Get the data through the IOD VOL */
+    if((ret_value = H5VL_iod_evict(map, c_version, mapl_id, req)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict map")
+
+    if(request && *req) {
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Mevict() */
+
 #endif /* H5_HAVE_EFF */

@@ -38,13 +38,21 @@
 #include "H5Lprivate.h"		/* Links		  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
-
+#include "H5VLiod.h"		/* IOD plugin    		  	*/
 
 /****************/
 /* Local Macros */
 /****************/
 
 /* ========  Link access properties ======== */
+#ifdef H5_HAVE_EFF
+/* replica ID to use when accessing an object at IOD */
+#define H5O_ACS_REPLICA_ID_SIZE    sizeof(hrpl_t)
+#define H5O_ACS_REPLICA_ID_DEF     0
+#define H5O_ACS_REPLICA_ID_ENC     H5P__encode_uint64_t
+#define H5O_ACS_REPLICA_ID_DEC     H5P__decode_uint64_t
+#endif
+
 /* Definitions for number of soft links to traverse */
 #define H5L_ACS_NLINKS_SIZE        sizeof(size_t)
 #define H5L_ACS_NLINKS_DEF         H5L_NUM_LINKS /*max symlinks to follow per lookup  */
@@ -151,7 +159,9 @@ static const char *H5L_def_elink_prefix_g = H5L_ACS_ELINK_PREFIX_DEF; /* Default
 static const hid_t H5L_def_fapl_id_g = H5L_ACS_ELINK_FAPL_DEF;    /* Default fapl for external link access */
 static const unsigned H5L_def_elink_flags_g = H5L_ACS_ELINK_FLAGS_DEF; /* Default file access flags for external link traversal */
 static const H5L_elink_cb_t H5L_def_elink_cb_g = H5L_ACS_ELINK_CB_DEF; /* Default external link traversal callback */
-
+#ifdef H5_HAVE_EFF
+static const hrpl_t H5O_replica_id_g = H5O_ACS_REPLICA_ID_DEF; /* Default replica ID */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -176,6 +186,14 @@ H5P_lacc_reg_prop(H5P_genclass_t *pclass)
     herr_t ret_value = SUCCEED;         	   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+#ifdef H5_HAVE_EFF
+    if(H5P_register_real(pclass, H5O_ACS_REPLICA_ID_NAME, H5O_ACS_REPLICA_ID_SIZE, 
+                         &H5O_replica_id_g,
+                         NULL, NULL, NULL, H5O_ACS_REPLICA_ID_ENC, H5O_ACS_REPLICA_ID_DEC, 
+                         NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+#endif
 
     /* Register property for number of links traversed */
     if(H5P_register_real(pclass, H5L_ACS_NLINKS_NAME, H5L_ACS_NLINKS_SIZE, &H5L_def_nlinks_g, 

@@ -155,6 +155,21 @@ int hg_proc_hbool_t(hg_proc_t proc, void *data)
 }
 
 /* Define hg_proc_iod_handle_t */
+int hg_proc_hrpl_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+
+    ret = hg_proc_uint64_t(proc, (uint64_t *)data);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    return ret;
+}
+
+/* Define hg_proc_iod_handle_t */
 int hg_proc_iod_handle_t(hg_proc_t proc, void *data)
 {
     int ret = HG_SUCCESS;

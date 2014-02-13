@@ -92,7 +92,9 @@ typedef enum H5RQ_type_t {
     HG_TR_FINISH,
     HG_TR_SET_DEPEND,
     HG_TR_SKIP,
-    HG_TR_ABORT
+    HG_TR_ABORT,
+    HG_PREFETCH,
+    HG_EVICT
 } H5RQ_type_t;
 
 /* the client IOD VOL request struct */
@@ -435,6 +437,10 @@ H5_DLL herr_t H5VL_iod_tr_set_dependency(H5TR_t *tr, uint64_t trans_num, void **
 H5_DLL herr_t H5VL_iod_tr_skip(H5VL_iod_file_t *file, uint64_t start_trans_num, 
                                uint64_t count, void **req);
 H5_DLL herr_t H5VL_iod_tr_abort(H5TR_t *tr, void **req);
+
+H5_DLL herr_t H5VL_iod_prefetch(void *obj, hid_t rcxt_id, hrpl_t *replica_id, 
+                                hid_t apl_id, void **req);
+H5_DLL herr_t H5VL_iod_evict(void *obj, uint64_t c_version, hid_t apl_id, void **req);
 
 H5_DLL herr_t H5VL_iod_analysis_execute(const char *file_name, const char *obj_name,
         hid_t query_id, const char *split_script, const char *combine_script,
