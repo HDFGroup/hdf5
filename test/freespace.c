@@ -26,7 +26,7 @@
 #define H5F_PACKAGE
 #include "H5Fpkg.h"
 #include "H5Iprivate.h"
-#include "H5Vprivate.h"
+#include "H5VMprivate.h"
 
 #define FILENAME_LEN	1024
 

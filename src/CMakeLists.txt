@@ -604,12 +604,12 @@ SET (H5TS_HDRS
 IDE_GENERATED_PROPERTIES ("H5TS" "${H5TS_HDRS}" "${H5TS_SRCS}" )
 
 
-SET (H5V_SRCS
-    ${HDF5_SRC_DIR}/H5V.c
+SET (H5VM_SRCS
+    ${HDF5_SRC_DIR}/H5VM.c
 )
-SET (H5V_HDRS
+SET (H5VM_HDRS
 )
-IDE_GENERATED_PROPERTIES ("H5V" "${H5V_HDRS}" "${H5V_SRCS}" )
+IDE_GENERATED_PROPERTIES ("H5VM" "${H5VM_HDRS}" "${H5VM_SRCS}" )
 
 
 SET (H5WB_SRCS
@@ -681,7 +681,7 @@ SET (common_SRCS
     ${H5ST_SRCS}
     ${H5T_SRCS}
     ${H5TS_SRCS}
-    ${H5V_SRCS}
+    ${H5VM_SRCS}
     ${H5WB_SRCS}
     ${H5Z_SRCS}
 )
@@ -760,7 +760,7 @@ SET (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5STprivate.h
     ${HDF5_SRC_DIR}/H5Tprivate.h
     ${HDF5_SRC_DIR}/H5TSprivate.h
-    ${HDF5_SRC_DIR}/H5Vprivate.h
+    ${HDF5_SRC_DIR}/H5VMprivate.h
     ${HDF5_SRC_DIR}/H5WBprivate.h
     ${HDF5_SRC_DIR}/H5Zprivate.h
     ${HDF5_SRC_DIR}/H5win32defs.h

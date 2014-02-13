@@ -25,7 +25,7 @@
 #include "h5test.h"
 #include "H5private.h"
 #include "H5Eprivate.h"
-#include "H5Vprivate.h"
+#include "H5VMprivate.h"
 
 #define TEST_SMALL	0x0001
 #define TEST_MEDIUM	0x0002
@@ -137,7 +137,7 @@ print_ref(size_t nx, size_t ny, size_t nz)
 /*-------------------------------------------------------------------------
  * Function:	test_fill
  *
- * Purpose:	Tests the H5V_hyper_fill() function.
+ * Purpose:	Tests the H5VM_hyper_fill() function.
  *
  * Return:	Success:	SUCCEED
  *
@@ -226,7 +226,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
                                 ref_value += fill_value * dx * dy * dz;
 
                                 /* Fill the hyperslab with some value */
-                                H5V_hyper_fill(ndims, hs_size, dst_size, dst_offset, dst, fill_value);
+                                H5VM_hyper_fill(ndims, hs_size, dst_size, dst_offset, dst, fill_value);
 
                                 /*
                                  * Sum the array and compare it to the
@@ -285,7 +285,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_copy
  *
- * Purpose:	Tests H5V_hyper_copy().
+ * Purpose:	Tests H5VM_hyper_copy().
  *
  *		The NX, NY, and NZ arguments are the size for the source and
  *		destination arrays.  You may pass zero for NZ or for NY and
@@ -466,7 +466,7 @@ test_copy(int mode,
                              * Copy a hyperslab from the global array to the
                              * local array.
                              */
-                            H5V_hyper_copy(ndims, hs_size, dst_size, dst_offset, dst, src_size, src_offset, src);
+                            H5VM_hyper_copy(ndims, hs_size, dst_size, dst_offset, dst, src_size, src_offset, src);
 
                             /*
                              * Sum the destination hyperslab.  It should be
@@ -569,7 +569,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_multifill
  *
- * Purpose:	Tests the H5V_stride_copy() function by using it to fill a
+ * Purpose:	Tests the H5VM_stride_copy() function by using it to fill a
  *		hyperslab by replicating a multi-byte sequence.	 This might
  *		be useful to initialize an array of structs with a default
  *		struct value, or to initialize an array of floating-point
@@ -634,7 +634,7 @@ test_multifill(size_t nx)
      * Copy the fill value into each element
      */
     size = nx;
-    H5V_stride_copy(1, (hsize_t)sizeof(double), &size, &dst_stride,
+    H5VM_stride_copy(1, (hsize_t)sizeof(double), &size, &dst_stride,
             &(dst[0].mid), &src_stride, &(fill.mid));
 
     /*
@@ -690,7 +690,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_endian
  *
- * Purpose:	Tests the H5V_stride_copy() function by using it to copy an
+ * Purpose:	Tests the H5VM_stride_copy() function by using it to copy an
  *		array of integers and swap the byte ordering from little
  *		endian to big endian or vice versa depending on the hardware.
  *
@@ -733,7 +733,7 @@ test_endian(size_t nx)
     size[1] = 4;
 
     /* Copy the array */
-    H5V_stride_copy_s(2, (hsize_t)1, size, dst_stride, dst + 3, src_stride, src);
+    H5VM_stride_copy_s(2, (hsize_t)1, size, dst_stride, dst + 3, src_stride, src);
 
     /* Compare */
     for(i = 0; i < nx; i++) {
@@ -824,10 +824,10 @@ test_transpose(size_t nx, size_t ny)
 
     /* Copy and transpose */
     if(nx == ny)
-        H5V_stride_copy(2, (hsize_t)sizeof(*src), size, dst_stride, dst,
+        H5VM_stride_copy(2, (hsize_t)sizeof(*src), size, dst_stride, dst,
                 src_stride, src);
     else
-        H5V_stride_copy(2, (hsize_t)sizeof(*src), size, dst_stride, dst,
+        H5VM_stride_copy(2, (hsize_t)sizeof(*src), size, dst_stride, dst,
                 src_stride, src);
 
     /* Check */
@@ -878,7 +878,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_sub_super
  *
- * Purpose:	Tests H5V_stride_copy() to reduce the resolution of an image
+ * Purpose:	Tests H5VM_stride_copy() to reduce the resolution of an image
  *		by copying half the pixels in the X and Y directions.  Then
  *		we use the small image and duplicate every pixel to result in
  *		a 2x2 square.
@@ -929,7 +929,7 @@ test_sub_super(size_t nx, size_t ny)
     dst_stride[1] = 1;
 
     /* Copy */
-    H5V_stride_copy(2, (hsize_t)sizeof(uint8_t), size, dst_stride, half,
+    H5VM_stride_copy(2, (hsize_t)sizeof(uint8_t), size, dst_stride, half,
             src_stride, full);
 
     /* Check */
@@ -978,7 +978,7 @@ test_sub_super(size_t nx, size_t ny)
     dst_stride[3] = sizeof(uint8_t);
 
     /* Copy */
-    H5V_stride_copy(4, (hsize_t)sizeof(uint8_t), size, dst_stride, twice,
+    H5VM_stride_copy(4, (hsize_t)sizeof(uint8_t), size, dst_stride, twice,
             src_stride, half);
 
     /* Check */
@@ -1038,7 +1038,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_array_fill
  *
- * Purpose:	Tests H5V_array_fill routine by copying a multibyte value
+ * Purpose:	Tests H5VM_array_fill routine by copying a multibyte value
  *              (an array of ints, in our case) into all the elements of an
  *              array.
  *
@@ -1072,7 +1072,7 @@ test_array_fill(size_t lo, size_t hi)
 
     /* Fill */
     for(w = lo; w <= hi; w++) {
-        H5V_array_fill(dst, src, sizeof(src), w);
+        H5VM_array_fill(dst, src, sizeof(src), w);
 
         /* Check */
         for(u = 0; u < w; u++)
@@ -1099,7 +1099,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_array_offset_n_calc
  *
- * Purpose:	Tests H5V_array_offset and H5V_array_calc routines by comparing
+ * Purpose:	Tests H5VM_array_offset and H5VM_array_calc routines by comparing
  *              computed array offsets against calculated ones and then going
  *              back to the coordinates from the offset and checking those.
  *
@@ -1149,14 +1149,14 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
         coords[2] = (hssize_t)(HDrandom() % x);
 
         /* Get offset of coordinate */
-        off = H5V_array_offset(ARRAY_OFFSET_NDIMS, dims, coords);
+        off = H5VM_array_offset(ARRAY_OFFSET_NDIMS, dims, coords);
 
         /* Check offset of coordinate */
         if(a[off] != off)
             TEST_ERROR
 
         /* Get coordinates of offset */
-        if(H5V_array_calc(off, ARRAY_OFFSET_NDIMS, dims, new_coords) < 0)
+        if(H5VM_array_calc(off, ARRAY_OFFSET_NDIMS, dims, new_coords) < 0)
             TEST_ERROR
 
         /* Check computed coordinates */

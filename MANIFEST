@@ -921,8 +921,8 @@
 ./src/H5Tvlen.c
 ./src/H5TS.c
 ./src/H5TSprivate.h
-./src/H5V.c
-./src/H5Vprivate.h
+./src/H5VM.c
+./src/H5VMprivate.h
 ./src/H5WB.c
 ./src/H5WBprivate.h
 ./src/H5Z.c

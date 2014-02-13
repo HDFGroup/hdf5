@@ -33,7 +33,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files				*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
-#include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5VMprivate.h"		/* Vector and array functions		*/
 
 
 /****************/
@@ -425,7 +425,7 @@ done:
 static herr_t
 H5D__efl_readvv_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata)
 {
-    H5D_efl_readvv_ud_t *udata = (H5D_efl_readvv_ud_t *)_udata; /* User data for H5V_opvv() operator */
+    H5D_efl_readvv_ud_t *udata = (H5D_efl_readvv_ud_t *)_udata; /* User data for H5VM_opvv() operator */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -459,7 +459,7 @@ H5D__efl_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_off_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    H5D_efl_readvv_ud_t udata;  /* User data for H5V_opvv() operator */
+    H5D_efl_readvv_ud_t udata;  /* User data for H5VM_opvv() operator */
     ssize_t ret_value;          /* Return value (Total size of sequence in bytes) */
 
     FUNC_ENTER_STATIC
@@ -475,12 +475,12 @@ H5D__efl_readvv(const H5D_io_info_t *io_info,
     HDassert(mem_len_arr);
     HDassert(mem_off_arr);
 
-    /* Set up user data for H5V_opvv() */
+    /* Set up user data for H5VM_opvv() */
     udata.efl = &(io_info->store->efl);
     udata.rbuf = (unsigned char *)io_info->u.rbuf;
 
     /* Call generic sequence operation routine */
-    if((ret_value = H5V_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
+    if((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
             mem_max_nseq, mem_curr_seq, mem_len_arr, mem_off_arr,
             H5D__efl_readvv_cb, &udata)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPERATE, FAIL, "can't perform vectorized EFL read")
@@ -505,7 +505,7 @@ done:
 static herr_t
 H5D__efl_writevv_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata)
 {
-    H5D_efl_writevv_ud_t *udata = (H5D_efl_writevv_ud_t *)_udata; /* User data for H5V_opvv() operator */
+    H5D_efl_writevv_ud_t *udata = (H5D_efl_writevv_ud_t *)_udata; /* User data for H5VM_opvv() operator */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -539,7 +539,7 @@ H5D__efl_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_off_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    H5D_efl_writevv_ud_t udata;  /* User data for H5V_opvv() operator */
+    H5D_efl_writevv_ud_t udata;  /* User data for H5VM_opvv() operator */
     ssize_t ret_value;          /* Return value (Total size of sequence in bytes) */
 
     FUNC_ENTER_STATIC
@@ -555,12 +555,12 @@ H5D__efl_writevv(const H5D_io_info_t *io_info,
     HDassert(mem_len_arr);
     HDassert(mem_off_arr);
 
-    /* Set up user data for H5V_opvv() */
+    /* Set up user data for H5VM_opvv() */
     udata.efl = &(io_info->store->efl);
     udata.wbuf = (const unsigned char *)io_info->u.wbuf;
 
     /* Call generic sequence operation routine */
-    if((ret_value = H5V_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
+    if((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
             mem_max_nseq, mem_curr_seq, mem_len_arr, mem_off_arr,
             H5D__efl_writevv_cb, &udata)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPERATE, FAIL, "can't perform vectorized EFL write")

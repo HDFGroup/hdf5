@@ -38,7 +38,7 @@
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5HFpkg.h"		/* Fractal heaps			*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 /****************/
 /* Local Macros */
@@ -409,7 +409,7 @@ H5HF_man_iblock_root_create(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_si
 
         nrows = hdr->man_dtable.cparam.start_root_rows;
 
-        block_row_off = H5V_log2_of2((uint32_t)min_dblock_size) - H5V_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size);
+        block_row_off = H5VM_log2_of2((uint32_t)min_dblock_size) - H5VM_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size);
         if(block_row_off > 0)
             block_row_off++;        /* Account for the pair of initial rows of the initial block size */
         rows_needed = 1 + block_row_off;
@@ -730,7 +730,7 @@ H5HF_man_iblock_root_halve(H5HF_indirect_t *iblock, hid_t dxpl_id)
     max_child_row = iblock->max_child / hdr->man_dtable.cparam.width;
 
     /* Compute new # of rows in root indirect block */
-    new_nrows = 1 << (1 + H5V_log2_gen((uint64_t)max_child_row));
+    new_nrows = 1 << (1 + H5VM_log2_gen((uint64_t)max_child_row));
 
     /* Check if the indirect block is NOT currently allocated in temp. file space */
     /* (temp. file space does not need to be freed) */
@@ -1662,10 +1662,10 @@ H5HF_man_iblock_size(H5F_t *f, hid_t dxpl_id, H5HF_hdr_t *hdr, haddr_t iblock_ad
         size_t      u;                  /* Local index variable */
 
         entry = hdr->man_dtable.max_direct_rows * hdr->man_dtable.cparam.width;
-	first_row_bits = H5V_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size) +
-			    H5V_log2_of2(hdr->man_dtable.cparam.width);
+	first_row_bits = H5VM_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size) +
+			    H5VM_log2_of2(hdr->man_dtable.cparam.width);
         num_indirect_rows =
-	    (H5V_log2_gen(hdr->man_dtable.row_block_size[hdr->man_dtable.max_direct_rows]) - first_row_bits) + 1;
+	    (H5VM_log2_gen(hdr->man_dtable.row_block_size[hdr->man_dtable.max_direct_rows]) - first_row_bits) + 1;
         for(u = hdr->man_dtable.max_direct_rows; u < iblock->nrows; u++, num_indirect_rows++) {
             size_t      v;                      /* Local index variable */
 
