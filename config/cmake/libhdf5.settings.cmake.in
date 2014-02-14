@@ -3,7 +3,7 @@
 
 General Information:
 -------------------
-                   HDF5 Version: @HDF5_PACKAGE_VERSION@
+                   HDF5 Version: @HDF5_PACKAGE_VERSION_STRING@
                   Configured on: @CONFIG_DATE@
                   Configured by: @CMAKE_GENERATOR@
                  Configure mode: CMAKE @CMAKE_VERSION@

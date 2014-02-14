@@ -40,7 +40,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FApkg.h"		/* Fixed Arrays				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5Vprivate.h"         /* Vector functions			*/
+#include "H5VMprivate.h"         /* Vector functions			*/
 
 
 /****************/
@@ -206,7 +206,7 @@ H5FA__test_fill(void *nat_blk, size_t nelmts))
     HDassert(nat_blk);
     HDassert(nelmts);
 
-    H5V_array_fill(nat_blk, &fill_val, sizeof(uint64_t), nelmts);
+    H5VM_array_fill(nat_blk, &fill_val, sizeof(uint64_t), nelmts);
 
 END_FUNC(STATIC)  /* end H5FA__test_fill() */
 

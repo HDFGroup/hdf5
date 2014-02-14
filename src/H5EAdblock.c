@@ -44,7 +44,7 @@
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 
 /****************/
@@ -276,7 +276,7 @@ HDfprintf(stderr, "%s: after adjusting for index block elements, idx = %Hu\n", F
 #ifdef QAK
 HDfprintf(stderr, "%s: hdr->cparam.data_blk_min_elmts = %u\n", FUNC, (unsigned)hdr->cparam.data_blk_min_elmts);
 #endif /* QAK */
-    sblk_idx = H5V_log2_gen((uint64_t)((idx / hdr->cparam.data_blk_min_elmts) + 1));
+    sblk_idx = H5VM_log2_gen((uint64_t)((idx / hdr->cparam.data_blk_min_elmts) + 1));
 #ifdef QAK
 HDfprintf(stderr, "%s: sblk_idx = %u\n", FUNC, sblk_idx);
 HDfprintf(stderr, "%s: hdr->sblk_info[%u] = {%Hu, %Zu, %Hu, %Hu}\n", FUNC, sblk_idx, hdr->sblk_info[sblk_idx].ndblks, hdr->sblk_info[sblk_idx].dblk_nelmts, hdr->sblk_info[sblk_idx].start_idx, hdr->sblk_info[sblk_idx].start_dblk);

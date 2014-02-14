@@ -136,7 +136,7 @@
 
 /* Compute the # of bytes required to store an offset into a given buffer size */
 #define H5HF_SIZEOF_OFFSET_BITS(b)   (((b) + 7) / 8)
-#define H5HF_SIZEOF_OFFSET_LEN(l)   H5HF_SIZEOF_OFFSET_BITS(H5V_log2_of2((unsigned)(l)))
+#define H5HF_SIZEOF_OFFSET_LEN(l)   H5HF_SIZEOF_OFFSET_BITS(H5VM_log2_of2((unsigned)(l)))
 
 /* Heap ID bit flags */
 /* Heap ID version (2 bits: 6-7) */

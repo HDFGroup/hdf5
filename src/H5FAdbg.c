@@ -41,7 +41,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FApkg.h"		/* Fixed Arrays				*/
 #include "H5Oprivate.h"		/* Object Header 			*/
-#include "H5Vprivate.h"         /* Vector functions                     */
+#include "H5VMprivate.h"         /* Vector functions                     */
 
 
 /****************/
@@ -233,7 +233,7 @@ H5FA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
 
 	/* Read and print each page's elements in the data block */
 	for(page_idx = 0; page_idx < dblock->npages; page_idx++) {
-	    if(!H5V_bit_get(dblock->dblk_page_init, page_idx)) {
+	    if(!H5VM_bit_get(dblock->dblk_page_init, page_idx)) {
 		HDfprintf(stream, "%*s%-*s %Hu %s\n", indent, "", fwidth,
 		    "Page %Zu:", page_idx, "empty");
 

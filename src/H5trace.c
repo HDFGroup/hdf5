@@ -1174,6 +1174,14 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "%ld (transaction)", (long)obj);
                                 break;
 
+                            case H5I_QUERY:
+                                fprintf(out, "%ld (query)", (long)obj);
+                                break;
+
+                            case H5I_VIEW:
+                                fprintf(out, "%ld (view)", (long)obj);
+                                break;
+
                             case H5I_DATATYPE:
                                 if(obj == H5T_NATIVE_SCHAR_g)
                                     fprintf(out, "H5T_NATIVE_SCHAR");
@@ -1495,6 +1503,14 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                                 case H5I_TR:
                                     fprintf(out, "H5I_TR");
+                                    break;
+
+                                case H5I_QUERY:
+                                    fprintf(out, "H5I_QUERY");
+                                    break;
+
+                                case H5I_VIEW:
+                                    fprintf(out, "H5I_VIEW");
                                     break;
 
                                 case H5I_DATATYPE:
@@ -1980,6 +1996,30 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     fprintf(out, "BADTYPE(%ld)", (long)request);
                                     break;
                             } /* end switch */
+                        } /* end else */
+                        break;
+
+                    case 'p':
+                        if(ptr) {
+                            if(vp) {
+                                fprintf(out, "0x%lx", (unsigned long)vp);
+                                if(asize_idx >= 0 && asize[asize_idx] >= 0) {
+                                    int *p = (int*)vp;
+
+                                    fprintf(out, " {");
+                                    for(i = 0; i < asize[asize_idx]; i++)
+                                        fprintf(out, "%s%d", (i ? ", " : ""), p[i]);
+                                    fprintf(out, "}");
+                                } /* end if */
+                            } /* end if */
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            hrpl_t replica_id = va_arg(ap, hrpl_t);
+
+                            fprintf (out, "%"PRIx64"", replica_id);
+                            asize[argno] = replica_id;
                         } /* end else */
                         break;
 #endif

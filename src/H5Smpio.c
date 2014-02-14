@@ -35,7 +35,7 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Spkg.h"		/* Dataspaces 				*/
-#include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5VMprivate.h"		/* Vector and array functions		*/
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -453,7 +453,7 @@ H5S_mpio_span_hyper_type(const H5S_t *space, size_t elmt_size,
     elmt_type_is_derived = TRUE;
 
     /* Compute 'down' sizes for each dimension */
-    if(H5V_array_down(space->extent.rank, space->extent.size, down) < 0)
+    if(H5VM_array_down(space->extent.rank, space->extent.size, down) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGETSIZE, FAIL, "couldn't compute 'down' dimension sizes")
 
     /* Obtain derived data type */

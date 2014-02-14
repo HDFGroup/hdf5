@@ -38,7 +38,7 @@ typedef enum H5I_type_t {
     H5I_BADID		= (-1),	/*invalid Type				    */
     H5I_FILE            = 1,  	/*type ID for File objects      	    */
     H5I_GROUP,	                /*type ID for Group objects     	    */
-    H5I_MAP,	                /*type ID for MAP objects     	    */
+    H5I_MAP,	                /*type ID for MAP objects             	    */
     H5I_DATATYPE,	        /*type ID for Datatype objects		    */
     H5I_DATASPACE,	        /*type ID for Dataspace objects		    */
     H5I_DATASET,	        /*type ID for Dataset objects		    */
@@ -49,7 +49,8 @@ typedef enum H5I_type_t {
     H5I_ES,		        /*type ID for Event Queue objects           */
     H5I_RC,		        /*type ID for Read Context objects          */
     H5I_TR,		        /*type ID for Transaction objects           */
-    H5I_QUERY,			/*type ID for Query objects           */
+    H5I_QUERY,			/*type ID for Query objects                 */
+    H5I_VIEW,			/*type ID for view objects       	    */
     H5I_GENPROP_CLS,            /*type ID for generic property list classes */
     H5I_GENPROP_LST,            /*type ID for generic property lists        */
     H5I_ERROR_CLASS,            /*type ID for error classes		    */

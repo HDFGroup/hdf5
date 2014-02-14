@@ -1072,6 +1072,7 @@ H5Pset_lapl_replica_id(hid_t lapl_id, hrpl_t replica_id)
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iRp", lapl_id, replica_id);
 
     if(lapl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
@@ -1108,6 +1109,7 @@ H5Pget_lapl_replica_id(hid_t lapl_id, hrpl_t *replica_id/*out*/)
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", lapl_id, replica_id);
 
     if(NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a lapl")
@@ -6686,6 +6688,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
     case H5I_RC:
     case H5I_TR:
     case H5I_QUERY:
+    case H5I_VIEW:
     case H5I_GENPROP_CLS:
     case H5I_GENPROP_LST:
     case H5I_ERROR_CLASS:
@@ -6785,6 +6788,7 @@ done:
         case H5I_RC:
         case H5I_TR:
         case H5I_QUERY:
+        case H5I_VIEW:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
@@ -8898,6 +8902,7 @@ H5VL_iod_prefetch(void *_obj, hid_t rcxt_id, hrpl_t *replica_id, hid_t apl_id, v
     case H5I_RC:
     case H5I_TR:
     case H5I_QUERY:
+    case H5I_VIEW:
     case H5I_GENPROP_CLS:
     case H5I_GENPROP_LST:
     case H5I_ERROR_CLASS:
@@ -9011,6 +9016,7 @@ H5VL_iod_evict(void *_obj, uint64_t c_version, hid_t apl_id, void **req)
     case H5I_RC:
     case H5I_TR:
     case H5I_QUERY:
+    case H5I_VIEW:
     case H5I_GENPROP_CLS:
     case H5I_GENPROP_LST:
     case H5I_ERROR_CLASS:

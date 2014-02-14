@@ -82,6 +82,7 @@ $Source = "";
 	       "hobj_ref_t"		    => "r",
                "H5R_type_t"                 => "Rt",
 	       "H5RC_request_t"             => "Rc",
+	       "hrpl_t"                     => "Rp",
                "char"                       => "s",
                "unsigned char"              => "s",
                "H5S_class_t"                => "Sc",

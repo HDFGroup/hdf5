@@ -2148,6 +2148,7 @@ H5VL_iod_get_loc_info(H5VL_iod_object_t *obj, iod_obj_id_t *iod_id,
         case H5I_RC:
         case H5I_TR:
         case H5I_QUERY:
+        case H5I_VIEW:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:

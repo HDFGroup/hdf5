@@ -171,7 +171,7 @@ hdf5_cv_ulong_to_fp_bottom_bit_accurate=${hdf5_cv_ulong_to_fp_bottom_bit_accurat
 hdf5_cv_ldouble_to_integer_accurate=${hdf5_cv_ldouble_to_integer_accurate='no'}
 hdf5_cv_integer_to_ldouble_accurate=${hdf5_cv_integer_to_ldouble_accurate='no'}
 
-# Set flag to generate alternate code for H5V_log2_gen, to avoid
+# Set flag to generate alternate code for H5VM_log2_gen, to avoid
 # problems with the MIPSpro compiler 7.30 and IRIX64 6.5 (ie. other
 # combinations might work, but haven't been tested)
 # (9/15/06 - QAK)

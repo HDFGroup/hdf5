@@ -40,7 +40,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
-#include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5VMprivate.h"		/* Vector and array functions		*/
 
 
 /****************/
@@ -297,7 +297,7 @@ H5D__compact_readvv(const H5D_io_info_t *io_info,
     HDassert(io_info);
 
     /* Use the vectorized memory copy routine to do actual work */
-    if((ret_value = H5V_memcpyvv(io_info->u.rbuf, mem_max_nseq, mem_curr_seq, mem_size_arr, mem_offset_arr, io_info->store->compact.buf, dset_max_nseq, dset_curr_seq, dset_size_arr, dset_offset_arr)) < 0)
+    if((ret_value = H5VM_memcpyvv(io_info->u.rbuf, mem_max_nseq, mem_curr_seq, mem_size_arr, mem_offset_arr, io_info->store->compact.buf, dset_max_nseq, dset_curr_seq, dset_size_arr, dset_offset_arr)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
 
 done:
@@ -338,7 +338,7 @@ H5D__compact_writevv(const H5D_io_info_t *io_info,
     HDassert(io_info);
 
     /* Use the vectorized memory copy routine to do actual work */
-    if((ret_value = H5V_memcpyvv(io_info->store->compact.buf, dset_max_nseq, dset_curr_seq, dset_size_arr, dset_offset_arr, io_info->u.wbuf, mem_max_nseq, mem_curr_seq, mem_size_arr, mem_offset_arr)) < 0)
+    if((ret_value = H5VM_memcpyvv(io_info->store->compact.buf, dset_max_nseq, dset_curr_seq, dset_size_arr, dset_offset_arr, io_info->u.wbuf, mem_max_nseq, mem_curr_seq, mem_size_arr, mem_offset_arr)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
 
     /* Mark the compact dataset's buffer as dirty */
