@@ -43,7 +43,7 @@
 #include "H5Oprivate.h"       /* Object headers    */
 #include "H5Pprivate.h"       /* Property lists    */
 #include "H5Sprivate.h"       /* Dataspaces        */
-#include "H5Vprivate.h"       /* Vector            */
+#include "H5VMprivate.h"       /* Vector            */
 
 #ifdef H5_HAVE_PARALLEL
 

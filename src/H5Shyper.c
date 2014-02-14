@@ -28,7 +28,7 @@
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Iprivate.h"		/* ID Functions				*/
 #include "H5Spkg.h"		/* Dataspace functions			*/
-#include "H5Vprivate.h"         /* Vector functions			*/
+#include "H5VMprivate.h"         /* Vector functions			*/
 
 /* Local datatypes */
 
@@ -464,7 +464,7 @@ H5S_hyper_iter_coords (const H5S_sel_iter_t *iter, hsize_t *coords)
                     HDassert(v >= 0);
 
                     /* Compute the coords for the flattened dimensions */
-                    H5V_array_calc(iter->u.hyp.off[v], (unsigned)((begin - u) + 1), &(iter->dims[u]), &(coords[u]));
+                    H5VM_array_calc(iter->u.hyp.off[v], (unsigned)((begin - u) + 1), &(iter->dims[u]), &(coords[u]));
 
                     /* Continue to faster dimension in both indices */
                     u--;
@@ -4102,7 +4102,7 @@ H5S_hyper_project_scalar(const H5S_t *space, hsize_t *offset)
     } /* end else */
 
     /* Calculate offset of selection in projected buffer */
-    *offset = H5V_array_offset(space->extent.rank, space->extent.size, block); 
+    *offset = H5VM_array_offset(space->extent.rank, space->extent.size, block); 
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4294,7 +4294,7 @@ H5S_hyper_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *off
             HDmemset(block, 0, sizeof(block));
             for(u = 0; u < (base_space->extent.rank - new_space->extent.rank); u++)
                 block[u] = opt_diminfo[u].start;
-            *offset = H5V_array_offset(base_space->extent.rank, base_space->extent.size, block); 
+            *offset = H5VM_array_offset(base_space->extent.rank, base_space->extent.size, block); 
 
             /* Set the correct dimensions for the base & new spaces */
             base_space_dim = base_space->extent.rank - new_space->extent.rank;
@@ -4377,7 +4377,7 @@ H5S_hyper_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *off
             } /* end while */
 
             /* Compute the offset for the down-projection */
-            *offset = H5V_array_offset(base_space->extent.rank, base_space->extent.size, block); 
+            *offset = H5VM_array_offset(base_space->extent.rank, base_space->extent.size, block); 
 
             /* Project the base space's selection down in less dimensions */
             if(H5S_hyper_project_simple_lower(base_space, new_space) < 0)

@@ -48,7 +48,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5Vprivate.h"         /* Vector functions			*/
+#include "H5VMprivate.h"         /* Vector functions			*/
 
 
 /****************/
@@ -560,13 +560,13 @@ if(sblock->dblk_npages)
 HDfprintf(stderr, "%s: sblock->addr = %a\n", FUNC, sblock->addr);
 HDfprintf(stderr, "%s: sblock->dblk_addrs[%Zu] = %a\n", FUNC, dblk_idx, sblock->dblk_addrs[dblk_idx]);
 HDfprintf(stderr, "%s: H5EA_DBLOCK_PREFIX_SIZE(sblock) = %u\n", FUNC, (unsigned)H5EA_DBLOCK_PREFIX_SIZE(sblock));
-HDfprintf(stderr, "%s: sblock->page_init[%Zu] = %t\n", FUNC, page_init_idx, H5V_bit_get(sblock->page_init, page_init_idx));
+HDfprintf(stderr, "%s: sblock->page_init[%Zu] = %t\n", FUNC, page_init_idx, H5VM_bit_get(sblock->page_init, page_init_idx));
 HDfprintf(stderr, "%s: page_idx = %Zu, elmt_idx = %Hu, dblk_page_addr = %a\n", FUNC, page_idx, elmt_idx, dblk_page_addr);
 HDfprintf(stderr, "%s: sblock->dblk_page_size = %Zu\n", FUNC, sblock->dblk_page_size);
 #endif /* QAK */
 
                 /* Check if page has been initialized yet */
-                if(!H5V_bit_get(sblock->page_init, page_init_idx)) {
+                if(!H5VM_bit_get(sblock->page_init, page_init_idx)) {
                     /* Check if we are allowed to create the thing */
                     if(H5AC_WRITE == thing_acc) {
                         /* Create the data block page */
@@ -574,7 +574,7 @@ HDfprintf(stderr, "%s: sblock->dblk_page_size = %Zu\n", FUNC, sblock->dblk_page_
                             H5E_THROW(H5E_CANTCREATE, "unable to create data block page")
 
                         /* Mark data block page as initialized in super block */
-                        H5V_bit_set(sblock->page_init, page_init_idx, TRUE);
+                        H5VM_bit_set(sblock->page_init, page_init_idx, TRUE);
                         sblock_cache_flags |= H5AC__DIRTIED_FLAG;
                     } /* end if */
                     else

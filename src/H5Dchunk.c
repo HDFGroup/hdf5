@@ -59,7 +59,7 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5VMprivate.h"		/* Vector and array functions		*/
 
 
 /****************/
@@ -324,7 +324,7 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsiz
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get simple dataspace info")
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index((unsigned)space_ndims, offset,
+    if(H5VM_chunk_index((unsigned)space_ndims, offset,
 	layout->u.chunk.dim, layout->u.chunk.down_chunks, &chunk_idx) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get chunk index")
 
@@ -419,7 +419,7 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize
     } /* end for */
 
     /* Get the "down" sizes for each dimension */
-    if(H5V_array_down(ndims, layout->chunks, layout->down_chunks) < 0)
+    if(H5VM_array_down(ndims, layout->chunks, layout->down_chunks) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute 'down' chunk size value")
 
 done:
@@ -1137,7 +1137,7 @@ H5D__create_chunk_map_single(H5D_chunk_map_t *fm, const H5D_io_info_t
     chunk_info->coords[fm->f_ndims] = 0;
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index(fm->f_ndims, chunk_info->coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_info->index) < 0)
+    if(H5VM_chunk_index(fm->f_ndims, chunk_info->coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_info->index) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Copy selection for file's dataspace into chunk dataspace */
@@ -1222,7 +1222,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
     } /* end for */
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index(fm->f_ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_index) < 0)
+    if(H5VM_chunk_index(fm->f_ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_index) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Iterate through each chunk in the dataset */
@@ -1340,7 +1340,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
             } while(coords[curr_dim] > sel_end[curr_dim]);
 
             /* Re-calculate the index of this chunk */
-            if(H5V_chunk_index(fm->f_ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_index) < 0)
+            if(H5VM_chunk_index(fm->f_ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_index) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
         } /* end if */
     } /* end while */
@@ -1488,7 +1488,7 @@ H5D__chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, cons
     FUNC_ENTER_STATIC
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index(ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_index) < 0)
+    if(H5VM_chunk_index(ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_index) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Find correct chunk in file & memory skip list */
@@ -1600,7 +1600,7 @@ H5D__chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const
     FUNC_ENTER_STATIC
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index(ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_index) < 0)
+    if(H5VM_chunk_index(ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_index) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Find correct chunk in file & memory skip list */
@@ -3412,7 +3412,7 @@ H5D__chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                 hsize_t chunk_idx;
 
                 /* Calculate the index of this chunk */
-                if(H5V_chunk_index((unsigned)space_ndims, chunk_offset,
+                if(H5VM_chunk_index((unsigned)space_ndims, chunk_offset,
                         layout->u.chunk.dim, layout->u.chunk.down_chunks,
                         &chunk_idx) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get chunk index")
@@ -3986,7 +3986,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
 
         while(!carry) {
             /* Calculate the index of this chunk */
-            if(H5V_chunk_index((unsigned)space_ndims, chunk_offset,
+            if(H5VM_chunk_index((unsigned)space_ndims, chunk_offset,
                     layout->u.chunk.dim, layout->u.chunk.down_chunks,
                     &(chk_io_info.store->chunk.index)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get chunk index")
@@ -4127,7 +4127,7 @@ H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     FUNC_ENTER_STATIC
 
     /* Compute the index for this chunk */
-    if(H5V_chunk_index(rank, chunk_rec->offset, udata->common.layout->dim, udata->common.layout->down_chunks, &chunk_index) < 0)
+    if(H5VM_chunk_index(rank, chunk_rec->offset, udata->common.layout->dim, udata->common.layout->down_chunks, &chunk_index) < 0)
        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, H5_ITER_ERROR, "can't get chunk index")
 
     /* Set it in the userdata to return */
@@ -4318,7 +4318,7 @@ H5D__chunk_update_cache(H5D_t *dset, hid_t dxpl_id)
         next = ent->next;
 
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index(rank, ent->offset, dset->shared->layout.u.chunk.dim, dset->shared->layout.u.chunk.down_chunks, &idx) < 0)
+        if(H5VM_chunk_index(rank, ent->offset, dset->shared->layout.u.chunk.dim, dset->shared->layout.u.chunk.down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
         /* Compute the index for the chunk entry */
@@ -5087,7 +5087,7 @@ static herr_t
 H5D__nonexistent_readvv_cb(hsize_t UNUSED dst_off, hsize_t src_off, size_t len,
     void *_udata)
 {
-    H5D_chunk_readvv_ud_t *udata = (H5D_chunk_readvv_ud_t *)_udata; /* User data for H5V_opvv() operator */
+    H5D_chunk_readvv_ud_t *udata = (H5D_chunk_readvv_ud_t *)_udata; /* User data for H5VM_opvv() operator */
     H5D_fill_buf_info_t fb_info;    /* Dataset's fill buffer info */
     hbool_t fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
     herr_t ret_value = SUCCEED;     /* Return value */
@@ -5139,7 +5139,7 @@ H5D__nonexistent_readvv(const H5D_io_info_t *io_info,
     size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_off_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    H5D_chunk_readvv_ud_t udata;        /* User data for H5V_opvv() operator */
+    H5D_chunk_readvv_ud_t udata;        /* User data for H5VM_opvv() operator */
     ssize_t ret_value;                  /* Return value */
 
     FUNC_ENTER_STATIC
@@ -5153,13 +5153,13 @@ H5D__nonexistent_readvv(const H5D_io_info_t *io_info,
     HDassert(mem_len_arr);
     HDassert(mem_off_arr);
 
-    /* Set up user data for H5V_opvv() */
+    /* Set up user data for H5VM_opvv() */
     udata.rbuf = (unsigned char *)io_info->u.rbuf;
     udata.dset = io_info->dset;
     udata.dxpl_id = io_info->dxpl_id;
 
     /* Call generic sequence operation routine */
-    if((ret_value = H5V_opvv(chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_off_arr,
+    if((ret_value = H5VM_opvv(chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_off_arr,
             mem_max_nseq, mem_curr_seq, mem_len_arr, mem_off_arr,
             H5D__nonexistent_readvv_cb, &udata)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPERATE, FAIL, "can't perform vectorized fill value init")

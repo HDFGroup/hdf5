@@ -43,7 +43,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 
 /****************/
@@ -201,7 +201,7 @@ H5EA__hdr_init(H5EA_hdr_t *hdr, void *ctx_udata))
     HDassert(hdr->cparam.sup_blk_min_data_ptrs);
 
     /* Compute general information */
-    hdr->nsblks = 1 + (hdr->cparam.max_nelmts_bits - H5V_log2_of2(hdr->cparam.data_blk_min_elmts));
+    hdr->nsblks = 1 + (hdr->cparam.max_nelmts_bits - H5VM_log2_of2(hdr->cparam.data_blk_min_elmts));
     hdr->dblk_page_nelmts = (size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits;
     hdr->arr_off_size = (unsigned char)H5EA_SIZEOF_OFFSET_BITS(hdr->cparam.max_nelmts_bits);
 #ifdef QAK
@@ -270,7 +270,7 @@ H5EA__hdr_alloc_elmts(H5EA_hdr_t *hdr, size_t nelmts))
 
     /* Compute the index of the element buffer factory */
     H5_CHECK_OVERFLOW(nelmts, /*From:*/size_t, /*To:*/uint32_t);
-    idx = H5V_log2_of2((uint32_t)nelmts) - H5V_log2_of2((uint32_t)hdr->cparam.data_blk_min_elmts);
+    idx = H5VM_log2_of2((uint32_t)nelmts) - H5VM_log2_of2((uint32_t)hdr->cparam.data_blk_min_elmts);
 #ifdef QAK
 HDfprintf(stderr, "%s: nelmts = %Zu, hdr->data_blk_min_elmts = %u, idx = %u\n", FUNC, nelmts, (unsigned)hdr->data_blk_min_elmts, idx);
 #endif /* QAK */
@@ -340,7 +340,7 @@ H5EA__hdr_free_elmts(H5EA_hdr_t *hdr, size_t nelmts, void *elmts))
 
     /* Compute the index of the element buffer factory */
     H5_CHECK_OVERFLOW(nelmts, /*From:*/size_t, /*To:*/uint32_t);
-    idx = H5V_log2_of2((uint32_t)nelmts) - H5V_log2_of2((uint32_t)hdr->cparam.data_blk_min_elmts);
+    idx = H5VM_log2_of2((uint32_t)nelmts) - H5VM_log2_of2((uint32_t)hdr->cparam.data_blk_min_elmts);
 #ifdef QAK
 HDfprintf(stderr, "%s: nelmts = %Zu, hdr->data_blk_min_elmts = %u, idx = %u\n", FUNC, nelmts, (unsigned)hdr->data_blk_min_elmts, idx);
 #endif /* QAK */

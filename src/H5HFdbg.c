@@ -39,7 +39,7 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5HFpkg.h"		/* Fractal heaps			*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 /****************/
 /* Local Macros */
@@ -638,10 +638,10 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock,
         unsigned    first_row_bits;         /* Number of bits used bit addresses in first row */
         unsigned    num_indirect_rows;      /* Number of rows of blocks in each indirect block */
 
-        first_row_bits = H5V_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size) +
-                            H5V_log2_of2(hdr->man_dtable.cparam.width);
+        first_row_bits = H5VM_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size) +
+                            H5VM_log2_of2(hdr->man_dtable.cparam.width);
         for(u = hdr->man_dtable.max_direct_rows; u < iblock->nrows; u++) {
-            num_indirect_rows = (H5V_log2_gen(hdr->man_dtable.row_block_size[u]) - first_row_bits) + 1;
+            num_indirect_rows = (H5VM_log2_gen(hdr->man_dtable.row_block_size[u]) - first_row_bits) + 1;
             HDsnprintf(temp_str, sizeof(temp_str), "Row #%u: (# of rows: %u)", (unsigned)u, num_indirect_rows);
             HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                     temp_str);

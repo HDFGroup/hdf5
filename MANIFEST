@@ -923,8 +923,8 @@
 ./src/H5Tvlen.c
 ./src/H5TS.c
 ./src/H5TSprivate.h
-./src/H5V.c
-./src/H5Vprivate.h
+./src/H5VM.c
+./src/H5VMprivate.h
 ./src/H5VL.c
 ./src/H5VLint.c
 ./src/H5VLnative.c
@@ -2457,6 +2457,7 @@
 ./config/cmake/hdf.gif
 ./config/cmake/NSIS.template.in
 ./config/cmake/NSIS.InstallOptions.ini.in
+./config/cmake/README.txt.cmake.in
 
 # CMake-specific User Files
 ./config/cmake/UserMacros/Windows_MT.cmake
