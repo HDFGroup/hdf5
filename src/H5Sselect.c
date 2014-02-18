@@ -29,7 +29,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Spkg.h"		/* Dataspaces 				*/
-#include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5VMprivate.h"		/* Vector and array functions		*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 /* Local functions */
@@ -1872,8 +1872,8 @@ H5S_select_construct_projection(const H5S_t *base_space, H5S_t **new_space_ptr,
              * and set the remaining dimensions to 1
              */
             rank_diff = new_space_rank - base_space_rank;
-            H5V_array_fill(new_space_dims, &tmp_dim_size, sizeof(tmp_dim_size), rank_diff);
-            H5V_array_fill(new_space_maxdims, &tmp_dim_size, sizeof(tmp_dim_size), rank_diff);
+            H5VM_array_fill(new_space_dims, &tmp_dim_size, sizeof(tmp_dim_size), rank_diff);
+            H5VM_array_fill(new_space_maxdims, &tmp_dim_size, sizeof(tmp_dim_size), rank_diff);
             HDmemcpy(&new_space_dims[rank_diff], base_space_dims, sizeof(new_space_dims[0]) * base_space_rank);
             HDmemcpy(&new_space_maxdims[rank_diff], base_space_maxdims, sizeof(new_space_maxdims[0]) * base_space_rank);
         } /* end if */
@@ -2038,7 +2038,7 @@ H5S_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void *_b
 
             /* Fill each sequence in memory with fill value */
             HDassert((len[curr_seq] % fill_size) == 0);
-            H5V_array_fill(buf, fill, fill_size, (len[curr_seq] / fill_size));
+            H5VM_array_fill(buf, fill, fill_size, (len[curr_seq] / fill_size));
         } /* end for */
 
         /* Decrement number of elements left to process */

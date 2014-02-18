@@ -20,7 +20,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Vprivate.h"		/* H5V_array_fill			*/
+#include "H5VMprivate.h"		/* H5VM_array_fill			*/
 #include "H5Zpkg.h"		/* Data filters				*/
 
 
@@ -292,7 +292,7 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 #define H5Z_XFORM_DO_OP5(TYPE, SIZE)                                                               \
 {                                                                                                  \
     TYPE val = ((tree->type == H5Z_XFORM_INTEGER) ? (TYPE)tree->value.int_val : (TYPE)tree->value.float_val); \
-    H5V_array_fill(array, &val, sizeof(TYPE), (SIZE));                                             \
+    H5VM_array_fill(array, &val, sizeof(TYPE), (SIZE));                                             \
 }
 
 /* The difference of this macro from H5Z_XFORM_DO_OP3 is that it handles the operations when the left operand is empty, like -x or +x.  

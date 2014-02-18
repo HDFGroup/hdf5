@@ -1186,7 +1186,7 @@ H5ConversionTests (H5_LDOUBLE_TO_LLONG_ACCURATE "Checking IF correctly convertin
 H5ConversionTests (H5_LLONG_TO_LDOUBLE_CORRECT "Checking IF correctly converting (unsigned) long long to long double values")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine generates bad code
-# for the H5V_log2_gen() routine in src/H5Vprivate.h
+# for the H5VM_log2_gen() routine in src/H5VMprivate.h
 # (This flag should be set to no for all machines, except for SGI IRIX64,
 # where the cache value is set to yes in it's config file)
 #

@@ -516,7 +516,7 @@ SET (common_SRCS
     ${HDF5_SRC_DIR}/H5SL.c
     ${HDF5_SRC_DIR}/H5ST.c
     ${HDF5_SRC_DIR}/H5TS.c
-    ${HDF5_SRC_DIR}/H5V.c
+    ${HDF5_SRC_DIR}/H5VM.c
     ${HDF5_SRC_DIR}/H5WB.c
 )
 
@@ -600,7 +600,7 @@ SET (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5STprivate.h
     ${HDF5_SRC_DIR}/H5Tprivate.h
     ${HDF5_SRC_DIR}/H5TSprivate.h
-    ${HDF5_SRC_DIR}/H5Vprivate.h
+    ${HDF5_SRC_DIR}/H5VMprivate.h
     ${HDF5_SRC_DIR}/H5WBprivate.h
     ${HDF5_SRC_DIR}/H5Zprivate.h
     ${HDF5_SRC_DIR}/H5win32defs.h

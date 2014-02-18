@@ -22,34 +22,34 @@
 #include "H5private.h"
 #include "H5Eprivate.h"
 #include "H5Oprivate.h"
-#include "H5Vprivate.h"
+#include "H5VMprivate.h"
 
 /* Local typedefs */
-typedef struct H5V_memcpy_ud_t {
+typedef struct H5VM_memcpy_ud_t {
     unsigned char *dst;         /* Pointer to destination buffer */
     const unsigned char *src;   /* Pointer to source buffer */
-} H5V_memcpy_ud_t;
+} H5VM_memcpy_ud_t;
 
 /* Local macros */
-#define H5V_HYPER_NDIMS H5O_LAYOUT_NDIMS
+#define H5VM_HYPER_NDIMS H5O_LAYOUT_NDIMS
 
 /* Local prototypes */
 static void
-H5V_stride_optimize1(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
+H5VM_stride_optimize1(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
 		     const hsize_t *size, hsize_t *stride1);
 static void
-H5V_stride_optimize2(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
+H5VM_stride_optimize2(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
 		     const hsize_t *size, hsize_t *stride1, hsize_t *stride2);
 #ifdef LATER
 static void
-H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
+H5VM_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
      unsigned dst_n, const hsize_t *dst_size, const ssize_t *dst_stride, void *_dst,
      unsigned src_n, const hsize_t *src_size, const ssize_t *src_stride, const void *_src);
 #endif /* LATER */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_stride_optimize1
+ * Function:	H5VM_stride_optimize1
  *
  * Purpose:	Given a stride vector which references elements of the
  *		specified size, optimize the dimensionality, the stride
@@ -69,7 +69,7 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
  *-------------------------------------------------------------------------
  */
 static void
-H5V_stride_optimize1(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
+H5VM_stride_optimize1(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
 		     const hsize_t *size, hsize_t *stride1)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -78,7 +78,7 @@ H5V_stride_optimize1(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
      * This has to be true because if we optimize the dimensionality down to
      * zero we still must make one reference.
      */
-    HDassert(1 == H5V_vector_reduce_product(0, NULL));
+    HDassert(1 == H5VM_vector_reduce_product(0, NULL));
 
     /*
      * Combine adjacent memory accesses
@@ -95,7 +95,7 @@ H5V_stride_optimize1(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_stride_optimize2
+ * Function:	H5VM_stride_optimize2
  *
  * Purpose:	Given two stride vectors which reference elements of the
  *		specified size, optimize the dimensionality, the stride
@@ -118,7 +118,7 @@ H5V_stride_optimize1(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
  *-------------------------------------------------------------------------
  */
 static void
-H5V_stride_optimize2(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
+H5VM_stride_optimize2(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
 		     const hsize_t *size, hsize_t *stride1, hsize_t *stride2)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -127,7 +127,7 @@ H5V_stride_optimize2(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
      * This has to be true because if we optimize the dimensionality down to
      * zero we still must make one reference.
      */
-    HDassert(1 == H5V_vector_reduce_product(0, NULL));
+    HDassert(1 == H5VM_vector_reduce_product(0, NULL));
     HDassert(*elmt_size>0);
 
     /*
@@ -224,7 +224,7 @@ H5V_stride_optimize2(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_hyper_stride
+ * Function:	H5VM_hyper_stride
  *
  * Purpose:	Given a description of a hyperslab, this function returns
  *		(through STRIDE[]) the byte strides appropriate for accessing
@@ -256,7 +256,7 @@ H5V_stride_optimize2(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5V_hyper_stride(unsigned n, const hsize_t *size,
+H5VM_hyper_stride(unsigned n, const hsize_t *size,
 		 const hsize_t *total_size, const hsize_t *offset,
 		 hsize_t *stride/*out*/)
 {
@@ -267,7 +267,7 @@ H5V_hyper_stride(unsigned n, const hsize_t *size,
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(n <= H5V_HYPER_NDIMS);
+    HDassert(n <= H5VM_HYPER_NDIMS);
     HDassert(size);
     HDassert(total_size);
     HDassert(stride);
@@ -333,7 +333,7 @@ H5V_hyper_stride(unsigned n, const hsize_t *size,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_hyper_eq
+ * Function:	H5VM_hyper_eq
  *
  * Purpose:	Determines whether two hyperslabs are equal.  This function
  *		assumes that both hyperslabs are relative to the same array,
@@ -356,7 +356,7 @@ H5V_hyper_stride(unsigned n, const hsize_t *size,
  *-------------------------------------------------------------------------
  */
 htri_t
-H5V_hyper_eq(unsigned n,
+H5VM_hyper_eq(unsigned n,
 	     const hsize_t *offset1, const hsize_t *size1,
 	     const hsize_t *offset2, const hsize_t *size2)
 {
@@ -386,7 +386,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_hyper_disjointp
+ * Function:	H5VM_hyper_disjointp
  *
  * Purpose:	Determines if two hyperslabs are disjoint.
  *
@@ -404,7 +404,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5V_hyper_disjointp(unsigned n,
+H5VM_hyper_disjointp(unsigned n,
     const hsize_t *offset1, const uint32_t *size1,
     const hsize_t *offset2, const uint32_t *size2)
 {
@@ -432,11 +432,11 @@ H5V_hyper_disjointp(unsigned n,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5V_hyper_disjointp() */
+} /* end H5VM_hyper_disjointp() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_hyper_fill
+ * Function:	H5VM_hyper_fill
  *
  * Purpose:	Similar to memset() except it operates on hyperslabs...
  *
@@ -457,13 +457,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_hyper_fill(unsigned n, const hsize_t *_size,
+H5VM_hyper_fill(unsigned n, const hsize_t *_size,
 	       const hsize_t *total_size, const hsize_t *offset, void *_dst,
 	       unsigned fill_value)
 {
     uint8_t	*dst = (uint8_t*)_dst;	/*cast for ptr arithmetic	*/
-    hsize_t	size[H5V_HYPER_NDIMS];	/*a modifiable copy of _size	*/
-    hsize_t	dst_stride[H5V_HYPER_NDIMS]; /*destination stride info  */
+    hsize_t	size[H5VM_HYPER_NDIMS];	/*a modifiable copy of _size	*/
+    hsize_t	dst_stride[H5VM_HYPER_NDIMS]; /*destination stride info  */
     hsize_t	dst_start;		/*byte offset to start of stride*/
     hsize_t	elmt_size = 1;		/*bytes per element		*/
     herr_t	ret_value;		/*function return status	*/
@@ -474,7 +474,7 @@ H5V_hyper_fill(unsigned n, const hsize_t *_size,
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    HDassert(n > 0 && n <= H5V_HYPER_NDIMS);
+    HDassert(n > 0 && n <= H5VM_HYPER_NDIMS);
     HDassert(_size);
     HDassert(total_size);
     HDassert(dst);
@@ -486,14 +486,14 @@ H5V_hyper_fill(unsigned n, const hsize_t *_size,
 #endif
 
     /* Copy the size vector so we can modify it */
-    H5V_vector_cpy(n, size, _size);
+    H5VM_vector_cpy(n, size, _size);
 
     /* Compute an optimal destination stride vector */
-    dst_start = H5V_hyper_stride(n, size, total_size, offset, dst_stride);
-    H5V_stride_optimize1(&n, &elmt_size, size, dst_stride);
+    dst_start = H5VM_hyper_stride(n, size, total_size, offset, dst_stride);
+    H5VM_stride_optimize1(&n, &elmt_size, size, dst_stride);
 
     /* Copy */
-    ret_value = H5V_stride_fill(n, elmt_size, size, dst_stride, dst+dst_start,
+    ret_value = H5VM_stride_fill(n, elmt_size, size, dst_stride, dst+dst_start,
 			     fill_value);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -501,7 +501,7 @@ H5V_hyper_fill(unsigned n, const hsize_t *_size,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_hyper_copy
+ * Function:	H5VM_hyper_copy
  *
  * Purpose:	Copies a hyperslab from the source to the destination.
  *
@@ -535,7 +535,7 @@ H5V_hyper_fill(unsigned n, const hsize_t *_size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_hyper_copy(unsigned n, const hsize_t *_size,
+H5VM_hyper_copy(unsigned n, const hsize_t *_size,
 
 	       /*destination*/
 	       const hsize_t *dst_size, const hsize_t *dst_offset,
@@ -547,9 +547,9 @@ H5V_hyper_copy(unsigned n, const hsize_t *_size,
 {
     const uint8_t *src = (const uint8_t*)_src;	/*cast for ptr arithmtc */
     uint8_t	*dst = (uint8_t*) _dst;		/*cast for ptr arithmtc */
-    hsize_t	size[H5V_HYPER_NDIMS];		/*a modifiable _size	*/
-    hsize_t	src_stride[H5V_HYPER_NDIMS];	/*source stride info	*/
-    hsize_t	dst_stride[H5V_HYPER_NDIMS];	/*dest stride info	*/
+    hsize_t	size[H5VM_HYPER_NDIMS];		/*a modifiable _size	*/
+    hsize_t	src_stride[H5VM_HYPER_NDIMS];	/*source stride info	*/
+    hsize_t	dst_stride[H5VM_HYPER_NDIMS];	/*dest stride info	*/
     hsize_t	dst_start, src_start;		/*offset to start at	*/
     hsize_t	elmt_size = 1;			/*element size in bytes */
     herr_t	ret_value;			/*return status		*/
@@ -560,7 +560,7 @@ H5V_hyper_copy(unsigned n, const hsize_t *_size,
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    HDassert(n > 0 && n <= H5V_HYPER_NDIMS);
+    HDassert(n > 0 && n <= H5VM_HYPER_NDIMS);
     HDassert(_size);
     HDassert(dst_size);
     HDassert(src_size);
@@ -575,14 +575,14 @@ H5V_hyper_copy(unsigned n, const hsize_t *_size,
 #endif
 
     /* Copy the size vector so we can modify it */
-    H5V_vector_cpy(n, size, _size);
+    H5VM_vector_cpy(n, size, _size);
 
     /* Compute stride vectors for source and destination */
 #ifdef NO_INLINED_CODE
-    dst_start = H5V_hyper_stride(n, size, dst_size, dst_offset, dst_stride);
-    src_start = H5V_hyper_stride(n, size, src_size, src_offset, src_stride);
+    dst_start = H5VM_hyper_stride(n, size, dst_size, dst_offset, dst_stride);
+    src_start = H5VM_hyper_stride(n, size, src_size, src_offset, src_stride);
 #else /* NO_INLINED_CODE */
-    /* in-line version of two calls to H5V_hyper_stride() */
+    /* in-line version of two calls to H5VM_hyper_stride() */
     {
         hsize_t	    dst_acc;	/*accumulator				*/
         hsize_t	    src_acc;	/*accumulator				*/
@@ -675,10 +675,10 @@ H5V_hyper_copy(unsigned n, const hsize_t *_size,
 #endif /* NO_INLINED_CODE */
 
     /* Optimize the strides as a pair */
-    H5V_stride_optimize2(&n, &elmt_size, size, dst_stride, src_stride);
+    H5VM_stride_optimize2(&n, &elmt_size, size, dst_stride, src_stride);
 
     /* Perform the copy in terms of stride */
-    ret_value = H5V_stride_copy(n, elmt_size, size,
+    ret_value = H5VM_stride_copy(n, elmt_size, size,
              dst_stride, dst+dst_start, src_stride, src+src_start);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -686,7 +686,7 @@ H5V_hyper_copy(unsigned n, const hsize_t *_size,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_stride_fill
+ * Function:	H5VM_stride_fill
  *
  * Purpose:	Fills all bytes of a hyperslab with the same value using
  *		memset().
@@ -701,11 +701,11 @@ H5V_hyper_copy(unsigned n, const hsize_t *_size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
+H5VM_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
 		const hsize_t *stride, void *_dst, unsigned fill_value)
 {
     uint8_t	*dst = (uint8_t*)_dst; 	/*cast for ptr arithmetic	*/
-    hsize_t	idx[H5V_HYPER_NDIMS]; 	/*1-origin indices		*/
+    hsize_t	idx[H5VM_HYPER_NDIMS]; 	/*1-origin indices		*/
     hsize_t	nelmts;			/*number of elements to fill	*/
     hsize_t	i;			/*counter			*/
     int	j;			/*counter			*/
@@ -715,8 +715,8 @@ H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
 
     HDassert(elmt_size < SIZET_MAX);
 
-    H5V_vector_cpy(n, idx, size);
-    nelmts = H5V_vector_reduce_product(n, size);
+    H5VM_vector_cpy(n, idx, size);
+    nelmts = H5VM_vector_reduce_product(n, size);
     for (i=0; i<nelmts; i++) {
         /* Copy an element */
         H5_CHECK_OVERFLOW(elmt_size,hsize_t,size_t);
@@ -740,7 +740,7 @@ H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_stride_copy
+ * Function:	H5VM_stride_copy
  *
  * Purpose:	Uses DST_STRIDE and SRC_STRIDE to advance through the arrays
  *		DST and SRC while copying bytes from SRC to DST.  This
@@ -749,7 +749,7 @@ H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
  *		outside the hyperslab defined by the strides.
  *
  * Note:	If the src_stride is all zero and elmt_size is one, then it's
- *		probably more efficient to use H5V_stride_fill() instead.
+ *		probably more efficient to use H5VM_stride_fill() instead.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -761,13 +761,13 @@ H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
+H5VM_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
 		const hsize_t *dst_stride, void *_dst,
 		const hsize_t *src_stride, const void *_src)
 {
     uint8_t	*dst = (uint8_t*)_dst;		/*cast for ptr arithmetic*/
     const uint8_t *src = (const uint8_t*) _src;	/*cast for ptr arithmetic*/
-    hsize_t	idx[H5V_HYPER_NDIMS];		/*1-origin indices	*/
+    hsize_t	idx[H5VM_HYPER_NDIMS];		/*1-origin indices	*/
     hsize_t	nelmts;				/*num elements to copy	*/
     hsize_t	i;				/*counter		*/
     int	j;				/*counters		*/
@@ -778,8 +778,8 @@ H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
     HDassert(elmt_size<SIZET_MAX);
 
     if (n) {
-        H5V_vector_cpy(n, idx, size);
-        nelmts = H5V_vector_reduce_product(n, size);
+        H5VM_vector_cpy(n, idx, size);
+        nelmts = H5VM_vector_reduce_product(n, size);
         for (i=0; i<nelmts; i++) {
 
             /* Copy an element */
@@ -809,7 +809,7 @@ H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_stride_copy_s
+ * Function:	H5VM_stride_copy_s
  *
  * Purpose:	Uses DST_STRIDE and SRC_STRIDE to advance through the arrays
  *		DST and SRC while copying bytes from SRC to DST.  This
@@ -818,7 +818,7 @@ H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
  *		outside the hyperslab defined by the strides.
  *
  * Note:	If the src_stride is all zero and elmt_size is one, then it's
- *		probably more efficient to use H5V_stride_fill() instead.
+ *		probably more efficient to use H5VM_stride_fill() instead.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -830,13 +830,13 @@ H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size,
+H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size,
 		const hssize_t *dst_stride, void *_dst,
 		const hssize_t *src_stride, const void *_src)
 {
     uint8_t	*dst = (uint8_t*)_dst;		/*cast for ptr arithmetic*/
     const uint8_t *src = (const uint8_t*) _src;	/*cast for ptr arithmetic*/
-    hsize_t	idx[H5V_HYPER_NDIMS];		/*1-origin indices	*/
+    hsize_t	idx[H5VM_HYPER_NDIMS];		/*1-origin indices	*/
     hsize_t	nelmts;				/*num elements to copy	*/
     hsize_t	i;				/*counter		*/
     int	j;				/*counters		*/
@@ -847,8 +847,8 @@ H5V_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size,
     HDassert(elmt_size<SIZET_MAX);
 
     if (n) {
-        H5V_vector_cpy(n, idx, size);
-        nelmts = H5V_vector_reduce_product(n, size);
+        H5VM_vector_cpy(n, idx, size);
+        nelmts = H5VM_vector_reduce_product(n, size);
         for (i=0; i<nelmts; i++) {
 
             /* Copy an element */
@@ -879,9 +879,9 @@ H5V_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size,
 #ifdef LATER
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_stride_copy2
+ * Function:	H5VM_stride_copy2
  *
- * Purpose:	Similar to H5V_stride_copy() except the source and
+ * Purpose:	Similar to H5VM_stride_copy() except the source and
  *		destination each have their own dimensionality and size and
  *		we copy exactly NELMTS elements each of size ELMT_SIZE.	 The
  *		size counters wrap if NELMTS is more than a size counter.
@@ -896,7 +896,7 @@ H5V_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size,
  *-------------------------------------------------------------------------
  */
 static void
-H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
+H5VM_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
 
 		 /* destination */
 		 unsigned dst_n, const hsize_t *dst_size,
@@ -910,8 +910,8 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
 {
     uint8_t	*dst = (uint8_t *) _dst;
     const uint8_t *src = (const uint8_t *) _src;
-    hsize_t	dst_idx[H5V_HYPER_NDIMS];
-    hsize_t	src_idx[H5V_HYPER_NDIMS];
+    hsize_t	dst_idx[H5VM_HYPER_NDIMS];
+    hsize_t	src_idx[H5VM_HYPER_NDIMS];
     hsize_t	i;              /* Local index variable */
     int		j;              /* Local index variable */
     hbool_t	carry;
@@ -922,8 +922,8 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
     HDassert(dst_n>0);
     HDassert(src_n>0);
 
-    H5V_vector_cpy(dst_n, dst_idx, dst_size);
-    H5V_vector_cpy(src_n, src_idx, src_size);
+    H5VM_vector_cpy(dst_n, dst_idx, dst_size);
+    H5VM_vector_cpy(src_n, src_idx, src_size);
 
     for (i=0; i<nelmts; i++) {
 
@@ -958,7 +958,7 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_array_fill
+ * Function:	H5VM_array_fill
  *
  * Purpose:	Fills all bytes of an array with the same value using
  *		memset(). Increases amount copied by power of two until the
@@ -974,7 +974,7 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_array_fill(void *_dst, const void *src, size_t size, size_t count)
+H5VM_array_fill(void *_dst, const void *src, size_t size, size_t count)
 {
     size_t      copy_size;          /* size of the buffer to copy	*/
     size_t      copy_items;         /* number of items currently copying*/
@@ -1010,11 +1010,11 @@ H5V_array_fill(void *_dst, const void *src, size_t size, size_t count)
         HDmemcpy(dst, _dst, items_left * size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5V_array_fill() */
+}   /* H5VM_array_fill() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_array_down
+ * Function:	H5VM_array_down
  *
  * Purpose:	Given a set of dimension sizes, calculate the size of each
  *              "down" slice.  This is the size of the dimensions for all the
@@ -1031,14 +1031,14 @@ H5V_array_fill(void *_dst, const void *src, size_t size, size_t count)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_array_down(unsigned n, const hsize_t *total_size, hsize_t *down)
+H5VM_array_down(unsigned n, const hsize_t *total_size, hsize_t *down)
 {
     hsize_t	acc;	                /*accumulator			*/
     int	        i;		        /*counter			*/
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(n <= H5V_HYPER_NDIMS);
+    HDassert(n <= H5VM_HYPER_NDIMS);
     HDassert(total_size);
     HDassert(down);
 
@@ -1050,11 +1050,11 @@ H5V_array_down(unsigned n, const hsize_t *total_size, hsize_t *down)
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5V_array_down() */
+} /* end H5VM_array_down() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_array_offset_pre
+ * Function:	H5VM_array_offset_pre
  *
  * Purpose:	Given a coordinate description of a location in an array, this
  *      function returns the byte offset of the coordinate.
@@ -1077,14 +1077,14 @@ H5V_array_down(unsigned n, const hsize_t *total_size, hsize_t *down)
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5V_array_offset_pre(unsigned n, const hsize_t *acc, const hsize_t *offset)
+H5VM_array_offset_pre(unsigned n, const hsize_t *acc, const hsize_t *offset)
 {
     int             i;		/*counter				*/
     hsize_t	    ret_value;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(n <= H5V_HYPER_NDIMS);
+    HDassert(n <= H5VM_HYPER_NDIMS);
     HDassert(acc);
     HDassert(offset);
 
@@ -1093,11 +1093,11 @@ H5V_array_offset_pre(unsigned n, const hsize_t *acc, const hsize_t *offset)
         ret_value += acc[i] * offset[i];
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5V_array_offset_pre() */
+} /* end H5VM_array_offset_pre() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_array_offset
+ * Function:	H5VM_array_offset
  *
  * Purpose:	Given a coordinate description of a location in an array, this
  *      function returns the byte offset of the coordinate.
@@ -1117,31 +1117,31 @@ H5V_array_offset_pre(unsigned n, const hsize_t *acc, const hsize_t *offset)
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5V_array_offset(unsigned n, const hsize_t *total_size, const hsize_t *offset)
+H5VM_array_offset(unsigned n, const hsize_t *total_size, const hsize_t *offset)
 {
-    hsize_t	acc_arr[H5V_HYPER_NDIMS];	/* Accumulated size of down dimensions */
+    hsize_t	acc_arr[H5VM_HYPER_NDIMS];	/* Accumulated size of down dimensions */
     hsize_t	ret_value;  /* Return value */
 
     FUNC_ENTER_NOAPI((HDabort(), 0)) /*lint !e527 Don't worry about unreachable statement */
 
-    HDassert(n <= H5V_HYPER_NDIMS);
+    HDassert(n <= H5VM_HYPER_NDIMS);
     HDassert(total_size);
     HDassert(offset);
 
     /* Build the sizes of each dimension in the array */
-    if(H5V_array_down(n,total_size,acc_arr)<0)
+    if(H5VM_array_down(n,total_size,acc_arr)<0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, UFAIL, "can't compute down sizes")
 
     /* Set return value */
-    ret_value=H5V_array_offset_pre(n,acc_arr,offset);
+    ret_value=H5VM_array_offset_pre(n,acc_arr,offset);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5V_array_offset() */
+} /* end H5VM_array_offset() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_array_calc_pre
+ * Function:	H5VM_array_calc_pre
  *
  * Purpose:	Given a linear offset in an array, the dimensions of that
  *              array and the pre-computed 'down' (accumulator) sizes, this
@@ -1159,7 +1159,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5V_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *down,
+H5VM_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *down,
     hsize_t *coords)
 {
     unsigned    u;                      /* Local index variable */
@@ -1167,7 +1167,7 @@ H5V_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *down,
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(n <= H5V_HYPER_NDIMS);
+    HDassert(n <= H5VM_HYPER_NDIMS);
     HDassert(coords);
 
     /* Compute the coordinates from the offset */
@@ -1177,11 +1177,11 @@ H5V_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *down,
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5V_array_calc_pre() */
+} /* end H5VM_array_calc_pre() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_array_calc
+ * Function:	H5VM_array_calc
  *
  * Purpose:	Given a linear offset in an array and the dimensions of that
  *              array, this function computes the coordinates of that offset
@@ -1201,33 +1201,33 @@ H5V_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *down,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_array_calc(hsize_t offset, unsigned n, const hsize_t *total_size, hsize_t *coords)
+H5VM_array_calc(hsize_t offset, unsigned n, const hsize_t *total_size, hsize_t *coords)
 {
-    hsize_t	idx[H5V_HYPER_NDIMS];	/* Size of each dimension in bytes */
+    hsize_t	idx[H5VM_HYPER_NDIMS];	/* Size of each dimension in bytes */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(n <= H5V_HYPER_NDIMS);
+    HDassert(n <= H5VM_HYPER_NDIMS);
     HDassert(total_size);
     HDassert(coords);
 
     /* Build the sizes of each dimension in the array */
-    if(H5V_array_down(n, total_size, idx) < 0)
+    if(H5VM_array_down(n, total_size, idx) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute down sizes")
 
     /* Compute the coordinates from the offset */
-    if(H5V_array_calc_pre(offset, n, idx, coords) < 0)
+    if(H5VM_array_calc_pre(offset, n, idx, coords) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute coordinates")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5V_array_calc() */
+} /* end H5VM_array_calc() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_chunk_index
+ * Function:	H5VM_chunk_index
  *
  * Purpose:	Given a coordinate offset (COORD), the size of each chunk
  *              (CHUNK), the number of chunks in each dimension (NCHUNKS)
@@ -1269,16 +1269,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
+H5VM_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
     const hsize_t *down_nchunks, hsize_t *chunk_idx)
 {
-    hsize_t	scaled_coord[H5V_HYPER_NDIMS];	/* Scaled, coordinates, in terms of chunks */
+    hsize_t	scaled_coord[H5VM_HYPER_NDIMS];	/* Scaled, coordinates, in terms of chunks */
     unsigned    u;                      /* Local index variable */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(ndims <= H5V_HYPER_NDIMS);
+    HDassert(ndims <= H5VM_HYPER_NDIMS);
     HDassert(coord);
     HDassert(chunk);
     HDassert(chunk_idx);
@@ -1288,14 +1288,14 @@ H5V_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
         scaled_coord[u]=coord[u]/chunk[u];
 
     /* Compute the chunk index */
-    *chunk_idx=H5V_array_offset_pre(ndims,down_nchunks,scaled_coord); /*lint !e772 scaled_coord will always be initialized */
+    *chunk_idx=H5VM_array_offset_pre(ndims,down_nchunks,scaled_coord); /*lint !e772 scaled_coord will always be initialized */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5V_chunk_index() */
+} /* end H5VM_chunk_index() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_opvv
+ * Function:	H5VM_opvv
  *
  * Purpose:	Perform an operation on a source & destination sequences
  *		of offset/length pairs.  Each set of sequnces has an array
@@ -1307,7 +1307,7 @@ H5V_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
  *              source or destination sequence runs out of information.
  *
  * Note:	The algorithm in this routine is [basically] the same as for
- *		H5V_memcpyvv().  Changes should be made to both!
+ *		H5VM_memcpyvv().  Changes should be made to both!
  *
  * Return:	Non-negative # of bytes operated on, on success/Negative on failure
  *
@@ -1317,11 +1317,11 @@ H5V_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5V_opvv(size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[],
+H5VM_opvv(size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[],
     hsize_t dst_off_arr[],
     size_t src_max_nseq, size_t *src_curr_seq, size_t src_len_arr[],
     hsize_t src_off_arr[],
-    H5V_opvv_func_t op, void *op_data)
+    H5VM_opvv_func_t op, void *op_data)
 {
     hsize_t *max_dst_off_ptr, *max_src_off_ptr;  /* Pointers to max. source and destination offset locations */
     hsize_t *dst_off_ptr, *src_off_ptr; /* Pointers to source and destination offset arrays */
@@ -1497,11 +1497,11 @@ finished:
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5V_opvv() */
+} /* end H5VM_opvv() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5V_memcpyvv
+ * Function:	H5VM_memcpyvv
  *
  * Purpose:	Given source and destination buffers in memory (SRC & DST)
  *              copy sequences of from the source buffer into the destination
@@ -1514,7 +1514,7 @@ done:
  *              source or destination buffer runs out of sequence information.
  *
  * Note:	The algorithm in this routine is [basically] the same as for
- *		H5V_opvv().  Changes should be made to both!
+ *		H5VM_opvv().  Changes should be made to both!
  *
  * Return:	Non-negative # of bytes copied on success/Negative on failure
  *
@@ -1524,7 +1524,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5V_memcpyvv(void *_dst,
+H5VM_memcpyvv(void *_dst,
     size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[], hsize_t dst_off_arr[],
     const void *_src,
     size_t src_max_nseq, size_t *src_curr_seq, size_t src_len_arr[], hsize_t src_off_arr[])
@@ -1708,5 +1708,5 @@ finished:
     *src_curr_seq = (size_t)(src_off_ptr - src_off_arr);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5V_memcpyvv() */
+} /* end H5VM_memcpyvv() */
 

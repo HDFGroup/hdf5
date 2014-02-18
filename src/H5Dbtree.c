@@ -43,7 +43,7 @@
 #include "H5MFprivate.h"	/* File space management		*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Sprivate.h"         /* Dataspaces                           */
-#include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5VMprivate.h"		/* Vector and array functions		*/
 
 /****************/
 /* Local Macros */
@@ -345,7 +345,7 @@ H5D__btree_cmp2(void *_lt_key, void *_udata, void *_rt_key)
     HDassert(udata->layout->ndims > 0 && udata->layout->ndims <= H5O_LAYOUT_NDIMS);
 
     /* Compare the offsets but ignore the other fields */
-    ret_value = H5V_vector_cmp_u(udata->layout->ndims, lt_key->offset, rt_key->offset);
+    ret_value = H5VM_vector_cmp_u(udata->layout->ndims, lt_key->offset, rt_key->offset);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree_cmp2() */
@@ -409,9 +409,9 @@ H5D__btree_cmp3(void *_lt_key, void *_udata, void *_rt_key)
             ret_value = (-1);
     } /* end if */
     else {
-        if(H5V_vector_ge_u(udata->layout->ndims, udata->offset, rt_key->offset))
+        if(H5VM_vector_ge_u(udata->layout->ndims, udata->offset, rt_key->offset))
             ret_value = 1;
-        else if(H5V_vector_lt_u(udata->layout->ndims, udata->offset, lt_key->offset))
+        else if(H5VM_vector_lt_u(udata->layout->ndims, udata->offset, lt_key->offset))
             ret_value = (-1);
     } /* end else */
 
@@ -540,7 +540,7 @@ H5D__btree_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
         /* Negative indices not supported yet */
         HGOTO_ERROR(H5E_STORAGE, H5E_UNSUPPORTED, H5B_INS_ERROR, "internal error")
 
-    } else if(H5V_vector_eq_u(udata->common.layout->ndims,
+    } else if(H5VM_vector_eq_u(udata->common.layout->ndims,
 				udata->common.offset, lt_key->offset) &&
 	       lt_key->nbytes > 0) {
         /*
@@ -579,10 +579,10 @@ H5D__btree_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
             ret_value = H5B_INS_NOOP;
         }
 
-    } else if (H5V_hyper_disjointp(udata->common.layout->ndims,
+    } else if (H5VM_hyper_disjointp(udata->common.layout->ndims,
 				   lt_key->offset, udata->common.layout->dim,
 				   udata->common.offset, udata->common.layout->dim)) {
-        HDassert(H5V_hyper_disjointp(udata->common.layout->ndims,
+        HDassert(H5VM_hyper_disjointp(udata->common.layout->ndims,
 				   rt_key->offset, udata->common.layout->dim,
 				   udata->common.offset, udata->common.layout->dim));
         /*

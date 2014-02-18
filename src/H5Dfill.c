@@ -38,7 +38,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5VMprivate.h"		/* Vector and array functions		*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 
@@ -262,7 +262,7 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf,
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             /* Replicate the file's fill value into the temporary buffer */
-            H5V_array_fill(tmp_buf, fill, src_type_size, (size_t)nelmts);
+            H5VM_array_fill(tmp_buf, fill, src_type_size, (size_t)nelmts);
 
             /* Convert from file's fill value into memory form */
             if(H5T_convert(tpath, src_id, dst_id, (size_t)nelmts, (size_t)0, (size_t)0, tmp_buf, bkg_buf, dxpl_id) < 0)
@@ -494,7 +494,7 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf,
             } /* end else */
 
             /* Replicate the fill value into the cached buffer */
-            H5V_array_fill(fb_info->fill_buf, fill->buf, fb_info->max_elmt_size, fb_info->elmts_per_buf);
+            H5VM_array_fill(fb_info->fill_buf, fill->buf, fb_info->max_elmt_size, fb_info->elmts_per_buf);
         } /* end else */
     } /* end if */
     else {      /* Fill the buffer with the default fill value */
@@ -588,7 +588,7 @@ H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts, hid_t dxpl_id)
 
     /* Replicate the fill value into the cached buffer */
     if(nelmts > 1)
-        H5V_array_fill((void *)((unsigned char *)fb_info->fill_buf + fb_info->mem_elmt_size), fb_info->fill_buf, fb_info->mem_elmt_size, (nelmts - 1));
+        H5VM_array_fill((void *)((unsigned char *)fb_info->fill_buf + fb_info->mem_elmt_size), fb_info->fill_buf, fb_info->mem_elmt_size, (nelmts - 1));
 
     /* Reset the entire background buffer, if necessary */
     if(H5T_path_bkg(fb_info->mem_to_dset_tpath))
