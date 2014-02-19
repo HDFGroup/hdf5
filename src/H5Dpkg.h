@@ -281,6 +281,8 @@ typedef struct H5D_dset_info_t {
     hsize_t last_index;         /* Index of last chunk operated on */
     H5D_piece_info_t *last_piece_info;  /* Pointer to last piece's info */
 
+    H5SL_t *dset_sel_pieces;    /* Skiplist of selected pieces in this dataset, indexed by index */
+
     hsize_t chunk_dim[H5O_LAYOUT_NDIMS];    /* Size of chunk in each dimension */
 
     H5D_type_info_t type_info;
