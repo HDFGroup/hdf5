@@ -379,7 +379,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
     /* Prepend the prefix value to the base name */
     if (prefix && *prefix) {
-  if (isppdriver){
+        if (isppdriver) {
             /* This is a parallel system */
             char *subdir;
 
@@ -406,9 +406,11 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
                 }
             }
 
-            if (!fullname[0])
+            if (!fullname[0]) {
                 /* We didn't append the prefix yet */
-                HDstrncpy(fullname, prefix, MIN(HDstrlen(prefix), size));
+                HDstrncpy(fullname, prefix, size);
+                fullname[size -1] = '\0';
+            }
 
             if (HDstrlen(fullname) + HDstrlen(base_name) + 1 < size) {
                 /*
