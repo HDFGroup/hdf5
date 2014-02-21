@@ -984,7 +984,7 @@ H5Q_apply_link_name(H5Q_t *query, hbool_t *result, const char *name)
 herr_t
 H5Qencode(hid_t query_id, void *buf, size_t *nalloc)
 {
-    H5Q_t *query;
+    H5Q_t *query = NULL;
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
