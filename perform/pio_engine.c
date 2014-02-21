@@ -464,7 +464,8 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         }
         else {
             /* We didn't append the prefix yet */
-            HDstrncpy(fullname, prefix, MIN(HDstrlen(prefix), size));
+            HDstrncpy(fullname, prefix, size);
+            fullname[size - 1] = '\0';
         }
 
         if ((HDstrlen(fullname) + HDstrlen(base_name) + 1) < size) {
