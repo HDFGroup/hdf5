@@ -529,9 +529,9 @@ H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *type_info,
-    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-    H5D_dset_info_t *dinfo)
+H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md,
+    const H5D_type_info_t UNUSED *type_info, hsize_t nelmts,
+    const H5S_t *file_space, const H5S_t *mem_space, H5D_dset_info_t *dinfo)
 {
     H5D_t *dataset = dinfo->dset;     /* Local pointer to dataset info */
 
@@ -540,7 +540,6 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
 
     int sm_ndims;               /* The number of dimensions of the memory buffer's dataspace (signed) */
     int sf_ndims;               /* The number of dimensions of the file dataspace (signed) */
-    H5SL_node_t *curr_node;
     H5S_class_t fsclass_type;   /* file space class type */
     H5S_sel_type fsel_type;     /* file space selection type */
     hbool_t sel_hyper_flag;
@@ -695,6 +694,10 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
             /* get dset file address for piece */
             new_piece_info->faddr = dinfo->dset->shared->layout.storage.u.contig.addr;
 
+            /* Save piece to last_piece_info so it is freed at the end of the
+             * operation */
+            dinfo->last_piece_info = new_piece_info;
+
             /* insert piece info */
             if(H5SL_insert(io_info_md->sel_pieces, new_piece_info, &new_piece_info->faddr) < 0) {
                     /* mimic H5D__free_piece_info */
@@ -715,7 +718,7 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
 
 done:
     if(ret_value < 0) {
-        if(H5D__piece_io_term_mdset(dinfo, io_info_md) < 0)
+        if(H5D__piece_io_term_mdset(dinfo) < 0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping")
     } /* end if */
 

@@ -130,8 +130,7 @@ typedef ssize_t (*H5D_layout_writevv_func_t)(const struct H5D_io_info_t *io_info
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
 typedef herr_t (*H5D_layout_flush_func_t)(H5D_t *dataset, hid_t dxpl_id);
 typedef herr_t (*H5D_layout_io_term_func_t)(const struct H5D_chunk_map_t *cm);
-typedef herr_t (*H5D_layout_io_term_md_func_t)(const struct H5D_dset_info_t *di, 
-    const struct H5D_io_info_md_t *io_info_md);
+typedef herr_t (*H5D_layout_io_term_md_func_t)(struct H5D_dset_info_t *di);
 
 /* Typedef for grouping layout I/O routines */
 typedef struct H5D_layout_ops_t {
@@ -251,7 +250,7 @@ typedef struct H5D_piece_info_t {
 
 /* dset info for multiple dsets */
 typedef struct H5D_dset_info_t {
-    hsize_t index;              /* "Index" of dataset info. key of skip list */
+    hsize_t index;              /* "Index" of dataset info. key of skip list *//*!FIXME remove me*/
 
     H5D_t *dset;                /* Pointer to dataset being operated on */
     H5D_storage_t *store;       /* Dataset storage info */
@@ -811,7 +810,7 @@ H5_DLL htri_t H5D__mpio_opt_possible_mdset(const size_t count, H5D_io_info_md_t 
 #endif /* H5_HAVE_PARALLEL */
 
 /* for both CHUNK and CONTIG dset skiplist free (sel_pieces) for layout_ops.io_term_md. */
-H5_DLL herr_t H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md);
+H5_DLL herr_t H5D__piece_io_term_mdset(H5D_dset_info_t *di);
 
 /* Testing functions */
 #ifdef H5D_TESTING

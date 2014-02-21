@@ -1046,7 +1046,7 @@ static herr_t
 H5D__read_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info)
 {
     H5D_io_info_md_t io_info_md;        /* Dataset I/O info for multi dsets */
-    hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
+    size_t type_info_init = 0;          /* Number of datatype info structs that have been initialized */
     H5D_dset_info_t *dset_info_array = NULL;
     H5S_t ** projected_mem_space;       /* If not NULL, ptr to dataspace containing a     */
                                         /* projection of the supplied mem_space to a new  */
@@ -1068,7 +1068,7 @@ H5D__read_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info
 #ifdef H5_HAVE_PARALLEL
     hbool_t     io_info_init = FALSE;   /* Whether the I/O info has been initialized */
 #endif /*H5_HAVE_PARALLEL*/
-    hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
+    size_t      io_op_init = 0;         /* Number I/O ops that have been initialized */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     H5FD_mpio_xfer_t xfer_mode;         /* Whether independent or parallel I/O */
@@ -1082,6 +1082,10 @@ H5D__read_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info
     io_info_md.sel_pieces = NULL;
     io_info_md.store_faddr = 0;
     io_info_md.base_maddr_r = NULL;
+
+    /* Create global piece skiplist */
+    if(NULL == (io_info_md.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for piece selections")
 
     /* Alloc dset_info */
     if(NULL == (io_info_md.dsets_info = (H5D_dset_info_t *)H5MM_calloc(count * sizeof(H5D_dset_info_t))))
@@ -1187,7 +1191,7 @@ H5D__read_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info
         /* Set up datatype info for operation */
         if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, info[i].mem_type_id, TRUE, &(dset_info_array[i].type_info)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
-        type_info_init = TRUE;
+        type_info_init++;
     
 #ifdef H5_HAVE_PARALLEL
         /* Collective access is not permissible without a MPI based VFD */
@@ -1294,8 +1298,10 @@ H5D__read_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info
         /* Init io_info_md.dset_info[] and generate piece_info in skip list */
         if(dset_info_array[i].layout_ops.io_init_md && (*dset_info_array[i].layout_ops.io_init_md)(&io_info_md, &(dset_info_array[i].type_info), nelmts, file_space, mem_space, &(dset_info_array[i])) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
-        io_op_init = TRUE;
+        io_op_init++;
     } /* end of for loop */
+    assert(type_info_init == count);
+    assert(io_op_init == count);
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
@@ -1309,6 +1315,15 @@ H5D__read_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info
      * Multiple-dset path can not be called since it is not supported, so make 
      * detour through single-dset path */
     if(TRUE == io_info_md.is_coll_broken) {
+        /* Shut down any I/O op information that was created for the multi
+         * dataset operation.  Iterate in reverse order so io_op_init remains
+         * valid. */
+        while(io_op_init > 0) {
+            io_op_init--;
+            if(dset_info_array[io_op_init].layout_ops.io_term_md && (*dset_info_array[io_op_init].layout_ops.io_term_md)(&(dset_info_array[io_op_init])) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+        } /* end while */
+
         /* Loop with serial & single-dset read IO path */
         for(i = 0; i < count; i++) {
             H5D_t   *dset;
@@ -1343,10 +1358,9 @@ H5D__read_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
-    /* iterate dsets */
-    for(i = 0; i < count; i++)
-        /* Shut down the I/O op information */
-        if(io_op_init && dset_info_array[i].layout_ops.io_term_md && (*dset_info_array[i].layout_ops.io_term_md)(&(dset_info_array[i]), &io_info_md) < 0)
+    /* Shut down the I/O op information */
+    for(i = 0; i < io_op_init; i++) 
+        if(dset_info_array[i].layout_ops.io_term_md && (*dset_info_array[i].layout_ops.io_term_md)(&(dset_info_array[i])) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
 
 #ifdef H5_HAVE_PARALLEL
@@ -1355,17 +1369,21 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
 
-    /* iterate dsets */
-    for(i = 0; i < count; i++) {
-        /* Shut down datatype info for operation */
-        if(type_info_init && H5D__typeinfo_term(&(dset_info_array[i].type_info)) < 0)
+    /* Shut down datatype info for operation */
+    for(i = 0; i < type_info_init; i++)
+        if(H5D__typeinfo_term(&(dset_info_array[i].type_info)) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
-        /* discard projected mem space if it was created */
+    /* Discard projected mem spaces if they were created */
+    for(i = 0; i < count; i++)
         if(NULL != projected_mem_space[i])
             if(H5S_close(projected_mem_space[i]) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
-    } /* end of for loop */
+
+    /* Free global piece skiplist */
+    if(io_info_md.sel_pieces)
+        if(H5SL_close(io_info_md.sel_pieces) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close dataset skip list")
 
     /* Free other buffers */
     if (info_rbuf_ori)
@@ -1640,7 +1658,7 @@ static herr_t
 H5D__write_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info)
 {    
     H5D_io_info_md_t io_info_md;        /* Dataset I/O info for multi dsets */
-    hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
+    size_t type_info_init = 0;          /* Number of datatype info structs that have been initialized */
     H5D_dset_info_t *dset_info_array = NULL;
     H5S_t **projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
                                         /* projection of the supplied mem_space to a new  */
@@ -1661,7 +1679,7 @@ H5D__write_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *inf
 #ifdef H5_HAVE_PARALLEL
     hbool_t     io_info_init = FALSE;   /* Whether the I/O info has been initialized */
 #endif /*H5_HAVE_PARALLEL*/
-    hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
+    size_t      io_op_init = 0;         /* Number I/O ops that have been initialized */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     const void **info_wbuf_ori = NULL;  /* save original wbuf */
@@ -1674,6 +1692,10 @@ H5D__write_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *inf
     io_info_md.sel_pieces = NULL;
     io_info_md.store_faddr = 0;
     io_info_md.base_maddr_w = NULL;
+
+    /* Create global piece skiplist */
+    if(NULL == (io_info_md.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for piece selections")
 
     /* Alloc dset_info */
     if(NULL == (io_info_md.dsets_info = (H5D_dset_info_t *)H5MM_calloc(count * sizeof(H5D_dset_info_t))))
@@ -1722,7 +1744,7 @@ H5D__write_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *inf
         /* Set up datatype info for operation */
         if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, info[i].mem_type_id, TRUE, &(dset_info_array[i].type_info)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
-        type_info_init = TRUE;
+        type_info_init++;
     
         /* Various MPI based checks */
 #ifdef H5_HAVE_PARALLEL
@@ -1866,8 +1888,10 @@ H5D__write_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *inf
         /* Init io_info_md.dset_info[] and generate piece_info in skip list */
         if(dset_info_array[i].layout_ops.io_init_md && (*dset_info_array[i].layout_ops.io_init_md)(&io_info_md, &(dset_info_array[i].type_info), nelmts, file_space, mem_space, &(dset_info_array[i])) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
-        io_op_init = TRUE;
+        io_op_init++;
     } /* end of Count for loop */
+    assert(type_info_init == count);
+    assert(io_op_init == count);
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
@@ -1880,15 +1904,24 @@ H5D__write_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *inf
      * Multiple-dset path can not be called since it is not supported, so make 
      * detour through single-dset path */
     if(TRUE == io_info_md.is_coll_broken) {
-       /* loop with serial & single-dset write IO path */
-       for(i = 0; i < count; i++) {
-           /* Restore ori wbuf, so it can be passed as initial state for 
-            * single-dset path */
-           info[i].u.wbuf = info_wbuf_ori[i];
+        /* Shut down any I/O op information that was created for the multi
+         * dataset operation.  Iterate in reverse order so io_op_init remains
+         * valid. */
+        while(io_op_init > 0) {
+            io_op_init--;
+            if(dset_info_array[io_op_init].layout_ops.io_term_md && (*dset_info_array[io_op_init].layout_ops.io_term_md)(&(dset_info_array[io_op_init])) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+        } /* end while */
 
-           if(H5D__pre_write(info[i].dset_id, info[i].mem_type_id, info[i].mem_space_id, info[i].dset_space_id, dxpl_id, info[i].u.wbuf) < 0) 
+        /* loop with serial & single-dset write IO path */
+        for(i = 0; i < count; i++) {
+            /* Restore ori wbuf, so it can be passed as initial state for 
+             * single-dset path */
+            info[i].u.wbuf = info_wbuf_ori[i];
+
+            if(H5D__pre_write(info[i].dset_id, info[i].mem_type_id, info[i].mem_space_id, info[i].dset_space_id, dxpl_id, info[i].u.wbuf) < 0) 
                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
-       } /* end for */
+        } /* end for */
     } /* end if */
     else
         /* Invoke correct "high level" I/O routine */
@@ -1914,10 +1947,9 @@ H5D__write_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *inf
 #endif /* OLD_WAY */
 
 done:
-    /* iterate dsets */
-    for(i = 0; i < count; i++) 
-        /* Shut down the I/O op information */
-        if(io_op_init && dset_info_array[i].layout_ops.io_term_md && (*dset_info_array[i].layout_ops.io_term_md)(&(dset_info_array[i]), &io_info_md) < 0)
+    /* Shut down the I/O op information */
+    for(i = 0; i < io_op_init; i++) 
+        if(dset_info_array[i].layout_ops.io_term_md && (*dset_info_array[i].layout_ops.io_term_md)(&(dset_info_array[i])) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
 
 #ifdef H5_HAVE_PARALLEL
@@ -1926,17 +1958,21 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
 
-    /* iterate dsets */
-    for(i = 0; i < count; i++) {
-        /* Shut down datatype info for operation */
-        if(type_info_init && H5D__typeinfo_term(&(dset_info_array[i].type_info)) < 0)
+    /* Shut down datatype info for operation */
+    for(i = 0; i < type_info_init; i++)
+        if(H5D__typeinfo_term(&(dset_info_array[i].type_info)) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
-        /* discard projected mem space if it was created */
+    /* Discard projected mem spaces if they were created */
+    for(i = 0; i < count; i++)
         if(NULL != projected_mem_space[i])
             if(H5S_close(projected_mem_space[i]) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
-    } /* end for */
+
+    /* Free global piece skiplist */
+    if(io_info_md.sel_pieces)
+        if(H5SL_close(io_info_md.sel_pieces) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close dataset skip list")
 
     /* Free other buffers */
     if(info_wbuf_ori)
@@ -2448,8 +2484,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__ioinfo_adjust() */
 
-
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__ioinfo_term
@@ -2504,7 +2538,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__ioinfo_term() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5D__ioinfo_term_mdset
  *

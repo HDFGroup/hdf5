@@ -1093,29 +1093,14 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create chunk selections for single element")
     } /* end if */
     else {
-        /* Initialize skip list for piece selections */
-        /* Only need single skip list point over multiple read/write IO 
-         * and multiple dsets until H5D_close. Thus check both 
-         * since io_info_md->sel_pieces only lives single write/read IO, 
-         * even cache.sel_pieces lives until Dclose */
-        if(NULL == dataset->shared->cache.sel_pieces && NULL == io_info_md->sel_pieces) {
-            if(NULL == (dataset->shared->cache.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for piece selections")
-
-            /* keep the skip list in cache, so do not need to recreate until close */
-            io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
+        /* Initialize skip list for chunk selections */
+        if(NULL == dataset->shared->cache.chunk.sel_chunks) {
+            if(NULL == (dataset->shared->cache.chunk.sel_chunks = H5SL_create(H5SL_TYPE_HSIZE, NULL)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for chunk selections")
         } /* end if */
-
-        /* this is need when multiple write/read occurs on the same dsets,
-         * just pass the previously created pointer */
-        if (NULL == io_info_md->sel_pieces)
-            io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
-
+        dinfo->dset_sel_pieces = dataset->shared->cache.chunk.sel_chunks;
+        HDassert(dinfo->dset_sel_pieces);
         HDassert(io_info_md->sel_pieces);
-        
-        /* Initialize dataset piece skip list */
-        if(NULL == (dinfo->dset_sel_pieces = H5SL_create(H5SL_TYPE_HSIZE, NULL)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for dataset piece selections")
 
         /* We are not using single element mode */
         dinfo->use_single = FALSE;
@@ -1255,7 +1240,7 @@ done:
             if(H5S_close(tmp_mspace) < 0)
                 HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template")
 
-        if(H5D__piece_io_term_mdset(dinfo, io_info_md) < 0)
+        if(H5D__piece_io_term_mdset(dinfo) < 0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping")
     } /* end if */
 
@@ -1413,6 +1398,7 @@ H5D__free_chunk_info(void *item, void UNUSED *key, void UNUSED *opdata)
     FUNC_LEAVE_NOAPI(0)
 }   /* H5D__free_chunk_info() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5D__free_piece_info
  *
@@ -1614,6 +1600,10 @@ H5D__create_piece_map_single(H5D_dset_info_t *di,
             piece_info->coords, piece_info->index, &udata) < 0)
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
     piece_info->faddr = udata.addr;
+
+    /* Insert piece into global piece skiplist */
+    if(H5SL_insert(io_info_md->sel_pieces, piece_info, &piece_info->faddr) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert chunk into skip list")
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
@@ -1923,7 +1913,7 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
 
             new_piece_info->faddr = udata.addr;
 
-            /* Insert the new piece into the skip list */
+            /* Insert the new piece into the global skip list */
             if(H5SL_insert(io_info_md->sel_pieces, new_piece_info, &new_piece_info->faddr) < 0) {
                 H5D__free_piece_info(new_piece_info, NULL, NULL);
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert chunk into skip list")
@@ -2365,7 +2355,7 @@ H5D__piece_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, cons
         /* If the chunk index is not the same as the last chunk index we used,
          * search for the chunk in the skip list.  If we do not find it, create
          * a new node. */
-        if(NULL == (piece_info = (H5D_chunk_info_t *)H5SL_search(dinfo->dset_sel_pieces, &chunk_index))) {
+        if(NULL == (piece_info = (H5D_piece_info_t *)H5SL_search(dinfo->dset_sel_pieces, &chunk_index))) {
             H5S_t *fspace;                      /* Memory chunk's dataspace */
 
             /* Allocate the file & memory chunk information */
@@ -2575,7 +2565,7 @@ H5D__piece_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const
         /* If the chunk index is not the same as the last chunk index we used,
          * find the chunk in the dataset skip list.
          */
-        if(NULL == (piece_info = (H5D_chunk_info_t *)H5SL_search(dinfo->dset_sel_pieces, &chunk_index)))
+        if(NULL == (piece_info = (H5D_piece_info_t *)H5SL_search(dinfo->dset_sel_pieces, &chunk_index)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_NOTFOUND, FAIL, "can't locate piece in dataset skip list")
 
         /* Check if the chunk already has a memory space */
@@ -3105,7 +3095,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md)
+H5D__piece_io_term_mdset(H5D_dset_info_t *di)
 {
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
@@ -3114,7 +3104,8 @@ H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md
     /* Single element I/O vs. multiple element I/O cleanup */
     if(di->use_single) {
         /* Sanity checks */
-        HDassert(io_info_md->sel_pieces == NULL); 
+        HDassert(di->dset_sel_pieces == NULL);
+        HDassert(di->last_piece_info == NULL);
         HDassert(di->single_piece_info);
         HDassert(di->single_piece_info->fspace_shared);
         HDassert(di->single_piece_info->mspace_shared);
@@ -3123,16 +3114,17 @@ H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md
         H5S_select_all(di->single_space, TRUE);
     } /* end if */
     else {
-        /* Release the nodes on the list of selected pieces */
-        if(io_info_md->sel_pieces)
-            if(H5SL_free(io_info_md->sel_pieces, H5D__free_piece_info, NULL) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTNEXT, FAIL, "can't iterate over pieces")
-            io_info_md->sel_pieces = NULL;
-
-        /* Delete dataset skip list */
-        if(di->dset_sel_pieces)
-            if(H5SL_close(di->dset_sel_pieces) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close dataset skip list")
+        /* Release the nodes on the list of selected pieces, or the last (only)
+         * piece if the skiplist is not available */
+        if(di->dset_sel_pieces) {
+            if(H5SL_free(di->dset_sel_pieces, H5D__free_piece_info, NULL) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free dataset skip list")
+        } /* end if */
+        else if(di->last_piece_info) {
+            if(H5D__free_piece_info(di->last_piece_info, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free piece info")
+            di->last_piece_info = NULL;
+        } /* end if */
     } /* end else */
 
     /* Free the memory piece dataspace template */
