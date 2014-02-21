@@ -1210,7 +1210,7 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
             /* Clean up hyperslab stuff, if necessary */
             if(dinfo->msel_type != H5S_SEL_POINTS) {
                 /* Clean memory pieces' hyperslab span "scratch" information */
-                curr_node = H5SL_first(io_info_md->sel_pieces);
+                curr_node = H5SL_first(dinfo->dset_sel_pieces);
                 while(curr_node) {
                     H5D_piece_info_t *piece_info;   /* Pointer piece information */
 
@@ -1218,13 +1218,9 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
                     piece_info = (H5D_piece_info_t *)H5SL_item(curr_node);
                     HDassert(piece_info);
 
-                    /* only for current dset */
-                    if(piece_info->dset_info == dinfo) {
-                        /* Clean hyperslab span's "scratch" information */
-                        if(H5S_hyper_reset_scratch(piece_info->mspace) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
-
-                    } /* end if */
+                    /* Clean hyperslab span's "scratch" information */
+                    if(H5S_hyper_reset_scratch(piece_info->mspace) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
 
                     /* Get the next piece node in the skip list */
                     curr_node = H5SL_next(curr_node);

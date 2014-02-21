@@ -250,8 +250,6 @@ typedef struct H5D_piece_info_t {
 
 /* dset info for multiple dsets */
 typedef struct H5D_dset_info_t {
-    hsize_t index;              /* "Index" of dataset info. key of skip list *//*!FIXME remove me*/
-
     H5D_t *dset;                /* Pointer to dataset being operated on */
     H5D_storage_t *store;       /* Dataset storage info */
     H5D_layout_ops_t layout_ops;    /* Dataset layout I/O operation function pointers */

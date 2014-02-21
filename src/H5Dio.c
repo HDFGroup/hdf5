@@ -1280,7 +1280,6 @@ H5D__read_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info
         /* Set up I/O operation */
         io_info_md.op_type = H5D_IO_OP_READ;
         dset_info_array[i].u.rbuf = info[i].u.rbuf;
-        dset_info_array[i].index = i;
     
         if(H5D__ioinfo_init_mdset(dataset, dxpl_cache, dxpl_id, &(dset_info_array[i]), &(store[i]), &io_info_md) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
@@ -1877,7 +1876,6 @@ H5D__write_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *inf
         /* Set up I/O operation */
         io_info_md.op_type = H5D_IO_OP_WRITE;
         dset_info_array[i].u.wbuf = info[i].u.wbuf;
-        dset_info_array[i].index = i;
         if(H5D__ioinfo_init_mdset(dataset, dxpl_cache, dxpl_id, &(dset_info_array[i]), &(store[i]), &io_info_md) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
 #ifdef H5_HAVE_PARALLEL
