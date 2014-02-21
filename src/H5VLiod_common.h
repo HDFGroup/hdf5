@@ -100,6 +100,24 @@ typedef struct iod_handles_t {
     iod_handle_t wr_oh;
 } iod_handles_t;
 
+typedef struct region_info_t {
+    hsize_t count;
+    binary_buf_t *tokens;
+    hid_t *regions;
+} region_info_t;
+
+typedef struct attr_info_t {
+    hsize_t count;
+    binary_buf_t *tokens;
+} attr_info_t;
+
+typedef struct obj_info_t {
+    hsize_t count;
+    binary_buf_t *tokens;
+} obj_info_t;
+
+typedef binary_buf_t loc_info_t;
+
 #endif /* H5_HAVE_EFF */
 
 H5_DLL int H5VL_iod_get_type_info(hid_t type_id, H5VL_iod_type_info_t *type_info);
@@ -138,6 +156,9 @@ H5_DLL int hg_proc_linfo_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_oinfo_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_coords_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_hrpl_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_region_info_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_obj_info_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_attr_info_t(hg_proc_t proc, void *data);
 
 MERCURY_GEN_PROC(analysis_execute_in_t, 
                  ((axe_t)(axe_info))
@@ -166,12 +187,10 @@ MERCURY_GEN_PROC(analysis_farm_out_t,
                  ((hid_t)(type_id))
                  ((size_t)(num_elmts)))
 MERCURY_GEN_PROC(analysis_transfer_in_t,
-        ((hg_bulk_t)(bulk_handle))
-        ((uint64_t)(axe_id))
-        )
+                 ((hg_bulk_t)(bulk_handle))
+                 ((uint64_t)(axe_id)))
 MERCURY_GEN_PROC(analysis_transfer_out_t,
-        ((int32_t)(ret))
-        )
+                 ((int32_t)(ret)))
 
 MERCURY_GEN_PROC(eff_init_in_t, 
                  ((uint32_t)(proc_num)))
@@ -726,6 +745,24 @@ MERCURY_GEN_PROC(evict_in_t,
                  ((int32_t)(obj_type))
                  ((iod_handles_t)(iod_oh))
                  ((iod_obj_id_t)(iod_id)))
+
+MERCURY_GEN_PROC(view_create_in_t, 
+                 ((axe_t)(axe_info))
+                 ((iod_handle_t)(coh))
+                 ((uint32_t)(cs_scope))  
+                 ((iod_handles_t)(loc_oh))
+                 ((iod_obj_id_t)(loc_id))
+                 ((iod_obj_id_t)(loc_mdkv_id))
+                 ((uint64_t)(rcxt_num))
+                 ((int32_t)(obj_type))
+                 ((hid_t)(vcpl_id))
+                 ((hid_t)(query_id)))
+
+MERCURY_GEN_PROC(view_create_out_t, 
+                 ((hbool_t)(valid_view))
+                 ((region_info_t)(region_info))
+                 ((obj_info_t)(obj_info))
+                 ((attr_info_t)(attr_info)))
 
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_common_H */

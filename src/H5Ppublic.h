@@ -74,6 +74,7 @@
 #define H5P_RC_ACQUIRE  		(H5OPEN H5P_CLS_READ_CONTEXT_ACQUIRE_g)
 #define H5P_TR_START    		(H5OPEN H5P_CLS_TRANSACTION_START_g)
 #define H5P_TR_FINISH   		(H5OPEN H5P_CLS_TRANSACTION_FINISH_g)
+#define H5P_VIEW_CREATE   		(H5OPEN H5P_CLS_VIEW_CREATE_g)
 
 /*
  * The library's default property lists
@@ -97,6 +98,7 @@
 #define H5P_RC_ACQUIRE_DEFAULT		(H5OPEN H5P_LST_READ_CONTEXT_ACQUIRE_g)
 #define H5P_TR_START_DEFAULT		(H5OPEN H5P_LST_TRANSACTION_START_g)
 #define H5P_TR_FINISH_DEFAULT		(H5OPEN H5P_LST_TRANSACTION_FINISH_g)
+#define H5P_VIEW_CREATE_DEFAULT  	(H5OPEN H5P_LST_VIEW_CREATE_g)
 
 /* Common creation order flags (for links in groups and attributes on objects) */
 #define H5P_CRT_ORDER_TRACKED           0x0001
@@ -205,6 +207,7 @@ H5_DLLVAR hid_t H5P_CLS_LINK_ACCESS_g;
 H5_DLLVAR hid_t H5P_CLS_READ_CONTEXT_ACQUIRE_g;
 H5_DLLVAR hid_t H5P_CLS_TRANSACTION_START_g;
 H5_DLLVAR hid_t H5P_CLS_TRANSACTION_FINISH_g;
+H5_DLLVAR hid_t H5P_CLS_VIEW_CREATE_g;
 
 /* Default roperty list IDs */
 /* (Internal to library, do not use!  Use macros above) */
@@ -227,6 +230,7 @@ H5_DLLVAR hid_t H5P_LST_LINK_ACCESS_g;
 H5_DLLVAR hid_t H5P_LST_READ_CONTEXT_ACQUIRE_g;
 H5_DLLVAR hid_t H5P_LST_TRANSACTION_START_g;
 H5_DLLVAR hid_t H5P_LST_TRANSACTION_FINISH_g;
+H5_DLLVAR hid_t H5P_LST_VIEW_CREATE_g;
 
 /*********************/
 /* Public Prototypes */

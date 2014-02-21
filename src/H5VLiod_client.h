@@ -94,7 +94,8 @@ typedef enum H5RQ_type_t {
     HG_TR_SKIP,
     HG_TR_ABORT,
     HG_PREFETCH,
-    HG_EVICT
+    HG_EVICT,
+    HG_VIEW_CREATE
 } H5RQ_type_t;
 
 /* the client IOD VOL request struct */
@@ -271,6 +272,20 @@ typedef struct H5VL_iod_dtype_t {
     hid_t tapl_id;
 } H5VL_iod_dtype_t;
 
+/* struct that contains the information about a View object */
+typedef struct H5VL_iod_view_t {
+    /* Do NOT change the order of the parameters */
+    hbool_t valid_view;
+    region_info_t region_info;
+    obj_info_t obj_info;
+    attr_info_t attr_info;
+    loc_info_t loc_info;
+    struct H5VL_iod_file_t *file;
+    uint64_t c_version;
+    hid_t query_id;
+    hid_t vcpl_id;
+} H5VL_iod_view_t;
+
 /* information about an attr IO request */
 typedef struct H5VL_iod_attr_io_info_t {
     int *status;
@@ -422,6 +437,7 @@ H5_DLL herr_t H5VL_iod_map_close(void *map, void **req);
 
 H5_DLL void * H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, 
                                       H5I_type_t *opened_type, void **req);
+H5_DLL herr_t H5VL_iod_get_token(void *obj, void *token, size_t *token_size);
 
 /* private routines for RC */
 H5_DLL herr_t H5VL_iod_rc_acquire(H5VL_iod_file_t *file, H5RC_t *rc, 
@@ -441,6 +457,10 @@ H5_DLL herr_t H5VL_iod_tr_abort(H5TR_t *tr, void **req);
 H5_DLL herr_t H5VL_iod_prefetch(void *obj, hid_t rcxt_id, hrpl_t *replica_id, 
                                 hid_t apl_id, void **req);
 H5_DLL herr_t H5VL_iod_evict(void *obj, uint64_t c_version, hid_t apl_id, void **req);
+
+H5_DLL void * H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t vcpl_id, 
+                                   hid_t rcxt_id, void **req);
+H5_DLL herr_t H5VL_iod_view_close(H5VL_iod_view_t *view);
 
 H5_DLL herr_t H5VL_iod_analysis_execute(const char *file_name, const char *obj_name,
         hid_t query_id, const char *split_script, const char *combine_script,

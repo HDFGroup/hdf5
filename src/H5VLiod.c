@@ -105,7 +105,7 @@ static hg_id_t H5VL_TR_ABORT_ID;
 static hg_id_t H5VL_PREFETCH_ID;
 static hg_id_t H5VL_EVICT_ID;
 static hg_id_t H5VL_CANCEL_OP_ID;
-
+static hg_id_t H5VL_VIEW_CREATE_ID;
 
 /* global AXE list struct */
 typedef struct H5VL_iod_axe_list_t {
@@ -769,6 +769,8 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
 
     H5VL_PREFETCH_ID = MERCURY_REGISTER("prefetch", prefetch_in_t, hrpl_t);
     H5VL_EVICT_ID    = MERCURY_REGISTER("evict", evict_in_t, ret_t);
+
+    H5VL_VIEW_CREATE_ID = MERCURY_REGISTER("view_create", view_create_in_t, view_create_out_t);
 
     H5VL_CANCEL_OP_ID = MERCURY_REGISTER("cancel_op", uint64_t, uint8_t);
 
@@ -6408,6 +6410,214 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }/* end H5VL_iod_obj_open_token() */
 
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_get_token
+ *
+ * Purpose:     Private version of H5Oget_token.
+ *
+ * Return:	Success:	Non-negative with the link value in BUF.
+ * 		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              August 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_get_token(void *_obj, void *token, size_t *token_size)
+{
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
+    iod_obj_id_t iod_id, mdkv_id, attrkv_id;
+    H5O_type_t type;
+    uint8_t *buf_ptr = (uint8_t *)token;
+    size_t dt_size = 0, space_size = 0;
+    H5T_t *dt = NULL;
+    H5S_t *space = NULL;
+    size_t keytype_size = 0, valtype_size;
+    H5T_t *kt = NULL, *vt = NULL;
+    herr_t ret_value = SUCCEED;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    *token_size = sizeof(iod_obj_id_t)*3 + sizeof(H5O_type_t);
+
+    switch(obj->obj_type) {
+        case H5I_GROUP:
+            iod_id = ((const H5VL_iod_group_t *)obj)->remote_group.iod_id;
+            mdkv_id = ((const H5VL_iod_group_t *)obj)->remote_group.mdkv_id;
+            attrkv_id = ((const H5VL_iod_group_t *)obj)->remote_group.attrkv_id;
+            type = H5O_TYPE_GROUP;
+            break;
+        case H5I_DATASET:
+            {
+                H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)obj;
+
+                iod_id = dset->remote_dset.iod_id;
+                mdkv_id = dset->remote_dset.mdkv_id;
+                attrkv_id = dset->remote_dset.attrkv_id;
+                type = H5O_TYPE_DATASET;
+
+                if(NULL == (dt = (H5T_t *)H5I_object_verify(dset->remote_dset.type_id, 
+                                                            H5I_DATATYPE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a datatype")
+                if(NULL == (space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
+                                                               H5I_DATASPACE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a dataspace")
+
+                if(H5T_encode(dt, NULL, &dt_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+
+                if(H5S_encode(space, NULL, &space_size) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
+
+                *token_size += dt_size + space_size + sizeof(size_t)*2;
+
+                break;
+            }
+        case H5I_DATATYPE:
+            {
+                H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)obj;
+
+                iod_id = dtype->remote_dtype.iod_id;
+                mdkv_id = dtype->remote_dtype.mdkv_id;
+                attrkv_id = dtype->remote_dtype.attrkv_id;
+                type = H5O_TYPE_NAMED_DATATYPE;
+
+                if(NULL == (dt = (H5T_t *)H5I_object_verify(dtype->remote_dtype.type_id, 
+                                                            H5I_DATATYPE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a datatype")
+
+                if(H5T_encode(dt, NULL, &dt_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+
+                *token_size += dt_size + sizeof(size_t);
+
+                break;
+            }
+        case H5I_MAP:
+            {
+                H5VL_iod_map_t *map = (H5VL_iod_map_t *)obj;
+
+                iod_id = map->remote_map.iod_id;
+                mdkv_id = map->remote_map.mdkv_id;
+                attrkv_id = map->remote_map.attrkv_id;
+                type = H5O_TYPE_MAP;
+
+                if(NULL == (kt = (H5T_t *)H5I_object_verify(map->remote_map.keytype_id, 
+                                                            H5I_DATATYPE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a datatype")
+
+                if(H5T_encode(kt, NULL, &keytype_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+
+                if(NULL == (vt = (H5T_t *)H5I_object_verify(map->remote_map.valtype_id, 
+                                                            H5I_DATATYPE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a datatype")
+
+                if(H5T_encode(vt, NULL, &valtype_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+
+                *token_size += keytype_size + valtype_size + sizeof(size_t)*2;
+
+                break;
+            }
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_ES:
+        case H5I_RC:
+        case H5I_TR:
+        case H5I_QUERY:
+        case H5I_VIEW:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad object");
+    }
+
+    if(token) {
+        HDmemcpy(buf_ptr, &iod_id, sizeof(iod_obj_id_t));
+        buf_ptr += sizeof(iod_obj_id_t);
+        HDmemcpy(buf_ptr, &mdkv_id, sizeof(iod_obj_id_t));
+        buf_ptr += sizeof(iod_obj_id_t);
+        HDmemcpy(buf_ptr, &attrkv_id, sizeof(iod_obj_id_t));
+        buf_ptr += sizeof(iod_obj_id_t);
+        HDmemcpy(buf_ptr, &type, sizeof(H5O_type_t));
+        buf_ptr += sizeof(H5O_type_t);
+
+        switch(obj->obj_type) {
+        case H5I_GROUP:
+            break;
+        case H5I_DATASET:
+            HDmemcpy(buf_ptr, &dt_size, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if(H5T_encode(dt, buf_ptr, &dt_size) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+            buf_ptr += dt_size;
+
+            HDmemcpy(buf_ptr, &space_size, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if(H5S_encode(space, buf_ptr, &space_size) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
+            buf_ptr += space_size;
+            break;
+        case H5I_DATATYPE:
+            HDmemcpy(buf_ptr, &dt_size, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if(H5T_encode(dt, buf_ptr, &dt_size) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+            buf_ptr += dt_size;
+            break;
+        case H5I_MAP:
+            HDmemcpy(buf_ptr, &keytype_size, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if(H5T_encode(kt, buf_ptr, &keytype_size) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+            buf_ptr += keytype_size;
+
+            HDmemcpy(buf_ptr, &valtype_size, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if(H5T_encode(vt, buf_ptr, &valtype_size) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+            buf_ptr += valtype_size;
+            break;
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_ES:
+        case H5I_RC:
+        case H5I_TR:
+        case H5I_QUERY:
+        case H5I_VIEW:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad object");
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_get_token() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_object_open
@@ -6802,6 +7012,363 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_object_open */
+
+#if 0
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_object_open_by_addr
+ *
+ * Purpose:	Opens a object inside IOD file.
+ *
+ * Return:	Success:	object id. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              February, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_iod_object_open_by_addr(void *_obj, iod_obj_id_t iod_id, H5I_type_t obj_type, 
+                             hid_t rcxt_id, void **req)
+{
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to open the group */
+    H5RC_t *rc = NULL;
+    size_t num_parents = 0;
+    char *loc_name = NULL;
+    object_open_by_addr_in_t input;
+    object_open_by_addr_out_t output;
+    H5VL_iod_remote_object_t remote_obj; /* generic remote object structure */
+    H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+    H5VL_iod_attr_t *attr = NULL; /* the attribute object that is created and passed to the user */
+    H5VL_iod_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
+    H5VL_iod_group_t  *grp = NULL; /* the group object that is created and passed to the user */
+    H5VL_iod_map_t  *map = NULL; /* the map object that is created and passed to the user */
+    H5VL_iod_request_t **parent_reqs = NULL;
+    void *ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* get the RC object */
+    if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a READ CONTEXT ID")
+
+    /* set the input structure for the HG encode routine */
+    input.coh = obj->file->remote_file.coh;
+    input.rcxt_num  = rc->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
+    input.iod_id = iod_id;
+
+    switch(obj_type) {
+    case H5I_DATASET:
+        /* allocate the dataset object that is returned to the user */
+        if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+        dset->remote_dset.iod_oh.rd_oh.cookie = remote_obj.iod_oh.rd_oh.cookie;
+        dset->remote_dset.iod_oh.wr_oh.cookie = remote_obj.iod_oh.wr_oh.cookie;
+        dset->remote_dset.iod_id = remote_obj.iod_id;
+        dset->remote_dset.mdkv_id = remote_obj.mdkv_id;
+        dset->remote_dset.attrkv_id = remote_obj.attrkv_id;
+        dset->remote_dset.dcpl_id = remote_obj.cpl_id;
+        dset->remote_dset.type_id = remote_obj.id1;
+        dset->remote_dset.space_id = remote_obj.id2;
+
+        if(dset->remote_dset.dcpl_id == H5P_DEFAULT){
+            dset->remote_dset.dcpl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT);
+        }
+
+        HDassert(dset->remote_dset.dcpl_id);
+        HDassert(dset->remote_dset.type_id);
+        HDassert(dset->remote_dset.space_id);
+
+        /* setup the local dataset struct */
+        /* store the entire path of the dataset locally */
+        if(obj->obj_name) {
+            size_t obj_name_len = HDstrlen(obj->obj_name);
+            size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
+
+            if (NULL == (dset->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+            HDmemcpy(dset->common.obj_name, obj->obj_name, obj_name_len);
+            HDmemcpy(dset->common.obj_name+obj_name_len, 
+                     loc_params.loc_data.loc_by_name.name, name_len);
+            dset->common.obj_name[obj_name_len+name_len] = '\0';
+        }
+
+        if((dset->dapl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
+
+        /* set common object parameters */
+        dset->common.obj_type = H5I_DATASET;
+        dset->common.file = obj->file;
+        dset->common.file->nopen_objs ++;
+
+        ret_value = (void *)dset;
+        break;
+    case H5I_DATATYPE:
+        /* allocate the dataset object that is returned to the user */
+        if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+        dtype->remote_dtype.iod_oh.rd_oh.cookie = remote_obj.iod_oh.rd_oh.cookie;
+        dtype->remote_dtype.iod_oh.wr_oh.cookie = remote_obj.iod_oh.wr_oh.cookie;
+        dtype->remote_dtype.iod_id = remote_obj.iod_id;
+        dtype->remote_dtype.mdkv_id = remote_obj.mdkv_id;
+        dtype->remote_dtype.attrkv_id = remote_obj.attrkv_id;
+        dtype->remote_dtype.tcpl_id = remote_obj.cpl_id;
+        dtype->remote_dtype.type_id = remote_obj.id1;
+
+        if(dtype->remote_dtype.tcpl_id == H5P_DEFAULT){
+            dtype->remote_dtype.tcpl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT);
+        }
+
+        HDassert(dtype->remote_dtype.tcpl_id);
+        HDassert(dtype->remote_dtype.type_id);
+
+        /* setup the local dataset struct */
+        /* store the entire path of the dataset locally */
+        if(obj->obj_name) {
+            size_t obj_name_len = HDstrlen(obj->obj_name);
+            size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
+
+            if (NULL == (dtype->common.obj_name = (char *)HDmalloc
+                         (obj_name_len + name_len + 1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+            HDmemcpy(dtype->common.obj_name, obj->obj_name, obj_name_len);
+            HDmemcpy(dtype->common.obj_name+obj_name_len, 
+                     loc_params.loc_data.loc_by_name.name, name_len);
+            dtype->common.obj_name[obj_name_len+name_len] = '\0';
+        }
+
+        if((dtype->tapl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
+
+        /* set common object parameters */
+        dtype->common.obj_type = H5I_DATATYPE;
+        dtype->common.file = obj->file;
+        dtype->common.file->nopen_objs ++;
+
+        ret_value = (void *)dtype;
+        break;
+    case H5I_GROUP:
+        /* allocate the dataset object that is returned to the user */
+        if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+        grp->remote_group.iod_oh.rd_oh.cookie = remote_obj.iod_oh.rd_oh.cookie;
+        grp->remote_group.iod_oh.wr_oh.cookie = remote_obj.iod_oh.wr_oh.cookie;
+        grp->remote_group.iod_id = remote_obj.iod_id;
+        grp->remote_group.mdkv_id = remote_obj.mdkv_id;
+        grp->remote_group.attrkv_id = remote_obj.attrkv_id;
+        grp->remote_group.gcpl_id = remote_obj.cpl_id;
+
+        if(grp->remote_group.gcpl_id == H5P_DEFAULT){
+            grp->remote_group.gcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
+        }
+
+        HDassert(grp->remote_group.gcpl_id);
+
+        /* setup the local dataset struct */
+        /* store the entire path of the dataset locally */
+        if(obj->obj_name) {
+            size_t obj_name_len = HDstrlen(obj->obj_name);
+            size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
+
+            if (NULL == (grp->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+            HDmemcpy(grp->common.obj_name, obj->obj_name, obj_name_len);
+            HDmemcpy(grp->common.obj_name+obj_name_len, 
+                     loc_params.loc_data.loc_by_name.name, name_len);
+            grp->common.obj_name[obj_name_len+name_len] = '\0';
+        }
+
+        if((grp->gapl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy gapl");
+
+        /* set common object parameters */
+        grp->common.obj_type = H5I_GROUP;
+        grp->common.file = obj->file;
+        grp->common.file->nopen_objs ++;
+
+        ret_value = (void *)grp;
+        break;
+    case H5I_MAP:
+        /* allocate the dataset object that is returned to the user */
+        if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+        map->remote_map.iod_oh.rd_oh.cookie = remote_obj.iod_oh.rd_oh.cookie;
+        map->remote_map.iod_oh.wr_oh.cookie = remote_obj.iod_oh.wr_oh.cookie;
+        map->remote_map.iod_id     = remote_obj.iod_id;
+        map->remote_map.mdkv_id    = remote_obj.mdkv_id;
+        map->remote_map.attrkv_id  = remote_obj.attrkv_id;
+        map->remote_map.mcpl_id    = remote_obj.cpl_id;
+        map->remote_map.keytype_id = remote_obj.id1;
+        map->remote_map.valtype_id = remote_obj.id2;
+
+        if(map->remote_map.mcpl_id == H5P_DEFAULT){
+            map->remote_map.mcpl_id = H5Pcopy(H5P_MAP_CREATE_DEFAULT);
+        }
+
+        /* setup the local dataset struct */
+        /* store the entire path of the dataset locally */
+        if(obj->obj_name) {
+            size_t obj_name_len = HDstrlen(obj->obj_name);
+            size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
+
+            if (NULL == (map->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+            HDmemcpy(map->common.obj_name, obj->obj_name, obj_name_len);
+            HDmemcpy(map->common.obj_name+obj_name_len, 
+                     loc_params.loc_data.loc_by_name.name, name_len);
+            map->common.obj_name[obj_name_len+name_len] = '\0';
+        }
+
+        if((map->mapl_id = H5Pcopy(H5P_MAP_ACCESS_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy mapl");
+
+        /* set common object parameters */
+        map->common.obj_type = H5I_MAP;
+        map->common.file = obj->file;
+        map->common.file->nopen_objs ++;
+
+        ret_value = (void *)map;
+        break;
+    case H5I_UNINIT:
+    case H5I_BADID:
+    case H5I_FILE:
+    case H5I_DATASPACE:
+    case H5I_ATTR:
+    case H5I_REFERENCE:
+    case H5I_VFL:
+    case H5I_VOL:
+    case H5I_ES:
+    case H5I_RC:
+    case H5I_TR:
+    case H5I_QUERY:
+    case H5I_VIEW:
+    case H5I_GENPROP_CLS:
+    case H5I_GENPROP_LST:
+    case H5I_ERROR_CLASS:
+    case H5I_ERROR_MSG:
+    case H5I_ERROR_STACK:
+    case H5I_NTYPES:
+    default:
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, NULL, "not a valid file object (dataset, map, group, or datatype)")
+            break;
+    }
+
+    /* H5Oopen has to be synchronous */
+    if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_ID, HG_OBJECT_OPEN, 
+                                    obj, 1, num_parents, parent_reqs,
+                                    (H5VL_iod_req_info_t *)rc, &input, 
+                                    &remote_obj, &remote_obj, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship object open");
+
+done:
+    if(NULL == ret_value) {
+        switch(remote_obj.obj_type) {
+            case H5I_DATASET:
+                if(dset->common.obj_name) {
+                    HDfree(dset->common.obj_name);
+                    dset->common.obj_name = NULL;
+                }
+                if(dset->common.comment) {
+                    HDfree(dset->common.comment);
+                    dset->common.comment = NULL;
+                }
+                if(dset->remote_dset.type_id != FAIL && H5I_dec_ref(dset->remote_dset.type_id) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
+                if(dset->remote_dset.space_id != FAIL && H5I_dec_ref(dset->remote_dset.space_id) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dspace");
+                if(dset->remote_dset.dcpl_id != FAIL && H5I_dec_ref(dset->remote_dset.dcpl_id) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
+                if(dset->dapl_id != FAIL && H5I_dec_ref(dset->dapl_id) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
+                if(dset)
+                    dset = H5FL_FREE(H5VL_iod_dset_t, dset);
+                break;
+            case H5I_DATATYPE:
+                /* free dtype components */
+                if(dtype->common.obj_name) {
+                    HDfree(dtype->common.obj_name);
+                    dtype->common.obj_name = NULL;
+                }
+                if(dtype->common.comment) {
+                    HDfree(dtype->common.comment);
+                    dtype->common.comment = NULL;
+                }
+                if(dtype->remote_dtype.tcpl_id != FAIL && H5I_dec_ref(dtype->remote_dtype.tcpl_id) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
+                if(dtype->tapl_id != FAIL && H5I_dec_ref(dtype->tapl_id) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
+                if(dtype->remote_dtype.type_id != FAIL && H5I_dec_ref(dtype->remote_dtype.type_id) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
+                if(dtype)
+                    dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
+                break;
+            case H5I_GROUP:
+                if(grp->common.obj_name) {
+                    HDfree(grp->common.obj_name);
+                    grp->common.obj_name = NULL;
+                }
+                if(grp->common.comment) {
+                    HDfree(grp->common.comment);
+                    grp->common.comment = NULL;
+                }
+                if(grp->gapl_id != FAIL && H5I_dec_ref(grp->gapl_id) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
+                if(grp->remote_group.gcpl_id != FAIL && 
+                   H5I_dec_ref(grp->remote_group.gcpl_id) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
+                if(grp)
+                    grp = H5FL_FREE(H5VL_iod_group_t, grp);
+                break;
+            case H5I_MAP:
+                /* free map components */
+                if(map->common.obj_name) {
+                    HDfree(map->common.obj_name);
+                    map->common.obj_name = NULL;
+                }
+                if(map->common.comment) {
+                    HDfree(map->common.comment);
+                    map->common.comment = NULL;
+                }
+                if(map->remote_map.keytype_id != FAIL && H5I_dec_ref(map->remote_map.keytype_id) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
+                if(map->remote_map.valtype_id != FAIL && H5I_dec_ref(map->remote_map.valtype_id) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
+                if(map)
+                    map = H5FL_FREE(H5VL_iod_map_t, map);
+                break;
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_ES:
+        case H5I_RC:
+        case H5I_TR:
+        case H5I_QUERY:
+        case H5I_VIEW:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+            default:
+                HDONE_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "not a valid object type");
+        } /* end switch */
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_object_open_by_addr */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -9248,4 +9815,184 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_wait() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_view_create
+ *
+ * Purpose:	Creates a view from a query on an iod h5 file.
+ *
+ * Return:	Success:	view
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              February, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, void **req)
+{
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the view */
+    H5VL_iod_view_t *view = NULL; /* the view object that is created and passed to the user */
+    view_create_in_t input;
+    iod_obj_id_t iod_id, mdkv_id;
+    iod_handles_t iod_oh;
+    H5VL_iod_request_t **parent_reqs = NULL;
+    size_t num_parents = 0;
+    H5RC_t *rc = NULL;
+    H5P_genplist_t *plist = NULL;
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get the view creation plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(vcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+
+    /* get the RC object */
+    if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a READ CONTEXT ID");
+
+    /* allocate parent request array */
+    if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate parent req element");
+
+    /* retrieve parent requests */
+    if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)rc, parent_reqs, &num_parents) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to retrieve parent requests");
+
+    /* retrieve IOD info of location object */
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location view info");
+
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == iod_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
+        obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current location view info");
+    }
+
+    /* allocate the view object that is returned to the user */
+    if(NULL == (view = H5FL_CALLOC(H5VL_iod_view_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+    /* set the input structure for the HG encode routine */
+    input.coh = obj->file->remote_file.coh;
+    input.loc_id = iod_id;
+    input.loc_oh = iod_oh;
+    input.loc_mdkv_id = mdkv_id;
+    input.query_id = query_id;
+    input.vcpl_id = vcpl_id;
+    input.obj_type = obj->obj_type;
+    input.rcxt_num  = rc->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
+
+    /* initialize View object */
+    view->file = obj->file;
+    view->c_version = rc->c_version;
+
+    /* store a token for the location object */
+    view->loc_info.buf_size = 0;
+    if(H5VL_iod_get_token(obj, NULL, &view->loc_info.buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to get location token");
+    if(NULL == (view->loc_info.buf = HDmalloc(view->loc_info.buf_size * sizeof(void *))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate token buffer");
+    if(H5VL_iod_get_token(obj, view->loc_info.buf, &view->loc_info.buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to get location token");
+
+    /* store the query ID */
+    view->query_id = query_id;
+    if(H5I_inc_ref(query_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, NULL, "can't increment ID ref count");
+
+    /* copy property list */
+    if((view->vcpl_id = H5Pcopy(vcpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy vcpl");
+
+    /* Initialize the view types to be obtained from server */
+    view->attr_info.count = 0;
+    view->attr_info.tokens = NULL;
+    view->obj_info.count = 0;
+    view->obj_info.tokens = NULL;
+    view->region_info.count = 0;
+    view->region_info.tokens = NULL;
+
+    view->valid_view = FALSE;
+
+#if H5VL_IOD_DEBUG
+    printf("View Create at IOD ID %"PRIu64", axe id %"PRIu64"\n", 
+           iod_id, g_axe_id);
+#endif
+
+    if(H5VL__iod_create_and_forward(H5VL_VIEW_CREATE_ID, HG_VIEW_CREATE, 
+                                    obj, 0, num_parents, parent_reqs, 
+                                    (H5VL_iod_req_info_t *)rc, &input, view, view, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship view create");
+
+    ret_value = (void *)view;
+
+done:
+    /* If the operation is synchronous and it failed at the server, or
+       it failed locally, then cleanup and return fail */
+    if(NULL == ret_value) {
+        if(view->vcpl_id != FAIL && H5I_dec_ref(view->vcpl_id) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
+        if(view)
+            view = H5FL_FREE(H5VL_iod_view_t, view);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_view_create() */
+
+herr_t 
+H5VL_iod_view_close(H5VL_iod_view_t *view)
+{
+    hsize_t i;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    for(i=0 ; i<view->region_info.count ; i++) {
+        free(view->region_info.tokens[i].buf);
+        H5Sclose(view->region_info.regions[i]);
+    }
+
+    for(i=0 ; i<view->obj_info.count ; i++) {
+        free(view->obj_info.tokens[i].buf);
+    }
+
+    for(i=0 ; i<view->attr_info.count ; i++) {
+        free(view->attr_info.tokens[i].buf);
+    }
+
+    if(view->region_info.tokens)
+        free(view->region_info.tokens);
+
+    if(view->region_info.regions)
+        free(view->region_info.regions);
+
+    if(view->obj_info.tokens)
+        free(view->obj_info.tokens);
+
+    if(view->attr_info.tokens)
+        free(view->attr_info.tokens);
+
+    if(view->loc_info.buf)
+        free(view->loc_info.buf);
+
+    if (H5I_dec_app_ref(view->query_id) < 0)
+    	HGOTO_ERROR(H5E_QUERY, H5E_CANTDEC, FAIL, "unable to decrement ref count on query");
+    if (H5I_dec_app_ref(view->vcpl_id) < 0)
+    	HGOTO_ERROR(H5E_QUERY, H5E_CANTDEC, FAIL, "unable to decrement ref count on vcpl");
+
+    view = H5FL_FREE(H5VL_iod_view_t, view);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_view_create() */
 #endif /* H5_HAVE_EFF */

@@ -934,4 +934,189 @@ int hg_proc_coords_t(hg_proc_t proc, void *data)
 
     return ret;
 }
+
+int hg_proc_region_info_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+    hsize_t i;
+    hg_proc_op_t op;
+    region_info_t *region_info = (region_info_t *) data;
+
+    ret = hg_proc_uint64_t(proc, &region_info->count);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    op = hg_proc_get_op(proc);
+
+    switch(op) {
+    case HG_ENCODE:
+        for(i=0 ; i<region_info->count ; i++) {
+            ret = hg_proc_binary_buf_t(proc, &region_info->tokens[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+            ret = hg_proc_hid_t(proc, &region_info->regions[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_DECODE:
+        if(region_info->count) {
+            region_info->tokens = (binary_buf_t *)malloc 
+                (sizeof(binary_buf_t) * (size_t)region_info->count);
+            region_info->regions = (hid_t *)malloc (sizeof(hid_t) * (size_t)region_info->count);
+        }
+        for(i=0 ; i<region_info->count ; i++) {
+            ret = hg_proc_binary_buf_t(proc, &region_info->tokens[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+            ret = hg_proc_hid_t(proc, &region_info->regions[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_FREE:
+        /*
+        for(i=0 ; i<region_info->count ; i++) {
+            ret = hg_proc_binary_buf_t(proc, &region_info->tokens[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+            ret = hg_proc_hid_t(proc, &region_info->regions[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        if(region_info->count) {
+            free(region_info->tokens);
+            free(region_info->regions);
+        }
+        */
+        break;
+    default:
+        return HG_FAIL;
+    }
+
+    return ret;
+}
+
+int hg_proc_obj_info_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+    hsize_t i;
+    hg_proc_op_t op;
+    obj_info_t *obj_info = (obj_info_t *) data;
+
+    ret = hg_proc_uint64_t(proc, &obj_info->count);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    op = hg_proc_get_op(proc);
+
+    switch(op) {
+    case HG_ENCODE:
+        for(i=0 ; i<obj_info->count ; i++) {
+            ret = hg_proc_binary_buf_t(proc, &obj_info->tokens[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_DECODE:
+        if(obj_info->count) {
+            obj_info->tokens = (binary_buf_t *)malloc 
+                (sizeof(binary_buf_t) * (size_t)obj_info->count);
+        }
+        for(i=0 ; i<obj_info->count ; i++) {
+            ret = hg_proc_binary_buf_t(proc, &obj_info->tokens[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_FREE:
+        break;
+    default:
+        return HG_FAIL;
+    }
+
+    return ret;
+}
+
+int hg_proc_attr_info_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+    hsize_t i;
+    hg_proc_op_t op;
+    attr_info_t *attr_info = (attr_info_t *) data;
+
+    ret = hg_proc_uint64_t(proc, &attr_info->count);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    op = hg_proc_get_op(proc);
+
+    switch(op) {
+    case HG_ENCODE:
+        for(i=0 ; i<attr_info->count ; i++) {
+            ret = hg_proc_binary_buf_t(proc, &attr_info->tokens[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_DECODE:
+        if(attr_info->count) {
+            attr_info->tokens = (binary_buf_t *)malloc 
+                (sizeof(binary_buf_t) * (size_t)attr_info->count);
+        }
+        for(i=0 ; i<attr_info->count ; i++) {
+            ret = hg_proc_binary_buf_t(proc, &attr_info->tokens[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_FREE:
+        break;
+    default:
+        return HG_FAIL;
+    }
+
+    return ret;
+}
+
+
 #endif /* H5_HAVE_EFF */

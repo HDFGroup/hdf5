@@ -73,6 +73,13 @@ typedef struct H5VL_iod_link_t {
     iod_obj_id_t iod_id;     /* The ID of the object the link points to */
 } H5VL_iod_link_t;
 
+/* User data for dataspace iteration to query elements. */
+typedef struct {
+    size_t num_elmts;
+    hid_t query_id;
+    hid_t space_query;
+} H5VL__iod_get_query_data_t;
+
 extern iod_obj_id_t ROOT_ID;
 extern int num_ions_g;
 extern int my_rank_g;
@@ -152,6 +159,7 @@ H5_DLL int H5VL_iod_server_trans_skip(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_trans_abort(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_prefetch(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_evict(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_view_create(hg_handle_t handle);
 
 H5_DLL void H5VL_iod_server_analysis_execute_cb(AXE_engine_t axe_engine, 
                                                 size_t num_n_parents, AXE_task_t n_parents[], 
@@ -392,6 +400,10 @@ H5_DLL void H5VL_iod_server_evict_cb(AXE_engine_t axe_engine,
                                      size_t num_n_parents, AXE_task_t n_parents[], 
                                      size_t num_s_parents, AXE_task_t s_parents[], 
                                      void *op_data);
+H5_DLL void H5VL_iod_server_view_create_cb(AXE_engine_t axe_engine, 
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
 
 /* Helper routines used several times in different places */
 H5_DLL herr_t H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t loc_handle, 
@@ -432,5 +444,7 @@ H5_DLL herr_t H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, siz
                                         hbool_t write_op, void *buf, size_t buf_size, 
                                         iod_checksum_t cs, uint32_t cs_scope, iod_trans_id_t tid);
 
+H5_DLL herr_t H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim, 
+                                          const hsize_t *point, void *_udata);
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_server_H */

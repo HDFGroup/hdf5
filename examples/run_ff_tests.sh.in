@@ -64,7 +64,7 @@ echo "Finished object test-----------------------------------------------"
 sleep 2
 
 echo "Starting VL datatypes for datasets test-----------------------------------------------"
-mpiexec -np $1 ./h5ff_server &> ff_output/server_obj &
+mpiexec -np $1 ./h5ff_server &> ff_output/server_vl_data &
 sleep 2 &&
 mpiexec -np $2 ./h5ff_client_vl_data
 RETVAL=$?

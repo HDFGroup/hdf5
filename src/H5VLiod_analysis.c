@@ -20,6 +20,7 @@
 #include "H5VLiod_server.h"
 
 #include "H5Qpublic.h"
+#include "H5Vpublic.h"
 
 #ifdef H5_HAVE_PYTHON
 #include <Python.h>
@@ -27,13 +28,6 @@
 #endif
 
 #ifdef H5_HAVE_EFF
-
-/* User data for dataspace iteration to query elements. */
-typedef struct {
-    size_t num_elmts;
-    hid_t query_id;
-    hid_t space_query;
-} H5VL__iod_get_query_data_t;
 
 /* do not change order */
 typedef struct {
@@ -70,7 +64,6 @@ herr_t H5VL__iod_combine(const char *combine_script,
                          size_t num_targets, hid_t data_type_id,
                          void **combine_data, size_t *combine_num_elmts,
                          hid_t *combine_data_type_id);
-
 #endif
 
 static herr_t H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid, 
@@ -81,8 +74,8 @@ static herr_t H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_tr
 
 static hid_t H5VL__iod_get_space_layout(coords_t coords, iod_size_t num_cells, hid_t space_id);
 
-static herr_t H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim, 
-                                          const hsize_t *point, void *_udata);
+herr_t H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim, 
+                                   const hsize_t *point, void *_udata);
 
 static herr_t H5VL__iod_get_query_data(iod_handle_t coh, iod_obj_id_t dset_id, 
                                        iod_trans_id_t rtid, hid_t query_id, 
@@ -862,12 +855,12 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
                              H5VL_IOD_KEY_OBJ_DATATYPE,
-                             NULL, NULL, &type_id) < 0)
+                             7, NULL, &type_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve datatype");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, 
                              H5VL_IOD_KEY_OBJ_DATASPACE,
-                             NULL, NULL, &space_id) < 0)
+                             7, NULL, &space_id) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 
     /*******************************************/
@@ -1154,7 +1147,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t 
+herr_t 
 H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim, 
                             const hsize_t *point, void *_udata)
 {
@@ -1163,8 +1156,6 @@ H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(ndim == 1);
 
     /* Apply the query */
     if(H5Qapply(udata->query_id, &result, type_id, elem) < 0)
