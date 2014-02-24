@@ -194,7 +194,7 @@ herr_t
 H5Orefresh(hid_t oid)
 {
     H5O_loc_t *oloc;            /* object location */
-    hid_t ret_value = SUCCEED; /* return value */
+    herr_t ret_value = SUCCEED; /* return value */
     
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", oid);
@@ -203,9 +203,10 @@ H5Orefresh(hid_t oid)
     if((oloc = H5O_get_loc(oid)) == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object")
 
-    /* Private function */
-    if ((H5O_refresh_metadata(oid, *oloc, H5AC_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to refresh object")
+     /* Private function */
+     if(H5O_refresh_metadata(oid, *oloc, H5AC_dxpl_id) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
+
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -215,30 +216,72 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O_refresh_metadata
  *
- * Purpose:    Internal routine that refreshes all buffers associated with 
- *          an object.
+ * Purpose:     Refreshes all buffers associated with an object.
+ *		This is based on the original H5O_refresh_metadata() but
+ *		is split into 2 routines.  
+ *		(This is done so that H5Fstart_swmr_write() can use these
+ *		2 routines to refresh opened objects.  This may be 
+ *		restored back to the original code when H5Fstart_swmr_write()
+ *		uses a different approach to handle issues with opened objects.	
  *
- * Return:  Success:    Non-negative
- *          Failure:    Negative
+ * Return:    	Non-negative on success, negative on failure
  *
- * Programmer: Mike McGreevy
- *             July 28, 2010
+ * Programmer: Mike McGreevy/Vailin Choi
+ *             July 28, 2010/Feb 2014
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
 {
-    void *object = NULL;        /* Dataset for this operation */
+    H5G_loc_t obj_loc;
+    H5O_loc_t obj_oloc;
+    H5G_name_t obj_path;
+    hid_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    obj_loc.oloc = &obj_oloc;
+    obj_loc.path = &obj_path;
+    H5G_loc_reset(&obj_loc);
+
+    if((H5O_refresh_metadata_close(oid, oloc, &obj_loc, H5AC_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
+
+    if((H5O_refresh_metadata_reopen(oid, &obj_loc, H5AC_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* H5O_refresh_metadata() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_refresh_metadata_close
+ *
+ * Purpose:     This is the first part of the original routine H5O_refresh_metadata().
+ *		(1) Save object location information.
+ *		(2) Get object cork status
+ *		(3) Close the object
+ *		(4) Flush and evict object metadata
+ *		(5) Re-cork the object if needed
+ *
+ * Return:  Success:    Non-negative
+ *          Failure:    Negative
+ *
+ * Programmer: Mike McGreevy/Vailin Choi
+ *             July 28, 2010/Feb 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc, hid_t dxpl_id)
+{
     haddr_t tag = 0;
     H5O_t *oh = NULL;
-    H5G_loc_t obj_loc;
     H5G_loc_t tmp_loc;
-    H5G_name_t obj_path;
-    H5O_loc_t obj_oloc;
     hbool_t corked;
     hid_t ret_value = SUCCEED;
-    H5I_type_t type;
 
     FUNC_ENTER_NOAPI(FAIL)
     
@@ -246,15 +289,9 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
     if(NULL == (oh = H5O_protect(&oloc, dxpl_id, H5AC_READ)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object's object header")
 
-    /* Get object's type */
-    type = H5I_get_type(oid);
-
     /* Make deep local copy of object's location information */
     H5G_loc(oid, &tmp_loc);
-    obj_loc.oloc = &obj_oloc;
-    obj_loc.path = &obj_path;
-    H5G_loc_reset(&obj_loc);
-    H5G_loc_copy(&obj_loc, &tmp_loc, H5_COPY_DEEP);
+    H5G_loc_copy(obj_loc, &tmp_loc, H5_COPY_DEEP);
 
     /* Get object header's address (i.e. the tag value for this object) */
     if(HADDR_UNDEF == (tag = H5O_OH_GET_ADDR(oh)))
@@ -289,26 +326,60 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
 	    HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to cork the object")
     }
 
-    switch (type)
-    {
+done:
+    if(oh && H5O_unprotect(&oloc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* H5O_refresh_metadata_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_refresh_metadata_reopen
+ *
+ * Purpose:     This is the second part of the original routine H5O_refresh_metadata().
+ *		(1) Re-open object with the saved object location information.
+ *		(2) Re-register object ID with the re-opened object.
+ *
+ * Return:  Success:    Non-negative
+ *          Failure:    Negative
+ *
+ * Programmer: Mike McGreevy/Vailin Choi
+ *             July 28, 2010/Feb 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hid_t dxpl_id)
+{
+    void *object = NULL;        /* Dataset for this operation */
+    H5I_type_t type;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Get object's type */
+    type = H5I_get_type(oid);
+
+    switch(type) {
         case(H5I_GROUP):
 
             /* Re-open the group */
-            if(NULL == (object = H5G_open(&obj_loc, dxpl_id)))
+            if(NULL == (object = H5G_open(obj_loc, dxpl_id)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
             break;
 
         case(H5I_DATATYPE):
 
             /* Re-open the named datatype */
-            if(NULL == (object = H5T_open(&obj_loc, dxpl_id)))
+            if(NULL == (object = H5T_open(obj_loc, dxpl_id)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named datatype")
             break;
 
         case(H5I_DATASET):
 
             /* Re-open the dataset */
-            if(NULL == (object = H5D_open(&obj_loc, H5P_DATASET_ACCESS_DEFAULT, dxpl_id)))
+            if(NULL == (object = H5D_open(obj_loc, H5P_DATASET_ACCESS_DEFAULT, dxpl_id)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
             break;
 
@@ -336,10 +407,6 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to re-register object atom")
 
 done:
-    /* Unprotect object header on failure */
-    if(oh && H5O_unprotect(&oloc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
-
     FUNC_LEAVE_NOAPI(ret_value);
-} /* H5O_refresh_metadata */
 
+} /* H5O_refresh_metadata_reopen() */

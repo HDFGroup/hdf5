@@ -2864,7 +2864,7 @@ expunge_entry(H5F_t * file_ptr,
 	HDassert( ! ((entry_ptr->header).is_dirty) );
 
 	result = H5C_get_entry_status(file_ptr, entry_ptr->base_addr,
-				      NULL, &in_cache, NULL, NULL, NULL, NULL, NULL);
+				      NULL, &in_cache, NULL, NULL, NULL, NULL, NULL, NULL);
 
 	if ( result < 0 ) {
 

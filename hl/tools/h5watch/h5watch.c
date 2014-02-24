@@ -28,7 +28,7 @@
  */
 #define PROGRAMNAME "h5watch"	/* Name of tool */
 #define FIELD_SEP	","	/* nested field separator */
-#define DEFAULT_RETRY 	10	/* number of times to try opening the file */
+#define DEFAULT_RETRY 	50	/* number of times to try opening the file */
 
 
 /*
@@ -66,6 +66,7 @@ static void parse_command_line(int argc, const char *argv[]);
  * The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
+static const char *s_opts ="?";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -696,7 +697,7 @@ parse_command_line(int argc, const char *argv[])
     }
 
     /* parse command line options */
-    while ((opt = get_option(argc, argv, NULL, l_opts)) != EOF) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
         case '?':
         case 'h': /* --help */
@@ -871,7 +872,7 @@ main(int argc, const char *argv[])
 	    *dname = '\0';
 	} /* end while */
     /* Try opening the file again if somehow unstable */
-    } while(g_retry-- > 0 && fid == FAIL && !HDsleep(g_polling_interval));
+    } while(g_retry-- > 0 && fid == FAIL);
 
     if(fid < 0) {
 	error_msg("unable to open file \"%s\"\n", fname);

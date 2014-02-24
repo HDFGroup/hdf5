@@ -229,7 +229,7 @@ H5F_evict_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "unable to evict tagged metadata")
 
     /* Re-read the superblock. */
-    if (H5F_super_read(f, dxpl_id) < 0)
+    if (H5F_super_read(f, dxpl_id, FALSE) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "unable to read superblock")
 
 done:
@@ -269,8 +269,7 @@ H5F_evict_cache_entries(H5F_t *f, hid_t dxpl_id)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to get entry status")
 
     /* Verify status of the superblock entry in the cache */
-    if(!(status & H5AC_ES__IN_CACHE) || !(status & H5AC_ES__IS_PINNED) ||
-        (status & H5AC_ES__IS_DIRTY) || (status & H5AC_ES__IS_PROTECTED))
+    if(!(status & H5AC_ES__IN_CACHE) || !(status & H5AC_ES__IS_PINNED))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to get entry status")
 
     /* Get the number of cache entries */

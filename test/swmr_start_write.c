@@ -42,6 +42,7 @@
 
 static hid_t create_file(const char *filename, unsigned verbose,
     const char *index_type, unsigned random_seed);
+static int create_datasets(hid_t fid, int comp_level, unsigned verbose);
 static int create_close_datasets(hid_t fid, int comp_level, unsigned verbose);
 static hid_t open_datasets(hid_t fid, unsigned verbose);
 static hid_t open_file(const char *filename, unsigned verbose);
@@ -103,37 +104,9 @@ create_file(const char *filename, unsigned verbose,
     if(!strcmp(index_type, "b2"))
         max_dims[0] = H5S_UNLIMITED;
 
-#ifdef QAK
-    /* Increase the initial size of the metadata cache */
-    {
-        H5AC_cache_config_t mdc_config;
-
-        mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
-        H5Pget_mdc_config(fapl, &mdc_config);
-        fprintf(stderr, "mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
-        fprintf(stderr, "mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
-        mdc_config.set_initial_size = 1;
-        mdc_config.initial_size = 16 * 1024 * 1024;
-        /* mdc_config.epoch_length = 5000; */
-        H5Pset_mdc_config(fapl, &mdc_config);
-    }
-#endif /* QAK */
-
-#ifdef QAK
-    H5Pset_small_data_block_size(fapl, (hsize_t)(50 * CHUNK_SIZE * DTYPE_SIZE));
-#endif /* QAK */
-
-#ifdef QAK
-    H5Pset_fapl_log(fapl, "append.log", H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
-#endif /* QAK */
-
     /* Create file creation property list */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         return -1;
-
-#ifdef QAK
-    H5Pset_link_phase_change(fcpl, 0, 0);
-#endif /* QAK */
 
     /* Emit informational message */
     if(verbose)
@@ -165,6 +138,69 @@ create_file(const char *filename, unsigned verbose,
 
     return fid;
 } /* end create_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    create_datasets
+ *
+ * Purpose:     Create datasets (and keep them opened) which will be used for testing 
+ *		H5Fstart_swmr_write().
+ *
+ * Parameters:  
+ *		fid: file ID for the SWMR test file
+ *              comp_level: the compresssion level
+ *              verbose: whether verbose console output is desired.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+create_datasets(hid_t fid, int comp_level, unsigned verbose)
+{
+    hid_t dcpl;         /* Dataset creation property list */
+    hid_t tid;          /* Datatype for dataset elements */
+    hid_t sid;          /* Dataspace ID */
+    hsize_t dims[2] = {1, 0}; /* Dataset starting dimensions */
+    hsize_t max_dims[2] = {1, H5S_UNLIMITED}; /* Dataset maximum dimensions */
+    hsize_t chunk_dims[2] = {1, CHUNK_SIZE}; /* Chunk dimensions */
+    unsigned u, v;      /* Local index variable */
+
+    /* Create datatype for creating datasets */
+    if((tid = create_symbol_datatype()) < 0)
+        return -1;
+
+    /* Create dataspace for creating datasets */
+    if((sid = H5Screate_simple(2, dims, max_dims)) < 0)
+        return -1;
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        return -1;
+    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
+        return -1;
+    if(comp_level >= 0) {
+        if(H5Pset_deflate(dcpl, (unsigned)comp_level) < 0)
+            return -1;
+    } /* end if */
+
+    /* Emit informational message */
+    if(verbose)
+        fprintf(stderr, "Creating datasets\n");
+
+    /* Create the datasets */
+    for(u = 0; u < NLEVELS; u++)
+        for(v = 0; v < symbol_count[u]; v++) {
+
+            if((symbol_info[u][v].dsid = H5Dcreate2(fid, symbol_info[u][v].name, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+                return -1;
+            symbol_info[u][v].nrecords = 0;
+
+        } /* end for */
+
+    return 0;
+} /* create_datasets() */
 
 
 /*-------------------------------------------------------------------------
@@ -394,11 +430,6 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
         /* Get the coordinate to write */
         start[1] = symbol->nrecords;
 
-        /* Cork the metadata cache, to prevent the object header from being
-         * flushed before the data has been written */
-        /*if(H5Fset_mdc_config(fid, &mdc_config_cork) < 0)
-            return(-1);*/
-
         /* Extend the dataset's dataspace to hold the new record */
         symbol->nrecords++;
         dim[1] = symbol->nrecords;
@@ -416,10 +447,6 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
         /* Write record to the dataset */
         if(H5Dwrite(symbol->dsid, tid, mem_sid, file_sid, H5P_DEFAULT, &record) < 0)
             return -1;
-
-        /* Uncork the metadata cache */
-        /*if(H5Fset_mdc_config(fid, &mdc_config_orig) < 0)
-            return -1;*/
 
         /* Close the dataset's dataspace */
         if(H5Sclose(file_sid) < 0)
@@ -490,15 +517,11 @@ usage(void)
 } /* usage() */
 
 /*
- * Can test with different scenarios as listed below.  Scenario (1) is tested here.
- *	1) create_file(), create_close_datasets(), H5Fstart_swmr_write(), open_datasets(), add_records(), H5Fclose().
- *	2) create_file(), H5Fstart_swmr_write(), create_close_datasets(), open_datasets(), add_records(), H5Fclose().
- *	3) create_file(), H5Fclose(), 
- *	   open_file(), create_close_datasets(), H5Fstart_swmr_write(), open_datasets(), add_records(), H5Fclose().
- *	4) create_file(), create_close_datasets(), H5Fclose(),
- *	   open_file(), H5Fstart_swmr_write(), open_datasets(), add_records(), H5Fclose().
- *	5) create_file(), H5Fclose(),
- *	   open_file(), H5Fstart_swmr_write(), create_close_datasets(), open_datasets(), add_records(), H5Fclose().
+ * Can test with different scenarios as below:
+ *	1) create_file(), create_datasets(), H5Fstart_swmr_write(), add_records(), H5Fclose().
+ *	2) create_file(), create_close_datasets(), open_datasets(), H5Fstart_swmr_write(), add_records(), H5Fclose().
+ *	3) create_file(), create_close_datasets(), H5Fclose(),
+ *	   open_file(), open_dataset(), H5Fstart_swmr_write(), add_records(), H5Fclose().
  */
 int main(int argc, const char *argv[])
 {
@@ -609,13 +632,36 @@ int main(int argc, const char *argv[])
         exit(1);
     }
 
+    /* Emit informational message */
+    if(verbose)
+        fprintf(stderr, "Generating symbol names\n");
+
+    /* Generate dataset names */
+    if(generate_symbols() < 0)
+        return -1;
+
+    /* Create the datasets in the file */
+    if(create_datasets(fid, comp_level, verbose) < 0) {
+        fprintf(stderr, "Error creating datasets...\n");
+        exit(1);
+    }
+
+    /* Enable SWMR writing mode */
+    if(H5Fstart_swmr_write(fid) < 0) {
+        fprintf(stderr, "Error starting SWMR writing mode...\n");
+        exit(1);
+    }
+
+#ifdef OUT
+    /* Emit informational message */
+    if(verbose)
+        fprintf(stderr, "Creating and closing datasets: %s\n", FILENAME);
+
     /* Create and close the datasets in the file */
     if(create_close_datasets(fid, comp_level, verbose) < 0) {
         fprintf(stderr, "Error creating datasets...\n");
         exit(1);
     }
-
-#ifdef OUT
 
     /* Close the file */
     if(H5Fclose(fid) < 0) {
@@ -628,13 +674,7 @@ int main(int argc, const char *argv[])
         fprintf(stderr, "Error opening the file...\n");
         exit(1);
     }
-#endif
 
-    /* Enable SWMR writing mode */
-    if(H5Fstart_swmr_write(fid) < 0) {
-        fprintf(stderr, "Error starting SWMR writing mode...\n");
-        exit(1);
-    }
 
     /* Emit informational message */
     if(verbose)
@@ -653,6 +693,14 @@ int main(int argc, const char *argv[])
         fprintf(stderr, "Error opening datasets...\n");
         exit(1);
     } /* end if */
+
+
+    /* Enable SWMR writing mode */
+    if(H5Fstart_swmr_write(fid) < 0) {
+        fprintf(stderr, "Error starting SWMR writing mode...\n");
+        exit(1);
+    }
+#endif
 
     /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
     h5_send_message(WRITER_MESSAGE);

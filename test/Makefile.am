@@ -58,7 +58,7 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            twriteorder big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_with_endianess\
            getname vfd ntypes dangle dtransform reserved cross_read \
-           freespace mf farray earray btree2 fheap file_image unregister test_swmr
+           freespace mf farray earray btree2 fheap file_image unregister cork test_swmr
 
 bin_PROGRAMS=swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \

@@ -1573,14 +1573,6 @@ H5O_close(H5O_loc_t *loc)
     } /* end if */
 #endif
 
-    /* Uncork cache entries with tag: addr */
-    if(H5AC_cork(loc->file, loc->addr, H5AC__GET_CORKED, &corked) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to retrieve an object's cork status")
-    else if(corked) {
-	if(H5AC_cork(loc->file, loc->addr, H5AC__UNCORK, NULL) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "unable to uncork an object")
-    }
-
     /*
      * If the file open object count has reached the number of open mount points
      * (each of which has a group open in the file) attempt to close the file.

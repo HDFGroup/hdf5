@@ -4584,7 +4584,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/src/Makefile
                  hl/test/Makefile
                  hl/test/H5srcdir_str.h
-		 hl/test/test_ld.sh
                  hl/tools/Makefile
                  hl/tools/gif2h5/Makefile
                  hl/tools/gif2h5/h52giftest.sh

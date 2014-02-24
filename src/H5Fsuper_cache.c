@@ -127,7 +127,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     size_t              variable_size;      /*variable sizeof superblock    */
     uint8_t            *p;                  /* Temporary pointer into encoding buffer */
     unsigned            super_vers;         /* Superblock version          */
-    hbool_t            *dirtied = (hbool_t *)_udata;  /* Set up dirtied out value */
+    H5F_super_ud_t *udata = (H5F_super_ud_t *)_udata;
     unsigned 		tries, max_tries;   /* The # of read attempts to try */
     unsigned 		retries; 	    /* The # of retries */
     uint32_t 		computed_chksum;    /* Computed checksum  */
@@ -139,7 +139,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     /* check arguments */
     HDassert(f);
     HDassert(H5F_addr_eq(addr, 0));
-    HDassert(dirtied);
+    HDassert(udata);
 
     /* Short cuts */
     shared = f->shared;
@@ -358,7 +358,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "failed to set base address for file driver")
 
             /* Indicate that the superblock should be marked dirty */
-            *dirtied = TRUE;
+	    udata->dirtied = TRUE;
         } /* end if */
 
         /* This step is for h5repart tool only. If user wants to change file driver
@@ -371,7 +371,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
             sblock->driver_addr = HADDR_UNDEF;
 
             /* Indicate that the superblock should be marked dirty */
-            *dirtied = TRUE;
+	    udata->dirtied = TRUE;
         } /* end if */
 
         /* Decode the optional driver information block */
@@ -471,7 +471,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "failed to set base address for file driver")
 
             /* Indicate that the superblock should be marked dirty */
-            *dirtied = TRUE;
+	    udata->dirtied = TRUE;
         } /* end if */
 
         /* Get the B-tree internal node values, etc */
@@ -497,7 +497,17 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
      * as the file can appear truncated if only part of it has been
      * been flushed to disk by the single writer process.)
      */
-    if (!(H5F_INTENT(f) & H5F_ACC_SWMR_READ)) {
+    /* Can skip this test when it is not the initial file open--
+     * H5F_super_read() call from H5F_evict_tagged_metadata() for
+     * refreshing object.
+     * When flushing file buffers and fractal heap is involved, 
+     * the library will allocate actual space for tmp addresses
+     * via the file layer.  The aggregator allocates a block,
+     * thus the eoa might be greater than eof.
+     * Note: the aggregator is changed again after being reset 
+     * earlier before H5AC_flush due to allocation of tmp addresses.
+     */
+    if (!(H5F_INTENT(f) & H5F_ACC_SWMR_READ) && udata->initial_read) {
         if(HADDR_UNDEF == (eof = H5FD_get_eof(lf)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to determine file size")
 
@@ -550,7 +560,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
             /* Check for ignoring the driver info for this file */
             if(H5F_HAS_FEATURE(f, H5FD_FEAT_IGNORE_DRVRINFO)) {
                 /* Indicate that the superblock should be marked dirty */
-                *dirtied = TRUE;
+		udata->dirtied = TRUE;
             } /* end if */
             else {
                 /* Retrieve the 'driver info' structure */

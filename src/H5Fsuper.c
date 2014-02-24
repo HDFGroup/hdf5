@@ -318,16 +318,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_super_read(H5F_t *f, hid_t dxpl_id)
+H5F_super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
 {
-    H5F_super_t *       sblock = NULL;      /* superblock structure                         */
+    H5F_super_t *       sblock = NULL;      	/* superblock structure                         */
     unsigned            sblock_flags = H5AC__NO_FLAGS_SET;       /* flags used in superblock unprotect call      */
-    haddr_t             super_addr;         /* Absolute address of superblock */
-    H5AC_protect_t      rw;                 /* read/write permissions for file              */
-    hbool_t             dirtied = FALSE;    /* Bool for sblock protect call                 */
-    herr_t              ret_value = SUCCEED; /* return value                                */
+    haddr_t             super_addr;         	/* Absolute address of superblock */
+    H5AC_protect_t      rw;                 	/* read/write permissions for file */
+    H5F_super_ud_t	udata;			/* User data passed to sblock protect */	
+    herr_t              ret_value = SUCCEED; 	/* return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
+
+    udata.dirtied = FALSE;		/* Boolean (dirtied or not ) for sblock protect call */
+    udata.initial_read = initial_read;	/* Indicate superblock read for initial file open: */
+					/* whether to skip the check for truncated file in H5F_sblock_load() */
 
     /* Find the superblock */
     if(H5F_locate_signature(f->shared->lf, dxpl_id, &super_addr) < 0)
@@ -349,11 +353,11 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id)
         rw = H5AC_READ;
 
     /* Look up the superblock */
-    if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, &dirtied, rw)))
+    if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, &udata, rw)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load superblock")
 
     /* Mark the superblock dirty if it was modified during loading or VFD indicated to do so */
-    if((H5AC_WRITE == rw) && (dirtied || H5F_HAS_FEATURE(f, H5FD_FEAT_DIRTY_SBLK_LOAD)))
+    if((H5AC_WRITE == rw) && (udata.dirtied || H5F_HAS_FEATURE(f, H5FD_FEAT_DIRTY_SBLK_LOAD)))
         sblock_flags |= H5AC__DIRTIED_FLAG;
 
     /* Pin the superblock in the cache */

@@ -3622,7 +3622,8 @@ done:
 herr_t
 H5T_close(H5T_t *dt)
 {
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    hbool_t 	corked;			/* Whether the named datatype is corked or not */
+    herr_t      ret_value = SUCCEED;   	/* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -3632,6 +3633,16 @@ H5T_close(H5T_t *dt)
         dt->shared->fo_count--;
 
     if(dt->shared->state != H5T_STATE_OPEN || dt->shared->fo_count == 0) {
+	/* Uncork cache entries with object address tag for named datatype only */
+	if(dt->shared->state == H5T_STATE_OPEN && dt->shared->fo_count == 0) {
+	    if(H5AC_cork(dt->oloc.file, dt->oloc.addr, H5AC__GET_CORKED, &corked) < 0)
+		HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to retrieve an object's cork status")
+	    else if(corked) {
+		if(H5AC_cork(dt->oloc.file, dt->oloc.addr, H5AC__UNCORK, NULL) < 0)
+		    HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "unable to uncork an object")
+	    }
+	}
+
         if(H5T__free(dt) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype");
 
