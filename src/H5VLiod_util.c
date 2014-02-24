@@ -22,6 +22,9 @@
 
 #ifdef H5_HAVE_EFF
 
+static H5I_type_t H5VL__iod_get_h5_obj_type(iod_obj_id_t oid, iod_handle_t coh, 
+                                            iod_trans_id_t rtid, uint32_t cs_scope);
+
 /*
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
  *              February, 2013
@@ -1242,6 +1245,183 @@ H5VL_iod_verify_kv_pair(void *key, iod_size_t key_size, void *value, iod_size_t 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL_iod_verify_kv_pair */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__iod_get_h5_obj_type
+ *
+ * Purpose:     Function to retrieve the HDF5 object type of an IOD object.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5I_type_t 
+H5VL__iod_get_h5_obj_type(iod_obj_id_t oid, iod_handle_t coh, iod_trans_id_t rtid, uint32_t cs_scope)
+{
+    iod_handle_t mdkv_oh, oh;
+    H5I_type_t obj_type;
+    iod_obj_type_t iod_type;
+    herr_t ret_value = -1;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    iod_type = IOD_OBJID_GETTYPE(oid);
+
+    if(IOD_OBJ_ARRAY == iod_type)
+        obj_type = H5I_DATASET;
+    else if(IOD_OBJ_BLOB == iod_type)
+        obj_type = H5I_DATATYPE;
+    else {
+        scratch_pad sp;
+        iod_checksum_t sp_cs = 0;
+
+        if (iod_obj_open_read(coh, oid, rtid, NULL /*hints*/, &oh, NULL) < 0)
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open object");
+
+        /* get scratch pad of the object */
+        if(iod_obj_get_scratch(oh, rtid, &sp, &sp_cs, NULL) < 0)
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+        if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+            /* verify scratch pad integrity */
+            if(H5VL_iod_verify_scratch_pad(&sp, sp_cs) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+        }
+
+        /* open the metadata KV */
+        if (iod_obj_open_read(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
+
+        if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, H5VL_IOD_KEY_OBJ_TYPE,
+                                 cs_scope, NULL, &obj_type) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
+
+        if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+        if(iod_obj_close(oh, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+    }
+
+    ret_value = obj_type;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_get_h5_obj_type() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_iterate
+ *
+ * Purpose: 
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
+                        H5I_type_t obj_type, uint32_t cs_scope, 
+                        H5VL_operator_t op, void *op_data)
+{
+    iod_handle_t obj_oh;
+    herr_t ret;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    ret = (*op)(coh, obj_id, rtid, obj_type, cs_scope, op_data);
+
+    /* Get the object type, if it is not a group do not check for links */
+    if(H5I_GROUP == obj_type) {
+        int num_entries;
+
+        /* Get the object ID and iterate into every member in the group */
+        if (iod_obj_open_read(coh, obj_id, rtid, NULL, &obj_oh, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+
+        ret = iod_kv_get_num(obj_oh, rtid, &num_entries, NULL);
+        if(ret != 0)
+            HGOTO_ERROR_IOD(ret, FAIL, "can't get number of KV entries");
+
+        if(0 != num_entries) {
+            iod_kv_params_t *kvs = NULL;
+            iod_kv_t *kv = NULL;
+            iod_checksum_t *oid_cs = NULL;
+            iod_ret_t *oid_ret = NULL;
+            int i;
+
+            kvs = (iod_kv_params_t *)malloc(sizeof(iod_kv_params_t) * (size_t)num_entries);
+            kv = (iod_kv_t *)malloc(sizeof(iod_kv_t) * (size_t)num_entries);
+            oid_cs = (iod_checksum_t *)malloc(sizeof(iod_checksum_t) * (size_t)num_entries);
+            oid_ret = (iod_ret_t *)malloc(sizeof(iod_ret_t) * (size_t)num_entries);
+
+            for(i=0 ; i<num_entries ; i++) {
+                kv[i].key = malloc(IOD_KV_KEY_MAXLEN);
+                kv[i].key_len = IOD_KV_KEY_MAXLEN;
+                //kv[i].value = malloc(sizeof(iod_obj_id_t));
+                //kv[i].value_len = sizeof(iod_obj_id_t);
+                kvs[i].kv = &kv[i];
+                kvs[i].cs = &oid_cs[i];
+                kvs[i].ret = &oid_ret[i];
+            }
+
+            ret = iod_kv_list_key(obj_oh, rtid, NULL, 0, &num_entries, kvs, NULL);
+            if(ret != 0)
+                HGOTO_ERROR_IOD(ret, FAIL, "can't get list of keys");
+            //ret = iod_kv_get_list(obj_oh, rtid, NULL, 0, &num_entries, kvs, NULL);
+            //if(ret != 0)
+            //HGOTO_ERROR_IOD(ret, FAIL, "can't get KV list from group KV");
+
+            for(i=0 ; i<num_entries ; i++) {
+
+                H5I_type_t otype;
+                iod_obj_id_t oid;// = *((iod_obj_id_t *)kv[i].value);
+                H5VL_iod_link_t value;
+
+                /* lookup object in the current group */
+                if(H5VL_iod_get_metadata(obj_oh, rtid, H5VL_IOD_LINK, 
+                                         (char *)(kv[i].key), cs_scope, NULL, &value) < 0)
+                    HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
+
+                if(H5L_TYPE_SOFT == value.link_type) {
+                    continue;
+                }
+                else
+                    oid = value.u.iod_id;
+
+#if H5VL_IOD_DEBUG
+                fprintf(stderr, "Iterating into %s OID %"PRIx64"\n", ((char *)kv[i].key), oid);
+#endif
+
+                /* Get the object type. */
+                if((otype = H5VL__iod_get_h5_obj_type(oid, coh, rtid, cs_scope)) < 0)
+                    HGOTO_ERROR_IOD(ret, FAIL, "can't get object type");
+
+                if(H5VL_iod_server_iterate(coh, oid, rtid, otype, cs_scope, op, op_data) < 0)
+                    HGOTO_ERROR_IOD(ret, FAIL, "can't iterate");
+            }
+
+            for(i=0 ; i<num_entries ; i++) {
+                free(kv[i].key);
+                //free(kv[i].value);
+            }
+
+            free(kv);
+            free(oid_cs);
+            free(oid_ret);
+            free(kvs);
+        }
+
+        if(iod_obj_close(obj_oh, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+    }
+
+    ret_value = ret;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 #if 0
 herr_t

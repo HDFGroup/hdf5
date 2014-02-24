@@ -18,7 +18,8 @@ write_dataset(const char *file_name, const char *dataset_name,
         hsize_t total, hsize_t ncomponents, hid_t datatype_id,
         hsize_t ntuples, hsize_t start, void *buf)
 {
-    hid_t       file_id, dataset_id, view_id;
+    hid_t       file_id, view_id;
+    hid_t       did1, did2, did3, gid1;
     hid_t       file_space_id, mem_space_id;
     hid_t       tid1, rid1, rid2, trspl_id;
     hid_t       fapl_id;
@@ -28,13 +29,13 @@ write_dataset(const char *file_name, const char *dataset_name,
     int         rank = (ncomponents == 1) ? 1 : 2;
     uint64_t    version;
     herr_t      ret;
-    void       *dset_token1;
-    size_t      token_size1;
+    void        *dset_token1, *dset_token2, *dset_token3;
+    size_t      token_size1, token_size2, token_size3;
     double lower_bound1 = 39.1, upper_bound1 = 42.1;
     int lower_bound2 = 295, upper_bound2 = 298;
     hid_t  query_id1, query_id2, query_id3, query_id4, query_id5, query_id6;
     hid_t query_id;
-    MPI_Request mpi_reqs[2];
+    MPI_Request mpi_reqs[6];
 
     /* Choose the IOD VOL plugin to use with this file. */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -69,46 +70,97 @@ write_dataset(const char *file_name, const char *dataset_name,
     assert(file_space_id);
 
     if(0 == my_rank) {
+        /* create a group */
+        gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
+                            tid1, H5_EVENT_STACK_NULL);
+        assert(gid1 > 0);
+
         /* Create a dataset. */
-        dataset_id = H5Dcreate_ff(file_id, dataset_name, datatype_id, file_space_id,
+        did1 = H5Dcreate_ff(gid1, "D1", datatype_id, file_space_id,
                 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, H5_EVENT_STACK_NULL);
-        assert(dataset_id);
+        assert(did1);
+
+        /* Create a dataset. */
+        did2 = H5Dcreate_ff(gid1, "D2", datatype_id, file_space_id,
+                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, H5_EVENT_STACK_NULL);
+        assert(did2);
+
+        /* Create a dataset. */
+        did3 = H5Dcreate_ff(gid1, "D3", datatype_id, file_space_id,
+                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, H5_EVENT_STACK_NULL);
+        assert(did3);
+
+        ret = H5Gclose_ff(gid1, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
 
         /* get the token size of each dset */
-        ret = H5Oget_token(dataset_id, NULL, &token_size1);
+        ret = H5Oget_token(did1, NULL, &token_size1);
+        assert(0 == ret);
+        ret = H5Oget_token(did2, NULL, &token_size2);
+        assert(0 == ret);
+        ret = H5Oget_token(did3, NULL, &token_size3);
         assert(0 == ret);
 
         /* allocate buffers for each token */
         dset_token1 = malloc(token_size1);
+        dset_token2 = malloc(token_size2);
+        dset_token3 = malloc(token_size3);
 
         /* get the token buffer */
-        ret = H5Oget_token(dataset_id, dset_token1, &token_size1);
+        ret = H5Oget_token(did1, dset_token1, &token_size1);
+        assert(0 == ret);
+        ret = H5Oget_token(did2, dset_token2, &token_size2);
+        assert(0 == ret);
+        ret = H5Oget_token(did3, dset_token3, &token_size3);
         assert(0 == ret);
 
         /* bcast the token sizes and the tokens */ 
         MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD,
                 &mpi_reqs[0]);
-        MPI_Ibcast(dset_token1, token_size1, MPI_BYTE, 0, MPI_COMM_WORLD,
+        MPI_Ibcast(&token_size2, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD,
                 &mpi_reqs[1]);
-        MPI_Waitall(2, mpi_reqs, MPI_STATUS_IGNORE);
+        MPI_Ibcast(&token_size3, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD,
+                &mpi_reqs[2]);
+
+        MPI_Ibcast(dset_token1, token_size1, MPI_BYTE, 0, MPI_COMM_WORLD,
+                &mpi_reqs[3]);
+        MPI_Ibcast(dset_token2, token_size2, MPI_BYTE, 0, MPI_COMM_WORLD,
+                &mpi_reqs[4]);
+        MPI_Ibcast(dset_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD,
+                &mpi_reqs[5]);
+        MPI_Waitall(6, mpi_reqs, MPI_STATUS_IGNORE);
     }
     else {
         /* recieve the token size */
         MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD,
                 &mpi_reqs[0]);
-        MPI_Waitall(1, mpi_reqs, MPI_STATUS_IGNORE);
+        MPI_Ibcast(&token_size2, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD,
+                &mpi_reqs[1]);
+        MPI_Ibcast(&token_size3, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD,
+                &mpi_reqs[2]);
+        MPI_Waitall(3, mpi_reqs, MPI_STATUS_IGNORE);
 
         /* allocate buffer for token */
         dset_token1 = malloc(token_size1);
+        dset_token2 = malloc(token_size2);
+        dset_token3 = malloc(token_size3);
 
         /* recieve the token */
         MPI_Ibcast(dset_token1, token_size1, MPI_BYTE, 0, MPI_COMM_WORLD,
                 &mpi_reqs[0]);
-        MPI_Waitall(1, mpi_reqs, MPI_STATUS_IGNORE);
+        MPI_Ibcast(dset_token2, token_size2, MPI_BYTE, 0, MPI_COMM_WORLD,
+                &mpi_reqs[1]);
+        MPI_Ibcast(dset_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD,
+                &mpi_reqs[2]);
+        MPI_Waitall(3, mpi_reqs, MPI_STATUS_IGNORE);
 
-        dataset_id = H5Oopen_by_token(dset_token1, tid1, H5_EVENT_STACK_NULL);
+        did1 = H5Oopen_by_token(dset_token1, tid1, H5_EVENT_STACK_NULL);
+        did2 = H5Oopen_by_token(dset_token2, tid1, H5_EVENT_STACK_NULL);
+        did3 = H5Oopen_by_token(dset_token3, tid1, H5_EVENT_STACK_NULL);
     }
     free(dset_token1);
+    free(dset_token2);
+    free(dset_token3);
 
     mem_space_id = H5Screate_simple(rank, count, NULL);
     assert(mem_space_id);
@@ -118,8 +170,16 @@ write_dataset(const char *file_name, const char *dataset_name,
            NULL, count, NULL);
     assert(0 == ret);
 
-    /* Write the first dataset. */
-    ret = H5Dwrite_ff(dataset_id, datatype_id, mem_space_id, file_space_id,
+    /* Write to the datasets. */
+    ret = H5Dwrite_ff(did1, datatype_id, mem_space_id, file_space_id,
+            H5P_DEFAULT, buf, tid1, H5_EVENT_STACK_NULL);
+    assert(0 == ret);
+
+    ret = H5Dwrite_ff(did2, datatype_id, mem_space_id, file_space_id,
+            H5P_DEFAULT, buf, tid1, H5_EVENT_STACK_NULL);
+    assert(0 == ret);
+
+    ret = H5Dwrite_ff(did3, datatype_id, mem_space_id, file_space_id,
             H5P_DEFAULT, buf, tid1, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 
@@ -128,8 +188,15 @@ write_dataset(const char *file_name, const char *dataset_name,
     assert(0 == ret);
 
     /* Finish transaction 1. */
-    ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, H5_EVENT_STACK_NULL);
+    ret = H5TRfinish(tid1, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
     assert(0 == ret);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    /* acquire container version 1 - EXACT. */
+    version = 1;
+    rid2 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    assert(rid2 > 0);
+    assert(1 == version);
 
     /* release container version 0. */
     ret = H5RCrelease(rid1, H5_EVENT_STACK_NULL);
@@ -158,7 +225,8 @@ write_dataset(const char *file_name, const char *dataset_name,
     query_id = H5Qcombine(query_id3, H5Q_COMBINE_OR, query_id6);
     assert(query_id);
 
-    view_id = H5Vcreate_ff(dataset_id, query_id, H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+    /* create a view on D1 */
+    view_id = H5Vcreate_ff(did1, query_id, H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
     assert(view_id > 0);
 
     {
@@ -169,13 +237,13 @@ write_dataset(const char *file_name, const char *dataset_name,
         hsize_t r_dims[2];
 
         H5Qclose(query_id);
-        ret = H5Dclose_ff(dataset_id, H5_EVENT_STACK_NULL);
+        ret = H5Dclose_ff(did1, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
-        ret = H5Vget_location_ff(view_id, &dataset_id, H5_EVENT_STACK_NULL);
+        ret = H5Vget_location_ff(view_id, &did1, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
-        ret = H5Dclose_ff(dataset_id, H5_EVENT_STACK_NULL);
+        ret = H5Dclose_ff(did1, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
         ret = H5Vget_query(view_id, &query_id);
@@ -187,7 +255,7 @@ write_dataset(const char *file_name, const char *dataset_name,
         assert(0 == obj_count);
         assert(1 == reg_count);
 
-        ret = H5Vget_elem_regions_ff(view_id, 0, 1, &dataset_id, 
+        ret = H5Vget_elem_regions_ff(view_id, 0, 1, &did1, 
                                      &region_space, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
@@ -198,10 +266,73 @@ write_dataset(const char *file_name, const char *dataset_name,
         assert(ncomponents == r_dims[1]);
 
         num_points = H5Sget_select_elem_npoints(region_space);
-        assert(9 == num_points);
+        if(my_size > 1)
+            assert(15 == num_points);
+        else
+            assert(9 == num_points);
 
         ret = H5Sclose(region_space);
         assert(0 == ret);
+    }
+
+    H5Vclose(view_id);
+
+    gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+    assert(gid1 > 0);
+
+    /* create a view on all datasets under G1 */
+    view_id = H5Vcreate_ff(gid1, query_id, H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+    assert(view_id > 0);
+
+    {
+        hsize_t attr_count, obj_count, reg_count, i;
+        hssize_t num_points;
+        hid_t regions[3];
+        hid_t did[3];
+        int r_ndims;
+        hsize_t r_dims[2];
+
+        H5Qclose(query_id);
+        ret = H5Gclose_ff(gid1, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+
+        ret = H5Vget_location_ff(view_id, &gid1, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        assert(gid1 > 0);
+
+        ret = H5Vget_query(view_id, &query_id);
+        assert(0 == ret);
+
+        ret = H5Vget_counts(view_id, &attr_count, &obj_count, &reg_count);
+        assert(0 == ret);
+        assert(0 == attr_count);
+        assert(0 == obj_count);
+        assert(3 == reg_count);
+
+        ret = H5Vget_elem_regions_ff(view_id, 0, reg_count, did, regions, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+
+        for(i=0 ; i<reg_count ; i++) {
+
+            assert(did[i] > 0);
+            ret = H5Dclose_ff(did[i], H5_EVENT_STACK_NULL);
+            assert(0 == ret);
+
+            r_ndims = H5Sget_simple_extent_dims(regions[i], r_dims, NULL);
+
+            assert(2 == r_ndims);
+            assert(total == r_dims[0]);
+            assert(ncomponents == r_dims[1]);
+
+            num_points = H5Sget_select_elem_npoints(regions[i]);
+            if(my_size > 1)
+                assert(15 == num_points);
+            else
+                assert(9 == num_points);
+
+            ret = H5Sclose(regions[i]);
+            assert(0 == ret);
+        }
     }
 
     H5Vclose(view_id);
@@ -214,8 +345,14 @@ write_dataset(const char *file_name, const char *dataset_name,
     H5Qclose(query_id2);
     H5Qclose(query_id1);
 
-    /* Close the first dataset. */
-    ret = H5Dclose_ff(dataset_id, H5_EVENT_STACK_NULL);
+    ret = H5Gclose_ff(gid1, H5_EVENT_STACK_NULL);
+    assert(0 == ret);
+
+    ret = H5Dclose_ff(did1, H5_EVENT_STACK_NULL);
+    assert(0 == ret);
+    ret = H5Dclose_ff(did2, H5_EVENT_STACK_NULL);
+    assert(0 == ret);
+    ret = H5Dclose_ff(did3, H5_EVENT_STACK_NULL);
     assert(0 == ret);
     ret = H5Sclose(file_space_id);
     assert(0 == ret);

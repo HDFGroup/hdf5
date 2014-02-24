@@ -90,6 +90,10 @@ extern hg_id_t H5VL_EFF_CLOSE_CONTAINER;
 extern hg_id_t H5VL_EFF_ANALYSIS_FARM;
 extern hg_id_t H5VL_EFF_ANALYSIS_FARM_TRANSFER;
 
+/* Define the operator function pointer for H5Diterate() */
+typedef herr_t (*H5VL_operator_t)(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
+                                  H5I_type_t obj_type, uint32_t cs_scope, void *operator_data);
+
 H5_DLL void EFF__mercury_register_callbacks(void);
 
 H5_DLL int H5VL_iod_server_analysis_execute(hg_handle_t handle);
@@ -443,6 +447,10 @@ H5_DLL herr_t H5VL_iod_verify_kv_pair(void *key, iod_size_t key_size, void *valu
 H5_DLL herr_t H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
                                         hbool_t write_op, void *buf, size_t buf_size, 
                                         iod_checksum_t cs, uint32_t cs_scope, iod_trans_id_t tid);
+
+H5_DLL herr_t H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
+                                      H5I_type_t obj_type, uint32_t cs_scope, 
+                                      H5VL_operator_t op, void *op_data);
 
 H5_DLL herr_t H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim, 
                                           const hsize_t *point, void *_udata);

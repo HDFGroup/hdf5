@@ -21,6 +21,8 @@
  *              by the function shipper.
  */
 
+#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5VL_iod_init_interface
 
@@ -31,6 +33,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Ppkg.h"		/* Property lists			*/
 #include "H5Sprivate.h"		/* Dataspaces		  		*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod.h"            /* Iod VOL plugin			*/
@@ -6097,7 +6100,18 @@ H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, H5I_type_t *opened_type, 
         dset->remote_dset.attrkv_id = attrkv_id;
 
         dset->dapl_id = H5Pcopy(H5P_DATASET_ACCESS_DEFAULT);
-        dset->remote_dset.dcpl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT);
+
+        /* decode creation property list */
+        {
+            size_t plist_size;
+
+            HDmemcpy(&plist_size, buf_ptr, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            /* Create plist by decoding buffer */
+            if((dset->remote_dset.dcpl_id = H5P__decode((const void *)buf_ptr)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, NULL, "can't decode object");
+            buf_ptr += plist_size;
+        }
 
         /* decode dtype */
         {
@@ -6166,7 +6180,18 @@ H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, H5I_type_t *opened_type, 
         dtype->remote_dtype.attrkv_id = attrkv_id;
 
         dtype->tapl_id = H5Pcopy(H5P_DATATYPE_ACCESS_DEFAULT);
-        dtype->remote_dtype.tcpl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT);
+
+        /* decode creation property list */
+        {
+            size_t plist_size;
+
+            HDmemcpy(&plist_size, buf_ptr, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            /* Create plist by decoding buffer */
+            if((dtype->remote_dtype.tcpl_id = H5P__decode((const void *)buf_ptr)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, NULL, "can't decode object");
+            buf_ptr += plist_size;
+        }
 
         /* decode dtype */
         {
@@ -6220,8 +6245,19 @@ H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, H5I_type_t *opened_type, 
         grp->remote_group.mdkv_id = mdkv_id;
         grp->remote_group.attrkv_id = attrkv_id;
 
-        grp->remote_group.gcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
         grp->gapl_id = H5Pcopy(H5P_GROUP_ACCESS_DEFAULT);
+
+        /* decode creation property list */
+        {
+            size_t plist_size;
+
+            HDmemcpy(&plist_size, buf_ptr, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            /* Create plist by decoding buffer */
+            if((grp->remote_group.gcpl_id = H5P__decode((const void *)buf_ptr)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, NULL, "can't decode object");
+            buf_ptr += plist_size;
+        }
 
         /* set the input structure for the HG encode routine */
         input.coh = tr->file->remote_file.coh;
@@ -6259,8 +6295,19 @@ H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, H5I_type_t *opened_type, 
         map->remote_map.mdkv_id = mdkv_id;
         map->remote_map.attrkv_id = attrkv_id;
 
-        map->remote_map.mcpl_id = H5Pcopy(H5P_MAP_CREATE_DEFAULT);
         map->mapl_id = H5Pcopy(H5P_MAP_ACCESS_DEFAULT);
+
+        /* decode creation property list */
+        {
+            size_t plist_size;
+
+            HDmemcpy(&plist_size, buf_ptr, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            /* Create plist by decoding buffer */
+            if((map->remote_map.mcpl_id = H5P__decode((const void *)buf_ptr)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, NULL, "can't decode object");
+            buf_ptr += plist_size;
+        }
 
         /* decode key_type */
         {
@@ -6430,9 +6477,11 @@ H5VL_iod_get_token(void *_obj, void *token, size_t *token_size)
     iod_obj_id_t iod_id, mdkv_id, attrkv_id;
     H5O_type_t type;
     uint8_t *buf_ptr = (uint8_t *)token;
-    size_t dt_size = 0, space_size = 0;
+    size_t dt_size = 0, space_size = 0, plist_size = 0;
     H5T_t *dt = NULL;
     H5S_t *space = NULL;
+    H5P_genplist_t *plist = NULL;
+    hid_t cpl_id;
     size_t keytype_size = 0, valtype_size;
     H5T_t *kt = NULL, *vt = NULL;
     herr_t ret_value = SUCCEED;              /* Return value */
@@ -6443,11 +6492,23 @@ H5VL_iod_get_token(void *_obj, void *token, size_t *token_size)
 
     switch(obj->obj_type) {
         case H5I_GROUP:
-            iod_id = ((const H5VL_iod_group_t *)obj)->remote_group.iod_id;
-            mdkv_id = ((const H5VL_iod_group_t *)obj)->remote_group.mdkv_id;
-            attrkv_id = ((const H5VL_iod_group_t *)obj)->remote_group.attrkv_id;
-            type = H5O_TYPE_GROUP;
-            break;
+            {
+                H5VL_iod_group_t *grp = (H5VL_iod_group_t *)obj;
+
+                iod_id = grp->remote_group.iod_id;
+                mdkv_id = grp->remote_group.mdkv_id;
+                attrkv_id = grp->remote_group.attrkv_id;
+                type = H5O_TYPE_GROUP;
+
+                cpl_id = grp->remote_group.gcpl_id;
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(cpl_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+                if(H5P__encode(plist, TRUE, NULL, &plist_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode plist")
+
+                *token_size += plist_size + sizeof(size_t);
+                break;
+            }
         case H5I_DATASET:
             {
                 H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)obj;
@@ -6470,7 +6531,13 @@ H5VL_iod_get_token(void *_obj, void *token, size_t *token_size)
                 if(H5S_encode(space, NULL, &space_size) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
 
-                *token_size += dt_size + space_size + sizeof(size_t)*2;
+                cpl_id = dset->remote_dset.dcpl_id;
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(cpl_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                if(H5P__encode(plist, TRUE, NULL, &plist_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode plist")
+
+                *token_size += plist_size + dt_size + space_size + sizeof(size_t)*3;
 
                 break;
             }
@@ -6490,7 +6557,13 @@ H5VL_iod_get_token(void *_obj, void *token, size_t *token_size)
                 if(H5T_encode(dt, NULL, &dt_size) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
 
-                *token_size += dt_size + sizeof(size_t);
+                cpl_id = dtype->remote_dtype.tcpl_id;
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(cpl_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                if(H5P__encode(plist, TRUE, NULL, &plist_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode plist")
+
+                *token_size += dt_size + plist_size + sizeof(size_t)*2;
 
                 break;
             }
@@ -6517,7 +6590,13 @@ H5VL_iod_get_token(void *_obj, void *token, size_t *token_size)
                 if(H5T_encode(vt, NULL, &valtype_size) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
 
-                *token_size += keytype_size + valtype_size + sizeof(size_t)*2;
+                cpl_id = map->remote_map.mcpl_id;
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(cpl_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                if(H5P__encode(plist, TRUE, NULL, &plist_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode plist")
+
+                *token_size += keytype_size + valtype_size + plist_size + sizeof(size_t)*3;
 
                 break;
             }
@@ -6556,8 +6635,19 @@ H5VL_iod_get_token(void *_obj, void *token, size_t *token_size)
 
         switch(obj->obj_type) {
         case H5I_GROUP:
+            HDmemcpy(buf_ptr, &plist_size, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if(H5P__encode(plist, TRUE, buf_ptr, &plist_size) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
+            buf_ptr += plist_size;
             break;
         case H5I_DATASET:
+            HDmemcpy(buf_ptr, &plist_size, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if(H5P__encode(plist, TRUE, buf_ptr, &plist_size) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
+            buf_ptr += plist_size;
+
             HDmemcpy(buf_ptr, &dt_size, sizeof(size_t));
             buf_ptr += sizeof(size_t);
             if(H5T_encode(dt, buf_ptr, &dt_size) < 0)
@@ -6571,6 +6661,12 @@ H5VL_iod_get_token(void *_obj, void *token, size_t *token_size)
             buf_ptr += space_size;
             break;
         case H5I_DATATYPE:
+            HDmemcpy(buf_ptr, &plist_size, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if(H5P__encode(plist, TRUE, buf_ptr, &plist_size) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
+            buf_ptr += plist_size;
+
             HDmemcpy(buf_ptr, &dt_size, sizeof(size_t));
             buf_ptr += sizeof(size_t);
             if(H5T_encode(dt, buf_ptr, &dt_size) < 0)
@@ -6578,6 +6674,12 @@ H5VL_iod_get_token(void *_obj, void *token, size_t *token_size)
             buf_ptr += dt_size;
             break;
         case H5I_MAP:
+            HDmemcpy(buf_ptr, &plist_size, sizeof(size_t));
+            buf_ptr += sizeof(size_t);
+            if(H5P__encode(plist, TRUE, buf_ptr, &plist_size) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
+            buf_ptr += plist_size;
+
             HDmemcpy(buf_ptr, &keytype_size, sizeof(size_t));
             buf_ptr += sizeof(size_t);
             if(H5T_encode(kt, buf_ptr, &keytype_size) < 0)
@@ -9907,7 +10009,7 @@ H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, v
 
     /* store the query ID */
     view->query_id = query_id;
-    if(H5I_inc_ref(query_id, FALSE) < 0)
+    if(H5I_inc_ref(query_id, TRUE) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, NULL, "can't increment ID ref count");
 
     /* copy property list */
