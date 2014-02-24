@@ -107,8 +107,6 @@ static herr_t H5D__final_collective_io_mdset(H5D_io_info_md_t *io_info_md,
 
 static herr_t H5D__all_piece_collective_io(const hid_t file_id, const size_t count, 
     H5D_io_info_md_t *io_info_md, H5P_genplist_t *dx_plist);
-static herr_t H5D__mpio_get_min_chunk(const H5D_io_info_t *io_info,
-    const H5D_chunk_map_t *fm, int *min_chunkf);
 
 
 /*********************/
@@ -448,82 +446,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mpio_select_write_mdset() */
 
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__mpio_get_min_chunk
- *
- * Purpose:     Routine for obtaining minimum number of chunks to cover
- *              hyperslab selection selected by all processors.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__mpio_get_min_chunk(const H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
-    int *min_chunkf)
-{
-    int num_chunkf;             /* Number of chunks to iterate over */
-    int mpi_code;               /* MPI return code */
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    /* Get the number of chunks to perform I/O on */
-    num_chunkf = H5SL_count(fm->sel_chunks);
-
-    /* Determine the minimum # of chunks for all processes */
-    if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&num_chunkf, min_chunkf, 1, MPI_INT, MPI_MIN, io_info->comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__mpio_get_min_chunk() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__mpio_get_sum_piece
- *
- * Purpose:     Routine for obtaining total number of pieces to cover
- *              hyperslab selection selected by all processors.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
- *
- * Modification: Jonathan Kim  Nov, 2013
- *   Modified from the previous H5D__mpio_get_sum_chunk.
- *   This is part multi-dset work.
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__mpio_get_sum_piece(const H5D_io_info_md_t *io_info_md, size_t *sum_chunkf)
-{
-    size_t num_chunkf;             /* Number of chunks to iterate over */
-    size_t ori_num_chunkf;
-    int mpi_code;               /* MPI return code */
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    /* Get the number of chunks to perform I/O on */
-    num_chunkf = 0;
-    ori_num_chunkf = H5SL_count(io_info_md->sel_pieces);
-    H5_ASSIGN_OVERFLOW(num_chunkf, ori_num_chunkf, size_t, int);
-
-    /* Determine the summation of number of chunks for all processes */
-    if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&num_chunkf, sum_chunkf, 1, MPI_UNSIGNED, MPI_SUM, io_info_md->comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__mpio_get_sum_piece() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__piece_mdset_io
@@ -554,7 +476,6 @@ H5D__piece_mdset_io(const hid_t file_id, const size_t count, H5D_io_info_md_t *i
     H5P_genplist_t *dx_plist;           /* Pointer to DXPL */
     H5FD_mpio_chunk_opt_t chunk_opt_mode;
     int         io_option = H5D_ONE_LINK_CHUNK_IO;
-    int         sum_chunk = -1;
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     htri_t      temp_not_link_io = FALSE;
 #endif
@@ -692,7 +613,6 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
     MPI_Datatype chunk_final_ftype;         /* Final file MPI datatype for all chunks with seletion */
     hbool_t chunk_final_ftype_is_derived = FALSE;
     H5D_storage_t ctg_store;                /* Storage info for "fake" contiguous dataset */
-    size_t              sum_chunk_allproc=0; /* sum of selected chunk from all process */
     size_t              i;
     MPI_Datatype       *chunk_mtype = NULL;
     MPI_Datatype       *chunk_ftype = NULL;
@@ -732,10 +652,6 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
      * Link chunk I/O does not break to independent, so can set right away */
     if(H5P_set(dx_plist, H5D_MPIO_ACTUAL_IO_MODE_NAME, &actual_io_mode) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "couldn't set actual io mode property")
-
-    /* Get the sum # of chunks */
-    if(H5D__mpio_get_sum_piece(io_info_md, &sum_chunk_allproc) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSWAP, FAIL, "unable to obtain the total chunk number of all processes");
 
     /* Code block for actual actions (Build a MPI Type, IO) */
     {

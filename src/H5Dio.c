@@ -383,10 +383,6 @@ H5Dread_multi(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info)
                 MPI_File mpi_fh_p;
                 MPI_File mpi_fh;
 
-                /* just to match up with MPI_Allreduce from H5D__mpio_get_sum_piece() */
-                if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&num_chunkf, &sum_chunkf, 1, MPI_UNSIGNED, MPI_SUM, H5F_mpi_get_comm(file))))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-
                 if (H5F_get_mpi_handle(file, (MPI_File **) &mpi_fh_p) <0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file handle")
                 mpi_fh = *(MPI_File*)mpi_fh_p;
@@ -657,10 +653,6 @@ H5D__pre_write_mdset(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t 
                 MPI_Status mpi_stat;
                 MPI_File mpi_fh_p;
                 MPI_File mpi_fh;
-
-                /* just to match up with MPI_Allreduce from H5D__mpio_get_sum_piece() */
-                if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&num_chunkf, &sum_chunkf, 1, MPI_UNSIGNED, MPI_SUM, H5F_mpi_get_comm(file))))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
 
                 if(H5F_get_mpi_handle(file, (MPI_File **)&mpi_fh_p) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file handle")
