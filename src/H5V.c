@@ -425,6 +425,13 @@ H5Vget_counts(hid_t view_id, hsize_t *attr_count, hsize_t *obj_count, hsize_t *e
     if(NULL == (view = (H5VL_iod_view_t *)H5I_object_verify(view_id, H5I_VIEW)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an view ID");
 
+    if(view->common.request) {
+        if(H5VL_IOD_PENDING == view->common.request->state) {
+            if(H5VL_iod_request_wait(view->common.file, view->common.request) < 0)
+                HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on operation");
+        }
+    }
+
     if(NULL != attr_count)
         *attr_count = view->attr_info.count;
     if(NULL != obj_count)
@@ -487,8 +494,12 @@ H5Vget_location_ff(hid_t view_id, hid_t *loc_id, hid_t estack_id)
         vol_plugin->nrefs ++;
     }
 
-    tr.file = view->file;
+    tr.file = view->common.file;
     tr.trans_num = view->c_version;
+    tr.req_info.request = NULL;
+    tr.req_info.head = NULL;
+    tr.req_info.tail = NULL;
+    tr.req_info.num_req = 0;
 
    if(NULL == (opened_obj = H5VL_iod_obj_open_token(view->loc_info.buf, 
                                                     &tr, &opened_type, req)))
@@ -539,6 +550,13 @@ H5Vget_elem_regions_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t datase
     if(NULL == (view = (H5VL_iod_view_t *)H5I_object_verify(view_id, H5I_VIEW)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an view ID");
 
+    if(view->common.request) {
+        if(H5VL_IOD_PENDING == view->common.request->state) {
+            if(H5VL_iod_request_wait(view->common.file, view->common.request) < 0)
+                HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on operation");
+        }
+    }
+
     if(start >= view->region_info.count || start+count > view->region_info.count)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "start/count out of range")
 
@@ -564,8 +582,12 @@ H5Vget_elem_regions_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t datase
             vol_plugin->nrefs ++;
         }
 
-        tr.file = view->file;
+        tr.file = view->common.file;
         tr.trans_num = view->c_version;
+        tr.req_info.request = NULL;
+        tr.req_info.head = NULL;
+        tr.req_info.tail = NULL;
+        tr.req_info.num_req = 0;
 
         if(NULL == (opened_obj = H5VL_iod_obj_open_token(view->region_info.tokens[i].buf, 
                                                          &tr, &opened_type, req)))

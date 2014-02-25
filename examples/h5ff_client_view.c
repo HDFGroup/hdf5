@@ -14,9 +14,9 @@
 static int my_rank = 0, my_size = 1;
 
 static void
-write_dataset(const char *file_name, const char *dataset_name,
-        hsize_t total, hsize_t ncomponents, hid_t datatype_id,
-        hsize_t ntuples, hsize_t start, void *buf)
+test_view(const char *file_name, const char *dataset_name,
+          hsize_t total, hsize_t ncomponents, hid_t datatype_id,
+          hsize_t ntuples, hsize_t start, void *buf)
 {
     hid_t       file_id, view_id;
     hid_t       did1, did2, did3, gid1;
@@ -34,12 +34,19 @@ write_dataset(const char *file_name, const char *dataset_name,
     double lower_bound1 = 39.1, upper_bound1 = 42.1;
     int lower_bound2 = 295, upper_bound2 = 298;
     hid_t  query_id1, query_id2, query_id3, query_id4, query_id5, query_id6;
-    hid_t query_id;
+    hid_t  query_id;
+    hid_t  e_stack;
+    H5ES_status_t status;
+    size_t num_events = 0;
     MPI_Request mpi_reqs[6];
 
     /* Choose the IOD VOL plugin to use with this file. */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fapl_iod(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);
+
+    /* create an event Queue for managing asynchronous requests. */
+    e_stack = H5EScreate();
+    assert(e_stack);
 
     /* Open an existing file. */
     file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id,
@@ -226,7 +233,7 @@ write_dataset(const char *file_name, const char *dataset_name,
     assert(query_id);
 
     /* create a view on D1 */
-    view_id = H5Vcreate_ff(did1, query_id, H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+    view_id = H5Vcreate_ff(did1, query_id, H5P_DEFAULT, rid2, e_stack);
     assert(view_id > 0);
 
     {
@@ -240,10 +247,7 @@ write_dataset(const char *file_name, const char *dataset_name,
         ret = H5Dclose_ff(did1, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
-        ret = H5Vget_location_ff(view_id, &did1, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-
-        ret = H5Dclose_ff(did1, H5_EVENT_STACK_NULL);
+        ret = H5Vget_location_ff(view_id, &did1, e_stack);
         assert(0 == ret);
 
         ret = H5Vget_query(view_id, &query_id);
@@ -255,9 +259,22 @@ write_dataset(const char *file_name, const char *dataset_name,
         assert(0 == obj_count);
         assert(1 == reg_count);
 
-        ret = H5Vget_elem_regions_ff(view_id, 0, 1, &did1, 
-                                     &region_space, H5_EVENT_STACK_NULL);
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
+
+        ret = H5Dclose_ff(did1, H5_EVENT_STACK_NULL);
         assert(0 == ret);
+
+        ret = H5Vget_elem_regions_ff(view_id, 0, 1, &did1, 
+                                     &region_space, e_stack);
+        assert(0 == ret);
+
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
         r_ndims = H5Sget_simple_extent_dims(region_space, r_dims, NULL);
 
@@ -277,11 +294,11 @@ write_dataset(const char *file_name, const char *dataset_name,
 
     H5Vclose(view_id);
 
-    gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+    gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, rid2, e_stack);
     assert(gid1 > 0);
 
     /* create a view on all datasets under G1 */
-    view_id = H5Vcreate_ff(gid1, query_id, H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+    view_id = H5Vcreate_ff(gid1, query_id, H5P_DEFAULT, rid2, e_stack);
     assert(view_id > 0);
 
     {
@@ -293,10 +310,10 @@ write_dataset(const char *file_name, const char *dataset_name,
         hsize_t r_dims[2];
 
         H5Qclose(query_id);
-        ret = H5Gclose_ff(gid1, H5_EVENT_STACK_NULL);
+        ret = H5Gclose_ff(gid1, e_stack);
         assert(0 == ret);
 
-        ret = H5Vget_location_ff(view_id, &gid1, H5_EVENT_STACK_NULL);
+        ret = H5Vget_location_ff(view_id, &gid1, e_stack);
         assert(0 == ret);
         assert(gid1 > 0);
 
@@ -309,13 +326,18 @@ write_dataset(const char *file_name, const char *dataset_name,
         assert(0 == obj_count);
         assert(3 == reg_count);
 
-        ret = H5Vget_elem_regions_ff(view_id, 0, reg_count, did, regions, H5_EVENT_STACK_NULL);
+        ret = H5Vget_elem_regions_ff(view_id, 0, reg_count, did, regions, e_stack);
         assert(0 == ret);
+
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
         for(i=0 ; i<reg_count ; i++) {
 
             assert(did[i] > 0);
-            ret = H5Dclose_ff(did[i], H5_EVENT_STACK_NULL);
+            ret = H5Dclose_ff(did[i], e_stack);
             assert(0 == ret);
 
             r_ndims = H5Sget_simple_extent_dims(regions[i], r_dims, NULL);
@@ -334,6 +356,11 @@ write_dataset(const char *file_name, const char *dataset_name,
             assert(0 == ret);
         }
     }
+
+    H5ESget_count(e_stack, &num_events);
+    H5ESwait_all(e_stack, &status);
+    H5ESclear(e_stack);
+    printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
     H5Vclose(view_id);
 
@@ -367,6 +394,9 @@ write_dataset(const char *file_name, const char *dataset_name,
     assert(0 == ret);
     ret = H5TRclose(tid1);
     assert(0 == ret);
+
+    ret = H5ESclose(e_stack);
+    assert(ret == 0);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -414,8 +444,8 @@ main(int argc, char **argv)
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    write_dataset(file_name, dataset_name, total, ncomponents, H5T_NATIVE_INT,
-            ntuples, start, data);
+    test_view(file_name, dataset_name, total, ncomponents, H5T_NATIVE_INT,
+              ntuples, start, data);
 
     MPI_Barrier(MPI_COMM_WORLD);
 

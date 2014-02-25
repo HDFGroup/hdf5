@@ -6161,7 +6161,7 @@ H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, H5I_type_t *opened_type, 
 
         if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
                                         (H5VL_iod_object_t *)dset, 1, 0, NULL,
-                                        (H5VL_iod_req_info_t *)tr, &input, 
+                                        NULL, &input, 
                                         &dset->remote_dset.iod_oh, dset, req) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship dataset open_by_token");
 
@@ -6227,7 +6227,7 @@ H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, H5I_type_t *opened_type, 
 
         if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
                                         (H5VL_iod_object_t *)dtype, 1, 0, NULL,
-                                        (H5VL_iod_req_info_t *)tr, &input, 
+                                        NULL, &input, 
                                         &dtype->remote_dtype.iod_oh, dtype, req) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship datatype open_by_token");
 
@@ -6277,7 +6277,7 @@ H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, H5I_type_t *opened_type, 
 
         if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
                                         (H5VL_iod_object_t *)grp, 1, 0, NULL,
-                                        (H5VL_iod_req_info_t *)tr, &input, 
+                                        NULL, &input, 
                                         &grp->remote_group.iod_oh, grp, req) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship group open_by_token");
 
@@ -6358,7 +6358,7 @@ H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, H5I_type_t *opened_type, 
 
         if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_BY_TOKEN_ID, HG_OBJECT_OPEN_BY_TOKEN, 
                                         (H5VL_iod_object_t *)map, 1, 0, NULL, 
-                                        (H5VL_iod_req_info_t *)tr, &input, 
+                                        NULL, &input, 
                                         &map->remote_map, map, req) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship map open");
 
@@ -9995,7 +9995,7 @@ H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, v
     input.cs_scope = obj->file->md_integrity_scope;
 
     /* initialize View object */
-    view->file = obj->file;
+    view->common.file = obj->file;
     view->c_version = rc->c_version;
 
     /* store a token for the location object */
@@ -10032,8 +10032,9 @@ H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, v
 #endif
 
     if(H5VL__iod_create_and_forward(H5VL_VIEW_CREATE_ID, HG_VIEW_CREATE, 
-                                    obj, 0, num_parents, parent_reqs, 
-                                    (H5VL_iod_req_info_t *)rc, &input, view, view, req) < 0)
+                                    (H5VL_iod_object_t *)view, 1, num_parents, parent_reqs, 
+                                    (H5VL_iod_req_info_t *)rc, &input, &view->valid_view, 
+                                    view, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship view create");
 
     ret_value = (void *)view;
