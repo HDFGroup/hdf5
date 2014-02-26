@@ -129,6 +129,9 @@ Bug Fixes since HDF5-1.8.12
 
     Testing
     -------
+    - testhdf5 now exits EXIT_SUCCESS(0) if no errors, else EXIT_FAILURE(1).
+      (AKC - 2014/01/27 - HDFFV-8572)
+
     - The big test now pays attention to the HDF5_DRIVER environment variable
       so it doesn't waste time when make check-vfd is run. (HDFFV-8554)
 
