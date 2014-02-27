@@ -271,7 +271,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     #  - Root install directory (displayed to end user at installer-run time)
     #  - "NSIS package/display name" (text used in the installer GUI)
     #  - Registry key used to store info about the installation
-    SET (CPACK_NSIS_PACKAGE_NAME "${HDF5_PACKAGE_STRING}-${CPACK_PACKAGE_VERSION}")
+    SET (CPACK_NSIS_PACKAGE_NAME "${HDF5_PACKAGE_STRING}")
     IF (CMAKE_CL_64)
       SET (CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
       SET (CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION} (Win64)")
