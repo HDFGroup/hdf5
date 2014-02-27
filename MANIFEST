@@ -2445,7 +2445,11 @@
 ./config/cmake/CTestCustom.cmake
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CPack.Info.plist.in
-./config/cmake/hdf.gif
+./config/cmake/hdf.bmp
+./config/cmake/hdf.icns
+./config/cmake/hdf.ico
+./config/cmake/PkgInfo.in
+./config/cmake/version.plist.in
 ./config/cmake/NSIS.template.in
 ./config/cmake/NSIS.InstallOptions.ini.in
 ./config/cmake/README.txt.cmake.in
