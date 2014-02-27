@@ -665,7 +665,13 @@ H5Zfilter_avail(H5Z_filter_t id)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number")
  
     if((ret_value = H5Z_filter_avail(id)) < 0)
-	HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "unable to check the availability of the filter")
+    	HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "unable to check the availability of the filter")
+    else if(ret_value == FALSE) {
+        const H5Z_class2_t *filter_info;
+
+        if(NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)id)))
+        	ret_value = TRUE;
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)

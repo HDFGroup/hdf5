@@ -198,19 +198,35 @@ MESSAGE (STATUS "SOVERSION: ${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_
 #-----------------------------------------------------------------------------
 SET (HDF5_PACKAGE "hdf5")
 SET (HDF5_PACKAGE_NAME "HDF5")
-IF ("${H5_VERS_SUBRELEASE}" STREQUAL "")
-    SET (HDF5_PACKAGE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}")
-ELSE ("${H5_VERS_SUBRELEASE}" STREQUAL "")
-    SET (HDF5_PACKAGE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}-${H5_VERS_SUBRELEASE}")
-ENDIF ("${H5_VERS_SUBRELEASE}" STREQUAL "")
+SET (HDF5_PACKAGE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}")
 SET (HDF5_PACKAGE_VERSION_MAJOR "${H5_VERS_MAJOR}.${H5_VERS_MINOR}")
 SET (HDF5_PACKAGE_VERSION_MINOR "${H5_VERS_RELEASE}")
-SET (HDF5_PACKAGE_VERSION_STRING "${HDF5_PACKAGE_VERSION}")
+IF (NOT "${H5_VERS_SUBRELEASE}" STREQUAL "")
+  SET (HDF5_PACKAGE_VERSION_STRING "${HDF5_PACKAGE_VERSION}-${H5_VERS_SUBRELEASE}")
+ELSE (NOT "${H5_VERS_SUBRELEASE}" STREQUAL "")
+  SET (HDF5_PACKAGE_VERSION_STRING "${HDF5_PACKAGE_VERSION}")
+ENDIF (NOT "${H5_VERS_SUBRELEASE}" STREQUAL "")
 SET (HDF5_PACKAGE_SOVERSION "${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
 SET (HDF5_PACKAGE_STRING "${HDF5_PACKAGE_NAME} ${HDF5_PACKAGE_VERSION_STRING}")
 SET (HDF5_PACKAGE_TARNAME "${HDF5_PACKAGE}${HDF_PACKAGE_EXT}")
 SET (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
 SET (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
+
+#-----------------------------------------------------------------------------
+# Set Install folder value
+#-----------------------------------------------------------------------------
+IF (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  IF(CMAKE_HOST_UNIX)
+    SET(CMAKE_INSTALL_PREFIX "/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
+      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+  ELSE(CMAKE_HOST_UNIX)
+    GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
+    SET(CMAKE_INSTALL_PREFIX
+      "${CMAKE_GENERIC_PROGRAM_FILES}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
+      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+    SET(CMAKE_GENERIC_PROGRAM_FILES)
+  ENDIF(CMAKE_HOST_UNIX)
+ENDIF (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 #-----------------------------------------------------------------------------
 # Include some macros for reusable code
@@ -265,13 +281,6 @@ SET (EXTERNAL_LIBRARYDLL_LIST "")
 # Run all the CMake configuration tests for our build environment
 #-----------------------------------------------------------------------------
 INCLUDE (${HDF5_RESOURCES_DIR}/ConfigureChecks.cmake)
-
-#-----------------------------------------------------------------------------
-# Option to use legacy naming for windows libs/programs, default is legacy
-#-----------------------------------------------------------------------------
-IF (WIN32 AND NOT CYGWIN)
-  OPTION (HDF_LEGACY_NAMING "Use Legacy Names for Libraries and Programs" OFF)
-ENDIF (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
 # Option to Build Shared/Static libs, default is static
@@ -382,7 +391,7 @@ ENDIF (MAKE_SYSTEM)
 IF (CMAKE_BUILD_TYPE MATCHES Debug)
   ADD_DEFINITIONS (-DDEBUG)
   ADD_DEFINITIONS (
-      -DH5Z_DEBUG -DH5VM_DEBUG -DH5T_DEBUG
+      -DH5Z_DEBUG -DH5V_DEBUG -DH5T_DEBUG
       -DH5S_DEBUG -DH5P_DEBUG -DH5O_DEBUG -DH5MM_DEBUG -DH5MF_DEBUG
       -DH5I_DEBUG -DH5HL_DEBUG -DH5HG_DEBUG -DH5G_DEBUG -DH5F_DEBUG
       -DH5E_DEBUG -DH5D_DEBUG -DH5B_DEBUG -DH5AC_DEBUG -UNDEBUG
@@ -673,7 +682,7 @@ ENDIF (HDF5_ENABLE_PARALLEL)
 IF (H5_HAVE_PARALLEL)
   SET (LINK_LIBS ${LINK_LIBS} ${MPI_C_LIBRARIES})
   IF (MPI_C_LINK_FLAGS)
-    SET (CMAKE_EXE_LINKER_FLAGS ${MPI_C_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS})
+    SET (CMAKE_EXE_LINKER_FLAGS "${MPI_C_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
   ENDIF (MPI_C_LINK_FLAGS)
 ENDIF (H5_HAVE_PARALLEL)
 

@@ -66,6 +66,10 @@ $SRC_H5REPACK_TESTFILES/h5repack_layout.h5
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5-plugin_test.ddl
 $SRC_H5REPACK_TESTFILES/plugin_test.h5repack_layout.h5.tst
 "
+#$SRC_H5REPACK_TESTFILES/h5repack_layout.UD.h5
+#$SRC_H5REPACK_TESTFILES/h5repack_layout.UD.h5-plugin_none.ddl
+#$SRC_H5REPACK_TESTFILES/plugin_none.h5repack_layout.UD.h5.tst
+#"
 
 #
 # copy test files and expected output files from source dirs to test dir
@@ -238,6 +242,9 @@ COPY_TESTFILES_TO_TESTDIR
 # Run the test
 arg="h5repack_layout.h5 -v -f UD=257,1,9"
 TOOLTEST_DUMP plugin_test $arg 
+
+#arg="h5repack_layout.UD.h5 -v -f NONE"
+#TOOLTEST_DUMP plugin_none $arg 
 
 # print results
 if test $nerrors -ne 0 ; then
