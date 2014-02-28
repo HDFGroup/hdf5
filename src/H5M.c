@@ -949,7 +949,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Mprefetch
+ * Function:	H5Mprefetch_ff
  *
  * Purpose:	Prefetched a Map from Central Storage to Burst Buffer.
  *
@@ -960,7 +960,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Mprefetch(hid_t map_id, hid_t rcxt_id, hrpl_t *replica_id,
+H5_DLL herr_t H5Mprefetch_ff(hid_t map_id, hid_t rcxt_id, hrpl_t *replica_id,
                           hid_t mapl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
@@ -1007,11 +1007,11 @@ H5_DLL herr_t H5Mprefetch(hid_t map_id, hid_t rcxt_id, hrpl_t *replica_id,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Mprefetch() */
+} /* end H5Mprefetch_ff() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Mevict
+ * Function:	H5Mevict_ff
  *
  * Purpose:	Evicts a Map from Burst Buffer.
  *
@@ -1022,7 +1022,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Mevict(hid_t map_id, uint64_t c_version, hid_t mapl_id, hid_t estack_id)
+H5_DLL herr_t H5Mevict_ff(hid_t map_id, uint64_t c_version, hid_t mapl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generated request pointer */
@@ -1068,6 +1068,6 @@ H5_DLL herr_t H5Mevict(hid_t map_id, uint64_t c_version, hid_t mapl_id, hid_t es
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Mevict() */
+} /* end H5Mevict_ff() */
 
 #endif /* H5_HAVE_EFF */

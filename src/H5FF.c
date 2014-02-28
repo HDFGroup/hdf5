@@ -4049,7 +4049,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dprefetch
+ * Function:	H5Dprefetch_ff
  *
  * Purpose:	Prefetched a Dataset from Central Storage to Burst Buffer.
  *
@@ -4060,7 +4060,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Dprefetch(hid_t dset_id, hid_t rcxt_id, hrpl_t *replica_id,
+H5_DLL herr_t H5Dprefetch_ff(hid_t dset_id, hid_t rcxt_id, hrpl_t *replica_id,
                           hid_t dapl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
@@ -4107,11 +4107,11 @@ H5_DLL herr_t H5Dprefetch(hid_t dset_id, hid_t rcxt_id, hrpl_t *replica_id,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Dprefetch() */
+} /* end H5Dprefetch_ff() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Devict
+ * Function:	H5Devict_ff
  *
  * Purpose:	Evicts a Dataset from Burst Buffer.
  *
@@ -4122,7 +4122,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Devict(hid_t dset_id, uint64_t c_version, hid_t dapl_id, hid_t estack_id)
+H5_DLL herr_t H5Devict_ff(hid_t dset_id, uint64_t c_version, hid_t dapl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generated request pointer */
@@ -4168,11 +4168,11 @@ H5_DLL herr_t H5Devict(hid_t dset_id, uint64_t c_version, hid_t dapl_id, hid_t e
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Devict() */
+} /* end H5Devict_ff() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gprefetch
+ * Function:	H5Gprefetch_ff
  *
  * Purpose:	Prefetched a Group from Central Storage to Burst Buffer.
  *
@@ -4183,7 +4183,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Gprefetch(hid_t grp_id, hid_t rcxt_id, hrpl_t *replica_id,
+H5_DLL herr_t H5Gprefetch_ff(hid_t grp_id, hid_t rcxt_id, hrpl_t *replica_id,
                           hid_t gapl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
@@ -4230,11 +4230,11 @@ H5_DLL herr_t H5Gprefetch(hid_t grp_id, hid_t rcxt_id, hrpl_t *replica_id,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Gprefetch() */
+} /* end H5Gprefetch_ff() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gevict
+ * Function:	H5Gevict_ff
  *
  * Purpose:	Evicts a Group from Burst Buffer.
  *
@@ -4245,7 +4245,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Gevict(hid_t grp_id, uint64_t c_version, hid_t gapl_id, hid_t estack_id)
+H5_DLL herr_t H5Gevict_ff(hid_t grp_id, uint64_t c_version, hid_t gapl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generated request pointer */
@@ -4291,11 +4291,11 @@ H5_DLL herr_t H5Gevict(hid_t grp_id, uint64_t c_version, hid_t gapl_id, hid_t es
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Gevict() */
+} /* end H5Gevict_ff() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tprefetch
+ * Function:	H5Tprefetch_ff
  *
  * Purpose:	Prefetched a Datatype from Central Storage to Burst Buffer.
  *
@@ -4306,7 +4306,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Tprefetch(hid_t dtype_id, hid_t rcxt_id, hrpl_t *replica_id,
+H5_DLL herr_t H5Tprefetch_ff(hid_t dtype_id, hid_t rcxt_id, hrpl_t *replica_id,
                           hid_t tapl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
@@ -4366,11 +4366,11 @@ H5_DLL herr_t H5Tprefetch(hid_t dtype_id, hid_t rcxt_id, hrpl_t *replica_id,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Tprefetch() */
+} /* end H5Tprefetch_ff() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tevict
+ * Function:	H5Tevict_ff
  *
  * Purpose:	Evicts a Datatype from Burst Buffer.
  *
@@ -4381,7 +4381,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Tevict(hid_t dtype_id, uint64_t c_version, hid_t tapl_id, hid_t estack_id)
+H5_DLL herr_t H5Tevict_ff(hid_t dtype_id, uint64_t c_version, hid_t tapl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;  /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -4440,6 +4440,6 @@ H5_DLL herr_t H5Tevict(hid_t dtype_id, uint64_t c_version, hid_t tapl_id, hid_t 
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Tevict() */
+} /* end H5Tevict_ff() */
 
 #endif /* H5_HAVE_EFF */
