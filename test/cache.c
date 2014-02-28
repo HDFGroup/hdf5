@@ -18005,6 +18005,9 @@ check_check_evictions_enabled_err(void)
  *              Added a basic set of tests for the flash cache size
  *              increment code.
  *
+ *		Vailin Choi; Feb 2014
+ *		Add the parameter to indicate "corking" the entry or not.
+ *		Suggest to do more thorough testing on this.
  *-------------------------------------------------------------------------
  */
 
@@ -34180,20 +34183,18 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:	check_metadata_cork
- *		This is a modification of the test: check_metadata_blizzard_absence()
- *		NEED: more work on testing different scenarios & more comments
  *
- * Purpose:	To verify that corked/uncorked entries are/are not in the cache.
+ * Purpose:	To verify that dirty corked entries are not evicted from the cache
+ *		but clean corked entries can be evicted from the cache.
+ *		The min_clean_size does not have effect.
+ *		NOTE: This is a modification of check_metadata_blizzard_absence().
  *
  * Return:	void
  *
  * Programmer:	Vailin Choi
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 static unsigned
 check_metadata_cork(hbool_t fill_via_insertion)
 {
@@ -34377,11 +34378,11 @@ check_metadata_cork(hbool_t fill_via_insertion)
 
     if (fill_via_insertion) {
 
-        TESTING("to ensure cork metadata when inserting");
+        TESTING("to ensure cork/uncork metadata when inserting");
 
     } else {
 
-        TESTING("to ensure cork metadata on protect/unprotect");
+        TESTING("to ensure cork/uncork metadata on protect/unprotect");
     }
 
     if ( show_progress) /* 0 */
@@ -34420,9 +34421,9 @@ check_metadata_cork(hbool_t fill_via_insertion)
      *  Phase 1:
      *
      *    Inserting dirty corked entries into an empty cache, until the cache
-     *    violates the min_clean_size requirement. The expected result is
-     *    that none of the inserted entries during this phase will get
-     *    flushed or evicted.
+     *    violates the min_clean_size requirement. 
+     *	  Since entries are all dirty and corked, no entry will get flushed or
+     *	  evicted.
      *
      * ========================================================================
      * ========================================================================
@@ -34474,8 +34475,9 @@ check_metadata_cork(hbool_t fill_via_insertion)
      *  Phase 2:
      *
      *    Inserting entries into a cache that violates the min_clean_size,
-     *    until the cache is full. The expected result is that none of the
-     *    dirty corked entries are flushed.
+     *    until the cache is full. 
+     *	  Since entries are all dirty and corked, no entry during this phase 
+     *	  will get flushed or evicted.
      *
      * ========================================================================
      * ========================================================================
@@ -34590,14 +34592,14 @@ check_metadata_cork(hbool_t fill_via_insertion)
             }
 
             /* 
-	     * Expected status is that all entries are dirty corked entries.
+	     * Expected status: all entries are dirty corked entries.
              */
 	    expected[entry_idx].in_cache = TRUE;
     	    expected[entry_idx].is_dirty = TRUE;
 	    expected[entry_idx].loaded   = (unsigned char)loaded;
             expected[entry_idx].is_corked = TRUE;
 
-            /* verify the status */
+            /* Verify the status */
             verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
                                 entry_idx, /* int tag */
                                 150,       /* int num_entries */
@@ -34619,8 +34621,8 @@ check_metadata_cork(hbool_t fill_via_insertion)
     /* ========================================================================
      * ========================================================================
      *  Phase 3:
-     *
      *    Inserting entries into a cache that is completely full. 
+     *	  No entry is flushed or evicted because all entries are dirty & corked.
      *
      * ========================================================================
      * ========================================================================
@@ -34651,7 +34653,7 @@ check_metadata_cork(hbool_t fill_via_insertion)
                                 H5C__DIRTIED_FLAG); /* unsigned int flags */
             }
 
-            /* This past inserted entry is now in the cache and dirty */
+            /* This past inserted entry is now in the cache: dirty and corked */
 	    expected[entry_idx].in_cache = TRUE;
     	    expected[entry_idx].is_dirty = TRUE;
 	    expected[entry_idx].loaded   = (unsigned char)loaded;
@@ -34763,8 +34765,8 @@ check_metadata_cork(hbool_t fill_via_insertion)
 
     if ( pass ) {
 
-        /* Insert 25 entries (indexes 101 through 125) into the cache. */
-	/* Insert 25 more "corked" entries, clean entry will be evicted one a time */
+        /* Insert 25 more corked entries (indexes 101 through 125) into the cache. */
+	/* Clean entry will be evicted one a time */
         for (entry_idx = 101; entry_idx < 126; entry_idx++) {
 
             if (fill_via_insertion) {
@@ -34873,12 +34875,13 @@ check_metadata_cork(hbool_t fill_via_insertion)
                                 H5C__DIRTIED_FLAG); /* unsigned int flags */
             }
 
-            /* This past inserted entry is now in the cache and dirty */
+            /* This past inserted entry is now in the cache, dirty and corked */
 	    expected[entry_idx].in_cache = TRUE;
     	    expected[entry_idx].is_dirty = TRUE;
 	    expected[entry_idx].loaded   = (unsigned char)loaded;
     	    expected[entry_idx].is_corked = TRUE;
 
+	    /* Entry that is 50 entries away will be evicted since it is clean even though corked */
 	    expected[entry_idx - 50].in_cache  = FALSE;
 	    expected[entry_idx - 50].destroyed = TRUE;
 	    expected[entry_idx - 50].is_corked = TRUE;

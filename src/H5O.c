@@ -1087,7 +1087,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ocork
+ * Function:	H5Odisable_mdc_flushes
  *
  * Purpose:	To "cork" an object:
  *		--keep dirty entries assoicated with the object in the metadata cache
@@ -1100,7 +1100,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Ocork(hid_t object_id)
+H5Odisable_mdc_flushes(hid_t object_id)
 {
     H5O_loc_t  *oloc;			/* Object location */
     herr_t      ret_value = SUCCEED;	/* Return value */
@@ -1117,11 +1117,11 @@ H5Ocork(hid_t object_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Ocork() */
+} /* H5Odisable_mdc_flushes() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ouncork
+ * Function:	H5Oenable_mdc_flushes
  *
  * Purpose:	To "uncork" an object
  *		--release keeping dirty entries associated with the object 
@@ -1135,7 +1135,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Ouncork(hid_t object_id)
+H5Oenable_mdc_flushes(hid_t object_id)
 {
     H5O_loc_t  *oloc;			/* Object location */
     herr_t      ret_value = SUCCEED;	/* Return value */
@@ -1153,15 +1153,15 @@ H5Ouncork(hid_t object_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Ouncork() */
+} /* H5Oenable_mdc_flushes() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ois_corked
+ * Function:	H5Oare_mdc_flushes_disabled
  *
- * Purpose:	Retrieve the object's "cork" status in the parameter "corked":
- *		  TRUE if the object is "corked"
- *		  FALSE if the object is not "corked"
- *		Return error if the parameter "corked" is not supplied
+ * Purpose:	Retrieve the object's "cork" status in the parameter "are_disabled":
+ *		  TRUE if mdc flushes for the object is disabled
+ *		  FALSE if mdc flushes for the object is not disabled
+ *		Return error if the parameter "are_disabled" is not supplied
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
@@ -1171,29 +1171,29 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Ois_corked(hid_t object_id, hbool_t *corked)
+H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled)
 {
     H5O_loc_t  *oloc;			/* Object location */
     herr_t      ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*b", object_id, corked);
+    H5TRACE2("e", "i*b", object_id, are_disabled);
 
     /* Check args */
 
     /* Get the object's oloc */
     if((oloc = H5O_get_loc(object_id)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
-    if(!corked)
+    if(!are_disabled)
         HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
 
     /* Get the cork status */
-    if(H5AC_cork(oloc->file, oloc->addr, H5AC__GET_CORKED, corked) < 0)
+    if(H5AC_cork(oloc->file, oloc->addr, H5AC__GET_CORKED, are_disabled) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to retrieve an object's cork status")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Ois_corked() */
+} /* H5Oare_mdc_flushes_disabled() */
 
 
 /*-------------------------------------------------------------------------
@@ -1549,7 +1549,6 @@ done:
 herr_t
 H5O_close(H5O_loc_t *loc)
 {
-    hbool_t corked;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)

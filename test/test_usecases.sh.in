@@ -98,8 +98,8 @@ TOOLTEST() {
     fi
 }
 
-# run tests for H5Ocork/H5Ouncork/H5Oiscork here temporary
-USECORK=use_cork
+# run tests for H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled here temporary
+USECORK=use_disable_mdc_flushes
 for p in $USECORK; do
     TOOLTEST $p
     TOOLTEST $p -y 3

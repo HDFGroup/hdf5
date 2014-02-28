@@ -184,9 +184,9 @@ H5_DLL herr_t H5Ovisit_by_name(hid_t loc_id, const char *obj_name,
 H5_DLL herr_t H5Oclose(hid_t object_id);
 H5_DLL herr_t H5Oflush(hid_t obj_id);
 H5_DLL herr_t H5Orefresh(hid_t oid);
-H5_DLL herr_t H5Ocork(hid_t object_id);
-H5_DLL herr_t H5Ouncork(hid_t object_id);
-H5_DLL herr_t H5Ois_corked(hid_t object_id, hbool_t *corked);
+H5_DLL herr_t H5Odisable_mdc_flushes(hid_t object_id);
+H5_DLL herr_t H5Oenable_mdc_flushes(hid_t object_id);
+H5_DLL herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled);
 
 
 

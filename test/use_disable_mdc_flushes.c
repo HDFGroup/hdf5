@@ -14,7 +14,7 @@
 
 /*
  * This is copied from use_append_chunk.c with modifications to show
- * the usage of H5Ocork/H5Ouncork/H5Ois_corked public routines.
+ * the usage of H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled public routines.
  */
 
 #include "h5test.h"
@@ -24,7 +24,7 @@
 #include "H5Dpkg.h"
 
 /* Global Variable definitions */
-const char *progname_g="use_cork";	/* program name */
+const char *progname_g="use_disable_mdc_flushes";	/* program name */
 
 /* these two definitions must match each other */
 #define UC_DATATYPE             H5T_NATIVE_SHORT    /* use case HDF5 data type */
@@ -52,10 +52,10 @@ static int setup_parameters(int argc, char * const argv[]);
 /*
  * Note: Long options are not yet implemented.
  *
- * usage: use_cork [OPTIONS]
+ * usage: use_disable_mdc_flushes [OPTIONS]
  * OPTIONS
  *  -h, --help 		  Print a usage message and exit
- *  -f FN                 Test file name [default: use_cork.h5]
+ *  -f FN                 Test file name [default: use_disable_mdc_flushes.h5]
  *  -n N, --nplanes=N     Number of planes to write. [default: 1000]
  *  -s N, --swmr=N        Use SWMR mode (0: no, non-0: yes) default is yes
  *  -z N, --chunksize=N   Chunk size [default: 256]
@@ -288,21 +288,21 @@ create_file(void)
 static int 
 write_file(void)
 {
-    hid_t	fid;          /* File ID for new HDF5 file */
-    hid_t	dsid;         /* dataset ID */
-    hid_t       fapl;         /* File access property list */
-    hid_t	dcpl;         /* Dataset creation property list */
+    hid_t	fid;          	/* File ID for new HDF5 file */
+    hid_t	dsid;         	/* dataset ID */
+    hid_t       fapl;         	/* File access property list */
+    hid_t	dcpl;      	/* Dataset creation property list */
     char	*name;
     UC_CTYPE	*buffer, *bufptr;	/* data buffer */
     hsize_t	cz=chunksize_g;		/* Chunk size */
-    hid_t	f_sid;	    /* dataset file space id */
-    hid_t	m_sid;	    /* memory space id */
-    int		rank;	    /* rank */
+    hid_t	f_sid;	    	/* dataset file space id */
+    hid_t	m_sid;	    	/* memory space id */
+    int		rank;	    	/* rank */
     hsize_t 	chunk_dims[3];	/* Chunk dimensions */
-    hsize_t	dims[3];    /* Dataspace dimensions */
-    hsize_t	memdims[3]; /* Memory space dimensions */
+    hsize_t	dims[3];    	/* Dataspace dimensions */
+    hsize_t	memdims[3]; 	/* Memory space dimensions */
     hsize_t	start[3] = {0,0,0}, count[3];    /* Hyperslab selection values */
-    hbool_t 	corked;		/* Object's cork status */	
+    hbool_t 	disabled;   	/* Object's disabled status */	
     hsize_t     i, j, k;
 
     name = filename_g;
@@ -324,20 +324,20 @@ write_file(void)
 	return -1;
     }
 
-    /* Cork the datset */
-    if(H5Ocork(dsid) < 0) {
-	fprintf(stderr, "H5Ocork failed\n");
+    /* Disabled mdc flushed for the dataset */
+    if(H5Odisable_mdc_flushes(dsid) < 0) {
+	fprintf(stderr, "H5Odisable_mdc_flushes failed\n");
 	return -1;
     }
 
-    /* Get cork status of the dataset */
-    if(H5Ois_corked(dsid, &corked) < 0) {
-	fprintf(stderr, "H5Ois_corked failed\n");
+    /* Get mdc disabled status of the dataset */
+    if(H5Oare_mdc_flushes_disabled(dsid, &disabled) < 0) {
+	fprintf(stderr, "H5Oare_mdc_flushes_disabled failed\n");
 	return -1;
-    } else if(corked)
-	printf("Dataset is corked.\n");
+    } else if(disabled)
+	printf("Dataset has disabled mdc flushes.\n");
     else
-	printf("Dataset should be corked.\n");
+	printf("Dataset should have disabled its mdc flushes.\n");
 
     /* Find chunksize used */
     if ((dcpl = H5Dget_create_plist(dsid)) < 0){
@@ -451,11 +451,11 @@ write_file(void)
 	return -1;
     }
 
-    /* Uncork the dataset */
-    /* Closing the dataset later will uncork automatically if this is not done */
-    if(corked)
-	if(H5Ouncork(dsid) < 0) {
-	    fprintf(stderr, "Failed to H5Ouncork\n");
+    /* Enable mdc flushes for the dataset */
+    /* Closing the dataset later will enable mdc flushes automatically if this is not done */
+    if(disabled)
+	if(H5Oenable_mdc_flushes(dsid) < 0) {
+	    fprintf(stderr, "Failed to H5Oenable_mdc_flushes\n");
 	    return -1;
 	}
 
@@ -506,7 +506,7 @@ main(int argc, char *argv[])
     /* ============*/
     /* Create file */
     /* ============*/
-    printf("Creating skeleton data file for testing H5Ocork()...\n");
+    printf("Creating skeleton data file for testing H5Odisable_mdc_flushes()...\n");
     if (create_file() < 0){
 	fprintf(stderr, "***encounter error\n");
 	Hgoto_error(1);

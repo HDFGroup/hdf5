@@ -3123,6 +3123,7 @@ insert_entry(H5F_t * file_ptr,
 	entry_ptr->is_dirty = TRUE;
 
 	/* Set the base address of the entry type into the property list as tag */
+	/* Use to cork entries for the object */
 	if(H5AC_tag(xfer, baddrs, NULL) < 0) {
 	    pass = FALSE;
 	    failure_mssg = "error in H5P_set().";
@@ -3404,6 +3405,7 @@ protect_entry(H5F_t * file_ptr,
         HDassert( !(entry_ptr->is_protected) );
 
 	/* Set the base address of the entry type into the property list as tag */
+	/* Use to cork entries for the object */
 	if(H5AC_tag(xfer, baddrs, NULL) < 0) {
 	    pass = FALSE;
 	    failure_mssg = "error in H5P_set().";
