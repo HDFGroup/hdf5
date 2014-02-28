@@ -741,7 +741,7 @@ MERCURY_GEN_PROC(evict_in_t,
                  ((uint32_t)(cs_scope))  
                  ((uint64_t)(rcxt_num))
                  ((hrpl_t)(replica_id))
-                 ((hid_t)(apl_id))
+                 //((hid_t)(apl_id))
                  ((int32_t)(obj_type))
                  ((iod_handles_t)(iod_oh))
                  ((iod_obj_id_t)(iod_id)))

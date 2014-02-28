@@ -1058,7 +1058,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_lapl_replica_id
+ * Function:	H5Pset_evict_replica
  *
  * Purpose:     Set the replica ID to be used when accessing an object 
  *              using this access plist.
@@ -1071,7 +1071,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_lapl_replica_id(hid_t lapl_id, hrpl_t replica_id)
+H5Pset_evict_replica(hid_t lapl_id, hrpl_t replica_id)
 {
     H5P_genplist_t *plist = NULL;    /* Property list pointer */
     herr_t ret_value = SUCCEED;      /* Return value */
@@ -1092,11 +1092,11 @@ H5Pset_lapl_replica_id(hid_t lapl_id, hrpl_t replica_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_lapl_replica_id() */
+} /* end H5Pset_evict_replica() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_lapl_replica_id
+ * Function:	H5Pget_evict_replica
  *
  * Purpose:     Retrieve the replica ID from this access plist.
  *
@@ -1108,7 +1108,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_lapl_replica_id(hid_t lapl_id, hrpl_t *replica_id/*out*/)
+H5Pget_evict_replica(hid_t lapl_id, hrpl_t *replica_id/*out*/)
 {
     H5P_genplist_t *plist = NULL;       /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -1126,7 +1126,7 @@ H5Pget_lapl_replica_id(hid_t lapl_id, hrpl_t *replica_id/*out*/)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_lapl_replica_id() */
+} /* end H5Pget_evict_replica() */
 
 
 /*-------------------------------------------------------------------------
@@ -9636,7 +9636,7 @@ H5VL_iod_evict(void *_obj, uint64_t c_version, hid_t apl_id, void **req)
     input.coh = obj->file->remote_file.coh;
     input.rcxt_num = c_version;
     input.cs_scope = obj->file->md_integrity_scope;
-    input.apl_id = apl_id;
+    //input.apl_id = apl_id;
 
     switch(obj->obj_type) {
     case H5I_DATASET:
