@@ -558,11 +558,23 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
 
     if(!is_vl_data) {
         size_t elmt_size;
+        iod_trans_id_t read_tid;
+
+        /* get replica ID from dxpl */
+        if(H5Pget_read_replica(dxpl_id, &read_tid) < 0)
+            HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get replica ID from dxpl");
+
+        if(read_tid) {
+            fprintf(stderr, "Reading from replica tag %"PRIx64"\n", read_tid);
+        }
+        else {
+            read_tid = rtid;
+        }
 
         /* If the data is not VL, we can read the data from the array the normal way */
         elmt_size = H5Tget_size(src_id);
         if(H5VL__iod_server_final_io(iod_oh.rd_oh, space_id, elmt_size, FALSE, 
-                                     buf, buf_size, (uint64_t)0, raw_cs_scope, rtid) < 0) {
+                                     buf, buf_size, (uint64_t)0, raw_cs_scope, read_tid) < 0) {
             fprintf(stderr, "can't read from array object\n");
             ret_value = FAIL;
             goto done;

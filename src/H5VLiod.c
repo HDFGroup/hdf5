@@ -1130,6 +1130,78 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Pset_read_replica
+ *
+ * Purpose:     Set the replica ID to be used when accessing an object 
+ *              using this transfer plist.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              February, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_read_replica(hid_t dxpl_id, hrpl_t replica_id)
+{
+    H5P_genplist_t *plist = NULL;    /* Property list pointer */
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iRp", dxpl_id, replica_id);
+
+    if(dxpl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+
+    /* Check arguments */
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Set the transfer mode */
+    if(H5P_set(plist, H5O_ACS_REPLICA_ID_NAME, &replica_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_read_replica() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_read_replica
+ *
+ * Purpose:     Retrieve the replica ID from this access plist.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              February, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_read_replica(hid_t dxpl_id, hrpl_t *replica_id/*out*/)
+{
+    H5P_genplist_t *plist = NULL;       /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", dxpl_id, replica_id);
+
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Get the transfer mode */
+    if(replica_id)
+        if(H5P_get(plist, H5O_ACS_REPLICA_ID_NAME, replica_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_read_replica() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_dxpl_checksum
  *
  * Purpose:     Modify the dataset transfer property list to set a

@@ -621,6 +621,19 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
         input->dxpl_id = H5Pcopy(H5P_DATASET_XFER_DEFAULT);
     dxpl_id = input->dxpl_id;
 
+    {
+        iod_trans_id_t read_tid;
+
+        /* get replica ID from dxpl */
+        if(H5Pget_read_replica(dxpl_id, &read_tid) < 0)
+            HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get replica ID from dxpl");
+
+        if(read_tid) {
+            fprintf(stderr, "Reading from replica tag %"PRIx64"\n", read_tid);
+            rtid = read_tid;
+        }
+    }
+
     /* get the scope for data integrity checks for raw data */
     if(H5Pget_rawdata_integrity_scope(dxpl_id, &raw_cs_scope) < 0)
         HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");

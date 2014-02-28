@@ -57,6 +57,8 @@ H5_DLL herr_t EFF_start_server(MPI_Comm comm, MPI_Info info);
 H5_DLL herr_t EFF_init(MPI_Comm comm, MPI_Info info);
 H5_DLL herr_t EFF_finalize(void);
 
+H5_DLL herr_t H5Pset_read_replica(hid_t dxpl_id, hrpl_t replica_id);
+H5_DLL herr_t H5Pget_read_replica(hid_t dxpl_id, hrpl_t *replica_id);
 H5_DLL herr_t H5Pset_evict_replica(hid_t lapl_id, hrpl_t replica_id);
 H5_DLL herr_t H5Pget_evict_replica(hid_t lapl_id, hrpl_t *replica_id);
 H5_DLL herr_t H5Pset_ocpl_enable_checksum(hid_t ocpl_id, hbool_t flag);

@@ -50,6 +50,12 @@
 
 #ifdef H5_HAVE_EFF
 
+/* replica ID to use when accessing an object at IOD */
+#define H5O_ACS_REPLICA_ID_SIZE    sizeof(hrpl_t)
+#define H5O_ACS_REPLICA_ID_DEF     0
+#define H5O_ACS_REPLICA_ID_ENC     H5P__encode_uint64_t
+#define H5O_ACS_REPLICA_ID_DEC     H5P__decode_uint64_t
+
 #define H5D_XFER_INJECT_CORRUPTION_SIZE		sizeof(hbool_t)
 #define H5D_XFER_INJECT_CORRUPTION_DEF  	FALSE
 #define H5D_XFER_INJECT_CORRUPTION_ENC          H5P__encode_hbool_t
@@ -266,6 +272,7 @@ static const hbool_t H5D_def_inject_corruption_g = H5D_XFER_INJECT_CORRUPTION_DE
 static const uint64_t H5D_def_checksum_g = H5D_XFER_CHECKSUM_DEF;
 static const uint64_t *H5D_def_checksum_ptr_g = H5D_XFER_CHECKSUM_PTR_DEF;
 static const uint32_t H5D_def_checksum_scope_g = H5D_XFER_CHECKSUM_SCOPE_DEF;
+static const hrpl_t H5O_replica_id_g = H5O_ACS_REPLICA_ID_DEF; /* Default replica ID */
 #endif /* H5_HAVE_EFF */
 
 /* Property value defaults */
@@ -323,6 +330,12 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     FUNC_ENTER_STATIC
 
 #ifdef H5_HAVE_EFF
+
+    if(H5P_register_real(pclass, H5O_ACS_REPLICA_ID_NAME, H5O_ACS_REPLICA_ID_SIZE, 
+                         &H5O_replica_id_g,
+                         NULL, NULL, NULL, H5O_ACS_REPLICA_ID_ENC, H5O_ACS_REPLICA_ID_DEC, 
+                         NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     if(H5P_register_real(pclass, H5D_XFER_INJECT_CORRUPTION_NAME, H5D_XFER_INJECT_CORRUPTION_SIZE, 
                          &H5D_def_inject_corruption_g,
