@@ -255,6 +255,10 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
             }
             fclose(config);
         }
+	else {
+	  fprintf(stderr, "could not open port.cfg file.\n");
+	  return FAIL;
+	}
     }
 
     iod_comm = comm;
