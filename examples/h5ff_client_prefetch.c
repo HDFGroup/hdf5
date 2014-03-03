@@ -30,6 +30,8 @@ int main(int argc, char **argv) {
     int provided;
     MPI_Request mpi_req;
 
+    int32_t *wdata1 = NULL, *rdata1 = NULL;
+    int key, value, i;
     H5ES_status_t status;
     size_t num_events = 0;
     herr_t ret;
@@ -50,6 +52,13 @@ int main(int argc, char **argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
     fprintf(stderr, "APP processes = %d, my rank is %d\n", my_size, my_rank);
+
+    wdata1 = malloc (sizeof(int32_t)*nelem);
+    rdata1 = malloc (sizeof(int32_t)*nelem);
+    for(i=0;i<nelem;++i) {
+        wdata1[i]=i;
+	rdata1[i] = 0;
+    }
 
     fprintf(stderr, "Create the FAPL to set the IOD VOL plugin and create the file\n");
     /* Choose the IOD VOL plugin to use with this file. 
@@ -109,6 +118,9 @@ int main(int argc, char **argv) {
                            H5P_DEFAULT, tid1, e_stack);
         assert(did >= 0);
 
+	ret = H5Dwrite_ff(did, dtid, H5S_ALL, H5S_ALL, dxpl_id, wdata1, tid1, e_stack);
+	assert(ret == 0);
+
         ret = H5Tcommit_ff(file_id, "DT1", dtid, H5P_DEFAULT, H5P_DEFAULT, 
                            H5P_DEFAULT, tid1, e_stack);
         assert(ret == 0);
@@ -116,6 +128,16 @@ int main(int argc, char **argv) {
         map = H5Mcreate_ff(file_id, "MAP1", H5T_STD_I32LE, H5T_STD_I32LE, 
                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
         assert(map >= 0);
+
+        /* write some KV pairs to each map object. */
+        {
+            key = 1;
+            value = 1000;
+            ret = H5Mset_ff(map, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
+                            H5P_DEFAULT, tid1, e_stack);
+            assert(ret == 0);
+
+        }
 
         ret = H5TRfinish(tid1, H5P_DEFAULT, &rid_temp, e_stack);
         assert(0 == ret);
@@ -196,39 +218,60 @@ int main(int argc, char **argv) {
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    if(0 == my_rank) {
+    if((my_size > 1 && 1 == my_rank) || 
+       (my_size == 1 && 0 == my_rank)) {
+      //if(0 == my_rank) {
         hid_t mapl_id, tapl_id, dapl_id;
         hrpl_t map_replica, dt_replica, dset_replica;
 
-        //ret = H5Mprefetch_ff(map, rid2, &map_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-        //assert(0 == ret);
-        //printf("prefetched map with replica id %"PRIx64"\n", map_replica);
-        //ret = H5Tprefetch_ff(dtid, rid2, &dt_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-        //assert(0 == ret);
-        //printf("prefetched datatype with replica id %"PRIx64"\n", dt_replica);
-
+        ret = H5Mprefetch_ff(map, rid2, &map_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        printf("prefetched map with replica id %"PRIx64"\n", map_replica);
+        ret = H5Tprefetch_ff(dtid, rid2, &dt_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        printf("prefetched datatype with replica id %"PRIx64"\n", dt_replica);
         ret = H5Dprefetch_ff(did, rid2, &dset_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
         printf("prefetched dataset with replica id %"PRIx64"\n", dset_replica);
 
+	/* set dxpl to read from replica in BB */
+	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+	ret = H5Pset_read_replica(dxpl_id, dset_replica);
+	assert(0 == ret);
+
+	ret = H5Dread_ff(did, dtid, H5S_ALL, H5S_ALL, dxpl_id, rdata1, rid2, H5_EVENT_STACK_NULL);
+	assert(ret == 0);
+	printf("Read Data1: ");
+	for(i=0;i<nelem;++i)
+	  printf("%d ",rdata1[i]);
+	printf("\n");
+
+        key = 1;
+        value = -1;
+        ret = H5Mget_ff(map, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
+                        dxpl_id, rid2, H5_EVENT_STACK_NULL);
+        printf("Value recieved = %d\n", value);
+
+	H5Pclose(dxpl_id);
+
+        tapl_id = H5Pcreate (H5P_DATATYPE_ACCESS);
+        ret = H5Pset_evict_replica(tapl_id, dt_replica);
+        assert(0 == ret);
+        ret = H5Tevict_ff(dtid, 2, tapl_id, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        H5Pclose(tapl_id);
+
+#if 0
         dapl_id = H5Pcreate (H5P_DATASET_ACCESS);
         ret = H5Pset_evict_replica(dapl_id, dset_replica);
         assert(0 == ret);
-        ret = H5Devict_ff(dtid, 2, dapl_id, H5_EVENT_STACK_NULL);
+        ret = H5Devict_ff(did, 2, dapl_id, H5_EVENT_STACK_NULL);
         assert(0 == ret);
         H5Pclose(dapl_id);
 
-#if 0
-        tapl_id = H5Pcreate (H5P_DATATYPE_ACCESS);
-        ret = H5Pset_evict_replica(tapl_id, dt_replica);
-        //assert(0 == ret);
-        ret = H5Tevict_ff(dtid, 2, tapl_id, H5_EVENT_STACK_NULL);
-        //assert(0 == ret);
-        H5Pclose(tapl_id);
-
         mapl_id = H5Pcreate (H5P_MAP_ACCESS);
         ret = H5Pset_evict_replica(mapl_id, map_replica);
-        //assert(0 == ret);
+        assert(0 == ret);
         ret = H5Mevict_ff(map, 2, mapl_id, H5_EVENT_STACK_NULL);
         assert(0 == ret);
         H5Pclose(mapl_id);
@@ -267,6 +310,9 @@ int main(int argc, char **argv) {
     H5Sclose(sid);
     H5Pclose(fapl_id);
     H5ESclose(e_stack);
+
+    free(wdata1);
+    free(rdata1);
 
     /* This finalizes the EFF stack. ships a terminate and IOD finalize to the server 
        and shutsdown the FS server (when all clients send the terminate request) 
