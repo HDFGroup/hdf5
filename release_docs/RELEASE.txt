@@ -215,6 +215,10 @@ They are built with the configure process unless specified otherwise.
     64-bit    			  gfortran GNU Fortran (GCC) 4.6.2
     (wren)                        Intel icc/icpc/ifort version 13.0.3
 
+    Mac OS X Mavericks 10.9.1     Apple clang/clang++ version 5.0 from Xcode 5.0.2
+    64-bit    			  gfortran GNU Fortran (GCC) 4.8.2
+    (vm)                        
+
     OpenVMS  IA64 V8.4            HP C V7.3-018         
     (Boeing)                      HP Fortran V8.2-104939-50H96
                                   HP C++ V7.4-004 
