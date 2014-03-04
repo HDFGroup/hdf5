@@ -86,7 +86,7 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    - None
+    Mac OS X 10.9 Mavericks is supported. (AKC - 2014/03/04 HDFFV-8694)
 
 Bug Fixes since HDF5-1.8.12
 ===========================
@@ -248,6 +248,7 @@ Windows 8.1   x64                       n        y/y    n        y    y     y
 Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
 Mac OS X Mountain Lion 10.8.1 64-bit    n        y/y    n        y    y     y
+Mac OS X Mavericks 10.9.1 64-bit        n        y/y    n        y    y     ?
 AIX 5.3 32- and 64-bit                  n        y/n    n        y    y     y
 CentOS 5.9 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
 CentOS 5.9 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
@@ -272,6 +273,7 @@ Windows 8.1 x64                            y       y         y         y
 Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
 Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
+Mac OS X Mavericks 10.9.1 64-bit           y       n         y         y
 AIX 5.3 32- and 64-bit                     y       n         n         y        
 CentOS 5.9 Linux 2.6.18-308 i686 GNU       y       y         y         y        
 CentOS 5.9 Linux 2.6.18-308 i686 Intel     y       y         y         n        
