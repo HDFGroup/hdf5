@@ -381,6 +381,7 @@ H5Vget_query(hid_t view_id, hid_t *query_id)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*i", view_id, query_id);
 
     if(NULL == query_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid return pointer")
@@ -420,6 +421,7 @@ H5Vget_counts(hid_t view_id, hsize_t *attr_count, hsize_t *obj_count, hsize_t *e
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "i*h*h*h", view_id, attr_count, obj_count, elem_region_count);
 
     /* Check args */
     if(NULL == (view = (H5VL_iod_view_t *)H5I_object_verify(view_id, H5I_VIEW)))
@@ -471,6 +473,7 @@ H5Vget_location_ff(hid_t view_id, hid_t *loc_id, hid_t estack_id)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*ii", view_id, loc_id, estack_id);
 
     if(NULL == loc_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid return pointer")
@@ -545,6 +548,8 @@ H5Vget_elem_regions_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t datase
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "ihh*i*ii", view_id, start, count, dataset_id, dataspace_id,
+             estack_id);
 
     /* Check args */
     if(NULL == (view = (H5VL_iod_view_t *)H5I_object_verify(view_id, H5I_VIEW)))

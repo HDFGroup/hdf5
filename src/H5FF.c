@@ -652,6 +652,8 @@ H5Dcreate_anon_ff(hid_t file_id, hid_t type_id, hid_t space_id,
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE7("i", "iiiiiii", file_id, type_id, space_id, dcpl_id, dapl_id, trans_id,
+             estack_id);
 
     /* Get correct property list */
     if(H5P_DEFAULT == dcpl_id)
