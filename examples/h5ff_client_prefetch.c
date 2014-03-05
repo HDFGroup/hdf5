@@ -10,7 +10,7 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name[]="eff_file_obj.h5";
+    const char file_name[]="eff_file_prefetch.h5";
     hid_t file_id;
     hid_t gid;
     hid_t did, map;
