@@ -93,6 +93,7 @@ int main(int argc, char **argv) {
        started. */
     if(0 == my_rank) {
         hid_t rid_temp;
+        hid_t anon_did;
 
         /* create transaction object */
         tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
@@ -117,6 +118,13 @@ int main(int argc, char **argv) {
                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
         assert(map >= 0);
 
+        anon_did = H5Dcreate_anon_ff(file_id, dtid, sid, H5P_DEFAULT, H5P_DEFAULT, 
+                                     tid1, e_stack);
+        assert(anon_did > 0);
+
+        ret = H5Dclose_ff(anon_did, e_stack);
+        assert(0 == ret);
+
         ret = H5TRfinish(tid1, H5P_DEFAULT, &rid_temp, e_stack);
         assert(0 == ret);
 
@@ -125,6 +133,7 @@ int main(int argc, char **argv) {
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
 
         /* Close transaction object. Local op */
         ret = H5TRclose(tid1);
@@ -165,6 +174,7 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
+    assert(status == H5ES_STATUS_SUCCEED);
 
     if(0 == my_rank) {
         /* Close transaction object. Local op */
@@ -269,6 +279,7 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
+    assert(status == H5ES_STATUS_SUCCEED);
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */

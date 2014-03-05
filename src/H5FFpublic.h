@@ -89,6 +89,8 @@ H5_DLL herr_t H5Gclose_ff(hid_t group_id, hid_t estack_id);
 H5_DLL hid_t H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id,
                           hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id,
                           hid_t trans_id, hid_t estack_id);
+H5_DLL hid_t H5Dcreate_anon_ff(hid_t file_id, hid_t type_id, hid_t space_id,
+                               hid_t plist_id, hid_t dapl_id, hid_t trans_id, hid_t estack_id);
 H5_DLL hid_t H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id,
                         hid_t rcxt_id, hid_t estack_id);
 H5_DLL herr_t H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,

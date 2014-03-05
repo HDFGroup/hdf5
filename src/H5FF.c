@@ -624,6 +624,94 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Dcreate_anon_ff
+ *
+ * Purpose:	Asynchronous wrapper around H5Dcreate_anon().
+ *
+ * Return:	Success:	The placeholder ID for a new dataset.  When
+ *                              the asynchronous operation completes, this
+ *                              ID will transparently be modified to be a
+ *                              "normal" ID.
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, March 20, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Dcreate_anon_ff(hid_t file_id, hid_t type_id, hid_t space_id,
+                  hid_t dcpl_id, hid_t dapl_id, hid_t trans_id, hid_t estack_id)
+{
+    void    *dset = NULL;       /* dset token from VOL plugin */
+    void    *obj = NULL;        /* object token of file_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5VL_loc_params_t loc_params;
+    H5P_genplist_t  *plist;     /* Property list pointer */
+    hid_t       ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == dcpl_id)
+        dcpl_id = H5P_DATASET_CREATE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == dapl_id)
+        dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dapl_id, H5P_DATASET_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* set creation properties */
+    if(H5P_set(plist, H5VL_DSET_TYPE_ID, &type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
+    if(H5P_set(plist, H5VL_DSET_SPACE_ID, &space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(file_id);
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5VL_get_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Create the dataset through the VOL */
+    if(NULL == (dset = H5VL_dataset_create(obj, loc_params, vol_plugin, NULL, dcpl_id, dapl_id, 
+                                           dxpl_id, estack_id)))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
+
+    /* Get an atom for the dataset */
+    if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+
+done:
+    if (ret_value < 0 && dset)
+        if(H5VL_dataset_close(dset, vol_plugin, H5AC_dxpl_id, estack_id) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dcreate_anon_ff() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Dopen_ff
  *
  * Purpose:	Asynchronous wrapper around H5Dopen().
@@ -680,7 +768,7 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
-    /* Create the dataset through the VOL */
+    /* Open the dataset through the VOL */
     if(NULL == (dset = H5VL_dataset_open(obj, loc_params, vol_plugin, name, 
                                          dapl_id, dxpl_id, estack_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open dataset")

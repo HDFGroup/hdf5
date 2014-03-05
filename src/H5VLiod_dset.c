@@ -133,7 +133,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t mdkv_oh;
     iod_obj_id_t cur_id;
     const char *name = input->name; /* name of dset including path to create */
-    char *last_comp; /* the name of the dataset obtained from the last component in the path */
+    char *last_comp = NULL; /* the name of the dataset obtained from the last component in the path */
     iod_array_struct_t array; /* IOD array struct describing the dataset's dimensions */
     scratch_pad sp;
     iod_ret_t ret = 0;
@@ -147,7 +147,10 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start dataset create %s at %"PRIu64"\n", name, loc_handle.wr_oh.cookie);
+    if(name)
+        fprintf(stderr, "Start dataset create %s at %"PRIu64"\n", name, loc_handle.wr_oh.cookie);
+    else
+        fprintf(stderr, "Start anon dataset create at %"PRIu64"\n", loc_handle.wr_oh.cookie);
 #endif
 
     if(H5P_DEFAULT == input->dcpl_id)
@@ -158,12 +161,20 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     if(H5Pget_ocpl_enable_checksum(dcpl_id, &enable_checksum) < 0)
         HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 
-    /* the traversal will retrieve the location where the dataset needs
-       to be created. The traversal will fail if an intermediate group
-       does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
-                                cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+    if(name) {
+        /* the traversal will retrieve the location where the dataset needs
+           to be created. The traversal will fail if an intermediate group
+           does not exist. */
+        if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
+                                    cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+    }
+    else {
+        /* this is an anon dataset.. no link information */
+        cur_oh.rd_oh.cookie = loc_handle.rd_oh.cookie;
+        cur_oh.wr_oh.cookie = loc_handle.wr_oh.cookie;
+        cur_id = loc_id;
+    }
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Creating Dataset ID %"PRIx64" ",dset_id);
@@ -216,8 +227,8 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     array.chunk_dims = NULL;
 
 #if H5VL_IOD_DEBUG 
-    fprintf(stderr, "now creating the dataset %s cellsize %d num dimensions %d\n",
-            last_comp, array.cell_size, array.num_dims);
+    fprintf(stderr, "now creating the dataset with cellsize %d num dimensions %d\n",
+            array.cell_size, array.num_dims);
 #endif
 
     /* create the dataset */
@@ -303,11 +314,12 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 
     step --;
 
-    /* add link in parent group to current object */
-    if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
-                                H5L_TYPE_HARD, &dset_id, cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
-
+    /* If dataset is not anonymous, add link in parent group to current object */
+    if(name) {
+        if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
+                                    H5L_TYPE_HARD, &dset_id, cs_scope, NULL, NULL) < 0)
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+    }
 
     output.iod_oh.rd_oh.cookie = dset_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = dset_oh.wr_oh.cookie;

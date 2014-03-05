@@ -205,6 +205,7 @@ int main(int argc, char **argv) {
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
 
         /* bcast the token sizes and the tokens */ 
         MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
@@ -294,6 +295,7 @@ int main(int argc, char **argv) {
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
     }
 
     /* Barrier to make sure all processes are done writing so Process
@@ -324,6 +326,7 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     printf("%d events in event stack. H5ESwait_all Completion status = %d\n", num_events, status);
     H5ESclear(e_stack);
+    assert(status == H5ES_STATUS_SUCCEED);
 
     /* Tell other procs that container version 1 is acquired */
     version = 1;

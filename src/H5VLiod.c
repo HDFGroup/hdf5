@@ -2912,7 +2912,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t UNUSED loc_params,
 
     /* setup the local dataset struct */
     /* store the entire path of the dataset locally */
-    if(obj->obj_name) {
+    if(name && obj->obj_name) {
         size_t obj_name_len = HDstrlen(obj->obj_name);
         size_t name_len = HDstrlen(name);
 
@@ -2939,8 +2939,12 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t UNUSED loc_params,
     dset->common.file->nopen_objs ++;
 
 #if H5VL_IOD_DEBUG
-    printf("Dataset Create %s IOD ID %"PRIu64", axe id %"PRIu64"\n", 
-           name, input.dset_id, g_axe_id);
+    if(name)
+        printf("Dataset Create %s IOD ID %"PRIu64", axe id %"PRIu64"\n", 
+               name, input.dset_id, g_axe_id);
+    else
+        printf("Anon Dataset Create IOD ID %"PRIu64", axe id %"PRIu64"\n", 
+               input.dset_id, g_axe_id);
 #endif
 
     if(H5VL__iod_create_and_forward(H5VL_DSET_CREATE_ID, HG_DSET_CREATE, 
