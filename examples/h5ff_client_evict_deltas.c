@@ -199,9 +199,6 @@ int main(int argc, char **argv) {
     if(0 == my_rank) {
         ret = H5RCpersist(rid2, H5_EVENT_STACK_NULL);
         assert(ret == 0);
-
-        ret = H5Tevict_ff(dtid, 1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -214,8 +211,12 @@ int main(int argc, char **argv) {
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    if(0 == my_rank) {
+    if((my_size > 1 && 1 == my_rank) || 
+       (my_size == 1 && 0 == my_rank)) {
         ret = H5Tevict_ff(dtid, 2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+
+        ret = H5Devict_ff(did, 2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
     }
 

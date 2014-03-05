@@ -220,7 +220,6 @@ int main(int argc, char **argv) {
 
     if((my_size > 1 && 1 == my_rank) || 
        (my_size == 1 && 0 == my_rank)) {
-      //if(0 == my_rank) {
         hid_t mapl_id, tapl_id, dapl_id;
         hrpl_t map_replica, dt_replica, dset_replica;
 
@@ -261,7 +260,6 @@ int main(int argc, char **argv) {
         assert(0 == ret);
         H5Pclose(tapl_id);
 
-#if 0
         dapl_id = H5Pcreate (H5P_DATASET_ACCESS);
         ret = H5Pset_evict_replica(dapl_id, dset_replica);
         assert(0 == ret);
@@ -269,6 +267,7 @@ int main(int argc, char **argv) {
         assert(0 == ret);
         H5Pclose(dapl_id);
 
+#if 0
         mapl_id = H5Pcreate (H5P_MAP_ACCESS);
         ret = H5Pset_evict_replica(mapl_id, map_replica);
         assert(0 == ret);
