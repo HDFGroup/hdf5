@@ -248,7 +248,11 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
 {
     op_data_t *op_data = (op_data_t *)_op_data;
     rc_persist_in_t *input = (rc_persist_in_t *)op_data->input;
-    iod_handle_t coh = input->coh; /* the container handle */    
+    iod_handle_t coh = input->coh; /* the container handle */  
+    char *persist = NULL, *sleep_timer = NULL;
+    int num_persist_retry = 0, i;
+    int sleep_t = 0;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -257,8 +261,42 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Persist Read Context %"PRIu64"\n", input->c_version);
 #endif
 
-    if(iod_trans_persist(coh, input->c_version, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't persist Read Context");
+    persist = getenv ("H5ENV_NUM_PERSIST_RETRY");
+    sleep_timer = getenv ("H5ENV_SLEEP_PERSIST_RETRY");
+
+    if(NULL != persist)
+        num_persist_retry = atoi(persist);
+
+    if(NULL != sleep_timer)
+        sleep_t = atoi(sleep_timer);
+
+    ret = iod_trans_persist(coh, input->c_version, NULL, NULL);
+    if(ret != 0) {
+        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+    }
+
+    if(ret != 0) {
+        for(i=0 ; i<num_persist_retry; i++) {
+            fprintf(stderr, "Retry Persist # %d on %"PRIu64".\n", i+1, input->c_version);
+            ret = iod_trans_persist(coh, input->c_version, NULL, NULL);
+            if(0 == ret) {
+                break;
+            }
+            else if(-ESHUTDOWN == ret) {
+                fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't persist read context");
+            }
+            else {
+                fprintf(stderr, "Retry failed.. %d (%s).\n", ret, strerror(-ret));
+                if(sleep_timer)
+                    sleep(sleep_t);
+            }
+        }
+    }
+
+    if(ret != 0) {
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't persist read context");
+    }
 
 done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
