@@ -118,6 +118,54 @@ if(VERBOSE_MED){
     }
 }
 
+/*
+ * Setup the coordinates for point selection.
+ */
+void point_set(hsize_t start[],
+               hsize_t count[],
+               hsize_t stride[],
+               hsize_t block[],
+               size_t num_points, 
+               hsize_t coords[],
+               int order)
+{
+    hsize_t i,j, k = 0, m ,n, s1 ,s2;
+
+    HDcompile_assert(RANK == 2);
+
+    if(OUT_OF_ORDER == order)
+        k = (num_points * RANK) - 1;
+    else if(IN_ORDER == order)
+        k = 0;
+
+    s1 = start[0];
+    s2 = start[1];
+
+    for(i = 0 ; i < count[0]; i++)
+        for(j = 0 ; j < count[1]; j++)
+            for(m = 0 ; m < block[0]; m++)
+                for(n = 0 ; n < block[1]; n++)
+                    if(OUT_OF_ORDER == order) {
+                        coords[k--] = s2 + (stride[1] * j) + n;
+                        coords[k--] = s1 + (stride[0] * i) + m;
+                    }
+                    else if(IN_ORDER == order) {
+                        coords[k++] = s1 + stride[0] * i + m;
+                        coords[k++] = s2 + stride[1] * j + n;
+                    }
+
+    if(VERBOSE_MED) {
+        printf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0], (unsigned long)count[1],
+               (unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+        k = 0;
+        for(i = 0; i < num_points ; i++) {
+            printf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
+            k += 2;
+        }
+    }
+}
 
 /*
  * Fill the dataset with trivial data for testing.
@@ -501,7 +549,8 @@ dataset_writeAll(void)
     hid_t sid;   		/* Dataspace ID */
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
-    hid_t dataset1, dataset2, dataset3, dataset4;	/* Dataset ID */
+    hid_t dataset1, dataset2, dataset3, dataset4; /* Dataset ID */
+    hid_t dataset5, dataset6, dataset7; /* Dataset ID */
     hid_t datatype;		/* Datatype ID */
     hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     hsize_t dims[RANK];   	/* dataset dim sizes */
@@ -511,6 +560,11 @@ dataset_writeAll(void)
     hsize_t start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
     hsize_t block[RANK];			/* for hyperslab setting */
+
+    size_t  num_points = dim1;    /* for point selection */
+    hsize_t coords [RANK*dim1];   /* for point selection */
+    hsize_t current_dims;         /* for point selection */
+    int i;
 
     herr_t ret;         	/* Generic return value */
     int mpi_size, mpi_rank;
@@ -572,6 +626,13 @@ dataset_writeAll(void)
     /* create a third dataset collectively */
     dataset3 = H5Dcreate2(fid, DATASETNAME3, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     VRFY((dataset3 >= 0), "H5Dcreate2 succeeded");
+
+    dataset5 = H5Dcreate2(fid, DATASETNAME7, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((dataset5 >= 0), "H5Dcreate2 succeeded");
+    dataset6 = H5Dcreate2(fid, DATASETNAME8, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((dataset6 >= 0), "H5Dcreate2 succeeded");
+    dataset7 = H5Dcreate2(fid, DATASETNAME9, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((dataset7 >= 0), "H5Dcreate2 succeeded");
 
     /* release 2-D space ID created */
     H5Sclose(sid);
@@ -827,8 +888,6 @@ dataset_writeAll(void)
       VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
-
-
     /* write data collectively */
     MESG("writeAll with scalar dataspace");
     ret = H5Dwrite(dataset4, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
@@ -846,6 +905,137 @@ dataset_writeAll(void)
     H5Sclose(mem_dataspace);
     H5Pclose(xfer_plist);
 
+
+    if(data_array1) free(data_array1);
+    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
+
+    block[0] = 1;
+    block[1] = dim1;
+    stride[0] = 1;
+    stride[1] = dim1;
+    count[0] = 1;
+    count[1] = 1;
+    start[0] = dim0/mpi_size * mpi_rank;
+    start[1] = 0;
+
+    dataset_fill(start, block, data_array1);
+    MESG("data_array initialized");
+    if(VERBOSE_MED){
+	MESG("data_array created");
+	dataset_print(start, block, data_array1);
+    }
+
+    /* Dataset5: point selection in File - Hyperslab selection in Memory*/
+    /* create a file dataspace independently */
+    point_set (start, count, stride, block, num_points, coords, OUT_OF_ORDER);
+    file_dataspace = H5Dget_space (dataset5);
+    VRFY((file_dataspace >= 0), "H5Dget_space succeeded");    
+    ret = H5Sselect_elements(file_dataspace, H5S_SELECT_SET, num_points, coords);
+    VRFY((ret >= 0), "H5Sselect_elements succeeded");
+
+    start[0] = 0;
+    start[1] = 0;
+    mem_dataspace = H5Dget_space (dataset5);
+    VRFY((mem_dataspace >= 0), "H5Dget_space succeeded");
+    ret = H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
+
+    /* set up the collective transfer properties list */
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((xfer_plist >= 0), "");
+    ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
+    /* write data collectively */
+    ret = H5Dwrite(dataset5, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+                   xfer_plist, data_array1);
+    VRFY((ret >= 0), "H5Dwrite dataset5 succeeded");
+
+    /* release all temporary handles. */
+    H5Sclose(file_dataspace);
+    H5Sclose(mem_dataspace);
+    H5Pclose(xfer_plist);
+
+    /* Dataset6: point selection in File - Point selection in Memory*/
+    /* create a file dataspace independently */
+    start[0] = dim0/mpi_size * mpi_rank;
+    start[1] = 0;
+    point_set (start, count, stride, block, num_points, coords, OUT_OF_ORDER);
+    file_dataspace = H5Dget_space (dataset6);
+    VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
+    ret = H5Sselect_elements(file_dataspace, H5S_SELECT_SET, num_points, coords);
+    VRFY((ret >= 0), "H5Sselect_elements succeeded");
+
+    start[0] = 0;
+    start[1] = 0;
+    point_set (start, count, stride, block, num_points, coords, IN_ORDER);
+    mem_dataspace = H5Dget_space (dataset6);
+    VRFY((mem_dataspace >= 0), "H5Dget_space succeeded");
+    ret = H5Sselect_elements(mem_dataspace, H5S_SELECT_SET, num_points, coords);
+    VRFY((ret >= 0), "H5Sselect_elements succeeded");
+
+    /* set up the collective transfer properties list */
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((xfer_plist >= 0), "");
+    ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
+    /* write data collectively */
+    ret = H5Dwrite(dataset6, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+                   xfer_plist, data_array1);
+    VRFY((ret >= 0), "H5Dwrite dataset6 succeeded");
+
+    /* release all temporary handles. */
+    H5Sclose(file_dataspace);
+    H5Sclose(mem_dataspace);
+    H5Pclose(xfer_plist);
+
+    /* Dataset7: point selection in File - All selection in Memory*/
+    /* create a file dataspace independently */
+    start[0] = dim0/mpi_size * mpi_rank;
+    start[1] = 0;
+    point_set (start, count, stride, block, num_points, coords, IN_ORDER);
+    file_dataspace = H5Dget_space (dataset7);
+    VRFY((file_dataspace >= 0), "H5Dget_space succeeded");    
+    ret = H5Sselect_elements(file_dataspace, H5S_SELECT_SET, num_points, coords);
+    VRFY((ret >= 0), "H5Sselect_elements succeeded");
+
+    current_dims = num_points;
+    mem_dataspace = H5Screate_simple (1, &current_dims, NULL);
+    VRFY((mem_dataspace >= 0), "mem_dataspace create succeeded");
+
+    ret = H5Sselect_all(mem_dataspace);
+    VRFY((ret >= 0), "H5Sselect_all succeeded");
+
+    /* set up the collective transfer properties list */
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((xfer_plist >= 0), "");
+    ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
+    /* write data collectively */
+    ret = H5Dwrite(dataset7, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+                   xfer_plist, data_array1);
+    VRFY((ret >= 0), "H5Dwrite dataset7 succeeded");
+
+    /* release all temporary handles. */
+    H5Sclose(file_dataspace);
+    H5Sclose(mem_dataspace);
+    H5Pclose(xfer_plist);
+
     /*
      * All writes completed.  Close datasets collectively
      */
@@ -856,7 +1046,13 @@ dataset_writeAll(void)
     ret = H5Dclose(dataset3);
     VRFY((ret >= 0), "H5Dclose3 succeeded");
     ret = H5Dclose(dataset4);
-    VRFY((ret >= 0), "H5Dclose3 succeeded");
+    VRFY((ret >= 0), "H5Dclose4 succeeded");
+    ret = H5Dclose(dataset5);
+    VRFY((ret >= 0), "H5Dclose5 succeeded");
+    ret = H5Dclose(dataset6);
+    VRFY((ret >= 0), "H5Dclose6 succeeded");
+    ret = H5Dclose(dataset7);
+    VRFY((ret >= 0), "H5Dclose7 succeeded");
 
     /* close the file collectively */
     H5Fclose(fid);
@@ -882,7 +1078,7 @@ dataset_readAll(void)
     hid_t xfer_plist;		/* Dataset transfer properties list */
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
-    hid_t dataset1, dataset2;	/* Dataset ID */
+    hid_t dataset1, dataset2, dataset5, dataset6, dataset7; /* Dataset ID */
     hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     DATATYPE *data_array1 = NULL;	/* data buffer */
     DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
@@ -891,6 +1087,11 @@ dataset_readAll(void)
     hsize_t start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
     hsize_t block[RANK];			/* for hyperslab setting */
+
+    size_t num_points = dim1;       /* for point selection */
+    hsize_t coords [RANK*dim0*dim1];     /* for point selection */
+    hsize_t current_dims;        /* for point selection */
+    int i,j,k;
 
     herr_t ret;         	/* Generic return value */
     int mpi_size, mpi_rank;
@@ -938,6 +1139,14 @@ dataset_readAll(void)
     /* open another dataset collectively */
     dataset2 = H5Dopen2(fid, DATASETNAME2, H5P_DEFAULT);
     VRFY((dataset2 >= 0), "H5Dopen2 2 succeeded");
+
+    /* open another dataset collectively */
+    dataset5 = H5Dopen2(fid, DATASETNAME7, H5P_DEFAULT);
+    VRFY((dataset5 >= 0), "H5Dopen2 5 succeeded");
+    dataset6 = H5Dopen2(fid, DATASETNAME8, H5P_DEFAULT);
+    VRFY((dataset6 >= 0), "H5Dopen2 6 succeeded");
+    dataset7 = H5Dopen2(fid, DATASETNAME9, H5P_DEFAULT);
+    VRFY((dataset7 >= 0), "H5Dopen2 7 succeeded");
 
     /*
      * Set up dimensions of the slab this process accesses.
@@ -1077,6 +1286,162 @@ dataset_readAll(void)
     H5Sclose(mem_dataspace);
     H5Pclose(xfer_plist);
 
+    if(data_array1) free(data_array1);
+    if(data_origin1) free(data_origin1);
+    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
+    data_origin1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
+
+    block[0] = 1;
+    block[1] = dim1;
+    stride[0] = 1;
+    stride[1] = dim1;
+    count[0] = 1;
+    count[1] = 1;
+    start[0] = dim0/mpi_size * mpi_rank;
+    start[1] = 0;
+
+    dataset_fill(start, block, data_origin1);
+    MESG("data_array initialized");
+    if(VERBOSE_MED){
+	MESG("data_array created");
+	dataset_print(start, block, data_origin1);
+    }
+
+    /* Dataset5: point selection in memory - Hyperslab selection in file*/
+    /* create a file dataspace independently */
+    file_dataspace = H5Dget_space (dataset5);
+    VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
+    ret = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
+
+    start[0] = 0;
+    start[1] = 0;
+    point_set (start, count, stride, block, num_points, coords, OUT_OF_ORDER);
+    mem_dataspace = H5Dget_space (dataset5);
+    VRFY((mem_dataspace >= 0), "H5Dget_space succeeded");
+    ret = H5Sselect_elements(mem_dataspace, H5S_SELECT_SET, num_points, coords);
+    VRFY((ret >= 0), "H5Sselect_elements succeeded");
+
+    /* set up the collective transfer properties list */
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((xfer_plist >= 0), "");
+    ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+     VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
+    /* read data collectively */
+    ret = H5Dread(dataset5, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+                  xfer_plist, data_array1);
+    VRFY((ret >= 0), "H5Dread dataset5 succeeded");
+
+    
+    ret = dataset_vrfy(start, count, stride, block, data_array1, data_origin1);
+    if(ret) nerrors++;
+
+    /* release all temporary handles. */
+    H5Sclose(file_dataspace);
+    H5Sclose(mem_dataspace);
+    H5Pclose(xfer_plist);
+
+
+    if(data_array1) free(data_array1);
+    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
+
+    /* Dataset6: point selection in File - Point selection in Memory*/
+    /* create a file dataspace independently */
+    start[0] = dim0/mpi_size * mpi_rank;
+    start[1] = 0;
+    point_set (start, count, stride, block, num_points, coords, IN_ORDER);
+    file_dataspace = H5Dget_space (dataset6);
+    VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
+    ret = H5Sselect_elements(file_dataspace, H5S_SELECT_SET, num_points, coords);
+    VRFY((ret >= 0), "H5Sselect_elements succeeded");
+
+    start[0] = 0;
+    start[1] = 0;
+    point_set (start, count, stride, block, num_points, coords, OUT_OF_ORDER);
+    mem_dataspace = H5Dget_space (dataset6);
+    VRFY((mem_dataspace >= 0), "H5Dget_space succeeded");
+    ret = H5Sselect_elements(mem_dataspace, H5S_SELECT_SET, num_points, coords);
+    VRFY((ret >= 0), "H5Sselect_elements succeeded");
+
+    /* set up the collective transfer properties list */
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((xfer_plist >= 0), "");
+    ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
+    /* read data collectively */
+    ret = H5Dread(dataset6, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+                  xfer_plist, data_array1);
+    VRFY((ret >= 0), "H5Dread dataset6 succeeded");
+
+    ret = dataset_vrfy(start, count, stride, block, data_array1, data_origin1);
+    if(ret) nerrors++;
+
+    /* release all temporary handles. */
+    H5Sclose(file_dataspace);
+    H5Sclose(mem_dataspace);
+    H5Pclose(xfer_plist);
+
+    if(data_array1) free(data_array1);
+    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
+
+    /* Dataset7: point selection in memory - All selection in file*/
+    /* create a file dataspace independently */
+    file_dataspace = H5Dget_space (dataset7);
+    VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
+    ret = H5Sselect_all(file_dataspace);
+    VRFY((ret >= 0), "H5Sselect_all succeeded");
+
+    num_points = dim0 * dim1;
+    k=0;
+    for (i=0 ; i<dim0; i++) {
+        for (j=0 ; j<dim1; j++) {
+            coords[k++] = i;
+            coords[k++] = j;
+        }
+    }
+    mem_dataspace = H5Dget_space (dataset7);
+    VRFY((mem_dataspace >= 0), "H5Dget_space succeeded");
+    ret = H5Sselect_elements(mem_dataspace, H5S_SELECT_SET, num_points, coords);
+    VRFY((ret >= 0), "H5Sselect_elements succeeded");
+
+    /* set up the collective transfer properties list */
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((xfer_plist >= 0), "");
+    ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
+    /* read data collectively */
+    ret = H5Dread(dataset7, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+                  xfer_plist, data_array1);
+    VRFY((ret >= 0), "H5Dread dataset7 succeeded");
+
+    start[0] = dim0/mpi_size * mpi_rank;
+    start[1] = 0;
+    ret = dataset_vrfy(start, count, stride, block, data_array1+(dim0/mpi_size * dim1 * mpi_rank), data_origin1);
+    if(ret) nerrors++;
+
+    /* release all temporary handles. */
+    H5Sclose(file_dataspace);
+    H5Sclose(mem_dataspace);
+    H5Pclose(xfer_plist);
 
     /*
      * All reads completed.  Close datasets collectively
@@ -1085,6 +1450,12 @@ dataset_readAll(void)
     VRFY((ret >= 0), "H5Dclose1 succeeded");
     ret = H5Dclose(dataset2);
     VRFY((ret >= 0), "H5Dclose2 succeeded");
+    ret = H5Dclose(dataset5);
+    VRFY((ret >= 0), "H5Dclose5 succeeded");
+    ret = H5Dclose(dataset6);
+    VRFY((ret >= 0), "H5Dclose6 succeeded");
+    ret = H5Dclose(dataset7);
+    VRFY((ret >= 0), "H5Dclose7 succeeded");
 
     /* close the file collectively */
     H5Fclose(fid);
@@ -3073,9 +3444,6 @@ actual_io_mode_tests(void) {
  *       TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES:
  *         Test for NULL dataspace as the cause of breaking collective I/O.
  *         
- *       TEST_POINT_SELECTIONS:
- *         Test for selecting elements of dataspce as the cause of breaking collective I/O.
- *
  *       TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT:
  *         Test for Compact layout as the cause of breaking collective I/O.
  *
@@ -3247,12 +3615,6 @@ test_no_collective_cause_mode(int selection_mode)
         no_collective_cause_global_expected |= H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
     }
 
-    if (selection_mode & TEST_POINT_SELECTIONS ) {
-        test_name = "Broken Collective I/O - Point Selection";
-        no_collective_cause_local_expected |= H5D_MPIO_POINT_SELECTIONS;
-        no_collective_cause_global_expected |= H5D_MPIO_POINT_SELECTIONS;
-    }
-
     if (selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT ||
         selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL) {
         test_name = "Broken Collective I/O - No CONTI or CHUNKED Dataset";
@@ -3310,17 +3672,6 @@ test_no_collective_cause_mode(int selection_mode)
         mem_space = H5Screate_simple (RANK, dims, NULL);
         VRFY((mem_space >= 0), "mem_space created");
     }
-
-    if (selection_mode & TEST_POINT_SELECTIONS) {
-        coord[0][0] = 0; coord[0][1] = 0;
-        coord[1][0] = 1; coord[1][1] = 1;
-        ret = H5Sselect_elements (file_space, H5S_SELECT_SET, NELM, (const hsize_t *)coord);
-        VRFY((ret >= 0), "H5Sselect_elements succeeded");
-
-        ret = H5Sselect_elements (mem_space, H5S_SELECT_SET, NELM, (const hsize_t *)coord);
-        VRFY((ret >= 0), "H5Sselect_elements succeeded");
-    }
-
 
     /* Get the number of elements in the selection */
     length = dim0 * dim1;
@@ -3437,7 +3788,7 @@ test_no_collective_cause_mode(int selection_mode)
  *    have the correct values.
  *
  * NOTE: 
- *    This is a temprary function. 
+ *    This is a temporary function. 
  *    test_no_collective_cause_mode(TEST_FILTERS) will replace this when
  *    H5Dcreate and H5write support for mpio and filter feature.
  *
@@ -3688,7 +4039,6 @@ no_collective_cause_tests(void)
     test_no_collective_cause_mode (TEST_DATA_TRANSFORMS);
     test_no_collective_cause_mode (TEST_SET_MPIPOSIX);
     test_no_collective_cause_mode (TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES);
-    test_no_collective_cause_mode (TEST_POINT_SELECTIONS);
     test_no_collective_cause_mode (TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT);
     test_no_collective_cause_mode (TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL);
 #ifdef H5_HAVE_FILTER_FLETCHER32            
@@ -3704,7 +4054,7 @@ no_collective_cause_tests(void)
      */
     test_no_collective_cause_mode (TEST_SET_MPIPOSIX | TEST_DATATYPE_CONVERSION);
     test_no_collective_cause_mode (TEST_DATATYPE_CONVERSION | TEST_DATA_TRANSFORMS);
-    test_no_collective_cause_mode (TEST_DATATYPE_CONVERSION | TEST_DATA_TRANSFORMS | TEST_POINT_SELECTIONS);
+    test_no_collective_cause_mode (TEST_SET_MPIPOSIX | TEST_DATATYPE_CONVERSION | TEST_DATA_TRANSFORMS);
 
     return;
 }

@@ -2246,7 +2246,6 @@
 ./hl/src/Makefile.am
 ./hl/src/Makefile.in
 ./hl/src/H5DO.c
-./hl/src/H5DOprivate.h
 ./hl/src/H5DOpublic.h
 ./hl/src/H5DS.c
 ./hl/src/H5DSprivate.h

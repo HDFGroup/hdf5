@@ -66,7 +66,7 @@ static herr_t H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space
 static herr_t H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset,
     hid_t dapl_id);
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
-static herr_t H5D__init_storage(H5D_t *dataset, hbool_t full_overwrite,
+static herr_t H5D__init_storage(const H5D_t *dataset, hbool_t full_overwrite,
     hsize_t old_dim[], hid_t dxpl_id);
 
 
@@ -1578,7 +1578,7 @@ H5D_typeof(const H5D_t *dset)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_alloc,
+H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc,
     hbool_t full_overwrite, hsize_t old_dim[])
 {
     H5F_t *f = dset->oloc.file;         /* The dataset's file pointer */
@@ -1741,7 +1741,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__init_storage(H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[],
+H5D__init_storage(const H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[],
     hid_t dxpl_id)
 {
     herr_t		ret_value = SUCCEED;    /* Return value */
@@ -2357,7 +2357,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__mark(H5D_t *dataset, hid_t UNUSED dxpl_id, unsigned flags)
+H5D__mark(const H5D_t *dataset, hid_t UNUSED dxpl_id, unsigned flags)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 

@@ -45,6 +45,13 @@ enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
 #define DATASETNAME4	"Data4"
 #define DATASETNAME5	"Data5"
 #define DATASETNAME6	"Data6"
+#define DATASETNAME7	"Data7"
+#define DATASETNAME8	"Data8"
+#define DATASETNAME9	"Data9"
+
+/* point selection order */
+#define IN_ORDER 1
+#define OUT_OF_ORDER 2
 
 /* Hyperslab layout styles */
 #define BYROW           1       /* divide into slabs of rows */
@@ -181,13 +188,12 @@ enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
 #define TEST_DATA_TRANSFORMS                            0x008
 #define TEST_SET_MPIPOSIX                               0x010
 #define TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES            0x020
-#define TEST_POINT_SELECTIONS                           0x040
-#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT  0x080
-#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL 0x100
-#define TEST_FILTERS                                    0x200
+#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT  0x040
+#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL 0x080
+#define TEST_FILTERS                                    0x100
 /* TEST_FILTERS will take place of this after supporting mpio + filter for 
  * H5Dcreate and H5Dwrite */
-#define TEST_FILTERS_READ                               0x400
+#define TEST_FILTERS_READ                               0x200
 
 /* Don't erase these lines, they are put here for debugging purposes */
 /*
@@ -296,5 +302,6 @@ hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type, hbool_
 MPI_Offset h5_mpi_get_file_size(const char *filename, MPI_Comm comm, MPI_Info info);
 int dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[],
                  hsize_t block[], DATATYPE *dataset, DATATYPE *original);
-
+void point_set (hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[],
+                size_t num_points, hsize_t coords[], int order);
 #endif /* PHDF5TEST_H */
