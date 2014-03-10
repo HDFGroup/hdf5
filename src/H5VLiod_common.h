@@ -233,6 +233,7 @@ MERCURY_GEN_PROC(file_close_in_t,
                  ((iod_handle_t)(coh)) 
                  ((iod_handles_t)(root_oh))
                  ((iod_obj_id_t)(root_id)) 
+                 ((hbool_t)(persist_on_close))
                  ((iod_obj_id_t)(max_kv_index)) 
                  ((iod_obj_id_t)(max_array_index)) 
                  ((iod_obj_id_t)(max_blob_index)))

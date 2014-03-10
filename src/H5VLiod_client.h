@@ -232,6 +232,7 @@ typedef struct H5VL_iod_file_t {
     int my_rank;
     int num_procs;
     size_t num_req;
+    hbool_t persist_on_close;
     unsigned nopen_objs;
     H5VL_iod_request_t *request_list_head;
     H5VL_iod_request_t *request_list_tail;

@@ -278,7 +278,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fclose_ff(hid_t file_id, hid_t estack_id)
+H5Fclose_ff(hid_t file_id, hbool_t persist_flag, hid_t estack_id)
 {
     H5VL_t  *vol_plugin = NULL;
     herr_t   ret_value = SUCCEED;
@@ -286,9 +286,21 @@ H5Fclose_ff(hid_t file_id, hid_t estack_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ii", file_id, estack_id);
 
-    /* Check/fix arguments. */
-    if(H5I_FILE != H5I_get_type(file_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
+    /* If persist flag is FALSE (non-default), then set that flag in the file struct */
+    if(FALSE == persist_flag) {
+        H5VL_iod_file_t *file = NULL;
+
+        /* Check/fix arguments. */
+        if(NULL == (file = (H5VL_iod_file_t *)H5I_object_verify(file_id, H5I_FILE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID");
+
+        file->persist_on_close = persist_flag;
+    }
+    else {
+        /* Check/fix arguments. */
+        if(H5I_FILE != H5I_get_type(file_id))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
+    }
 
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))

@@ -698,7 +698,9 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
             if(ret != 0)
                 HGOTO_ERROR_IOD(ret, FAIL, "can't get number of KV entries");
 
+#if H5VL_IOD_DEBUG
             fprintf(stderr, "NUM entries in OID index KV = %d\n", num_entries);
+#endif
 
             if(num_entries) {
                 kvs = (iod_kv_params_t *)malloc(sizeof(iod_kv_params_t) * (size_t)num_entries);
@@ -743,6 +745,15 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         /* finish the transaction */
         if(iod_trans_finish(coh, trans_num, NULL, 0, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction");
+
+        if(TRUE == input->persist_on_close) {
+#if H5VL_IOD_DEBUG
+            fprintf(stderr, "Persisting Last TID (%"PRIu64") before closing\n", trans_num);
+#endif
+            /* persist the last transaction */
+            if(iod_trans_persist(coh, trans_num, NULL, NULL) < 0)
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't persist before closing container");
+        }
     }
 
 #if H5VL_IOD_DEBUG

@@ -1826,6 +1826,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy fapl");
     file->nopen_objs = 1;
     file->num_req = 0;
+    file->persist_on_close = TRUE;
 
     /* initialize head and tail of the container's linked list of requests */
     file->request_list_head = NULL;
@@ -1966,6 +1967,7 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy fapl");
     file->nopen_objs = 1;
     file->num_req = 0;
+    file->persist_on_close = TRUE;
 
     /* initialize head and tail of the container's linked list */
     file->request_list_head = NULL;
@@ -2285,6 +2287,7 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED dxpl_id, void **req)
     input.root_oh = file->remote_file.root_oh;
     input.root_id = file->remote_file.root_id;
     input.cs_scope = file->md_integrity_scope;
+    input.persist_on_close = file->persist_on_close;
 
     if(file->num_req) {
         H5VL_iod_request_t *cur_req = file->request_list_head;
