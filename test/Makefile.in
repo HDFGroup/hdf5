@@ -155,12 +155,12 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	cache_tagging$(EXEEXT) pool$(EXEEXT) accum$(EXEEXT) \
 	hyperslab$(EXEEXT) istore$(EXEEXT) bittests$(EXEEXT) \
 	dt_arith$(EXEEXT) dtypes$(EXEEXT) dsets$(EXEEXT) \
-	cmpd_dset$(EXEEXT) filter_fail$(EXEEXT) extend$(EXEEXT) \
-	external$(EXEEXT) efc$(EXEEXT) objcopy$(EXEEXT) links$(EXEEXT) \
-	unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) fillval$(EXEEXT) \
-	mount$(EXEEXT) flush1$(EXEEXT) flush2$(EXEEXT) \
-	app_ref$(EXEEXT) enum$(EXEEXT) set_extent$(EXEEXT) \
-	ttsafe$(EXEEXT) enc_dec_plist$(EXEEXT) \
+	cmpd_dset$(EXEEXT) mdset$(EXEEXT) filter_fail$(EXEEXT) \
+	extend$(EXEEXT) external$(EXEEXT) efc$(EXEEXT) \
+	objcopy$(EXEEXT) links$(EXEEXT) unlink$(EXEEXT) big$(EXEEXT) \
+	mtime$(EXEEXT) fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
+	flush2$(EXEEXT) app_ref$(EXEEXT) enum$(EXEEXT) \
+	set_extent$(EXEEXT) ttsafe$(EXEEXT) enc_dec_plist$(EXEEXT) \
 	enc_dec_plist_with_endianess$(EXEEXT) getname$(EXEEXT) \
 	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
 	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
@@ -407,6 +407,10 @@ links_env_SOURCES = links_env.c
 links_env_OBJECTS = links_env.$(OBJEXT)
 links_env_LDADD = $(LDADD)
 links_env_DEPENDENCIES = libh5test.la $(LIBHDF5)
+mdset_SOURCES = mdset.c
+mdset_OBJECTS = mdset.$(OBJEXT)
+mdset_LDADD = $(LDADD)
+mdset_DEPENDENCIES = libh5test.la $(LIBHDF5)
 mf_SOURCES = mf.c
 mf_OBJECTS = mf.$(OBJEXT)
 mf_LDADD = $(LDADD)
@@ -540,10 +544,10 @@ SOURCES = $(libdynlib1_la_SOURCES) $(libdynlib2_la_SOURCES) \
 	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
 	gen_new_super.c gen_noencoder.c gen_nullspace.c gen_plist.c \
 	gen_sizes_lheap.c gen_specmetaread.c gen_udlinks.c getname.c \
-	gheap.c hyperslab.c istore.c lheap.c links.c links_env.c mf.c \
-	mount.c mtime.c ntypes.c objcopy.c ohdr.c plugin.c pool.c \
-	reserved.c set_extent.c space_overflow.c stab.c \
-	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
+	gheap.c hyperslab.c istore.c lheap.c links.c links_env.c \
+	mdset.c mf.c mount.c mtime.c ntypes.c objcopy.c ohdr.c \
+	plugin.c pool.c reserved.c set_extent.c space_overflow.c \
+	stab.c tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
 	$(ttsafe_SOURCES) unlink.c unregister.c vfd.c
 DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
 	$(am__libdynlib2_la_SOURCES_DIST) \
@@ -559,10 +563,10 @@ DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
 	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
 	gen_new_super.c gen_noencoder.c gen_nullspace.c gen_plist.c \
 	gen_sizes_lheap.c gen_specmetaread.c gen_udlinks.c getname.c \
-	gheap.c hyperslab.c istore.c lheap.c links.c links_env.c mf.c \
-	mount.c mtime.c ntypes.c objcopy.c ohdr.c plugin.c pool.c \
-	reserved.c set_extent.c space_overflow.c stab.c \
-	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
+	gheap.c hyperslab.c istore.c lheap.c links.c links_env.c \
+	mdset.c mf.c mount.c mtime.c ntypes.c objcopy.c ohdr.c \
+	plugin.c pool.c reserved.c set_extent.c space_overflow.c \
+	stab.c tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
 	$(ttsafe_SOURCES) unlink.c unregister.c vfd.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -861,7 +865,7 @@ TRACE = perl $(top_srcdir)/bin/trace
 # prefix or low-level driver with environment variables will influence
 # the temporary file name in ways that the makefile is not aware of.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
-	compact_dataset.h5 dataset.h5 dset_offset.h5 \
+	mdset.h5 compact_dataset.h5 dataset.h5 dset_offset.h5 \
 	max_compact_dataset.h5 simple.h5 set_local.h5 random_chunks.h5 \
 	huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_expand.h5 \
 	copy_dcpl_newfile.h5 extend.h5 istore.h5 extlinks*.h5 \
@@ -905,7 +909,7 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # other current library code tests.
 TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            pool accum hyperslab istore bittests dt_arith \
-           dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
+           dtypes dsets cmpd_dset mdset filter_fail extend external efc objcopy links unlink \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_with_endianess\
            getname vfd ntypes dangle dtransform reserved cross_read \
@@ -1259,6 +1263,9 @@ links$(EXEEXT): $(links_OBJECTS) $(links_DEPENDENCIES) $(EXTRA_links_DEPENDENCIE
 links_env$(EXEEXT): $(links_env_OBJECTS) $(links_env_DEPENDENCIES) $(EXTRA_links_env_DEPENDENCIES) 
 	@rm -f links_env$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(links_env_OBJECTS) $(links_env_LDADD) $(LIBS)
+mdset$(EXEEXT): $(mdset_OBJECTS) $(mdset_DEPENDENCIES) $(EXTRA_mdset_DEPENDENCIES) 
+	@rm -f mdset$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mdset_OBJECTS) $(mdset_LDADD) $(LIBS)
 mf$(EXEEXT): $(mf_OBJECTS) $(mf_DEPENDENCIES) $(EXTRA_mf_DEPENDENCIES) 
 	@rm -f mf$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mf_OBJECTS) $(mf_LDADD) $(LIBS)
@@ -1385,6 +1392,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/links.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/links_env.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mdset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mount.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtime.Po@am__quote@
