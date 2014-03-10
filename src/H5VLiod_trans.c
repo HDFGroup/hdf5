@@ -251,6 +251,7 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* the container handle */  
     char *persist = NULL, *sleep_timer = NULL;
     int num_persist_retry = 0, i;
+    iod_trans_id_t tid = input->c_version;
     int sleep_t = 0;
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
@@ -258,7 +259,7 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Persist Read Context %"PRIu64"\n", input->c_version);
+    fprintf(stderr, "Persist Read Context %"PRIu64"\n", tid);
 #endif
 
     persist = getenv ("H5ENV_NUM_PERSIST_RETRY");
@@ -270,15 +271,15 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
     if(NULL != sleep_timer)
         sleep_t = atoi(sleep_timer);
 
-    ret = iod_trans_persist(coh, input->c_version, NULL, NULL);
+    ret = iod_trans_persist(coh, tid, NULL, NULL);
     if(ret != 0) {
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
     }
 
     if(ret != 0) {
         for(i=0 ; i<num_persist_retry; i++) {
-            fprintf(stderr, "Retry Persist # %d on %"PRIu64".\n", i+1, input->c_version);
-            ret = iod_trans_persist(coh, input->c_version, NULL, NULL);
+            fprintf(stderr, "Retry Persist # %d on %"PRIu64".\n", i+1, tid);
+            ret = iod_trans_persist(coh, tid, NULL, NULL);
             if(0 == ret) {
                 break;
             }
