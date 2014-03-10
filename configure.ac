@@ -1840,53 +1840,53 @@ case $withval in
 esac
 
 ## ----------------------------------------------------------------------
-## Is the daos_posix present? It has a header file `daos_posix.h' and a library
-## `-ldaos_posix' and their locations might be specified with the `--with-daos_posix'
+## Is the daos present? It has a header file `daos.h' and a library
+## `-ldaos' and their locations might be specified with the `--with-daos'
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
 ##
-AC_ARG_WITH([daos_posix],
-            [AS_HELP_STRING([--with-daos-posix=DIR],
-                            [Use daos_posix [default=no]])],,
+AC_ARG_WITH([daos],
+            [AS_HELP_STRING([--with-daos=DIR],
+                            [Use daos [default=no]])],,
             [withval=no])
 
 case $withval in
   yes)
-    HAVE_DAOS_POSIX="yes"
+    HAVE_DAOS="yes"
     AC_CHECK_HEADERS([daos_api.h] [daos_types.h])
-    AC_CHECK_LIB([daos_posix], [daos_posix_init],[MYDAOS_POSIX_LIBS='-ldaos_posix'], [unset HAVE_DAOS_POSIX])
-    AC_SUBST([MYDAOS_POSIX_LIBS])
-    if test -z "$HAVE_DAOS_POSIX" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find daos_posix library])
+    AC_CHECK_LIB([daos], [daos_init],[MYDAOS_LIBS='-ldaos'], [unset HAVE_DAOS])
+    AC_SUBST([MYDAOS_LIBS])
+    if test -z "$HAVE_DAOS" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find daos library])
     fi
     ;;
   no)
     HAVE_DAOS_POSIX="no"
-    AC_MSG_CHECKING([for daos_posix library])
+    AC_MSG_CHECKING([for daos library])
     AC_MSG_RESULT([suppressed])
     ;;
   *)
-    HAVE_DAOS_POSIX="yes"
+    HAVE_DAOS="yes"
     case "$withval" in
       *,*)
-        daos_posix_inc="`echo $withval |cut -f1 -d,`"
-        daos_posix_lib="`echo $withval |cut -f2 -d, -s`"
+        daos_inc="`echo $withval |cut -f1 -d,`"
+        daos_lib="`echo $withval |cut -f2 -d, -s`"
         ;;
       *)
         if test -n "$withval"; then
-          daos_posix_inc="$withval"
-          daos_posix_lib="$withval/lib"
+          daos_inc="$withval/include/"
+          daos_lib="$withval/lib64"
         fi
         ;;
     esac
 
     ## Trying to include -I/usr/include and -L/usr/lib is redundant and
     ## can mess some compilers up.
-    if test "X$daos_posix_inc" = "X/usr/include"; then
-      daos_posix_inc=""
+    if test "X$daos_inc" = "X/usr/include"; then
+      daos_inc=""
     fi
-    if test "X$daos_posix_lib" = "X/usr/lib"; then
-      daos_posix_lib=""
+    if test "X$daos_lib" = "X/usr/lib"; then
+      daos_lib=""
     fi
 
     saved_CPPFLAGS="$CPPFLAGS"
@@ -1894,23 +1894,23 @@ case $withval in
     saved_LDFLAGS="$LDFLAGS"
     saved_AM_LDFLAGS="$AM_LDFLAGS"
 
-    if test -n "$daos_posix_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$daos_posix_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$daos_posix_inc"
+    if test -n "$daos_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$daos_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$daos_inc"
     fi
 
     AC_CHECK_HEADERS([daos_api.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
 
-    if test -n "$daos_posix_lib"; then
-      LDFLAGS="$LDFLAGS -L$daos_posix_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$daos_posix_lib"
+    if test -n "$daos_lib"; then
+      LDFLAGS="$LDFLAGS -L$daos_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$daos_lib"
     fi
 
-    AC_CHECK_LIB([daos_posix], [daos_posix_finalize],, 
-		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_DAOS_POSIX])
+    AC_CHECK_LIB([daos], [daos_container_close],, 
+		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_DAOS])
 
-    if test -z "$HAVE_DAOS_POSIX" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find daos_posix library])
+    if test -z "$HAVE_DAOS" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find daos library])
     fi
     ;;
 esac
