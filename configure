@@ -710,7 +710,7 @@ LL_PATH
 USE_FILTER_SZIP
 USE_FILTER_DEFLATE
 MYIOD_LIBS
-MYDAOS_POSIX_LIBS
+MYDAOS_LIBS
 MYPLFS_LIBS
 MYAXE_LIBS
 AM_MAKEFLAGS
@@ -937,7 +937,7 @@ with_fnord
 with_dmalloc
 with_axe
 with_plfs
-with_daos_posix
+with_daos
 with_iod
 with_zlib
 with_szlib
@@ -1709,7 +1709,7 @@ Optional Packages:
   --with-dmalloc=DIR      Use dmalloc memory debugging aid [default=no]
   --with-axe=DIR          Use axe [default=no]
   --with-plfs=DIR         Use plfs [default=no]
-  --with-daos-posix=DIR   Use daos_posix [default=no]
+  --with-daos=DIR         Use daos [default=no]
   --with-iod=DIR          Use iod [default=no]
   --with-zlib=DIR         Use zlib library for external deflate I/O filter
                           [default=yes]
@@ -26041,15 +26041,15 @@ fi
 esac
 
 ## ----------------------------------------------------------------------
-## Is the daos_posix present? It has a header file `daos_posix.h' and a library
-## `-ldaos_posix' and their locations might be specified with the `--with-daos_posix'
+## Is the daos present? It has a header file `daos.h' and a library
+## `-ldaos' and their locations might be specified with the `--with-daos'
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
 ##
 
-# Check whether --with-daos_posix was given.
-if test "${with_daos_posix+set}" = set; then :
-  withval=$with_daos_posix;
+# Check whether --with-daos was given.
+if test "${with_daos+set}" = set; then :
+  withval=$with_daos;
 else
   withval=no
 fi
@@ -26057,7 +26057,7 @@ fi
 
 case $withval in
   yes)
-    HAVE_DAOS_POSIX="yes"
+    HAVE_DAOS="yes"
     for ac_header in daos_api.h daos_types.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
@@ -26071,13 +26071,13 @@ fi
 
 done
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for daos_posix_init in -ldaos_posix" >&5
-$as_echo_n "checking for daos_posix_init in -ldaos_posix... " >&6; }
-if ${ac_cv_lib_daos_posix_daos_posix_init+:} false; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for daos_init in -ldaos" >&5
+$as_echo_n "checking for daos_init in -ldaos... " >&6; }
+if ${ac_cv_lib_daos_daos_init+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-ldaos_posix  $LIBS"
+LIBS="-ldaos  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -26087,7 +26087,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char daos_posix_init ();
+char daos_init ();
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -26099,62 +26099,62 @@ char daos_posix_init ();
 int
 main ()
 {
-return daos_posix_init ();
+return daos_init ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_daos_posix_daos_posix_init=yes
+  ac_cv_lib_daos_daos_init=yes
 else
-  ac_cv_lib_daos_posix_daos_posix_init=no
+  ac_cv_lib_daos_daos_init=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_daos_posix_daos_posix_init" >&5
-$as_echo "$ac_cv_lib_daos_posix_daos_posix_init" >&6; }
-if test "x$ac_cv_lib_daos_posix_daos_posix_init" = xyes; then :
-  MYDAOS_POSIX_LIBS='-ldaos_posix'
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_daos_daos_init" >&5
+$as_echo "$ac_cv_lib_daos_daos_init" >&6; }
+if test "x$ac_cv_lib_daos_daos_init" = xyes; then :
+  MYDAOS_LIBS='-ldaos'
 else
-  unset HAVE_DAOS_POSIX
+  unset HAVE_DAOS
 fi
 
 
-    if test -z "$HAVE_DAOS_POSIX" -a -n "$HDF5_CONFIG_ABORT"; then
-      as_fn_error $? "couldn't find daos_posix library" "$LINENO" 5
+    if test -z "$HAVE_DAOS" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find daos library" "$LINENO" 5
     fi
     ;;
   no)
     HAVE_DAOS_POSIX="no"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for daos_posix library" >&5
-$as_echo_n "checking for daos_posix library... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for daos library" >&5
+$as_echo_n "checking for daos library... " >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
     ;;
   *)
-    HAVE_DAOS_POSIX="yes"
+    HAVE_DAOS="yes"
     case "$withval" in
       *,*)
-        daos_posix_inc="`echo $withval |cut -f1 -d,`"
-        daos_posix_lib="`echo $withval |cut -f2 -d, -s`"
+        daos_inc="`echo $withval |cut -f1 -d,`"
+        daos_lib="`echo $withval |cut -f2 -d, -s`"
         ;;
       *)
         if test -n "$withval"; then
-          daos_posix_inc="$withval"
-          daos_posix_lib="$withval/lib"
+          daos_inc="$withval/include/"
+          daos_lib="$withval/lib64"
         fi
         ;;
     esac
 
     ## Trying to include -I/usr/include and -L/usr/lib is redundant and
     ## can mess some compilers up.
-    if test "X$daos_posix_inc" = "X/usr/include"; then
-      daos_posix_inc=""
+    if test "X$daos_inc" = "X/usr/include"; then
+      daos_inc=""
     fi
-    if test "X$daos_posix_lib" = "X/usr/lib"; then
-      daos_posix_lib=""
+    if test "X$daos_lib" = "X/usr/lib"; then
+      daos_lib=""
     fi
 
     saved_CPPFLAGS="$CPPFLAGS"
@@ -26162,9 +26162,9 @@ $as_echo "suppressed" >&6; }
     saved_LDFLAGS="$LDFLAGS"
     saved_AM_LDFLAGS="$AM_LDFLAGS"
 
-    if test -n "$daos_posix_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$daos_posix_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$daos_posix_inc"
+    if test -n "$daos_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$daos_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$daos_inc"
     fi
 
     for ac_header in daos_api.h
@@ -26182,18 +26182,18 @@ fi
 done
 
 
-    if test -n "$daos_posix_lib"; then
-      LDFLAGS="$LDFLAGS -L$daos_posix_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$daos_posix_lib"
+    if test -n "$daos_lib"; then
+      LDFLAGS="$LDFLAGS -L$daos_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$daos_lib"
     fi
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for daos_posix_finalize in -ldaos_posix" >&5
-$as_echo_n "checking for daos_posix_finalize in -ldaos_posix... " >&6; }
-if ${ac_cv_lib_daos_posix_daos_posix_finalize+:} false; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for daos_container_close in -ldaos" >&5
+$as_echo_n "checking for daos_container_close in -ldaos... " >&6; }
+if ${ac_cv_lib_daos_daos_container_close+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-ldaos_posix  $LIBS"
+LIBS="-ldaos  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -26203,7 +26203,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char daos_posix_finalize ();
+char daos_container_close ();
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -26215,36 +26215,36 @@ char daos_posix_finalize ();
 int
 main ()
 {
-return daos_posix_finalize ();
+return daos_container_close ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_daos_posix_daos_posix_finalize=yes
+  ac_cv_lib_daos_daos_container_close=yes
 else
-  ac_cv_lib_daos_posix_daos_posix_finalize=no
+  ac_cv_lib_daos_daos_container_close=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_daos_posix_daos_posix_finalize" >&5
-$as_echo "$ac_cv_lib_daos_posix_daos_posix_finalize" >&6; }
-if test "x$ac_cv_lib_daos_posix_daos_posix_finalize" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_daos_daos_container_close" >&5
+$as_echo "$ac_cv_lib_daos_daos_container_close" >&6; }
+if test "x$ac_cv_lib_daos_daos_container_close" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBDAOS_POSIX 1
+#define HAVE_LIBDAOS 1
 _ACEOF
 
-  LIBS="-ldaos_posix $LIBS"
+  LIBS="-ldaos $LIBS"
 
 else
-  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_DAOS_POSIX
+  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_DAOS
 fi
 
 
-    if test -z "$HAVE_DAOS_POSIX" -a -n "$HDF5_CONFIG_ABORT"; then
-      as_fn_error $? "couldn't find daos_posix library" "$LINENO" 5
+    if test -z "$HAVE_DAOS" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find daos library" "$LINENO" 5
     fi
     ;;
 esac

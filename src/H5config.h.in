@@ -214,8 +214,8 @@
 /* Define to 1 if you have the `axe' library (-laxe). */
 #undef HAVE_LIBAXE
 
-/* Define to 1 if you have the `daos_posix' library (-ldaos_posix). */
-#undef HAVE_LIBDAOS_POSIX
+/* Define to 1 if you have the `daos' library (-ldaos). */
+#undef HAVE_LIBDAOS
 
 /* Define to 1 if you have the `dl' library (-ldl). */
 #undef HAVE_LIBDL

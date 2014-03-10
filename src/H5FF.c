@@ -284,7 +284,7 @@ H5Fclose_ff(hid_t file_id, hbool_t persist_flag, hid_t estack_id)
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", file_id, estack_id);
+    H5TRACE3("e", "ibi", file_id, persist_flag, estack_id);
 
     /* If persist flag is FALSE (non-default), then set that flag in the file struct */
     if(FALSE == persist_flag) {
