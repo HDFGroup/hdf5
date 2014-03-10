@@ -30,6 +30,7 @@
 
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 
+
 /***********/
 /* Headers */
 /***********/
@@ -134,6 +135,7 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
     H5B2_cache_leaf_free_icr,
 }};
 
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -182,7 +184,6 @@ H5B2_cache_hdr_get_load_size(const void *_udata, size_t *image_len)
  * Purpose:	Loads a B-tree header from the disk.
  *
  * Return:	Success:	Pointer to a new B-tree.
- *
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -224,16 +225,16 @@ H5B2_cache_hdr_deserialize(const void *image, size_t UNUSED len,
 
     /* Magic number */
     if(HDmemcmp(p, H5B2_HDR_MAGIC, (size_t)H5B2_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree header signature")
+	HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree header signature")
     p += H5B2_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5B2_HDR_VERSION)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree header version")
+	HGOTO_ERROR(H5E_BTREE, H5E_BADRANGE, NULL, "wrong B-tree header version")
 
     /* B-tree type */
     if(*p++ != (uint8_t)udata->type->id)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree type")
+	HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type")
 
     /* Node size (in bytes) */
     UINT32DECODE(p, node_size);
