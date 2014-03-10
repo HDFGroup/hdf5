@@ -561,9 +561,9 @@ dataset_writeAll(void)
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
     hsize_t block[RANK];			/* for hyperslab setting */
 
-    size_t  num_points = dim1;    /* for point selection */
-    hsize_t coords [RANK*dim1];   /* for point selection */
-    hsize_t current_dims;         /* for point selection */
+    size_t  num_points;         /* for point selection */
+    hsize_t *coords = NULL;     /* for point selection */
+    hsize_t current_dims;       /* for point selection */
     int i;
 
     herr_t ret;         	/* Generic return value */
@@ -579,6 +579,11 @@ dataset_writeAll(void)
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* set up the coords array selection */
+    num_points = dim1;
+    coords = (hsize_t *)HDmalloc(dim1 * RANK * sizeof(hsize_t));
+    VRFY((coords != NULL), "coords malloc succeeded");
 
     /* allocate memory for data buffer */
     data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
@@ -1058,6 +1063,7 @@ dataset_writeAll(void)
     H5Fclose(fid);
 
     /* release data buffers */
+    if(coords) HDfree(coords);
     if(data_array1) HDfree(data_array1);
 }
 
@@ -1088,9 +1094,9 @@ dataset_readAll(void)
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
     hsize_t block[RANK];			/* for hyperslab setting */
 
-    size_t num_points = dim1;       /* for point selection */
-    hsize_t coords [RANK*dim0*dim1];     /* for point selection */
-    hsize_t current_dims;        /* for point selection */
+    size_t num_points;          /* for point selection */
+    hsize_t *coords = NULL;     /* for point selection */
+    hsize_t current_dims;       /* for point selection */
     int i,j,k;
 
     herr_t ret;         	/* Generic return value */
@@ -1106,6 +1112,11 @@ dataset_readAll(void)
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* set up the coords array selection */
+    num_points = dim1;
+    coords = (hsize_t *)HDmalloc(dim0 * dim1 * RANK * sizeof(hsize_t));
+    VRFY((coords != NULL), "coords malloc succeeded");
 
     /* allocate memory for data buffer */
     data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
@@ -1461,6 +1472,7 @@ dataset_readAll(void)
     H5Fclose(fid);
 
     /* release data buffers */
+    if(coords) HDfree(coords);
     if(data_array1) HDfree(data_array1);
     if(data_origin1) HDfree(data_origin1);
 }

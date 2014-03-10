@@ -620,9 +620,9 @@ coll_chunktest(const char* filename,
   MPI_Comm comm = MPI_COMM_WORLD;
   MPI_Info info = MPI_INFO_NULL;
 
-  size_t  num_points;    /* for point selection */
-  hsize_t *coords =NULL; /* for point selection */
-  hsize_t current_dims;  /* for point selection */
+  size_t  num_points;           /* for point selection */
+  hsize_t *coords = NULL;       /* for point selection */
+  hsize_t current_dims;         /* for point selection */
   int i;
 
   /* set up MPI parameters */
@@ -1033,9 +1033,9 @@ coll_chunktest(const char* filename,
   VRFY((status >= 0),"H5Fclose");
 
   /* release data buffers */
-  if (coords) free(coords);
-  if (data_array1) HDfree(data_array1);
-  if (data_origin1) HDfree(data_origin1);
+  if(coords) HDfree(coords);
+  if(data_array1) HDfree(data_array1);
+  if(data_origin1) HDfree(data_origin1);
 
 }
 
