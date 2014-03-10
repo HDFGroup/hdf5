@@ -208,7 +208,7 @@ write_dataset(const char *file_name, const char *dataset_name,
     ret = H5Fclose(file_id);
     assert(0 == ret);
 #else
-    ret = H5Fclose_ff(file_id, H5_EVENT_STACK_NULL);
+    ret = H5Fclose_ff(file_id, 0, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 #endif
 }

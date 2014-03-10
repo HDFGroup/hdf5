@@ -281,7 +281,7 @@ int main(int argc, char **argv) {
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
-    assert(H5Fclose_ff(file_id, H5_EVENT_STACK_NULL) == 0);
+    assert(H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL) == 0);
 
     /* wait on all requests and print completion status */
     H5ESget_count(e_stack, &num_events);

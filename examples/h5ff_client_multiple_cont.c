@@ -377,8 +377,8 @@ int main(int argc, char **argv) {
     ret = H5RCclose(rid2);
     assert(0 == ret);
 
-    assert(H5Fclose_ff(fid1, H5_EVENT_STACK_NULL) == 0);
-    assert(H5Fclose_ff(fid2, H5_EVENT_STACK_NULL) == 0);
+    assert(H5Fclose_ff(fid1, 1, H5_EVENT_STACK_NULL) == 0);
+    assert(H5Fclose_ff(fid2, 1, H5_EVENT_STACK_NULL) == 0);
 
     /* wait on all requests and print completion status */
     H5ESget_count(e_stack, &num_events);

@@ -464,7 +464,7 @@ int main( int argc, char **argv ) {
 
    /* Close the file, then barrier to make sure all have closed it. */
    fprintf( stderr, "M6.2-r%d: close the container (Step 17)\n", my_rank );
-   ret = H5Fclose_ff( file_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
+   ret = H5Fclose_ff( file_id, 1, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
    MPI_Barrier( MPI_COMM_WORLD );
 
@@ -510,7 +510,7 @@ int main( int argc, char **argv ) {
 
    /* Close 2 H5 Objects that are still open */
    fprintf( stderr, "M6.2-r%d: close all h5 objects that are still open\n", my_rank );
-   ret = H5Fclose_ff( file_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
+   ret = H5Fclose_ff( file_id, 1, H5_EVENT_STACK_NULL ); ASSERT_RET;
    ret = H5Pclose( fapl_id ); ASSERT_RET;
 
    fprintf( stderr, "M6.2-r%d: Finalize EFF stack\n", my_rank );

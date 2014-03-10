@@ -218,6 +218,9 @@ int main(int argc, char **argv) {
 
         ret = H5Devict_ff(did, 2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
+
+        ret = H5Mevict_ff(map, 2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -240,7 +243,7 @@ int main(int argc, char **argv) {
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
-    assert(H5Fclose_ff(file_id, H5_EVENT_STACK_NULL) == 0);
+    assert(H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL) == 0);
 
     H5Sclose(sid);
     H5Pclose(fapl_id);

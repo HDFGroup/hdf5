@@ -401,7 +401,7 @@ test_view(const char *file_name, const char *dataset_name,
     MPI_Barrier(MPI_COMM_WORLD);
 
     /* Close the file. */
-    ret = H5Fclose_ff(file_id, H5_EVENT_STACK_NULL);
+    ret = H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 }
 

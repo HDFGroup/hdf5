@@ -207,6 +207,11 @@ int main(int argc, char **argv) {
         assert(rid2 > 0);
     }
 
+    if(0 == my_rank) {
+        ret = H5RCpersist(rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+    }
+
     gid = H5Oopen_ff(file_id, "G1", H5P_DEFAULT, rid2);
     assert(gid);
     dtid = H5Oopen_ff(file_id, "DT1", H5P_DEFAULT, rid2);
@@ -267,15 +272,12 @@ int main(int argc, char **argv) {
         assert(0 == ret);
         H5Pclose(dapl_id);
 
-#if 0
         mapl_id = H5Pcreate (H5P_MAP_ACCESS);
         ret = H5Pset_evict_replica(mapl_id, map_replica);
         assert(0 == ret);
         ret = H5Mevict_ff(map, 2, mapl_id, H5_EVENT_STACK_NULL);
         assert(0 == ret);
         H5Pclose(mapl_id);
-#endif
-
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -304,7 +306,7 @@ int main(int argc, char **argv) {
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
-    assert(H5Fclose_ff(file_id, H5_EVENT_STACK_NULL) == 0);
+    assert(H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL) == 0);
 
     H5Sclose(sid);
     H5Pclose(fapl_id);

@@ -573,7 +573,7 @@ int main(int argc, char **argv) {
     ret = H5Gclose_ff(gid1, e_stack);
     assert(ret == 0);
 
-    H5Fclose_ff(file_id, H5_EVENT_STACK_NULL);
+    H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL);
 
     H5ESget_count(e_stack, &num_events);
 
