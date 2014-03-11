@@ -27,7 +27,7 @@ add_custom_command (
 )
 
 # Remove any output file left over from previous test run
-ADD_TEST (
+add_test (
     NAME HL_TOOLS-clear-objects
     COMMAND    ${CMAKE_COMMAND}
         -E remove 
@@ -35,6 +35,6 @@ ADD_TEST (
         image1.h5
 )
 
-ADD_TEST (NAME HL_TOOLS_h52gif COMMAND $<TARGET_FILE:h52gif> testfiles/h52giftst.h5 image1.gif -i image)
+add_test (NAME HL_TOOLS_h52gif COMMAND $<TARGET_FILE:h52gif> testfiles/h52giftst.h5 image1.gif -i image)
 
-ADD_TEST (NAME HL_TOOLS_gif2h5 COMMAND $<TARGET_FILE:gif2h5> testfiles/image1.gif image1.h5)
+add_test (NAME HL_TOOLS_gif2h5 COMMAND $<TARGET_FILE:gif2h5> testfiles/image1.gif image1.h5)

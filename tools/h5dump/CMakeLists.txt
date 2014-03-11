@@ -32,7 +32,7 @@ if (BUILD_TESTING)
     target_link_libraries (h5dumpgentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     set_target_properties (h5dumpgentest PROPERTIES FOLDER generator/tools)
     
-    #ADD_TEST (NAME h5dumpgentest COMMAND $<TARGET_FILE:h5dumpgentest>)
+    #add_test (NAME h5dumpgentest COMMAND $<TARGET_FILE:h5dumpgentest>)
   endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
   include (CMakeTests.cmake)

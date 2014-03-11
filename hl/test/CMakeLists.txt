@@ -12,7 +12,7 @@ PROJECT (HDF5_HL_TEST)
 # Generate the H5srcdir_str.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
 set (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
-CONFIGURE_FILE (${HDF5_HL_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
+configure_file (${HDF5_HL_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 
 INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})

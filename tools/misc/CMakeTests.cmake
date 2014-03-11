@@ -77,7 +77,7 @@
       COMMAND    ${CMAKE_COMMAND}
       ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/testfiles/h5mkgrp_help.txt ${PROJECT_BINARY_DIR}/testfiles/h5mkgrp_help.txt
   )
-  CONFIGURE_FILE (${PROJECT_SOURCE_DIR}/testfiles/h5mkgrp_version.txt.in ${PROJECT_BINARY_DIR}/testfiles/h5mkgrp_version.txt @ONLY)
+  configure_file (${PROJECT_SOURCE_DIR}/testfiles/h5mkgrp_version.txt.in ${PROJECT_BINARY_DIR}/testfiles/h5mkgrp_version.txt @ONLY)
 
 ##############################################################################
 ##############################################################################
@@ -87,7 +87,7 @@
 
   MACRO (ADD_H5_TEST resultfile resultcode resultoption)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (
+      add_test (
           NAME H5MKGRP-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove 
@@ -95,21 +95,21 @@
                   ${resultfile}.out
                   ${resultfile}.out.err
       )
-      SET_TESTS_PROPERTIES (H5MKGRP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+      set_tests_properties (H5MKGRP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
       
-    ADD_TEST (
+    add_test (
         NAME H5MKGRP-${resultfile}
         COMMAND $<TARGET_FILE:h5mkgrp> ${resultoption} ${resultfile}.h5 ${ARGN}
     )
-    SET_TESTS_PROPERTIES (H5MKGRP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+    set_tests_properties (H5MKGRP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     if (HDF5_ENABLE_USING_MEMCHECKER)
       if (NOT "${last_test}" STREQUAL "")
-        SET_TESTS_PROPERTIES (H5MKGRP-${resultfile} PROPERTIES DEPENDS ${last_test})
+        set_tests_properties (H5MKGRP-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif (NOT "${last_test}" STREQUAL "")
     else (HDF5_ENABLE_USING_MEMCHECKER)
-      SET_TESTS_PROPERTIES (H5MKGRP-${resultfile} PROPERTIES DEPENDS H5MKGRP-${resultfile}-clear-objects)
-      ADD_TEST (
+      set_tests_properties (H5MKGRP-${resultfile} PROPERTIES DEPENDS H5MKGRP-${resultfile}-clear-objects)
+      add_test (
           NAME H5MKGRP-${resultfile}-h5ls
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
@@ -121,15 +121,15 @@
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5MKGRP-${resultfile}-h5ls PROPERTIES DEPENDS H5MKGRP-${resultfile})
+      set_tests_properties (H5MKGRP-${resultfile}-h5ls PROPERTIES DEPENDS H5MKGRP-${resultfile})
     endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_TEST resultfile resultcode resultoption)
 
   MACRO (ADD_H5_CMP resultfile resultcode)
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (NAME H5MKGRP_CMP-${resultfile} COMMAND $<TARGET_FILE:h5mkgrp> ${ARGN})
+      add_test (NAME H5MKGRP_CMP-${resultfile} COMMAND $<TARGET_FILE:h5mkgrp> ${ARGN})
     else (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (
+      add_test (
           NAME H5MKGRP_CMP-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove 
@@ -137,8 +137,8 @@
                   ${resultfile}.out
                   ${resultfile}.out.err
       )
-      SET_TESTS_PROPERTIES (H5MKGRP_CMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      ADD_TEST (
+      set_tests_properties (H5MKGRP_CMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+      add_test (
           NAME H5MKGRP_CMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5mkgrp>"
@@ -149,7 +149,7 @@
               -D "TEST_REFERENCE=${resultfile}.txt"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5MKGRP_CMP-${resultfile} PROPERTIES DEPENDS H5MKGRP_CMP-${resultfile}-clear-objects)
+      set_tests_properties (H5MKGRP_CMP-${resultfile} PROPERTIES DEPENDS H5MKGRP_CMP-${resultfile}-clear-objects)
     endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_CMP resultfile resultcode)
 
@@ -160,7 +160,7 @@
 ##############################################################################
 
   # Remove any output file left over from previous test run
-  ADD_TEST (
+  add_test (
     NAME H5REPART-clearall-objects
     COMMAND    ${CMAKE_COMMAND}
         -E remove 
@@ -172,32 +172,32 @@
         family_to_sec2.h5
   )
   if (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5REPART-clearall-objects PROPERTIES DEPENDS ${last_test})
+    set_tests_properties (H5REPART-clearall-objects PROPERTIES DEPENDS ${last_test})
   endif (NOT "${last_test}" STREQUAL "")
   set (last_test "H5REPART-clearall-objects")
   
   # repartition family member size to 20,000 bytes.
-  ADD_TEST (NAME H5REPART-h5repart_20K COMMAND $<TARGET_FILE:h5repart> -m 20000 family_file%05d.h5 fst_family%05d.h5)
-  SET_TESTS_PROPERTIES (H5REPART-h5repart_20K PROPERTIES DEPENDS H5REPART-clearall-objects)
+  add_test (NAME H5REPART-h5repart_20K COMMAND $<TARGET_FILE:h5repart> -m 20000 family_file%05d.h5 fst_family%05d.h5)
+  set_tests_properties (H5REPART-h5repart_20K PROPERTIES DEPENDS H5REPART-clearall-objects)
 
   # repartition family member size to 5 KB.
-  ADD_TEST (NAME H5REPART-h5repart_5K COMMAND $<TARGET_FILE:h5repart> -m 5k family_file%05d.h5 scd_family%05d.h5)
-  SET_TESTS_PROPERTIES (H5REPART-h5repart_5K PROPERTIES DEPENDS H5REPART-clearall-objects)
+  add_test (NAME H5REPART-h5repart_5K COMMAND $<TARGET_FILE:h5repart> -m 5k family_file%05d.h5 scd_family%05d.h5)
+  set_tests_properties (H5REPART-h5repart_5K PROPERTIES DEPENDS H5REPART-clearall-objects)
 
   # convert family file to sec2 file of 20,000 bytes
-  ADD_TEST (NAME H5REPART-h5repart_sec2 COMMAND $<TARGET_FILE:h5repart> -m 20000 -family_to_sec2 family_file%05d.h5 family_to_sec2.h5)
-  SET_TESTS_PROPERTIES (H5REPART-h5repart_sec2 PROPERTIES DEPENDS H5REPART-clearall-objects)
+  add_test (NAME H5REPART-h5repart_sec2 COMMAND $<TARGET_FILE:h5repart> -m 20000 -family_to_sec2 family_file%05d.h5 family_to_sec2.h5)
+  set_tests_properties (H5REPART-h5repart_sec2 PROPERTIES DEPENDS H5REPART-clearall-objects)
 
   # test the output files repartitioned above.
-  ADD_TEST (NAME H5REPART-h5repart_test COMMAND $<TARGET_FILE:h5repart_test>)
-  SET_TESTS_PROPERTIES (H5REPART-h5repart_test PROPERTIES DEPENDS H5REPART-clearall-objects DEPENDS H5REPART-h5repart_20K DEPENDS H5REPART-h5repart_5K DEPENDS H5REPART-h5repart_sec2)
+  add_test (NAME H5REPART-h5repart_test COMMAND $<TARGET_FILE:h5repart_test>)
+  set_tests_properties (H5REPART-h5repart_test PROPERTIES DEPENDS H5REPART-clearall-objects DEPENDS H5REPART-h5repart_20K DEPENDS H5REPART-h5repart_5K DEPENDS H5REPART-h5repart_sec2)
 
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
         h5repart_test
   )
   
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    ADD_TEST (
+    add_test (
         NAME H5MKGRP-clearall-objects
         COMMAND    ${CMAKE_COMMAND}
             -E remove 
@@ -242,9 +242,9 @@
                 h5mkgrp_nested_mult_lp.out
                 h5mkgrp_nested_mult_lp.out.err
     )
-    SET_TESTS_PROPERTIES (H5MKGRP-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+    set_tests_properties (H5MKGRP-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     if (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5MKGRP-clearall-objects PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (H5MKGRP-clearall-objects PROPERTIES DEPENDS ${last_test})
     endif (NOT "${last_test}" STREQUAL "")
     set (last_test "H5MKGRP-clearall-objects")
   endif (HDF5_ENABLE_USING_MEMCHECKER)

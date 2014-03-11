@@ -203,7 +203,7 @@ target_link_libraries (${example} ${LINK_LIBS})
 ENABLE_TESTING ()
 include (CTest)
 
-ADD_TEST (NAME test_example COMMAND ${example})
+add_test (NAME test_example COMMAND ${example})
 ##########################################################
 
 

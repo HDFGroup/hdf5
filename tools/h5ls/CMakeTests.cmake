@@ -117,21 +117,21 @@
   MACRO (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
-      SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+      add_test (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
+      set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       if (${resultcode} STREQUAL "1")
-        SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
+        set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
       endif (${resultcode} STREQUAL "1")
       if (NOT "${last_test}" STREQUAL "")
-        SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
+        set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif (NOT "${last_test}" STREQUAL "")
     else (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (
+      add_test (
           NAME H5LS-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove ./testfiles/${resultfile}.out ./testfiles/${resultfile}.out.err
       )
-      ADD_TEST (
+      add_test (
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
@@ -142,7 +142,7 @@
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES DEPENDS "H5LS-${resultfile}-clear-objects")
+      set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS "H5LS-${resultfile}-clear-objects")
     endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_TEST file)
 
@@ -154,7 +154,7 @@
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run
-    ADD_TEST (
+    add_test (
       NAME H5LS-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
@@ -266,7 +266,7 @@
           tvldtypes2be.out.err
     )
     if (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5LS-clearall-objects PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (H5LS-clearall-objects PROPERTIES DEPENDS ${last_test})
     endif (NOT "${last_test}" STREQUAL "")
     set (last_test "H5LS-clearall-objects")
   endif (HDF5_ENABLE_USING_MEMCHECKER)

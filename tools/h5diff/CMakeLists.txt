@@ -42,7 +42,7 @@ if (BUILD_TESTING)
     target_link_libraries (h5diffgentest ${HDF5_LIB_TARGET})
     set_target_properties (h5diffgentest PROPERTIES FOLDER generator/tools)
     
-    #ADD_TEST (NAME h5diffgentest COMMAND $<TARGET_FILE:h5diffgentest>)
+    #add_test (NAME h5diffgentest COMMAND $<TARGET_FILE:h5diffgentest>)
   endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
   include (CMakeTests.cmake)

@@ -6,5 +6,5 @@
 ##############################################################################
 
 foreach (example ${examples})
-  ADD_TEST (NAME hl_f90_ex_${example} COMMAND $<TARGET_FILE:hl_f90_ex_${example}>)
+  add_test (NAME hl_f90_ex_${example} COMMAND $<TARGET_FILE:hl_f90_ex_${example}>)
 endforeach (example ${examples})

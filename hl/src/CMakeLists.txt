@@ -11,8 +11,6 @@ endif (BUILD_SHARED_LIBS)
 #-----------------------------------------------------------------------------
 # List Source files
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_HL_SRC_DIR}/src)
-
 set (HL_SRCS
     ${HDF5_HL_SRC_SOURCE_DIR}/H5DO.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5DS.c
@@ -38,9 +36,12 @@ set (HL_HEADERS
 add_library (${HDF5_HL_LIB_TARGET} ${LIB_TYPE} ${HL_SRCS} ${HL_HEADERS})
 TARGET_C_PROPERTIES (${HDF5_HL_LIB_TARGET} " " " ")
 target_link_libraries (${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
-set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_HL_LIB_TARGET} ${HDF5_HL_LIB_NAME} ${LIB_TYPE})
-set_target_properties (${HDF5_HL_LIB_TARGET} PROPERTIES FOLDER libraries/hl)
+set_target_properties (${HDF5_HL_LIB_TARGET} PROPERTIES
+    FOLDER libraries/hl
+    INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+)
+set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_LIB_TARGET}")
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install 

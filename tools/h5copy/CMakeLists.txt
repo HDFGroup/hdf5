@@ -25,7 +25,7 @@ if (BUILD_TESTING)
     target_link_libraries (h5copygentest ${HDF5_LIB_TARGET})
     set_target_properties (h5copygentest PROPERTIES FOLDER generator/tools)
 
-    #ADD_TEST (NAME h5copygentest COMMAND $<TARGET_FILE:h5copygentest>)
+    #add_test (NAME h5copygentest COMMAND $<TARGET_FILE:h5copygentest>)
   endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
   include (CMakeTests.cmake)

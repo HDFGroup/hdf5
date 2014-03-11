@@ -5,7 +5,7 @@
 ##############################################################################
 ##############################################################################
 # Remove any output file left over from previous test run
-ADD_TEST (
+add_test (
     NAME cpp_testhdf5-clear-objects
     COMMAND    ${CMAKE_COMMAND}
         -E remove 
@@ -17,8 +17,8 @@ ADD_TEST (
             tfattrs.h5
 )
 
-ADD_TEST (NAME cpp_testhdf5 COMMAND $<TARGET_FILE:cpp_testhdf5>)
-SET_TESTS_PROPERTIES (cpp_testhdf5 PROPERTIES DEPENDS cpp_testhdf5-clear-objects)
+add_test (NAME cpp_testhdf5 COMMAND $<TARGET_FILE:cpp_testhdf5>)
+set_tests_properties (cpp_testhdf5 PROPERTIES DEPENDS cpp_testhdf5-clear-objects)
 
 if (HDF5_TEST_VFD)
 
@@ -37,7 +37,7 @@ if (HDF5_TEST_VFD)
 
   MACRO (ADD_VFD_TEST vfdname resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (
+      add_test (
           NAME VFD-${vfdname}-cpp_testhdf5-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove 
@@ -48,7 +48,7 @@ if (HDF5_TEST_VFD)
                   tattr_scalar.h5
                   tfattrs.h5
       )
-      ADD_TEST (
+      add_test (
         NAME VFD-${vfdname}-cpp_testhdf5 
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_PROGRAM=$<TARGET_FILE:cpp_testhdf5>"
@@ -59,7 +59,7 @@ if (HDF5_TEST_VFD)
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
             -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
       )
-      SET_TESTS_PROPERTIES (VFD-${vfdname}-cpp_testhdf5 PROPERTIES DEPENDS VFD-${vfdname}-cpp_testhdf5-clear-objects)
+      set_tests_properties (VFD-${vfdname}-cpp_testhdf5 PROPERTIES DEPENDS VFD-${vfdname}-cpp_testhdf5-clear-objects)
     endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_VFD_TEST)
   

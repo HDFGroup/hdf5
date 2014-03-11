@@ -5,7 +5,7 @@
 ##############################################################################
 ##############################################################################
   # Remove any output file left over from previous test run
-  ADD_TEST (
+  add_test (
       NAME cpp_ex-clear-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
@@ -16,14 +16,14 @@
           Select.h5
   )
   if (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (cpp_ex-clear-objects PROPERTIES DEPENDS ${last_test})
+    set_tests_properties (cpp_ex-clear-objects PROPERTIES DEPENDS ${last_test})
   endif (NOT "${last_test}" STREQUAL "")
   set (last_test "cpp_ex-clear-objects")
 
   foreach (example ${examples})
-    ADD_TEST (NAME cpp_ex_${example} COMMAND $<TARGET_FILE:cpp_ex_${example}>)
+    add_test (NAME cpp_ex_${example} COMMAND $<TARGET_FILE:cpp_ex_${example}>)
     if (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (cpp_ex_${example} PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (cpp_ex_${example} PROPERTIES DEPENDS ${last_test})
     endif (NOT "${last_test}" STREQUAL "")
     set (last_test "cpp_ex_${example}")
   endforeach (example ${examples})
@@ -31,7 +31,7 @@
 #  SET_TESTS_PROPERTIES(cpp_ex_readdata PROPERTIES DEPENDS cpp_ex_create)
 #  SET_TESTS_PROPERTIES(cpp_ex_chunks PROPERTIES DEPENDS cpp_ex_extend_ds)
 
-  ADD_TEST (
+  add_test (
       NAME cpp_ex_tutr-clear-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
@@ -43,14 +43,14 @@
           h5tutr_subset.h5
   )
   if (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (cpp_ex_tutr-clear-objects PROPERTIES DEPENDS ${last_test})
+    set_tests_properties (cpp_ex_tutr-clear-objects PROPERTIES DEPENDS ${last_test})
   endif (NOT "${last_test}" STREQUAL "")
   set (last_test "cpp_ex_tutr-clear-objects")
   
   foreach (example ${tutr_examples})
-    ADD_TEST (NAME cpp_ex_${example} COMMAND $<TARGET_FILE:cpp_ex_${example}>)
+    add_test (NAME cpp_ex_${example} COMMAND $<TARGET_FILE:cpp_ex_${example}>)
     if (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (cpp_ex_${example} PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (cpp_ex_${example} PROPERTIES DEPENDS ${last_test})
     endif (NOT "${last_test}" STREQUAL "")
     set (last_test "cpp_ex_${example}")
   endforeach (example ${tutr_examples})

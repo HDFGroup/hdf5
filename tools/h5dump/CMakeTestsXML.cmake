@@ -160,7 +160,7 @@
   MACRO (ADD_XML_SKIP_H5_TEST skipresultfile skipresultcode testtype)
     if (${testtype} STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-        ADD_TEST (
+        add_test (
             NAME H5DUMP-XML-${skipresultfile}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile}.xml --xml ${ARGN}"
         )
@@ -172,22 +172,22 @@
 
   MACRO (ADD_XML_H5_TEST resultfile resultcode)
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (NAME H5DUMP-XML-${resultfile} COMMAND $<TARGET_FILE:h5dump> --xml ${ARGN})
-      SET_TESTS_PROPERTIES (H5DUMP-XML-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
+      add_test (NAME H5DUMP-XML-${resultfile} COMMAND $<TARGET_FILE:h5dump> --xml ${ARGN})
+      set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
       if (NOT ${resultcode} STREQUAL "0")
-        SET_TESTS_PROPERTIES (H5DUMP-XML-${resultfile} PROPERTIES WILL_FAIL "true")
+        set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES WILL_FAIL "true")
       endif (NOT ${resultcode} STREQUAL "0")
       if (NOT "${last_xml_test}" STREQUAL "")
-        SET_TESTS_PROPERTIES (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
+        set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
       endif (NOT "${last_xml_test}" STREQUAL "")
     else (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (
+      add_test (
           NAME H5DUMP-XML-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove ${resultfile}.out ${resultfile}.out.err
       )
-      SET_TESTS_PROPERTIES (H5DUMP-XML-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
-      ADD_TEST (
+      set_tests_properties (H5DUMP-XML-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
+      add_test (
           NAME H5DUMP-XML-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
@@ -198,7 +198,7 @@
               -D "TEST_REFERENCE=${resultfile}.xml"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS "H5DUMP-XML-${resultfile}-clear-objects")
+      set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS "H5DUMP-XML-${resultfile}-clear-objects")
     endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_XML_H5_TEST file)
 
@@ -210,7 +210,7 @@
    
   if (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run
-    ADD_TEST (
+    add_test (
       NAME H5DUMP-XML-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
@@ -343,9 +343,9 @@
           tvlstr.h5.out
           tvlstr.h5.out.err
     )
-    SET_TESTS_PROPERTIES (H5DUMP-XML-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
+    set_tests_properties (H5DUMP-XML-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
     if (NOT "${last_xml_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5DUMP-XML-clearall-objects PROPERTIES DEPENDS ${last_xml_test})
+      set_tests_properties (H5DUMP-XML-clearall-objects PROPERTIES DEPENDS ${last_xml_test})
     endif (NOT "${last_xml_test}" STREQUAL "")
     set (last_test "H5DUMP-XML-clearall-objects")
   endif (HDF5_ENABLE_USING_MEMCHECKER)

@@ -38,7 +38,7 @@ set (H5_DEP_EXECUTABLES
 # Generate the h5cc file containing settings needed to compile programs
 #-----------------------------------------------------------------------------
 #if (NOT WIN32)
-#  CONFIGURE_FILE (${HDF5_TOOLS_MISC_SOURCE_DIR}/h5cc.in ${HDF5_BINARY_DIR}/h5cc @ONLY)
+#  configure_file (${HDF5_TOOLS_MISC_SOURCE_DIR}/h5cc.in ${HDF5_BINARY_DIR}/h5cc @ONLY)
 #endif (NOT WIN32)
 
 if (BUILD_TESTING)
@@ -51,7 +51,7 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (h5repart_gentest " " " ")
     target_link_libraries (h5repart_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     set_target_properties (h5repart_gentest PROPERTIES FOLDER generator/tools)
-    #ADD_TEST (NAME h5repart_gentest COMMAND $<TARGET_FILE:h5repart_gentest>)
+    #add_test (NAME h5repart_gentest COMMAND $<TARGET_FILE:h5repart_gentest>)
   endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
   add_executable (h5repart_test ${HDF5_TOOLS_MISC_SOURCE_DIR}/repart_test.c)

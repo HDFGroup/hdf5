@@ -43,7 +43,7 @@ set (HDF5_VERSION_STRING @HDF5_PACKAGE_VERSION@)
 set (HDF5_VERSION_MAJOR  @HDF5_PACKAGE_VERSION_MAJOR@)
 set (HDF5_VERSION_MINOR  @HDF5_PACKAGE_VERSION_MINOR@)
 
-CONFIGURE_FILE (
+configure_file (
     ${HDF5_RESOURCES_DIR}/hdf5-config.cmake.build.in 
     ${HDF5_BINARY_DIR}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake @ONLY
 )
@@ -52,7 +52,7 @@ CONFIGURE_FILE (
 # Configure the FindHDF5.cmake file for the install directory
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
-  CONFIGURE_FILE (
+  configure_file (
       ${HDF5_RESOURCES_DIR}/FindHDF5.cmake.in 
       ${HDF5_BINARY_DIR}/CMakeFiles/FindHDF5${HDF_PACKAGE_EXT}.cmake @ONLY
   )
@@ -67,7 +67,7 @@ endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 # Configure the hdf5-config.cmake file for the install directory
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
-  CONFIGURE_FILE (
+  configure_file (
       ${HDF5_RESOURCES_DIR}/hdf5-config.cmake.install.in
       ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake @ONLY
   )
@@ -82,7 +82,7 @@ endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 # Configure the hdf5-config-version .cmake file for the install directory
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
-  CONFIGURE_FILE (
+  configure_file (
       ${HDF5_RESOURCES_DIR}/hdf5-config-version.cmake.in
       ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake @ONLY
   )
@@ -101,7 +101,7 @@ if (H5_WORDS_BIGENDIAN)
 else (H5_WORDS_BIGENDIAN)
   set (BYTESEX little-endian)
 endif (H5_WORDS_BIGENDIAN)
-CONFIGURE_FILE (
+configure_file (
     ${HDF5_RESOURCES_DIR}/libhdf5.settings.cmake.in 
     ${HDF5_BINARY_DIR}/libhdf5.settings @ONLY
 )
@@ -116,7 +116,7 @@ install (
 #-----------------------------------------------------------------------------
 option (HDF5_PACK_EXAMPLES  "Package the HDF5 Library Examples Compressed File" OFF)
 if (HDF5_PACK_EXAMPLES)
-  CONFIGURE_FILE (
+  configure_file (
       ${HDF5_RESOURCES_DIR}/HDF518_Examples.cmake.in 
       ${HDF5_BINARY_DIR}/HDF518_Examples.cmake @ONLY
   )
@@ -179,7 +179,7 @@ if (HDF4_BUILD_FORTRAN)
   set (BINARY_PLATFORM "${BINARY_PLATFORM} / ${CMAKE_Fortran_COMPILER_ID} Fortran")
 endif (HDF4_BUILD_FORTRAN)
 
-CONFIGURE_FILE (
+configure_file (
     ${HDF5_RESOURCES_DIR}/README.txt.cmake.in 
     ${HDF5_BINARY_DIR}/README.txt @ONLY
 )
@@ -314,15 +314,15 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
       #-----------------------------------------------------------------------------
       # Configure the Info.plist file for the install bundle
       #-----------------------------------------------------------------------------
-      CONFIGURE_FILE (
+      configure_file (
           ${HDF5_RESOURCES_DIR}/CPack.Info.plist.in
           ${HDF5_BINARY_DIR}/CMakeFiles/Info.plist @ONLY
       )
-      CONFIGURE_FILE (
+      configure_file (
           ${HDF5_RESOURCES_DIR}/PkgInfo.in
           ${HDF5_BINARY_DIR}/CMakeFiles/PkgInfo @ONLY
       )
-      CONFIGURE_FILE (
+      configure_file (
           ${HDF5_RESOURCES_DIR}/version.plist.in
           ${HDF5_BINARY_DIR}/CMakeFiles/version.plist @ONLY
       )
@@ -368,7 +368,7 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
     #-----------------------------------------------------------------------------
     # Configure the spec file for the install RPM
     #-----------------------------------------------------------------------------
-#    CONFIGURE_FILE ("${HDF5_RESOURCES_DIR}/hdf5.spec.in" "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_PACKAGE_NAME}.spec" @ONLY IMMEDIATE)
+#    configure_file ("${HDF5_RESOURCES_DIR}/hdf5.spec.in" "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_PACKAGE_NAME}.spec" @ONLY IMMEDIATE)
 #    set (CPACK_RPM_USER_BINARY_SPECFILE "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_PACKAGE_NAME}.spec")
   endif (WIN32)
   

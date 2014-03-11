@@ -30,10 +30,7 @@ set (CPP_TEST_SRCS
 # Generate the H5srcdir_str.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
 set (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
-CONFIGURE_FILE (${HDF5_CPP_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
-INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
-
-INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR} )
+configure_file (${HDF5_CPP_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 
 add_executable (cpp_testhdf5 ${CPP_TEST_SRCS} )
 TARGET_NAMING (cpp_testhdf5 ${LIB_TYPE})
@@ -43,7 +40,10 @@ target_link_libraries (cpp_testhdf5
     ${HDF5_LIB_TARGET}
     ${HDF5_TEST_LIB_TARGET}
 )
-set_target_properties (cpp_testhdf5 PROPERTIES FOLDER test/cpp)
+set_target_properties (cpp_testhdf5 PROPERTIES
+    FOLDER test/cpp
+    INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+)
 
 add_custom_command (
     TARGET     cpp_testhdf5

@@ -9,9 +9,9 @@
 #  Macro used to add a unit test
 # --------------------------------------------------------------------
 MACRO (HL_ADD_TEST hl_name files)
-  ADD_TEST (NAME hl_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
+  add_test (NAME hl_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
   if (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (hl_${hl_name} PROPERTIES DEPENDS ${last_test})
+    set_tests_properties (hl_${hl_name} PROPERTIES DEPENDS ${last_test})
   endif (NOT "${last_test}" STREQUAL "")
 
   # --------------------------------------------------------------------
@@ -31,7 +31,7 @@ MACRO (HL_ADD_TEST hl_name files)
 ENDMACRO (HL_ADD_TEST)
 
 # Remove any output file left over from previous test run
-ADD_TEST (
+add_test (
     NAME hl_test-clear-objects
     COMMAND    ${CMAKE_COMMAND}
         -E remove 
@@ -61,13 +61,13 @@ ADD_TEST (
         test_table.h5
 )
 if (NOT "${last_test}" STREQUAL "")
-  SET_TESTS_PROPERTIES (hl_test-clear-objects PROPERTIES DEPENDS ${last_test})
+  set_tests_properties (hl_test-clear-objects PROPERTIES DEPENDS ${last_test})
 endif (NOT "${last_test}" STREQUAL "")
 set (last_test "hl_test-clear-objects")
 
-HL_ADD_TEST (test_ds "dsdata.txt;dslat.txt;dslon.txt;test_ds_be.h5;test_ds_le.h5")
-HL_ADD_TEST (test_dset_opt "")
-HL_ADD_TEST (test_image "image8.txt;sepia.pal;earth.pal;image24pixel.txt;image24plane.txt;usa.wri")
-HL_ADD_TEST (test_lite "dtype_file.txt")
-HL_ADD_TEST (test_packet "")
-HL_ADD_TEST (test_table "test_table_be.h5;test_table_cray.h5;test_table_le.h5")
+HL_add_test (test_ds "dsdata.txt;dslat.txt;dslon.txt;test_ds_be.h5;test_ds_le.h5")
+HL_add_test (test_dset_opt "")
+HL_add_test (test_image "image8.txt;sepia.pal;earth.pal;image24pixel.txt;image24plane.txt;usa.wri")
+HL_add_test (test_lite "dtype_file.txt")
+HL_add_test (test_packet "")
+HL_add_test (test_table "test_table_be.h5;test_table_cray.h5;test_table_le.h5")

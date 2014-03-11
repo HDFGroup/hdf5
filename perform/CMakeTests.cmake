@@ -17,7 +17,7 @@ add_custom_command (
 #-----------------------------------------------------------------------------
 
 # Remove any output file left over from previous test run
-ADD_TEST (
+add_test (
     NAME PERFORM_h5perform-clear-objects
     COMMAND    ${CMAKE_COMMAND}
         -E remove 
@@ -31,31 +31,31 @@ ADD_TEST (
         x-gnuplot
 )
 
-ADD_TEST (NAME PERFORM_h5perf_serial COMMAND $<TARGET_FILE:h5perf_serial>)
+add_test (NAME PERFORM_h5perf_serial COMMAND $<TARGET_FILE:h5perf_serial>)
 
 if (HDF5_BUILD_PERFORM_STANDALONE)
-  ADD_TEST (NAME PERFORM_h5perf_serial_alone COMMAND $<TARGET_FILE:h5perf_serial_alone>)
+  add_test (NAME PERFORM_h5perf_serial_alone COMMAND $<TARGET_FILE:h5perf_serial_alone>)
 endif (HDF5_BUILD_PERFORM_STANDALONE)
 
-ADD_TEST (NAME PERFORM_chunk COMMAND $<TARGET_FILE:chunk>)
+add_test (NAME PERFORM_chunk COMMAND $<TARGET_FILE:chunk>)
 
-ADD_TEST (NAME PERFORM_iopipe COMMAND $<TARGET_FILE:iopipe>)
+add_test (NAME PERFORM_iopipe COMMAND $<TARGET_FILE:iopipe>)
 
-ADD_TEST (NAME PERFORM_overhead COMMAND $<TARGET_FILE:overhead>)
+add_test (NAME PERFORM_overhead COMMAND $<TARGET_FILE:overhead>)
 
-ADD_TEST (NAME PERFORM_perf_meta COMMAND $<TARGET_FILE:perf_meta>)
+add_test (NAME PERFORM_perf_meta COMMAND $<TARGET_FILE:perf_meta>)
 
-ADD_TEST (NAME PERFORM_zip_perf_help COMMAND $<TARGET_FILE:zip_perf> "-h")
-ADD_TEST (NAME PERFORM_zip_perf COMMAND $<TARGET_FILE:zip_perf> tfilters.h5)
+add_test (NAME PERFORM_zip_perf_help COMMAND $<TARGET_FILE:zip_perf> "-h")
+add_test (NAME PERFORM_zip_perf COMMAND $<TARGET_FILE:zip_perf> tfilters.h5)
 
 if (H5_HAVE_PARALLEL)
-  ADD_TEST (NAME PERFORM_h5perf COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:h5perf>)
+  add_test (NAME PERFORM_h5perf COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:h5perf>)
 
   if (HDF5_BUILD_PERFORM_STANDALONE)
-    ADD_TEST (NAME PERFORM_h5perf_alone COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:h5perf_alone>)
+    add_test (NAME PERFORM_h5perf_alone COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:h5perf_alone>)
   endif (HDF5_BUILD_PERFORM_STANDALONE)
 
   if (HDF5_BUILD_PARALLEL_ALL)
-    ADD_TEST (NAME PERFORM_benchpar COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:benchpar>)
+    add_test (NAME PERFORM_benchpar COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:benchpar>)
   endif (HDF5_BUILD_PARALLEL_ALL)
 endif (H5_HAVE_PARALLEL)
