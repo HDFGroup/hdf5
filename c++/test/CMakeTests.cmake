@@ -20,9 +20,9 @@ ADD_TEST (
 ADD_TEST (NAME cpp_testhdf5 COMMAND $<TARGET_FILE:cpp_testhdf5>)
 SET_TESTS_PROPERTIES (cpp_testhdf5 PROPERTIES DEPENDS cpp_testhdf5-clear-objects)
 
-IF (HDF5_TEST_VFD)
+if (HDF5_TEST_VFD)
 
-  SET (VFD_LIST
+  set (VFD_LIST
       sec2
       stdio
       core
@@ -31,12 +31,12 @@ IF (HDF5_TEST_VFD)
       family
   )
   
-  IF (DIRECT_VFD)
-    SET (VFD_LIST ${VFD_LIST} direct)
-  ENDIF (DIRECT_VFD)
+  if (DIRECT_VFD)
+    set (VFD_LIST ${VFD_LIST} direct)
+  endif (DIRECT_VFD)
 
   MACRO (ADD_VFD_TEST vfdname resultcode)
-    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME VFD-${vfdname}-cpp_testhdf5-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -60,12 +60,12 @@ IF (HDF5_TEST_VFD)
             -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
       )
       SET_TESTS_PROPERTIES (VFD-${vfdname}-cpp_testhdf5 PROPERTIES DEPENDS VFD-${vfdname}-cpp_testhdf5-clear-objects)
-    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_VFD_TEST)
   
   # Run test with different Virtual File Driver
-  FOREACH (vfd ${VFD_LIST})
+  foreach (vfd ${VFD_LIST})
     ADD_VFD_TEST (${vfd} 0)
-  ENDFOREACH (vfd ${VFD_LIST})
+  endforeach (vfd ${VFD_LIST})
 
-ENDIF (HDF5_TEST_VFD)
+endif (HDF5_TEST_VFD)

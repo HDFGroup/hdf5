@@ -8,7 +8,7 @@
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
-  SET (LIST_HDF5_TEST_FILES
+  set (LIST_HDF5_TEST_FILES
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_basic1.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_basic2.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_types.h5
@@ -52,7 +52,7 @@
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/non_comparables2.h5
   )
 
-  SET (LIST_OTHER_TEST_FILES
+  set (LIST_OTHER_TEST_FILES
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_10.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_100.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_101.txt
@@ -239,50 +239,50 @@
   #
   # copy test files from source to build dir
   #
-  FOREACH (h5_tstfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+  foreach (h5_tstfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
     GET_FILENAME_COMPONENT(fname "${h5_tstfiles}" NAME)
-    SET (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
-    #MESSAGE (STATUS " Copying ${fname}")
-    ADD_CUSTOM_COMMAND (
+    set (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
+    #message (STATUS " Copying ${fname}")
+    add_custom_command (
         TARGET     h5diff
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${h5_tstfiles} ${dest}
     )
-  ENDFOREACH (h5_tstfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+  endforeach (h5_tstfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
 
 
   #
   # Overwrite system dependent files (Windows)
   #
-  IF (WIN32 AND NOT CYGWIN)
-    ADD_CUSTOM_COMMAND (
+  if (WIN32 AND NOT CYGWIN)
+    add_custom_command (
         TARGET     h5diff
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_101w.txt ${PROJECT_BINARY_DIR}/testfiles/h5diff_101.txt
     )
 
-    ADD_CUSTOM_COMMAND (
+    add_custom_command (
         TARGET     h5diff
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102w.txt ${PROJECT_BINARY_DIR}/testfiles/h5diff_102.txt
     )
-    ADD_CUSTOM_COMMAND (
+    add_custom_command (
         TARGET     h5diff
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_103w.txt ${PROJECT_BINARY_DIR}/testfiles/h5diff_103.txt
     )
 
-    ADD_CUSTOM_COMMAND (
+    add_custom_command (
         TARGET     h5diff
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_104w.txt ${PROJECT_BINARY_DIR}/testfiles/h5diff_104.txt
     )
-  ENDIF (WIN32 AND NOT CYGWIN)
+  endif (WIN32 AND NOT CYGWIN)
   
 ##############################################################################
 ##############################################################################
@@ -292,16 +292,16 @@
 
   MACRO (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    IF (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (NAME H5DIFF-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${ARGN})
       SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      IF (NOT ${resultcode} STREQUAL "0")
+      if (NOT ${resultcode} STREQUAL "0")
         SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-      ENDIF (NOT ${resultcode} STREQUAL "0")
-      IF (NOT "${last_test}" STREQUAL "")
+      endif (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${last_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
-      ENDIF (NOT "${last_test}" STREQUAL "")
-    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      endif (NOT "${last_test}" STREQUAL "")
+    else (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5DIFF-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -320,24 +320,24 @@
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
       SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES DEPENDS "H5DIFF-${resultfile}-clear-objects")
-    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
-    IF (H5_HAVE_PARALLEL)
+    endif (HDF5_ENABLE_USING_MEMCHECKER)
+    if (H5_HAVE_PARALLEL)
       ADD_PH5_TEST (${resultfile} ${resultcode} ${ARGN})
-    ENDIF (H5_HAVE_PARALLEL)
+    endif (H5_HAVE_PARALLEL)
   ENDMACRO (ADD_H5_TEST file)
 
   MACRO (ADD_PH5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    IF (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (NAME PH5DIFF-${resultfile} COMMAND $<TARGET_FILE:ph5diff> ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} ${ARGN})
       SET_TESTS_PROPERTIES (PH5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      IF (NOT ${resultcode} STREQUAL "0")
+      if (NOT ${resultcode} STREQUAL "0")
         SET_TESTS_PROPERTIES (PH5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-      ENDIF (NOT ${resultcode} STREQUAL "0")
-      IF (NOT "${last_test}" STREQUAL "")
+      endif (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${last_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (PH5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
-      ENDIF (NOT "${last_test}" STREQUAL "")
-    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      endif (NOT "${last_test}" STREQUAL "")
+    else (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME PH5DIFF-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -358,7 +358,7 @@
               -P "${HDF5_RESOURCES_DIR}/prunTest.cmake"
       )
       SET_TESTS_PROPERTIES (PH5DIFF-${resultfile} PROPERTIES DEPENDS "PH5DIFF-${resultfile}-clear-objects")
-    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_PH5_TEST file)
 
    # ADD_H5_NO_OUTPUT_TEST
@@ -366,30 +366,30 @@
    # Don't use this if possible; this may be removed.
    MACRO (ADD_H5_NO_OUTPUT_TEST testname resultcode)
     # If using memchecker add tests without using scripts
-    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5DIFF-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove ./testfiles/${testname}.out ./testfiles/${testname}.out.err
       )
       # if there was a previous test
-      IF (NOT "${last_test}" STREQUAL "")
+      if (NOT "${last_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5DIFF-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      ENDIF (NOT "${last_test}" STREQUAL "")
-    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      endif (NOT "${last_test}" STREQUAL "")
+    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
 
     ADD_TEST (NAME H5DIFF-${testname} COMMAND $<TARGET_FILE:h5diff> ${ARGN})
-    IF (NOT ${resultcode} STREQUAL "0")
+    if (NOT ${resultcode} STREQUAL "0")
       SET_TESTS_PROPERTIES (H5DIFF-${testname} PROPERTIES WILL_FAIL "true")
-    ENDIF (NOT ${resultcode} STREQUAL "0")
+    endif (NOT ${resultcode} STREQUAL "0")
 
-    IF (HDF5_ENABLE_USING_MEMCHECKER)
-      IF (NOT "${last_test}" STREQUAL "")
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      if (NOT "${last_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5DIFF-${testname} PROPERTIES DEPENDS ${last_test})
-      ENDIF (NOT "${last_test}" STREQUAL "")
-    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      endif (NOT "${last_test}" STREQUAL "")
+    else (HDF5_ENABLE_USING_MEMCHECKER)
       SET_TESTS_PROPERTIES (H5DIFF-${testname} PROPERTIES DEPENDS H5DIFF-${testname}-clear-objects)
-    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_NO_OUTPUT_TEST)
 
 ##############################################################################
@@ -401,54 +401,54 @@
   # --------------------------------------------------------------------
   # test file names 
   # --------------------------------------------------------------------
-  SET (FILE1 h5diff_basic1.h5)
-  SET (FILE2 h5diff_basic2.h5)
-  SET (FILE3 h5diff_types.h5)
-  SET (FILE4 h5diff_dtypes.h5)
-  SET (FILE5 h5diff_attr1.h5)
-  SET (FILE6 h5diff_attr2.h5)
-  SET (FILE7 h5diff_dset1.h5)
-  SET (FILE8 h5diff_dset2.h5)
-  SET (FILE9 h5diff_hyper1.h5)
-  SET (FILE10 h5diff_hyper2.h5)
-  SET (FILE11 h5diff_empty.h5)
-  SET (FILE12 h5diff_links.h5)
-  SET (FILE13 h5diff_softlinks.h5)
-  SET (FILE14 h5diff_linked_softlink.h5)
-  SET (FILE15 h5diff_extlink_src.h5)
-  SET (FILE16 h5diff_extlink_trg.h5)
-  SET (FILE17 h5diff_ext2softlink_src.h5)
-  SET (FILE18 h5diff_ext2softlink_trg.h5)
-  SET (FILE19 h5diff_dset_zero_dim_size1.h5)
-  SET (FILE20 h5diff_dset_zero_dim_size2.h5)
-  SET (DANGLE_LINK_FILE1 h5diff_danglelinks1.h5)
-  SET (DANGLE_LINK_FILE2 h5diff_danglelinks2.h5)
-  SET (GRP_RECURSE_FILE1 h5diff_grp_recurse1.h5)
-  SET (GRP_RECURSE_FILE2 h5diff_grp_recurse2.h5)
+  set (FILE1 h5diff_basic1.h5)
+  set (FILE2 h5diff_basic2.h5)
+  set (FILE3 h5diff_types.h5)
+  set (FILE4 h5diff_dtypes.h5)
+  set (FILE5 h5diff_attr1.h5)
+  set (FILE6 h5diff_attr2.h5)
+  set (FILE7 h5diff_dset1.h5)
+  set (FILE8 h5diff_dset2.h5)
+  set (FILE9 h5diff_hyper1.h5)
+  set (FILE10 h5diff_hyper2.h5)
+  set (FILE11 h5diff_empty.h5)
+  set (FILE12 h5diff_links.h5)
+  set (FILE13 h5diff_softlinks.h5)
+  set (FILE14 h5diff_linked_softlink.h5)
+  set (FILE15 h5diff_extlink_src.h5)
+  set (FILE16 h5diff_extlink_trg.h5)
+  set (FILE17 h5diff_ext2softlink_src.h5)
+  set (FILE18 h5diff_ext2softlink_trg.h5)
+  set (FILE19 h5diff_dset_zero_dim_size1.h5)
+  set (FILE20 h5diff_dset_zero_dim_size2.h5)
+  set (DANGLE_LINK_FILE1 h5diff_danglelinks1.h5)
+  set (DANGLE_LINK_FILE2 h5diff_danglelinks2.h5)
+  set (GRP_RECURSE_FILE1 h5diff_grp_recurse1.h5)
+  set (GRP_RECURSE_FILE2 h5diff_grp_recurse2.h5)
   # group recursive - same structure via external links through files 
-  SET (GRP_RECURSE1_EXT h5diff_grp_recurse_ext1.h5)
-  SET (GRP_RECURSE2_EXT1 h5diff_grp_recurse_ext2-1.h5)
-  SET (GRP_RECURSE2_EXT2 h5diff_grp_recurse_ext2-2.h5)
-  SET (GRP_RECURSE2_EXT3 h5diff_grp_recurse_ext2-3.h5)
+  set (GRP_RECURSE1_EXT h5diff_grp_recurse_ext1.h5)
+  set (GRP_RECURSE2_EXT1 h5diff_grp_recurse_ext2-1.h5)
+  set (GRP_RECURSE2_EXT2 h5diff_grp_recurse_ext2-2.h5)
+  set (GRP_RECURSE2_EXT3 h5diff_grp_recurse_ext2-3.h5)
   # same structure, same obj name with different value
-  SET (EXCLUDE_FILE1_1 h5diff_exclude1-1.h5)
-  SET (EXCLUDE_FILE1_2 h5diff_exclude1-2.h5)
+  set (EXCLUDE_FILE1_1 h5diff_exclude1-1.h5)
+  set (EXCLUDE_FILE1_2 h5diff_exclude1-2.h5)
   # different structure and obj names
-  SET (EXCLUDE_FILE2_1 h5diff_exclude2-1.h5)
-  SET (EXCLUDE_FILE2_2 h5diff_exclude2-2.h5)
+  set (EXCLUDE_FILE2_1 h5diff_exclude2-1.h5)
+  set (EXCLUDE_FILE2_2 h5diff_exclude2-2.h5)
   # Only one file contains unique objs. Common objs are same.
-  SET (EXCLUDE_FILE3_1 h5diff_exclude3-1.h5)
-  SET (EXCLUDE_FILE3_2 h5diff_exclude3-2.h5)
+  set (EXCLUDE_FILE3_1 h5diff_exclude3-1.h5)
+  set (EXCLUDE_FILE3_2 h5diff_exclude3-2.h5)
   # compound type with multiple vlen string types
-  SET (COMP_VL_STRS_FILE h5diff_comp_vl_strs.h5)
+  set (COMP_VL_STRS_FILE h5diff_comp_vl_strs.h5)
   # container types (array,vlen) with multiple nested compound types
-  SET (COMPS_ARRAY_VLEN_FILE1 compounds_array_vlen1.h5)
-  SET (COMPS_ARRAY_VLEN_FILE2 compounds_array_vlen2.h5)
+  set (COMPS_ARRAY_VLEN_FILE1 compounds_array_vlen1.h5)
+  set (COMPS_ARRAY_VLEN_FILE2 compounds_array_vlen2.h5)
   # attrs with verbose option level
-  SET (ATTR_VERBOSE_LEVEL_FILE1 h5diff_attr_v_level1.h5)
-  SET (ATTR_VERBOSE_LEVEL_FILE2 h5diff_attr_v_level2.h5)
+  set (ATTR_VERBOSE_LEVEL_FILE1 h5diff_attr_v_level1.h5)
+  set (ATTR_VERBOSE_LEVEL_FILE2 h5diff_attr_v_level2.h5)
 
-  IF (HDF5_ENABLE_USING_MEMCHECKER)
+  if (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run
     ADD_TEST (
       NAME H5DIFF-clearall-objects
@@ -802,11 +802,11 @@
           h5diff_90.out.err
     )
     SET_TESTS_PROPERTIES (H5DIFF-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-    IF (NOT "${last_test}" STREQUAL "")
+    if (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5DIFF-clearall-objects PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "H5DIFF-clearall-objects")
-  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    endif (NOT "${last_test}" STREQUAL "")
+    set (last_test "H5DIFF-clearall-objects")
+  endif (HDF5_ENABLE_USING_MEMCHECKER)
 
 # ############################################################################
 # # Common usage
@@ -1074,7 +1074,7 @@ ADD_H5_TEST (h5diff_90 0 -v ${FILE2} ${FILE2})
 # 10. read by hyperslab, print indexes
 #if test -n "$pmode" -a "$mydomainname" = hdfgroup.uiuc.edu; then
 #    # skip this test which sometimes hangs in some THG machines
-#    MESSAGE (STATUS "SKIP -v ${FILE9} ${FILE10})
+#    message (STATUS "SKIP -v ${FILE9} ${FILE10})
 #else
 #    ADD_H5_TEST (h5diff_100 1 -v ${FILE9} ${FILE10}) 
 #fi

@@ -4,7 +4,7 @@ PROJECT (HDF5_HL_EXAMPLES )
 #-----------------------------------------------------------------------------
 # Define Sources
 #-----------------------------------------------------------------------------
-SET (examples
+set (examples
     ex_lite1
     ex_lite2    #ex_lite2 PROPERTIES DEPENDS ex_lite1)
     ex_lite3
@@ -26,16 +26,16 @@ SET (examples
     ex_ds1
 )
 
-FOREACH (example ${examples})
-  ADD_EXECUTABLE (hl_ex_${example} ${HDF5_HL_EXAMPLES_SOURCE_DIR}/${example}.c)
+foreach (example ${examples})
+  add_executable (hl_ex_${example} ${HDF5_HL_EXAMPLES_SOURCE_DIR}/${example}.c)
   TARGET_NAMING (hl_ex_${example} ${LIB_TYPE})
   TARGET_C_PROPERTIES (hl_ex_${example} " " " ")
-  TARGET_LINK_LIBRARIES (hl_ex_${example} ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
-  SET_TARGET_PROPERTIES (hl_ex_${example} PROPERTIES FOLDER examples/hl)
-ENDFOREACH (example ${examples})
+  target_link_libraries (hl_ex_${example} ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
+  set_target_properties (hl_ex_${example} PROPERTIES FOLDER examples/hl)
+endforeach (example ${examples})
 
-IF (BUILD_TESTING)
+if (BUILD_TESTING)
 
-  INCLUDE (CMakeTests.cmake)
+  include (CMakeTests.cmake)
 
-ENDIF (BUILD_TESTING)
+endif (BUILD_TESTING)

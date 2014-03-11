@@ -192,16 +192,16 @@ PROJECT (HDF5MyApp C CXX)
 FIND_PACKAGE (HDF5 NAMES hdf5)
 # FIND_PACKAGE (HDF5) # Find non-cmake built HDF5
 INCLUDE_DIRECTORIES (${HDF5_INCLUDE_DIR})
-SET (LINK_LIBS ${LINK_LIBS} ${HDF5_LIBRARIES})
+set (LINK_LIBS ${LINK_LIBS} ${HDF5_LIBRARIES})
 
-SET (example hdf_example)
+set (example hdf_example)
 
-ADD_EXECUTABLE (${example} ${PROJECT_SOURCE_DIR}/${example}.c)
+add_executable (${example} ${PROJECT_SOURCE_DIR}/${example}.c)
 TARGET_C_PROPERTIES (${example} " " " ")
-TARGET_LINK_LIBRARIES (${example} ${LINK_LIBS})
+target_link_libraries (${example} ${LINK_LIBS})
 
 ENABLE_TESTING ()
-INCLUDE (CTest)
+include (CTest)
 
 ADD_TEST (NAME test_example COMMAND ${example})
 ##########################################################

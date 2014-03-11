@@ -9,14 +9,14 @@ ADD_SUBDIRECTORY (${HDF5_HL_CPP_SOURCE_DIR}/src ${HDF5_HL_CPP_BINARY_DIR}/src)
 # --------------------------------------------------------------------
 #  Add in the examples for the Packet Table codes
 # --------------------------------------------------------------------
-IF (HDF5_BUILD_EXAMPLES)
+if (HDF5_BUILD_EXAMPLES)
   ADD_SUBDIRECTORY (${HDF5_HL_CPP_SOURCE_DIR}/examples ${HDF5_HL_CPP_BINARY_DIR}/examples)
-ENDIF (HDF5_BUILD_EXAMPLES)
+endif (HDF5_BUILD_EXAMPLES)
 
 # --------------------------------------------------------------------
 # Add in the unit tests for the packet table c++ wrapper
 # --------------------------------------------------------------------
 
-IF (BUILD_TESTING)
+if (BUILD_TESTING)
   ADD_SUBDIRECTORY (${HDF5_HL_CPP_SOURCE_DIR}/test ${HDF5_HL_CPP_BINARY_DIR}/test)
-ENDIF (BUILD_TESTING)
+endif (BUILD_TESTING)

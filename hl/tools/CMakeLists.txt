@@ -4,7 +4,7 @@ PROJECT (HDF5_HL_TOOLS)
 #-----------------------------------------------------------------------------
 # Define Sources
 #-----------------------------------------------------------------------------
-SET (GIF2H5_SRCS
+set (GIF2H5_SRCS
     ${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5/gif.h
     ${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5/decompress.c
     ${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5/gif2hdf.c
@@ -17,46 +17,46 @@ SET (GIF2H5_SRCS
 INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 INCLUDE_DIRECTORIES (${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5)
 
-ADD_EXECUTABLE (gif2h5 ${GIF2H5_SRCS})
+add_executable (gif2h5 ${GIF2H5_SRCS})
 TARGET_NAMING (gif2h5 ${LIB_TYPE})
 TARGET_C_PROPERTIES (gif2h5 " " " ")
-TARGET_LINK_LIBRARIES (gif2h5 ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
-SET_TARGET_PROPERTIES (gif2h5 PROPERTIES FOLDER tools/hl)
+target_link_libraries (gif2h5 ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+set_target_properties (gif2h5 PROPERTIES FOLDER tools/hl)
 
 #-- Add h52gif program
-SET (hdf2gif_SRCS
+set (hdf2gif_SRCS
     ${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5/hdf2gif.c
     ${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5/hdfgifwr.c
 )
-ADD_EXECUTABLE (h52gif ${hdf2gif_SRCS})
+add_executable (h52gif ${hdf2gif_SRCS})
 TARGET_NAMING (h52gif ${LIB_TYPE})
 TARGET_C_PROPERTIES (h52gif " " " ")
-TARGET_LINK_LIBRARIES (h52gif ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
-SET_TARGET_PROPERTIES (h52gif PROPERTIES FOLDER tools/hl)
+target_link_libraries (h52gif ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+set_target_properties (h52gif PROPERTIES FOLDER tools/hl)
 
-IF (BUILD_TESTING)
+if (BUILD_TESTING)
   # --------------------------------------------------------------------
   # This executable can generate the actual test files - Currently not
   #  used in the CMake Build system as we rely on the test files that are
   #  shipped with HDF5 source archives
   # --------------------------------------------------------------------
-  IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
-      ADD_EXECUTABLE (hl_h52gifgentest ${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5/h52gifgentst.c)
+  if (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
+      add_executable (hl_h52gifgentest ${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5/h52gifgentst.c)
       TARGET_NAMING (hl_h52gifgentest ${LIB_TYPE})
       TARGET_C_PROPERTIES (hl_h52gifgentest " " " ")
-      TARGET_LINK_LIBRARIES (hl_h52gifgentest ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
-      SET_TARGET_PROPERTIES (hl_h52gifgentest PROPERTIES FOLDER generator/tools/hl)
+      target_link_libraries (hl_h52gifgentest ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
+      set_target_properties (hl_h52gifgentest PROPERTIES FOLDER generator/tools/hl)
     
 #      ADD_TEST (NAME hl_h52gifgentest COMMAND $<TARGET_FILE:hl_h52gifgentest>)
-  ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
+  endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
-  INCLUDE (CMakeTests.cmake)
-ENDIF (BUILD_TESTING)
+  include (CMakeTests.cmake)
+endif (BUILD_TESTING)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
-INSTALL (
+install (
     TARGETS
         gif2h5
         h52gif

@@ -10,24 +10,24 @@
 # --------------------------------------------------------------------
 MACRO (HL_ADD_TEST hl_name files)
   ADD_TEST (NAME hl_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
-  IF (NOT "${last_test}" STREQUAL "")
+  if (NOT "${last_test}" STREQUAL "")
     SET_TESTS_PROPERTIES (hl_${hl_name} PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
+  endif (NOT "${last_test}" STREQUAL "")
 
   # --------------------------------------------------------------------
   #-- Copy the necessary files.
   # --------------------------------------------------------------------
-  FOREACH (h5_file ${files})
-    SET (dest "${HDF5_HL_TEST_BINARY_DIR}/${h5_file}")
-    #MESSAGE (STATUS " Copying HL Test File ${h5_file} to ${dest}")
-    ADD_CUSTOM_COMMAND (
+  foreach (h5_file ${files})
+    set (dest "${HDF5_HL_TEST_BINARY_DIR}/${h5_file}")
+    #message (STATUS " Copying HL Test File ${h5_file} to ${dest}")
+    add_custom_command (
         TARGET     hl_${hl_name}
         PRE_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_HL_TEST_SOURCE_DIR}/${h5_file} ${dest}
     )
 
-  ENDFOREACH (h5_file ${HL_REFERENCE_TEST_FILES})
+  endforeach (h5_file ${HL_REFERENCE_TEST_FILES})
 ENDMACRO (HL_ADD_TEST)
 
 # Remove any output file left over from previous test run
@@ -60,10 +60,10 @@ ADD_TEST (
         test_packet_table.h5
         test_table.h5
 )
-IF (NOT "${last_test}" STREQUAL "")
+if (NOT "${last_test}" STREQUAL "")
   SET_TESTS_PROPERTIES (hl_test-clear-objects PROPERTIES DEPENDS ${last_test})
-ENDIF (NOT "${last_test}" STREQUAL "")
-SET (last_test "hl_test-clear-objects")
+endif (NOT "${last_test}" STREQUAL "")
+set (last_test "hl_test-clear-objects")
 
 HL_ADD_TEST (test_ds "dsdata.txt;dslat.txt;dslon.txt;test_ds_be.h5;test_ds_le.h5")
 HL_ADD_TEST (test_dset_opt "")

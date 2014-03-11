@@ -9,30 +9,30 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 # --------------------------------------------------------------------
 # Add the h5stat executables
 # --------------------------------------------------------------------
-ADD_EXECUTABLE (h5stat ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat.c)
+add_executable (h5stat ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat.c)
 TARGET_NAMING (h5stat ${LIB_TYPE})
 TARGET_C_PROPERTIES (h5stat " " " ")
-TARGET_LINK_LIBRARIES (h5stat  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
-SET_TARGET_PROPERTIES (h5stat PROPERTIES FOLDER tools)
+target_link_libraries (h5stat  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+set_target_properties (h5stat PROPERTIES FOLDER tools)
 
-SET (H5_DEP_EXECUTABLES h5stat)
+set (H5_DEP_EXECUTABLES h5stat)
 
-IF (BUILD_TESTING)
+if (BUILD_TESTING)
   # --------------------------------------------------------------------
   # Add the h5stat test executables
   # --------------------------------------------------------------------
-  IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
-    ADD_EXECUTABLE (h5stat_gentest ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat_gentest.c)
+  if (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
+    add_executable (h5stat_gentest ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat_gentest.c)
     TARGET_NAMING (h5stat_gentest ${LIB_TYPE})
     TARGET_C_PROPERTIES (h5stat_gentest " " " ")
-    TARGET_LINK_LIBRARIES (h5stat_gentest ${HDF5_LIB_TARGET})
-    SET_TARGET_PROPERTIES (h5stat_gentest PROPERTIES FOLDER generator/tools)
+    target_link_libraries (h5stat_gentest ${HDF5_LIB_TARGET})
+    set_target_properties (h5stat_gentest PROPERTIES FOLDER generator/tools)
     
     #ADD_TEST (NAME h5stat_gentest COMMAND $<TARGET_FILE:h5stat_gentest>)
-  ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
+  endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
-  INCLUDE (CMakeTests.cmake)
-ENDIF (BUILD_TESTING)
+  include (CMakeTests.cmake)
+endif (BUILD_TESTING)
 
 ##############################################################################
 ##############################################################################
@@ -46,7 +46,7 @@ ENDIF (BUILD_TESTING)
 
 #INSTALL_PROGRAM_PDB (h5stat ${HDF5_INSTALL_BIN_DIR} toolsapplications)
 
-INSTALL (
+install (
     TARGETS
         h5stat
     RUNTIME DESTINATION

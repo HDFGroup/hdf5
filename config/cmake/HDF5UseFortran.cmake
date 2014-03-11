@@ -7,7 +7,7 @@ ENABLE_LANGUAGE (Fortran)
 #-----------------------------------------------------------------------------
 # Detect name mangling convention used between Fortran and C
 #-----------------------------------------------------------------------------
-INCLUDE (FortranCInterface)
+include (FortranCInterface)
 FortranCInterface_HEADER (
     ${CMAKE_BINARY_DIR}/FCMangle.h
     MACRO_NAMESPACE "H5_FC_"
@@ -16,26 +16,26 @@ FortranCInterface_HEADER (
 )
 
 FILE (STRINGS ${CMAKE_BINARY_DIR}/FCMangle.h CONTENTS REGEX "H5_FC_GLOBAL\\(.*,.*\\) +(.*)")
-STRING (REGEX MATCH "H5_FC_GLOBAL\\(.*,.*\\) +(.*)" RESULT ${CONTENTS})
-SET (H5_FC_FUNC "H5_FC_FUNC(name,NAME) ${CMAKE_MATCH_1}")
+string (REGEX MATCH "H5_FC_GLOBAL\\(.*,.*\\) +(.*)" RESULT ${CONTENTS})
+set (H5_FC_FUNC "H5_FC_FUNC(name,NAME) ${CMAKE_MATCH_1}")
 
 FILE (STRINGS ${CMAKE_BINARY_DIR}/FCMangle.h CONTENTS REGEX "H5_FC_GLOBAL_\\(.*,.*\\) +(.*)")
-STRING (REGEX MATCH "H5_FC_GLOBAL_\\(.*,.*\\) +(.*)" RESULT ${CONTENTS})
-SET (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) ${CMAKE_MATCH_1}")
+string (REGEX MATCH "H5_FC_GLOBAL_\\(.*,.*\\) +(.*)" RESULT ${CONTENTS})
+set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) ${CMAKE_MATCH_1}")
 
 #-----------------------------------------------------------------------------
 # The provided CMake Fortran macros don't provide a general check function
 # so this one is used for a sizeof test.
 #-----------------------------------------------------------------------------
 MACRO (CHECK_FORTRAN_FEATURE FUNCTION CODE VARIABLE)
-  IF (NOT DEFINED ${VARIABLE})
-    MESSAGE (STATUS "Testing Fortran ${FUNCTION}")
-    IF (CMAKE_REQUIRED_LIBRARIES)
-      SET (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
+  if (NOT DEFINED ${VARIABLE})
+    message (STATUS "Testing Fortran ${FUNCTION}")
+    if (CMAKE_REQUIRED_LIBRARIES)
+      set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
           "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
-    ELSE (CMAKE_REQUIRED_LIBRARIES)
-      SET (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
-    ENDIF (CMAKE_REQUIRED_LIBRARIES)
+    else (CMAKE_REQUIRED_LIBRARIES)
+      set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
+    endif (CMAKE_REQUIRED_LIBRARIES)
     FILE (WRITE
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f
         "${CODE}"
@@ -47,25 +47,25 @@ MACRO (CHECK_FORTRAN_FEATURE FUNCTION CODE VARIABLE)
         OUTPUT_VARIABLE OUTPUT
     )
 
-#    MESSAGE ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-#    MESSAGE ( "Test result ${OUTPUT}")
-#    MESSAGE ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+#    message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+#    message ( "Test result ${OUTPUT}")
+#    message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
 
-    IF (${VARIABLE})
-      SET (${VARIABLE} 1 CACHE INTERNAL "Have Fortran function ${FUNCTION}")
-      MESSAGE (STATUS "Testing Fortran ${FUNCTION} - OK")
+    if (${VARIABLE})
+      set (${VARIABLE} 1 CACHE INTERNAL "Have Fortran function ${FUNCTION}")
+      message (STATUS "Testing Fortran ${FUNCTION} - OK")
       FILE (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
           "Determining if the Fortran ${FUNCTION} exists passed with the following output:\n"
           "${OUTPUT}\n\n"
       )
-    ELSE (${VARIABLE})
-      MESSAGE (STATUS "Testing Fortran ${FUNCTION} - Fail")
-      SET (${VARIABLE} "" CACHE INTERNAL "Have Fortran function ${FUNCTION}")
+    else (${VARIABLE})
+      message (STATUS "Testing Fortran ${FUNCTION} - Fail")
+      set (${VARIABLE} "" CACHE INTERNAL "Have Fortran function ${FUNCTION}")
       FILE (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
           "Determining if the Fortran ${FUNCTION} exists failed with the following output:\n"
           "${OUTPUT}\n\n")
-    ENDIF (${VARIABLE})
-  ENDIF (NOT DEFINED ${VARIABLE})
+    endif (${VARIABLE})
+  endif (NOT DEFINED ${VARIABLE})
 ENDMACRO (CHECK_FORTRAN_FEATURE)
 
 #-----------------------------------------------------------------------------
@@ -131,9 +131,9 @@ CHECK_FORTRAN_FEATURE(iso_c_binding
 #-----------------------------------------------------------------------------
 # Add debug information (intel Fortran : JB)
 #-----------------------------------------------------------------------------
-IF (CMAKE_Fortran_COMPILER MATCHES ifort)
-    IF (WIN32)
-        SET (CMAKE_Fortran_FLAGS_DEBUG "/debug:full /dbglibs " CACHE "flags" STRING FORCE)
-        SET (CMAKE_EXE_LINKER_FLAGS_DEBUG "/DEBUG" CACHE "flags" STRING FORCE)
-    ENDIF (WIN32)
-ENDIF (CMAKE_Fortran_COMPILER MATCHES ifort)
+if (CMAKE_Fortran_COMPILER MATCHES ifort)
+    if (WIN32)
+        set (CMAKE_Fortran_FLAGS_DEBUG "/debug:full /dbglibs " CACHE "flags" STRING FORCE)
+        set (CMAKE_EXE_LINKER_FLAGS_DEBUG "/DEBUG" CACHE "flags" STRING FORCE)
+    endif (WIN32)
+endif (CMAKE_Fortran_COMPILER MATCHES ifort)

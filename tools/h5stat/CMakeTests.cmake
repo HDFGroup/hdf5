@@ -8,7 +8,7 @@
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
-  SET (HDF5_REFERENCE_FILES
+  set (HDF5_REFERENCE_FILES
       h5stat_help1.ddl
       h5stat_help2.ddl
       h5stat_notexist.ddl
@@ -41,34 +41,34 @@
       h5stat_numattrs3.ddl
       h5stat_numattrs4.ddl
   )
-  SET (HDF5_REFERENCE_TEST_FILES
+  set (HDF5_REFERENCE_TEST_FILES
       h5stat_filters.h5
       h5stat_tsohm.h5
       h5stat_newgrat.h5
       h5stat_threshold.h5
   )
 
-  FOREACH (ddl_file ${HDF5_REFERENCE_FILES})
-    SET (ddldest "${PROJECT_BINARY_DIR}/${ddl_file}")
-    #MESSAGE (STATUS " Translating ${ddl_file}")
-    ADD_CUSTOM_COMMAND (
+  foreach (ddl_file ${HDF5_REFERENCE_FILES})
+    set (ddldest "${PROJECT_BINARY_DIR}/${ddl_file}")
+    #message (STATUS " Translating ${ddl_file}")
+    add_custom_command (
         TARGET     h5stat
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/testfiles/${ddl_file} ${ddldest}
     )
-  ENDFOREACH (ddl_file ${HDF5_REFERENCE_FILES})
+  endforeach (ddl_file ${HDF5_REFERENCE_FILES})
 
-  FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    SET (dest "${PROJECT_BINARY_DIR}/${h5_file}")
-    #MESSAGE (STATUS " Copying ${h5_file}")
-    ADD_CUSTOM_COMMAND (
+  foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
+    set (dest "${PROJECT_BINARY_DIR}/${h5_file}")
+    #message (STATUS " Copying ${h5_file}")
+    add_custom_command (
         TARGET     h5stat
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/testfiles/${h5_file} ${dest}
     )
-  ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
+  endforeach (h5_file ${HDF5_REFERENCE_TEST_FILES})
   
 ##############################################################################
 ##############################################################################
@@ -78,15 +78,15 @@
 
   MACRO (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    IF (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
-      IF (NOT ${resultcode} STREQUAL "0")
+      if (NOT ${resultcode} STREQUAL "0")
         SET_TESTS_PROPERTIES (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
-      ENDIF (NOT ${resultcode} STREQUAL "0")
-      IF (NOT "${last_test}" STREQUAL "")
+      endif (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${last_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
-      ENDIF (NOT "${last_test}" STREQUAL "")
-    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      endif (NOT "${last_test}" STREQUAL "")
+    else (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5STAT-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -104,7 +104,7 @@
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
       SET_TESTS_PROPERTIES (H5STAT-${resultfile} PROPERTIES DEPENDS "H5STAT-${resultfile}-clear-objects")
-    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_TEST file)
 
 ##############################################################################
@@ -113,7 +113,7 @@
 ##############################################################################
 ##############################################################################
 
-  IF (HDF5_ENABLE_USING_MEMCHECKER)
+  if (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run
     ADD_TEST (
       NAME H5STAT-clearall-objects
@@ -182,11 +182,11 @@
           h5stat_numattrs4.out
           h5stat_numattrs4.out.err
     )
-    IF (NOT "${last_test}" STREQUAL "")
+    if (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5STAT-clearall-objects PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "H5STAT-clearall-objects")
-  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    endif (NOT "${last_test}" STREQUAL "")
+    set (last_test "H5STAT-clearall-objects")
+  endif (HDF5_ENABLE_USING_MEMCHECKER)
 
 # Test for help flag
   ADD_H5_TEST (h5stat_help1 0 -h)

@@ -9,7 +9,7 @@
   # Packed Bits
   # --------------------------------------------------------------------
   #-- Copy all the HDF5 files from the test directory into the source directory
-  SET (HDF5_REFERENCE_PBITS
+  set (HDF5_REFERENCE_PBITS
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnofilename-with-packed-bits.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsArray.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsCompound.ddl
@@ -64,12 +64,12 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedLongLong16.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedLongLong16.ddl
   )
-  SET (HDF5_REFERENCE_TEST_PBITS
+  set (HDF5_REFERENCE_TEST_PBITS
       ${HDF5_TOOLS_SRC_DIR}/testfiles/packedbits.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound.h5
   )
-  SET (HDF5_ERROR_REFERENCE_PBITS
+  set (HDF5_ERROR_REFERENCE_PBITS
       ${PROJECT_SOURCE_DIR}/errfiles/tnofilename-with-packed-bits.err
       ${PROJECT_SOURCE_DIR}/errfiles/tpbitsCharLengthExceeded.err
       ${PROJECT_SOURCE_DIR}/errfiles/tpbitsCharOffsetExceeded.err
@@ -85,42 +85,42 @@
       ${PROJECT_SOURCE_DIR}/errfiles/tpbitsOffsetNegative.err
   )
 
-  FOREACH (pbits_h5_file ${HDF5_REFERENCE_TEST_PBITS})
+  foreach (pbits_h5_file ${HDF5_REFERENCE_TEST_PBITS})
     GET_FILENAME_COMPONENT(fname "${pbits_h5_file}" NAME)
-    SET (dest "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}")
-    #MESSAGE (STATUS " Copying ${pbits_h5_file}")
-    ADD_CUSTOM_COMMAND (
+    set (dest "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}")
+    #message (STATUS " Copying ${pbits_h5_file}")
+    add_custom_command (
         TARGET     h5dump
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${pbits_h5_file} ${dest}
     )
-  ENDFOREACH (pbits_h5_file ${HDF5_REFERENCE_TEST_PBITS})
+  endforeach (pbits_h5_file ${HDF5_REFERENCE_TEST_PBITS})
   
 
-  FOREACH (ddl_pbits ${HDF5_REFERENCE_PBITS})
+  foreach (ddl_pbits ${HDF5_REFERENCE_PBITS})
     GET_FILENAME_COMPONENT(fname "${ddl_pbits}" NAME)
-    SET (ddldest "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}")
-    #MESSAGE (STATUS " Copying ${ddl_pbits}")
-    ADD_CUSTOM_COMMAND (
+    set (ddldest "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}")
+    #message (STATUS " Copying ${ddl_pbits}")
+    add_custom_command (
         TARGET     h5dump
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${ddl_pbits} ${ddldest}
     )
-  ENDFOREACH (ddl_pbits ${HDF5_REFERENCE_PBITS})
+  endforeach (ddl_pbits ${HDF5_REFERENCE_PBITS})
 
-  FOREACH (ddl_pbits ${HDF5_ERROR_REFERENCE_PBITS})
+  foreach (ddl_pbits ${HDF5_ERROR_REFERENCE_PBITS})
     GET_FILENAME_COMPONENT(fname "${ddl_pbits}" NAME)
-    SET (ddldest "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}")
-    #MESSAGE (STATUS " Copying ${ddl_pbits}")
-    ADD_CUSTOM_COMMAND (
+    set (ddldest "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}")
+    #message (STATUS " Copying ${ddl_pbits}")
+    add_custom_command (
         TARGET     h5dump
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${ddl_pbits} ${ddldest}
     )
-  ENDFOREACH (ddl_pbits ${HDF5_ERROR_REFERENCE_PBITS})
+  endforeach (ddl_pbits ${HDF5_ERROR_REFERENCE_PBITS})
   
 ##############################################################################
 ##############################################################################
@@ -130,16 +130,16 @@
 
   MACRO (ADD_H5_PBITS_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    IF (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
       SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/pbits")
-      IF (NOT ${resultcode} STREQUAL "0")
+      if (NOT ${resultcode} STREQUAL "0")
         SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
-      ENDIF (NOT ${resultcode} STREQUAL "0")
-      IF (NOT "${last_pbits_test}" STREQUAL "")
+      endif (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${last_pbits_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_pbits_test})
-      ENDIF (NOT "${last_pbits_test}" STREQUAL "")
-    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      endif (NOT "${last_pbits_test}" STREQUAL "")
+    else (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5DUMP-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -158,7 +158,7 @@
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
       SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
-    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_PBITS_TEST file)
 
 ##############################################################################
@@ -167,7 +167,7 @@
 ##############################################################################
 ##############################################################################
 
-  IF (HDF5_ENABLE_USING_MEMCHECKER)
+  if (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run
     ADD_TEST (
       NAME H5DUMP_PACKED_BITS-clearall-objects
@@ -281,11 +281,11 @@
           tpbitsUnsignedLongLong16.out.err
     )
     SET_TESTS_PROPERTIES (H5DUMP_PACKED_BITS-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/pbits")
-    IF (NOT "${last_pbits_test}" STREQUAL "")
+    if (NOT "${last_pbits_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5DUMP_PACKED_BITS-clearall-objects PROPERTIES DEPENDS ${last_pbits_test})
-    ENDIF (NOT "${last_pbits_test}" STREQUAL "")
-    SET (last_pbits_test "H5DUMP_PACKED_BITS-clearall-objects")
-  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    endif (NOT "${last_pbits_test}" STREQUAL "")
+    set (last_pbits_test "H5DUMP_PACKED_BITS-clearall-objects")
+  endif (HDF5_ENABLE_USING_MEMCHECKER)
 
   # test failure handling
   # Missing file name

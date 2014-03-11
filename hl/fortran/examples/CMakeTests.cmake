@@ -5,6 +5,6 @@
 ##############################################################################
 ##############################################################################
 
-FOREACH (example ${examples})
+foreach (example ${examples})
   ADD_TEST (NAME hl_f90_ex_${example} COMMAND $<TARGET_FILE:hl_f90_ex_${example}>)
-ENDFOREACH (example ${examples})
+endforeach (example ${examples})

@@ -286,8 +286,8 @@ set($ENV{LC_MESSAGES}  "en_EN")
 #-----------------------------------------------------------------------------
 # Initialize the CTEST commands
 #------------------------------
-SET (CTEST_CMAKE_COMMAND "\"${CMAKE_COMMAND}\"")
-SET (CTEST_CONFIGURE_COMMAND
+set (CTEST_CMAKE_COMMAND "\"${CMAKE_COMMAND}\"")
+set (CTEST_CONFIGURE_COMMAND
     "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\"")
 
 # Print summary information.

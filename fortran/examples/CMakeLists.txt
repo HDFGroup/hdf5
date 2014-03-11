@@ -13,7 +13,7 @@ INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_F90_BINARY_DIR} ${
 #-----------------------------------------------------------------------------
 # Define Sources
 #-----------------------------------------------------------------------------
-SET (examples
+set (examples
     h5_cmprss
     h5_crtdat
     h5_rdwt
@@ -31,69 +31,69 @@ SET (examples
     compound
 )
 
-SET (F2003_examples
+set (F2003_examples
     rwdset_fortran2003
     nested_derived_type
     compound_fortran2003
     compound_complex_fortran2003
 )
 
-FOREACH (example ${examples})
-  ADD_EXECUTABLE (f90_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
+foreach (example ${examples})
+  add_executable (f90_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
   TARGET_NAMING (f90_ex_${example} ${LIB_TYPE})
   TARGET_FORTRAN_PROPERTIES (f90_ex_${example} " " " ")
-  IF (WIN32 AND NOT CYGWIN)
-    SET_PROPERTY (TARGET f90_ex_${example} 
+  if (WIN32 AND NOT CYGWIN)
+    set_property (TARGET f90_ex_${example} 
         APPEND PROPERTY COMPILE_DEFINITIONS 
           HDF5F90_WINDOWS
     )
-  ENDIF (WIN32 AND NOT CYGWIN)
-  TARGET_LINK_LIBRARIES (f90_ex_${example}
+  endif (WIN32 AND NOT CYGWIN)
+  target_link_libraries (f90_ex_${example}
       ${HDF5_F90_LIB_TARGET}
       ${HDF5_LIB_TARGET}
   )
-  SET_TARGET_PROPERTIES (f90_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
-  SET_TARGET_PROPERTIES (f90_ex_${example} PROPERTIES FOLDER examples/fortran)
-ENDFOREACH (example ${examples})
+  set_target_properties (f90_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
+  set_target_properties (f90_ex_${example} PROPERTIES FOLDER examples/fortran)
+endforeach (example ${examples})
 
-IF (HDF5_ENABLE_F2003)
-  FOREACH (example ${F2003_examples})
-    ADD_EXECUTABLE (f03_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
+if (HDF5_ENABLE_F2003)
+  foreach (example ${F2003_examples})
+    add_executable (f03_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
     TARGET_NAMING (f03_ex_${example} ${LIB_TYPE})
     TARGET_FORTRAN_PROPERTIES (f03_ex_${example} " " " ")
-    IF (WIN32 AND NOT CYGWIN)
-      SET_PROPERTY (TARGET f03_ex_${example} 
+    if (WIN32 AND NOT CYGWIN)
+      set_property (TARGET f03_ex_${example} 
           APPEND PROPERTY COMPILE_DEFINITIONS HDF5F90_WINDOWS
       )
-    ENDIF (WIN32 AND NOT CYGWIN)
-    TARGET_LINK_LIBRARIES (f03_ex_${example}
+    endif (WIN32 AND NOT CYGWIN)
+    target_link_libraries (f03_ex_${example}
         ${HDF5_F90_LIB_TARGET}
         ${HDF5_LIB_TARGET}
     )
-    SET_TARGET_PROPERTIES (f03_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
-    SET_TARGET_PROPERTIES (f03_ex_${example} PROPERTIES FOLDER examples/fortran03)
-  ENDFOREACH (example ${F2003_examples})
-ENDIF (HDF5_ENABLE_F2003)
+    set_target_properties (f03_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
+    set_target_properties (f03_ex_${example} PROPERTIES FOLDER examples/fortran03)
+  endforeach (example ${F2003_examples})
+endif (HDF5_ENABLE_F2003)
 
-IF (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
-  ADD_EXECUTABLE (f90_ex_ph5example ${HDF5_F90_EXAMPLES_SOURCE_DIR}/ph5example.f90)
+if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
+  add_executable (f90_ex_ph5example ${HDF5_F90_EXAMPLES_SOURCE_DIR}/ph5example.f90)
   TARGET_NAMING (f90_ex_ph5example ${LIB_TYPE})
   TARGET_FORTRAN_PROPERTIES (f90_ex_ph5example " " " ")
-  IF (WIN32 AND NOT CYGWIN)
-    SET_PROPERTY (TARGET f90_ex_ph5example 
+  if (WIN32 AND NOT CYGWIN)
+    set_property (TARGET f90_ex_ph5example 
         APPEND PROPERTY COMPILE_DEFINITIONS 
           HDF5F90_WINDOWS
     )
-  ENDIF (WIN32 AND NOT CYGWIN)
-  TARGET_LINK_LIBRARIES (f90_ex_ph5example
+  endif (WIN32 AND NOT CYGWIN)
+  target_link_libraries (f90_ex_ph5example
       ${HDF5_F90_LIB_TARGET}
       ${HDF5_LIB_TARGET}
       ${MPI_Fortran_LIBRARIES}
   )
-  SET_TARGET_PROPERTIES (f90_ex_ph5example PROPERTIES LINKER_LANGUAGE Fortran)
-  SET_TARGET_PROPERTIES (f90_ex_ph5example PROPERTIES FOLDER examples/fortran)
-ENDIF (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
+  set_target_properties (f90_ex_ph5example PROPERTIES LINKER_LANGUAGE Fortran)
+  set_target_properties (f90_ex_ph5example PROPERTIES FOLDER examples/fortran)
+endif (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
 
-IF (BUILD_TESTING)
-  INCLUDE (CMakeTests.cmake)
-ENDIF (BUILD_TESTING)
+if (BUILD_TESTING)
+  include (CMakeTests.cmake)
+endif (BUILD_TESTING)

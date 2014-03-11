@@ -8,7 +8,7 @@
   # --------------------------------------------------------------------
   # Copy all the test files from source directory to test directory
   # --------------------------------------------------------------------
-  SET (LIST_HDF5_TEST_FILES
+  set (LIST_HDF5_TEST_FILES
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr2.h5
@@ -33,7 +33,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes1.h5
   )
 
-  SET (LIST_OTHER_TEST_FILES
+  set (LIST_OTHER_TEST_FILES
       ${HDF5_TOOLS_SRC_DIR}/testfiles/help-1.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/help-2.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/help-3.ls
@@ -95,17 +95,17 @@
   FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
   # copy the list of test files
-  FOREACH (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+  foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
     GET_FILENAME_COMPONENT(fname "${listfiles}" NAME)
-    SET (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
-    #MESSAGE (STATUS " Copying ${listfiles} to ${dest}")
-    ADD_CUSTOM_COMMAND (
+    set (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
+    #message (STATUS " Copying ${listfiles} to ${dest}")
+    add_custom_command (
         TARGET     h5ls
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${listfiles} ${dest}
     )
-  ENDFOREACH (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+  endforeach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
 
   
 ##############################################################################
@@ -116,16 +116,16 @@
 
   MACRO (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    IF (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
       SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      IF (${resultcode} STREQUAL "1")
+      if (${resultcode} STREQUAL "1")
         SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
-      ENDIF (${resultcode} STREQUAL "1")
-      IF (NOT "${last_test}" STREQUAL "")
+      endif (${resultcode} STREQUAL "1")
+      if (NOT "${last_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
-      ENDIF (NOT "${last_test}" STREQUAL "")
-    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      endif (NOT "${last_test}" STREQUAL "")
+    else (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5LS-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -143,7 +143,7 @@
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
       SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES DEPENDS "H5LS-${resultfile}-clear-objects")
-    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_TEST file)
 
 ##############################################################################
@@ -152,7 +152,7 @@
 ##############################################################################
 ##############################################################################
 
-  IF (HDF5_ENABLE_USING_MEMCHECKER)
+  if (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run
     ADD_TEST (
       NAME H5LS-clearall-objects
@@ -265,11 +265,11 @@
           tvldtypes2be.out
           tvldtypes2be.out.err
     )
-    IF (NOT "${last_test}" STREQUAL "")
+    if (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5LS-clearall-objects PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "H5LS-clearall-objects")
-  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    endif (NOT "${last_test}" STREQUAL "")
+    set (last_test "H5LS-clearall-objects")
+  endif (HDF5_ENABLE_USING_MEMCHECKER)
 
   # test the help syntax
   ADD_H5_TEST (help-1 0 -w80 -h)
@@ -378,25 +378,25 @@
 
   # test for attribute with region references wo verbose mode
   # ( HDFFV-7838, )
-  IF (H5_WORDS_BIGENDIAN)
+  if (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tattrreg_be 0 -w80 -v -d tattrreg.h5)
-  ELSE (H5_WORDS_BIGENDIAN)
+  else (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tattrreg_le 0 -w80 -v -d tattrreg.h5)
-  ENDIF (H5_WORDS_BIGENDIAN)
+  endif (H5_WORDS_BIGENDIAN)
 
   # test for non-existing file
   ADD_H5_TEST (nosuchfile 1 nosuchfile.h5)
 
   # test for variable length data types in verbose mode
-  IF (H5_WORDS_BIGENDIAN)
+  if (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tvldtypes2be 0 -v tvldtypes1.h5)
-  ELSE (H5_WORDS_BIGENDIAN)
+  else (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tvldtypes2le 0 -v tvldtypes1.h5)
-  ENDIF (H5_WORDS_BIGENDIAN)
+  endif (H5_WORDS_BIGENDIAN)
 
   # test for dataset region references data types in verbose mode
-  IF (H5_WORDS_BIGENDIAN)
+  if (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tdataregbe 0 -v tdatareg.h5)
-  ELSE (H5_WORDS_BIGENDIAN)
+  else (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tdataregle 0 -v tdatareg.h5)
-  ENDIF (H5_WORDS_BIGENDIAN)
+  endif (H5_WORDS_BIGENDIAN)

@@ -8,7 +8,7 @@
   #
   # copy XML test files from source dir to test dir
   #
-  SET (HDF5_XML_REFERENCE_TEST_FILES
+  set (HDF5_XML_REFERENCE_TEST_FILES
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray2.h5
@@ -61,7 +61,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes5.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlstr.h5
   )
-  SET (HDF5_XML_REFERENCE_FILES
+  set (HDF5_XML_REFERENCE_FILES
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall.h5.xml
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-2A.h5.xml
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1.h5.xml
@@ -127,29 +127,29 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlstr.h5.xml
   )
 
-  FOREACH (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
+  foreach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
     GET_FILENAME_COMPONENT(fname "${tst_xml_h5_file}" NAME)
-    SET (dest "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}")
-    #MESSAGE (STATUS " Copying ${tst_xml_h5_file}")
-    ADD_CUSTOM_COMMAND (
+    set (dest "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}")
+    #message (STATUS " Copying ${tst_xml_h5_file}")
+    add_custom_command (
         TARGET     h5dump
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${tst_xml_h5_file} ${dest}
     )
-  ENDFOREACH (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
+  endforeach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
   
-  FOREACH (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
+  foreach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
     GET_FILENAME_COMPONENT(fname "${tst_xml_other_file}" NAME)
-    SET (dest "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}")
-    #MESSAGE (STATUS " Copying ${tst_xml_other_file}")
-    ADD_CUSTOM_COMMAND (
+    set (dest "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}")
+    #message (STATUS " Copying ${tst_xml_other_file}")
+    add_custom_command (
         TARGET     h5dump
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${tst_xml_other_file} ${dest}
     )
-  ENDFOREACH (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
+  endforeach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
   
 ##############################################################################
 ##############################################################################
@@ -158,29 +158,29 @@
 ##############################################################################
 
   MACRO (ADD_XML_SKIP_H5_TEST skipresultfile skipresultcode testtype)
-    IF (${testtype} STREQUAL "SKIP")
-      IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (${testtype} STREQUAL "SKIP")
+      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         ADD_TEST (
             NAME H5DUMP-XML-${skipresultfile}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile}.xml --xml ${ARGN}"
         )
-      ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    ELSE (${testtype} STREQUAL "SKIP")
+      endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    else (${testtype} STREQUAL "SKIP")
       ADD_XML_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})
-    ENDIF (${testtype} STREQUAL "SKIP")
+    endif (${testtype} STREQUAL "SKIP")
   ENDMACRO (ADD_XML_SKIP_H5_TEST)
 
   MACRO (ADD_XML_H5_TEST resultfile resultcode)
-    IF (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (NAME H5DUMP-XML-${resultfile} COMMAND $<TARGET_FILE:h5dump> --xml ${ARGN})
       SET_TESTS_PROPERTIES (H5DUMP-XML-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
-      IF (NOT ${resultcode} STREQUAL "0")
+      if (NOT ${resultcode} STREQUAL "0")
         SET_TESTS_PROPERTIES (H5DUMP-XML-${resultfile} PROPERTIES WILL_FAIL "true")
-      ENDIF (NOT ${resultcode} STREQUAL "0")
-      IF (NOT "${last_xml_test}" STREQUAL "")
+      endif (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${last_xml_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
-      ENDIF (NOT "${last_xml_test}" STREQUAL "")
-    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      endif (NOT "${last_xml_test}" STREQUAL "")
+    else (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5DUMP-XML-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -199,7 +199,7 @@
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
       SET_TESTS_PROPERTIES (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS "H5DUMP-XML-${resultfile}-clear-objects")
-    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_XML_H5_TEST file)
 
 ##############################################################################
@@ -208,7 +208,7 @@
 ##############################################################################
 ##############################################################################
    
-  IF (HDF5_ENABLE_USING_MEMCHECKER)
+  if (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run
     ADD_TEST (
       NAME H5DUMP-XML-clearall-objects
@@ -344,11 +344,11 @@
           tvlstr.h5.out.err
     )
     SET_TESTS_PROPERTIES (H5DUMP-XML-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
-    IF (NOT "${last_xml_test}" STREQUAL "")
+    if (NOT "${last_xml_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5DUMP-XML-clearall-objects PROPERTIES DEPENDS ${last_xml_test})
-    ENDIF (NOT "${last_xml_test}" STREQUAL "")
-    SET (last_test "H5DUMP-XML-clearall-objects")
-  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    endif (NOT "${last_xml_test}" STREQUAL "")
+    set (last_test "H5DUMP-XML-clearall-objects")
+  endif (HDF5_ENABLE_USING_MEMCHECKER)
 
   ########## test XML
   ADD_XML_H5_TEST (tall.h5 0 tall.h5)
@@ -413,10 +413,10 @@
 
   # The lone colon here confuses some systems (Cray X1).  Skip
   # it if configure detects that this is a problem.
-  SET (TESTTYPE "TEST")
-  IF (NOT "H5_LONE_COLON")
-    SET (TESTTYPE "SKIP")
-  ENDIF (NOT "H5_LONE_COLON")
+  set (TESTTYPE "TEST")
+  if (NOT "H5_LONE_COLON")
+    set (TESTTYPE "SKIP")
+  endif (NOT "H5_LONE_COLON")
   ADD_XML_SKIP_H5_TEST (tempty-nons.h5 0 ${TESTTYPE} -X : tempty.h5)
 
   ADD_XML_H5_TEST (tempty-nons-2.h5 0 --xml-ns=: tempty.h5)

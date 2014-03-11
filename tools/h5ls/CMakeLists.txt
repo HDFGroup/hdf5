@@ -9,21 +9,21 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 #-----------------------------------------------------------------------------
 # Add the h5ls executable
 #-----------------------------------------------------------------------------
-ADD_EXECUTABLE (h5ls ${HDF5_TOOLS_H5LS_SOURCE_DIR}/h5ls.c)
+add_executable (h5ls ${HDF5_TOOLS_H5LS_SOURCE_DIR}/h5ls.c)
 TARGET_NAMING (h5ls ${LIB_TYPE})
 TARGET_C_PROPERTIES (h5ls " " " ")
-TARGET_LINK_LIBRARIES (h5ls  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
-SET_TARGET_PROPERTIES (h5ls PROPERTIES FOLDER tools)
+target_link_libraries (h5ls  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+set_target_properties (h5ls PROPERTIES FOLDER tools)
 
-SET (H5_DEP_EXECUTABLES
+set (H5_DEP_EXECUTABLES
     h5ls
 )
 
-IF (BUILD_TESTING)
+if (BUILD_TESTING)
 
-  INCLUDE (CMakeTests.cmake)
+  include (CMakeTests.cmake)
 
-ENDIF (BUILD_TESTING)
+endif (BUILD_TESTING)
 
 ##############################################################################
 ##############################################################################
@@ -37,7 +37,7 @@ ENDIF (BUILD_TESTING)
 
 #INSTALL_PROGRAM_PDB (h5ls ${HDF5_INSTALL_BIN_DIR} toolsapplications)
 
-INSTALL (
+install (
     TARGETS
         h5ls
     RUNTIME DESTINATION

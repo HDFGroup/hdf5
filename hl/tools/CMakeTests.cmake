@@ -12,14 +12,14 @@ FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 # copy test files from source to build dir
 #
 
-ADD_CUSTOM_COMMAND (
+add_custom_command (
     TARGET     gif2h5
     POST_BUILD
     COMMAND    ${CMAKE_COMMAND}
     ARGS       -E copy_if_different ${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5/testfiles/image1.gif ${PROJECT_BINARY_DIR}/testfiles/image1.gif
 )
 
-ADD_CUSTOM_COMMAND (
+add_custom_command (
     TARGET     h52gif
     POST_BUILD
     COMMAND    ${CMAKE_COMMAND}

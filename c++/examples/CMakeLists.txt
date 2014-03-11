@@ -10,7 +10,7 @@ PROJECT (HDF5_CPP_EXAMPLES)
 # Define examples
 #-----------------------------------------------------------------------------
 
-SET (examples
+set (examples
     create
     readdata
     writedata
@@ -20,7 +20,7 @@ SET (examples
     h5group
 )
 
-SET (tutr_examples
+set (tutr_examples
     h5tutr_cmprss
     h5tutr_crtdat
     h5tutr_crtatt
@@ -32,22 +32,22 @@ SET (tutr_examples
     h5tutr_subset
 )
 
-FOREACH (example ${examples})
-  ADD_EXECUTABLE (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
+foreach (example ${examples})
+  add_executable (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
   TARGET_NAMING (cpp_ex_${example} ${LIB_TYPE})
   TARGET_C_PROPERTIES (cpp_ex_${example} " " " ")
-  TARGET_LINK_LIBRARIES (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
-  SET_TARGET_PROPERTIES (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
-ENDFOREACH (example ${examples})
+  target_link_libraries (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
+  set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
+endforeach (example ${examples})
 
-FOREACH (example ${tutr_examples})
-  ADD_EXECUTABLE (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
+foreach (example ${tutr_examples})
+  add_executable (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
   TARGET_NAMING (cpp_ex_${example} ${LIB_TYPE})
   TARGET_C_PROPERTIES (cpp_ex_${example} " " " ")
-  TARGET_LINK_LIBRARIES (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
-  SET_TARGET_PROPERTIES (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
-ENDFOREACH (example ${tutr_examples})
+  target_link_libraries (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
+  set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
+endforeach (example ${tutr_examples})
 
-IF (BUILD_TESTING)
-  INCLUDE (CMakeTests.cmake)
-ENDIF (BUILD_TESTING)
+if (BUILD_TESTING)
+  include (CMakeTests.cmake)
+endif (BUILD_TESTING)

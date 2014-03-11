@@ -4,7 +4,7 @@ PROJECT (HDF5_TOOLS)
 #-----------------------------------------------------------------------------
 # Apply Definitions to compiler in this directory and below
 #-----------------------------------------------------------------------------
-ADD_DEFINITIONS (${HDF5_EXTRA_C_FLAGS})
+add_definitions (${HDF5_EXTRA_C_FLAGS})
 
 #-----------------------------------------------------------------------------
 # Setup include Directories
@@ -14,9 +14,9 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib)
 # --------------------------------------------------------------------
 # If testing was NOT enabled, then we need to build the tools library
 # --------------------------------------------------------------------
-IF (NOT BUILD_TESTING)
+if (NOT BUILD_TESTING)
   ADD_SUBDIRECTORY (${HDF5_TOOLS_SOURCE_DIR}/lib)
-ENDIF (NOT BUILD_TESTING)
+endif (NOT BUILD_TESTING)
 
 #-- Add the h5diff and test executables
 ADD_SUBDIRECTORY (${HDF5_TOOLS_SOURCE_DIR}/h5diff)
