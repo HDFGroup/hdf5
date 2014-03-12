@@ -192,7 +192,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__contig_fill(H5D_t *dset, hid_t dxpl_id)
+H5D__contig_fill(const H5D_t *dset, hid_t dxpl_id)
 {
     H5D_io_info_t ioinfo;       /* Dataset I/O info */
     H5D_storage_t store;        /* Union of storage info for dataset */

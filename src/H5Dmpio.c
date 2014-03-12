@@ -183,42 +183,30 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     /* Optimized MPI types flag must be set and it must be collective IO */
     /* (Don't allow parallel I/O for the MPI-posix driver, since it doesn't do real collective I/O) */
     if(!(H5S_mpi_opt_types_g && io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE
-            && !IS_H5FD_MPIPOSIX(io_info->dset->oloc.file))) {
+            && !IS_H5FD_MPIPOSIX(io_info->dset->oloc.file)))
         local_cause |= H5D_MPIO_SET_MPIPOSIX;
-    } /* end if */
 
     /* Don't allow collective operations if datatype conversions need to happen */
-    if(!type_info->is_conv_noop) {
+    if(!type_info->is_conv_noop)
         local_cause |= H5D_MPIO_DATATYPE_CONVERSION;
-    } /* end if */
 
     /* Don't allow collective operations if data transform operations should occur */
-    if(!type_info->is_xform_noop) {
+    if(!type_info->is_xform_noop)
         local_cause |= H5D_MPIO_DATA_TRANSFORMS;
-    } /* end if */
 
     /* Check whether these are both simple or scalar dataspaces */
     if(!((H5S_SIMPLE == H5S_GET_EXTENT_TYPE(mem_space) || H5S_SCALAR == H5S_GET_EXTENT_TYPE(mem_space))
-            && (H5S_SIMPLE == H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR == H5S_GET_EXTENT_TYPE(file_space)))) {
+            && (H5S_SIMPLE == H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR == H5S_GET_EXTENT_TYPE(file_space))))
         local_cause |= H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
-    } /* end if */
-
-    /* Can't currently handle point selections */
-    if(H5S_SEL_POINTS == H5S_GET_SELECT_TYPE(mem_space)
-            || H5S_SEL_POINTS == H5S_GET_SELECT_TYPE(file_space)) {
-        local_cause |= H5D_MPIO_POINT_SELECTIONS;
-    } /* end if */
 
     /* Dataset storage must be contiguous or chunked */
     if(!(io_info->dset->shared->layout.type == H5D_CONTIGUOUS ||
-            io_info->dset->shared->layout.type == H5D_CHUNKED)) {
+            io_info->dset->shared->layout.type == H5D_CHUNKED))
         local_cause |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
-    } /* end if */
 
     /* check if external-file storage is used */
-    if (io_info->dset->shared->dcpl_cache.efl.nused > 0) {
+    if(io_info->dset->shared->dcpl_cache.efl.nused > 0)
         local_cause |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
-    }
 
     /* The handling of memory space is different for chunking and contiguous
      *  storage.  For contiguous storage, mem_space and file_space won't change
@@ -228,11 +216,9 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
      */
 
     /* Don't allow collective operations if filters need to be applied */
-    if(io_info->dset->shared->layout.type == H5D_CHUNKED) {
-        if(io_info->dset->shared->dcpl_cache.pline.nused > 0) {
-            local_cause |= H5D_MPIO_FILTERS;
-        } /* end if */
-    } /* end if */
+    if(io_info->dset->shared->layout.type == H5D_CHUNKED &&
+            io_info->dset->shared->dcpl_cache.pline.nused > 0)
+        local_cause |= H5D_MPIO_FILTERS;
 
     /* Form consensus opinion among all processes about whether to perform
      * collective I/O
@@ -241,7 +227,6 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
         HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
 
     ret_value = global_cause > 0 ? FALSE : TRUE;
-
 
 done:
     /* Write the local value of no-collective-cause to the DXPL. */
@@ -946,15 +931,58 @@ if(H5DEBUG(D))
 
             /* Obtain MPI derived datatype from all individual chunks */
             for(u = 0; u < num_chunk; u++) {
-                /* Disk MPI derived datatype */
-                if(H5S_mpio_space_type(chunk_addr_info_array[u].chunk_info.fspace,
-                        type_info->src_type_size, &chunk_ftype[u], &chunk_mpi_file_counts[u], &(chunk_mft_is_derived_array[u])) < 0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI file type")
+                hsize_t *permute_map = NULL; /* array that holds the mapping from the old, 
+                                                out-of-order displacements to the in-order 
+                                                displacements of the MPI datatypes of the 
+                                                point selection of the file space */
+                hbool_t is_permuted = FALSE;
 
-                /* Buffer MPI derived datatype */
+                /* Obtain disk and memory MPI derived datatype */
+                /* NOTE: The permute_map array can be allocated within H5S_mpio_space_type
+                 *              and will be fed into the next call to H5S_mpio_space_type
+                 *              where it will be freed.
+                 */
+                if(H5S_mpio_space_type(chunk_addr_info_array[u].chunk_info.fspace,
+                                       type_info->src_type_size, 
+                                       &chunk_ftype[u], /* OUT: datatype created */ 
+                                       &chunk_mpi_file_counts[u], /* OUT */
+                                       &(chunk_mft_is_derived_array[u]), /* OUT */
+                                       TRUE, /* this is a file space,
+                                                so permute the
+                                                datatype if the point
+                                                selections are out of
+                                                order */
+                                       &permute_map,/* OUT: a map to indicate the
+                                                       permutation of points
+                                                       selected in case they
+                                                       are out of order */
+                                       &is_permuted /* OUT */) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI file type")
+                /* Sanity check */
+                if(is_permuted)
+                    HDassert(permute_map);
                 if(H5S_mpio_space_type(chunk_addr_info_array[u].chunk_info.mspace,
-                        type_info->dst_type_size, &chunk_mtype[u], &chunk_mpi_mem_counts[u], &(chunk_mbt_is_derived_array[u])) < 0)
+                                       type_info->dst_type_size, &chunk_mtype[u], 
+                                       &chunk_mpi_mem_counts[u], 
+                                       &(chunk_mbt_is_derived_array[u]), 
+                                       FALSE, /* this is a memory
+                                                 space, so if the file
+                                                 space is not
+                                                 permuted, there is no
+                                                 need to permute the
+                                                 datatype if the point
+                                                 selections are out of
+                                                 order*/
+                                       &permute_map, /* IN: the permutation map
+                                                        generated by the
+                                                        file_space selection
+                                                        and applied to the
+                                                        memory selection */
+                                       &is_permuted /* IN */) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI buf type")
+                /* Sanity check */
+                if(is_permuted)
+                    HDassert(!permute_map);
 
                 /* Chunk address relative to the first chunk */
                 chunk_addr_info_array[u].chunk_addr -= ctg_store.contig.dset_addr;
@@ -1309,12 +1337,51 @@ H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
 
     if((file_space != NULL) && (mem_space != NULL)) {
         int  mpi_file_count;         /* Number of file "objects" to transfer */
+        hsize_t *permute_map = NULL; /* array that holds the mapping from the old, 
+                                        out-of-order displacements to the in-order 
+                                        displacements of the MPI datatypes of the 
+                                        point selection of the file space */
+        hbool_t is_permuted = FALSE;
 
         /* Obtain disk and memory MPI derived datatype */
-        if(H5S_mpio_space_type(file_space, type_info->src_type_size, &mpi_file_type, &mpi_file_count, &mft_is_derived) < 0)
+        /* NOTE: The permute_map array can be allocated within H5S_mpio_space_type
+         *              and will be fed into the next call to H5S_mpio_space_type
+         *              where it will be freed.
+         */
+        if(H5S_mpio_space_type(file_space, type_info->src_type_size, 
+                               &mpi_file_type, &mpi_file_count, &mft_is_derived, /* OUT: datatype created */  
+                               TRUE, /* this is a file space, so
+                                        permute the datatype if the
+                                        point selection is out of
+                                        order */
+                               &permute_map, /* OUT: a map to indicate
+                                                the permutation of
+                                                points selected in
+                                                case they are out of
+                                                order */ 
+                               &is_permuted /* OUT */) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI file type")
-        if(H5S_mpio_space_type(mem_space, type_info->src_type_size, &mpi_buf_type, &mpi_buf_count, &mbt_is_derived) < 0)
+        /* Sanity check */
+        if(is_permuted)
+            HDassert(permute_map);
+        if(H5S_mpio_space_type(mem_space, type_info->src_type_size, 
+                               &mpi_buf_type, &mpi_buf_count, &mbt_is_derived, /* OUT: datatype created */
+                               FALSE, /* this is a memory space, so if
+                                         the file space is not
+                                         permuted, there is no need to
+                                         permute the datatype if the
+                                         point selections are out of
+                                         order*/
+                               &permute_map /* IN: the permutation map
+                                               generated by the
+                                               file_space selection
+                                               and applied to the
+                                               memory selection */, 
+                               &is_permuted /* IN */) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI buffer type")
+        /* Sanity check */
+        if(is_permuted)
+            HDassert(!permute_map);
     } /* end if */
     else {
         /* For non-selection, participate with a none MPI derived datatype, the count is 0.  */
