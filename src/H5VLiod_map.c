@@ -645,7 +645,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
 
     if(iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, NULL, 
                         &src_size, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value from parent KV store");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve value size from parent KV store");
 
     if(val_is_vl) {
         output.ret = ret_value;

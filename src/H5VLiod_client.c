@@ -946,12 +946,14 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
                 /* free stuff associated with request */
                 info->value_handle = (hg_bulk_t *)H5MM_xfree(info->value_handle);
-                if(H5Tclose(info->val_mem_type_id) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release datatype");
-                if(H5Tclose(info->key_mem_type_id) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release datatype");
-                if(H5Pclose(info->dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to release plist");
+                if(info->val_is_vl) {
+                    if(H5Tclose(info->val_mem_type_id) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release datatype");
+                    if(H5Tclose(info->key_mem_type_id) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release datatype");
+                    if(H5Pclose(info->dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to release plist");
+                }
 
                 free(info->output);
                 info->output = NULL;
