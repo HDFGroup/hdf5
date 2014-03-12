@@ -30,6 +30,8 @@ int main(int argc, char **argv) {
     int provided;
     MPI_Request mpi_req;
 
+    int32_t *wdata1 = NULL, *rdata1 = NULL;
+    int key, value, i;
     H5ES_status_t status;
     size_t num_events = 0;
     herr_t ret;
@@ -50,6 +52,13 @@ int main(int argc, char **argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
     fprintf(stderr, "APP processes = %d, my rank is %d\n", my_size, my_rank);
+
+    wdata1 = malloc (sizeof(int32_t)*nelem);
+    rdata1 = malloc (sizeof(int32_t)*nelem);
+    for(i=0;i<nelem;++i) {
+        wdata1[i] = i;
+	rdata1[i] = 0;
+    }
 
     fprintf(stderr, "Create the FAPL to set the IOD VOL plugin and create the file\n");
     /* Choose the IOD VOL plugin to use with this file. 
@@ -109,6 +118,9 @@ int main(int argc, char **argv) {
                            H5P_DEFAULT, tid1, e_stack);
         assert(did >= 0);
 
+	ret = H5Dwrite_ff(did, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata1, tid1, e_stack);
+	assert(ret == 0);
+
         ret = H5Tcommit_ff(file_id, "DT1", dtid, H5P_DEFAULT, H5P_DEFAULT, 
                            H5P_DEFAULT, tid1, e_stack);
         assert(ret == 0);
@@ -116,6 +128,16 @@ int main(int argc, char **argv) {
         map = H5Mcreate_ff(file_id, "MAP1", H5T_STD_I32LE, H5T_STD_I32LE, 
                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
         assert(map >= 0);
+
+        /* write some KV pairs to each map object. */
+        {
+            key = 1;
+            value = 1000;
+            ret = H5Mset_ff(map, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
+                            H5P_DEFAULT, tid1, e_stack);
+            assert(ret == 0);
+
+        }
 
         ret = H5TRfinish(tid1, H5P_DEFAULT, &rid_temp, e_stack);
         assert(0 == ret);
@@ -194,20 +216,12 @@ int main(int argc, char **argv) {
     map = H5Oopen_ff(file_id,"MAP1", H5P_DEFAULT, rid2);
     assert(did);
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
     if(0 == my_rank) {
         ret = H5RCpersist(rid2, H5_EVENT_STACK_NULL);
         assert(ret == 0);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
-
-    if(my_rank == 0) {
-        /* release container version 2. This is async. */
-        ret = H5RCrelease(rid2, e_stack);
-        assert(0 == ret);
-    }
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -221,9 +235,29 @@ int main(int argc, char **argv) {
 
         ret = H5Mevict_ff(map, 2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
+
+        /* see if we can read after evicting */
+	ret = H5Dread_ff(did, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata1, rid2, H5_EVENT_STACK_NULL);
+	assert(ret == 0);
+	printf("Read Data1: ");
+	for(i=0;i<nelem;++i)
+	  printf("%d ",rdata1[i]);
+	printf("\n");
+
+        key = 1;
+        value = -1;
+        ret = H5Mget_ff(map, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
+                        H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+        printf("Value recieved = %d\n", value);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
+
+    if(my_rank == 0) {
+        /* release container version 2. This is async. */
+        ret = H5RCrelease(rid2, e_stack);
+        assert(0 == ret);
+    }
 
     assert(H5Oclose_ff(gid, e_stack) == 0);
     assert(H5Oclose_ff(did, e_stack) == 0);

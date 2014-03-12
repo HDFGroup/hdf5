@@ -10,7 +10,7 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name[]="eff_file_prefetch.h5";
+    const char file_name[]="eff_file_prefetch2.h5";
     hid_t file_id;
     hid_t gid;
     hid_t did, map;
@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
                            H5P_DEFAULT, tid1, e_stack);
         assert(did >= 0);
 
-	ret = H5Dwrite_ff(did, dtid, H5S_ALL, H5S_ALL, dxpl_id, wdata1, tid1, e_stack);
+	ret = H5Dwrite_ff(did, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata1, tid1, e_stack);
 	assert(ret == 0);
 
         ret = H5Tcommit_ff(file_id, "DT1", dtid, H5P_DEFAULT, H5P_DEFAULT, 
@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
         assert(H5Tclose_ff(dtid, e_stack) == 0);
         assert(H5Dclose_ff(did, e_stack) == 0);
 
-        /* release container version 2. This is async. */
+        /* release container version 1. This is async. */
         ret = H5RCrelease(rid_temp, e_stack);
         assert(0 == ret);
         ret = H5RCclose(rid_temp);
@@ -188,14 +188,6 @@ int main(int argc, char **argv) {
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
-    if(0 == my_rank) {
-        /* Close transaction object. Local op */
-        ret = H5TRclose(tid2);
-        assert(0 == ret);
-    }
-
-    MPI_Barrier(MPI_COMM_WORLD);
-
     /* Process 0 tells other procs that container version 2 is acquired */
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
     assert(2 == version);
@@ -208,9 +200,15 @@ int main(int argc, char **argv) {
     }
 
     if(0 == my_rank) {
+        /* Close transaction object. Local op */
+        ret = H5TRclose(tid2);
+        assert(0 == ret);
+
         ret = H5RCpersist(rid2, H5_EVENT_STACK_NULL);
         assert(ret == 0);
     }
+
+    MPI_Barrier(MPI_COMM_WORLD);
 
     gid = H5Oopen_ff(file_id, "G1", H5P_DEFAULT, rid2);
     assert(gid);
@@ -225,9 +223,24 @@ int main(int argc, char **argv) {
 
     if((my_size > 1 && 1 == my_rank) || 
        (my_size == 1 && 0 == my_rank)) {
+        ret = H5Tevict_ff(dtid, 2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+
+        ret = H5Devict_ff(did, 2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+
+        ret = H5Mevict_ff(map, 2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if((my_size > 1 && 1 == my_rank) || 
+       (my_size == 1 && 0 == my_rank)) {
         hid_t mapl_id, tapl_id, dapl_id;
         hrpl_t map_replica, dt_replica, dset_replica;
 
+        /* prefetch objects */
         ret = H5Mprefetch_ff(map, rid2, &map_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
         printf("prefetched map with replica id %"PRIx64"\n", map_replica);
@@ -238,6 +251,7 @@ int main(int argc, char **argv) {
         assert(0 == ret);
         printf("prefetched dataset with replica id %"PRIx64"\n", dset_replica);
 
+        /* Read from prefetched Replicas */
 	/* set dxpl to read from replica in BB */
 	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
 	ret = H5Pset_read_replica(dxpl_id, dset_replica);
@@ -250,6 +264,10 @@ int main(int argc, char **argv) {
 	  printf("%d ",rdata1[i]);
 	printf("\n");
 
+	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+	ret = H5Pset_read_replica(dxpl_id, map_replica);
+	assert(0 == ret);
+
         key = 1;
         value = -1;
         ret = H5Mget_ff(map, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
@@ -258,6 +276,7 @@ int main(int argc, char **argv) {
 
 	H5Pclose(dxpl_id);
 
+        /* evict Replicas */
         tapl_id = H5Pcreate (H5P_DATATYPE_ACCESS);
         ret = H5Pset_evict_replica(tapl_id, dt_replica);
         assert(0 == ret);
@@ -283,8 +302,8 @@ int main(int argc, char **argv) {
     MPI_Barrier(MPI_COMM_WORLD);
 
     if(my_rank == 0) {
-        /* release container version 2. This is async. */
-        ret = H5RCrelease(rid2, e_stack);
+        /* release container version 2. */
+        ret = H5RCrelease(rid2, H5_EVENT_STACK_NULL);
         assert(0 == ret);
     }
 
