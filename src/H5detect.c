@@ -332,7 +332,7 @@ precision (detected_t *d)
             if(_v1 != _v2)                                                    \
                 _pad_mask[_i] |= _byte_mask;                                  \
             _buf1[_i] ^= _byte_mask;                                          \
-        } /* enf for */                                                       \
+        } /* end for */                                                       \
                                                                               \
     /* Byte Order */                                                          \
     for(_i = 0, _v1 = 0.0, _v2 = 1.0; _i < (int)sizeof(TYPE); _i++) {         \
