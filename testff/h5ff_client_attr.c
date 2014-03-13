@@ -287,7 +287,7 @@ int main(int argc, char **argv) {
     MPI_Barrier(MPI_COMM_WORLD);
 
     if(my_rank == 0) {
-        /* release container version 1. This is async. */
+        /* release container version 2. This is async. */
         ret = H5RCrelease(rid3, e_stack);
         assert(0 == ret);
     }
@@ -301,7 +301,7 @@ int main(int argc, char **argv) {
     ret = H5Pclose(fapl_id);
     assert(ret == 0);
 
-    H5Fclose_ff(file_id, H5_EVENT_STACK_NULL);
+    H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL);
 
     H5ESget_count(e_stack, &num_events);
     H5ESwait_all(e_stack, &status);

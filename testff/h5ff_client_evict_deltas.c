@@ -10,7 +10,7 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name[]="eff_file_obj.h5";
+    const char file_name[]="eff_file_deltas.h5";
     hid_t file_id;
     hid_t gid;
     hid_t did, map;
@@ -30,6 +30,8 @@ int main(int argc, char **argv) {
     int provided;
     MPI_Request mpi_req;
 
+    int32_t *wdata1 = NULL, *rdata1 = NULL;
+    int key, value, i;
     H5ES_status_t status;
     size_t num_events = 0;
     herr_t ret;
@@ -50,6 +52,13 @@ int main(int argc, char **argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
     fprintf(stderr, "APP processes = %d, my rank is %d\n", my_size, my_rank);
+
+    wdata1 = malloc (sizeof(int32_t)*nelem);
+    rdata1 = malloc (sizeof(int32_t)*nelem);
+    for(i=0;i<nelem;++i) {
+        wdata1[i] = i;
+	rdata1[i] = 0;
+    }
 
     fprintf(stderr, "Create the FAPL to set the IOD VOL plugin and create the file\n");
     /* Choose the IOD VOL plugin to use with this file. 
@@ -93,7 +102,6 @@ int main(int argc, char **argv) {
        started. */
     if(0 == my_rank) {
         hid_t rid_temp;
-        hid_t anon_did;
 
         /* create transaction object */
         tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
@@ -110,6 +118,9 @@ int main(int argc, char **argv) {
                            H5P_DEFAULT, tid1, e_stack);
         assert(did >= 0);
 
+	ret = H5Dwrite_ff(did, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata1, tid1, e_stack);
+	assert(ret == 0);
+
         ret = H5Tcommit_ff(file_id, "DT1", dtid, H5P_DEFAULT, H5P_DEFAULT, 
                            H5P_DEFAULT, tid1, e_stack);
         assert(ret == 0);
@@ -118,12 +129,15 @@ int main(int argc, char **argv) {
                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
         assert(map >= 0);
 
-        anon_did = H5Dcreate_anon_ff(file_id, dtid, sid, H5P_DEFAULT, H5P_DEFAULT, 
-                                     tid1, e_stack);
-        assert(anon_did > 0);
+        /* write some KV pairs to each map object. */
+        {
+            key = 1;
+            value = 1000;
+            ret = H5Mset_ff(map, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
+                            H5P_DEFAULT, tid1, e_stack);
+            assert(ret == 0);
 
-        ret = H5Dclose_ff(anon_did, e_stack);
-        assert(0 == ret);
+        }
 
         ret = H5TRfinish(tid1, H5P_DEFAULT, &rid_temp, e_stack);
         assert(0 == ret);
@@ -133,7 +147,6 @@ int main(int argc, char **argv) {
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
-        assert(status == H5ES_STATUS_SUCCEED);
 
         /* Close transaction object. Local op */
         ret = H5TRclose(tid1);
@@ -156,7 +169,7 @@ int main(int argc, char **argv) {
         assert(H5Tclose_ff(dtid, e_stack) == 0);
         assert(H5Dclose_ff(did, e_stack) == 0);
 
-        /* release container version 2. This is async. */
+        /* release container version 1. This is async. */
         ret = H5RCrelease(rid_temp, e_stack);
         assert(0 == ret);
         ret = H5RCclose(rid_temp);
@@ -174,7 +187,6 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
-    assert(status == H5ES_STATUS_SUCCEED);
 
     if(0 == my_rank) {
         /* Close transaction object. Local op */
@@ -184,7 +196,7 @@ int main(int argc, char **argv) {
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    /* Process 0 tells other procs that container version 1 is acquired */
+    /* Process 0 tells other procs that container version 2 is acquired */
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
     assert(2 == version);
 
@@ -204,62 +216,45 @@ int main(int argc, char **argv) {
     map = H5Oopen_ff(file_id,"MAP1", H5P_DEFAULT, rid2);
     assert(did);
 
-    {
-        ssize_t ret_size = 0;
-        char *comment = NULL;
-        H5O_ff_info_t oinfo;
-
-        ret = H5Oget_comment_ff(gid, NULL, 0, &ret_size, rid2, H5_EVENT_STACK_NULL);
+    if(0 == my_rank) {
+        ret = H5RCpersist(rid2, H5_EVENT_STACK_NULL);
         assert(ret == 0);
-
-        fprintf(stderr, "size of comment is %d\n", ret_size);
-
-        comment = malloc((size_t)ret_size + 1);
-
-        ret = H5Oget_comment_ff(gid, comment, (size_t)ret_size + 1, 
-                                &ret_size, rid2, H5_EVENT_STACK_NULL);
-        assert(ret == 0);
-
-        fprintf(stderr, "size of comment is %d Comment is %s\n", ret_size, comment);
-        free(comment);
-
-        ret = H5Oget_info_ff(gid, &oinfo, rid2, H5_EVENT_STACK_NULL);
-        assert(ret == 0);
-        assert(H5O_TYPE_GROUP == oinfo.type);
-        fprintf(stderr, 
-                "get_info: Group with OID: %"PRIx64", num attrs = %zu, ref count = %u\n", 
-                oinfo.addr, oinfo.num_attrs, oinfo.rc);
-
-        ret = H5Oget_info_ff(did, &oinfo, rid2, H5_EVENT_STACK_NULL);
-        assert(ret == 0);
-        assert(H5O_TYPE_DATASET == oinfo.type);
-        fprintf(stderr, 
-                "get_info: Dataset with OID: %"PRIx64", num attrs = %zu, ref count = %u\n", 
-                oinfo.addr, oinfo.num_attrs, oinfo.rc);
-
-        ret = H5Oget_info_ff(dtid, &oinfo, rid2, H5_EVENT_STACK_NULL);
-        assert(ret == 0);
-        assert(H5O_TYPE_NAMED_DATATYPE == oinfo.type);
-        fprintf(stderr, 
-                "get_info: Named Datatype with OID: %"PRIx64", num attrs = %zu, ref count = %u\n", 
-                oinfo.addr, oinfo.num_attrs, oinfo.rc);
-
-        ret = H5Oget_info_ff(map, &oinfo, rid2, H5_EVENT_STACK_NULL);
-        assert(ret == 0);
-        assert(H5O_TYPE_MAP == oinfo.type);
-        fprintf(stderr, 
-                "get_info: MAP with OID: %"PRIx64", num attrs = %zu, ref count = %u\n", 
-                oinfo.addr, oinfo.num_attrs, oinfo.rc);
     }
 
-    /* check if an object exists. This is asynchronous, so checking
-       the value should be done after the wait */
-    ret = H5Oexists_by_name_ff(file_id, "G1", &exists, 
-                               H5P_DEFAULT, rid2, e_stack);
-    assert(ret == 0);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if((my_size > 1 && 1 == my_rank) || 
+       (my_size == 1 && 0 == my_rank)) {
+        ret = H5Tevict_ff(dtid, 2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+
+        ret = H5Devict_ff(did, 2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+
+        ret = H5Mevict_ff(map, 2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+
+        /* see if we can read after evicting */
+	ret = H5Dread_ff(did, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata1, rid2, H5_EVENT_STACK_NULL);
+	assert(ret == 0);
+	printf("Read Data1: ");
+	for(i=0;i<nelem;++i)
+	  printf("%d ",rdata1[i]);
+	printf("\n");
+
+        key = 1;
+        value = -1;
+        ret = H5Mget_ff(map, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
+                        H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+        printf("Value recieved = %d\n", value);
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
 
     if(my_rank == 0) {
-        /* release container version 1. This is async. */
+        /* release container version 2. This is async. */
         ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);
     }
@@ -279,13 +274,10 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
-    assert(status == H5ES_STATUS_SUCCEED);
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
     assert(H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL) == 0);
-
-    assert(exists);
 
     H5Sclose(sid);
     H5Pclose(fapl_id);

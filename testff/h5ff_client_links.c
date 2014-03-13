@@ -123,6 +123,7 @@ int main(int argc, char **argv) {
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
 
         /* Close transaction object. Local op */
         ret = H5TRclose(tid1);
@@ -180,6 +181,7 @@ int main(int argc, char **argv) {
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
 
         /* Close transaction object. Local op */
         ret = H5TRclose(tid2);
@@ -204,6 +206,7 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
+    assert(status == H5ES_STATUS_SUCCEED);
 
     /* Leader tells other procs that container version 2 is acquired */
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
@@ -278,13 +281,14 @@ int main(int argc, char **argv) {
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
-    assert(H5Fclose_ff(file_id, H5_EVENT_STACK_NULL) == 0);
+    assert(H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL) == 0);
 
     /* wait on all requests and print completion status */
     H5ESget_count(e_stack, &num_events);
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
+    assert(status == H5ES_STATUS_SUCCEED);
 
     assert(0 == ret);
 
