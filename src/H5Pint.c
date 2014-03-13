@@ -129,6 +129,11 @@ hid_t H5P_CLS_READ_CONTEXT_ACQUIRE_g = FAIL;
 hid_t H5P_CLS_TRANSACTION_START_g   = FAIL;
 hid_t H5P_CLS_TRANSACTION_FINISH_g  = FAIL;
 hid_t H5P_CLS_VIEW_CREATE_g        = FAIL;
+#ifdef H5_HAVE_INDEXING
+hid_t H5P_CLS_INDEX_CREATE_g        = FAIL;
+hid_t H5P_CLS_INDEX_ACCESS_g        = FAIL;
+hid_t H5P_CLS_INDEX_XFER_g          = FAIL;
+#endif
 
 /*
  * Predefined property lists for each predefined class. These are initialized
@@ -154,6 +159,11 @@ hid_t H5P_LST_READ_CONTEXT_ACQUIRE_g = FAIL;
 hid_t H5P_LST_TRANSACTION_START_g   = FAIL;
 hid_t H5P_LST_TRANSACTION_FINISH_g  = FAIL;
 hid_t H5P_LST_VIEW_CREATE_g        = FAIL;
+#ifdef H5_HAVE_INDEXING
+hid_t H5P_LST_INDEX_CREATE_g        = FAIL;
+hid_t H5P_LST_INDEX_ACCESS_g        = FAIL;
+hid_t H5P_LST_INDEX_XFER_g          = FAIL;
+#endif
 
 /* Root property list class library initialization object */
 const H5P_libclass_t H5P_CLS_ROOT[1] = {{
@@ -242,6 +252,11 @@ H5_DLLVAR const H5P_libclass_t H5P_CLS_RCACC[1];        /* Read Context acquire 
 H5_DLLVAR const H5P_libclass_t H5P_CLS_TRSCC[1];        /* Transaction start */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_TRFCC[1];        /* Transaction finish */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_VCRT[1];         /* View create */
+#ifdef H5_HAVE_INDEXING
+H5_DLLVAR const H5P_libclass_t H5P_CLS_XCRT[1];         /* Index creation */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_XACC[1];         /* Index access */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_XXFR[1];         /* Index transfer */
+#endif
 
 /*****************************/
 /* Library Private Variables */
@@ -283,6 +298,11 @@ static H5P_libclass_t const * const init_class[] = {
     H5P_CLS_TRSCC,      /* Transaction start */
     H5P_CLS_TRFCC,      /* Transaction finish */
     H5P_CLS_VCRT,       /* View create */
+#ifdef H5_HAVE_INDEXING
+    H5P_CLS_XCRT,       /* Index creation */
+    H5P_CLS_XACC,       /* Index access */
+    H5P_CLS_XXFR,       /* Index transfer */
+#endif
     H5P_CLS_LCRT        /* Link creation */
 };
 
@@ -608,6 +628,11 @@ H5P_term_interface(void)
                         H5P_LST_TRANSACTION_START_g =
                         H5P_LST_TRANSACTION_FINISH_g =
                         H5P_LST_VIEW_CREATE_g =
+#ifdef H5_HAVE_INDEXING
+                        H5P_LST_INDEX_CREATE_g =
+                        H5P_LST_INDEX_ACCESS_g =
+                        H5P_LST_INDEX_XFER_g =
+#endif
                         H5P_LST_FILE_MOUNT_g = (-1);
                 } /* end if */
             } /* end if */
@@ -640,6 +665,11 @@ H5P_term_interface(void)
                         H5P_CLS_TRANSACTION_START_g =
                         H5P_CLS_TRANSACTION_FINISH_g = 
                         H5P_CLS_VIEW_CREATE_g =
+#ifdef H5_HAVE_INDEXING
+                        H5P_CLS_INDEX_CREATE_g =
+                        H5P_CLS_INDEX_ACCESS_g =
+                        H5P_CLS_INDEX_XFER_g =
+#endif
                         H5P_CLS_FILE_MOUNT_g = (-1);
                 } /* end if */
             } /* end if */
@@ -5088,8 +5118,8 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDcompile_assert(H5P_TYPE_VIEW_CREATE == (H5P_TYPE_MAX_TYPE - 1));
-    HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_VIEW_CREATE);
+    HDcompile_assert(H5P_TYPE_INDEX_XFER == (H5P_TYPE_MAX_TYPE - 1));
+    HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_INDEX_XFER);
 
     /* Check arguments */
     if(type == H5P_TYPE_USER)
@@ -5186,6 +5216,20 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
         case H5P_TYPE_VIEW_CREATE:
             class_id = H5P_CLS_VIEW_CREATE_g;
             break;
+
+#ifdef H5_HAVE_INDEXING
+        case H5P_TYPE_INDEX_CREATE:
+            class_id = H5P_CLS_INDEX_CREATE_g;
+            break;
+
+        case H5P_TYPE_INDEX_ACCESS:
+            class_id = H5P_CLS_INDEX_ACCESS_g;
+            break;
+
+        case H5P_TYPE_INDEX_XFER:
+            class_id = H5P_CLS_INDEX_XFER_g;
+            break;
+#endif
 
         case H5P_TYPE_USER:     /* shut compiler warnings up */
         case H5P_TYPE_ROOT:

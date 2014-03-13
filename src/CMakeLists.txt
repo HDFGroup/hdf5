@@ -648,6 +648,16 @@ IF (HDF5_ENABLE_EFF)
         ${HDF5_SRC_DIR}/H5TR.c
         ${HDF5_SRC_DIR}/H5V.c
     )
+    IF (HDF5_ENABLE_INDEXING)
+      SET (H5FF_SRCS
+        ${H5FF_SRCS}
+        ${HDF5_SRC_DIR}/H5X.c
+        ${HDF5_SRC_DIR}/H5Xdummy.c
+        ${HDF5_SRC_DIR}/H5Pxapl.c
+        ${HDF5_SRC_DIR}/H5Pxcpl.c
+        ${HDF5_SRC_DIR}/H5Pxxpl.c
+      )
+    ENDIF (HDF5_ENABLE_INDEXING)
     SET (H5FF_HDRS
         ${HDF5_SRC_DIR}/H5ASpublic.h
         ${HDF5_SRC_DIR}/H5FFpublic.h
@@ -657,6 +667,12 @@ IF (HDF5_ENABLE_EFF)
         ${HDF5_SRC_DIR}/H5TRpublic.h
         ${HDF5_SRC_DIR}/H5Vpublic.h
     )
+    IF (HDF5_ENABLE_INDEXING)
+      SET (H5FF_HDRS
+        ${H5FF_HDRS}
+        ${HDF5_SRC_DIR}/H5Xpublic.h
+      )
+    ENDIF (HDF5_ENABLE_INDEXING)
     IDE_GENERATED_PROPERTIES ("H5FF" "${H5FF_HDRS}" "${H5FF_SRCS}" )
     SET (H5VL_SRCS
         ${H5VL_SRCS}
@@ -863,6 +879,12 @@ IF (HDF5_ENABLE_EFF)
     ${HDF5_SRC_DIR}/H5ASprivate.h
     ${HDF5_SRC_DIR}/H5FFprivate.h
   )
+  IF (HDF5_ENABLE_INDEXING)
+    SET (H5_PRIVATE_HEADERS
+      ${H5_PRIVATE_HEADERS}
+      ${HDF5_SRC_DIR}/H5Xprivate.h
+    )
+  ENDIF (HDF5_ENABLE_INDEXING)  
 ENDIF (HDF5_ENABLE_EFF)
 
 INCLUDE_DIRECTORIES (${HDF5_SOURCE_DIR})

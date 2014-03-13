@@ -320,6 +320,9 @@
 /* Define if we have Python support */
 #cmakedefine H5_HAVE_PYTHON @H5_HAVE_PYTHON@
 
+/* Define if we have Indexing support */
+#cmakedefine H5_HAVE_INDEXING @H5_HAVE_INDEXING@
+
 /* Define to 1 if you have the <pthread.h> header file. */
 #cmakedefine H5_HAVE_PTHREAD_H @H5_HAVE_PTHREAD_H@
 

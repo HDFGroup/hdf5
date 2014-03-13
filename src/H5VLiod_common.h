@@ -765,5 +765,53 @@ MERCURY_GEN_PROC(view_create_out_t,
                  ((obj_info_t)(obj_info))
                  ((attr_info_t)(attr_info)))
 
+#ifdef H5_HAVE_INDEXING
+
+MERCURY_GEN_PROC(dset_set_index_info_in_t,
+                 ((axe_t)(axe_info))
+                 ((uint32_t)(cs_scope))
+                 ((uint64_t)(rcxt_num))
+                 ((uint64_t)(trans_num))
+                 ((iod_handle_t)(coh))
+                 ((iod_handles_t)(loc_oh))
+                 ((iod_obj_id_t)(loc_id))
+                 ((hid_t)(dxpl_id))
+                 )
+
+MERCURY_GEN_PROC(dset_set_index_info_out_t,
+                 ((herr_t)(error))
+                 )
+
+MERCURY_GEN_PROC(dset_get_index_info_in_t,
+                 ((axe_t)(axe_info))
+                 ((uint32_t)(cs_scope))
+                 ((uint64_t)(rcxt_num))
+                 ((uint64_t)(trans_num))
+                 ((iod_handle_t)(coh))
+                 ((iod_handles_t)(loc_oh))
+                 ((iod_obj_id_t)(loc_id))
+                 ((hid_t)(dxpl_id))
+                 )
+
+MERCURY_GEN_PROC(dset_get_index_info_out_t,
+                 ((herr_t)(error))
+                 )
+
+MERCURY_GEN_PROC(dset_rm_index_info_in_t,
+                 ((axe_t)(axe_info))
+                 ((uint32_t)(cs_scope))
+                 ((uint64_t)(rcxt_num))
+                 ((uint64_t)(trans_num))
+                 ((iod_handle_t)(coh))
+                 ((iod_handles_t)(loc_oh))
+                 ((iod_obj_id_t)(loc_id))
+                 ((hid_t)(dxpl_id))
+                 )
+
+MERCURY_GEN_PROC(dset_rm_index_info_out_t,
+                 ((herr_t)(error))
+                 )
+
+#endif /* H5_HAVE_INDEXING */
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_common_H */

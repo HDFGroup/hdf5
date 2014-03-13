@@ -74,6 +74,9 @@ typedef enum H5P_plist_type_t {
     H5P_TYPE_TRANSACTION_START = 21,
     H5P_TYPE_TRANSACTION_FINISH = 22,
     H5P_TYPE_VIEW_CREATE       = 23,
+    H5P_TYPE_INDEX_CREATE       = 24,
+    H5P_TYPE_INDEX_ACCESS       = 25,
+    H5P_TYPE_INDEX_XFER         = 26,
     H5P_TYPE_MAX_TYPE
 } H5P_plist_type_t;
 

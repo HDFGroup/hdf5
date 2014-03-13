@@ -109,6 +109,11 @@ static hg_id_t H5VL_PREFETCH_ID;
 static hg_id_t H5VL_EVICT_ID;
 static hg_id_t H5VL_CANCEL_OP_ID;
 static hg_id_t H5VL_VIEW_CREATE_ID;
+#ifdef H5_HAVE_INDEXING
+static hg_id_t H5VL_DSET_SET_INDEX_INFO_ID;
+static hg_id_t H5VL_DSET_GET_INDEX_INFO_ID;
+static hg_id_t H5VL_DSET_RM_INDEX_INFO_ID;
+#endif
 
 /* global AXE list struct */
 typedef struct H5VL_iod_axe_list_t {
@@ -774,6 +779,15 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     H5VL_EVICT_ID    = MERCURY_REGISTER("evict", evict_in_t, ret_t);
 
     H5VL_VIEW_CREATE_ID = MERCURY_REGISTER("view_create", view_create_in_t, view_create_out_t);
+
+#ifdef H5_HAVE_INDEXING
+    H5VL_DSET_SET_INDEX_INFO_ID = MERCURY_REGISTER("dset_set_index_info",
+            dset_set_index_info_in_t, dset_set_index_info_out_t);
+    H5VL_DSET_GET_INDEX_INFO_ID = MERCURY_REGISTER("dset_get_index_info",
+            dset_get_index_info_in_t, dset_get_index_info_out_t);
+    H5VL_DSET_RM_INDEX_INFO_ID = MERCURY_REGISTER("dset_rm_index_info",
+            dset_rm_index_info_in_t, dset_rm_index_info_out_t);
+#endif
 
     H5VL_CANCEL_OP_ID = MERCURY_REGISTER("cancel_op", uint64_t, uint8_t);
 
@@ -3106,6 +3120,13 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
                                     (H5VL_iod_req_info_t *)rc, &input, &dset->remote_dset, dset, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship dataset open");
 
+#ifdef H5_HAVE_INDEXING
+    /* TODO create a new req here */
+    if (FAIL == H5VL_iod_dataset_get_index_info(dset, &dset->idx_plugin_id,
+            &dset->metadata_size, &dset->metadata, req))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index info for dataset");
+#endif
+
     ret_value = (void *)dset;
 
 done:
@@ -3625,6 +3646,14 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     info->vl_len_bulk_handle = vl_len_bulk_handle;
     info->vl_lengths = vl_lengths;
     info->vl_segments = vl_segments;
+#ifdef H5_HAVE_INDEXING
+    /* setup extra info required for the index post_update operation */
+    info->idx_handle = dset->idx_handle;
+    info->idx_plugin_id = dset->idx_plugin_id;
+    info->buf = buf;
+    info->dataspace_id = mem_space_id;
+    info->trans_id = trans_id;
+#endif
 
     if(H5VL__iod_create_and_forward(H5VL_DSET_WRITE_ID, HG_DSET_WRITE, 
                                     (H5VL_iod_object_t *)dset, 0, num_parents, parent_reqs,
@@ -10177,4 +10206,278 @@ H5VL_iod_view_close(H5VL_iod_view_t *view)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_view_create() */
+
+#ifdef H5_HAVE_INDEXING
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_dataset_set_index
+ *
+ * Purpose: Set a new index to a dataset.
+ *
+ * Return:  Success:    SUCCEED
+ *          Failure:    FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_dataset_set_index(void *dset, void *idx_handle)
+{
+    H5VL_iod_dset_t *iod_dset = (H5VL_iod_dset_t *) dset;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+
+    iod_dset->idx_handle = idx_handle;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_dataset_set_index() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_dataset_get_index
+ *
+ * Purpose: Get the index associated to a dataset.
+ *
+ * Return:  Success:    Index handle
+ *          Failure:    NULL
+ *-------------------------------------------------------------------------
+ */
+void *
+H5VL_iod_dataset_get_index(void *dset)
+{
+    H5VL_iod_dset_t *iod_dset = (H5VL_iod_dset_t *) dset;
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+
+    ret_value = iod_dset->idx_handle;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_dataset_get_index() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_dataset_get_index_plugin_id
+ *
+ * Purpose: Get the index plugin id associated to a dataset.
+ *
+ * Return:  Success:    Index handle
+ *          Failure:    NULL
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5VL_iod_dataset_get_index_plugin_id(void *dset)
+{
+    H5VL_iod_dset_t *iod_dset = (H5VL_iod_dset_t *) dset;
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+
+    ret_value = iod_dset->idx_plugin_id;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_dataset_get_index() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_dataset_set_index_info
+ *
+ * Purpose: Set a new index to a dataset.
+ *
+ * Return:  Success:    SUCCEED
+ *          Failure:    FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_dataset_set_index_info(void *_dset, unsigned plugin_id,
+        size_t metadata_size, void *metadata, hid_t trans_id, void **req)
+{
+    H5VL_iod_request_t **parent_reqs = NULL;
+    H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *) _dset;
+    dset_set_index_info_in_t input;
+    H5TR_t *tr = NULL;
+    size_t num_parents = 0;
+    int *status = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+
+    /* set local index info */
+    dset->idx_plugin_id = plugin_id;
+
+    /* get the TR object */
+    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID");
+
+    if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+            H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+    /* retrieve parent requests */
+    if(H5VL_iod_get_parent_requests((H5VL_iod_object_t *)dset, (H5VL_iod_req_info_t *)tr,
+            parent_reqs, &num_parents) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+    status = (int *)malloc(sizeof(int));
+
+    /* Fill input structure */
+    input.coh = dset->common.file->remote_file.coh;
+//    input.iod_oh = dset->remote_dset.iod_oh;
+//    input.iod_id = dset->remote_dset.iod_id;
+    input.dxpl_id = dxpl_id;
+    input.trans_num = tr->trans_num;
+    input.rcxt_num  = tr->c_version;
+    input.cs_scope = dset->common.file->md_integrity_scope;
+
+    if(H5VL__iod_create_and_forward(H5VL_DSET_SET_INDEX_INFO_ID, HG_DSET_SET_INDEX_INFO,
+                                    (H5VL_iod_object_t *)dset, 0,
+                                    num_parents, parent_reqs,
+                                    (H5VL_iod_req_info_t *)tr, &input, status,
+                                    status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship set index info");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_dataset_set_index_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_dataset_get_index_info
+ *
+ * Purpose: Get index info from a dataset.
+ *
+ * Return:  Success:    SUCCEED
+ *          Failure:    FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_dataset_get_index_info(void *_dset, unsigned *plugin_id,
+        size_t *metadata_size, void **metadata, hid_t trans_id, void **req)
+{
+    H5VL_iod_request_t **parent_reqs = NULL;
+    H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *) _dset;
+    H5VL_iod_dataset_get_index_info_t *info;
+    dset_get_index_info_in_t input;
+    H5TR_t *tr = NULL;
+    size_t num_parents = 0;
+    int *status = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+
+    /* get the TR object */
+    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID");
+
+    if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+            H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+    /* retrieve parent requests */
+    if(H5VL_iod_get_parent_requests((H5VL_iod_object_t *)dset, (H5VL_iod_req_info_t *)tr,
+            parent_reqs, &num_parents) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+    status = (int *)malloc(sizeof(int));
+
+    /* Fill input structure */
+    input.coh = dset->common.file->remote_file.coh;
+//    input.iod_oh = dset->remote_dset.iod_oh;
+//    input.iod_id = dset->remote_dset.iod_id;
+    input.dxpl_id = dxpl_id;
+    input.trans_num = tr->trans_num;
+    input.rcxt_num  = tr->c_version;
+    input.cs_scope = dset->common.file->md_integrity_scope;
+
+    /* setup info struct for I/O request
+       This is to manage the I/O operation once the wait is called. */
+    if (NULL == (info =
+            (H5VL_iod_dataset_get_index_info_t *)
+            H5MM_calloc(sizeof(H5VL_iod_dataset_get_index_info_t))))
+        HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate info");
+    info->idx_handle = dset->idx_handle;
+    info->idx_plugin_id = dset->idx_plugin_id;
+//    info->metadata = ;
+//    info->metadata_size = ;
+    info->dset = dset;
+    info->trans_id = trans_id;
+
+    if(H5VL__iod_create_and_forward(H5VL_DSET_GET_INDEX_INFO_ID, HG_DSET_GET_INDEX_INFO,
+                                    (H5VL_iod_object_t *)dset, 0,
+                                    num_parents, parent_reqs,
+                                    (H5VL_iod_req_info_t *)tr, &input, status,
+                                    status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship get index info");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_dataset_get_index_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_dataset_remove_index_info
+ *
+ * Purpose: Remove index info attached to the dataset.
+ *
+ * Return:  Success:    SUCCEED
+ *          Failure:    FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_dataset_remove_index_info(void *_dset, hid_t trans_id, void **req)
+{
+    H5VL_iod_request_t **parent_reqs = NULL;
+    H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *) _dset;
+    dset_get_index_info_in_t input;
+    H5TR_t *tr = NULL;
+    size_t num_parents = 0;
+    int *status = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+
+    /* get the TR object */
+    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID");
+
+    if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+            H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+    /* retrieve parent requests */
+    if(H5VL_iod_get_parent_requests((H5VL_iod_object_t *)dset, (H5VL_iod_req_info_t *)tr,
+            parent_reqs, &num_parents) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+    status = (int *)malloc(sizeof(int));
+
+    /* Fill input structure */
+    input.coh = dset->common.file->remote_file.coh;
+//    input.iod_oh = dset->remote_dset.iod_oh;
+//    input.iod_id = dset->remote_dset.iod_id;
+    input.dxpl_id = dxpl_id;
+    input.trans_num = tr->trans_num;
+    input.rcxt_num  = tr->c_version;
+    input.cs_scope = dset->common.file->md_integrity_scope;
+
+    if(H5VL__iod_create_and_forward(H5VL_DSET_RM_INDEX_INFO_ID, HG_DSET_RM_INDEX_INFO,
+                                    (H5VL_iod_object_t *)dset, 0,
+                                    num_parents, parent_reqs,
+                                    (H5VL_iod_req_info_t *)tr, &input, status,
+                                    status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship get index info");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_dataset_remove_index_info() */
+#endif /* H5_HAVE_INDEXING */
+
 #endif /* H5_HAVE_EFF */

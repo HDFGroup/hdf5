@@ -820,9 +820,11 @@ H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 {
     H5VL_t     *vol_plugin;
     void       *dset;
+#ifdef H5_HAVE_INDEXING
+    void       *idx_handle;
+#endif
     H5P_genplist_t *plist ;     /* Property list pointer */
     herr_t      ret_value;              /* Return value */
-
     FUNC_ENTER_API(FAIL)
     H5TRACE8("e", "iiiii*xii", dset_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf, trans_id, estack_id);
@@ -845,11 +847,34 @@ H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
     /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+    if (NULL == (vol_plugin = (H5VL_t *) H5I_get_aux(dset_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the dataset object */
     if(NULL == (dset = (void *)H5I_object(dset_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
+#ifdef H5_HAVE_INDEXING
+    /* Get the index handle */
+    if (NULL != (idx_handle = H5VL_iod_dataset_get_index(dset))) {
+        H5X_class_t *idx_class = NULL;
+        H5P_genplist_t *xxpl_plist; /* Property list pointer */
+        unsigned plugin_id;
+        hid_t xxpl_id = H5P_INDEX_XFER_DEFAULT;
+
+        /* store the transaction ID in the xxpl */
+        if(NULL == (xxpl_plist = (H5P_genplist_t *)H5I_object(xxpl_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        if(H5P_set(xxpl_plist, H5VL_TRANS_ID, &trans_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
+        if (!(plugin_id = H5VL_iod_dataset_get_index_plugin_id(dset)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin ID from dataset");
+        if (NULL == (idx_class = H5X_registered(plugin_id)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
+
+        idx_class->pre_update(idx_handle, mem_space_id, xxpl_id);
+    }
+#endif
 
     /* Write the data through the VOL */
     if((ret_value = H5VL_dataset_write(dset, vol_plugin, mem_type_id, mem_space_id, 
@@ -988,6 +1013,10 @@ done:
 herr_t
 H5Dclose_ff(hid_t dset_id, hid_t estack_id)
 {
+#ifdef H5_HAVE_INDEXING
+    void *idx_handle = NULL;
+#endif
+    void *dset;
     H5VL_t      *vol_plugin = NULL;
     herr_t       ret_value = SUCCEED;   /* Return value */
 
@@ -1005,6 +1034,15 @@ H5Dclose_ff(hid_t dset_id, hid_t estack_id)
     vol_plugin->close_estack_id = estack_id;
     vol_plugin->close_dxpl_id = H5AC_dxpl_id;
 
+    /* get the dataset object */
+    if(NULL == (dset = (void *)H5I_object(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
+#ifdef H5_HAVE_INDEXING
+    /* Get the index handle if there is one */
+    idx_handle = H5VL_iod_dataset_get_index(dset);
+#endif
+
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
      * reaches zero.  
@@ -1015,6 +1053,24 @@ H5Dclose_ff(hid_t dset_id, hid_t estack_id)
      */
     if(H5I_dec_app_ref_always_close(dset_id) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
+
+#ifdef H5_HAVE_INDEXING
+	/*
+	 * Close the index if the dataset is now closed
+	 */
+	if (idx_handle && !H5I_get_ref(dset_id, FALSE)) {
+        H5X_class_t *idx_class = NULL;
+        unsigned plugin_id;
+
+        if (!(plugin_id = H5VL_iod_dataset_get_index_plugin_id(dset)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin ID from dataset");
+        if (NULL == (idx_class = H5X_registered(plugin_id)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
+
+        if (FAIL == idx_class->close(idx_handle))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
+	}
+#endif
 
 done:
     FUNC_LEAVE_API(ret_value)
