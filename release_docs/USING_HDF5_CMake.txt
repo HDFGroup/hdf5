@@ -186,7 +186,7 @@ III. Minimum C Project Files for CMake
       following text in the file:
 
 ##########################################################
-cmake_minimum_required (VERSION 2.8.10)
+cmake_minimum_required (VERSION 2.8.11)
 PROJECT (HDF5MyApp C CXX)
 
 FIND_PACKAGE (HDF5 NAMES hdf5)
