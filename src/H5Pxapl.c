@@ -39,6 +39,7 @@
 #include "H5Xprivate.h"     /* Index                */
 #include "H5Ppkg.h"         /* Property lists       */
 
+#ifdef H5_HAVE_INDEXING
 
 /****************/
 /* Local Macros */
@@ -112,3 +113,5 @@ H5P__xacc_reg_prop(H5P_genclass_t *pclass)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__xacc_reg_prop() */
+
+#endif /* H5_HAVE_INDEXING */

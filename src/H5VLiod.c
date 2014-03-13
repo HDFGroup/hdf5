@@ -782,11 +782,11 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
 
 #ifdef H5_HAVE_INDEXING
     H5VL_DSET_SET_INDEX_INFO_ID = MERCURY_REGISTER("dset_set_index_info",
-            dset_set_index_info_in_t, dset_set_index_info_out_t);
+                                                   dset_set_index_info_in_t, ret_t);
     H5VL_DSET_GET_INDEX_INFO_ID = MERCURY_REGISTER("dset_get_index_info",
-            dset_get_index_info_in_t, dset_get_index_info_out_t);
+                                                   dset_get_index_info_in_t, ret_t);
     H5VL_DSET_RM_INDEX_INFO_ID = MERCURY_REGISTER("dset_rm_index_info",
-            dset_rm_index_info_in_t, dset_rm_index_info_out_t);
+                                                  dset_rm_index_info_in_t, ret_t);
 #endif
 
     H5VL_CANCEL_OP_ID = MERCURY_REGISTER("cancel_op", uint64_t, uint8_t);
@@ -3123,7 +3123,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
 #ifdef H5_HAVE_INDEXING
     /* TODO create a new req here */
     if (FAIL == H5VL_iod_dataset_get_index_info(dset, &dset->idx_plugin_id,
-            &dset->metadata_size, &dset->metadata, req))
+                                                &dset->metadata_size, &dset->metadata, req))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index info for dataset");
 #endif
 
@@ -10308,6 +10308,13 @@ H5VL_iod_dataset_set_index_info(void *_dset, unsigned plugin_id,
 
     HDassert(dset);
 
+    if(IOD_OBJ_INVALID == dset->remote_dset.mdkv_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        dset->common.request = NULL;
+    }
+
     /* set local index info */
     dset->idx_plugin_id = plugin_id;
 
@@ -10321,25 +10328,23 @@ H5VL_iod_dataset_set_index_info(void *_dset, unsigned plugin_id,
 
     /* retrieve parent requests */
     if(H5VL_iod_get_parent_requests((H5VL_iod_object_t *)dset, (H5VL_iod_req_info_t *)tr,
-            parent_reqs, &num_parents) < 0)
+                                    parent_reqs, &num_parents) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
 
     status = (int *)malloc(sizeof(int));
 
     /* Fill input structure */
     input.coh = dset->common.file->remote_file.coh;
-//    input.iod_oh = dset->remote_dset.iod_oh;
-//    input.iod_id = dset->remote_dset.iod_id;
-    input.dxpl_id = dxpl_id;
+    input.mdkv_id = dset->remote_dset.mdkv_id;
     input.trans_num = tr->trans_num;
-    input.rcxt_num  = tr->c_version;
     input.cs_scope = dset->common.file->md_integrity_scope;
+    input.idx_plugin_id = (uint32_t)plugin_id;
+    input.idx_metadata.buf = metadata;
+    input.idx_metadata.buf_size = metadata_size;
 
     if(H5VL__iod_create_and_forward(H5VL_DSET_SET_INDEX_INFO_ID, HG_DSET_SET_INDEX_INFO,
-                                    (H5VL_iod_object_t *)dset, 0,
-                                    num_parents, parent_reqs,
-                                    (H5VL_iod_req_info_t *)tr, &input, status,
-                                    status, req) < 0)
+                                    (H5VL_iod_object_t *)dset, 0, num_parents, parent_reqs,
+                                    (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship set index info");
 
 done:
@@ -10356,14 +10361,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_iod_dataset_get_index_info(void *_dset, unsigned *plugin_id,
-        size_t *metadata_size, void **metadata, hid_t trans_id, void **req)
+H5VL_iod_dataset_get_index_info(void *_dset, unsigned *plugin_id, size_t *metadata_size, 
+                                void **metadata, hid_t rcxt_id, void **req)
 {
     H5VL_iod_request_t **parent_reqs = NULL;
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *) _dset;
     H5VL_iod_dataset_get_index_info_t *info;
     dset_get_index_info_in_t input;
-    H5TR_t *tr = NULL;
+    dset_get_index_info_out_t *output;
+    H5RC_t *rc = NULL;
     size_t num_parents = 0;
     int *status = NULL;
     herr_t ret_value = SUCCEED;
@@ -10372,48 +10378,51 @@ H5VL_iod_dataset_get_index_info(void *_dset, unsigned *plugin_id,
 
     HDassert(dset);
 
-    /* get the TR object */
-    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID");
+    if(IOD_OBJ_INVALID == dset->remote_dset.mdkv_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        dset->common.request = NULL;
+    }
+
+    /* get the RC object */
+    if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID");
 
     if(NULL == (parent_reqs = (H5VL_iod_request_t **)
             H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
 
     /* retrieve parent requests */
-    if(H5VL_iod_get_parent_requests((H5VL_iod_object_t *)dset, (H5VL_iod_req_info_t *)tr,
+    if(H5VL_iod_get_parent_requests((H5VL_iod_object_t *)dset, (H5VL_iod_req_info_t *)rc,
             parent_reqs, &num_parents) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
 
-    status = (int *)malloc(sizeof(int));
-
     /* Fill input structure */
     input.coh = dset->common.file->remote_file.coh;
-//    input.iod_oh = dset->remote_dset.iod_oh;
-//    input.iod_id = dset->remote_dset.iod_id;
-    input.dxpl_id = dxpl_id;
-    input.trans_num = tr->trans_num;
-    input.rcxt_num  = tr->c_version;
+    input.mdkv_id = dset->remote_dset.mdkv_id;
+    input.rcxt_num = rc->c_version;
     input.cs_scope = dset->common.file->md_integrity_scope;
+
+    if (NULL == (output = (dset_get_index_info_out_t *)
+                 H5MM_calloc(sizeof(dset_get_index_info_out_t))))
+        HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate output struct");
 
     /* setup info struct for I/O request
        This is to manage the I/O operation once the wait is called. */
-    if (NULL == (info =
-            (H5VL_iod_dataset_get_index_info_t *)
-            H5MM_calloc(sizeof(H5VL_iod_dataset_get_index_info_t))))
+    if (NULL == (info = (H5VL_iod_dataset_get_index_info_t *)
+                 H5MM_calloc(sizeof(H5VL_iod_dataset_get_index_info_t))))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate info");
     info->idx_handle = dset->idx_handle;
     info->idx_plugin_id = dset->idx_plugin_id;
-//    info->metadata = ;
-//    info->metadata_size = ;
+    info->metadata = metadata;
+    info->metadata_size = metadata_size;
     info->dset = dset;
-    info->trans_id = trans_id;
+    info->output = output;
 
     if(H5VL__iod_create_and_forward(H5VL_DSET_GET_INDEX_INFO_ID, HG_DSET_GET_INDEX_INFO,
-                                    (H5VL_iod_object_t *)dset, 0,
-                                    num_parents, parent_reqs,
-                                    (H5VL_iod_req_info_t *)tr, &input, status,
-                                    status, req) < 0)
+                                    (H5VL_iod_object_t *)dset, 0, num_parents, parent_reqs,
+                                    (H5VL_iod_req_info_t *)tr, &input, output, info, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship get index info");
 
 done:
@@ -10444,6 +10453,13 @@ H5VL_iod_dataset_remove_index_info(void *_dset, hid_t trans_id, void **req)
 
     HDassert(dset);
 
+    if(IOD_OBJ_INVALID == dset->remote_dset.mdkv_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        dset->common.request = NULL;
+    }
+
     /* get the TR object */
     if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID");
@@ -10461,23 +10477,19 @@ H5VL_iod_dataset_remove_index_info(void *_dset, hid_t trans_id, void **req)
 
     /* Fill input structure */
     input.coh = dset->common.file->remote_file.coh;
-//    input.iod_oh = dset->remote_dset.iod_oh;
-//    input.iod_id = dset->remote_dset.iod_id;
-    input.dxpl_id = dxpl_id;
+    input.mdkv_id = dset->remote_dset.mdkv_id;
     input.trans_num = tr->trans_num;
-    input.rcxt_num  = tr->c_version;
     input.cs_scope = dset->common.file->md_integrity_scope;
 
     if(H5VL__iod_create_and_forward(H5VL_DSET_RM_INDEX_INFO_ID, HG_DSET_RM_INDEX_INFO,
-                                    (H5VL_iod_object_t *)dset, 0,
-                                    num_parents, parent_reqs,
-                                    (H5VL_iod_req_info_t *)tr, &input, status,
-                                    status, req) < 0)
+                                    (H5VL_iod_object_t *)dset, 0, num_parents, parent_reqs,
+                                    (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship get index info");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_dataset_remove_index_info() */
+
 #endif /* H5_HAVE_INDEXING */
 
 #endif /* H5_HAVE_EFF */

@@ -42,6 +42,9 @@
 #define H5VL_IOD_KEY_MAP_KEY_TYPE    "map_keytype"
 #define H5VL_IOD_KEY_MAP_VALUE_TYPE  "map_valtype"
 
+#define H5VL_IOD_IDX_PLUGIN_ID       "index_plugin_id"
+#define H5VL_IOD_IDX_PLUGIN_MD       "index_plugin_metadata"
+
 /* Enum for metadata types stored in MD KV for HDF5->IOD objects */
 typedef enum H5VL_iod_metadata_t {
     H5VL_IOD_PLIST,             /*type ID for property lists     	    */
@@ -101,6 +104,12 @@ H5_DLL int H5VL_iod_server_analysis_farm(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_analysis_transfer(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_container_open(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_container_close(hg_handle_t handle);
+
+#ifdef H5_HAVE_INDEXING
+H5_DLL int H5VL_iod_server_dset_set_index_info(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_get_index_info(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_remove_index_info(hg_handle_t handle);
+#endif
 
 H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_eff_finalize(hg_handle_t handle);
@@ -174,9 +183,24 @@ H5_DLL void H5VL_iod_server_analysis_farm_cb(AXE_engine_t axe_engine,
                                              size_t num_s_parents, AXE_task_t s_parents[], 
                                              void *_op_data);
 H5_DLL void H5VL_iod_server_analysis_transfer_cb(AXE_engine_t axe_engine,
-        size_t num_n_parents, AXE_task_t n_parents[],
-        size_t num_s_parents, AXE_task_t s_parents[],
-        void *_op_data);
+                                                 size_t num_n_parents, AXE_task_t n_parents[],
+                                                 size_t num_s_parents, AXE_task_t s_parents[],
+                                                 void *_op_data);
+
+#ifdef H5_HAVE_INDEXING
+H5_DLL void H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t axe_engine, 
+                                                   size_t num_n_parents, AXE_task_t n_parents[], 
+                                                   size_t num_s_parents, AXE_task_t s_parents[], 
+                                                   void *_op_data);
+H5_DLL void H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t axe_engine, 
+                                                   size_t num_n_parents, AXE_task_t n_parents[], 
+                                                   size_t num_s_parents, AXE_task_t s_parents[], 
+                                                   void *_op_data);
+H5_DLL void H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t axe_engine, 
+                                                   size_t num_n_parents, AXE_task_t n_parents[], 
+                                                   size_t num_s_parents, AXE_task_t s_parents[], 
+                                                   void *_op_data);
+#endif
 
 H5_DLL void H5VL_iod_server_file_create_cb(AXE_engine_t axe_engine, 
                                            size_t num_n_parents, AXE_task_t n_parents[], 

@@ -39,6 +39,8 @@
 #include "H5FFprivate.h"    /* FF */
 #include "H5Xpkg.h"         /* Index plugins */
 
+#ifdef H5_HAVE_INDEXING
+
 /****************/
 /* Local Macros */
 /****************/
@@ -297,6 +299,7 @@ H5Xunregister(unsigned plugin_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "Iu", plugin_id);
 
     /* Check args */
     if ((plugin_id < 0) || (plugin_id > H5X_PLUGIN_MAX))
@@ -387,6 +390,7 @@ H5Xcreate(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t xcpl_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "iIuii", file_id, plugin_id, scope_id, xcpl_id);
 
     /* Check args */
     if ((plugin_id < 0) || (plugin_id > H5X_PLUGIN_MAX))
@@ -431,6 +435,8 @@ H5Xcreate_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t xcpl_id,
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "iIuiiii", file_id, plugin_id, scope_id, xcpl_id, trans_id,
+             estack_id);
 
     /* Check args */
     if ((plugin_id < 0) || (plugin_id > H5X_PLUGIN_MAX))
@@ -510,6 +516,7 @@ H5Xremove(hid_t file_id, unsigned plugin_id, hid_t scope_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iIui", file_id, plugin_id, scope_id);
 
     /* Check args */
     if ((plugin_id < 0) || (plugin_id > H5X_PLUGIN_MAX))
@@ -552,6 +559,7 @@ H5Xremove_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t trans_id,
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "iIuiii", file_id, plugin_id, scope_id, trans_id, estack_id);
 
     /* Check args */
     if ((plugin_id < 0) || (plugin_id > H5X_PLUGIN_MAX))
@@ -626,6 +634,7 @@ H5Xget_count(hid_t scope_id, hsize_t *idx_count)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*h", scope_id, idx_count);
 
     /* TODO if necessary */
 done:
@@ -652,6 +661,7 @@ H5Xget_count_ff(hid_t scope_id, hsize_t *idx_count, hid_t rcxt_id,
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "i*hii", scope_id, idx_count, rcxt_id, estack_id);
 
     if (NULL == H5I_object_verify(scope_id, H5I_DATASET))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "scope_id is restricted to dataset ID");
@@ -683,3 +693,5 @@ H5Xget_count_ff(hid_t scope_id, hsize_t *idx_count, hid_t rcxt_id,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Xget_count_ff() */
+
+#endif /* H5_HAVE_INDEXING */

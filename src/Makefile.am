@@ -90,6 +90,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Osdspace.c H5Oshared.c H5Ostab.c \
         H5Oshmesg.c H5Otest.c H5Ounknown.c \
         H5P.c H5Pacpl.c H5Pdapl.c H5Pdcpl.c \
+        H5Pxapl.c H5Pxcpl.c H5Pxxpl.c H5X.c H5Xdummy.c \
         H5Pdeprec.c H5Pdxpl.c H5Pencdec.c \
         H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
         H5Pgcpl.c H5Pvcpl.c H5Pmcpl.c H5Pmapl.c H5Pint.c H5Prcapl.c H5Ptrspl.c H5Ptrfpl.c \
@@ -123,7 +124,8 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
 	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h \
         H5VLpublic.h H5VLnative.h H5VLiod.h \
-        H5FFpublic.h H5ESpublic.h H5RCpublic.h H5TRpublic.h H5Mpublic.h H5ASpublic.h H5Vpublic.h\
+        H5FFpublic.h H5ESpublic.h H5RCpublic.h H5TRpublic.h \
+        H5Mpublic.h H5ASpublic.h H5Vpublic.h H5Xpublic.h\
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h \
         H5PLextern.h \

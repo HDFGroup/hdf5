@@ -265,7 +265,7 @@ H5_term_library(void)
 	pending += DOWN(TR);
 	pending += DOWN(RC);
 #ifdef H5_HAVE_INDEXING
-    pending += DOWN(X);
+        pending += DOWN(X);
 #endif
 #endif /* H5_HAVE_EFF */
 	pending += DOWN(ES);

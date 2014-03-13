@@ -141,6 +141,15 @@ EFF__mercury_register_callbacks(void)
     MERCURY_HANDLER_REGISTER("dset_close", H5VL_iod_server_dset_close, 
                              dset_close_in_t, ret_t);
 
+#ifdef H5_HAVE_INDEXING
+    MERCURY_HANDLER_REGISTER("dset_set_index_info", H5VL_iod_server_dset_set_index_info,
+                             dset_set_index_info_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("dset_get_index_info", H5VL_iod_server_dset_get_index_info,
+                             dset_get_index_info_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("dset_rm_index_info", H5VL_iod_server_dset_remove_index_info,
+                             dset_rm_index_info_in_t, ret_t);
+#endif
+
     MERCURY_HANDLER_REGISTER("dtype_commit", H5VL_iod_server_dtype_commit, 
                              dtype_commit_in_t, dtype_commit_out_t);
     MERCURY_HANDLER_REGISTER("dtype_open", H5VL_iod_server_dtype_open, 
@@ -1850,6 +1859,170 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_close() */
+
+#ifdef H5_HAVE_INDEXING
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_set_index_info
+ *
+ * Purpose:	Function shipper registered call for Dset Set_Index_Info.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_dset_set_index_info(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    dset_set_index_info_in_t *input = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (dset_set_index_info_in_t *)
+                H5MM_malloc(sizeof(dset_set_index_info_in_t))))
+	HGOTO_ERROR2(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR2(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_dset_set_index_info_cb, op_data, NULL))
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dset_set_index_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_get_index_info
+ *
+ * Purpose:	Function shipper registered call for Dset Get_Index_Info.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_dset_get_index_info(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    dset_get_index_info_in_t *input = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (dset_get_index_info_in_t *)
+                H5MM_malloc(sizeof(dset_get_index_info_in_t))))
+	HGOTO_ERROR2(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR2(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_dset_get_index_info_cb, op_data, NULL))
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dset_get_index_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_remove_index_info
+ *
+ * Purpose:	Function shipper registered call for Dset Remove_Index_Info.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_dset_remove_index_info(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    dset_rm_index_info_in_t *input = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (dset_rm_index_info_in_t *)
+                H5MM_malloc(sizeof(dset_rm_index_info_in_t))))
+	HGOTO_ERROR2(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR2(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
+                                      input->axe_info.num_parents, input->axe_info.parent_axe_ids, 
+                                      0, NULL, H5VL_iod_server_dset_remove_index_info_cb, op_data, NULL))
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dset_remove_index_info() */
+#endif
 
 
 /*-------------------------------------------------------------------------

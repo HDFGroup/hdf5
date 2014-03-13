@@ -185,6 +185,7 @@ AC_SUBST([HDF5_HL]) HDF5_HL=yes
 AC_SUBST([GPFS]) GPFS=no
 AC_SUBST([PYTHON]) PYTHON=no
 AC_SUBST([EFF]) EFF=no
+AC_SUBST([INDEXING]) INDEXING=no
 AC_SUBST([LARGEFILE]) LARGEFILE=yes
 AC_SUBST([INSTRUMENT])
 AC_SUBST([CODESTACK]) CODESTACK=no
@@ -2924,6 +2925,28 @@ case "X-$CLEARFILEBUF" in
       AC_MSG_RESULT([no])
     ;;
 esac
+
+## ----------------------------------------------------------------------
+## Check for dataset indexing
+##
+AC_MSG_CHECKING([whether to enable indexing on datasets])
+AC_ARG_ENABLE([indexing],
+              [AS_HELP_STRING([--enable-indexing],
+                              [Enable INDEXING [default=no]])],,
+              [enableval=no])
+case "X-$enableval" in
+  X-yes)
+      INDEXING=yes
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([HAVE_INDEXING], [1],
+                [Define id indexing code should be enabled.])
+    ;;
+  X-no)
+      INDEXING=no
+      AC_MSG_RESULT([no])
+    ;;
+esac
+
 
 ## ----------------------------------------------------------------------
 ## Check for python devel

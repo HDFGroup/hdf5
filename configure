@@ -812,6 +812,7 @@ HAVE_DMALLOC
 CODESTACK
 INSTRUMENT
 LARGEFILE
+INDEXING
 EFF
 PYTHON
 GPFS
@@ -950,6 +951,7 @@ enable_metadata_trace_file
 enable_trace
 enable_instrument
 enable_clear_file_buffers
+enable_indexing
 enable_python
 enable_eff
 enable_using_memchecker
@@ -1654,6 +1656,7 @@ Optional Features:
   --enable-clear-file-buffers
                           Securely clear file buffers before writing to file.
                           Default=yes.
+  --enable-indexing       Enable INDEXING [default=no]
   --enable-python         Enable Python environment [default=no]
   --enable-eff            Enable EFF stack [default=no]
   --enable-using-memchecker
@@ -4062,6 +4065,7 @@ $as_echo "done" >&6; }
  GPFS=no
  PYTHON=no
  EFF=no
+ INDEXING=no
  LARGEFILE=yes
 
  CODESTACK=no
@@ -28993,6 +28997,35 @@ $as_echo "#define CLEAR_MEMORY 1" >>confdefs.h
 $as_echo "no" >&6; }
     ;;
 esac
+
+## ----------------------------------------------------------------------
+## Check for dataset indexing
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable indexing on datasets" >&5
+$as_echo_n "checking whether to enable indexing on datasets... " >&6; }
+# Check whether --enable-indexing was given.
+if test "${enable_indexing+set}" = set; then :
+  enableval=$enable_indexing;
+else
+  enableval=no
+fi
+
+case "X-$enableval" in
+  X-yes)
+      INDEXING=yes
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_INDEXING 1" >>confdefs.h
+
+    ;;
+  X-no)
+      INDEXING=no
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+esac
+
 
 ## ----------------------------------------------------------------------
 ## Check for python devel

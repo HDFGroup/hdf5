@@ -192,6 +192,9 @@
 /* Define to 1 if you have the <gpfs.h> header file. */
 #undef HAVE_GPFS_H
 
+/* Define id indexing code should be enabled. */
+#undef HAVE_INDEXING
+
 /* Define if library will contain instrumentation to detect correct
    optimization operation */
 #undef HAVE_INSTRUMENTED_LIBRARY
