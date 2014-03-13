@@ -147,6 +147,12 @@ hid_t H5P_CLS_LINK_ACCESS_ID_g                  = FAIL;
 H5P_genclass_t *H5P_CLS_LINK_ACCESS_g           = NULL;
 hid_t H5P_CLS_STRING_CREATE_ID_g                = FAIL;
 H5P_genclass_t *H5P_CLS_STRING_CREATE_g         = NULL;
+hid_t H5P_CLS_INDEX_CREATE_ID_g                 = FAIL;
+H5P_genclass_t *H5P_CLS_INDEX_CREATE_g          = NULL;
+hid_t H5P_CLS_INDEX_ACCESS_ID_g                 = FAIL;
+H5P_genclass_t *H5P_CLS_INDEX_ACCESS_g          = NULL;
+hid_t H5P_CLS_INDEX_XFER_ID_g                   = FAIL;
+H5P_genclass_t *H5P_CLS_INDEX_XFER_g            = NULL;
 
 /*
  * Predefined property lists for each predefined class. These are initialized
@@ -166,6 +172,9 @@ hid_t H5P_LST_ATTRIBUTE_CREATE_ID_g     = FAIL;
 hid_t H5P_LST_OBJECT_COPY_ID_g          = FAIL;
 hid_t H5P_LST_LINK_CREATE_ID_g          = FAIL;
 hid_t H5P_LST_LINK_ACCESS_ID_g          = FAIL;
+hid_t H5P_LST_INDEX_CREATE_ID_g         = FAIL;
+hid_t H5P_LST_INDEX_ACCESS_ID_g         = FAIL;
+hid_t H5P_LST_INDEX_XFER_ID_g           = FAIL;
 
 /* Root property list class library initialization object */
 const H5P_libclass_t H5P_CLS_ROOT[1] = {{
@@ -261,7 +270,9 @@ H5_DLLVAR const H5P_libclass_t H5P_CLS_DXFR[1];         /* Data transfer */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FMNT[1];         /* File mount */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_ACRT[1];         /* Attribute creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_LCRT[1];         /* Link creation */
-
+H5_DLLVAR const H5P_libclass_t H5P_CLS_XCRT[1];         /* Index creation */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_XACC[1];         /* Index access */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_XXFR[1];         /* Index transfer */
 
 /*****************************/
 /* Library Private Variables */
@@ -297,6 +308,9 @@ static H5P_libclass_t const * const init_class[] = {
     H5P_CLS_TCRT,       /* Datatype creation */
     H5P_CLS_TACC,       /* Datatype access */
     H5P_CLS_ACRT,       /* Attribute creation */
+    H5P_CLS_XCRT,       /* Index creation */
+    H5P_CLS_XACC,       /* Index access */
+    H5P_CLS_XXFR,       /* Index transfer */
     H5P_CLS_LCRT        /* Link creation */
 };
 
@@ -490,6 +504,9 @@ H5P_term_package(void)
                         H5P_LST_OBJECT_COPY_ID_g =
                         H5P_LST_LINK_CREATE_ID_g =
                         H5P_LST_LINK_ACCESS_ID_g =
+                        H5P_LST_INDEX_CREATE_ID_g =
+                        H5P_LST_INDEX_ACCESS_ID_g =
+                        H5P_LST_INDEX_XFER_ID_g =
                         H5P_LST_FILE_MOUNT_ID_g = (-1);
                 } /* end if */
             } /* end if */
@@ -516,6 +533,9 @@ H5P_term_package(void)
                         H5P_CLS_OBJECT_COPY_g =
                         H5P_CLS_LINK_CREATE_g =
                         H5P_CLS_LINK_ACCESS_g =
+                        H5P_CLS_INDEX_CREATE_g =
+                        H5P_CLS_INDEX_ACCESS_g =
+                        H5P_CLS_INDEX_XFER_g =
                         H5P_CLS_FILE_MOUNT_g = NULL;
 
                         H5P_CLS_ROOT_ID_g =
@@ -534,6 +554,9 @@ H5P_term_package(void)
                         H5P_CLS_OBJECT_COPY_ID_g =
                         H5P_CLS_LINK_CREATE_ID_g =
                         H5P_CLS_LINK_ACCESS_ID_g =
+                        H5P_CLS_INDEX_CREATE_ID_g =
+                        H5P_CLS_INDEX_ACCESS_ID_g =
+                        H5P_CLS_INDEX_XFER_ID_g =
                         H5P_CLS_FILE_MOUNT_ID_g = (-1);
                 } /* end if */
             } /* end if */
@@ -5253,8 +5276,8 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDcompile_assert(H5P_TYPE_LINK_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
-    HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_LINK_ACCESS);
+    HDcompile_assert(H5P_TYPE_INDEX_XFER == (H5P_TYPE_MAX_TYPE - 1));
+    HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_INDEX_XFER);
 
     /* Check arguments */
     if(type == H5P_TYPE_USER)
@@ -5326,6 +5349,18 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
 
         case H5P_TYPE_LINK_ACCESS:
             class_id = H5P_CLS_LINK_ACCESS_ID_g;
+            break;
+
+        case H5P_TYPE_INDEX_CREATE:
+            class_id = H5P_CLS_INDEX_CREATE_ID_g;
+            break;
+
+        case H5P_TYPE_INDEX_ACCESS:
+            class_id = H5P_CLS_INDEX_ACCESS_ID_g;
+            break;
+
+        case H5P_TYPE_INDEX_XFER:
+            class_id = H5P_CLS_INDEX_XFER_ID_g;
             break;
 
         case H5P_TYPE_USER:     /* shut compiler warnings up */

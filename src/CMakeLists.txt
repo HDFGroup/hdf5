@@ -629,6 +629,17 @@ set (H5WB_HDRS
 )
 IDE_GENERATED_PROPERTIES ("H5WB" "${H5WB_HDRS}" "${H5WB_SRCS}" )
 
+set (H5X_SRCS
+    ${HDF5_SRC_DIR}/H5X.c
+    ${HDF5_SRC_DIR}/H5Xdummy.c
+    ${HDF5_SRC_DIR}/H5Pxapl.c
+    ${HDF5_SRC_DIR}/H5Pxcpl.c
+    ${HDF5_SRC_DIR}/H5Pxxpl.c
+)
+set (H5X_HDRS
+    ${HDF5_SRC_DIR}/H5Xpublic.h
+)
+IDE_GENERATED_PROPERTIES ("H5X" "${H5X_HDRS}" "${H5X_SRCS}" )
 
 set (H5Z_SRCS
     ${HDF5_SRC_DIR}/H5Z.c
@@ -694,6 +705,7 @@ set (common_SRCS
     ${H5TS_SRCS}
     ${H5VM_SRCS}
     ${H5WB_SRCS}
+    ${H5X_SRCS}
     ${H5Z_SRCS}
 )
 
@@ -728,6 +740,7 @@ set (H5_PUBLIC_HEADERS
     ${H5S_HDRS}
     ${H5SM_HDRS}
     ${H5T_HDRS}
+    ${H5X_HDRS}
     ${H5Z_HDRS}
 )
 
@@ -774,6 +787,7 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5TSprivate.h
     ${HDF5_SRC_DIR}/H5VMprivate.h
     ${HDF5_SRC_DIR}/H5WBprivate.h
+    ${HDF5_SRC_DIR}/H5Xprivate.h
     ${HDF5_SRC_DIR}/H5Zprivate.h
     ${HDF5_SRC_DIR}/H5win32defs.h
 )
