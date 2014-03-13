@@ -83,8 +83,8 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
     size_t max_dsets;
     size_t buf_size;
     size_t ndsets;
-    hid_t file_id;
-    hid_t dcpl_id;
+    hid_t file_id = - 1;
+    hid_t dcpl_id = -1;
     hsize_t dset_dims[MAX_DSETS][3];
     hsize_t chunk_dims[2];
     hsize_t max_dims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
@@ -139,9 +139,13 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
     start[2] = 0;
     count[2] = 1;
 
-    /* Initialize memory type */
-    for(i = 0; i < max_dsets; i++)
+    /* Initialize multi_info */
+    for(i = 0; i < max_dsets; i++) {
+        multi_info[i].dset_id = -1;
+        multi_info[i].dset_space_id = -1;
         multi_info[i].mem_type_id = H5T_NATIVE_UINT;
+        multi_info[i].mem_space_id = -1;
+    } /* end for */
 
     /* Generate memory dataspace */
     dset_dims[0][0] = MAX_DSET_X;
@@ -257,29 +261,11 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                     /* Point selection */
                     size_t npoints = (size_t)(((size_t)HDrandom() % MAX_POINTS) + 1); /* Number of points */
 
-                    /* Generate points, 2D if using "shapesame", 3D otherwise */
-                    if(flags & MDSET_FLAG_SHAPESAME)
-                        for(l = 0; l < npoints; l++) {
-                            points[2 * l] = (unsigned)((hsize_t)HDrandom() % dset_dims[k][0]);
-                            points[(2 * l) + 1] = (unsigned)((hsize_t)HDrandom() % dset_dims[k][1]);
-                        } /* end for */
-                    else
-                        for(l = 0; l < npoints; l++) {
-                            points[3 * l] = (unsigned)((hsize_t)HDrandom() % dset_dims[k][0]);
-                            points[(3 * l) + 1] = (unsigned)((hsize_t)HDrandom() % dset_dims[k][1]);
-                            points[(3 * l) + 2] = 0;
-                        } /* end for */
-
-                    /* Select points in memory */
-                    if(H5Sselect_elements(multi_info[k].mem_space_id, H5S_SELECT_APPEND, npoints, points) < 0)
-                        TEST_ERROR
-
-                    /* Convert to 2D for file selection, if not using "shapesame" */
-                    if(!(flags & MDSET_FLAG_SHAPESAME) && (npoints > 1))
-                        for(l = 1; l < npoints; l++) {
-                            points[2 * l] = points[3 * l];
-                            points[(2 * l) + 1] = points[(3 * l) + 1];
-                        } /* end for */
+                    /* Generate points */
+                    for(l = 0; l < npoints; l++) {
+                        points[2 * l] = (unsigned)((hsize_t)HDrandom() % dset_dims[k][0]);
+                        points[(2 * l) + 1] = (unsigned)((hsize_t)HDrandom() % dset_dims[k][1]);
+                    } /* end for */
 
                     /* Select points in file */
                     if(H5Sselect_elements(multi_info[k].dset_space_id, H5S_SELECT_APPEND, npoints, points) < 0)
@@ -293,6 +279,21 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                     else
                         for(l = 0; l < npoints; l++)
                             efbufi[k][points[2 * l]][points[(2 * l) + 1]] = wbufi[k][points[2 * l]][points[(2 * l) + 1]];
+
+                    /* Convert to 3D for memory selection, if not using
+                     * "shapesame" */
+                    if(!(flags & MDSET_FLAG_SHAPESAME)) {
+                        for(l = npoints - 1; l > 0; l--) {
+                            points[(3 * l) + 2] = 0;
+                            points[(3 * l) + 1] = points[(2 * l) + 1];
+                            points[3 * l] = points[2 * l];
+                        } /* end for */
+                        points[2] = 0;
+                    } /* end if */
+
+                    /* Select points in memory */
+                    if(H5Sselect_elements(multi_info[k].mem_space_id, H5S_SELECT_APPEND, npoints, points) < 0)
+                        TEST_ERROR
                 } /* end else */
             } /* end for */
 
@@ -343,19 +344,25 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
         for(j = 0; j < ndsets; j++) {
             if(H5Dclose(multi_info[j].dset_id) < 0)
                 TEST_ERROR
+            multi_info[j].dset_id = -1;
             if(H5Sclose(multi_info[j].dset_space_id) < 0)
                 TEST_ERROR
+            multi_info[j].dset_space_id = -1;
         } /* end for */
         if(H5Fclose(file_id) < 0)
             TEST_ERROR
+        file_id = -1;
     } /* end for */
 
     /* Close */
-    for(i = 0; i < max_dsets; i++)
+    for(i = 0; i < max_dsets; i++) {
         if(H5Sclose(multi_info[i].mem_space_id) < 0)
             TEST_ERROR
+        multi_info[i].mem_space_id = -1;
+    } /* end for */
     if(H5Pclose(dcpl_id) < 0)
         TEST_ERROR
+    dcpl_id = -1;
     free(rbuf);
     rbuf = NULL;
     free(erbuf);

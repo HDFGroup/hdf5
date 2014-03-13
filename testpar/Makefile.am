@@ -25,7 +25,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
 #
-TEST_PROG_PARA=t_mpi t_posix_compliant testphdf5 ph5mdsettest t_cache \
+TEST_PROG_PARA=t_mpi t_posix_compliant testphdf5 ph5mdsettest t_pmulti_dset t_cache \
 	t_pflush1 t_pflush2 t_shapesame 
 TEST_SCRIPT_PARA=testph5.sh
 
@@ -43,7 +43,7 @@ LDADD = $(LIBH5TEST) $(LIBHDF5)
 # MPItest.h5 is from t_mpi
 # Para*.h5 are from testphdf
 # go is used for debugging. See testphdf5.c.
-CHECK_CLEANFILES+=MPItest.h5 Para*.h5 CacheTestDummy.h5 go
+CHECK_CLEANFILES+=MPItest.h5 Para*.h5 CacheTestDummy.h5 pmulti_dset.h5 go
 DISTCLEANFILES=testph5.sh
 
 include $(top_srcdir)/config/conclude.am

@@ -1159,6 +1159,7 @@
 ./testpar/t_ph5basic.c
 ./testpar/t_pflush1.c
 ./testpar/t_pflush2.c
+./testpar/t_pmulti_dset.c
 ./testpar/t_posix_compliant.c
 ./testpar/t_prop.c
 ./testpar/t_shapesame.c

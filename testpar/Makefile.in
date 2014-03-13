@@ -83,20 +83,21 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = testph5.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = t_mpi$(EXEEXT) t_posix_compliant$(EXEEXT) \
-	testphdf5$(EXEEXT) ph5mdsettest$(EXEEXT) t_cache$(EXEEXT) t_pflush1$(EXEEXT) \
+	testphdf5$(EXEEXT) ph5mdsettest$(EXEEXT) \
+	t_pmulti_dset$(EXEEXT) t_cache$(EXEEXT) t_pflush1$(EXEEXT) \
 	t_pflush2$(EXEEXT) t_shapesame$(EXEEXT)
 ph5mdsettest_SOURCES = ph5mdsettest.c
 ph5mdsettest_OBJECTS = ph5mdsettest.$(OBJEXT)
 ph5mdsettest_LDADD = $(LDADD)
 ph5mdsettest_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
-t_cache_SOURCES = t_cache.c
-t_cache_OBJECTS = t_cache.$(OBJEXT)
-t_cache_LDADD = $(LDADD)
-t_cache_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+t_cache_SOURCES = t_cache.c
+t_cache_OBJECTS = t_cache.$(OBJEXT)
+t_cache_LDADD = $(LDADD)
+t_cache_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
 t_mpi_SOURCES = t_mpi.c
 t_mpi_OBJECTS = t_mpi.$(OBJEXT)
 t_mpi_LDADD = $(LDADD)
@@ -109,6 +110,10 @@ t_pflush2_SOURCES = t_pflush2.c
 t_pflush2_OBJECTS = t_pflush2.$(OBJEXT)
 t_pflush2_LDADD = $(LDADD)
 t_pflush2_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+t_pmulti_dset_SOURCES = t_pmulti_dset.c
+t_pmulti_dset_OBJECTS = t_pmulti_dset.$(OBJEXT)
+t_pmulti_dset_LDADD = $(LDADD)
+t_pmulti_dset_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
 t_posix_compliant_SOURCES = t_posix_compliant.c
 t_posix_compliant_OBJECTS = t_posix_compliant.$(OBJEXT)
 t_posix_compliant_LDADD = $(LDADD)
@@ -159,10 +164,12 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = t_cache.c t_mpi.c ph5mdsettest.c t_pflush1.c t_pflush2.c \
-	t_posix_compliant.c t_shapesame.c $(testphdf5_SOURCES)
-DIST_SOURCES = t_cache.c ph5mdsettest.c t_mpi.c t_pflush1.c t_pflush2.c \
-	t_posix_compliant.c t_shapesame.c $(testphdf5_SOURCES)
+SOURCES = ph5mdsettest.c t_cache.c t_mpi.c t_pflush1.c t_pflush2.c \
+	t_pmulti_dset.c t_posix_compliant.c t_shapesame.c \
+	$(testphdf5_SOURCES)
+DIST_SOURCES = ph5mdsettest.c t_cache.c t_mpi.c t_pflush1.c \
+	t_pflush2.c t_pmulti_dset.c t_posix_compliant.c t_shapesame.c \
+	$(testphdf5_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -459,12 +466,14 @@ TRACE = perl $(top_srcdir)/bin/trace
 # Para*.h5 are from testphdf
 # go is used for debugging. See testphdf5.c.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog MPItest.h5 Para*.h5 \
-	CacheTestDummy.h5 go
+	CacheTestDummy.h5 pmulti_dset.h5 go
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
 #
-TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 ph5mdsettest t_cache t_pflush1 t_pflush2 t_shapesame
+TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 ph5mdsettest t_pmulti_dset t_cache \
+	t_pflush1 t_pflush2 t_shapesame 
+
 TEST_SCRIPT_PARA = testph5.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
@@ -556,6 +565,9 @@ t_pflush1$(EXEEXT): $(t_pflush1_OBJECTS) $(t_pflush1_DEPENDENCIES) $(EXTRA_t_pfl
 t_pflush2$(EXEEXT): $(t_pflush2_OBJECTS) $(t_pflush2_DEPENDENCIES) $(EXTRA_t_pflush2_DEPENDENCIES) 
 	@rm -f t_pflush2$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(t_pflush2_OBJECTS) $(t_pflush2_LDADD) $(LIBS)
+t_pmulti_dset$(EXEEXT): $(t_pmulti_dset_OBJECTS) $(t_pmulti_dset_DEPENDENCIES) $(EXTRA_t_pmulti_dset_DEPENDENCIES) 
+	@rm -f t_pmulti_dset$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(t_pmulti_dset_OBJECTS) $(t_pmulti_dset_LDADD) $(LIBS)
 t_posix_compliant$(EXEEXT): $(t_posix_compliant_OBJECTS) $(t_posix_compliant_DEPENDENCIES) $(EXTRA_t_posix_compliant_DEPENDENCIES) 
 	@rm -f t_posix_compliant$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(t_posix_compliant_OBJECTS) $(t_posix_compliant_LDADD) $(LIBS)
@@ -585,6 +597,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_pflush1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_pflush2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_ph5basic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_pmulti_dset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_posix_compliant.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_prop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_shapesame.Po@am__quote@
