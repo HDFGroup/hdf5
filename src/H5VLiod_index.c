@@ -66,7 +66,7 @@ H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open MDKV object");
 
     kv.key = H5VL_IOD_IDX_PLUGIN_ID;
-    kv.key_len = (iod_size_t)strlen(kv.key);
+    kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_ID);
     kv.value = &input->idx_plugin_id;
     kv.value_len = (iod_size_t)sizeof(uint32_t);
 
@@ -84,9 +84,9 @@ H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     kv.key = H5VL_IOD_IDX_PLUGIN_MD;
-    kv.key_len = (iod_size_t)strlen(kv.key);
+    kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_MD);
     kv.value = input->idx_metadata.buf;
-    kv.value_len = (iod_size_t)input->index_metadata.buf_size;
+    kv.value_len = (iod_size_t)input->idx_metadata.buf_size;
 
     if(cs_scope & H5_CHECKSUM_IOD) {
         iod_checksum_t cs[2];
@@ -109,7 +109,7 @@ done:
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-    input = (dset_create_in_t *)H5MM_xfree(input);
+    input = (dset_set_index_info_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
     FUNC_LEAVE_NOAPI_VOID
@@ -145,8 +145,9 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t mdkv_oh;
     iod_size_t key_size = 0;
     iod_size_t val_size = 0;
-    void *value = NULL;
     iod_checksum_t *iod_cs = NULL;
+    char *key = NULL;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -167,10 +168,12 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
     key_size = strlen(key);
     val_size = sizeof(uint32_t);
 
-    if(iod_kv_get_value(mdkv_oh, rtid, key, key_size, &output.idx_plugin_id, 
-                        &val_size, iod_cs, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "link_count lookup failed");
-
+    if((ret = iod_kv_get_value(mdkv_oh, rtid, key, key_size, &output.idx_plugin_id, 
+                               &val_size, iod_cs, NULL)) < 0) {
+        //if(ret == -EBADF)
+        //fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+    }
     if(cs_scope & H5_CHECKSUM_IOD) {
         iod_checksum_t cs[2];
 
@@ -184,6 +187,7 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
 
     key = H5VL_IOD_IDX_PLUGIN_MD;
     key_size = strlen(key);
+    val_size = 0;
 
     if(iod_kv_get_value(mdkv_oh, rtid, key, key_size, NULL, 
                         &val_size, iod_cs, NULL) < 0)
@@ -192,7 +196,7 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
     output.idx_metadata.buf_size = val_size;
     output.idx_metadata.buf = malloc(val_size);
 
-    if(iod_kv_get_value(mdkv_oh, rtid, key, key_size, output.idx_metadata.buf, 
+    if(iod_kv_get_value(mdkv_oh, rtid, key, key_size, (char *)output.idx_metadata.buf, 
                         &val_size, iod_cs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
@@ -207,6 +211,8 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     output.ret = ret_value;
+    /* MSC for now, idx_count is always 1 */
+    output.idx_count = 1;
     HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
@@ -225,7 +231,7 @@ done:
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-    input = (dset_create_in_t *)H5MM_xfree(input);
+    input = (dset_get_index_info_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
     FUNC_LEAVE_NOAPI_VOID
@@ -256,7 +262,7 @@ H5VL_iod_server_dset_remove_index_info_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* container handle */
     iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV to be created */
     iod_trans_id_t wtid = input->trans_num;
-    uint32_t cs_scope = input->cs_scope;
+    //uint32_t cs_scope = input->cs_scope;
     iod_handle_t mdkv_oh;
     iod_kv_params_t kvs;
     iod_kv_t kv;
@@ -274,17 +280,17 @@ H5VL_iod_server_dset_remove_index_info_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open MDKV object");
 
     kv.key = H5VL_IOD_IDX_PLUGIN_ID;
-    kv.key_len = (iod_size_t)strlen(kv.key);
+    kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_ID);
     kvs.kv = &kv;
-    kvs.cs = &cs;
+    kvs.cs = NULL;
     kvs.ret = &ret;
     if(iod_kv_unlink_keys(mdkv_oh, wtid, NULL, 1, &kvs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
 
     kv.key = H5VL_IOD_IDX_PLUGIN_MD;
-    kv.key_len = (iod_size_t)strlen(kv.key);
+    kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_MD);
     kvs.kv = &kv;
-    kvs.cs = &cs;
+    kvs.cs = NULL;
     kvs.ret = &ret;
     if(iod_kv_unlink_keys(mdkv_oh, wtid, NULL, 1, &kvs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
@@ -297,7 +303,7 @@ done:
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-    input = (dset_create_in_t *)H5MM_xfree(input);
+    input = (dset_rm_index_info_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
     FUNC_LEAVE_NOAPI_VOID

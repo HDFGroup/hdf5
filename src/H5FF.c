@@ -794,8 +794,6 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
 
 #ifdef H5_HAVE_INDEXING
     {
-        H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
-        void **req = NULL; /* pointer to plugin generate requests (NULL if VOL plugin does not support async) */
         H5X_class_t *idx_class = NULL;
         void *idx_handle = NULL;
         unsigned plugin_id;
@@ -805,29 +803,10 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
         H5P_genplist_t *xxpl_plist; /* Property list pointer */
         hid_t xapl_id = H5P_INDEX_ACCESS_DEFAULT;
 
-        if (estack_id != H5_EVENT_STACK_NULL) {
-            /* create the private request */
-            if (NULL == (request = (H5_priv_request_t *) H5MM_calloc(sizeof(H5_priv_request_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            request->req = NULL;
-            req = &request->req;
-            request->next = NULL;
-            request->vol_plugin = vol_plugin;
-            vol_plugin->nrefs ++;
-        }
-
         /* Get index info if present */
         if (FAIL == H5VL_iod_dataset_get_index_info(dset, &idx_count, &plugin_id,
-                &metadata_size, &metadata, rcxt_id, req))
+                &metadata_size, &metadata, rcxt_id, NULL))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index info for dataset");
-
-        if (request && *req) {
-            if(H5ES_insert(estack_id, request) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-        }
-
-        /* TODO this is synchronous for now as we need the info first */
-//        H5ES_wait(estack_id, );
 
         if (idx_count) {
             /* store the read context ID in the xxpl */
@@ -851,7 +830,7 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
                 HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "cannot set index plugin ID to dataset");
         }
     }
-#endif
+#endif /* H5_HAVE_INDEXING */
 
 done:
     if (ret_value < 0 && dset)

@@ -1654,52 +1654,85 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         }
 #ifdef H5_HAVE_INDEXING
     case HG_DSET_SET_INDEX_INFO:
-    {
-        req->data = NULL;
-        H5VL_iod_request_delete(file, req);
-        break;
-    }
-    case HG_DSET_GET_INDEX_INFO:
-    {
-        H5VL_iod_dataset_get_index_info_t *idx_info =
-                (H5VL_iod_dataset_get_index_info_t *)req->data;
-        unsigned plugin_id = idx_info->output->idx_plugin_id;
-        size_t count = idx_info->output->idx_count;
+        {
+            int *status = (int *)req->data;
 
-        if(!plugin_id) {
-            HERROR(H5E_INDEX, H5E_BADVALUE, "invalid index plugin ID\n");
-            req->status = H5ES_STATUS_FAIL;
-            req->state = H5VL_IOD_COMPLETED;
-        } else {
-            size_t metadata_size = idx_info->output->idx_metadata.buf_size;
-            void *metadata = idx_info->output->idx_metadata.buf;
-            void *new_metadata;
+            if(SUCCEED != *status) {
+                HERROR(H5E_FUNC, H5E_CANTINIT, "set_index_info failed at the server\n");
+                req->status = H5ES_STATUS_FAIL;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
-            if (!metadata_size)
-                HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "invalid metadata size");
-
-            if (NULL == (new_metadata = H5MM_calloc(metadata_size)))
-                HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate metadata");
-            if (FAIL == HDmemcpy(new_metadata, metadata, metadata_size))
-                HGOTO_ERROR(H5E_INDEX, H5E_CANTCOPY, FAIL, "can't copy metadata");
-
-            if (idx_info->count) *idx_info->count = count;
-            if (idx_info->plugin_id) *idx_info->plugin_id = plugin_id;
-            if (idx_info->metadata_size) *idx_info->metadata_size = metadata_size;
-            if (idx_info->metadata) *idx_info->metadata = new_metadata;
+            free(status);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
         }
+    case HG_DSET_GET_INDEX_INFO:
+        {
+            H5VL_iod_dataset_get_index_info_t *idx_info =
+                (H5VL_iod_dataset_get_index_info_t *)req->data;
+            dset_get_index_info_out_t *output = idx_info->output;
 
-        req->data = NULL;
-        H5VL_iod_request_delete(file, req);
-        break;
-    }
+            if(SUCCEED != output->ret) {
+                HERROR(H5E_FUNC, H5E_CANTINIT, "set_index_info failed at the server\n");
+                req->status = H5ES_STATUS_FAIL;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+            else {
+                unsigned plugin_id;
+                size_t count;
+
+                count = output->idx_count;
+                /* MSC - for now, idx_plugin_count is always 1 */
+                HDassert(1 == count || 0 == count);
+
+                plugin_id = (unsigned) output->idx_plugin_id;
+                if(!plugin_id) {
+                    HERROR(H5E_INDEX, H5E_BADVALUE, "invalid index plugin ID\n");
+                    req->status = H5ES_STATUS_FAIL;
+                    req->state = H5VL_IOD_COMPLETED;
+                } else {
+                    size_t metadata_size = idx_info->output->idx_metadata.buf_size;
+                    void *metadata = idx_info->output->idx_metadata.buf;
+                    void *new_metadata;
+
+                    if (!metadata_size)
+                        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "invalid metadata size");
+
+                    if (NULL == (new_metadata = H5MM_calloc(metadata_size)))
+                        HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate metadata");
+                    HDmemcpy(new_metadata, metadata, metadata_size);
+
+                    if (idx_info->count) *idx_info->count = count;
+                    if (idx_info->plugin_id) *idx_info->plugin_id = plugin_id;
+                    if (idx_info->metadata_size) *idx_info->metadata_size = metadata_size;
+                    if (idx_info->metadata) *idx_info->metadata = new_metadata;
+                }
+            }
+
+            output = (dset_get_index_info_out_t *)H5MM_xfree(output);
+            idx_info = (H5VL_iod_dataset_get_index_info_t *)H5MM_xfree(idx_info);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
     case HG_DSET_RM_INDEX_INFO:
-    {
-        req->data = NULL;
-        H5VL_iod_request_delete(file, req);
-        break;
-    }
-#endif
+        {
+            int *status = (int *)req->data;
+
+            if(SUCCEED != *status) {
+                HERROR(H5E_FUNC, H5E_CANTINIT, "remove_index_info failed at the server\n");
+                req->status = H5ES_STATUS_FAIL;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+
+            free(status);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+#endif /* H5_HAVE_INDEXING */
     case HG_LINK_ITERATE:
     case HG_OBJECT_VISIT:
     case HG_MAP_ITERATE:
@@ -2115,6 +2148,10 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     case HG_TR_SKIP:
     case HG_TR_ABORT:
     case HG_EVICT:
+#ifdef H5_HAVE_INDEXING
+    case HG_DSET_SET_INDEX_INFO:
+    case HG_DSET_RM_INDEX_INFO:
+#endif /* H5_HAVE_INDEXING */
         {
             int *status = (int *)req->data;
 
@@ -2123,6 +2160,20 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
             break;
         }
+#ifdef H5_HAVE_INDEXING
+    case HG_DSET_GET_INDEX_INFO:
+        {
+            H5VL_iod_dataset_get_index_info_t *idx_info =
+                (H5VL_iod_dataset_get_index_info_t *)req->data;
+            dset_get_index_info_out_t *output = idx_info->output;
+
+            output = (dset_get_index_info_out_t *)H5MM_xfree(output);
+            idx_info = (H5VL_iod_dataset_get_index_info_t *)H5MM_xfree(idx_info);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+#endif /* H5_HAVE_INDEXING */
     case HG_PREFETCH:
     case HG_VIEW_CREATE:
         req->data = NULL;
