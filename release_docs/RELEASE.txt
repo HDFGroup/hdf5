@@ -86,7 +86,12 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
+    Mac OS X 10.6 Snow Leopard is not supported by Apple any more. In view of
+    the added support of Mac OS X 10.9, Mac OS X 10.6 is retired from HDF5
+    supported platforms. (AKC - 2014/03/14 HDFFV-8704)
+
     Mac OS X 10.9 Mavericks is supported. (AKC - 2014/03/04 HDFFV-8694)
+                                  
 
 Bug Fixes since HDF5-1.8.12
 ===========================
@@ -239,7 +244,6 @@ Windows 7 x64                           y        y/y    n        y    y     y
 Windows 7 Cygwin                        n        y/n    n        y    y     y
 Windows 8.1                             n        y/y    n        y    y     y
 Windows 8.1   x64                       n        y/y    n        y    y     y
-Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
 Mac OS X Mountain Lion 10.8.1 64-bit    n        y/y    n        y    y     y
 Mac OS X Mavericks 10.9.1 64-bit        n        y/y    n        y    y     ?
@@ -264,7 +268,6 @@ Windows 7 x64                              y       y         y         y
 Windows 7 Cygwin                           n       n         n         y
 Windows 8.1                                y       y         y         y
 Windows 8.1 x64                            y       y         y         y
-Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
 Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
 Mac OS X Mavericks 10.9.1 64-bit           y       n         y         y
@@ -296,12 +299,6 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP x86_64 GNU/Linux           gcc 4.1.2 and gfortran 4.1.2
     (koala)                       g95 (GCC 4.0.3 (g95 0.94!)
 
-    Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
-    Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6
-    64-bit                        gfortran GNU Fortran (GCC) 4.6.2
-    (fred)                        Intel C (icc), Fortran (ifort), C++ (icpc)
-                                      12.1 Build 20120928
-                                  
     FreeBSD 8.2-STABLE i386       gcc 4.5.4 [FreeBSD] 20110526
     (loyalty)                     gcc 4.6.1 20110527
                                   g++ 4.6.1 20110527
