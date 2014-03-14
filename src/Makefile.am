@@ -60,7 +60,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5FAstat.c H5FAtest.c \
         H5VL.c H5VLint.c H5VLnative.c \
         H5VLiod.c H5VLiod_common.c H5VLiod_client.c H5VLiod_server.c H5VLiod_encdec.c H5VLiod_util.c \
-        H5VLiod_file.c H5VLiod_group.c H5VLiod_map.c H5VLiod_dset.c H5VLiod_dtype.c \
+        H5VLiod_file.c H5VLiod_group.c H5VLiod_map.c H5VLiod_dset.c H5VLiod_dtype.c H5VLiod_index.c \
         H5VLiod_attr.c H5VLiod_link.c H5VLiod_obj.c H5VLiod_trans.c H5VLiod_view.c H5VLiod_analysis.c \
         H5FD.c H5FDcore.c  \
         H5FDdirect.c H5FDfamily.c H5FDint.c H5FDlog.c H5FDmpi.c H5FDmpio.c \
