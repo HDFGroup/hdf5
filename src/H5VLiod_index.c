@@ -170,8 +170,18 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
 
     if((ret = iod_kv_get_value(mdkv_oh, rtid, key, key_size, &output.idx_plugin_id, 
                                &val_size, iod_cs, NULL)) < 0) {
-        //if(ret == -EBADF)
-        //fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+        if(ret == -ENOKEY) {
+            fprintf(stderr, "no index to retrieve\n");
+
+            output.ret = ret_value;
+            output.idx_count = 0;
+            output.idx_plugin_id = 0;
+            output.idx_metadata.buf_size = 0;
+            output.idx_metadata.buf = NULL;
+            HG_Handler_start_output(op_data->hg_handle, &output);
+            HGOTO_DONE(SUCCEED);
+        }
+        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
     }
     if(cs_scope & H5_CHECKSUM_IOD) {

@@ -790,7 +790,7 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
 
     /* Get an atom for the dataset */
     if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
-    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
 
 #ifdef H5_HAVE_INDEXING
     {

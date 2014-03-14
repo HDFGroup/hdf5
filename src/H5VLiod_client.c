@@ -1687,27 +1687,42 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 /* MSC - for now, idx_plugin_count is always 1 */
                 HDassert(1 == count || 0 == count);
 
-                plugin_id = (unsigned) output->idx_plugin_id;
-                if(!plugin_id) {
-                    HERROR(H5E_INDEX, H5E_BADVALUE, "invalid index plugin ID\n");
-                    req->status = H5ES_STATUS_FAIL;
-                    req->state = H5VL_IOD_COMPLETED;
-                } else {
-                    size_t metadata_size = idx_info->output->idx_metadata.buf_size;
-                    void *metadata = idx_info->output->idx_metadata.buf;
-                    void *new_metadata;
+                if (idx_info->count) 
+                    *idx_info->count = count;
 
-                    if (!metadata_size)
-                        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "invalid metadata size");
+                if(0 == count) {
+                    if (idx_info->plugin_id) 
+                        *idx_info->plugin_id = plugin_id;
+                    if (idx_info->metadata_size) 
+                        *idx_info->metadata_size = 0;
+                    if (idx_info->metadata) 
+                        *idx_info->metadata = NULL;
+                }
+                if(1 == count) {
+                    plugin_id = (unsigned) output->idx_plugin_id;
+                    if(!plugin_id) {
+                        HERROR(H5E_INDEX, H5E_BADVALUE, "invalid index plugin ID\n");
+                        req->status = H5ES_STATUS_FAIL;
+                        req->state = H5VL_IOD_COMPLETED;
+                    } else {
+                        size_t metadata_size = idx_info->output->idx_metadata.buf_size;
+                        void *metadata = idx_info->output->idx_metadata.buf;
+                        void *new_metadata;
 
-                    if (NULL == (new_metadata = H5MM_calloc(metadata_size)))
-                        HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate metadata");
-                    HDmemcpy(new_metadata, metadata, metadata_size);
+                        if (!metadata_size)
+                            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "invalid metadata size");
 
-                    if (idx_info->count) *idx_info->count = count;
-                    if (idx_info->plugin_id) *idx_info->plugin_id = plugin_id;
-                    if (idx_info->metadata_size) *idx_info->metadata_size = metadata_size;
-                    if (idx_info->metadata) *idx_info->metadata = new_metadata;
+                        if (NULL == (new_metadata = H5MM_calloc(metadata_size)))
+                            HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate metadata");
+                        HDmemcpy(new_metadata, metadata, metadata_size);
+
+                        if (idx_info->plugin_id) 
+                            *idx_info->plugin_id = plugin_id;
+                        if (idx_info->metadata_size) 
+                            *idx_info->metadata_size = metadata_size;
+                        if (idx_info->metadata) 
+                            *idx_info->metadata = new_metadata;
+                    }
                 }
             }
 
