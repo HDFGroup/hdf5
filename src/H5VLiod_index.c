@@ -302,3 +302,6 @@ done:
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_remove_index_info_cb() */
+
+#endif /* H5_HAVE_INDEXING */
+#endif /* H5_HAVE_EFF */
