@@ -1652,51 +1652,69 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             break;
         }
 #ifdef H5_HAVE_INDEXING
-    case HG_DSET_GET_INDEX_INFO:
-    {
-        H5VL_iod_dataset_get_index_info_t *index_info =
-                (H5VL_iod_dataset_get_index_info_t *)req->data;
-
-        if(!index_info->idx_plugin_id) {
-            HERROR(H5E_INDEX, H5E_BADVALUE, "invalid index plugin ID\n");
-            req->status = H5ES_STATUS_FAIL;
-            req->state = H5VL_IOD_COMPLETED;
-        } else {
-            H5X_class_t *idx_class = NULL;
-            H5P_genplist_t *xxpl_plist; /* Property list pointer */
-            unsigned plugin_id = index_info->idx_plugin_id;
-            void *dset = index_info->dset;
-            hid_t xapl_id = H5P_INDEX_ACCESS_DEFAULT;
-
-            /* store the transaction ID in the xxpl */
-            if(NULL == (xxpl_plist = (H5P_genplist_t *)H5I_object(xapl_id)))
-                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-            if(H5P_set(xxpl_plist, H5VL_TRANS_ID, &index_info->trans_id) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
-
-            if (!(plugin_id = H5VL_iod_dataset_set_index_plugin_id(dset)))
-                HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "can't set index plugin ID for dataset");
-            if (NULL == (idx_class = H5X_registered(plugin_id)))
-                HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
-
-            /* TODO registered tmp IDs for file and dset ?? */
-            if (FAIL == idx_class->open(file_id, dataset_id, xapl_id,
-                    metadata_size, metadata))
-                HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "indexing open callback failed");
-        }
-
-        req->data = NULL;
-        H5VL_iod_request_delete(file, req);
-        break;
-    }
     case HG_DSET_SET_INDEX_INFO:
     {
         req->data = NULL;
         H5VL_iod_request_delete(file, req);
         break;
     }
-    case HG_DSET_RM_INDEX_INFO:
+    case HG_DSET_GET_INDEX_INFO:
+    {
+        H5VL_iod_dataset_get_index_info_t *index_info =
+                (H5VL_iod_dataset_get_index_info_t *)req->data;
+        unsigned plugin_id = index_info->output->idx_plugin_id;
+
+        if(!plugin_id) {
+            HERROR(H5E_INDEX, H5E_BADVALUE, "invalid index plugin ID\n");
+            req->status = H5ES_STATUS_FAIL;
+            req->state = H5VL_IOD_COMPLETED;
+        } else {
+            size_t metadata_size = index_info->output->idx_metadata.buf_size;
+            void *metadata = index_info->output->idx_metadata.buf;
+            void *new_metadata;
+
+            if (!metadata_size)
+                HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "invalid metadata size");
+
+            if (NULL == (new_metadata = H5MM_calloc(metadata_size)))
+                HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate metadata");
+            if (FAIL == HDmemcpy(new_metadata, metadata, metadata_size))
+                HGOTO_ERROR(H5E_INDEX, H5E_CANTCOPY, FAIL, "can't copy metadata");
+
+            *index_info->plugin_id = plugin_id;
+            *index_info->metadata_size = metadata_size;
+            *index_info->metadata = new_metadata;
+
+            //            H5X_class_t *idx_class = NULL;
+            //            H5P_genplist_t *xxpl_plist; /* Property list pointer */
+
+            //            hid_t xapl_id = H5P_INDEX_ACCESS_DEFAULT;
+
+            /* store the transaction ID in the xxpl */
+//            if(NULL == (xxpl_plist = (H5P_genplist_t *)H5I_object(xapl_id)))
+//                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+//            if(H5P_set(xxpl_plist, H5VL_CONTEXT_ID, &index_info->rcxt_id) < 0)
+//                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id");
+
+//            if (NULL == (idx_class = H5X_registered(plugin_id)))
+//                HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
+
+            /* TODO registered tmp IDs for file and dset ?? */
+//            if (NULL == (idx_handle = idx_class->open(file_id, dataset_id, xapl_id,
+//                    metadata_size, metadata)))
+//                HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "indexing open callback failed");
+        }
+
+        req->data = NULL;
+        H5VL_iod_request_delete(file, req);
         break;
+    }
+    case HG_DSET_RM_INDEX_INFO:
+    {
+        req->data = NULL;
+        H5VL_iod_request_delete(file, req);
+        break;
+    }
 #endif
     case HG_LINK_ITERATE:
     case HG_OBJECT_VISIT:

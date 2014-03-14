@@ -393,10 +393,10 @@ typedef struct H5VL_iod_exists_info_t {
 #ifdef H5_HAVE_INDEXING
 /* information about a dataset write request */
 typedef struct H5VL_iod_dataset_get_index_info_t {
-    void *idx_handle;
-    unsigned idx_plugin_id;
-    void *dset;
-    hid_t trans_id;
+    unsigned *plugin_id;
+    size_t *metadata_size;
+    void **metadata;
+    dset_get_index_info_out_t *output;
 } H5VL_iod_dataset_get_index_info_t;
 #endif
 
@@ -496,6 +496,7 @@ H5_DLL herr_t H5VL_iod_analysis_execute(const char *file_name, const char *obj_n
 /* private routines for X */
 H5_DLL herr_t H5VL_iod_dataset_set_index(void *dset, void *idx_handle);
 H5_DLL void *H5VL_iod_dataset_get_index(void *dset);
+H5_DLL herr_t H5VL_iod_dataset_set_index_plugin_id(void *dset, unsigned plugin_id);
 H5_DLL unsigned H5VL_iod_dataset_get_index_plugin_id(void *dset);
 H5_DLL herr_t H5VL_iod_dataset_set_index_info(void *dset, unsigned plugin_id,
         size_t metadata_size, void *metadata, hid_t trans_id, void **req);

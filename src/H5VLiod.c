@@ -3123,7 +3123,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
 #ifdef H5_HAVE_INDEXING
     /* TODO create a new req here */
     if (FAIL == H5VL_iod_dataset_get_index_info(dset, &dset->idx_plugin_id,
-                                                &dset->metadata_size, &dset->metadata, req))
+            &dset->metadata_size, &dset->metadata, rcxt_id, req))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index info for dataset");
 #endif
 
@@ -10259,6 +10259,32 @@ done:
 } /* end H5VL_iod_dataset_get_index() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_dataset_set_index_plugin_id
+ *
+ * Purpose: Set a new index plugin ID to a dataset.
+ *
+ * Return:  Success:    SUCCEED
+ *          Failure:    FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_dataset_set_index_plugin_id(void *dset, unsigned plugin_id)
+{
+    H5VL_iod_dset_t *iod_dset = (H5VL_iod_dset_t *) dset;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+
+    iod_dset->idx_plugin_id = plugin_id;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_dataset_set_index_plugin_id() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_iod_dataset_get_index_plugin_id
  *
  * Purpose: Get the index plugin id associated to a dataset.
@@ -10413,16 +10439,14 @@ H5VL_iod_dataset_get_index_info(void *_dset, unsigned *plugin_id, size_t *metada
     if (NULL == (info = (H5VL_iod_dataset_get_index_info_t *)
                  H5MM_calloc(sizeof(H5VL_iod_dataset_get_index_info_t))))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate info");
-    info->idx_handle = dset->idx_handle;
-    info->idx_plugin_id = dset->idx_plugin_id;
-    info->metadata = metadata;
+    info->plugin_id = plugin_id;
     info->metadata_size = metadata_size;
-    info->dset = dset;
+    info->metadata = metadata;
     info->output = output;
 
     if(H5VL__iod_create_and_forward(H5VL_DSET_GET_INDEX_INFO_ID, HG_DSET_GET_INDEX_INFO,
                                     (H5VL_iod_object_t *)dset, 0, num_parents, parent_reqs,
-                                    (H5VL_iod_req_info_t *)tr, &input, output, info, req) < 0)
+                                    (H5VL_iod_req_info_t *)rc, &input, output, info, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship get index info");
 
 done:
@@ -10443,7 +10467,7 @@ H5VL_iod_dataset_remove_index_info(void *_dset, hid_t trans_id, void **req)
 {
     H5VL_iod_request_t **parent_reqs = NULL;
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *) _dset;
-    dset_get_index_info_in_t input;
+    dset_rm_index_info_in_t input;
     H5TR_t *tr = NULL;
     size_t num_parents = 0;
     int *status = NULL;

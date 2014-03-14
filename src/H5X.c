@@ -588,11 +588,6 @@ H5Xremove_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t trans_id,
         vol_plugin->nrefs ++;
     }
 
-    /* Get idx_handle from dataset */
-    if (FAIL == H5VL_iod_dataset_get_index_info(dset, &plugin_id,
-            &metadata_size, &metadata, NULL))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "cannot get index from dataset");
-
     /* Store the transaction ID in the xapl_id */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(xapl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
@@ -681,8 +676,9 @@ H5Xget_count_ff(hid_t scope_id, hsize_t *idx_count, hid_t rcxt_id,
         vol_plugin->nrefs ++;
     }
 
-    if (FAIL == H5VL_iod_dataset_get_index_info(dset, idx_count, NULL,
-            NULL, NULL, req))
+    /* TODO for now idx_count is flag exist */
+    if (FAIL == H5VL_iod_dataset_get_index_info(dset, idx_count, NULL, NULL,
+            rcxt_id, req))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "cannot get indexing info from dataset");
 
     if (request && *req) {
