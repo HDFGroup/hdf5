@@ -676,7 +676,7 @@ H5Xget_count_ff(hid_t scope_id, hsize_t *idx_count, hid_t rcxt_id,
         vol_plugin->nrefs ++;
     }
 
-    /* TODO for now idx_count is flag exist */
+    /* Get index info */
     if (FAIL == H5VL_iod_dataset_get_index_info(dset, idx_count, NULL, NULL,
             rcxt_id, req))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "cannot get indexing info from dataset");

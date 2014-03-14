@@ -270,8 +270,6 @@ typedef struct H5VL_iod_dset_t {
 #ifdef H5_HAVE_INDEXING
     void *idx_handle;
     unsigned idx_plugin_id;
-    size_t metadata_size;
-    void *metadata;
 #endif
 } H5VL_iod_dset_t;
 
@@ -393,6 +391,7 @@ typedef struct H5VL_iod_exists_info_t {
 #ifdef H5_HAVE_INDEXING
 /* information about a dataset write request */
 typedef struct H5VL_iod_dataset_get_index_info_t {
+    size_t *count;
     unsigned *plugin_id;
     size_t *metadata_size;
     void **metadata;
@@ -500,8 +499,9 @@ H5_DLL herr_t H5VL_iod_dataset_set_index_plugin_id(void *dset, unsigned plugin_i
 H5_DLL unsigned H5VL_iod_dataset_get_index_plugin_id(void *dset);
 H5_DLL herr_t H5VL_iod_dataset_set_index_info(void *dset, unsigned plugin_id,
         size_t metadata_size, void *metadata, hid_t trans_id, void **req);
-H5_DLL herr_t H5VL_iod_dataset_get_index_info(void *dset, unsigned *plugin_id,
-        size_t *metadata_size, void **metadata, hid_t trans_id, void **req);
+H5_DLL herr_t H5VL_iod_dataset_get_index_info(void *dset, size_t *count,
+        unsigned *plugin_id, size_t *metadata_size, void **metadata,
+        hid_t trans_id, void **req);
 H5_DLL herr_t H5VL_iod_dataset_remove_index_info(void *dset, hid_t trans_id,
         void **req);
 

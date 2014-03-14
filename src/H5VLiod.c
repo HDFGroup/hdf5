@@ -2890,6 +2890,10 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t UNUSED loc_params,
     dset->remote_dset.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
     dset->remote_dset.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
     dset->remote_dset.iod_id = IOD_OBJ_INVALID;
+#ifdef H5_HAVE_INDEXING
+    dset->idx_plugin_id = 0;
+    dset->idx_handle = NULL;
+#endif
 
     /* Generate IOD IDs for the dset to be created */
     H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
@@ -3078,6 +3082,10 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
     dset->remote_dset.dcpl_id = -1;
     dset->remote_dset.type_id = -1;
     dset->remote_dset.space_id = -1;
+#ifdef H5_HAVE_INDEXING
+    dset->idx_plugin_id = 0;
+    dset->idx_handle = NULL;
+#endif
 
     /* set the input structure for the HG encode routine */
     input.coh = obj->file->remote_file.coh;
@@ -3119,13 +3127,6 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t UNUSED loc_params, const cha
                                     num_parents, parent_reqs,
                                     (H5VL_iod_req_info_t *)rc, &input, &dset->remote_dset, dset, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship dataset open");
-
-#ifdef H5_HAVE_INDEXING
-    /* TODO create a new req here */
-    if (FAIL == H5VL_iod_dataset_get_index_info(dset, &dset->idx_plugin_id,
-            &dset->metadata_size, &dset->metadata, rcxt_id, req))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index info for dataset");
-#endif
 
     ret_value = (void *)dset;
 
@@ -10297,7 +10298,7 @@ unsigned
 H5VL_iod_dataset_get_index_plugin_id(void *dset)
 {
     H5VL_iod_dset_t *iod_dset = (H5VL_iod_dset_t *) dset;
-    void *ret_value = NULL;
+    unsigned ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -10387,8 +10388,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_iod_dataset_get_index_info(void *_dset, unsigned *plugin_id, size_t *metadata_size, 
-                                void **metadata, hid_t rcxt_id, void **req)
+H5VL_iod_dataset_get_index_info(void *_dset, size_t *count,
+        unsigned *plugin_id, size_t *metadata_size,
+        void **metadata, hid_t rcxt_id, void **req)
 {
     H5VL_iod_request_t **parent_reqs = NULL;
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *) _dset;
@@ -10439,6 +10441,7 @@ H5VL_iod_dataset_get_index_info(void *_dset, unsigned *plugin_id, size_t *metada
     if (NULL == (info = (H5VL_iod_dataset_get_index_info_t *)
                  H5MM_calloc(sizeof(H5VL_iod_dataset_get_index_info_t))))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate info");
+    info->count = count;
     info->plugin_id = plugin_id;
     info->metadata_size = metadata_size;
     info->metadata = metadata;

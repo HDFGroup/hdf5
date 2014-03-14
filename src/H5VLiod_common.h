@@ -783,6 +783,7 @@ MERCURY_GEN_PROC(dset_get_index_info_in_t,
                  ((iod_obj_id_t)(mdkv_id)))
 MERCURY_GEN_PROC(dset_get_index_info_out_t,
                  ((int32_t)(ret))
+                 ((uint64_t)(idx_count))
                  ((uint32_t)(idx_plugin_id))
                  ((binary_buf_t)(idx_metadata)))
 MERCURY_GEN_PROC(dset_rm_index_info_in_t,

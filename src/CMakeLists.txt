@@ -656,6 +656,7 @@ IF (HDF5_ENABLE_EFF)
         ${HDF5_SRC_DIR}/H5Pxapl.c
         ${HDF5_SRC_DIR}/H5Pxcpl.c
         ${HDF5_SRC_DIR}/H5Pxxpl.c
+        ${HDF5_SRC_DIR}/H5VLiod_index.c
       )
     ENDIF (HDF5_ENABLE_INDEXING)
     SET (H5FF_HDRS

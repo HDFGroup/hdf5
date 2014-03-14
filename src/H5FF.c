@@ -53,6 +53,7 @@
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod.h"		/* IOD plugin - tmp      		*/
 #include "H5VLiod_client.h"	/* Client IOD - tmp			*/
+#include "H5Xprivate.h"       /* Indexing */
 
 #ifdef H5_HAVE_EFF
 /****************/
@@ -789,7 +790,68 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
 
     /* Get an atom for the dataset */
     if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+
+#ifdef H5_HAVE_INDEXING
+    {
+        H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+        void **req = NULL; /* pointer to plugin generate requests (NULL if VOL plugin does not support async) */
+        H5X_class_t *idx_class = NULL;
+        void *idx_handle = NULL;
+        unsigned plugin_id;
+        size_t metadata_size;
+        size_t idx_count;
+        void *metadata;
+        H5P_genplist_t *xxpl_plist; /* Property list pointer */
+        hid_t xapl_id = H5P_INDEX_ACCESS_DEFAULT;
+
+        if (estack_id != H5_EVENT_STACK_NULL) {
+            /* create the private request */
+            if (NULL == (request = (H5_priv_request_t *) H5MM_calloc(sizeof(H5_priv_request_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            request->req = NULL;
+            req = &request->req;
+            request->next = NULL;
+            request->vol_plugin = vol_plugin;
+            vol_plugin->nrefs ++;
+        }
+
+        /* Get index info if present */
+        if (FAIL == H5VL_iod_dataset_get_index_info(dset, &idx_count, &plugin_id,
+                &metadata_size, &metadata, rcxt_id, req))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index info for dataset");
+
+        if (request && *req) {
+            if(H5ES_insert(estack_id, request) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
+        }
+
+        /* TODO this is synchronous for now as we need the info first */
+//        H5ES_wait(estack_id, );
+
+        if (idx_count) {
+            /* store the read context ID in the xxpl */
+            if(NULL == (xxpl_plist = (H5P_genplist_t *)H5I_object(xapl_id)))
+                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+            if(H5P_set(xxpl_plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id");
+
+            if (NULL == (idx_class = H5X_registered(plugin_id)))
+                HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
+
+            /* Call open of index plugin */
+            if (NULL == (idx_handle = idx_class->open(loc_id, ret_value, xapl_id,
+                    metadata_size, metadata)))
+                HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "indexing open callback failed");
+
+            /* Add idx_handle to dataset */
+            if (FAIL == H5VL_iod_dataset_set_index(dset, idx_handle))
+                HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "cannot set index to dataset");
+            if (FAIL == H5VL_iod_dataset_set_index_plugin_id(dset, plugin_id))
+                HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "cannot set index plugin ID to dataset");
+        }
+    }
+#endif
 
 done:
     if (ret_value < 0 && dset)
