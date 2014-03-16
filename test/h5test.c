@@ -131,63 +131,61 @@ h5_errors(hid_t estack, void UNUSED *client_data)
  * Programmer:  Albert Cheng
  *              May 28, 1998
  *
- * Modifications:
- *    Albert Cheng, 2000-09-09
- *    Added the explicite base_name argument to replace the
- *    global variable FILENAME.
- *
  *-------------------------------------------------------------------------
  */
 int
 h5_cleanup(const char *base_name[], hid_t fapl)
 {
-    char  filename[1024];
-    char  temp[2048];
-    int    i, j;
-    int    retval=0;
-    hid_t  driver;
+    int    retval = 0;
 
-    if (GetTestCleanup()){
-  for (i = 0; base_name[i]; i++) {
-      if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
-    continue;
+    if(GetTestCleanup()) {
+        int i;
+
+        for(i = 0; base_name[i]; i++) {
+            char filename[1024];
+            char temp[2048];
+            hid_t driver;
+
+            if(NULL == h5_fixname(base_name[i], fapl, filename, sizeof(filename)))
+                continue;
 
             driver = H5Pget_driver(fapl);
 
-      if (driver == H5FD_FAMILY) {
-    for (j = 0; /*void*/; j++) {
-        HDsnprintf(temp, sizeof temp, filename, j);
+            if(driver == H5FD_FAMILY) {
+                int j;
 
-        if (HDaccess(temp, F_OK) < 0)
+                for(j = 0; /*void*/; j++) {
+                    HDsnprintf(temp, sizeof temp, filename, j);
+
+                    if(HDaccess(temp, F_OK) < 0)
                         break;
 
-        HDremove(temp);
-    }
-      } else if (driver == H5FD_CORE) {
+                    HDremove(temp);
+                } /* end for */
+            } else if(driver == H5FD_CORE) {
                 hbool_t backing;        /* Whether the core file has backing store */
 
-                H5Pget_fapl_core(fapl,NULL,&backing);
+                H5Pget_fapl_core(fapl, NULL, &backing);
 
                 /* If the file was stored to disk with bacing store, remove it */
                 if(backing)
                     HDremove(filename);
+            } else if (driver == H5FD_MULTI) {
+                H5FD_mem_t mt;
 
-      } else if (driver == H5FD_MULTI) {
-    H5FD_mem_t mt;
-    assert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
+                HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
 
-    for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
-        HDsnprintf(temp, sizeof temp, "%s-%c.h5",
-             filename, multi_letters[mt]);
-        HDremove(temp); /*don't care if it fails*/
-    }
-      } else {
-    HDremove(filename);
-      }
-  }
+                for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+                    HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
+                    HDremove(temp); /*don't care if it fails*/
+                } /* end for */
+            } else {
+                HDremove(filename);
+            }
+        } /* end for */
 
-  retval = 1;
-    }
+        retval = 1;
+    } /* end if */
 
     H5Pclose(fapl);
     return retval;
@@ -203,8 +201,6 @@ h5_cleanup(const char *base_name[], hid_t fapl)
  *
  * Programmer:  Robb Matzke
  *              Friday, November 20, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -267,16 +263,6 @@ h5_reset(void)
  * Programmer:  Robb Matzke
  *              Thursday, November 19, 1998
  *
- * Modifications:
- *    Robb Matzke, 1999-08-03
- *    Modified to use the virtual file layer.
- *
- *    Albert Cheng, 2000-01-25
- *    Added prefix for parallel test files.
- *
- *     Albert Cheng, 2003-05-08
- *    Changed the default parallel prefix back to NULL but added
- *              an explanation remark of $HDF5_PARAPREFIX.
  *-------------------------------------------------------------------------
  */
 char *
@@ -292,37 +278,36 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     if (!base_name || !fullname || size < 1)
         return NULL;
 
-    memset(fullname, 0, size);
+    HDmemset(fullname, 0, size);
 
     /* figure out the suffix */
-    if (H5P_DEFAULT != fapl) {
-  if ((driver = H5Pget_driver(fapl)) < 0)
+    if(H5P_DEFAULT != fapl) {
+        if((driver = H5Pget_driver(fapl)) < 0)
             return NULL;
 
-  if (H5FD_FAMILY == driver)
-      suffix = "%05d.h5";
-  else if (H5FD_MULTI == driver)
-      suffix = NULL;
+        if(H5FD_FAMILY == driver)
+            suffix = "%05d.h5";
+        else if (H5FD_MULTI == driver)
+            suffix = NULL;
     }
 
     /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
      * could be of value -1 if it is not defined.
      */
-    isppdriver = H5P_DEFAULT != fapl &&
-  (H5FD_MPIO==driver || H5FD_MPIPOSIX==driver);
+    isppdriver = H5P_DEFAULT != fapl && (H5FD_MPIO==driver || H5FD_MPIPOSIX==driver);
 
     /* Check HDF5_NOCLEANUP environment setting.
      * (The #ifdef is needed to prevent compile failure in case MPI is not
      * configured.)
      */
-    if (isppdriver){
+    if(isppdriver) {
 #ifdef H5_HAVE_PARALLEL
-  if (getenv_all(MPI_COMM_WORLD, 0, "HDF5_NOCLEANUP"))
-      SetTestNoCleanup();
+        if(getenv_all(MPI_COMM_WORLD, 0, "HDF5_NOCLEANUP"))
+            SetTestNoCleanup();
 #endif  /* H5_HAVE_PARALLEL */
-    }else{
-  if (HDgetenv("HDF5_NOCLEANUP"))
-      SetTestNoCleanup();
+    } else {
+        if(HDgetenv("HDF5_NOCLEANUP"))
+            SetTestNoCleanup();
     }
 
     /* Check what prefix to use for test files. Process HDF5_PARAPREFIX and
@@ -331,7 +316,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
      * (The #ifdef is needed to prevent compile failure in case MPI is not
      * configured.)
      */
-    if (isppdriver){
+    if(isppdriver) {
 #ifdef H5_HAVE_PARALLEL
   /*
          * For parallel:
@@ -340,38 +325,38 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
    */
         static int explained = 0;
 
-  prefix = (paraprefix ? paraprefix : getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX"));
+        prefix = (paraprefix ? paraprefix : getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX"));
 
-  if (!prefix && !explained) {
-      /* print hint by process 0 once. */
-      int mpi_rank;
+        if (!prefix && !explained) {
+            /* print hint by process 0 once. */
+            int mpi_rank;
 
-      MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+            MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
-      if (mpi_rank == 0)
-    printf("*** Hint ***\n"
-       "You can use environment variable HDF5_PARAPREFIX to "
-       "run parallel test files in a\n"
-       "different directory or to add file type prefix. E.g.,\n"
-       "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
-       "   export HDF5_PARAPREFIX\n"
-       "*** End of Hint ***\n");
+            if (mpi_rank == 0)
+                printf("*** Hint ***\n"
+                        "You can use environment variable HDF5_PARAPREFIX to "
+                        "run parallel test files in a\n"
+                        "different directory or to add file type prefix. E.g.,\n"
+                        "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
+                        "   export HDF5_PARAPREFIX\n"
+                        "*** End of Hint ***\n");
 
-      explained = TRUE;
+            explained = TRUE;
 #ifdef HDF5_PARAPREFIX
             prefix = HDF5_PARAPREFIX;
 #endif  /* HDF5_PARAPREFIX */
-  }
+        }
 #endif  /* H5_HAVE_PARALLEL */
     } else {
-  /*
+        /*
          * For serial:
          *      First use the environment variable, then try the constant
-   */
-  prefix = HDgetenv("HDF5_PREFIX");
+        */
+        prefix = HDgetenv("HDF5_PREFIX");
 
 #ifdef HDF5_PREFIX
-  if (!prefix)
+        if (!prefix)
             prefix = HDF5_PREFIX;
 #endif  /* HDF5_PREFIX */
     }

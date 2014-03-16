@@ -531,15 +531,14 @@ except_func(H5T_conv_except_t except_type, hid_t UNUSED src_id, hid_t UNUSED dst
  * Programmer:	Robb Matzke
  *              Tuesday, July 21, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
 some_dummy_func(float x)
 {
     char	s[128];
-    sprintf(s, "%g", x);
+
+    HDsnprintf(s, sizeof(s), "%g", x);
 }
 
 
@@ -576,7 +575,8 @@ generates_sigfpe(void)
 	HDexit(1);
     } else if (0==pid) {
 	for (i=0; i<2000; i++) {
-	    for (j=0; j<sizeof(double); j++) dp[j] = HDrand();
+	    for(j = 0; j < sizeof(double); j++)
+                dp[j] = (unsigned char)HDrand();
 	    f = (float)d;
 	    some_dummy_func((float)f);
 	}
@@ -1044,14 +1044,14 @@ test_derived_flt(void)
      */
     src_size = H5Tget_size(H5T_NATIVE_INT);
     endian = H5Tget_order(H5T_NATIVE_INT);
-    buf = (unsigned char*)HDmalloc(nelmts * (MAX(src_size, size)));
-    saved_buf = (unsigned char*)HDmalloc(nelmts * src_size);
+    buf = (unsigned char *)HDmalloc(nelmts * (MAX(src_size, size)));
+    saved_buf = (unsigned char *)HDmalloc(nelmts * src_size);
     HDmemset(buf, 0, nelmts * MAX(src_size, size));
     HDmemset(saved_buf, 0, nelmts * src_size);
-    aligned = (int*)HDcalloc((size_t)1, src_size);
+    aligned = (int *)HDcalloc((size_t)1, src_size);
 
     for(i = 0; i < nelmts * src_size; i++)
-        buf[i] = saved_buf[i] = HDrand();
+        buf[i] = saved_buf[i] = (unsigned char)HDrand();
 
     /* Convert data from native integer to derived floating-point type.
      * The mantissa is big enough to retain the integer's precision. */
@@ -1077,7 +1077,7 @@ test_derived_flt(void)
 
         /* Print errors */
         if (0==fails_this_test++) {
-	    sprintf(str, "\nTesting random sw derived floating-point -> derived floating-point conversions");
+	    HDsnprintf(str, sizeof(str), "\nTesting random sw derived floating-point -> derived floating-point conversions");
 	    printf("%-70s", str);
 	    HDfflush(stdout);
             H5_FAILED();
@@ -1204,13 +1204,13 @@ test_derived_flt(void)
     src_size = H5Tget_size(tid2);
     dst_size = H5Tget_size(tid1);
     endian = H5Tget_order(tid2);
-    buf = (unsigned char*)HDmalloc(nelmts*(MAX(src_size, dst_size)));
-    saved_buf = (unsigned char*)HDmalloc(nelmts*src_size);
-    HDmemset(buf, 0, nelmts*MAX(src_size, dst_size));
+    buf = (unsigned char *)HDmalloc(nelmts*(MAX(src_size, dst_size)));
+    saved_buf = (unsigned char *)HDmalloc(nelmts*src_size);
+    HDmemset(buf, 0, nelmts * MAX(src_size, dst_size));
     HDmemset(saved_buf, 0, nelmts*src_size);
 
     for(i=0; i<nelmts*src_size; i++)
-        buf[i] = saved_buf[i] = HDrand();
+        buf[i] = saved_buf[i] = (unsigned char)HDrand();
 
     /* Convert data from the 2nd to the 1st derived floating-point type.
      * The mantissa and exponent of the 2nd type are big enough to retain
@@ -1245,7 +1245,7 @@ test_derived_flt(void)
 
         /* Print errors */
         if (0==fails_this_test++) {
-	    sprintf(str, "\nTesting random sw derived floating-point -> derived floating-point conversions");
+	    HDsnprintf(str, sizeof(str), "\nTesting random sw derived floating-point -> derived floating-point conversions");
 	    printf("%-70s", str);
 	    HDfflush(stdout);
             H5_FAILED();
@@ -1514,13 +1514,13 @@ test_derived_integer(void)
     src_size = H5Tget_size(tid1);
     dst_size = H5Tget_size(tid2);
     endian = H5Tget_order(tid1);
-    buf = (unsigned char*)HDmalloc(nelmts*(MAX(src_size, dst_size)));
-    saved_buf = (unsigned char*)HDmalloc(nelmts*src_size);
-    HDmemset(buf, 0, nelmts*MAX(src_size, dst_size));
+    buf = (unsigned char *)HDmalloc(nelmts*(MAX(src_size, dst_size)));
+    saved_buf = (unsigned char *)HDmalloc(nelmts*src_size);
+    HDmemset(buf, 0, nelmts * MAX(src_size, dst_size));
     HDmemset(saved_buf, 0, nelmts*src_size);
 
-    for(i=0; i<nelmts*src_size; i++)
-        buf[i] = saved_buf[i] = HDrand();
+    for(i=0; i<nelmts * src_size; i++)
+        buf[i] = saved_buf[i] = (unsigned char)HDrand();
 
     /* Convert data from the 1st to the 2nd derived integer type.
      * The precision of the 2nd type are big enough to retain
@@ -1547,7 +1547,7 @@ test_derived_integer(void)
 
         /* Print errors */
         if (0==fails_this_test++) {
-	    sprintf(str, "\nTesting random sw derived integer -> derived integer conversions");
+	    HDsnprintf(str, sizeof(str), "\nTesting random sw derived integer -> derived integer conversions");
 	    printf("%-70s", str);
 	    HDfflush(stdout);
             H5_FAILED();
@@ -1748,14 +1748,14 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 
     /* Sanity checks */
     if (OTHER==src_type || OTHER==dst_type) {
-	sprintf(str, "Testing %s %s -> %s conversions",
+	HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
 		name, src_type_name, dst_type_name);
 	printf("%-70s", str);
 	H5_FAILED();
 	HDputs("    Unknown data type.");
 	goto error;
     } else {
-        sprintf(str, "Testing %s %s -> %s conversions",
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
             name, src_type_name, dst_type_name);
         printf("%-70s", str);
         HDfflush(stdout);
@@ -2718,17 +2718,20 @@ my_isnan(dtype_t type, void *val)
     if (!retval) {
 	if (FLT_FLOAT==type) {
 	    float x;
+
 	    HDmemcpy(&x, val, sizeof(float));
-	    sprintf(s, "%g", x);
+	    HDsnprintf(s, sizeof(s), "%g", x);
 	} else if (FLT_DOUBLE==type) {
 	    double x;
+
 	    HDmemcpy(&x, val, sizeof(double));
-	    sprintf(s, "%g", x);
+	    HDsnprintf(s, sizeof(s), "%g", x);
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
 	} else if (FLT_LDOUBLE==type) {
 	    long double x;
+
 	    HDmemcpy(&x, val, sizeof(long double));
-	    sprintf(s, "%Lg", x);
+	    HDsnprintf(s, sizeof(s), "%Lg", x);
 #endif
 	} else {
 	    return 0;
@@ -2896,7 +2899,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
 	} else if (WIFEXITED(status)) {
 	    return WEXITSTATUS(status);
 	} else if (WIFSIGNALED(status)) {
-	    sprintf(str, "   Child caught signal %d.", WTERMSIG(status));
+	    HDsnprintf(str, sizeof(str), "   Child caught signal %d.", WTERMSIG(status));
 	    HDputs(str);
 	    return 1; /*child exit after catching non-SIGFPE signal */
 	} else {
@@ -2952,16 +2955,16 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
         HDputs("Sizeof(float)==sizeof(double) - some tests may not be sensible.");
     if (OTHER==src_type || OTHER==dst_type) {
         if(!strcmp(name, "noop"))
-	    sprintf(str, "Testing %s %s -> %s conversions",
+	    HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
 		name, src_type_name, dst_type_name);
         else if(run_test==TEST_SPECIAL)
-	    sprintf(str, "Testing %s special %s -> %s conversions",
+	    HDsnprintf(str, sizeof(str), "Testing %s special %s -> %s conversions",
 		name, src_type_name, dst_type_name);
         else if(run_test==TEST_NORMAL)
-	    sprintf(str, "Testing %s normalized %s -> %s conversions",
+	    HDsnprintf(str, sizeof(str), "Testing %s normalized %s -> %s conversions",
 		name, src_type_name, dst_type_name);
         else if(run_test==TEST_DENORM)
-	    sprintf(str, "Testing %s denormalized %s -> %s conversions",
+	    HDsnprintf(str, sizeof(str), "Testing %s denormalized %s -> %s conversions",
 		name, src_type_name, dst_type_name);
 
 	printf("%-70s", str);
@@ -2970,16 +2973,16 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
 	goto error;
     } else {
         if(!strcmp(name, "noop"))
-            sprintf(str, "Testing %s %s -> %s conversions",
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
                 name, src_type_name, dst_type_name);
         else if(run_test==TEST_SPECIAL)
-            sprintf(str, "Testing %s special %s -> %s conversions",
+            HDsnprintf(str, sizeof(str), "Testing %s special %s -> %s conversions",
                 name, src_type_name, dst_type_name);
         else if(run_test==TEST_NORMAL)
-            sprintf(str, "Testing %s normalized %s -> %s conversions",
+            HDsnprintf(str, sizeof(str), "Testing %s normalized %s -> %s conversions",
                 name, src_type_name, dst_type_name);
         else if(run_test==TEST_DENORM)
-            sprintf(str, "Testing %s denormalized %s -> %s conversions",
+            HDsnprintf(str, sizeof(str), "Testing %s denormalized %s -> %s conversions",
                 name, src_type_name, dst_type_name);
 
         printf("%-70s", str);
@@ -3097,10 +3100,10 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     /* Check the software results against the hardware */
     for (j=0; j<nelmts; j++) {
         underflow = 0;
-        hw_f = 911.0;
-        hw_d = 911.0;
+        hw_f = 911.0f;
+        hw_d = 911.0f;
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-        hw_ld = 911.0;
+        hw_ld = 911.0f;
 #endif
 
         /* The hardware conversion */
@@ -3174,10 +3177,11 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
          * 0s before compare the values.
          */
 #if H5_SIZEOF_LONG_DOUBLE !=0
-        if(sendian==H5T_ORDER_LE && dst_type==FLT_LDOUBLE) {
-            unsigned int q;
-            for(q=dst_nbits/8; q<dst_size; q++) {
-                buf[j*dst_size+q] = 0x00;
+        if(sendian == H5T_ORDER_LE && dst_type == FLT_LDOUBLE) {
+            size_t q;
+
+            for(q = dst_nbits / 8; q < dst_size; q++) {
+                buf[j * dst_size + q] = 0x00;
                 hw[q] = 0x00;
             }
         }
@@ -3652,7 +3656,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
 
     /* Sanity checks */
     if (OTHER==src_type || OTHER==dst_type) {
-	sprintf(str, "Testing %s %s -> %s conversions",
+	HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
 		name, src_type_name, dst_type_name);
 	printf("%-70s", str);
 	H5_FAILED();
@@ -3661,15 +3665,15 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     }
 
     if ((INT_SCHAR==src_type || INT_UCHAR==src_type || INT_SHORT==src_type ||
-        INT_USHORT==src_type || INT_INT==src_type || INT_UINT==src_type ||
-        INT_LONG==src_type || INT_ULONG==src_type || INT_LLONG==src_type ||
-        INT_ULLONG==src_type) &&
-        (FLT_FLOAT!=dst_type && FLT_DOUBLE!=dst_type
+            INT_USHORT==src_type || INT_INT==src_type || INT_UINT==src_type ||
+            INT_LONG==src_type || INT_ULONG==src_type || INT_LLONG==src_type ||
+            INT_ULLONG==src_type) &&
+            (FLT_FLOAT!=dst_type && FLT_DOUBLE!=dst_type
 #if H5_SIZEOF_LONG_DOUBLE !=0
-        && FLT_LDOUBLE!=dst_type
+            && FLT_LDOUBLE!=dst_type
 #endif
-        )) {
-	sprintf(str, "Testing %s %s -> %s conversions",
+            )) {
+	HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
 	    name, src_type_name, dst_type_name);
 	printf("%-70s", str);
 	H5_FAILED();
@@ -3679,14 +3683,14 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
 
     if ((FLT_FLOAT==src_type || FLT_DOUBLE==src_type
 #if H5_SIZEOF_LONG_DOUBLE !=0
-        || FLT_LDOUBLE==src_type
+            || FLT_LDOUBLE==src_type
 #endif
-        )
-        && (INT_SCHAR!=dst_type && INT_UCHAR!=dst_type && INT_SHORT!=dst_type
-        && INT_USHORT!=dst_type && INT_INT!=dst_type && INT_UINT!=dst_type
-        && INT_LONG!=dst_type && INT_ULONG!=dst_type && INT_LLONG!=dst_type
-        && INT_ULLONG!=dst_type)) {
- 	sprintf(str, "Testing %s %s -> %s conversions",
+            )
+            && (INT_SCHAR!=dst_type && INT_UCHAR!=dst_type && INT_SHORT!=dst_type
+            && INT_USHORT!=dst_type && INT_INT!=dst_type && INT_UINT!=dst_type
+            && INT_LONG!=dst_type && INT_ULONG!=dst_type && INT_LLONG!=dst_type
+            && INT_ULLONG!=dst_type)) {
+ 	HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
 	    name, src_type_name, dst_type_name);
 	printf("%-70s", str);
 	H5_FAILED();
@@ -3695,23 +3699,23 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     }
 
     if (INT_SCHAR==src_type || INT_UCHAR==src_type || INT_SHORT==src_type ||
-        INT_USHORT==src_type || INT_INT==src_type || INT_UINT==src_type ||
-        INT_LONG==src_type || INT_ULONG==src_type || INT_LLONG==src_type ||
-        INT_ULLONG==src_type) {
-        sprintf(str, "Testing %s %s -> %s conversions",
+            INT_USHORT==src_type || INT_INT==src_type || INT_UINT==src_type ||
+            INT_LONG==src_type || INT_ULONG==src_type || INT_LLONG==src_type ||
+            INT_ULLONG==src_type) {
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
             name, src_type_name, dst_type_name);
         printf("%-70s", str);
         HDfflush(stdout);
         fails_this_test=0;
     } else {
         if(run_test==TEST_NORMAL)
-            sprintf(str, "Testing %s normalized %s -> %s conversions",
+            HDsnprintf(str, sizeof(str), "Testing %s normalized %s -> %s conversions",
                     name, src_type_name, dst_type_name);
         else if(run_test==TEST_DENORM)
-            sprintf(str, "Testing %s denormalized %s -> %s conversions",
+            HDsnprintf(str, sizeof(str), "Testing %s denormalized %s -> %s conversions",
                     name, src_type_name, dst_type_name);
         else
-            sprintf(str, "Testing %s special %s -> %s conversions",
+            HDsnprintf(str, sizeof(str), "Testing %s special %s -> %s conversions",
                     name, src_type_name, dst_type_name);
         printf("%-70s", str);
         HDfflush(stdout);
@@ -5125,13 +5129,13 @@ run_int_fp_conv(const char *name)
     {
         char		str[256];		/*hello string		*/
 
-        sprintf(str, "Testing %s %s -> %s conversions",
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
                 name, "unsigned long long", "float");
         printf("%-70s", str);
         SKIPPED();
         HDputs("    Test skipped due to compiler not handling conversion.");
 
-        sprintf(str, "Testing %s %s -> %s conversions",
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
                 name, "unsigned long long", "double");
         printf("%-70s", str);
         SKIPPED();
@@ -5153,19 +5157,19 @@ run_int_fp_conv(const char *name)
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LONG, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULONG, H5T_NATIVE_LDOUBLE);
 #else
-        {
-            char		str[256];		/*string		*/
+    {
+        char		str[256];		/*string		*/
 
-            sprintf(str, "Testing %s %s -> %s conversions",
-                    name, "(unsigned) long", "long double");
-            printf("%-70s", str);
-            SKIPPED();
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
+                name, "(unsigned) long", "long double");
+        printf("%-70s", str);
+        SKIPPED();
 #if H5_SIZEOF_LONG_DOUBLE!=0
-            HDputs("    Test skipped due to the special algorithm of hardware conversion.");
+        HDputs("    Test skipped due to the special algorithm of hardware conversion.");
 #else
-            HDputs("    Test skipped due to disabled long double.");
+        HDputs("    Test skipped due to disabled long double.");
 #endif
-        }
+    }
 #endif
 #endif /* H5_SIZEOF_LONG!=H5_SIZEOF_INT */
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
@@ -5175,7 +5179,7 @@ run_int_fp_conv(const char *name)
     {
         char		str[256];		/*hello string		*/
 
-        sprintf(str, "Testing %s %s -> %s conversions",
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
                 name, "long long", "long double");
         printf("%-70s", str);
         SKIPPED();
@@ -5188,7 +5192,7 @@ run_int_fp_conv(const char *name)
     {
         char		str[256];		/*hello string		*/
 
-        sprintf(str, "Testing %s %s -> %s conversions",
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
                 name, "unsigned long long", "long double");
         printf("%-70s", str);
         SKIPPED();
@@ -5201,7 +5205,7 @@ run_int_fp_conv(const char *name)
     {
         char		str[256];		/*string		*/
 
-        sprintf(str, "Testing %s %s -> %s conversions",
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
                 name, "all integers", "long double");
         printf("%-70s", str);
         SKIPPED();
@@ -5290,13 +5294,13 @@ run_fp_int_conv(const char *name)
         {
             char		str[256];		/*hello string		*/
 
-            sprintf(str, "Testing %s %s -> %s conversions",
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
                     name, "float", "unsigned long long");
             printf("%-70s", str);
             SKIPPED();
             HDputs("    Test skipped due to hardware conversion error.");
 
-            sprintf(str, "Testing %s %s -> %s conversions",
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
                     name, "double", "unsigned long long");
             printf("%-70s", str);
             SKIPPED();
@@ -5318,7 +5322,7 @@ run_fp_int_conv(const char *name)
         {
             char		str[256];		/*string		*/
 
-            sprintf(str, "Testing %s %s -> %s conversions",
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
                     name, "long double", "unsigned int");
             printf("%-70s", str);
             SKIPPED();
@@ -5337,7 +5341,7 @@ run_fp_int_conv(const char *name)
         {
             char		str[256];		/*string		*/
 
-            sprintf(str, "Testing %s %s -> %s conversions",
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
                     name, "long double", "(unsigned) long");
             printf("%-70s", str);
             SKIPPED();
@@ -5357,7 +5361,7 @@ run_fp_int_conv(const char *name)
         {
             char		str[256];		/*string		*/
 
-            sprintf(str, "Testing %s %s -> %s conversions",
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
                     name, "long double", "long long");
             printf("%-70s", str);
             SKIPPED();
@@ -5374,7 +5378,7 @@ run_fp_int_conv(const char *name)
         {
             char		str[256];		/*string		*/
 
-            sprintf(str, "Testing %s %s -> %s conversions",
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
                     name, "long double", "unsigned long long");
             printf("%-70s", str);
             SKIPPED();
@@ -5391,7 +5395,7 @@ run_fp_int_conv(const char *name)
         {
             char		str[256];		/*hello string		*/
 
-            sprintf(str, "Testing %s %s -> %s conversions",
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
                     name, "long double", "all integers");
             printf("%-70s", str);
             SKIPPED();
@@ -5412,7 +5416,7 @@ run_fp_int_conv(const char *name)
  */
     char		str[256];		/*string		*/
 
-    sprintf(str, "Testing %s %s -> %s conversions",
+    HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
             name, "all floating-point numbers", "all integers");
     printf("%-70s", str);
     SKIPPED();
