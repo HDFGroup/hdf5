@@ -45,7 +45,6 @@
 #ifdef H5_HAVE_THREADSAFE
 
 #define FILENAME		"ttsafe_dcreate.h5"
-#define DATASETNAME_LENGTH	10
 #define NUM_THREAD		16
 
 void *tts_dcreate_creator(void *);

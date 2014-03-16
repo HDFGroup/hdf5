@@ -75,7 +75,6 @@ char  *paraprefix = NULL;  /* for command line option para-prefix */
 MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
 #endif
 
-#define FILENAME_BUF_SIZE       1024
 #define READ_BUF_SIZE           4096
 
 /*

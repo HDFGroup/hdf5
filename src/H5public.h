@@ -72,6 +72,25 @@
 extern "C" {
 #endif
 
+/* Macros for enabling/disabling particular GCC warnings */
+/* (see the following web-sites for more info:
+ *      http://www.dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
+ *      http://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
+ */
+/* These pragmas are only implemented usefully in gcc 4.6+ */
+#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406
+    #define H5_GCC_DIAG_STR(s) #s
+    #define H5_GCC_DIAG_JOINSTR(x,y) H5_GCC_DIAG_STR(x ## y)
+    #define H5_GCC_DIAG_DO_PRAGMA(x) _Pragma (#x)
+    #define H5_GCC_DIAG_PRAGMA(x) H5_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
+
+    #define H5_GCC_DIAG_OFF(x) H5_GCC_DIAG_PRAGMA(push) H5_GCC_DIAG_PRAGMA(ignored H5_GCC_DIAG_JOINSTR(-W,x))
+    #define H5_GCC_DIAG_ON(x) H5_GCC_DIAG_PRAGMA(pop)
+#else
+    #define H5_GCC_DIAG_OFF(x)
+    #define H5_GCC_DIAG_ON(x)
+#endif
+
 /* Version numbers */
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
 #define H5_VERS_MINOR	9	/* For minor interface/format changes  	     */
@@ -148,8 +167,10 @@ typedef long long ssize_t;
  * type.
  */
 #if H5_SIZEOF_LONG_LONG >= 8
+H5_GCC_DIAG_OFF(long-long)
 typedef unsigned long long 	hsize_t;
 typedef signed long long	hssize_t;
+H5_GCC_DIAG_ON(long-long)
 #       define H5_SIZEOF_HSIZE_T H5_SIZEOF_LONG_LONG
 #       define H5_SIZEOF_HSSIZE_T H5_SIZEOF_LONG_LONG
 #else

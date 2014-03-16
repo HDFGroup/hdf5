@@ -38,20 +38,12 @@
 /* Macro definitions */
 
 /* sizes of various items. these sizes won't change during program execution */
-/* The following three must have the same type */
-#define ELMT_SIZE           (sizeof(unsigned char))     /* we're doing bytes */
 #define ELMT_H5_TYPE        H5T_NATIVE_UCHAR
 
 #define GOTOERROR(errcode)  { ret_code = errcode; goto done; }
-#define GOTODONE        { goto done; }
 #define ERRMSG(mesg) {                                                  \
     fprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n",    \
         mesg, (int)__LINE__, __FILE__);                             \
-}
-
-#define MSG(mesg) {                                     \
-    fprintf(stderr, "(%s) at line %4d in %s\n",         \
-        mesg, (int)__LINE__, __FILE__);             \
 }
 
 /* verify: if val is false (0), print mesg. */
@@ -80,10 +72,6 @@ enum {
 static int  clean_file_g = -1;  /*whether to cleanup temporary test     */
 /*files. -1 is not defined;             */
 /*0 is no cleanup; 1 is do cleanup      */
-
-#ifndef MIN
-#   define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif  /* !MIN */
 
 /* the different types of file descriptors we can expect */
 typedef union _file_descr {
