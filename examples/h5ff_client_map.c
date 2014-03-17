@@ -111,26 +111,26 @@ int main(int argc, char **argv) {
     file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, H5_EVENT_STACK_NULL);
     assert(file_id > 0);
 
-    /* acquire container version 0 - EXACT.  
+    /* acquire container version 1 - EXACT.  
        This can be asynchronous, but here we need the acquired ID 
        right after the call to start the transaction so we make synchronous. */
-    version = 0;
+    version = 1;
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(0 == version);
+    assert(1 == version);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
     /* create transaction object */
-    tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
+    tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
     assert(tid1);
 
-    /* start transaction 1 with default Leader/Delegate model. Leader
+    /* start transaction 2 with default Leader/Delegate model. Leader
        which is rank 0 here starts the transaction. It can be
        asynchronous, but we make it synchronous here so that the
        Leader can tell its delegates that the transaction is
        started. */
     if(0 == my_rank) {
-        trans_num = 1;
+        trans_num = 2;
         ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
@@ -228,7 +228,7 @@ int main(int argc, char **argv) {
 
         /* this wait if for the transaction start */
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
-        assert(1 == trans_num);
+        assert(2 == trans_num);
 
         /* recieve the token sizes */ 
         MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
@@ -282,7 +282,7 @@ int main(int argc, char **argv) {
     ret = H5TRclose(tid1);
     assert(0 == ret);
 
-    /* release container version 0. This is async. */
+    /* release container version 1. This is async. */
     ret = H5RCrelease(rid1, e_stack);
     assert(0 == ret);
 
@@ -291,9 +291,9 @@ int main(int argc, char **argv) {
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
-    /* Leader process tells delegates that container version 1 is acquired */
-    version = 1;
-    MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
+    /* Leader process tells delegates that container version 2 is acquired */
+    version = 2;
+    MPI_Bcast(&version, 2, MPI_UINT64_T, 0, MPI_COMM_WORLD);
 
     /* delegates just create a read context object; no need to acquire
        it, since it has been acquired by the leader. */
@@ -315,8 +315,8 @@ int main(int argc, char **argv) {
     ret = H5Mexists_ff(map1, H5T_STD_I32LE, &key, &exists, rid2, e_stack);
     assert(ret == 0);
 
-    /* create & start transaction 2 with Multiple Leader - No Delegate Model. */
-    tid2 = H5TRcreate(file_id, rid2, (uint64_t)2);
+    /* create & start transaction 3 with Multiple Leader - No Delegate Model. */
+    tid2 = H5TRcreate(file_id, rid2, (uint64_t)3);
     assert(tid2);
     trspl_id = H5Pcreate (H5P_TR_START);
     ret = H5Pset_trspl_num_peers(trspl_id, my_size);
@@ -342,7 +342,7 @@ int main(int argc, char **argv) {
             assert(H5Gclose_ff(temp_id, H5_EVENT_STACK_NULL) ==0);
     }
 
-    /* finish transaction 2 */
+    /* finish transaction 3 */
     if(my_rank == 0) {
         ret = H5TRabort(tid2, H5_EVENT_STACK_NULL);
         assert(0 == ret);
@@ -372,8 +372,8 @@ int main(int argc, char **argv) {
     /* Barrier so all processes are guranteed to have finished/aborted transaction 2 */
     MPI_Barrier(MPI_COMM_WORLD);
 
-    /* acquire container version 2 - EXACT  (Should Fail since 2 is aborted) */
-    version = 2;
+    /* acquire container version 3 - EXACT  (Should Fail since 2 is aborted) */
+    version = 3;
     rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
     assert(rid3 < 0);
 
@@ -442,7 +442,7 @@ int main(int argc, char **argv) {
     assert(H5Mclose_ff(map3, e_stack) == 0);
 
     if(my_rank == 0) {
-        /* release container version 1. This is async. */
+        /* release container version 2. This is async. */
         ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);
     }
@@ -458,9 +458,9 @@ int main(int argc, char **argv) {
        on the container. */
     assert(H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL) == 0);
 
-    fprintf(stderr, "\n*****************************************************************************************************************\n");
+    fprintf(stderr, "\n*******************************************************************\n");
     fprintf(stderr, "Wait on everything in ES and check Results of operations in ES\n");
-    fprintf(stderr, "*****************************************************************************************************************\n");
+    fprintf(stderr, "\n*******************************************************************\n");
 
     H5ESget_count(e_stack, &num_events);
 

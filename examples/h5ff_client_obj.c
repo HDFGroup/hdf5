@@ -82,11 +82,11 @@ int main(int argc, char **argv) {
     /* acquire container version 0 - EXACT.  
        This can be asynchronous, but here we need the acquired ID 
        right after the call to start the transaction so we make synchronous. */
-    version = 0;
+    version = 1;
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(0 == version);
+    assert(1 == version);
 
-    /* start transaction 1 with default Leader/Delegate model. Leader
+    /* start transaction 2 with default Leader/Delegate model. Leader
        which is rank 0 here starts the transaction. It can be
        asynchronous, but we make it synchronous here so that the
        Leader can tell its delegates that the transaction is
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
         hid_t anon_did;
 
         /* create transaction object */
-        tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
+        tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
         assert(tid1);
         ret = H5TRstart(tid1, H5P_DEFAULT, e_stack);
         assert(0 == ret);
@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
         assert(0 == ret);
 
         /* create transaction object */
-        tid2 = H5TRcreate(file_id, rid_temp, (uint64_t)2);
+        tid2 = H5TRcreate(file_id, rid_temp, (uint64_t)3);
         assert(tid2);
         ret = H5TRstart(tid2, H5P_DEFAULT, e_stack);
         assert(0 == ret);
@@ -162,10 +162,10 @@ int main(int argc, char **argv) {
         ret = H5RCclose(rid_temp);
         assert(0 == ret);
 
-        version = 2;
+        version = 3;
     }
 
-    /* release container version 0. This is async. */
+    /* release container version 1. This is async. */
     ret = H5RCrelease(rid1, e_stack);
     assert(0 == ret);
 
@@ -184,9 +184,9 @@ int main(int argc, char **argv) {
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    /* Process 0 tells other procs that container version 1 is acquired */
+    /* Process 0 tells other procs that container version 3 is acquired */
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
-    assert(2 == version);
+    assert(3 == version);
 
     /* other processes just create a read context object; no need to
        acquire it */
@@ -259,7 +259,7 @@ int main(int argc, char **argv) {
     assert(ret == 0);
 
     if(my_rank == 0) {
-        /* release container version 1. This is async. */
+        /* release container version 3. This is async. */
         ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);
     }

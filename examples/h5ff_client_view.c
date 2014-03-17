@@ -55,13 +55,13 @@ test_view(const char *file_name, const char *dataset_name,
     ret = H5Pclose(fapl_id);
     assert(0 == ret);
 
-    /* acquire container version 0 - EXACT. */
-    version = 0;
+    /* acquire container version 1 - EXACT. */
+    version = 1;
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(0 == version);
+    assert(1 == version);
 
     /* create transaction object */
-    tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
+    tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
     assert(tid1);
 
     trspl_id = H5Pcreate(H5P_TR_START);
@@ -194,16 +194,16 @@ test_view(const char *file_name, const char *dataset_name,
     ret = H5Sclose(mem_space_id);
     assert(0 == ret);
 
-    /* Finish transaction 1. */
+    /* Finish transaction 2. */
     ret = H5TRfinish(tid1, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 
     MPI_Barrier(MPI_COMM_WORLD);
-    /* acquire container version 1 - EXACT. */
-    version = 1;
+    /* acquire container version 2 - EXACT. */
+    version = 2;
     rid2 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
     assert(rid2 > 0);
-    assert(1 == version);
+    assert(2 == version);
 
     /* release container version 0. */
     ret = H5RCrelease(rid1, H5_EVENT_STACK_NULL);
@@ -384,7 +384,7 @@ test_view(const char *file_name, const char *dataset_name,
     ret = H5Sclose(file_space_id);
     assert(0 == ret);
 
-    /* release container version 1. */
+    /* release container version 2. */
     ret = H5RCrelease(rid2, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 

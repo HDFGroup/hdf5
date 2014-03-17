@@ -131,15 +131,15 @@ int main(int argc, char **argv) {
 
     dtid = H5Tcopy(H5T_STD_I32LE);
 
-    /* acquire container version 0 - EXACT.  
+    /* acquire container version 1 - EXACT.  
        This can be asynchronous, but here we need the acquired ID 
        right after the call to start the transaction so we make synchronous. */
-    version = 0;
+    version = 1;
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(0 == version);
+    assert(1 == version);
 
     /* create transaction object */
-    tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
+    tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
     assert(tid1);
 
     /* start transaction 1 with default Leader/Delegate model. Leader
@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
        Leader can tell its delegates that the transaction is
        started. */
     if(0 == my_rank) {
-        trans_num = 1;
+        trans_num = 2;
         ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
@@ -216,11 +216,11 @@ int main(int argc, char **argv) {
         MPI_Ibcast(dset_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[5]);
     }
 
-    /* Leader can continue writing to transaction 1, 
+    /* Leader can continue writing to transaction 2, 
        while others wait for the ibcast to complete */
     if(0 != my_rank) {
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
-        assert(1 == trans_num);
+        assert(2 == trans_num);
 
         /* recieve the token sizes */ 
         MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
@@ -318,7 +318,7 @@ int main(int argc, char **argv) {
     ret = H5TRclose(tid1);
     assert(0 == ret);
 
-    /* release container version 0. This is async. */
+    /* release container version 1. This is async. */
     ret = H5RCrelease(rid1, e_stack);
     assert(0 == ret);
 
@@ -328,8 +328,8 @@ int main(int argc, char **argv) {
     H5ESclear(e_stack);
     assert(status == H5ES_STATUS_SUCCEED);
 
-    /* Tell other procs that container version 1 is acquired */
-    version = 1;
+    /* Tell other procs that container version 2 is acquired */
+    version = 2;
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
 
     /* other processes just create a read context object; no need to
@@ -558,7 +558,7 @@ int main(int argc, char **argv) {
 
     MPI_Barrier(MPI_COMM_WORLD);    
     if(my_rank == 0) {
-        /* release container version 1. This is async. */
+        /* release container version 2. This is async. */
         ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);
     }

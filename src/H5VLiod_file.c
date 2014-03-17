@@ -108,6 +108,18 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     if(ret < 0)
         HGOTO_ERROR_IOD(ret, FAIL, "can't create container");
 
+    /* MSC - skip transaction 0 since it can't be persisted */
+    ret = iod_trans_start(coh, &first_tid, NULL, num_peers, IOD_TRANS_W, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_IOD(ret, FAIL, "can't start transaction 0");
+    /* Finish  the transaction */
+    ret = iod_trans_finish(coh, first_tid, NULL, 0, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_IOD(ret, FAIL, "can't finish transaction 0");
+
+    first_tid = 1;
+
+    /* Take transaction 1 to create root group */
     ret = iod_trans_start(coh, &first_tid, NULL, num_peers, IOD_TRANS_W, NULL);
     if(ret < 0)
         HGOTO_ERROR_IOD(ret, FAIL, "can't start transaction");
@@ -246,7 +258,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     /* Finish  the transaction */
     ret = iod_trans_finish(coh, first_tid, NULL, 0, NULL);
     if(ret < 0)
-        HGOTO_ERROR_IOD(ret, FAIL, "can't finish transaction 0");
+        HGOTO_ERROR_IOD(ret, FAIL, "can't finish transaction 1");
 
     output.coh.cookie = coh.cookie;
     output.root_oh.rd_oh = root_oh.rd_oh;
@@ -362,9 +374,12 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object for write");
     }
+
     /* get scratch pad of root group */
-    if(iod_obj_get_scratch(root_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
+    if((ret = iod_obj_get_scratch(root_oh.rd_oh, rtid, &sp, &sp_cs, NULL)) < 0) {
+        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
+    }
 
     if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */

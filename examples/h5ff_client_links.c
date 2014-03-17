@@ -84,12 +84,12 @@ int main(int argc, char **argv) {
     sid = H5Screate_simple(1, dims, NULL);
     dtid = H5Tcopy(H5T_STD_I32LE);
 
-    /* acquire container version 0 - EXACT.  
+    /* acquire container version 1 - EXACT.  
        This can be asynchronous, but here we need the acquired ID 
        right after the call to start the transaction so we make synchronous. */
-    version = 0;
+    version = 1;
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(0 == version);
+    assert(1 == version);
 
     /* start transaction 1 with default Leader/Delegate model. Leader
        which is rank 0 here starts the transaction. It can be
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
        started. */
     if(0 == my_rank) {
         /* create transaction object */
-        tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
+        tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
         assert(tid1);
         ret = H5TRstart(tid1, H5P_DEFAULT, e_stack);
         assert(0 == ret);
@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
         assert(0 == ret);
 
         /* create transaction object */
-        tid2 = H5TRcreate(file_id, rid2, (uint64_t)2);
+        tid2 = H5TRcreate(file_id, rid2, (uint64_t)3);
         assert(tid2);
         ret = H5TRstart(tid2, H5P_DEFAULT, e_stack);
         assert(0 == ret);
@@ -194,10 +194,10 @@ int main(int argc, char **argv) {
         assert(H5Gclose_ff(gid5, e_stack) == 0);
         assert(H5Dclose_ff(did1, e_stack) == 0);
         assert(H5Dclose_ff(did3, e_stack) == 0);
-        version = 2;
+        version = 3;
     }
 
-    /* release container version 0. This is async. */
+    /* release container version 1. This is async. */
     ret = H5RCrelease(rid1, e_stack);
     assert(0 == ret);
 
@@ -214,7 +214,7 @@ int main(int argc, char **argv) {
     /* other processes just create a read context object; no need to
        acquire it */
     if(0 != my_rank) {
-        assert(2 == version);
+        assert(3 == version);
         rid3 = H5RCcreate(file_id, version);
         assert(rid3 > 0);
     }
@@ -263,7 +263,7 @@ int main(int argc, char **argv) {
     }
 
     if(0 == my_rank) {
-        /* release container version 1. This is async. */
+        /* release container version 3. This is async. */
         ret = H5RCrelease(rid3, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 

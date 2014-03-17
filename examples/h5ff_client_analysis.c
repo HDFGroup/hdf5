@@ -80,13 +80,13 @@ write_dataset(const char *file_name, const char *dataset_name,
     assert(0 == ret);
 
 #ifndef USE_NATIVE
-    /* acquire container version 0 - EXACT. */
-    version = 0;
+    /* acquire container version 1 - EXACT. */
+    version = 1;
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(0 == version);
+    assert(1 == version);
 
     /* create transaction object */
-    tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
+    tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
     assert(tid1);
 
     trspl_id = H5Pcreate(H5P_TR_START);
@@ -186,11 +186,11 @@ write_dataset(const char *file_name, const char *dataset_name,
     assert(0 == ret);
 
 #ifndef USE_NATIVE
-    /* Finish transaction 1. */
+    /* Finish transaction 2. */
     ret = H5TRfinish(tid1, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 
-    /* release container version 0. */
+    /* release container version 1. */
     ret = H5RCrelease(rid1, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 
