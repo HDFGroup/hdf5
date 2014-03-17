@@ -10041,7 +10041,8 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, void **req)
+H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t dataspace_id,
+        hid_t vcpl_id, hid_t rcxt_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the view */
     H5VL_iod_view_t *view = NULL; /* the view object that is created and passed to the user */
@@ -10098,6 +10099,7 @@ H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, v
     input.loc_oh = iod_oh;
     input.loc_mdkv_id = mdkv_id;
     input.query_id = query_id;
+    input.dataspace_id = dataspace_id;
     input.vcpl_id = vcpl_id;
     input.obj_type = obj->obj_type;
     input.rcxt_num  = rc->c_version;

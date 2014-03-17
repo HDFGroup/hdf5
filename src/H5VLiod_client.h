@@ -484,8 +484,8 @@ H5_DLL herr_t H5VL_iod_prefetch(void *obj, hid_t rcxt_id, hrpl_t *replica_id,
                                 hid_t apl_id, void **req);
 H5_DLL herr_t H5VL_iod_evict(void *obj, uint64_t c_version, hid_t apl_id, void **req);
 
-H5_DLL void * H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t vcpl_id, 
-                                   hid_t rcxt_id, void **req);
+H5_DLL void * H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t dataspace_id,
+        hid_t vcpl_id, hid_t rcxt_id, void **req);
 H5_DLL herr_t H5VL_iod_view_close(H5VL_iod_view_t *view);
 
 H5_DLL herr_t H5VL_iod_analysis_execute(const char *file_name, const char *obj_name,

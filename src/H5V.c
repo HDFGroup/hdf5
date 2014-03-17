@@ -33,6 +33,9 @@
 #include "H5Vprivate.h" 	/* Views				*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod_client.h"	/* IOD VOL plugin			*/
+#ifdef H5_HAVE_INDEXING
+#include "H5Xprivate.h"     /* Indexing */
+#endif
 
 #ifdef H5_HAVE_EFF
 
@@ -305,6 +308,10 @@ H5Vcreate_ff(hid_t loc_id, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, hid_t e
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void    *view = NULL;       /* pointer to view object created */
     void    *obj = NULL;        /* object token of loc_id */
+#ifdef H5_HAVE_INDEXING
+    void *idx_handle = NULL; /* index */
+#endif
+    hid_t dataspace_id;
     H5VL_t  *vol_plugin;        /* VOL plugin information */
     hid_t ret_value;
 
@@ -339,8 +346,41 @@ H5Vcreate_ff(hid_t loc_id, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, hid_t e
         vol_plugin->nrefs ++;
     }
 
+#ifdef H5_HAVE_INDEXING
+    /* Try to get indexing info (only for one dataset now) */
+    if (H5I_object_verify(loc_id, H5I_DATASET) &&
+            (NULL != (idx_handle = H5VL_iod_dataset_get_index(obj)))) {
+        H5X_class_t *idx_class = NULL;
+        H5P_genplist_t *xxpl_plist; /* Property list pointer */
+        hid_t xxpl_id = H5P_INDEX_XFER_DEFAULT;
+        unsigned plugin_id;
+
+        if (!(plugin_id = H5VL_iod_dataset_get_index_plugin_id(obj)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin ID from dataset");
+        if (NULL == (idx_class = H5X_registered(plugin_id)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
+
+        /* store the read context ID in the xxpl */
+        if (NULL == (xxpl_plist = (H5P_genplist_t *) H5I_object(xxpl_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+        if (H5P_set(xxpl_plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id");
+
+        if (FAIL == idx_class->query(idx_handle, query_id, xxpl_id, &dataspace_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
+    }
+#endif
+    if (!H5I_object_verify(dataspace_id, H5I_DATASPACE)) {
+        /* The indexing pre_selection is NULL */
+        H5S_t *dataspace = H5S_create(H5S_NULL);
+        if((ret_value = H5I_register (H5I_DATASPACE, dataspace, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom");
+    }
+    /* TODO might want to pass dataspace_id with vcpl_id */
+
     /* call the IOD specific private routine to create a view object */
-    if(NULL == (view = H5VL_iod_view_create(obj, query_id, vcpl_id, rcxt_id, req)))
+    if(NULL == (view = H5VL_iod_view_create(obj, query_id, dataspace_id,
+            vcpl_id, rcxt_id, req)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create view")
 
     if(request && *req) {
@@ -353,9 +393,11 @@ H5Vcreate_ff(hid_t loc_id, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, hid_t e
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize view handle")
 
 done:
-    if (ret_value < 0 && view)
+    if (ret_value < 0 && view) {
         if(H5V_close (view) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release view")
+    }
+    H5I_dec_ref(dataspace_id);
     FUNC_LEAVE_API(ret_value)
 } /* end H5Vcreate_ff */
 

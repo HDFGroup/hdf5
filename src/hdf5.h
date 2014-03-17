@@ -42,6 +42,10 @@
 #include "H5Spublic.h"		/* Dataspaces				*/
 #include "H5Tpublic.h"		/* Datatypes				*/
 #include "H5TRpublic.h"		/* Transcations 			*/
+#include "H5Vpublic.h"      /* Views */
+#ifdef H5_HAVE_INDEXING
+#include "H5Xpublic.h"      /* Index plugins */
+#endif
 #include "H5Zpublic.h"		/* Data filters				*/
 #include "H5VLpublic.h"		/* VOL plugins			        */
 

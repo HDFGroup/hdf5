@@ -800,7 +800,7 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
         size_t metadata_size;
         size_t idx_count;
         void *metadata;
-        H5P_genplist_t *xxpl_plist; /* Property list pointer */
+        H5P_genplist_t *xapl_plist; /* Property list pointer */
         hid_t xapl_id = H5P_INDEX_ACCESS_DEFAULT;
 
         /* Get index info if present */
@@ -809,10 +809,10 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index info for dataset");
 
         if (idx_count) {
-            /* store the read context ID in the xxpl */
-            if(NULL == (xxpl_plist = (H5P_genplist_t *)H5I_object(xapl_id)))
+            /* store the read context ID in the xapl */
+            if(NULL == (xapl_plist = (H5P_genplist_t *)H5I_object(xapl_id)))
                 HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-            if(H5P_set(xxpl_plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+            if(H5P_set(xapl_plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id");
 
             if (NULL == (idx_class = H5X_registered(plugin_id)))
