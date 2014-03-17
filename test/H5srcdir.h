@@ -46,8 +46,8 @@ static const char *H5_get_srcdir_filename(const char *filename)
 
     /* Build path to test file */
     if((HDstrlen(srcdir) + HDstrlen(filename) + 2) < sizeof(srcdir_testpath)) {
-        HDstrcpy(srcdir_testpath, srcdir);
 #ifdef H5_VMS
+        HDstrcpy(srcdir_testpath, srcdir);
         if(filename[0] == '[') {
             char *tmp = filename;
 
@@ -57,8 +57,7 @@ static const char *H5_get_srcdir_filename(const char *filename)
         else
             HDstrcat(srcdir_testpath, filename);
 #else
-        HDstrcat(srcdir_testpath, "/");
-        HDstrcat(srcdir_testpath, filename);
+        HDsnprintf(srcdir_testpath, sizeof(srcdir_testpath), "%s/%s", srcdir, filename);
 #endif
         return(srcdir_testpath);
     } /* end if */
@@ -77,8 +76,7 @@ static const char *H5_get_srcdir(void)
 
     /* Build path to all test files */
     if((HDstrlen(srcdir) + 2) < sizeof(srcdir_path)) {
-        HDstrcpy(srcdir_path, srcdir);
-        HDstrcat(srcdir_path, "/");
+        HDsnprintf(srcdir_path, sizeof(srcdir_path), "%s/", srcdir);
         return(srcdir_path);
     } /* end if */
     else

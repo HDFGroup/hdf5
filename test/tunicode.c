@@ -29,16 +29,13 @@
 #define LONG_BUF_SIZE (2 * MAX_STRING_LENGTH + 4)
 
 #define DSET1_NAME "fl_string_dataset"
-#define DSET2_NAME "dataset2"
 #define DSET3_NAME "dataset3"
 #define DSET4_NAME "dataset4"
 #define VL_DSET1_NAME "vl_dset_1"
-#define VL_DSET2_NAME "vl_dset_2"
 #define GROUP1_NAME "group1"
 #define GROUP2_NAME "group2"
 #define GROUP3_NAME "group3"
 #define GROUP4_NAME "group4"
-#define SLINK_NAME "soft_link"
 
 #define RANK 1
 #define COMP_INT_VAL 7

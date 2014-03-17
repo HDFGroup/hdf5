@@ -31,13 +31,6 @@
 
 #define FILENAME "group_new.h5"
 
-#ifndef TRUE
-#define TRUE 1
-#endif /* TRUE */
-#ifndef FALSE
-#define FALSE 0
-#endif /* FALSE */
-
 int main(void)
 {
     hid_t fid = -1;             /* File ID */
