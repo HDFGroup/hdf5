@@ -36,6 +36,7 @@
 #include "H5Eprivate.h"     /* Error handling       */
 #include "H5Iprivate.h"     /* IDs                  */
 #include "H5Sprivate.h"     /* Dataspaces           */
+#include "H5FFprivate.h"    /* Fast Forward routines*/
 #include "H5Xprivate.h"     /* Index                */
 #include "H5Ppkg.h"         /* Property lists       */
 
@@ -106,10 +107,21 @@ const H5P_libclass_t H5P_CLS_XCRT[1] = {{
 static herr_t
 H5P__xcrt_reg_prop(H5P_genclass_t *pclass)
 {
+    hid_t trans_id = FAIL;
+    hid_t context_id = FAIL;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Register the transaction ID property*/
+    if(H5P_register_real(pclass, H5VL_TRANS_ID, sizeof(hid_t), &trans_id,
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the context ID property*/
+    if(H5P_register_real(pclass, H5VL_CONTEXT_ID, sizeof(hid_t), &context_id,
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__xcrt_reg_prop() */
