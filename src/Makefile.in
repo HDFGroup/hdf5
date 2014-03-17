@@ -121,10 +121,10 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_la_LIBADD =
 am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5timer.lo H5trace.lo H5A.lo H5Abtree2.lo H5Adense.lo \
-	H5Adeprec.lo H5Aint.lo H5Atest.lo H5AC.lo H5B.lo H5Bcache.lo \
-	H5Bdbg.lo H5B2.lo H5B2cache.lo H5B2dbg.lo H5B2hdr.lo \
-	H5B2int.lo H5B2stat.lo H5B2test.lo H5C.lo H5CS.lo H5D.lo \
-	H5Dbtree.lo H5Dbtree2.lo H5Dchunk.lo H5Dcompact.lo \
+	H5Adeprec.lo H5Aint.lo H5Atest.lo H5AC.lo H5AClog.lo H5B.lo \
+	H5Bcache.lo H5Bdbg.lo H5B2.lo H5B2cache.lo H5B2dbg.lo \
+	H5B2hdr.lo H5B2int.lo H5B2stat.lo H5B2test.lo H5C.lo H5CS.lo \
+	H5D.lo H5Dbtree.lo H5Dbtree2.lo H5Dchunk.lo H5Dcompact.lo \
 	H5Dcontig.lo H5Ddbg.lo H5Ddeprec.lo H5Dearray.lo H5Defl.lo \
 	H5Dfarray.lo H5Dfill.lo H5Dint.lo H5Dio.lo H5Dlayout.lo \
 	H5Dmpio.lo H5Dnone.lo H5Doh.lo H5Dproxy.lo H5Dscatgath.lo \
@@ -540,7 +540,7 @@ DISTCLEANFILES = H5pubconf.h
 # library sources
 libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5A.c H5Abtree2.c H5Adense.c H5Adeprec.c H5Aint.c H5Atest.c \
-        H5AC.c H5B.c H5Bcache.c H5Bdbg.c \
+        H5AC.c H5AClog.c H5B.c H5Bcache.c H5Bdbg.c \
         H5B2.c H5B2cache.c H5B2dbg.c H5B2hdr.c H5B2int.c H5B2stat.c H5B2test.c \
         H5C.c H5CS.c \
         H5D.c H5Dbtree.c H5Dbtree2.c H5Dchunk.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
@@ -762,6 +762,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5A.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5AC.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5AClog.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Abtree2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Adense.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Adeprec.Plo@am__quote@

@@ -1171,7 +1171,11 @@ H5C_create(size_t		      max_cache_size,
 
     cache_ptr->flush_in_progress		= FALSE;
 
-    cache_ptr->trace_file_ptr			= NULL;
+    cache_ptr->logging_enabled                  = FALSE;
+
+    cache_ptr->currently_logging                = FALSE;
+
+    cache_ptr->log_file_ptr			= NULL;
 
     cache_ptr->aux_ptr				= aux_ptr;
 
@@ -2595,66 +2599,318 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_get_trace_file_ptr
+ * Function:    H5C_set_up_logging
  *
- * Purpose:     Get the trace_file_ptr field from the cache.
+ * Purpose:     Setup for metadata cache logging.
  *
- *              This field will either be NULL (which indicates that trace
- *              file logging is turned off), or contain a pointer to the
- *              open file to which trace file data is to be written.
+ *              Metadata logging is enabled and disabled at two levels. This
+ *              function and the associated tear_down function open and close
+ *              the log file. the start_ and stop_logging functions are then
+ *              used to switch logging on/off. Optionally, logging can begin
+ *              as soon as the log file is opened (set via the start_immediately
+ *              parameter to this function).
+ *
+ *              The log functionality is split between the H5C and H5AC
+ *              packages. Log state and direct log manipulation resides in
+ *              H5C. Log messages are generated in H5AC and sent to
+ *              the H5C_write_log_message function.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              1/20/06
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_get_trace_file_ptr(const H5C_t *cache_ptr, FILE **trace_file_ptr_ptr)
+H5C_set_up_logging(H5C_t *cache_ptr, const char log_location[],
+    hbool_t start_immediately)
 {
-    FUNC_ENTER_NOAPI_NOERR
+    char *file_name;
+    size_t n_chars;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    HDassert(trace_file_ptr_ptr);
+    HDassert(log_location);
 
-    *trace_file_ptr_ptr = cache_ptr->trace_file_ptr;
+    /* Sanity checks */
+    if(NULL == cache_ptr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cache_ptr == NULL")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5C_get_trace_file_ptr() */
+    if(H5C__H5C_T_MAGIC != cache_ptr->magic)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cache magic value incorrect")
+
+    if(cache_ptr->logging_enabled)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "logging already set up")
+
+    if(NULL == log_location)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL log location not allowed")
+
+    /* Possibly fix up the log file name.
+     * The extra 39 characters are for adding the rank to the file name
+     * under parallel HDF5. 39 characters allows > 2^127 processes which
+     * should be enough for anybody.
+     *
+     * allocation size = <path length> + dot + <rank # length> + \0
+     */
+    n_chars = HDstrlen(log_location) + 1 + 39 + 1;
+    if(NULL == (file_name = (char *)HDcalloc(n_chars, sizeof(char))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, \
+            "can't allocate memory for mdc log file name manipulation")
+
+#ifdef H5_HAVE_PARALLEL
+
+    /* Add the rank to the log file name when MPI is in use */
+
+    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+
+    if(NULL == cache_ptr->aux_ptr) {
+        HDsnprintf(file_name, n_chars, "%s", log_location);
+    }
+    else {
+        if(aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC) {
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad aux_ptr->magic")
+        }
+        HDsnprintf(file_name, n_chars, "%s.%d", log_location, aux_ptr->mpi_rank);
+    }
+
+#else /* H5_HAVE_PARALLEL */
+
+    HDsnprintf(file_name, n_chars, "%s", log_location);
+
+#endif /* H5_HAVE_PARALLEL */
+
+    /* Open log file */
+    if(NULL == (cache_ptr->log_file_ptr = HDfopen(file_name, "w")))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't create mdc log file")
+
+    /* Set logging flags */
+    cache_ptr->logging_enabled = TRUE;
+    cache_ptr->currently_logging = start_immediately;
+
+ done:
+
+    HDfree(file_name);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_set_up_logging() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_get_trace_file_ptr_from_entry
+ * Function:    H5C_tear_down_logging
  *
- * Purpose:     Get the trace_file_ptr field from the cache, via an entry.
- *
- *              This field will either be NULL (which indicates that trace
- *              file logging is turned off), or contain a pointer to the
- *              open file to which trace file data is to be written.
+ * Purpose:     Tear-down for metadata cache logging.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              6/9/08
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_ptr,
-    FILE **trace_file_ptr_ptr)
+H5C_tear_down_logging(H5C_t *cache_ptr)
 {
-    FUNC_ENTER_NOAPI_NOERR
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* Sanity checks */
-    HDassert(entry_ptr);
-    HDassert(entry_ptr->cache_ptr);
+    if(NULL == cache_ptr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cache_ptr == NULL")
 
-    H5C_get_trace_file_ptr(entry_ptr->cache_ptr, trace_file_ptr_ptr);
+    if(H5C__H5C_T_MAGIC != cache_ptr->magic)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cache magic value incorrect")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5C_get_trace_file_ptr_from_entry() */
+    if(FALSE == cache_ptr->logging_enabled)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "logging not enabled")
+
+    /* Unset logging flags */
+    cache_ptr->logging_enabled = FALSE;
+    cache_ptr->currently_logging = FALSE;
+
+    /* Close log file */
+    if(EOF == HDfclose(cache_ptr->log_file_ptr))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problem closing mdc log file")
+    cache_ptr->log_file_ptr = NULL;
+
+ done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_tear_down_logging() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_start_logging
+ *
+ * Purpose:     Start logging metadata cache operations.
+ *
+ *              TODO: Add a function that dumps the current state of the
+ *                    metadata cache.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_start_logging(H5C_t *cache_ptr)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    /* Sanity checks */
+    if(NULL == cache_ptr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cache_ptr == NULL")
+
+    if(H5C__H5C_T_MAGIC != cache_ptr->magic)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cache magic value incorrect")
+
+    if(FALSE == cache_ptr->logging_enabled)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "logging not enabled")
+
+    if(cache_ptr->currently_logging)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "logging already in progress")
+
+    /* Set logging flags */
+    cache_ptr->currently_logging = TRUE;
+
+    /* TODO - Dump cache state */
+
+ done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_start_logging() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_stop_logging
+ *
+ * Purpose:     Stop logging metadata cache operations.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_stop_logging(H5C_t *cache_ptr)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    /* Sanity checks */
+    if(NULL == cache_ptr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cache_ptr == NULL")
+
+    if(H5C__H5C_T_MAGIC != cache_ptr->magic)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cache magic value incorrect")
+
+    if(FALSE == cache_ptr->logging_enabled)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "logging not enabled")
+
+    if(FALSE == cache_ptr->currently_logging)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "logging not in progress")
+
+    /* Set logging flags */
+    cache_ptr->currently_logging = FALSE;
+
+ done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_stop_logging() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_get_logging_status
+ *
+ * Purpose:     Determines if the cache is actively logging (via the OUT
+ *              parameter).
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_get_logging_status(const H5C_t *cache_ptr, /*OUT*/ hbool_t *is_enabled,
+                       /*OUT*/ hbool_t *is_currently_logging)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(is_enabled);
+    HDassert(is_currently_logging);
+
+    /* Sanity checks */
+    if(NULL == cache_ptr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cache_ptr == NULL")
+
+    if(H5C__H5C_T_MAGIC != cache_ptr->magic)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cache magic value incorrect")
+
+    *is_enabled = cache_ptr->logging_enabled;
+    *is_currently_logging = cache_ptr->currently_logging;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_get_logging_status() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_write_log_message
+ *
+ * Purpose:     Write a message to the log file and flush the file. 
+ *              The message string is neither modified nor freed.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_write_log_message(const H5C_t *cache_ptr, const char message[])
+{
+    size_t n_chars;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(message);
+
+    /* Sanity checks */
+    if(NULL == cache_ptr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cache_ptr == NULL")
+
+    if(H5C__H5C_T_MAGIC != cache_ptr->magic)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cache magic value incorrect")
+
+    if(FALSE == cache_ptr->currently_logging)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "not currently logging")
+
+    if(NULL == message)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL log message not allowed")
+
+    /* Write the log message and flush */
+    n_chars = HDstrlen(message);
+    if((int)n_chars != HDfprintf(cache_ptr->log_file_ptr, message))
+        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error writing log message")
+    if(EOF == HDfflush(cache_ptr->log_file_ptr))
+        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error flushing log message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_write_log_message() */
+
 
 
 /*-------------------------------------------------------------------------
@@ -2728,7 +2984,7 @@ H5C_insert_entry(H5F_t *             f,
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "thing already in index.\n");
     }
-#endif /* H5C_DO_SANITY_CHECKS */
+#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
     if ( H5C_validate_lru_list(cache_ptr) < 0 ) {
@@ -4626,13 +4882,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_set_trace_file_ptr
+ * Function:    H5C_set_log_file_ptr
  *
- * Purpose:     Set the trace_file_ptr field for the cache.
+ * Purpose:     Set the log_file_ptr field for the cache.
  *
- *              This field must either be NULL (which turns of trace
- *              file logging), or be a pointer to an open file to which
- *              trace file data is to be written.
+ *              This field must either be NULL (which turns of metadata
+ *              cache logging), or be a pointer to an open file to which
+ *              log entries are to be written.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -4642,8 +4898,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_set_trace_file_ptr(H5C_t * cache_ptr,
-                       FILE * trace_file_ptr)
+H5C_set_log_file_ptr(H5C_t * cache_ptr,
+                       FILE * log_file_ptr)
 {
     herr_t		ret_value = SUCCEED;   /* Return value */
 
@@ -4657,12 +4913,12 @@ H5C_set_trace_file_ptr(H5C_t * cache_ptr,
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr")
     }
 
-    cache_ptr->trace_file_ptr = trace_file_ptr;
+    cache_ptr->log_file_ptr = log_file_ptr;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C_set_trace_file_ptr() */
+} /* H5C_set_log_file_ptr() */
 
 
 /*-------------------------------------------------------------------------

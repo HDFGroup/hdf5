@@ -1105,6 +1105,24 @@ H5_DLL H5C_t * H5C_create(size_t                     max_cache_size,
                           H5C_log_flush_func_t       log_flush,
                           void *                     aux_ptr);
 
+H5_DLL herr_t H5C_set_up_logging(H5C_t *cache_ptr,
+                                 const char log_location[],
+                                 hbool_t start_immediately);
+
+H5_DLL herr_t H5C_tear_down_logging(H5C_t *cache_ptr);
+
+H5_DLL herr_t H5C_start_logging(H5C_t *cache_ptr);
+
+H5_DLL herr_t H5C_stop_logging(H5C_t *cache_ptr);
+
+H5_DLL herr_t H5C_get_logging_status(const H5C_t *cache_ptr,
+                                     /*OUT*/ hbool_t *is_enabled,
+                                     /*OUT*/ hbool_t *is_currently_logging);
+
+H5_DLL herr_t H5C_write_log_message(const H5C_t *cache_ptr,
+                                    const char message[]);
+
+
 H5_DLL void H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
                                         int32_t version,
                                         double hit_rate,
@@ -1173,11 +1191,6 @@ H5_DLL herr_t H5C_get_entry_status(const H5F_t *f,
 H5_DLL herr_t H5C_get_evictions_enabled(const H5C_t * cache_ptr,
                                         hbool_t * evictions_enabled_ptr);
 
-H5_DLL herr_t H5C_get_trace_file_ptr(const H5C_t *cache_ptr,
-    FILE **trace_file_ptr_ptr);
-H5_DLL herr_t H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_ptr,
-    FILE **trace_file_ptr_ptr);
-
 H5_DLL herr_t H5C_insert_entry(H5F_t *             f,
                                hid_t               primary_dxpl_id,
                                hid_t               secondary_dxpl_id,
@@ -1223,8 +1236,8 @@ H5_DLL herr_t H5C_set_evictions_enabled(H5C_t *cache_ptr,
 
 H5_DLL herr_t H5C_set_prefix(H5C_t * cache_ptr, char * prefix);
 
-H5_DLL herr_t H5C_set_trace_file_ptr(H5C_t * cache_ptr,
-		                     FILE * trace_file_ptr);
+H5_DLL herr_t H5C_set_log_file_ptr(H5C_t * cache_ptr,
+		                     FILE * log_file_ptr);
 
 H5_DLL herr_t H5C_stats(H5C_t * cache_ptr,
                         const char * cache_name,

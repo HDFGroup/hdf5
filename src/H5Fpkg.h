@@ -250,6 +250,10 @@ struct H5F_file_t {
                                 /* metadata cache.  This structure is   */
                                 /* fixed at creation time and should    */
                                 /* not change thereafter.               */
+    hbool_t     use_mdc_logging; /* Set when metadata logging is desired */
+    hbool_t     start_mdc_log_on_access; /* set when mdc logging should  */
+                                /* begin on file access/create          */
+    char        *mdc_log_location; /* location of mdc log               */
     hid_t       fcpl_id;	/* File creation property list ID 	*/
     H5F_close_degree_t fc_degree;   /* File close behavior degree	*/
     size_t	rdcc_nslots;	/* Size of raw data chunk cache (slots)	*/
