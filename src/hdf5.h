@@ -39,6 +39,7 @@
 #include "H5Rpublic.h"		/* References				*/
 #include "H5Spublic.h"		/* Dataspaces				*/
 #include "H5Tpublic.h"		/* Datatypes				*/
+#include "H5Xpublic.h"		/* Index plugins			*/
 #include "H5Zpublic.h"		/* Data filters				*/
 
 /* Predefined file drivers */
