@@ -348,6 +348,7 @@ done:
         output.iod_id = IOD_OBJ_INVALID;
         output.keytype_id = FAIL;
         output.valtype_id = FAIL;
+        output.mcpl_id = FAIL;
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
