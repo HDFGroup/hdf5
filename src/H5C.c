@@ -70,13 +70,14 @@
  *
  **************************************************************************/
 
+#define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
 #define H5C_PACKAGE		/*suppress error about including H5Cpkg   */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 
 #include "H5private.h"		/* Generic Functions			*/
 #ifdef H5_HAVE_PARALLEL
-#include "H5ACprivate.h"        /* Metadata cache                       */
+#include "H5ACpkg.h"        /* Metadata cache                       */
 #endif /* H5_HAVE_PARALLEL */
 #include "H5Cpkg.h"		/* Cache				*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
@@ -2623,6 +2624,9 @@ herr_t
 H5C_set_up_logging(H5C_t *cache_ptr, const char log_location[],
     hbool_t start_immediately)
 {
+#ifdef H5_HAVE_PARALLEL
+    H5AC_aux_t *aux_ptr = NULL;
+#endif /*H5_HAVE_PARALLEL*/
     char *file_name;
     size_t n_chars;
     herr_t ret_value = SUCCEED;      /* Return value */
@@ -2661,10 +2665,9 @@ H5C_set_up_logging(H5C_t *cache_ptr, const char log_location[],
 #ifdef H5_HAVE_PARALLEL
 
     /* Add the rank to the log file name when MPI is in use */
-
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
 
-    if(NULL == cache_ptr->aux_ptr) {
+    if(NULL == aux_ptr) {
         HDsnprintf(file_name, n_chars, "%s", log_location);
     }
     else {
