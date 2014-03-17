@@ -584,6 +584,7 @@
 ./src/H5Aprivate.h
 ./src/H5Apublic.h
 ./src/H5AC.c
+./src/H5AClog.c
 ./src/H5ACpkg.h
 ./src/H5ACprivate.h
 ./src/H5ACpublic.h
@@ -983,6 +984,7 @@
 ./test/cache_api.c
 ./test/cache_common.c
 ./test/cache_common.h
+./test/cache_logging.c
 ./test/cache_tagging.c
 ./test/cmpd_dset.c
 ./test/cork.c
