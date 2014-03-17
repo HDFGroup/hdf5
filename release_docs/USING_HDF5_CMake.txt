@@ -37,7 +37,7 @@ I. Preconditions
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
       web site. The HDF5 1.8.x product requires a minimum CMake version 
-      of 2.8.10.                     
+      of 2.8.12.                     
                                                                          
    2. You have installed the HDF5 library built with CMake, by executing 
       the HDF Install Utility (the *.exe file in the binary package for 
@@ -186,7 +186,7 @@ III. Minimum C Project Files for CMake
       following text in the file:
 
 ##########################################################
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 2.8.12)
 PROJECT (HDF5MyApp C CXX)
 
 FIND_PACKAGE (HDF5 NAMES hdf5)
@@ -239,7 +239,7 @@ ctest
 # where hdf518Examples is the source folder relative to the location of these scripts
 ############################################################################
 
-cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
 set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
 set(CTEST_SOURCE_NAME ${CTEST_SCRIPT_ARG})

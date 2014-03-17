@@ -678,6 +678,11 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - When CMake commands are executed individually on the command line and the
+      external filters are being built, the CMAKE_BUILD_TYPE define must be set
+      to the same value as the configuration 
+        (-DCMAKE_BUILD_TYPE:STRING=Release if using -C Release). This is needed 
+      by the the szip and zlib filter build commands. (ADB - HDFFV-8695)
     - Modified H5detect.c to scan floating point types for padding bits before
       analyzing the type further.  This should fix problems with gcc 4.8
       (NAF - 2013/09/19 - HDFFV-8523/HDFFV-8500)
@@ -1172,20 +1177,19 @@ Supported Platforms
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows 7                     Visual Studio 2008 w/ Intel Fortran 11 (cmake)
-                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
-                                  Visual Studio 2012 w/ Intel Fortran 13 (cmake)
-                                  Cygwin(CYGWIN_NT-6.1 1.7.25(0.270/5/3) gcc(4.7.3) compiler and gfortran)
+    Windows 7                     Visual Studio 2008 w/ Intel Fortran 14 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 14 (cmake)
+                                  Visual Studio 2012 w/ Intel Fortran 14 (cmake)
+                                  Cygwin(CYGWIN_NT-6.1 1.7.25(0.270/5/3) gcc(4.8.2) compiler and gfortran)
                                   (cmake and autotools)
 
-    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11 (cmake)
-                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
-                                  Visual Studio 2012 w/ Intel Fortran 13 (cmake)
-                                  Cygwin(CYGWIN_NT-6.1 1.7.25(0.270/5/3) gcc(4.8.1) compiler and gfortran)
-                                  (cmake and autotools)
-    Windows 8.1                   Visual Studio 2012 w/ Intel Fortran 13 (cmake)
+    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 14 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 14 (cmake)
+                                  Visual Studio 2012 w/ Intel Fortran 14 (cmake)
+                                  
+    Windows 8.1                   Visual Studio 2012 w/ Intel Fortran 14 (cmake)
 
-    Windows 8.1 x64               Visual Studio 2012 w/ Intel Fortran 13 (cmake)
+    Windows 8.1 x64               Visual Studio 2012 w/ Intel Fortran 14 (cmake)
 
     Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
     Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6

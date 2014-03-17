@@ -89,8 +89,9 @@ Notes: This short set of instructions is written for users who want to
          c:\MyHDFstuff\hdf5\build
       
       4. Configure the C library, tools and tests with this command:
-         cmake -G "Visual Studio 10" -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..
-         The two dots on the end of the command is the location of the source.
+         cmake -G "Visual Studio 10" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..
+         The two dots on the end of the command is the location of the source. 
+         The CMAKE_BUILD_TYPE must match the configuration type.
       
       5. Build the C library, tools and tests with this command:
          cmake --build . --config Release
@@ -118,8 +119,9 @@ Notes: This short set of instructions is written for users who want to
          ~/MyHDFstuff/hdf5/build
       
       4. Configure the C library, tools and tests with this command:
-         cmake -G "Unix Makefiles" -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..
+         cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..
          The two dots on the end of the command is the location of the source.
+         The CMAKE_BUILD_TYPE must match the configuration type.
       
       5. Build the C library, tools and tests with this command:
          cmake --build . --config Release
@@ -141,7 +143,7 @@ III. Preconditions
 ========================================================================
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
-      web site. The HDF5 1.8.x product requires a minimum CMake version 2.8.10.                     
+      web site. The HDF5 1.8.x product requires a minimum CMake version 2.8.12.                     
                                                                          
    2. If you plan to use Zlib or Szip:
       A. Download the binary packages and install them in a central location. 
@@ -152,7 +154,8 @@ III. Preconditions
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="SVN"
             ZLIB_SVN_URL:STRING="http://some_location/zlib/trunk"
             SZIP_SVN_URL:STRING="http://some_location/szip/trunk"
-         where "some_location" is the URL to the SVN repository.
+         where "some_location" is the URL to the SVN repository. Also set
+         CMAKE_BUILD_TYPE to the configuration type.
       C. Use source packages from a compressed file by adding the following 
          CMake options:
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
@@ -160,7 +163,8 @@ III. Preconditions
             SZIP_TGZ_NAME:STRING="szip_src.ext"
             TGZPATH:STRING="some_location"
          where "some_location" is the URL or full path to the compressed 
-         file and ext is the type of compression file.
+         file and ext is the type of compression file. Also set CMAKE_BUILD_TYPE
+         to the configuration type during configuration
                                     
    3. If you are building on Apple Darwin platforms, you should add the 
       following options:
@@ -181,7 +185,8 @@ III. Preconditions
       on the command line are those options that are different. Example using HDF
       default cache file:
                cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 10" \
-               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF ..
+               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
+               -DCMAKE_BUILD_TYPE:STRING=Release ..
 
 Notes: CMake and HDF5
 
@@ -346,7 +351,8 @@ These five steps are described in detail below.
       2.2  Preferred command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
       
                cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 10" \
-               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF ..
+               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
+               -DCMAKE_BUILD_TYPE:STRING=Release ..
 
       2.3  On Windows, if you are using a Visual Studio Express version you must 
            be sure that the following two options are correctly set/unset:
@@ -381,7 +387,8 @@ These five steps are described in detail below.
            The options to control the SVN URL (config/cmake/cacheinit.cmake file) are:
                ZLIB_SVN_URL:STRING="http://svn.hdfgroup.uiuc.edu/zlib/trunk"
                SZIP_SVN_URL:STRING="http://svn.hdfgroup.uiuc.edu/szip/trunk"
-           These should be changed to your location.
+           These should be changed to your location. Also define CMAKE_BUILD_TYPE
+           to be the configuration type.
            
       3.2.2  Or the external libraries (zlib and szip) can be configured
            to allow building the libraries by using a compressed file.
@@ -396,7 +403,8 @@ These five steps are described in detail below.
                TGZPATH:STRING="some_location"
             where "some_location/xxxx_src.ext" is the URL or full path to 
             the compressed file and where ext is the type of the compression 
-            file such as .bz2, .tar, .tar.gz, .tgz, or .zip.
+            file such as .bz2, .tar, .tar.gz, .tgz, or .zip. Also define
+            CMAKE_BUILD_TYPE to be the configuration type.
 
    4. Test HDF5
 
@@ -563,7 +571,7 @@ is used to build, test, and package HDF5 Library files.
 
 
 
-cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 ########################################################
 # This dashboard is maintained by The HDF Group
 # For any comments please contact cdashhelp@hdfgroup.org
@@ -859,7 +867,7 @@ and the build folder is created as a sub-folder.
 # "ctest -S HDF518Static.cmake,hdf518 -C Release -O hdf518static.log"
 # where hdf518 is the source folder relative to the location of these scripts
 ############################################################################
-cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 set(CTEST_SOURCE_NAME ${CTEST_SCRIPT_ARG})
 set(CTEST_BINARY_NAME ${CTEST_SOURCE_NAME}/build)
 set(CTEST_DASHBOARD_ROOT "${CTEST_SCRIPT_DIRECTORY}")
