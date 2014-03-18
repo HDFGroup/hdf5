@@ -1,0 +1,5 @@
+Lower priority tasks
+- Remove MPI_Init_thread from client example and use MPI_Init instead
+- Define/use macro to generate mercury server code that pushes execution to AXE engine
+- Replace switch case by callback and use mercury callback API with mercury request emulation API
+
