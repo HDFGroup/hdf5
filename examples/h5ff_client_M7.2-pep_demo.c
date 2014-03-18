@@ -540,6 +540,8 @@ int main( int argc, char **argv ) {
    ret = H5RCrelease( rc_id, H5_EVENT_STACK_NULL); ASSERT_RET;
    ret = H5RCclose( rc_id ); ASSERT_RET;
 
+   MPI_Barrier( MPI_COMM_WORLD );
+
    /* Close H5 Objects that are still open */
    fprintf( stderr, "APP-r%d: Close all H5 objects that are still open\n", my_rank );
    ret = H5Fclose_ff( file_id, 1, H5_EVENT_STACK_NULL ); ASSERT_RET;
