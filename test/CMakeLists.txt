@@ -46,8 +46,8 @@ set_target_properties (${HDF5_TEST_LIB_TARGET} PROPERTIES
 #-----------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
   # make plugins dir
-  FILE (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/testdir1")
-  FILE (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/testdir2")
+  file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/testdir1")
+  file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/testdir2")
 
   #-----------------------------------------------------------------------------
   # Define Test Library Sources
@@ -294,7 +294,7 @@ set_target_properties (links_env PROPERTIES FOLDER test)
 #-- Adding test for libinfo
 set (GREP_RUNNER ${PROJECT_BINARY_DIR}/GrepRunner.cmake)
 file (WRITE ${GREP_RUNNER} 
-  "FILE (STRINGS \${TEST_PROGRAM} TEST_RESULT REGEX \"SUMMARY OF THE HDF5 CONFIGURATION\")
+  "file (STRINGS \${TEST_PROGRAM} TEST_RESULT REGEX \"SUMMARY OF THE HDF5 CONFIGURATION\")
 if (\${TEST_RESULT} STREQUAL \"0\")
   message (FATAL_ERROR \"Failed: The output: \${TEST_RESULT} of \${TEST_PROGRAM} did not contain SUMMARY OF THE HDF5 CONFIGURATION\")
 else (\${TEST_RESULT} STREQUAL \"0\")

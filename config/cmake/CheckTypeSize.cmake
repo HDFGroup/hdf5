@@ -34,12 +34,12 @@ MACRO (HDF_CHECK_TYPE_SIZE TYPE VARIABLE)
     )
     if (HAVE_${VARIABLE})
       message (STATUS "Check size of ${TYPE} - done")
-      FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
+      file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
           "Determining size of ${TYPE} passed with the following output:\n${OUTPUT}\n\n"
       )
     else (HAVE_${VARIABLE})
       message (STATUS "Check size of ${TYPE} - failed")
-      FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
+      file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
           "Determining size of ${TYPE} failed with the following output:\n${OUTPUT}\n\n"
       )
     endif (HAVE_${VARIABLE})

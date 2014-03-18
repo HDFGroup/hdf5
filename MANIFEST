@@ -1259,6 +1259,7 @@
 # h5repack sources
 ./tools/h5repack/Makefile.am
 ./tools/h5repack/Makefile.in
+./tools/h5repack/dynlib_rpk.c
 ./tools/h5repack/h5repack.sh.in
 ./tools/h5repack/h5repack_plugin.sh.in
 ./tools/h5repack/h5repack.c

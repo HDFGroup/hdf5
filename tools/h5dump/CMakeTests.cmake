@@ -307,7 +307,7 @@
   )
 
   # make test dir
-  FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
   #
   # copy test files from source dir to test dir
@@ -326,8 +326,8 @@
   
   foreach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
     if (WIN32 AND NOT CYGWIN)
-      FILE (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_exp_file} TEST_STREAM)
-      FILE (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file} "${TEST_STREAM}")
+      file (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_exp_file} TEST_STREAM)
+      file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file} "${TEST_STREAM}")
     else (WIN32 AND NOT CYGWIN)
       add_custom_command (
           TARGET     h5dump
@@ -373,8 +373,8 @@
   )
   
   if (WIN32 AND NOT CYGWIN)
-    FILE (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp TEST_STREAM)
-    FILE (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
+    file (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp TEST_STREAM)
+    file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
   else (WIN32 AND NOT CYGWIN)
     add_custom_command (
         TARGET     h5dump

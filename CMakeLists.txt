@@ -52,22 +52,22 @@ PROJECT (HDF5 C CXX)
 #
 #   # Setup all necessary overrides for zlib so that HDF5 uses our
 #   # internally compiled zlib rather than any other version
-#   IF(HDF5_ENABLE_Z_LIB_SUPPORT)
+#   if (HDF5_ENABLE_Z_LIB_SUPPORT)
 #     # We must tell the main HDF5 library that it depends on our zlib 
 #     set (HDF5_LIB_DEPENDENCIES vtkzlib)    
 #     # Override the zlib header file
-#     IF(VTK_USE_SYSTEM_ZLIB)
+#     if (VTK_USE_SYSTEM_ZLIB)
 #       set (H5_ZLIB_HEADER "zlib.h")
-#     ELSE(VTK_USE_SYSTEM_ZLIB)
+#     else (VTK_USE_SYSTEM_ZLIB)
 #       set (H5_ZLIB_HEADER "vtk_zlib.h")
 #       # Set vars that FindZlib would have set if used in sub project
 #       set (ZLIB_INCLUDE_DIRS "${VTK_ZLIB_INCLUDE_DIRS}")
 #       set (ZLIB_LIBRARIES vtkzlib)
-#     ENDIF(VTK_USE_SYSTEM_ZLIB)
-#   ENDIF(HDF5_ENABLE_Z_LIB_SUPPORT)
+#     endif (VTK_USE_SYSTEM_ZLIB)
+#   endif (HDF5_ENABLE_Z_LIB_SUPPORT)
 # 
 #   # Add the sub project
-#   ADD_SUBDIRECTORY(Utilities/hdf5-1.8)
+#   add_subdirectory (Utilities/hdf5-1.8)
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
@@ -78,12 +78,12 @@ PROJECT (HDF5 C CXX)
 # explicitly turn off this option to build HDF5 in the Express IDE...
 #
 option (HDF5_USE_FOLDERS "Enable folder grouping of projects in IDEs." ON)
-MARK_AS_ADVANCED (HDF5_USE_FOLDERS)
+mark_as_advanced (HDF5_USE_FOLDERS)
 if (HDF5_USE_FOLDERS)
   set_property (GLOBAL PROPERTY USE_FOLDERS ON)
 endif (HDF5_USE_FOLDERS)
 option (HDF5_NO_PACKAGES "CPACK - Disable packaging" OFF)
-MARK_AS_ADVANCED (HDF5_NO_PACKAGES)
+mark_as_advanced (HDF5_NO_PACKAGES)
 
 #-----------------------------------------------------------------------------
 # Set the core names of all the libraries
@@ -169,7 +169,7 @@ endif (NOT HDF5_INSTALL_DATA_DIR)
 #-----------------------------------------------------------------------------
 # parse the full version number from H5public.h and include in H5_VERS_INFO
 #-----------------------------------------------------------------------------
-FILE (READ ${HDF5_SRC_DIR}/H5public.h _h5public_h_contents)
+file (READ ${HDF5_SRC_DIR}/H5public.h _h5public_h_contents)
 string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MAJOR[ \t]+([0-9]*).*$"
     "\\1" H5_VERS_MAJOR ${_h5public_h_contents})
 string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MINOR[ \t]+([0-9]*).*$"
@@ -183,14 +183,14 @@ string (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z._]*)
 #-----------------------------------------------------------------------------
 # parse the full soversion number from config/lt_vers.am and include in H5_SOVERS_INFO
 #-----------------------------------------------------------------------------
-FILE (READ ${HDF5_SOURCE_DIR}/config/lt_vers.am _lt_vers_am_contents)
+file (READ ${HDF5_SOURCE_DIR}/config/lt_vers.am _lt_vers_am_contents)
 string (REGEX REPLACE ".*LT_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$"
     "\\1" H5_SOVERS_INTERFACE ${_lt_vers_am_contents})
 string (REGEX REPLACE ".*LT_VERS_REVISION[ \t]+=[ \t]+([0-9]*).*$"
     "\\1" H5_SOVERS_MINOR ${_lt_vers_am_contents})
 string (REGEX REPLACE ".*LT_VERS_AGE[ \t]+=[ \t]+([0-9]*).*$"
     "\\1" H5_SOVERS_RELEASE ${_lt_vers_am_contents})
-MATH(EXPR H5_SOVERS_MAJOR ${H5_SOVERS_INTERFACE}-${H5_SOVERS_RELEASE})
+MATH (EXPR H5_SOVERS_MAJOR ${H5_SOVERS_INTERFACE}-${H5_SOVERS_RELEASE})
 message (STATUS "SOVERSION: ${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
 
 #-----------------------------------------------------------------------------
@@ -216,16 +216,16 @@ set (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 # Set Install folder value
 #-----------------------------------------------------------------------------
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  IF(CMAKE_HOST_UNIX)
+  if (CMAKE_HOST_UNIX)
     set (CMAKE_INSTALL_PREFIX "/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
       CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
-  ELSE(CMAKE_HOST_UNIX)
+  else (CMAKE_HOST_UNIX)
     GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
     set (CMAKE_INSTALL_PREFIX
       "${CMAKE_GENERIC_PROGRAM_FILES}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
       CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
     set (CMAKE_GENERIC_PROGRAM_FILES)
-  ENDIF(CMAKE_HOST_UNIX)
+  endif (CMAKE_HOST_UNIX)
 endif (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 #-----------------------------------------------------------------------------
@@ -327,7 +327,7 @@ endif (HDF5_ENABLE_COVERAGE)
 #-----------------------------------------------------------------------------
 # option (HDF5_ENABLE_USING_DMALLOC "Indicate that dmalloc is used" OFF)
 # if (HDF5_ENABLE_USING_DMALLOC)
-#   FIND_PACKAGE (DMALLOC)
+#   find_package (DMALLOC)
 #   set (H5_HAVE_DMALLOC DMALLOC_FOUND)   
 # endif (HDF5_ENABLE_USING_DMALLOC)
 
@@ -396,7 +396,7 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
   if (HDF5_ENABLE_INSTRUMENT)
     set (H5_HAVE_INSTRUMENTED_LIBRARY 1)
   endif (HDF5_ENABLE_INSTRUMENT)
-  MARK_AS_ADVANCED (HDF5_Enable_Instrument)
+  mark_as_advanced (HDF5_Enable_Instrument)
   #-- NMake Makefiles will overwhelm the console with warnings if -Wall is used.
   if (NOT WIN32)
     add_definitions (-Wall)
@@ -754,7 +754,7 @@ endif (WIN32 AND NOT CYGWIN)
 #-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
 #-----------------------------------------------------------------------------
-ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
+add_subdirectory (${HDF5_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
 if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
   if (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
@@ -774,28 +774,28 @@ if (BUILD_TESTING)
       CACHE INTEGER
       "Timeout in seconds for each test (default 1200=20minutes)"
   )
-  ENABLE_TESTING ()
+  enable_testing ()
   include (CTest)
   if (NOT HDF5_EXTERNALLY_CONFIGURED)
     if (EXISTS "${HDF5_SOURCE_DIR}/test" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/test")
-      ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/tools/lib ${PROJECT_BINARY_DIR}/tools/lib)
-      ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/test      ${PROJECT_BINARY_DIR}/test)
+      add_subdirectory (${HDF5_SOURCE_DIR}/tools/lib ${PROJECT_BINARY_DIR}/tools/lib)
+      add_subdirectory (${HDF5_SOURCE_DIR}/test      ${PROJECT_BINARY_DIR}/test)
     endif (EXISTS "${HDF5_SOURCE_DIR}/test" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/test")
     if (EXISTS "${HDF5_SOURCE_DIR}/perform" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/perform")
-      ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/perform   ${PROJECT_BINARY_DIR}/perform)
-    ENDIF(EXISTS "${HDF5_SOURCE_DIR}/perform" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/perform")
+      add_subdirectory (${HDF5_SOURCE_DIR}/perform   ${PROJECT_BINARY_DIR}/perform)
+    endif (EXISTS "${HDF5_SOURCE_DIR}/perform" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/perform")
     if (H5_HAVE_PARALLEL)
       if (EXISTS "${HDF5_SOURCE_DIR}/testpar" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/testpar")
-        ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/testpar ${PROJECT_BINARY_DIR}/testpar)
+        add_subdirectory (${HDF5_SOURCE_DIR}/testpar ${PROJECT_BINARY_DIR}/testpar)
       endif (EXISTS "${HDF5_SOURCE_DIR}/testpar" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/testpar")
     endif (H5_HAVE_PARALLEL)
   endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 
   option (HDF5_TEST_VFD "Execute tests with different VFDs" OFF)
-  MARK_AS_ADVANCED (HDF5_TEST_VFD)
+  mark_as_advanced (HDF5_TEST_VFD)
   if (HDF5_TEST_VFD)
     option (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON)
-    MARK_AS_ADVANCED (HDF5_TEST_FHEAP_VFD)
+    mark_as_advanced (HDF5_TEST_FHEAP_VFD)
   endif (HDF5_TEST_VFD)
   
   include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
@@ -829,11 +829,11 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
     # 
 #    set (FCFLAGS "${Fortran_DEFINES}")
 
-    ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/fortran ${PROJECT_BINARY_DIR}/fortran)
+    add_subdirectory (${HDF5_SOURCE_DIR}/fortran ${PROJECT_BINARY_DIR}/fortran)
     if (HDF5_BUILD_HL_LIB)
       if (EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
         #-- Build the High Level Fortran source codes
-        ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/hl/fortran ${PROJECT_BINARY_DIR}/hl/fortran)
+        add_subdirectory (${HDF5_SOURCE_DIR}/hl/fortran ${PROJECT_BINARY_DIR}/hl/fortran)
       endif (EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
     endif (HDF5_BUILD_HL_LIB)
   endif (HDF5_BUILD_FORTRAN)
@@ -845,7 +845,7 @@ endif (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/
 if (EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples")
   option (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" OFF)
   if (HDF5_BUILD_EXAMPLES)
-    ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/examples ${PROJECT_BINARY_DIR}/examples)
+    add_subdirectory (${HDF5_SOURCE_DIR}/examples ${PROJECT_BINARY_DIR}/examples)
   endif (HDF5_BUILD_EXAMPLES)
 endif (EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples")
 
@@ -862,7 +862,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
     if (CMAKE_NO_STD_NAMESPACE)
       set (H5_NO_STD 1)
     endif (CMAKE_NO_STD_NAMESPACE)
-    ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/c++ ${PROJECT_BINARY_DIR}/c++)
+    add_subdirectory (${HDF5_SOURCE_DIR}/c++ ${PROJECT_BINARY_DIR}/c++)
   endif (HDF5_BUILD_CPP_LIB)
 endif (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
 
@@ -872,7 +872,7 @@ endif (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++"
 if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
   option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" OFF)
   if (HDF5_BUILD_TOOLS)
-    ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/tools ${PROJECT_BINARY_DIR}/tools)
+    add_subdirectory (${HDF5_SOURCE_DIR}/tools ${PROJECT_BINARY_DIR}/tools)
   endif (HDF5_BUILD_TOOLS)
 endif (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
 
@@ -883,7 +883,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
   option (HDF5_BUILD_HL_LIB  "Build HIGH Level HDF5 Library" OFF)
   if (HDF5_BUILD_HL_LIB)
     set (H5_INCLUDE_HL 1)
-    ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/hl ${PROJECT_BINARY_DIR}/hl)
+    add_subdirectory (${HDF5_SOURCE_DIR}/hl ${PROJECT_BINARY_DIR}/hl)
   endif (HDF5_BUILD_HL_LIB)
 endif (EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
 

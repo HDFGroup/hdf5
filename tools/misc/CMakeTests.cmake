@@ -58,7 +58,7 @@
   )
 
   # make test dir
-  FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
   foreach (h5_mkgrp_file ${HDF5_MKGRP_TEST_FILES})
     set (dest "${PROJECT_BINARY_DIR}/testfiles/${h5_mkgrp_file}")
