@@ -3839,6 +3839,7 @@ H5VL_iod_dataset_get(void *_dset, H5VL_dataset_get_t get_type,
 
                 if((*ret_id = H5Tcopy(dset->remote_dset.type_id)) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of dataset")
+                break;
             }
         case H5VL_DATASET_GET_STORAGE_SIZE:
         case H5VL_DATASET_GET_OFFSET:
