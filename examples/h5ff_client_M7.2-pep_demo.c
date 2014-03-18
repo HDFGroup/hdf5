@@ -403,9 +403,12 @@ int main( int argc, char **argv ) {
    space_p_id = H5Dget_space( dset_p_id ); assert ( space_p_id >= 0 ); /* Space info doesn't get prefetched, so read it here */
 
    if ( use_daos_lustre ) {
-      /* FOR NOW:  All ranks prefetch synchronously.  TODO: change so only one - async - then share replica_id */
-      fprintf( stderr, "APP-r%d: prefetch /G-prefeteched/D.\n", my_rank );
-      ret = H5Dprefetch_ff( dset_p_id, rc_id, &dset_p_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
+      /* FOR NOW:  Rank 0 prefetches synchronously, then bcasts replica_id.  TODO: change to async. */
+      if ( my_rank == 0 ) {
+         fprintf( stderr, "APP-r%d: prefetch /G-prefeteched/D.\n", my_rank );
+         ret = H5Dprefetch_ff( dset_p_id, rc_id, &dset_p_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
+      }
+      MPI_Bcast( &dset_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
       dxpl_p_id = H5Pcreate( H5P_DATASET_XFER );
       ret = H5Pset_read_replica( dxpl_p_id, dset_p_replica );  ASSERT_RET;
    } else {
@@ -423,9 +426,12 @@ int main( int argc, char **argv ) {
    assert( map_p_id >= 0 );
 
    if ( use_daos_lustre ) {
-      /* FOR NOW:  All ranks prefetch synchronously.  TODO: change so only one - async - then share replica_id */
-      fprintf( stderr, "APP-r%d: prefetch /M-prefeteched/D.\n", my_rank );
-      ret = H5Mprefetch_ff( map_p_id, rc_id, &map_p_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
+      /* FOR NOW:  Rank 0 prefetches synchronously then bcasts replica_id.  TODO: change to async */
+      if ( my_rank == 0 ) {
+         fprintf( stderr, "APP-r%d: prefetch /G-prefeteched/M.\n", my_rank );
+         ret = H5Mprefetch_ff( map_p_id, rc_id, &map_p_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
+      }
+      MPI_Bcast( &map_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
       mxpl_p_id = H5Pcreate( H5P_DATASET_XFER );
       ret = H5Pset_read_replica( mxpl_p_id, map_p_replica );  ASSERT_RET;
    } else {
