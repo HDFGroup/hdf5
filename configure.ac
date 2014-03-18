@@ -1931,7 +1931,7 @@ case $withval in
   yes)
     HAVE_IOD="yes"
     AC_CHECK_HEADERS([iod_api.h])
-    AC_CHECK_LIB([iod], [iod_initialize],[MYIOD_LIBS="-liod -lmdhim -lpbl"], [unset HAVE_IOD])
+    AC_CHECK_LIB([iod], [iod_initialize],[MYIOD_LIBS="-liod"], [unset HAVE_IOD])
     AC_SUBST([MYIOD_LIBS])
     if test -z "$HAVE_IOD" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find iod library])
@@ -1953,10 +1953,6 @@ case $withval in
         if test -n "$withval"; then
           iod_inc="$withval/include"
           iod_lib="$withval/lib"
-          pbl_inc="$withval/include"
-          pbl_lib="$withval/lib"
-          mdhim_inc="$withval/include"
-          mdhim_lib="$withval/lib"
         fi
         ;;
     esac
@@ -1976,25 +1972,20 @@ case $withval in
     saved_AM_LDFLAGS="$AM_LDFLAGS"
 
     if test -n "$iod_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$iod_inc -I$mdhim_inc -I$pbl_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$iod_inc -I$mdhim_inc -I$pbl_inc"
+      CPPFLAGS="$CPPFLAGS -I$iod_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$iod_inc"
     fi
 
     AC_CHECK_HEADERS([iod_api.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
 
     if test -n "$iod_lib"; then
-      LDFLAGS="$LDFLAGS -L$iod_lib -L$mdhim_lib -L$pbl_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$iod_lib -L$mdhim_lib -L$pbl_lib"
+      LDFLAGS="$LDFLAGS -L$iod_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$iod_lib"
     fi
 
-    AC_CHECK_LIB([pbl], [pbl_malloc],, 
-		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD])
-    AC_CHECK_LIB([mdhim], [mdhimFinalize],, 
-		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD],
-		[-lpbl])
     AC_CHECK_LIB([iod], [iod_finalize],, 
 		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD],
-		[-lmdhim -lpbl])
+		)
 
     if test -z "$HAVE_IOD" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find iod library])
