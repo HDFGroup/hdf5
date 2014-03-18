@@ -709,6 +709,7 @@ BUILD_SHARED_SZIP_CONDITIONAL_TRUE
 LL_PATH
 USE_FILTER_SZIP
 USE_FILTER_DEFLATE
+MYIODP_LIBS
 MYIOD_LIBS
 MYDAOS_LIBS
 MYPLFS_LIBS
@@ -940,6 +941,7 @@ with_axe
 with_plfs
 with_daos
 with_iod
+with_iodp
 with_zlib
 with_szlib
 with_pthread
@@ -1714,6 +1716,7 @@ Optional Packages:
   --with-plfs=DIR         Use plfs [default=no]
   --with-daos=DIR         Use daos [default=no]
   --with-iod=DIR          Use iod [default=no]
+  --with-iodp=DIR         Use iodp [default=no]
   --with-zlib=DIR         Use zlib library for external deflate I/O filter
                           [default=yes]
   --with-szlib=DIR        Use szlib library for external szlib I/O filter
@@ -26328,7 +26331,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iod_iod_initialize" >&5
 $as_echo "$ac_cv_lib_iod_iod_initialize" >&6; }
 if test "x$ac_cv_lib_iod_iod_initialize" = xyes; then :
-  MYIOD_LIBS="-liod -lmdhim -lpbl"
+  MYIOD_LIBS="-liod"
 else
   unset HAVE_IOD
 fi
@@ -26342,6 +26345,214 @@ fi
     HAVE_IOD="no"
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for iod library" >&5
 $as_echo_n "checking for iod library... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
+$as_echo "suppressed" >&6; }
+    ;;
+  *)
+    HAVE_IOD="yes"
+    case "$withval" in
+      *,*)
+        iod_inc="`echo $withval |cut -f1 -d,`"
+        iod_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          iod_inc="$withval/include"
+          iod_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$iod_inc" = "X/usr/include"; then
+      iod_inc=""
+    fi
+    if test "X$iod_lib" = "X/usr/lib"; then
+      iod_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$iod_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$iod_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$iod_inc"
+    fi
+
+    for ac_header in iod_api.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "iod_api.h" "ac_cv_header_iod_api_h" "$ac_includes_default"
+if test "x$ac_cv_header_iod_api_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_IOD_API_H 1
+_ACEOF
+
+else
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+fi
+
+done
+
+
+    if test -n "$iod_lib"; then
+      LDFLAGS="$LDFLAGS -L$iod_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$iod_lib"
+    fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for iod_finalize in -liod" >&5
+$as_echo_n "checking for iod_finalize in -liod... " >&6; }
+if ${ac_cv_lib_iod_iod_finalize+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-liod  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char iod_finalize ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return iod_finalize ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_iod_iod_finalize=yes
+else
+  ac_cv_lib_iod_iod_finalize=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iod_iod_finalize" >&5
+$as_echo "$ac_cv_lib_iod_iod_finalize" >&6; }
+if test "x$ac_cv_lib_iod_iod_finalize" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBIOD 1
+_ACEOF
+
+  LIBS="-liod $LIBS"
+
+else
+  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD
+fi
+
+
+    if test -z "$HAVE_IOD" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find iod library" "$LINENO" 5
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Is the iod present? It has a header file `IOD.h' and a library
+## `-liod' and their locations might be specified with the `--with-iod'
+## command-line switch. The value is an include path and/or a library path.
+## If the library path is specified then it must be preceded by a comma.
+##
+
+# Check whether --with-iodp was given.
+if test "${with_iodp+set}" = set; then :
+  withval=$with_iodp;
+else
+  withval=no
+fi
+
+
+case $withval in
+  yes)
+    HAVE_IODP="yes"
+    for ac_header in iod_api.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "iod_api.h" "ac_cv_header_iod_api_h" "$ac_includes_default"
+if test "x$ac_cv_header_iod_api_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_IOD_API_H 1
+_ACEOF
+
+fi
+
+done
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for iod_initialize in -liod" >&5
+$as_echo_n "checking for iod_initialize in -liod... " >&6; }
+if ${ac_cv_lib_iod_iod_initialize+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-liod  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char iod_initialize ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return iod_initialize ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_iod_iod_initialize=yes
+else
+  ac_cv_lib_iod_iod_initialize=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iod_iod_initialize" >&5
+$as_echo "$ac_cv_lib_iod_iod_initialize" >&6; }
+if test "x$ac_cv_lib_iod_iod_initialize" = xyes; then :
+  MYIOD_LIBS="-liod -lmdhim -lpbl"
+else
+  unset HAVE_IODP
+fi
+
+
+    if test -z "$HAVE_IODP" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find iodp libraries" "$LINENO" 5
+    fi
+    ;;
+  no)
+    HAVE_IODP="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for iodp libraries" >&5
+$as_echo_n "checking for iodp libraries... " >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
     ;;
@@ -26569,8 +26780,8 @@ else
 fi
 
 
-    if test -z "$HAVE_IOD" -a -n "$HDF5_CONFIG_ABORT"; then
-      as_fn_error $? "couldn't find iod library" "$LINENO" 5
+    if test -z "$HAVE_IODP" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find iod libraries" "$LINENO" 5
     fi
     ;;
 esac

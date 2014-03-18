@@ -1994,6 +1994,92 @@ case $withval in
 esac
 
 ## ----------------------------------------------------------------------
+## Is the iod present? It has a header file `IOD.h' and a library
+## `-liod' and their locations might be specified with the `--with-iod'
+## command-line switch. The value is an include path and/or a library path.
+## If the library path is specified then it must be preceded by a comma.
+##
+AC_ARG_WITH([iodp],
+            [AS_HELP_STRING([--with-iodp=DIR],
+                            [Use iodp [default=no]])],,
+            [withval=no])
+
+case $withval in
+  yes)
+    HAVE_IODP="yes"
+    AC_CHECK_HEADERS([iod_api.h])
+    AC_CHECK_LIB([iod], [iod_initialize],[MYIOD_LIBS="-liod -lmdhim -lpbl"], [unset HAVE_IODP])
+    AC_SUBST([MYIODP_LIBS])
+    if test -z "$HAVE_IODP" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find iodp libraries])
+    fi
+    ;;
+  no)
+    HAVE_IODP="no"
+    AC_MSG_CHECKING([for iodp libraries])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_IOD="yes"
+    case "$withval" in
+      *,*)
+        iod_inc="`echo $withval |cut -f1 -d,`"
+        iod_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          iod_inc="$withval/include"
+          iod_lib="$withval/lib"
+          pbl_inc="$withval/include"
+          pbl_lib="$withval/lib"
+          mdhim_inc="$withval/include"
+          mdhim_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$iod_inc" = "X/usr/include"; then
+      iod_inc=""
+    fi
+    if test "X$iod_lib" = "X/usr/lib"; then
+      iod_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$iod_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$iod_inc -I$mdhim_inc -I$pbl_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$iod_inc -I$mdhim_inc -I$pbl_inc"
+    fi
+
+    AC_CHECK_HEADERS([iod_api.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+
+    if test -n "$iod_lib"; then
+      LDFLAGS="$LDFLAGS -L$iod_lib -L$mdhim_lib -L$pbl_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$iod_lib -L$mdhim_lib -L$pbl_lib"
+    fi
+
+    AC_CHECK_LIB([pbl], [pbl_malloc],, 
+		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD])
+    AC_CHECK_LIB([mdhim], [mdhimFinalize],, 
+		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD],
+		[-lpbl])
+    AC_CHECK_LIB([iod], [iod_finalize],, 
+		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD],
+		[-lmdhim -lpbl])
+
+    if test -z "$HAVE_IODP" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find iod libraries])
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
 ## Is the GNU zlib present? It has a header file `zlib.h' and a library
 ## `-lz' and their locations might be specified with the `--with-zlib'
 ## command-line switch. The value is an include path and/or a library path.
