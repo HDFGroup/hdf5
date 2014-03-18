@@ -1180,7 +1180,7 @@ Supported Platforms
     Windows 7                     Visual Studio 2008 w/ Intel Fortran 14 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 14 (cmake)
                                   Visual Studio 2012 w/ Intel Fortran 14 (cmake)
-                                  Cygwin(CYGWIN_NT-6.1 1.7.25(0.270/5/3) gcc(4.8.2) compiler and gfortran)
+                                  Cygwin(CYGWIN_NT-6.1 1.7.28(0.271/5/3) gcc(4.8.2) compiler and gfortran)
                                   (cmake and autotools)
 
     Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 14 (cmake)
