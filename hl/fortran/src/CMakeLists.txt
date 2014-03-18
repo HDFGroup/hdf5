@@ -96,9 +96,10 @@ endif (WIN32 AND NOT CYGWIN)
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
-
-  INSTALL_TARGET_PDB (${HDF5_HL_F90_C_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} hlfortlibraries)
-  #INSTALL_TARGET_PDB (${HDF5_HL_F90_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} hlfortlibraries)
+  if (BUILD_SHARED_LIBS)
+    INSTALL_TARGET_PDB (${HDF5_HL_F90_C_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} hlfortlibraries)
+    #INSTALL_TARGET_PDB (${HDF5_HL_F90_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} hlfortlibraries)
+  endif (BUILD_SHARED_LIBS)
   
   install (
       TARGETS

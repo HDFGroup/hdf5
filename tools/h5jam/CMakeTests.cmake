@@ -255,7 +255,7 @@
         set_tests_properties (H5JAM-${testname}-UNJAM-CHECK_NOUB PROPERTIES DEPENDS H5JAM-${testname}-UNJAM)
       endif (NOT "${compare_test}" STREQUAL "")
 
-      CHECKfile (${testname} "H5JAM-${testname}-UNJAM-CHECK_NOUB" ${chkfile} ${outfile})
+      CHECKFILE (${testname} "H5JAM-${testname}-UNJAM-CHECK_NOUB" ${chkfile} ${outfile})
     endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO(UNJAMTEST testname infile ufile outfile)
 
@@ -298,7 +298,7 @@
               -P "${HDF5_RESOURCES_DIR}/userblockTest.cmake"
       )
       set_tests_properties (H5JAM-${testname}-CHECK_UB_1 PROPERTIES DEPENDS H5JAM-${testname}-CHECK_UB_1-clear-objects)
-      CHECKfile (${testname} "H5JAM-${testname}-CHECK_UB_1" ${chkfile} ${outfile})
+      CHECKFILE (${testname} "H5JAM-${testname}-CHECK_UB_1" ${chkfile} ${outfile})
     endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (JAMTEST testname jamfile infile outfile)
 
@@ -353,7 +353,7 @@
               -P "${HDF5_RESOURCES_DIR}/userblockTest.cmake"
       )
       set_tests_properties (H5JAM-${testname}_NONE-CHECK_UB_1 PROPERTIES DEPENDS H5JAM-${testname}_NONE-CHECK_UB_1-clear-objects)
-      CHECKfile (${testname} "H5JAM-${testname}_NONE-CHECK_UB_1" ${infile} ${chkfile})
+      CHECKFILE (${testname} "H5JAM-${testname}_NONE-CHECK_UB_1" ${infile} ${chkfile})
     endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (JAMTEST_NONE testname jamfile infile setfile chkfile)
 
