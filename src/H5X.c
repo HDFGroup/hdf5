@@ -37,6 +37,7 @@
 #include "H5ESprivate.h"
 
 #include "H5FFprivate.h"    /* FF */
+#include "H5VLiod_client.h"
 #include "H5Xpkg.h"         /* Index plugins */
 
 #ifdef H5_HAVE_INDEXING
@@ -189,13 +190,12 @@ H5X_registered(unsigned plugin_id)
     H5X_class_t *ret_value = NULL;
     size_t plugin_index;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5X__registered(plugin_id, &plugin_index)) {
         ret_value = &H5X_table_g[plugin_index];
     }
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -474,11 +474,13 @@ H5Xcreate_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t xcpl_id,
 
     /* Store the transaction ID in the xapl_id */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(xapl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
     if (H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id");
 
     /* Call create of the plugin */
+    if (NULL == H5X_table_g[plugin_index].create)
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin create callback is not defined");
     if (NULL == (idx_handle = H5X_table_g[plugin_index].create(
             file_id, dataset_id, xcpl_id, xapl_id, &metadata_size, &metadata)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot create new plugin index");
@@ -590,11 +592,13 @@ H5Xremove_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t trans_id,
 
     /* Store the transaction ID in the xapl_id */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(xapl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
     if (H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id");
 
     /* Call remove of the plugin */
+    if (NULL == H5X_table_g[plugin_index].remove)
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin remove callback is not defined");
     if (FAIL == H5X_table_g[plugin_index].remove(file_id, dataset_id,
             metadata_size, metadata))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot remove index");
@@ -677,7 +681,7 @@ H5Xget_count_ff(hid_t scope_id, hsize_t *idx_count, hid_t rcxt_id,
     }
 
     /* Get index info */
-    if (FAIL == H5VL_iod_dataset_get_index_info(dset, idx_count, NULL, NULL,
+    if (FAIL == H5VL_iod_dataset_get_index_info(dset, idx_count, NULL, NULL, NULL,
             rcxt_id, req))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "cannot get indexing info from dataset");
 
@@ -689,5 +693,34 @@ H5Xget_count_ff(hid_t scope_id, hsize_t *idx_count, hid_t rcxt_id,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Xget_count_ff() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_xapl_transaction
+ *
+ * Purpose:     Retrieve the transaction ID from this access plist.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_xapl_transaction(hid_t xapl_id, hid_t *trans_id)
+{
+    H5P_genplist_t *plist = NULL; /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if (NULL == (plist = H5P_object_verify(xapl_id, H5P_INDEX_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a xapl");
+
+    /* Get the trans_id */
+    if (trans_id)
+        if (H5P_get(plist, H5VL_TRANS_ID, trans_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
 
 #endif /* H5_HAVE_INDEXING */

@@ -366,6 +366,8 @@ H5Vcreate_ff(hid_t loc_id, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, hid_t e
         if (H5P_set(xxpl_plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id");
 
+        if (NULL == idx_class->query)
+            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin query callback is not defined");
         if (FAIL == idx_class->query(idx_handle, query_id, xxpl_id, &dataspace_id))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
     }

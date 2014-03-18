@@ -819,6 +819,8 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
                 HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
 
             /* Call open of index plugin */
+            if (NULL == idx_class->open)
+                HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin open callback is not defined");
             if (NULL == (idx_handle = idx_class->open(loc_id, ret_value, xapl_id,
                     metadata_size, metadata)))
                 HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "indexing open callback failed");
@@ -913,7 +915,10 @@ H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         if (NULL == (idx_class = H5X_registered(plugin_id)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
 
-        idx_class->pre_update(idx_handle, mem_space_id, xxpl_id);
+        if (NULL == idx_class->pre_update)
+            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin pre_update callback is not defined");
+        if (FAIL == idx_class->pre_update(idx_handle, mem_space_id, xxpl_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "cannot execute index pre_update operation");
     }
 #endif
 
@@ -1099,7 +1104,7 @@ H5Dclose_ff(hid_t dset_id, hid_t estack_id)
 	/*
 	 * Close the index if the dataset is now closed
 	 */
-	if (idx_handle && !H5I_get_ref(dset_id, FALSE)) {
+	if (idx_handle && (FAIL == H5I_get_ref(dset_id, FALSE))) {
         H5X_class_t *idx_class = NULL;
         unsigned plugin_id;
 
@@ -1108,6 +1113,8 @@ H5Dclose_ff(hid_t dset_id, hid_t estack_id)
         if (NULL == (idx_class = H5X_registered(plugin_id)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
 
+        if (NULL == idx_class->close)
+            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin close callback is not defined");
         if (FAIL == idx_class->close(idx_handle))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
 	}

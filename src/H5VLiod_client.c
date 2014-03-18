@@ -682,11 +682,13 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
                 /* Store the transaction ID in the xxpl */
                 if(NULL == (xxpl_plist = (H5P_genplist_t *)H5I_object(xxpl_id)))
-                    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+                    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
                 if(H5P_set(xxpl_plist, H5VL_TRANS_ID, &info->trans_id) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id");
 
                 /* Call post_update */
+                if (NULL == idx_class->post_update)
+                    HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin post_update callback is not defined");
                 if (FAIL == idx_class->post_update(info->idx_handle,
                         info->buf, info->dataspace_id, xxpl_id))
                     HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "unable to issue index post_update operation");
