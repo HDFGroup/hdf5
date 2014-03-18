@@ -73,7 +73,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
         fprintf(stderr, "Exact Acquire Read Context %"PRIu64"\n", input->c_version);
 #endif
         if((ret = iod_trans_start(coh, &c_version, NULL, 0, IOD_TRANS_R, NULL)) < 0) {
-            fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
+            fprintf(stderr, "can't acquire read context. %d (%s).\n", ret, strerror(-ret));
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't acquire read context");
         }
         acquired_version = c_version;
@@ -492,8 +492,10 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
     step --;
 
     /* Finish  the transaction */
-    if(iod_trans_finish(coh, trans_num, NULL, 0, NULL) < 0)
+    if((ret = iod_trans_finish(coh, trans_num, NULL, 0, NULL)) < 0) {
+        fprintf(stderr, "can't finish transaction %d (%s).\n", ret, strerror(-ret));
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction");
+    }
 
     /* if the flag is true, acquire a read context on the finished transaction */
     if(TRUE == acquire) {

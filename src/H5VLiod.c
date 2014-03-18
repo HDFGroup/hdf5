@@ -9691,6 +9691,11 @@ H5VL_iod_prefetch(void *_obj, hid_t rcxt_id, hrpl_t *replica_id, hid_t apl_id, v
         HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "not a valid object to prefetch");
     }
 
+#if H5VL_IOD_DEBUG
+    printf("Prefetch object %"PRIx64" at tr %"PRIu64" axe id %"PRIu64"\n", 
+           input.iod_id, input.rcxt_num, g_axe_id);
+#endif
+
     if(H5VL__iod_create_and_forward(H5VL_PREFETCH_ID, HG_PREFETCH, 
                                     obj, 1, 0, NULL, NULL, 
                                     &input, replica_id, replica_id, req) < 0)
@@ -9806,6 +9811,11 @@ H5VL_iod_evict(void *_obj, uint64_t c_version, hid_t apl_id, void **req)
     }
 
     status = (int *)malloc(sizeof(int));
+
+#if H5VL_IOD_DEBUG
+    printf("Evict object %"PRIx64" at tr %"PRIu64" axe id %"PRIu64"\n", 
+           input.iod_id, input.rcxt_num, g_axe_id);
+#endif
 
     if(H5VL__iod_create_and_forward(H5VL_EVICT_ID, HG_EVICT, 
                                     obj, 1, 0, NULL, NULL, 
