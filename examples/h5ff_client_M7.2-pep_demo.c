@@ -141,7 +141,7 @@ int main( int argc, char **argv ) {
    if (verbose) print_container_contents( file_id, rc_id2, "/", my_rank );
 
    /****
-    * Transaction 3 - In each of the 3 Groups, Rank 0 creates "D", Rank 1 creates "M", Rank 2 creates "T" 
+    * Transaction 3 - In each of the 3 Groups, create "D"(rnk 0), "M"(rnk 1 or 0), "T" (rnk 2 or 1 or 0)
     ****/
 
    if ( my_rank < 3 ) {
@@ -171,11 +171,13 @@ int main( int argc, char **argv ) {
          create_dataset( glog_id, "D", tr_id, glog_path, my_rank, 1 );
          create_dataset( gpre_id, "D", tr_id, gpre_path, my_rank, 2 );
          create_dataset( gsto_id, "D", tr_id, gsto_path, my_rank, 3 );
-      } else if ( my_rank == 1 ) {
+      }  
+      if ( ( my_rank == 1 ) || ( ( my_rank == 0 ) && ( comm_size == 1 ) ) )  {
          create_map( glog_id, "M", tr_id, glog_path, my_rank, 1 );
          create_map( gpre_id, "M", tr_id, gpre_path, my_rank, 2 );
          create_map( gsto_id, "M", tr_id, gsto_path, my_rank, 3 );
-      } else if ( my_rank == 2 ) {
+      }
+      if ( ( my_rank == 2 )  || ( ( my_rank == 1 ) && ( comm_size == 2 ) )  || ( ( my_rank == 0 ) && ( comm_size == 1 ) ) ) {
          create_committed_datatype( glog_id, "T", tr_id, glog_path, my_rank );
          create_committed_datatype( gpre_id, "T", tr_id, gpre_path, my_rank );
          create_committed_datatype( gsto_id, "T", tr_id, gsto_path, my_rank );
