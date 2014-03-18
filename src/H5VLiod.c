@@ -2980,7 +2980,7 @@ done:
     /* If the operation is synchronous and it failed at the server, or
        it failed locally, then cleanup and return fail */
     if(NULL == ret_value) {
-        if(dset->common.obj_name) {
+        if(name && dset->common.obj_name) {
             HDfree(dset->common.obj_name);
             dset->common.obj_name = NULL;
         }
