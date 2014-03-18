@@ -195,8 +195,6 @@ int main( int argc, char **argv ) {
       ret = H5Pclose( trspl_id ); ASSERT_RET;
    }
 
-   MPI_Barrier( MPI_COMM_WORLD );
-
    /* Acquire a read handle for container version and create a read context. */
    version = 3;
    if (verbose) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
