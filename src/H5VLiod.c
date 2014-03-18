@@ -2979,7 +2979,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t UNUSED loc_params,
 done:
     /* If the operation is synchronous and it failed at the server, or
        it failed locally, then cleanup and return fail */
-    if(NULL == ret_value) {
+    if(dset != NULL && NULL == ret_value) {
         if(name && dset->common.obj_name) {
             HDfree(dset->common.obj_name);
             dset->common.obj_name = NULL;
