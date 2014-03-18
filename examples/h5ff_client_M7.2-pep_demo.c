@@ -47,7 +47,7 @@ int main( int argc, char **argv ) {
    size_t        num_events;
 
    uint64_t version;
-   hid_t    rc_id0, rc_id1, rc_id2, rc_id3, rc_id4, rc_id;
+   hid_t    rc_id1, rc_id2, rc_id3, rc_id4, rc_id5, rc_id;
 
    uint64_t tr_num;
    hid_t    tr_id;
@@ -94,7 +94,7 @@ int main( int argc, char **argv ) {
 
    /* Get read context */
    version = 1;
-   rc_id0 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET; assert( version == 1 );
+   rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET; assert( version == 1 );
 
    /****
     * Transaction 2: Rank 0 creates three H5Groups in the H5File 
@@ -105,7 +105,7 @@ int main( int argc, char **argv ) {
 
       /* Create a local transaction for transaction number and start it with a single tr leader (the default). */
       fprintf( stderr, "APP-r%d: Create and start tr %lu\n", my_rank, tr_num );
-      tr_id = H5TRcreate( file_id, rc_id0, tr_num ); assert( tr_id >= 0 );
+      tr_id = H5TRcreate( file_id, rc_id1, tr_num ); assert( tr_id >= 0 );
       ret = H5TRstart( tr_id, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
       /* Add updates to the transaction */
@@ -122,21 +122,23 @@ int main( int argc, char **argv ) {
    /* Acquire a read handle for container version and create a read context. */
    version = 2;
    if (verbose) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
-   rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-   while ( rc_id1 < 0 ) {
-      if (verbose) fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
-      sleep( 1 );
-      rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-   }
-   assert( rc_id1 >= 0 ); assert ( version == 2 );
+   H5E_BEGIN_TRY { 
+      rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
+      while ( rc_id2 < 0 ) {
+         if (verbose) fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
+         sleep( 1 );
+         rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
+      }
+   } H5E_END_TRY;
+   assert( rc_id2 >= 0 ); assert ( version == 2 );
    fprintf( stderr, "APP-r%d: Acquired read context %lu\n", my_rank, version );
 
    /* Release the read handle and close read context on previous CV  */
-   fprintf( stderr, "APP-r%d: Release read context 0\n", my_rank );
-   ret = H5RCrelease( rc_id0, H5_EVENT_STACK_NULL); ASSERT_RET;
-   ret = H5RCclose( rc_id0 ); ASSERT_RET;
+   fprintf( stderr, "APP-r%d: Release read context 1\n", my_rank );
+   ret = H5RCrelease( rc_id1, H5_EVENT_STACK_NULL); ASSERT_RET;
+   ret = H5RCclose( rc_id1 ); ASSERT_RET;
 
-   if (verbose) print_container_contents( file_id, rc_id1, "/", my_rank );
+   if (verbose) print_container_contents( file_id, rc_id2, "/", my_rank );
 
    /****
     * Transaction 3 - In each of the 3 Groups, Rank 0 creates "D", Rank 1 creates "M", Rank 2 creates "T" 
@@ -148,7 +150,7 @@ int main( int argc, char **argv ) {
 
       /* Create a local transaction for transaction number and start it. */
       fprintf( stderr, "APP-r%d: Create and start tr %lu with %d transaction leaders\n", my_rank, tr_num, num_tr_leaders );
-      tr_id = H5TRcreate( file_id, rc_id1, tr_num ); assert( tr_id >= 0 );
+      tr_id = H5TRcreate( file_id, rc_id2, tr_num ); assert( tr_id >= 0 );
       trspl_id = H5Pcreate( H5P_TR_START );  assert( trspl_id >= 0 );
       ret = H5Pset_trspl_num_peers( trspl_id, num_tr_leaders ); ASSERT_RET;
       ret = H5TRstart( tr_id, trspl_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
@@ -157,9 +159,9 @@ int main( int argc, char **argv ) {
       char glog_path[128], gpre_path[128], gsto_path[128];
 
       /* Open the groups where objects will be created and set pathnames used in status messages */
-      glog_id = H5Gopen_ff( file_id, "G-logged", H5P_DEFAULT, rc_id1, H5_EVENT_STACK_NULL ); assert( glog_id >= 0 );
-      gpre_id = H5Gopen_ff( file_id, "G-prefetched", H5P_DEFAULT, rc_id1, H5_EVENT_STACK_NULL ); assert( gpre_id >= 0 );
-      gsto_id = H5Gopen_ff( file_id, "G-stored", H5P_DEFAULT, rc_id1, H5_EVENT_STACK_NULL ); assert( gsto_id >= 0 );
+      glog_id = H5Gopen_ff( file_id, "G-logged", H5P_DEFAULT, rc_id2, H5_EVENT_STACK_NULL ); assert( glog_id >= 0 );
+      gpre_id = H5Gopen_ff( file_id, "G-prefetched", H5P_DEFAULT, rc_id2, H5_EVENT_STACK_NULL ); assert( gpre_id >= 0 );
+      gsto_id = H5Gopen_ff( file_id, "G-stored", H5P_DEFAULT, rc_id2, H5_EVENT_STACK_NULL ); assert( gsto_id >= 0 );
       sprintf( glog_path, "/G-logged/" );
       sprintf( gpre_path, "/G-prefetched/" );
       sprintf( gsto_path, "/G-stored/" );
@@ -194,19 +196,21 @@ int main( int argc, char **argv ) {
    /* Acquire a read handle for container version and create a read context. */
    version = 3;
    if (verbose) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
-   rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-   while ( rc_id2 < 0 ) {
-      if (verbose) fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
-      sleep( 1 );
-      rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-   }
-   assert( rc_id2 >= 0 ); assert ( version == 3 );
+   H5E_BEGIN_TRY { 
+      rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
+      while ( rc_id3 < 0 ) {
+         if (verbose) fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
+         sleep( 1 );
+         rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
+      }
+   } H5E_END_TRY;
+   assert( rc_id3 >= 0 ); assert ( version == 3 );
    fprintf( stderr, "APP-r%d: Acquired read context %lu\n", my_rank, version );
 
    /* Release the read handle and close read context on previous CV  */
    fprintf( stderr, "APP-r%d: Release read context 2\n", my_rank );
-   ret = H5RCrelease( rc_id1, H5_EVENT_STACK_NULL); ASSERT_RET;
-   ret = H5RCclose( rc_id1 ); ASSERT_RET;
+   ret = H5RCrelease( rc_id2, H5_EVENT_STACK_NULL); ASSERT_RET;
+   ret = H5RCclose( rc_id2 ); ASSERT_RET;
 
    /**** 
     * Rank 0 persists CV 3 
@@ -216,12 +220,12 @@ int main( int argc, char **argv ) {
     ****/
 
    if ( my_rank == 0 ) {
-      fprintf( stderr, "APP-r%d: Persist cv 2.\n", my_rank );
-      print_container_contents( file_id, rc_id2, "/", my_rank );
-      ret = H5RCpersist(rc_id2, H5_EVENT_STACK_NULL); ASSERT_RET; 
+      fprintf( stderr, "APP-r%d: Persist cv 3.\n", my_rank );
+      print_container_contents( file_id, rc_id3, "/", my_rank );
+      ret = H5RCpersist(rc_id3, H5_EVENT_STACK_NULL); ASSERT_RET; 
    }
 
-   if (verbose) print_container_contents( file_id, rc_id2, "/", my_rank );
+   if (verbose) print_container_contents( file_id, rc_id3, "/", my_rank );
 
    /**** 
     * Transaction 4 - All ranks update Dataset and Map objects in the 3 Groups  
@@ -232,19 +236,19 @@ int main( int argc, char **argv ) {
 
    /* Create a local transaction for transaction number and start it. */
    fprintf( stderr, "APP-r%d: Create and start tr %lu with %d transaction leaders\n", my_rank, tr_num, num_tr_leaders );
-   tr_id = H5TRcreate( file_id, rc_id2, tr_num ); assert( tr_id >= 0 );
+   tr_id = H5TRcreate( file_id, rc_id3, tr_num ); assert( tr_id >= 0 );
    trspl_id = H5Pcreate( H5P_TR_START );  assert( trspl_id >= 0 );
    ret = H5Pset_trspl_num_peers( trspl_id, num_tr_leaders ); ASSERT_RET;
    ret = H5TRstart( tr_id, trspl_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
    /* Add updates to the transaction */
-   update_dataset( file_id, "G-logged/D", tr_id, rc_id2, "/", my_rank, 1 );
-   update_dataset( file_id, "G-prefetched/D", tr_id, rc_id2, "/", my_rank, 2 );
-   update_dataset( file_id, "G-stored/D", tr_id, rc_id2, "/", my_rank, 3 );
+   update_dataset( file_id, "G-logged/D", tr_id, rc_id3, "/", my_rank, 1 );
+   update_dataset( file_id, "G-prefetched/D", tr_id, rc_id3, "/", my_rank, 2 );
+   update_dataset( file_id, "G-stored/D", tr_id, rc_id3, "/", my_rank, 3 );
 
-   update_map( file_id, "G-logged/M", tr_id, rc_id2, "/", my_rank, 1 );
-   update_map( file_id, "G-prefetched/M", tr_id, rc_id2, "/", my_rank, 2 );
-   update_map( file_id, "G-stored/M", tr_id, rc_id2, "/", my_rank, 3 );
+   update_map( file_id, "G-logged/M", tr_id, rc_id3, "/", my_rank, 1 );
+   update_map( file_id, "G-prefetched/M", tr_id, rc_id3, "/", my_rank, 2 );
+   update_map( file_id, "G-stored/M", tr_id, rc_id3, "/", my_rank, 3 );
 
    /* Finish, commit, and close transaction */
    fprintf( stderr, "APP-r%d: Finish, commit, and close tr %lu\n", my_rank, tr_num );
@@ -256,21 +260,23 @@ int main( int argc, char **argv ) {
    if ( verbose ) {
       version = 4;
       fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
-      rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-      while ( rc_id3 < 0 ) {
-         fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
-         sleep( 1 );
-         rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-      }
-      assert( rc_id3 >= 0 ); assert ( version == 4 );
+      H5E_BEGIN_TRY { 
+         rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
+         while ( rc_id4 < 0 ) {
+            fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
+            sleep( 1 );
+            rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
+         }
+      } H5E_END_TRY;
+      assert( rc_id4 >= 0 ); assert ( version == 4 );
       fprintf( stderr, "APP-r%d: Acquired read context %lu\n", my_rank, version );
 
-      print_container_contents( file_id, rc_id3, "/", my_rank );
+      print_container_contents( file_id, rc_id4, "/", my_rank );
 
       /* Release the read handle and close read context on CV 4 */
       fprintf( stderr, "APP-r%d: Release read context 4\n", my_rank );
-      ret = H5RCrelease( rc_id3, H5_EVENT_STACK_NULL); ASSERT_RET;
-      ret = H5RCclose( rc_id3 ); ASSERT_RET;
+      ret = H5RCrelease( rc_id4, H5_EVENT_STACK_NULL); ASSERT_RET;
+      ret = H5RCclose( rc_id4 ); ASSERT_RET;
    }
 
    /**** 
@@ -282,19 +288,19 @@ int main( int argc, char **argv ) {
 
    /* Create a local transaction for transaction number and start it. */
    fprintf( stderr, "APP-r%d: Create and start tr %lu with %d transaction leaders\n", my_rank, tr_num, num_tr_leaders );
-   tr_id = H5TRcreate( file_id, rc_id2, tr_num ); assert( tr_id >= 0 );
+   tr_id = H5TRcreate( file_id, rc_id3, tr_num ); assert( tr_id >= 0 );
    trspl_id = H5Pcreate( H5P_TR_START );  assert( trspl_id >= 0 );
    ret = H5Pset_trspl_num_peers( trspl_id, num_tr_leaders ); ASSERT_RET;
    ret = H5TRstart( tr_id, trspl_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
    /* Add updates to the transaction */
-   update_dataset( file_id, "G-logged/D", tr_id, rc_id2, "/", my_rank, 1 );
-   update_dataset( file_id, "G-prefetched/D", tr_id, rc_id2, "/", my_rank, 2 );
-   update_dataset( file_id, "G-stored/D", tr_id, rc_id2, "/", my_rank, 3 );
+   update_dataset( file_id, "G-logged/D", tr_id, rc_id3, "/", my_rank, 1 );
+   update_dataset( file_id, "G-prefetched/D", tr_id, rc_id3, "/", my_rank, 2 );
+   update_dataset( file_id, "G-stored/D", tr_id, rc_id3, "/", my_rank, 3 );
 
-   update_map( file_id, "G-logged/M", tr_id, rc_id2, "/", my_rank, 1 );
-   update_map( file_id, "G-prefetched/M", tr_id, rc_id2, "/", my_rank, 2 );
-   update_map( file_id, "G-stored/M", tr_id, rc_id2, "/", my_rank, 3 );
+   update_map( file_id, "G-logged/M", tr_id, rc_id3, "/", my_rank, 1 );
+   update_map( file_id, "G-prefetched/M", tr_id, rc_id3, "/", my_rank, 2 );
+   update_map( file_id, "G-stored/M", tr_id, rc_id3, "/", my_rank, 3 );
 
    /* Finish, commit, and close transaction */
    fprintf( stderr, "APP-r%d: Finish, commit, and close tr %lu\n", my_rank, tr_num );
@@ -305,21 +311,23 @@ int main( int argc, char **argv ) {
    /* Acquire a read handle for container version and create a read context. */
    version = 5;
    if (verbose) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
-   rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-   while ( rc_id4 < 0 ) {
-      if (verbose) fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
-      sleep( 1 );
-      rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-   }
-   assert( rc_id4 >= 0 ); assert ( version == 5 );
+   H5E_BEGIN_TRY { 
+      rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
+      while ( rc_id5 < 0 ) {
+         if (verbose) fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
+         sleep( 1 );
+         rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
+      }
+   } H5E_END_TRY;
+   assert( rc_id5 >= 0 ); assert ( version == 5 );
    fprintf( stderr, "APP-r%d: Acquired read context %lu\n", my_rank, version );
 
    /* Release the read handle and close read context on CV 3 */
    fprintf( stderr, "APP-r%d: Release read context 3\n", my_rank );
-   ret = H5RCrelease( rc_id2, H5_EVENT_STACK_NULL); ASSERT_RET;
-   ret = H5RCclose( rc_id2 ); ASSERT_RET;
+   ret = H5RCrelease( rc_id3, H5_EVENT_STACK_NULL); ASSERT_RET;
+   ret = H5RCclose( rc_id3 ); ASSERT_RET;
 
-   if (verbose) print_container_contents( file_id, rc_id4, "/", my_rank );
+   if (verbose) print_container_contents( file_id, rc_id5, "/", my_rank );
 
    /**** 
     * Highest rank persists CV 5, then evicts objects under G-prefetched and G-stored. 
@@ -331,24 +339,24 @@ int main( int argc, char **argv ) {
 
    if ( my_rank == comm_size-1 ) {
       fprintf( stderr, "APP-r%d: Persist cv 5.\n", my_rank );
-      print_container_contents( file_id, rc_id4, "/", my_rank );
-      ret = H5RCpersist(rc_id4, H5_EVENT_STACK_NULL); ASSERT_RET; 
+      print_container_contents( file_id, rc_id5, "/", my_rank );
+      ret = H5RCpersist(rc_id5, H5_EVENT_STACK_NULL); ASSERT_RET; 
 
       /* TODO:  Add code showing BB space in use */
 
-      evict_group_members_updates( file_id, rc_id4, "/G-prefetched", my_rank );
-      evict_group_members_updates( file_id, rc_id4, "/G-stored", my_rank );
+      evict_group_members_updates( file_id, rc_id5, "/G-prefetched", my_rank );
+      evict_group_members_updates( file_id, rc_id5, "/G-stored", my_rank );
 
       /* TODO:  Add code showing BB space in use */
    }
    
    /* All ranks print container here.  For rank == comm_size, this will be after objects have been evicted */
-   if (verbose) print_container_contents( file_id, rc_id4, "/", my_rank ); 
+   if (verbose) print_container_contents( file_id, rc_id5, "/", my_rank ); 
 
    /* Release the read handle and close read context on CV 5 */
    fprintf( stderr, "APP-r%d: Release read context 5\n", my_rank );
-   ret = H5RCrelease( rc_id4, H5_EVENT_STACK_NULL); ASSERT_RET;
-   ret = H5RCclose( rc_id4 ); ASSERT_RET;
+   ret = H5RCrelease( rc_id5, H5_EVENT_STACK_NULL); ASSERT_RET;
+   ret = H5RCclose( rc_id5 ); ASSERT_RET;
 
    /****
     *  Close the H5File.  Reopen, pre-fetch D, M, and TODO T in /G-prefetched.  
