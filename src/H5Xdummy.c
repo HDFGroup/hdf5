@@ -214,9 +214,10 @@ H5X_dummy_open(hid_t file_id, hid_t dataset_id, hid_t xapl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL metadata size");
     if (!metadata)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL metadata");
+#ifdef H5_HAVE_INDEXING
     if (FAIL == H5Pget_xapl_read_context(xapl_id, &rc_id))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get rc_id from xapl");
-
+#endif
     if (NULL == (dummy = (H5X_dummy_t *) H5MM_malloc(sizeof(H5X_dummy_t))))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, NULL, "can't allocate dummy struct");
 

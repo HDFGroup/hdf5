@@ -327,6 +327,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_size_t key_size = 0, val_size = 0;
     uint32_t cs_scope = 0;
     iod_ret_t ret;
+    iod_hint_list_t *con_open_hint = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -350,8 +351,15 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     if(H5Pget_metadata_integrity_scope(input->fapl_id, &cs_scope) < 0)
         HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 
+    /* scratch pad integrity in the container */
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        con_open_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
+        con_open_hint->num_hint = 1;
+        con_open_hint->hint[0].key = "iod_hint_co_scratch_cksum";
+    }
+
     /* open the container */
-    if(iod_container_open(input->name, NULL, mode, &coh, NULL /*event*/))
+    if(iod_container_open(input->name, con_open_hint, mode, &coh, NULL /*event*/))
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
     if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
@@ -546,6 +554,11 @@ done:
 
     input = (file_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
+
+    if(con_open_hint) {
+        free(con_open_hint);
+        con_open_hint = NULL;
+    }
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_file_open_cb() */
