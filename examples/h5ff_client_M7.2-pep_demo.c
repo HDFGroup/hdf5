@@ -18,6 +18,7 @@
 /* option flags */
 int use_daos_lustre = 0;   // Use DAOS Lustre - defaults to no
 int verbose = 0;           // Verbose output - defaults to no
+int pause = 0;             // Seconds to pause to allow out-of-band space check - defaults to 0.
 
 /* prototypes for helper functions */
 void create_group( hid_t, const char*, hid_t, const char*, int );
@@ -122,6 +123,7 @@ int main( int argc, char **argv ) {
    /* Acquire a read handle for container version and create a read context. */
    version = 2;
    if (verbose) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
+   MPI_Barrier( MPI_COMM_WORLD );      /* Q7 Workaround to avoid transaction race in IOD */
    H5E_BEGIN_TRY { 
       rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
       while ( rc_id2 < 0 ) {
@@ -198,6 +200,7 @@ int main( int argc, char **argv ) {
    /* Acquire a read handle for container version and create a read context. */
    version = 3;
    if (verbose) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
+   MPI_Barrier( MPI_COMM_WORLD );      /* Q7 Workaround to avoid transaction race in IOD */
    H5E_BEGIN_TRY { 
       rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
       while ( rc_id3 < 0 ) {
@@ -262,6 +265,7 @@ int main( int argc, char **argv ) {
    if ( verbose ) {
       version = 4;
       fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
+      MPI_Barrier( MPI_COMM_WORLD );      /* Q7 Workaround to avoid transaction race in IOD */
       H5E_BEGIN_TRY { 
          rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
          while ( rc_id4 < 0 ) {
@@ -313,6 +317,7 @@ int main( int argc, char **argv ) {
    /* Acquire a read handle for container version and create a read context. */
    version = 5;
    if (verbose) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
+   MPI_Barrier( MPI_COMM_WORLD );      /* Q7 Workaround to avoid transaction race in IOD */
    H5E_BEGIN_TRY { 
       rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
       while ( rc_id5 < 0 ) {
@@ -339,17 +344,38 @@ int main( int argc, char **argv ) {
     * container, releasing space in the burst buffer.
     ****/
 
+   /* Optionally, pause to show change in BB space using out-of-band check. All ranks paused. */
+   if ( pause )  { 
+      MPI_Barrier( MPI_COMM_WORLD );
+      if ( my_rank == 0 ) {
+         fprintf( stdout, "APP: All ranks PAUSED before persist/evict to allow BB space usage to be checked.\n" );
+      }
+      sleep( pause );
+      if ( my_rank == 0 ) {
+         fprintf( stdout, "APP: Waking up.\n" );
+      }
+   }
+
    if ( my_rank == comm_size-1 ) {
       fprintf( stderr, "APP-r%d: Persist cv 5.\n", my_rank );
       print_container_contents( file_id, rc_id5, "/", my_rank );
       ret = H5RCpersist(rc_id5, H5_EVENT_STACK_NULL); ASSERT_RET; 
 
-      /* TODO:  Add code showing BB space in use */
-
       evict_group_members_updates( file_id, rc_id5, "/G-prefetched", my_rank );
       evict_group_members_updates( file_id, rc_id5, "/G-stored", my_rank );
 
-      /* TODO:  Add code showing BB space in use */
+   }
+
+   /* Optionally, pause to show change in BB space using out-of-band check. All ranks paused. */
+   if ( pause )  { 
+      MPI_Barrier( MPI_COMM_WORLD );
+      if ( my_rank == 0 ) {
+         fprintf( stdout, "APP: All ranks PAUSED after persist/evict to allow BB space usage to be checked.\n" );
+      }
+      sleep( pause );
+      if ( my_rank == 0 ) {
+         fprintf( stdout, "APP: Waking up.\n" );
+      }
    }
    
    /* All ranks print container here.  For rank == comm_size, this will be after objects have been evicted */
@@ -377,7 +403,6 @@ int main( int argc, char **argv ) {
    H5RCget_version( rc_id, &version );
    fprintf( stderr, "APP-r%d: Container re-opened; Acquired RC\n", my_rank, version );
 
-   /* TODO:  Add code showing BB space in use */
 
    /****************** STILL WORKING ON THIS PART *****************************/
 
@@ -386,34 +411,23 @@ int main( int argc, char **argv ) {
    int data_l[4], data_p[4], data_s[4];              
    hrpl_t dset_p_replica;
    hid_t dxpl_p_id;
+   hid_t dapl_p_id;
 
    hid_t map_l_id, map_p_id, map_s_id;
    int key_l[4], key_p[4], key_s[4];              
    int value_l[4], value_p[4], value_s[4];              
    hrpl_t map_p_replica;
    hid_t mxpl_p_id;
+   hid_t mapl_p_id;
 
-   /* Open Datasets and then Maps in all 3 Groups, prefetching objects in the /G-prefetched group. */
+   /* Open Datasets and then Maps in all 3 Groups */
    dset_l_id = H5Dopen_ff( file_id, "/G-logged/D", H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL );
    assert( dset_l_id >= 0 );
    space_l_id = H5Dget_space( dset_l_id ); assert ( space_l_id >= 0 );
 
    dset_p_id = H5Dopen_ff( file_id, "/G-prefetched/D", H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL );
    assert( dset_p_id >= 0 );
-   space_p_id = H5Dget_space( dset_p_id ); assert ( space_p_id >= 0 ); /* Space info doesn't get prefetched, so read it here */
-
-   if ( use_daos_lustre ) {
-      /* FOR NOW:  Rank 0 prefetches synchronously, then bcasts replica_id.  TODO: change to async. */
-      if ( my_rank == 0 ) {
-         fprintf( stderr, "APP-r%d: prefetch /G-prefeteched/D.\n", my_rank );
-         ret = H5Dprefetch_ff( dset_p_id, rc_id, &dset_p_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
-      }
-      MPI_Bcast( &dset_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
-      dxpl_p_id = H5Pcreate( H5P_DATASET_XFER );
-      ret = H5Pset_read_replica( dxpl_p_id, dset_p_replica );  ASSERT_RET;
-   } else {
-      dxpl_p_id = H5P_DEFAULT;
-   }
+   space_p_id = H5Dget_space( dset_p_id ); assert ( space_p_id >= 0 ); 
 
    dset_s_id = H5Dopen_ff( file_id, "/G-stored/D", H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL );
    assert( dset_s_id >= 0 );
@@ -425,21 +439,64 @@ int main( int argc, char **argv ) {
    map_p_id = H5Mopen_ff( file_id, "/G-prefetched/M", H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL );
    assert( map_p_id >= 0 );
 
-   if ( use_daos_lustre ) {
-      /* FOR NOW:  Rank 0 prefetches synchronously then bcasts replica_id.  TODO: change to async */
+   map_s_id = H5Mopen_ff( file_id, "/G-stored/M", H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL );
+   assert( map_s_id >= 0 );
+
+   /* Prefetch objects in the /G-prefetched group. */
+
+   /* Optionally, pause to show BB space using out-of-band check. All ranks paused. */
+   if ( pause )  { 
+      MPI_Barrier( MPI_COMM_WORLD );
       if ( my_rank == 0 ) {
+         fprintf( stdout, "APP: All ranks PAUSED before prefetch to allow BB space usage to be checked.\n" );
+      }
+      sleep( pause );
+      if ( my_rank == 0 ) {
+         fprintf( stdout, "APP: Waking up.\n" );
+      }
+   }
+
+   if ( use_daos_lustre ) {
+
+      /* FOR NOW:  Rank 0 prefetches synchronously, then bcasts.  TODO: change to async. */
+      if ( my_rank == 0 ) {
+         fprintf( stderr, "APP-r%d: prefetch /G-prefeteched/D.\n", my_rank );
+         ret = H5Dprefetch_ff( dset_p_id, rc_id, &dset_p_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
+
          fprintf( stderr, "APP-r%d: prefetch /G-prefeteched/M.\n", my_rank );
          ret = H5Mprefetch_ff( map_p_id, rc_id, &map_p_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
       }
+      MPI_Bcast( &dset_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
+
+      dxpl_p_id = H5Pcreate( H5P_DATASET_XFER );                              /* Used in Read */
+      ret = H5Pset_read_replica( dxpl_p_id, dset_p_replica ); ASSERT_RET;
+      dapl_p_id = H5Pcreate( H5P_DATASET_ACCESS );                            /* Used in Evict */
+      ret = H5Pset_evict_replica( dapl_p_id, dset_p_replica ); ASSERT_RET;
+
       MPI_Bcast( &map_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
-      mxpl_p_id = H5Pcreate( H5P_DATASET_XFER );
+      mxpl_p_id = H5Pcreate( H5P_DATASET_XFER );                              /* Used in Get */
       ret = H5Pset_read_replica( mxpl_p_id, map_p_replica );  ASSERT_RET;
+      mapl_p_id = H5Pcreate( H5P_MAP_ACCESS );                                /* Used in Evict */
+      ret = H5Pset_evict_replica( mapl_p_id, map_p_replica ); ASSERT_RET;
+
    } else {
+      dxpl_p_id = H5P_DEFAULT;
+      dapl_p_id = H5P_DEFAULT;
       mxpl_p_id = H5P_DEFAULT;
+      mapl_p_id = H5P_DEFAULT;
    }
 
-   map_s_id = H5Mopen_ff( file_id, "/G-stored/M", H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL );
-   assert( map_s_id >= 0 );
+   /* Optionally, pause to show BB space using out-of-band check. All ranks paused. */
+   if ( pause )  { 
+      MPI_Barrier( MPI_COMM_WORLD );
+      if ( my_rank == 0 ) {
+         fprintf( stdout, "APP: All ranks PAUSED after prefetch to allow BB space usage to be checked.\n" );
+      }
+      sleep( pause );
+      if ( my_rank == 0 ) {
+         fprintf( stdout, "APP: Waking up.\n" );
+      }
+   }
 
    // TODO:  Do these reads/prints multiple times, to get a better sense of variance in read times
 
@@ -506,16 +563,38 @@ int main( int argc, char **argv ) {
    fprintf( stderr, "APP-r%d: /G-stored/M key/values: 0/%d 1/%d 2/%d 3/%d\n", my_rank, 
                     value_s[0], value_s[1], value_s[2], value_s[3] );
 
-   /* TODO:  Add barrier ( unless can show BB space per ION per rank ) */
 
-   /* TODO:  Add code showing BB space in use */
+   /* Rank 0 evicts replicas */
+   if ( my_rank == 0 ) {
+      if ( use_daos_lustre ) {
+         fprintf( stderr, "APP-r%d: evict replica of /G-prefeteched/D.\n", my_rank );
+         ret = H5Devict_ff( dset_p_id, version, dapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  /* Note: CV redundant for replica */
 
-   /* TODO:  Add code to evict replicas */
+         fprintf( stderr, "APP-r%d: evict replica of /G-prefeteched/M.\n", my_rank );
+         ret = H5Devict_ff( map_p_id, version, mapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;   /* Note: CV redundant for replica */
+      } else {
+         fprintf( stderr, "APP-r%d DAOS-POSIX - No replicas to evict.\n", my_rank );
+      }
+   }
+
+   /* Optionally, pause to show BB space using out-of-band check. All ranks paused. */
+   if ( pause )  { 
+      MPI_Barrier( MPI_COMM_WORLD );
+      if ( my_rank == 0 ) {
+         fprintf( stdout, "APP: All ranks PAUSED after evict of replicas to allow BB space usage to be checked.\n" );
+      }
+      sleep( pause );
+      if ( my_rank == 0 ) {
+         fprintf( stdout, "APP: Waking up.\n" );
+      }
+   }
 
    /* Close Objects*/
 
    if ( use_daos_lustre ) {
+      ret = H5Pclose( mapl_p_id ); ASSERT_RET;
       ret = H5Pclose( mxpl_p_id ); ASSERT_RET;
+      ret = H5Pclose( dapl_p_id ); ASSERT_RET;
       ret = H5Pclose( dxpl_p_id ); ASSERT_RET;
    }
 
@@ -1005,7 +1084,7 @@ evict_group_members_updates( hid_t file_id, hid_t rc_id, const char* grp_path, i
 
       if ( use_daos_lustre ) {
          ret = H5Mevict_ff( map_id, cv, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
-         fprintf( stderr, "%s: evicted updates for object %s\n", preface, path_to_object );
+         fprintf( stderr, "%s: evicted updates for object %s (Q7 workaround: This is NO-OP in IOD)\n", preface, path_to_object );
       } else {
          fprintf( stderr, "%s: DAOS-POSIX - Won't evict updates for object %s\n", preface, path_to_object );
       }
@@ -1038,7 +1117,6 @@ evict_group_members_updates( hid_t file_id, hid_t rc_id, const char* grp_path, i
 }
 
 
-
 /*
  * parse_options - helper function to parse the command line options.
  */
@@ -1055,13 +1133,24 @@ parse_options( int argc, char** argv, int my_rank ) {
             case 'l':   
                use_daos_lustre = 1;
                break;
+            case 'p':
+               if ( --argc == 0 )  {
+                  printf( "Error: No seconds specified after -p option\n." );
+                  return( 1 );
+               } else {
+                  ++argv;
+                  pause = atoi( *argv );
+                  printf( "Will pause for %d seconds. \n", pause );
+               }
+               break;
             case 'v':   
                verbose = 1;
                break;
             default: 
                if ( my_rank == 0 ) {
-                  printf( "Usage: %s [-lv]\n", app  );
+                  printf( "Usage: %s [-l] [-p seconds] [-v]\n", app  );
                   printf( "\tl: use DAOS Lustre\n" );
+                  printf( "\tp: pause 'seconds' to allow out-of-band BB space check\n" );
                   printf( "\tv: verbose output\n" );
                }
                return( 1 );
