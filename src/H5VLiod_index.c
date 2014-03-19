@@ -223,6 +223,11 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
     output.ret = ret_value;
     /* MSC for now, idx_count is always 1 */
     output.idx_count = 1;
+    fprintf(stderr, "Found index, index count is %d!\n", output.idx_count);
+    printf("Get index info ret is: %d\n", output.ret);
+    printf("Index count is: %d\n", output.idx_count);
+    printf("Plugin ID is: %d\n", output.idx_plugin_id);
+
     HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:

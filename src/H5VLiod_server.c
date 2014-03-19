@@ -145,7 +145,7 @@ EFF__mercury_register_callbacks(void)
     MERCURY_HANDLER_REGISTER("dset_set_index_info", H5VL_iod_server_dset_set_index_info,
                              dset_set_index_info_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("dset_get_index_info", H5VL_iod_server_dset_get_index_info,
-                             dset_get_index_info_in_t, ret_t);
+                             dset_get_index_info_in_t, dset_get_index_info_out_t);
     MERCURY_HANDLER_REGISTER("dset_rm_index_info", H5VL_iod_server_dset_remove_index_info,
                              dset_rm_index_info_in_t, ret_t);
 #endif

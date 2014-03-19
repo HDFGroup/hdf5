@@ -784,7 +784,7 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     H5VL_DSET_SET_INDEX_INFO_ID = MERCURY_REGISTER("dset_set_index_info",
                                                    dset_set_index_info_in_t, ret_t);
     H5VL_DSET_GET_INDEX_INFO_ID = MERCURY_REGISTER("dset_get_index_info",
-                                                   dset_get_index_info_in_t, ret_t);
+                                                   dset_get_index_info_in_t, dset_get_index_info_out_t);
     H5VL_DSET_RM_INDEX_INFO_ID = MERCURY_REGISTER("dset_rm_index_info",
                                                   dset_rm_index_info_in_t, ret_t);
 #endif

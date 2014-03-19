@@ -1677,13 +1677,17 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             dset_get_index_info_out_t *output = idx_info->output;
 
             if(SUCCEED != output->ret) {
-                HERROR(H5E_FUNC, H5E_CANTINIT, "set_index_info failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "get_index_info failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
             else {
                 unsigned plugin_id;
                 size_t count;
+
+                printf("Get index info ret is: %d\n", output->ret);
+                printf("Index count is: %d\n", output->idx_count);
+                printf("Plugin ID is: %d\n", output->idx_plugin_id);
 
                 count = output->idx_count;
                 /* MSC - for now, idx_plugin_count is always 1 */

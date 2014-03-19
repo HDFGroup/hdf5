@@ -723,4 +723,33 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_xapl_read_context
+ *
+ * Purpose:     Retrieve the read context ID from this access plist.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_xapl_read_context(hid_t xapl_id, hid_t *rc_id)
+{
+    H5P_genplist_t *plist = NULL; /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if (NULL == (plist = H5P_object_verify(xapl_id, H5P_INDEX_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a xapl");
+
+    /* Get the trans_id */
+    if (rc_id)
+        if (H5P_get(plist, H5VL_CONTEXT_ID, rc_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
 #endif /* H5_HAVE_INDEXING */

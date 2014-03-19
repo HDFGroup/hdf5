@@ -29,6 +29,8 @@
 #include "H5Iprivate.h"		/* IDs */
 #include "H5MMprivate.h"	/* Memory management */
 #include "H5Pprivate.h"
+#include "H5FFprivate.h"
+/* TODO using private headers but could use public ones */
 
 /****************/
 /* Local Macros */
@@ -87,7 +89,7 @@ H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
 /*******************/
 
 /* Dummy index class */
-const H5X_class_t H5X_DUMMY[1] = {
+const H5X_class_t H5X_DUMMY[1] = {{
     H5X_CLASS_T_VERS,       /* (From the H5Xpublic.h header file) */
     1,                      /* (Or whatever number is assigned) */
     "dummy index plugin",   /* Whatever name desired */
@@ -99,7 +101,7 @@ const H5X_class_t H5X_DUMMY[1] = {
     H5X_dummy_pre_update,   /* pre_update */
     H5X_dummy_post_update,  /* post_update */
     H5X_dummy_query         /* query */
-};
+}};
 
 /*-------------------------------------------------------------------------
  * Function:    H5X_dummy_create
@@ -112,7 +114,7 @@ const H5X_class_t H5X_DUMMY[1] = {
  *------------------------------------------------------------------------
  */
 static void *
-H5X_dummy_create(hid_t file_id, hid_t dataset_id, hid_t xcpl_id,
+H5X_dummy_create(hid_t file_id, hid_t dataset_id, hid_t UNUSED xcpl_id,
         hid_t xapl_id, size_t *metadata_size, void **metadata)
 {
     H5X_dummy_t *dummy = NULL;
@@ -171,16 +173,17 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_dummy_remove(hid_t file_id, hid_t dataset_id, size_t metadata_size,
-        void *metadata)
+H5X_dummy_remove(hid_t UNUSED file_id, hid_t UNUSED dataset_id, size_t UNUSED metadata_size,
+        void UNUSED *metadata)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    printf("Calling H5X_dummy_remove\n");
 
     /* TODO Does not do anything */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_dummy_remove() */
 
@@ -198,11 +201,40 @@ static void *
 H5X_dummy_open(hid_t file_id, hid_t dataset_id, hid_t xapl_id,
         size_t metadata_size, void *metadata)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5X_dummy_t *dummy = NULL;
+    hid_t trans_id, rc_id;
+    uint64_t c_version;
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     printf("Calling H5X_dummy_open\n");
+
+    if (!metadata_size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL metadata size");
+    if (!metadata)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL metadata");
+    if (FAIL == H5Pget_xapl_read_context(xapl_id, &rc_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get rc_id from xapl");
+
+    if (NULL == (dummy = (H5X_dummy_t *) H5MM_malloc(sizeof(H5X_dummy_t))))
+        HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, NULL, "can't allocate dummy struct");
+
+    dummy->dataset_id = dataset_id;
+    dummy->idx_token_size = metadata_size;
+    if (NULL == (dummy->idx_token = H5MM_malloc(dummy->idx_token_size)))
+        HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, NULL, "can't allocate token");
+    HDmemcpy(dummy->idx_token, metadata, dummy->idx_token_size);
+
+    /* TODO do that like this for now */
+    H5RCget_version(rc_id, &c_version);
+    trans_id = H5TRcreate(file_id, rc_id, c_version);
+    if (FAIL == (dummy->idx_anon_id = H5Oopen_by_token(dummy->idx_token,
+            trans_id, H5_EVENT_STACK_NULL)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, NULL, "can't open anonymous dataset");
+    H5TRclose(trans_id);
+
+    ret_value = dummy;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -226,8 +258,16 @@ H5X_dummy_close(void *idx_handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     printf("Calling H5X_dummy_close\n");
-    if (FAIL == H5Dclose_ff(dummy->idx_anon_id))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, NULL, "can't close anonymous dataset for index");
+
+    if (NULL == dummy)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
+
+    /* Close anonymous dataset */
+    if (FAIL == H5Dclose_ff(dummy->idx_anon_id, H5_EVENT_STACK_NULL))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "can't close anonymous dataset for index");
+
+    H5MM_free(dummy->idx_token);
+    H5MM_free(dummy);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -245,11 +285,16 @@ done:
 static herr_t
 H5X_dummy_pre_update(void *idx_handle, hid_t dataspace_id, hid_t xxpl_id)
 {
+    H5X_dummy_t *dummy = (H5X_dummy_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     printf("Calling H5X_dummy_pre_update\n");
+
+    if (NULL == dummy)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_dummy_pre_update() */
@@ -267,11 +312,15 @@ static herr_t
 H5X_dummy_post_update(void *idx_handle, const void *buf, hid_t dataspace_id,
         hid_t xxpl_id)
 {
+    H5X_dummy_t *dummy = (H5X_dummy_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     printf("Calling H5X_dummy_post_update\n");
+
+    if (NULL == dummy)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
 
     /* Update index elements */
 done:
@@ -291,11 +340,15 @@ static herr_t
 H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
         hid_t *dataspace_id)
 {
+    H5X_dummy_t *dummy = (H5X_dummy_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     printf("Calling H5X_dummy_query\n");
+
+    if (NULL == dummy)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
