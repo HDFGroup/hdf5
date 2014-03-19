@@ -133,8 +133,10 @@ H5X_dummy_create(hid_t file_id, hid_t dataset_id, hid_t xcpl_id,
     if (FAIL == (space_id = H5Dget_space(dataset_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get dataspace from dataset");
 
+#ifdef H5_HAVE_INDEXING
     if (FAIL == H5Pget_xapl_transaction(xapl_id, &trans_id))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get trans_id from xapl");
+#endif
 
     if (FAIL == (dummy->idx_anon_id = H5Dcreate_anon_ff(file_id, type_id, space_id,
             H5P_DEFAULT, H5P_DEFAULT, trans_id, H5_EVENT_STACK_NULL)))
