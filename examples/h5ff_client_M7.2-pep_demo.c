@@ -571,7 +571,7 @@ int main( int argc, char **argv ) {
          ret = H5Devict_ff( dset_p_id, version, dapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  /* Note: CV redundant for replica */
 
          fprintf( stderr, "APP-r%d: evict replica of /G-prefeteched/M.\n", my_rank );
-         ret = H5Devict_ff( map_p_id, version, mapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;   /* Note: CV redundant for replica */
+         ret = H5Mevict_ff( map_p_id, version, mapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;   /* Note: CV redundant for replica */
       } else {
          fprintf( stderr, "APP-r%d DAOS-POSIX - No replicas to evict.\n", my_rank );
       }
