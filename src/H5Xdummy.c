@@ -46,6 +46,12 @@ typedef struct H5X_dummy_t {
     size_t idx_token_size;
 } H5X_dummy_t;
 
+typedef struct H5X__dummy_query_data_t {
+    size_t num_elmts;
+    hid_t query_id;
+    hid_t space_query;
+} H5X__dummy_query_data_t;
+
 /********************/
 /* Local Prototypes */
 /********************/
@@ -296,6 +302,7 @@ H5X_dummy_pre_update(void *idx_handle, hid_t dataspace_id, hid_t xxpl_id)
     if (NULL == dummy)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
 
+    /* Not needed here */
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_dummy_pre_update() */
@@ -314,6 +321,7 @@ H5X_dummy_post_update(void *idx_handle, const void *buf, hid_t dataspace_id,
         hid_t xxpl_id)
 {
     H5X_dummy_t *dummy = (H5X_dummy_t *) idx_handle;
+    hid_t mem_type_id, file_space_id, trans_id;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -323,10 +331,49 @@ H5X_dummy_post_update(void *idx_handle, const void *buf, hid_t dataspace_id,
     if (NULL == dummy)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
 
-    /* Update index elements */
+    if (FAIL == (mem_type_id = H5Dget_type(dummy->dataset_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get type from dataset");
+    if (FAIL == (file_space_id = H5Dget_space(dummy->dataset_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get dataspace from dataset");
+#ifdef H5_HAVE_INDEXING
+    if (FAIL == H5Pget_xxpl_transaction(xxpl_id, &trans_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get trans_id from xxpl");
+#endif
+
+    /* Update index elements (simply write data for now) */
+    if (FAIL == H5Dwrite_ff(dummy->idx_anon_id, mem_type_id, dataspace_id,
+            file_space_id, H5P_DEFAULT, buf, trans_id, H5_EVENT_STACK_NULL))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, NULL, "can't update index elements");
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_dummy_post_update() */
+
+static herr_t
+H5X__dummy_get_query_data_cb(void *elem, hid_t type_id,
+                            const hsize_t *point, void *_udata)
+{
+    H5X__dummy_query_data_t *udata = (H5X__dummy_query_data_t *)_udata;
+    hbool_t result;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Apply the query */
+    if (H5Qapply(udata->query_id, &result, type_id, elem) < 0)
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query to data element");
+
+    /* If element satisfies query, add it to the selection */
+    if (result) {
+        /* TODO remove that after demo */
+        printf("Element |%d| matches query\n", *((int *) elem));
+        udata->num_elmts++;
+        if(H5Sselect_elements(udata->space_query, H5S_SELECT_APPEND, 1, point))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "unable to add point to selection");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_get_query_data_cb */
 
 /*-------------------------------------------------------------------------
  * Function:    H5X_dummy_query
@@ -342,6 +389,12 @@ H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
         hid_t *dataspace_id)
 {
     H5X_dummy_t *dummy = (H5X_dummy_t *) idx_handle;
+    H5X__dummy_query_data_t udata;
+    hid_t space_id, type_id;
+    hsize_t dims[1];
+    size_t nelmts;
+    void *buf;
+    hbool_t result = FALSE;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -350,6 +403,26 @@ H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
 
     if (NULL == dummy)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
+
+    nelmts = (size_t) H5Sget_select_npoints(space_id);
+    dims[0] = (hsize_t) nelmts;
+
+    /* create a 1-D selection to describe the data read in memory */
+//    if(FAIL == (mem_space = H5Screate_simple(1, dims, NULL)))
+//        HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
+
+    if(FAIL == (udata.space_query = H5Scopy(space_id)))
+        HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace");
+    if(H5Sselect_none(udata.space_query) < 0)
+        HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to reset selection");
+
+    udata.num_elmts = 0;
+    udata.query_id = query_id;
+
+    /* iterate over every element and apply the query on it. If the
+       query is not satisfied, then remove it from the query selection */
+    if (H5Diterate(buf, type_id, space_id, H5X__dummy_get_query_data_cb, &udata) < 0)
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to compute buffer size");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
