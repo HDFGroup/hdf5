@@ -16,7 +16,7 @@
 #define ASSERT_RET assert( ret >= 0 )
 
 /* option flags */
-int use_daos_lustre = 0;   // Use DAOS Lustre - defaults to no
+int use_daos_lustre = 1;   // Use DAOS Lustre - defaults to yes
 int verbose = 0;           // Verbose output - defaults to no
 int pause = 0;             // Seconds to pause to allow out-of-band space check - defaults to 0.
 
@@ -30,6 +30,7 @@ void update_map( hid_t, const char*, hid_t, hid_t, const char*, int, int );
 void evict_group_members_updates( hid_t, hid_t, const char*, int );
 void print_container_contents( hid_t, hid_t, const char*, int );
 int  parse_options( int, char**, int );
+void usage( const char* );
 
 /**************************************************************************************************************/
 int main( int argc, char **argv ) {
@@ -1131,16 +1132,17 @@ parse_options( int argc, char** argv, int my_rank ) {
       } else {
          switch( *(*argv+1) ) {
             case 'l':   
-               use_daos_lustre = 1;
+               use_daos_lustre = 0;
                break;
             case 'p':
-               if ( --argc == 0 )  {
-                  printf( "Error: No seconds specified after -p option\n." );
+               if ( ( --argc == 0 )  || (  **(argv+1) == '-' ) ) {
+                  printf( "Error: No seconds specified after -p option.\n" );
+                  usage( app );
                   return( 1 );
                } else {
                   ++argv;
                   pause = atoi( *argv );
-                  printf( "Will pause for %d seconds. \n", pause );
+                  printf( "Will pause for %d seconds.\n", pause );
                }
                break;
             case 'v':   
@@ -1148,14 +1150,22 @@ parse_options( int argc, char** argv, int my_rank ) {
                break;
             default: 
                if ( my_rank == 0 ) {
-                  printf( "Usage: %s [-l] [-p seconds] [-v]\n", app  );
-                  printf( "\tl: use DAOS Lustre\n" );
-                  printf( "\tp: pause 'seconds' to allow out-of-band BB space check\n" );
-                  printf( "\tv: verbose output\n" );
+                  usage( app );
                }
                return( 1 );
          }
       }
    }
    return( 0 );
+}
+
+/*
+ * Display usage message 
+ */
+void
+usage( const char* app ) {
+   printf( "Usage: %s [-l] [-p seconds] [-v]\n", app  );
+   printf( "\tl: don't use DAOS Lustre\n" );
+   printf( "\tp: pause 'seconds' to allow out-of-band BB space check\n" );
+   printf( "\tv: verbose output\n" );
 }
