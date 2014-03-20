@@ -30,6 +30,9 @@
 #include "H5MMprivate.h"	/* Memory management */
 #include "H5Pprivate.h"
 #include "H5FFprivate.h"
+#include "H5RCprivate.h"
+#include "H5TRprivate.h"
+#include "H5Qprivate.h"
 /* TODO using private headers but could use public ones */
 
 /****************/
@@ -81,6 +84,10 @@ H5X_dummy_post_update(void *idx_handle, const void *buf, hid_t dataspace_id,
 static herr_t
 H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
         hid_t *dataspace_id);
+
+static herr_t
+H5X__dummy_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim,
+        const hsize_t *point, void *_udata);
 
 /*********************/
 /* Package Variables */
@@ -290,7 +297,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_dummy_pre_update(void *idx_handle, hid_t dataspace_id, hid_t xxpl_id)
+H5X_dummy_pre_update(void *idx_handle, hid_t UNUSED dataspace_id, hid_t UNUSED xxpl_id)
 {
     H5X_dummy_t *dummy = (H5X_dummy_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -332,25 +339,34 @@ H5X_dummy_post_update(void *idx_handle, const void *buf, hid_t dataspace_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
 
     if (FAIL == (mem_type_id = H5Dget_type(dummy->idx_anon_id)))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get type from dataset");
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get type from dataset");
     if (FAIL == (file_space_id = H5Dget_space(dummy->idx_anon_id)))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get dataspace from dataset");
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get dataspace from dataset");
 #ifdef H5_HAVE_INDEXING
     if (FAIL == H5Pget_xxpl_transaction(xxpl_id, &trans_id))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get trans_id from xxpl");
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get trans_id from xxpl");
 #endif
 
     /* Update index elements (simply write data for now) */
     if (FAIL == H5Dwrite_ff(dummy->idx_anon_id, mem_type_id, dataspace_id,
             file_space_id, H5P_DEFAULT, buf, trans_id, H5_EVENT_STACK_NULL))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, NULL, "can't update index elements");
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't update index elements");
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_dummy_post_update() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5X__dummy_get_query_data_cb
+ *
+ * Purpose: This function unregisters an index class.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t
-H5X__dummy_get_query_data_cb(void *elem, hid_t type_id,
-                            const hsize_t *point, void *_udata)
+H5X__dummy_get_query_data_cb(void *elem, hid_t type_id, unsigned UNUSED ndim,
+        const hsize_t *point, void *_udata)
 {
     H5X__dummy_query_data_t *udata = (H5X__dummy_query_data_t *)_udata;
     hbool_t result;
@@ -373,7 +389,7 @@ H5X__dummy_get_query_data_cb(void *elem, hid_t type_id,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__iod_get_query_data_cb */
+} /* end H5X__dummy_get_query_data_cb */
 
 /*-------------------------------------------------------------------------
  * Function:    H5X_dummy_query
@@ -392,11 +408,9 @@ H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
     H5X__dummy_query_data_t udata;
     hid_t space_id, type_id;
     hid_t rcxt_id;
-    hsize_t dims[1];
     size_t nelmts;
     size_t elmt_size = 0, buf_size = 0;
     void *buf;
-    hbool_t result = FALSE;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -407,17 +421,19 @@ H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
 #ifdef H5_HAVE_INDEXING
     if (FAIL == H5Pget_xxpl_read_context(xxpl_id, &rcxt_id))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get trans_id from xapl");
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get rcxt_id from xxpl");
 #endif
-
-    space_id = H5Dget_space(dummy->idx_anon_id);
-    type_id = H5Dget_type(dummy->idx_anon_id);
-
-    nelmts = (size_t) H5Sget_select_npoints(space_id);
-    elmt_size = H5Tget_size(type_id);
-    buf_size = nelmts * elmt_size;
+    if (FAIL == (type_id = H5Dget_type(dummy->idx_anon_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get type from index");
+    if (FAIL == (space_id = H5Dget_space(dummy->idx_anon_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get dataspace from index");
+    if (0 == (nelmts = (size_t) H5Sget_select_npoints(space_id)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid number of elements");
+    if (0 == (elmt_size = H5Tget_size(type_id)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "invalid size of element");
 
     /* allocate buffer to hold data */
+    buf_size = nelmts * elmt_size;
     if(NULL == (buf = malloc(buf_size)))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate read buffer");
 
@@ -437,9 +453,11 @@ H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
     /* iterate over every element and apply the query on it. If the
        query is not satisfied, then remove it from the query selection */
     if (H5Diterate(buf, type_id, space_id, H5X__dummy_get_query_data_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to compute buffer size");
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCOMPUTE, FAIL, "failed to compute buffer size");
 
     *dataspace_id = udata.space_query;
+    printf("Created dataspace from index with %d elements\n",
+            (int) H5Sget_select_npoints(*dataspace_id));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -1688,7 +1688,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 size_t count;
 
                 printf("Get index info ret is: %d\n", output->ret);
-                printf("Index count is: %d\n", output->idx_count);
+                printf("Index count is: %ld\n", output->idx_count);
                 printf("Plugin ID is: %d\n", output->idx_plugin_id);
 
                 count = output->idx_count;
@@ -1700,7 +1700,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
                 if(0 == count) {
                     if (idx_info->plugin_id) 
-                        *idx_info->plugin_id = plugin_id;
+                        *idx_info->plugin_id = H5X_PLUGIN_NONE;
                     if (idx_info->metadata_size) 
                         *idx_info->metadata_size = 0;
                     if (idx_info->metadata) 
