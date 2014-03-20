@@ -113,6 +113,10 @@ H5_DLL herr_t H5Xget_type_ff(hid_t object_id, hsize_t index_idx,
 H5_DLL herr_t H5Pget_xapl_transaction(hid_t xapl_id, hid_t *trans_id);
 H5_DLL herr_t H5Pget_xapl_read_context(hid_t xapl_id, hid_t *rc_id);
 
+H5_DLL herr_t H5Pget_xxpl_transaction(hid_t xxpl_id, hid_t *trans_id);
+H5_DLL herr_t H5Pget_xxpl_read_context(hid_t xxpl_id, hid_t *rc_id);
+
+
 #ifdef __cplusplus
 }
 #endif
