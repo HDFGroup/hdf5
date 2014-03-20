@@ -152,13 +152,13 @@ query_and_view(hid_t file_id, const char *dataset_name)
     dataset_id = H5Dopen_ff(file_id, dataset_name, H5P_DEFAULT, rid2,
             H5_EVENT_STACK_NULL);
 
-//    view_id = H5Vcreate_ff(dataset_id, query_id, H5P_DEFAULT, rid2,
-//            H5_EVENT_STACK_NULL);
-//    assert(view_id > 0);
+    view_id = H5Vcreate_ff(dataset_id, query_id, H5P_DEFAULT, rid2,
+            H5_EVENT_STACK_NULL);
+    assert(view_id > 0);
 
     /* TODO do stuff here */
 
-//    H5Vclose(view_id);
+    H5Vclose(view_id);
 
     ret = H5Dclose_ff(dataset_id, H5_EVENT_STACK_NULL);
     assert(0 == ret);
