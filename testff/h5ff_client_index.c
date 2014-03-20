@@ -196,7 +196,6 @@ main(int argc, char **argv)
 
     MPI_Init(&argc, &argv);
 
-    getchar();
     /* Call EFF_init to initialize the EFF stack. */
     EFF_init(MPI_COMM_WORLD, MPI_INFO_NULL);
 
