@@ -56,10 +56,11 @@
     set (last_test "EXAMPLES-${example}")
   endforeach (example ${examples})
 
-  if (H5_HAVE_PARALLEL)
+### Windows pops up a modal permission dialog on this test
+  if (H5_HAVE_PARALLEL AND NOT WIN32)
     add_test (NAME EXAMPLES-ph5example COMMAND $<TARGET_FILE:ph5example>)
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (EXAMPLES-ph5example PROPERTIES DEPENDS ${last_test})
     endif (NOT "${last_test}" STREQUAL "")
     set (last_test "EXAMPLES-ph5example")
-  endif (H5_HAVE_PARALLEL)
+  endif (H5_HAVE_PARALLEL AND NOT WIN32)

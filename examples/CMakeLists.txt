@@ -44,14 +44,13 @@ foreach (example ${examples})
   set_target_properties (${example} PROPERTIES FOLDER examples)
 endforeach (example ${examples})
 
-### Windows pops up a modal permission dialog on this test
-if (H5_HAVE_PARALLEL AND NOT WIN32)
+if (H5_HAVE_PARALLEL)
   add_executable (ph5example ${HDF5_EXAMPLES_SOURCE_DIR}/ph5example.c)
   TARGET_NAMING (ph5example ${LIB_TYPE})
   TARGET_C_PROPERTIES (ph5example " " " ")
   target_link_libraries (ph5example ${HDF5_LIB_TARGET})
   set_target_properties (ph5example PROPERTIES FOLDER examples)
-endif (H5_HAVE_PARALLEL AND NOT WIN32)
+endif (H5_HAVE_PARALLEL)
 
 if (BUILD_TESTING)
   include (CMakeTests.cmake)
