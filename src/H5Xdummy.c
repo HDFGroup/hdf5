@@ -331,9 +331,9 @@ H5X_dummy_post_update(void *idx_handle, const void *buf, hid_t dataspace_id,
     if (NULL == dummy)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
 
-    if (FAIL == (mem_type_id = H5Dget_type(dummy->dataset_id)))
+    if (FAIL == (mem_type_id = H5Dget_type(dummy->idx_anon_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get type from dataset");
-    if (FAIL == (file_space_id = H5Dget_space(dummy->dataset_id)))
+    if (FAIL == (file_space_id = H5Dget_space(dummy->idx_anon_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get dataspace from dataset");
 #ifdef H5_HAVE_INDEXING
     if (FAIL == H5Pget_xxpl_transaction(xxpl_id, &trans_id))

@@ -248,7 +248,6 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 
                     tmp_req = cur_req->file_next;
 
-                    printf("Request type: %d\n", cur_req->type);
                     HDassert(cur_req->state == H5VL_IOD_PENDING);
                     ret = HG_Wait(*((hg_request_t *)cur_req->req), 0, &tmp_status);
                     if(HG_FAIL == ret) {
@@ -670,6 +669,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 req->state = H5VL_IOD_COMPLETED;
             }
 
+            H5VL_iod_request_delete(file, req);
+
 #ifdef H5_HAVE_INDEXING
             /* check whether index needs to be updated or not */
             if (info->idx_handle) {
@@ -711,7 +712,6 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             info->vl_len_bulk_handle = (hg_bulk_t *)H5MM_xfree(info->vl_len_bulk_handle);
             info = (H5VL_iod_write_info_t *)H5MM_xfree(info);
             req->data = NULL;
-            H5VL_iod_request_delete(file, req);
             break;
         }
     case HG_DSET_READ:
