@@ -248,6 +248,7 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 
                     tmp_req = cur_req->file_next;
 
+                    printf("Request type: %d\n", cur_req->type);
                     HDassert(cur_req->state == H5VL_IOD_PENDING);
                     ret = HG_Wait(*((hg_request_t *)cur_req->req), 0, &tmp_status);
                     if(HG_FAIL == ret) {
@@ -1659,6 +1660,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             int *status = (int *)req->data;
 
+            printf("Index info is now set\n");
             if(SUCCEED != *status) {
                 HERROR(H5E_FUNC, H5E_CANTINIT, "set_index_info failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;

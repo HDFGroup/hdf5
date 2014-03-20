@@ -10383,7 +10383,7 @@ H5VL_iod_dataset_set_index_info(void *_dset, unsigned plugin_id,
     input.idx_metadata.buf_size = metadata_size;
 
     if(H5VL__iod_create_and_forward(H5VL_DSET_SET_INDEX_INFO_ID, HG_DSET_SET_INDEX_INFO,
-                                    (H5VL_iod_object_t *)dset, 0, num_parents, parent_reqs,
+                                    (H5VL_iod_object_t *)dset, 1, num_parents, parent_reqs,
                                     (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship set index info");
 

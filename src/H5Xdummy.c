@@ -391,8 +391,10 @@ H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
     H5X_dummy_t *dummy = (H5X_dummy_t *) idx_handle;
     H5X__dummy_query_data_t udata;
     hid_t space_id, type_id;
+    hid_t rcxt_id;
     hsize_t dims[1];
     size_t nelmts;
+    size_t elmt_size = 0, buf_size = 0;
     void *buf;
     hbool_t result = FALSE;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -403,18 +405,31 @@ H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
 
     if (NULL == dummy)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
+#ifdef H5_HAVE_INDEXING
+    if (FAIL == H5Pget_xxpl_read_context(xxpl_id, &rcxt_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get trans_id from xapl");
+#endif
+
+    space_id = H5Dget_space(dummy->idx_anon_id);
+    type_id = H5Dget_type(dummy->idx_anon_id);
 
     nelmts = (size_t) H5Sget_select_npoints(space_id);
-    dims[0] = (hsize_t) nelmts;
+    elmt_size = H5Tget_size(type_id);
+    buf_size = nelmts * elmt_size;
 
-    /* create a 1-D selection to describe the data read in memory */
-//    if(FAIL == (mem_space = H5Screate_simple(1, dims, NULL)))
-//        HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
+    /* allocate buffer to hold data */
+    if(NULL == (buf = malloc(buf_size)))
+        HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate read buffer");
+
+    /* read data from index */
+    if (FAIL == H5Dread_ff(dummy->idx_anon_id, type_id, H5S_ALL, space_id,
+            H5P_DEFAULT, buf, rcxt_id, H5_EVENT_STACK_NULL))
+        HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
 
     if(FAIL == (udata.space_query = H5Scopy(space_id)))
-        HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace");
     if(H5Sselect_none(udata.space_query) < 0)
-        HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to reset selection");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to reset selection");
 
     udata.num_elmts = 0;
     udata.query_id = query_id;
@@ -422,7 +437,9 @@ H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
     /* iterate over every element and apply the query on it. If the
        query is not satisfied, then remove it from the query selection */
     if (H5Diterate(buf, type_id, space_id, H5X__dummy_get_query_data_cb, &udata) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to compute buffer size");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to compute buffer size");
+
+    *dataspace_id = udata.space_query;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
