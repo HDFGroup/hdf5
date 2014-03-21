@@ -118,7 +118,6 @@ usage(void)
         "\tset number of groups for the multiple group test\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-2\t\tuse Split-file together with MPIO\n");
-    printf("\t-p\t\tuse combo MPI-POSIX driver\n");
     printf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n",
 	ROW_FACTOR, COL_FACTOR);
     printf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
@@ -168,9 +167,6 @@ parse_options(int argc, char **argv)
 				return(1);
 			    }
 			    paraprefix = *argv;
-			    break;
-		case 'p':   /* Use the MPI-POSIX driver access */
-			    facc_type = FACC_MPIPOSIX;
 			    break;
 		case 'i':   /* Collective MPI-IO access with independent IO  */
 			    dxfer_coll_type = DXFER_INDEPENDENT_IO;
@@ -257,8 +253,7 @@ parse_options(int argc, char **argv)
  * Create the appropriate File access property list
  */
 hid_t
-create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type,
-                     hbool_t use_gpfs)
+create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
 {
     hid_t ret_pl = -1;
     herr_t ret;                 /* generic return value */
@@ -296,13 +291,6 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type,
 	ret = H5Pset_fapl_split(ret_pl, ".meta", mpio_pl, ".raw", mpio_pl);
 	VRFY((ret >= 0), "H5Pset_fapl_split succeeded");
 	H5Pclose(mpio_pl);
-	return(ret_pl);
-    }
-
-    if (l_facc_type == FACC_MPIPOSIX) {
-	/* set Parallel access with communicator */
-	ret = H5Pset_fapl_mpiposix(ret_pl, comm, use_gpfs);
-	VRFY((ret >= 0), "H5Pset_fapl_mpiposix succeeded");
 	return(ret_pl);
     }
 
@@ -353,8 +341,6 @@ int main(int argc, char **argv)
     /* Tests are generally arranged from least to most complexity... */
     AddTest("mpiodup", test_fapl_mpio_dup, NULL,
 	    "fapl_mpio duplicate", NULL);
-    AddTest("posixdup", test_fapl_mpiposix_dup, NULL,
-	    "fapl_mpiposix duplicate", NULL);
 
     AddTest("split", test_split_comm_access, NULL,
 	    "dataset using split communicators", PARATESTFILE);
@@ -551,12 +537,6 @@ int main(int argc, char **argv)
 
     /* Parse command line arguments */
     TestParseCmdLine(argc, argv);
-
-    if (facc_type == FACC_MPIPOSIX && MAINPROCESS){
-	printf("===================================\n"
-	       "   Using MPIPOSIX driver\n"
-	       "===================================\n");
-    }
 
     if (dxfer_coll_type == DXFER_INDEPENDENT_IO && MAINPROCESS){
 	printf("===================================\n"

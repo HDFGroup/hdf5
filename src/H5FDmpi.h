@@ -57,7 +57,6 @@ typedef enum H5FD_mpio_collective_opt_t {
 
 /* Include all the MPI VFL headers */
 #include "H5FDmpio.h"           /* MPI I/O file driver			*/
-#include "H5FDmpiposix.h"       /* MPI/posix I/O file driver            */
 
 #endif /* H5FDmpi_H */
 

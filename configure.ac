@@ -160,7 +160,6 @@ AC_MSG_RESULT([done])
 ## HDF_CXX: whether C++ is enabled. Default no.
 ## CXX: C++ compiler.
 ## HDF5_HL: whether high-level library is enabled. Default is yes.
-## GPFS: whether gpfs is enabled. Default no.
 ## LARGEFILE: whether largefile support is enabled. Default yes.
 ## INSTRUMENT: whether INSTRUMENT is enabled. No default set here.
 ## CODESTACK: whether CODESTACK is enabled. Default no.
@@ -182,7 +181,6 @@ AC_SUBST([FC2003]) HDF_FORTRAN2003=no
 AC_SUBST([HDF_CXX]) HDF_CXX=no
 AC_SUBST([CXX]) HDF_CXX=no
 AC_SUBST([HDF5_HL]) HDF5_HL=yes
-AC_SUBST([GPFS]) GPFS=no
 AC_SUBST([LARGEFILE]) LARGEFILE=yes
 AC_SUBST([INSTRUMENT])
 AC_SUBST([CODESTACK]) CODESTACK=no
@@ -2392,35 +2390,6 @@ else
 fi
 
 ## ----------------------------------------------------------------------
-## Checking to see if GPFS is available on this filesystem
-##
-AC_ARG_ENABLE([gpfs],
-              [AS_HELP_STRING([--enable-gpfs],
-                              [Enable GPFS hints for the MPI/POSIX file
-                               driver. [default=no]])],,
-              [enableval=no])
-
-case "X-$enableval" in
-  X-yes)
-    AC_CHECK_HEADERS([gpfs.h],
-                     [AC_MSG_CHECKING([for GPFS support])
-                     AC_TRY_COMPILE([#include <gpfs.h>],
-                                    [int fd = 0; gpfs_fcntl(fd, (void *)0);],
-                                    [AC_DEFINE([HAVE_GPFS], [1],
-                                               [Define if we have GPFS support])
-                                       AC_MSG_RESULT([yes])
-                                       LIBS="$LIBS -lgpfs"
-                                       GPFS="yes"],
-                                    [AC_MSG_RESULT([no])
-                                       GPFS="no"])])
-    ;;
-  X-no|*)
-    AC_MSG_CHECKING([for gpfs])
-    AC_MSG_RESULT([suppressed])
-    ;;
-esac
-   
-## ----------------------------------------------------------------------
 ## Turn on debugging by setting compiler flags
 ## This must come after the enable-production since it depends on production.
 ##
@@ -4456,7 +4425,7 @@ PARALLEL_MAKE=""
 FORTRAN_PARALLEL_MAKE=""
 
 if test -n "$TESTPARALLEL"; then
-  PARALLEL_MAKE="$TESTPARALLEL/Makefile $TESTPARALLEL/testph5.sh"
+  PARALLEL_MAKE="$TESTPARALLEL/Makefile"
 
   if test "X$HDF_FORTRAN" = "Xyes"; then
     FORTRAN_PARALLEL_MAKE=fortran/$TESTPARALLEL/Makefile
@@ -4532,7 +4501,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testlinks_env.sh
                  test/test_plugin.sh
                  testpar/Makefile
-                 testpar/testph5.sh
                  perform/Makefile
                  tools/Makefile
                  tools/h5dump/Makefile

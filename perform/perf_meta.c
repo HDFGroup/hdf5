@@ -29,7 +29,6 @@
 /* File_Access_type bits */
 #define FACC_DEFAULT	0x0	/* serial as default */
 #define FACC_MPIO	0x1	/* MPIO */
-#define FACC_MPIPOSIX   0x8	/* MPIPOSIX */
 
 /* Which test to run */
 int RUN_TEST = 0x0;     /* all tests as default */
@@ -129,11 +128,7 @@ parse_options(int argc, char **argv)
 			    }
 			    break;
 
-		case 'p':   /* Use the MPI-POSIX driver access */
-			    facc_type = FACC_MPIPOSIX;
-			    break;
-
-		case 'm':   /* Use the MPI-POSIX driver access */
+		case 'm':   /* Use the MPI-IO driver */
 			    facc_type = FACC_MPIO;
 			    break;
 
@@ -171,7 +166,7 @@ parse_options(int argc, char **argv)
 
     /* Check valid values */
 #ifndef H5_HAVE_PARALLEL
-    if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX)
+    if(facc_type == FACC_MPIO)
     {
         nerrors++;
         return(1);
@@ -215,19 +210,15 @@ parse_options(int argc, char **argv)
 static void
 usage(void)
 {
-    printf("Usage: perf_meta [-h] [-m] [-p] [-d<num_datasets>]"
+    printf("Usage: perf_meta [-h] [-m] [-d<num_datasets>]"
            "[-a<num_attributes>]\n"
            "\t[-n<batch_attributes>] [-f<option>] [-t<test>]\n");
     printf("\t-h"
 	"\t\t\thelp page.\n");
     printf("\t-m"
 	"\t\t\tset MPIO as the file driver when parallel HDF5\n"
-        "\t\t\t\tis enabled.  Either -m or -p has be to \n"
-        "\t\t\t\tspecified when running parallel program.\n");
-    printf("\t-p"
-	"\t\t\tset MPI POSIX as the file driver when parallel \n"
-	"\t\t\t\tHDF5 is enabled.  Either -m or -p has be to \n"
-        "\t\t\t\tspecified when running parallel program.\n");
+        "\t\t\t\tis enabled.  -m must be specified\n"
+        "\t\t\t\twhen running parallel program.\n");
     printf("\t-d<num_datasets>"
 	"\tset number of datasets for meta data \n"
         "\t\t\t\tperformance test\n");
@@ -372,7 +363,7 @@ create_attrs_1(void)
 #ifdef H5_HAVE_PARALLEL
     /* need the rank for printing data */
     int         mpi_rank;
-    if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX)
+    if(facc_type == FACC_MPIO)
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -416,7 +407,7 @@ create_attrs_1(void)
             goto error;
     } /* end for */
 
-    if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX) {
+    if(facc_type == FACC_MPIO) {
 #ifdef H5_HAVE_PARALLEL
         MPI_Barrier(MPI_COMM_WORLD);
 #endif /*H5_HAVE_PARALLEL*/
@@ -478,7 +469,7 @@ create_attrs_2(void)
 #ifdef H5_HAVE_PARALLEL
     /* need the rank for printing data */
     int         mpi_rank;
-    if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX)
+    if(facc_type == FACC_MPIO)
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -519,11 +510,10 @@ create_attrs_2(void)
             goto error;
     } /* end for */
 
-    if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX) {
 #ifdef H5_HAVE_PARALLEL
-    MPI_Barrier(MPI_COMM_WORLD);
+    if(facc_type == FACC_MPIO)
+        MPI_Barrier(MPI_COMM_WORLD);
 #endif /*H5_HAVE_PARALLEL*/
-    }
 
 #ifdef H5_HAVE_PARALLEL
     /* only process 0 reports if parallel */
@@ -584,7 +574,7 @@ create_attrs_3(void)
 #ifdef H5_HAVE_PARALLEL
     /* need the rank for printing data */
     int         mpi_rank;
-    if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX)
+    if(facc_type == FACC_MPIO)
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -633,11 +623,10 @@ create_attrs_3(void)
     	} /* end for */
     } /* end for */
 
-    if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX) {
 #ifdef H5_HAVE_PARALLEL
+    if(facc_type == FACC_MPIO)
         MPI_Barrier(MPI_COMM_WORLD);
 #endif /*H5_HAVE_PARALLEL*/
-    }
 
 #ifdef H5_HAVE_PARALLEL
     /* only process 0 reports if parallel */
@@ -709,8 +698,8 @@ void perf(p_time *perf_t, double start_t, double end_t)
 {
 	double t = end_t - start_t;
 
-    if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX) {
 #ifdef H5_HAVE_PARALLEL
+    if(facc_type == FACC_MPIO) {
         double reduced_t;
         double t_max, t_min;
         int    mpi_size, mpi_rank;
@@ -736,8 +725,9 @@ void perf(p_time *perf_t, double start_t, double end_t)
 	    if(t_min < perf_t->min)
 		perf_t->min = t_min;
         }
+    } else
 #endif /*H5_HAVE_PARALLEL*/
-    } else {
+    {
 	perf_t->total += t;
 
 	if(t > perf_t->max)
@@ -796,17 +786,17 @@ main(int argc, char **argv)
 #endif /*H5_HAVE_PARALLEL*/
 
     if(parse_options(argc, argv) != 0) {
-	   usage();
-	   return 0;
+       usage();
+       return 0;
     }
 
-    if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX) {
 #ifdef H5_HAVE_PARALLEL
+    if(facc_type == FACC_MPIO) {
         MPI_Init(&argc, &argv);
         MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-#endif /*H5_HAVE_PARALLEL*/
     }
+#endif /*H5_HAVE_PARALLEL*/
 
 #ifdef H5_HAVE_PARALLEL
     if (facc_type == FACC_DEFAULT || (facc_type != FACC_DEFAULT && MAINPROCESS))
@@ -814,14 +804,10 @@ main(int argc, char **argv)
         fprintf(stderr, "\t\tPerformance result of metadata for datasets and attributes\n\n");
 
     fapl = H5Pcreate (H5P_FILE_ACCESS);
-    if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX) {
 #ifdef H5_HAVE_PARALLEL
-        if(facc_type == FACC_DEFAULT || facc_type == FACC_MPIO)
-            H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
-        else if(facc_type == FACC_MPIPOSIX)
-            H5Pset_fapl_mpiposix(fapl, MPI_COMM_WORLD, FALSE);
+    if(facc_type == FACC_MPIO)
+        H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
 #endif /*H5_HAVE_PARALLEL*/
-    }
 
     nerrors += create_dspace() < 0 	?1:0;
 
@@ -837,12 +823,11 @@ main(int argc, char **argv)
 
     h5_cleanup(FILENAME, fapl);
 
-    if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX) {
 #ifdef H5_HAVE_PARALLEL
+    if(facc_type == FACC_MPIO)
         /* MPI_Finalize must be called AFTER H5close which may use MPI calls */
         MPI_Finalize();
 #endif /*H5_HAVE_PARALLEL*/
-    }
 
     if (nerrors) goto error;
 #ifdef H5_HAVE_PARALLEL

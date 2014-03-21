@@ -613,7 +613,6 @@ coll_chunktest(const char* filename,
   unsigned prop_value;
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
-  hbool_t  use_gpfs = FALSE;
   int      mpi_size,mpi_rank;
 
   herr_t   status;
@@ -631,7 +630,7 @@ coll_chunktest(const char* filename,
 
   /* Create the data space */
 
-  acc_plist = create_faccess_plist(comm,info,facc_type,use_gpfs);
+  acc_plist = create_faccess_plist(comm,info,facc_type);
   VRFY((acc_plist >= 0),"");
 
   file = H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_plist);
@@ -918,7 +917,7 @@ coll_chunktest(const char* filename,
   data_origin1 = (int *)HDmalloc(dims[0]*dims[1]*sizeof(int));
   VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
-  acc_plist = create_faccess_plist(comm, info, facc_type, use_gpfs);
+  acc_plist = create_faccess_plist(comm, info, facc_type);
   VRFY((acc_plist >= 0),"MPIO creation property list succeeded");
 
   file = H5Fopen(filename,H5F_ACC_RDONLY,acc_plist);

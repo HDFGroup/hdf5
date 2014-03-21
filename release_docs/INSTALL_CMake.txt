@@ -481,7 +481,6 @@ HDF5_ENABLE_CODESTACK          "Enable the function stack tracing (for developer
 HDF5_ENABLE_COVERAGE           "Enable code coverage for Libraries and Programs"              OFF
 HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols"                         ON
 HDF5_ENABLE_EMBEDDED_LIBINFO   "embed library info into executables"                          ON
-HDF5_ENABLE_GPFS               "Enable GPFS hints for the MPI/POSIX file driver"              OFF
 HDF5_ENABLE_HSIZET             "Enable datasets larger than memory"                           ON
 HDF5_ENABLE_LARGE_FILE         "Enable support for large (64-bit) files on Linux."            ON
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF

@@ -788,7 +788,6 @@ HAVE_DMALLOC
 CODESTACK
 INSTRUMENT
 LARGEFILE
-GPFS
 HDF5_HL
 CXX
 HDF_CXX
@@ -913,7 +912,6 @@ with_zlib
 with_szlib
 enable_threadsafe
 with_pthread
-enable_gpfs
 enable_debug
 enable_codestack
 enable_metadata_trace_file
@@ -1596,8 +1594,6 @@ Optional Features:
   --enable-production     Determines how to run the compiler.
   --disable-largefile     omit support for large files
   --enable-threadsafe     Enable thread-safe capability
-  --enable-gpfs           Enable GPFS hints for the MPI/POSIX file driver.
-                          [default=no]
   --enable-debug=all      Turn on debugging in all packages. One may also
                           specify a comma-separated list of package names
                           without the leading H5 or the word no. The default
@@ -3975,7 +3971,6 @@ $as_echo "done" >&6; }
 ## HDF_CXX: whether C++ is enabled. Default no.
 ## CXX: C++ compiler.
 ## HDF5_HL: whether high-level library is enabled. Default is yes.
-## GPFS: whether gpfs is enabled. Default no.
 ## LARGEFILE: whether largefile support is enabled. Default yes.
 ## INSTRUMENT: whether INSTRUMENT is enabled. No default set here.
 ## CODESTACK: whether CODESTACK is enabled. Default no.
@@ -3997,7 +3992,6 @@ $as_echo "done" >&6; }
  HDF_CXX=no
  HDF_CXX=no
  HDF5_HL=yes
- GPFS=no
  LARGEFILE=yes
 
  CODESTACK=no
@@ -27683,74 +27677,6 @@ $as_echo "no" >&6; }
 fi
 
 ## ----------------------------------------------------------------------
-## Checking to see if GPFS is available on this filesystem
-##
-# Check whether --enable-gpfs was given.
-if test "${enable_gpfs+set}" = set; then :
-  enableval=$enable_gpfs;
-else
-  enableval=no
-fi
-
-
-case "X-$enableval" in
-  X-yes)
-    for ac_header in gpfs.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "gpfs.h" "ac_cv_header_gpfs_h" "$ac_includes_default"
-if test "x$ac_cv_header_gpfs_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_GPFS_H 1
-_ACEOF
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GPFS support" >&5
-$as_echo_n "checking for GPFS support... " >&6; }
-                     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <gpfs.h>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-int fd = 0; gpfs_fcntl(fd, (void *)0);
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-
-$as_echo "#define HAVE_GPFS 1" >>confdefs.h
-
-                                       { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-                                       LIBS="$LIBS -lgpfs"
-                                       GPFS="yes"
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-                                       GPFS="no"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
-done
-
-    ;;
-  X-no|*)
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gpfs" >&5
-$as_echo_n "checking for gpfs... " >&6; }
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
-$as_echo "suppressed" >&6; }
-    ;;
-esac
-
-## ----------------------------------------------------------------------
 ## Turn on debugging by setting compiler flags
 ## This must come after the enable-production since it depends on production.
 ##
@@ -31244,7 +31170,7 @@ PARALLEL_MAKE=""
 FORTRAN_PARALLEL_MAKE=""
 
 if test -n "$TESTPARALLEL"; then
-  PARALLEL_MAKE="$TESTPARALLEL/Makefile $TESTPARALLEL/testph5.sh"
+  PARALLEL_MAKE="$TESTPARALLEL/Makefile"
 
   if test "X$HDF_FORTRAN" = "Xyes"; then
     FORTRAN_PARALLEL_MAKE=fortran/$TESTPARALLEL/Makefile
@@ -33192,7 +33118,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5repack/h5repack_plugin.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
+ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh testpar/Makefile perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5repack/h5repack_plugin.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
 
 
 cat >confcache <<\_ACEOF
@@ -34468,7 +34394,6 @@ do
     "test/testlinks_env.sh") CONFIG_FILES="$CONFIG_FILES test/testlinks_env.sh" ;;
     "test/test_plugin.sh") CONFIG_FILES="$CONFIG_FILES test/test_plugin.sh" ;;
     "testpar/Makefile") CONFIG_FILES="$CONFIG_FILES testpar/Makefile" ;;
-    "testpar/testph5.sh") CONFIG_FILES="$CONFIG_FILES testpar/testph5.sh" ;;
     "perform/Makefile") CONFIG_FILES="$CONFIG_FILES perform/Makefile" ;;
     "tools/Makefile") CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
     "tools/h5dump/Makefile") CONFIG_FILES="$CONFIG_FILES tools/h5dump/Makefile" ;;

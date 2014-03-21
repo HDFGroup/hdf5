@@ -69,7 +69,6 @@ Features:
 Clear file buffers before write: @CLEARFILEBUF@
            Using memory checker: @USINGMEMCHECKER@
          Function Stack Tracing: @CODESTACK@
-                           GPFS: @GPFS@
       Strict File Format Checks: @STRICT_FORMAT_CHECKS@
    Optimization Instrumentation: @INSTRUMENT@
        Large File Support (LFS): @LARGEFILE@

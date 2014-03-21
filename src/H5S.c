@@ -67,10 +67,6 @@ static H5S_t *H5S_decode(const unsigned char *buf);
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-#ifdef H5_HAVE_PARALLEL
-/* Global vars whose value can be set from environment variable also */
-hbool_t H5S_mpi_opt_types_g = TRUE;
-#endif /* H5_HAVE_PARALLEL */
 
 
 /*******************/
@@ -118,15 +114,6 @@ H5S_init_interface(void)
     /* Initialize the atom group for the file IDs */
     if(H5I_register_type(H5I_DATASPACE_CLS) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize interface")
-
-#ifdef H5_HAVE_PARALLEL
-    {
-        /* Allow MPI buf-and-file-type optimizations? */
-        const char *s = HDgetenv ("HDF5_MPI_OPT_TYPES");
-        if (s && HDisdigit(*s))
-            H5S_mpi_opt_types_g = (hbool_t)HDstrtol (s, NULL, 0);
-    }
-#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

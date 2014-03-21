@@ -914,8 +914,6 @@ H5_FCDLL int_f nh5oget_comment_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *
 #define nh5pset_btree_ratios_c         H5_FC_FUNC_(h5pset_btree_ratios_c, H5PSET_BTREE_RATIOS_C)
 #define nh5pset_fapl_mpio_c         H5_FC_FUNC_(h5pset_fapl_mpio_c, H5PSET_FAPL_MPIO_C)
 #define nh5pget_fapl_mpio_c         H5_FC_FUNC_(h5pget_fapl_mpio_c, H5PGET_FAPL_MPIO_C)
-#define nh5pset_fapl_mpiposix_c     H5_FC_FUNC_(h5pset_fapl_mpiposix_c, H5PSET_FAPL_MPIPOSIX_C)
-#define nh5pget_fapl_mpiposix_c     H5_FC_FUNC_(h5pget_fapl_mpiposix_c, H5PGET_FAPL_MPIPOSIX_C)
 #define nh5pset_dxpl_mpio_c        H5_FC_FUNC_(h5pset_dxpl_mpio_c, H5PSET_DXPL_MPIO_C)
 #define nh5pget_dxpl_mpio_c        H5_FC_FUNC_(h5pget_dxpl_mpio_c, H5PGET_DXPL_MPIO_C)
 #define nh5pget_fclose_degree_c    H5_FC_FUNC_(h5pget_fclose_degree_c, H5PGET_FCLOSE_DEGREE_C)
@@ -1072,8 +1070,6 @@ H5_FCDLL int_f nh5pget_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* mid
 H5_FCDLL int_f nh5pset_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* right);
 H5_FCDLL int_f nh5pget_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info);
 H5_FCDLL int_f nh5pset_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info);
-H5_FCDLL int_f nh5pget_fapl_mpiposix_c(hid_t_f *prp_id, int_f* comm, int_f* flag);
-H5_FCDLL int_f nh5pset_fapl_mpiposix_c(hid_t_f *prp_id, int_f* comm, int_f* flag);
 H5_FCDLL int_f nh5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode);
 H5_FCDLL int_f nh5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode);
 H5_FCDLL int_f nh5pset_fclose_degree_c(hid_t_f *fapl, int_f *degree);

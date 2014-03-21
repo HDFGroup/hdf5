@@ -144,13 +144,6 @@ if (WIN32)
   endif (NOT UNIX AND NOT CYGWIN AND NOT MINGW)
 endif (WIN32)
 
-#if (WIN32)
-#  set (DEFAULT_STREAM_VFD OFF)
-#else (WIN32)
-#  set (DEFAULT_STREAM_VFD ON)
-#endif (WIN32)
-#option (HDF5_STREAM_VFD "Compile Stream Virtual File Driver support" ${DEFAULT_STREAM_VFD})
-
 # TODO --------------------------------------------------------------------------
 # Should the Default Virtual File Driver be compiled?
 # This is hard-coded now but option should added to match configure
@@ -817,16 +810,6 @@ if (NOT WINDOWS)
 endif (NOT WINDOWS)
 
 #-----------------------------------------------------------------------------
-#  Check for the Stream VFD driver
-#-----------------------------------------------------------------------------
-if (HDF5_STREAM_VFD)
-  CHECK_INCLUDE_FILE_CONCAT ("netdb.h"       H5_HAVE_NETDB_H)
-  CHECK_INCLUDE_FILE_CONCAT ("netinet/tcp.h" H5_HAVE_NETINET_TCP_H)
-  CHECK_INCLUDE_FILE_CONCAT ("sys/filio.h"   H5_HAVE_SYS_FILIO_H)
-  set (H5_HAVE_STREAM 1)
-endif (HDF5_STREAM_VFD)
-
-#-----------------------------------------------------------------------------
 # Check if InitOnceExecuteOnce is available
 #-----------------------------------------------------------------------------
 if (WINDOWS)
@@ -890,18 +873,6 @@ if (WINDOWS)
   endif ("${H5_HAVE_IOEO}" MATCHES "^${H5_HAVE_IOEO}$")
   endif (NOT HDF5_NO_IOEO_TEST)
 endif (WINDOWS)
-
-#-----------------------------------------------------------------------------
-# Option to see if GPFS is available on this filesystem --enable-gpfs
-#-----------------------------------------------------------------------------
-option (HDF5_ENABLE_GPFS "Enable GPFS hints for the MPI/POSIX file driver" OFF)
-if (HDF5_ENABLE_GPFS)
-  CHECK_INCLUDE_FILE_CONCAT ("gpfs.h"        HAVE_GPFS)
-  if (HAVE_GPFS)
-    HDF5_FUNCTION_TEST (HAVE_GPFS)  
-  endif (HAVE_GPFS)
-endif (HDF5_ENABLE_GPFS)
-MARK_AS_ADVANCED (HDF5_ENABLE_GPFS)
 
 #-----------------------------------------------------------------------------
 # Determine how 'inline' is used

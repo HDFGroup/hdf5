@@ -40,7 +40,6 @@ test_split_comm_access(void)
     int newrank, newprocs;
     hid_t fid;			/* file IDs */
     hid_t acc_tpl;		/* File access properties */
-    hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     herr_t ret;			/* generic return value */
     const char *filename;
 
@@ -68,7 +67,7 @@ test_split_comm_access(void)
 	MPI_Comm_rank(comm,&sub_mpi_rank);
 
 	/* setup file access template */
-	acc_tpl = create_faccess_plist(comm, info, facc_type, use_gpfs);
+	acc_tpl = create_faccess_plist(comm, info, facc_type);
 	VRFY((acc_tpl >= 0), "");
 
 	/* create the file collectively */
