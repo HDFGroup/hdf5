@@ -1112,8 +1112,10 @@ done:
     op_data = (op_data_t *)H5MM_xfree(op_data);
     H5VL_iod_type_info_reset(&type_info);
 
-    if(buf)
+    if(buf) {
         free(buf);
+        buf = NULL;
+    }
 
     /* close the dataset if we opened it in this routine */
     if(TRUE == opened_locally) {

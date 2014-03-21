@@ -779,8 +779,10 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
             fprintf(stderr, "Persisting Last TID (%"PRIu64") before closing\n", trans_num);
 #endif
             /* persist the last transaction */
-            if(iod_trans_persist(coh, trans_num, NULL, NULL) < 0)
+            if((ret = iod_trans_persist(coh, trans_num, NULL, NULL)) < 0) {
+                fprintf(stderr, "iod_trans_persist failed. %d (%s).\n", ret, strerror(-ret));
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't persist before closing container");
+            }
         }
     }
 

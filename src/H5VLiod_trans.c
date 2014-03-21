@@ -276,7 +276,7 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
     }
 
-    if(ret != 0) {
+    if(ret != 0 && -ESHUTDOWN != ret) {
         for(i=0 ; i<num_persist_retry; i++) {
             fprintf(stderr, "Retry Persist # %d on %"PRIu64".\n", i+1, tid);
             ret = iod_trans_persist(coh, tid, NULL, NULL);
@@ -455,8 +455,8 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Transaction Finish %"PRIu64"\n", trans_num);
 #endif
 
-    IOD_OBJID_SETTYPE(oidkv_id, IOD_OBJ_KV)
-    IOD_OBJID_SETOWNER_APP(oidkv_id)
+    //IOD_OBJID_SETTYPE(oidkv_id, IOD_OBJ_KV)
+    //IOD_OBJID_SETOWNER_APP(oidkv_id)
 
     oid_index[0] = input->kv_oid_index;
     oid_index[1] = input->array_oid_index;
@@ -497,6 +497,30 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction");
     }
 
+    {
+        int iod_corrupt_step = -1;
+        char *cor_step = NULL;
+
+        cor_step = getenv ("H5ENV_IOD_STEP_CORRUPT");
+        if(NULL != cor_step) {
+            iod_corrupt_step = atoi(cor_step);
+
+            if((int)trans_num == iod_corrupt_step+3) {
+                uint64_t oid;
+
+                fprintf (stderr, "CORRUPTING at VPIC step %d at trans_num %d,array ID %"PRIx64", \n", 
+                         iod_corrupt_step, (int)trans_num, oid);
+                oid = (iod_corrupt_step) * 8 + 1;
+                IOD_OBJID_SETOWNER_APP(oid)
+                IOD_OBJID_SETTYPE(oid, IOD_OBJ_ARRAY)
+
+                ret = corrupt_data("eff_vpic", oid, trans_num, 5, 1);
+                if(ret < 0) {
+                    fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
+                }
+            }
+        }
+    }
     /* if the flag is true, acquire a read context on the finished transaction */
     if(TRUE == acquire) {
 #if H5VL_IOD_DEBUG

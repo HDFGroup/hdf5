@@ -749,11 +749,6 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                         req->status = H5ES_STATUS_FAIL;
                         req->state = H5VL_IOD_COMPLETED;
                     }
-#if H5VL_IOD_DEBUG
-                    if(!raw_cs_scope & H5_CHECKSUM_TRANSFER) {
-                        printf("NO TRANSFER DATA INTEGRITY CHECKS ON RAW DATA READ\n");
-                    }
-#endif
 
                     /* If the app gave us a buffer to store the checksum, then put it there */
                     if(info->cs_ptr)
@@ -1018,11 +1013,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                             req->status = H5ES_STATUS_FAIL;
                             req->state = H5VL_IOD_COMPLETED;
                         }
-#if H5VL_IOD_DEBUG
-                        if(!raw_cs_scope & H5_CHECKSUM_TRANSFER) {
-                            printf("NO TRANSFER DATA INTEGRITY CHECKS ON RAW DATA READ\n");
-                        }
-#endif
+
                         /* If the app gave us a buffer to store the checksum, then put it there */
                         if(info->val_cs_ptr)
                             *info->val_cs_ptr = internal_cs;

@@ -527,7 +527,7 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
     H5VL__iod_request_add_to_axe_list(request);
     axe_info->count = axe_list.last_released_task - axe_info->start_range + 1;
 
-#if H5VL_IOD_DEBUG
+#if 0//H5VL_IOD_DEBUG
     printf("Operation %"PRIu64" Dependencies: ", request->axe_id);
     for(u=0 ; u<num_parents ; u++)
         printf("%"PRIu64" ", axe_info->parent_axe_ids[u]);
@@ -8428,9 +8428,6 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get value size");
     }
     else {
-#if H5VL_IOD_DEBUG        
-        printf("NO DATA INTEGRITY CHECKS ON RAW DATA WRITTEN\n");
-#endif
         /* get the value size and checksum from the provided value datatype & buffer */
         if(H5VL_iod_map_get_size(val_mem_type_id, value, NULL, 
                                  &val_size, &val_type_class) < 0)
@@ -9363,7 +9360,7 @@ H5VL_iod_tr_finish(H5TR_t *tr, hbool_t acquire, hid_t trfpl_id, void **req)
     input.trfpl_id = trfpl_id;
     input.acquire = acquire;
     input.client_rank = (uint32_t)tr->file->my_rank;
-    input.oidkv_id = (iod_obj_id_t)(tr->file->num_procs * 3);
+    input.oidkv_id = tr->file->remote_file.oidkv_id;
     input.kv_oid_index = tr->file->remote_file.kv_oid_index;
     input.array_oid_index = tr->file->remote_file.array_oid_index;
     input.blob_oid_index = tr->file->remote_file.blob_oid_index;
