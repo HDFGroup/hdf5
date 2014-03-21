@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5stat --links=8 h5stat_threshold.h5'
-#############################
 Filename: h5stat_threshold.h5
 File information
 	# of unique groups: 4

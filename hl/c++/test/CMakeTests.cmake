@@ -5,4 +5,4 @@
 ##############################################################################
 ##############################################################################
   
-  ADD_TEST (NAME hl_ptableTest COMMAND $<TARGET_FILE:hl_ptableTest>)
+  add_test (NAME hl_ptableTest COMMAND $<TARGET_FILE:hl_ptableTest>)

@@ -191,9 +191,6 @@ TOOLTEST() {
    # Run test.
    TESTING $STAT $@
    (
-      echo "#############################"
-      echo "Expected output for '$STAT $@'" 
-      echo "#############################"
       cd $TESTDIR
       $RUNSERIAL $STAT_BIN $@
    ) >$actual 2>$actual_err

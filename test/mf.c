@@ -36,7 +36,7 @@
 
 #include "H5FLprivate.h"
 #include "H5Iprivate.h"
-#include "H5Vprivate.h"
+#include "H5VMprivate.h"
 
 #define FILENAME_LEN		1024
 

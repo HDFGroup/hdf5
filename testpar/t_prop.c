@@ -28,6 +28,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
     hid_t pl;                   /* Decoded property list */
     void *buf = NULL;
     size_t buf_size = 0;
+    int casted_size;
     herr_t ret;         	/* Generic return value */
 
     if(mpi_rank == 0) {
@@ -40,13 +41,17 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
         ret = H5Pencode(orig_pl, buf, &buf_size);
         VRFY((ret >= 0), "H5Pencode succeeded");
 
-        MPI_Isend(&buf_size, 1, MPI_INT, recv_proc, 123, MPI_COMM_WORLD, &req[0]);
-        MPI_Isend(buf, (int)buf_size, MPI_BYTE, recv_proc, 124, MPI_COMM_WORLD, &req[1]);
+        /* this is a temp fix to send this size_t */
+        casted_size = (int)buf_size;
+
+        MPI_Isend(&casted_size, 1, MPI_INT, recv_proc, 123, MPI_COMM_WORLD, &req[0]);
+        MPI_Isend(buf, casted_size, MPI_BYTE, recv_proc, 124, MPI_COMM_WORLD, &req[1]);
     } /* end if */
     if(mpi_rank == recv_proc) {
-        MPI_Recv(&buf_size, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
+        MPI_Recv(&casted_size, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
+        buf_size = casted_size;
         buf = (uint8_t *)HDmalloc(buf_size);
-        MPI_Recv(buf, (int)buf_size, MPI_BYTE, 0, 124, MPI_COMM_WORLD, &status);
+        MPI_Recv(buf, casted_size, MPI_BYTE, 0, 124, MPI_COMM_WORLD, &status);
 
         pl = H5Pdecode(buf);
         VRFY((pl >= 0), "H5Pdecode succeeded");
@@ -67,8 +72,6 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
 
     return(0);
 }
-
-
 
 void
 test_plist_ed(void)

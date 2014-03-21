@@ -36,7 +36,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5HFpkg.h"		/* Fractal heaps			*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 /****************/
 /* Local Macros */
@@ -213,7 +213,7 @@ H5HF_man_iter_start_offset(H5HF_hdr_t *hdr, hid_t dxpl_id,
 
             /* Compute # of rows in context indirect block */
             child_size = hdr->man_dtable.row_block_size[biter->curr->up->row];
-            iblock_nrows = (H5V_log2_gen(child_size) - hdr->man_dtable.first_row_bits) + 1;
+            iblock_nrows = (H5VM_log2_gen(child_size) - hdr->man_dtable.first_row_bits) + 1;
         } /* end else */
 
         /* Load indirect block for this context location */

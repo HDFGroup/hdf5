@@ -514,7 +514,7 @@ H5P_lacc_elink_pref_enc(const void *value, void **_pp, size_t *size)
         len = HDstrlen(elink_pref);
 
     enc_value = (uint64_t)len;
-    enc_size = H5V_limit_enc_size(enc_value);
+    enc_size = H5VM_limit_enc_size(enc_value);
     HDassert(enc_size < 256);
 
     if(NULL != *pp) {

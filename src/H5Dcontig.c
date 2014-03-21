@@ -43,7 +43,7 @@
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"		/* Property lists			*/
-#include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5VMprivate.h"		/* Vector and array functions		*/
 
 
 /****************/
@@ -199,7 +199,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__contig_fill(H5D_t *dset, hid_t dxpl_id)
+H5D__contig_fill(const H5D_t *dset, hid_t dxpl_id)
 {
     H5D_io_info_t ioinfo;       /* Dataset I/O info */
     H5D_storage_t store;        /* Union of storage info for dataset */
@@ -516,6 +516,7 @@ H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__contig_io_init() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5D__contig_io_init_mdset
  *
@@ -626,19 +627,15 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md,
     else
         sel_hyper_flag = TRUE;
 
-    /* Check if file selection is a hyperslab selection */
-    if(sel_hyper_flag) {
-       /*
-        * This section is referred from H5D__create_piece_file_map_hyper
-        * as part of multi-dset work
-        * Note: may be able to make a seperate function as a seperate 
-        * task later.
-        */
-        {
+    /*
+     * This block is referred from H5D__create_piece_file_map_hyper as part of
+     * multi-dset work
+     * Note: may be able to make a seperate function as a seperate task later.
+     */
+    {
         unsigned    u;
 
-        /* Sanity check */
-        HDassert(dinfo->f_ndims > 0);
+        
 
         /* if selected elements exist */
         if (dinfo->nelmts) {
@@ -652,10 +649,16 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md,
             if(NULL == (tmp_fspace = H5S_copy(dinfo->file_space, TRUE, FALSE)))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
-            /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
-            if(H5S_hyper_convert(tmp_fspace) < 0) {
-                (void)H5S_close(tmp_fspace);
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
+            /* Actions specific to hyperslab selections */
+            if(sel_hyper_flag) {
+                /* Sanity check */
+                HDassert(dinfo->f_ndims > 0);
+
+                /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
+                if(H5S_hyper_convert(tmp_fspace) < 0) {
+                    (void)H5S_close(tmp_fspace);
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
+                } /* end if */
             } /* end if */
 
             /* Add temporary chunk to the list of pieces */
@@ -710,11 +713,11 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md,
         
             /* only scratch for this dset */
             /* Clean hyperslab span's "scratch" information */
-            if(H5S_hyper_reset_scratch(new_piece_info->fspace) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
+            if(sel_hyper_flag)
+                if(H5S_hyper_reset_scratch(new_piece_info->fspace) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
         } /* end if */
-        } /* referred from H5D__create_piece_file_map_hype */
-    }
+    } /* end block referred from H5D__create_piece_file_map_hyper */
 
 done:
     if(ret_value < 0) {
@@ -860,7 +863,7 @@ static herr_t
 H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
     void *_udata)
 {
-    H5D_contig_readvv_sieve_ud_t *udata = (H5D_contig_readvv_sieve_ud_t *)_udata; /* User data for H5V_opvv() operator */
+    H5D_contig_readvv_sieve_ud_t *udata = (H5D_contig_readvv_sieve_ud_t *)_udata; /* User data for H5VM_opvv() operator */
     H5F_t *file = udata->file;        /* File for dataset */
     H5D_rdcdc_t *dset_contig = udata->dset_contig; /* Cached information about contiguous data */
     const H5D_contig_storage_t *store_contig = udata->store_contig;    /* Contiguous storage info for this I/O operation */
@@ -1026,7 +1029,7 @@ done:
 static herr_t
 H5D__contig_readvv_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata)
 {
-    H5D_contig_readvv_ud_t *udata = (H5D_contig_readvv_ud_t *)_udata; /* User data for H5V_opvv() operator */
+    H5D_contig_readvv_ud_t *udata = (H5D_contig_readvv_ud_t *)_udata; /* User data for H5VM_opvv() operator */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1079,9 +1082,9 @@ H5D__contig_readvv(const H5D_io_info_t *io_info,
 
     /* Check if data sieving is enabled */
     if(H5F_HAS_FEATURE(io_info->dset->oloc.file, H5FD_FEAT_DATA_SIEVE)) {
-        H5D_contig_readvv_sieve_ud_t udata;     /* User data for H5V_opvv() operator */
+        H5D_contig_readvv_sieve_ud_t udata;     /* User data for H5VM_opvv() operator */
 
-        /* Set up user data for H5V_opvv() */
+        /* Set up user data for H5VM_opvv() */
         udata.file = io_info->dset->oloc.file;
         udata.dset_contig = &(io_info->dset->shared->cache.contig);
         udata.store_contig = &(io_info->store->contig);
@@ -1089,22 +1092,22 @@ H5D__contig_readvv(const H5D_io_info_t *io_info,
         udata.dxpl_id = io_info->dxpl_id;
 
         /* Call generic sequence operation routine */
-        if((ret_value = H5V_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
+        if((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
                 mem_max_nseq, mem_curr_seq, mem_len_arr, mem_off_arr,
                 H5D__contig_readvv_sieve_cb, &udata)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPERATE, FAIL, "can't perform vectorized sieve buffer read")
     } /* end if */
     else {
-        H5D_contig_readvv_ud_t udata;     /* User data for H5V_opvv() operator */
+        H5D_contig_readvv_ud_t udata;     /* User data for H5VM_opvv() operator */
 
-        /* Set up user data for H5V_opvv() */
+        /* Set up user data for H5VM_opvv() */
         udata.file = io_info->dset->oloc.file;
         udata.dset_addr = io_info->store->contig.dset_addr;
         udata.rbuf = (unsigned char *)io_info->u.rbuf;
         udata.dxpl_id = io_info->dxpl_id;
 
         /* Call generic sequence operation routine */
-        if((ret_value = H5V_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
+        if((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
                 mem_max_nseq, mem_curr_seq, mem_len_arr, mem_off_arr,
                 H5D__contig_readvv_cb, &udata)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPERATE, FAIL, "can't perform vectorized read")
@@ -1131,7 +1134,7 @@ static herr_t
 H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
     void *_udata)
 {
-    H5D_contig_writevv_sieve_ud_t *udata = (H5D_contig_writevv_sieve_ud_t *)_udata; /* User data for H5V_opvv() operator */
+    H5D_contig_writevv_sieve_ud_t *udata = (H5D_contig_writevv_sieve_ud_t *)_udata; /* User data for H5VM_opvv() operator */
     H5F_t *file = udata->file;        /* File for dataset */
     H5D_rdcdc_t *dset_contig = udata->dset_contig; /* Cached information about contiguous data */
     const H5D_contig_storage_t *store_contig = udata->store_contig;    /* Contiguous storage info for this I/O operation */
@@ -1348,7 +1351,7 @@ done:
 static herr_t
 H5D__contig_writevv_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata)
 {
-    H5D_contig_writevv_ud_t *udata = (H5D_contig_writevv_ud_t *)_udata; /* User data for H5V_opvv() operator */
+    H5D_contig_writevv_ud_t *udata = (H5D_contig_writevv_ud_t *)_udata; /* User data for H5VM_opvv() operator */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1400,9 +1403,9 @@ H5D__contig_writevv(const H5D_io_info_t *io_info,
 
     /* Check if data sieving is enabled */
     if(H5F_HAS_FEATURE(io_info->dset->oloc.file, H5FD_FEAT_DATA_SIEVE)) {
-        H5D_contig_writevv_sieve_ud_t udata;    /* User data for H5V_opvv() operator */
+        H5D_contig_writevv_sieve_ud_t udata;    /* User data for H5VM_opvv() operator */
 
-        /* Set up user data for H5V_opvv() */
+        /* Set up user data for H5VM_opvv() */
         udata.file = io_info->dset->oloc.file;
         udata.dset_contig = &(io_info->dset->shared->cache.contig);
         udata.store_contig = &(io_info->store->contig);
@@ -1410,22 +1413,22 @@ H5D__contig_writevv(const H5D_io_info_t *io_info,
         udata.dxpl_id = io_info->dxpl_id;
 
         /* Call generic sequence operation routine */
-        if((ret_value = H5V_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
+        if((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
                 mem_max_nseq, mem_curr_seq, mem_len_arr, mem_off_arr,
                 H5D__contig_writevv_sieve_cb, &udata)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPERATE, FAIL, "can't perform vectorized sieve buffer write")
     } /* end if */
     else {
-        H5D_contig_writevv_ud_t udata;     /* User data for H5V_opvv() operator */
+        H5D_contig_writevv_ud_t udata;     /* User data for H5VM_opvv() operator */
 
-        /* Set up user data for H5V_opvv() */
+        /* Set up user data for H5VM_opvv() */
         udata.file = io_info->dset->oloc.file;
         udata.dset_addr = io_info->store->contig.dset_addr;
         udata.wbuf = (const unsigned char *)io_info->u.wbuf;
         udata.dxpl_id = io_info->dxpl_id;
 
         /* Call generic sequence operation routine */
-        if((ret_value = H5V_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
+        if((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
                 mem_max_nseq, mem_curr_seq, mem_len_arr, mem_off_arr,
                 H5D__contig_writevv_cb, &udata)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPERATE, FAIL, "can't perform vectorized read")

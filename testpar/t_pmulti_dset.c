@@ -114,7 +114,7 @@ test_pmdset(size_t niter, unsigned flags)
     unsigned op_data_incr;
     size_t i, j, k, l, m, n, o;
 
-    if(mpi_rank == 1)
+    if(mpi_rank == 0)
         TESTING("random I/O");
 
     /* Calculate maximum number of datasets */
@@ -351,8 +351,9 @@ test_pmdset(size_t niter, unsigned flags)
                         } /* end for */
 
                         /* Update dataset usage array if writing */
-                        for(m = 0; m < npoints; m++)
-                            dset_usagei[k][points[2 * m]][points[(2 * m) + 1]] = (unsigned char)1;
+                        if(!do_read)
+                            for(m = 0; m < npoints; m++)
+                                dset_usagei[k][points[2 * m]][points[(2 * m) + 1]] = (unsigned char)1;
 
                         /* Select points in file if this is the current process
                          */
@@ -471,7 +472,7 @@ test_pmdset(size_t niter, unsigned flags)
     free(efbuf);
     efbuf = NULL;
 
-    if(mpi_rank == 1)
+    if(mpi_rank == 0)
         PASSED();
 
     return 0;
@@ -552,14 +553,14 @@ main(int argc, char *argv[])
 
     for(i = 0; i <= MDSET_ALL_FLAGS; i++) {
         /* Print flag configuration */
-        if(mpi_rank == 1) {
+        if(mpi_rank == 0) {
             puts("\nConfiguration:");
             printf("  Layout:     %s\n", (i & MDSET_FLAG_CHUNK) ? "Chunked" : "Contiguous");
             printf("  Shape same: %s\n", (i & MDSET_FLAG_SHAPESAME) ? "Yes" : "No");
             printf("  I/O type:   %s\n", (i & MDSET_FLAG_MDSET) ? "Multi" : "Single");
             printf("  MPI I/O type: %s\n", (i & MDSET_FLAG_COLLECTIVE) ? "Collective" : "Independent");
         } /* end if */
-    
+
         nerrors += test_pmdset(100, i);
     } /* end for */
 

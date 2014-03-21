@@ -1,6 +1,3 @@
-#############################
-Expected output for err_compat
-#############################
 Testing error API H5Eset/get_auto                                     Testing error API based on data I/O                                   All error API tests passed.
    This program tests the Error API compatible with HDF5 version (number).  There're supposed to be some error messages
 ********* Print error stack in HDF5 default way *********

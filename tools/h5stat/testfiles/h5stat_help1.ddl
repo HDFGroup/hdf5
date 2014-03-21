@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5stat -h'
-#############################
 Usage: h5stat [OPTIONS] file
 
       OPTIONS

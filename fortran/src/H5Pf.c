@@ -324,30 +324,23 @@ nh5pset_chunk_c ( hid_t_f *prp_id, int_f *rank, hsize_t_f *dims )
 /******/
 {
   int ret_value = -1;
-  hid_t c_prp_id;
-  int c_rank;
-  hsize_t *c_dims;
+  hid_t c_prp_id = (hid_t)*prp_id;
+  int c_rank = (int)*rank;
+  hsize_t c_dims[H5S_MAX_RANK];
   herr_t status;
   int i;
-
-  c_dims =  (hsize_t *)HDmalloc(sizeof(hsize_t) * (*rank ));
-  if (!c_dims) return ret_value;
 
   /*
    * Transpose dimension arrays because of C-FORTRAN storage order
    */
-  for (i = 0; i < *rank ; i++) {
-       c_dims[i] =  dims[*rank - i - 1];
-  }
+  for (i = 0; i < c_rank ; i++)
+       c_dims[i] =  (hsize_t)dims[c_rank - i - 1];
 
-  c_prp_id = (hid_t)*prp_id;
-  c_rank = (int)*rank;
   status = H5Pset_chunk(c_prp_id, c_rank, c_dims);
   if (status < 0) goto DONE;
   ret_value = 0;
 
 DONE:
-  HDfree (c_dims);
   return ret_value;
 }
 
@@ -375,26 +368,19 @@ nh5pget_chunk_c ( hid_t_f *prp_id, int_f *max_rank, hsize_t_f *dims )
 /******/
 {
   int ret_value = -1;
-  hid_t c_prp_id;
-  hsize_t *c_dims;
+  hid_t c_prp_id = (hid_t)*prp_id;
+  hsize_t c_dims[H5S_MAX_RANK];
   int rank;
-  int c_max_rank;
+  int c_max_rank = (int)*max_rank;
   int i;
 
-  c_dims =  (hsize_t *)HDmalloc(sizeof(hsize_t) * (*max_rank ));
-  if (!c_dims) return ret_value;
-
-  c_prp_id = (hid_t)*prp_id;
-  c_max_rank = (int)*max_rank;
   rank = H5Pget_chunk(c_prp_id, c_max_rank, c_dims);
 
   /*
    * Transpose dimension arrays because of C-FORTRAN storage order
    */
-  for (i = 0; i < *max_rank ; i++) {
-       dims[*max_rank - i - 1] = (hsize_t_f)c_dims[i];
-  }
-  HDfree (c_dims);
+  for (i = 0; i < c_max_rank ; i++)
+       dims[c_max_rank - i - 1] = (hsize_t_f)c_dims[i];
   if (rank < 0) return ret_value;
   ret_value = (int_f)rank;
   return ret_value;
@@ -1801,18 +1787,15 @@ nh5pset_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_nel
 /******/
 {
      int ret_value = -1;
-     hid_t c_prp_id;
+     hid_t c_prp_id = (hid_t)*prp_id;
      herr_t ret;
-     size_t c_cd_nelmts;
-     unsigned int c_flags;
-     H5Z_filter_t c_filter;
+     size_t c_cd_nelmts = (size_t)*cd_nelmts;
+     unsigned int c_flags = (unsigned)*flags;
+     H5Z_filter_t c_filter = (H5Z_filter_t)*filter;
      unsigned int * c_cd_values;
      unsigned i;
 
-     c_filter = (H5Z_filter_t)*filter;
-     c_flags = (unsigned)*flags;
-     c_cd_nelmts = (size_t)*cd_nelmts;
-     c_cd_values = (unsigned int*)HDmalloc(sizeof(unsigned int) * ((int)c_cd_nelmts));
+     c_cd_values = (unsigned int*)HDmalloc(sizeof(unsigned int) * c_cd_nelmts);
      if (!c_cd_values) return ret_value;
      for (i = 0; i < c_cd_nelmts; i++)
           c_cd_values[i] = (unsigned int)cd_values[i];
@@ -1820,7 +1803,6 @@ nh5pset_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_nel
      /*
       * Call H5Pset_filter function.
       */
-     c_prp_id = (hid_t)*prp_id;
      ret = H5Pset_filter(c_prp_id, c_filter, c_flags, c_cd_nelmts,c_cd_values );
 
      if (ret < 0) goto DONE;
@@ -1967,13 +1949,12 @@ nh5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, off_t_f* offset,
      herr_t ret;
      hsize_t c_bytes;
      char* c_name;
-     size_t c_namelen;
+     size_t c_namelen = (size_t)*namelen;
      off_t c_offset;
      c_bytes = (hsize_t) *bytes;
      c_offset = (off_t) *offset;
 
 
-     c_namelen = (int)*namelen;
      c_name = (char *)HD5f2cstring(name, c_namelen);
      if (c_name == NULL) return ret_value;
 
@@ -3819,7 +3800,7 @@ nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _f
  * Check that we got correct values from Fortran for memb_addr array
  */
   for (i=0; i < H5FD_MEM_NTYPES; i++) {
-       if(memb_addr[i] >= 1.) return ret_value;
+       if(memb_addr[i] >= 1.0f) return ret_value;
   }
 /*
  * Take care of names array
@@ -3971,7 +3952,7 @@ HD5packFstring(tmp, _fcdtocp(memb_name), (size_t)(c_lenmax*H5FD_MEM_NTYPES));
        memb_map[i] = (int_f)c_memb_map[i];
        memb_fapl[i] = (hid_t_f)c_memb_fapl[i];
        if(c_memb_addr[i] == HADDR_UNDEF) memb_addr[i] = -1;
-       else memb_addr[i] = (real_f) ((long)c_memb_addr[i]/HADDR_MAX);
+       else memb_addr[i] = (real_f) (c_memb_addr[i]/HADDR_MAX);
   }
   *flag = (int_f)relax;
   *maxlen_out = (int_f)length;
@@ -4104,7 +4085,7 @@ nh5pget_filter_by_id_c(hid_t_f *prp_id, int_f* filter_id, int_f* flags, size_t_f
      if(NULL == (c_name = (char *)HDmalloc((size_t)*namelen + 1)))
          goto DONE;
 
-     if(NULL == (c_cd_values = (unsigned int *)HDmalloc(sizeof(unsigned int) * ((int)c_cd_nelmts_in))))
+     if(NULL == (c_cd_values = (unsigned int *)HDmalloc(sizeof(unsigned int) * c_cd_nelmts_in)))
          goto DONE;
 
      /*
@@ -4157,18 +4138,15 @@ nh5pmodify_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_
 /******/
 {
      int_f ret_value = -1;
-     hid_t c_prp_id;
+     hid_t c_prp_id = (hid_t)*prp_id;
      herr_t ret;
-     size_t c_cd_nelmts;
-     unsigned int c_flags;
-     H5Z_filter_t c_filter;
+     size_t c_cd_nelmts = (size_t)*cd_nelmts;
+     unsigned int c_flags = (unsigned)*flags;
+     H5Z_filter_t c_filter = (H5Z_filter_t)*filter;
      unsigned int * c_cd_values;
      unsigned i;
 
-     c_filter = (H5Z_filter_t)*filter;
-     c_flags = (unsigned)*flags;
-     c_cd_nelmts = (size_t)*cd_nelmts;
-     c_cd_values = (unsigned int *)HDmalloc(sizeof(unsigned int) * ((int)c_cd_nelmts));
+     c_cd_values = (unsigned int *)HDmalloc(sizeof(unsigned int) * c_cd_nelmts);
      if (!c_cd_values) return ret_value;
      for (i = 0; i < c_cd_nelmts; i++)
           c_cd_values[i] = (unsigned int)cd_values[i];
@@ -4176,7 +4154,6 @@ nh5pmodify_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_
      /*
       * Call H5Pmodify_filter function.
       */
-     c_prp_id = (hid_t)*prp_id;
      ret = H5Pmodify_filter(c_prp_id, c_filter, c_flags, c_cd_nelmts,c_cd_values );
 
      if (ret < 0) goto DONE;
@@ -4905,11 +4882,9 @@ nh5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_l
 /******/
 {
     char *c_expression = NULL;          /* Buffer to hold C string */
-    size_t c_expression_len;
+    size_t c_expression_len = (size_t)*expression_len + 1;
     ssize_t ret;
     int_f ret_value = 0;
-
-    c_expression_len = (size_t)*expression_len + 1;
 
     /*
      * Allocate memory to store the expression.
@@ -4928,7 +4903,7 @@ nh5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_l
        HGOTO_DONE(FAIL)
 
     /* or strlen ? */
-    HD5packFstring(c_expression, _fcdtocp(expression), c_expression_len - 1);
+    HD5packFstring(c_expression, _fcdtocp(expression), (size_t)*expression_len);
 
     *size = (size_t_f)ret;
 

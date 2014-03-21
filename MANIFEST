@@ -921,8 +921,8 @@
 ./src/H5Tvlen.c
 ./src/H5TS.c
 ./src/H5TSprivate.h
-./src/H5V.c
-./src/H5Vprivate.h
+./src/H5VM.c
+./src/H5VMprivate.h
 ./src/H5WB.c
 ./src/H5WBprivate.h
 ./src/H5Z.c
@@ -2249,7 +2249,6 @@
 ./hl/src/Makefile.am
 ./hl/src/Makefile.in
 ./hl/src/H5DO.c
-./hl/src/H5DOprivate.h
 ./hl/src/H5DOpublic.h
 ./hl/src/H5DS.c
 ./hl/src/H5DSprivate.h
@@ -2425,7 +2424,6 @@
 ./config/cmake/GetTimeOfDayTest.cpp
 ./config/cmake/HDF5CXXTests.cpp
 ./config/cmake/HDF5Tests.c
-./config/cmake/xlatefile.c
 ./config/cmake/CheckTypeSize.cmake
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
@@ -2448,11 +2446,15 @@
 ./config/cmake/vfdTest.cmake
 ./config/cmake/CTestCustom.cmake
 ./config/cmake/ConfigureChecks.cmake
-./config/cmake/CPack.cmake
 ./config/cmake/CPack.Info.plist.in
-./config/cmake/hdf.gif
+./config/cmake/hdf.bmp
+./config/cmake/hdf.icns
+./config/cmake/hdf.ico
+./config/cmake/PkgInfo.in
+./config/cmake/version.plist.in
 ./config/cmake/NSIS.template.in
 ./config/cmake/NSIS.InstallOptions.ini.in
+./config/cmake/README.txt.cmake.in
 
 # CMake-specific User Files
 ./config/cmake/UserMacros/Windows_MT.cmake

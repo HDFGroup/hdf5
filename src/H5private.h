@@ -439,8 +439,8 @@
 /*
  * Maximum & minimum values for our typedefs.
  */
-#define  HSIZET_MAX  ((hsize_t)ULLONG_MAX)
-#define  HSSIZET_MAX  ((hssize_t)LLONG_MAX)
+#define HSIZET_MAX   ((hsize_t)ULLONG_MAX)
+#define HSSIZET_MAX  ((hssize_t)LLONG_MAX)
 #define HSSIZET_MIN  (~(HSSIZET_MAX))
 
 /*

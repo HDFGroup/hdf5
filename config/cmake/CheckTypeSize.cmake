@@ -8,23 +8,23 @@
 #
 
 MACRO (HDF_CHECK_TYPE_SIZE TYPE VARIABLE)
-  SET (CMAKE_ALLOW_UNKNOWN_VARIABLE_READ_ACCESS 1)
-  IF ("HAVE_${VARIABLE}" MATCHES "^HAVE_${VARIABLE}$")
-    SET (MACRO_CHECK_TYPE_SIZE_FLAGS 
+  set (CMAKE_ALLOW_UNKNOWN_VARIABLE_READ_ACCESS 1)
+  if ("HAVE_${VARIABLE}" MATCHES "^HAVE_${VARIABLE}$")
+    set (MACRO_CHECK_TYPE_SIZE_FLAGS 
         "-DCHECK_TYPE_SIZE_TYPE=\"${TYPE}\" ${CMAKE_REQUIRED_FLAGS}"
     )
-    FOREACH (def HAVE_SYS_TYPES_H HAVE_STDINT_H HAVE_STDDEF_H HAVE_INTTYPES_H)
-      IF ("${def}")
-        SET (MACRO_CHECK_TYPE_SIZE_FLAGS "${MACRO_CHECK_TYPE_SIZE_FLAGS} -D${def}")
+    foreach (def HAVE_SYS_TYPES_H HAVE_STDINT_H HAVE_STDDEF_H HAVE_INTTYPES_H)
+      if ("${def}")
+        set (MACRO_CHECK_TYPE_SIZE_FLAGS "${MACRO_CHECK_TYPE_SIZE_FLAGS} -D${def}")
       ENDIF("${def}")
-    ENDFOREACH (def)
+    endforeach (def)
 
-    MESSAGE (STATUS "Check size of ${TYPE}")
-    IF (CMAKE_REQUIRED_LIBRARIES)
-      SET (CHECK_TYPE_SIZE_ADD_LIBRARIES 
+    message (STATUS "Check size of ${TYPE}")
+    if (CMAKE_REQUIRED_LIBRARIES)
+      set (CHECK_TYPE_SIZE_ADD_LIBRARIES 
           "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}"
       )
-    ENDIF (CMAKE_REQUIRED_LIBRARIES)
+    endif (CMAKE_REQUIRED_LIBRARIES)
     TRY_RUN (${VARIABLE} HAVE_${VARIABLE}
         ${CMAKE_BINARY_DIR}
         ${HDF5_RESOURCES_DIR}/CheckTypeSize.c
@@ -32,17 +32,17 @@ MACRO (HDF_CHECK_TYPE_SIZE TYPE VARIABLE)
         "${CHECK_TYPE_SIZE_ADD_LIBRARIES}"
         OUTPUT_VARIABLE OUTPUT
     )
-    IF (HAVE_${VARIABLE})
-      MESSAGE (STATUS "Check size of ${TYPE} - done")
+    if (HAVE_${VARIABLE})
+      message (STATUS "Check size of ${TYPE} - done")
       FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
           "Determining size of ${TYPE} passed with the following output:\n${OUTPUT}\n\n"
       )
-    ELSE (HAVE_${VARIABLE})
-      MESSAGE (STATUS "Check size of ${TYPE} - failed")
+    else (HAVE_${VARIABLE})
+      message (STATUS "Check size of ${TYPE} - failed")
       FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
           "Determining size of ${TYPE} failed with the following output:\n${OUTPUT}\n\n"
       )
-    ENDIF (HAVE_${VARIABLE})
-  ENDIF ("HAVE_${VARIABLE}" MATCHES "^HAVE_${VARIABLE}$")
-  SET (CMAKE_ALLOW_UNKNOWN_VARIABLE_READ_ACCESS)
+    endif (HAVE_${VARIABLE})
+  endif ("HAVE_${VARIABLE}" MATCHES "^HAVE_${VARIABLE}$")
+  set (CMAKE_ALLOW_UNKNOWN_VARIABLE_READ_ACCESS)
 ENDMACRO (HDF_CHECK_TYPE_SIZE)

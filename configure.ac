@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.170], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.175], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -4020,7 +4020,7 @@ fi
 
 ## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine generates bad code
-## for the H5V_log2_gen() routine in src/H5Vprivate.h
+## for the H5VM_log2_gen() routine in src/H5VMprivate.h
 ## (This flag should be set to no for all machines, except for SGI IRIX64,
 ## where the cache value is set to yes in it's config file)
 ##
