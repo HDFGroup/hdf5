@@ -180,9 +180,9 @@ H5fortran_detect.f90: H5test_kind$(EXEEXT)
 # how to compile a fortran program given its sources.
 
 if FORTRAN_HAVE_SIZEOF
-  H5test_kind_SOURCES = $(srcdir)/H5test_kind_SIZEOF.f90
+  H5test_kind_SOURCES = H5test_kind_SIZEOF.f90
 else
-  H5test_kind_SOURCES = $(srcdir)/H5test_kind.f90
+  H5test_kind_SOURCES = H5test_kind.f90
 endif
 
 # Mark this directory as part of the Fortran API

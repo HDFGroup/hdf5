@@ -117,8 +117,9 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libdynlibadd_la_LIBADD =
-am__libdynlibadd_la_SOURCES_DIST = $(top_srcdir)/test/dynlib1.c
-@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibadd_la_OBJECTS = dynlib1.lo
+am__libdynlibadd_la_SOURCES_DIST = dynlib_rpk.c
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibadd_la_OBJECTS =  \
+@HAVE_SHARED_CONDITIONAL_TRUE@	dynlib_rpk.lo
 libdynlibadd_la_OBJECTS = $(am_libdynlibadd_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -508,7 +509,7 @@ h5repack_SOURCES = $(COMMON_SOURCES) h5repack_main.c
 h5repacktst_SOURCES = $(COMMON_SOURCES) h5repacktst.c 
 testh5repack_detect_szip_SOURCES = testh5repack_detect_szip.c
 @HAVE_SHARED_CONDITIONAL_TRUE@lib_LTLIBRARIES = libdynlibadd.la
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibadd_la_SOURCES = $(top_srcdir)/test/dynlib1.c
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibadd_la_SOURCES = dynlib_rpk.c
 DISTCLEANFILES = h5repack.sh h5repack_plugin.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
@@ -685,7 +686,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynlib1.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynlib_rpk.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_filters.Po@am__quote@
@@ -717,13 +718,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
-
-dynlib1.lo: $(top_srcdir)/test/dynlib1.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dynlib1.lo -MD -MP -MF $(DEPDIR)/dynlib1.Tpo -c -o dynlib1.lo `test -f '$(top_srcdir)/test/dynlib1.c' || echo '$(srcdir)/'`$(top_srcdir)/test/dynlib1.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/dynlib1.Tpo $(DEPDIR)/dynlib1.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(top_srcdir)/test/dynlib1.c' object='dynlib1.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dynlib1.lo `test -f '$(top_srcdir)/test/dynlib1.c' || echo '$(srcdir)/'`$(top_srcdir)/test/dynlib1.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
