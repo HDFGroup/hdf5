@@ -19,6 +19,8 @@
 
 #ifdef H5_HAVE_EFF
 
+static void check_corruptions(iod_trans_id_t trans_num);
+
 /*
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
  *              July, 2013
@@ -455,9 +457,6 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Transaction Finish %"PRIu64"\n", trans_num);
 #endif
 
-    //IOD_OBJID_SETTYPE(oidkv_id, IOD_OBJ_KV)
-    //IOD_OBJID_SETOWNER_APP(oidkv_id)
-
     oid_index[0] = input->kv_oid_index;
     oid_index[1] = input->array_oid_index;
     oid_index[2] = input->blob_oid_index;
@@ -497,30 +496,9 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction");
     }
 
-    {
-        int iod_corrupt_step = -1;
-        char *cor_step = NULL;
+    if(0 == client_rank)
+        check_corruptions(trans_num);
 
-        cor_step = getenv ("H5ENV_IOD_STEP_CORRUPT");
-        if(NULL != cor_step) {
-            iod_corrupt_step = atoi(cor_step);
-
-            if((int)trans_num == iod_corrupt_step+3) {
-                uint64_t oid;
-
-                fprintf (stderr, "CORRUPTING at VPIC step %d at trans_num %d,array ID %"PRIx64", \n", 
-                         iod_corrupt_step, (int)trans_num, oid);
-                oid = (iod_corrupt_step) * 8 + 1;
-                IOD_OBJID_SETOWNER_APP(oid)
-                IOD_OBJID_SETTYPE(oid, IOD_OBJ_ARRAY)
-
-                ret = corrupt_data("eff_vpic", oid, trans_num, 5, 1);
-                if(ret < 0) {
-                    fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
-                }
-            }
-        }
-    }
     /* if the flag is true, acquire a read context on the finished transaction */
     if(TRUE == acquire) {
 #if H5VL_IOD_DEBUG
@@ -835,4 +813,95 @@ done:
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_evict_cb() */
 
+static void check_corruptions(iod_trans_id_t trans_num)
+{
+    int step;
+    char *cor_step = NULL;
+    char *num_procs_s = NULL;
+    int num_procs = -1;
+    char *cor_data_s = NULL;
+    int cor_data = -1;
+    int ret;
+
+    num_procs_s = getenv ("H5ENV_NUM_CLIENTS");
+    if(NULL != num_procs_s)
+        num_procs = atoi(num_procs_s);
+    else
+        return;
+
+    cor_data_s = getenv ("H5ENV_CORRUPT_DATA");
+    if(NULL != cor_data_s)
+        cor_data = atoi(cor_data_s);
+    else
+        return;
+
+    cor_step = getenv ("H5ENV_STEP_CORRUPT_DSET");
+    if(NULL != cor_step) {
+        step = atoi(cor_step);
+
+        if((int)trans_num == step+3) {
+            uint64_t oid;
+
+            oid = step*8*num_procs + 8;
+            IOD_OBJID_SETOWNER_APP(oid)
+            IOD_OBJID_SETTYPE(oid, IOD_OBJ_ARRAY)
+                
+            printf("CORRUPTING at VPIC step %d at trans_num %d, array ID %"PRIx64"\n", 
+                   step, (int)trans_num, oid);
+
+            ret = corrupt_data("eff_vpic", oid, trans_num, 5, cor_data);
+            if(ret < 0) {
+                fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
+            }
+        }
+    }
+
+    cor_step = NULL;
+    step = -1;
+
+    cor_step = getenv ("H5ENV_STEP_CORRUPT_DTYPE");
+    if(NULL != cor_step) {
+        step = atoi(cor_step);
+
+        if((int)trans_num == step+3) {
+            uint64_t oid;
+
+            oid = step*num_procs;
+            IOD_OBJID_SETOWNER_APP(oid)
+            IOD_OBJID_SETTYPE(oid, IOD_OBJ_BLOB)
+                
+            printf("CORRUPTING at VPIC step %d at trans_num %d, blob ID %"PRIx64"\n", 
+                   step, (int)trans_num, oid);
+
+            ret = corrupt_data("eff_vpic", oid, trans_num, 5, cor_data);
+            if(ret < 0) {
+                fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
+            }
+        }
+    }
+
+    cor_step = NULL;
+    step = -1;
+
+    cor_step = getenv ("H5ENV_STEP_CORRUPT_GROUP");
+    if(NULL != cor_step) {
+        step = atoi(cor_step);
+
+        if((int)trans_num == step+3) {
+            uint64_t oid;
+
+            oid = 5*num_procs + step*21*num_procs + 3;
+            IOD_OBJID_SETOWNER_APP(oid)
+            IOD_OBJID_SETTYPE(oid, IOD_OBJ_KV)
+                
+            printf("CORRUPTING at VPIC step %d at trans_num %d, kv ID %"PRIx64"\n", 
+                   step, (int)trans_num, oid);
+
+            ret = corrupt_kv("eff_vpic", oid, trans_num, 1, cor_data);
+            if(ret < 0) {
+                fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
+            }
+        }
+    }
+}
 #endif /* H5_HAVE_EFF */

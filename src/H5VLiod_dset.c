@@ -1453,9 +1453,13 @@ done:
     /* free allocated descriptors */
     for(n=0 ; n<num_descriptors ; n++) {
         free(hslabs[n].start);
+        hslabs[n].start = NULL;
         free(hslabs[n].stride);
+        hslabs[n].stride = NULL;
         free(hslabs[n].block);
+        hslabs[n].block = NULL;
         free(hslabs[n].count);
+        hslabs[n].count = NULL;
     }
     if(hslabs) {
         free(hslabs);
@@ -1593,14 +1597,22 @@ H5VL__iod_server_vl_data_read(iod_handle_t coh, AXE_engine_t axe_engine, AXE_tas
 
 done:
 
-    if(io_blob)
+    if(io_blob) {
         free(io_blob);
-    if(blob_oh)
+        io_blob = NULL;
+    }
+    if(blob_oh) {
         free(blob_oh);
-    if(cs_list)
+        blob_oh = NULL;
+    }
+    if(cs_list) {
         free(cs_list);
-    if(ret_list)
+        cs_list = NULL;
+    }
+    if(ret_list) {
         free(ret_list);
+        ret_list = NULL;
+    }
 
     vlen_buf = NULL;
     free(op_data->output);
@@ -1803,7 +1815,9 @@ H5VL__iod_server_vl_data_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndi
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
 
     free(mem_desc);
+    mem_desc = NULL;
     free(blob_desc);
+    blob_desc = NULL;
 
     /* close BLOB */
     if(iod_obj_close(blob_oh, NULL, NULL) < 0)
@@ -1840,6 +1854,7 @@ H5VL__iod_server_vl_data_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndi
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
         free(mem_desc);
+        mem_desc = NULL;
     }
 
     /* advance buffer pointer */
@@ -1849,9 +1864,13 @@ H5VL__iod_server_vl_data_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndi
 done:
 
     free(hslab.start);
+    hslab.start = NULL;
     free(hslab.stride);
+    hslab.stride = NULL;
     free(hslab.block);
+    hslab.block = NULL;
     free(hslab.count);
+    hslab.count = NULL;
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* end H5VL__iod_server_vl_data_write_cb */

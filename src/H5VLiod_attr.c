@@ -686,18 +686,6 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
         HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
-#if H5VL_IOD_DEBUG 
-    { 
-        int i;
-        int *buf_ptr = (int *)buf;
-
-        fprintf(stderr, "AWRITE Received a buffer of size %zu with values: ", size);
-        for(i=0;i<60;++i)
-            fprintf(stderr, "%d ", buf_ptr[i]);
-        fprintf(stderr, "\n");
-    }
-#endif
-
     /* Get dataspace if it is not available */
     if(H5I_UNINIT == space_id) {
         /* open the metadata scratch pad of the attribute */

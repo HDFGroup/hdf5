@@ -103,6 +103,7 @@ int hg_proc_axe_t(hg_proc_t proc, void *data)
         }
         break;
     case HG_DECODE:
+        struct_data->parent_axe_ids = NULL;
         if(struct_data->num_parents)
             struct_data->parent_axe_ids = (uint64_t *)malloc (sizeof(hsize_t) * 
                                                               struct_data->num_parents);
