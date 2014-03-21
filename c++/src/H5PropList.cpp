@@ -390,8 +390,13 @@ void PropList::getProperty(const char* name, void* value) const
 //--------------------------------------------------------------------------
 H5std_string PropList::getProperty(const char* name) const
 {
+   // Get property size first
    size_t size = getPropSize(name);
+
+   // Allocate buffer then get the property
    char* prop_strg_C = new char[size+1];  // temporary C-string for C API
+   HDmemset(prop_strg_C, 0, size+1); // clear buffer
+
    herr_t ret_value = H5Pget(id, name, prop_strg_C); // call C API
 
    // Throw exception if H5Pget returns failure

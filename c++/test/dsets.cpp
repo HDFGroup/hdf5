@@ -120,6 +120,11 @@ test_create( H5File& file)
 	// way to open an existing dataset for accessing.
 	dataset = new DataSet (file.openDataSet (DSET_DEFAULT_NAME));
 
+	// Get and verify the comment from this dataset, using
+	// H5std_string getComment(const H5std_string& name, <buf_size=0, by default>)
+	H5std_string comment = file.getComment(DSET_DEFAULT_NAME);
+	verify_val(comment, "This is a dataset", "H5Location::getComment", __LINE__, __FILE__);
+
 	// Close the dataset when accessing is completed
 	delete dataset;
 
@@ -1066,6 +1071,12 @@ void test_dset()
 	nerrors += test_compression(file)<0	?1:0;
 	nerrors += test_multiopen (file)<0	?1:0;
 	nerrors += test_types(file)<0       ?1:0;
+
+	// Get part of the comment, random length using
+	// ssize_t getComment(const char* name, const size_t buf_size, char* comment)
+	char* comment = new char[11];
+	ssize_t comment_len = file.getComment("emit diagnostics", 10, comment);
+	verify_val((const char*)comment, "Causes dia", "H5Location::getComment", __LINE__, __FILE__);
 
 	// Close group "emit diagnostics".
 	grp.close();
