@@ -911,8 +911,8 @@ with_fnord
 with_dmalloc
 with_zlib
 with_szlib
-with_pthread
 enable_threadsafe
+with_pthread
 enable_gpfs
 enable_debug
 enable_codestack
@@ -1595,7 +1595,7 @@ Optional Features:
                           Disable use of the '=Wl,-rpath' linker option
   --enable-production     Determines how to run the compiler.
   --disable-largefile     omit support for large files
-  --enable-threadsafe     Enable thread safe capability
+  --enable-threadsafe     Enable thread-safe capability
   --enable-gpfs           Enable GPFS hints for the MPI/POSIX file driver.
                           [default=no]
   --enable-debug=all      Turn on debugging in all packages. One may also
@@ -1669,7 +1669,8 @@ Optional Packages:
                           [default=yes]
   --with-szlib=DIR        Use szlib library for external szlib I/O filter
                           [default=no]
-  --with-pthread=DIR      Use the Pthreads library [default=no]
+  --with-pthread=DIR      Specify alternative path to Pthreads library when
+                          thread-safe capability is built
   --with-mpe=DIR          Use MPE instrumentation [default=no]
   --with-default-vfd=driver
                           Specify default file driver [default=sec2]
@@ -26205,25 +26206,79 @@ fi
 rm -f confcache
 
 ## ----------------------------------------------------------------------
-## Is the Pthreads library present?  It has a header file `pthread.h' and
-## a library `-lpthread' and their locations might be specified with the
-## `--with-pthread' command-line switch.  The value is an include path
-## and/or a library path.  If the library path is specified then it must
-## be preceded by a comma.
+## Enable thread-safe version of library.  It requires Pthreads support
+## on POSIX systems.
 ##
- HAVE_PTHREAD=yes
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread safe support" >&5
+$as_echo_n "checking for thread safe support... " >&6; }
+# Check whether --enable-threadsafe was given.
+if test "${enable_threadsafe+set}" = set; then :
+  enableval=$enable_threadsafe; THREADSAFE=$enableval
+fi
+
+
+## The --enable-threadsafe flag is not compatible with --enable-cxx.
+## If the user tried to specify both flags, throw an error, unless
+## they also provided the --enable-unsupported flag.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_CXX}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    as_fn_error $? "--enable-cxx and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error." "$LINENO" 5
+  fi
+fi
+
+## --enable-threadsafe is also incompatible with --enable-fortran, unless
+## --enable-unsupported has been specified on the configure line.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    as_fn_error $? "--enable-fortran and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error." "$LINENO" 5
+  fi
+fi
+
+case "X-$THREADSAFE" in
+  X-|X-no)
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+  X-yes)
+    THREADSAFE=yes
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    ;;
+  *)
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: error" >&5
+$as_echo "error" >&6; }
+    as_fn_error $? "\'$enableval\' is not a valid threadsafe type" "$LINENO" 5
+    ;;
+esac
+
+if test "X$THREADSAFE" = "Xyes"; then
+
+$as_echo "#define HAVE_THREADSAFE 1" >>confdefs.h
+
+
+    ## ----------------------------------------------------------------------
+    ## Is the pthreads library present?  It has a header file `pthread.h' and
+    ## a library `-lpthread' and their locations might be specified with the
+    ## `--with-pthread' command-line switch.  The value is an include path
+    ## and/or a library path.  If the library path is specified then it must
+    ## be preceded by a comma.
+    ##
+    ## Thread-safety in HDF5 only uses Pthreads via configure, so the
+    ## default is "yes", though this only has an effect when
+    ## --enable-threadsafe is specified.
+     HAVE_PTHREAD=yes
 
 # Check whether --with-pthread was given.
 if test "${with_pthread+set}" = set; then :
   withval=$with_pthread;
 else
-  withval=no
+  withval=yes
 fi
 
 
-case "$withval" in
-  yes)
-    for ac_header in pthread.h
+    case "$withval" in
+      yes)
+        for ac_header in pthread.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "pthread.h" "ac_cv_header_pthread_h" "$ac_includes_default"
 if test "x$ac_cv_header_pthread_h" = xyes; then :
@@ -26237,8 +26292,8 @@ fi
 
 done
 
-    if test "x$HAVE_PTHREAD" = "xyes"; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_self in -lpthread" >&5
+        if test "x$HAVE_PTHREAD" = "xyes"; then
+          { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_self in -lpthread" >&5
 $as_echo_n "checking for pthread_self in -lpthread... " >&6; }
 if ${ac_cv_lib_pthread_pthread_self+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -26293,44 +26348,44 @@ else
   unset HAVE_PTHREAD
 fi
 
-    fi
-    ;;
-  no)
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread" >&5
-$as_echo_n "checking for pthread... " >&6; }
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
-$as_echo "suppressed" >&6; }
-    unset HAVE_PTHREAD
-    ;;
-  *)
-    case "$withval" in
-      *,*)
-        pthread_inc="`echo $withval | cut -f1 -d,`"
-        pthread_lib="`echo $withval | cut -f2 -d, -s`"
-        ;;
-      *)
-        if test -n "$withval"; then
-          pthread_inc="$withval/include"
-          pthread_lib="$withval/lib"
         fi
         ;;
-    esac
+      no)
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread" >&5
+$as_echo_n "checking for pthread... " >&6; }
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
+$as_echo "suppressed" >&6; }
+        unset HAVE_PTHREAD
+        ;;
+      *)
+        case "$withval" in
+          *,*)
+            pthread_inc="`echo $withval | cut -f1 -d,`"
+            pthread_lib="`echo $withval | cut -f2 -d, -s`"
+            ;;
+          *)
+            if test -n "$withval"; then
+              pthread_inc="$withval/include"
+              pthread_lib="$withval/lib"
+            fi
+            ;;
+        esac
 
-    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-    ## can mess some compilers up.
-    if test "X$pthread_inc" = "X/usr/include"; then
-      pthread_inc=""
-    fi
-    if test "X$pthread_lib" = "X/usr/lib"; then
-      pthread_lib=""
-    fi
+        ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+        ## can mess some compilers up.
+        if test "X$pthread_inc" = "X/usr/include"; then
+          pthread_inc=""
+        fi
+        if test "X$pthread_lib" = "X/usr/lib"; then
+          pthread_lib=""
+        fi
 
-    if test -n "$pthread_inc"; then
-      saved_CPPFLAGS="$CPPFLAGS"
-      saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-      CPPFLAGS="$CPPFLAGS -I$pthread_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
-      for ac_header in pthread.h
+        if test -n "$pthread_inc"; then
+          saved_CPPFLAGS="$CPPFLAGS"
+          saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+          CPPFLAGS="$CPPFLAGS -I$pthread_inc"
+          AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
+          for ac_header in pthread.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "pthread.h" "ac_cv_header_pthread_h" "$ac_includes_default"
 if test "x$ac_cv_header_pthread_h" = xyes; then :
@@ -26344,8 +26399,8 @@ fi
 
 done
 
-    else
-      for ac_header in pthread.h
+        else
+          for ac_header in pthread.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "pthread.h" "ac_cv_header_pthread_h" "$ac_includes_default"
 if test "x$ac_cv_header_pthread_h" = xyes; then :
@@ -26359,15 +26414,15 @@ fi
 
 done
 
-    fi
+        fi
 
-    if test "x$HAVE_PTHREAD" = "xyes"; then
-      if test -n "$pthread_lib"; then
-        saved_LDFLAGS="$LDFLAGS"
-        saved_AM_LDFLAGS="$AM_LDFLAGS"
-        LDFLAGS="$LDFLAGS -L$pthread_lib"
-        AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_self in -lpthread" >&5
+        if test "x$HAVE_PTHREAD" = "xyes"; then
+          if test -n "$pthread_lib"; then
+            saved_LDFLAGS="$LDFLAGS"
+            saved_AM_LDFLAGS="$AM_LDFLAGS"
+            LDFLAGS="$LDFLAGS -L$pthread_lib"
+            AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_self in -lpthread" >&5
 $as_echo_n "checking for pthread_self in -lpthread... " >&6; }
 if ${ac_cv_lib_pthread_pthread_self+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -26422,8 +26477,8 @@ else
   LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD
 fi
 
-      else
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_self in -lpthread" >&5
+          else
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_self in -lpthread" >&5
 $as_echo_n "checking for pthread_self in -lpthread... " >&6; }
 if ${ac_cv_lib_pthread_pthread_self+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -26478,85 +26533,10 @@ else
   unset HAVE_PTHREAD
 fi
 
-      fi
-    fi
-    ;;
-esac
-
-## ----------------------------------------------------------------------
-## Enable thread-safe version of library.  It requires Pthreads support.
-##
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread safe support" >&5
-$as_echo_n "checking for thread safe support... " >&6; }
-# Check whether --enable-threadsafe was given.
-if test "${enable_threadsafe+set}" = set; then :
-  enableval=$enable_threadsafe; THREADSAFE=$enableval
-fi
-
-
-## The --enable-threadsafe flag is not compatible with --enable-cxx.
-## If the user tried to specify both flags, throw an error, unless
-## they also provided the --enable-unsupported flag.
-if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${HDF_CXX}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
-    as_fn_error $? "--enable-cxx and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error." "$LINENO" 5
-  fi
-fi
-
-## --enable-threadsafe is also incompatible with --enable-fortran, unless
-## --enable-unsupported has been specified on the configure line.
-if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
-    as_fn_error $? "--enable-fortran and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error." "$LINENO" 5
-  fi
-fi
-
-case "X-$THREADSAFE" in
-  X-|X-no)
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-    ;;
-  X-yes)
-    ## Check that we can link a simple Pthread program.
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-pthread_self()
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }; THREADSAFE=yes
-else
-  as_fn_error $? "needed pthread library not available" "$LINENO" 5
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-    ;;
-  *)
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: error" >&5
-$as_echo "error" >&6; }
-    as_fn_error $? "\'$enableval\' is not a valid threadsafe type" "$LINENO" 5
-    ;;
-esac
-
-if test "X$THREADSAFE" = "Xyes"; then
-
-$as_echo "#define HAVE_THREADSAFE 1" >>confdefs.h
-
+          fi
+        fi
+        ;;
+    esac
 fi
 
 ## ----------------------------------------------------------------------

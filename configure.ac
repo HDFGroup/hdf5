@@ -1932,85 +1932,13 @@ AM_CONDITIONAL([BUILD_SHARED_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xye
 AC_CACHE_SAVE
 
 ## ----------------------------------------------------------------------
-## Is the Pthreads library present?  It has a header file `pthread.h' and
-## a library `-lpthread' and their locations might be specified with the
-## `--with-pthread' command-line switch.  The value is an include path
-## and/or a library path.  If the library path is specified then it must
-## be preceded by a comma.
-##
-AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
-AC_ARG_WITH([pthread],
-            [AS_HELP_STRING([--with-pthread=DIR],
-                            [Use the Pthreads library [default=no]])],,
-            [withval=no])
-
-case "$withval" in
-  yes)
-    AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
-    if test "x$HAVE_PTHREAD" = "xyes"; then
-      AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
-    fi
-    ;;
-  no)
-    AC_MSG_CHECKING([for pthread])
-    AC_MSG_RESULT([suppressed])
-    unset HAVE_PTHREAD
-    ;;
-  *)
-    case "$withval" in
-      *,*)
-        pthread_inc="`echo $withval | cut -f1 -d,`"
-        pthread_lib="`echo $withval | cut -f2 -d, -s`"
-        ;;
-      *)
-        if test -n "$withval"; then
-          pthread_inc="$withval/include"
-          pthread_lib="$withval/lib"
-        fi
-        ;;
-    esac
-
-    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-    ## can mess some compilers up.
-    if test "X$pthread_inc" = "X/usr/include"; then
-      pthread_inc=""
-    fi
-    if test "X$pthread_lib" = "X/usr/lib"; then
-      pthread_lib=""
-    fi
-
-    if test -n "$pthread_inc"; then
-      saved_CPPFLAGS="$CPPFLAGS"
-      saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-      CPPFLAGS="$CPPFLAGS -I$pthread_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
-      AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset HAVE_PTHREAD])
-    else
-      AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
-    fi
-
-    if test "x$HAVE_PTHREAD" = "xyes"; then
-      if test -n "$pthread_lib"; then
-        saved_LDFLAGS="$LDFLAGS"
-        saved_AM_LDFLAGS="$AM_LDFLAGS"
-        LDFLAGS="$LDFLAGS -L$pthread_lib"
-        AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
-        AC_CHECK_LIB([pthread], [pthread_self],,
-                     [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD])
-      else
-        AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
-      fi
-    fi
-    ;;
-esac
-
-## ----------------------------------------------------------------------
-## Enable thread-safe version of library.  It requires Pthreads support.
+## Enable thread-safe version of library.  It requires Pthreads support
+## on POSIX systems.
 ##
 AC_MSG_CHECKING([for thread safe support])
 AC_ARG_ENABLE([threadsafe],
               [AS_HELP_STRING([--enable-threadsafe],
-                              [Enable thread safe capability])],
+                              [Enable thread-safe capability])],
               [THREADSAFE=$enableval])
 
 ## The --enable-threadsafe flag is not compatible with --enable-cxx.
@@ -2035,10 +1963,8 @@ case "X-$THREADSAFE" in
     AC_MSG_RESULT([no])
     ;;
   X-yes)
-    ## Check that we can link a simple Pthread program.
-    AC_TRY_LINK(, [pthread_self()],
-                [AC_MSG_RESULT([yes]); THREADSAFE=yes],
-                [AC_MSG_ERROR([needed pthread library not available])])
+    THREADSAFE=yes 
+    AC_MSG_RESULT([yes])
     ;;
   *)
     AC_MSG_RESULT([error])
@@ -2047,7 +1973,83 @@ case "X-$THREADSAFE" in
 esac
 
 if test "X$THREADSAFE" = "Xyes"; then
-  AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
+    AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
+
+    ## ----------------------------------------------------------------------
+    ## Is the pthreads library present?  It has a header file `pthread.h' and
+    ## a library `-lpthread' and their locations might be specified with the
+    ## `--with-pthread' command-line switch.  The value is an include path
+    ## and/or a library path.  If the library path is specified then it must
+    ## be preceded by a comma.
+    ##
+    ## Thread-safety in HDF5 only uses Pthreads via configure, so the
+    ## default is "yes", though this only has an effect when
+    ## --enable-threadsafe is specified.
+    AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
+    AC_ARG_WITH([pthread],
+                [AS_HELP_STRING([--with-pthread=DIR],
+                                [Specify alternative path to Pthreads library when thread-safe capability is built])],,
+                [withval=yes])
+
+    case "$withval" in
+      yes)
+        AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
+        if test "x$HAVE_PTHREAD" = "xyes"; then
+          AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+        fi
+        ;;
+      no)
+        AC_MSG_CHECKING([for pthread])
+        AC_MSG_RESULT([suppressed])
+        unset HAVE_PTHREAD
+        ;;
+      *)
+        case "$withval" in
+          *,*)
+            pthread_inc="`echo $withval | cut -f1 -d,`"
+            pthread_lib="`echo $withval | cut -f2 -d, -s`"
+            ;;
+          *)
+            if test -n "$withval"; then
+              pthread_inc="$withval/include"
+              pthread_lib="$withval/lib"
+            fi
+            ;;
+        esac
+
+        ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+        ## can mess some compilers up.
+        if test "X$pthread_inc" = "X/usr/include"; then
+          pthread_inc=""
+        fi
+        if test "X$pthread_lib" = "X/usr/lib"; then
+          pthread_lib=""
+        fi
+
+        if test -n "$pthread_inc"; then
+          saved_CPPFLAGS="$CPPFLAGS"
+          saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+          CPPFLAGS="$CPPFLAGS -I$pthread_inc"
+          AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
+          AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset HAVE_PTHREAD])
+        else
+          AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
+        fi
+
+        if test "x$HAVE_PTHREAD" = "xyes"; then
+          if test -n "$pthread_lib"; then
+            saved_LDFLAGS="$LDFLAGS"
+            saved_AM_LDFLAGS="$AM_LDFLAGS"
+            LDFLAGS="$LDFLAGS -L$pthread_lib"
+            AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
+            AC_CHECK_LIB([pthread], [pthread_self],,
+                         [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD])
+          else
+            AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+          fi
+        fi
+        ;;
+    esac
 fi
 
 ## ----------------------------------------------------------------------
