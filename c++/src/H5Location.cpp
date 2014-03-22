@@ -500,8 +500,12 @@ ssize_t H5Location::getComment(const char* name, const size_t buf_size, char* co
     {
         throw LocationException("H5Location::getComment", "H5Oget_comment_by_name failed");
     }
+    // If the comment is longer than the provided buffer size, the C library
+    // will not null terminate it
+    if (comment_len >= buf_size)
+	comment[buf_size-1] = '\0';
 
-    // Return the comment length, which might be different from buf_size
+    // Return the actual comment length, which might be different from buf_size
     return(comment_len);
 }
 
@@ -544,7 +548,7 @@ H5std_string H5Location::getComment(const char* name, const size_t buf_size) con
 	HDmemset(comment_C, 0, tmp_len+1); // clear buffer
 
 	// Used overloaded function
-	ssize_t comment_len = getComment(name, tmp_len, comment_C);
+	ssize_t comment_len = getComment(name, tmp_len+1, comment_C);
 
 	// Convert the C comment to return
 	comment = comment_C;

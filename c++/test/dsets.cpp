@@ -1075,7 +1075,7 @@ void test_dset()
 	// Get part of the comment, random length using
 	// ssize_t getComment(const char* name, const size_t buf_size, char* comment)
 	char* comment = new char[11];
-	ssize_t comment_len = file.getComment("emit diagnostics", 10, comment);
+	ssize_t comment_len = file.getComment("emit diagnostics", 11, comment);
 	verify_val((const char*)comment, "Causes dia", "H5Location::getComment", __LINE__, __FILE__);
 
 	// Close group "emit diagnostics".

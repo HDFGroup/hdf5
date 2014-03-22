@@ -60,7 +60,7 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
 	void write(const DataType& mem_type, const H5std_string& strg ) const;
 
 	// Flushes all buffers associated with the file specified by this
-	// attribute to disk
+	// attribute to disk.
 	void flush( H5F_scope_t scope ) const;
 
 	///\brief Returns this class name.
