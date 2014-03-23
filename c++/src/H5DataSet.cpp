@@ -629,7 +629,7 @@ hid_t DataSet::getId() const
 
 //--------------------------------------------------------------------------
 // Function:	DataSet::p_read_fixed_len (private)
-// brief	Reads a fixed length \a H5std_string from an dataset.
+// brief	Reads a fixed length \a H5std_string from a dataset.
 // param	mem_type  - IN: DataSet datatype (in memory)
 // param	strg      - IN: Buffer for read string
 // exception	H5::DataSetIException
@@ -643,14 +643,14 @@ void DataSet::p_read_fixed_len(const hid_t mem_type_id, const hid_t mem_space_id
     // Only allocate for fixed-len string.
 
     // Get the size of the dataset's data
-    size_t attr_size = getInMemDataSize();
+    size_t data_size = getInMemDataSize();
 
     // If there is data, allocate buffer and read it.
-    if (attr_size > 0)
+    if (data_size > 0)
     {
-	char *strg_C = NULL;
+	char *strg_C = new char [data_size+1];
+	HDmemset(strg_C, 0, data_size+1); // clear buffer
 
-	strg_C = new char [(size_t)attr_size+1];
 	herr_t ret_value = H5Dread(id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, strg_C);
 
 	if( ret_value < 0 )

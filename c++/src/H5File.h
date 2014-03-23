@@ -76,6 +76,7 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 
 	// Reopens this file.
 	void reOpen();	// added for better name
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 	void reopen();  // obsolete in favor of reOpen()
 
@@ -102,19 +103,18 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 	// H5File destructor.
 	virtual ~H5File();
 
+   protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+	// Sets the HDF5 file id.
+	virtual void p_setId(const hid_t new_id);
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
    private:
 	hid_t id;	// HDF5 file id
 
 	// This function is private and contains common code between the
 	// constructors taking a string or a char*
 	void p_get_file( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist );
-
-   protected:
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Sets the HDF5 file id.
-	virtual void p_setId(const hid_t new_id);
-
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 };
 #ifndef H5_NO_NAMESPACE

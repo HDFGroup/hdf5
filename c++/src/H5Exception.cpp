@@ -522,6 +522,29 @@ LibraryIException::LibraryIException(const H5std_string& func_name, const H5std_
 LibraryIException::~LibraryIException() throw() {}
 
 //--------------------------------------------------------------------------
+// Subclass:	LocationException
+// Programmer	Binh-Minh Ribler - 2014
+//--------------------------------------------------------------------------
+//--------------------------------------------------------------------------
+// Function:	LocationException default constructor
+///\brief	Default constructor.
+//--------------------------------------------------------------------------
+LocationException::LocationException():Exception(){}
+//--------------------------------------------------------------------------
+// Function:	LocationException overloaded constructor
+///\brief	Creates a LocationException with the name of the function,
+///		in which the failure occurs, and an optional detailed message.
+///\param	func_name - IN: Name of the function where failure occurs
+///\param	message   - IN: Message on the failure
+//--------------------------------------------------------------------------
+LocationException::LocationException(const H5std_string& func_name, const H5std_string& message) : Exception(func_name, message) {}
+//--------------------------------------------------------------------------
+// Function:	LocationException destructor
+///\brief	Noop destructor.
+//--------------------------------------------------------------------------
+LocationException::~LocationException() throw() {}
+
+//--------------------------------------------------------------------------
 // Subclass:	IdComponentException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
