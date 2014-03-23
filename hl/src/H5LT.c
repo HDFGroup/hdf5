@@ -26,7 +26,7 @@
 #define         INCREMENT       1024
 #define         TMP_LEN         256
 #define         MAX(a,b)        (((a)>(b)) ? (a) : (b))
-int  input_len;
+size_t  input_len;
 char *myinput;
 size_t  indent = 0;
 
@@ -2290,9 +2290,9 @@ print_enum(hid_t type, char* str, size_t *str_len, hbool_t no_ubuf, size_t indt)
     size_t           dst_size;      /*destination value type size    */
     int              i;
 
-    if((nmembs = H5Tget_nmembers(type))==0)
+    if((nmembs = H5Tget_nmembers(type))<=0)
         goto out;
-    assert(nmembs>0);
+
     if((super = H5Tget_super(type)) < 0)
         goto out;
 

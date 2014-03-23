@@ -484,6 +484,9 @@ H5O_link_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    /* Sanity check */
+    HDcompile_assert(sizeof(uint64_t) >= sizeof(size_t));
+
     /* Get name's length */
     name_len = (uint64_t)HDstrlen(lnk->name);
 
@@ -500,7 +503,7 @@ H5O_link_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     /* Set return value */
     ret_value = 1 +                     /* Version */
                 1 +                     /* Link encoding flags */
-                (lnk->type != H5L_TYPE_HARD ? 1 : 0) + /* Link type */
+                (lnk->type != H5L_TYPE_HARD ? (size_t)1 : 0) + /* Link type */
                 (lnk->corder_valid ? 8 : 0) + /* Creation order */
                 (lnk->cset != H5T_CSET_ASCII ? 1 : 0) + /* Character set */
                 name_size +             /* Name length */

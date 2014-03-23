@@ -125,7 +125,7 @@ main(void)
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
 
-    if((H5Pset_chunk(dcpl, 2, &chunk_size)) < 0)
+    if((H5Pset_chunk(dcpl, 2, chunk_size)) < 0)
         FAIL_STACK_ERROR
 
     if((H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE)) < 0)
