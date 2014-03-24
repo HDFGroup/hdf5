@@ -26622,7 +26622,7 @@ if ${ac_cv_lib_iodcorrupt_corrupt_data+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-liodcorrupt LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD_CORRUPT_TOOL $LIBS"
+LIBS="-liodcorrupt  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -26663,9 +26663,9 @@ $as_echo "$ac_cv_lib_iodcorrupt_corrupt_data" >&6; }
 if test "x$ac_cv_lib_iodcorrupt_corrupt_data" = xyes; then :
 
 $as_echo "#define HAVE_IOD_CORRUPT_TOOL 1" >>confdefs.h
-
+, IOD_CORRUPT_TOOL="yes"
 else
-  IOD_CORRUPT_TOOL="yes"
+  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD_CORRUPT_TOOL
 fi
 
 

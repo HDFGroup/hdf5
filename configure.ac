@@ -2062,7 +2062,7 @@ case $withval in
     fi
 
     AC_CHECK_LIB([iodcorrupt], [corrupt_data],
-                [AC_DEFINE([HAVE_IOD_CORRUPT_TOOL], [1], [Define if IOD corruption code should be built])], IOD_CORRUPT_TOOL="yes", 
+                [AC_DEFINE([HAVE_IOD_CORRUPT_TOOL], [1], [Define if IOD corruption code should be built]), IOD_CORRUPT_TOOL="yes"], 
 		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD_CORRUPT_TOOL],
 		)
 
