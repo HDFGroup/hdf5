@@ -17,6 +17,8 @@ if (WIN32 AND NOT CYGWIN)
   endif (BUILD_SHARED_LIBS)
 endif (WIN32 AND NOT CYGWIN)
 
+INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${CMAKE_Fortran_MODULE_DIRECTORY})
+
 #-----------------------------------------------------------------------------
 # Setup the Fortran auto-detection utilities
 # H5test_kind(_SIZEOF).f90 used to generate H5fortran_detect.f90
@@ -80,8 +82,6 @@ add_custom_command (
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
     DEPENDS H5fortran_detect
 )
-
-INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${CMAKE_Fortran_MODULE_DIRECTORY})
 #-----------------------------------------------------------------------------
 add_executable (H5match_types
     ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
