@@ -75,10 +75,10 @@ set_target_properties (${HDF5_HL_F90_LIB_TARGET} PROPERTIES FOLDER libraries/hl/
 if (WIN32 AND NOT CYGWIN)
   install (
       FILES
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/H5ds.f90
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/H5tb.f90
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/H5lt.f90
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/H5im.f90
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5ds.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5tb.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5lt.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5im.mod
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
@@ -87,10 +87,10 @@ if (WIN32 AND NOT CYGWIN)
 else (WIN32 AND NOT CYGWIN)
   install (
       FILES
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/H5ds.f90
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/H5tb.f90
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/H5lt.f90
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/H5im.f90
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5ds.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5tb.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5lt.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5im.mod
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
