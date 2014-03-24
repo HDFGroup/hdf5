@@ -26663,7 +26663,7 @@ $as_echo "$ac_cv_lib_iodcorrupt_corrupt_data" >&6; }
 if test "x$ac_cv_lib_iodcorrupt_corrupt_data" = xyes; then :
 
 $as_echo "#define HAVE_IOD_CORRUPT_TOOL 1" >>confdefs.h
-, IOD_CORRUPT_TOOL="yes"
+; IOD_CORRUPT_TOOL="yes"
 else
   LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD_CORRUPT_TOOL
 fi
