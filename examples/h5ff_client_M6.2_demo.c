@@ -2,6 +2,8 @@
  * M6.2-demo.c: This is the demo program for Milestone 6.2 - HDF5 and IO Dispatcher Container Versioning Demonstration.
  * This program runs on one or more compute nodes and makes calls to the HDF5 API.
  * The Function Shipper server should be running before this demo program is started.
+ *
+ * March, 2014:  Updated to start user-initated transactions at number 1, not 0, to reflect DAOS numbering requirements.
  */
 
 #include <stdio.h>
@@ -19,7 +21,7 @@
 /* option flags */
 int verbose = 0;        // Verbose (print CV contents between every transaction) defaults to no
 int last_cv_only = 0;   // Only print contents of last container version when file re-opened  - defaults to no
-int abort3 = 0;         // Abort transaction 3 defaults to no
+int abort4 = 0;         // Abort transaction 4 defaults to no
 
 /* prototypes for helper functions */
 void create_string_attribute( hid_t, const char*, hid_t, const char*, int, uint64_t );
@@ -43,7 +45,7 @@ int main( int argc, char **argv ) {
    herr_t ret;
 
    uint64_t version;
-   hid_t rc_id, rc_id0, rc_id1, rc_id2, rc_id3, rc_id4;
+   hid_t rc_id, rc_id1, rc_id2, rc_id3, rc_id4, rc_id5;
 
    /* Check for MPI multi-thread support */
    MPI_Init_thread( &argc, &argv, MPI_THREAD_MULTIPLE, &provided );
@@ -71,17 +73,17 @@ int main( int argc, char **argv ) {
    ret = H5Pset_fapl_iod( fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL ); ASSERT_RET;
    file_id = H5Fcreate_ff( file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, H5_EVENT_STACK_NULL ); assert( file_id >= 0 );
 
-   /* Acquire a read handle for container version 0 and create a read context. */
-   version = 0;
+   /* Acquire a read handle for container version 1 and create a read context. */
+   version = 1;
    fprintf( stderr, "M6.2-r%d: Acquire read context for container version %d (Step 3)\n", my_rank, (int)version );
-   rc_id0 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET; assert( version == 0 );
+   rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET; assert( version == 1 );
 
    /* Print container contents at this point */
    fprintf( stderr, "M6.2-r%d: 1st call to print container contents (Step 4)\n", my_rank );
-   if ( verbose ) print_container_contents( file_id, rc_id0, "/", my_rank );
+   if ( verbose ) print_container_contents( file_id, rc_id1, "/", my_rank );
 
    /* 
-    * Transaction 1 is created, started, updated, and committed by rank 0.
+    * Transaction 2 is created, started, updated, and committed by rank 0.
     * Root group attributes AA and AB are created and populated.
     * Groups /GA and /GB are created.
     * Datasets /DA and /DB are created and populated.
@@ -90,14 +92,14 @@ int main( int argc, char **argv ) {
     */
    if ( my_rank == 0 ) {
 
-      uint64_t tr_num = 1;
+      uint64_t tr_num = 2;
       hid_t tr_id;
 
       /* Create a local transaction for transaction number. */
       fprintf( stderr, "M6.2-r%d: Create tr %d (Step 5 - begin) \n", my_rank, (int)tr_num );
-      tr_id = H5TRcreate( file_id, rc_id0, (uint64_t)tr_num ); assert( tr_id >= 0 );
+      tr_id = H5TRcreate( file_id, rc_id1, (uint64_t)tr_num ); assert( tr_id >= 0 );
 
-      /* Start transaction 1 with single transaction leader (the default) */
+      /* Start transaction 2 with single transaction leader (the default) */
       fprintf( stderr, "M6.2-r%d: Start tr %d\n", my_rank, (int)tr_num );
       ret = H5TRstart( tr_id, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
@@ -120,7 +122,7 @@ int main( int argc, char **argv ) {
       create_group( file_id, "GA", tr_id, "/", my_rank, tr_num );
       create_group( file_id, "GB", tr_id, "/", my_rank, tr_num );
 
-      /* Finish and commit transaction 1, causing the updates to appear in container version 1. */
+      /* Finish and commit transaction 2, causing the updates to appear in container version 2. */
       fprintf( stderr, "M6.2-r%d: Finish and commit tr %d (Step 5 - end)\n", my_rank, (int)tr_num );
       ret = H5TRfinish( tr_id, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
@@ -130,31 +132,31 @@ int main( int argc, char **argv ) {
 
    /* Print container contents at this point */
    fprintf( stderr, "M6.2-r%d: 2nd call to print container contents (Step 6)\n", my_rank );
-   if (verbose) print_container_contents( file_id, rc_id0, "/", my_rank );
+   if (verbose) print_container_contents( file_id, rc_id1, "/", my_rank );
 
-   /* Acquire a read handle for container version 1 and create a read context. */
-   version = 1;
+   /* Acquire a read handle for container version 2 and create a read context. */
+   version = 2;
    fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 7)\n", my_rank, (int)version );
-   rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
-   while ( rc_id1 < 0 ) {
+   rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+   while ( rc_id2 < 0 ) {
       fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv %d - sleep then retry\n", my_rank, (int)version );
       sleep( 1 );
-      version = 1;      
-      rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+      version = 2;      
+      rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
    }
 
-   assert( rc_id1 >= 0 ); assert ( version == 1 );
-   fprintf( stderr, "M6.2-r%d: Acquired read context for cv 1\n", my_rank );
+   assert( rc_id2 >= 0 ); assert ( version == 2 );
+   fprintf( stderr, "M6.2-r%d: Acquired read context for cv 2\n", my_rank );
    fprintf( stderr, "M6.2-r%d: 3rd call to print container contents (Step 8)\n", my_rank );
-   if (verbose) print_container_contents( file_id, rc_id1, "/", my_rank ); ASSERT_RET;
+   if (verbose) print_container_contents( file_id, rc_id2, "/", my_rank ); ASSERT_RET;
 
-   /* Release the read handle and close read context on cv 0 */
-   fprintf( stderr, "M6.2-r%d: Release read handle on cv 0 (Step 9)\n", my_rank );
-   ret = H5RCrelease( rc_id0, H5_EVENT_STACK_NULL); ASSERT_RET;
-   ret = H5RCclose( rc_id0 ); ASSERT_RET;
+   /* Release the read handle and close read context on cv 1 */
+   fprintf( stderr, "M6.2-r%d: Release read handle on cv 1 (Step 9)\n", my_rank );
+   ret = H5RCrelease( rc_id1, H5_EVENT_STACK_NULL); ASSERT_RET;
+   ret = H5RCclose( rc_id1 ); ASSERT_RET;
 
    /* 
-    * Transaction 2 is created, started, updated, and committed by ranks 0 & 1, if 2 or more MPI processes.
+    * Transaction 3 is created, started, updated, and committed by ranks 0 & 1, if 2 or more MPI processes.
     * Group /GA attributes AA and AB are created and populated by rank 0.
     * Group /GB attributes AA and AB are created and populated by rank 1.
     * Groups /GA/GA and /GA/GB are created by rank 0.
@@ -167,16 +169,16 @@ int main( int argc, char **argv ) {
     */
    if ( (my_rank == 0) || (my_rank == 1) ) {
 
-      uint64_t tr_num = 2;
+      uint64_t tr_num = 3;
       hid_t tr_id;
       hid_t trspl_id;
       hid_t gr_id;
       char gr_path[128];
 
-      /* Create a local transaction for transaction number 2. */
-      tr_id = H5TRcreate( file_id, rc_id1, tr_num ); assert( tr_id >= 0 );
+      /* Create a local transaction for transaction number 3. */
+      tr_id = H5TRcreate( file_id, rc_id2, tr_num ); assert( tr_id >= 0 );
 
-      /* Start transaction 2 with two transaction leaders (unless there is only 1 MPI process) */
+      /* Start transaction 3 with two transaction leaders (unless there is only 1 MPI process) */
       fprintf( stderr, "M6.2-r%d: Start tr %d (Step 10 - begin)\n", my_rank, (int)tr_num );
       trspl_id = H5Pcreate( H5P_TR_START );  assert( trspl_id >= 0 );
       if ( comm_size >= 2 ) {
@@ -188,10 +190,10 @@ int main( int argc, char **argv ) {
 
       /* Add updates to the transaction */
       if ( my_rank == 0 ) {
-         gr_id = H5Gopen_ff( file_id, "GA", H5P_DEFAULT, rc_id1, H5_EVENT_STACK_NULL ); assert( gr_id >= 0 );
+         gr_id = H5Gopen_ff( file_id, "GA", H5P_DEFAULT, rc_id2, H5_EVENT_STACK_NULL ); assert( gr_id >= 0 );
          sprintf( gr_path, "/GA/" );
       } else {
-         gr_id = H5Gopen_ff( file_id, "GB", H5P_DEFAULT, rc_id1, H5_EVENT_STACK_NULL ); assert( gr_id >= 0 );
+         gr_id = H5Gopen_ff( file_id, "GB", H5P_DEFAULT, rc_id2, H5_EVENT_STACK_NULL ); assert( gr_id >= 0 );
          sprintf( gr_path, "/GB/" );
       }
 
@@ -213,13 +215,13 @@ int main( int argc, char **argv ) {
 
       /* Append to dataset /DC */
       if ( my_rank == 0 ) {
-         append_dataset2( file_id, "/DC", tr_id, rc_id1, "/", my_rank, tr_num );
+         append_dataset2( file_id, "/DC", tr_id, rc_id2, "/", my_rank, tr_num );
       }
 
       /* Close the group */
       ret = H5Gclose_ff ( gr_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
-      /* Finish and commit transaction 2, causing the updates to appear in container version 2. */
+      /* Finish and commit transaction 3, causing the updates to appear in container version 3. */
       fprintf( stderr, "M6.2-r%d: Finish and commit tr %d (Step 10 - end)\n", my_rank, (int)tr_num );
       ret = H5TRfinish( tr_id, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
@@ -229,238 +231,238 @@ int main( int argc, char **argv ) {
    }
 
    fprintf( stderr, "M6.2-r%d: 4th call to print container contents (Step 11)\n", my_rank );
-   if (verbose) print_container_contents( file_id, rc_id1, "/", my_rank ); ASSERT_RET;
-
-   version = 2;
-   fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 12)\n", my_rank, (int)version );
-   rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
-   while ( rc_id2 < 0 ) {
-      fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv 2 - sleep then retry\n", my_rank );
-      sleep( 1 );
-      version = 2;
-      rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
-   }
-   assert( rc_id2 >= 0 ); assert( version == 2 );
-   fprintf( stderr, "M6.2-r%d: Acquired read context for cv 2\n", my_rank );
-   fprintf( stderr, "M6.2-r%d: 5th call to print container contents (Step 13)\n", my_rank );
    if (verbose) print_container_contents( file_id, rc_id2, "/", my_rank ); ASSERT_RET;
 
-   /* Release the read handle and close read context on cv 1 */
-   fprintf( stderr, "M6.2-r%d: Release read handle on cv 1 (Step 14)\n", my_rank );
-   ret = H5RCrelease( rc_id1, H5_EVENT_STACK_NULL); ASSERT_RET;
-   ret = H5RCclose( rc_id1 ); ASSERT_RET;
+   version = 3;
+   fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 12)\n", my_rank, (int)version );
+   rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+   while ( rc_id3 < 0 ) {
+      fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv 3 - sleep then retry\n", my_rank );
+      sleep( 1 );
+      version = 3;
+      rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+   }
+   assert( rc_id3 >= 0 ); assert( version == 3 );
+   fprintf( stderr, "M6.2-r%d: Acquired read context for cv 3\n", my_rank );
+   fprintf( stderr, "M6.2-r%d: 5th call to print container contents (Step 13)\n", my_rank );
+   if (verbose) print_container_contents( file_id, rc_id3, "/", my_rank ); ASSERT_RET;
+
+   /* Release the read handle and close read context on cv 2 */
+   fprintf( stderr, "M6.2-r%d: Release read handle on cv 2 (Step 14)\n", my_rank );
+   ret = H5RCrelease( rc_id2, H5_EVENT_STACK_NULL); ASSERT_RET;
+   ret = H5RCclose( rc_id2 ); ASSERT_RET;
 
    /* 
+    * Transaction 5 is created and started by all MPI processes.
     * Transaction 4 is created and started by all MPI processes.
-    * Transaction 3 is created and started by all MPI processes.
     * Updates are added to the transactions in an interleaved manner, 
     * with the ranks progressing independent of each other, and 
-    * additional updates to transaction 14 after transaction 13 
+    * additional updates to transaction 5 after transaction 4 
     * is finished and committed.
-    * Transaction 3 may be aborted 
+    * Transaction 4 may be aborted 
     */
    {           /* Bracket to localize variables, and to later make it easier to restrict ranks participating if desired. */
-      uint64_t tr_num3 = 3;
       uint64_t tr_num4 = 4;
-      hid_t tr_id3, tr_id4;
+      uint64_t tr_num5 = 5;
+      hid_t tr_id4, tr_id5;
       hid_t trspl_id;
    
       /* Set up transaction start property list with the number of transaction leaders */
       trspl_id = H5Pcreate( H5P_TR_START );  assert( trspl_id >= 0 );
       ret = H5Pset_trspl_num_peers( trspl_id, comm_size ); ASSERT_RET;
    
-      /* Create & start transaction 4, based on cv 2  */
-      tr_id4 = H5TRcreate( file_id, rc_id2, tr_num4 ); assert( tr_id4 >= 0 );
-      ret = H5TRstart( tr_id4, trspl_id, H5_EVENT_STACK_NULL ); 
-      fprintf( stderr, "M6.2-r%d: Start tr %d (Step 15a - begin) - %s\n", my_rank, (int)tr_num4, STATUS );
+      /* Create & start transaction 5, based on cv 3  */
+      tr_id5 = H5TRcreate( file_id, rc_id3, tr_num5 ); assert( tr_id5 >= 0 );
+      ret = H5TRstart( tr_id5, trspl_id, H5_EVENT_STACK_NULL ); 
+      fprintf( stderr, "M6.2-r%d: Start tr %d (Step 15a - begin) - %s\n", my_rank, (int)tr_num5, STATUS );
    
-      /* Create & start transaction 3, based on cv 2  */
-      tr_id3 = H5TRcreate( file_id, rc_id2, tr_num3 ); assert( tr_id3 >= 0 );
-      ret = H5TRstart( tr_id3, trspl_id, H5_EVENT_STACK_NULL ); 
-      fprintf( stderr, "M6.2-r%d: Start tr %d (Step 15b - begin) - %s\n", my_rank, (int)tr_num3, STATUS );
+      /* Create & start transaction 4, based on cv 3  */
+      tr_id4 = H5TRcreate( file_id, rc_id3, tr_num4 ); assert( tr_id4 >= 0 );
+      ret = H5TRstart( tr_id4, trspl_id, H5_EVENT_STACK_NULL ); 
+      fprintf( stderr, "M6.2-r%d: Start tr %d (Step 15b - begin) - %s\n", my_rank, (int)tr_num4, STATUS );
    
       /* Close the transaction start property list. */
       ret = H5Pclose( trspl_id ); ASSERT_RET;
 
       /* Add updates to the transactions */
-      /*    1) /GA/GA/GB added to Tr 4 by rank 0   */
+      /*    1) /GA/GA/GB added to Tr 5 by rank 0   */
       if ( my_rank == 0 ) {
-         create_group( file_id, "/GA/GA/GB", tr_id4, "/", my_rank, tr_num4 );
+         create_group( file_id, "/GA/GA/GB", tr_id5, "/", my_rank, tr_num5 );
       } 
-      /*    2) /GB/GB/GB added to Tr 4 by rank 1   */
+      /*    2) /GB/GB/GB added to Tr 5 by rank 1   */
       if ( my_rank == 1 ) {
-         create_group( file_id, "/GB/GB/GB", tr_id4, "/", my_rank, tr_num4 );
+         create_group( file_id, "/GB/GB/GB", tr_id5, "/", my_rank, tr_num5 );
       }
-      /*    3) AA@/ deleted in Tr 3 by rank 0      */
+      /*    3) AA@/ deleted in Tr 4 by rank 0      */
       if ( my_rank == 0 ) {
-         ret = H5Adelete_by_name_ff( file_id, ".", "AA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
-         fprintf( stderr, "M6.2-r%d: delete AA @ / in tr %d - %s\n", my_rank, (int)tr_num3, STATUS );
+         ret = H5Adelete_by_name_ff( file_id, ".", "AA", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); 
+         fprintf( stderr, "M6.2-r%d: delete AA @ / in tr %d - %s\n", my_rank, (int)tr_num4, STATUS );
       }
-      /*    4) /GA/DA deleted in Tr 3 by rank 1    */
+      /*    4) /GA/DA deleted in Tr 4 by rank 1    */
       if ( my_rank == 1 ) {
-         ret = H5Ldelete_ff( file_id, "/GA/DA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
-         fprintf( stderr, "M6.2-r%d: delete /GA/DA in tr %d - %s\n", my_rank, (int)tr_num3, STATUS);
+         ret = H5Ldelete_ff( file_id, "/GA/DA", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); 
+         fprintf( stderr, "M6.2-r%d: delete /GA/DA in tr %d - %s\n", my_rank, (int)tr_num4, STATUS);
       }
-      /*    5) /GA/TB deleted in Tr 4 by rank 0    */
+      /*    5) /GA/TB deleted in Tr 5 by rank 0    */
       if ( my_rank == 0 ) {
-         ret = H5Ldelete_ff( file_id, "/GA/TB", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); 
-         fprintf( stderr, "M6.2-r%d: delete /GA/TB in tr %d - %s\n", my_rank, (int)tr_num4, STATUS );
+         ret = H5Ldelete_ff( file_id, "/GA/TB", H5P_DEFAULT, tr_id5, H5_EVENT_STACK_NULL); 
+         fprintf( stderr, "M6.2-r%d: delete /GA/TB in tr %d - %s\n", my_rank, (int)tr_num5, STATUS );
       }
-      /*    6) /DB deleted in Tr 4 by rank 1       */
+      /*    6) /DB deleted in Tr 5 by rank 1       */
       if ( my_rank == 1 ) {
-         ret = H5Ldelete_ff( file_id, "/DB", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); 
-         fprintf( stderr, "M6.2-r%d: delete /DB in tr %d - %s \n", my_rank, (int)tr_num4, STATUS );
+         ret = H5Ldelete_ff( file_id, "/DB", H5P_DEFAULT, tr_id5, H5_EVENT_STACK_NULL); 
+         fprintf( stderr, "M6.2-r%d: delete /DB in tr %d - %s \n", my_rank, (int)tr_num5, STATUS );
       }
-      /*    7) /GB/GA deleted in Tr 3 by rank 0    */
+      /*    7) /GB/GA deleted in Tr 4 by rank 0    */
       if ( my_rank == 0 ) {
-         ret = H5Ldelete_ff( file_id, "/GB/GA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
-         fprintf( stderr, "M6.2-r%d: delete /GB/GA in tr %d - %s\n", my_rank, (int)tr_num3, STATUS );
+         ret = H5Ldelete_ff( file_id, "/GB/GA", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); 
+         fprintf( stderr, "M6.2-r%d: delete /GB/GA in tr %d - %s\n", my_rank, (int)tr_num4, STATUS );
       }
-      /*    8) /GA/TA deleted in Tr 3 by rank 1    */
+      /*    8) /GA/TA deleted in Tr 4 by rank 1    */
       if ( my_rank == 1  ) {
-         ret = H5Ldelete_ff( file_id, "/GA/TA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
-         fprintf( stderr, "M6.2-r%d: delete /GA/TA in tr %d - %s\n", my_rank, (int)tr_num3, STATUS );
+         ret = H5Ldelete_ff( file_id, "/GA/TA", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); 
+         fprintf( stderr, "M6.2-r%d: delete /GA/TA in tr %d - %s\n", my_rank, (int)tr_num4, STATUS );
       }
-      /*    9) /GA/GA/GA added in Tr 3 by rank 0   */
+      /*    9) /GA/GA/GA added in Tr 4 by rank 0   */
       if ( my_rank == 0 ) {
-         create_group( file_id, "/GA/GA/GA", tr_id3, "/", my_rank, tr_num3 );
+         create_group( file_id, "/GA/GA/GA", tr_id4, "/", my_rank, tr_num4 );
       } 
-      /*    10) /GB/TA deleted in Tr 3 by rank 1   */
+      /*    10) /GB/TA deleted in Tr 4 by rank 1   */
       if ( my_rank == 1 ) {
-         ret = H5Ldelete_ff( file_id, "/GB/TA", H5P_DEFAULT, tr_id3, H5_EVENT_STACK_NULL); 
-         fprintf( stderr, "M6.2-r%d: delete /GB/TA in tr %d - %s\n", my_rank, (int)tr_num3, STATUS );
+         ret = H5Ldelete_ff( file_id, "/GB/TA", H5P_DEFAULT, tr_id4, H5_EVENT_STACK_NULL); 
+         fprintf( stderr, "M6.2-r%d: delete /GB/TA in tr %d - %s\n", my_rank, (int)tr_num4, STATUS );
       }
-      /*    11) /GB/GB/DB added in Tr 3 by rank 1  */
+      /*    11) /GB/GB/DB added in Tr 4 by rank 1  */
       if ( my_rank == 1 ) {
-         create_dataset( file_id, "/GB/GB/DB", tr_id3, "/", my_rank, tr_num3, 2 );
+         create_dataset( file_id, "/GB/GB/DB", tr_id4, "/", my_rank, tr_num4, 2 );
       } 
-      /*    12) /DA updated in Tr 3 by all ranks   */
-      update_dataset( file_id, "/DA", tr_id3, rc_id2, "/", my_rank, tr_num3, 1 );
+      /*    12) /DA updated in Tr 4 by all ranks   */
+      update_dataset( file_id, "/DA", tr_id4, rc_id3, "/", my_rank, tr_num4, 1 );
 
-      /*    13) /GB/DA updated in Tr 3 by rank 0  */
+      /*    13) /GB/DA updated in Tr 4 by rank 0  */
       if ( my_rank == 0 ) {
-         update_dataset( file_id, "/GB/DA", tr_id3, rc_id2, "/", my_rank, tr_num3, 1 );
+         update_dataset( file_id, "/GB/DA", tr_id4, rc_id3, "/", my_rank, tr_num4, 1 );
       }
 
-      /*    14) Append to dataset /DC in Tr 3 by rank 0 */
+      /*    14) Append to dataset /DC in Tr 4 by rank 0 */
       if ( my_rank == 0 ) {
-         append_dataset2( file_id, "/DC", tr_id3, rc_id2, "/", my_rank, tr_num3 );
+         append_dataset2( file_id, "/DC", tr_id4, rc_id3, "/", my_rank, tr_num4 );
       }
 
       /*    Abort - one or more processes should be able to abort the Transaction with the same effect. */
-      if ( abort3 ) {
+      if ( abort4 ) {
          /* All ranks call TRabort; the order of actual calls is not determined by the code. 
           * The first abort to reach IOD is the one that aborts the transaction, and abort need not be called by all ranks. */
-         ret = H5TRabort( tr_id3, H5_EVENT_STACK_NULL ); 
-         fprintf( stderr, "M6.2-r%d: ABORT tr %d (Step 15b - abort) - %s\n", my_rank, (int)tr_num3, STATUS );
-      }
-
-      /* Finish and commit transaction 3, causing the updates to appear in container version 3. */
-      ret = H5TRfinish( tr_id3, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); 
-      fprintf( stderr, "M6.2-r%d: Finish and commit tr %d (Step 15b - end) - %s\n", my_rank, (int)tr_num3, STATUS );
-
-      ret = H5TRclose( tr_id3 ); ASSERT_RET;
-
-      /* Get read context for CV 3, then print the contents of container */
-      /* Limit the number of tries, because if it was aborted we'll never get it */
-      int max_tries = 4;
-      int current_try = 0;
-      version = 3;
-      fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 15c)\n", my_rank, (int)version );
-      rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
-      while ( (rc_id3 < 0) && (current_try < max_tries) ) {
-         fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv 3 - sleep then retry\n", my_rank );
-         sleep( 1 );
-         current_try++;
-         version = 3;
-         rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
-      }
-      if ( rc_id3 >= 0 ) {
-         assert( version == 3 );
-         fprintf( stderr, "M6.2-r%d: Acquired read context for cv 3\n", my_rank );
-         fprintf( stderr, "M6.2-r%d: 6th call to print container contents (Step 15d)\n", my_rank );
-         if (verbose) print_container_contents( file_id, rc_id3, "/", my_rank ); ASSERT_RET;
-
-         /* Release read handle & close read context for CV 3 */
-         fprintf( stderr, "M6.2-r%d: Release read handle on cv 3 (Step 15e)\n", my_rank );
-         ret = H5RCrelease( rc_id3, H5_EVENT_STACK_NULL ); ASSERT_RET;
-         ret = H5RCclose( rc_id3 ); ASSERT_RET;
-      } else {
-         fprintf( stderr, "M6.2-r%d: Failed %d times to aquire read context for cv 3 - continuing\n", my_rank, max_tries );
-      }
-         
-      /*    15) /GB/GB/GA added in Tr 4 by rank 1  */
-      if ( my_rank == 1 ) {
-         create_group( file_id, "/GB/GB/GA", tr_id4, "/", my_rank, tr_num4 );
-      }
-
-      /*    16) /DA updated in Tr 4 by all ranks */
-      update_dataset( file_id, "/DA", tr_id4, rc_id2, "/", my_rank, tr_num4, 1 );
-
-      /*    17) Append to dataset /DC in Tr 4 by rank 0*/
-      if ( my_rank == 0 ) {
-         append_dataset2( file_id, "/DC", tr_id4, rc_id2, "/", my_rank, tr_num4 );
+         ret = H5TRabort( tr_id4, H5_EVENT_STACK_NULL ); 
+         fprintf( stderr, "M6.2-r%d: ABORT tr %d (Step 15b - abort) - %s\n", my_rank, (int)tr_num4, STATUS );
       }
 
       /* Finish and commit transaction 4, causing the updates to appear in container version 4. */
-      fprintf( stderr, "M6.2-r%d: Finish and commit tr %d (Step 15a - end)\n", my_rank, (int)tr_num4 );
-      ret = H5TRfinish( tr_id4, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); ASSERT_RET;
+      ret = H5TRfinish( tr_id4, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); 
+      fprintf( stderr, "M6.2-r%d: Finish and commit tr %d (Step 15b - end) - %s\n", my_rank, (int)tr_num4, STATUS );
+
       ret = H5TRclose( tr_id4 ); ASSERT_RET;
 
-      /* Get read context for CV 4, then print the contents of the container */
+      /* Get read context for CV 4, then print the contents of container */
+      /* Limit the number of tries, because if it was aborted we'll never get it */
+      int max_tries = 4;
+      int current_try = 0;
       version = 4;
-      fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 15f)\n", my_rank, (int)version );
+      fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 15c)\n", my_rank, (int)version );
       rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
-      while ( rc_id4 < 0 ) {
+      while ( (rc_id4 < 0) && (current_try < max_tries) ) {
          fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv 4 - sleep then retry\n", my_rank );
          sleep( 1 );
+         current_try++;
          version = 4;
          rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
       }
-      assert( rc_id4 >= 0 ); assert( version == 4 );
-      fprintf( stderr, "M6.2-r%d: Acquired read context for cv 4\n", my_rank );
+      if ( rc_id4 >= 0 ) {
+         assert( version == 4 );
+         fprintf( stderr, "M6.2-r%d: Acquired read context for cv 4\n", my_rank );
+         fprintf( stderr, "M6.2-r%d: 6th call to print container contents (Step 15d)\n", my_rank );
+         if (verbose) print_container_contents( file_id, rc_id4, "/", my_rank ); ASSERT_RET;
+
+         /* Release read handle & close read context for CV 4 */
+         fprintf( stderr, "M6.2-r%d: Release read handle on cv 4 (Step 15e)\n", my_rank );
+         ret = H5RCrelease( rc_id4, H5_EVENT_STACK_NULL ); ASSERT_RET;
+         ret = H5RCclose( rc_id4 ); ASSERT_RET;
+      } else {
+         fprintf( stderr, "M6.2-r%d: Failed %d times to aquire read context for cv 4 - continuing\n", my_rank, max_tries );
+      }
+         
+      /*    15) /GB/GB/GA added in Tr 5 by rank 1  */
+      if ( my_rank == 1 ) {
+         create_group( file_id, "/GB/GB/GA", tr_id5, "/", my_rank, tr_num5 );
+      }
+
+      /*    16) /DA updated in Tr 5 by all ranks */
+      update_dataset( file_id, "/DA", tr_id5, rc_id3, "/", my_rank, tr_num5, 1 );
+
+      /*    17) Append to dataset /DC in Tr 5 by rank 0*/
+      if ( my_rank == 0 ) {
+         append_dataset2( file_id, "/DC", tr_id5, rc_id3, "/", my_rank, tr_num5 );
+      }
+
+      /* Finish and commit transaction 5, causing the updates to appear in container version 5. */
+      fprintf( stderr, "M6.2-r%d: Finish and commit tr %d (Step 15a - end)\n", my_rank, (int)tr_num5 );
+      ret = H5TRfinish( tr_id5, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); ASSERT_RET;
+      ret = H5TRclose( tr_id5 ); ASSERT_RET;
+
+      /* Get read context for CV 5, then print the contents of the container */
+      version = 5;
+      fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 15f)\n", my_rank, (int)version );
+      rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+      while ( rc_id5 < 0 ) {
+         fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv 5 - sleep then retry\n", my_rank );
+         sleep( 1 );
+         version = 5;
+         rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+      }
+      assert( rc_id5 >= 0 ); assert( version == 5 );
+      fprintf( stderr, "M6.2-r%d: Acquired read context for cv 5\n", my_rank );
       fprintf( stderr, "M6.2-r%d: 7th call to print container contents (Step 15g)\n", my_rank );
-      if (verbose) print_container_contents( file_id, rc_id4, "/", my_rank ); ASSERT_RET;
+      if (verbose) print_container_contents( file_id, rc_id5, "/", my_rank ); ASSERT_RET;
 
       /* 
-       * Get read context for CV 3. 
-       * Should be there first time if Transaction 3 was finished & committed (because we know Transaction 4 is done)
-       * If Transaction 3 was aborted, it will never be there.
+       * Get read context for CV 4. 
+       * Should be there first time if Transaction 4 was finished & committed (because we know Transaction 5 is done)
+       * If Transaction 4 was aborted, it will never be there.
        */
-      version = 3;
+      version = 4;
       fprintf( stderr, "M6.2-r%d: Once again, try to acquire read context for cv %d (Step 15h)\n", my_rank, (int)version );
-      rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
-      if ( rc_id3 < 0 ) {
-         fprintf( stderr, "M6.2-r%d: Read context for cv 3 not available.\n", my_rank );
+      rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+      if ( rc_id4 < 0 ) {
+         fprintf( stderr, "M6.2-r%d: Read context for cv 4 not available.\n", my_rank );
       } else {
-         assert( rc_id3 >= 0 ); assert( version == 3 );
-         fprintf( stderr, "M6.2-r%d: Acquired read context for cv 3\n", my_rank );
+         assert( rc_id4 >= 0 ); assert( version == 4 );
+         fprintf( stderr, "M6.2-r%d: Acquired read context for cv 4\n", my_rank );
          fprintf( stderr, "M6.2-r%d: 8th call to print container contents (Step 15i)\n", my_rank );
-         if (verbose) print_container_contents( file_id, rc_id3, "/", my_rank ); ASSERT_RET;
+         if (verbose) print_container_contents( file_id, rc_id4, "/", my_rank ); ASSERT_RET;
 
-         /* Release read handle & close read context for CV 3 */
-         fprintf( stderr, "M6.2-r%d: Release read handle on cv 3 (Step 15j)\n", my_rank );
-         ret = H5RCrelease( rc_id3, H5_EVENT_STACK_NULL ); ASSERT_RET;
-         ret = H5RCclose( rc_id3 ); ASSERT_RET;
+         /* Release read handle & close read context for CV 4 */
+         fprintf( stderr, "M6.2-r%d: Release read handle on cv 4 (Step 15j)\n", my_rank );
+         ret = H5RCrelease( rc_id4, H5_EVENT_STACK_NULL ); ASSERT_RET;
+         ret = H5RCclose( rc_id4 ); ASSERT_RET;
       }
 
       /* 
-       * Note that rc_id4 was obtained in this bracketed code, but we aren't releasing it until later.
+       * Note that rc_id5 was obtained in this bracketed code, but we aren't releasing it until later.
        * Inelegant but I want it again & don't want to have to acquire again. 
-       * Wanted to use it in print above (15f) before 2nd print of CV3 (15g), so didn't wait until
+       * Wanted to use it in print above (15f) before 2nd print of CV4 (15g), so didn't wait until
        * bracket closed to acquire. 
        */
    
    }
 
    /* Release the read handle and close read context on open CVs */
-   fprintf( stderr, "M6.2-r%d: Release read handle on cv 2 (Step 16)\n", my_rank );
-   ret = H5RCrelease( rc_id2, H5_EVENT_STACK_NULL ); ASSERT_RET;
-   ret = H5RCclose( rc_id2 ); ASSERT_RET;
+   fprintf( stderr, "M6.2-r%d: Release read handle on cv 3 (Step 16)\n", my_rank );
+   ret = H5RCrelease( rc_id3, H5_EVENT_STACK_NULL ); ASSERT_RET;
+   ret = H5RCclose( rc_id3 ); ASSERT_RET;
    
-   fprintf( stderr, "M6.2-r%d: Release read handle on cv 4\n", my_rank );
-   ret = H5RCrelease( rc_id4, H5_EVENT_STACK_NULL ); ASSERT_RET;
-   ret = H5RCclose( rc_id4 ); ASSERT_RET;
+   fprintf( stderr, "M6.2-r%d: Release read handle on cv 5\n", my_rank );
+   ret = H5RCrelease( rc_id5, H5_EVENT_STACK_NULL ); ASSERT_RET;
+   ret = H5RCclose( rc_id5 ); ASSERT_RET;
 
    /* Close the file, then barrier to make sure all have closed it. */
    fprintf( stderr, "M6.2-r%d: close the container (Step 17)\n", my_rank );
@@ -476,9 +478,6 @@ int main( int argc, char **argv ) {
    /* Reopen the file Read/Write */
    fprintf( stderr, "M6.2-r%d: open the container\n", my_rank );
 
-   /* KEEP CODE IN CASE WANT TO Ask for explicit CV 4 Later */
-   /*  file_id = H5Fopen_ff( file_name, H5F_ACC_RDWR, fapl_id, NULL, H5_EVENT_STACK_NULL ); assert( file_id >= 0 ); */
-
    /* Get latest CV on open */
    file_id = H5Fopen_ff( file_name, H5F_ACC_RDWR, fapl_id, &last_rc_id, H5_EVENT_STACK_NULL ); assert( file_id >= 0 );
 
@@ -488,7 +487,7 @@ int main( int argc, char **argv ) {
    if ( last_cv_only ) {
       v = last_version;
    } else {
-      v = 0;
+      v = 1;
    }
    for ( v; v <= last_version; v++ ) {
       version = v;
@@ -1004,7 +1003,7 @@ parse_options( int argc, char** argv, int my_rank ) {
       } else {
          switch( *(*argv+1) ) {
             case 'a':
-               abort3 = 1;
+               abort4 = 1;
                break;
             case 'l':   
                last_cv_only = 1;
@@ -1014,8 +1013,8 @@ parse_options( int argc, char** argv, int my_rank ) {
                break;
             default: 
                if ( my_rank == 0 ) {
-                  printf( "Usage: h5ff_client_M6.2_demo [-aivw]\n" );
-                  printf( "\ta: abort transaction 3\n" );
+                  printf( "Usage: h5ff_client_M6.2_demo [-aiv]\n" );
+                  printf( "\ta: abort transaction 4\n" );
                   printf( "\tl: last container version contents are the only ones printed on reopen\n" );
                   printf( "\tv: verbose printing\n" );
                }
