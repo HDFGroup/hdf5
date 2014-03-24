@@ -1017,7 +1017,6 @@
 ./testpar/testpar.h
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
-./testpar/testph5.sh.in
 
 ./tools/COPYING
 ./tools/Makefile.am
