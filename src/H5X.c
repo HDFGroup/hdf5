@@ -710,6 +710,7 @@ H5Pget_xapl_transaction(hid_t xapl_id, hid_t *trans_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*i", xapl_id, trans_id);
 
     if (NULL == (plist = H5P_object_verify(xapl_id, H5P_INDEX_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a xapl");
@@ -739,6 +740,7 @@ H5Pget_xapl_read_context(hid_t xapl_id, hid_t *rc_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*i", xapl_id, rc_id);
 
     if (NULL == (plist = H5P_object_verify(xapl_id, H5P_INDEX_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a xapl");
@@ -768,6 +770,7 @@ H5Pget_xxpl_transaction(hid_t xxpl_id, hid_t *trans_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*i", xxpl_id, trans_id);
 
     if (NULL == (plist = H5P_object_verify(xxpl_id, H5P_INDEX_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a xxpl");
@@ -797,6 +800,7 @@ H5Pget_xxpl_read_context(hid_t xxpl_id, hid_t *rc_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*i", xxpl_id, rc_id);
 
     if (NULL == (plist = H5P_object_verify(xxpl_id, H5P_INDEX_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a xxpl");

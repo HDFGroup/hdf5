@@ -185,6 +185,7 @@ AC_SUBST([HDF5_HL]) HDF5_HL=yes
 AC_SUBST([GPFS]) GPFS=no
 AC_SUBST([PYTHON]) PYTHON=no
 AC_SUBST([EFF]) EFF=no
+AC_SUBST([IOD_CORRUPT_TOOL]) IOD_CORRUPT_TOOL=no
 AC_SUBST([INDEXING]) INDEXING=no
 AC_SUBST([LARGEFILE]) LARGEFILE=yes
 AC_SUBST([INSTRUMENT])
@@ -1999,6 +2000,84 @@ esac
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
 ##
+AC_ARG_WITH([iod-corrupt-tool],
+            [AS_HELP_STRING([--with-iod-corrupt-tool=DIR],
+                            [Use iod-corrupt-tool [default=no]])],,
+            [withval=no])
+
+case $withval in
+  yes)
+    HAVE_IOD_CORRUPT_TOOL="yes"
+    AC_CHECK_HEADERS([iod_corrupt_tool.h])
+    AC_CHECK_LIB([iodcorrupt], [corrupt_data],[MYIOD_CT_LIBS="-liodcorrupt"], [unset HAVE_IOD_CORRUPT_TOOL=])
+    AC_SUBST([MYIOD_CT_LIBS])
+    if test -z "$HAVE_IOD_CORRUPT_TOOL=" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find iod corrupt tool library])
+    fi
+    ;;
+  no)
+    HAVE_IOD_CORRUPT_TOOL=="no"
+    AC_MSG_CHECKING([for iod corrupt tool library])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_IOD_CORRUPT_TOOL="yes"
+    case "$withval" in
+      *,*)
+        iod_ct_inc="`echo $withval |cut -f1 -d,`"
+        iod_ct_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          iod_ct_inc="$withval/include"
+          iod_ct_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$iod_ct_inc" = "X/usr/include"; then
+      iod_ct_inc=""
+    fi
+    if test "X$iod_ct_lib" = "X/usr/lib"; then
+      iod_ct_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$iod_ct_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$iod_ct_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$iod_ct_inc"
+    fi
+
+    AC_CHECK_HEADERS([iod_corrupt_tool.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+
+    if test -n "$iod_ct_lib"; then
+      LDFLAGS="$LDFLAGS -L$iod_ct_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$iod_ct_lib"
+    fi
+
+    AC_CHECK_LIB([iodcorrupt], [corrupt_data],
+                [AC_DEFINE([HAVE_IOD_CORRUPT_TOOL], [1], [Define if IOD corruption code should be built])], IOD_CORRUPT_TOOL="yes", 
+		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD_CORRUPT_TOOL],
+		)
+
+    if test -z "$HAVE_IOD_CORRUPT_TOOL" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find iod corrupt tool library])
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Is the iod present? It has a header file `IOD.h' and a library
+## `-liod' and their locations might be specified with the `--with-iod'
+## command-line switch. The value is an include path and/or a library path.
+## If the library path is specified then it must be preceded by a comma.
+##
 AC_ARG_WITH([iodp],
             [AS_HELP_STRING([--with-iodp=DIR],
                             [Use iodp [default=no]])],,
@@ -3104,7 +3183,7 @@ case "X-$enableval" in
     AM_CPPFLAGS="$AM_CPPFLAGS $MCHECKSUM_CFLAGS"
     AM_LDFLAGS="$AM_LDFLAGS $MCHECKSUM_LIBS"
     
-    AC_CHECK_HEADERS([axe.h iod_api.h iod_types.h],
+    AC_CHECK_HEADERS([axe.h iod_api.h iod_types.h iod_corrupt_tool.h],
                      [AC_MSG_CHECKING([for EFF support])
                      AC_TRY_COMPILE([#include <axe.h>
                                      #include <iod_api.h>

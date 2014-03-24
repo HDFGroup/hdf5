@@ -710,6 +710,7 @@ LL_PATH
 USE_FILTER_SZIP
 USE_FILTER_DEFLATE
 MYIODP_LIBS
+MYIOD_CT_LIBS
 MYIOD_LIBS
 MYDAOS_LIBS
 MYPLFS_LIBS
@@ -814,6 +815,7 @@ CODESTACK
 INSTRUMENT
 LARGEFILE
 INDEXING
+IOD_CORRUPT_TOOL
 EFF
 PYTHON
 GPFS
@@ -941,6 +943,7 @@ with_axe
 with_plfs
 with_daos
 with_iod
+with_iod_corrupt_tool
 with_iodp
 with_zlib
 with_szlib
@@ -1716,6 +1719,8 @@ Optional Packages:
   --with-plfs=DIR         Use plfs [default=no]
   --with-daos=DIR         Use daos [default=no]
   --with-iod=DIR          Use iod [default=no]
+  --with-iod-corrupt-tool=DIR
+                          Use iod-corrupt-tool [default=no]
   --with-iodp=DIR         Use iodp [default=no]
   --with-zlib=DIR         Use zlib library for external deflate I/O filter
                           [default=yes]
@@ -4068,6 +4073,7 @@ $as_echo "done" >&6; }
  GPFS=no
  PYTHON=no
  EFF=no
+ IOD_CORRUPT_TOOL=no
  INDEXING=no
  LARGEFILE=yes
 
@@ -26471,6 +26477,211 @@ esac
 ## If the library path is specified then it must be preceded by a comma.
 ##
 
+# Check whether --with-iod-corrupt-tool was given.
+if test "${with_iod_corrupt_tool+set}" = set; then :
+  withval=$with_iod_corrupt_tool;
+else
+  withval=no
+fi
+
+
+case $withval in
+  yes)
+    HAVE_IOD_CORRUPT_TOOL="yes"
+    for ac_header in iod_corrupt_tool.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "iod_corrupt_tool.h" "ac_cv_header_iod_corrupt_tool_h" "$ac_includes_default"
+if test "x$ac_cv_header_iod_corrupt_tool_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_IOD_CORRUPT_TOOL_H 1
+_ACEOF
+
+fi
+
+done
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for corrupt_data in -liodcorrupt" >&5
+$as_echo_n "checking for corrupt_data in -liodcorrupt... " >&6; }
+if ${ac_cv_lib_iodcorrupt_corrupt_data+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-liodcorrupt  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char corrupt_data ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return corrupt_data ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_iodcorrupt_corrupt_data=yes
+else
+  ac_cv_lib_iodcorrupt_corrupt_data=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iodcorrupt_corrupt_data" >&5
+$as_echo "$ac_cv_lib_iodcorrupt_corrupt_data" >&6; }
+if test "x$ac_cv_lib_iodcorrupt_corrupt_data" = xyes; then :
+  MYIOD_CT_LIBS="-liodcorrupt"
+else
+  unset HAVE_IOD_CORRUPT_TOOL=
+fi
+
+
+    if test -z "$HAVE_IOD_CORRUPT_TOOL=" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find iod corrupt tool library" "$LINENO" 5
+    fi
+    ;;
+  no)
+    HAVE_IOD_CORRUPT_TOOL=="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for iod corrupt tool library" >&5
+$as_echo_n "checking for iod corrupt tool library... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
+$as_echo "suppressed" >&6; }
+    ;;
+  *)
+    HAVE_IOD_CORRUPT_TOOL="yes"
+    case "$withval" in
+      *,*)
+        iod_ct_inc="`echo $withval |cut -f1 -d,`"
+        iod_ct_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          iod_ct_inc="$withval/include"
+          iod_ct_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$iod_ct_inc" = "X/usr/include"; then
+      iod_ct_inc=""
+    fi
+    if test "X$iod_ct_lib" = "X/usr/lib"; then
+      iod_ct_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$iod_ct_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$iod_ct_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$iod_ct_inc"
+    fi
+
+    for ac_header in iod_corrupt_tool.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "iod_corrupt_tool.h" "ac_cv_header_iod_corrupt_tool_h" "$ac_includes_default"
+if test "x$ac_cv_header_iod_corrupt_tool_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_IOD_CORRUPT_TOOL_H 1
+_ACEOF
+
+else
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+fi
+
+done
+
+
+    if test -n "$iod_ct_lib"; then
+      LDFLAGS="$LDFLAGS -L$iod_ct_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$iod_ct_lib"
+    fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for corrupt_data in -liodcorrupt" >&5
+$as_echo_n "checking for corrupt_data in -liodcorrupt... " >&6; }
+if ${ac_cv_lib_iodcorrupt_corrupt_data+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-liodcorrupt LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD_CORRUPT_TOOL $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char corrupt_data ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return corrupt_data ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_iodcorrupt_corrupt_data=yes
+else
+  ac_cv_lib_iodcorrupt_corrupt_data=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iodcorrupt_corrupt_data" >&5
+$as_echo "$ac_cv_lib_iodcorrupt_corrupt_data" >&6; }
+if test "x$ac_cv_lib_iodcorrupt_corrupt_data" = xyes; then :
+
+$as_echo "#define HAVE_IOD_CORRUPT_TOOL 1" >>confdefs.h
+
+else
+  IOD_CORRUPT_TOOL="yes"
+fi
+
+
+    if test -z "$HAVE_IOD_CORRUPT_TOOL" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find iod corrupt tool library" "$LINENO" 5
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Is the iod present? It has a header file `IOD.h' and a library
+## `-liod' and their locations might be specified with the `--with-iod'
+## command-line switch. The value is an include path and/or a library path.
+## If the library path is specified then it must be preceded by a comma.
+##
+
 # Check whether --with-iodp was given.
 if test "${with_iodp+set}" = set; then :
   withval=$with_iodp;
@@ -30354,7 +30565,7 @@ fi
     AM_CPPFLAGS="$AM_CPPFLAGS $MCHECKSUM_CFLAGS"
     AM_LDFLAGS="$AM_LDFLAGS $MCHECKSUM_LIBS"
 
-    for ac_header in axe.h iod_api.h iod_types.h
+    for ac_header in axe.h iod_api.h iod_types.h iod_corrupt_tool.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"

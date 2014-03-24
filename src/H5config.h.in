@@ -208,6 +208,12 @@
 /* Define to 1 if you have the <iod_api.h> header file. */
 #undef HAVE_IOD_API_H
 
+/* Define if IOD corruption code should be built */
+#undef HAVE_IOD_CORRUPT_TOOL
+
+/* Define to 1 if you have the <iod_corrupt_tool.h> header file. */
+#undef HAVE_IOD_CORRUPT_TOOL_H
+
 /* Define to 1 if you have the <iod_types.h> header file. */
 #undef HAVE_IOD_TYPES_H
 
