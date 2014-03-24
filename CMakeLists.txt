@@ -249,7 +249,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
       ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all static libraries."
   )
   set (CMAKE_Fortran_MODULE_DIRECTORY
-      ${PROJECT_BINARY_DIR}/bin/fortran CACHE PATH "Single Directory for all fortran modules."
+      ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all fortran modules."
   )
 else (NOT HDF5_EXTERNALLY_CONFIGURED)
   # if we are externally configured, but the project uses old cmake scripts
@@ -651,7 +651,7 @@ INCLUDE_DIRECTORIES (${HDF5_BINARY_DIR} ${HDF5_SRC_DIR} ${CMAKE_RUNTIME_OUTPUT_D
 set (CMAKE_MODULE_PATH ${HDF5_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
 option (HDF5_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
 if (HDF5_ENABLE_PARALLEL)
-  include (FindMPI)
+  find_package (MPI)
   INCLUDE_DIRECTORIES (${MPI_C_INCLUDE_PATH})
   if (MPI_C_FOUND)
     set (H5_HAVE_PARALLEL 1)

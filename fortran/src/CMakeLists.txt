@@ -262,8 +262,33 @@ install (
 
 if (WIN32 AND NOT CYGWIN)
   install (
-      DIRECTORY
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
+      FILES
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5fortran_types.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5test_kind_sizeof_mod.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/hdf5.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5a.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5d.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5e.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5f.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5g.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5i.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5l.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5o.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5p.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5r.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5s.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5t.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5z.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5a_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5d_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5e_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5f_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5l_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5o_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5p_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5r_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5t_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5_dble_interface.mod
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
@@ -271,8 +296,34 @@ if (WIN32 AND NOT CYGWIN)
   )
 else (WIN32 AND NOT CYGWIN)
   install (
-      DIRECTORY
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/
+      FILES
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5fortran_types.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5test_kind_sizeof_mod.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/hdf5.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5f.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5a.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5d.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5e.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5f.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5g.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5i.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5l.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5o.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5p.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5r.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5s.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5t.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5z.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5a_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5d_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5E_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5F_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5L_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5O_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5P_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5R_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5T_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5_dble_interface.mod
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
