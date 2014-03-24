@@ -19,7 +19,9 @@
 
 #ifdef H5_HAVE_EFF
 
+#if 0
 static void check_corruptions(iod_trans_id_t trans_num);
+#endif
 
 /*
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
@@ -496,8 +498,10 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction");
     }
 
+#if 0
     if(0 == client_rank)
         check_corruptions(trans_num);
+#endif
 
     /* if the flag is true, acquire a read context on the finished transaction */
     if(TRUE == acquire) {
@@ -813,6 +817,7 @@ done:
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_evict_cb() */
 
+#if 0
 static void check_corruptions(iod_trans_id_t trans_num)
 {
     int step;
@@ -904,4 +909,6 @@ static void check_corruptions(iod_trans_id_t trans_num)
         }
     }
 }
+#endif
+
 #endif /* H5_HAVE_EFF */
