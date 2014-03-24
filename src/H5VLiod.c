@@ -1970,6 +1970,9 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
     /* create the file object that is passed to the API layer */
     MPI_Comm_rank(fa->comm, &file->my_rank);
     MPI_Comm_size(fa->comm, &file->num_procs);
+
+    input.num_peers = (uint32_t)file->num_procs;
+
     /* Duplicate communicator and Info object. */
     if(FAIL == H5FD_mpi_comm_info_dup(fa->comm, fa->info, &file->comm, &file->info))
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed");

@@ -214,6 +214,7 @@ MERCURY_GEN_PROC(file_open_in_t,
                  ((hg_const_string_t)(name)) 
                  ((uint32_t)(flags)) 
                  ((hbool_t)(acquire)) 
+                 ((uint32_t)(num_peers))
                  ((hid_t)(fapl_id)))
 MERCURY_GEN_PROC(file_open_out_t, 
                  ((iod_handle_t)(coh)) 

@@ -315,6 +315,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     file_open_out_t output;
     unsigned int mode = input->flags; /* File Open mode */
     hbool_t acquire = input->acquire;
+    unsigned num_peers = input->num_peers; /* the number of peers participating in creation */
     iod_handle_t coh; /* container handle */
     iod_handles_t root_oh; /* root object handle */
     iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
@@ -370,7 +371,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_free_cont_trans_stat(coh, tids) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
 
-    if(iod_trans_start(coh, &rtid, NULL, 0, IOD_TRANS_R, NULL) < 0)
+    if(iod_trans_start(coh, &rtid, NULL, num_peers, IOD_TRANS_R, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
     /* open the root group */
