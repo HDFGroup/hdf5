@@ -27,7 +27,7 @@
 #include "axe.h"
 #include "iod_api.h"
 #include "iod_types.h"
-#if 0
+#if H5_HAVE_IOD_CORRUPT_TOOL
 #include "iod_corrupt_tool.h"
 #endif
 #include "mercury.h"

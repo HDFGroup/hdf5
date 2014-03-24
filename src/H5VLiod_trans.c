@@ -19,7 +19,7 @@
 
 #ifdef H5_HAVE_EFF
 
-#if 0
+#if H5_HAVE_IOD_CORRUPT_TOOL
 static void check_corruptions(iod_trans_id_t trans_num);
 #endif
 
@@ -498,7 +498,7 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction");
     }
 
-#if 0
+#if H5_HAVE_IOD_CORRUPT_TOOL
     if(0 == client_rank)
         check_corruptions(trans_num);
 #endif
@@ -817,7 +817,7 @@ done:
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_evict_cb() */
 
-#if 0
+#if H5_HAVE_IOD_CORRUPT_TOOL
 static void check_corruptions(iod_trans_id_t trans_num)
 {
     int step;
