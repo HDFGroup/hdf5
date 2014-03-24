@@ -235,6 +235,9 @@
 /* Define to 1 if you have the `iod' library (-liod). */
 #undef HAVE_LIBIOD
 
+/* Define to 1 if you have the `iodcorrupt' library (-liodcorrupt). */
+#undef HAVE_LIBIODCORRUPT
+
 /* Define to 1 if you have the `lmpe' library (-llmpe). */
 #undef HAVE_LIBLMPE
 

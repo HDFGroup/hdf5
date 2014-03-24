@@ -710,7 +710,6 @@ LL_PATH
 USE_FILTER_SZIP
 USE_FILTER_DEFLATE
 MYIODP_LIBS
-MYIOD_CT_LIBS
 MYIOD_LIBS
 MYDAOS_LIBS
 MYPLFS_LIBS
@@ -26471,10 +26470,7 @@ fi
 esac
 
 ## ----------------------------------------------------------------------
-## Is the iod present? It has a header file `IOD.h' and a library
-## `-liod' and their locations might be specified with the `--with-iod'
-## command-line switch. The value is an include path and/or a library path.
-## If the library path is specified then it must be preceded by a comma.
+## Is the IOD corrupt tool present?
 ##
 
 # Check whether --with-iod-corrupt-tool was given.
@@ -26495,12 +26491,15 @@ if test "x$ac_cv_header_iod_corrupt_tool_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_IOD_CORRUPT_TOOL_H 1
 _ACEOF
-
+ HAVE_IOD_CORRUPT_TOOL_H="yes"
+else
+  unset HAVE_IOD_CORRUPT_TOOL
 fi
 
 done
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for corrupt_data in -liodcorrupt" >&5
+    if test "x$HAVE_IOD_CORRUPT_TOOL" = "xyes" -a "x$HAVE_IOD_CORRUPT_TOOL_H" = "xyes"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for corrupt_data in -liodcorrupt" >&5
 $as_echo_n "checking for corrupt_data in -liodcorrupt... " >&6; }
 if ${ac_cv_lib_iodcorrupt_corrupt_data+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -26545,20 +26544,27 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iodcorrupt_corrupt_data" >&5
 $as_echo "$ac_cv_lib_iodcorrupt_corrupt_data" >&6; }
 if test "x$ac_cv_lib_iodcorrupt_corrupt_data" = xyes; then :
-  MYIOD_CT_LIBS="-liodcorrupt"
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBIODCORRUPT 1
+_ACEOF
+
+  LIBS="-liodcorrupt $LIBS"
+
 else
-  unset HAVE_IOD_CORRUPT_TOOL=
+  unset HAVE_IOD_CORRUPT_TOOL
 fi
 
-
-    if test -z "$HAVE_IOD_CORRUPT_TOOL=" -a -n "$HDF5_CONFIG_ABORT"; then
-      as_fn_error $? "couldn't find iod corrupt tool library" "$LINENO" 5
+    fi
+    if test -z "$HAVE_IOD_CORRUPT_TOOL"; then
+      if test -n "$HDF5_CONFIG_ABORT"; then
+        as_fn_error $? "couldn't find IOD corrupt tool library" "$LINENO" 5
+      fi
     fi
     ;;
   no)
-    HAVE_IOD_CORRUPT_TOOL=="no"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for iod corrupt tool library" >&5
-$as_echo_n "checking for iod corrupt tool library... " >&6; }
+    HAVE_IOD_CORRUPT_TOOL="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for iod corrupt tool" >&5
+$as_echo_n "checking for iod corrupt tool... " >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
     ;;
@@ -26566,8 +26572,8 @@ $as_echo "suppressed" >&6; }
     HAVE_IOD_CORRUPT_TOOL="yes"
     case "$withval" in
       *,*)
-        iod_ct_inc="`echo $withval |cut -f1 -d,`"
-        iod_ct_lib="`echo $withval |cut -f2 -d, -s`"
+        iod_ct_inc="`echo $withval | cut -f1 -d,`"
+        iod_ct_lib="`echo $withval | cut -f2 -d, -s`"
         ;;
       *)
         if test -n "$withval"; then
@@ -26603,9 +26609,9 @@ if test "x$ac_cv_header_iod_corrupt_tool_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_IOD_CORRUPT_TOOL_H 1
 _ACEOF
-
+ HAVE_IOD_CORRUPT_TOOL_H="yes"
 else
-  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS" unset HAVE_IOD_CORRUPT_TOOL
 fi
 
 done
@@ -26616,7 +26622,8 @@ done
       AM_LDFLAGS="$AM_LDFLAGS -L$iod_ct_lib"
     fi
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for corrupt_data in -liodcorrupt" >&5
+    if test "x$HAVE_IOD_CORRUPT_TOOL" = "xyes" -a "x$HAVE_IOD_CORRUPT_TOOL_H" = "xyes"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for corrupt_data in -liodcorrupt" >&5
 $as_echo_n "checking for corrupt_data in -liodcorrupt... " >&6; }
 if ${ac_cv_lib_iodcorrupt_corrupt_data+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -26661,19 +26668,31 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iodcorrupt_corrupt_data" >&5
 $as_echo "$ac_cv_lib_iodcorrupt_corrupt_data" >&6; }
 if test "x$ac_cv_lib_iodcorrupt_corrupt_data" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBIODCORRUPT 1
+_ACEOF
 
-$as_echo "#define HAVE_IOD_CORRUPT_TOOL 1" >>confdefs.h
-; IOD_CORRUPT_TOOL="yes"
+  LIBS="-liodcorrupt $LIBS"
+
 else
   LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD_CORRUPT_TOOL
 fi
 
+    fi
 
-    if test -z "$HAVE_IOD_CORRUPT_TOOL" -a -n "$HDF5_CONFIG_ABORT"; then
-      as_fn_error $? "couldn't find iod corrupt tool library" "$LINENO" 5
+    if test -z "$HAVE_IOD_CORRUPT_TOOL"; then
+      if test -n "$HDF5_CONFIG_ABORT"; then
+        as_fn_error $? "couldn't find IOD corrupt tool library" "$LINENO" 5
+      fi
     fi
     ;;
 esac
+
+if test "x$HAVE_IOD_CORRUPT_TOOL" = "xyes" -a "x$HAVE_IOD_CORRUPT_TOOL_H" = "xyes"; then
+
+$as_echo "#define HAVE_IOD_CORRUPT_TOOL 1" >>confdefs.h
+
+fi
 
 ## ----------------------------------------------------------------------
 ## Is the iod present? It has a header file `IOD.h' and a library
