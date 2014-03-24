@@ -10057,7 +10057,6 @@ H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t dataspace_id,
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the view */
     H5VL_iod_view_t *view = NULL; /* the view object that is created and passed to the user */
-    view_create_in_t input;
     iod_obj_id_t iod_id, mdkv_id;
     iod_handles_t iod_oh;
     H5VL_iod_request_t **parent_reqs = NULL;
@@ -10104,18 +10103,6 @@ H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t dataspace_id,
     if(NULL == (view = H5FL_CALLOC(H5VL_iod_view_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
-    /* set the input structure for the HG encode routine */
-    input.coh = obj->file->remote_file.coh;
-    input.loc_id = iod_id;
-    input.loc_oh = iod_oh;
-    input.loc_mdkv_id = mdkv_id;
-    input.query_id = query_id;
-    input.dataspace_id = dataspace_id;
-    input.vcpl_id = vcpl_id;
-    input.obj_type = obj->obj_type;
-    input.rcxt_num  = rc->c_version;
-    input.cs_scope = obj->file->md_integrity_scope;
-
     /* initialize View object */
     view->common.file = obj->file;
     view->c_version = rc->c_version;
@@ -10138,26 +10125,56 @@ H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t dataspace_id,
     if((view->vcpl_id = H5Pcopy(vcpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy vcpl");
 
-    /* Initialize the view types to be obtained from server */
-    view->attr_info.count = 0;
-    view->attr_info.tokens = NULL;
-    view->obj_info.count = 0;
-    view->obj_info.tokens = NULL;
-    view->region_info.count = 0;
-    view->region_info.tokens = NULL;
-
-    view->valid_view = FALSE;
-
 #if H5VL_IOD_DEBUG
     printf("View Create at IOD ID %"PRIu64", axe id %"PRIu64"\n", 
            iod_id, g_axe_id);
 #endif
 
-    if(H5VL__iod_create_and_forward(H5VL_VIEW_CREATE_ID, HG_VIEW_CREATE, 
-                                    (H5VL_iod_object_t *)view, 1, num_parents, parent_reqs, 
-                                    (H5VL_iod_req_info_t *)rc, &input, &view->valid_view, 
-                                    view, req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship view create");
+    /* If we already have a dataspace id, no need to ship */
+    if (H5I_object_verify(dataspace_id, H5I_DATASPACE)) {
+        printf("no ship\n");
+        view->attr_info.count = 0;
+        view->attr_info.tokens = NULL;
+        view->obj_info.count = 0;
+        view->obj_info.tokens = NULL;
+        view->region_info.count = 0;
+//        view->region_info.regions = H5MM_malloc(sizeof(hid_t));
+//        view->region_info.regions[0] = H5Scopy(dataspace_id);
+//        H5Sclose(dataspace_id);
+        /* TODO fix that */
+        view->region_info.tokens = NULL;
+
+        view->valid_view = TRUE;
+    } else {
+        view_create_in_t input;
+
+        /* Initialize the view types to be obtained from server */
+        view->attr_info.count = 0;
+        view->attr_info.tokens = NULL;
+        view->obj_info.count = 0;
+        view->obj_info.tokens = NULL;
+        view->region_info.count = 0;
+        view->region_info.tokens = NULL;
+
+        view->valid_view = FALSE;
+
+        /* set the input structure for the HG encode routine */
+        input.coh = obj->file->remote_file.coh;
+        input.loc_id = iod_id;
+        input.loc_oh = iod_oh;
+        input.loc_mdkv_id = mdkv_id;
+        input.query_id = query_id;
+        input.vcpl_id = vcpl_id;
+        input.obj_type = obj->obj_type;
+        input.rcxt_num  = rc->c_version;
+        input.cs_scope = obj->file->md_integrity_scope;
+
+        if(H5VL__iod_create_and_forward(H5VL_VIEW_CREATE_ID, HG_VIEW_CREATE,
+                (H5VL_iod_object_t *)view, 1, num_parents, parent_reqs,
+                (H5VL_iod_req_info_t *)rc, &input, &view->valid_view,
+                view, req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship view create");
+    }
 
     ret_value = (void *)view;
 
@@ -10240,6 +10257,10 @@ H5VL_iod_dataset_set_index(void *dset, void *idx_handle)
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(dset);
+
+#if H5VL_IOD_DEBUG
+    printf("Index handle set to dataset\n");
+#endif
 
     iod_dset->idx_handle = idx_handle;
 
@@ -10382,6 +10403,10 @@ H5VL_iod_dataset_set_index_info(void *_dset, unsigned plugin_id,
     input.idx_metadata.buf = metadata;
     input.idx_metadata.buf_size = metadata_size;
 
+#if H5VL_IOD_DEBUG
+    printf("Set index info, axe id %"PRIu64"\n", g_axe_id);
+#endif
+
     if(H5VL__iod_create_and_forward(H5VL_DSET_SET_INDEX_INFO_ID, HG_DSET_SET_INDEX_INFO,
                                     (H5VL_iod_object_t *)dset, 1, num_parents, parent_reqs,
                                     (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
@@ -10460,6 +10485,10 @@ H5VL_iod_dataset_get_index_info(void *_dset, size_t *count,
     info->metadata = metadata;
     info->output = output;
 
+#if H5VL_IOD_DEBUG
+    printf("Get index info, axe id %"PRIu64"\n", g_axe_id);
+#endif
+
     if(H5VL__iod_create_and_forward(H5VL_DSET_GET_INDEX_INFO_ID, HG_DSET_GET_INDEX_INFO,
                                     (H5VL_iod_object_t *)dset, 0, num_parents, parent_reqs,
                                     (H5VL_iod_req_info_t *)rc, &input, output, info, req) < 0)
@@ -10520,6 +10549,10 @@ H5VL_iod_dataset_remove_index_info(void *_dset, hid_t trans_id, void **req)
     input.mdkv_id = dset->remote_dset.mdkv_id;
     input.trans_num = tr->trans_num;
     input.cs_scope = dset->common.file->md_integrity_scope;
+
+#if H5VL_IOD_DEBUG
+    printf("Remove index info, axe id %"PRIu64"\n", g_axe_id);
+#endif
 
     if(H5VL__iod_create_and_forward(H5VL_DSET_RM_INDEX_INFO_ID, HG_DSET_RM_INDEX_INFO,
                                     (H5VL_iod_object_t *)dset, 0, num_parents, parent_reqs,

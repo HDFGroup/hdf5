@@ -757,7 +757,6 @@ MERCURY_GEN_PROC(view_create_in_t,
                  ((iod_obj_id_t)(loc_mdkv_id))
                  ((uint64_t)(rcxt_num))
                  ((int32_t)(obj_type))
-                 ((hid_t)(dataspace_id))
                  ((hid_t)(vcpl_id))
                  ((hid_t)(query_id)))
 

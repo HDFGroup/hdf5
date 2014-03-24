@@ -410,7 +410,7 @@ H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
     hid_t rcxt_id;
     size_t nelmts;
     size_t elmt_size = 0, buf_size = 0;
-    void *buf;
+    void *buf = NULL;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -434,7 +434,7 @@ H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
 
     /* allocate buffer to hold data */
     buf_size = nelmts * elmt_size;
-    if(NULL == (buf = malloc(buf_size)))
+    if(NULL == (buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate read buffer");
 
     /* read data from index */
@@ -460,5 +460,6 @@ H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
             (int) H5Sget_select_npoints(*dataspace_id));
 
 done:
+    H5MM_free(buf);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_dummy_query() */

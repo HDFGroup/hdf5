@@ -372,13 +372,6 @@ H5Vcreate_ff(hid_t loc_id, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, hid_t e
             HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
     }
 #endif
-    if (!H5I_object_verify(dataspace_id, H5I_DATASPACE)) {
-        /* The indexing pre_selection is NULL */
-        H5S_t *dataspace = H5S_create(H5S_NULL);
-        if((ret_value = H5I_register (H5I_DATASPACE, dataspace, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom");
-    }
-    /* TODO might want to pass dataspace_id with vcpl_id */
 
     /* call the IOD specific private routine to create a view object */
     if(NULL == (view = H5VL_iod_view_create(obj, query_id, dataspace_id,
