@@ -147,7 +147,6 @@ SET (H5FD_SRCS
     ${HDF5_SRC_DIR}/H5FDlog.c
     ${HDF5_SRC_DIR}/H5FDmpi.c
     ${HDF5_SRC_DIR}/H5FDmpio.c
-    ${HDF5_SRC_DIR}/H5FDmpiposix.c
     ${HDF5_SRC_DIR}/H5FDmulti.c
     ${HDF5_SRC_DIR}/H5FDsec2.c
     ${HDF5_SRC_DIR}/H5FDspace.c
@@ -161,7 +160,6 @@ SET (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDlog.h
     ${HDF5_SRC_DIR}/H5FDmpi.h
     ${HDF5_SRC_DIR}/H5FDmpio.h
-    ${HDF5_SRC_DIR}/H5FDmpiposix.h
     ${HDF5_SRC_DIR}/H5FDmulti.h
     ${HDF5_SRC_DIR}/H5FDpkg.h
     ${HDF5_SRC_DIR}/H5FDpublic.h

@@ -1203,28 +1203,24 @@ dump_fcpl(hid_t fid)
     PRINTSTREAM(rawoutstream, "%s %d\n","BTREE_LEAF", sym_lk);
 
 #ifdef SHOW_FILE_DRIVER
-    if (H5FD_CORE==fdriver)
+    if(H5FD_CORE==fdriver)
         HDstrcpy(dname,"H5FD_CORE");
 #ifdef H5_HAVE_DIRECT
-    else if (H5FD_DIRECT==fdriver)
+    else if(H5FD_DIRECT==fdriver)
         HDstrcpy(dname,"H5FD_DIRECT");
 #endif
-    else if (H5FD_FAMILY==fdriver)
+    else if(H5FD_FAMILY==fdriver)
         HDstrcpy(dname,"H5FD_FAMILY");
-    else if (H5FD_LOG==fdriver)
+    else if(H5FD_LOG==fdriver)
         HDstrcpy(dname,"H5FD_LOG");
-    else if (H5FD_MPIO==fdriver)
+    else if(H5FD_MPIO==fdriver)
         HDstrcpy(dname,"H5FD_MPIO");
-    else if (H5FD_MULTI==fdriver)
+    else if(H5FD_MULTI==fdriver)
         HDstrcpy(dname,"H5FD_MULTI");
-    else if (H5FD_SEC2==fdriver)
+    else if(H5FD_SEC2==fdriver)
         HDstrcpy(dname,"H5FD_SEC2");
-    else if (H5FD_STDIO==fdriver)
+    else if(H5FD_STDIO==fdriver)
         HDstrcpy(dname,"H5FD_STDIO");
-#ifdef H5_HAVE_STREAM
-    else if (H5FD_STREAM==fdriver)
-        HDstrcpy(dname,"H5FD_STREAM");
-#endif
     else
         HDstrcpy(dname,"Unknown driver");
 

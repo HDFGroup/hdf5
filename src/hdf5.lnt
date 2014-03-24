@@ -92,6 +92,5 @@
     macros cleaned up, but have not been linted
     due to their dependencies on features that we don't support on Windows:
         H5FDmpio.c
-        H5FDmpiposix.c
         H5FDstream.c
 */

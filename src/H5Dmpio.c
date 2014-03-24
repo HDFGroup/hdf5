@@ -157,12 +157,9 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     const H5S_t *mem_space, const H5D_type_info_t *type_info,
     const H5D_chunk_map_t *fm, H5P_genplist_t *dx_plist)
 {
-    /* variables to set cause of broken collective I/O */
-    int local_cause = 0;
-    int global_cause = 0;
-
-    int mpi_code;               /* MPI error code */
-    htri_t ret_value = TRUE;
+    int local_cause = 0;        /* Local reason(s) for breaking collective mode */
+    int global_cause = 0;       /* Global reason(s) for breaking collective mode */
+    htri_t ret_value;           /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -174,17 +171,13 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
 
 
     /* For independent I/O, get out quickly and don't try to form consensus */
-    if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_INDEPENDENT) {
-        local_cause = H5D_MPIO_SET_INDEPENDENT;
-        global_cause = H5D_MPIO_SET_INDEPENDENT;
-        HGOTO_DONE(FALSE);
-    }
+    if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_INDEPENDENT)
+        local_cause |= H5D_MPIO_SET_INDEPENDENT;
 
-    /* Optimized MPI types flag must be set and it must be collective IO */
-    /* (Don't allow parallel I/O for the MPI-posix driver, since it doesn't do real collective I/O) */
-    if(!(H5S_mpi_opt_types_g && io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE
-            && !IS_H5FD_MPIPOSIX(io_info->dset->oloc.file)))
-        local_cause |= H5D_MPIO_SET_MPIPOSIX;
+    /* Optimized MPI types flag must be set */
+    /* (based on 'HDF5_MPI_OPT_TYPES' environment variable) */
+    if(!H5FD_mpi_opt_types_g)
+        local_cause |= H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED;
 
     /* Don't allow collective operations if datatype conversions need to happen */
     if(!type_info->is_conv_noop)
@@ -220,15 +213,19 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
             io_info->dset->shared->dcpl_cache.pline.nused > 0)
         local_cause |= H5D_MPIO_FILTERS;
 
-    /* Form consensus opinion among all processes about whether to perform
-     * collective I/O
-     */
-    if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 1, MPI_INT, MPI_BOR, io_info->comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
+    /* Check for independent I/O */
+    if(local_cause & H5D_MPIO_SET_INDEPENDENT)
+        global_cause = local_cause;
+    else {
+        int mpi_code;               /* MPI error code */
 
-    ret_value = global_cause > 0 ? FALSE : TRUE;
+        /* Form consensus opinion among all processes about whether to perform
+         * collective I/O
+         */
+        if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 1, MPI_INT, MPI_BOR, io_info->comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
+    } /* end else */
 
-done:
     /* Write the local value of no-collective-cause to the DXPL. */
     if(H5P_set(dx_plist, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, &local_cause) < 0)
        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "couldn't set local no collective cause property")
@@ -237,6 +234,10 @@ done:
     if(H5P_set(dx_plist, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, &global_cause) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "couldn't set global no collective cause property")
 
+    /* Set the return value, based on the global cause */
+    ret_value = global_cause > 0 ? FALSE : TRUE;
+
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__mpio_opt_possible() */
 

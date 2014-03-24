@@ -437,17 +437,6 @@ main ()
 
 #endif
 
-#ifdef HAVE_GPFS
-
-#include <gpfs.h>
-int main ()
-{
-    int fd = 0; 
-    gpfs_fcntl(fd, (void *)0);
-}
-
-#endif /* HAVE_GPFS */
-
 #ifdef HAVE_IOEO
 
 #include <windows.h>

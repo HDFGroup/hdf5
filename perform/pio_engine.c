@@ -37,10 +37,6 @@
 #   include <mpio.h>
 #endif  /* !MPI_FILE_NULL */
 
-#ifdef H5_HAVE_GPFS
-#   include <gpfs_fcntl.h>
-#endif  /* H5_HAVE_GPFS */
-
 #include "pio_perf.h"
 #include "pio_timer.h"
 
@@ -135,19 +131,6 @@ static herr_t do_fopen(parameters *param, char *fname, file_descr *fd /*out*/,
 static herr_t do_fclose(iotype iot, file_descr *fd);
 static void do_cleanupfile(iotype iot, char *fname);
 
-/* GPFS-specific functions */
-#ifdef H5_HAVE_GPFS
-static void gpfs_access_range(int handle, off_t start, off_t length, int is_write);
-static void gpfs_free_range(int handle, off_t start, off_t length);
-static void gpfs_clear_file_cache(int handle);
-static void gpfs_cancel_hints(int handle);
-static void gpfs_start_data_shipping(int handle, int num_insts);
-static void gpfs_start_data_ship_map(int handle, int partition_size,
-    int agent_count, int *agent_node_num);
-static void gpfs_stop_data_shipping(int handle);
-static void gpfs_invalidate_file_cache(const char *filename);
-#endif /* H5_HAVE_GPFS */
-
 /*
  * Function:        do_pio
  * Purpose:         PIO Engine where Parallel IO are executed.
@@ -189,22 +172,22 @@ do_pio(parameters param)
     iot = param.io_type;
 
     switch (iot) {
-    case MPIO:
-        fd.mpifd = MPI_FILE_NULL;
-        res.timers = pio_time_new(MPI_TIMER);
-        break;
-    case POSIXIO:
-        fd.posixfd = -1;
-        res.timers = pio_time_new(MPI_TIMER);
-        break;
-    case PHDF5:
-        fd.h5fd = -1;
-        res.timers = pio_time_new(MPI_TIMER);
-        break;
-    default:
-        /* unknown request */
-        fprintf(stderr, "Unknown IO type request (%d)\n", iot);
-        GOTOERROR(FAIL);
+        case MPIO:
+            fd.mpifd = MPI_FILE_NULL;
+            res.timers = pio_time_new(MPI_TIMER);
+            break;
+        case POSIXIO:
+            fd.posixfd = -1;
+            res.timers = pio_time_new(MPI_TIMER);
+            break;
+        case PHDF5:
+            fd.h5fd = -1;
+            res.timers = pio_time_new(MPI_TIMER);
+            break;
+        default:
+            /* unknown request */
+            fprintf(stderr, "Unknown IO type request (%d)\n", iot);
+            GOTOERROR(FAIL);
     }
 
     ndsets = param.num_dsets;       /* number of datasets per file          */
@@ -379,18 +362,18 @@ done:
     /* close any opened files */
     /* no remove(fname) because that should have happened normally. */
     switch (iot) {
-    case POSIXIO:
-        if (fd.posixfd != -1)
-        hrc = do_fclose(iot, &fd);
-        break;
-    case MPIO:
-        if (fd.mpifd != MPI_FILE_NULL)
-        hrc = do_fclose(iot, &fd);
-        break;
-    case PHDF5:
-        if (fd.h5fd != -1)
-        hrc = do_fclose(iot, &fd);
-        break;
+        case POSIXIO:
+            if (fd.posixfd != -1)
+            hrc = do_fclose(iot, &fd);
+            break;
+        case MPIO:
+            if (fd.mpifd != MPI_FILE_NULL)
+            hrc = do_fclose(iot, &fd);
+            break;
+        case PHDF5:
+            if (fd.h5fd != -1)
+            hrc = do_fclose(iot, &fd);
+            break;
     }
 
     /* release generic resources */
@@ -423,15 +406,15 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
     HDmemset(fullname, 0, size);
 
     switch (iot) {
-    case POSIXIO:
-        suffix = ".posix";
-        break;
-    case MPIO:
-        suffix = ".mpio";
-        break;
-    case PHDF5:
-        suffix = ".h5";
-        break;
+        case POSIXIO:
+            suffix = ".posix";
+            break;
+        case MPIO:
+            suffix = ".mpio";
+            break;
+        case PHDF5:
+            suffix = ".h5";
+            break;
     }
 
     /* First use the environment variable and then try the constant */
@@ -886,60 +869,59 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     switch (parms->io_type) {
         case POSIXIO:
         case MPIO:
-        /* both posix and mpi io just need dataset offset in file*/
-        dset_offset = (ndset - 1) * nbytes;
-        break;
+            /* both posix and mpi io just need dataset offset in file*/
+            dset_offset = (ndset - 1) * nbytes;
+            break;
 
         case PHDF5:
-        h5dcpl = H5Pcreate(H5P_DATASET_CREATE);
-        if (h5dcpl < 0) {
-            fprintf(stderr, "HDF5 Property List Create failed\n");
-            GOTOERROR(FAIL);
-        }
-        /* 1D dataspace */
-        if (!parms->dim2d){
-            /* Make the dataset chunked if asked */
-            if(parms->h5_use_chunks) {
-            /* Set the chunk size to be the same as the buffer size */
-            h5dims[0] = blk_size;
-            hrc = H5Pset_chunk(h5dcpl, 1, h5dims);
-            if (hrc < 0) {
-                fprintf(stderr, "HDF5 Property List Set failed\n");
+            h5dcpl = H5Pcreate(H5P_DATASET_CREATE);
+            if (h5dcpl < 0) {
+                fprintf(stderr, "HDF5 Property List Create failed\n");
                 GOTOERROR(FAIL);
-            } /* end if */
-            } /* end if */
-        }/* end if */
-        else{
-            /* 2D dataspace */
-            if(parms->h5_use_chunks) {
-            /* Set the chunk size to be the same as the block size */
-            h5dims[0] = blk_size;
-            h5dims[1] = blk_size;
-            hrc = H5Pset_chunk(h5dcpl, 2, h5dims);
-            if (hrc < 0) {
-                fprintf(stderr, "HDF5 Property List Set failed\n");
+            }
+            /* 1D dataspace */
+            if (!parms->dim2d){
+                /* Make the dataset chunked if asked */
+                if(parms->h5_use_chunks) {
+                /* Set the chunk size to be the same as the buffer size */
+                h5dims[0] = blk_size;
+                hrc = H5Pset_chunk(h5dcpl, 1, h5dims);
+                if (hrc < 0) {
+                    fprintf(stderr, "HDF5 Property List Set failed\n");
+                    GOTOERROR(FAIL);
+                } /* end if */
+                } /* end if */
+            }/* end if */
+            else{
+                /* 2D dataspace */
+                if(parms->h5_use_chunks) {
+                /* Set the chunk size to be the same as the block size */
+                h5dims[0] = blk_size;
+                h5dims[1] = blk_size;
+                hrc = H5Pset_chunk(h5dcpl, 2, h5dims);
+                if (hrc < 0) {
+                    fprintf(stderr, "HDF5 Property List Set failed\n");
+                    GOTOERROR(FAIL);
+                } /* end if */
+                } /* end if */
+            }/* end else */
+
+            sprintf(dname, "Dataset_%ld", ndset);
+            h5ds_id = H5DCREATE(fd->h5fd, dname, ELMT_H5_TYPE,
+                h5dset_space_id, h5dcpl);
+
+            if (h5ds_id < 0) {
+                fprintf(stderr, "HDF5 Dataset Create failed\n");
                 GOTOERROR(FAIL);
-            } /* end if */
-            } /* end if */
-        }/* end else */
+            }
 
-        sprintf(dname, "Dataset_%ld", ndset);
-        h5ds_id = H5DCREATE(fd->h5fd, dname, ELMT_H5_TYPE,
-            h5dset_space_id, h5dcpl);
-
-        if (h5ds_id < 0) {
-            fprintf(stderr, "HDF5 Dataset Create failed\n");
-            GOTOERROR(FAIL);
-        }
-
-        hrc = H5Pclose(h5dcpl);
-        /* verifying the close of the dcpl */
-        if (hrc < 0) {
-            fprintf(stderr, "HDF5 Property List Close failed\n");
-            GOTOERROR(FAIL);
-        }
-
-        break;
+            hrc = H5Pclose(h5dcpl);
+            /* verifying the close of the dcpl */
+            if (hrc < 0) {
+                fprintf(stderr, "HDF5 Property List Close failed\n");
+                GOTOERROR(FAIL);
+            }
+            break;
     }
 
     /* The task is to transfer bytes_count bytes, starting at
@@ -2462,119 +2444,96 @@ done:
 do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 {
     int ret_code = SUCCESS, mrc;
-    herr_t hrc;
     hid_t acc_tpl = -1;         /* file access templates */
-    hbool_t use_gpfs = FALSE;   /* use GPFS hints        */
 
     switch (param->io_type) {
-    case POSIXIO:
-        if (flags & (PIO_CREATE | PIO_WRITE))
-        fd->posixfd = POSIXCREATE(fname);
-        else
-        fd->posixfd = POSIXOPEN(fname, O_RDONLY);
+        case POSIXIO:
+            if (flags & (PIO_CREATE | PIO_WRITE))
+                fd->posixfd = POSIXCREATE(fname);
+            else
+                fd->posixfd = POSIXOPEN(fname, O_RDONLY);
 
-        if (fd->posixfd < 0 ) {
-        fprintf(stderr, "POSIX File Open failed(%s)\n", fname);
-        GOTOERROR(FAIL);
-        }
+            if (fd->posixfd < 0 ) {
+                fprintf(stderr, "POSIX File Open failed(%s)\n", fname);
+                GOTOERROR(FAIL);
+            }
 
 
-        /* The perils of POSIX I/O in a parallel environment. The problem is:
-         *
-         *      - Process n opens a file with truncation and then starts
-         *        writing to the file.
-         *      - Process m also opens the file with truncation, but after
-         *        process n has already started to write to the file. Thus,
-         *        all of the stuff process n wrote is now lost.
-         */
-        MPI_Barrier(pio_comm_g);
+            /* The perils of POSIX I/O in a parallel environment. The problem is:
+             *
+             *      - Process n opens a file with truncation and then starts
+             *        writing to the file.
+             *      - Process m also opens the file with truncation, but after
+             *        process n has already started to write to the file. Thus,
+             *        all of the stuff process n wrote is now lost.
+             */
+            MPI_Barrier(pio_comm_g);
 
-        break;
+            break;
 
-    case MPIO:
-        if (flags & (PIO_CREATE | PIO_WRITE)) {
-        MPI_File_delete(fname, h5_io_info_g);
-        mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_CREATE | MPI_MODE_RDWR,
-            h5_io_info_g, &fd->mpifd);
+        case MPIO:
+            if (flags & (PIO_CREATE | PIO_WRITE)) {
+                MPI_File_delete(fname, h5_io_info_g);
+                mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_CREATE | MPI_MODE_RDWR,
+                    h5_io_info_g, &fd->mpifd);
 
-        if (mrc != MPI_SUCCESS) {
-            fprintf(stderr, "MPI File Open failed(%s)\n", fname);
-            GOTOERROR(FAIL);
-        }
+                if (mrc != MPI_SUCCESS) {
+                    fprintf(stderr, "MPI File Open failed(%s)\n", fname);
+                    GOTOERROR(FAIL);
+                }
 
-        /*since MPI_File_open with MPI_MODE_CREATE does not truncate  */
-        /*filesize , set size to 0 explicitedly.    */
-        mrc = MPI_File_set_size(fd->mpifd, (MPI_Offset)0);
+                /*since MPI_File_open with MPI_MODE_CREATE does not truncate  */
+                /*filesize , set size to 0 explicitedly.    */
+                mrc = MPI_File_set_size(fd->mpifd, (MPI_Offset)0);
+                if (mrc != MPI_SUCCESS) {
+                    fprintf(stderr, "MPI_File_set_size failed\n");
+                    GOTOERROR(FAIL);
+                }
+            } else {
+                mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_RDONLY, h5_io_info_g, &fd->mpifd);
+                if (mrc != MPI_SUCCESS) {
+                    fprintf(stderr, "MPI File Open failed(%s)\n", fname);
+                    GOTOERROR(FAIL);
+                }
+            }
 
-        if (mrc != MPI_SUCCESS) {
-            fprintf(stderr, "MPI_File_set_size failed\n");
-            GOTOERROR(FAIL);
-        }
-        } else {
-        mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_RDONLY,
-            h5_io_info_g, &fd->mpifd);
+            break;
 
-        if (mrc != MPI_SUCCESS) {
-            fprintf(stderr, "MPI File Open failed(%s)\n", fname);
-            GOTOERROR(FAIL);
-        }
-        }
+        case PHDF5:
+            if ((acc_tpl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
+                fprintf(stderr, "HDF5 Property List Create failed\n");
+                GOTOERROR(FAIL);
+            }
 
-        break;
+            /* Set the file driver to the MPI-IO driver */
+            if (H5Pset_fapl_mpio(acc_tpl, pio_comm_g, h5_io_info_g) < 0) {
+                fprintf(stderr, "HDF5 Property List Set failed\n");
+                GOTOERROR(FAIL);
+            }
 
-    case PHDF5:
-        acc_tpl = H5Pcreate(H5P_FILE_ACCESS);
-        if (acc_tpl < 0) {
-        fprintf(stderr, "HDF5 Property List Create failed\n");
-        GOTOERROR(FAIL);
-        }
+            /* Set the alignment of objects in HDF5 file */
+            if (H5Pset_alignment(acc_tpl, param->h5_thresh, param->h5_align) < 0) {
+                fprintf(stderr, "HDF5 Property List Set failed\n");
+                GOTOERROR(FAIL);
+            }
 
-        /* Use the appropriate VFL driver */
-        if(param->h5_use_mpi_posix) {
-        /* Set the file driver to the MPI-posix driver */
-        hrc = H5Pset_fapl_mpiposix(acc_tpl, pio_comm_g, use_gpfs);
-        if (hrc < 0) {
-            fprintf(stderr, "HDF5 Property List Set failed\n");
-            GOTOERROR(FAIL);
-        }
-        } /* end if */
-        else {
-        /* Set the file driver to the MPI-I/O driver */
-        hrc = H5Pset_fapl_mpio(acc_tpl, pio_comm_g, h5_io_info_g);
-        if (hrc < 0) {
-            fprintf(stderr, "HDF5 Property List Set failed\n");
-            GOTOERROR(FAIL);
-        }
-        } /* end else */
+            /* create the parallel file */
+            if (flags & (PIO_CREATE | PIO_WRITE))
+                fd->h5fd = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
+            else
+                fd->h5fd = H5Fopen(fname, H5F_ACC_RDONLY, acc_tpl);
+            if (fd->h5fd < 0) {
+                fprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
+                GOTOERROR(FAIL);
+            }
 
-        /* Set the alignment of objects in HDF5 file */
-        hrc = H5Pset_alignment(acc_tpl, param->h5_thresh, param->h5_align);
-        if (hrc < 0) {
-        fprintf(stderr, "HDF5 Property List Set failed\n");
-        GOTOERROR(FAIL);
-        }
+            /* verifying the close of the acc_tpl */
+            if (H5Pclose(acc_tpl) < 0) {
+                fprintf(stderr, "HDF5 Property List Close failed\n");
+                GOTOERROR(FAIL);
+            }
 
-        /* create the parallel file */
-        if (flags & (PIO_CREATE | PIO_WRITE)) {
-        fd->h5fd = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
-        } else {
-        fd->h5fd = H5Fopen(fname, H5F_ACC_RDONLY, acc_tpl);
-        }
-
-        hrc = H5Pclose(acc_tpl);
-
-        if (fd->h5fd < 0) {
-        fprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
-        GOTOERROR(FAIL);
-        }
-
-        /* verifying the close of the acc_tpl */
-        if (hrc < 0) {
-        fprintf(stderr, "HDF5 Property List Close failed\n");
-        GOTOERROR(FAIL);
-        }
-
-        break;
+            break;
     }
 
 done:
@@ -2664,449 +2623,6 @@ do_cleanupfile(iotype iot, char *fname)
     }
     }
 }
-
-#ifdef H5_HAVE_GPFS
-
-/* Descriptions here come from the IBM GPFS Manual */
-
-/*
- * Function:    gpfs_access_range
- * Purpose:     Declares an access range within a file for an
- *              application.
- *
- *              The application will access file offsets within the given
- *              range, and will not access offsets outside the range.
- *              Violating this hint may produce worse performance than if
- *              no hint was specified.
- *
- *              This hint is useful in situations where a file is
- *              partitioned coarsely among several nodes. If the ranges
- *              do not overlap, each node can specify which range of the
- *              file it will access, with a performance improvement in
- *              some cases, such as for sequential writing within a
- *              range.
- *
- *              Subsequent GPFS_ACCESS_RANGE hints will replace a hint
- *              passed earlier.
- *
- *                  START    - The start of the access range offset, in
- *                             bytes, from the beginning of the file
- *                  LENGTH   - Length of the access range. 0 indicates to
- *                             the end of the file
- *                  IS_WRITE - 0 indicates READ access, 1 indicates WRITE access
- * Return:      Nothing
- * Programmer:  Bill Wendling, 03. June 2002
- * Modifications:
- */
-    static void
-gpfs_access_range(int handle, off_t start, off_t length, int is_write)
-{
-    struct {
-    gpfsFcntlHeader_t hdr;
-    gpfsAccessRange_t access;
-    } access_range;
-
-    access_range.hdr.totalLength = sizeof(access_range);
-    access_range.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
-    access_range.hdr.fcntlReserved = 0;
-    access_range.access.structLen = sizeof(gpfsAccessRange_t);
-    access_range.access.structType = GPFS_ACCESS_RANGE;
-    access_range.access.start = start;
-    access_range.access.length = length;
-    access_range.access.isWrite = is_write;
-
-    if (gpfs_fcntl(handle, &access_range) != 0) {
-    fprintf(stderr,
-        "gpfs_fcntl DS start directive failed. errno=%d errorOffset=%d\n",
-        errno, access_range.hdr.errorOffset);
-    exit(EXIT_FAILURE);
-    }
-}
-
-/*
- * Function:    gpfs_free_range
- * Purpose:     Undeclares an access range within a file for an
- *              application.
- *
- *              The application will no longer access file offsets within
- *              the given range. GPFS flushes the data at the file
- *              offsets and removes it from the cache.
- *
- *              Multi-node applications that have finished one phase of
- *              their computation may wish to use this hint before the
- *              file is accessed in a conflicting mode from another node
- *              in a later phase. The potential performance benefit is
- *              that GPFS can avoid later synchronous cache consistency
- *              operations.
- *
- *                  START  - The start of the access range offset, in
- *                           bytes from the beginning of the file.
- *                  LENGTH - Length of the access range. 0 indicates to
- *                           the end of the file.
- * Return:      Nothing
- * Programmer:  Bill Wendling, 03. June 2002
- * Modifications:
- */
-    static void
-gpfs_free_range(int handle, off_t start, off_t length)
-{
-    struct {
-    gpfsFcntlHeader_t hdr;
-    gpfsFreeRange_t range;
-    } free_range;
-
-    /* Issue the invalidate hint */
-    free_range.hdr.totalLength = sizeof(free_range);
-    free_range.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
-    free_range.hdr.fcntlReserved = 0;
-    free_range.range.structLen = sizeof(gpfsFreeRange_t);
-    free_range.range.structType = GPFS_FREE_RANGE;
-    free_range.range.start = start;
-    free_range.range.length = length;
-
-    if (gpfs_fcntl(handle, &free_range) != 0) {
-    fprintf(stderr,
-        "gpfs_fcntl free range failed for range %d:%d. errno=%d errorOffset=%d\n",
-        start, length, errno, free_range.hdr.errorOffset);
-    exit(EXIT_FAILURE);
-    }
-}
-
-/*
- * Function:    gpfs_clear_file_cache
- * Purpose:     Indicates file access in the near future is not expected.
- *
- *              The application does not expect to make any further
- *              accesses to the file in the near future, so GPFS removes
- *              any data or metadata pertaining to the file from its
- *              cache.
- *
- *              Multi-node applications that have finished one phase of
- *              their computation may wish to use this hint before the
- *              file is accessed in a conflicting mode from another node
- *              in a later phase. The potential performance benefit is
- *              that GPFS can avoid later synchronous cache consistency
- *              operations.
- * Return:      Nothing
- * Programmer:  Bill Wendling, 03. June 2002
- * Modifications:
- */
-    static void
-gpfs_clear_file_cache(int handle)
-{
-    struct {
-    gpfsFcntlHeader_t hdr;
-    gpfsClearFileCache_t clear;
-    } clear_cache;
-
-    clear_cache.hdr.totalLength = sizeof(clear_cache);
-    clear_cache.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
-    clear_cache.hdr.fcntlReserved = 0;
-    clear_cache.clear.structLen = sizeof(gpfsClearFileCache_t);
-    clear_cache.clear.structType = GPFS_CLEAR_FILE_CACHE;
-
-    if (gpfs_fcntl(handle, &clear_cache) != 0) {
-    fprintf(stderr,
-        "gpfs_fcntl clear file cache directive failed. errno=%d errorOffset=%d\n",
-        errno, clear_cache.hdr.errorOffset);
-    exit(EXIT_FAILURE);
-    }
-}
-
-/*
- * Function:    gpfs_cancel_hints
- * Purpose:     Indicates to remove any hints against the open file
- *              handle.
- *
- *              GPFS removes any hints that may have been issued against
- *              this open file handle:
- *
- *                  - The hint status of the file is restored ot what it
- *                    would have been immediately after being opened, but
- *                    does not affect the contents of the GPFS file
- *                    cache. Cancelling an earlier hint that resulted in
- *                    data being removed from the GPFS file cache does
- *                    not bring that data back int othe cache; data
- *                    re-enters the cache only pon access by the
- *                    application or by user-driven or automatic
- *                    prefetching.
- *                  - Only the GPFS_MULTIPLE_ACCESS_RANGE hint has a
- *                    state that might be removed by the
- *                    GPFS_CANCEL_HINTS directive.
- * Return:      Nothing
- * Programmer:  Bill Wendling, 03. June 2002
- * Modifications:
- */
-    static void
-gpfs_cancel_hints(int handle)
-{
-    struct {
-    gpfsFcntlHeader_t hdr;
-    gpfsCancelHints_t cancel;
-    } cancel_hints;
-
-    cancel_hints.hdr.totalLength = sizeof(cancel_hints);
-    cancel_hints.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
-    cancel_hints.hdr.fcntlReserved = 0;
-    cancel_hints.cancel.structLen = sizeof(gpfsCancelHints_t);
-    cancel_hints.cancel.structType = GPFS_CANCEL_HINTS;
-
-    if (gpfs_fcntl(handle, &cancel_hints) != 0) {
-    fprintf(stderr,
-        "gpfs_fcntl cancel hints directive failed. errno=%d errorOffset=%d\n",
-        errno, cancel_hints.hdr.errorOffset);
-    exit(EXIT_FAILURE);
-    }
-}
-
-/*
- * Function:    gpfs_start_data_shipping
- * Purpose:     Initiates data shipping mode.
- *
- *              Once all participating threads have issued this directive
- *              for a file, GPFS enters a mode where it logically
- *              partitions the blocks of the file among a group of agent
- *              nodes. The agents are those nodes on which one or more
- *              threads have issued the GPFS_DATA_SHIP_START directive.
- *              Each thread that has issued a GPFS_DATA_SHIP_START
- *              directive and the associated agent nodes are referred to
- *              as the data shipping collective.
- *
- *              The second parameter is the total number of open
- *              instances on all nodes that will be operating on the
- *              file. Must be called for every such instance with the
- *              same value of NUM_INSTS.
- *
- *                  NUM_INSTS - The number of open file instances, on all
- *                              nodes, collaborating to operate on the file
- * Return:      Nothing
- * Programmer:  Bill Wendling, 28. May 2002
- * Modifications:
- */
-    static void
-gpfs_start_data_shipping(int handle, int num_insts)
-{
-    struct {
-    gpfsFcntlHeader_t hdr;
-    gpfsDataShipStart_t start;
-    } ds_start;
-
-    ds_start.hdr.totalLength = sizeof(ds_start);
-    ds_start.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
-    ds_start.hdr.fcntlReserved = 0;
-    ds_start.start.structLen = sizeof(gpfsDataShipStart_t);
-    ds_start.start.structType = GPFS_DATA_SHIP_START;
-    ds_start.start.numInstances = num_insts;
-    ds_start.start.reserved = 0;
-
-    if (gpfs_fcntl(handle, &ds_start) != 0) {
-    fprintf(stderr,
-        "gpfs_fcntl DS start directive failed. errno=%d errorOffset=%d\n",
-        errno, ds_start.hdr.errorOffset);
-    exit(EXIT_FAILURE);
-    }
-}
-
-/*
- * Function:    gpfs_start_data_ship_map
- * Purpose:     Indicates which agent nodes are to be used for data
- *              shipping. GPFS recognizes which agent nodes to use for
- *              data shipping.
- *
- *                  PARTITION_SIZE - The number of contiguous bytes per
- *                                   server. This value must be a
- *                                   multiple of the number of bytes in a
- *                                   single file system block
- *                  AGENT_COUNT    - The number of entries in the
- *                                   agentNodeNumber array
- *                  AGENT_NODE_NUM - The data ship agent node numbers as
- *                                   listed in the SDT or the global ODM
- *
- * Return:      Nothing
- * Programmer:  Bill Wendling, 10. Jul 2002
- * Modifications:
- */
-    static void
-gpfs_start_data_ship_map(int handle, int partition_size, int agent_count,
-    int *agent_node_num)
-{
-    int i;
-    struct {
-    gpfsFcntlHeader_t hdr;
-    gpfsDataShipMap_t map;
-    } ds_map;
-
-    ds_map.hdr.totalLength = sizeof(ds_map);
-    ds_map.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
-    ds_map.hdr.fcntlReserved = 0;
-    ds_map.map.structLen = sizeof(gpfsDataShipMap_t);
-    ds_map.map.structType = GPFS_DATA_SHIP_MAP;
-    ds_map.map.partitionSize = partition_size;
-    ds_map.map.agentCount = agent_count;
-
-    for (i = 0; i < agent_count; ++i)
-    ds_map.map.agentNodeNumber[i] = agent_node_num[i];
-
-    if (gpfs_fcntl(handle, &ds_map) != 0) {
-    fprintf(stderr,
-        "gpfs_fcntl DS map directive failed. errno=%d errorOffset=%d\n",
-        errno, ds_map.hdr.errorOffset);
-    exit(EXIT_FAILURE);
-    }
-}
-
-/*
- * Function:    gpfs_stop_data_shipping
- * Purpose:     Takes a file out of the data shipping mode.
- *
- *              - GPFS waits for all threads that issued the
- *                GPFS_DATA_SHIP_START directive to issue this directive,
- *                then flushes the dirty file data to disk.
- *
- *              - While a gpfs_cntl() call is blocked for other threads,
- *                the call can be interrupted by any signal. If a signal
- *                is delivered to any of the waiting calls, all waiting
- *                calls on every node will be interrupted and will return
- *                EINTR. GPFS will not cancel data shipping mode if such
- *                a signal occurs. It is the responsibility of the
- *                application to mask off any signals that might normally
- *                occur while waiting for another node in the data
- *                shipping collective. Several libraries use SIGALRM; the
- *                thread that makes the gpfs_fcntl() call should use
- *                sigthreadmask to mask off delivery of this signal while
- *                inside the call.
- * Return:      Nothing
- * Programmer:  Bill Wendling, 28. May 2002
- * Modifications:
- */
-    static void
-gpfs_stop_data_shipping(int handle)
-{
-    struct {
-    gpfsFcntlHeader_t hdr;
-    gpfsDataShipStop_t stop;
-    } ds_stop;
-
-    ds_stop.hdr.totalLength = sizeof(ds_stop);
-    ds_stop.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
-    ds_stop.hdr.fcntlReserved = 0;
-    ds_stop.stop.structLen = sizeof(ds_stop.stop);
-    ds_stop.stop.structType = GPFS_DATA_SHIP_STOP;
-
-    if (gpfs_fcntl(handle, &ds_stop) != 0)
-    fprintf(stderr,
-        "gpfs_fcntl DS stop directive failed. errno=%d errorOffset=%d\n",
-        errno, ds_stop.hdr.errorOffset);
-}
-
-/*
- * Function:    gpfs_invalidate_file_cache
- * Purpose:     Invalidate all cached data held on behalf of a file on
- *              this node.
- * Return:      Nothing
- * Programmer:  Bill Wendling, 03. June 2002
- * Modifications:
- */
-    static void
-gpfs_invalidate_file_cache(const char *filename)
-{
-    int handle;
-    struct {
-    gpfsFcntlHeader_t hdr;
-    gpfsClearFileCache_t inv;
-    } inv_cache_hint;
-
-    /* Open the file.  If the open fails, the file cannot be cached. */
-    handle = open(filename, O_RDONLY, 0);
-
-    if (handle == -1)
-    return;
-
-    /* Issue the invalidate hint */
-    inv_cache_hint.hdr.totalLength = sizeof(inv_cache_hint);
-    inv_cache_hint.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
-    inv_cache_hint.hdr.fcntlReserved = 0;
-    inv_cache_hint.inv.structLen = sizeof(gpfsClearFileCache_t);
-    inv_cache_hint.inv.structType = GPFS_CLEAR_FILE_CACHE;
-
-    if (gpfs_fcntl(handle, &inv_cache_hint) != 0) {
-    fprintf(stderr,
-        "gpfs_fcntl clear cache hint failed for file '%s'.",
-        filename);
-    fprintf(stderr, " errno=%d errorOffset=%d\n",
-        errno, inv_cache_hint.hdr.errorOffset);
-    exit(EXIT_FAILURE);
-    }
-
-    /* Close the file */
-    if (close(handle) == -1) {
-    fprintf(stderr,
-        "could not close file '%s' after flushing file cache, ",
-        filename);
-    fprintf(stderr, "errno=%d\n", errno);
-    exit(EXIT_FAILURE);
-    }
-}
-
-#else
-
-/* turn the stubs off since some compilers are warning they are not used */
-#if 0
-/* H5_HAVE_GPFS isn't defined...stub functions */
-
-    static void
-gpfs_access_range(int UNUSED handle, off_t UNUSED start, off_t UNUSED length,
-    int UNUSED is_write)
-{
-    return;
-}
-
-    static void
-gpfs_free_range(int UNUSED handle, off_t UNUSED start, off_t UNUSED length)
-{
-    return;
-}
-
-    static void
-gpfs_clear_file_cache(int UNUSED handle)
-{
-    return;
-}
-
-    static void
-gpfs_cancel_hints(int UNUSED handle)
-{
-    return;
-}
-
-    static void
-gpfs_start_data_shipping(int UNUSED handle, int UNUSED num_insts)
-{
-    return;
-}
-
-    static void
-gpfs_stop_data_shipping(int UNUSED handle)
-{
-    return;
-}
-
-    static void
-gpfs_start_data_ship_map(int UNUSED handle, int UNUSED partition_size,
-    int UNUSED agent_count, int UNUSED *agent_node_num)
-{
-    return;
-}
-
-    static void
-gpfs_invalidate_file_cache(const char UNUSED *filename)
-{
-    return;
-}
-
-#endif  /* 0 */
-
-#endif  /* H5_HAVE_GPFS */
 
 #ifdef TIME_MPI
 /* instrument the MPI_File_wrirte_xxx and read_xxx calls to measure

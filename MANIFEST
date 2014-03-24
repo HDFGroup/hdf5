@@ -586,8 +586,6 @@
 ./src/H5FDmpi.h
 ./src/H5FDmpio.c
 ./src/H5FDmpio.h
-./src/H5FDmpiposix.c
-./src/H5FDmpiposix.h
 ./src/H5FDmulti.c
 ./src/H5FDmulti.h
 ./src/H5FDpkg.h
@@ -1014,7 +1012,6 @@
 ./testpar/t_chunk_alloc.c
 ./testpar/t_coll_chunk.c
 ./testpar/t_filter_read.c
-./testpar/t_posix_compliant.c
 ./testpar/t_shapesame.c
 ./testpar/t_span_tree.c
 ./testpar/testpar.h

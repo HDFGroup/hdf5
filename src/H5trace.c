@@ -544,48 +544,45 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         } /* end if */
                         else {
                             H5D_mpio_no_collective_cause_t nocol_cause_mode = (H5D_mpio_no_collective_cause_t)va_arg(ap, int);
+                            hbool_t flag_already_displayed = FALSE;
 
-                            switch(nocol_cause_mode) {
-                                case H5D_MPIO_COLLECTIVE:
-                                    fprintf(out, "H5D_MPIO_COLLECTIVE");
-                                    break;
+                            /* Check for all bit-flags which might be set */
+                            if(nocol_cause_mode & H5D_MPIO_COLLECTIVE) {
+                                fprintf(out, "H5D_MPIO_COLLECTIVE");
+                                flag_already_displayed = TRUE;
+                            } /* end if */
+                            if(nocol_cause_mode & H5D_MPIO_SET_INDEPENDENT) {
+                                fprintf(out, "%sH5D_MPIO_SET_INDEPENDENT", flag_already_displayed ? " | " : "");
+                                flag_already_displayed = TRUE;
+                            } /* end if */
+                            if(nocol_cause_mode & H5D_MPIO_DATATYPE_CONVERSION) {
+                                fprintf(out, "%sH5D_MPIO_DATATYPE_CONVERSION", flag_already_displayed ? " | " : "");
+                                flag_already_displayed = TRUE;
+                            } /* end if */
+                            if(nocol_cause_mode & H5D_MPIO_DATA_TRANSFORMS) {
+                                fprintf(out, "%sH5D_MPIO_DATA_TRANSFORMS", flag_already_displayed ? " | " : "");
+                                flag_already_displayed = TRUE;
+                            } /* end if */
+                            if(nocol_cause_mode & H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED) {
+                                fprintf(out, "%sH5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED", flag_already_displayed ? " | " : "");
+                                flag_already_displayed = TRUE;
+                            } /* end if */
+                            if(nocol_cause_mode & H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES) {
+                                fprintf(out, "%sH5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES", flag_already_displayed ? " | " : "");
+                                flag_already_displayed = TRUE;
+                            } /* end if */
+                            if(nocol_cause_mode & H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET) {
+                                fprintf(out, "%sH5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET", flag_already_displayed ? " | " : "");
+                                flag_already_displayed = TRUE;
+                            } /* end if */
+                            if(nocol_cause_mode & H5D_MPIO_FILTERS) {
+                                fprintf(out, "%sH5D_MPIO_FILTERS", flag_already_displayed ? " | " : "");
+                                flag_already_displayed = TRUE;
+                            } /* end if */
 
-                                case H5D_MPIO_SET_INDEPENDENT:
-                                    fprintf(out, "H5D_MPIO_SET_INDEPENDENT");
-                                    break;
-
-                                case H5D_MPIO_DATATYPE_CONVERSION:
-                                    fprintf(out, "H5D_MPIO_DATATYPE_CONVERSION");
-                                    break;
-
-                                case H5D_MPIO_DATA_TRANSFORMS:
-                                    fprintf(out, "H5D_MPIO_DATA_TRANSFORMS");
-                                    break;
-
-                                case H5D_MPIO_SET_MPIPOSIX:
-                                    fprintf(out, "H5D_MPIO_SET_MPIPOSIX");
-                                    break;
-
-                                case H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES:
-                                    fprintf(out, "H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES");
-                                    break;
-
-                                case H5D_MPIO_POINT_SELECTIONS:
-                                    fprintf(out, "H5D_MPIO_POINT_SELECTIONS");
-                                    break;
-
-                                case H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET:
-                                    fprintf(out, "H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET");
-                                    break;
-
-                                case H5D_MPIO_FILTERS:
-                                    fprintf(out, "H5D_MPIO_FILTERS");
-                                    break;
-
-                                default:
-                                    fprintf(out, "%ld", (long)nocol_cause_mode);
-                                    break;
-                            } /* end switch */
+                            /* Display '<none>' if there's no flags set */
+                            if(!flag_already_displayed)
+                                fprintf(out, "<none>");
                         } /* end else */
                         break;
 

@@ -180,12 +180,6 @@
 /* Define to 1 if you have the `get_fpc_csr' function. */
 /* #undef H5_HAVE_GET_FPC_CSR */
 
-/* Define if we have GPFS support */
-/* #undef H5_HAVE_GPFS */
-
-/* Define to 1 if you have the <gpfs.h> header file. */
-/* #undef H5_HAVE_GPFS_H */
-
 /* Define if library will contain instrumentation to detect correct
    optimization operation */
 #define H5_HAVE_INSTRUMENTED_LIBRARY 1

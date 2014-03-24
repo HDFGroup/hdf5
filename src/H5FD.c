@@ -230,7 +230,6 @@ H5FD_term_interface(void)
                 H5FD_multi_term();
 #ifdef H5_HAVE_PARALLEL
                 H5FD_mpio_term();
-                H5FD_mpiposix_term();
 #endif /* H5_HAVE_PARALLEL */
             } /* end if */
 	} else {

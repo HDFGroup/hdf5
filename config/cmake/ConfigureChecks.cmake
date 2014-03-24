@@ -144,13 +144,6 @@ IF (WIN32)
   ENDIF (NOT UNIX AND NOT CYGWIN AND NOT MINGW)
 ENDIF (WIN32)
 
-#IF (WIN32)
-#  SET (DEFAULT_STREAM_VFD OFF)
-#ELSE (WIN32)
-#  SET (DEFAULT_STREAM_VFD ON)
-#ENDIF (WIN32)
-#OPTION (HDF5_STREAM_VFD "Compile Stream Virtual File Driver support" ${DEFAULT_STREAM_VFD})
-
 # TODO --------------------------------------------------------------------------
 # Should the Default Virtual File Driver be compiled?
 # This is hard-coded now but option should added to match configure
@@ -817,16 +810,6 @@ IF (NOT WINDOWS)
 ENDIF (NOT WINDOWS)
 
 #-----------------------------------------------------------------------------
-#  Check for the Stream VFD driver
-#-----------------------------------------------------------------------------
-IF (HDF5_STREAM_VFD)
-  CHECK_INCLUDE_FILE_CONCAT ("netdb.h"       H5_HAVE_NETDB_H)
-  CHECK_INCLUDE_FILE_CONCAT ("netinet/tcp.h" H5_HAVE_NETINET_TCP_H)
-  CHECK_INCLUDE_FILE_CONCAT ("sys/filio.h"   H5_HAVE_SYS_FILIO_H)
-  SET (H5_HAVE_STREAM 1)
-ENDIF (HDF5_STREAM_VFD)
-
-#-----------------------------------------------------------------------------
 # Check if InitOnceExecuteOnce is available
 #-----------------------------------------------------------------------------
 IF (WINDOWS)
@@ -890,18 +873,6 @@ IF (WINDOWS)
   ENDIF("${H5_HAVE_IOEO}" MATCHES "^${H5_HAVE_IOEO}$")
   ENDIF (NOT HDF5_NO_IOEO_TEST)
 ENDIF (WINDOWS)
-
-#-----------------------------------------------------------------------------
-# Option to see if GPFS is available on this filesystem --enable-gpfs
-#-----------------------------------------------------------------------------
-OPTION (HDF5_ENABLE_GPFS "Enable GPFS hints for the MPI/POSIX file driver" OFF)
-IF (HDF5_ENABLE_GPFS)
-  CHECK_INCLUDE_FILE_CONCAT ("gpfs.h"        HAVE_GPFS)
-  IF (HAVE_GPFS)
-    HDF5_FUNCTION_TEST (HAVE_GPFS)  
-  ENDIF (HAVE_GPFS)
-ENDIF (HDF5_ENABLE_GPFS)
-MARK_AS_ADVANCED (HDF5_ENABLE_GPFS)
 
 #-----------------------------------------------------------------------------
 # Determine how 'inline' is used
