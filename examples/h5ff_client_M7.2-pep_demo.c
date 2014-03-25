@@ -19,12 +19,20 @@
 int use_daos_lustre = 1;   // Use DAOS Lustre - defaults to yes
 int verbose = 0;           // Verbose output - defaults to no
 int pause = 0;             // Seconds to pause to allow out-of-band space check - defaults to 0.
+int time_reads = 0;        // Time reads after container re-open
+
+/* global variables and macros used to make timing easier */
+struct timeval tv_start;
+struct timeval tv_end;
+#define START_TIME gettimeofday( &tv_start, NULL )
+#define END_TIME gettimeofday( &tv_end, NULL )
+#define ELAPSED_TIME (ulong)( (tv_end.tv_usec + 1000000*tv_end.tv_sec) - (tv_start.tv_usec + 1000000*tv_start.tv_sec) ) 
 
 /* prototypes for helper functions */
 void create_group( hid_t, const char*, hid_t, const char*, int );
 void create_dataset( hid_t, const char*, hid_t, const char*, int, int );
 void create_map( hid_t, const char*, hid_t, const char*, int, int );
-void create_committed_datatype( hid_t, const char*, hid_t, const char*, int );
+void create_named_datatype( hid_t, const char*, hid_t, const char*, int );
 void update_dataset( hid_t, const char*, hid_t, hid_t, const char*, int, int );
 void update_map( hid_t, const char*, hid_t, hid_t, const char*, int, int );
 void evict_group_members_updates( hid_t, hid_t, const char*, int );
@@ -56,8 +64,6 @@ int main( int argc, char **argv ) {
    hid_t    trspl_id;
    int      num_tr_leaders;
 
-   struct timeval tv_start;
-   struct timeval tv_end;
    int    i;
 
    /****
@@ -123,12 +129,12 @@ int main( int argc, char **argv ) {
 
    /* Acquire a read handle for container version and create a read context. */
    version = 2;
-   if (verbose) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
+   if ( verbose ) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
    MPI_Barrier( MPI_COMM_WORLD );      /* Q7 Workaround to avoid transaction race in IOD */
    H5E_BEGIN_TRY { 
       rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
       while ( rc_id2 < 0 ) {
-         if (verbose) fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
+         if ( verbose ) fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
          sleep( 1 );
          rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
       }
@@ -141,7 +147,7 @@ int main( int argc, char **argv ) {
    ret = H5RCrelease( rc_id1, H5_EVENT_STACK_NULL); ASSERT_RET;
    ret = H5RCclose( rc_id1 ); ASSERT_RET;
 
-   if (verbose) print_container_contents( file_id, rc_id2, "/", my_rank );
+   if ( verbose ) print_container_contents( file_id, rc_id2, "/", my_rank );
 
    /****
     * Transaction 3 - In each of the 3 Groups, create "D"(rnk 0), "M"(rnk 1 or 0), "T" (rnk 2 or 1 or 0)
@@ -181,9 +187,9 @@ int main( int argc, char **argv ) {
          create_map( gsto_id, "M", tr_id, gsto_path, my_rank, 3 );
       }
       if ( ( my_rank == 2 )  || ( ( my_rank == 1 ) && ( comm_size == 2 ) )  || ( ( my_rank == 0 ) && ( comm_size == 1 ) ) ) {
-         create_committed_datatype( glog_id, "T", tr_id, glog_path, my_rank );
-         create_committed_datatype( gpre_id, "T", tr_id, gpre_path, my_rank );
-         create_committed_datatype( gsto_id, "T", tr_id, gsto_path, my_rank );
+         create_named_datatype( glog_id, "T", tr_id, glog_path, my_rank );
+         create_named_datatype( gpre_id, "T", tr_id, gpre_path, my_rank );
+         create_named_datatype( gsto_id, "T", tr_id, gsto_path, my_rank );
       }
 
       /* Close the groups */
@@ -200,12 +206,12 @@ int main( int argc, char **argv ) {
 
    /* Acquire a read handle for container version and create a read context. */
    version = 3;
-   if (verbose) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
+   if ( verbose ) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
    MPI_Barrier( MPI_COMM_WORLD );      /* Q7 Workaround to avoid transaction race in IOD */
    H5E_BEGIN_TRY { 
       rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
       while ( rc_id3 < 0 ) {
-         if (verbose) fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
+         if ( verbose ) fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
          sleep( 1 );
          rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
       }
@@ -231,7 +237,7 @@ int main( int argc, char **argv ) {
       ret = H5RCpersist(rc_id3, H5_EVENT_STACK_NULL); ASSERT_RET; 
    }
 
-   if (verbose) print_container_contents( file_id, rc_id3, "/", my_rank );
+   if ( verbose ) print_container_contents( file_id, rc_id3, "/", my_rank );
 
    /**** 
     * Transaction 4 - All ranks update Dataset and Map objects in the 3 Groups  
@@ -317,12 +323,12 @@ int main( int argc, char **argv ) {
 
    /* Acquire a read handle for container version and create a read context. */
    version = 5;
-   if (verbose) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
+   if ( verbose ) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
    MPI_Barrier( MPI_COMM_WORLD );      /* Q7 Workaround to avoid transaction race in IOD */
    H5E_BEGIN_TRY { 
       rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
       while ( rc_id5 < 0 ) {
-         if (verbose) fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
+         if ( verbose ) fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
          sleep( 1 );
          rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
       }
@@ -335,13 +341,13 @@ int main( int argc, char **argv ) {
    ret = H5RCrelease( rc_id3, H5_EVENT_STACK_NULL); ASSERT_RET;
    ret = H5RCclose( rc_id3 ); ASSERT_RET;
 
-   if (verbose) print_container_contents( file_id, rc_id5, "/", my_rank );
+   if ( verbose ) print_container_contents( file_id, rc_id5, "/", my_rank );
 
    /**** 
     * Highest rank persists CV 5, then evicts objects under G-prefetched and G-stored. 
     *
     * Satisfies:  An application will create multiple transactions in a container, then persist them
-    * from the burst buffer storate to persistent storage, then evict several of the objects in the IOD
+    * from the burst buffer storage to persistent storage, then evict several of the objects in the IOD
     * container, releasing space in the burst buffer.
     ****/
 
@@ -380,7 +386,7 @@ int main( int argc, char **argv ) {
    }
    
    /* All ranks print container here.  For rank == comm_size, this will be after objects have been evicted */
-   if (verbose) print_container_contents( file_id, rc_id5, "/", my_rank ); 
+   if ( verbose ) print_container_contents( file_id, rc_id5, "/", my_rank ); 
 
    /* Release the read handle and close read context on CV 5 */
    fprintf( stderr, "APP-r%d: Release read context 5\n", my_rank );
@@ -388,7 +394,7 @@ int main( int argc, char **argv ) {
    ret = H5RCclose( rc_id5 ); ASSERT_RET;
 
    /****
-    *  Close the H5File.  Reopen, pre-fetch D, M, and TODO T in /G-prefetched.  
+    *  Close the H5File.  Reopen, pre-fetch D, M, and T in /G-prefetched.  
     *
     *  Satisfies: "... then closing the container.  The application will then re-open the container and asynchronously 
     *  pre-fetch multiple objects from persistent storage to burst buffer storage.
@@ -409,19 +415,23 @@ int main( int argc, char **argv ) {
 
    hid_t dset_l_id, dset_p_id, dset_s_id;
    hid_t space_l_id, space_p_id, space_s_id;
-   int data_l[4], data_p[4], data_s[4];              
    hrpl_t dset_p_replica;
    hid_t dxpl_p_id;
    hid_t dapl_p_id;
+   int data_l[4], data_p[4], data_s[4];              
 
    hid_t map_l_id, map_p_id, map_s_id;
-   int key_l[4], key_p[4], key_s[4];              
-   int value_l[4], value_p[4], value_s[4];              
    hrpl_t map_p_replica;
    hid_t mxpl_p_id;
    hid_t mapl_p_id;
+   int key_l[4], key_p[4], key_s[4];              
+   int value_l[4], value_p[4], value_s[4];              
 
-   /* Open Datasets and then Maps in all 3 Groups */
+   hid_t type_l_id, type_p_id, type_s_id;
+   hrpl_t type_p_replica;
+   hid_t tapl_p_id;
+
+   /* Open Datasets, Maps and DataTypes in all 3 Groups */
    dset_l_id = H5Dopen_ff( file_id, "/G-logged/D", H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL );
    assert( dset_l_id >= 0 );
    space_l_id = H5Dget_space( dset_l_id ); assert ( space_l_id >= 0 );
@@ -442,6 +452,15 @@ int main( int argc, char **argv ) {
 
    map_s_id = H5Mopen_ff( file_id, "/G-stored/M", H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL );
    assert( map_s_id >= 0 );
+
+   type_l_id = H5Topen_ff( file_id, "G-logged/T", H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL );
+   assert( type_l_id >= 0 );
+
+   type_p_id = H5Topen_ff( file_id, "G-prefetched/T", H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL );
+   assert( type_p_id >= 0 );
+
+   type_s_id = H5Topen_ff( file_id, "G-stored/T", H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL );
+   assert( type_s_id >= 0 );
 
    /* Prefetch objects in the /G-prefetched group. */
 
@@ -466,6 +485,9 @@ int main( int argc, char **argv ) {
 
          fprintf( stderr, "APP-r%d: prefetch /G-prefeteched/M.\n", my_rank );
          ret = H5Mprefetch_ff( map_p_id, rc_id, &map_p_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
+
+         fprintf( stderr, "APP-r%d: prefetch /G-prefeteched/T.\n", my_rank );
+         ret = H5Tprefetch_ff( type_p_id, rc_id, &type_p_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
       }
       MPI_Bcast( &dset_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
 
@@ -480,11 +502,16 @@ int main( int argc, char **argv ) {
       mapl_p_id = H5Pcreate( H5P_MAP_ACCESS );                                /* Used in Evict */
       ret = H5Pset_evict_replica( mapl_p_id, map_p_replica ); ASSERT_RET;
 
+      MPI_Bcast( &type_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
+      tapl_p_id = H5Pcreate( H5P_DATATYPE_ACCESS );                           /* Used in Evict */
+      ret = H5Pset_evict_replica( tapl_p_id, type_p_replica ); ASSERT_RET;
+
    } else {
       dxpl_p_id = H5P_DEFAULT;
       dapl_p_id = H5P_DEFAULT;
       mxpl_p_id = H5P_DEFAULT;
       mapl_p_id = H5P_DEFAULT;
+      tapl_p_id = H5P_DEFAULT;
    }
 
    /* Optionally, pause to show BB space using out-of-band check. All ranks paused. */
@@ -503,54 +530,110 @@ int main( int argc, char **argv ) {
 
    /* Read Datasets and then Maps in all 3 Groups, measuring time it takes to read data for each*/
 
-   gettimeofday( &tv_start, NULL );
-   ret = H5Dread_ff( dset_l_id, H5T_NATIVE_INT, space_l_id, space_l_id, H5P_DEFAULT, data_l, rc_id, H5_EVENT_STACK_NULL ); 
-   ASSERT_RET;
-   gettimeofday( &tv_end, NULL );
-   fprintf( stderr, "APP-r%d  Time (usec) to read /G-logged/D: %lu\n", my_rank, 
-         (ulong)( (tv_end.tv_usec + 1000000*tv_end.tv_sec) - (tv_start.tv_usec + 1000000*tv_start.tv_sec) ) );
+   if ( time_reads ) {
+      ulong usec_dl, usec_dp, usec_ds;                   // per-read elapsed time for for datasets
+      ulong usec_ml, usec_mp, usec_ms;                   // per-read elapsed time for maps
 
-   gettimeofday( &tv_start, NULL );
-   ret = H5Dread_ff( dset_p_id, H5T_NATIVE_INT, space_p_id, space_p_id, dxpl_p_id, data_p, rc_id, H5_EVENT_STACK_NULL ); 
-   ASSERT_RET;
-   gettimeofday( &tv_end, NULL );
-   fprintf( stderr, "APP-r%d  Time (usec) to read /G-prefetched/D: %lu\n", my_rank, 
-         (ulong)( (tv_end.tv_usec + 1000000*tv_end.tv_sec) - (tv_start.tv_usec + 1000000*tv_start.tv_sec) ) );
+      ulong all_usec_dl, all_usec_dp, all_usec_ds;       // total read time for datasets
+      ulong all_usec_ml, all_usec_mp, all_usec_ms;       // total read time for maps
 
-   gettimeofday( &tv_start, NULL );
-   ret = H5Dread_ff( dset_s_id, H5T_NATIVE_INT, space_s_id, space_s_id, H5P_DEFAULT, data_s, rc_id, H5_EVENT_STACK_NULL ); 
-   ASSERT_RET;
-   gettimeofday( &tv_end, NULL );
-   fprintf( stderr, "APP-r%d  Time (usec) to read /G-stored/D: %lu\n", my_rank, 
-         (ulong)( (tv_end.tv_usec + 1000000*tv_end.tv_sec) - (tv_start.tv_usec + 1000000*tv_start.tv_sec) ) );
+      all_usec_dl = all_usec_dp = all_usec_ds = 0;
+      all_usec_ml = all_usec_mp = all_usec_ms = 0;
 
-   gettimeofday( &tv_start, NULL );
-   for ( i = 0; i < 4; i++ ) {
-      ret = H5Mget_ff( map_l_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_l[i], H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
+      int t;
+
+      for ( t = 0; t < time_reads; t++ ) {
+
+         START_TIME;
+         ret = H5Dread_ff( dset_l_id, H5T_NATIVE_INT, space_l_id, space_l_id, H5P_DEFAULT, data_l, rc_id, H5_EVENT_STACK_NULL ); 
+         ASSERT_RET;
+         END_TIME;
+         usec_dl = ELAPSED_TIME;
+         all_usec_dl += usec_dl;
+         fprintf( stderr, "APP-r%d Read Time %d for /G-logged/D: %lu usec\n", my_rank, t, usec_dl );
+      
+         START_TIME;
+         ret = H5Dread_ff( dset_p_id, H5T_NATIVE_INT, space_p_id, space_p_id, dxpl_p_id, data_p, rc_id, H5_EVENT_STACK_NULL ); 
+         ASSERT_RET;
+         END_TIME;
+         usec_dp = ELAPSED_TIME;
+         all_usec_dp += usec_dp;
+         fprintf( stderr, "APP-r%d Read Time %d for /G-prefetched/D: %lu usec\n", my_rank, t, usec_dp );
+      
+         START_TIME;
+         ret = H5Dread_ff( dset_s_id, H5T_NATIVE_INT, space_s_id, space_s_id, H5P_DEFAULT, data_s, rc_id, H5_EVENT_STACK_NULL ); 
+         ASSERT_RET;
+         END_TIME;
+         usec_ds = ELAPSED_TIME;
+         all_usec_ds += usec_ds;
+         fprintf( stderr, "APP-r%d Read Time %d for /G-stored/D: %lu usec\n", my_rank, t, usec_ds );
+      
+         START_TIME;
+         for ( i = 0; i < 4; i++ ) {
+            ret = H5Mget_ff( map_l_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_l[i], H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
+            ASSERT_RET;
+         }
+         END_TIME;
+         usec_ml = ELAPSED_TIME;
+         all_usec_ml += usec_ml;
+         fprintf( stderr, "APP-r%d Read Time %d for /G-logged/M: %lu usec\n", my_rank, t, usec_ml );
+      
+         START_TIME;
+         for ( i = 0; i < 4; i++ ) {
+            ret = H5Mget_ff( map_p_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_p[i], mxpl_p_id, rc_id, H5_EVENT_STACK_NULL ); 
+            ASSERT_RET;
+         }
+         END_TIME;
+         usec_mp = ELAPSED_TIME;
+         all_usec_mp += usec_mp;
+         fprintf( stderr, "APP-r%d Read Time %d for /G-prefetched/M: %lu usec\n", my_rank, t, usec_mp );
+      
+         START_TIME;
+         for ( i = 0; i < 4; i++ ) {
+            ret = H5Mget_ff( map_s_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_s[i], H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
+            ASSERT_RET;
+         }
+         END_TIME;
+         usec_ms = ELAPSED_TIME;
+         all_usec_ms += usec_ms;
+         fprintf( stderr, "APP-r%d Read Time %d for /G-stored/M: %lu usec\n", my_rank, t, usec_ms );
+   
+      }
+
+      if ( time_reads > 1 ) {
+         fprintf( stderr, "APP-r%d Read Time Avg for /G-logged/D: %lu usec\n", my_rank, all_usec_dl/time_reads );
+         fprintf( stderr, "APP-r%d Read Time Avg for /G-prefetched/D: %lu usec\n", my_rank, all_usec_dp/time_reads );
+         fprintf( stderr, "APP-r%d Read Time Avg for /G-stored/D: %lu usec\n", my_rank, all_usec_ds/time_reads );
+         fprintf( stderr, "APP-r%d Read Time Avg for /G-logged/M: %lu usec\n", my_rank, all_usec_ml/time_reads );
+         fprintf( stderr, "APP-r%d Read Time Avg for /G-prefetched/M: %lu usec\n", my_rank, all_usec_mp/time_reads );
+         fprintf( stderr, "APP-r%d Read Time Avg for /G-stored/M: %lu usec\n", my_rank, all_usec_ms/time_reads );
+      }
+   
+   } else {
+      ret = H5Dread_ff( dset_l_id, H5T_NATIVE_INT, space_l_id, space_l_id, H5P_DEFAULT, data_l, rc_id, H5_EVENT_STACK_NULL ); 
       ASSERT_RET;
-   }
-   gettimeofday( &tv_end, NULL );
-   fprintf( stderr, "APP-r%d  Time (usec) to read /G-logged/M: %lu\n", my_rank, 
-         (ulong)( (tv_end.tv_usec + 1000000*tv_end.tv_sec) - (tv_start.tv_usec + 1000000*tv_start.tv_sec) ) );
 
-   gettimeofday( &tv_start, NULL );
-   for ( i = 0; i < 4; i++ ) {
-      ret = H5Mget_ff( map_p_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_p[i], mxpl_p_id, rc_id, H5_EVENT_STACK_NULL ); 
+      ret = H5Dread_ff( dset_p_id, H5T_NATIVE_INT, space_p_id, space_p_id, dxpl_p_id, data_p, rc_id, H5_EVENT_STACK_NULL ); 
       ASSERT_RET;
-   }
-   gettimeofday( &tv_end, NULL );
-   fprintf( stderr, "APP-r%d  Time (usec) to read /G-prefetched/M: %lu\n", my_rank, 
-         (ulong)( (tv_end.tv_usec + 1000000*tv_end.tv_sec) - (tv_start.tv_usec + 1000000*tv_start.tv_sec) ) );
 
-   gettimeofday( &tv_start, NULL );
-   for ( i = 0; i < 4; i++ ) {
-      ret = H5Mget_ff( map_s_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_s[i], H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
+      ret = H5Dread_ff( dset_s_id, H5T_NATIVE_INT, space_s_id, space_s_id, H5P_DEFAULT, data_s, rc_id, H5_EVENT_STACK_NULL ); 
       ASSERT_RET;
-   }
-   gettimeofday( &tv_end, NULL );
-   fprintf( stderr, "APP-r%d  Time (usec) to read /G-stored/M: %lu\n", my_rank, 
-         (ulong)( (tv_end.tv_usec + 1000000*tv_end.tv_sec) - (tv_start.tv_usec + 1000000*tv_start.tv_sec) ) );
 
+      for ( i = 0; i < 4; i++ ) {
+         ret = H5Mget_ff( map_l_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_l[i], H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
+         ASSERT_RET;
+      }
+
+      for ( i = 0; i < 4; i++ ) {
+         ret = H5Mget_ff( map_p_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_p[i], mxpl_p_id, rc_id, H5_EVENT_STACK_NULL ); 
+         ASSERT_RET;
+      }
+
+      for ( i = 0; i < 4; i++ ) {
+         ret = H5Mget_ff( map_s_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_s[i], H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
+         ASSERT_RET;
+      }
+   }
 
    /* Print Dataset and Map values for all 3 groups */
    fprintf( stderr, "APP-r%d: /G-logged/D values: %d %d %d %d\n", my_rank, data_l[0], data_l[1], data_l[2], data_l[3] );
@@ -573,6 +656,9 @@ int main( int argc, char **argv ) {
 
          fprintf( stderr, "APP-r%d: evict replica of /G-prefeteched/M.\n", my_rank );
          ret = H5Mevict_ff( map_p_id, version, mapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;   /* Note: CV redundant for replica */
+
+         fprintf( stderr, "APP-r%d: evict replica of /G-prefeteched/T.\n", my_rank );
+         ret = H5Tevict_ff( type_p_id, version, tapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  /* Note: CV redundant for replica */
       } else {
          fprintf( stderr, "APP-r%d DAOS-POSIX - No replicas to evict.\n", my_rank );
       }
@@ -611,6 +697,9 @@ int main( int argc, char **argv ) {
    ret = H5Mclose_ff( map_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
    ret = H5Mclose_ff( map_s_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
+   ret = H5Tclose_ff( type_l_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
+   ret = H5Tclose_ff( type_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
+   ret = H5Tclose_ff( type_s_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
    /****************** WORKING ON THIS PART *****************************/
    
@@ -756,13 +845,13 @@ create_map( hid_t obj_id, const char* map_name, hid_t tr_id, const char* obj_pat
 }
 
 /*
- * Helper function used to create committed datatype "type_name"
+ * Helper function used to create named datatype "type_name"
  * in group identified by "obj_id"
  * in transaction identified by "tr_id".
  * "obj_path" and "my_rank" are used in the status output.
  */
 void
-create_committed_datatype( hid_t obj_id, const char* type_name, hid_t tr_id, const char* obj_path, int my_rank ) {
+create_named_datatype( hid_t obj_id, const char* type_name, hid_t tr_id, const char* obj_path, int my_rank ) {
 
    herr_t   ret;
    uint64_t tr_num;
@@ -774,7 +863,7 @@ create_committed_datatype( hid_t obj_id, const char* type_name, hid_t tr_id, con
 
    /* Create */
    ret = H5Tcommit_ff( obj_id, type_name, dtype_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tr_id, H5_EVENT_STACK_NULL );
-   fprintf( stderr, "APP-r%d: Create CDT %s in %s tr %d - %s\n", my_rank, type_name, obj_path, (int)tr_num, STATUS );
+   fprintf( stderr, "APP-r%d: Create %s in %s tr %d - %s\n", my_rank, type_name, obj_path, (int)tr_num, STATUS );
    ret = H5Tclose( dtype_id ); ASSERT_RET;
    return;
 }
@@ -855,8 +944,8 @@ update_dataset( hid_t obj_id, const char* dset_name, hid_t tr_id, hid_t rc_id, c
  * in transaction identified by "tr_id".
  * "rc_id" for "tr_id" passed in explicitly for now - later may be able to get it from info in tr_id (cv & file_id)
  * "obj_path" and "my_rank" are used in the status output.
- * key/value set according to: 
- *    key = my_rank 
+ * key/value set according to:
+ *    key = my_rank
  *    value = ordinal*1000 + tr_num*100 + my_rank*10 + my_rank;
  */
 void
@@ -889,8 +978,8 @@ update_map( hid_t obj_id, const char* map_name, hid_t tr_id, hid_t rc_id, const 
 }
 
 /*
- * Helper function used to recursively print container contents
- * for container identified by "file_id" 
+ * Helper function used to recursively read and print container contents
+ * for container identified by "file_id"
  * in read context identified by "rc_id"
  * with path to current level in "grp_path"
  * and "my_rank" used to identify the process doing the reading / printing.
@@ -990,7 +1079,7 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
       ret = H5Mclose_ff( map_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
    }
 
-   /* Committed datatypes */
+   /* Named Datatypes */
    sprintf( path_to_object, "%s%s", grp_path, "T" );
    ret = H5Lexists_ff( file_id, path_to_object, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL );
 
@@ -1028,11 +1117,12 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
 
 
 /*
- * Helper function used to evict logged updates for (expected) members of specified group group 
- * for container identified by "file_id" 
- * in read context identified by "rc_id"
- * for group specified by "grp_path"
- * and "my_rank" used to identify the process doing the evicting
+ * evict_group_members_updates -  evict logged updates for (expected) members of specified group 
+ *  parameters:
+ *    file_id: identifies container
+ *    rc_id: identifies read context
+ *    grp_path: path that specifies group
+ *    my_rank: identifies rank doing the evict
  */
 void
 evict_group_members_updates( hid_t file_id, hid_t rc_id, const char* grp_path, int my_rank )
@@ -1053,7 +1143,7 @@ evict_group_members_updates( hid_t file_id, hid_t rc_id, const char* grp_path, i
 
    /* Dataset */
    sprintf( path_to_object, "%s/%s", grp_path, "D" );
-   if (verbose) fprintf( stderr, "%s: checking for existance of object %s before evicting\n", preface, path_to_object );
+   if ( verbose ) fprintf( stderr, "%s: checking for existance of object %s before evicting\n", preface, path_to_object );
    ret = H5Lexists_ff( file_id, path_to_object, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL );
 
    if ( exists ) { 
@@ -1074,7 +1164,7 @@ evict_group_members_updates( hid_t file_id, hid_t rc_id, const char* grp_path, i
 
    /* Map */
    sprintf( path_to_object, "%s/%s", grp_path, "M" );
-   fprintf( stderr, "%s: checking for existance of object %s before evicting\n", preface, path_to_object );
+   if ( verbose ) fprintf( stderr, "%s: checking for existance of object %s before evicting\n", preface, path_to_object );
    ret = H5Lexists_ff( file_id, path_to_object, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL );
 
    if ( exists ) { 
@@ -1093,9 +1183,9 @@ evict_group_members_updates( hid_t file_id, hid_t rc_id, const char* grp_path, i
       ret = H5Mclose_ff( map_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
    }
 
-   /* Committed datatypes */
+   /* Named Datatype */
    sprintf( path_to_object, "%s/%s", grp_path, "T" );
-   fprintf( stderr, "%s: checking for existance of object %s before evicting\n", preface, path_to_object );
+   if ( verbose ) fprintf( stderr, "%s: checking for existance of object %s before evicting\n", preface, path_to_object );
    ret = H5Lexists_ff( file_id, path_to_object, H5P_DEFAULT, &exists, rc_id, H5_EVENT_STACK_NULL );
 
    if ( exists ) { 
@@ -1119,7 +1209,7 @@ evict_group_members_updates( hid_t file_id, hid_t rc_id, const char* grp_path, i
 
 
 /*
- * parse_options - helper function to parse the command line options.
+ * parse_options - parse command line options
  */
 int
 parse_options( int argc, char** argv, int my_rank ) {
@@ -1136,13 +1226,32 @@ parse_options( int argc, char** argv, int my_rank ) {
                break;
             case 'p':
                if ( ( --argc == 0 )  || (  **(argv+1) == '-' ) ) {
-                  printf( "Error: No seconds specified after -p option.\n" );
-                  usage( app );
+                  if ( my_rank == 0 ) {
+                     printf( "Error: No seconds specified after -p option.\n" );
+                     usage( app );
+                  }
                   return( 1 );
                } else {
                   ++argv;
                   pause = atoi( *argv );
-                  printf( "Will pause for %d seconds.\n", pause );
+                  if ( my_rank == 0 ) {
+                     printf( "Will pause for %d seconds.\n", pause );
+                  }
+               }
+               break;
+            case 't':   
+               if ( ( --argc == 0 )  || (  **(argv+1) == '-' ) ) {
+                  if ( my_rank == 0 ) {
+                     printf( "Error: No repeat_cnt specified after -t option.\n" );
+                     usage( app );
+                  }
+                  return( 1 );
+               } else {
+                  ++argv;
+                  time_reads = atoi( *argv );
+                  if ( my_rank == 0 ) {
+                     printf( "Will repeat read sequence %d times to get average elapsed time per read.\n", time_reads );
+                  }
                }
                break;
             case 'v':   
@@ -1160,12 +1269,13 @@ parse_options( int argc, char** argv, int my_rank ) {
 }
 
 /*
- * Display usage message 
+ * usage - display usage message 
  */
 void
 usage( const char* app ) {
-   printf( "Usage: %s [-l] [-p seconds] [-v]\n", app  );
+   printf( "Usage: %s [-l] [-p seconds] [-t repeat_cnt] [-v]\n", app  );
    printf( "\tl: don't use DAOS Lustre\n" );
    printf( "\tp: pause 'seconds' to allow out-of-band BB space check\n" );
+   printf( "\tt: time reads after container re-open, performing read sequence 'repeat_cnt' times\n" );
    printf( "\tv: verbose output\n" );
 }
