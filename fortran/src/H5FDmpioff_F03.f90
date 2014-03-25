@@ -64,13 +64,15 @@ CONTAINS
 ! PURPOSE
 !
 ! INPUTS
-! file_id - file or group id for the location of datasets
-! count   - the number of accessing datasets.
-! Info    - the array of dataset information and read buffer.
-! dxpl_id - dataset transfer property
+!  file_id - file or group id for the location of datasets
+!  count   - the number of accessing datasets.
+!  dxpl_id - dataset transfer property
 !
 ! OUTPUTS
+!  Info    - the array of dataset information and read buffer.
 ! AUTHOR
+!  M. Scot Breitenfeld
+!  March 25, 2014
 !
 ! SOURCE
   SUBROUTINE H5Dread_multi_f(file_id, dxpl_id, count, info, hdferr)
@@ -103,5 +105,55 @@ CONTAINS
     hdferr = H5Dread_multi_c(file_id, dxpl_id, count, info)
 
   END SUBROUTINE H5Dread_multi_f
+
+!****s* H5FDMPIO/H5Dwrite_multi_f
+!
+! NAME
+!  H5Dwrite_multi_f
+!
+! PURPOSE
+!
+! INPUTS
+!  file_id - file or group id for the location of datasets
+!  count   - the number of accessing datasets.
+!  dxpl_id - dataset transfer property
+!
+! OUTPUTS
+!  Info    - the array of dataset information and write buffer.
+! AUTHOR
+!  M. Scot Breitenfeld
+!  March 25, 2014
+!
+! SOURCE
+  SUBROUTINE H5Dwrite_multi_f(file_id, dxpl_id, count, info, hdferr)
+
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+
+    INTEGER(HID_T),       INTENT(IN)                :: file_id
+    INTEGER(SIZE_T),      INTENT(IN)                :: count
+    TYPE(H5D_rw_multi_t), INTENT(OUT), DIMENSION(*) :: info
+    INTEGER(HID_T),       INTENT(IN)                :: dxpl_id
+    INTEGER,              INTENT(OUT)               :: hdferr
+!*****
+
+    INTERFACE
+       INTEGER FUNCTION H5Dwrite_multi_c(file_id, dxpl_id, count, info)
+         USE H5GLOBAL
+         USE, INTRINSIC :: ISO_C_BINDING
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_MULTI_C':: h5dwrite_multi_c
+         !DEC$ENDIF
+         IMPORT :: H5D_rw_multi_t
+         INTEGER(HID_T), INTENT(IN) :: file_id
+         INTEGER(SIZE_T),      INTENT(IN)                :: count
+         TYPE(H5D_rw_multi_t), INTENT(OUT), DIMENSION(*) :: info
+         INTEGER(HID_T),       INTENT(IN)                :: dxpl_id
+       END FUNCTION H5Dwrite_multi_c
+    END INTERFACE
+
+    hdferr = H5Dwrite_multi_c(file_id, dxpl_id, count, info)
+
+  END SUBROUTINE H5Dwrite_multi_f
   
 END MODULE H5FDMPIO_PROVISIONAL

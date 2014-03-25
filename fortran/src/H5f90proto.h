@@ -298,6 +298,7 @@ H5_FCDLL int_f nh5sextent_equal_c ( hid_t_f * space1_id, hid_t_f *space2_id, hid
 #define nh5dget_access_plist_c    H5_FC_FUNC_(h5dget_access_plist_c, H5DGET_ACCESS_PLIST_C)
 #define nh5dvlen_reclaim_c        H5_FC_FUNC_(h5dvlen_reclaim_c, H5DVLEN_RECLAIM_C)
 #define nh5dread_multi_c H5_FC_FUNC_(h5dread_multi_c, H5DREAD_MULTI_C)
+#define nh5dwrite_multi_c H5_FC_FUNC_(h5dwrite_multi_c, H5DWRITE_MULTI_C)
 
 
 H5_FCDLL int_f nh5dcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_f *space_id,
@@ -417,6 +418,7 @@ H5_FCDLL int_f nh5dread_f_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f 
 				   hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf);
 H5_FCDLL int_f nh5dvlen_reclaim_c (hid_t_f *type_id ,  hid_t_f *space_id, hid_t_f *plist_id, void *buf);
 H5_FCDLL int_f nh5dread_multi_c(hid_t_f *file_id, hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info);
+H5_FCDLL int_f nh5dwrite_multi_c(hid_t_f *file_id, hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info);
 /*
  * Functions from H5Gf.c
  */
