@@ -281,6 +281,7 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
     chint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + 9*sizeof(iod_hint_t));
     chint->num_hint = 0;
     check_daos_corruptions(chint, tid);
+
     if(chint != NULL && 0 == chint->num_hint) {
         free (chint);
         chint = NULL;
@@ -859,14 +860,14 @@ static void check_ion_corruptions(iod_trans_id_t trans_num)
         if((int)trans_num == step+3) {
             uint64_t oid;
 
-            oid = step*8*num_procs + 8;
+            oid = step*8*num_procs + num_procs;
             IOD_OBJID_SETOWNER_APP(oid)
             IOD_OBJID_SETTYPE(oid, IOD_OBJ_ARRAY)
                 
             printf("CORRUPTING at VPIC step %d at trans_num %d, array ID %"PRIx64"\n", 
                    step, (int)trans_num, oid);
 
-            ret = corrupt_data("eff_vpic", oid, trans_num, 5, cor_data);
+            ret = corrupt_data("eff_vpic", oid, trans_num, 20, cor_data);
             if(ret < 0) {
                 fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
             }
@@ -907,14 +908,14 @@ static void check_ion_corruptions(iod_trans_id_t trans_num)
         if((int)trans_num == step+3) {
             uint64_t oid;
 
-            oid = 5*num_procs + step*21*num_procs + 3;
+            oid = 0;//5*num_procs + step*21*num_procs;
             IOD_OBJID_SETOWNER_APP(oid)
             IOD_OBJID_SETTYPE(oid, IOD_OBJ_KV)
                 
             printf("CORRUPTING at VPIC step %d at trans_num %d, kv ID %"PRIx64"\n", 
                    step, (int)trans_num, oid);
 
-            ret = corrupt_kv("eff_vpic", oid, trans_num, 1, cor_data);
+            ret = corrupt_kv("eff_vpic", oid, trans_num, step, cor_data);
             if(ret < 0) {
                 fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
             }
@@ -953,30 +954,31 @@ static void check_daos_corruptions(iod_hint_list_t *chint, iod_trans_id_t trans_
 
         step = atoi(cor_step);
 
-        oid = step*8*num_procs + 8;
-        IOD_OBJID_SETOWNER_APP(oid)
-        IOD_OBJID_SETTYPE(oid, IOD_OBJ_ARRAY)
+        if((int)trans_num == step+3) {
+            oid = step*8*num_procs + num_procs;
+            IOD_OBJID_SETOWNER_APP(oid)
+            IOD_OBJID_SETTYPE(oid, IOD_OBJ_ARRAY)
 
-        chint->num_hint += 2;
-        chint->hint[i].key = strdup("iod_hint_obj_corrupt_offset");
-        chint->hint[i].value = strdup("5");
-        i++;
-        chint->hint[i].key = strdup("iod_hint_obj_corrupt_whichone");
-        chint->hint[i].value = (char *)malloc(32);
-        sprintf(chint->hint[i].value, "0x%llx", (unsigned long long)oid);
-        i++;
-        if(!cor_data) {
-            chint->num_hint ++;
-            chint->hint[i].key = strdup("iod_hint_obj_corrupt_checksum");
-            chint->hint[i].value = NULL;
+            chint->num_hint += 2;
+            chint->hint[i].key = strdup("iod_hint_obj_corrupt_offset");
+            chint->hint[i].value = strdup("20");
             i++;
-
-            printf("CORRUPTING CS at VPIC step %d at trans_num %d, array ID %"PRIx64"\n", 
-                   step, (int)trans_num, oid);
-        }
-        else {
-            printf("CORRUPTING Data at VPIC step %d at trans_num %d, array ID %"PRIx64"\n", 
-                   step, (int)trans_num, oid);
+            chint->hint[i].key = strdup("iod_hint_obj_corrupt_whichone");
+            chint->hint[i].value = (char *)malloc(50);
+            sprintf(chint->hint[i].value, "0x%llx", (unsigned long long)oid);
+            i++;
+            if(!cor_data) {
+                chint->num_hint ++;
+                chint->hint[i].key = strdup("iod_hint_obj_corrupt_checksum");
+                chint->hint[i].value = NULL;
+                i++;
+                printf("CORRUPTING CS at VPIC step %d, array ID %"PRIx64"\n", 
+                       step, oid);
+            }
+            else {
+                printf("CORRUPTING Data at VPIC step %d, array ID %"PRIx64"\n", 
+                       step, oid);
+            }
         }
     }
 
@@ -989,59 +991,81 @@ static void check_daos_corruptions(iod_hint_list_t *chint, iod_trans_id_t trans_
 
         step = atoi(cor_step);
 
-        oid = step*num_procs;
-        IOD_OBJID_SETOWNER_APP(oid)
-        IOD_OBJID_SETTYPE(oid, IOD_OBJ_BLOB)
+        if((int)trans_num == step+3) {
+            oid = step*num_procs;
+            IOD_OBJID_SETOWNER_APP(oid)
+            IOD_OBJID_SETTYPE(oid, IOD_OBJ_BLOB)
                 
-        chint->num_hint += 2;
-        chint->hint[i].key = strdup("iod_hint_obj_corrupt_offset");
-        chint->hint[i].value = strdup("5");
-        i++;
-        chint->hint[i].key = strdup("iod_hint_obj_corrupt_whichone");
-        chint->hint[i].value = (char *)malloc(50);
-        sprintf(chint->hint[i].value, "0x%"PRIx64"", oid);
-        i++;
-        if(!cor_data) {
-            chint->num_hint ++;
-            chint->hint[i].key = strdup("iod_hint_obj_corrupt_checksum");
-            chint->hint[i].value = NULL;
+            chint->num_hint += 2;
+            chint->hint[i].key = strdup("iod_hint_obj_corrupt_offset");
+            chint->hint[i].value = strdup("5");
             i++;
+            chint->hint[i].key = strdup("iod_hint_obj_corrupt_whichone");
+            chint->hint[i].value = (char *)malloc(50);
+            sprintf(chint->hint[i].value, "0x%llx", (unsigned long long)oid);
+            //sprintf(chint->hint[i].value, "0x%"PRIx64"", oid);
+            i++;
+            if(!cor_data) {
+                chint->num_hint ++;
+                chint->hint[i].key = strdup("iod_hint_obj_corrupt_checksum");
+                chint->hint[i].value = NULL;
+                i++;
 
-            printf("CORRUPTING CS at VPIC step %d at trans_num %d, blob ID %"PRIx64"\n", 
-                   step, (int)trans_num, oid);
-        }
-        else {
-            printf("CORRUPTING Data at VPIC step %d at trans_num %d, blob ID %"PRIx64"\n", 
-                   step, (int)trans_num, oid);
+                printf("CORRUPTING CS at VPIC step %d, blob ID %"PRIx64"\n", 
+                       step, oid);
+            }
+            else {
+                printf("CORRUPTING Data at VPIC step %d, blob ID %"PRIx64"\n", 
+                       step, oid);
+            }
         }
     }
 
     cor_step = NULL;
     step = -1;
 
-#if 0
     cor_step = getenv ("H5ENV_STEP_CORRUPT_DAOS_GROUP");
     if(NULL != cor_step) {
+        uint64_t oid;
+
         step = atoi(cor_step);
 
         if((int)trans_num == step+3) {
-            uint64_t oid;
-
-            oid = 5*num_procs + step*21*num_procs + 3;
+            oid = 0;
             IOD_OBJID_SETOWNER_APP(oid)
             IOD_OBJID_SETTYPE(oid, IOD_OBJ_KV)
                 
-            printf("CORRUPTING at VPIC step %d at trans_num %d, kv ID %"PRIx64"\n", 
-                   step, (int)trans_num, oid);
+            chint->num_hint += 2;
+            chint->hint[i].key = strdup("iod_hint_obj_corrupt_offset");
+            chint->hint[i].value = (char *)malloc(10);
+            sprintf(chint->hint[i].value, "%d", step);
 
-            ret = corrupt_kv("eff_vpic", oid, trans_num, 1, cor_data);
+            i++;
+            chint->hint[i].key = strdup("iod_hint_obj_corrupt_whichone");
+            chint->hint[i].value = (char *)malloc(50);
+            sprintf(chint->hint[i].value, "0x%llx", (unsigned long long)oid);
+            //sprintf(chint->hint[i].value, "0x%"PRIx64"", oid);
+            i++;
+            if(!cor_data) {
+                chint->num_hint ++;
+                chint->hint[i].key = strdup("iod_hint_obj_corrupt_checksum");
+                chint->hint[i].value = NULL;
+                i++;
+
+                printf("CORRUPTING CS at VPIC step %d, KV ID %"PRIx64"\n", 
+                       step, oid);
+            }
+            else {
+                printf("CORRUPTING Data at VPIC step %d, KV ID %"PRIx64"\n", 
+                       step, oid);
+            }
+
+            ret = corrupt_kv("eff_vpic", oid, trans_num, step, cor_data);
             if(ret < 0) {
                 fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
             }
         }
     }
-#endif
-
 }
 
 #endif

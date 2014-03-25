@@ -177,7 +177,8 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     }
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Creating Dataset ID %"PRIx64" ",dset_id);
+    fprintf(stderr, "Creating Dataset ID %"PRIx64" (CV %"PRIu64", TR %"PRIu64") ", 
+            dset_id, rtid, wtid);
     fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh.cookie, cur_id);
     if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum)
         fprintf(stderr, "with Data integrity ENABLED\n");
@@ -637,18 +638,21 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     /* free block handle */
     if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
         HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't free bds block handle");
+
+#if H5VL_IOD_DEBUG 
+    fprintf(stderr, "Done with dset read, checksum %016lX, sending response to client\n", cs);
+#endif
 done:
 
     output.ret = ret_value;
     output.cs = cs;
     output.buf_size = buf_size;
 
+    if(ret_value != SUCCEED)
+        fprintf(stderr, "FAILED dset read, checksum %016lX \n", cs);
+
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &output))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
-
-#if H5VL_IOD_DEBUG 
-    fprintf(stderr, "Done with dset read, checksum %016lX, sending response to client\n", cs);
-#endif
 
     input = (dset_io_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -1100,9 +1104,15 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
     }
 
-done:
 #if H5VL_IOD_DEBUG 
-    fprintf(stderr, "Done with dset write, sending %d response to client\n", ret_value);
+    fprintf(stderr, "Done with dset write, sending %d response to client \n", ret_value);
+#endif
+
+done:
+
+#if H5VL_IOD_DEBUG 
+    if(ret_value != SUCCEED)
+        fprintf(stderr, "FAILED dset write, sending %d response to client \n", ret_value);
 #endif
 
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
