@@ -544,7 +544,7 @@ static int test_generate(void)
     int      imax, jmax, kmax;
     int      n_elements;
     float    valex, xmin, xmax, value;
-    FILE     *f;
+    FILE     *f = NULL;
     char     *srcdir = getenv("srcdir"); /* the source directory */
     char     data_file[512]="";          /* buffer to hold name of existing data file */
     int      i;
@@ -648,7 +648,8 @@ static int test_generate(void)
         fscanf( f, "%f ", &value );
         data[i] = value;
     }
-    HDfclose( f );
+    HDfclose(f);
+    f = NULL;
 
     /*-------------------------------------------------------------------------
     * transform the data from floating point to unsigned char
@@ -758,6 +759,8 @@ out:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
     } H5E_END_TRY;
+    if(f)
+        HDfclose(f);
     H5_FAILED();
     return retval;
 }
