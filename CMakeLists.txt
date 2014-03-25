@@ -723,23 +723,30 @@ endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 
 #-----------------------------------------------------------------------------
 # Option to use threadsafe
-# Note: Currently CMake only allows configuring of threadsafe on WINDOWS.
+# Note: Currently CMake only allows configuring of threadsafe on 
+# non-Cygwin WINDOWS.
 #-----------------------------------------------------------------------------
 if (WIN32 AND NOT CYGWIN)
-  option (HDF5_ENABLE_THREADSAFE "Enable Threadsafety" OFF)
+  option (HDF5_ENABLE_THREADSAFE "Enable thread-safety" OFF)
   if (HDF5_ENABLE_THREADSAFE)
     # check for unsupported options
     if (HDF5_ENABLE_PARALLEL)
-      message (FATAL_ERROR " **** Parallel and Threadsafe options are mutually exclusive **** ")
+      message (FATAL_ERROR " **** parallel and thread-safety options are mutually exclusive **** ")
     endif (HDF5_ENABLE_PARALLEL)
+    if (HDF5_BUILD_FORTRAN)
+      message (FATAL_ERROR " **** Fortran and thread-safety options are mutually exclusive **** ")
+    endif (HDF5_BUILD_FORTRAN)
+    if (HDF5_BUILD_CPP_LIB)
+      message (FATAL_ERROR " **** C++ and thread-safety options are mutually exclusive **** ")
+    endif (HDF5_BUILD_CPP_LIB)
     set (H5_HAVE_THREADSAFE 1)
     if (H5_HAVE_IOEO)
-      message (STATUS " **** Windows Threads only available in WINVER>=0x600 (Vista or Windows 7) **** ")
+      message (STATUS " **** Win32 threads requires WINVER>=0x600 (Windows Vista/7/8) **** ")
       set (H5_HAVE_WIN_THREADS 1)
     else (H5_HAVE_IOEO)
       if (NOT H5_HAVE_PTHREAD_H)
         set (H5_HAVE_THREADSAFE 0)
-        message (FATAL_ERROR " **** Threadsafe option requires thread library **** ")
+        message (FATAL_ERROR " **** thread-safe option requires Win32 threads or Pthreads **** ")
       endif (NOT H5_HAVE_PTHREAD_H)
     endif (H5_HAVE_IOEO)
   endif (HDF5_ENABLE_THREADSAFE)
