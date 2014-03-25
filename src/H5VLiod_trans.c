@@ -20,7 +20,8 @@
 #ifdef H5_HAVE_EFF
 
 #if H5_HAVE_IOD_CORRUPT_TOOL
-static void check_corruptions(iod_trans_id_t trans_num);
+static void check_ion_corruptions(iod_trans_id_t trans_num);
+static void check_daos_corruptions(iod_hint_list_t *chint, iod_trans_id_t trans_num);
 #endif
 
 /*
@@ -258,6 +259,7 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t tid = input->c_version;
     int sleep_t = 0;
     iod_ret_t ret;
+    iod_hint_list_t *chint = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -275,7 +277,17 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
     if(NULL != sleep_timer)
         sleep_t = atoi(sleep_timer);
 
-    ret = iod_trans_persist(coh, tid, NULL, NULL);
+#if H5_HAVE_IOD_CORRUPT_TOOL
+    chint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + 9*sizeof(iod_hint_t));
+    chint->num_hint = 0;
+    check_daos_corruptions(chint, tid);
+    if(chint != NULL && 0 == chint->num_hint) {
+        free (chint);
+        chint = NULL;
+    }
+#endif
+
+    ret = iod_trans_persist(coh, tid, chint, NULL);
     if(ret != 0) {
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
     }
@@ -500,7 +512,7 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5_HAVE_IOD_CORRUPT_TOOL
     if(0 == client_rank)
-        check_corruptions(trans_num);
+        check_ion_corruptions(trans_num);
 #endif
 
     /* if the flag is true, acquire a read context on the finished transaction */
@@ -818,7 +830,7 @@ done:
 } /* end H5VL_iod_server_evict_cb() */
 
 #if H5_HAVE_IOD_CORRUPT_TOOL
-static void check_corruptions(iod_trans_id_t trans_num)
+static void check_ion_corruptions(iod_trans_id_t trans_num)
 {
     int step;
     char *cor_step = NULL;
@@ -840,7 +852,7 @@ static void check_corruptions(iod_trans_id_t trans_num)
     else
         return;
 
-    cor_step = getenv ("H5ENV_STEP_CORRUPT_DSET");
+    cor_step = getenv ("H5ENV_STEP_CORRUPT_BB_DSET");
     if(NULL != cor_step) {
         step = atoi(cor_step);
 
@@ -864,7 +876,7 @@ static void check_corruptions(iod_trans_id_t trans_num)
     cor_step = NULL;
     step = -1;
 
-    cor_step = getenv ("H5ENV_STEP_CORRUPT_DTYPE");
+    cor_step = getenv ("H5ENV_STEP_CORRUPT_BB_DTYPE");
     if(NULL != cor_step) {
         step = atoi(cor_step);
 
@@ -888,7 +900,7 @@ static void check_corruptions(iod_trans_id_t trans_num)
     cor_step = NULL;
     step = -1;
 
-    cor_step = getenv ("H5ENV_STEP_CORRUPT_GROUP");
+    cor_step = getenv ("H5ENV_STEP_CORRUPT_BB_GROUP");
     if(NULL != cor_step) {
         step = atoi(cor_step);
 
@@ -909,6 +921,129 @@ static void check_corruptions(iod_trans_id_t trans_num)
         }
     }
 }
+
+static void check_daos_corruptions(iod_hint_list_t *chint, iod_trans_id_t trans_num)
+{
+    int step;
+    char *cor_step = NULL;
+    char *num_procs_s = NULL;
+    int num_procs = -1;
+    char *cor_data_s = NULL;
+    int cor_data = -1;
+    int ret, i;
+
+    num_procs_s = getenv ("H5ENV_NUM_CLIENTS");
+    if(NULL != num_procs_s)
+        num_procs = atoi(num_procs_s);
+    else
+        return;
+
+    cor_data_s = getenv ("H5ENV_CORRUPT_DATA");
+    if(NULL != cor_data_s)
+        cor_data = atoi(cor_data_s);
+    else
+        return;
+
+    chint->num_hint = 0;
+    i = 0;
+
+    cor_step = getenv ("H5ENV_STEP_CORRUPT_DAOS_DSET");
+    if(NULL != cor_step) {
+        uint64_t oid;
+
+        step = atoi(cor_step);
+
+        oid = step*8*num_procs + 8;
+        IOD_OBJID_SETOWNER_APP(oid)
+        IOD_OBJID_SETTYPE(oid, IOD_OBJ_ARRAY)
+
+        chint->num_hint += 2;
+        chint->hint[i].key = strdup("iod_hint_obj_corrupt_offset");
+        chint->hint[i].value = strdup("5");
+        i++;
+        chint->hint[i].key = strdup("iod_hint_obj_corrupt_whichone");
+        chint->hint[i].value = (char *)malloc(32);
+        sprintf(chint->hint[i].value, "0x%llx", (unsigned long long)oid);
+        i++;
+        if(!cor_data) {
+            chint->num_hint ++;
+            chint->hint[i].key = strdup("iod_hint_obj_corrupt_checksum");
+            chint->hint[i].value = NULL;
+            i++;
+
+            printf("CORRUPTING CS at VPIC step %d at trans_num %d, array ID %"PRIx64"\n", 
+                   step, (int)trans_num, oid);
+        }
+        else {
+            printf("CORRUPTING Data at VPIC step %d at trans_num %d, array ID %"PRIx64"\n", 
+                   step, (int)trans_num, oid);
+        }
+    }
+
+    cor_step = NULL;
+    step = -1;
+
+    cor_step = getenv ("H5ENV_STEP_CORRUPT_DAOS_DTYPE");
+    if(NULL != cor_step) {
+        uint64_t oid;
+
+        step = atoi(cor_step);
+
+        oid = step*num_procs;
+        IOD_OBJID_SETOWNER_APP(oid)
+        IOD_OBJID_SETTYPE(oid, IOD_OBJ_BLOB)
+                
+        chint->num_hint += 2;
+        chint->hint[i].key = strdup("iod_hint_obj_corrupt_offset");
+        chint->hint[i].value = strdup("5");
+        i++;
+        chint->hint[i].key = strdup("iod_hint_obj_corrupt_whichone");
+        chint->hint[i].value = (char *)malloc(50);
+        sprintf(chint->hint[i].value, "0x%"PRIx64"", oid);
+        i++;
+        if(!cor_data) {
+            chint->num_hint ++;
+            chint->hint[i].key = strdup("iod_hint_obj_corrupt_checksum");
+            chint->hint[i].value = NULL;
+            i++;
+
+            printf("CORRUPTING CS at VPIC step %d at trans_num %d, blob ID %"PRIx64"\n", 
+                   step, (int)trans_num, oid);
+        }
+        else {
+            printf("CORRUPTING Data at VPIC step %d at trans_num %d, blob ID %"PRIx64"\n", 
+                   step, (int)trans_num, oid);
+        }
+    }
+
+    cor_step = NULL;
+    step = -1;
+
+#if 0
+    cor_step = getenv ("H5ENV_STEP_CORRUPT_DAOS_GROUP");
+    if(NULL != cor_step) {
+        step = atoi(cor_step);
+
+        if((int)trans_num == step+3) {
+            uint64_t oid;
+
+            oid = 5*num_procs + step*21*num_procs + 3;
+            IOD_OBJID_SETOWNER_APP(oid)
+            IOD_OBJID_SETTYPE(oid, IOD_OBJ_KV)
+                
+            printf("CORRUPTING at VPIC step %d at trans_num %d, kv ID %"PRIx64"\n", 
+                   step, (int)trans_num, oid);
+
+            ret = corrupt_kv("eff_vpic", oid, trans_num, 1, cor_data);
+            if(ret < 0) {
+                fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
+            }
+        }
+    }
+#endif
+
+}
+
 #endif
 
 #endif /* H5_HAVE_EFF */
