@@ -334,6 +334,8 @@
 ./fortran/src/H5match_types.c
 ./fortran/src/HDF5.f90
 ./fortran/src/HDF5mpio.f90
+./fortran/src/HDF5mpio_F03.f90
+./fortran/src/HDF5mpio_F90.f90
 ./fortran/src/Makefile.am
 ./fortran/src/Makefile.in
 ./fortran/src/README

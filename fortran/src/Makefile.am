@@ -42,13 +42,6 @@ else
    AM_LDFLAGS+=-static
 endif
 
-# Include HDF5.f90 if parallel is disabled, HDF5mpiof*  if parallel is enabled
-if BUILD_PARALLEL_CONDITIONAL
-   PARALLEL_COND_SRC = H5FDmpiof.c HDF5mpio.f90 H5FDmpioff.f90
-else
-   PARALLEL_COND_SRC = HDF5.f90
-endif
-
 # Check if the compiler supports the Fortran 2003 standard
 # which should include the intrinsic module iso_c_binding
 if FORTRAN_2003_CONDITIONAL_F
@@ -56,6 +49,14 @@ if FORTRAN_2003_CONDITIONAL_F
 else
    F_STATUS = _F90
 endif
+
+# Include HDF5.f90 if parallel is disabled, HDF5mpiof*  if parallel is enabled
+if BUILD_PARALLEL_CONDITIONAL
+   PARALLEL_COND_SRC = H5FDmpiof.c H5FDmpioff$(F_STATUS).f90 HDF5mpio.f90 H5FDmpioff.f90 
+else
+   PARALLEL_COND_SRC = HDF5.f90
+endif
+
 
 #   Condition for including/excluding the DBLE interfaces for when the 
 #   default REAL is of type DOUBLE PRECISION.

@@ -337,3 +337,36 @@ nh5pget_mpio_actual_io_mode_c(hid_t_f *dxpl_id, int_f *actual_io_mode)
   ret_value = 0;
   return ret_value;
 }
+
+/****if* H5FDmpio/h5dread_multi_c
+ * NAME
+ *  h5dread_multi_c
+ * PURPOSE
+ *  Calls H5Dread_multi
+ *
+ * INPUTS
+ *  
+ * OUTPUTS
+ *  
+ *
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  M. Scot Breitenfeld
+ *  March 25, 2014 
+ * SOURCE
+*/
+int_f
+nh5dread_multi_c(hid_t_f *file_id, hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info)
+/******/
+{
+  int ret_value = -1;
+  /*
+   * Call H5Dread_multi function.
+   */
+  if( (H5Dread_multi((hid_t)*file_id, (hid_t)*dxpl_id, (size_t)*count, info )) <0 )
+    return ret_value; /* error occurred */
+
+  ret_value = 0;
+  return ret_value;
+}
