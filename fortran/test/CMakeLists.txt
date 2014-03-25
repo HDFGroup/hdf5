@@ -16,7 +16,10 @@ target_link_libraries (${HDF5_F90_C_TEST_LIB_TARGET}
     ${HDF5_TEST_LIB_TARGET}
 )
 H5_SET_LIB_OPTIONS (${HDF5_F90_C_TEST_LIB_TARGET} ${HDF5_F90_C_TEST_LIB_NAME} ${LIB_TYPE})
-set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test/fortran)
+set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
+    FOLDER libraries/test/fortran
+    INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+)
 
 add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf.f90)
 set (SHARED_LINK_FLAGS " ")
@@ -37,7 +40,10 @@ target_link_libraries (${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_LIB_TARGET}
 )
 H5_SET_LIB_OPTIONS (${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_TEST_LIB_NAME} ${LIB_TYPE})
-set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test/fortran)
+set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES
+    FOLDER libraries/test/fortran
+    INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+)
 
 #-----------------------------------------------------------------------------
 # Add Tests

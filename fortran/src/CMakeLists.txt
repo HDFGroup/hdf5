@@ -137,8 +137,11 @@ TARGET_C_PROPERTIES (${HDF5_F90_C_LIB_TARGET} " " " ")
 target_link_libraries (${HDF5_F90_C_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_LIBS})
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_C_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_F90_C_LIB_TARGET} ${HDF5_F90_C_LIB_NAME} ${LIB_TYPE})
-set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES FOLDER libraries/fortran)
-set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES LINKER_LANGUAGE C)
+set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES
+    FOLDER libraries/fortran
+    LINKER_LANGUAGE C
+    INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+)
 
 #-----------------------------------------------------------------------------
 # Fortran 2003 standard
@@ -242,7 +245,10 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
 endif (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_F90_LIB_TARGET} ${HDF5_F90_LIB_NAME} ${LIB_TYPE})
-set_target_properties (${HDF5_F90_LIB_TARGET} PROPERTIES FOLDER libraries/fortran)
+set_target_properties (${HDF5_F90_LIB_TARGET} PROPERTIES
+    FOLDER libraries/fortran
+    INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
