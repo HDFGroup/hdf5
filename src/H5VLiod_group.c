@@ -271,6 +271,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t mdkv_oh; /* The metadata KV handle */
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
+    int step = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -297,6 +298,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     /* open a write handle on the ID. */
     if(iod_obj_open_write(coh, grp_id, rtid, NULL, &grp_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+    step ++;
 
     /* get scratch pad of group */
     if(iod_obj_get_scratch(grp_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
@@ -311,6 +313,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     /* open the metadata scratch pad */
     if (iod_obj_open_read(coh, sp[0], rtid, NULL, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    step ++;
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL, 
                              cs_scope, NULL, &output.gcpl_id) < 0)
@@ -319,6 +322,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close meta data KV handle");
+    step --;
 
     output.iod_id = grp_id;
     output.iod_oh.rd_oh.cookie = grp_oh.rd_oh.cookie;
@@ -338,6 +342,16 @@ done:
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_id = IOD_OBJ_INVALID;
         output.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+
+        if(step == 2) {
+            iod_obj_close(mdkv_oh, NULL, NULL);
+            step --;
+        }
+        if(step == 1) {
+            iod_obj_close(grp_oh.rd_oh, NULL, NULL);
+            iod_obj_close(grp_oh.wr_oh, NULL, NULL);
+        }
+
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 

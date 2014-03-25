@@ -316,6 +316,22 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't persist read context");
     }
 
+#if H5_HAVE_IOD_CORRUPT_TOOL
+    if(chint != NULL) {
+        for(i=0 ; i<chint->num_hint ; i++) {
+            if(chint->hint[i].key) {
+                free(chint->hint[i].key);
+                chint->hint[i].key = NULL;
+            }
+            if(chint->hint[i].value) {
+                free(chint->hint[i].value);
+                chint->hint[i].value = NULL;
+            }
+        }
+        free(chint);
+    }
+#endif
+
 done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         fprintf(stderr, "Failed to Persist Read context\n");
@@ -967,6 +983,7 @@ static void check_daos_corruptions(iod_hint_list_t *chint, iod_trans_id_t trans_
             chint->hint[i].value = (char *)malloc(50);
             sprintf(chint->hint[i].value, "0x%llx", (unsigned long long)oid);
             i++;
+
             if(!cor_data) {
                 chint->num_hint ++;
                 chint->hint[i].key = strdup("iod_hint_obj_corrupt_checksum");

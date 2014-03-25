@@ -334,6 +334,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_checksum_t dt_cs = 0, blob_cs = 0;
     iod_size_t key_size=0, val_size=0;
     iod_checksum_t iod_cs[2];
+    int step = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -351,6 +352,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     /* open a write handle on the ID. */
     if (iod_obj_open_write(coh, dtype_id, rtid, NULL, &dtype_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current datatype");
+    step ++;
 
     /* get scratch pad of the datatype */
     if(iod_obj_get_scratch(dtype_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
@@ -365,6 +367,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     /* open the metadata scratch pad */
     if (iod_obj_open_read(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    step ++;
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
                              cs_scope, NULL, &output.tcpl_id) < 0)
@@ -390,6 +393,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL))
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+    step --;
 
     /* create memory descriptor for writing */
     mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
@@ -448,6 +452,16 @@ done:
         output.iod_id = IOD_OBJ_INVALID;
         output.type_id = FAIL;
         output.tcpl_id = FAIL;
+
+        if(step == 2) {
+            iod_obj_close(mdkv_oh, NULL, NULL);
+            step --;
+        }
+        if(step == 1) {
+            iod_obj_close(dtype_oh.rd_oh, NULL, NULL);
+            iod_obj_close(dtype_oh.wr_oh, NULL, NULL);
+        }
+
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 

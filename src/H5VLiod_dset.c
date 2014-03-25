@@ -405,6 +405,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t mdkv_oh;
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
+    int step = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -422,6 +423,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     /* open a write handle on the ID. */
     if (iod_obj_open_write(coh, dset_id, rtid, NULL, &dset_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current dset");
+    step ++;
 
     /* get scratch pad of the dataset */
     if(iod_obj_get_scratch(dset_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
@@ -436,6 +438,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     /* open the metadata scratch pad */
     if (iod_obj_open_read(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    step ++;
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
                              cs_scope, NULL, &output.dcpl_id) < 0)
@@ -452,6 +455,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+    step --;
 
     output.iod_id = dset_id;
     output.mdkv_id = sp[0];
@@ -474,6 +478,16 @@ done:
         output.space_id = FAIL;
         output.type_id = FAIL;
         output.dcpl_id = FAIL;
+
+        if(step == 2) {
+            iod_obj_close(mdkv_oh, NULL, NULL);
+            step --;
+        }
+        if(step == 1) {
+            iod_obj_close(dset_oh.rd_oh, NULL, NULL);
+            iod_obj_close(dset_oh.wr_oh, NULL, NULL);
+        }
+
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
