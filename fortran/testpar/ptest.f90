@@ -99,7 +99,8 @@ PROGRAM parallel_test
 
   IF (mpi_rank == 0) WRITE(*,*) 'Writing/reading several datasets (contiguous layout, independent MPI I/O)'
 
-  do_collective = .FALSE.
+  do_collective = .TRUE.
+!  do_collective = .FALSE.
   do_chunk      = .FALSE.
   CALL multiple_dset_write(length, do_collective, do_chunk, mpi_size, mpi_rank, nerrors)
 
