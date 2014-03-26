@@ -2306,6 +2306,20 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED dxpl_id, void **req)
     input.cs_scope = file->md_integrity_scope;
     input.persist_on_close = file->persist_on_close;
 
+    /* 
+     * All ranks must wait for rank 0 to go close the file and write
+     * out the metadata succesfully before going on and closing the
+     * file. Rank 0 calls the bcast on request completion in
+     * H5VLiod_client.c.
+
+     * (This is an IOD limitation.) 
+     */
+    if(0 != file->my_rank) {
+        MPI_Bcast(&ret_value, 1, MPI_INT, 0, file->comm);
+        if(ret_value == FAIL)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Rank 0 Failed to close file");
+    }
+
     if(file->num_req) {
         H5VL_iod_request_t *cur_req = file->request_list_head;
 
@@ -2326,17 +2340,6 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED dxpl_id, void **req)
 #if H5VL_IOD_DEBUG
     printf("File Close Root ID %"PRIu64" axe id %"PRIu64"\n", input.root_id, g_axe_id);
 #endif
-
-    /* 
-     * All ranks must wait for rank 0 to go close the file and write
-     * out the metadata before going on an closing the file. Rank 0
-     * calls the barrier on request completion in
-     * H5VLiod_client.c. 
-
-     * (This is an IOD limitation.) 
-     */
-    if(0 != file->my_rank)
-        MPI_Barrier (file->comm);
 
     if(H5VL__iod_create_and_forward(H5VL_FILE_CLOSE_ID, HG_FILE_CLOSE, 
                                     (H5VL_iod_object_t *)file, 1,

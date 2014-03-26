@@ -1163,6 +1163,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     case HG_FILE_CLOSE:
         {
             int *status = (int *)req->data;
+            herr_t ret = *status;
 
             if(SUCCEED != *status) {
                 HERROR(H5E_FUNC, H5E_CANTINIT, "FILE close failed at the server\n");
@@ -1171,26 +1172,29 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             }
 
             if(0 == file->my_rank)
-                MPI_Barrier (file->comm);
+                MPI_Bcast(status, 1, MPI_INT, 0, file->comm);
+            //MPI_Barrier (file->comm);
 
             free(status);
             req->data = NULL;
             file->common.request = NULL;
             H5VL_iod_request_delete(file, req);
 
-            /* free everything */
-            free(file->file_name);
-            free(file->common.obj_name);
-            if(H5FD_mpi_comm_info_free(&file->comm, &file->info) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "Communicator/Info free failed");
-            if(file->common.comment)
-                HDfree(file->common.comment);
-            if(file->fapl_id != H5P_FILE_ACCESS_DEFAULT && H5Pclose(file->fapl_id) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
-            if(file->remote_file.fcpl_id != H5P_FILE_CREATE_DEFAULT && 
-               H5Pclose(file->remote_file.fcpl_id) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
-            file = H5FL_FREE(H5VL_iod_file_t, file);
+            if(SUCCEED == ret) {
+                /* free everything */
+                free(file->file_name);
+                free(file->common.obj_name);
+                if(H5FD_mpi_comm_info_free(&file->comm, &file->info) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "Communicator/Info free failed");
+                if(file->common.comment)
+                    HDfree(file->common.comment);
+                if(file->fapl_id != H5P_FILE_ACCESS_DEFAULT && H5Pclose(file->fapl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+                if(file->remote_file.fcpl_id != H5P_FILE_CREATE_DEFAULT && 
+                   H5Pclose(file->remote_file.fcpl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+                file = H5FL_FREE(H5VL_iod_file_t, file);
+            }
             break;
         }
     case HG_ATTR_RENAME:

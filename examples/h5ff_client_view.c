@@ -174,20 +174,20 @@ test_view(const char *file_name, const char *dataset_name,
 
     /* write data to datasets */
     ret = H5Sselect_hyperslab(file_space_id, H5S_SELECT_SET, offset,
-           NULL, count, NULL);
+                              NULL, count, NULL);
     assert(0 == ret);
 
     /* Write to the datasets. */
     ret = H5Dwrite_ff(did1, datatype_id, mem_space_id, file_space_id,
-            H5P_DEFAULT, buf, tid1, H5_EVENT_STACK_NULL);
+                      H5P_DEFAULT, buf, tid1, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 
     ret = H5Dwrite_ff(did2, datatype_id, mem_space_id, file_space_id,
-            H5P_DEFAULT, buf, tid1, H5_EVENT_STACK_NULL);
+                      H5P_DEFAULT, buf, tid1, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 
     ret = H5Dwrite_ff(did3, datatype_id, mem_space_id, file_space_id,
-            H5P_DEFAULT, buf, tid1, H5_EVENT_STACK_NULL);
+                      H5P_DEFAULT, buf, tid1, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 
     /* Close the data space for the first dataset. */

@@ -879,9 +879,13 @@ static void check_ion_corruptions(iod_trans_id_t trans_num)
             oid = step*8*num_procs + num_procs;
             IOD_OBJID_SETOWNER_APP(oid)
             IOD_OBJID_SETTYPE(oid, IOD_OBJ_ARRAY)
-                
-            printf("CORRUPTING at VPIC step %d at trans_num %d, array ID %"PRIx64"\n", 
-                   step, (int)trans_num, oid);
+
+            if(cor_data)
+                printf("CORRUPTING DATA at step %d, ARRAY ID %"PRIx64"\n", 
+                       step, oid);
+            else
+                printf("CORRUPTING CS at step %d, ARRAY ID %"PRIx64"\n", 
+                       step, oid);
 
             ret = corrupt_data("eff_vpic", oid, trans_num, 20, cor_data);
             if(ret < 0) {
@@ -903,9 +907,13 @@ static void check_ion_corruptions(iod_trans_id_t trans_num)
             oid = step*num_procs;
             IOD_OBJID_SETOWNER_APP(oid)
             IOD_OBJID_SETTYPE(oid, IOD_OBJ_BLOB)
-                
-            printf("CORRUPTING at VPIC step %d at trans_num %d, blob ID %"PRIx64"\n", 
-                   step, (int)trans_num, oid);
+
+            if(cor_data)
+                printf("CORRUPTING DATA at step %d, BLOB ID %"PRIx64"\n", 
+                       step, oid);
+            else
+                printf("CORRUPTING CS at step %d, BLOB ID %"PRIx64"\n", 
+                       step, oid);
 
             ret = corrupt_data("eff_vpic", oid, trans_num, 5, cor_data);
             if(ret < 0) {
@@ -927,9 +935,13 @@ static void check_ion_corruptions(iod_trans_id_t trans_num)
             oid = 0;//5*num_procs + step*21*num_procs;
             IOD_OBJID_SETOWNER_APP(oid)
             IOD_OBJID_SETTYPE(oid, IOD_OBJ_KV)
-                
-            printf("CORRUPTING at VPIC step %d at trans_num %d, kv ID %"PRIx64"\n", 
-                   step, (int)trans_num, oid);
+
+            if(cor_data)
+                printf("CORRUPTING DATA at step %d, KV ID %"PRIx64"\n", 
+                       step, oid);
+            else
+                printf("CORRUPTING CS at step %d, KV ID %"PRIx64"\n", 
+                       step, oid);
 
             ret = corrupt_kv("eff_vpic", oid, trans_num, step, cor_data);
             if(ret < 0) {

@@ -1088,7 +1088,7 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         fprintf(stderr, "Key CS iod = %016lX computed = %016lX\n", iod_cs[0], cs[0]);
         fprintf(stderr, "Value CS iod = %016lX computed = %016lX\n", iod_cs[1], cs[1]);
 #endif
-        if(iod_cs[0] != cs[0] && iod_cs[1] != cs[1])
+        if(iod_cs[0] != cs[0] || iod_cs[1] != cs[1])
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected when reading metadata from IOD");
     }
 

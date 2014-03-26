@@ -137,6 +137,7 @@ int main( int argc, char **argv ) {
    /* Acquire a read handle for container version 2 and create a read context. */
    version = 2;
    fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 7)\n", my_rank, (int)version );
+   H5E_BEGIN_TRY { 
    rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
    while ( rc_id2 < 0 ) {
       fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv %d - sleep then retry\n", my_rank, (int)version );
@@ -144,6 +145,7 @@ int main( int argc, char **argv ) {
       version = 2;      
       rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
    }
+   } H5E_END_TRY;
 
    assert( rc_id2 >= 0 ); assert ( version == 2 );
    fprintf( stderr, "M6.2-r%d: Acquired read context for cv 2\n", my_rank );
@@ -235,6 +237,7 @@ int main( int argc, char **argv ) {
 
    version = 3;
    fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 12)\n", my_rank, (int)version );
+   H5E_BEGIN_TRY { 
    rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
    while ( rc_id3 < 0 ) {
       fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv 3 - sleep then retry\n", my_rank );
@@ -242,6 +245,8 @@ int main( int argc, char **argv ) {
       version = 3;
       rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
    }
+   } H5E_END_TRY;
+
    assert( rc_id3 >= 0 ); assert( version == 3 );
    fprintf( stderr, "M6.2-r%d: Acquired read context for cv 3\n", my_rank );
    fprintf( stderr, "M6.2-r%d: 5th call to print container contents (Step 13)\n", my_rank );
@@ -369,6 +374,7 @@ int main( int argc, char **argv ) {
       int current_try = 0;
       version = 4;
       fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 15c)\n", my_rank, (int)version );
+      H5E_BEGIN_TRY { 
       rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
       while ( (rc_id4 < 0) && (current_try < max_tries) ) {
          fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv 4 - sleep then retry\n", my_rank );
@@ -377,6 +383,8 @@ int main( int argc, char **argv ) {
          version = 4;
          rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
       }
+      } H5E_END_TRY;
+
       if ( rc_id4 >= 0 ) {
          assert( version == 4 );
          fprintf( stderr, "M6.2-r%d: Acquired read context for cv 4\n", my_rank );
@@ -412,6 +420,7 @@ int main( int argc, char **argv ) {
       /* Get read context for CV 5, then print the contents of the container */
       version = 5;
       fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 15f)\n", my_rank, (int)version );
+      H5E_BEGIN_TRY { 
       rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
       while ( rc_id5 < 0 ) {
          fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv 5 - sleep then retry\n", my_rank );
@@ -419,6 +428,7 @@ int main( int argc, char **argv ) {
          version = 5;
          rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
       }
+      } H5E_END_TRY;
       assert( rc_id5 >= 0 ); assert( version == 5 );
       fprintf( stderr, "M6.2-r%d: Acquired read context for cv 5\n", my_rank );
       fprintf( stderr, "M6.2-r%d: 7th call to print container contents (Step 15g)\n", my_rank );
@@ -492,7 +502,9 @@ int main( int argc, char **argv ) {
    for ( v; v <= last_version; v++ ) {
       version = v;
       fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d\n", my_rank, (int)version );
+      H5E_BEGIN_TRY 
       rc_id = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+      H5E_END_TRY
       if ( rc_id < 0 ) {
          fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv %d\n", my_rank, (int)v );
       } else {
