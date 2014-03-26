@@ -3,7 +3,7 @@ PROJECT (HDF5_F90_SRC C CXX Fortran)
 
 #-----------------------------------------------------------------------------
 # configure def file for shared libs on windows
-if (WIN32 AND NOT CYGWIN)
+if (WIN32)
   if (BUILD_SHARED_LIBS)
     if (MSVC)
       if (NOT H5_HAVE_PARALLEL)
@@ -15,7 +15,7 @@ if (WIN32 AND NOT CYGWIN)
       configure_file (${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def.in ${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def @ONLY)
     endif (MSVC)
   endif (BUILD_SHARED_LIBS)
-endif (WIN32 AND NOT CYGWIN)
+endif (WIN32)
 
 INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${CMAKE_Fortran_MODULE_DIRECTORY})
 
@@ -222,7 +222,7 @@ endif (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
 #-----------------------------------------------------------------------------
 add_library (${HDF5_F90_LIB_TARGET} ${LIB_TYPE} ${f90_F_SRCS})
 set (SHARED_LINK_FLAGS " ")
-if (WIN32 AND NOT CYGWIN)
+if (WIN32)
   if (BUILD_SHARED_LIBS)
     set_property (TARGET ${HDF5_F90_LIB_TARGET}
       APPEND PROPERTY COMPILE_DEFINITIONS
@@ -236,7 +236,7 @@ if (WIN32 AND NOT CYGWIN)
       APPEND PROPERTY COMPILE_DEFINITIONS
         HDF5F90_WINDOWS
   )
-endif (WIN32 AND NOT CYGWIN)
+endif (WIN32)
 TARGET_FORTRAN_PROPERTIES (${HDF5_F90_LIB_TARGET} " " ${SHARED_LINK_FLAGS})
 set_target_properties (${HDF5_F90_LIB_TARGET} PROPERTIES LINKER_LANGUAGE Fortran)
 target_link_libraries (${HDF5_F90_LIB_TARGET} ${HDF5_F90_C_LIB_TARGET} ${HDF5_LIB_TARGET})
@@ -266,7 +266,7 @@ install (
         fortheaders
 )
 
-if (WIN32 AND NOT CYGWIN)
+if (WIN32)
   install (
       FILES
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5fortran_types.mod
@@ -300,11 +300,10 @@ if (WIN32 AND NOT CYGWIN)
       COMPONENT
           fortheaders
   )
-else (WIN32 AND NOT CYGWIN)
+else (WIN32)
   install (
       FILES
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5fortran_types.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5test_kind_sizeof_mod.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/hdf5.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5f.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5a.mod
@@ -322,20 +321,20 @@ else (WIN32 AND NOT CYGWIN)
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5z.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5a_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5d_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5E_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5F_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5L_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5O_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5P_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5R_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5T_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5e_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5e_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5l_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5o_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5p_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5r_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5t_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5_dble_interface.mod
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
           fortheaders
   )
-endif (WIN32 AND NOT CYGWIN)
+endif (WIN32)
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
