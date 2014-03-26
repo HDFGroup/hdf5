@@ -6,7 +6,7 @@
 ##############################################################################
 
 # Remove any output file left over from previous test run
-ADD_TEST (
+add_test (
     NAME hl_fortran_test-clear-objects
     COMMAND    ${CMAKE_COMMAND}
         -E remove 
@@ -20,10 +20,10 @@ ADD_TEST (
         tstds.h5
 )
 
-ADD_TEST (NAME hl_f90_tstds COMMAND $<TARGET_FILE:hl_f90_tstds>)
+add_test (NAME hl_f90_tstds COMMAND $<TARGET_FILE:hl_f90_tstds>)
 
-ADD_TEST (NAME hl_f90_tstlite COMMAND $<TARGET_FILE:hl_f90_tstlite>)
+add_test (NAME hl_f90_tstlite COMMAND $<TARGET_FILE:hl_f90_tstlite>)
 
-ADD_TEST (NAME hl_f90_tstimage COMMAND $<TARGET_FILE:hl_f90_tstimage>)
+add_test (NAME hl_f90_tstimage COMMAND $<TARGET_FILE:hl_f90_tstimage>)
 
-ADD_TEST (NAME hl_f90_tsttable COMMAND $<TARGET_FILE:hl_f90_tsttable>)
+add_test (NAME hl_f90_tsttable COMMAND $<TARGET_FILE:hl_f90_tsttable>)

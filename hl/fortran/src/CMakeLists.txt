@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.10)
+cmake_minimum_required (VERSION 2.8.11)
 PROJECT(HDF5_HL_F90_SRC C CXX Fortran)
 
 #-----------------------------------------------------------------------------
@@ -14,94 +14,106 @@ INCLUDE_DIRECTORIES (
 #-----------------------------------------------------------------------------
 # hl_f90CStub lib
 #-----------------------------------------------------------------------------
-SET (HDF5_HL_F90_C_SRCS
+set (HDF5_HL_F90_C_SRCS
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5DSfc.c
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTfc.c
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMfc.c
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMcc.c
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5TBfc.c
 )
-SET_SOURCE_FILES_PROPERTIES (${HDF5_HL_F90_C_SRCS} PROPERTIES LANGUAGE C)
+set_source_files_properties (${HDF5_HL_F90_C_SRCS} PROPERTIES LANGUAGE C)
 
-SET (HDF5_HL_F90_HEADERS ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTf90proto.h)
+set (HDF5_HL_F90_HEADERS ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTf90proto.h)
 
-ADD_LIBRARY (${HDF5_HL_F90_C_LIB_TARGET} ${LIB_TYPE} ${HDF5_HL_F90_C_SRCS} ${HDF5_HL_F90_HEADERS})
+add_library (${HDF5_HL_F90_C_LIB_TARGET} ${LIB_TYPE} ${HDF5_HL_F90_C_SRCS} ${HDF5_HL_F90_HEADERS})
 TARGET_C_PROPERTIES (${HDF5_HL_F90_C_LIB_TARGET} " " " ")
-TARGET_LINK_LIBRARIES (${HDF5_HL_F90_C_LIB_TARGET} ${HDF5_F90_C_LIB_TARGET} ${HDF5_HL_LIB_TARGET})
-SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_F90_C_LIB_TARGET}")
+target_link_libraries (${HDF5_HL_F90_C_LIB_TARGET} ${HDF5_F90_C_LIB_TARGET} ${HDF5_HL_LIB_TARGET})
+set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_F90_C_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_HL_F90_C_LIB_TARGET} ${HDF5_HL_F90_C_LIB_NAME} ${LIB_TYPE})
-SET_TARGET_PROPERTIES (${HDF5_HL_F90_C_LIB_TARGET} PROPERTIES FOLDER libraries/hl/fortran)
-SET_TARGET_PROPERTIES (${HDF5_HL_F90_C_LIB_TARGET} PROPERTIES LINKER_LANGUAGE C)
+set_target_properties (${HDF5_HL_F90_C_LIB_TARGET} PROPERTIES
+    FOLDER libraries/hl/fortran
+    LINKER_LANGUAGE C
+    INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+)
 
 #-----------------------------------------------------------------------------
 # Fortran Modules
 #-----------------------------------------------------------------------------
-SET (HDF5_HL_F90_F_SRCS
+set (HDF5_HL_F90_F_SRCS
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5DSff.f90
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5TBff.f90
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTff.f90
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMff.f90
 )
 
-ADD_LIBRARY (${HDF5_HL_F90_LIB_TARGET} ${LIB_TYPE} ${HDF5_HL_F90_F_SRCS})
-SET (SHARED_LINK_FLAGS " ")
-IF (BUILD_SHARED_LIBS)
-  IF (WIN32 AND NOT CYGWIN)
-    SET_PROPERTY (TARGET ${HDF5_HL_F90_LIB_TARGET} 
+add_library (${HDF5_HL_F90_LIB_TARGET} ${LIB_TYPE} ${HDF5_HL_F90_F_SRCS})
+set (SHARED_LINK_FLAGS " ")
+if (BUILD_SHARED_LIBS)
+  if (WIN32 AND NOT CYGWIN)
+    set_property (TARGET ${HDF5_HL_F90_LIB_TARGET} 
       APPEND PROPERTY COMPILE_DEFINITIONS 
         BUILD_HDF5_DLL
   )
-    IF (MSVC)
-      SET (SHARED_LINK_FLAGS "/DLL")
-    ENDIF (MSVC)
-  ENDIF (WIN32 AND NOT CYGWIN)
-ENDIF (BUILD_SHARED_LIBS)
-IF (WIN32 AND NOT CYGWIN)
-  SET_PROPERTY (TARGET ${HDF5_HL_F90_LIB_TARGET} 
+    if (MSVC)
+      set (SHARED_LINK_FLAGS "/DLL")
+    endif (MSVC)
+  endif (WIN32 AND NOT CYGWIN)
+endif (BUILD_SHARED_LIBS)
+if (WIN32 AND NOT CYGWIN)
+  set_property (TARGET ${HDF5_HL_F90_LIB_TARGET} 
       APPEND PROPERTY COMPILE_DEFINITIONS 
         HDF5F90_WINDOWS
   )
-ENDIF (WIN32 AND NOT CYGWIN)
+endif (WIN32 AND NOT CYGWIN)
 TARGET_FORTRAN_PROPERTIES (${HDF5_HL_F90_LIB_TARGET} " " ${SHARED_LINK_FLAGS})
-SET_TARGET_PROPERTIES (${HDF5_HL_F90_LIB_TARGET} PROPERTIES LINKER_LANGUAGE Fortran)
-TARGET_LINK_LIBRARIES (${HDF5_HL_F90_LIB_TARGET} ${HDF5_HL_F90_C_LIB_TARGET} ${HDF5_F90_LIB_TARGET})
-SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_F90_LIB_TARGET}")
+set_target_properties (${HDF5_HL_F90_LIB_TARGET} PROPERTIES LINKER_LANGUAGE Fortran)
+target_link_libraries (${HDF5_HL_F90_LIB_TARGET} ${HDF5_HL_F90_C_LIB_TARGET} ${HDF5_F90_LIB_TARGET})
+set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_F90_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_HL_F90_LIB_TARGET} ${HDF5_HL_F90_LIB_NAME} ${LIB_TYPE})
-SET_TARGET_PROPERTIES (${HDF5_HL_F90_LIB_TARGET} PROPERTIES FOLDER libraries/hl/fortran)
+set_target_properties (${HDF5_HL_F90_LIB_TARGET} PROPERTIES
+    FOLDER libraries/hl/fortran
+    INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
-IF (WIN32 AND NOT CYGWIN)
-  INSTALL (
-      DIRECTORY
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
+if (WIN32 AND NOT CYGWIN)
+  install (
+      FILES
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5ds.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5tb.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5lt.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5im.mod
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
           fortheaders
   )
-ELSE (WIN32 AND NOT CYGWIN)
-  INSTALL (
-      DIRECTORY
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/
+else (WIN32 AND NOT CYGWIN)
+  install (
+      FILES
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5ds.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5tb.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5lt.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5im.mod
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
           fortheaders
   )
-ENDIF (WIN32 AND NOT CYGWIN)
+endif (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
-IF (HDF5_EXPORTED_TARGETS)
-  IF (BUILD_SHARED_LIBS)
+if (HDF5_EXPORTED_TARGETS)
+  if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_HL_F90_C_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} hlfortlibraries)
     #INSTALL_TARGET_PDB (${HDF5_HL_F90_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} hlfortlibraries)
-  ENDIF (BUILD_SHARED_LIBS)
+  endif (BUILD_SHARED_LIBS)
   
-  INSTALL (
+  install (
       TARGETS
           ${HDF5_HL_F90_C_LIB_TARGET}
           ${HDF5_HL_F90_LIB_TARGET}
@@ -111,4 +123,4 @@ IF (HDF5_EXPORTED_TARGETS)
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT hlfortlibraries
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hlfortlibraries
   )
-ENDIF (HDF5_EXPORTED_TARGETS)
+endif (HDF5_EXPORTED_TARGETS)

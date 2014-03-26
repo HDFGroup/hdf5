@@ -86,7 +86,7 @@ include(GetPrerequisites)
 #
 # The compilers are detected in this order:
 #
-# 1. Try to find the most generic availble MPI compiler, as this is usually set up by
+# 1. Try to find the most generic available MPI compiler, as this is usually set up by
 #    cluster admins.  e.g., if plain old mpicc is available, we'll use it and assume it's
 #    the right compiler.
 #
@@ -354,6 +354,20 @@ function (interrogate_mpi_compiler lang try_libs)
         # Extract the set of libraries to link against from the link command
         # line
         string(REGEX MATCHALL "(^| )-l([^\" ]+|\"[^\"]+\")" MPI_LIBNAMES "${MPI_LINK_CMDLINE}")
+        # add the compiler implicit directories because some compilers
+        # such as the intel compiler have libraries that show up
+        # in the showme list that can only be found in the implicit
+        # link directories of the compiler. Do this for C++ and C
+        # compilers if the implicit link directories are defined.
+        if (DEFINED CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES)
+          set(MPI_LINK_PATH
+            "${MPI_LINK_PATH};${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}")
+        endif ()
+
+        if (DEFINED CMAKE_C_IMPLICIT_LINK_DIRECTORIES)
+          set(MPI_LINK_PATH
+            "${MPI_LINK_PATH};${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
+        endif ()
 
         # Determine full path names for all of the libraries that one needs
         # to link against in an MPI program
@@ -413,18 +427,18 @@ function (interrogate_mpi_compiler lang try_libs)
           HINTS         ${_MPI_BASE_DIR} ${_MPI_PREFIX_PATH}
           PATH_SUFFIXES lib)
         if (MPI_LIBRARIES_WORK AND MPI_LIB)
-          set(MPI_LIBRARIES_WORK ${MPI_LIBRARIES_WORK} ${MPI_LIB})
+          list(APPEND MPI_LIBRARIES_WORK ${MPI_LIB})
         endif()
       endif()
 
       if (${lang} STREQUAL Fortran)
         set(MPI_LIB "MPI_LIB-NOTFOUND" CACHE FILEPATH "Cleared" FORCE)
         find_library(MPI_LIB
-          NAMES         fmpi fmpich fmpich2 fmpich2g
+          NAMES         fmpi fmpich fmpich2 fmpich2g msmpifec msmpifmc
           HINTS         ${_MPI_BASE_DIR} ${_MPI_PREFIX_PATH}
-          PATH_SUFFIXES lib)
+          PATH_SUFFIXES lib lib/${MS_MPI_ARCH_DIR} Lib Lib/${MS_MPI_ARCH_DIR})
         if (MPI_LIBRARIES_WORK AND MPI_LIB)
-          set(MPI_LIBRARIES_WORK ${MPI_LIBRARIES_WORK} ${MPI_LIB})
+          list(APPEND MPI_LIBRARIES_WORK ${MPI_LIB})
         endif()
       endif()
 
@@ -572,6 +586,11 @@ foreach (lang C CXX Fortran)
     if (NOT MPI_${lang}_LIBRARIES OR NOT MPI_${lang}_INCLUDE_PATH)
       try_regular_compiler(${lang} regular_compiler_worked)
     endif()
+
+    set(MPI_${lang}_FIND_QUIETLY ${MPI_FIND_QUIETLY})
+    set(MPI_${lang}_FIND_REQUIRED ${MPI_FIND_REQUIRED})
+    set(MPI_${lang}_FIND_VERSION ${MPI_FIND_VERSION})
+    set(MPI_${lang}_FIND_VERSION_EXACT ${MPI_FIND_VERSION_EXACT})
 
     if (regular_compiler_worked)
       find_package_handle_standard_args(MPI_${lang} DEFAULT_MSG MPI_${lang}_COMPILER)
