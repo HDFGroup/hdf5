@@ -943,7 +943,7 @@ static void check_ion_corruptions(iod_trans_id_t trans_num)
                 printf("CORRUPTING CS at step %d, KV ID %"PRIx64"\n", 
                        step, oid);
 
-            ret = corrupt_kv("eff_vpic", oid, trans_num, step, cor_data);
+            ret = corrupt_kv("eff_vpic", oid, trans_num, step*2+1, cor_data);
             if(ret < 0) {
                 fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
             }
@@ -1067,7 +1067,7 @@ static void check_daos_corruptions(iod_hint_list_t *chint, iod_trans_id_t trans_
             chint->num_hint += 2;
             chint->hint[i].key = strdup("iod_hint_obj_corrupt_offset");
             chint->hint[i].value = (char *)malloc(10);
-            sprintf(chint->hint[i].value, "%d", step);
+            sprintf(chint->hint[i].value, "%d", step*2+1);
 
             i++;
             chint->hint[i].key = strdup("iod_hint_obj_corrupt_whichone");
@@ -1089,7 +1089,7 @@ static void check_daos_corruptions(iod_hint_list_t *chint, iod_trans_id_t trans_
                        step, oid);
             }
 
-            ret = corrupt_kv("eff_vpic", oid, trans_num, step, cor_data);
+            ret = corrupt_kv("eff_vpic", oid, trans_num, step*2+1, cor_data);
             if(ret < 0) {
                 fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
             }
