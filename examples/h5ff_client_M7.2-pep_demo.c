@@ -18,7 +18,7 @@
 /* option flags */
 int use_daos_lustre = 1;   // Use DAOS Lustre - defaults to yes
 int verbose = 0;           // Verbose output - defaults to no
-int pause = 0;             // Seconds to pause to allow out-of-band space check - defaults to 0.
+int pause = 0;             // Pause to allow out-of-band space check - defaults to 0.
 int time_reads = 0;        // Time reads after container re-open
 
 /* global variables and macros used to make timing easier */
@@ -29,7 +29,6 @@ struct timeval tv_end;
 #define ELAPSED_TIME (ulong)( (tv_end.tv_usec + 1000000*tv_end.tv_sec) - (tv_start.tv_usec + 1000000*tv_start.tv_sec) ) 
 
 /* prototypes for helper functions */
-void create_group( hid_t, const char*, hid_t, const char*, int );
 void create_dataset( hid_t, const char*, hid_t, const char*, int, int );
 void create_map( hid_t, const char*, hid_t, const char*, int, int );
 void create_named_datatype( hid_t, const char*, hid_t, const char*, int );
@@ -43,27 +42,36 @@ void usage( const char* );
 /**************************************************************************************************************/
 int main( int argc, char **argv ) {
 
-   const char file_name[]="eff_pep.h5";
-
+   /* MPI */
    int my_rank, comm_size;
    int provided;
 
-   hid_t  fapl_id;
+   /* Container */
+   const char file_name[]="eff_pep.h5";
+   hid_t  fapl_id;         
    hid_t  file_id;
-   herr_t ret;
 
+   /* Groups */
+   hid_t  grp_l_id;
+   hid_t  grp_p_id;
+   hid_t  grp_s_id;
+
+   /* Event stack */
    hid_t         es_id;   
    H5ES_status_t status;
    size_t        num_events;
 
+   /* Container Version & Read Contexts */
    uint64_t version;
    hid_t    rc_id1, rc_id2, rc_id3, rc_id4, rc_id5, rc_id;
 
+   /* Transactions  */
    uint64_t tr_num;
    hid_t    tr_id;
    hid_t    trspl_id;
    int      num_tr_leaders;
 
+   herr_t ret;
    int    i;
 
    /****
@@ -80,7 +88,9 @@ int main( int argc, char **argv ) {
    /* Find MPI rank & communicator size */
    MPI_Comm_rank( MPI_COMM_WORLD, &my_rank );
    MPI_Comm_size( MPI_COMM_WORLD, &comm_size );
-   fprintf( stderr, "APP-r%d: Number of MPI processes = %d\n", my_rank, comm_size );
+   if ( my_rank == 0 ) {
+      fprintf( stderr, "APP-r%d: Number of MPI processes = %d\n", my_rank, comm_size );
+   }
 
    /* Parse command-line options controlling behavior */
    if ( parse_options( argc, argv, my_rank ) != 0 ) {
@@ -112,42 +122,44 @@ int main( int argc, char **argv ) {
       tr_num = 2;
 
       /* Create a local transaction for transaction number and start it with a single tr leader (the default). */
-      fprintf( stderr, "APP-r%d: Create and start tr %lu\n", my_rank, tr_num );
+      fprintf( stderr, "APP-r%d: Start tr %lu\n", my_rank, tr_num );
       tr_id = H5TRcreate( file_id, rc_id1, tr_num ); assert( tr_id >= 0 );
       ret = H5TRstart( tr_id, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
-      /* Add updates to the transaction */
-      create_group( file_id, "G-logged", tr_id, "/", my_rank );
-      create_group( file_id, "G-prefetched", tr_id, "/", my_rank );
-      create_group( file_id, "G-stored", tr_id, "/", my_rank );
+      /* Add updates to the transaction for Group creates */
+      fprintf( stderr, "APP-r%d: Create /G-logged, /G-prefetched, /G-stored in tr %d\n", my_rank, tr_num );
+      grp_l_id = H5Gcreate_ff( file_id, "G-logged", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tr_id, H5_EVENT_STACK_NULL );
+      assert( grp_l_id >= 0 );
+      grp_p_id = H5Gcreate_ff( file_id, "G-prefetched", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tr_id, H5_EVENT_STACK_NULL );
+      assert( grp_p_id >= 0 );
+      grp_s_id = H5Gcreate_ff( file_id, "G-stored", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tr_id, H5_EVENT_STACK_NULL );
+      assert( grp_s_id >= 0 );
 
-      /* Finish, commit, and close transaction */
-      fprintf( stderr, "APP-r%d: Finish, commit, and close tr %lu\n", my_rank, tr_num );
-      ret = H5TRfinish( tr_id, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); ASSERT_RET;
+      /* Finish and commit TR and get RC */
+      fprintf( stderr, "APP-r%d: Finish tr %lu and acquire rc for resulting cv\n", my_rank, tr_num );
+
+      ret = H5TRfinish( tr_id, H5P_DEFAULT, &rc_id2, H5_EVENT_STACK_NULL ); ASSERT_RET;
       ret = H5TRclose( tr_id ); ASSERT_RET;
+      version = 2;
+      assert( rc_id2 >= 0 ); 
    }
 
-   /* Acquire a read handle for container version and create a read context. */
-   version = 2;
-   if ( verbose ) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
-   MPI_Barrier( MPI_COMM_WORLD );      /* Q7 Workaround to avoid transaction race in IOD */
-   H5E_BEGIN_TRY { 
-      rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-      while ( rc_id2 < 0 ) {
-         if ( verbose ) fprintf( stderr, "APP-r%d: Failed to acquire read context %lu; sleep then retry\n", my_rank, version );
-         sleep( 1 );
-         rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-      }
-   } H5E_END_TRY;
-   assert( rc_id2 >= 0 ); assert ( version == 2 );
-   fprintf( stderr, "APP-r%d: Acquired read context %lu\n", my_rank, version );
+   /* Rank 0 tells others that RC has been acquired; they create local RC object and open the Groups */
+   MPI_Bcast( &version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
+   if ( my_rank != 0 ) {
+      rc_id2 = H5RCcreate( file_id, version );
+      assert( rc_id2 >= 0 ); assert ( version == 2 );
+
+      grp_l_id = H5Gopen_ff( file_id, "G-logged", H5P_DEFAULT, rc_id2, H5_EVENT_STACK_NULL ); assert( grp_l_id >= 0 );
+      grp_p_id = H5Gopen_ff( file_id, "G-prefetched", H5P_DEFAULT, rc_id2, H5_EVENT_STACK_NULL ); assert( grp_p_id >= 0 );
+      grp_s_id = H5Gopen_ff( file_id, "G-stored", H5P_DEFAULT, rc_id2, H5_EVENT_STACK_NULL ); assert( grp_s_id >= 0 );
+   } 
 
    /* Release the read handle and close read context on previous CV  */
-   fprintf( stderr, "APP-r%d: Release read context 1\n", my_rank );
    ret = H5RCrelease( rc_id1, H5_EVENT_STACK_NULL); ASSERT_RET;
    ret = H5RCclose( rc_id1 ); ASSERT_RET;
 
-   if ( verbose ) print_container_contents( file_id, rc_id2, "/", my_rank );
+   if ( verbose && ( my_rank == 0 ) ) print_container_contents( file_id, rc_id2, "/", my_rank );
 
    /****
     * Transaction 3 - In each of the 3 Groups, create "D"(rnk 0), "M"(rnk 1 or 0), "T" (rnk 2 or 1 or 0)
@@ -158,56 +170,49 @@ int main( int argc, char **argv ) {
       num_tr_leaders = ( (comm_size < 4) ? comm_size : 3 );
 
       /* Create a local transaction for transaction number and start it. */
-      fprintf( stderr, "APP-r%d: Create and start tr %lu with %d transaction leaders\n", my_rank, tr_num, num_tr_leaders );
+      fprintf( stderr, "APP-r%d: Start tr %lu with %d transaction leaders\n", my_rank, tr_num, num_tr_leaders );
       tr_id = H5TRcreate( file_id, rc_id2, tr_num ); assert( tr_id >= 0 );
       trspl_id = H5Pcreate( H5P_TR_START );  assert( trspl_id >= 0 );
       ret = H5Pset_trspl_num_peers( trspl_id, num_tr_leaders ); ASSERT_RET;
       ret = H5TRstart( tr_id, trspl_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
-      hid_t glog_id, gpre_id, gsto_id;
       char glog_path[128], gpre_path[128], gsto_path[128];
 
-      /* Open the groups where objects will be created and set pathnames used in status messages */
-      glog_id = H5Gopen_ff( file_id, "G-logged", H5P_DEFAULT, rc_id2, H5_EVENT_STACK_NULL ); assert( glog_id >= 0 );
-      gpre_id = H5Gopen_ff( file_id, "G-prefetched", H5P_DEFAULT, rc_id2, H5_EVENT_STACK_NULL ); assert( gpre_id >= 0 );
-      gsto_id = H5Gopen_ff( file_id, "G-stored", H5P_DEFAULT, rc_id2, H5_EVENT_STACK_NULL ); assert( gsto_id >= 0 );
+      /* Set pathnames to groups used in status messages */
       sprintf( glog_path, "/G-logged/" );
       sprintf( gpre_path, "/G-prefetched/" );
       sprintf( gsto_path, "/G-stored/" );
 
       /* Add updates to the transaction */
       if ( my_rank == 0 ) {
-         create_dataset( glog_id, "D", tr_id, glog_path, my_rank, 1 );
-         create_dataset( gpre_id, "D", tr_id, gpre_path, my_rank, 2 );
-         create_dataset( gsto_id, "D", tr_id, gsto_path, my_rank, 3 );
+         create_dataset( grp_l_id, "D", tr_id, glog_path, my_rank, 1 );
+         create_dataset( grp_p_id, "D", tr_id, gpre_path, my_rank, 2 );
+         create_dataset( grp_s_id, "D", tr_id, gsto_path, my_rank, 3 );
       }  
       if ( ( my_rank == 1 ) || ( ( my_rank == 0 ) && ( comm_size == 1 ) ) )  {
-         create_map( glog_id, "M", tr_id, glog_path, my_rank, 1 );
-         create_map( gpre_id, "M", tr_id, gpre_path, my_rank, 2 );
-         create_map( gsto_id, "M", tr_id, gsto_path, my_rank, 3 );
+         create_map( grp_l_id, "M", tr_id, glog_path, my_rank, 1 );
+         create_map( grp_p_id, "M", tr_id, gpre_path, my_rank, 2 );
+         create_map( grp_s_id, "M", tr_id, gsto_path, my_rank, 3 );
       }
       if ( ( my_rank == 2 )  || ( ( my_rank == 1 ) && ( comm_size == 2 ) )  || ( ( my_rank == 0 ) && ( comm_size == 1 ) ) ) {
-         create_named_datatype( glog_id, "T", tr_id, glog_path, my_rank );
-         create_named_datatype( gpre_id, "T", tr_id, gpre_path, my_rank );
-         create_named_datatype( gsto_id, "T", tr_id, gsto_path, my_rank );
+         create_named_datatype( grp_l_id, "T", tr_id, glog_path, my_rank );
+         create_named_datatype( grp_p_id, "T", tr_id, gpre_path, my_rank );
+         create_named_datatype( grp_s_id, "T", tr_id, gsto_path, my_rank );
       }
 
-      /* Close the groups */
-      ret = H5Gclose_ff ( glog_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
-      ret = H5Gclose_ff ( gpre_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
-      ret = H5Gclose_ff ( gsto_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
-
       /* Finish, commit, and close transaction */
-      fprintf( stderr, "APP-r%d: Finish, commit, and close tr %lu\n", my_rank, tr_num );
+      fprintf( stderr, "APP-r%d: Finish tr %lu\n", my_rank, tr_num );
       ret = H5TRfinish( tr_id, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); ASSERT_RET;
       ret = H5TRclose( tr_id ); ASSERT_RET;
       ret = H5Pclose( trspl_id ); ASSERT_RET;
    }
 
+
    /* Acquire a read handle for container version and create a read context. */
    version = 3;
    if ( verbose ) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
-   MPI_Barrier( MPI_COMM_WORLD );      /* Q7 Workaround to avoid transaction race in IOD */
+
+   MPI_Barrier( MPI_COMM_WORLD );      /* Q7 Workaround to avoid potential transaction race in IOD */
    H5E_BEGIN_TRY { 
       rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
       while ( rc_id3 < 0 ) {
@@ -221,7 +226,9 @@ int main( int argc, char **argv ) {
 
    /* Release the read handle and close read context on previous CV  */
    fprintf( stderr, "APP-r%d: Release read context 2\n", my_rank );
-   ret = H5RCrelease( rc_id2, H5_EVENT_STACK_NULL); ASSERT_RET;
+   if ( my_rank == 0 ) {
+      ret = H5RCrelease( rc_id2, H5_EVENT_STACK_NULL); ASSERT_RET;
+   }
    ret = H5RCclose( rc_id2 ); ASSERT_RET;
 
    /**** 
@@ -233,8 +240,8 @@ int main( int argc, char **argv ) {
 
    if ( my_rank == 0 ) {
       fprintf( stderr, "APP-r%d: Persist cv 3.\n", my_rank );
-      print_container_contents( file_id, rc_id3, "/", my_rank );
       ret = H5RCpersist(rc_id3, H5_EVENT_STACK_NULL); ASSERT_RET; 
+      print_container_contents( file_id, rc_id3, "/", my_rank );
    }
 
    if ( verbose ) print_container_contents( file_id, rc_id3, "/", my_rank );
@@ -247,7 +254,7 @@ int main( int argc, char **argv ) {
    num_tr_leaders = comm_size;
 
    /* Create a local transaction for transaction number and start it. */
-   fprintf( stderr, "APP-r%d: Create and start tr %lu with %d transaction leaders\n", my_rank, tr_num, num_tr_leaders );
+   fprintf( stderr, "APP-r%d: Start tr %lu with %d transaction leaders\n", my_rank, tr_num, num_tr_leaders );
    tr_id = H5TRcreate( file_id, rc_id3, tr_num ); assert( tr_id >= 0 );
    trspl_id = H5Pcreate( H5P_TR_START );  assert( trspl_id >= 0 );
    ret = H5Pset_trspl_num_peers( trspl_id, num_tr_leaders ); ASSERT_RET;
@@ -262,8 +269,8 @@ int main( int argc, char **argv ) {
    update_map( file_id, "G-prefetched/M", tr_id, rc_id3, "/", my_rank, 2 );
    update_map( file_id, "G-stored/M", tr_id, rc_id3, "/", my_rank, 3 );
 
-   /* Finish, commit, and close transaction */
-   fprintf( stderr, "APP-r%d: Finish, commit, and close tr %lu\n", my_rank, tr_num );
+   /* Finish and close transaction */
+   fprintf( stderr, "APP-r%d: Finish tr %lu\n", my_rank, tr_num );
    ret = H5TRfinish( tr_id, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); ASSERT_RET;
    ret = H5TRclose( tr_id ); ASSERT_RET;
    ret = H5Pclose( trspl_id ); ASSERT_RET;
@@ -272,7 +279,8 @@ int main( int argc, char **argv ) {
    if ( verbose ) {
       version = 4;
       fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
-      MPI_Barrier( MPI_COMM_WORLD );      /* Q7 Workaround to avoid transaction race in IOD */
+
+      MPI_Barrier( MPI_COMM_WORLD );      /* Q7 Workaround to avoid potential transaction race in IOD */
       H5E_BEGIN_TRY { 
          rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
          while ( rc_id4 < 0 ) {
@@ -300,7 +308,7 @@ int main( int argc, char **argv ) {
    num_tr_leaders = comm_size;
 
    /* Create a local transaction for transaction number and start it. */
-   fprintf( stderr, "APP-r%d: Create and start tr %lu with %d transaction leaders\n", my_rank, tr_num, num_tr_leaders );
+   fprintf( stderr, "APP-r%d: Start tr %lu with %d transaction leaders\n", my_rank, tr_num, num_tr_leaders );
    tr_id = H5TRcreate( file_id, rc_id3, tr_num ); assert( tr_id >= 0 );
    trspl_id = H5Pcreate( H5P_TR_START );  assert( trspl_id >= 0 );
    ret = H5Pset_trspl_num_peers( trspl_id, num_tr_leaders ); ASSERT_RET;
@@ -316,7 +324,7 @@ int main( int argc, char **argv ) {
    update_map( file_id, "G-stored/M", tr_id, rc_id3, "/", my_rank, 3 );
 
    /* Finish, commit, and close transaction */
-   fprintf( stderr, "APP-r%d: Finish, commit, and close tr %lu\n", my_rank, tr_num );
+   fprintf( stderr, "APP-r%d: Finish tr %lu\n", my_rank, tr_num );
    ret = H5TRfinish( tr_id, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); ASSERT_RET;
    ret = H5TRclose( tr_id ); ASSERT_RET;
    ret = H5Pclose( trspl_id ); ASSERT_RET;
@@ -324,7 +332,8 @@ int main( int argc, char **argv ) {
    /* Acquire a read handle for container version and create a read context. */
    version = 5;
    if ( verbose ) fprintf( stderr, "APP-r%d: Try to acquire read context %lu\n", my_rank, version );
-   MPI_Barrier( MPI_COMM_WORLD );      /* Q7 Workaround to avoid transaction race in IOD */
+
+   MPI_Barrier( MPI_COMM_WORLD );      /* Q7 Workaround to avoid potential transaction race in IOD */
    H5E_BEGIN_TRY { 
       rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
       while ( rc_id5 < 0 ) {
@@ -354,35 +363,32 @@ int main( int argc, char **argv ) {
    /* Optionally, pause to show change in BB space using out-of-band check. All ranks paused. */
    if ( pause )  { 
       MPI_Barrier( MPI_COMM_WORLD );
-      if ( my_rank == 0 ) {
-         fprintf( stdout, "APP: All ranks PAUSED before persist/evict to allow BB space usage to be checked.\n" );
-      }
-      sleep( pause );
-      if ( my_rank == 0 ) {
-         fprintf( stdout, "APP: Waking up.\n" );
-      }
+         if ( my_rank == 0 ) {
+            fprintf( stderr, ">>> PAUSED before persist/evict to allow BB space usage to be checked.\n" );
+            fprintf( stderr, ">>> Press return to continue..." );
+            getchar();
+         }
+      MPI_Barrier( MPI_COMM_WORLD );
    }
 
    if ( my_rank == comm_size-1 ) {
       fprintf( stderr, "APP-r%d: Persist cv 5.\n", my_rank );
-      print_container_contents( file_id, rc_id5, "/", my_rank );
       ret = H5RCpersist(rc_id5, H5_EVENT_STACK_NULL); ASSERT_RET; 
+      print_container_contents( file_id, rc_id5, "/", my_rank );
 
       evict_group_members_updates( file_id, rc_id5, "/G-prefetched", my_rank );
       evict_group_members_updates( file_id, rc_id5, "/G-stored", my_rank );
-
    }
 
    /* Optionally, pause to show change in BB space using out-of-band check. All ranks paused. */
    if ( pause )  { 
       MPI_Barrier( MPI_COMM_WORLD );
       if ( my_rank == 0 ) {
-         fprintf( stdout, "APP: All ranks PAUSED after persist/evict to allow BB space usage to be checked.\n" );
+         fprintf( stderr, ">>> PAUSED after persist/evict to allow BB space usage to be checked.\n" );
+         fprintf( stderr, ">>> Press return to continue..." );
+         getchar();
       }
-      sleep( pause );
-      if ( my_rank == 0 ) {
-         fprintf( stdout, "APP: Waking up.\n" );
-      }
+      MPI_Barrier( MPI_COMM_WORLD );
    }
    
    /* All ranks print container here.  For rank == comm_size, this will be after objects have been evicted */
@@ -400,19 +406,18 @@ int main( int argc, char **argv ) {
     *  pre-fetch multiple objects from persistent storage to burst buffer storage.
     ****/
 
+   ret = H5Gclose_ff( grp_l_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
+   ret = H5Gclose_ff( grp_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
+   ret = H5Gclose_ff( grp_s_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
+
    /* Close the container, then barrier to make sure all ranks have closed it before continuing */
    fprintf( stderr, "APP-r%d: Close the container.\n", my_rank );
    ret = H5Fclose_ff( file_id, 1, H5_EVENT_STACK_NULL ); ASSERT_RET;
+   ret = H5Pclose( fapl_id ); ASSERT_RET;
    MPI_Barrier( MPI_COMM_WORLD );
 
    /* Reopen the container read-only and get a read context for highest CV */
-   file_id = H5Fopen_ff( file_name, H5F_ACC_RDONLY, fapl_id, &rc_id, H5_EVENT_STACK_NULL ); assert( file_id >= 0 );
-   H5RCget_version( rc_id, &version );
-   fprintf( stderr, "APP-r%d: Container re-opened; Acquired RC\n", my_rank, version );
-
-
-   /****************** STILL WORKING ON THIS PART *****************************/
-
+   /* Define variables here so easier to move this into separate routine if desired (note: still rely on some defined earlier */
    hid_t dset_l_id, dset_p_id, dset_s_id;
    hid_t space_l_id, space_p_id, space_s_id;
    hrpl_t dset_p_replica;
@@ -430,6 +435,12 @@ int main( int argc, char **argv ) {
    hid_t type_l_id, type_p_id, type_s_id;
    hrpl_t type_p_replica;
    hid_t tapl_p_id;
+
+   fapl_id = H5Pcreate( H5P_FILE_ACCESS ); assert( fapl_id >= 0 );
+   ret = H5Pset_fapl_iod( fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL ); ASSERT_RET;
+   file_id = H5Fopen_ff( file_name, H5F_ACC_RDONLY, fapl_id, &rc_id, H5_EVENT_STACK_NULL ); assert( file_id >= 0 );
+   H5RCget_version( rc_id, &version );
+   fprintf( stderr, "APP-r%d: Container re-opened; Acquired read context %lu\n", my_rank, version );
 
    /* Open Datasets, Maps and DataTypes in all 3 Groups */
    dset_l_id = H5Dopen_ff( file_id, "/G-logged/D", H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL );
@@ -462,20 +473,19 @@ int main( int argc, char **argv ) {
    type_s_id = H5Topen_ff( file_id, "G-stored/T", H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL );
    assert( type_s_id >= 0 );
 
-   /* Prefetch objects in the /G-prefetched group. */
 
-   /* Optionally, pause to show BB space using out-of-band check. All ranks paused. */
+   /* Optionally, pause to show change in BB space using out-of-band check. All ranks paused. */
    if ( pause )  { 
       MPI_Barrier( MPI_COMM_WORLD );
       if ( my_rank == 0 ) {
-         fprintf( stdout, "APP: All ranks PAUSED before prefetch to allow BB space usage to be checked.\n" );
+         fprintf( stderr, ">>> PAUSED before prefetch of replicas allow BB space usage to be checked.\n" );
+         fprintf( stderr, ">>> Press return to continue..." );
+         getchar();
       }
-      sleep( pause );
-      if ( my_rank == 0 ) {
-         fprintf( stdout, "APP: Waking up.\n" );
-      }
+      MPI_Barrier( MPI_COMM_WORLD );
    }
 
+   /* Prefetch objects in the /G-prefetched group. */
    if ( use_daos_lustre ) {
 
       /* FOR NOW:  Rank 0 prefetches synchronously, then bcasts.  TODO: change to async. */
@@ -514,19 +524,16 @@ int main( int argc, char **argv ) {
       tapl_p_id = H5P_DEFAULT;
    }
 
-   /* Optionally, pause to show BB space using out-of-band check. All ranks paused. */
+   /* Optionally, pause to show change in BB space using out-of-band check. All ranks paused. */
    if ( pause )  { 
       MPI_Barrier( MPI_COMM_WORLD );
       if ( my_rank == 0 ) {
-         fprintf( stdout, "APP: All ranks PAUSED after prefetch to allow BB space usage to be checked.\n" );
+         fprintf( stderr, ">>> PAUSED after prefetch of replicas to allow BB space usage to be checked.\n" );
+         fprintf( stderr, ">>> Press return to continue..." );
+         getchar();
       }
-      sleep( pause );
-      if ( my_rank == 0 ) {
-         fprintf( stdout, "APP: Waking up.\n" );
-      }
+      MPI_Barrier( MPI_COMM_WORLD );
    }
-
-   // TODO:  Do these reads/prints multiple times, to get a better sense of variance in read times
 
    /* Read Datasets and then Maps in all 3 Groups, measuring time it takes to read data for each*/
 
@@ -664,16 +671,15 @@ int main( int argc, char **argv ) {
       }
    }
 
-   /* Optionally, pause to show BB space using out-of-band check. All ranks paused. */
+   /* Optionally, pause to show change in BB space using out-of-band check. All ranks paused. */
    if ( pause )  { 
       MPI_Barrier( MPI_COMM_WORLD );
       if ( my_rank == 0 ) {
-         fprintf( stdout, "APP: All ranks PAUSED after evict of replicas to allow BB space usage to be checked.\n" );
+         fprintf( stderr, ">>> PAUSED after evict of replicas to allow BB space usage to be checked.\n" );
+         fprintf( stderr, ">>> Press return to continue..." );
+      getchar();
       }
-      sleep( pause );
-      if ( my_rank == 0 ) {
-         fprintf( stdout, "APP: Waking up.\n" );
-      }
+      MPI_Barrier( MPI_COMM_WORLD );
    }
 
    /* Close Objects*/
@@ -701,9 +707,6 @@ int main( int argc, char **argv ) {
    ret = H5Tclose_ff( type_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
    ret = H5Tclose_ff( type_s_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
-   /****************** WORKING ON THIS PART *****************************/
-   
-
    /* Release the read handle and close read context  */
    fprintf( stderr, "APP-r%d: Release read context\n", my_rank );
    ret = H5RCrelease( rc_id, H5_EVENT_STACK_NULL); ASSERT_RET;
@@ -726,31 +729,6 @@ int main( int argc, char **argv ) {
    return 0;
 }
 
-
-/*
- * Helper function used to create group "group_name"
- * in object identified by "obj_id"
- * in transaction identified by "tr_id".
- * "obj_path" and "my_rank" are used in the status output.
- */
-void
-create_group( hid_t obj_id, const char* group_name, hid_t tr_id, const char* obj_path, int my_rank ) {
-   herr_t   ret;
-   uint64_t tr_num;
-   hid_t    group_id;
-
-   ret = H5TRget_trans_num( tr_id, &tr_num ); ASSERT_RET;
-
-   group_id = H5Gcreate_ff( obj_id, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tr_id, H5_EVENT_STACK_NULL );
-   if ( group_id >= 0 ) {
-      fprintf( stderr, "APP-r%d: Create %s in %s in tr %d - %s\n", my_rank, group_name, obj_path, (int)tr_num, "OK"  );
-      ret = H5Gclose_ff( group_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
-   } else {
-      fprintf( stderr, "APP-r%d: Create %s in %s in tr %d - %s\n", my_rank, group_name, obj_path, (int)tr_num, "FAILED"  );
-   }
-
-   return;
-}
 
 /*
  * Helper function used to create and initialize dataset "dset_name"
@@ -1225,19 +1203,7 @@ parse_options( int argc, char** argv, int my_rank ) {
                use_daos_lustre = 0;
                break;
             case 'p':
-               if ( ( --argc == 0 )  || (  **(argv+1) == '-' ) ) {
-                  if ( my_rank == 0 ) {
-                     printf( "Error: No seconds specified after -p option.\n" );
-                     usage( app );
-                  }
-                  return( 1 );
-               } else {
-                  ++argv;
-                  pause = atoi( *argv );
-                  if ( my_rank == 0 ) {
-                     printf( "Will pause for %d seconds.\n", pause );
-                  }
-               }
+               pause = 1;
                break;
             case 't':   
                if ( ( --argc == 0 )  || (  **(argv+1) == '-' ) ) {
@@ -1273,9 +1239,9 @@ parse_options( int argc, char** argv, int my_rank ) {
  */
 void
 usage( const char* app ) {
-   printf( "Usage: %s [-l] [-p seconds] [-t repeat_cnt] [-v]\n", app  );
+   printf( "Usage: %s [-l] [-p] [-t repeat_cnt] [-v]\n", app  );
    printf( "\tl: don't use DAOS Lustre\n" );
-   printf( "\tp: pause 'seconds' to allow out-of-band BB space check\n" );
+   printf( "\tp: pause to allow out-of-band BB space check\n" );
    printf( "\tt: time reads after container re-open, performing read sequence 'repeat_cnt' times\n" );
    printf( "\tv: verbose output\n" );
 }
