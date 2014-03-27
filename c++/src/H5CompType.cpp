@@ -451,6 +451,25 @@ void CompType::pack() const
 }
 
 //--------------------------------------------------------------------------
+// Function:	CompType::setSize
+///\brief	Sets the total size for this compound datatype.
+///\param	size - IN: Size to set
+///\exception	H5::DataTypeIException
+// Note
+//	H5Tset_size works on atom datatypes and compound datatypes only
+// Programmer	Binh-Minh Ribler - 2014
+//--------------------------------------------------------------------------
+void CompType::setSize(size_t size) const
+{
+    // Call C routine H5Tset_size to set the total size
+    herr_t ret_value = H5Tset_size(id, size);
+    if (ret_value < 0)
+    {
+	throw DataTypeIException("CompType::setSize", "H5Tset_size failed");
+    }
+}
+
+//--------------------------------------------------------------------------
 // Function:    CompType destructor
 ///\brief       Properly terminates access to this compound datatype.
 // Programmer   Binh-Minh Ribler - 2000

@@ -727,7 +727,96 @@ cerr << "test_compound_7 in catch" << endl;
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_compound_7()
+
+/*-------------------------------------------------------------------------
+ * Function:	test_compound_set_size
+ *
+ * Purpose:	Tests member function setSize() on compound datatype
+ *
+ * Return:	None
+ *
+ * Programmer:	Binh-Minh Ribler (use partial C version test_ooo_order)
+ *              March, 2014
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+#define	COMPFILE	"tcompound_types.h5"
+static void test_compound_set_size()
+{
+    typedef struct {
+	int a, b, c[4], d, e;
+    } src_typ_t;
+    src_typ_t	  *s_ptr;
 
+    // Output message about test being performed
+    SUBTEST("Setting Size on Compound Datatype");
+    try {
+        // Create File
+        H5File file(COMPFILE, H5F_ACC_TRUNC);
+
+        // Create a compound datatype
+        CompType dtype(sizeof(src_typ_t));
+
+        dtype.insertMember("a", HOFFSET(src_typ_t, a), PredType::NATIVE_INT);
+        dtype.insertMember("b", HOFFSET(src_typ_t, b), PredType::NATIVE_FLOAT);
+        dtype.insertMember("c", HOFFSET(src_typ_t, c), PredType::NATIVE_LONG);
+        dtype.insertMember("d", HOFFSET(src_typ_t, d), PredType::NATIVE_DOUBLE);
+
+	// Verify that the compound is not packed
+	// bool packed = dtype.packed(); // not until C library provides API
+	// verify_val(packed, FALSE, "DataType::packed", __LINE__, __FILE__);
+
+	dtype.commit(file, "dtype");
+
+	// Close the type and file
+	dtype.close();
+	file.close();
+
+	// Open the file for read/write
+	file.openFile(COMPFILE, H5F_ACC_RDWR);
+
+	// Open the data type "dtype"
+	CompType dtype_tmp = file.openCompType("dtype");
+
+	// Make a copy of the data type
+	dtype = dtype_tmp;
+
+	// Verify that the compound is not packed
+	// packed = dtype_tmp.packed(); // not until C library provides API
+	// verify_val(packed, FALSE, "DataType::packed", __LINE__, __FILE__);
+
+	// Expand the type, and verify that it became unpacked
+	dtype.setSize((size_t)33);
+	// packed = dtype.packed(); // not until C library provides API
+	// verify_val(packed, FALSE, "DataType::packed", __LINE__, __FILE__);
+
+	// Verify setSize() actually set size
+	size_t new_size = dtype.getSize();
+	verify_val(new_size, 33, "DataType::getSize", __LINE__, __FILE__);
+
+	// Shrink the type, and verify that it became packed
+	dtype.setSize((size_t)32);
+	// packed = dtype.packed(); // not until C library provides API
+	// verify_val(packed, TRUE, "DataType::packed", __LINE__, __FILE__);
+
+	// Verify setSize() actually set size again
+	new_size = dtype.getSize();
+	verify_val(new_size, 32, "DataType::getSize", __LINE__, __FILE__);
+
+	/* Close types and file */
+	dtype_tmp.close();
+	dtype.close();
+	file.close();
+
+	PASSED();
+    }   // end of try block
+
+    catch (Exception E) {
+        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}   // test_compound_set_size()
 
 /*-------------------------------------------------------------------------
  * Function:	test_compound
@@ -758,6 +847,7 @@ void test_compound()
     test_compound_5();	// optimized struct converter
     test_compound_6();	// compound element growing
     test_compound_7();	// compound element insertion
+    test_compound_set_size();	// set size on compound data types
 }   // test_compound()
 
 
