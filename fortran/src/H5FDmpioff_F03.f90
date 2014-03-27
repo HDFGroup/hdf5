@@ -40,17 +40,12 @@ MODULE H5FDMPIO_PROVISIONAL
 
   USE H5GLOBAL
 
-  TYPE, BIND(C) :: union_t
-     TYPE(C_PTR) :: rbuf
-     TYPE(C_PTR) :: wbuf
-  END TYPE union_t
-
   TYPE, BIND(C) :: H5D_rw_multi_t
      INTEGER(HID_T) :: dset_id
      INTEGER(HID_T) :: dset_space_id
      INTEGER(HID_T) :: mem_type_id
      INTEGER(HID_T) :: mem_space_id
-     TYPE(union_t)  :: u
+     TYPE(C_PTR)    :: rwbuf
   END TYPE H5D_rw_multi_t
 
 CONTAINS

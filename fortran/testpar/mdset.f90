@@ -36,6 +36,7 @@ SUBROUTINE multiple_dset_write(length, do_collective, do_chunk, mpi_size, mpi_ra
   INTEGER, ALLOCATABLE :: wbuf(:)                   ! write buffer
   INTEGER, ALLOCATABLE :: rbuf(:)                   ! read buffer
   INTEGER, ALLOCATABLE, TARGET :: rbuf_md(:,:)              ! read buffer
+  INTEGER, ALLOCATABLE, TARGET :: wbuf_md(:,:)              ! read buffer
   INTEGER(hsize_t), DIMENSION(1) :: counti          ! hyperslab selection
   INTEGER(hsize_t), DIMENSION(1) :: start           ! hyperslab selection
   INTEGER(hid_t) :: fapl_id                         ! file access identifier
@@ -58,7 +59,7 @@ SUBROUTINE multiple_dset_write(length, do_collective, do_chunk, mpi_size, mpi_ra
   INTEGER(SIZE_T), PARAMETER :: count = 1 ! 300
 
   !
-  ! initialize the array data between the processes (3)
+  ! Initialize the array data between the processes (3)
   ! for the 12 size array we get
   ! p0 = 1,2,3,4
   ! p1 = 5,6,7,8
@@ -81,6 +82,11 @@ SUBROUTINE multiple_dset_write(length, do_collective, do_chunk, mpi_size, mpi_ra
      WRITE(*,*) 'allocate error'
      RETURN
   ENDIF
+  ALLOCATE(wbuf_md(1:count, 0:length-1),stat=hdferror)
+  IF (hdferror .NE. 0) THEN
+     WRITE(*,*) 'allocate error'
+     RETURN
+  ENDIF
 
   icount  = length/mpi_size     ! divide the array by the number of processes
   istart  = mpi_rank*icount     ! start position
@@ -90,6 +96,10 @@ SUBROUTINE multiple_dset_write(length, do_collective, do_chunk, mpi_size, mpi_ra
   !
   dims(1)  = length
   cdims(1) = length/mpi_size     ! define chunks as the number of processes
+
+  ALLOCATE(info_md(1:count))
+  CALL h5tcopy_f(H5T_STD_I32LE, tid1, hdferror)
+
   !
   ! setup file access property list with parallel IO access
   !
@@ -179,6 +189,37 @@ SUBROUTINE multiple_dset_write(length, do_collective, do_chunk, mpi_size, mpi_ra
      CALL check("h5dclose_f", hdferror, nerrors)
 
   ENDDO
+
+!!$  DO n = 1, count
+!!$
+!!$     ! direct the output of the write statement to unit "dsetname"
+!!$     WRITE(dsetname,'("dataset",I0)') n
+!!$
+!!$     ! create this dataset
+!!$     CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, fspace_id, dset_id, hdferror, dcpl_id)
+!!$     CALL check("h5dcreate_f", hdferror, nerrors)
+!!$
+!!$     DO i = istart, iend-1
+!!$        wbuf_md(n,i) = n + mpi_rank
+!!$     ENDDO
+!!$
+!!$     f_ptr = C_LOC(wbuf_md(n,0))
+!!$
+!!$     info_md(n)%dset_id = dset_id
+!!$     info_md(n)%dset_space_id = fspace_id
+!!$     info_md(n)%mem_type_id = H5T_NATIVE_INTEGER ! tid1
+!!$     info_md(n)%mem_space_id = mspace_id
+!!$
+!!$     info_md(n)%rwbuf = f_ptr
+!!$
+!!$     ! close this dataset
+!!$     CALL h5dclose_f(dset_id, hdferror)
+!!$     CALL check("h5dclose_f", hdferror, nerrors)
+!!$     
+!!$  ENDDO
+!!$
+!!$  CALL h5dwrite_multi_f(file_id, dxpl_id, count, info_md, hdferror)
+
   !
   ! close HDF5 IO
   !
@@ -239,41 +280,39 @@ SUBROUTINE multiple_dset_write(length, do_collective, do_chunk, mpi_size, mpi_ra
   !
   ! read dataset
   !
-  DO n = 1, count
-
-     ! direct the output of the write statement to unit "dsetname"
-     WRITE(dsetname,'("dataset",I0)') n
-     ! create this dataset
-     CALL h5dopen_f(file_id, dsetname, dset_id, hdferror)
-     CALL check("h5pcreate_f", hdferror, nerrors)
-
-     ! read this dataset
-     CALL h5dread_f(dset_id,H5T_NATIVE_INTEGER,rbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
-     CALL check("h5pcreate_f", hdferror, nerrors)
-
-     ! close this dataset
-     CALL h5dclose_f(dset_id, hdferror)
-     CALL check("h5dclose_f", hdferror, nerrors)
-
-     DO i = istart, iend-1
-        wbuf(i) = n + mpi_rank
-     ENDDO
-
-     ! compare read and write data. each process compares a subset of the array
-     DO i = istart, iend-1
-        IF( wbuf(i) .NE. rbuf(i)) THEN
-           WRITE(*,*) 'buffers differs at ', i, rbuf(i), wbuf(i)
-           nerrors = nerrors + 1
-        ENDIF
-     ENDDO
-
-  ENDDO
+!!$  DO n = 1, count
+!!$
+!!$     ! direct the output of the write statement to unit "dsetname"
+!!$     WRITE(dsetname,'("dataset",I0)') n
+!!$     ! create this dataset
+!!$     CALL h5dopen_f(file_id, dsetname, dset_id, hdferror)
+!!$     CALL check("h5pcreate_f", hdferror, nerrors)
+!!$
+!!$     ! read this dataset
+!!$     CALL h5dread_f(dset_id,H5T_NATIVE_INTEGER,rbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
+!!$     CALL check("h5pcreate_f", hdferror, nerrors)
+!!$
+!!$     ! close this dataset
+!!$     CALL h5dclose_f(dset_id, hdferror)
+!!$     CALL check("h5dclose_f", hdferror, nerrors)
+!!$
+!!$     DO i = istart, iend-1
+!!$        wbuf(i) = n + mpi_rank
+!!$     ENDDO
+!!$
+!!$     ! compare read and write data. each process compares a subset of the array
+!!$     DO i = istart, iend-1
+!!$        IF( wbuf(i) .NE. rbuf(i)) THEN
+!!$           WRITE(*,*) 'buffers differs at ', i, rbuf(i), wbuf(i)
+!!$           nerrors = nerrors + 1
+!!$        ENDIF
+!!$     ENDDO
+!!$
+!!$  ENDDO
   !
   ! read dataset using multi-dataset API
   !
-  ALLOCATE(info_md(1:count))
-     
-   CALL h5tcopy_f(H5T_STD_I32LE, tid1, hdferror)
+
   
 
   DO n = 1, 1 !count
@@ -290,8 +329,7 @@ SUBROUTINE multiple_dset_write(length, do_collective, do_chunk, mpi_size, mpi_ra
      info_md(n)%dset_space_id = fspace_id
      info_md(n)%mem_type_id = tid1
      info_md(n)%mem_space_id = mspace_id
-     info_md(n)%u%rbuf = f_ptr
-     info_md(n)%u%wbuf = C_NULL_PTR
+     info_md(n)%rwbuf = f_ptr
 
      ! close this dataset
      CALL h5dclose_f(dset_id, hdferror)

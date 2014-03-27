@@ -13,9 +13,9 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-!//////////////////////////////////////////////////////////
+!
 ! main program for parallel HDF5 Fortran tests
-!//////////////////////////////////////////////////////////
+!
 
 PROGRAM parallel_test
   USE hdf5
@@ -24,17 +24,15 @@ PROGRAM parallel_test
 
   INTEGER :: mpierror                             ! MPI hdferror flag
   INTEGER :: hdferror                             ! HDF hdferror flag
-  LOGICAL :: do_collective                        ! use collective MPI I/O
+  LOGICAL :: do_collective                        ! use collective MPI IO
   LOGICAL :: do_chunk                             ! use chunking
   INTEGER :: nerrors = 0                          ! number of errors
   INTEGER :: mpi_size                             ! number of processes in the group of communicator
   INTEGER :: mpi_rank                             ! rank of the calling process in the communicator
-  INTEGER :: length = 12000                       ! length of array
-
-  !//////////////////////////////////////////////////////////
+  INTEGER :: length = 12                       ! length of array
+  !
   ! initialize MPI
-  !//////////////////////////////////////////////////////////
-
+  !
   CALL mpi_init(mpierror)
   IF (mpierror .NE. MPI_SUCCESS) THEN
      WRITE(*,*) "MPI_INIT  *FAILED*"
@@ -47,74 +45,63 @@ PROGRAM parallel_test
   IF (mpierror .NE. MPI_SUCCESS) THEN
      WRITE(*,*) "MPI_COMM_SIZE  *FAILED* Process = ", mpi_rank
   ENDIF
-  !//////////////////////////////////////////////////////////
+  !
   ! initialize the HDF5 fortran interface
-  !//////////////////////////////////////////////////////////
-
+  !
   CALL h5open_f(hdferror)
-
-  !//////////////////////////////////////////////////////////
-  ! test write/read dataset by hyperslabs with independent MPI I/O
-  !//////////////////////////////////////////////////////////
-
-  IF (mpi_rank == 0) WRITE(*,*) 'Writing/reading dataset by hyperslabs (contiguous layout, independent MPI I/O)'
+  !
+  ! test writeread dataset by hyperslabs with independent MPI IO
+  !
+  IF (mpi_rank == 0) WRITE(*,*) 'Writingreading dataset by hyperslabs (contiguous layout, independent MPI IO)'
 
   do_collective = .FALSE.
   do_chunk      = .FALSE.
   CALL hyper(length, do_collective, do_chunk, mpi_size, mpi_rank, nerrors)
 
-  !//////////////////////////////////////////////////////////
-  ! test write/read dataset by hyperslabs with collective MPI I/O
-  !//////////////////////////////////////////////////////////
-
-  IF (mpi_rank == 0) WRITE(*,*) 'Writing/reading dataset by hyperslabs (contiguous layout, collective MPI I/O)'
+  !
+  ! test writeread dataset by hyperslabs with collective MPI IO
+  !
+  IF (mpi_rank == 0) WRITE(*,*) 'Writingreading dataset by hyperslabs (contiguous layout, collective MPI IO)'
 
   do_collective = .TRUE.
   do_chunk      = .FALSE.
   CALL hyper(length, do_collective, do_chunk, mpi_size, mpi_rank, nerrors)
 
-  !//////////////////////////////////////////////////////////
-  ! test write/read dataset by hyperslabs with independent MPI I/O
-  !//////////////////////////////////////////////////////////
-
-  IF (mpi_rank == 0) WRITE(*,*) 'Writing/reading dataset by hyperslabs (chunk layout, independent MPI I/O)'
+  !
+  ! test writeread dataset by hyperslabs with independent MPI IO
+  !
+  IF (mpi_rank == 0) WRITE(*,*) 'Writingreading dataset by hyperslabs (chunk layout, independent MPI IO)'
 
   do_collective = .FALSE.
   do_chunk      = .TRUE.
   CALL hyper(length, do_collective, do_chunk, mpi_size, mpi_rank, nerrors)
 
-  !//////////////////////////////////////////////////////////
-  ! test write/read dataset by hyperslabs with collective MPI I/O
-  !//////////////////////////////////////////////////////////
-
-  IF (mpi_rank == 0) WRITE(*,*) 'Writing/reading dataset by hyperslabs (chunk layout, collective MPI I/O)'
+  !
+  ! test writeread dataset by hyperslabs with collective MPI IO
+  !
+  IF (mpi_rank == 0) WRITE(*,*) 'Writingreading dataset by hyperslabs (chunk layout, collective MPI IO)'
 
   do_collective = .TRUE.
   do_chunk      = .TRUE.
   CALL hyper(length, do_collective, do_chunk, mpi_size, mpi_rank, nerrors)
 
-  !//////////////////////////////////////////////////////////
-  ! test write/read several datasets (independent MPI I/O)
-  !//////////////////////////////////////////////////////////
-
-  IF (mpi_rank == 0) WRITE(*,*) 'Writing/reading several datasets (contiguous layout, independent MPI I/O)'
+  !
+  ! test writeread several datasets (independent MPI IO)
+  !
+  IF (mpi_rank == 0) WRITE(*,*) 'Writingreading several datasets (contiguous layout, independent MPI IO)'
 
   do_collective = .TRUE.
 !  do_collective = .FALSE.
   do_chunk      = .FALSE.
   CALL multiple_dset_write(length, do_collective, do_chunk, mpi_size, mpi_rank, nerrors)
 
-
-  !//////////////////////////////////////////////////////////
+  !
   ! close HDF5 interface
-  !//////////////////////////////////////////////////////////
-
+  !
   CALL h5close_f(hdferror)
-
-  !//////////////////////////////////////////////////////////
+  !
   ! close MPI
-  !//////////////////////////////////////////////////////////
-
+  !
   IF (nerrors == 0) THEN
      CALL mpi_finalize(mpierror)
      IF (mpierror .NE. MPI_SUCCESS) THEN
@@ -127,10 +114,8 @@ PROGRAM parallel_test
         WRITE(*,*) "MPI_ABORT  *FAILED* Process = ", mpi_rank
      ENDIF
   ENDIF
-
-  !//////////////////////////////////////////////////////////
+  !
   ! end main program
-  !//////////////////////////////////////////////////////////
-
+  !
 END PROGRAM parallel_test
 
