@@ -29,7 +29,7 @@ struct timeval tv_end;
 #define END_TIME gettimeofday( &tv_end, NULL )
 #define ELAPSED_TIME (ulong)( (tv_end.tv_usec + 1000000*tv_end.tv_sec) - (tv_start.tv_usec + 1000000*tv_start.tv_sec) ) 
 
-/* prototypes for helper functions */
+/* function prototypes */
 void create_dataset( hid_t, const char*, hid_t, const char*, int, int );
 void create_map( hid_t, const char*, hid_t, const char*, int, int );
 void create_named_datatype( hid_t, const char*, hid_t, const char*, int );
@@ -425,20 +425,21 @@ int main( int argc, char **argv ) {
    hrpl_t map_p_replica;
    hid_t mxpl_p_id;
    hid_t mapl_p_id;
-   int key_l[4], key_p[4], key_s[4];              
-   int value_l[4], value_p[4], value_s[4];              
+   int map_entries;                       /* know same number in all maps */
+   int *value_l, *value_p, *value_s;              
 
    hid_t type_l_id, type_p_id, type_s_id;
    hrpl_t type_p_replica;
    hid_t tapl_p_id;
 
    /* Event stack */
-   hid_t         es_id;   
+   hid_t         d_es_id;        /* for prefetch of Dataset */
+   hid_t         mt_es_id;       /* for prefetch of Map and dataType (shared event stack) */
    H5ES_status_t status;
-   size_t        num_events;
 
-   /* Create an event stack for managing asynchronous requests. */
-   es_id = H5EScreate();  assert( es_id >= 0 );
+   /* Create event stacks for managing asynchronous requests. */
+   d_es_id = H5EScreate();  assert( d_es_id >= 0 );
+   mt_es_id = H5EScreate();  assert( mt_es_id >= 0 );
 
    /* Reopen the container read-only and get a read context for highest CV */
    fapl_id = H5Pcreate( H5P_FILE_ACCESS ); assert( fapl_id >= 0 );
@@ -493,28 +494,36 @@ int main( int argc, char **argv ) {
    /* Prefetch objects in the /G-prefetched group. */
    if ( use_daos_lustre ) {
 
-      /* FOR NOW:  Rank 0 prefetches asynchronously, then bcasts.  TODO: see if way to allow more overlap of ops . */
+      /* Rank 0 prefetches asynchronously, using 2 different stacks */
       if ( my_rank == 0 ) {
-         fprintf( stderr, "APP-r%d: Prefetch /G-prefetched/D\n", my_rank );
-         ret = H5Dprefetch_ff( dset_p_id, rc_id, &dset_p_replica, H5P_DEFAULT, es_id ); ASSERT_RET;
+         fprintf( stderr, "APP-r%d: Prefetch /G-prefetched/D asynchronously\n", my_rank );
+         ret = H5Dprefetch_ff( dset_p_id, rc_id, &dset_p_replica, H5P_DEFAULT, d_es_id ); ASSERT_RET;
 
-         fprintf( stderr, "APP-r%d: Prefetch /G-prefetched/M\n", my_rank );
-         ret = H5Mprefetch_ff( map_p_id, rc_id, &map_p_replica, H5P_DEFAULT, es_id ); ASSERT_RET;
+         fprintf( stderr, "APP-r%d: Prefetch /G-prefetched/M asynchronously\n", my_rank );
+         ret = H5Mprefetch_ff( map_p_id, rc_id, &map_p_replica, H5P_DEFAULT, mt_es_id ); ASSERT_RET;
 
-         fprintf( stderr, "APP-r%d: Prefetch /G-prefetched/T\n", my_rank );
-         ret = H5Tprefetch_ff( type_p_id, rc_id, &type_p_replica, H5P_DEFAULT, es_id ); ASSERT_RET;
+         fprintf( stderr, "APP-r%d: Prefetch /G-prefetched/T asynchronously\n", my_rank );
+         ret = H5Tprefetch_ff( type_p_id, rc_id, &type_p_replica, H5P_DEFAULT, mt_es_id ); ASSERT_RET;
+      }
 
-         H5ESget_count( es_id, &num_events );
-         H5ESwait_all( es_id, &status );
-         fprintf( stderr, "APP-r%d: Event Stack - %d events completed with status %d\n", my_rank, num_events, status );
+      /* Note: could start some reads of non-prefetched objects here, but since I want to offer pause & read timing, I didn't */
+
+      /* After dataset prefetch completes, bcast the replica ID and set up properties */
+      if ( my_rank == 0 ) {
+         H5ESwait_all( d_es_id, &status );
+         fprintf( stderr, "APP-r%d: asynchronous prefetch of D completed with status %d\n", my_rank, status );
       }
       MPI_Bcast( &dset_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
-
       dxpl_p_id = H5Pcreate( H5P_DATASET_XFER );                              /* Used in Read */
       ret = H5Pset_read_replica( dxpl_p_id, dset_p_replica ); ASSERT_RET;
       dapl_p_id = H5Pcreate( H5P_DATASET_ACCESS );                            /* Used in Evict */
       ret = H5Pset_evict_replica( dapl_p_id, dset_p_replica ); ASSERT_RET;
 
+      /* After both map and datatype prefetches complete, bcast the replica IDs and set up properties */
+      if ( my_rank == 0 ) {
+         H5ESwait_all( mt_es_id, &status );
+         fprintf( stderr, "APP-r%d: asynchronous prefetch of M and T completed with status %d\n", my_rank, status );
+      }
       MPI_Bcast( &map_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
       mxpl_p_id = H5Pcreate( H5P_DATASET_XFER );                              /* Used in Get */
       ret = H5Pset_read_replica( mxpl_p_id, map_p_replica );  ASSERT_RET;
@@ -526,6 +535,7 @@ int main( int argc, char **argv ) {
       ret = H5Pset_evict_replica( tapl_p_id, type_p_replica ); ASSERT_RET;
 
    } else {
+      /* Without daos-lustre, we don't do prefetch, so default properties */
       dxpl_p_id = H5P_DEFAULT;
       dapl_p_id = H5P_DEFAULT;
       mxpl_p_id = H5P_DEFAULT;
@@ -543,6 +553,12 @@ int main( int argc, char **argv ) {
       }
       MPI_Barrier( MPI_COMM_WORLD );
    }
+
+   /* Find entries in first Map, then use to create value vectors for all three Map objects - we know they have same size. */
+   ret = H5Mget_count_ff( map_l_id, &map_entries, rc_id, H5_EVENT_STACK_NULL );  ASSERT_RET;
+   value_l = (int *)calloc( map_entries, sizeof(int) ); 
+   value_p = (int *)calloc( map_entries, sizeof(int) ); 
+   value_s = (int *)calloc( map_entries, sizeof(int) ); 
 
    /* Read Datasets and then Maps in all 3 Groups, measuring time it takes to read data for each*/
 
@@ -585,7 +601,7 @@ int main( int argc, char **argv ) {
          fprintf( stderr, "APP-r%d Read Time %d for /G-stored/D: %lu usec\n", my_rank, t, usec_ds );
       
          START_TIME;
-         for ( i = 0; i < 4; i++ ) {
+         for ( i = 0; i < map_entries; i++ ) {
             ret = H5Mget_ff( map_l_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_l[i], H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
             ASSERT_RET;
          }
@@ -595,7 +611,7 @@ int main( int argc, char **argv ) {
          fprintf( stderr, "APP-r%d Read Time %d for /G-logged/M: %lu usec\n", my_rank, t, usec_ml );
       
          START_TIME;
-         for ( i = 0; i < 4; i++ ) {
+         for ( i = 0; i < map_entries; i++ ) {
             ret = H5Mget_ff( map_p_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_p[i], mxpl_p_id, rc_id, H5_EVENT_STACK_NULL ); 
             ASSERT_RET;
          }
@@ -605,7 +621,7 @@ int main( int argc, char **argv ) {
          fprintf( stderr, "APP-r%d Read Time %d for /G-prefetched/M: %lu usec\n", my_rank, t, usec_mp );
       
          START_TIME;
-         for ( i = 0; i < 4; i++ ) {
+         for ( i = 0; i < map_entries; i++ ) {
             ret = H5Mget_ff( map_s_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_s[i], H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
             ASSERT_RET;
          }
@@ -639,19 +655,19 @@ int main( int argc, char **argv ) {
       ASSERT_RET;
 
       fprintf( stderr, "APP-r%d Read /G-logged/M\n", my_rank  );
-      for ( i = 0; i < 4; i++ ) {
+      for ( i = 0; i < map_entries; i++ ) {
          ret = H5Mget_ff( map_l_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_l[i], H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
          ASSERT_RET;
       }
 
       fprintf( stderr, "APP-r%d Read /G-prefetched/M\n", my_rank  );
-      for ( i = 0; i < 4; i++ ) {
+      for ( i = 0; i < map_entries; i++ ) {
          ret = H5Mget_ff( map_p_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_p[i], mxpl_p_id, rc_id, H5_EVENT_STACK_NULL ); 
          ASSERT_RET;
       }
 
       fprintf( stderr, "APP-r%d Read /G-stored/M\n", my_rank  );
-      for ( i = 0; i < 4; i++ ) {
+      for ( i = 0; i < map_entries; i++ ) {
          ret = H5Mget_ff( map_s_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value_s[i], H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
          ASSERT_RET;
       }
@@ -662,13 +678,24 @@ int main( int argc, char **argv ) {
    fprintf( stderr, "APP-r%d: /G-prefetched/D data: %d %d %d %d\n", my_rank, data_p[0], data_p[1], data_p[2], data_p[3]);
    fprintf( stderr, "APP-r%d: /G-stored/D data: %d %d %d %d\n", my_rank, data_s[0], data_s[1], data_s[2], data_s[3] );
 
-   fprintf( stderr, "APP-r%d: /G-logged/M key/values: 0/%d 1/%d 2/%d 3/%d\n", my_rank, 
+   if ( map_entries == 4 ) {
+      fprintf( stderr, "APP-r%d: /G-logged/M key/values: 0/%d 1/%d 2/%d 3/%d\n", my_rank, 
                     value_l[0], value_l[1], value_l[2], value_l[3] );
-   fprintf( stderr, "APP-r%d: /G-prefetched/M key/values: 0/%d 1/%d 2/%d 3/%d\n", my_rank, 
+      fprintf( stderr, "APP-r%d: /G-prefetched/M key/values: 0/%d 1/%d 2/%d 3/%d\n", my_rank, 
                     value_p[0], value_p[1], value_p[2], value_p[3] );
-   fprintf( stderr, "APP-r%d: /G-stored/M key/values: 0/%d 1/%d 2/%d 3/%d\n", my_rank, 
+      fprintf( stderr, "APP-r%d: /G-stored/M key/values: 0/%d 1/%d 2/%d 3/%d\n", my_rank, 
                     value_s[0], value_s[1], value_s[2], value_s[3] );
-
+   } else {
+      fprintf( stderr, "APP-r%d: /G-logged/M key/values: 0/%d 1/%d 2/%d 3/%d ... %d/%d\n", my_rank, 
+                    value_l[0], value_l[1], value_l[2], value_l[3], map_entries-1, value_l[map_entries-1] );
+      fprintf( stderr, "APP-r%d: /G-prefetched/M key/values: 0/%d 1/%d 2/%d 3/%d ... %d/%d\n", my_rank, 
+                    value_p[0], value_p[1], value_p[2], value_p[3], map_entries-1, value_p[map_entries-1] );
+      fprintf( stderr, "APP-r%d: /G-stored/M key/values: 0/%d 1/%d 2/%d 3/%d ... %d/%d\n", my_rank, 
+                    value_s[0], value_s[1], value_s[2], value_s[3], map_entries-1, value_s[map_entries-1] );
+   }
+   free( value_l );
+   free( value_p );
+   free( value_s );
 
    /* Rank 0 evicts replicas */
    if ( my_rank == 0 ) {
@@ -676,7 +703,7 @@ int main( int argc, char **argv ) {
          fprintf( stderr, "APP-r%d: Evict replica of /G-prefetched/D\n", my_rank );
          ret = H5Devict_ff( dset_p_id, version, dapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  /* Note: CV redundant for replica */
 
-         fprintf( stderr, "APP-r%d: Evict replica of /G-prefetched/M\n", my_rank );
+         fprintf( stderr, "APP-r%d: Evict replica of /G-prefetched/M (Q7 note: currently a no-op in IOD)\n", my_rank );
          ret = H5Mevict_ff( map_p_id, version, mapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;   /* Note: CV redundant for replica */
 
          fprintf( stderr, "APP-r%d: Evict replica of /G-prefetched/T\n", my_rank );
@@ -807,7 +834,7 @@ create_map( hid_t obj_id, const char* map_name, hid_t tr_id, const char* obj_pat
    herr_t   ret;
    uint64_t tr_num;
    int      i;
-   int      num_kvs = 4;           /* For now, we hard-code to small number */
+   int      num_kvs = 4;           /* Start with 4 KV pairs */
    int      value[4];             
    hid_t    map_id;
 
@@ -929,7 +956,7 @@ update_dataset( hid_t obj_id, const char* dset_name, hid_t tr_id, hid_t rc_id, c
 }
 
 /*
- * Helper function used to update raw data in "dset_name"
+ * Helper function used to update (or add) key/value data in "map_name"
  * in object identified by "obj_id"
  * in transaction identified by "tr_id".
  * "rc_id" for "tr_id" passed in explicitly for now - later may be able to get it from info in tr_id (cv & file_id)
