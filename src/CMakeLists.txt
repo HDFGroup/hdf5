@@ -770,9 +770,9 @@ set (H5_PRIVATE_HEADERS
 #-----------------------------------------------------------------------------
 add_executable (H5detect ${HDF5_SRC_DIR}/H5detect.c)
 TARGET_C_PROPERTIES (H5detect " " " ")
-if (MSVC)
+if (MSVC OR MINGW)
   target_link_libraries (H5detect "ws2_32.lib")
-endif (MSVC)
+endif (MSVC OR MINGW)
 
 set (CMD $<TARGET_FILE:H5detect>)
 add_custom_command (
@@ -784,9 +784,9 @@ add_custom_command (
 
 add_executable (H5make_libsettings ${HDF5_SRC_DIR}/H5make_libsettings.c)
 TARGET_C_PROPERTIES (H5make_libsettings " " " ")
-if (MSVC)
+if (MSVC OR MINGW)
   target_link_libraries (H5make_libsettings "ws2_32.lib")
-endif (MSVC)
+endif (MSVC OR MINGW)
 
 set (CMD $<TARGET_FILE:H5make_libsettings>)
 add_custom_command (
