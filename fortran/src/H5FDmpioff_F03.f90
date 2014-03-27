@@ -45,7 +45,7 @@ MODULE H5FDMPIO_PROVISIONAL
      INTEGER(HID_T) :: dset_space_id
      INTEGER(HID_T) :: mem_type_id
      INTEGER(HID_T) :: mem_space_id
-     TYPE(C_PTR)    :: rwbuf
+     TYPE(C_PTR)    :: buf
   END TYPE H5D_rw_multi_t
 
 CONTAINS
@@ -77,7 +77,7 @@ CONTAINS
 
     INTEGER(HID_T),       INTENT(IN)                :: file_id
     INTEGER(SIZE_T),      INTENT(IN)                :: count
-    TYPE(H5D_rw_multi_t), INTENT(OUT), DIMENSION(*) :: info
+    TYPE(H5D_rw_multi_t), INTENT(OUT), DIMENSION(1:count) :: info
     INTEGER(HID_T),       INTENT(IN)                :: dxpl_id
     INTEGER,              INTENT(OUT)               :: hdferr
 !*****
@@ -92,8 +92,8 @@ CONTAINS
          IMPORT :: H5D_rw_multi_t
          INTEGER(HID_T), INTENT(IN) :: file_id
          INTEGER(SIZE_T),      INTENT(IN)                :: count
-         TYPE(H5D_rw_multi_t), INTENT(OUT), DIMENSION(*) :: info
          INTEGER(HID_T),       INTENT(IN)                :: dxpl_id
+         TYPE(H5D_rw_multi_t), INTENT(OUT), DIMENSION(1:count) :: info
        END FUNCTION H5Dread_multi_c
     END INTERFACE
 
@@ -127,7 +127,7 @@ CONTAINS
 
     INTEGER(HID_T),       INTENT(IN)                :: file_id
     INTEGER(SIZE_T),      INTENT(IN)                :: count
-    TYPE(H5D_rw_multi_t), INTENT(OUT), DIMENSION(*) :: info
+    TYPE(H5D_rw_multi_t), INTENT(OUT), DIMENSION(1:count) :: info
     INTEGER(HID_T),       INTENT(IN)                :: dxpl_id
     INTEGER,              INTENT(OUT)               :: hdferr
 !*****
@@ -142,7 +142,7 @@ CONTAINS
          IMPORT :: H5D_rw_multi_t
          INTEGER(HID_T), INTENT(IN) :: file_id
          INTEGER(SIZE_T),      INTENT(IN)                :: count
-         TYPE(H5D_rw_multi_t), INTENT(OUT), DIMENSION(*) :: info
+         TYPE(H5D_rw_multi_t), INTENT(OUT), DIMENSION(1:count) :: info
          INTEGER(HID_T),       INTENT(IN)                :: dxpl_id
        END FUNCTION H5Dwrite_multi_c
     END INTERFACE
