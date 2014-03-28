@@ -73,6 +73,9 @@ int main( int argc, char **argv ) {
    ret = H5Pset_fapl_iod( fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL ); ASSERT_RET;
    file_id = H5Fcreate_ff( file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, H5_EVENT_STACK_NULL ); assert( file_id >= 0 );
 
+   /* MSC */
+   MPI_Barrier( MPI_COMM_WORLD );
+
    /* Acquire a read handle for container version 1 and create a read context. */
    version = 1;
    fprintf( stderr, "M6.2-r%d: Acquire read context for container version %d (Step 3)\n", my_rank, (int)version );
@@ -133,6 +136,9 @@ int main( int argc, char **argv ) {
    /* Print container contents at this point */
    fprintf( stderr, "M6.2-r%d: 2nd call to print container contents (Step 6)\n", my_rank );
    if (verbose) print_container_contents( file_id, rc_id1, "/", my_rank );
+
+   /* MSC */
+   MPI_Barrier( MPI_COMM_WORLD );
 
    /* Acquire a read handle for container version 2 and create a read context. */
    version = 2;
@@ -234,6 +240,9 @@ int main( int argc, char **argv ) {
 
    fprintf( stderr, "M6.2-r%d: 4th call to print container contents (Step 11)\n", my_rank );
    if (verbose) print_container_contents( file_id, rc_id2, "/", my_rank ); ASSERT_RET;
+
+   /* MSC */
+   MPI_Barrier( MPI_COMM_WORLD );
 
    version = 3;
    fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 12)\n", my_rank, (int)version );
@@ -354,6 +363,9 @@ int main( int argc, char **argv ) {
          append_dataset2( file_id, "/DC", tr_id4, rc_id3, "/", my_rank, tr_num4 );
       }
 
+      /* MSC */
+      MPI_Barrier( MPI_COMM_WORLD );
+
       /*    Abort - one or more processes should be able to abort the Transaction with the same effect. */
       if ( abort4 ) {
          /* All ranks call TRabort; the order of actual calls is not determined by the code. 
@@ -361,12 +373,16 @@ int main( int argc, char **argv ) {
          ret = H5TRabort( tr_id4, H5_EVENT_STACK_NULL ); 
          fprintf( stderr, "M6.2-r%d: ABORT tr %d (Step 15b - abort) - %s\n", my_rank, (int)tr_num4, STATUS );
       }
-
-      /* Finish and commit transaction 4, causing the updates to appear in container version 4. */
-      ret = H5TRfinish( tr_id4, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); 
-      fprintf( stderr, "M6.2-r%d: Finish and commit tr %d (Step 15b - end) - %s\n", my_rank, (int)tr_num4, STATUS );
+      else {
+          /* Finish and commit transaction 4, causing the updates to appear in container version 4. */
+          ret = H5TRfinish( tr_id4, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); 
+          fprintf( stderr, "M6.2-r%d: Finish and commit tr %d (Step 15b - end) - %s\n", my_rank, (int)tr_num4, STATUS );
+      }
 
       ret = H5TRclose( tr_id4 ); ASSERT_RET;
+
+      /* MSC */
+      MPI_Barrier( MPI_COMM_WORLD );
 
       /* Get read context for CV 4, then print the contents of container */
       /* Limit the number of tries, because if it was aborted we'll never get it */
@@ -417,6 +433,9 @@ int main( int argc, char **argv ) {
       ret = H5TRfinish( tr_id5, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL ); ASSERT_RET;
       ret = H5TRclose( tr_id5 ); ASSERT_RET;
 
+      /* MSC */
+      MPI_Barrier( MPI_COMM_WORLD );
+
       /* Get read context for CV 5, then print the contents of the container */
       version = 5;
       fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 15f)\n", my_rank, (int)version );
@@ -433,6 +452,9 @@ int main( int argc, char **argv ) {
       fprintf( stderr, "M6.2-r%d: Acquired read context for cv 5\n", my_rank );
       fprintf( stderr, "M6.2-r%d: 7th call to print container contents (Step 15g)\n", my_rank );
       if (verbose) print_container_contents( file_id, rc_id5, "/", my_rank ); ASSERT_RET;
+
+      /* MSC */
+      MPI_Barrier( MPI_COMM_WORLD );
 
       /* 
        * Get read context for CV 4. 

@@ -24,8 +24,8 @@ build AXE:
 	make install
 
 
-build DAOS_POSIX, PLFS, and IOD:
-        Please refer to the IOD tarball for instruction on how to build and setup the three libraries.
+build DAOS, PLFS, and IOD:
+        Please refer to the DAOS and IOD tarball for instruction on how to build and setup the three libraries.
 
 
 build Mercury (Function Shipper)
@@ -39,10 +39,10 @@ build HDF5 IOD VOL plugin:
         get it from here:
             svn checkout http://svn.hdfgroup.uiuc.edu/hdf5/features/hdf5_ff
 
-	./configure --with-daos-posix=/path/to/daos/posix --with-plfs=/path/to/plfs --with-iod=/path/to/iod/ --with-axe=/path/to/axe/install/directory PKG_CONFIG_PATH=/path/to/mercury/install/directory/lib/pkgconfig/ --enable-parallel --enable-debug --enable-trace --enable-threadsafe --enable-unsupported --with-pthread=/usr --enable-eff 
+	./configure --with-daos=/path/to/daos/posix --with-plfs=/path/to/plfs --with-iod=/path/to/iod/ --with-axe=/path/to/axe/install/directory PKG_CONFIG_PATH=/path/to/mercury/install/directory/lib/pkgconfig/:/path/to/mchecksum/install/dir --enable-parallel --enable-debug --enable-trace --enable-threadsafe --enable-unsupported --with-pthread=/usr --enable-eff --enable-shared --enable-python
 
-	If you wise to build the analysis shipping with python scripts, add --enable-shared --enable-python to the configure script. 
-	Note in that case all 3rd party libraries have to be build shared or with -fPIC. You should also have devel python libraries and numpy installed on your system.
+	If you want indexing to be built in add --enable-indexing
+	Note in that case all 3rd party libraries have to be build shared or with -fPIC. You should also have devel python devel libraries and numpy installed on your system.
 
 	You should see in the configure summary at the end if the EFF plugin in HDF5 was successfully configured.
 
@@ -63,6 +63,7 @@ build the example programs:
 	- h5ff_client_obj.c : This tests generic object routines (H5O).
         - h5ff_client_analysis.c : This tests the analysis shipping functionality (H5AS).
 	- h5ff_client_M6.2_demo.c: HDF5 and I/O Dispatcher Container Versioning Demonstration
+	- h5ff_client_M7.2-pep_demo.c: Prefetch, evict, persist data movement demo.
 
 	cd path/where/hdf5_ff/is/built/examples/
 	make
@@ -77,5 +78,14 @@ build the example programs:
  		mpiexec -n <x> ./h5ff_client_xx
 
 	Note, for now, the number of clients must be greater than or equal to the number of servers.
+
+H5Part:
+	fastforward/H5Part-1.6.6_ff/configure --enable-debug --enable-shared --enable-parallel --with-hdf5=/path/to/hdf5
+	make
+	make install
+
+VPICIO:
+	Edit makefile in source to point to H5Part and HDF5 installation
+	make
 
 END
