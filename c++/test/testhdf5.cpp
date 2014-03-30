@@ -84,6 +84,7 @@ main(int argc, char *argv[])
     AddTest("tvlstr", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings", NULL);
     AddTest("ttypes", test_types, cleanup_types,  "Generic Data Types", NULL);
     AddTest("tcompound", test_compound, cleanup_compound,  "Compound Data Types", NULL);
+    AddTest("tdspl", test_dsproplist, cleanup_dsproplist,  "Dataset Property List", NULL);
     AddTest("tfilter", test_filters, cleanup_filters,  "Various Filters", NULL);
     AddTest("tlinks", test_links, cleanup_links,  "Various Links", NULL);
 /* Comment out tests that are not done yet. - BMR, Feb 2001

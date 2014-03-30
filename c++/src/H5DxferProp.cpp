@@ -20,6 +20,17 @@
 #include "H5IdComponent.h"
 #include "H5PropList.h"
 #include "H5DxferProp.h"
+#include "H5private.h"		// for HDmemset
+
+#include <iostream>
+
+#ifndef H5_NO_NAMESPACE
+#ifndef H5_NO_STD
+    using std::cerr;
+    using std::endl;
+#endif  // H5_NO_STD
+#endif
+
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -37,6 +48,17 @@ const DSetMemXferPropList DSetMemXferPropList::DEFAULT;
 // Programmer:	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DSetMemXferPropList::DSetMemXferPropList() : PropList(H5P_DATASET_XFER) {}
+
+//--------------------------------------------------------------------------
+// Function	DSetMemXferPropList constructor
+///\brief	Creates a dataset transfer property list with transform
+///		expression.
+// Programmer:	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+DSetMemXferPropList::DSetMemXferPropList(const char* exp) : PropList(H5P_DATASET_XFER)
+{
+    setDataTransform(exp);
+}
 
 //--------------------------------------------------------------------------
 // Function	DSetMemXferPropList copy constructor
@@ -175,7 +197,112 @@ void DSetMemXferPropList::getBtreeRatios( double& left, double& middle, double& 
 }
 
 //--------------------------------------------------------------------------
-// Function:	DSetMemXferPropList::setTypeConvCB
+// Function:	DSetMemXferPropList::setDataTransform
+///\brief	Sets data transform expression.
+///\param	expression - IN: null-terminated data transform expression (char*)
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - Mar, 2014
+//--------------------------------------------------------------------------
+void DSetMemXferPropList::setDataTransform(const char* expression) const
+{
+   herr_t ret_value = H5Pset_data_transform( id, expression);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("DSetMemXferPropList::setDataTransform",
+		"H5Pset_data_transform failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::setDataTransform
+///\brief	This is an overloaded member function, provided for convenience.
+///		It takes a reference to a \c H5std_string for the expression.
+///\param	expression - IN: H5std_string data transform expression
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - Mar, 2014
+//--------------------------------------------------------------------------
+void DSetMemXferPropList::setDataTransform(const H5std_string& expression) const
+{
+    setDataTransform(expression.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::getDataTransform
+///\brief	Sets data transform expression.
+///\param	expression - OUT: buffer for data transform expression (char*)
+///\param	buf_size   - IN: size of buffer for expression, including the
+///				 null terminator
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - Mar, 2014
+//--------------------------------------------------------------------------
+ssize_t DSetMemXferPropList::getDataTransform(char* exp, size_t buf_size) const
+{
+    // If application does not pass in 
+    // H5Pget_data_transform will get buf_size characters of the expression including
+    // the null terminator
+    ssize_t exp_len;
+    exp_len = H5Pget_data_transform(id, exp, buf_size);
+
+    // H5Pget_data_transform returns a negative value, raise an exception
+    if (exp_len < 0)
+    {
+	throw PropListIException("DSetMemXferPropList::getDataTransform",
+		"H5Pget_data_transform failed");
+    }
+
+    // H5Pget_data_transform will put a null terminator at the end of the
+    // expression or at [buf_size-1] if the expression is at least the size
+    // of the buffer.
+
+    // Return the actual comment length, which might be different from buf_size
+    return(exp_len);
+}
+
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::getDataTransform
+///\brief	This is an overloaded member function, provided for convenience.
+///		It takes no parameter and returns a \c H5std_string for the expression.
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - Mar, 2014
+//--------------------------------------------------------------------------
+H5std_string DSetMemXferPropList::getDataTransform() const
+{
+    // Initialize string to "", so that if there is no expression, the returned
+    // string will be empty
+    H5std_string expression("");
+
+    // Preliminary call to get the expression's length
+    ssize_t exp_len = H5Pget_data_transform(id, NULL, (size_t)0);
+
+    // If H5Pget_data_transform returns a negative value, raise an exception
+    if (exp_len < 0)
+    {
+        throw PropListIException("DSetMemXferPropList::getDataTransform", "H5Pget_data_transform failed");
+    }
+
+    // If expression exists, calls C routine again to get it
+    else if (exp_len > 0)
+    {
+        // Temporary buffer for char* expression
+        char* exp_C = new char[exp_len+1];
+	exp_C = (char *)HDmalloc(exp_len+1);
+        HDmemset(exp_C, 0, exp_len+1); // clear buffer
+
+        // Used overloaded function
+        exp_len = getDataTransform(exp_C, exp_len+1);
+
+        // Convert the C expression to return
+        expression = exp_C;
+
+        // Clean up resource
+        delete []exp_C;
+    }
+    // Return the string expression
+    return(expression);
+}
+
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::getTypeConvCB
 ///\brief	Sets an exception handling callback for datatype conversion
 ///		for a dataset transfer property list.
 ///\param	op        - IN: User's function

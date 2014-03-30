@@ -556,7 +556,6 @@ H5std_string H5Location::getComment(const char* name, const size_t buf_size) con
 	// Clean up resource
 	delete []comment_C;
     }
-    // Otherwise, keep comment intact
 
     // Return the string comment
     return(comment);
