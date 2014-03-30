@@ -495,6 +495,7 @@
 ./c++/test/h5cpputil.h
 ./c++/test/tattr.cpp
 ./c++/test/tcompound.cpp
+./c++/test/tdspl.cpp
 ./c++/test/testhdf5.cpp
 ./c++/test/tfile.cpp
 ./c++/test/tfilter.cpp
