@@ -575,7 +575,7 @@ nh5sget_simple_extent_npoints_c ( hid_t_f *space_id , hsize_t_f *npoints )
 {
   int ret_value = 0;
   hid_t c_space_id;
-  hsize_t c_npoints;
+  hssize_t c_npoints;
 
   c_space_id = *space_id;
   c_npoints = H5Sget_simple_extent_npoints(c_space_id);

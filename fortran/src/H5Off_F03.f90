@@ -205,7 +205,6 @@ CONTAINS
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
 !*****
-    INTEGER         :: corder_valid
     INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T)  :: lapl_id_default
     TYPE(C_PTR)     :: ptr
@@ -329,7 +328,6 @@ CONTAINS
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
 !*****
-    INTEGER         :: corder_valid
     INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T)  :: lapl_id_default
     TYPE(C_PTR)     :: ptr
@@ -418,7 +416,6 @@ CONTAINS
 
     INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T)  :: lapl_id_default
-    TYPE(C_PTR)     :: ptr
 
     INTERFACE
        INTEGER FUNCTION h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &
