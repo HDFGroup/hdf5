@@ -237,9 +237,8 @@ void DSetMemXferPropList::setDataTransform(const H5std_string& expression) const
 //--------------------------------------------------------------------------
 ssize_t DSetMemXferPropList::getDataTransform(char* exp, size_t buf_size) const
 {
-    // If application does not pass in 
-    // H5Pget_data_transform will get buf_size characters of the expression including
-    // the null terminator
+    // H5Pget_data_transform will get buf_size characters of the expression
+    // including the null terminator
     ssize_t exp_len;
     exp_len = H5Pget_data_transform(id, exp, buf_size);
 
@@ -254,7 +253,7 @@ ssize_t DSetMemXferPropList::getDataTransform(char* exp, size_t buf_size) const
     // expression or at [buf_size-1] if the expression is at least the size
     // of the buffer.
 
-    // Return the actual comment length, which might be different from buf_size
+    // Return the expression length, which might be different from buf_size
     return(exp_len);
 }
 

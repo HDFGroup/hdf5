@@ -80,6 +80,7 @@ static void test_transfplist()
 	dxpl_c_to_f_copy.getDataTransform(c_to_f_read, tran_len+1);
 	verify_val((const char*)c_to_f_read, (const char*)c_to_f,
 		"DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+	HDfree(c_to_f_read);
 
 	//
 	// Read the expression of each of the prop lists and verify the read
@@ -89,10 +90,12 @@ static void test_transfplist()
 	// Get and verify the expression with:
 	// ssize_t getDataTransform(char* exp, const size_t buf_size [default=0])
 	tran_len =  dxpl_c_to_f.getDataTransform(NULL);
+	c_to_f_read = (char *)HDmalloc(tran_len+1);
 	HDmemset(c_to_f_read, 0, tran_len+1);
 	dxpl_c_to_f.getDataTransform(c_to_f_read, tran_len+1);
 	verify_val((const char*)c_to_f_read, (const char*)c_to_f,
 		"DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+	HDfree(c_to_f_read);
 
 	// Get and verify the expression with:
 	// H5std_string DSetMemXferPropList::getDataTransform()
@@ -108,6 +111,7 @@ static void test_transfplist()
 	dxpl_utrans_inv.getDataTransform(utrans_inv_read, tran_len+1);
 	verify_val((const char*)utrans_inv_read, (const char*)utrans_inv,
 		"DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+	HDfree(utrans_inv_read);
 
 	PASSED();
     }
