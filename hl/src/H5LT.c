@@ -2359,7 +2359,7 @@ print_enum(hid_t type, char* str, size_t *str_len, hbool_t no_ubuf, size_t indt)
 
     /* Release resources */
     for(i = 0; i < nmembs; i++)
-        HDfree(name[i]);
+        H5free_memory(name[i]);
 
     HDfree(name);
     HDfree(value);
@@ -2744,7 +2744,7 @@ next:
             if(tag) {
                 HDsnprintf(tmp_str, TMP_LEN, "OPQ_TAG \"%s\";\n", tag);
                 if(tag)
-                    HDfree(tag);
+                    H5free_memory(tag);
                 tag = NULL;
             } else
                 HDsnprintf(tmp_str, TMP_LEN, "OPQ_TAG \"\";\n");
@@ -2950,7 +2950,7 @@ next:
                     if(!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                         goto out;
                     if(mname)
-                        HDfree(mname);
+                        H5free_memory(mname);
                     mname = NULL;
 
                     HDsnprintf(tmp_str, TMP_LEN, " : %lu;\n", (unsigned long)moffset);

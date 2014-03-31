@@ -2336,7 +2336,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
            h5tools_str_append(buffer, "OPAQUE_TAG \"%s\";", ttag);
            h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
            
-           HDfree(ttag);
+           H5free_memory(ttag);
         } 
         ctx->indent_level--;
 
@@ -2372,7 +2372,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
             }
             else
                 HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tget_member_type failed");
-            HDfree(mname);
+            H5free_memory(mname);
         }
         ctx->indent_level--;
 
@@ -2688,7 +2688,7 @@ CATCH
         /* Release resources */
         for(i = 0; i < nmembs; i++)
             if(name[i])
-                HDfree(name[i]);
+                H5free_memory(name[i]);
         HDfree(name);
     } /* end if */
 

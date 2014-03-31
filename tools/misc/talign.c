@@ -152,7 +152,7 @@ out:
             mname ? mname : "(null)", (int)H5Tget_member_offset(fix,0),
             string5, (char *)(data + H5Tget_member_offset(fix, 0)));
         if(mname)
-            HDfree(mname);
+            H5free_memory(mname);
 
         fptr = (float *)(data + H5Tget_member_offset(fix, 1));
         mname = H5Tget_member_name(fix, 1);
@@ -163,7 +163,7 @@ out:
             (double)fok[0], (double)fptr[0],
             (double)fok[1], (double)fptr[1]);
         if(mname)
-            HDfree(mname);
+            H5free_memory(mname);
 
         fptr = (float *)(data + H5Tget_member_offset(fix, 2));
         mname = H5Tget_member_name(fix, 2);
@@ -173,7 +173,7 @@ out:
             (double)fnok[0], (double)fptr[0],
             (double)fnok[1], (double)fptr[1]);
         if(mname)
-            HDfree(mname);
+            H5free_memory(mname);
 
         fptr = (float *)(data + H5Tget_member_offset(fix, 1));
         printf("\n"

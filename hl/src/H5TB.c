@@ -196,7 +196,7 @@ herr_t H5TBmake_table( const char *table_title,
         if (H5LTset_attribute_string( loc_id, dset_name, attr_name, member_name ) < 0)
             goto out;
 
-        HDfree( member_name );
+        H5free_memory( member_name );
 
     }
 
@@ -234,7 +234,7 @@ herr_t H5TBmake_table( const char *table_title,
             if (H5Aclose(attr_id) < 0)
                 goto out;
 
-            HDfree(member_name);
+            H5free_memory(member_name);
         }
 
         /* terminate access to the data space. */
@@ -570,7 +570,7 @@ herr_t H5TBwrite_fields_name( hid_t loc_id,
                 goto out;
         }
 
-        HDfree( member_name );
+        H5free_memory( member_name );
 
     }
 
@@ -734,7 +734,7 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
         if(H5Tclose( nmtype_id ) < 0)
             goto out;
 
-        HDfree( member_name );
+        H5free_memory( member_name );
 
     }
 
@@ -1059,7 +1059,7 @@ herr_t H5TBread_fields_name( hid_t loc_id,
                 goto out;
             j++;
         }
-        HDfree( member_name );
+        H5free_memory( member_name );
     }
 
     /* get the dataspace handle */
@@ -1221,7 +1221,7 @@ herr_t H5TBread_fields_index( hid_t loc_id,
         if (H5Tclose( nmtype_id ) < 0)
             goto out;
 
-        HDfree( member_name );
+        H5free_memory( member_name );
     }
 
     /* get the dataspace handle */
@@ -2314,7 +2314,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
 
         curr_offset += member_size;
 
-        HDfree( member_name );
+        H5free_memory( member_name );
 
         /* close the member type */
         if(H5Tclose( member_type_id ) < 0)
@@ -2694,13 +2694,13 @@ herr_t H5TBdelete_field( hid_t loc_id,
             if (H5Tclose( member_type_id ) < 0)
                 goto out;
 
-            HDfree( member_name );
+            H5free_memory( member_name );
 
             break;
 
         }
 
-        HDfree( member_name );
+        H5free_memory( member_name );
 
     } /* i */
 
@@ -2742,7 +2742,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
         /* we want to skip the field to delete */
         if (H5TB_find_field( member_name, field_name ) > 0 )
         {
-            HDfree( member_name );
+            H5free_memory( member_name );
             continue;
         }
 
@@ -2780,7 +2780,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
 
         curr_offset += member_size;
 
-        HDfree(member_name);
+        H5free_memory(member_name);
 
         /* close the member type */
         if (H5Tclose(member_type_id) < 0)
@@ -2821,7 +2821,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
         /* skip the field to delete */
         if (H5TB_find_field(member_name, field_name) > 0)
         {
-            HDfree(member_name);
+            H5free_memory(member_name);
             continue;
         }
 
@@ -2881,7 +2881,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
             goto out;
 
         /* release resources. */
-        HDfree( member_name );
+        H5free_memory( member_name );
         HDfree ( tmp_buf );
 
     } /* i */
@@ -3306,7 +3306,7 @@ herr_t H5TBget_field_info( hid_t loc_id,
 
             member_name = H5Tget_member_name(tid, (unsigned)i);
             strcpy(field_names[i], member_name);
-            HDfree(member_name);
+            H5free_memory(member_name);
         } /* end if */
 
         /* get the member type */
@@ -3459,7 +3459,7 @@ herr_t H5TB_attach_attributes( const char *table_title,
         if (H5LTset_attribute_string( loc_id, dset_name, attr_name, member_name ) < 0)
             goto out;
 
-        HDfree( member_name );
+        H5free_memory( member_name );
 
     }
 

@@ -490,7 +490,7 @@ H5std_string PropList::getClassName() const
    if (temp_str != NULL)
    {
       H5std_string class_name(temp_str);
-      HDfree(temp_str);
+      H5free_memory(temp_str);
       return(class_name);
    }
    else

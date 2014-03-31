@@ -3388,7 +3388,7 @@ nh5pget_class_name_c(hid_t_f *cls, _fcd name, int_f *name_len)
 
      HD5packFstring(c_name, _fcdtocp(name), (size_t)*name_len);
      ret_value = (int_f)HDstrlen(c_name);
-     HDfree(c_name);
+     H5free_memory(c_name);
 
 DONE:
      return ret_value;

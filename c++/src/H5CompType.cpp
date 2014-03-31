@@ -123,7 +123,7 @@ H5std_string CompType::getMemberName( unsigned member_num ) const
 		"H5Tget_member_name returns NULL for member name");
     }
     H5std_string member_name = H5std_string(member_name_C); // convert C string to string
-    HDfree(member_name_C); // free the C string
+    H5free_memory(member_name_C); // free the C string
     return( member_name ); // return the member name string
 }
 
