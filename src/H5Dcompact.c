@@ -117,7 +117,7 @@ H5FL_BLK_EXTERN(type_conv);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__compact_fill(H5D_t *dset, hid_t dxpl_id)
+H5D__compact_fill(const H5D_t *dset, hid_t dxpl_id)
 {
     H5D_fill_buf_info_t fb_info;        /* Dataset's fill buffer info */
     hbool_t     fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */

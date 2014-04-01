@@ -1712,7 +1712,7 @@ nh5dread_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_s
   size_t max_len;
 
   hvl_t *c_buf;
-  size_t i;
+  hssize_t i;
   hssize_t num_elem;
 
   c_dset_id       = (hid_t)*dset_id;
@@ -2027,7 +2027,7 @@ nh5dread_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spac
   size_t max_len;
 
   hvl_t *c_buf;
-  size_t i;
+  hssize_t i;
   hssize_t num_elem;
 
   c_dset_id       = (hid_t)*dset_id;

@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.172], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.176], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -160,7 +160,6 @@ AC_MSG_RESULT([done])
 ## HDF_CXX: whether C++ is enabled. Default no.
 ## CXX: C++ compiler.
 ## HDF5_HL: whether high-level library is enabled. Default is yes.
-## GPFS: whether gpfs is enabled. Default no.
 ## LARGEFILE: whether largefile support is enabled. Default yes.
 ## INSTRUMENT: whether INSTRUMENT is enabled. No default set here.
 ## CODESTACK: whether CODESTACK is enabled. Default no.
@@ -182,7 +181,6 @@ AC_SUBST([FC2003]) HDF_FORTRAN2003=no
 AC_SUBST([HDF_CXX]) HDF_CXX=no
 AC_SUBST([CXX]) HDF_CXX=no
 AC_SUBST([HDF5_HL]) HDF5_HL=yes
-AC_SUBST([GPFS]) GPFS=no
 AC_SUBST([PYTHON]) PYTHON=no
 AC_SUBST([EFF]) EFF=no
 AC_SUBST([IOD_CORRUPT_TOOL]) IOD_CORRUPT_TOOL=no
@@ -2413,85 +2411,13 @@ AM_CONDITIONAL([BUILD_SHARED_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xye
 AC_CACHE_SAVE
 
 ## ----------------------------------------------------------------------
-## Is the Pthreads library present?  It has a header file `pthread.h' and
-## a library `-lpthread' and their locations might be specified with the
-## `--with-pthread' command-line switch.  The value is an include path
-## and/or a library path.  If the library path is specified then it must
-## be preceded by a comma.
-##
-AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
-AC_ARG_WITH([pthread],
-            [AS_HELP_STRING([--with-pthread=DIR],
-                            [Use the Pthreads library [default=no]])],,
-            [withval=no])
-
-case "$withval" in
-  yes)
-    AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
-    if test "x$HAVE_PTHREAD" = "xyes"; then
-      AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
-    fi
-    ;;
-  no)
-    AC_MSG_CHECKING([for pthread])
-    AC_MSG_RESULT([suppressed])
-    unset HAVE_PTHREAD
-    ;;
-  *)
-    case "$withval" in
-      *,*)
-        pthread_inc="`echo $withval | cut -f1 -d,`"
-        pthread_lib="`echo $withval | cut -f2 -d, -s`"
-        ;;
-      *)
-        if test -n "$withval"; then
-          pthread_inc="$withval/include"
-          pthread_lib="$withval/lib"
-        fi
-        ;;
-    esac
-
-    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-    ## can mess some compilers up.
-    if test "X$pthread_inc" = "X/usr/include"; then
-      pthread_inc=""
-    fi
-    if test "X$pthread_lib" = "X/usr/lib"; then
-      pthread_lib=""
-    fi
-
-    if test -n "$pthread_inc"; then
-      saved_CPPFLAGS="$CPPFLAGS"
-      saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-      CPPFLAGS="$CPPFLAGS -I$pthread_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
-      AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset HAVE_PTHREAD])
-    else
-      AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
-    fi
-
-    if test "x$HAVE_PTHREAD" = "xyes"; then
-      if test -n "$pthread_lib"; then
-        saved_LDFLAGS="$LDFLAGS"
-        saved_AM_LDFLAGS="$AM_LDFLAGS"
-        LDFLAGS="$LDFLAGS -L$pthread_lib"
-        AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
-        AC_CHECK_LIB([pthread], [pthread_self],,
-                     [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD])
-      else
-        AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
-      fi
-    fi
-    ;;
-esac
-
-## ----------------------------------------------------------------------
-## Enable thread-safe version of library.  It requires Pthreads support.
+## Enable thread-safe version of library.  It requires Pthreads support
+## on POSIX systems.
 ##
 AC_MSG_CHECKING([for thread safe support])
 AC_ARG_ENABLE([threadsafe],
               [AS_HELP_STRING([--enable-threadsafe],
-                              [Enable thread safe capability])],
+                              [Enable thread-safe capability])],
               [THREADSAFE=$enableval])
 
 ## The --enable-threadsafe flag is not compatible with --enable-cxx.
@@ -2516,10 +2442,8 @@ case "X-$THREADSAFE" in
     AC_MSG_RESULT([no])
     ;;
   X-yes)
-    ## Check that we can link a simple Pthread program.
-    AC_TRY_LINK(, [pthread_self()],
-                [AC_MSG_RESULT([yes]); THREADSAFE=yes],
-                [AC_MSG_ERROR([needed pthread library not available])])
+    THREADSAFE=yes 
+    AC_MSG_RESULT([yes])
     ;;
   *)
     AC_MSG_RESULT([error])
@@ -2528,7 +2452,83 @@ case "X-$THREADSAFE" in
 esac
 
 if test "X$THREADSAFE" = "Xyes"; then
-  AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
+    AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
+
+    ## ----------------------------------------------------------------------
+    ## Is the pthreads library present?  It has a header file `pthread.h' and
+    ## a library `-lpthread' and their locations might be specified with the
+    ## `--with-pthread' command-line switch.  The value is an include path
+    ## and/or a library path.  If the library path is specified then it must
+    ## be preceded by a comma.
+    ##
+    ## Thread-safety in HDF5 only uses Pthreads via configure, so the
+    ## default is "yes", though this only has an effect when
+    ## --enable-threadsafe is specified.
+    AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
+    AC_ARG_WITH([pthread],
+                [AS_HELP_STRING([--with-pthread=DIR],
+                                [Specify alternative path to Pthreads library when thread-safe capability is built])],,
+                [withval=yes])
+
+    case "$withval" in
+      yes)
+        AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
+        if test "x$HAVE_PTHREAD" = "xyes"; then
+          AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+        fi
+        ;;
+      no)
+        AC_MSG_CHECKING([for pthread])
+        AC_MSG_RESULT([suppressed])
+        unset HAVE_PTHREAD
+        ;;
+      *)
+        case "$withval" in
+          *,*)
+            pthread_inc="`echo $withval | cut -f1 -d,`"
+            pthread_lib="`echo $withval | cut -f2 -d, -s`"
+            ;;
+          *)
+            if test -n "$withval"; then
+              pthread_inc="$withval/include"
+              pthread_lib="$withval/lib"
+            fi
+            ;;
+        esac
+
+        ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+        ## can mess some compilers up.
+        if test "X$pthread_inc" = "X/usr/include"; then
+          pthread_inc=""
+        fi
+        if test "X$pthread_lib" = "X/usr/lib"; then
+          pthread_lib=""
+        fi
+
+        if test -n "$pthread_inc"; then
+          saved_CPPFLAGS="$CPPFLAGS"
+          saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+          CPPFLAGS="$CPPFLAGS -I$pthread_inc"
+          AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
+          AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset HAVE_PTHREAD])
+        else
+          AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
+        fi
+
+        if test "x$HAVE_PTHREAD" = "xyes"; then
+          if test -n "$pthread_lib"; then
+            saved_LDFLAGS="$LDFLAGS"
+            saved_AM_LDFLAGS="$AM_LDFLAGS"
+            LDFLAGS="$LDFLAGS -L$pthread_lib"
+            AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
+            AC_CHECK_LIB([pthread], [pthread_self],,
+                         [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD])
+          else
+            AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+          fi
+        fi
+        ;;
+    esac
 fi
 
 ## ----------------------------------------------------------------------
@@ -2870,35 +2870,6 @@ else
   AC_MSG_RESULT([no])
 fi
 
-## ----------------------------------------------------------------------
-## Checking to see if GPFS is available on this filesystem
-##
-AC_ARG_ENABLE([gpfs],
-              [AS_HELP_STRING([--enable-gpfs],
-                              [Enable GPFS hints for the MPI/POSIX file
-                               driver. [default=no]])],,
-              [enableval=no])
-
-case "X-$enableval" in
-  X-yes)
-    AC_CHECK_HEADERS([gpfs.h],
-                     [AC_MSG_CHECKING([for GPFS support])
-                     AC_TRY_COMPILE([#include <gpfs.h>],
-                                    [int fd = 0; gpfs_fcntl(fd, (void *)0);],
-                                    [AC_DEFINE([HAVE_GPFS], [1],
-                                               [Define if we have GPFS support])
-                                       AC_MSG_RESULT([yes])
-                                       LIBS="$LIBS -lgpfs"
-                                       GPFS="yes"],
-                                    [AC_MSG_RESULT([no])
-                                       GPFS="no"])])
-    ;;
-  X-no|*)
-    AC_MSG_CHECKING([for gpfs])
-    AC_MSG_RESULT([suppressed])
-    ;;
-esac
-   
 ## ----------------------------------------------------------------------
 ## Turn on debugging by setting compiler flags
 ## This must come after the enable-production since it depends on production.
@@ -5057,7 +5028,7 @@ PARALLEL_MAKE=""
 FORTRAN_PARALLEL_MAKE=""
 
 if test -n "$TESTPARALLEL"; then
-  PARALLEL_MAKE="$TESTPARALLEL/Makefile $TESTPARALLEL/testph5.sh"
+  PARALLEL_MAKE="$TESTPARALLEL/Makefile"
 
   if test "X$HDF_FORTRAN" = "Xyes"; then
     FORTRAN_PARALLEL_MAKE=fortran/$TESTPARALLEL/Makefile
@@ -5133,7 +5104,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testlinks_env.sh
                  test/test_plugin.sh
                  testpar/Makefile
-                 testpar/testph5.sh
                  perform/Makefile
                  tools/Makefile
                  tools/h5dump/Makefile

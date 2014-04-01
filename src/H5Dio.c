@@ -53,7 +53,11 @@
 /********************/
 
 /* Setup/teardown routines */
-static herr_t H5D__ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
+static herr_t H5D__ioinfo_init(H5D_t *dset,
+#ifndef H5_HAVE_PARALLEL
+const
+#endif /* H5_HAVE_PARALLEL */
+    H5D_dxpl_cache_t *dxpl_cache,
     hid_t dxpl_id, const H5D_type_info_t *type_info, H5D_storage_t *store,
     H5D_io_info_t *io_info);
 static herr_t H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
@@ -255,14 +259,15 @@ H5D__pre_write(H5D_t *dset, hid_t mem_type_id, const H5S_t *mem_space,
     /* Get the dataset transfer property list */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
+    /* Retrieve the 'direct write' flag */
     if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, &direct_write) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting flag for direct chunk write")
 
     /* Direct chunk write */
     if(direct_write) {
-        uint32_t direct_filters = 0;
+        uint32_t direct_filters;
         hsize_t *direct_offset;
-        size_t   direct_datasize = 0;
+        uint32_t direct_datasize;
 	int      ndims = 0;
 	hsize_t  dims[H5O_LAYOUT_NDIMS];
 	hsize_t  internal_offset[H5O_LAYOUT_NDIMS];
@@ -271,12 +276,11 @@ H5D__pre_write(H5D_t *dset, hid_t mem_type_id, const H5S_t *mem_space,
         if(H5D_CHUNKED != dset->shared->layout.type)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
 
+        /* Retrieve parameters for direct chunk write */
         if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME, &direct_filters) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting filter info for direct chunk write")
-
         if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME, &direct_offset) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting offset info for direct chunk write")
-
         if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, &direct_datasize) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting data size for direct chunk write")
 
@@ -285,7 +289,7 @@ H5D__pre_write(H5D_t *dset, hid_t mem_type_id, const H5S_t *mem_space,
 	if((ndims = H5S_get_simple_extent_dims(dset->shared->space, dims, NULL)) < 0)
 	    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve dataspace extent dims")
 
-	for(i=0; i<ndims; i++) {
+	for(i = 0; i < ndims; i++) {
 	    /* Make sure the offset doesn't exceed the dataset's dimensions */
             if(direct_offset[i] > dims[i])
 		HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
@@ -295,7 +299,7 @@ H5D__pre_write(H5D_t *dset, hid_t mem_type_id, const H5S_t *mem_space,
 		HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
 
 	    internal_offset[i] = direct_offset[i]; 
-	}
+	} /* end for */
 	   
 	/* Terminate the offset with a zero */ 
 	internal_offset[ndims] = 0;
@@ -303,7 +307,8 @@ H5D__pre_write(H5D_t *dset, hid_t mem_type_id, const H5S_t *mem_space,
 	/* write raw data */
 	if(H5D__chunk_direct_write(dset, dxpl_id, direct_filters, internal_offset, direct_datasize, buf) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write chunk directly")
-    } else {     /* Normal write */
+    } /* end if */
+    else {     /* Normal write */
         /* write raw data */
         if(H5D__write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
@@ -418,7 +423,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
         /* Attempt to construct projected dataspace for memory dataspace */
         if(H5S_select_construct_projection(mem_space, &projected_mem_space,
-                (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf, type_info.dst_type_size) < 0)
+                (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, (const void **)&adj_buf, type_info.dst_type_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
         HDassert(projected_mem_space);
         HDassert(adj_buf);
@@ -644,7 +649,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
         /* Attempt to construct projected dataspace for memory dataspace */
         if(H5S_select_construct_projection(mem_space, &projected_mem_space,
-                (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf, type_info.src_type_size) < 0)
+                (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, (const void **)&adj_buf, type_info.src_type_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
         HDassert(projected_mem_space);
         HDassert(adj_buf);
@@ -771,7 +776,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+H5D__ioinfo_init(H5D_t *dset,
+#ifndef H5_HAVE_PARALLEL
+const
+#endif /* H5_HAVE_PARALLEL */
+    H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     const H5D_type_info_t *type_info, H5D_storage_t *store, H5D_io_info_t *io_info)
 {
     FUNC_ENTER_STATIC_NOERR

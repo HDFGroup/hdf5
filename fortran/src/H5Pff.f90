@@ -5977,7 +5977,7 @@ SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdfer
     INTEGER(HID_T), INTENT(IN) :: fapl_id       ! File access property list identifier
     INTEGER(SIZE_T), INTENT(OUT) :: alignment   ! Required memory alignment boundary!
     INTEGER(SIZE_T), INTENT(OUT) :: block_size  ! File system block size
-    INTEGER(SIZE_T), INTENT(OUT) :: cbuf_size 	! Copy buffer size
+    INTEGER(SIZE_T), INTENT(OUT) :: cbuf_size   ! Copy buffer size
     INTEGER, INTENT(OUT) :: hdferr              ! Error code
                                                 ! 0 on success and -1 on failure
 !***** 

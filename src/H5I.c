@@ -865,7 +865,6 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
      */
     if(type_ptr->wrapped) {
         H5I_wrap_ud_t udata;    /* User data for iteration */
-        hid_t previd;           /* Previous ID value */
         herr_t iter_status;     /* Iteration status */
 
         /* Set up user data for iteration */
@@ -1288,7 +1287,7 @@ H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id)
     HDassert(type_ptr);
 
     /* Get the ID node for the ID */
-    if(NULL == (curr_id = H5SL_remove(type_ptr->ids, &id)))
+    if(NULL == (curr_id = (H5I_id_info_t *)H5SL_remove(type_ptr->ids, &id)))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, NULL, "can't remove ID node from skip list")
 
     /* (Casting away const OK -QAK) */
@@ -1321,7 +1320,6 @@ void *
 H5I_remove(hid_t id)
 {
     H5I_id_type_t	*type_ptr;	/*ptr to the atomic type	*/
-    H5I_id_info_t	*curr_id;	/*ptr to the current atom	*/
     H5I_type_t		type;		/*atom's atomic type		*/
     void *	        ret_value;	/*return value			*/
 
@@ -1419,7 +1417,7 @@ H5I_dec_ref(hid_t id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
 
     /* General lookup of the ID */
-    if(NULL == (id_ptr = H5SL_search(type_ptr->ids, &id)))
+    if(NULL == (id_ptr = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id)))
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID")
 
     /*
@@ -1621,7 +1619,7 @@ H5I_inc_ref(hid_t id, hbool_t app_ref)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
 
     /* General lookup of the ID */
-    if(NULL == (id_ptr = H5SL_search(type_ptr->ids, &id)))
+    if(NULL == (id_ptr = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id)))
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID")
 
     /* Adjust reference counts */
@@ -1706,7 +1704,7 @@ H5I_get_ref(hid_t id, hbool_t app_ref)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
 
     /* General lookup of the ID */
-    if(NULL == (id_ptr = H5SL_search(type_ptr->ids, &id)))
+    if(NULL == (id_ptr = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id)))
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID")
 
     /* Set return value */
@@ -2289,7 +2287,7 @@ H5I__find_id(hid_t id)
         HGOTO_DONE(NULL);
 
     /* Locate the ID node for the ID */
-    ret_value = H5SL_search(type_ptr->ids, &id);
+    ret_value = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

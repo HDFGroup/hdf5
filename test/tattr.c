@@ -829,7 +829,7 @@ test_attr_compound_read(hid_t fapl)
                 HDstrcmp(fieldname, ATTR4_FIELDNAME2) ||
                 HDstrcmp(fieldname, ATTR4_FIELDNAME3)))
             TestErrPrintf("invalid field name for field #%d: %s\n", i, fieldname);
-        HDfree(fieldname);
+        H5free_memory(fieldname);
       } /* end for */
     offset = H5Tget_member_offset(type, 0);
     VERIFY(offset, attr4_field1_off, "H5Tget_member_offset");

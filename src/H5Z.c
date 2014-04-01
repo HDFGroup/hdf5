@@ -664,7 +664,13 @@ H5Zfilter_avail(H5Z_filter_t id)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number")
  
     if((ret_value = H5Z_filter_avail(id)) < 0)
-	HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "unable to check the availability of the filter")
+    	HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "unable to check the availability of the filter")
+    else if(ret_value == FALSE) {
+        const H5Z_class2_t *filter_info;
+
+        if(NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)id)))
+        	ret_value = TRUE;
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1324,22 +1330,20 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
              */
 	    if((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0) {
                 hbool_t issue_error = FALSE;
+				const H5Z_class2_t    *filter_info;
 
-                /* Check for "no plugins" indicated" */
-                    const H5Z_class2_t    *filter_info;
+				/* Try loading the filter */
+				if(NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)(pline->filter[idx].id)))) {
+					/* Register the filter we loaded */
+					if(H5Z_register(filter_info) < 0)
+						HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")
 
-                    /* Try loading the filter */
-                    if(NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)(pline->filter[idx].id)))) {
-                        /* Register the filter we loaded */
-                        if(H5Z_register(filter_info) < 0)
-                            HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")
-
-                        /* Search in the table of registered filters again to find the dynamic filter just loaded and registered */ 
-                        if((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0)
-                            issue_error = TRUE;
-                    } /* end if */
-                    else
-                        issue_error = TRUE;
+					/* Search in the table of registered filters again to find the dynamic filter just loaded and registered */
+					if((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0)
+						issue_error = TRUE;
+				} /* end if */
+				else
+					issue_error = TRUE;
 
                 /* Check for error */
                 if(issue_error) {

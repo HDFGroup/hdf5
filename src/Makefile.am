@@ -64,7 +64,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5VLiod_attr.c H5VLiod_link.c H5VLiod_obj.c H5VLiod_trans.c H5VLiod_view.c H5VLiod_analysis.c \
         H5FD.c H5FDcore.c  \
         H5FDdirect.c H5FDfamily.c H5FDint.c H5FDlog.c H5FDmpi.c H5FDmpio.c \
-        H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c \
+        H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c \
         H5FF.c H5ES.c H5RC.c H5TR.c H5M.c H5AS.c H5V.c\
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSsection.c H5FSstat.c H5FStest.c \
         H5G.c H5Gbtree2.c H5Gcache.c \
@@ -120,8 +120,9 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
 include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5version.h \
         H5Apublic.h H5ACpublic.h \
         H5Cpublic.h H5Dpublic.h \
-        H5Epubgen.h H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDdirect.h \
-	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
+        H5Epubgen.h H5Epublic.h H5Fpublic.h \
+        H5FDpublic.h H5FDcore.h H5FDdirect.h \
+	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h \
         H5VLpublic.h H5VLnative.h H5VLiod.h \
         H5FFpublic.h H5ESpublic.h H5RCpublic.h H5TRpublic.h \

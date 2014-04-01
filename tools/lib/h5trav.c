@@ -21,13 +21,15 @@
  * local typedefs
  *-------------------------------------------------------------------------
  */
+typedef struct trav_addr_path_t {
+    haddr_t addr;
+    char *path;
+} trav_addr_path_t;
+
 typedef struct trav_addr_t {
     size_t      nalloc;
     size_t      nused;
-    struct {
-        haddr_t addr;
-        char *path;
-    } *objs;
+    trav_addr_path_t *objs;
 } trav_addr_t;
 
 typedef struct {
@@ -49,7 +51,9 @@ typedef struct {
 } trav_print_udata_t;
 
 /* format for hsize_t */
+#ifdef H5TRAV_PRINT_SPACE
 #define HSIZE_T_FORMAT   "%" H5_PRINTF_LL_WIDTH "u"
+#endif /* H5TRAV_PRINT_SPACE */
 
 /*-------------------------------------------------------------------------
  * local functions
@@ -130,7 +134,7 @@ trav_addr_add(trav_addr_t *visited, haddr_t addr, const char *path)
     /* Allocate space if necessary */
     if(visited->nused == visited->nalloc) {
         visited->nalloc = MAX(1, visited->nalloc * 2);;
-        visited->objs = HDrealloc(visited->objs, visited->nalloc * sizeof(visited->objs[0]));
+        visited->objs = (trav_addr_path_t *)HDrealloc(visited->objs, visited->nalloc * sizeof(trav_addr_path_t));
     } /* end if */
 
     /* Append it */
@@ -192,14 +196,15 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
     /* Create the full path name for the link */
     if(udata->is_absolute) {
         size_t base_len = HDstrlen(udata->base_grp_name);
-        size_t add_slash = base_len ? ((udata->base_grp_name)[base_len-1] != '/') : 1;
+        size_t add_slash = base_len ? ((udata->base_grp_name)[base_len - 1] != '/') : 1;
+        size_t new_name_len = base_len + add_slash + HDstrlen(path) + 1;
 
-        if(NULL == (new_name = (char*)HDmalloc(base_len + add_slash + HDstrlen(path) + 1)))
+        if(NULL == (new_name = (char*)HDmalloc(new_name_len)))
             return(H5_ITER_ERROR);
-        HDstrcpy(new_name, udata->base_grp_name);
-        if (add_slash)
-            new_name[base_len] = '/';
-        HDstrcpy(new_name + base_len + add_slash, path);
+        if(add_slash)
+            HDsnprintf(new_name, new_name_len, "%s/%s", udata->base_grp_name, path);
+        else
+            HDsnprintf(new_name, new_name_len, "%s%s", udata->base_grp_name, path);
         full_name = new_name;
     } /* end if */
     else
@@ -214,7 +219,7 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
             if(new_name)
                 HDfree(new_name);
             return(H5_ITER_ERROR);
-        }
+        } /* end if */
 
         /* If the object has multiple links, add it to the list of addresses
          *  already visited, if it isn't there already
@@ -229,7 +234,7 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
                 if(new_name)
                     HDfree(new_name);
                 return(H5_ITER_ERROR);
-            }
+            } /* end if */
     } /* end if */
     else {
         /* Make 'visit link' callback */
@@ -238,7 +243,7 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
                 if(new_name)
                     HDfree(new_name);
                 return(H5_ITER_ERROR);
-            }
+            } /* end if */
     } /* end else */
 
     if(new_name)
@@ -680,11 +685,11 @@ h5trav_getindext(const char *name, const trav_table_t *table)
     for(i = 0; i < table->nobjs; i++) {
         /* Check for object name having full path (with leading '/') */
         if(HDstrcmp(name, table->objs[i].name) == 0)
-            return(i);
+            return((int)i);
 
         /* Check for object name without leading '/' */
         if(HDstrcmp(name, table->objs[i].name + 1) == 0)
-            return(i);
+            return((int)i);
 
         /* search also in the list of links */
         if(table->objs[i].nlinks) {
@@ -693,11 +698,11 @@ h5trav_getindext(const char *name, const trav_table_t *table)
             for ( j=0; j<table->objs[i].nlinks; j++) {
                 /* Check for object name having full path (with leading '/') */
                 if(HDstrcmp(name, table->objs[i].links[j].new_name) == 0)
-                    return(i);
+                    return((int)i);
 
                 /* Check for object name without leading '/' */
                 if(HDstrcmp(name, table->objs[i].links[j].new_name + 1) == 0)
-                    return(i);
+                    return((int)i);
             } /* end for */
         } /* end if */
     } /* end for */
@@ -728,7 +733,7 @@ trav_table_add(trav_table_t *table,
 
     if(table->nobjs == table->size) {
         table->size = MAX(1, table->size * 2);
-        table->objs = (trav_obj_t*)HDrealloc(table->objs, table->size * sizeof(trav_obj_t));
+        table->objs = (trav_obj_t *)HDrealloc(table->objs, table->size * sizeof(trav_obj_t));
     } /* end if */
 
     new_obj = table->nobjs++;
@@ -772,7 +777,7 @@ trav_table_addlink(trav_table_t *table, haddr_t objno, const char *path)
             /* allocate space if necessary */
             if(table->objs[i].nlinks == (unsigned)table->objs[i].sizelinks) {
                 table->objs[i].sizelinks = MAX(1, table->objs[i].sizelinks * 2);
-                table->objs[i].links = (trav_link_t*)HDrealloc(table->objs[i].links, table->objs[i].sizelinks * sizeof(trav_link_t));
+                table->objs[i].links = (trav_link_t *)HDrealloc(table->objs[i].links, table->objs[i].sizelinks * sizeof(trav_link_t));
             } /* end if */
 
             /* insert it */
@@ -807,7 +812,7 @@ void trav_table_addflags(unsigned *flags,
                          h5trav_type_t type,
                          trav_table_t *table)
 {
-    unsigned int new_obj;
+    size_t new_obj;
 
     if(table->nobjs == table->size) {
         table->size = MAX(1, table->size * 2);
@@ -995,6 +1000,8 @@ trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
             printf(" %-10s %s", "datatype", path);
             break;
 
+        case H5O_TYPE_UNKNOWN:
+        case H5O_TYPE_NTYPES:
         default:
             printf(" %-10s %s", "unknown object type", path);
             break;
@@ -1005,7 +1012,7 @@ trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
         /* Finish printing line about object */
         printf("\n");
         if(trav_verbosity > 0)
-            H5Aiterate_by_name(print_udata->fid, path, trav_index_by, trav_index_order, NULL, trav_attr, path, H5P_DEFAULT);
+            H5Aiterate_by_name(print_udata->fid, path, trav_index_by, trav_index_order, NULL, trav_attr, (void *)path, H5P_DEFAULT);
     }
     else
         /* Print the link's original name */
@@ -1040,7 +1047,8 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
                 char *targbuf = (char*)HDmalloc(linfo->u.val_size + 1);
                 HDassert(targbuf);
 
-                H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT);
+                if(H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT) < 0)
+                    targbuf[0] = 0;
                 printf(" %-10s %s -> %s\n", "link", path, targbuf);
                 HDfree(targbuf);
             } /* end if */
@@ -1051,21 +1059,28 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
         case H5L_TYPE_EXTERNAL:
             if(linfo->u.val_size > 0) {
                 char *targbuf;
-                const char *filename;
-                const char *objname;
+                const char *filename = NULL;
+                const char *objname = NULL;
 
                 targbuf = (char*)HDmalloc(linfo->u.val_size + 1);
                 HDassert(targbuf);
 
-                H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT);
-                H5Lunpack_elink_val(targbuf, linfo->u.val_size, NULL, &filename, &objname);
-                printf(" %-10s %s -> %s %s\n", "ext link", path, filename, objname);
+                if(H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT) < 0)
+                    targbuf[0] = 0;
+                if(H5Lunpack_elink_val(targbuf, linfo->u.val_size, NULL, &filename, &objname) >= 0)
+                    printf(" %-10s %s -> %s %s\n", "ext link", path, filename, objname);
                 HDfree(targbuf);
             } /* end if */
             else
                 printf(" %-10s %s ->\n", "ext link", path);
             break;
 
+        case H5L_TYPE_HARD:
+            /* Should be handled elsewhere */
+            return(-1);
+
+        case H5L_TYPE_ERROR:
+        case H5L_TYPE_MAX:
         default:
             printf(" %-10s %s -> ???\n", "unknown type of UD link", path);
             break;
@@ -1156,31 +1171,21 @@ h5trav_visit(hid_t fid, const char *grp_name, hbool_t visit_start,
  *
  * Date: September 5, 2008
  *
- * Modified: 
- *  Jonathan Kim
- *   - Moved from h5ls.c to share among tools.  (Sep 16, 2010)
- *   - Renamed from elink_trav_add to symlink_visit_add for both soft and 
- *     external links.   (May 25, 2010)
- *   - Add type parameter to distingush between soft and external link for 
- *     sure, which prevent from mixing up visited link when the target names
- *     are same between the soft and external link, as code marks with the
- *     target name.  (May 25,2010) 
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, const char *path)
 {
     size_t  idx;         /* Index of address to use */
-    void    *tmp_ptr;
 
     /* Allocate space if necessary */
-    if(visited->nused == visited->nalloc) 
-    {
+    if(visited->nused == visited->nalloc) {
+        void    *tmp_ptr;
+
         visited->nalloc = MAX(1, visited->nalloc * 2);
-        if(NULL == (tmp_ptr = HDrealloc(visited->objs, visited->nalloc * sizeof(visited->objs[0]))))
+        if(NULL == (tmp_ptr = HDrealloc(visited->objs, visited->nalloc * sizeof(symlink_trav_path_t))))
             return -1;
-        visited->objs = tmp_ptr;
+        visited->objs = (symlink_trav_path_t *)tmp_ptr;
     } /* end if */
 
     /* Append it */
@@ -1190,22 +1195,19 @@ symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, co
     visited->objs[idx].file = NULL;
     visited->objs[idx].path = NULL;
 
-    if (type == H5L_TYPE_EXTERNAL)
-    {
-        if(NULL == (visited->objs[idx].file = HDstrdup(file))) 
-        {
+    if(type == H5L_TYPE_EXTERNAL) {
+        if(NULL == (visited->objs[idx].file = HDstrdup(file))) {
             visited->nused--;
             return -1;
-        }
-    }
+        } /* end if */
+    } /* end if */
 
-    if(NULL == (visited->objs[idx].path = HDstrdup(path))) 
-    {
+    if(NULL == (visited->objs[idx].path = HDstrdup(path))) {
         visited->nused--;
-        if (visited->objs[idx].file)
+        if(visited->objs[idx].file)
             HDfree (visited->objs[idx].file);
         return -1;
-    }
+    } /* end if */
 
     return 0;
 } /* end symlink_visit_add() */
@@ -1223,16 +1225,6 @@ symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, co
  *
  * Date: September 5, 2008
  *
- * Modified: 
- *  Jonathan Kim
- *   - Moved from h5ls.c to share among tools.  (Sep 16, 2010)
- *   - Renamed from elink_trav_visited to symlink_is_visited for both soft and 
- *     external links.  (May 25, 2010)
- *   - Add type parameter to distingush between soft and external link for 
- *     sure, which prevent from mixing up visited link when the target names
- *     are same between the soft and external link, as code marks with the
- *     target name.  (May 25,2010) 
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -1241,21 +1233,19 @@ symlink_is_visited(symlink_trav_t *visited, H5L_type_t type, const char *file, c
     size_t u;  /* Local index variable */
 
     /* Look for symlink */
-    for(u = 0; u < visited->nused; u++)
-    {
+    for(u = 0; u < visited->nused; u++) {
         /* Check for symlink values already in array */
         /* check type and path pair to distingush between symbolic links */
-        if ((visited->objs[u].type == type) && !HDstrcmp(visited->objs[u].path, path))
-        {
+        if((visited->objs[u].type == type) && !HDstrcmp(visited->objs[u].path, path)) {
             /* if external link, file need to be matched as well */
-            if (visited->objs[u].type == H5L_TYPE_EXTERNAL)
-            {
-                if (!HDstrcmp(visited->objs[u].file, file))
-                    return (TRUE);
-            }
+            if(visited->objs[u].type == H5L_TYPE_EXTERNAL)
+                if(!HDstrcmp(visited->objs[u].file, file))
+                    return(TRUE);
+
             return (TRUE);
-        }
-    }
+        } /* end if */
+    } /* end for */
+
     /* Didn't find symlink */
     return(FALSE);
 } /* end symlink_is_visited() */

@@ -231,15 +231,15 @@ END SUBROUTINE test_create
 
 SUBROUTINE test_genprop_class_callback(total_error)
 
-  !/****************************************************************
-  !**
-  !**  test_genprop_class_callback(): Test basic generic property list code.
-  !**      Tests callbacks for property lists in a generic class.
-  !**
-  !**  FORTRAN TESTS:
-  !**      Tests function H5Pcreate_class_f with callback.
-  !**
-  !****************************************************************/
+  !
+  !
+  !  test_genprop_class_callback(): Test basic generic property list code.
+  !      Tests callbacks for property lists in a generic class.
+  !
+  !  FORTRAN TESTS:
+  !      Tests function H5Pcreate_class_f with callback.
+  !
+  !
 
   USE HDF5
   USE ISO_C_BINDING
@@ -362,6 +362,79 @@ SUBROUTINE test_genprop_class_callback(total_error)
   CALL check("h5pclose_class_f", error, total_error)
 
 END SUBROUTINE test_genprop_class_callback
+
+!-------------------------------------------------------------------------
+! Function: test_h5p_file_image
+!
+! Purpose: Tests APIs:
+!          h5pget_file_image_f and h5pset_file_image_f
+!
+! Return:      Success: 0
+!              Failure: -1
+!
+! FORTRAN Programmer: M. Scot Breitenfeld
+!                     April 1, 2014
+!-------------------------------------------------------------------------
+
+SUBROUTINE test_h5p_file_image(total_error)
+
+  USE HDF5
+  USE ISO_C_BINDING
+  IMPLICIT NONE
+  INTEGER, INTENT(INOUT) :: total_error
+  INTEGER(hid_t) ::   fapl_1 = -1
+  INTEGER, PARAMETER :: count = 10
+  INTEGER, DIMENSION(1:count), TARGET :: buffer
+  INTEGER, DIMENSION(1:count), TARGET :: temp
+  INTEGER :: i   
+  INTEGER(size_t) :: size
+  INTEGER(size_t) :: temp_size
+  INTEGER :: error ! error return value
+  TYPE(C_PTR) :: f_ptr
+  TYPE(C_PTR), DIMENSION(1:count) :: f_ptr1
+  TYPE(C_PTR), DIMENSION(1:1) :: f_ptr2
+
+  ! Initialize file image buffer
+
+  DO i = 1, count
+     buffer(i) = i*10
+  ENDDO
+
+  ! Create fapl
+  CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_1, error)
+  CALL check("h5pcreate_f", error, total_error)
+
+  ! Test with NULL ptr
+  f_ptr2 = C_NULL_PTR
+  temp_size = 1
+  CALL h5pget_file_image_f(fapl_1, f_ptr2, temp_size, error)
+  CALL check("h5pget_file_image_f", error, total_error)
+  CALL verify("h5pget_file_image_f", temp_size, 0, total_error)
+
+  ! Set file image
+  f_ptr = C_LOC(buffer(1))
+  size = SIZEOF(buffer)
+  CALL h5pset_file_image_f(fapl_1, f_ptr, size, error)
+  CALL check("h5pset_file_image_f", error, total_error)
+  
+  ! Get the same data back
+  DO i = 1, count
+     f_ptr1(i) = C_LOC(temp(i))
+  ENDDO
+
+  temp_size = 0
+  CALL h5pget_file_image_f(fapl_1, f_ptr1, temp_size, error)
+  CALL check("h5pget_file_image_f", error, total_error)
+
+  ! Check that sizes are the same, and that the buffers are identical but separate
+  CALL VERIFY("h5pget_file_image_f", temp_size, size, total_error)
+  
+  ! Verify the image data is correct
+  DO i = 1, count
+     CALL VERIFY("h5pget_file_image_f", temp(i), buffer(i), total_error)
+  ENDDO
+
+END SUBROUTINE test_h5p_file_image
 
 !-------------------------------------------------------------------------
 ! Function: external_test_offset

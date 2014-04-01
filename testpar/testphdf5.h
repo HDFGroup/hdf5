@@ -45,6 +45,13 @@ enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
 #define DATASETNAME4	"Data4"
 #define DATASETNAME5	"Data5"
 #define DATASETNAME6	"Data6"
+#define DATASETNAME7	"Data7"
+#define DATASETNAME8	"Data8"
+#define DATASETNAME9	"Data9"
+
+/* point selection order */
+#define IN_ORDER 1
+#define OUT_OF_ORDER 2
 
 /* Hyperslab layout styles */
 #define BYROW           1       /* divide into slabs of rows */
@@ -56,8 +63,6 @@ enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
 #define FACC_DEFAULT    0x0     /* default */
 #define FACC_MPIO       0x1     /* MPIO */
 #define FACC_SPLIT      0x2     /* Split File */
-#define FACC_MULTI      0x4     /* Multi File */
-#define FACC_MPIPOSIX   0x8     /* MPIPOSIX */
 
 #define DXFER_COLLECTIVE_IO 0x1  /* Collective IO*/
 #define DXFER_INDEPENDENT_IO 0x2 /* Independent IO collectively */
@@ -179,15 +184,13 @@ enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
 #define TEST_SET_INDEPENDENT                            0x002 
 #define TEST_DATATYPE_CONVERSION                        0x004
 #define TEST_DATA_TRANSFORMS                            0x008
-#define TEST_SET_MPIPOSIX                               0x010
-#define TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES            0x020
-#define TEST_POINT_SELECTIONS                           0x040
-#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT  0x080
-#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL 0x100
-#define TEST_FILTERS                                    0x200
+#define TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES            0x010
+#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT  0x020
+#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL 0x040
+#define TEST_FILTERS                                    0x080
 /* TEST_FILTERS will take place of this after supporting mpio + filter for 
  * H5Dcreate and H5Dwrite */
-#define TEST_FILTERS_READ                               0x400
+#define TEST_FILTERS_READ                               0x100
 
 /* Don't erase these lines, they are put here for debugging purposes */
 /*
@@ -240,7 +243,6 @@ void multiple_group_read(void);
 void collective_group_write(void);
 void independent_group_read(void);
 void test_fapl_mpio_dup(void);
-void test_fapl_mpiposix_dup(void);
 void test_split_comm_access(void);
 void dataset_atomicity(void);
 void dataset_writeInd(void);
@@ -292,9 +294,10 @@ void compress_readAll(void);
 void test_dense_attr(void);
 
 /* commonly used prototypes */
-hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type, hbool_t use_gpfs);
+hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type);
 MPI_Offset h5_mpi_get_file_size(const char *filename, MPI_Comm comm, MPI_Info info);
 int dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[],
                  hsize_t block[], DATATYPE *dataset, DATATYPE *original);
-
+void point_set (hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[],
+                size_t num_points, hsize_t coords[], int order);
 #endif /* PHDF5TEST_H */

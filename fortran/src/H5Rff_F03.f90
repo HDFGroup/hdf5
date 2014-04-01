@@ -238,7 +238,6 @@ CONTAINS
     INTEGER(HID_T), INTENT(OUT) :: space_id    ! Space identifier
     INTEGER, INTENT(OUT) :: hdferr             ! Error code
 !*****
-    INTEGER :: ref_f(REF_REG_BUF_LEN)          ! Local buffer to pass reference
 
     hdferr = h5rget_region_ptr_c(dset_id, ref, space_id )
 
@@ -441,7 +440,6 @@ CONTAINS
     INTEGER(HID_T), INTENT(OUT) :: ref_obj_id     ! Object identifier
     INTEGER, INTENT(OUT) :: hdferr                ! Error code
 !*****
-    INTEGER(HADDR_T) :: ref_f          ! Local buffer to pass reference
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(ref)
@@ -567,7 +565,6 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(OUT) :: name
     INTEGER, INTENT(OUT) :: hdferr
 !*****
-    INTEGER(HADDR_T) :: ref_f  ! Local buffer to pass reference
 
     INTEGER(SIZE_T) :: size_default
     INTEGER(SIZE_T) :: name_len
@@ -615,7 +612,6 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(OUT) :: name
     INTEGER, INTENT(OUT) :: hdferr
 !*****
-    INTEGER :: ref_f(REF_REG_BUF_LEN)      ! Local buffer to pass reference
     INTEGER(SIZE_T) :: size_default
     INTEGER(SIZE_T) :: name_len
     TYPE(C_PTR) :: f_ptr

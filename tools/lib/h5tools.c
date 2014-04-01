@@ -64,12 +64,8 @@ static const char *drivernames[]={
     "family",
     "split",
     "multi",
-#ifdef H5_HAVE_STREAM
-    "stream",
-#endif /* H5_HAVE_STREAM */
 #ifdef H5_HAVE_PARALLEL
     "mpio",
-    "mpiposix"
 #endif /* H5_HAVE_PARALLEL */
 };
 
@@ -80,12 +76,8 @@ typedef enum {
    ,FAMILY_IDX
    ,SPLIT_IDX
    ,MULTI_IDX
-#ifdef H5_HAVE_STREAM
-   ,STREAM_IDX
-#endif /* H5_HAVE_STREAM */
 #ifdef H5_HAVE_PARALLEL
    ,MPIO_IDX
-   ,MPIPOSIX_IDX
 #endif /* H5_HAVE_PARALLEL */
 } driver_idx;
 #define NUM_DRIVERS     (sizeof(drivernames) / sizeof(drivernames[0]))
@@ -521,48 +513,23 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 
         if(drivernum)
         *drivernum = MULTI_IDX;
-#ifdef H5_HAVE_STREAM
-            }
-            else if(!HDstrcmp(driver, drivernames[STREAM_IDX])) {
-                /* STREAM Driver */
-                if(H5Pset_fapl_stream(new_fapl, NULL) < 0)
-                goto error;
-
-                if(drivernum)
-                *drivernum = STREAM_IDX;
-#endif /* H5_HAVE_STREAM */
-#ifdef H5_HAVE_PARALLEL
-            }
-            else if(!HDstrcmp(driver, drivernames[MPIO_IDX])) {
-                /* MPI-I/O Driver */
-                /* check if MPI has been initialized. */
-                if(!h5tools_mpi_init_g)
-                MPI_Initialized(&h5tools_mpi_init_g);
-                if(h5tools_mpi_init_g) {
-                    if(H5Pset_fapl_mpio(new_fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
-                goto error;
-
-            if(drivernum)
-                *drivernum = MPIO_IDX;
-        } /* end if */
     }
-    else if (!HDstrcmp(driver, drivernames[MPIPOSIX_IDX])) {
+#ifdef H5_HAVE_PARALLEL
+    else if(!HDstrcmp(driver, drivernames[MPIO_IDX])) {
         /* MPI-I/O Driver */
         /* check if MPI has been initialized. */
         if(!h5tools_mpi_init_g)
             MPI_Initialized(&h5tools_mpi_init_g);
         if(h5tools_mpi_init_g) {
-            if(H5Pset_fapl_mpiposix(new_fapl, MPI_COMM_WORLD, TRUE) < 0)
+            if(H5Pset_fapl_mpio(new_fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
                 goto error;
-
             if(drivernum)
-                *drivernum = MPIPOSIX_IDX;
+                *drivernum = MPIO_IDX;
         } /* end if */
+    }
 #endif /* H5_HAVE_PARALLEL */
-    }
-    else {
+    else
         goto error;
-    }
 
     return(new_fapl);
 
@@ -580,8 +547,7 @@ error:
  *      Loop through the various types of VFL drivers trying to open FNAME.
  *      If the HDF5 library is version 1.2 or less, then we have only the SEC2
  *      driver to try out. If the HDF5 library is greater than version 1.2,
- *      then we have the FAMILY, SPLIT, and MULTI drivers to play with (and
- *      the STREAM driver if H5_HAVE_STREAM is defined, that is).
+ *      then we have the FAMILY, SPLIT, and MULTI drivers to play with.
  *
  *      If DRIVER is non-NULL, then it will try to open the file with that
  *      driver first. We assume that the user knows what they are doing so, if
@@ -956,10 +922,9 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
     h5tools_str_region_prefix(&prefix, info, elmtno, ptdata, ctx->ndims, ctx->p_max_idx, ctx);
 
     /* Write new prefix to output */
-    if (ctx->indent_level >= 0) {
+    if (ctx->indent_level >= 0)
         indentlevel = ctx->indent_level;
-    }
-    else {
+    else
         /*
          * This is because sometimes we don't print out all the header
          * info for the data (like the tattr-2.ddl example). If that happens
@@ -967,25 +932,20 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
          * just print out the default indent levels.
          */
         indentlevel = ctx->default_indent_level;
-    }
 
     /* when printing array indices, print the indentation before the prefix
        the prefix is printed one indentation level before */
-    if (info->pindex) {
+    if (info->pindex)
         for (i = 0; i < indentlevel - 1; i++) {
             PUTSTREAM(h5tools_str_fmt(&str, (size_t)0, info->line_indent), stream);
         }
-    }
 
     if (elmtno == 0 && secnum == 0 && info->line_1st) {
         PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_1st), stream);
-    }
-    else if (secnum && info->line_cont) {
+    } else if (secnum && info->line_cont) {
         PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_cont), stream);
-    }
-    else {
+    } else
         PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_pre), stream);
-    }
 
     templength = h5tools_str_len(&prefix);
 

@@ -1280,7 +1280,7 @@ nh5tget_member_name_c ( hid_t_f *type_id ,int_f* idx, _fcd member_name, int_f *n
 
   HD5packFstring(c_name, _fcdtocp(member_name), strlen(c_name));
   *namelen = (int_f)strlen(c_name);
-  HDfree(c_name);
+  H5free_memory(c_name);
   ret_value = 0;
   return ret_value;
 }
@@ -1986,7 +1986,7 @@ nh5tget_tag_c(hid_t_f* type_id, _fcd tag, size_t_f* tag_size, int_f* taglen)
 
   HD5packFstring(c_tag, _fcdtocp(tag), (size_t)*tag_size);
   *taglen = (int_f)HDstrlen(c_tag);
-  HDfree(c_tag);
+  H5free_memory(c_tag);
   ret_value = 0;
   return ret_value;
 }

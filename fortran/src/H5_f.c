@@ -330,9 +330,10 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
  * PURPOSE
  *  Initialize Fortran flags
  * INPUTS
- *  h5d_flags       - H5D inteface flags
- *  h5e_flags       - H5E inteface flags
- *  h5e_hid_flags   - H5E inteface flags of type hid_t
+ *  h5d_flags       - H5D interface flags
+ *  h5d_size_flags  - H5D interface flags of type size_t
+ *  h5e_flags       - H5E interface flags
+ *  h5e_hid_flags   - H5E interface flags of type hid_t
  *  h5f_flags       - H5F interface flags
  *  h5fd_flags      - H5FD interface flags
  *  h5fd_hid_flags  - H5FD interface flags of type hid_t
@@ -360,12 +361,15 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
  *  Added Generic flags introduced in version 1.8
  *           MSB, January, 2008
  *  Added types in lines h5*_flags = ( )variable to match input
- *  Added E flags. 
+ *  Added E flags
  *           MSB, July 9, 2009
+ *  Added type h5d_flags of type size_t
+ *           MSB, Feb. 28, 2014
  * SOURCE
  */
 int_f
-nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, hid_t_f *h5e_hid_flags, int_f *h5f_flags,
+nh5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags, 
+		 int_f *h5e_flags, hid_t_f *h5e_hid_flags, int_f *h5f_flags,
                  int_f *h5fd_flags, hid_t_f *h5fd_hid_flags,
                  int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags,
                  hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags, int_f *h5s_flags,
@@ -376,6 +380,9 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, hid_t_f *h5e_hid_flags, int
 /*
  *  H5D flags
  */
+    h5d_size_flags[0] = (size_t_f)H5D_CHUNK_CACHE_NSLOTS_DEFAULT;
+    h5d_size_flags[1] = (size_t_f)H5D_CHUNK_CACHE_NBYTES_DEFAULT;
+
     h5d_flags[0] = (int_f)H5D_COMPACT;
     h5d_flags[1] = (int_f)H5D_CONTIGUOUS;
     h5d_flags[2] = (int_f)H5D_CHUNKED;
@@ -395,18 +402,18 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, hid_t_f *h5e_hid_flags, int
     h5d_flags[16] = (int_f)H5D_FILL_VALUE_UNDEFINED;
     h5d_flags[17] = (int_f)H5D_FILL_VALUE_DEFAULT;
     h5d_flags[18] = (int_f)H5D_FILL_VALUE_USER_DEFINED;
-    h5d_flags[19] = (int_f)H5D_CHUNK_CACHE_NSLOTS_DEFAULT;
-    h5d_flags[20] = (int_f)H5D_CHUNK_CACHE_NBYTES_DEFAULT;
-    h5d_flags[21] = (int_f)H5D_CHUNK_CACHE_W0_DEFAULT;
-    h5d_flags[22] = (int_f)H5D_MPIO_NO_COLLECTIVE;
-    h5d_flags[23] = (int_f)H5D_MPIO_CHUNK_INDEPENDENT;
-    h5d_flags[24] = (int_f)H5D_MPIO_CHUNK_COLLECTIVE;
-    h5d_flags[25] = (int_f)H5D_MPIO_CHUNK_MIXED;
-    h5d_flags[26] = (int_f)H5D_MPIO_CONTIGUOUS_COLLECTIVE;
+    h5d_flags[19] = (int_f)H5D_CHUNK_CACHE_W0_DEFAULT;
+    h5d_flags[20] = (int_f)H5D_MPIO_NO_COLLECTIVE;
+    h5d_flags[21] = (int_f)H5D_MPIO_CHUNK_INDEPENDENT;
+    h5d_flags[22] = (int_f)H5D_MPIO_CHUNK_COLLECTIVE;
+    h5d_flags[23] = (int_f)H5D_MPIO_CHUNK_MIXED;
+    h5d_flags[24] = (int_f)H5D_MPIO_CONTIGUOUS_COLLECTIVE;
+
 /*
  *  H5E flags
  */
     h5e_hid_flags[0] = (hid_t_f)H5E_DEFAULT;
+
     h5e_flags[0] = (int_f)H5E_MAJOR;
     h5e_flags[1] = (int_f)H5E_MINOR;
     h5e_flags[2] = (int_f)H5E_WALK_UPWARD;
