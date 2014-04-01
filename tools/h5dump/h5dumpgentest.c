@@ -8643,7 +8643,7 @@ static void gent_compound_int_array(void) {
     herr_t status; /* Error checking variable */
     hsize_t dim[] = { F76_LENGTH }; /* Dataspace dimensions     */
 
-    int m, n, o; /* Array init loop vars     */
+    int m, n; /* Array init loop vars     */
 
     /* Initialize the data in the arrays/datastructure                */
     for (m = 0; m < F76_LENGTH; m++) {
@@ -8853,7 +8853,6 @@ static void gent_compound_int_array(void) {
 
 static void gent_compound_ints(void) {
     hid_t fid, dataset, space;
-    hsize_t dims[1];
     uint8_t  valu8bits = (uint8_t) ~0u;  /* all 1s */
     uint16_t valu16bits = (uint16_t) ~0u;  /* all 1s */
     uint32_t valu32bits = (uint32_t) ~0u;  /* all 1s */

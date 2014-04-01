@@ -318,7 +318,7 @@ test_extend(hid_t f, const char *prefix,
 	    nelmts = 1;
 	} else {
 	    for (i=0, nelmts=1; i<(size_t)ndims; i++) {
-		if (ctr % ndims == i) {
+		if (ctr % (size_t)ndims == i) {
 		    offset[i] = max_corner[i];
 		    size[i] = MIN(1, whole_size[i] - offset[i]);
 		} else {

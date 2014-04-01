@@ -43,6 +43,14 @@ static herr_t H5S_mpio_all_type(const H5S_t *space, size_t elmt_size,
     MPI_Datatype *new_type, int *count, hbool_t *is_derived_type);
 static herr_t H5S_mpio_none_type(MPI_Datatype *new_type, int *count,
     hbool_t *is_derived_type);
+static herr_t H5S_mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, 
+    MPI_Aint *disp, MPI_Datatype *new_type);
+static herr_t H5S_mpio_point_type(const H5S_t *space, size_t elmt_size,
+    MPI_Datatype *new_type, int *count, hbool_t *is_derived_type,
+    hbool_t do_permute, hsize_t **permute_map, hbool_t *is_permuted);
+static herr_t H5S_mpio_permute_type(const H5S_t *space, size_t elmt_size, 
+    hsize_t **permute_map, MPI_Datatype *new_type, int *count,
+    hbool_t *is_derived_type);
 static herr_t H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
     MPI_Datatype *new_type, int *count, hbool_t *is_derived_type);
 static herr_t H5S_mpio_span_hyper_type(const H5S_t *space, size_t elmt_size,
@@ -128,6 +136,335 @@ H5S_mpio_none_type(MPI_Datatype *new_type, int *count, hbool_t *is_derived_type)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5S_mpio_none_type() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_mpio_create_point_datatype
+ *
+ * Purpose:	Create a derived datatype for point selections.
+ *
+ * Return:	non-negative on success, negative on failure.
+ *
+ * Outputs:	*new_type	  the MPI type corresponding to the selection
+ *
+ * Programmer:	Mohamad Chaarawi
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5S_mpio_create_point_datatype (size_t elmt_size, hsize_t num_points,
+    MPI_Aint *disp, MPI_Datatype *new_type) 
+{
+    MPI_Datatype   elmt_type;           /* MPI datatype for individual element */
+    hbool_t        elmt_type_created = FALSE;   /* Whether the element MPI datatype was created */
+    int            mpi_code;            /* MPI error code */
+    int            *blocks = NULL;      /* Array of block sizes for MPI hindexed create call */
+    hsize_t        u;                   /* Local index variable */
+    herr_t	   ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Create an MPI datatype for an element */
+    if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)elmt_size, MPI_BYTE, &elmt_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
+    elmt_type_created = TRUE;
+    
+    /* Allocate block sizes for MPI datatype call */
+    if(NULL == (blocks = (int *)H5MM_malloc(sizeof(int) * num_points)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks")
+
+    /* Would be nice to have Create_Hindexed_block to avoid this array of all ones */
+    for(u = 0; u < num_points; u++)
+        blocks[u] = 1;
+
+    /* Create an MPI datatype for the whole point selection */
+    if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)num_points, blocks, disp, elmt_type, new_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_indexed_block failed", mpi_code)
+
+    /* Commit MPI datatype for later use */
+    if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+
+done:
+    if(elmt_type_created)
+        MPI_Type_free(&elmt_type);
+    if(blocks)
+        H5MM_free(blocks);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5S_mpio_create_point_datatype() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_mpio_point_type
+ *
+ * Purpose:	Translate an HDF5 "point" selection into an MPI type.
+ *              Create a permutation array to handle out-of-order point selections.
+ *
+ * Return:	non-negative on success, negative on failure.
+ *
+ * Outputs:	*new_type	  the MPI type corresponding to the selection
+ *		*count		  how many objects of the new_type in selection
+ *				  (useful if this is the buffer type for xfer)
+ *		*is_derived_type  0 if MPI primitive type, 1 if derived
+ *              *permute_map      the permutation of the displacements to create
+ *                                the MPI_Datatype
+ *              *is_permuted      0 if the displacements are permuted, 1 if not
+ *
+ * Programmer:	Mohamad Chaarawi
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5S_mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, 
+    int *count, hbool_t *is_derived_type, hbool_t do_permute, hsize_t **permute,
+    hbool_t *is_permuted)
+{
+    MPI_Aint *disp = NULL;      /* Datatype displacement for each point*/
+    H5S_pnt_node_t *curr = NULL; /* Current point being operated on in from the selection */
+    hssize_t snum_points;       /* Signed number of elements in selection */
+    hsize_t num_points;         /* Sumber of points in the selection */
+    hsize_t u;                  /* Local index variable */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check args */
+    HDassert(space);
+
+    /* Get the total number of points selected */
+    if((snum_points = (hssize_t)H5S_GET_SELECT_NPOINTS(space)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
+    num_points = (hsize_t)snum_points;
+
+    /* Allocate array for element displacements */
+    if(NULL == (disp = (MPI_Aint *)H5MM_malloc(sizeof(MPI_Aint) * num_points)))
+         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
+
+    /* Allocate array for element permutation - returned to caller */
+    if(do_permute)
+        if(NULL == (*permute = (hsize_t *)H5MM_malloc(sizeof(hsize_t) * num_points)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate permutation array")
+
+    /* Iterate through list of elements */
+    curr = space->select.sel_info.pnt_lst->head;
+    for(u = 0 ; u < num_points ; u++) {
+        /* calculate the displacement of the current point */
+        disp[u] = H5VM_array_offset(space->extent.rank, space->extent.size, curr->pnt);
+        disp[u] *= elmt_size;
+
+        /* This is a File Space used to set the file view, so adjust the displacements 
+         * to have them monotonically non-decreasing.
+         * Generate the permutation array by indicating at each point being selected, 
+         * the position it will shifted in the new displacement. Example: 
+         * Suppose 4 points with corresponding are selected 
+         * Pt 1: disp=6 ; Pt 2: disp=3 ; Pt 3: disp=0 ; Pt 4: disp=4 
+         * The permute map to sort the displacements in order will be:
+         * point 1: map[0] = L, indicating that this point is not moved (1st point selected)
+         * point 2: map[1] = 0, indicating that this point is moved to the first position, 
+         *                      since disp_pt1(6) > disp_pt2(3)
+         * point 3: map[2] = 0, move to position 0, bec it has the lowest disp between 
+         *                      the points selected so far.
+         * point 4: map[3] = 2, move the 2nd position since point 1 has a higher disp, 
+         *                      but points 2 and 3 have lower displacements.
+         */
+        if(do_permute) {
+            if(u > 0 && disp[u] < disp[u - 1]) {
+                unsigned s = 0, l = u, m = u / 2;
+
+                *is_permuted = TRUE;
+                do {
+                    if(disp[u] > disp[m])
+                        s = m + 1;
+                    else if(disp[u] < disp[m])
+                        l = m;
+                    else
+                        break;
+                    m = s + ((l - s) / 2);
+                } while(s < l);
+
+                if(m < u) {
+                    MPI_Aint temp;
+
+                    temp = disp[u];
+                    HDmemmove(disp + m + 1, disp + m, (u - m) * sizeof(MPI_Aint));
+                    disp[m] = temp;
+                } /* end if */
+                (*permute)[u] = m;                
+            } /* end if */
+            else
+                (*permute)[u] = num_points;
+        } /* end if */
+        /* this is a memory space, and no permutation is necessary to create
+           the derived datatype */
+        else {
+            ;/* do nothing */
+        } /* end else */
+
+        /* get the next point */
+        curr = curr->next;
+    } /* end for */
+
+    /* Create the MPI datatype for the set of element displacements */
+    if(H5S_mpio_create_point_datatype(elmt_size, num_points, disp, new_type) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create an MPI Datatype from point selection")
+
+    /* Set values about MPI datatype created */
+    *count = 1;
+    *is_derived_type = TRUE;
+
+done:
+    if(NULL != disp)
+        H5MM_free(disp);
+
+    /* Release the permutation buffer, if it wasn't used */
+    if(!(*is_permuted) && (*permute)) {
+        H5MM_free(*permute);
+        *permute = NULL;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5S_mpio_point_type() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_mpio_permute_type
+ *
+ * Purpose:	Translate an HDF5 "all/hyper/point" selection into an MPI type,
+ *              while applying the permutation map. This function is called if
+ *              the file space selection is permuted due to out-of-order point
+ *              selection and so the memory datatype has to be permuted using the
+ *              permutation map created by the file selection.
+ *
+ * Note:	This routine is called from H5S_mpio_space_type(), which is
+ *              called first for the file dataspace and creates
+ *
+ * Return:	non-negative on success, negative on failure.
+ *
+ * Outputs:	*new_type	  the MPI type corresponding to the selection
+ *		*count		  how many objects of the new_type in selection
+ *				  (useful if this is the buffer type for xfer)
+ *		*is_derived_type  0 if MPI primitive type, 1 if derived
+ *
+ * Programmer:	Mohamad Chaarawi
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5S_mpio_permute_type(const H5S_t *space, size_t elmt_size, hsize_t **permute, 
+    MPI_Datatype *new_type, int *count, hbool_t *is_derived_type)
+{
+    MPI_Aint *disp = NULL;      /* Datatype displacement for each point*/
+    H5S_sel_iter_t sel_iter;    /* Selection iteration info */
+    hbool_t sel_iter_init = FALSE;      /* Selection iteration info has been initialized */
+    hsize_t off[H5D_IO_VECTOR_SIZE];    /* Array to store sequence offsets */
+    size_t len[H5D_IO_VECTOR_SIZE];     /* Array to store sequence lengths */
+    hssize_t snum_points;       /* Signed number of elements in selection */
+    hsize_t num_points;         /* Number of points in the selection */
+    size_t max_elem;            /* Maximum number of elements allowed in sequences */
+    hsize_t u;                  /* Local index variable */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check args */
+    HDassert(space);
+
+    /* Get the total number of points selected */
+    if((snum_points = (hssize_t)H5S_GET_SELECT_NPOINTS(space)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
+    num_points = (hsize_t)snum_points;
+
+    /* Allocate array to store point displacements */
+    if(NULL == (disp = (MPI_Aint *)H5MM_malloc(sizeof(MPI_Aint) * num_points)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
+
+    /* Initialize selection iterator */
+    if(H5S_select_iter_init(&sel_iter, space, elmt_size) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
+    sel_iter_init = TRUE;	/* Selection iteration info has been initialized */
+
+    /* Set the number of elements to iterate over */
+    H5_ASSIGN_OVERFLOW(max_elem, num_points, hsize_t, size_t);
+
+    /* Loop, while elements left in selection */
+    u = 0;
+    while(max_elem > 0) {
+        hsize_t off[H5D_IO_VECTOR_SIZE];        /* Array to store sequence offsets */
+        size_t len[H5D_IO_VECTOR_SIZE];         /* Array to store sequence lengths */
+        size_t nelem;               /* Number of elements used in sequences */
+        size_t nseq;                /* Number of sequences generated */
+        size_t curr_seq;            /* Current sequence being worked on */
+
+        /* Get the sequences of bytes */
+        if(H5S_SELECT_GET_SEQ_LIST(space, 0, &sel_iter, (size_t)H5D_IO_VECTOR_SIZE, max_elem, &nseq, &nelem, off, len) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+
+        /* Loop, while sequences left to process */
+        for(curr_seq = 0; curr_seq < nseq; curr_seq++) {
+            hsize_t curr_off;           /* Current offset within sequence */
+            size_t curr_len;            /* Length of bytes left to process in sequence */
+
+            /* Get the current offset */
+            curr_off = off[curr_seq];
+
+            /* Get the number of bytes in sequence */
+            curr_len = len[curr_seq];
+
+            /* Loop, while bytes left in sequence */
+            while(curr_len > 0) {
+                /* Set the displacement of the current point */
+                disp[u] = curr_off;
+
+                /* This is a memory displacement, so for each point selected, 
+                 * apply the map that was generated by the file selection */
+                if((*permute)[u] != num_points) {
+                    MPI_Aint temp = disp[u];
+
+                    HDmemmove(disp + (*permute)[u] + 1, disp + (*permute)[u], 
+                             (u - (*permute)[u]) * sizeof(MPI_Aint));
+                    disp[(*permute)[u]] = temp;
+                } /* end if */
+
+                /* Advance to next element */
+                u++;
+
+                /* Increment offset in dataspace */
+                curr_off += elmt_size;
+
+                /* Decrement number of bytes left in sequence */
+                curr_len -= elmt_size;
+            } /* end while */
+        } /* end for */
+
+        /* Decrement number of elements left to process */
+        max_elem -= nelem;
+    } /* end while */
+
+    /* Create the MPI datatype for the set of element displacements */
+    if(H5S_mpio_create_point_datatype(elmt_size, num_points, disp, new_type) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create an MPI Datatype from point selection")
+
+    /* Set values about MPI datatype created */
+    *count = 1;
+    *is_derived_type = TRUE;
+
+done:
+    /* Release selection iterator */
+    if(sel_iter_init)
+        if(H5S_SELECT_ITER_RELEASE(&sel_iter) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+
+    /* Free memory */
+    if(disp)
+        H5MM_free(disp);
+    if(*permute) {
+        H5MM_free(*permute);
+        *permute = NULL;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5S_mpio_permute_type() */
 
 
 /*-------------------------------------------------------------------------
@@ -478,7 +815,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_obtain datatype
+ * Function:	H5S_obtain_datatype
  *
  * Purpose:	Obtain an MPI derived datatype based on span-tree
  *              implementation
@@ -673,8 +1010,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_mpio_space_type(const H5S_t *space, size_t elmt_size,
-    MPI_Datatype *new_type, int *count, hbool_t *is_derived_type)
+H5S_mpio_space_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, 
+    int *count, hbool_t *is_derived_type, hbool_t do_permute, hsize_t **permute_map,
+    hbool_t *is_permuted)
 {
     herr_t	ret_value = SUCCEED;    /* Return value */
 
@@ -684,44 +1022,75 @@ H5S_mpio_space_type(const H5S_t *space, size_t elmt_size,
     HDassert(space);
     HDassert(elmt_size);
 
-    /* Creat MPI type based on the kind of selection */
+    /* Create MPI type based on the kind of selection */
     switch(H5S_GET_EXTENT_TYPE(space)) {
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            switch(H5S_GET_SELECT_TYPE(space)) {
-                case H5S_SEL_NONE:
-                    if(H5S_mpio_none_type(new_type, count, is_derived_type) < 0)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert 'none' selection to MPI type")
-                    break;
+            /* If the file space has been permuted previously due to
+             * out-of-order point selection, then permute this selection which
+             * should be a memory selection to match the file space permutation.
+             */
+            if(TRUE == *is_permuted) { 
+                switch(H5S_GET_SELECT_TYPE(space)) {
+                    case H5S_SEL_NONE:
+                        if(H5S_mpio_none_type(new_type, count, is_derived_type) < 0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't convert 'none' selection to MPI type")
+                        break;
 
-                case H5S_SEL_ALL:
-                    if(H5S_mpio_all_type(space, elmt_size, new_type, count, is_derived_type) < 0)
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert 'all' selection to MPI type")
-                    break;
+                    case H5S_SEL_ALL:
+                    case H5S_SEL_POINTS:
+                    case H5S_SEL_HYPERSLABS:
+                        /* Sanity check */
+                        HDassert(!do_permute);
 
-                case H5S_SEL_POINTS:
-                    /* not yet implemented */
-                    ret_value = FAIL;
-                    break;
+                        if(H5S_mpio_permute_type(space, elmt_size, permute_map, new_type, count, is_derived_type) < 0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't convert 'all' selection to MPI type")
+                        break;
 
-                case H5S_SEL_HYPERSLABS:
-                    if((H5S_SELECT_IS_REGULAR(space) == TRUE)) {
-                        if(H5S_mpio_hyper_type(space, elmt_size, new_type, count, is_derived_type) < 0)
-                            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert regular 'hyperslab' selection to MPI type")
-		    } /* end if */
-                    else {
-                        if(H5S_mpio_span_hyper_type(space, elmt_size, new_type, count, is_derived_type) < 0)
-                            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert irregular 'hyperslab' selection to MPI type")
-                    } /* end else */
-                    break;
+                    case H5S_SEL_ERROR:
+                    case H5S_SEL_N:
+                    default:
+                        HDassert("unknown selection type" && 0);
+                        break;
+                } /* end switch */
+            } /* end if */
+            /* the file space is not permuted, so do a regular selection */
+            else {
+                switch(H5S_GET_SELECT_TYPE(space)) {
+                    case H5S_SEL_NONE:
+                        if(H5S_mpio_none_type(new_type, count, is_derived_type) < 0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert 'none' selection to MPI type")
+                        break;
 
-		case H5S_SEL_ERROR:
-		case H5S_SEL_N:
-                default:
-                    HDassert("unknown selection type" && 0);
-                    break;
-            } /* end switch */
+                    case H5S_SEL_ALL:
+                        if(H5S_mpio_all_type(space, elmt_size, new_type, count, is_derived_type) < 0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert 'all' selection to MPI type")
+                        break;
+
+                    case H5S_SEL_POINTS:
+                        if(H5S_mpio_point_type(space, elmt_size, new_type, count, is_derived_type, do_permute, permute_map, is_permuted) < 0)
+                           HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't convert 'point' selection to MPI type")
+                        break;
+
+                    case H5S_SEL_HYPERSLABS:
+                        if((H5S_SELECT_IS_REGULAR(space) == TRUE)) {
+                            if(H5S_mpio_hyper_type(space, elmt_size, new_type, count, is_derived_type) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert regular 'hyperslab' selection to MPI type")
+                        } /* end if */
+                        else {
+                            if(H5S_mpio_span_hyper_type(space, elmt_size, new_type, count, is_derived_type) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert irregular 'hyperslab' selection to MPI type")
+                        } /* end else */
+                        break;
+
+                    case H5S_SEL_ERROR:
+                    case H5S_SEL_N:
+                    default:
+                        HDassert("unknown selection type" && 0);
+                        break;
+                } /* end switch */
+            } /* end else */
             break;
 
         case H5S_NO_CLASS:

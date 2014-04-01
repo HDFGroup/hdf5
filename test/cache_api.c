@@ -883,7 +883,6 @@ mdc_api_call_smoke_check(int express_test)
     hid_t properties;
     char dset_name[64];
     int i, j, k, l, m, n;
-    int progress_counter;
     herr_t status;
     hsize_t dims[2];
     hsize_t a_size[2];
@@ -1164,7 +1163,6 @@ mdc_api_call_smoke_check(int express_test)
 
     /* initialize all datasets on a round robin basis */
     i = 0;
-    progress_counter = 0;
 
     while ( ( pass ) && ( i < DSET_SIZE ) )
     {
@@ -1249,7 +1247,6 @@ mdc_api_call_smoke_check(int express_test)
 
     /* do random reads on all datasets */
     n = 0;
-    progress_counter = 0;
     while ( ( pass ) && ( n < NUM_RANDOM_ACCESSES ) )
     {
         m = rand() % NUM_DSETS;
@@ -1376,7 +1373,6 @@ mdc_api_call_smoke_check(int express_test)
     /* do random reads on data set 0 only */
     m = 0;
     n = 0;
-    progress_counter = 0;
     while ( ( pass ) && ( n < NUM_RANDOM_ACCESSES ) )
     {
         i = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;

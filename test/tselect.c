@@ -2734,7 +2734,6 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
     hid_t dset_type, hid_t xfer_plist)
 {
     hbool_t		data_ok;
-    hbool_t		start_in_checker[5];
     hid_t               fapl;                   /* File access property list */
     hid_t		fid;			/* HDF5 File IDs		*/
     hid_t		full_small_cube_sid;    /* Dataspace for small cube w/all selection */
@@ -2955,7 +2954,6 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
      * large cube.
      */
 
-    start_in_checker[0] = TRUE;
     u = 0;
     do {
         if(small_rank_offset > 0)
@@ -3063,7 +3061,6 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                                                              sel_start);
 
 
-    start_in_checker[0] = TRUE;
     u = 0;
     do {
         if(0 < small_rank_offset)
@@ -3207,7 +3204,6 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                                                              small_rank,
                                                              sel_start);
 
-    start_in_checker[0] = TRUE;
     u = 0;
     do {
         if(small_rank_offset > 0)
@@ -3340,7 +3336,6 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                                                              small_rank,
                                                              sel_start);
 
-    start_in_checker[0] = TRUE;
     u = 0;
     do {
         if(small_rank_offset > 0)

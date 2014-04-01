@@ -77,6 +77,7 @@
 ./bin/runtest        _DO_NOT_DISTRIBUTE_
 ./bin/snapshot
 ./bin/snapshot_version      _DO_NOT_DISTRIBUTE_
+./bin/test-driver
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
@@ -496,6 +497,7 @@
 ./c++/test/h5cpputil.h
 ./c++/test/tattr.cpp
 ./c++/test/tcompound.cpp
+./c++/test/tdspl.cpp
 ./c++/test/testhdf5.cpp
 ./c++/test/tfile.cpp
 ./c++/test/tfilter.cpp
@@ -696,8 +698,6 @@
 ./src/H5FDmpi.h
 ./src/H5FDmpio.c
 ./src/H5FDmpio.h
-./src/H5FDmpiposix.c
-./src/H5FDmpiposix.h
 ./src/H5FDmulti.c
 ./src/H5FDmulti.h
 ./src/H5FDpkg.h
@@ -1166,14 +1166,12 @@
 ./testpar/t_ph5basic.c
 ./testpar/t_pflush1.c
 ./testpar/t_pflush2.c
-./testpar/t_posix_compliant.c
 ./testpar/t_prop.c
 ./testpar/t_shapesame.c
 ./testpar/t_span_tree.c
 ./testpar/testpar.h
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
-./testpar/testph5.sh.in
 
 ./tools/COPYING
 ./tools/Makefile.am
@@ -1268,6 +1266,7 @@
 # h5repack sources
 ./tools/h5repack/Makefile.am
 ./tools/h5repack/Makefile.in
+./tools/h5repack/dynlib_rpk.c
 ./tools/h5repack/h5repack.sh.in
 ./tools/h5repack/h5repack_plugin.sh.in
 ./tools/h5repack/h5repack.c
@@ -2255,7 +2254,6 @@
 ./hl/src/Makefile.am
 ./hl/src/Makefile.in
 ./hl/src/H5DO.c
-./hl/src/H5DOprivate.h
 ./hl/src/H5DOpublic.h
 ./hl/src/H5DS.c
 ./hl/src/H5DSprivate.h
@@ -2454,7 +2452,11 @@
 ./config/cmake/CTestCustom.cmake
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CPack.Info.plist.in
-./config/cmake/hdf.gif
+./config/cmake/hdf.bmp
+./config/cmake/hdf.icns
+./config/cmake/hdf.ico
+./config/cmake/PkgInfo.in
+./config/cmake/version.plist.in
 ./config/cmake/NSIS.template.in
 ./config/cmake/NSIS.InstallOptions.ini.in
 ./config/cmake/README.txt.cmake.in

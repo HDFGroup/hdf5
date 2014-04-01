@@ -26,7 +26,7 @@
 #define         INCREMENT       1024
 #define         TMP_LEN         256
 #define         MAX(a,b)        (((a)>(b)) ? (a) : (b))
-int  input_len;
+size_t  input_len;
 char *myinput;
 size_t  indent = 0;
 
@@ -2290,9 +2290,9 @@ print_enum(hid_t type, char* str, size_t *str_len, hbool_t no_ubuf, size_t indt)
     size_t           dst_size;      /*destination value type size    */
     int              i;
 
-    if((nmembs = H5Tget_nmembers(type))==0)
+    if((nmembs = H5Tget_nmembers(type))<=0)
         goto out;
-    assert(nmembs>0);
+
     if((super = H5Tget_super(type)) < 0)
         goto out;
 
@@ -2359,7 +2359,7 @@ print_enum(hid_t type, char* str, size_t *str_len, hbool_t no_ubuf, size_t indt)
 
     /* Release resources */
     for(i = 0; i < nmembs; i++)
-        HDfree(name[i]);
+        H5free_memory(name[i]);
 
     HDfree(name);
     HDfree(value);
@@ -2744,7 +2744,7 @@ next:
             if(tag) {
                 HDsnprintf(tmp_str, TMP_LEN, "OPQ_TAG \"%s\";\n", tag);
                 if(tag)
-                    HDfree(tag);
+                    H5free_memory(tag);
                 tag = NULL;
             } else
                 HDsnprintf(tmp_str, TMP_LEN, "OPQ_TAG \"\";\n");
@@ -2950,7 +2950,7 @@ next:
                     if(!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                         goto out;
                     if(mname)
-                        HDfree(mname);
+                        H5free_memory(mname);
                     mname = NULL;
 
                     HDsnprintf(tmp_str, TMP_LEN, " : %lu;\n", (unsigned long)moffset);

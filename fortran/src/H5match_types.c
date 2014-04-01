@@ -51,8 +51,8 @@ FILE * fort_header;
 void writeTypedef(const char* c_type, unsigned int size);
 void writeFloatTypedef(const char* c_type, unsigned int size);
 void writeTypedefDefault(unsigned int size);
-void writeToFiles(const char* fortran_type, const char* c_type, unsigned int size, unsigned int kind);
-void writeFloatToFiles(const char* fortran_type, const char* c_type, unsigned int size, unsigned int kind);
+void writeToFiles(const char* fortran_type, const char* c_type, int size, unsigned int kind);
+void writeFloatToFiles(const char* fortran_type, const char* c_type, int size, unsigned int kind);
 
 static void
 initCfile(void)
@@ -141,26 +141,26 @@ void writeTypedefDefault(unsigned int size)
 }
 
 /* Create matching Fortran and C types by writing to both files */
-void writeToFiles(const char* fortran_type, const char* c_type, unsigned int size, unsigned int kind)
+void writeToFiles(const char* fortran_type, const char* c_type, int size, unsigned int kind)
 {
   fprintf(fort_header, "        INTEGER, PARAMETER :: %s = %u\n", fortran_type, kind);
-  fprintf(c_header, "typedef c_int_%u %s;\n", size, c_type);
+  fprintf(c_header, "typedef c_int_%d %s;\n", size, c_type);
 }
 
 /* Create matching Fortran and C floating types by writing to both files */
-void writeFloatToFiles(const char* fortran_type, const char* c_type, unsigned int size, unsigned int kind)
+void writeFloatToFiles(const char* fortran_type, const char* c_type, int size, unsigned int kind)
 {
   fprintf(fort_header, "        INTEGER, PARAMETER :: %s = %u\n", fortran_type, kind);
 
-  fprintf(c_header, "typedef c_float_%u %s;\n", size, c_type);
+  fprintf(c_header, "typedef c_float_%d %s;\n", size, c_type);
 }
 
 int main(void)
 {
   int FoundIntSize[4];
-  int FoundIntSizeKind[4];
+  unsigned FoundIntSizeKind[4];
   int FoundRealSize[3];
-  int FoundRealSizeKind[3];
+  unsigned FoundRealSizeKind[3];
   int i,j,flag;
   char chrA[20],chrB[20];
   int H5_C_HAS_REAL_NATIVE_16;
@@ -428,9 +428,7 @@ int main(void)
 		}
 	    }
 	  if(flag == 0) /* No higher or lower one found, indicating an error */
-	    {
 	     return -1;
-	    }
 	}
     }
 
@@ -496,9 +494,8 @@ int main(void)
 		    {
 		      sprintf(chrA, "Fortran_REAL_%d", (-1)*FoundRealSize[i]);
 		      sprintf(chrB, "real_%d_f", (-1)*FoundRealSize[i]);
-		      if(FoundRealSize[j]>4) {
+		      if(FoundRealSize[j]>4)
 			writeFloatToFiles(chrA, chrB,  FoundRealSize[j], FoundRealSizeKind[j]);
-		      }
 		     /*  else { */
 /* 			writeFloatToFiles(chrA, chrB, FoundRealSize[j]); */
 /* 		      } */
@@ -508,9 +505,7 @@ int main(void)
 		}
 	    }
 	  if(flag == 0) /* No higher or lower one found, indicating an error */
-	    {
 	     return -1;
-	    }
 	}
     }
 

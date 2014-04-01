@@ -174,12 +174,6 @@
 /* Define to 1 if you have the `get_fpc_csr' function. */
 #undef HAVE_GET_FPC_CSR
 
-/* Define if we have GPFS support */
-#undef HAVE_GPFS
-
-/* Define to 1 if you have the <gpfs.h> header file. */
-#undef HAVE_GPFS_H
-
 /* Define if library will contain instrumentation to detect correct
    optimization operation */
 #undef HAVE_INSTRUMENTED_LIBRARY

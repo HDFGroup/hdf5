@@ -316,11 +316,13 @@ static void test_reference_obj(void)
 	// Dereference group object from the location where 'dataset' is located
 	group.dereference(dataset, &rbuf[2]);
 
-	// Get group's comment
+	// Get group's comment using
+	// H5std_string getComment(const char* name, <buf_size=0 by default>)
 	H5std_string read_comment1 = group.getComment(".", 10);
 	verify_val(read_comment1.c_str(), write_comment, "Group::getComment",__LINE__,__FILE__);
 
-	// Test that getComment handles failures gracefully
+	// Test that getComment handles failures gracefully, using
+	// H5std_string getComment(const char* name, <buf_size=0 by default>)
 	try {
 	    H5std_string read_comment_tmp = group.getComment(NULL);
 	}

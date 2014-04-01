@@ -644,6 +644,7 @@ xml_escape_the_name(const char *str)
     const char *cp;
     char       *ncp;
     char       *rcp;
+    size_t      ncp_len;
 
     if (!str)
         return NULL;
@@ -653,21 +654,16 @@ xml_escape_the_name(const char *str)
     extra = 0;
 
     for (i = 0; i < len; i++) {
-        if (*cp == '\"') {
+        if (*cp == '\"')
             extra += (HDstrlen(quote) - 1);
-        } 
-        else if (*cp == '\'') {
+        else if (*cp == '\'')
             extra += (HDstrlen(apos) - 1);
-        } 
-        else if (*cp == '<') {
+        else if (*cp == '<')
             extra += (HDstrlen(lt) - 1);
-        } 
-        else if (*cp == '>') {
+        else if (*cp == '>')
             extra += (HDstrlen(gt) - 1);
-        } 
-        else if (*cp == '&') {
+        else if (*cp == '&')
             extra += (HDstrlen(amp) - 1);
-        }
 
         cp++;
     }
@@ -676,40 +672,43 @@ xml_escape_the_name(const char *str)
         return HDstrdup(str);
 
     cp = str;
-    rcp = ncp = (char *)HDmalloc(len + extra + 1);
+    ncp_len = len + extra + 1;
+    rcp = ncp = (char *)HDmalloc(ncp_len);
 
     if (!ncp)
         return NULL;    /* ?? */
 
     for (i = 0; i < len; i++) {
+        size_t esc_len;
+
+        HDassert(ncp_len);
         if (*cp == '\'') {
-            HDstrncpy(ncp, apos, HDstrlen(apos));
-            ncp += HDstrlen(apos);
-            cp++;
+            HDstrncpy(ncp, apos, ncp_len);
+            esc_len = HDstrlen(apos);
         } 
         else if (*cp == '<') {
-            HDstrncpy(ncp, lt, HDstrlen(lt));
-            ncp += HDstrlen(lt);
-            cp++;
+            HDstrncpy(ncp, lt, ncp_len);
+            esc_len = HDstrlen(lt);
         } 
         else if (*cp == '>') {
-            HDstrncpy(ncp, gt, HDstrlen(gt));
-            ncp += HDstrlen(gt);
-            cp++;
+            HDstrncpy(ncp, gt, ncp_len);
+            esc_len = HDstrlen(gt);
         } 
         else if (*cp == '\"') {
-            HDstrncpy(ncp, quote, HDstrlen(quote));
-            ncp += HDstrlen(quote);
-            cp++;
+            HDstrncpy(ncp, quote, ncp_len);
+            esc_len = HDstrlen(quote);
         } 
         else if (*cp == '&') {
-            HDstrncpy(ncp, amp, HDstrlen(amp));
-            ncp += HDstrlen(amp);
-            cp++;
+            HDstrncpy(ncp, amp, ncp_len);
+            esc_len = HDstrlen(amp);
         } 
         else {
-            *ncp++ = *cp++;
+            *ncp = *cp;
+            esc_len = 1;
         }
+        ncp += esc_len;
+        ncp_len -= esc_len;
+        cp++;
     }
 
     *ncp = '\0';
@@ -739,6 +738,7 @@ xml_escape_the_string(const char *str, int slen)
     const char *cp;
     char       *ncp;
     char       *rcp;
+    size_t      ncp_len;
 
     if (!str)
         return NULL;
@@ -753,65 +753,65 @@ xml_escape_the_string(const char *str, int slen)
     extra = 0;
 
     for (i = 0; i < len; i++) {
-        if (*cp == '\\') {
+        if (*cp == '\\')
             extra++;
-        }
-        else if (*cp == '\"') {
+        else if (*cp == '\"')
             extra++;
-        }
-        else if (*cp == '\'') {
+        else if (*cp == '\'')
             extra += (HDstrlen(apos) - 1);
-        }
-        else if (*cp == '<') {
+        else if (*cp == '<')
             extra += (HDstrlen(lt) - 1);
-        }
-        else if (*cp == '>') {
+        else if (*cp == '>')
             extra += (HDstrlen(gt) - 1);
-        }
-        else if (*cp == '&') {
+        else if (*cp == '&')
             extra += (HDstrlen(amp) - 1);
-        }
         cp++;
     }
 
     cp = str;
-    rcp = ncp = (char *) HDcalloc((len + extra + 1), sizeof(char));
+    ncp_len = len + extra + 1;
+    rcp = ncp = (char *) HDcalloc(ncp_len, sizeof(char));
 
     if (ncp == NULL)
         return NULL; /* ?? */
 
     for (i = 0; i < len; i++) {
+        size_t esc_len;
+
+        HDassert(ncp_len);
         if (*cp == '\\') {
             *ncp++ = '\\';
-            *ncp++ = *cp++;
+            *ncp = *cp;
+            esc_len = 1;
         }
         else if (*cp == '\"') {
             *ncp++ = '\\';
-            *ncp++ = *cp++;
+            *ncp = *cp;
+            esc_len = 1;
         }
         else if (*cp == '\'') {
-            HDstrncpy(ncp, apos, HDstrlen(apos));
-            ncp += HDstrlen(apos);
-            cp++;
+            HDstrncpy(ncp, apos, ncp_len);
+            esc_len = HDstrlen(apos);
         }
         else if (*cp == '<') {
-            HDstrncpy(ncp, lt, HDstrlen(lt));
-            ncp += HDstrlen(lt);
-            cp++;
+            HDstrncpy(ncp, lt, ncp_len);
+            esc_len = HDstrlen(lt);
         }
         else if (*cp == '>') {
-            HDstrncpy(ncp, gt, HDstrlen(gt));
-            ncp += HDstrlen(gt);
-            cp++;
+            HDstrncpy(ncp, gt, ncp_len);
+            esc_len = HDstrlen(gt);
         }
         else if (*cp == '&') {
-            HDstrncpy(ncp, amp, HDstrlen(amp));
-            ncp += HDstrlen(amp);
-            cp++;
+            HDstrncpy(ncp, amp, ncp_len);
+            esc_len = HDstrlen(amp);
         }
         else {
-            *ncp++ = *cp++;
+            *ncp = *cp;
+            esc_len = 1;
         }
+        ncp += esc_len;
+        ncp_len -= esc_len;
+        cp++;
     }
 
     *ncp = '\0';
@@ -1216,7 +1216,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
             /* Render the element */
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "<%sOpaqueType Tag=\"%s\" ",xmlnsprefix, mname);
-            HDfree(mname);
+            H5free_memory(mname);
             size = H5Tget_size(type);
             h5tools_str_append(&buffer, "Size=\"%lu\"/>", (unsigned long)size);
             h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
@@ -1265,7 +1265,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
                 h5tools_str_append(&buffer, "<%sField FieldName=\"%s\">",xmlnsprefix, t_fname);
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-                HDfree(mname);
+                H5free_memory(mname);
                 HDfree(t_fname);
                 dump_indent += COL;
                 ctx.indent_level++;
@@ -3623,7 +3623,8 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "\"%s\"", name);
             h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-
+            if(name)
+                H5free_memory(name);
             ctx.need_prefix = TRUE;
             h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
@@ -4526,7 +4527,7 @@ xml_print_enum(hid_t type)
 
     /* Release resources */
     for (i = 0; i < nmembs; i++)
-        HDfree(name[i]);
+        H5free_memory(name[i]);
 
     HDfree(name);
     HDfree(value);

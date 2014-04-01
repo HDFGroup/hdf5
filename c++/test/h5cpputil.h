@@ -49,14 +49,14 @@ class InvalidActionException : public Exception {
    public:
 	InvalidActionException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
 	InvalidActionException();
-	virtual ~InvalidActionException();
+	virtual ~InvalidActionException() throw();
 };
 
 class TestFailedException : public Exception {
    public:
 	TestFailedException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
 	TestFailedException();
-	virtual ~TestFailedException();
+	virtual ~TestFailedException() throw();
 };
 
 // Overloaded/Template functions to verify values and display proper info
@@ -121,6 +121,7 @@ extern "C" {
 #endif
 void test_attr();
 void test_compound();
+void test_dsproplist();
 void test_file();
 void test_filters();
 void test_links();
@@ -133,6 +134,7 @@ void test_dset();
 /* Prototypes for the cleanup routines */
 void cleanup_attr();
 void cleanup_compound();
+void cleanup_dsproplist();
 void cleanup_dsets();
 void cleanup_file();
 void cleanup_filters();

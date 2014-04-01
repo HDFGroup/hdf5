@@ -51,7 +51,7 @@ const H5Z_class2_t H5Z_DEFLATE[1] = {{
     H5Z_filter_deflate,         /* The actual filter function	*/
 }};
 
-#define H5Z_DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s))*1.001)+12)
+#define H5Z_DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s)) * (double)1.001f) + 12)
 
 
 /*-------------------------------------------------------------------------

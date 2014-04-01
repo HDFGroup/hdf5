@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.10)
+cmake_minimum_required (VERSION 2.8.11)
 PROJECT (HDF5_CPP_TEST)
 # --------------------------------------------------------------------
 # Notes: When creating unit test executables they should be prefixed
@@ -11,10 +11,11 @@ PROJECT (HDF5_CPP_TEST)
 #-----------------------------------------------------------------------------
 # Define Sources
 #-----------------------------------------------------------------------------
-SET (CPP_TEST_SRCS
+set (CPP_TEST_SRCS
     ${HDF5_CPP_TEST_SOURCE_DIR}/testhdf5.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/tattr.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/tcompound.cpp
+    ${HDF5_CPP_TEST_SOURCE_DIR}/tdspl.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/tfile.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/tfilter.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/th5s.cpp
@@ -29,27 +30,27 @@ SET (CPP_TEST_SRCS
 #-----------------------------------------------------------------------------
 # Generate the H5srcdir_str.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
-SET (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
-CONFIGURE_FILE (${HDF5_CPP_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
-INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
+set (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
+configure_file (${HDF5_CPP_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 
-INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR} )
-
-ADD_EXECUTABLE (cpp_testhdf5 ${CPP_TEST_SRCS} )
+add_executable (cpp_testhdf5 ${CPP_TEST_SRCS} )
 TARGET_NAMING (cpp_testhdf5 ${LIB_TYPE})
 TARGET_C_PROPERTIES (cpp_testhdf5 " " " ")
-TARGET_LINK_LIBRARIES (cpp_testhdf5
+target_link_libraries (cpp_testhdf5
     ${HDF5_CPP_LIB_TARGET}
     ${HDF5_LIB_TARGET}
     ${HDF5_TEST_LIB_TARGET}
 )
-SET_TARGET_PROPERTIES (cpp_testhdf5 PROPERTIES FOLDER test/cpp)
+set_target_properties (cpp_testhdf5 PROPERTIES
+    FOLDER test/cpp
+    INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+)
 
-ADD_CUSTOM_COMMAND (
+add_custom_command (
     TARGET     cpp_testhdf5
     POST_BUILD
     COMMAND    ${CMAKE_COMMAND}
     ARGS       -E copy_if_different ${HDF5_CPP_TEST_SOURCE_DIR}/th5s.h5 ${PROJECT_BINARY_DIR}/th5s.h5
 )
 
-INCLUDE (CMakeTests.cmake)
+include (CMakeTests.cmake)

@@ -32,6 +32,9 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 	// Creates a dataset memory and transfer property list.
 	DSetMemXferPropList();
 
+	// Creates a dataset transform property list.
+	DSetMemXferPropList(const char* expression);
+
 	// Sets type conversion and background buffers.
 	void setBuffer( size_t size, void* tconv, void* bkg ) const;
 
@@ -43,6 +46,16 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 
 	// Gets B-tree split ratios for a dataset transfer property list.
 	void getBtreeRatios( double& left, double& middle, double& right ) const;
+
+	// Sets data transform expression.
+	void setDataTransform(const char* expression) const;
+	void setDataTransform(const H5std_string& expression) const;
+
+	// Gets data transform expression.
+	ssize_t getDataTransform(char* exp, size_t buf_size=0) const;
+	H5std_string getDataTransform() const;
+	//H5std_string getDataTransform(const size_t buf_size=0) const;
+	// this will collide with the first one when exp=NULL
 
 	// Sets the dataset transfer property list status to TRUE or FALSE.
 	void setPreserve( bool status ) const;

@@ -25,6 +25,7 @@
 #include "H5Library.h"
 #include "H5IdComponent.h"
 #include "H5DataSpace.h"
+#include "H5private.h"			// for HDmemset
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -289,6 +290,8 @@ H5std_string IdComponent::p_get_file_name() const
 
    // Call H5Fget_name again to get the actual file name
    char* name_C = new char[name_size+1];  // temporary C-string for C API
+   HDmemset(name_C, 0, name_size+1); // clear buffer
+
    name_size = H5Fget_name(temp_id, name_C, name_size+1);
 
    // Check for failure again
