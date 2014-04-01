@@ -52,7 +52,7 @@ endif
 
 # Include HDF5.f90 if parallel is disabled, HDF5mpiof*  if parallel is enabled
 if BUILD_PARALLEL_CONDITIONAL
-   PARALLEL_COND_SRC = H5FDmpiof.c H5FDmpioff$(F_STATUS).f90 HDF5mpio.f90 H5FDmpioff.f90 
+   PARALLEL_COND_SRC = H5FDmpiof.c HDF5mpio.f90 H5FDmpioff.f90 
 else
    PARALLEL_COND_SRC = HDF5.f90
 endif

@@ -131,11 +131,10 @@ am__libhdf5_fortran_la_SOURCES_DIST = H5f90global.f90 \
 	H5Tf.c H5Zf.c H5Aff$(F_STATUS).f90 H5Dff$(F_STATUS).f90 \
 	H5Eff$(F_STATUS).f90 H5Fff$(F_STATUS).f90 H5Lff$(F_STATUS).f90 \
 	H5Off$(F_STATUS).f90 H5Pff$(F_STATUS).f90 H5Rff$(F_STATUS).f90 \
-	H5Tff$(F_STATUS).f90 HDF5.f90 H5FDmpiof.c \
-	H5FDmpioff$(F_STATUS).f90 HDF5mpio.f90 H5FDmpioff.f90
+	H5Tff$(F_STATUS).f90 HDF5.f90 H5FDmpiof.c HDF5mpio.f90 \
+	H5FDmpioff.f90
 @BUILD_PARALLEL_CONDITIONAL_FALSE@am__objects_1 = HDF5.lo
 @BUILD_PARALLEL_CONDITIONAL_TRUE@am__objects_1 = H5FDmpiof.lo \
-@BUILD_PARALLEL_CONDITIONAL_TRUE@	H5FDmpioff$(F_STATUS).lo \
 @BUILD_PARALLEL_CONDITIONAL_TRUE@	HDF5mpio.lo H5FDmpioff.lo
 am_libhdf5_fortran_la_OBJECTS = H5f90global.lo H5fortran_types.lo \
 	H5_ff$(F_STATUS).lo H5_ff.lo H5Aff.lo H5Dff.lo H5Eff.lo \
@@ -542,7 +541,7 @@ libhdf5_fortran_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISI
 @BUILD_PARALLEL_CONDITIONAL_FALSE@PARALLEL_COND_SRC = HDF5.f90
 
 # Include HDF5.f90 if parallel is disabled, HDF5mpiof*  if parallel is enabled
-@BUILD_PARALLEL_CONDITIONAL_TRUE@PARALLEL_COND_SRC = H5FDmpiof.c H5FDmpioff$(F_STATUS).f90 HDF5mpio.f90 H5FDmpioff.f90 
+@BUILD_PARALLEL_CONDITIONAL_TRUE@PARALLEL_COND_SRC = H5FDmpiof.c HDF5mpio.f90 H5FDmpioff.f90 
 @FORTRAN_DEFAULT_REALisDBLE_F_FALSE@F_DBLE = Include
 
 #   Condition for including/excluding the DBLE interfaces for when the 
