@@ -284,7 +284,6 @@ H5std_string DSetMemXferPropList::getDataTransform() const
     {
         // Temporary buffer for char* expression
         char* exp_C = new char[exp_len+1];
-	exp_C = (char *)HDmalloc(exp_len+1);
         HDmemset(exp_C, 0, exp_len+1); // clear buffer
 
         // Used overloaded function
