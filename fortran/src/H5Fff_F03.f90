@@ -30,12 +30,10 @@
 !
 !*****
 
-
 MODULE H5F_PROVISIONAL
 
   USE H5GLOBAL
   USE, INTRINSIC :: ISO_C_BINDING
-
 
 CONTAINS
 !****s* H5F (F03)/h5fget_file_image_f_F03
@@ -82,13 +80,12 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5FGET_FILE_IMAGE_C'::h5fget_file_image_c
          !DEC$ENDIF
-         INTEGER(HID_T)  , INTENT(IN)    :: file_id
-         TYPE(C_PTR)     , VALUE         :: buf_ptr
-         INTEGER(SIZE_T) , INTENT(IN)    :: buf_len
-         INTEGER(SIZE_T), INTENT(IN)     :: buf_size
+         INTEGER(HID_T) , INTENT(IN) :: file_id
+         TYPE(C_PTR)    , VALUE      :: buf_ptr
+         INTEGER(SIZE_T), INTENT(IN) :: buf_len
+         INTEGER(SIZE_T), INTENT(IN) :: buf_size
        END FUNCTION h5fget_file_image_c
     END INTERFACE
-
 
     IF(PRESENT(buf_size))THEN
        buf_ptr = C_NULL_PTR
