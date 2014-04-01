@@ -345,9 +345,11 @@ nh5pget_mpio_actual_io_mode_c(hid_t_f *dxpl_id, int_f *actual_io_mode)
  *  Calls H5Dread_multi
  *
  * INPUTS
- *  
+ *  file_id - file or group id for the location of datasets.
+ *  dxpl_id - dataset transfer property.
+ *  count   - the number of accessing datasets.
  * OUTPUTS
- *  
+ *  info    - the array of dataset information and read buffer.
  *
  * RETURNS
  *  0 on success, -1 on failure
@@ -378,10 +380,11 @@ nh5dread_multi_c(hid_t_f *file_id, hid_t_f *dxpl_id, size_t_f *count, H5D_rw_mul
  *  Calls H5Dwrite_multi
  *
  * INPUTS
+ *  file_id - file or group id for the location of datasets,
+ *  count   - the number of accessing datasets.
+ *  dxpl_id - dataset transfer property.
+ *  Info    - the array of dataset information and write buffer.
  *  
- * OUTPUTS
- *  
- *
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR

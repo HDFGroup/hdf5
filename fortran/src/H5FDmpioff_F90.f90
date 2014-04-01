@@ -4,7 +4,7 @@
 !  MODULE H5FDMPIO_PROVISIONAL
 !
 ! FILE
-!  src/fortran/src/H5FDmpioff_F90.f90 
+!  fortran/src/H5FDmpioff_F90.f90 
 !
 ! PURPOSE
 !  This file contains Fortran 90 interfaces for H5FDmpio functions. It contains
@@ -33,7 +33,7 @@
 !
 ! NOTES
 !                         *** IMPORTANT ***
-!  If you add a new H5P function you must add the function name to the
+!  If you add a new function then you must add the function name to the
 !  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !

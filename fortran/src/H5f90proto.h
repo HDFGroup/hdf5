@@ -26,6 +26,10 @@ H5_FCDLL void HD5packFstring(char *src, char *dest, size_t len);
 #define H5_FC_FUNC_(name, NAME) NAME
 #endif /*H5_VMS*/
 
+/*
+ * Storage struct used by H5Dread_multi and H5Dwrite_multi 
+ * interoperable with Fortran.
+ */
 typedef struct H5D_rw_multi_t_f {
     hid_t dset_id;          /* dstaset ID */
     hid_t dset_space_id;    /* dataset selection dataspace ID */
