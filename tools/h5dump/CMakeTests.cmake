@@ -325,17 +325,17 @@
   endforeach (tst_h5_file ${HDF5_REFERENCE_TEST_FILES})
   
   foreach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
-    if (WIN32 AND NOT CYGWIN)
+    if (WIN32)
       file (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_exp_file} TEST_STREAM)
       file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file} "${TEST_STREAM}")
-    else (WIN32 AND NOT CYGWIN)
+    else (WIN32)
       add_custom_command (
           TARGET     h5dump
           POST_BUILD
           COMMAND    ${CMAKE_COMMAND}
           ARGS       -E copy_if_different  ${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_exp_file}  ${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}
       )
-    endif (WIN32 AND NOT CYGWIN)
+    endif (WIN32)
   endforeach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
 
   foreach (tst_other_file ${HDF5_REFERENCE_FILES})
@@ -372,17 +372,17 @@
       ARGS       -E copy_if_different  ${HDF5_TOOLS_SOURCE_DIR}/testfiles/tbin1.ddl  ${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl
   )
   
-  if (WIN32 AND NOT CYGWIN)
+  if (WIN32)
     file (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp TEST_STREAM)
     file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
-  else (WIN32 AND NOT CYGWIN)
+  else (WIN32)
     add_custom_command (
         TARGET     h5dump
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different  ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp  ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp
     )
-  endif (WIN32 AND NOT CYGWIN)
+  endif (WIN32)
   
 ##############################################################################
 ##############################################################################

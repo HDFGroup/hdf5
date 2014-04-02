@@ -449,9 +449,9 @@ if (HDF5_DISABLE_COMPILER_WARNINGS)
     string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
   endif (MSVC)
-  if (WIN32 AND NOT CYGWIN)
+  if (WIN32)
     add_definitions (-D_CRT_SECURE_NO_WARNINGS)
-  endif (WIN32 AND NOT CYGWIN)
+  endif (WIN32)
   # Borland uses -w- to suppress warnings.
   if (BORLAND)
     set (HDF5_WARNINGS_BLOCKED 1)
@@ -726,7 +726,7 @@ endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 # Note: Currently CMake only allows configuring of threadsafe on 
 # non-Cygwin WINDOWS.
 #-----------------------------------------------------------------------------
-if (WIN32 AND NOT CYGWIN)
+if (WIN32)
   option (HDF5_ENABLE_THREADSAFE "Enable thread-safety" OFF)
   if (HDF5_ENABLE_THREADSAFE)
     # check for unsupported options
@@ -750,7 +750,7 @@ if (WIN32 AND NOT CYGWIN)
       endif (NOT H5_HAVE_PTHREAD_H)
     endif (H5_HAVE_IOEO)
   endif (HDF5_ENABLE_THREADSAFE)
-endif (WIN32 AND NOT CYGWIN)
+endif (WIN32)
 
 # -----------------------------------------------------------------------
 # wrapper script variables
