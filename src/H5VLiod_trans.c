@@ -67,7 +67,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
     rcapl_id = input->rcapl_id;
 
     if(H5Pget_rcapl_version_request(rcapl_id, &acquire_req) < 0) {
-        HGOTO_ERROR2(H5E_PLIST, H5E_CANTSET,FAIL, "can't get acquire request property");
+        HGOTO_ERROR_FF(FAIL, "can't get acquire request property");
     }
 
     switch(acquire_req) {
@@ -77,7 +77,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
 #endif
         if((ret = iod_trans_start(coh, &c_version, NULL, 0, IOD_TRANS_R, NULL)) < 0) {
             fprintf(stderr, "can't acquire read context. %d (%s).\n", ret, strerror(-ret));
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't acquire read context");
+            HGOTO_ERROR_FF(FAIL, "can't acquire read context");
         }
         acquired_version = c_version;
         break;
@@ -87,7 +87,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
 #endif
         c_version = IOD_TID_UNKNOWN;
         if(iod_trans_start(coh, &c_version, NULL, 0, IOD_TRANS_R, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't acquire read context");
+            HGOTO_ERROR_FF(FAIL, "can't acquire read context");
         acquired_version = c_version;
         break;
     case H5RC_NEXT:
@@ -99,7 +99,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
             fprintf(stderr, "Next Acquire Read Context %"PRIu64"\n", input->c_version);
 #endif
             if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
+                HGOTO_ERROR_FF(FAIL, "can't get container tids status");
 
             acquired_version = IOD_TID_UNKNOWN;
 
@@ -111,12 +111,12 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
             }
 
             if(IOD_TID_UNKNOWN == acquired_version) {
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, 
+                HGOTO_ERROR_FF(FAIL, 
                             "can't get a read version");
             }
 
             if(iod_free_cont_trans_stat(coh, tids) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
+                HGOTO_ERROR_FF(FAIL, "can't free container transaction status object");
             break;
         }
     case H5RC_PREV:
@@ -128,12 +128,12 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
             fprintf(stderr, "Next Acquire Read Context %"PRIu64"\n", input->c_version);
 #endif
             if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get container tids status");
+                HGOTO_ERROR_FF(FAIL, "can't get container tids status");
 
             if(c_version >= tids->latest_rdable) {
                 acquired_version = tids->latest_rdable;
                 if(iod_trans_start(coh, &acquired_version, NULL, 0, IOD_TRANS_R, NULL) < 0)
-                    HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't acquire read context");
+                    HGOTO_ERROR_FF(FAIL, "can't acquire read context");
                 break;
             }
 
@@ -148,17 +148,17 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
             }
 
             if(IOD_TID_UNKNOWN == acquired_version) {
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, 
+                HGOTO_ERROR_FF(FAIL, 
                             "can't get a read version");
             }
 
             if(iod_free_cont_trans_stat(coh, tids) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
+                HGOTO_ERROR_FF(FAIL, "can't free container transaction status object");
 
             break;
         }
     default:
-        HGOTO_ERROR2(H5E_PLIST, H5E_CANTSET, FAIL, "invalid acquire request");
+        HGOTO_ERROR_FF(FAIL, "invalid acquire request");
     }
 
     output.c_version = acquired_version;
@@ -214,7 +214,7 @@ H5VL_iod_server_rcxt_release_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     if(iod_trans_finish(coh, input->c_version, NULL, 0, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't release Read Context");
+        HGOTO_ERROR_FF(FAIL, "can't release Read Context");
 
 done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
@@ -294,7 +294,7 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
             }
             else if(-ESHUTDOWN == ret) {
                 fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't persist read context");
+                HGOTO_ERROR_FF(FAIL, "can't persist read context");
             }
             else {
                 fprintf(stderr, "Retry failed.. %d (%s).\n", ret, strerror(-ret));
@@ -305,7 +305,7 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     if(ret != 0) {
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't persist read context");
+        HGOTO_ERROR_FF(FAIL, "can't persist read context");
     }
 
 #if H5_HAVE_IOD_CORRUPT_TOOL
@@ -365,7 +365,7 @@ H5VL_iod_server_rcxt_snapshot_cb(AXE_engine_t UNUSED axe_engine,
 
     /* MSC - can only snapshot latest version */
     if(iod_container_snapshot(coh, tid, input->snapshot_name, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't snapshot Read Context");
+        HGOTO_ERROR_FF(FAIL, "can't snapshot Read Context");
 
 done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
@@ -413,10 +413,10 @@ H5VL_iod_server_trans_start_cb(AXE_engine_t UNUSED axe_engine,
     trspl_id = input->trspl_id;
 
     if(H5Pget_trspl_num_peers(trspl_id, &num_peers) < 0)
-        HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't get acquire request property");
+        HGOTO_ERROR_FF(FAIL, "can't get acquire request property");
 
     if(iod_trans_start(coh, &trans_num, NULL, num_peers, IOD_TRANS_W, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
+        HGOTO_ERROR_FF(FAIL, "can't start transaction");
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Done with Transaction Start\n");
@@ -477,7 +477,7 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
 
     ret = iod_obj_open_write(coh, oidkv_id, trans_num, NULL, &oidkv_oh, NULL);
     if(ret != 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open oid KV");
+        HGOTO_ERROR_FF(FAIL, "can't open oid KV");
 
     step ++;
 
@@ -492,22 +492,22 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
         cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
         cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
         if (iod_kv_set(oidkv_oh, trans_num, NULL, &kv, cs, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
     else {
         if (iod_kv_set(oidkv_oh, trans_num, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in oid KV");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in oid KV");
     }
 
     if(iod_obj_close(oidkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object handle");
+        HGOTO_ERROR_FF(FAIL, "can't close object handle");
 
     step --;
 
     /* Finish  the transaction */
     if((ret = iod_trans_finish(coh, trans_num, NULL, 0, NULL)) < 0) {
         fprintf(stderr, "can't finish transaction %d (%s).\n", ret, strerror(-ret));
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction");
+        HGOTO_ERROR_FF(FAIL, "can't finish transaction");
     }
 
 #if H5_HAVE_IOD_CORRUPT_TOOL
@@ -522,7 +522,7 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
         if(iod_trans_start(coh, &trans_num, NULL, 0, IOD_TRANS_R, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't acquire read context");
+            HGOTO_ERROR_FF(FAIL, "can't acquire read context");
     }
 
 #if H5_EFF_DEBUG
@@ -576,7 +576,7 @@ H5VL_iod_server_trans_set_dependency_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - set depends */
 
     //if(iod_trans_depend(coh, depends, NULL) < 0)
-    //HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set dependency between transactions");
+    //HGOTO_ERROR_FF(FAIL, "can't set dependency between transactions");
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Done with Transaction Set_Dependency\n");
@@ -626,7 +626,7 @@ H5VL_iod_server_trans_skip_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - set skip ranges */
     skip_ranges.n_range = 1;
     //if(iod_trans_skip(coh, skip_ranges, NULL) < 0)
-    //HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't skip transactions");
+    //HGOTO_ERROR_FF(FAIL, "can't skip transactions");
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Done with Transaction Skip\n");
@@ -677,7 +677,7 @@ H5VL_iod_server_trans_abort_cb(AXE_engine_t UNUSED axe_engine,
         fprintf(stderr, "Transaction %"PRIu64" already discarded\n", input->trans_num);
     else if(ret < 0) {
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't abort transaction");
+        HGOTO_ERROR_FF(FAIL, "can't abort transaction");
     }
 
 #if H5_EFF_DEBUG
@@ -733,7 +733,7 @@ H5VL_iod_server_prefetch_cb(AXE_engine_t UNUSED axe_engine,
     ret = iod_obj_fetch(iod_oh.rd_oh, tid, NULL, NULL, NULL, &replica_id, NULL);
     if(ret != 0) {
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch object");
+        HGOTO_ERROR_FF(FAIL, "can't prefetch object");
     }
 
 #if H5_EFF_DEBUG
@@ -797,7 +797,7 @@ H5VL_iod_server_evict_cb(AXE_engine_t UNUSED axe_engine,
 
     if(ret < 0) {
         fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't evict object");
+        HGOTO_ERROR_FF(FAIL, "can't evict object");
     }
 
 #if H5_EFF_DEBUG

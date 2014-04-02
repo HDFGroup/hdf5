@@ -45,17 +45,18 @@
 #define H5VL_IOD_IDX_PLUGIN_ID       "index_plugin_id"
 #define H5VL_IOD_IDX_PLUGIN_MD       "index_plugin_metadata"
 
-#define HGOTO_ERROR2(maj, min, ret_val, string) {			      \
+
+#define HGOTO_ERROR_FF(ret_val, string) {			      \
    fprintf(stderr, "%s\n", string);                                           \
-   HGOTO_DONE2(ret_val)						              \
+   HGOTO_DONE_FF(ret_val)						              \
 }
 
-#define HDONE_ERROR2(maj, min, ret_val, string) {			      \
+#define HDONE_ERROR_FF(ret_val, string) {			      \
    fprintf(stderr, "%s\n", string);                                           \
    ret_value = ret_val;                                                       \
 }
 
-#define HGOTO_DONE2(ret_val) {ret_value = ret_val; goto done;}
+#define HGOTO_DONE_FF(ret_val) {ret_value = ret_val; goto done;}
 
 /* Enum for metadata types stored in MD KV for HDF5->IOD objects */
 typedef enum H5VL_iod_metadata_t {

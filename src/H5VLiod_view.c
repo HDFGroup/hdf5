@@ -63,7 +63,7 @@ H5VL__iod_view_iterate_cb(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t 
         if((op_data->region_info.regions[i] = 
             H5VL__iod_get_elmt_region(coh, obj_id, rtid, op_data->query_id, op_data->vcpl_id,
                                       cs_scope, &op_data->region_info.tokens[i])) < 0)
-            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get region from query");
+            HGOTO_ERROR_FF(FAIL, "can't get region from query");
 
         op_data->region_info.count ++;
     }
@@ -119,7 +119,7 @@ H5VL_iod_server_view_create_cb(AXE_engine_t UNUSED axe_engine,
         if((output.region_info.regions[0] = 
             H5VL__iod_get_elmt_region(coh, loc_id, rtid, query_id, vcpl_id,
                                       cs_scope, output.region_info.tokens)) < 0)
-            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get region from query");
+            HGOTO_ERROR_FF(FAIL, "can't get region from query");
 
         output.valid_view = TRUE;
         output.obj_info.count = 0;
@@ -143,7 +143,7 @@ H5VL_iod_server_view_create_cb(AXE_engine_t UNUSED axe_engine,
 
         if(H5VL_iod_server_iterate(coh, loc_id, rtid, obj_type, cs_scope, 
                                    H5VL__iod_view_iterate_cb, &udata) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't iterate to create group");
+            HGOTO_ERROR_FF(FAIL, "can't iterate to create group");
 
         output.region_info.count = udata.region_info.count;
         output.region_info.tokens = udata.region_info.tokens;
@@ -221,39 +221,39 @@ H5VL__iod_get_elmt_region(iod_handle_t coh, iod_obj_id_t dset_id,
 
     /* Check if VCPL has a dataspace specified; otherwise, read the entire dataset. */
     if(H5Pget_view_elmt_scope(vcpl_id, &space_id) < 0)
-        HGOTO_ERROR2(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve vcpl region scope");;
+        HGOTO_ERROR_FF(FAIL, "can't retrieve vcpl region scope");;
 
     /* open the array object */
     if(iod_obj_open_read(coh, dset_id, rtid, NULL, &dset_oh, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open array object fo read");
+        HGOTO_ERROR_FF(FAIL, "can't open array object fo read");
 
     /* get scratch pad */
     if(iod_obj_get_scratch(dset_oh, rtid, &sp, &sp_cs, NULL) < 0)
-        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+        HGOTO_ERROR_FF(FAIL, "can't get scratch pad for object");
 
     if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
         if(H5VL_iod_verify_scratch_pad(&sp, sp_cs) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+            HGOTO_ERROR_FF(FAIL, "Scratch Pad failed integrity check");
     }
 
     /* open the metadata scratch pad */
     if(iod_obj_open_read(coh, sp[0], rtid, NULL, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+        HGOTO_ERROR_FF(FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
                              H5VL_IOD_KEY_OBJ_DATATYPE,
                              7, NULL, &type_id) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve datatype");
+        HGOTO_ERROR_FF(FAIL, "failed to retrieve datatype");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, 
                              H5VL_IOD_KEY_OBJ_DATASPACE,
                              7, NULL, &dset_space_id) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
+        HGOTO_ERROR_FF(FAIL, "failed to retrieve dataspace");
 
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
                              cs_scope, NULL, &dcpl_id) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
+        HGOTO_ERROR_FF(FAIL, "failed to retrieve dcpl");
 
     if(space_id < 0) {
         use_region_scope = FALSE;
@@ -261,7 +261,7 @@ H5VL__iod_get_elmt_region(iod_handle_t coh, iod_obj_id_t dset_id,
     }
 
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close iod object");
+        HGOTO_ERROR_FF(FAIL, "can't close iod object");
 
     nelmts = (size_t) H5Sget_select_npoints(space_id);
     elmt_size = H5Tget_size(type_id);
@@ -269,21 +269,21 @@ H5VL__iod_get_elmt_region(iod_handle_t coh, iod_obj_id_t dset_id,
 
     /* allocate buffer to hold data */
     if(NULL == (buf = malloc(buf_size)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
+        HGOTO_ERROR_FF(FAIL, "can't allocate read buffer");
 
     /* read the data selection from IOD. */
     elmt_size = H5Tget_size(type_id);
     if(H5VL__iod_server_final_io(dset_oh, space_id, elmt_size, FALSE, 
                                  buf, buf_size, (uint64_t)0, 0, rtid) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+        HGOTO_ERROR_FF(FAIL, "can't read from array object");
 
     if(iod_obj_close(dset_oh, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close iod object");
+        HGOTO_ERROR_FF(FAIL, "can't close iod object");
 
     if(FAIL == (udata.space_query = H5Scopy(space_id)))
-        HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace");
+        HGOTO_ERROR_FF(FAIL, "unable to copy dataspace");
     if(H5Sselect_none(udata.space_query) < 0)
-        HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to reset selection");
+        HGOTO_ERROR_FF(FAIL, "unable to reset selection");
 
     udata.query_id = query_id;
     udata.num_elmts = 0;
@@ -291,25 +291,25 @@ H5VL__iod_get_elmt_region(iod_handle_t coh, iod_obj_id_t dset_id,
     /* iterate over every element and apply the query on it. If the
        query is not satisfied, then remove it from the query selection */
     if(H5Diterate(buf, type_id, space_id, H5VL__iod_get_query_data_cb, &udata) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to compute buffer size");
+        HGOTO_ERROR_FF(FAIL, "failed to compute buffer size");
 
     ret_value = udata.space_query;
 
     if(H5VL__iod_get_token(H5O_TYPE_DATASET, dset_id, sp[0], sp[1], dcpl_id, type_id,
                            dset_space_id, token) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get object token");
+        HGOTO_ERROR_FF(FAIL, "failed to get object token");
 
 done:
     if(space_id && H5Sclose(space_id) < 0)
-        HDONE_ERROR2(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
+        HDONE_ERROR_FF(FAIL, "unable to release dataspace");
     if(use_region_scope) {
         if(dset_space_id && H5Sclose(dset_space_id) < 0)
-            HDONE_ERROR2(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
+            HDONE_ERROR_FF(FAIL, "unable to release dataspace");
     }
     if(type_id && H5Tclose(type_id) < 0)
-        HDONE_ERROR2(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release datatype")
+        HDONE_ERROR_FF(FAIL, "unable to release datatype")
     if(dcpl_id && H5Pclose(dcpl_id) < 0)
-        HDONE_ERROR2(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release property list")
+        HDONE_ERROR_FF(FAIL, "unable to release property list")
 
     if(buf != NULL)
         free(buf);
@@ -333,46 +333,46 @@ H5VL__iod_get_token(H5O_type_t obj_type, iod_obj_id_t iod_id, iod_obj_id_t mdkv_
     switch(obj_type) {
     case H5O_TYPE_GROUP:
         if(H5Pencode(cpl_id, NULL, &plist_size) < 0)
-            HGOTO_ERROR2(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode plist");
+            HGOTO_ERROR_FF(FAIL, "can't encode plist");
         token_size += plist_size + sizeof(size_t);
         break;
     case H5O_TYPE_DATASET:
         if(H5Pencode(cpl_id, NULL, &plist_size) < 0)
-            HGOTO_ERROR2(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode plist");
+            HGOTO_ERROR_FF(FAIL, "can't encode plist");
 
         if(H5Tencode(id1, NULL, &dt_size) < 0)
-            HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+            HGOTO_ERROR_FF(FAIL, "can't encode datatype");
 
         if(H5Sencode(id2, NULL, &space_size) < 0)
-            HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace");
+            HGOTO_ERROR_FF(FAIL, "can't encode dataspace");
 
         token_size += plist_size + dt_size + space_size + sizeof(size_t)*3;
         break;
     case H5O_TYPE_NAMED_DATATYPE:
         if(H5Pencode(cpl_id, NULL, &plist_size) < 0)
-            HGOTO_ERROR2(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode plist");
+            HGOTO_ERROR_FF(FAIL, "can't encode plist");
 
         if(H5Tencode(id1, NULL, &dt_size) < 0)
-            HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+            HGOTO_ERROR_FF(FAIL, "can't encode datatype");
 
         token_size += plist_size + dt_size + sizeof(size_t)*2;
         break;
     case H5O_TYPE_MAP:
         if(H5Pencode(cpl_id, NULL, &plist_size) < 0)
-            HGOTO_ERROR2(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode plist");
+            HGOTO_ERROR_FF(FAIL, "can't encode plist");
 
         if(H5Tencode(id1, NULL, &keytype_size) < 0)
-            HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+            HGOTO_ERROR_FF(FAIL, "can't encode datatype");
 
         if(H5Tencode(id2, NULL, &valtype_size) < 0)
-            HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+            HGOTO_ERROR_FF(FAIL, "can't encode datatype");
 
         token_size += plist_size + keytype_size + valtype_size + sizeof(size_t)*3;
         break;
     case H5O_TYPE_UNKNOWN:
     case H5O_TYPE_NTYPES:
     default:
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "bad object");
+        HGOTO_ERROR_FF(FAIL, "bad object");
     }
 
     token->buf_size = token_size;
@@ -393,64 +393,64 @@ H5VL__iod_get_token(H5O_type_t obj_type, iod_obj_id_t iod_id, iod_obj_id_t mdkv_
         HDmemcpy(buf_ptr, &plist_size, sizeof(size_t));
         buf_ptr += sizeof(size_t);
         if(H5Pencode(cpl_id, buf_ptr, &plist_size) < 0)
-            HGOTO_ERROR2(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode plist");
+            HGOTO_ERROR_FF(FAIL, "can't encode plist");
         buf_ptr += plist_size;
         break;
     case H5O_TYPE_DATASET:
         HDmemcpy(buf_ptr, &plist_size, sizeof(size_t));
         buf_ptr += sizeof(size_t);
         if(H5Pencode(cpl_id, buf_ptr, &plist_size) < 0)
-            HGOTO_ERROR2(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode plist");
+            HGOTO_ERROR_FF(FAIL, "can't encode plist");
         buf_ptr += plist_size;
 
         HDmemcpy(buf_ptr, &dt_size, sizeof(size_t));
         buf_ptr += sizeof(size_t);
         if(H5Tencode(id1, buf_ptr, &dt_size) < 0)
-            HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+            HGOTO_ERROR_FF(FAIL, "can't encode datatype");
         buf_ptr += dt_size;
 
         HDmemcpy(buf_ptr, &space_size, sizeof(size_t));
         buf_ptr += sizeof(size_t);
         if(H5Sencode(id2, buf_ptr, &space_size) < 0)
-            HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace");
+            HGOTO_ERROR_FF(FAIL, "can't encode dataspace");
         buf_ptr += space_size;
         break;
     case H5O_TYPE_NAMED_DATATYPE:
         HDmemcpy(buf_ptr, &plist_size, sizeof(size_t));
         buf_ptr += sizeof(size_t);
         if(H5Pencode(cpl_id, buf_ptr, &plist_size) < 0)
-            HGOTO_ERROR2(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode plist");
+            HGOTO_ERROR_FF(FAIL, "can't encode plist");
         buf_ptr += plist_size;
 
         HDmemcpy(buf_ptr, &dt_size, sizeof(size_t));
         buf_ptr += sizeof(size_t);
         if(H5Tencode(id1, buf_ptr, &dt_size) < 0)
-            HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+            HGOTO_ERROR_FF(FAIL, "can't encode datatype");
         buf_ptr += dt_size;
         break;
     case H5O_TYPE_MAP:
         HDmemcpy(buf_ptr, &plist_size, sizeof(size_t));
         buf_ptr += sizeof(size_t);
         if(H5Pencode(cpl_id, buf_ptr, &plist_size) < 0)
-            HGOTO_ERROR2(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode plist");
+            HGOTO_ERROR_FF(FAIL, "can't encode plist");
         buf_ptr += plist_size;
 
         HDmemcpy(buf_ptr, &keytype_size, sizeof(size_t));
         buf_ptr += sizeof(size_t);
         if(H5Tencode(id1, buf_ptr, &keytype_size) < 0)
-            HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+            HGOTO_ERROR_FF(FAIL, "can't encode datatype");
         buf_ptr += keytype_size;
 
         HDmemcpy(buf_ptr, &valtype_size, sizeof(size_t));
         buf_ptr += sizeof(size_t);
         if(H5Tencode(id2, buf_ptr, &valtype_size) < 0)
-            HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+            HGOTO_ERROR_FF(FAIL, "can't encode datatype");
         buf_ptr += valtype_size;
         break;
     case H5O_TYPE_UNKNOWN:
     case H5O_TYPE_NTYPES:
     default:
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "bad object");
+        HGOTO_ERROR_FF(FAIL, "bad object");
     }
 
 done:
@@ -499,12 +499,12 @@ H5VL_iod_server_get_layout_cb(AXE_engine_t UNUSED axe_engine,
 
     if(obj_oh.cookie == IOD_OH_UNDEFINED) {
         if (iod_obj_open_read(coh, obj_id, NULL /*hints*/, &obj_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+            HGOTO_ERROR_FF(FAIL, "can't open current group");
         opened_locally = TRUE;
     }
 
     if(iod_obj_get_layout(obj_oh, rtid, &layout, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get object layout");
+        HGOTO_ERROR_FF(FAIL, "can't get object layout");
 
     output.ret = ret_value;
     output.layout = layout
@@ -522,7 +522,7 @@ done:
     /* close the dataset if we opened it in this routine */
     if(opened_locally) {
         if(iod_obj_close(obj_oh, NULL, NULL) < 0)
-            HDONE_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
+            HDONE_ERROR_FF(FAIL, "can't close Array object");
     }
 
 } /* end H5VL_iod_server_get_layout_cb() */
@@ -570,17 +570,17 @@ H5VL_iod_server_view_create_cb(AXE_engine_t UNUSED axe_engine,
     else if(loc_type == H5I_GROUP || loc_type == H5I_FILE) {
         if(iod_container_list_obj(coh, rtid, IOD_OBJ_ANY, 0, &token_count,
                                   NULL, NULL, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve total number of objects in container");
+            HGOTO_ERROR_FF(FAIL, "failed to retrieve total number of objects in container");
     }
 
     if(NULL == (tokens = (H5VL_token_t *)malloc(sizeof(H5VL_token_t) * token_count)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate token structs");
+        HGOTO_ERROR_FF(FAIL, "can't allocate token structs");
 
     if(H5VL__iod_server_construct_view(coh, loc_id, rtid, query, &num_tokens, tokens) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to construct view");
+        HGOTO_ERROR_FF(FAIL, "failed to construct view");
 
     if(NULL == (output = (view_create_out_t *)H5MM_malloc(sizeof(view_create_out_t))))
-	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate output struct for view create");
+	HGOTO_ERROR_FF(FAIL, "can't allocate output struct for view create");
 
     output->ret = ret_value;
     output->num_tokens = num_tokens;
@@ -634,14 +634,14 @@ H5VL_iod_server_get_view_tokens_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Write bulk data here and wait for the data to be there  */
     if(HG_SUCCESS != HG_Bulk_write_all(dest, bulk_handle, bulk_block_handle, &bulk_request))
-        HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+        HGOTO_ERROR_FF(FAIL, "can't read from array object");
     /* wait for it to complete */
     if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-        HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+        HGOTO_ERROR_FF(FAIL, "can't read from array object");
 
     /* free block handle */
     if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
-        HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't free bds block handle");
+        HGOTO_ERROR_FF(FAIL, "can't free bds block handle");
 
     HG_Handler_start_output(op_data->hg_handle, output);
 
@@ -676,14 +676,14 @@ H5VL__iod_server_construct_view(iod_handle_t coh, iod_obj_id_t loc_id, iod_trans
        location object */
     if(query_type & H5Q_TYPE_ATTR_NAME) {
         if(H5VL_iod_query_attribute(coh, rtid, loc_id, query, num_tokens, tokens) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to query dataset for selection");
+            HGOTO_ERROR_FF(FAIL, "unable to query dataset for selection");
     }
 
     if(loc_id & IOD_OBJ_TYPE_ARRAY) {
         /* get token for dataset and space selection for data
            elements that satisfy the query */
         if(H5VL_iod_query_selection(coh, rtid, loc_id, query, num_tokens, tokens) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to query dataset for selection");
+            HGOTO_ERROR_FF(FAIL, "unable to query dataset for selection");
     }
 
     else if(loc_id & IOD_OBJ_TYPE_KV) {
@@ -693,7 +693,7 @@ H5VL__iod_server_construct_view(iod_handle_t coh, iod_obj_id_t loc_id, iod_trans
            has a link from the current location object. */
         if(query_type & H5Q_TYPE_LINK_NAME) {
             if(H5VL_iod_query_link(coh, rtid, loc_id, query, num_tokens, tokens) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unable to query dataset for selection");
+                HGOTO_ERROR_FF(FAIL, "unable to query dataset for selection");
         }
     }
 
@@ -729,24 +729,24 @@ H5VL__iod_query_selection(iod_handle_t coh, iod_obj_id_t obj_id,
 
     /* open the array object */
     if (iod_obj_open_read(coh, obj_id, NULL /*hints*/, &obj_oh, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+        HGOTO_ERROR_FF(FAIL, "can't open current group");
 
     /* get scratch pad of the dataset */
     if(iod_obj_get_scratch(obj_oh, rtid, &sp, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+        HGOTO_ERROR_FF(FAIL, "can't get scratch pad for object");
 
     /* open the metadata scratch pad */
     if (iod_obj_open_write(coh, sp[0], NULL /*hints*/, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+        HGOTO_ERROR_FF(FAIL, "can't open scratch pad");
 
     /* retrieve the datatype of array object */
     if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, H5VL_IOD_KEY_OBJ_DATATYPE,
                              NULL, NULL, type_id) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve datatype");
+        HGOTO_ERROR_FF(FAIL, "failed to retrieve datatype");
 
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        HGOTO_ERROR_FF(FAIL, "can't close object");
 
     /* get layout dataspace from the query to read from */
     layout_space = H5Qget_space(query);
@@ -757,21 +757,21 @@ H5VL__iod_query_selection(iod_handle_t coh, iod_obj_id_t obj_id,
 
     /* allocate buffer to hold data */
     if(NULL == (buf = malloc(buf_size)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
+        HGOTO_ERROR_FF(FAIL, "can't allocate read buffer");
 
     /* read the data selection from IOD. */
     /* MSC - will need to do it in pieces, not it one shot. */
     if(H5VL__iod_server_final_io(coh, obj_oh, layout_space, type_id, 
                                  FALSE, buf, buf_size, 0, 0, rtid) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTREAD, FAIL, "can't read from array object");
+        HGOTO_ERROR_FF(FAIL, "can't read from array object");
 
     if(H5Qapply(query, buf, type_id, layout_space, H5P_DEFAULT, &queried_space) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't apply query on dataspace");
+        HGOTO_ERROR_FF(FAIL, "can't apply query on dataspace");
 
     if(H5Sencode(queried_space, NULL, &ds_size) < 0)
-        HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace");
+        HGOTO_ERROR_FF(FAIL, "can't encode dataspace");
     if(H5Tencode(type_id, NULL, &dt_size) < 0)
-        HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+        HGOTO_ERROR_FF(FAIL, "can't encode datatype");
 
     token_size += sizeof(iod_obj_id_t)*3 + sizeof(H5O_type_t) +
         dt_size + ds_size + sizeof(size_t)*2;
@@ -780,7 +780,7 @@ H5VL__iod_query_selection(iod_handle_t coh, iod_obj_id_t obj_id,
     tokens[u].token_size = token_size;
 
     if(NULL == (tokens[u].token = malloc(token_size)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate token buffer");
+        HGOTO_ERROR_FF(FAIL, "can't allocate token buffer");
 
     buf_ptr = (uint8_t *)tokens[u].token;
 
@@ -797,13 +797,13 @@ H5VL__iod_query_selection(iod_handle_t coh, iod_obj_id_t obj_id,
     HDmemcpy(buf_ptr, &dt_size, sizeof(size_t));
     buf_ptr += sizeof(size_t);
     if(H5Tencode(type_id, buf_ptr, &dt_size) < 0)
-        HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+        HGOTO_ERROR_FF(FAIL, "can't encode datatype");
     buf_ptr += dt_size;
 
     HDmemcpy(buf_ptr, &ds_size, sizeof(size_t));
     buf_ptr += sizeof(size_t);
     if(H5Sencode(queried_space, buf_ptr, &ds_size) < 0)
-        HGOTO_ERROR2(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace");
+        HGOTO_ERROR_FF(FAIL, "can't encode dataspace");
     buf_ptr += space_size;
 
     *num_tokens ++;
@@ -819,7 +819,7 @@ done:
         free(buf);
 
     if(obj_oh != IOD_OH_UNDEFINED && iod_obj_close(obj_oh, NULL, NULL) < 0)
-        HDONE_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
+        HDONE_ERROR_FF(FAIL, "can't close Array object");
 
     return ret_value;
 } /* end H5VL__iod_query_selection() */

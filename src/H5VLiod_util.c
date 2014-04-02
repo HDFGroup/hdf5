@@ -76,15 +76,15 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
     /* open the current group */
     if(cur_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
         if (iod_obj_open_read(coh, loc_id, wtid, NULL, &cur_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+            HGOTO_ERROR_FF(FAIL, "can't open current group");
     }
 
     /* Wrap the local buffer for serialized header info */
     if(NULL == (wb = H5WB_wrap(comp_buf, sizeof(comp_buf))))
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
+        HGOTO_ERROR_FF(FAIL, "can't wrap buffer")
     /* Get a pointer to a buffer that's large enough  */
     if(NULL == (comp = (char *)H5WB_actual(wb, (HDstrlen(path) + 1))))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
+        HGOTO_ERROR_FF(FAIL, "can't get actual buffer")
 
     /* Traverse the path */
     while((path = H5G__component(path, &nchars)) && *path) {
@@ -119,7 +119,7 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
         /* lookup next object in the current group */
         if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
                                  comp, cs_scope, NULL, &value) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
+            HGOTO_ERROR_FF(FAIL, "failed to retrieve link value");
 
         /* if this a soft link, traverse the link value if the ID is undefined */
         if(H5L_TYPE_SOFT == value.link_type) {
@@ -130,7 +130,7 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
             /* Traverse Path and open the target object */
             if(H5VL_iod_server_open_path(coh, cur_id, cur_oh, value.u.symbolic_name, 
                                          rtid, cs_scope, &cur_id, &cur_oh) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
+                HGOTO_ERROR_FF(FAIL, "can't open object");
 
             free(value.u.symbolic_name);
         }
@@ -140,12 +140,12 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
         /* Close previous read handle unless it is the original one */
         if(loc_handle.rd_oh.cookie != prev_oh.cookie) {
             if(iod_obj_close(prev_oh, NULL, NULL) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+                HGOTO_ERROR_FF(FAIL, "can't close current object handle");
         }
 
         /* open the current group */
         if (iod_obj_open_read(coh, cur_id, rtid, NULL, &cur_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+            HGOTO_ERROR_FF(FAIL, "can't open current group");
 
 	/* Advance to next component in string */
 	path += nchars;
@@ -153,7 +153,7 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
 
     /* Release temporary component buffer */
     if(wb && H5WB_unwrap(wb) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer");
+        HGOTO_ERROR_FF(FAIL, "can't release wrapped buffer");
 
     *iod_id = cur_id;
     (*iod_oh).rd_oh.cookie = cur_oh.rd_oh.cookie;
@@ -162,7 +162,7 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
        loc_handle.wr_oh.cookie == IOD_OH_UNDEFINED) {
         /* open a write handle on the ID. */
         if (iod_obj_open_write(coh, cur_id, wtid, NULL, &cur_oh.wr_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+            HGOTO_ERROR_FF(FAIL, "can't open current group");
     }
         
     (*iod_oh).wr_oh.cookie = cur_oh.wr_oh.cookie;
@@ -208,15 +208,15 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
     if(cur_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
         /* open the current group */
         if (iod_obj_open_read(coh, loc_id, rtid, NULL, &cur_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open start location");
+            HGOTO_ERROR_FF(FAIL, "can't open start location");
     }
 
     /* Wrap the local buffer for serialized header info */
     if(NULL == (wb = H5WB_wrap(comp_buf, sizeof(comp_buf))))
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
+        HGOTO_ERROR_FF(FAIL, "can't wrap buffer")
     /* Get a pointer to a buffer that's large enough  */
     if(NULL == (comp = (char *)H5WB_actual(wb, (HDstrlen(path) + 1))))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
+        HGOTO_ERROR_FF(FAIL, "can't get actual buffer")
 
     /* Traverse the path */
     while((path = H5G__component(path, &nchars)) && *path) {
@@ -245,8 +245,8 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
             /* Close previous handle unless it is the original one */
             if(loc_handle.rd_oh.cookie != prev_oh.cookie && 
                iod_obj_close(prev_oh, NULL, NULL) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
+                HGOTO_ERROR_FF(FAIL, "can't close current object handle");
+            HGOTO_ERROR_FF(FAIL, "failed to retrieve link value");
         }
 
         /* if this a soft link, traverse the link value if the ID is undefined */
@@ -258,7 +258,7 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
             /* Traverse Path and open the target object */
             if(H5VL_iod_server_open_path(coh, cur_id, cur_oh, value.u.symbolic_name, 
                                          rtid, cs_scope, &cur_id, &cur_oh) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
+                HGOTO_ERROR_FF(FAIL, "can't open object");
 
             free(value.u.symbolic_name);
         }
@@ -268,11 +268,11 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
         /* Close previous handle unless it is the original one */
         if(loc_handle.rd_oh.cookie != prev_oh.cookie && 
            iod_obj_close(prev_oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+            HGOTO_ERROR_FF(FAIL, "can't close current object handle");
 
         /* open the current group */
         if (iod_obj_open_read(coh, cur_id, rtid, NULL, &cur_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current object");
+            HGOTO_ERROR_FF(FAIL, "can't open current object");
 
 	/* Advance to next component in string */
 	path += nchars;
@@ -280,7 +280,7 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
 
     /* Release temporary component buffer */
     if(wb && H5WB_unwrap(wb) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer");
+        HGOTO_ERROR_FF(FAIL, "can't release wrapped buffer");
 
     *iod_id = cur_id;
     (*iod_oh).rd_oh.cookie = cur_oh.rd_oh.cookie;
@@ -313,13 +313,13 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
 
     /* get the rank of this dataspace */
     if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
-        HGOTO_ERROR2(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion");
+        HGOTO_ERROR_FF(FAIL, "unable to get dataspace dimesnsion");
 
     switch(H5Sget_select_type(space_id)) {
     case H5S_SEL_NONE:
         /* nothing selected */
         num_descriptors = 0;
-        HGOTO_DONE2(SUCCEED);
+        HGOTO_DONE_FF(SUCCEED);
     case H5S_SEL_ALL:
         /* The entire dataspace is selected, 1 large iod hyperslab is needed */
         num_descriptors = 1;
@@ -329,7 +329,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
 
             /* get the dimensions sizes of the dataspace */
             if(H5Sget_simple_extent_dims(space_id, dims, NULL) < 0)
-                HGOTO_ERROR2(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion sizes");
+                HGOTO_ERROR_FF(FAIL, "unable to get dataspace dimesnsion sizes");
             /* populate the hyperslab */
             for(i=0 ; i<ndims ; i++) {
                 hslabs[0].start[i] = 0;
@@ -343,7 +343,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
         {
             /* we need a hyperslab element for each point */
             if((num_descriptors = H5Sget_select_elem_npoints(space_id)) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "invalid point selection");
+                HGOTO_ERROR_FF(FAIL, "invalid point selection");
 
             if(NULL != hslabs) {
                 hsize_t *points = NULL;
@@ -352,11 +352,11 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                 point_count = (hsize_t)num_descriptors * (unsigned int)ndims * sizeof(hsize_t);
 
                 if(NULL == (points = (hsize_t *)malloc(point_count)))
-                    HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for points coords");
+                    HGOTO_ERROR_FF(FAIL, "can't allocate array for points coords");
 
                 if(H5Sget_select_elem_pointlist(space_id, (hsize_t)0, 
                                                 (hsize_t)num_descriptors, points) < 0)
-                    HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "Failed to retrieve point coordinates");
+                    HGOTO_ERROR_FF(FAIL, "Failed to retrieve point coordinates");
 
                 /* populate the hyperslab */
                 for(n=0 ; n<num_descriptors ; n++) {
@@ -390,7 +390,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                                                    hslabs[0].stride,
                                                    hslabs[0].count,
                                                    hslabs[0].block) < 0)
-                        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "Failed to retrieve hyperslab selection");
+                        HGOTO_ERROR_FF(FAIL, "Failed to retrieve hyperslab selection");
                     for(i=0 ; i<ndims ; i++) {
                         hslabs[0].stride[i] = hslabs[0].block[i] * hslabs[0].stride[i];
                     }
@@ -399,7 +399,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
             /* Otherwise populate the hslabs by getting every block */
             else {
                 if((num_descriptors = H5Sget_select_hyper_nblocks(space_id)) < 0)
-                    HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "invalid hyperslab selection");
+                    HGOTO_ERROR_FF(FAIL, "invalid hyperslab selection");
 
                 if(NULL != hslabs) {
                     hsize_t *blocks = NULL;
@@ -408,13 +408,13 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                     block_count = (unsigned int)ndims * (hsize_t)num_descriptors * sizeof(hsize_t) * 2;
 
                     if(NULL == (blocks = (hsize_t *)malloc(block_count)))
-                        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for points coords");
+                        HGOTO_ERROR_FF(FAIL, "can't allocate array for points coords");
 
                     fprintf(stderr, "block count = %zu\n", block_count);
 
                     if(H5Sget_select_hyper_blocklist(space_id, (hsize_t)0, 
                                                      (hsize_t)num_descriptors, blocks) < 0)
-                        HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "Failed to retrieve point coordinates");
+                        HGOTO_ERROR_FF(FAIL, "Failed to retrieve point coordinates");
 
                     /* populate the hyperslab */
                     for(n=0 ; n<num_descriptors ; n++) {
@@ -438,7 +438,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
     case H5S_SEL_ERROR:
     case H5S_SEL_N:
     default:
-        HGOTO_ERROR2(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "Invalid Selection type");
+        HGOTO_ERROR_FF(FAIL, "Invalid Selection type");
     }
 
     *count = num_descriptors;
@@ -474,12 +474,12 @@ H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
 
     /* determine the buffer size needed to store the encoded plist */ 
     if(H5Pencode(plist_id,  NULL, &buf_size) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode plist");
+        HGOTO_ERROR_FF(FAIL, "failed to encode plist");
     if(NULL == (value = malloc (buf_size)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate plist buffer");
+        HGOTO_ERROR_FF(FAIL, "can't allocate plist buffer");
     /* encode plist */ 
     if(H5Pencode(plist_id, value, &buf_size) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode plist");
+        HGOTO_ERROR_FF(FAIL, "failed to encode plist");
 
     kv.key = (void *)key;
     kv.key_len = (iod_size_t)strlen(key);
@@ -497,11 +497,11 @@ H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
 #endif
 
         if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
     else {
         if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
 
 done:
@@ -555,11 +555,11 @@ H5VL_iod_insert_link_count(iod_handle_t oh, iod_trans_id_t tid, uint64_t count,
 #endif
 
         if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
     else {
         if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
 
 done:
@@ -608,11 +608,11 @@ H5VL_iod_insert_object_type(iod_handle_t oh, iod_trans_id_t tid, H5I_type_t obj_
 #endif
 
         if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
     else {
         if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
 
 done:
@@ -650,12 +650,12 @@ H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
 
     /* determine the buffer size needed to store the encoded type */ 
     if(H5Tencode(type_id,  NULL, &buf_size) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode type");
+        HGOTO_ERROR_FF(FAIL, "failed to encode type");
     if(NULL == (value = malloc (buf_size)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate type buffer");
+        HGOTO_ERROR_FF(FAIL, "can't allocate type buffer");
     /* encode type */ 
     if(H5Tencode(type_id, value, &buf_size) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode type");
+        HGOTO_ERROR_FF(FAIL, "failed to encode type");
 
     kv.key = (void *)key;
     kv.key_len = (iod_size_t)strlen(key);
@@ -673,11 +673,11 @@ H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
 #endif
 
         if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
     else {
         if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
 
 done:
@@ -717,12 +717,12 @@ H5VL_iod_insert_datatype_with_key(iod_handle_t oh, iod_trans_id_t tid, hid_t typ
 
     /* determine the buffer size needed to store the encoded type */ 
     if(H5Tencode(type_id,  NULL, &buf_size) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode type");
+        HGOTO_ERROR_FF(FAIL, "failed to encode type");
     if(NULL == (value = malloc (buf_size)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate type buffer");
+        HGOTO_ERROR_FF(FAIL, "can't allocate type buffer");
     /* encode type */ 
     if(H5Tencode(type_id, value, &buf_size) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode type");
+        HGOTO_ERROR_FF(FAIL, "failed to encode type");
 
     kv.key = (void *)key;
     kv.key_len = (iod_size_t)strlen(key);
@@ -740,11 +740,11 @@ H5VL_iod_insert_datatype_with_key(iod_handle_t oh, iod_trans_id_t tid, hid_t typ
 #endif
 
         if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
     else {
         if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
 
 done:
@@ -783,12 +783,12 @@ H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
 
     /* determine the buffer size needed to store the encoded space */ 
     if(H5Sencode(space_id,  NULL, &buf_size) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode space");
+        HGOTO_ERROR_FF(FAIL, "failed to encode space");
     if(NULL == (value = malloc (buf_size)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate space buffer");
+        HGOTO_ERROR_FF(FAIL, "can't allocate space buffer");
     /* encode space */ 
     if(H5Sencode(space_id, value, &buf_size) < 0)
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode space");
+        HGOTO_ERROR_FF(FAIL, "failed to encode space");
 
     kv.key = (void *)key;
     kv.key_len = (iod_size_t)strlen(key);
@@ -806,11 +806,11 @@ H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
 #endif
 
         if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
     else {
         if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
 
 done:
@@ -878,7 +878,7 @@ H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_n
         case H5L_TYPE_EXTERNAL:
         case H5L_TYPE_MAX:
         default:
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unsupported link type");
+            HGOTO_ERROR_FF(FAIL, "unsupported link type");
     }
 
     kv.key = (void *)link_name;
@@ -897,11 +897,11 @@ H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_n
 #endif
 
         if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
     else {
         if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
     }
 
 done:
@@ -944,16 +944,16 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
             hid_t plist_id;
 
             if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+                HGOTO_ERROR_FF(FAIL, "lookup failed");
 
             if(NULL == (value = malloc((size_t)val_size)))
-                HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+                HGOTO_ERROR_FF(FAIL, "can't allocate value buffer");
 
             if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+                HGOTO_ERROR_FF(FAIL, "lookup failed");
 
             if((plist_id = H5Pdecode(value)) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode cpl");
+                HGOTO_ERROR_FF(FAIL, "failed to decode cpl");
 
             *((hid_t *)ret) = plist_id;
             break;
@@ -961,10 +961,10 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
     case H5VL_IOD_LINK_COUNT:
         val_size = sizeof(uint64_t);
         if(NULL == (value = malloc((size_t)val_size)))
-            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+            HGOTO_ERROR_FF(FAIL, "can't allocate value buffer");
 
         if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "link_count lookup failed");
+            HGOTO_ERROR_FF(FAIL, "link_count lookup failed");
 
         memcpy(ret, value, val_size);
         break;
@@ -973,16 +973,16 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
             hid_t type_id;
 
             if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+                HGOTO_ERROR_FF(FAIL, "lookup failed");
 
             if(NULL == (value = malloc((size_t)val_size)))
-                HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+                HGOTO_ERROR_FF(FAIL, "can't allocate value buffer");
 
             if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+                HGOTO_ERROR_FF(FAIL, "lookup failed");
 
             if((type_id = H5Tdecode(value)) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode datatype");
+                HGOTO_ERROR_FF(FAIL, "failed to decode datatype");
 
             *((hid_t *)ret) = type_id;
             break;
@@ -992,16 +992,16 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
             hid_t space_id;
 
             if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+                HGOTO_ERROR_FF(FAIL, "lookup failed");
 
             if(NULL == (value = malloc((size_t)val_size)))
-                HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+                HGOTO_ERROR_FF(FAIL, "can't allocate value buffer");
 
             if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+                HGOTO_ERROR_FF(FAIL, "lookup failed");
 
             if((space_id = H5Sdecode(value)) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode dataspace");
+                HGOTO_ERROR_FF(FAIL, "failed to decode dataspace");
 
             *((hid_t *)ret) = space_id;
             break;
@@ -1009,10 +1009,10 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
     case H5VL_IOD_OBJECT_TYPE:
         val_size = sizeof(int32_t);
         if(NULL == (value = malloc((size_t)val_size)))
-            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+            HGOTO_ERROR_FF(FAIL, "can't allocate value buffer");
 
         if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "link_count lookup failed");
+            HGOTO_ERROR_FF(FAIL, "link_count lookup failed");
 
         memcpy(ret, value, val_size);
         break;
@@ -1024,13 +1024,13 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
 
             if((iod_ret = iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event)) < 0) {
                 fprintf(stderr, "%d (%s).\n", iod_ret, strerror(-iod_ret));
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+                HGOTO_ERROR_FF(FAIL, "lookup failed");
             }
             if(NULL == (value = malloc((size_t)val_size)))
-                HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+                HGOTO_ERROR_FF(FAIL, "can't allocate value buffer");
 
             if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+                HGOTO_ERROR_FF(FAIL, "lookup failed");
 
             val_ptr = (uint8_t *)value;
 
@@ -1048,12 +1048,12 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
                 case H5L_TYPE_EXTERNAL:
                 case H5L_TYPE_MAX:
                 default:
-                    HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "unsupported link type");
+                    HGOTO_ERROR_FF(FAIL, "unsupported link type");
             }
             break;
         }
     default:
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "invalide metadata type");
+        HGOTO_ERROR_FF(FAIL, "invalide metadata type");
     }
 
     if(cs_scope & H5_CHECKSUM_IOD) {
@@ -1067,7 +1067,7 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         fprintf(stderr, "Value CS iod = %016lX computed = %016lX\n", iod_cs[1], cs[1]);
 #endif
         if(iod_cs[0] != cs[0] || iod_cs[1] != cs[1])
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected when reading metadata from IOD");
+            HGOTO_ERROR_FF(FAIL, "Corruption detected when reading metadata from IOD");
     }
 
 done:
@@ -1139,7 +1139,7 @@ H5VL__iod_server_adjust_buffer(hid_t mem_type_id, hid_t dset_type_id, size_t nel
                     buf_size = dset_type_size * nelmts;
 
                     if(NULL == (*buf = realloc(*buf, (size_t)buf_size)))
-                        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "Can't adjust buffer for DT conversion");
+                        HGOTO_ERROR_FF(FAIL, "Can't adjust buffer for DT conversion");
 #if H5_EFF_DEBUG
                     fprintf(stderr, "Adjusted Buffer size for dt conversion from %zu to %lld\n", 
                             size, buf_size);
@@ -1148,7 +1148,7 @@ H5VL__iod_server_adjust_buffer(hid_t mem_type_id, hid_t dset_type_id, size_t nel
                 else {
                     buf_size = mem_type_size * nelmts;
                     if(buf_size != size)
-                        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Incoming data size is not equal to expected size");
+                        HGOTO_ERROR_FF(FAIL, "Incoming data size is not equal to expected size");
                 }
 
                 *_buf_size = buf_size;
@@ -1160,7 +1160,7 @@ H5VL__iod_server_adjust_buffer(hid_t mem_type_id, hid_t dset_type_id, size_t nel
             *_buf_size = size;
             break;
         default:
-            HGOTO_ERROR2(H5E_ARGS, H5E_CANTINIT, FAIL, "unsupported datatype");
+            HGOTO_ERROR_FF(FAIL, "unsupported datatype");
     }
 
 done:
@@ -1212,7 +1212,7 @@ H5VL_iod_verify_kv_pair(void *key, iod_size_t key_size, void *value, iod_size_t 
 #endif
 
     if(iod_cs[0] != cs[0] && iod_cs[1] != cs[1])
-        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected in IOD KV pair");
+        HGOTO_ERROR_FF(FAIL, "Corruption detected in IOD KV pair");
 
 done:
     return ret_value;
@@ -1248,29 +1248,29 @@ H5VL__iod_get_h5_obj_type(iod_obj_id_t oid, iod_handle_t coh, iod_trans_id_t rti
         iod_checksum_t sp_cs = 0;
 
         if (iod_obj_open_read(coh, oid, rtid, NULL /*hints*/, &oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open object");
+            HGOTO_ERROR_FF(FAIL, "can't open object");
 
         /* get scratch pad of the object */
         if(iod_obj_get_scratch(oh, rtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+            HGOTO_ERROR_FF(FAIL, "can't get scratch pad for object");
         if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
             /* verify scratch pad integrity */
             if(H5VL_iod_verify_scratch_pad(&sp, sp_cs) < 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Scratch Pad failed integrity check");
+                HGOTO_ERROR_FF(FAIL, "Scratch Pad failed integrity check");
         }
 
         /* open the metadata KV */
         if (iod_obj_open_read(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, FAIL, "can't open MDKV");
+            HGOTO_ERROR_FF(FAIL, "can't open MDKV");
 
         if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, H5VL_IOD_KEY_OBJ_TYPE,
                                  cs_scope, NULL, &obj_type) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
+            HGOTO_ERROR_FF(FAIL, "failed to retrieve link count");
 
         if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+            HGOTO_ERROR_FF(FAIL, "can't close current object handle");
         if(iod_obj_close(oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+            HGOTO_ERROR_FF(FAIL, "can't close current object handle");
     }
 
     ret_value = obj_type;
@@ -1307,11 +1307,11 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
 
         /* Get the object ID and iterate into every member in the group */
         if (iod_obj_open_read(coh, obj_id, rtid, NULL, &obj_oh, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+            HGOTO_ERROR_FF(FAIL, "can't open current group");
 
         ret = iod_kv_get_num(obj_oh, rtid, &num_entries, NULL);
         if(ret != 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get number of KV entries");
+            HGOTO_ERROR_FF(FAIL, "can't get number of KV entries");
 
         if(0 != num_entries) {
             iod_kv_params_t *kvs = NULL;
@@ -1337,7 +1337,7 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
 
             ret = iod_kv_list_key(obj_oh, rtid, NULL, 0, &num_entries, kvs, NULL);
             if(ret != 0)
-                HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get list of keys");
+                HGOTO_ERROR_FF(FAIL, "can't get list of keys");
 
             for(i=0 ; i<num_entries ; i++) {
 
@@ -1348,7 +1348,7 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
                 /* lookup object in the current group */
                 if(H5VL_iod_get_metadata(obj_oh, rtid, H5VL_IOD_LINK, 
                                          (char *)(kv[i].key), cs_scope, NULL, &value) < 0)
-                    HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
+                    HGOTO_ERROR_FF(FAIL, "failed to retrieve link value");
 
                 if(H5L_TYPE_SOFT == value.link_type) {
                     continue;
@@ -1362,10 +1362,10 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
 
                 /* Get the object type. */
                 if((otype = H5VL__iod_get_h5_obj_type(oid, coh, rtid, cs_scope)) < 0)
-                    HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type");
+                    HGOTO_ERROR_FF(FAIL, "can't get object type");
 
                 if(H5VL_iod_server_iterate(coh, oid, rtid, otype, cs_scope, op, op_data) < 0)
-                    HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't iterate");
+                    HGOTO_ERROR_FF(FAIL, "can't iterate");
             }
 
             for(i=0 ; i<num_entries ; i++) {
@@ -1380,7 +1380,7 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
         }
 
         if(iod_obj_close(obj_oh, NULL, NULL) < 0)
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+            HGOTO_ERROR_FF(FAIL, "can't close current object handle");
     }
 
     ret_value = ret;
@@ -1397,11 +1397,11 @@ H5VL_iod_map_type_convert(hid_t src_id, hid_t dst_id, void *buf, size_t buf_size
 
     class = H5Tget_class(src_id);
     if(H5T_VLEN == class || (H5T_STRING == class && H5Tis_variable_str(src_id)))
-        HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Can't convert VL or string types");
+        HGOTO_ERROR_FF(FAIL, "Can't convert VL or string types");
 
     class = H5Tget_class(dset_id);
     if(H5T_VLEN == class || (H5T_STRING == class && H5Tis_variable_str(dst_id)))
-        HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Can't convert VL or string types");
+        HGOTO_ERROR_FF(FAIL, "Can't convert VL or string types");
 
     /* Check (and do) Type conversion on the Key */
     src_size = H5Tget_size(src_id);
@@ -1411,18 +1411,18 @@ H5VL_iod_map_type_convert(hid_t src_id, hid_t dst_id, void *buf, size_t buf_size
     if(src_size < dst_size) {
         new_size = dst_size;
         if(NULL == (*buf = realloc(*buf, new_size)))
-            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "Can't adjust buffer for DT conversion");
+            HGOTO_ERROR_FF(FAIL, "Can't adjust buffer for DT conversion");
     }
     else {
         new_size = src_size;
     }
 
     if(NULL == (key_buf = malloc((size_t)key_size)))
-        HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+        HGOTO_ERROR_FF(FAIL, "can't allocate buffer");
     memcpy(key_buf, key.buf, src_size);
 
     if(H5Tconvert(src_id, dst_id, 1, key_buf, NULL, dxpl_id) < 0)
-        HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
+        HGOTO_ERROR_FF(FAIL, "data type conversion failed")
 
 done:
     return ret_value;
