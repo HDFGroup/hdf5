@@ -58,8 +58,6 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
     char *src_last_comp = NULL, *dst_last_comp = NULL;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start Link create\n");
 #endif
@@ -186,7 +184,6 @@ done:
     input = (link_create_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_link_create_cb() */
 
 
@@ -224,8 +221,6 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
     iod_kv_t kv;
     H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start link move SRC %s DST %s (%"PRIu64", %"PRIu64") to (%"PRIu64", %"PRIu64")\n",
@@ -372,7 +367,6 @@ done:
             free(iod_link.u.symbolic_name);
     }
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_link_move_cb() */
 
 
@@ -409,8 +403,6 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
     htri_t ret = -1;
     iod_size_t val_size = 0;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start link Exists for %s on CV %d\n", loc_name, (int)rtid);
@@ -471,7 +463,6 @@ done:
     op_data = (op_data_t *)H5MM_xfree(op_data);
     last_comp = (char *)H5MM_xfree(last_comp);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_link_exists_cb() */
 
 
@@ -508,8 +499,6 @@ H5VL_iod_server_link_get_info_cb(AXE_engine_t UNUSED axe_engine,
     char *last_comp = NULL;
     H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* the traversal will retrieve the location where the link needs
        to be checked */
@@ -575,7 +564,6 @@ done:
             free(iod_link.u.symbolic_name);
     }
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_link_get_info_cb() */
 
 
@@ -613,8 +601,6 @@ H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine,
     char *last_comp = NULL;
     H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* the traversal will retrieve the location where the link needs
        to be checked */
@@ -680,7 +666,6 @@ done:
             free(iod_link.u.symbolic_name);
     }
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_link_get_val_cb() */
 
 
@@ -724,8 +709,6 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     H5VL_iod_link_t iod_link;
     int step = 0;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start link Remove %s at (%"PRIu64", %"PRIu64")\n",
@@ -860,7 +843,6 @@ done:
             free(iod_link.u.symbolic_name);
     }
         
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_link_remove_cb() */
 
 #endif /* H5_HAVE_EFF */

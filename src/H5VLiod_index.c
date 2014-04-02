@@ -55,8 +55,6 @@ H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t UNUSED axe_engine,
     iod_kv_t kv;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG 
     fprintf(stderr, "Start dataset set_index_info\n");
 #endif
@@ -107,7 +105,7 @@ H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
-        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+        HDONE_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
     /* close the Metadata KV object */
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
@@ -116,7 +114,6 @@ done:
     input = (dset_set_index_info_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_set_index_info_cb() */
 
 
@@ -153,8 +150,6 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
     char *key = NULL;
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG 
     fprintf(stderr, "Start dataset get_index_info\n");
@@ -257,7 +252,6 @@ done:
     input = (dset_get_index_info_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_get_index_info_cb() */
 
 
@@ -292,8 +286,6 @@ H5VL_iod_server_dset_remove_index_info_cb(AXE_engine_t UNUSED axe_engine,
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG 
     fprintf(stderr, "Start dataset rm_index_info\n");
 #endif
@@ -324,7 +316,7 @@ H5VL_iod_server_dset_remove_index_info_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
-        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+        HDONE_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
     /* close the Metadata KV object */
     if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
@@ -333,7 +325,6 @@ done:
     input = (dset_rm_index_info_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_remove_index_info_cb() */
 
 #endif /* H5_HAVE_INDEXING */

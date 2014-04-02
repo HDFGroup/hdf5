@@ -387,15 +387,13 @@ H5VL__iod_server_finish_axe_tasks(AXE_engine_t axe_engine, AXE_task_t start_rang
     AXE_task_t u;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     for(u=start_range ; u<count+start_range ; u++) {
         if(AXE_SUCCEED != AXEfinish(axe_engine, u))
-            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE task");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE task")
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_server_finish_axe_tasks() */
 
 
@@ -419,8 +417,6 @@ H5VL_iod_server_eff_init(hg_handle_t handle)
     uint32_t num_procs;
     int ret_value = HG_SUCCESS;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     /* get the input from the client connecting */
     if(HG_FAIL == HG_Handler_get_input(handle, &num_procs))
 	HGOTO_ERROR2(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
@@ -437,7 +433,7 @@ H5VL_iod_server_eff_init(hg_handle_t handle)
 
 done:
     HG_Handler_start_output(handle, &ret_value);
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_eff_init() */
 
 
@@ -459,8 +455,6 @@ H5VL_iod_server_eff_finalize(hg_handle_t handle)
 {
     int ret_value = HG_SUCCESS;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     /* increment the number of terminate requests received so far */
     terminate_requests ++;
 
@@ -476,7 +470,7 @@ H5VL_iod_server_eff_finalize(hg_handle_t handle)
 
 done:
     HG_Handler_start_output(handle, &ret_value);
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_eff_finalize() */
 
 
@@ -500,8 +494,6 @@ H5VL_iod_server_analysis_execute(hg_handle_t handle)
     op_data_t *op_data = NULL;
     analysis_execute_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -531,7 +523,7 @@ H5VL_iod_server_analysis_execute(hg_handle_t handle)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_analysis_execute() */
 
 
@@ -557,8 +549,6 @@ H5VL_iod_server_analysis_farm(hg_handle_t handle)
     AXE_task_t axe_id;
     int ret_value = HG_SUCCESS;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
@@ -583,7 +573,7 @@ H5VL_iod_server_analysis_farm(hg_handle_t handle)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_analysis_farm() */
 
 
@@ -609,8 +599,6 @@ H5VL_iod_server_analysis_transfer(hg_handle_t handle)
     AXE_task_t axe_id;
     int ret_value = HG_SUCCESS;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
@@ -634,7 +622,7 @@ H5VL_iod_server_analysis_transfer(hg_handle_t handle)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_analysis_transfer() */
 
 int
@@ -643,8 +631,6 @@ H5VL_iod_server_container_open(hg_handle_t handle)
     const char *file_name;
     iod_handle_t coh;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(HG_FAIL == HG_Handler_get_input(handle, &file_name))
 	HGOTO_ERROR2(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
@@ -661,8 +647,7 @@ done:
         coh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(handle, &coh);
     }
-
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_container_open() */
 
 int
@@ -670,8 +655,6 @@ H5VL_iod_server_container_close(hg_handle_t handle)
 {
     iod_handle_t coh;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(HG_FAIL == HG_Handler_get_input(handle, &coh))
 	HGOTO_ERROR2(H5E_FILE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
@@ -682,8 +665,7 @@ H5VL_iod_server_container_close(hg_handle_t handle)
 
 done:
     HG_Handler_start_output(handle, &ret_value);
-
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_container_open() */
 
 
@@ -709,8 +691,6 @@ H5VL_iod_server_cancel_op(hg_handle_t handle)
     H5ES_status_t status = H5ES_STATUS_IN_PROGRESS;
     int ret_value = HG_SUCCESS;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     if(HG_FAIL == HG_Handler_get_input(handle, &axe_id))
 	HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
 
@@ -730,9 +710,10 @@ H5VL_iod_server_cancel_op(hg_handle_t handle)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get op data");
         /* Attempt to cancel the task manually */
     }
+
 done:
     HG_Handler_start_output(handle, &status);
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_cancel_op() */
 
 
@@ -756,8 +737,6 @@ H5VL_iod_server_file_create(hg_handle_t handle)
     op_data_t *op_data = NULL;
     file_create_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -784,7 +763,7 @@ H5VL_iod_server_file_create(hg_handle_t handle)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_file_create() */
 
 
@@ -808,8 +787,6 @@ H5VL_iod_server_file_open(hg_handle_t handle)
     op_data_t *op_data = NULL;
     file_open_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -836,7 +813,7 @@ H5VL_iod_server_file_open(hg_handle_t handle)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_file_open() */
 
 
@@ -860,8 +837,6 @@ H5VL_iod_server_file_close(hg_handle_t handle)
     op_data_t *op_data = NULL;
     file_close_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -889,7 +864,7 @@ H5VL_iod_server_file_close(hg_handle_t handle)
         HGOTO_ERROR2(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_file_close() */
 
 
@@ -913,8 +888,6 @@ H5VL_iod_server_attr_create(hg_handle_t handle)
     op_data_t *op_data = NULL;
     attr_create_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -943,7 +916,7 @@ H5VL_iod_server_attr_create(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_attr_create() */
 
 
@@ -967,8 +940,6 @@ H5VL_iod_server_attr_open(hg_handle_t handle)
     op_data_t *op_data = NULL;
     attr_open_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -997,7 +968,7 @@ H5VL_iod_server_attr_open(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_attr_open() */
 
 
@@ -1021,8 +992,6 @@ H5VL_iod_server_attr_read(hg_handle_t handle)
     op_data_t *op_data = NULL;
     attr_io_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1051,7 +1020,7 @@ H5VL_iod_server_attr_read(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_attr_read() */
 
 
@@ -1075,8 +1044,6 @@ H5VL_iod_server_attr_write(hg_handle_t handle)
     op_data_t *op_data = NULL;
     attr_io_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1105,7 +1072,7 @@ H5VL_iod_server_attr_write(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_attr_write() */
 
 
@@ -1129,8 +1096,6 @@ H5VL_iod_server_attr_exists(hg_handle_t handle)
     op_data_t *op_data = NULL;
     attr_op_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1159,7 +1124,7 @@ H5VL_iod_server_attr_exists(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_attr_exists() */
 
 
@@ -1183,8 +1148,6 @@ H5VL_iod_server_attr_rename(hg_handle_t handle)
     op_data_t *op_data = NULL;
     attr_rename_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1213,7 +1176,7 @@ H5VL_iod_server_attr_rename(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_attr_rename() */
 
 
@@ -1237,8 +1200,6 @@ H5VL_iod_server_attr_remove(hg_handle_t handle)
     op_data_t *op_data = NULL;
     attr_op_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1267,7 +1228,7 @@ H5VL_iod_server_attr_remove(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_attr_remove() */
 
 
@@ -1291,8 +1252,6 @@ H5VL_iod_server_attr_close(hg_handle_t handle)
     op_data_t *op_data = NULL;
     attr_close_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1321,7 +1280,7 @@ H5VL_iod_server_attr_close(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_attr_close() */
 
 
@@ -1345,8 +1304,6 @@ H5VL_iod_server_group_create(hg_handle_t handle)
     op_data_t *op_data = NULL;
     group_create_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1374,7 +1331,7 @@ H5VL_iod_server_group_create(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_group_create() */
 
 
@@ -1398,8 +1355,6 @@ H5VL_iod_server_group_open(hg_handle_t handle)
     op_data_t *op_data = NULL;
     group_open_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1427,7 +1382,7 @@ H5VL_iod_server_group_open(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_group_open() */
 
 
@@ -1451,8 +1406,6 @@ H5VL_iod_server_group_close(hg_handle_t handle)
     op_data_t *op_data = NULL;
     group_close_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1479,7 +1432,7 @@ H5VL_iod_server_group_close(hg_handle_t handle)
                                       0, NULL, H5VL_iod_server_group_close_cb, op_data, NULL))
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_group_close() */
 
 
@@ -1503,8 +1456,6 @@ H5VL_iod_server_dset_create(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dset_create_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1533,7 +1484,7 @@ H5VL_iod_server_dset_create(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_dset_create() */
 
 
@@ -1557,8 +1508,6 @@ H5VL_iod_server_dset_open(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dset_open_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1587,7 +1536,7 @@ H5VL_iod_server_dset_open(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_dset_open() */
 
 
@@ -1611,8 +1560,6 @@ H5VL_iod_server_dset_read(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dset_io_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1641,7 +1588,7 @@ H5VL_iod_server_dset_read(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_dset_read() */
 
 
@@ -1665,8 +1612,6 @@ H5VL_iod_server_dset_get_vl_size(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dset_io_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1695,7 +1640,7 @@ H5VL_iod_server_dset_get_vl_size(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_dset_get_vl_size() */
 
 
@@ -1719,8 +1664,6 @@ H5VL_iod_server_dset_write(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dset_io_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1749,7 +1692,7 @@ H5VL_iod_server_dset_write(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_dset_write() */
 
 
@@ -1773,8 +1716,6 @@ H5VL_iod_server_dset_set_extent(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dset_set_extent_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1803,7 +1744,7 @@ H5VL_iod_server_dset_set_extent(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_dset_set_extent() */
 
 
@@ -1827,8 +1768,6 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dset_close_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1857,7 +1796,7 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_dset_close() */
 
 #ifdef H5_HAVE_INDEXING
@@ -1882,8 +1821,6 @@ H5VL_iod_server_dset_set_index_info(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dset_set_index_info_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1912,7 +1849,7 @@ H5VL_iod_server_dset_set_index_info(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_dset_set_index_info() */
 
 
@@ -1936,8 +1873,6 @@ H5VL_iod_server_dset_get_index_info(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dset_get_index_info_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -1966,7 +1901,7 @@ H5VL_iod_server_dset_get_index_info(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_dset_get_index_info() */
 
 
@@ -1990,8 +1925,6 @@ H5VL_iod_server_dset_remove_index_info(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dset_rm_index_info_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2020,7 +1953,7 @@ H5VL_iod_server_dset_remove_index_info(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_dset_remove_index_info() */
 #endif
 
@@ -2045,8 +1978,6 @@ H5VL_iod_server_dtype_commit(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dtype_commit_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2075,7 +2006,7 @@ H5VL_iod_server_dtype_commit(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_dtype_commit() */
 
 
@@ -2099,8 +2030,6 @@ H5VL_iod_server_dtype_open(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dtype_open_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2129,7 +2058,7 @@ H5VL_iod_server_dtype_open(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_dtype_open() */
 
 
@@ -2153,8 +2082,6 @@ H5VL_iod_server_dtype_close(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dtype_close_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2183,7 +2110,7 @@ H5VL_iod_server_dtype_close(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_dtype_close() */
 
 
@@ -2207,8 +2134,6 @@ H5VL_iod_server_link_create(hg_handle_t handle)
     op_data_t *op_data = NULL;
     link_create_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2237,7 +2162,7 @@ H5VL_iod_server_link_create(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_link_create() */
 
 
@@ -2261,8 +2186,6 @@ H5VL_iod_server_link_move(hg_handle_t handle)
     op_data_t *op_data = NULL;
     link_move_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2291,7 +2214,7 @@ H5VL_iod_server_link_move(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_link_move() */
 
 
@@ -2314,8 +2237,6 @@ H5VL_iod_server_link_iterate(hg_handle_t UNUSED handle)
 {
     //op_data_t *op_data = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #if 0
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
@@ -2340,8 +2261,8 @@ H5VL_iod_server_link_iterate(hg_handle_t UNUSED handle)
     op_data->input = (void *)input;
 #endif
 
-    //done:
-    FUNC_LEAVE_NOAPI(ret_value)
+done:
+    return ret_value;
 } /* end H5VL_iod_server_link_iterate() */
 
 
@@ -2365,8 +2286,6 @@ H5VL_iod_server_link_exists(hg_handle_t handle)
     op_data_t *op_data = NULL;
     link_op_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2395,7 +2314,7 @@ H5VL_iod_server_link_exists(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_link_exists() */
 
 
@@ -2419,8 +2338,6 @@ H5VL_iod_server_link_get_info(hg_handle_t handle)
     op_data_t *op_data = NULL;
     link_op_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2449,7 +2366,7 @@ H5VL_iod_server_link_get_info(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_link_get_info() */
 
 
@@ -2473,8 +2390,6 @@ H5VL_iod_server_link_get_val(hg_handle_t handle)
     op_data_t *op_data = NULL;
     link_get_val_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2503,7 +2418,7 @@ H5VL_iod_server_link_get_val(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_link_get_val() */
 
 
@@ -2527,8 +2442,6 @@ H5VL_iod_server_link_remove(hg_handle_t handle)
     op_data_t *op_data = NULL;
     link_op_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2557,7 +2470,7 @@ H5VL_iod_server_link_remove(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_link_remove() */
 
 
@@ -2581,8 +2494,6 @@ H5VL_iod_server_object_open_by_token(hg_handle_t handle)
     op_data_t *op_data = NULL;
     object_token_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2611,7 +2522,7 @@ H5VL_iod_server_object_open_by_token(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_object_open_by_token() */
 
 
@@ -2635,8 +2546,6 @@ H5VL_iod_server_object_open(hg_handle_t handle)
     op_data_t *op_data = NULL;
     object_op_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2665,7 +2574,7 @@ H5VL_iod_server_object_open(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_object_open() */
 
 
@@ -2689,8 +2598,6 @@ H5VL_iod_server_object_copy(hg_handle_t handle)
     op_data_t *op_data = NULL;
     object_copy_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2719,7 +2626,7 @@ H5VL_iod_server_object_copy(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_object_copy() */
 
 
@@ -2743,10 +2650,8 @@ H5VL_iod_server_object_visit(hg_handle_t UNUSED handle)
     //op_data_t *op_data = NULL;
     int ret_value = HG_SUCCESS;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-        //done:
-    FUNC_LEAVE_NOAPI(ret_value)
+done:
+    return ret_value;
 } /* end H5VL_iod_server_object_visit() */
 
 
@@ -2770,8 +2675,6 @@ H5VL_iod_server_object_exists(hg_handle_t handle)
     op_data_t *op_data = NULL;
     object_op_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2800,7 +2703,7 @@ H5VL_iod_server_object_exists(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_object_exists() */
 
 
@@ -2824,8 +2727,6 @@ H5VL_iod_server_object_set_comment(hg_handle_t handle)
     op_data_t *op_data = NULL;
     object_set_comment_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2854,7 +2755,7 @@ H5VL_iod_server_object_set_comment(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_object_set_comment() */
 
 
@@ -2878,8 +2779,6 @@ H5VL_iod_server_object_get_comment(hg_handle_t handle)
     op_data_t *op_data = NULL;
     object_get_comment_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2908,7 +2807,7 @@ H5VL_iod_server_object_get_comment(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_object_get_comment() */
 
 
@@ -2932,8 +2831,6 @@ H5VL_iod_server_object_get_info(hg_handle_t handle)
     op_data_t *op_data = NULL;
     object_op_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -2962,7 +2859,7 @@ H5VL_iod_server_object_get_info(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_object_get_info() */
 
 
@@ -2986,8 +2883,6 @@ H5VL_iod_server_map_create(hg_handle_t handle)
     op_data_t *op_data = NULL;
     map_create_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3015,7 +2910,7 @@ H5VL_iod_server_map_create(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_map_create() */
 
 
@@ -3039,8 +2934,6 @@ H5VL_iod_server_map_open(hg_handle_t handle)
     op_data_t *op_data = NULL;
     map_open_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3068,7 +2961,7 @@ H5VL_iod_server_map_open(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_map_open() */
 
 
@@ -3092,8 +2985,6 @@ H5VL_iod_server_map_set(hg_handle_t handle)
     op_data_t *op_data = NULL;
     map_set_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3121,7 +3012,7 @@ H5VL_iod_server_map_set(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_map_set() */
 
 
@@ -3145,8 +3036,6 @@ H5VL_iod_server_map_get(hg_handle_t handle)
     op_data_t *op_data = NULL;
     map_get_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3174,7 +3063,7 @@ H5VL_iod_server_map_get(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_map_get() */
 
 
@@ -3198,8 +3087,6 @@ H5VL_iod_server_map_get_count(hg_handle_t handle)
     op_data_t *op_data = NULL;
     map_get_count_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3227,7 +3114,7 @@ H5VL_iod_server_map_get_count(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_map_get_count() */
 
 
@@ -3251,8 +3138,6 @@ H5VL_iod_server_map_exists(hg_handle_t handle)
     op_data_t *op_data = NULL;
     map_op_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3280,7 +3165,7 @@ H5VL_iod_server_map_exists(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_map_exists() */
 
 
@@ -3304,8 +3189,6 @@ H5VL_iod_server_map_delete(hg_handle_t handle)
     op_data_t *op_data = NULL;
     map_op_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3333,7 +3216,7 @@ H5VL_iod_server_map_delete(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_map_delete() */
 
 
@@ -3357,8 +3240,6 @@ H5VL_iod_server_map_close(hg_handle_t handle)
     op_data_t *op_data = NULL;
     map_close_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3386,7 +3267,7 @@ H5VL_iod_server_map_close(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_map_close() */
 
 
@@ -3410,8 +3291,6 @@ H5VL_iod_server_rcxt_acquire(hg_handle_t handle)
     op_data_t *op_data = NULL;
     rc_acquire_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3439,7 +3318,7 @@ H5VL_iod_server_rcxt_acquire(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_rcxt_acquire() */
 
 
@@ -3463,8 +3342,6 @@ H5VL_iod_server_rcxt_release(hg_handle_t handle)
     op_data_t *op_data = NULL;
     rc_release_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3492,7 +3369,7 @@ H5VL_iod_server_rcxt_release(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_rcxt_release() */
 
 
@@ -3516,8 +3393,6 @@ H5VL_iod_server_rcxt_persist(hg_handle_t handle)
     op_data_t *op_data = NULL;
     rc_persist_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3545,7 +3420,7 @@ H5VL_iod_server_rcxt_persist(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_rcxt_persist() */
 
 
@@ -3569,8 +3444,6 @@ H5VL_iod_server_rcxt_snapshot(hg_handle_t handle)
     op_data_t *op_data = NULL;
     rc_snapshot_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3598,7 +3471,7 @@ H5VL_iod_server_rcxt_snapshot(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_rcxt_snapshot() */
 
 
@@ -3622,8 +3495,6 @@ H5VL_iod_server_trans_start(hg_handle_t handle)
     op_data_t *op_data = NULL;
     tr_start_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3651,7 +3522,7 @@ H5VL_iod_server_trans_start(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_trans_start() */
 
 
@@ -3675,8 +3546,6 @@ H5VL_iod_server_trans_finish(hg_handle_t handle)
     op_data_t *op_data = NULL;
     tr_finish_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3704,7 +3573,7 @@ H5VL_iod_server_trans_finish(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_trans_finish() */
 
 
@@ -3728,8 +3597,6 @@ H5VL_iod_server_trans_set_dependency(hg_handle_t handle)
     op_data_t *op_data = NULL;
     tr_set_depend_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3757,7 +3624,7 @@ H5VL_iod_server_trans_set_dependency(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_trans_set_dependency() */
 
 
@@ -3781,8 +3648,6 @@ H5VL_iod_server_trans_skip(hg_handle_t handle)
     op_data_t *op_data = NULL;
     tr_skip_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3810,7 +3675,7 @@ H5VL_iod_server_trans_skip(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_trans_skip() */
 
 
@@ -3834,8 +3699,6 @@ H5VL_iod_server_trans_abort(hg_handle_t handle)
     op_data_t *op_data = NULL;
     tr_abort_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3863,7 +3726,7 @@ H5VL_iod_server_trans_abort(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_trans_abort() */
 
 
@@ -3887,8 +3750,6 @@ H5VL_iod_server_prefetch(hg_handle_t handle)
     op_data_t *op_data = NULL;
     prefetch_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3916,7 +3777,7 @@ H5VL_iod_server_prefetch(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_prefetch() */
 
 
@@ -3940,8 +3801,6 @@ H5VL_iod_server_evict(hg_handle_t handle)
     op_data_t *op_data = NULL;
     evict_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -3969,7 +3828,7 @@ H5VL_iod_server_evict(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_evict() */
 
 
@@ -3993,8 +3852,6 @@ H5VL_iod_server_view_create(hg_handle_t handle)
     op_data_t *op_data = NULL;
     view_create_in_t *input;
     int ret_value = HG_SUCCESS;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
 	HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
@@ -4022,7 +3879,7 @@ H5VL_iod_server_view_create(hg_handle_t handle)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_view_create() */
 
 #endif /* H5_HAVE_EFF */

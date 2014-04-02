@@ -144,8 +144,6 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_size_t array_dims[H5S_MAX_RANK], current_dims[H5S_MAX_RANK];
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     if(name)
         fprintf(stderr, "Start dataset create %s at %"PRIu64"\n", name, loc_handle.wr_oh.cookie);
@@ -368,7 +366,6 @@ done:
     input = (dset_create_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_create_cb() */
 
 
@@ -407,8 +404,6 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_checksum_t sp_cs = 0;
     int step = 0;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start dataset open %s at (OH %"PRIu64" ID %"PRIx64")\n", 
@@ -494,7 +489,6 @@ done:
     input = (dset_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_open_cb() */
 
 
@@ -541,8 +535,6 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the dset here or if it was already open */
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
@@ -666,7 +658,7 @@ done:
         fprintf(stderr, "FAILED dset read, checksum %016lX \n", cs);
 
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &output))
-        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+        HDONE_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
     input = (dset_io_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -679,9 +671,8 @@ done:
     /* close the dataset if we opened it in this routine */
     if(TRUE == opened_locally) {
         if(iod_obj_close(iod_oh.rd_oh, NULL, NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
+            HDONE_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_read_cb() */
 
 
@@ -725,8 +716,6 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the dset here or if it was already open */
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
@@ -827,7 +816,7 @@ done:
     output.buf_size = buf_size;
 
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &output))
-        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+        HDONE_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
 #if H5_EFF_DEBUG 
     fprintf(stderr, "Done with dset get vl size (%zu), sending response to client\n", buf_size);
@@ -838,9 +827,8 @@ done:
     /* close the dataset if we opened it in this routine */
     if(TRUE == opened_locally) {
         if(iod_obj_close(iod_oh.rd_oh, NULL, NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
+            HDONE_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_get_vl_size_cb() */
 
 
@@ -892,8 +880,6 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the dset here or if it was already open */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.wr_oh.cookie == IOD_OH_UNDEFINED) {
         if (iod_obj_open_write(coh, iod_id, wtid, NULL /*hints*/, &iod_oh.wr_oh, NULL) < 0)
@@ -913,7 +899,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Get type info */
     if(H5VL_iod_get_type_info(src_id, &type_info) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get datatype info");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get datatype info");
 
     if(type_info.vls) {
         hg_bulk_segment_t *segments = NULL;
@@ -1130,7 +1116,7 @@ done:
 #endif
 
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
-        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+        HDONE_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
     input = (dset_io_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -1144,9 +1130,8 @@ done:
     /* close the dataset if we opened it in this routine */
     if(TRUE == opened_locally) {
         if(iod_obj_close(iod_oh.wr_oh, NULL, NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
+            HDONE_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_write_cb() */
 
 
@@ -1181,8 +1166,6 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     /* int rank = input->dims.rank;  rank of dataset */
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG 
         fprintf(stderr, "Start dataset Set Extent first dim to %zu\n", 
@@ -1249,7 +1232,6 @@ done:
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_set_extent_cb() */
 
 
@@ -1278,8 +1260,6 @@ H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine,
     //iod_obj_id_t iod_id = input->iod_id; 
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start dataset Close %"PRIu64" %"PRIu64"\n",
             iod_oh.rd_oh.cookie, iod_oh.wr_oh.cookie);
@@ -1300,7 +1280,6 @@ done:
     input = (dset_close_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_close_cb() */
 
 
@@ -1322,7 +1301,7 @@ done:
 herr_t 
 H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
                           hbool_t write_op, void *buf, 
-                          size_t UNUSED buf_size, iod_checksum_t cs, 
+                          size_t UNUSED buf_size, iod_checksum_t UNUSED cs, 
                           uint32_t cs_scope, iod_trans_id_t tid)
 {
     int ndims, i; /* dataset's rank/number of dimensions */
@@ -1334,8 +1313,6 @@ H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
     uint8_t *buf_ptr = NULL;
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* get the rank of the dataspace */
     if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
@@ -1498,7 +1475,7 @@ done:
         mem_desc = NULL;
     }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_server_final_io() */
 
 
@@ -1532,8 +1509,6 @@ H5VL__iod_server_vl_data_read(iod_handle_t coh, AXE_engine_t axe_engine, AXE_tas
     iod_handle_t *blob_oh;
     size_t u, elmt_size;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* retrieve the buffer that contains the blob IDs and their sizes
        that was created in the get_size operation */
@@ -1643,7 +1618,7 @@ done:
     op_data->output = NULL;
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* H5VL__iod_server_vl_data_read */
 
 
@@ -1676,8 +1651,6 @@ H5VL__iod_server_vl_data_write(iod_handle_t coh, iod_obj_id_t iod_id, iod_handle
     size_t buf_size = 0, u;
     void *buf = NULL;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* Print VL length DATA */
     for(u = 0; u < num_segments; u++) {
@@ -1728,7 +1701,7 @@ done:
         free(buf);
         buf = NULL;
     }
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }/* end H5VL__iod_server_vl_data_write */
 
 
@@ -1770,8 +1743,6 @@ H5VL__iod_server_vl_data_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndi
     hbool_t created = FALSE;
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* read in the point from the array object */
     hslab.start = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
@@ -1896,7 +1867,7 @@ done:
     free(hslab.count);
     hslab.count = NULL;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }/* end H5VL__iod_server_vl_data_write_cb */
 
 #endif /* H5_HAVE_EFF */

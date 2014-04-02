@@ -53,8 +53,6 @@ H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine,
     iod_handles_t obj_oh; /* The handle for object */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Open by token = %"PRIx64"\n", obj_id);
 #endif
@@ -80,7 +78,6 @@ done:
     input = (object_token_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_object_open_cb() */
 
 
@@ -115,8 +112,6 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Open on %s (OH %"PRIu64" ID %"PRIx64")\n", 
@@ -295,7 +290,6 @@ done:
     input = (object_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_object_open_cb() */
 
 
@@ -337,8 +331,6 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start object copy\n");
@@ -494,7 +486,6 @@ done:
     input = (object_copy_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_object_copy_cb() */
 
 
@@ -530,8 +521,6 @@ H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine,
     htri_t ret = -1;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Exists on %s (OH %"PRIu64" ID %"PRIx64")\n", 
             input->loc_name, input->loc_oh.rd_oh.cookie, input->loc_id);
@@ -564,7 +553,6 @@ done:
     input = (object_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_object_exists_cb() */
 
 
@@ -605,8 +593,6 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
     const char *loc_name = input->loc_name;
     uint64_t link_count = 0;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Get Info on %s (OH %"PRIu64" ID %"PRIx64")\n", 
@@ -711,7 +697,6 @@ done:
     input = (object_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_object_get_info_cb() */
 
 
@@ -750,8 +735,6 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Set comment on %s (OH %"PRIu64" ID %"PRIx64")\n", 
@@ -826,7 +809,6 @@ done:
     input = (object_set_comment_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_object_set_comment_cb() */
 
 
@@ -869,8 +851,6 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     void *value = NULL;
     iod_checksum_t *iod_cs = NULL;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Get comment on %s (OH %"PRIu64" ID %"PRIx64")\n", 
@@ -976,7 +956,6 @@ done:
     input = (object_get_comment_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_object_get_comment_cb() */
 
 #if 0
@@ -1012,8 +991,6 @@ H5VL_iod_server_object_open_by_addr_cb(AXE_engine_t UNUSED axe_engine,
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Open By addr on %"PRIx64"\n", obj_id);
@@ -1190,7 +1167,6 @@ done:
     input = (object_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_object_open_by_addr_cb() */
 #endif
 

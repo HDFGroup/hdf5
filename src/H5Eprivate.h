@@ -69,27 +69,9 @@ typedef struct H5E_t H5E_t;
    HGOTO_DONE(ret_val)						              \
 }
 
-#define HGOTO_ERROR_IOD(iod_ret, ret_val, string) {			      \
-   fprintf(stderr, "%s\n", string);                                           \
-   fprintf(stderr, "%d (%s).\n", iod_ret, strerror(-iod_ret));                \
-   HGOTO_DONE(ret_val)						              \
-}
-
 #define HGOTO_ERROR_FF(ret_val, string) {			              \
    fprintf(stderr, "%s\n", string);                                           \
    HGOTO_DONE(ret_val)						              \
-}
-
-#define HGOTO_ERROR2(maj, min, ret_val, string) {			      \
-   fprintf(stderr, "%s\n", string);                                           \
-   err_occurred = TRUE;                                                       \
-   err_occurred = err_occurred;         /* Shut GCC warnings up! */ \
-   HGOTO_DONE(ret_val)						              \
-}
-
-#define HDONE_ERROR2(maj, min, ret_val, string) {			      \
-   fprintf(stderr, "%s\n", string);                                           \
-   ret_value = ret_val;                                                       \
 }
 
 /*

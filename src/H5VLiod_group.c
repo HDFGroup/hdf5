@@ -69,8 +69,6 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     int step = 0;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start group create %s at %"PRIu64"\n", name, loc_handle.wr_oh.cookie);
 #endif
@@ -234,7 +232,6 @@ done:
     input = (group_create_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_group_create_cb() */
 
 
@@ -273,8 +270,6 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_checksum_t sp_cs = 0;
     int step = 0;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start group open %s at (OH %"PRIu64" ID %"PRIx64")\n", 
@@ -358,7 +353,6 @@ done:
     input = (group_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_group_open_cb() */
 
 
@@ -386,8 +380,6 @@ H5VL_iod_server_group_close_cb(AXE_engine_t UNUSED axe_engine,
     iod_handles_t iod_oh = input->iod_oh;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start group close\n");
 #endif
@@ -412,7 +404,6 @@ done:
     input = (group_close_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_group_close_cb() */
 
 #endif /* H5_HAVE_EFF */

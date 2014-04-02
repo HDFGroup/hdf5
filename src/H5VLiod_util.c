@@ -66,8 +66,6 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
     iod_obj_id_t cur_id;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     /* Creating intermediate groups is not supported for now */
     assert(FALSE == create_interm_grps);
 
@@ -170,7 +168,7 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
     (*iod_oh).wr_oh.cookie = cur_oh.wr_oh.cookie;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }
 
 
@@ -202,8 +200,6 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
     iod_handle_t prev_oh;
     iod_obj_id_t cur_id;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     cur_oh.rd_oh.cookie = loc_handle.rd_oh.cookie;
     cur_oh.wr_oh.cookie = loc_handle.wr_oh.cookie;
@@ -291,7 +287,7 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
     (*iod_oh).wr_oh.cookie = IOD_OH_UNDEFINED;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }
 
 
@@ -315,8 +311,6 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
     int ndims = 0, i;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     /* get the rank of this dataspace */
     if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
         HGOTO_ERROR2(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion");
@@ -325,7 +319,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
     case H5S_SEL_NONE:
         /* nothing selected */
         num_descriptors = 0;
-        HGOTO_DONE(SUCCEED);
+        HGOTO_DONE2(SUCCEED);
     case H5S_SEL_ALL:
         /* The entire dataspace is selected, 1 large iod hyperslab is needed */
         num_descriptors = 1;
@@ -355,7 +349,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                 hsize_t *points = NULL;
                 size_t point_count = 0;
 
-                point_count = ndims * num_descriptors * sizeof(hsize_t);
+                point_count = (hsize_t)num_descriptors * (unsigned int)ndims * sizeof(hsize_t);
 
                 if(NULL == (points = (hsize_t *)malloc(point_count)))
                     HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for points coords");
@@ -411,7 +405,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                     hsize_t *blocks = NULL;
                     size_t block_count = 0;
 
-                    block_count = ndims * (size_t)num_descriptors * sizeof(hsize_t) * 2;
+                    block_count = (unsigned int)ndims * (hsize_t)num_descriptors * sizeof(hsize_t) * 2;
 
                     if(NULL == (blocks = (hsize_t *)malloc(block_count)))
                         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for points coords");
@@ -450,7 +444,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
     *count = num_descriptors;
 
  done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
         }
 
 
@@ -474,8 +468,6 @@ H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
     iod_kv_t kv;
     size_t buf_size;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* insert group creation properties in Metadata KV */
     key = strdup(H5VL_IOD_KEY_OBJ_CPL);
@@ -522,7 +514,7 @@ done:
         value = NULL;
     }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }
 
 
@@ -544,8 +536,6 @@ H5VL_iod_insert_link_count(iod_handle_t oh, iod_trans_id_t tid, uint64_t count,
     char *key = NULL;
     iod_kv_t kv;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     key = strdup(H5VL_IOD_KEY_OBJ_LINK_COUNT);
 
@@ -577,7 +567,7 @@ done:
         free(key); 
         key = NULL;
     }
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }
 
 
@@ -599,8 +589,6 @@ H5VL_iod_insert_object_type(iod_handle_t oh, iod_trans_id_t tid, H5I_type_t obj_
     char *key = NULL;
     iod_kv_t kv;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     key = strdup(H5VL_IOD_KEY_OBJ_TYPE);
 
@@ -632,7 +620,7 @@ done:
         free(key); 
         key = NULL;
     }
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }
 
 
@@ -656,8 +644,6 @@ H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
     iod_kv_t kv;
     size_t buf_size;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* insert group creation properties in Metadata KV */
     key = strdup(H5VL_IOD_KEY_OBJ_DATATYPE);
@@ -704,7 +690,7 @@ done:
         value = NULL;
     }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }
 
 
@@ -728,8 +714,6 @@ H5VL_iod_insert_datatype_with_key(iod_handle_t oh, iod_trans_id_t tid, hid_t typ
     iod_kv_t kv;
     size_t buf_size;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* determine the buffer size needed to store the encoded type */ 
     if(H5Tencode(type_id,  NULL, &buf_size) < 0)
@@ -769,7 +753,7 @@ done:
         value = NULL;
     }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }
 
 
@@ -793,8 +777,6 @@ H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
     iod_kv_t kv;
     size_t buf_size;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* insert group creation properties in Metadata KV */
     key = strdup(H5VL_IOD_KEY_OBJ_DATASPACE);
@@ -841,7 +823,7 @@ done:
         value = NULL;
     }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }
 
 
@@ -866,8 +848,6 @@ H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_n
     uint8_t *val_ptr = NULL;
     size_t value_len;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     switch(link_type) {
         case H5L_TYPE_HARD:
@@ -929,7 +909,7 @@ done:
     if(value)
         free(value);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }
 
 
@@ -954,8 +934,6 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
     iod_checksum_t *iod_cs = NULL;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     if(cs_scope & H5_CHECKSUM_IOD) {
         iod_cs = (iod_checksum_t *)malloc(sizeof(iod_checksum_t) * 2);
     }
@@ -971,7 +949,7 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 
-            if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, iod_cs, event) < 0)
+            if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
             if((plist_id = H5Pdecode(value)) < 0)
@@ -985,7 +963,7 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         if(NULL == (value = malloc((size_t)val_size)))
             HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 
-        if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, iod_cs, event) < 0)
+        if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "link_count lookup failed");
 
         memcpy(ret, value, val_size);
@@ -1000,7 +978,7 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 
-            if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, iod_cs, event) < 0)
+            if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
             if((type_id = H5Tdecode(value)) < 0)
@@ -1019,7 +997,7 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 
-            if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, iod_cs, event) < 0)
+            if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
             if((space_id = H5Sdecode(value)) < 0)
@@ -1033,7 +1011,7 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         if(NULL == (value = malloc((size_t)val_size)))
             HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 
-        if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, iod_cs, event) < 0)
+        if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "link_count lookup failed");
 
         memcpy(ret, value, val_size);
@@ -1051,7 +1029,7 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
 
-            if(iod_kv_get_value(oh, tid, key, key_size, value, &val_size, iod_cs, event) < 0)
+            if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
                 HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
 
             val_ptr = (uint8_t *)value;
@@ -1103,7 +1081,7 @@ done:
         iod_cs = NULL;
     }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }
 
 
@@ -1127,8 +1105,6 @@ H5VL__iod_server_adjust_buffer(hid_t mem_type_id, hid_t dset_type_id, size_t nel
                                hbool_t *is_vl_data, size_t *_buf_size)
 {
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     switch(H5Tget_class(dset_type_id)) {
         case H5T_INTEGER:
@@ -1188,7 +1164,7 @@ H5VL__iod_server_adjust_buffer(hid_t mem_type_id, hid_t dset_type_id, size_t nel
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_server_adjust_buffer */
 
 
@@ -1209,8 +1185,6 @@ H5VL_iod_verify_scratch_pad(scratch_pad *sp, iod_checksum_t iod_cs)
     iod_checksum_t computed_cs = 0;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
     computed_cs = H5_checksum_crc64(sp, sizeof(scratch_pad));
 
     if(computed_cs != iod_cs) {
@@ -1219,7 +1193,7 @@ H5VL_iod_verify_scratch_pad(scratch_pad *sp, iod_checksum_t iod_cs)
         ret_value = FAIL;
     }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL_iod_verify_scratch_pad() */
 
 herr_t
@@ -1228,8 +1202,6 @@ H5VL_iod_verify_kv_pair(void *key, iod_size_t key_size, void *value, iod_size_t 
 {
     iod_checksum_t cs[2];
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     cs[0] = H5_checksum_crc64(key, key_size);
     cs[1] = H5_checksum_crc64(value, val_size);
@@ -1243,7 +1215,7 @@ H5VL_iod_verify_kv_pair(void *key, iod_size_t key_size, void *value, iod_size_t 
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "Corruption detected in IOD KV pair");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* H5VL_iod_verify_kv_pair */
 
 
@@ -1264,8 +1236,6 @@ H5VL__iod_get_h5_obj_type(iod_obj_id_t oid, iod_handle_t coh, iod_trans_id_t rti
     H5I_type_t obj_type;
     iod_obj_type_t iod_type;
     herr_t ret_value = -1;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     iod_type = IOD_OBJID_GETTYPE(oid);
 
@@ -1306,7 +1276,7 @@ H5VL__iod_get_h5_obj_type(iod_obj_id_t oid, iod_handle_t coh, iod_trans_id_t rti
     ret_value = obj_type;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_get_h5_obj_type() */
 
 
@@ -1329,8 +1299,6 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
     herr_t ret;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     ret = (*op)(coh, obj_id, rtid, obj_type, cs_scope, op_data);
 
     /* Get the object type, if it is not a group do not check for links */
@@ -1343,7 +1311,7 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
 
         ret = iod_kv_get_num(obj_oh, rtid, &num_entries, NULL);
         if(ret != 0)
-            HGOTO_ERROR_IOD(ret, FAIL, "can't get number of KV entries");
+            HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get number of KV entries");
 
         if(0 != num_entries) {
             iod_kv_params_t *kvs = NULL;
@@ -1369,10 +1337,7 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
 
             ret = iod_kv_list_key(obj_oh, rtid, NULL, 0, &num_entries, kvs, NULL);
             if(ret != 0)
-                HGOTO_ERROR_IOD(ret, FAIL, "can't get list of keys");
-            //ret = iod_kv_get_list(obj_oh, rtid, NULL, 0, &num_entries, kvs, NULL);
-            //if(ret != 0)
-            //HGOTO_ERROR_IOD(ret, FAIL, "can't get KV list from group KV");
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get list of keys");
 
             for(i=0 ; i<num_entries ; i++) {
 
@@ -1397,10 +1362,10 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
 
                 /* Get the object type. */
                 if((otype = H5VL__iod_get_h5_obj_type(oid, coh, rtid, cs_scope)) < 0)
-                    HGOTO_ERROR_IOD(ret, FAIL, "can't get object type");
+                    HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type");
 
                 if(H5VL_iod_server_iterate(coh, oid, rtid, otype, cs_scope, op, op_data) < 0)
-                    HGOTO_ERROR_IOD(ret, FAIL, "can't iterate");
+                    HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't iterate");
             }
 
             for(i=0 ; i<num_entries ; i++) {
@@ -1420,7 +1385,7 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
 
     ret_value = ret;
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }
 
 #if 0
@@ -1429,8 +1394,6 @@ H5VL_iod_map_type_convert(hid_t src_id, hid_t dst_id, void *buf, size_t buf_size
 {
     H5T_class_t class;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     class = H5Tget_class(src_id);
     if(H5T_VLEN == class || (H5T_STRING == class && H5Tis_variable_str(src_id)))
@@ -1462,7 +1425,7 @@ H5VL_iod_map_type_convert(hid_t src_id, hid_t dst_id, void *buf, size_t buf_size
         HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }
 #endif
 #endif /* H5_HAVE_EFF */

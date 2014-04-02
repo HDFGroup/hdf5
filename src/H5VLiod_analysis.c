@@ -74,9 +74,6 @@ static herr_t H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_tr
 
 static hid_t H5VL__iod_get_space_layout(coords_t coords, iod_size_t num_cells, hid_t space_id);
 
-herr_t H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim, 
-                                   const hsize_t *point, void *_udata);
-
 static herr_t H5VL__iod_get_query_data(iod_handle_t coh, iod_obj_id_t dset_id, 
                                        iod_trans_id_t rtid, hid_t query_id, 
                                        hid_t space_id, hid_t type_id, 
@@ -133,8 +130,6 @@ H5VL__iod_load_script(const char *script, const char *func_name)
         PyObject* dlfl_dict = PyModule_GetDict( dlfl );
     */
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     /* Get reference to main */
     if(NULL == (po_main = PyImport_AddModule("__main__")))
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, NULL, "can't get reference to main module");
@@ -155,7 +150,7 @@ H5VL__iod_load_script(const char *script, const char *func_name)
 done:
     Py_DECREF(po_rstring);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_load_script() */
 
 /*-------------------------------------------------------------------------
@@ -174,8 +169,6 @@ H5VL__iod_translate_h5_type(hid_t data_type_id, enum NPY_TYPES *npy_type)
     herr_t ret_value = SUCCEED; /* Return value */
     enum NPY_TYPES translated_type;
     hid_t native_datatype_id;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if((native_datatype_id = H5Tget_native_type(data_type_id, H5T_DIR_DEFAULT)) < 0)
         HGOTO_ERROR2(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot retrieve native type");
@@ -203,7 +196,7 @@ H5VL__iod_translate_h5_type(hid_t data_type_id, enum NPY_TYPES *npy_type)
     *npy_type = translated_type;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_translate_h5_type() */
 
 /*-------------------------------------------------------------------------
@@ -223,8 +216,6 @@ H5VL__iod_translate_numpy_type(enum NPY_TYPES npy_type, hid_t *data_type_id,
     herr_t ret_value = SUCCEED; /* Return value */
     hid_t translated_type_id;
     size_t translated_type_size;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     switch (npy_type) {
         case NPY_LONGLONG:
@@ -260,7 +251,7 @@ H5VL__iod_translate_numpy_type(enum NPY_TYPES npy_type, hid_t *data_type_id,
     *data_type_size = translated_type_size;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_translate_numpy_type() */
 
 /*-------------------------------------------------------------------------
@@ -280,8 +271,6 @@ H5VL__iod_create_numpy_array(size_t num_elmts, hid_t data_type_id, void *data)
     npy_intp dim[1] = {(npy_intp) num_elmts};
     enum NPY_TYPES npy_type;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     HDassert(data);
 
     /* Convert data_type to numpy type */
@@ -291,7 +280,7 @@ H5VL__iod_create_numpy_array(size_t num_elmts, hid_t data_type_id, void *data)
     ret_value = PyArray_SimpleNewFromData(1, dim, npy_type, data);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_create_numpy_array() */
 
 /*-------------------------------------------------------------------------
@@ -314,8 +303,6 @@ H5VL__iod_extract_numpy_array(PyObject *numpy_array, void **data,
     npy_intp *numpy_dims;
     int numpy_datatype;
     size_t numpy_num_elmts, extracted_datatype_size;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(numpy_array);
     HDassert(data);
@@ -351,7 +338,7 @@ H5VL__iod_extract_numpy_array(PyObject *numpy_array, void **data,
     *data_type_id = extracted_datatype_id;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* H5VL__iod_extract_numpy_array */
 
 /*-------------------------------------------------------------------------
@@ -373,8 +360,6 @@ H5VL__iod_split(const char *split_script, void *data, size_t num_elmts,
 
     PyObject *po_func = NULL, *po_numpy_array = NULL, *po_args_tup = NULL;
     PyObject *po_numpy_array_split = NULL;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(!numpy_initialized) H5VL__iod_numpy_init();
 
@@ -410,7 +395,7 @@ done:
     Py_XDECREF(po_numpy_array);
     Py_XDECREF(po_numpy_array_split);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_split() */
 
 /*-------------------------------------------------------------------------
@@ -433,8 +418,6 @@ H5VL__iod_combine(const char *combine_script, void **split_data, size_t *split_n
     PyObject *po_func = NULL, *po_numpy_arrays = NULL, *po_args_tup = NULL;
     PyObject *po_numpy_array_combine = NULL;
     size_t i;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(!numpy_initialized) H5VL__iod_numpy_init();
 
@@ -485,7 +468,7 @@ done:
     }
     Py_XDECREF(po_numpy_array_combine);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 }
 
 #endif /* H5_HAVE_PYTHON */
@@ -507,8 +490,6 @@ H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs)
     hg_request_t *hg_reqs = NULL;
     iod_handle_t *temp_cohs = NULL;
     int i;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (hg_reqs = (hg_request_t *)malloc(sizeof(hg_request_t) * (unsigned int) num_ions_g)))
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
@@ -541,7 +522,7 @@ H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs)
     *cohs = temp_cohs;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_request_container_open */
 
 /*-------------------------------------------------------------------------
@@ -560,8 +541,6 @@ H5VL__iod_request_container_close(iod_handle_t *cohs)
     herr_t ret_value = SUCCEED; /* Return value */
     hg_request_t *hg_reqs = NULL;
     int i;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (hg_reqs = (hg_request_t *)malloc(sizeof(hg_request_t) * (unsigned int) num_ions_g)))
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate HG requests");
@@ -589,7 +568,7 @@ H5VL__iod_request_container_close(iod_handle_t *cohs)
     free(cohs);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_request_container_close */
 
 /*-------------------------------------------------------------------------
@@ -619,8 +598,6 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
     unsigned int num_targets = obj_map->u_map.array_map.n_range;
     analysis_farm_in_t farm_input;
     analysis_farm_out_t *farm_output = NULL;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* function shipper requests */
     if(NULL == (hg_reqs = (hg_request_t *) malloc(sizeof(hg_request_t) * num_targets)))
@@ -750,7 +727,7 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
     free(split_num_elmts);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_farm_work */
 
 /*-------------------------------------------------------------------------
@@ -790,8 +767,6 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     unsigned int i;
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* ****************** TEMP THING (as IOD requires collective container open) */
 
@@ -878,7 +853,7 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
     /* close object */
     if(iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
+        HDONE_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
 
     if(iod_trans_finish(cohs[0], rtid, NULL, 0, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction 0");
@@ -908,7 +883,6 @@ done:
     input = (analysis_execute_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_analysis_execute_cb() */
 
 /*-------------------------------------------------------------------------
@@ -933,8 +907,6 @@ H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
     herr_t ret_value = SUCCEED;
     hid_t space_layout;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     if(FAIL == (space_layout = H5VL__iod_get_space_layout(coords, num_cells, space_id)))
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't generate local dataspace selection");
 
@@ -958,7 +930,7 @@ done:
     if(space_layout)
         H5Sclose(space_layout);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_farm_work */
 
 /*-------------------------------------------------------------------------
@@ -994,8 +966,6 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
     hid_t split_type_id;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     if(FAIL == H5VL__iod_farm_split(coh, obj_id, rtid, space_id, coords, num_cells,
                                     type_id, query_id, split_script,
                                     &split_data, &split_num_elmts, &split_type_id))
@@ -1019,7 +989,6 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
 done:
     input = (analysis_farm_in_t *)H5MM_xfree(input);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_analysis_farm_cb() */
 
 /*-------------------------------------------------------------------------
@@ -1048,8 +1017,6 @@ H5VL_iod_server_analysis_transfer_cb(AXE_engine_t axe_engine,
     size_t data_size;
     hg_bulk_request_t bulk_request;
     na_addr_t source = HG_Handler_get_addr(op_data->hg_handle);
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     if(AXE_SUCCEED != AXEget_op_data(axe_engine, input->axe_id, &farm_op_data_ptr))
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "failed to get farm op_data");
@@ -1085,7 +1052,6 @@ done:
     input = (analysis_transfer_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_analysis_farm_cb() */
 
 /*-------------------------------------------------------------------------
@@ -1109,8 +1075,6 @@ H5VL__iod_get_space_layout(coords_t coords, iod_size_t num_cells, hid_t space_id
 
     hid_t space_layout = FAIL, ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     /* retrieve number of dimensions and dimensions. */
     ndims = H5Sget_simple_extent_ndims(space_id);
 
@@ -1132,10 +1096,10 @@ H5VL__iod_get_space_layout(coords_t coords, iod_size_t num_cells, hid_t space_id
 done:
     if(ret_value < 0) {
         if(FAIL != space_layout && H5Sclose(space_layout) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+            HDONE_ERROR2(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_get_space_layout() */
 
 /*-------------------------------------------------------------------------
@@ -1155,8 +1119,6 @@ H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim,
     hbool_t result;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     /* Apply the query */
     if(H5Qapply(udata->query_id, &result, type_id, elem) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "unable to apply query to data element");
@@ -1171,7 +1133,7 @@ H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim,
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_get_query_data_cb */
 
 /*-------------------------------------------------------------------------
@@ -1198,8 +1160,6 @@ H5VL__iod_get_query_data(iod_handle_t coh, iod_obj_id_t dset_id,
     void *buf = NULL;
     hid_t space_query = FAIL, mem_space = FAIL;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     nelmts = (size_t) H5Sget_select_npoints(space_id);
     elmt_size = H5Tget_size(type_id);
@@ -1245,13 +1205,13 @@ H5VL__iod_get_query_data(iod_handle_t coh, iod_obj_id_t dset_id,
 
 done:
     if(space_query && H5Sclose(space_query) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+        HDONE_ERROR2(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
     if(mem_space && H5Sclose(mem_space) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+        HDONE_ERROR2(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
     if(buf != NULL)
         free(buf);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_get_query_data() */
 
 /*-------------------------------------------------------------------------
@@ -1274,8 +1234,6 @@ H5VL__iod_read_selection(iod_handle_t coh, iod_obj_id_t obj_id,
     size_t elmt_size;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     /* open the array object */
     if (iod_obj_open_read(coh, obj_id, rtid, NULL, &obj_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open array object fo read");
@@ -1290,9 +1248,9 @@ H5VL__iod_read_selection(iod_handle_t coh, iod_obj_id_t obj_id,
 done:
     if(obj_oh.cookie != IOD_OH_UNDEFINED && 
        iod_obj_close(obj_oh, NULL, NULL) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
+        HDONE_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    return ret_value;
 } /* end H5VL__iod_read_selection() */
 
 #endif /* H5_HAVE_EFF */

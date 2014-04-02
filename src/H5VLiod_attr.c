@@ -70,8 +70,6 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start attribute create %s at %"PRIu64" with ID %"PRIx64" %"PRIx64"\n",
             attr_name, loc_handle.wr_oh.cookie, attr_id, loc_attrkv_id);
@@ -224,10 +222,10 @@ done:
 
         if(attr_oh.rd_oh.cookie != IOD_OH_UNDEFINED &&
            iod_obj_close(attr_oh.rd_oh, NULL, NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            HDONE_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
         if(attr_oh.wr_oh.cookie != IOD_OH_UNDEFINED &&
            iod_obj_close(attr_oh.wr_oh, NULL, NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+            HDONE_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
@@ -243,18 +241,17 @@ done:
     /* close the Metadata KV object */
     if(mdkv_oh.cookie != IOD_OH_UNDEFINED &&
        iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        HDONE_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
     /* close the Attribute KV object */
     if(attr_kv_oh.cookie != IOD_OH_UNDEFINED &&
        iod_obj_close(attr_kv_oh, NULL, NULL) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        HDONE_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 #endif
 
     input = (attr_create_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_create_cb() */
 
 
@@ -296,8 +293,6 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_checksum_t sp_cs = 0;
     H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 
 #if H5_EFF_DEBUG
@@ -417,7 +412,6 @@ done:
     input = (attr_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_open_cb() */
 
 
@@ -466,8 +460,6 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the attribute here or if it was already open */
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* open the attribute if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
@@ -581,9 +573,9 @@ done:
 #endif
 
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
-        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+        HDONE_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
     if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
-        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
+        HDONE_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     input = (attr_io_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -604,7 +596,6 @@ done:
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_read_cb() */
 
 
@@ -653,8 +644,6 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     na_addr_t source = HG_Handler_get_addr(op_data->hg_handle); /* source address to pull data from */
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the attribute here or if it was already opened */
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* open the attribute if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
@@ -760,7 +749,7 @@ done:
 #endif
 
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
-        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+        HDONE_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
     input = (attr_io_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -780,7 +769,6 @@ done:
         if(iod_obj_close(iod_oh, NULL, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_write_cb() */
 
 
@@ -820,8 +808,6 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
     iod_size_t kv_size = 0;
     htri_t ret = -1;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start attribute Exists %s/%s on CV %d\n", loc_name, attr_name, (int)rtid);
@@ -886,7 +872,6 @@ done:
     input = (attr_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_exists_cb() */
 
 
@@ -931,8 +916,6 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
     iod_checksum_t cs;
     iod_checksum_t sp_cs = 0;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start attribute Rename %s to %s\n", old_name, new_name);
@@ -1017,7 +1000,6 @@ done:
     input = (attr_rename_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_rename_cb() */
 
 
@@ -1063,8 +1045,6 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     iod_checksum_t cs;
     int step = 0;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start attribute Remove %s\n", attr_name);
@@ -1191,7 +1171,6 @@ done:
     input = (attr_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_remove_cb() */
 
 
@@ -1220,8 +1199,6 @@ H5VL_iod_server_attr_close_cb(AXE_engine_t UNUSED axe_engine,
     //iod_obj_id_t iod_id = input->iod_id; /* iod id of object to close */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start attribute Close %"PRIu64" %"PRIu64"\n",
             iod_oh.rd_oh.cookie, iod_oh.wr_oh.cookie);
@@ -1242,7 +1219,6 @@ done:
     input = (attr_close_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_close_cb() */
 
 #endif /* H5_HAVE_EFF */

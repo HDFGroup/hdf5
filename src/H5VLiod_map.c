@@ -73,8 +73,6 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     scratch_pad sp;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
         fprintf(stderr, "Start map create %s at %"PRIu64"\n", 
                 name, loc_handle.wr_oh.cookie);
@@ -240,7 +238,6 @@ done:
     input = (map_create_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_map_create_cb() */
 
 
@@ -279,8 +276,6 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_checksum_t sp_cs = 0;
     int step = 0;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start map open %s at (OH %"PRIu64" ID %"PRIx64")\n", 
@@ -370,7 +365,6 @@ done:
     input = (map_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_map_open_cb() */
 
 
@@ -419,8 +413,6 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     hbool_t opened_locally = FALSE;
     hbool_t val_is_vl_data = FALSE, key_is_vl_data = FALSE;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG 
     fprintf(stderr, "Start Map Set Key %d on OH %"PRIu64" OID %"PRIx64"\n", 
@@ -549,7 +541,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
 done:
 
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
-        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+        HDONE_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
     input = (map_set_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -567,7 +559,6 @@ done:
     fprintf(stderr, "Done with map set, sent %d response to client\n", ret_value);
 #endif
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_map_set_cb() */
 
 
@@ -618,8 +609,6 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
     hbool_t opened_locally = FALSE;
     iod_checksum_t kv_cs[2];
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG 
     fprintf(stderr, "Start Map Get Key %d on OH %"PRIu64" OID %"PRIx64"\n", 
@@ -783,7 +772,7 @@ done:
         output.val_size = 0;
         output.val_cs = 0;
         if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &output))
-            HDONE_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't send result of map get");
+            HDONE_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't send result of map get");
     }
 
     if(val_buf) 
@@ -798,7 +787,6 @@ done:
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_map_get_cb() */
 
 
@@ -833,8 +821,6 @@ H5VL_iod_server_map_get_count_cb(AXE_engine_t UNUSED axe_engine,
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start map get_count \n");
 #endif
@@ -863,7 +849,7 @@ done:
     if(ret_value < 0) {
         output = IOD_COUNT_UNDEFINED;
         if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &output))
-            HDONE_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't send result of map get_count");
+            HDONE_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't send result of map get_count");
     }
 
     input = (map_get_count_in_t *)H5MM_xfree(input);
@@ -875,7 +861,6 @@ done:
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_map_get_count_cb() */
 
 
@@ -915,8 +900,6 @@ H5VL_iod_server_map_exists_cb(AXE_engine_t UNUSED axe_engine,
     hbool_t is_vl_data = FALSE;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start map exists \n");
 #endif
@@ -953,7 +936,7 @@ done:
     if(ret_value < 0) {
         exists = -1; 
         if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &exists))
-            HDONE_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't send result of map exists");
+            HDONE_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't send result of map exists");
     }
 
     input = (map_op_in_t *)H5MM_xfree(input);
@@ -965,7 +948,6 @@ done:
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_map_exists_cb() */
 
 
@@ -1005,8 +987,6 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
     hbool_t is_vl_data = FALSE;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start map delete \n");
 #endif
@@ -1041,7 +1021,7 @@ done:
 #endif
 
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
-        HDONE_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't send result of map delete");
+        HDONE_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't send result of map delete");
 
     input = (map_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -1052,7 +1032,6 @@ done:
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_map_delete_cb() */
 
 
@@ -1080,8 +1059,6 @@ H5VL_iod_server_map_close_cb(AXE_engine_t UNUSED axe_engine,
     iod_handles_t iod_oh = input->iod_oh;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start map Close %"PRIu64" %"PRIu64"\n",
             iod_oh.rd_oh.cookie, iod_oh.wr_oh.cookie);
@@ -1102,7 +1079,6 @@ done:
     input = (map_close_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_map_close_cb() */
 
 #endif /* H5_HAVE_EFF */

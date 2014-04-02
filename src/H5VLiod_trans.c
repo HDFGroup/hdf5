@@ -62,8 +62,6 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
     H5RC_request_t acquire_req;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     if(H5P_DEFAULT == input->rcapl_id)
         input->rcapl_id = H5Pcopy(H5P_RC_ACQUIRE_DEFAULT);
     rcapl_id = input->rcapl_id;
@@ -184,7 +182,6 @@ done:
     input = (rc_acquire_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_rcxt_acquire_cb() */
 
 
@@ -212,8 +209,6 @@ H5VL_iod_server_rcxt_release_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* the container handle */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Release Read Context %"PRIu64"\n", input->c_version);
 #endif
@@ -228,7 +223,6 @@ done:
     input = (rc_release_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_rcxt_release_cb() */
 
 
@@ -261,8 +255,6 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
     iod_ret_t ret;
     iod_hint_list_t *chint = NULL;
     herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Persist Read Context %"PRIu64"\n", tid);
@@ -339,7 +331,6 @@ done:
     input = (rc_persist_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_rcxt_persist_cb() */
 
 
@@ -368,8 +359,6 @@ H5VL_iod_server_rcxt_snapshot_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t tid = input->c_version;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Snapshot %s with Read Context %"PRIu64"\n", input->snapshot_name, input->c_version);
 #endif
@@ -385,7 +374,6 @@ done:
     input = (rc_snapshot_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_rcxt_snapshot_cb() */
 
 
@@ -416,8 +404,6 @@ H5VL_iod_server_trans_start_cb(AXE_engine_t UNUSED axe_engine,
     unsigned num_peers; /* the number of peers starting this transaction */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Transaction Start %"PRIu64"\n", input->trans_num);
 #endif
@@ -443,7 +429,6 @@ done:
     input = (tr_start_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_trans_start_cb() */
 
 
@@ -482,8 +467,6 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
     int step = 0;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Transaction Finish %"PRIu64"\n", trans_num);
 #endif
@@ -494,7 +477,7 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
 
     ret = iod_obj_open_write(coh, oidkv_id, trans_num, NULL, &oidkv_oh, NULL);
     if(ret != 0)
-        HGOTO_ERROR_IOD(ret, FAIL, "can't open oid KV");
+        HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open oid KV");
 
     step ++;
 
@@ -557,7 +540,6 @@ done:
     input = (tr_finish_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_trans_finish_cb() */
 
 
@@ -586,8 +568,6 @@ H5VL_iod_server_trans_set_dependency_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_depend_desc_t depends;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Transaction Set_Dependency %"PRIu64" on %"PRIu64"\n", 
             input->child_trans_num, input->parent_trans_num);
@@ -609,7 +589,6 @@ done:
     input = (tr_set_depend_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_trans_set_dependency_cb() */
 
 
@@ -640,8 +619,6 @@ H5VL_iod_server_trans_skip_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_range_desc_t skip_ranges;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Transaction Skip %"PRIu64" starting at %"PRIu64"\n", count, start_trans_num);
 #endif
@@ -662,7 +639,6 @@ done:
     input = (tr_skip_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_trans_skip_cb() */
 
 
@@ -692,8 +668,6 @@ H5VL_iod_server_trans_abort_cb(AXE_engine_t UNUSED axe_engine,
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Aborting Transaction %"PRIu64"\n", input->trans_num);
 #endif
@@ -717,7 +691,6 @@ done:
     input = (tr_abort_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_trans_abort_cb() */
 
 
@@ -752,8 +725,6 @@ H5VL_iod_server_prefetch_cb(AXE_engine_t UNUSED axe_engine,
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
 #if H5_EFF_DEBUG
     fprintf(stderr, "Prefetch Object (OID %"PRIx64" OH %"PRIu64") at Version %"PRIu64"\n", 
             iod_id, iod_oh.rd_oh.cookie, tid);
@@ -779,7 +750,6 @@ done:
     input = (prefetch_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_prefetch_cb() */
 
 
@@ -814,8 +784,6 @@ H5VL_iod_server_evict_cb(AXE_engine_t UNUSED axe_engine,
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     if(replica_id) {
         fprintf(stderr, "Evict Object (OID %"PRIx64" OH %"PRIu64") replica tag %"PRIx64"\n", 
                 iod_id, iod_oh.rd_oh.cookie, replica_id);
@@ -843,7 +811,6 @@ done:
     input = (evict_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_evict_cb() */
 
 #if H5_HAVE_IOD_CORRUPT_TOOL
