@@ -500,7 +500,7 @@ H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
         cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
         cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
         fprintf(stderr, "PLIST Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
 #endif
 
@@ -560,7 +560,7 @@ H5VL_iod_insert_link_count(iod_handle_t oh, iod_trans_id_t tid, uint64_t count,
         cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
         cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
         fprintf(stderr, "Link Count Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
 #endif
 
@@ -615,7 +615,7 @@ H5VL_iod_insert_object_type(iod_handle_t oh, iod_trans_id_t tid, H5I_type_t obj_
         cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
         cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
         fprintf(stderr, "Object Type Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
 #endif
 
@@ -682,7 +682,7 @@ H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
         cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
         cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
         fprintf(stderr, "Datatype Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
 #endif
 
@@ -751,7 +751,7 @@ H5VL_iod_insert_datatype_with_key(iod_handle_t oh, iod_trans_id_t tid, hid_t typ
         cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
         cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
         fprintf(stderr, "Map Datatype Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
 #endif
 
@@ -819,7 +819,7 @@ H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
         cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
         cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
         fprintf(stderr, "Dataspace Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
 #endif
 
@@ -912,7 +912,7 @@ H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_n
         cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
         cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
         fprintf(stderr, "Link Type Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
 #endif
 
@@ -1084,7 +1084,7 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         cs[0] = H5_checksum_crc64(key, key_size);
         cs[1] = H5_checksum_crc64(value, val_size);
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
         fprintf(stderr, "Key CS iod = %016lX computed = %016lX\n", iod_cs[0], cs[0]);
         fprintf(stderr, "Value CS iod = %016lX computed = %016lX\n", iod_cs[1], cs[1]);
 #endif
@@ -1164,7 +1164,7 @@ H5VL__iod_server_adjust_buffer(hid_t mem_type_id, hid_t dset_type_id, size_t nel
 
                     if(NULL == (*buf = realloc(*buf, (size_t)buf_size)))
                         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "Can't adjust buffer for DT conversion");
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
                     fprintf(stderr, "Adjusted Buffer size for dt conversion from %zu to %lld\n", 
                             size, buf_size);
 #endif
@@ -1234,7 +1234,7 @@ H5VL_iod_verify_kv_pair(void *key, iod_size_t key_size, void *value, iod_size_t 
     cs[0] = H5_checksum_crc64(key, key_size);
     cs[1] = H5_checksum_crc64(value, val_size);
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Key CS iod = %016lX computed = %016lX\n", iod_cs[0], cs[0]);
     fprintf(stderr, "Value CS iod = %016lX computed = %016lX\n", iod_cs[1], cs[1]);
 #endif
@@ -1391,7 +1391,7 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
                 else
                     oid = value.u.iod_id;
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
                 fprintf(stderr, "Iterating into %s OID %"PRIx64"\n", ((char *)kv[i].key), oid);
 #endif
 

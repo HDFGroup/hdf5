@@ -75,7 +75,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
         fprintf(stderr, "Start map create %s at %"PRIu64"\n", 
                 name, loc_handle.wr_oh.cookie);
 #endif
@@ -101,7 +101,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
                                 cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Creating Map ID %"PRIx64" (CV %"PRIu64", TR %"PRIu64") ", 
             map_id, rtid, wtid);
     fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh.cookie, cur_id);
@@ -194,7 +194,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
                                 H5L_TYPE_HARD, &map_id, cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with map create, sending response to client\n");
 #endif
 
@@ -282,7 +282,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start map open %s at (OH %"PRIu64" ID %"PRIx64")\n", 
             name, loc_handle.rd_oh.cookie, loc_id);
 #endif
@@ -340,7 +340,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_oh.rd_oh.cookie = map_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = map_oh.wr_oh.cookie;
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with map open, sending response to client\n");
 #endif
 
@@ -422,7 +422,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Start Map Set Key %d on OH %"PRIu64" OID %"PRIx64"\n", 
             *((int *)key.buf), iod_oh.cookie, iod_id);
 #endif
@@ -475,7 +475,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
             goto done;
         }
     }
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     else {
         fprintf(stderr, "NO TRANSFER DATA INTEGRITY CHECKS ON RAW DATA\n");
     }
@@ -490,7 +490,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
                                       val_size, &val_buf, &val_is_vl_data, &new_val_size) < 0)
         HGOTO_ERROR2(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     /* fake debugging */
     if(val_is_vl_data) {
         H5T_class_t dt_class;
@@ -563,7 +563,7 @@ done:
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Done with map set, sent %d response to client\n", ret_value);
 #endif
 
@@ -621,7 +621,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Start Map Get Key %d on OH %"PRIu64" OID %"PRIx64"\n", 
             *((int *)key.buf), iod_oh.cookie, iod_id);
 #endif
@@ -687,7 +687,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
                 /* set checksum for the data to be sent */
                 output.val_cs = kv_cs[1];
             }
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
             else {
                 fprintf(stderr, "NO TRANSFER DATA INTEGRITY CHECKS ON RAW DATA\n");
             }
@@ -745,7 +745,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
             /* calculate a checksum for the data to be sent */
             output.val_cs = H5_checksum_crc64(val_buf, val_size);
         }
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
         else {
             fprintf(stderr, "NO TRANSFER DATA INTEGRITY CHECKS ON RAW DATA\n");
         }
@@ -769,7 +769,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't free bds block handle");
     }
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Done with map get, sending %d response to client\n", ret_value);
 #endif
 
@@ -835,7 +835,7 @@ H5VL_iod_server_map_get_count_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start map get_count \n");
 #endif
 
@@ -851,7 +851,7 @@ H5VL_iod_server_map_get_count_cb(AXE_engine_t UNUSED axe_engine,
 
     output = (hsize_t)num;
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Done with map get_count, sending %d response to client\n", ret_value);
 #endif
 
@@ -917,7 +917,7 @@ H5VL_iod_server_map_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start map exists \n");
 #endif
 
@@ -941,7 +941,7 @@ H5VL_iod_server_map_exists_cb(AXE_engine_t UNUSED axe_engine,
         exists = TRUE;
 
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Done with map exists, sending %d response to client\n", ret_value);
 #endif
 
@@ -1007,7 +1007,7 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start map delete \n");
 #endif
 
@@ -1036,7 +1036,7 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
 done:
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Done with map delete, sending %d response to client\n", ret_value);
 #endif
 
@@ -1082,7 +1082,7 @@ H5VL_iod_server_map_close_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start map Close %"PRIu64" %"PRIu64"\n",
             iod_oh.rd_oh.cookie, iod_oh.wr_oh.cookie);
 #endif
@@ -1093,7 +1093,7 @@ H5VL_iod_server_map_close_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
 done:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with map close, sending response to client\n");
 #endif
 

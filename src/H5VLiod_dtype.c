@@ -74,7 +74,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start datatype commit %s at %"PRIu64"\n", name, loc_handle.wr_oh.cookie);
 #endif
 
@@ -99,7 +99,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
                                 cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Creating Datatype ID %"PRIx64" (CV %"PRIu64", TR %"PRIu64") ", 
             dtype_id, rtid, wtid);
     fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh.cookie, cur_id);
@@ -249,7 +249,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_oh.rd_oh.cookie = dtype_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = dtype_oh.wr_oh.cookie;
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with dtype commit, sending response to client\n");
 #endif
 
@@ -339,7 +339,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start datatype open %s at (OH %"PRIu64" ID %"PRIx64")\n", 
             name, loc_handle.rd_oh.cookie, loc_id);
 #endif
@@ -416,7 +416,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
         /* calculate a checksum for the datatype */
         dt_cs = H5_checksum_crc64(buf, buf_size);
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
         fprintf(stderr, "IOD BLOB checksum  = %016lX  Checksum Computed = %016lX\n",
                 blob_cs, dt_cs);
 #endif
@@ -439,7 +439,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_oh.rd_oh.cookie = dtype_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = dtype_oh.wr_oh.cookie;
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with dtype open, sending response to client\n");
 #endif
 
@@ -499,7 +499,7 @@ H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start datatype Close\n");
 #endif
 
@@ -513,7 +513,7 @@ H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine,
     if((iod_obj_close(iod_oh.wr_oh, NULL, NULL)) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Write OH");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with dtype close, sending response to client\n");
 #endif
 done:

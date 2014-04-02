@@ -3005,7 +3005,7 @@ H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params,
             }
         }
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
         printf("Found %s Locally\n", comp);
 #endif
 

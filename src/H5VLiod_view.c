@@ -107,7 +107,7 @@ H5VL_iod_server_view_create_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Start View create on OID %"PRIx64"\n", loc_id);
 #endif
 

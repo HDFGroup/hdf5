@@ -146,7 +146,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     if(name)
         fprintf(stderr, "Start dataset create %s at %"PRIu64"\n", name, loc_handle.wr_oh.cookie);
     else
@@ -176,7 +176,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
         cur_id = loc_id;
     }
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Creating Dataset ID %"PRIx64" (CV %"PRIu64", TR %"PRIu64") ", 
             dset_id, rtid, wtid);
     fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh.cookie, cur_id);
@@ -227,7 +227,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - Add chunking support */
     array.chunk_dims = NULL;
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "now creating the dataset with cellsize %d num dimensions %d\n",
             array.cell_size, array.num_dims);
 #endif
@@ -325,7 +325,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_oh.rd_oh.cookie = dset_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = dset_oh.wr_oh.cookie;
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Done with dset create, sending response to client\n");
 #endif
 
@@ -410,7 +410,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start dataset open %s at (OH %"PRIu64" ID %"PRIx64")\n", 
             name, loc_handle.rd_oh.cookie, loc_id);
 #endif
@@ -463,7 +463,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_oh.rd_oh.cookie = dset_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = dset_oh.wr_oh.cookie;
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Done with dset open, sending response to client\n");
 #endif
 
@@ -551,7 +551,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
         opened_locally = TRUE;
     }
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Start dataset Read on OH %"PRIu64" OID %"PRIx64"\n", iod_oh.rd_oh.cookie, iod_id);
 #endif
 
@@ -618,7 +618,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
                 /* calculate a checksum for the data to be sent */
                 cs = H5_checksum_crc64(buf, size);
             }
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
             else {
                 fprintf(stderr, "NO TRANSFER DATA INTEGRITY CHECKS ON RAW DATA\n");
             }
@@ -653,7 +653,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
         HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "can't free bds block handle");
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Done with dset read, checksum %016lX, sending response to client\n", cs);
 #endif
 done:
@@ -775,7 +775,7 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
 
         /* copy just the size of each VL element into the temp buffer */
         for(u=0 ; u<nelmts ; u++) {
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
             fprintf(stderr, "Element %u with BLOB ID %"PRIx64" size %zu\n", 
                     u, *((iod_obj_id_t *)buf_ptr),*((size_t *)(buf_ptr+sizeof(iod_obj_id_t))));
 #endif
@@ -829,7 +829,7 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &output))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Done with dset get vl size (%zu), sending response to client\n", buf_size);
 #endif
 
@@ -901,7 +901,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
         opened_locally = TRUE;
     }
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Start dataset Write on OH %"PRIu64" OID %"PRIx64"\n", iod_oh.wr_oh.cookie, iod_id);
 #endif
 
@@ -1079,7 +1079,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
                 goto done;
             }
         }
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
         else {
             fprintf(stderr, "NO TRANSFER DATA INTEGRITY CHECKS ON RAW DATA\n");
         }
@@ -1118,13 +1118,13 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
     }
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Done with dset write, sending %d response to client \n", ret_value);
 #endif
 
 done:
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     if(ret_value != SUCCEED)
         fprintf(stderr, "FAILED dset write, sending %d response to client \n", ret_value);
 #endif
@@ -1184,7 +1184,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
         fprintf(stderr, "Start dataset Set Extent first dim to %zu\n", 
                 (iod_size_t)input->dims.size[0]);
 #endif
@@ -1234,7 +1234,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     }
 
 done:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with dset set_extent, sending response to client\n");
 #endif
 
@@ -1280,7 +1280,7 @@ H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start dataset Close %"PRIu64" %"PRIu64"\n",
             iod_oh.rd_oh.cookie, iod_oh.wr_oh.cookie);
 #endif
@@ -1291,7 +1291,7 @@ H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Write Array object");
 
 done:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with dset close, sending response to client\n");
 #endif
 
@@ -1391,7 +1391,7 @@ H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
                     (sizeof(iod_checksum_t), (size_t)num_descriptors)))
             HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate checksum array");
     }
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     else {
         fprintf(stderr, "NO IOD DATA INTEGRITY CHECKS ON RAW DATA\n");
     }
@@ -1417,7 +1417,7 @@ H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
         if(write_op && (cs_scope & H5_CHECKSUM_IOD))
             cs_list[n] = H5_checksum_crc64(buf_ptr, (size_t)num_bytes);
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
         for(i=0 ; i<ndims ; i++) {
             fprintf(stderr, "Dim %d:  start %zu   stride %zu   block %zu   count %zu\n", 
                     i, (size_t)file_desc->start[i], (size_t)file_desc->stride[i], 
@@ -1459,7 +1459,7 @@ H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
             num_bytes = num_elems * elmt_size;
 
             checksum = H5_checksum_crc64(buf_ptr, (size_t)num_bytes);
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
             fprintf(stderr, "IOD checksum  = %016lX  Checksum Computed = %016lX\n",
                     cs_list[n], checksum);
 #endif
@@ -1572,7 +1572,7 @@ H5VL__iod_server_vl_data_read(iod_handle_t coh, AXE_engine_t axe_engine, AXE_tas
         blob_size = *((size_t *)(vlen_buf_ptr+sizeof(iod_obj_id_t)));
         vlen_buf_ptr += elmt_size;
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
         fprintf(stderr, "Element %zu with BLOB ID %"PRIx64" size %zu\n", 
                 u, blob_id, blob_size);
 #endif
@@ -1681,7 +1681,7 @@ H5VL__iod_server_vl_data_write(iod_handle_t coh, iod_obj_id_t iod_id, iod_handle
 
     /* Print VL length DATA */
     for(u = 0; u < num_segments; u++) {
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
         fprintf(stderr, "Element %zu  size %zu \n", u, segments[u].size);
 #endif
         buf_size += segments[u].size;
@@ -1779,7 +1779,7 @@ H5VL__iod_server_vl_data_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndi
     hslab.block = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
     hslab.count = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Writing VL element # %zu\n", udata->cur_seg);
 #endif
 
@@ -1802,7 +1802,7 @@ H5VL__iod_server_vl_data_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndi
         /* if the BLOB exists now, try to open it again */
         if(0 == ret || -EEXIST == ret) {
             if(0 == ret) {
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
                 fprintf(stderr, "created BLOB with ID %"PRIx64"\n", blob_id);
 #endif
                 created = TRUE;

@@ -57,7 +57,7 @@ H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Start dataset set_index_info\n");
 #endif
 
@@ -101,7 +101,7 @@ H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
     }
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with dataset set_index_info, sending response to client\n");
 #endif
 
@@ -156,7 +156,7 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Start dataset get_index_info\n");
 #endif
 
@@ -232,7 +232,7 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
     printf("Index count is: %d\n", output.idx_count);
     printf("Plugin ID is: %d\n", output.idx_plugin_id);
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with dataset get_index_info, sending response to client\n");
 #endif
 
@@ -294,7 +294,7 @@ H5VL_iod_server_dset_remove_index_info_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Start dataset rm_index_info\n");
 #endif
 
@@ -318,7 +318,7 @@ H5VL_iod_server_dset_remove_index_info_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_kv_unlink_keys(mdkv_oh, wtid, NULL, 1, &kvs, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with dataset rm_index_info, sending response to client\n");
 #endif
 

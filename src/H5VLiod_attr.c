@@ -72,7 +72,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start attribute create %s at %"PRIu64" with ID %"PRIx64" %"PRIx64"\n",
             attr_name, loc_handle.wr_oh.cookie, attr_id, loc_attrkv_id);
 #endif
@@ -201,7 +201,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_oh.rd_oh.cookie = attr_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = attr_oh.wr_oh.cookie;
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with attr create, sending response to client\n");
 #endif
 
@@ -300,7 +300,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start attribute open %s at %s (OH %"PRIu64" ID %"PRIx64")\n", 
             attr_name, loc_name, loc_handle.rd_oh.cookie, loc_id);
 #endif
@@ -310,7 +310,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
                                  rtid, cs_scope, &obj_id, &obj_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Attribute is on object (OH %"PRIu64" ID %"PRIx64")\n", 
             obj_oh.rd_oh.cookie, obj_id);
 #endif
@@ -398,7 +398,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_oh.rd_oh.cookie = attr_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = attr_oh.wr_oh.cookie;
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with attr open, sending response to client\n");
 #endif
 
@@ -476,7 +476,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
         opened_locally = TRUE;
     }
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Start Attribute Read on OH %"PRIu64" OID %"PRIx64"\n", 
             iod_oh.cookie, iod_id);
 #endif
@@ -576,7 +576,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_READERROR, FAIL, "Failed to wait on Mercury Bulk data write");
 
 done:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with attr read, sending response to client\n");
 #endif
 
@@ -663,7 +663,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
         opened_locally = TRUE;
     }
 
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Start Attribute Write on OH %"PRIu64" OID %"PRIx64"\n", 
             iod_oh.cookie, iod_id);
 #endif
@@ -755,7 +755,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     }
 
 done:
-#if H5VL_IOD_DEBUG 
+#if H5_EFF_DEBUG 
     fprintf(stderr, "Done with attr write, sending %d response to client\n", ret_value);
 #endif
 
@@ -823,7 +823,7 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start attribute Exists %s/%s on CV %d\n", loc_name, attr_name, (int)rtid);
 #endif
 
@@ -877,7 +877,7 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_close(attr_kv_oh, NULL, NULL);
 
 done:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with attr exists, sending %d to client\n", ret);
 #endif
 
@@ -934,7 +934,7 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start attribute Rename %s to %s\n", old_name, new_name);
 #endif
 
@@ -1008,7 +1008,7 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with attr rename, sending response to client\n");
 #endif
 
@@ -1066,7 +1066,7 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start attribute Remove %s\n", attr_name);
 #endif
 
@@ -1164,7 +1164,7 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     }
 
 done:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with attr remove, sending response to client\n");
 #endif
 
@@ -1222,7 +1222,7 @@ H5VL_iod_server_attr_close_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start attribute Close %"PRIu64" %"PRIu64"\n",
             iod_oh.rd_oh.cookie, iod_oh.wr_oh.cookie);
 #endif
@@ -1233,7 +1233,7 @@ H5VL_iod_server_attr_close_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
 done:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with attr close, sending response to client\n");
 #endif
 

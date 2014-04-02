@@ -55,7 +55,7 @@ H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Open by token = %"PRIx64"\n", obj_id);
 #endif
 
@@ -64,7 +64,7 @@ H5VL_iod_server_object_open_by_token_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_write(coh, obj_id, tid, NULL /*hints*/, &obj_oh.wr_oh, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with object open by token, sending response to client\n");
 #endif
 
@@ -118,7 +118,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Open on %s (OH %"PRIu64" ID %"PRIx64")\n", 
             input->loc_name, input->loc_oh.rd_oh.cookie, input->loc_id);
 #endif
@@ -275,7 +275,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_oh.rd_oh.cookie = obj_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = obj_oh.wr_oh.cookie;
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with object open, sending response to client\n");
 #endif
 
@@ -340,7 +340,7 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start object copy\n");
 #endif
 
@@ -483,7 +483,7 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
 done:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with object Copy, sending response to client\n");
 #endif
 
@@ -532,7 +532,7 @@ H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Exists on %s (OH %"PRIu64" ID %"PRIx64")\n", 
             input->loc_name, input->loc_oh.rd_oh.cookie, input->loc_id);
 #endif
@@ -555,7 +555,7 @@ H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with Object exists, sending response to client\n");
 #endif
 
@@ -608,7 +608,7 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Get Info on %s (OH %"PRIu64" ID %"PRIx64")\n", 
             input->loc_name, input->loc_oh.rd_oh.cookie, input->loc_id);
 #endif
@@ -693,7 +693,7 @@ H5VL_iod_server_object_get_info_cb(AXE_engine_t UNUSED axe_engine,
        iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with Object get_info, sending response to client\n");
 #endif
 
@@ -753,7 +753,7 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Set comment on %s (OH %"PRIu64" ID %"PRIx64")\n", 
             input->path, input->loc_oh.rd_oh.cookie, input->loc_id);
 #endif
@@ -817,7 +817,7 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with set comment, sending response to client\n");
 #endif
 
@@ -872,7 +872,7 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Get comment on %s (OH %"PRIu64" ID %"PRIx64")\n", 
             input->path, input->loc_oh.rd_oh.cookie, input->loc_id);
 #endif
@@ -952,7 +952,7 @@ done:
     output.ret = ret_value;
     output.name = comment;
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with get comment, sending response to client\n");
 #endif
 
@@ -1015,7 +1015,7 @@ H5VL_iod_server_object_open_by_addr_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Open By addr on %"PRIx64"\n", obj_id);
 #endif
 
@@ -1170,7 +1170,7 @@ H5VL_iod_server_object_open_by_addr_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_oh.rd_oh.cookie = obj_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = obj_oh.wr_oh.cookie;
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with object open, sending response to client\n");
 #endif
 

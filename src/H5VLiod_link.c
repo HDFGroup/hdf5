@@ -60,7 +60,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start Link create\n");
 #endif
 
@@ -71,7 +71,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
                                 wtid, rtid, FALSE, cs_scope, &src_last_comp, &src_id, &src_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "new link name = %s\n", src_last_comp);
 #endif
 
@@ -156,7 +156,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
                                     cs_scope, NULL, NULL) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
         fprintf(stderr, "Soft link Value = %s\n", input->link_value);
 #endif
     }
@@ -174,7 +174,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
     }
 
 done:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with link create, sending response %d to client\n", 
             ret_value);
 #endif
@@ -227,7 +227,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start link move SRC %s DST %s (%"PRIu64", %"PRIu64") to (%"PRIu64", %"PRIu64")\n",
             input->src_loc_name, input->dst_loc_name, 
             input->src_loc_oh.wr_oh.cookie, input->src_loc_oh.rd_oh.cookie,
@@ -355,7 +355,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
     }
 
 done:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with link move, sending response %d to client\n",
             ret_value);
 #endif
@@ -412,7 +412,7 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start link Exists for %s on CV %d\n", loc_name, (int)rtid);
 #endif
 
@@ -461,7 +461,7 @@ done:
         iod_obj_close(cur_oh.wr_oh, NULL, NULL);
     }
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with link exists, sending %d to client\n", ret);
 #endif
 
@@ -517,7 +517,7 @@ H5VL_iod_server_link_get_info_cb(AXE_engine_t UNUSED axe_engine,
                                 cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Link Get_Info on link %s\n", last_comp);
 #endif
     
@@ -543,7 +543,7 @@ H5VL_iod_server_link_get_info_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "unsuppored link type");
     }
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with link get_info, sending response to client\n");
 #endif
 
@@ -622,7 +622,7 @@ H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine,
                                 cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Link Get_val on link %s\n", last_comp);
 #endif
     
@@ -648,7 +648,7 @@ H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine,
     HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with get link_val, sending (%s) response to client\n", 
             (char *)output.value.val);
 #endif
@@ -727,7 +727,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start link Remove %s at (%"PRIu64", %"PRIu64")\n",
             loc_name, loc_oh.wr_oh.cookie, loc_oh.rd_oh.cookie);
 #endif
@@ -844,7 +844,7 @@ done:
         step --;
     }
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with link remove, sending response %d to client\n",
             ret_value);
 #endif

@@ -71,7 +71,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start group create %s at %"PRIu64"\n", name, loc_handle.wr_oh.cookie);
 #endif
 
@@ -96,7 +96,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Creating Group ID %"PRIx64" (CV %"PRIu64", TR %"PRIu64") ", 
             grp_id, rtid, wtid);
     fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh.cookie, cur_id);
@@ -184,7 +184,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
                                 &grp_id, cs_scope, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with group create, sending response to client\n");
 #endif
 
@@ -276,7 +276,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start group open %s at (OH %"PRIu64" ID %"PRIx64")\n", 
             name, loc_handle.rd_oh.cookie, loc_id);
 #endif
@@ -330,7 +330,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     output.mdkv_id = sp[0];
     output.attrkv_id = sp[1];
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with group open, sending response to client\n");
 #endif
 
@@ -388,7 +388,7 @@ H5VL_iod_server_group_close_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start group close\n");
 #endif
 
@@ -403,7 +403,7 @@ H5VL_iod_server_group_close_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
 done:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with group close, sending response to client\n");
 #endif
 

@@ -74,7 +74,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
 
     switch(acquire_req) {
     case H5RC_EXACT:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
         fprintf(stderr, "Exact Acquire Read Context %"PRIu64"\n", input->c_version);
 #endif
         if((ret = iod_trans_start(coh, &c_version, NULL, 0, IOD_TRANS_R, NULL)) < 0) {
@@ -84,7 +84,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
         acquired_version = c_version;
         break;
     case H5RC_LAST:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
         fprintf(stderr, "Acquire LAST Read Context\n");
 #endif
         c_version = IOD_TID_UNKNOWN;
@@ -97,7 +97,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
             iod_cont_trans_stat_t *tids;
             uint64_t u;
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
             fprintf(stderr, "Next Acquire Read Context %"PRIu64"\n", input->c_version);
 #endif
             if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
@@ -126,7 +126,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
             iod_cont_trans_stat_t *tids;
             uint64_t u;
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
             fprintf(stderr, "Next Acquire Read Context %"PRIu64"\n", input->c_version);
 #endif
             if(iod_query_cont_trans_stat(coh, &tids, NULL) < 0)
@@ -166,7 +166,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t UNUSED axe_engine,
     output.c_version = acquired_version;
     output.ret = ret_value;
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with Acquire Read Context. Acquired %"PRIu64"\n", output.c_version);
 #endif
 
@@ -214,7 +214,7 @@ H5VL_iod_server_rcxt_release_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Release Read Context %"PRIu64"\n", input->c_version);
 #endif
 
@@ -264,7 +264,7 @@ H5VL_iod_server_rcxt_persist_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Persist Read Context %"PRIu64"\n", tid);
 #endif
 
@@ -370,7 +370,7 @@ H5VL_iod_server_rcxt_snapshot_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Snapshot %s with Read Context %"PRIu64"\n", input->snapshot_name, input->c_version);
 #endif
 
@@ -418,7 +418,7 @@ H5VL_iod_server_trans_start_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Transaction Start %"PRIu64"\n", input->trans_num);
 #endif
 
@@ -432,7 +432,7 @@ H5VL_iod_server_trans_start_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_trans_start(coh, &trans_num, NULL, num_peers, IOD_TRANS_W, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't start transaction");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with Transaction Start\n");
 #endif
 
@@ -484,7 +484,7 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Transaction Finish %"PRIu64"\n", trans_num);
 #endif
 
@@ -534,7 +534,7 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
 
     /* if the flag is true, acquire a read context on the finished transaction */
     if(TRUE == acquire) {
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
         fprintf(stderr, "Transaction Acquire after Finish %"PRIu64"\n", trans_num);
 #endif
 
@@ -542,7 +542,7 @@ H5VL_iod_server_trans_finish_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't acquire read context");
     }
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with Transaction Finish\n");
 #endif
 
@@ -588,7 +588,7 @@ H5VL_iod_server_trans_set_dependency_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Transaction Set_Dependency %"PRIu64" on %"PRIu64"\n", 
             input->child_trans_num, input->parent_trans_num);
 #endif
@@ -598,7 +598,7 @@ H5VL_iod_server_trans_set_dependency_cb(AXE_engine_t UNUSED axe_engine,
     //if(iod_trans_depend(coh, depends, NULL) < 0)
     //HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't set dependency between transactions");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with Transaction Set_Dependency\n");
 #endif
 
@@ -642,7 +642,7 @@ H5VL_iod_server_trans_skip_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Transaction Skip %"PRIu64" starting at %"PRIu64"\n", count, start_trans_num);
 #endif
 
@@ -651,7 +651,7 @@ H5VL_iod_server_trans_skip_cb(AXE_engine_t UNUSED axe_engine,
     //if(iod_trans_skip(coh, skip_ranges, NULL) < 0)
     //HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't skip transactions");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with Transaction Skip\n");
 #endif
 
@@ -694,7 +694,7 @@ H5VL_iod_server_trans_abort_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Aborting Transaction %"PRIu64"\n", input->trans_num);
 #endif
 
@@ -706,7 +706,7 @@ H5VL_iod_server_trans_abort_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't abort transaction");
     }
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with Transaction Abort\n");
 #endif
 
@@ -754,7 +754,7 @@ H5VL_iod_server_prefetch_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Prefetch Object (OID %"PRIx64" OH %"PRIu64") at Version %"PRIu64"\n", 
             iod_id, iod_oh.rd_oh.cookie, tid);
 #endif
@@ -765,7 +765,7 @@ H5VL_iod_server_prefetch_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch object");
     }
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with Prefetch\n");
 #endif
 
@@ -832,7 +832,7 @@ H5VL_iod_server_evict_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR2(H5E_SYM, H5E_CANTGET, FAIL, "can't evict object");
     }
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with Evict\n");
 #endif
 

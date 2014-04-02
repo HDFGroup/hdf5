@@ -67,7 +67,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start file create %s ", input->name);
     fprintf(stderr, "with MDKV %"PRIx64" ", mdkv_id), 
     fprintf(stderr, "with attrKV %"PRIx64"\n", attrkv_id), 
@@ -264,7 +264,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     output.root_oh.rd_oh = root_oh.rd_oh;
     output.root_oh.wr_oh = root_oh.wr_oh;
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with file create coh: %"PRIu64" root rd: %"PRIu64"  wr: %"PRIu64"\n",
             coh.cookie, root_oh.rd_oh.cookie, root_oh.wr_oh.cookie);
 #endif
@@ -333,7 +333,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start file open %s %d %d\n", input->name, input->flags, input->fapl_id);
 #endif
 
@@ -532,7 +532,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction 0");
     }
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with file open coh: %"PRIu64" root rd: %"PRIu64"  wr: %"PRIu64" CV: %"PRIu64"\n",
             coh.cookie, root_oh.rd_oh.cookie, root_oh.wr_oh.cookie, rtid);
 #endif
@@ -593,7 +593,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Start file close\n");
 #endif
 
@@ -617,7 +617,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         if(iod_free_cont_trans_stat(coh, tids) < 0)
             HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, FAIL, "can't free container transaction status object");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
         fprintf(stderr, "File Close starting transaction %"PRIu64" rcxt %"PRIu64"\n", 
                 trans_num, rtid);
 #endif
@@ -727,7 +727,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
             if(ret != 0)
                 HGOTO_ERROR_IOD(ret, FAIL, "can't get number of KV entries");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
             fprintf(stderr, "NUM entries in OID index KV = %d\n", num_entries);
 #endif
 
@@ -776,7 +776,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR2(H5E_SYM, H5E_CANTSET, FAIL, "can't finish transaction");
 
         if(TRUE == input->persist_on_close) {
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
             fprintf(stderr, "Persisting Last TID (%"PRIu64") before closing\n", trans_num);
 #endif
             /* persist the last transaction */
@@ -787,7 +787,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         }
     }
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Closing ROOT Group: R: %"PRIu64"  W: %"PRIu64"\n", 
             root_oh.rd_oh.cookie, root_oh.wr_oh.cookie);
 #endif
@@ -798,7 +798,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_close(root_oh.wr_oh, NULL, NULL) < 0)
         HGOTO_ERROR2(H5E_SYM, H5E_CANTDEC, FAIL, "can't close root object handle");
 
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Closing Container: %"PRIu64"\n", coh.cookie);
 #endif
 
@@ -809,7 +809,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
     }
 
 done:
-#if H5VL_IOD_DEBUG
+#if H5_EFF_DEBUG
     fprintf(stderr, "Done with file close, sending response to client\n");
 #endif
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
