@@ -149,6 +149,10 @@ PROGRAM fortranlibtest_F03
   CALL external_test_offset(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing external dataset with offset', total_error)
 
+  ret_total_error = 0
+  CALL multiple_dset_rw(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing multi-dataset reads and writes', total_error)
+
 !     write(*,*)
 !     write(*,*) '========================================='
 !     write(*,*) 'Testing GROUP interface             '
