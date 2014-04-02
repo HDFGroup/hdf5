@@ -395,7 +395,6 @@ SUBROUTINE test_h5p_file_image(total_error)
   TYPE(C_PTR), DIMENSION(1:1) :: f_ptr2
 
   ! Initialize file image buffer
-
   DO i = 1, count
      buffer(i) = i*10
   ENDDO
@@ -409,7 +408,7 @@ SUBROUTINE test_h5p_file_image(total_error)
   temp_size = 1
   CALL h5pget_file_image_f(fapl_1, f_ptr2, temp_size, error)
   CALL check("h5pget_file_image_f", error, total_error)
-  CALL verify("h5pget_file_image_f", temp_size, 0, total_error)
+  CALL verify("h5pget_file_image_f", INT(temp_size), 0, total_error)
 
   ! Set file image
   f_ptr = C_LOC(buffer(1))
