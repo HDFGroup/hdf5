@@ -71,6 +71,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     hbool_t enable_checksum = FALSE;
     int step = 0;
     scratch_pad sp;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG
@@ -95,9 +96,10 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the map needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
-                                cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't traverse path");
+    ret = H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
+                                   cs_scope, &last_comp, &cur_id, &cur_oh);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't traverse path");
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Creating Map ID %"PRIx64" (CV %"PRIu64", TR %"PRIu64") ", 
@@ -110,26 +112,31 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* create the map */
-    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
-                      NULL, NULL, &map_id, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't create Map");
+    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                         NULL, NULL, &map_id, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't create Map");
 
-    if (iod_obj_open_read(coh, map_id, wtid, NULL, &map_oh.rd_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open Map");
-    if (iod_obj_open_write(coh, map_id, wtid, NULL, &map_oh.wr_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open Map");
+    ret = iod_obj_open_read(coh, map_id, wtid, NULL, &map_oh.rd_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open Map");
+    ret = iod_obj_open_write(coh, map_id, wtid, NULL, &map_oh.wr_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open Map");
 
     step ++;
 
     /* create the metadata KV object for the map */
-    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
-                      NULL, NULL, &mdkv_id, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't create metadata KV object");
+    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                         NULL, NULL, &mdkv_id, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't create metadata KV object");
 
     /* create the attribute KV object for the root group */
-    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
-                      NULL, NULL, &attr_id, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't create metadata KV object");
+    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                         NULL, NULL, &attr_id, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't create metadata KV object");
 
     /* set values for the scratch pad object */
     sp[0] = mdkv_id;
@@ -142,55 +149,62 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
         iod_checksum_t sp_cs;
 
         sp_cs = H5_checksum_crc64(&sp, sizeof(sp));
-        if (iod_obj_set_scratch(map_oh.wr_oh, wtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set scratch pad");
+        ret = iod_obj_set_scratch(map_oh.wr_oh, wtid, &sp, &sp_cs, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't set scratch pad");
     }
     else {
-        if (iod_obj_set_scratch(map_oh.wr_oh, wtid, &sp, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set scratch pad");
+        ret = iod_obj_set_scratch(map_oh.wr_oh, wtid, &sp, NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't set scratch pad");
     }
 
     /* Open Metadata KV object for write */
-    if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't create scratch pad");
+    ret = iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't create scratch pad");
 
     step ++;
 
     /* insert plist metadata */
-    if(H5VL_iod_insert_plist(mdkv_oh, wtid, mcpl_id, 
-                             cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_plist(mdkv_oh, wtid, mcpl_id, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* insert link count metadata */
-    if(H5VL_iod_insert_link_count(mdkv_oh, wtid, (uint64_t)1, 
-                                  cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_link_count(mdkv_oh, wtid, (uint64_t)1, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* insert object type metadata */
-    if(H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_MAP, 
-                                   cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_MAP, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* insert Key datatype metadata */
-    if(H5VL_iod_insert_datatype_with_key(mdkv_oh, wtid, keytype, H5VL_IOD_KEY_MAP_KEY_TYPE,
-                                         cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_datatype_with_key(mdkv_oh, wtid, keytype, H5VL_IOD_KEY_MAP_KEY_TYPE,
+                                            cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* insert Value datatype metadata */
-    if(H5VL_iod_insert_datatype_with_key(mdkv_oh, wtid, valtype, H5VL_IOD_KEY_MAP_VALUE_TYPE,
-                                         cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_datatype_with_key(mdkv_oh, wtid, valtype, H5VL_IOD_KEY_MAP_VALUE_TYPE,
+                                            cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* close MD KV object */
-    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close object");
+    ret = iod_obj_close(mdkv_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close object");
 
     step --;
 
     /* add link in parent group to current object */
-    if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
-                                H5L_TYPE_HARD, &map_id, cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
+                                   H5L_TYPE_HARD, &map_id, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Done with map create, sending response to client\n");
@@ -275,6 +289,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
     int step = 0;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG
@@ -286,18 +301,21 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     output.valtype_id = -1;
 
     /* Traverse Path and open map */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, 
-                                 cs_scope, &map_id, &map_oh) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open object");
+    ret = H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, 
+                                    cs_scope, &map_id, &map_oh);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't open object");
 
     /* open a write handle on the ID. */
-    if (iod_obj_open_write(coh, map_id, rtid, NULL, &map_oh.wr_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open current map");
+    ret = iod_obj_open_write(coh, map_id, rtid, NULL, &map_oh.wr_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open current map");
     step ++;
 
     /* get scratch pad of map */
-    if(iod_obj_get_scratch(map_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't get scratch pad for object");
+    ret = iod_obj_get_scratch(map_oh.rd_oh, rtid, &sp, &sp_cs, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't get scratch pad for object");
 
     if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
@@ -306,27 +324,32 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_read(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open scratch pad");
+    ret = iod_obj_open_read(coh, sp[0], rtid, NULL, &mdkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open scratch pad");
     step ++;
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, 
-                             H5VL_IOD_KEY_OBJ_CPL, cs_scope, NULL, &output.mcpl_id) < 0)
-        HGOTO_ERROR_FF(FAIL, "failed to retrieve gcpl");
+    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, 
+                                H5VL_IOD_KEY_OBJ_CPL, cs_scope, NULL, &output.mcpl_id);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "failed to retrieve gcpl");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
-                             H5VL_IOD_KEY_MAP_KEY_TYPE,
-                             cs_scope, NULL, &output.keytype_id) < 0)
-        HGOTO_ERROR_FF(FAIL, "failed to retrieve link count");
+    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
+                                H5VL_IOD_KEY_MAP_KEY_TYPE,
+                                cs_scope, NULL, &output.keytype_id);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "failed to retrieve link count");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
-                             H5VL_IOD_KEY_MAP_VALUE_TYPE,
-                             cs_scope, NULL, &output.valtype_id) < 0)
-        HGOTO_ERROR_FF(FAIL, "failed to retrieve link count");
+    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
+                                H5VL_IOD_KEY_MAP_VALUE_TYPE,
+                                cs_scope, NULL, &output.valtype_id);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "failed to retrieve link count");
 
     /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close meta data KV handle");
+    ret = iod_obj_close(mdkv_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close meta data KV handle");
     step --;
 
     output.iod_id = map_id;
@@ -412,6 +435,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     uint32_t raw_cs_scope;
     hbool_t opened_locally = FALSE;
     hbool_t val_is_vl_data = FALSE, key_is_vl_data = FALSE;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG 
@@ -421,8 +445,9 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the map if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_write(coh, iod_id, wtid, NULL /*hints*/, &iod_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open current group");
+        ret = iod_obj_open_write(coh, iod_id, wtid, NULL, &iod_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open current group");
         opened_locally = TRUE;
     }
 
@@ -530,12 +555,14 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
 
         cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
         cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
-        if (iod_kv_set(iod_oh, wtid, NULL, &kv, cs, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in Map");
+        ret = iod_kv_set(iod_oh, wtid, NULL, &kv, cs, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair in Map");
     }
     else {
-        if (iod_kv_set(iod_oh, wtid, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in Map");
+        ret = iod_kv_set(iod_oh, wtid, NULL, &kv, NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair in Map");
     }
 
 done:
@@ -551,8 +578,9 @@ done:
 
     /* close the map if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't close Array object");
+        ret = iod_obj_close(iod_oh, NULL, NULL);
+        if(ret < 0)
+            HDONE_ERROR_FF(ret, "can't close Array object");
     }
 
 #if H5_EFF_DEBUG 
@@ -608,6 +636,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
     hbool_t opened_locally = FALSE;
     iod_checksum_t kv_cs[2];
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG 
@@ -617,8 +646,9 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the map if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_read(coh, iod_id, rtid, NULL /*hints*/, &iod_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open current group");
+        ret = iod_obj_open_read(coh, iod_id, rtid, NULL, &iod_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open current group");
         opened_locally = TRUE;
     }
 
@@ -648,9 +678,10 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
                                       key.buf_size, &key.buf, &key_is_vl, &key_size) < 0) 
         HGOTO_ERROR_FF(FAIL, "data type conversion failed");
 
-    if(iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, NULL, 
-                        &src_size, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't retrieve value size from parent KV store");
+    ret = iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, NULL, 
+                           &src_size, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't retrieve value size from parent KV store");
 
     if(val_is_vl) {
         output.ret = ret_value;
@@ -660,9 +691,10 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
             if(NULL == (val_buf = malloc((size_t)src_size)))
                 HGOTO_ERROR_FF(FAIL, "can't allocate buffer");
 
-            if(iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, val_buf, 
-                                &src_size, kv_cs, NULL) < 0)
-                HGOTO_ERROR_FF(FAIL, "can't retrieve value from parent KV store");
+            ret = iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, val_buf, 
+                                   &src_size, kv_cs, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "can't retrieve value from parent KV store");
 
             if(raw_cs_scope) {
                 iod_checksum_t cs[2];
@@ -704,9 +736,10 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
         if(NULL == (val_buf = malloc((size_t)src_size)))
             HGOTO_ERROR_FF(FAIL, "can't allocate buffer");
 
-        if(iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, val_buf, 
-                            &src_size, kv_cs, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't retrieve value from parent KV store");
+        ret = iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, val_buf, 
+                               &src_size, kv_cs, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't retrieve value from parent KV store");
 
         if(raw_cs_scope) {
             iod_checksum_t cs[2];
@@ -783,8 +816,9 @@ done:
 
     /* close the map if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't close Array object");
+        ret = iod_obj_close(iod_oh, NULL, NULL);
+        if(ret < 0)
+            HDONE_ERROR_FF(ret, "can't close Array object");
     }
 
 } /* end H5VL_iod_server_map_get_cb() */
@@ -817,6 +851,7 @@ H5VL_iod_server_map_get_count_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
     int num;
+    iod_ret_t ret;
     hsize_t output;
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
@@ -827,13 +862,15 @@ H5VL_iod_server_map_get_count_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the map if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_read(coh, iod_id, rtid, NULL /*hints*/, &iod_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open current group");
+        ret = iod_obj_open_read(coh, iod_id, rtid, NULL, &iod_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open current group");
         opened_locally = TRUE;
     }
 
-    if(iod_kv_get_num(iod_oh, rtid, &num, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't retrieve Number of KV pairs in MAP");
+    ret = iod_kv_get_num(iod_oh, rtid, &num, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't retrieve Number of KV pairs in MAP");
 
     output = (hsize_t)num;
 
@@ -857,8 +894,9 @@ done:
 
     /* close the map if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't close Array object");
+        ret = iod_obj_close(iod_oh, NULL, NULL);
+        if(ret < 0)
+            HDONE_ERROR_FF(ret, "can't close Array object");
     }
 
 } /* end H5VL_iod_server_map_get_count_cb() */
@@ -898,6 +936,7 @@ H5VL_iod_server_map_exists_cb(AXE_engine_t UNUSED axe_engine,
     hbool_t opened_locally = FALSE;
     htri_t exists;
     hbool_t is_vl_data = FALSE;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG
@@ -906,8 +945,9 @@ H5VL_iod_server_map_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the map if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_read(coh, iod_id, rtid, NULL /*hints*/, &iod_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open current group");
+        ret = iod_obj_open_read(coh, iod_id, rtid, NULL, &iod_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open current group");
         opened_locally = TRUE;
     }
 
@@ -944,8 +984,9 @@ done:
 
     /* close the map if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't close Array object");
+        ret = iod_obj_close(iod_oh, NULL, NULL);
+        if(ret < 0)
+            HDONE_ERROR_FF(ret, "can't close Array object");
     }
 
 } /* end H5VL_iod_server_map_exists_cb() */
@@ -993,8 +1034,9 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the map if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_write(coh, iod_id, rtid, NULL /*hints*/, &iod_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open current group");
+        ret = iod_obj_open_write(coh, iod_id, rtid, NULL, &iod_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open current group");
         opened_locally = TRUE;
     }
 
@@ -1009,11 +1051,9 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
     kvs.cs = &cs;
     kvs.ret = &ret;
 
-    if(iod_kv_unlink_keys(iod_oh, wtid, NULL, 1, &kvs, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "Unable to unlink KV pair");
-
+    ret = iod_kv_unlink_keys(iod_oh, wtid, NULL, 1, &kvs, NULL);
     if(ret < 0)
-        HGOTO_ERROR_FF(FAIL, "Unable to unlink KV pair");
+        HGOTO_ERROR_FF(ret, "Unable to unlink KV pair");
 done:
 
 #if H5_EFF_DEBUG 
@@ -1028,8 +1068,9 @@ done:
 
     /* close the map if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't close Array object");
+        ret = iod_obj_close(iod_oh, NULL, NULL);
+        if(ret < 0)
+            HDONE_ERROR_FF(ret, "can't close Array object");
     }
 
 } /* end H5VL_iod_server_map_delete_cb() */
@@ -1057,6 +1098,7 @@ H5VL_iod_server_map_close_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     map_close_in_t *input = (map_close_in_t *)op_data->input;
     iod_handles_t iod_oh = input->iod_oh;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG
@@ -1064,10 +1106,12 @@ H5VL_iod_server_map_close_cb(AXE_engine_t UNUSED axe_engine,
             iod_oh.rd_oh.cookie, iod_oh.wr_oh.cookie);
 #endif
 
-    if((iod_obj_close(iod_oh.rd_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close object");
-    if((iod_obj_close(iod_oh.wr_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close object");
+    ret = iod_obj_close(iod_oh.rd_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close object");
+    ret = iod_obj_close(iod_oh.wr_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close object");
 
 done:
 #if H5_EFF_DEBUG

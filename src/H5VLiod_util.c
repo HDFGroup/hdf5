@@ -64,6 +64,7 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
     iod_handles_t cur_oh;
     iod_handle_t prev_oh;
     iod_obj_id_t cur_id;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     /* Creating intermediate groups is not supported for now */
@@ -117,9 +118,10 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
         prev_oh.cookie = cur_oh.rd_oh.cookie;
 
         /* lookup next object in the current group */
-        if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
-                                 comp, cs_scope, NULL, &value) < 0)
-            HGOTO_ERROR_FF(FAIL, "failed to retrieve link value");
+        ret = H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
+                                    comp, cs_scope, NULL, &value);
+        if(SUCCEED != ret)
+            HGOTO_ERROR_FF(ret, "failed to get link value");
 
         /* if this a soft link, traverse the link value if the ID is undefined */
         if(H5L_TYPE_SOFT == value.link_type) {
@@ -128,9 +130,10 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
             }
 
             /* Traverse Path and open the target object */
-            if(H5VL_iod_server_open_path(coh, cur_id, cur_oh, value.u.symbolic_name, 
-                                         rtid, cs_scope, &cur_id, &cur_oh) < 0)
-                HGOTO_ERROR_FF(FAIL, "can't open object");
+            ret = H5VL_iod_server_open_path(coh, cur_id, cur_oh, value.u.symbolic_name, 
+                                            rtid, cs_scope, &cur_id, &cur_oh);
+            if(SUCCEED != ret)
+                HGOTO_ERROR_FF(ret, "failed to traverse object path");
 
             free(value.u.symbolic_name);
         }
@@ -139,13 +142,15 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
 
         /* Close previous read handle unless it is the original one */
         if(loc_handle.rd_oh.cookie != prev_oh.cookie) {
-            if(iod_obj_close(prev_oh, NULL, NULL) < 0)
-                HGOTO_ERROR_FF(FAIL, "can't close current object handle");
+            ret = iod_obj_close(prev_oh, NULL, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "failed to close IOD object");
         }
 
         /* open the current group */
-        if (iod_obj_open_read(coh, cur_id, rtid, NULL, &cur_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open current group");
+        ret = iod_obj_open_read(coh, cur_id, rtid, NULL, &cur_oh.rd_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "failed to open IOD object");
 
 	/* Advance to next component in string */
 	path += nchars;
@@ -161,8 +166,9 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t lo
     if(cur_id != loc_id ||
        loc_handle.wr_oh.cookie == IOD_OH_UNDEFINED) {
         /* open a write handle on the ID. */
-        if (iod_obj_open_write(coh, cur_id, wtid, NULL, &cur_oh.wr_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open current group");
+        ret = iod_obj_open_write(coh, cur_id, wtid, NULL, &cur_oh.wr_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open IOD object");
     }
         
     (*iod_oh).wr_oh.cookie = cur_oh.wr_oh.cookie;
@@ -199,6 +205,7 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
     iod_handles_t cur_oh;
     iod_handle_t prev_oh;
     iod_obj_id_t cur_id;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     cur_oh.rd_oh.cookie = loc_handle.rd_oh.cookie;
@@ -240,13 +247,14 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
         prev_oh.cookie = cur_oh.rd_oh.cookie;
 
         /* lookup next object in the current group */
-        if(H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
-                                 comp, cs_scope, NULL, &value) < 0) {
+        ret = H5VL_iod_get_metadata(cur_oh.rd_oh, rtid, H5VL_IOD_LINK, 
+                                    comp, cs_scope, NULL, &value); 
+        if(SUCCEED != ret) {
             /* Close previous handle unless it is the original one */
             if(loc_handle.rd_oh.cookie != prev_oh.cookie && 
                iod_obj_close(prev_oh, NULL, NULL) < 0)
-                HGOTO_ERROR_FF(FAIL, "can't close current object handle");
-            HGOTO_ERROR_FF(FAIL, "failed to retrieve link value");
+                HGOTO_ERROR_FF(ret, "can't close current object handle");
+            HGOTO_ERROR_FF(ret, "failed to retrieve link value");
         }
 
         /* if this a soft link, traverse the link value if the ID is undefined */
@@ -256,9 +264,10 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
             }
 
             /* Traverse Path and open the target object */
-            if(H5VL_iod_server_open_path(coh, cur_id, cur_oh, value.u.symbolic_name, 
-                                         rtid, cs_scope, &cur_id, &cur_oh) < 0)
-                HGOTO_ERROR_FF(FAIL, "can't open object");
+            ret = H5VL_iod_server_open_path(coh, cur_id, cur_oh, value.u.symbolic_name, 
+                                            rtid, cs_scope, &cur_id, &cur_oh);
+            if(SUCCEED != ret)
+                HGOTO_ERROR_FF(ret, "failed to traverse object path");
 
             free(value.u.symbolic_name);
         }
@@ -271,8 +280,9 @@ H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, iod_handles_t l
             HGOTO_ERROR_FF(FAIL, "can't close current object handle");
 
         /* open the current group */
-        if (iod_obj_open_read(coh, cur_id, rtid, NULL, &cur_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open current object");
+        ret = iod_obj_open_read(coh, cur_id, rtid, NULL, &cur_oh.rd_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "failed to open IOD object");
 
 	/* Advance to next component in string */
 	path += nchars;
@@ -443,9 +453,9 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
 
     *count = num_descriptors;
 
- done:
+done:
     return ret_value;
-        }
+}
 
 
 /*-------------------------------------------------------------------------
@@ -467,6 +477,7 @@ H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
     void *value = NULL;
     iod_kv_t kv;
     size_t buf_size;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     /* insert group creation properties in Metadata KV */
@@ -496,12 +507,14 @@ H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
         fprintf(stderr, "PLIST Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
 #endif
 
-        if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(oh, tid, hints, &kv, cs, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair for plist");
     }
     else {
-        if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(oh, tid, hints, &kv, NULL, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair for plist");
     }
 
 done:
@@ -535,6 +548,7 @@ H5VL_iod_insert_link_count(iod_handle_t oh, iod_trans_id_t tid, uint64_t count,
 {
     char *key = NULL;
     iod_kv_t kv;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     key = strdup(H5VL_IOD_KEY_OBJ_LINK_COUNT);
@@ -554,12 +568,14 @@ H5VL_iod_insert_link_count(iod_handle_t oh, iod_trans_id_t tid, uint64_t count,
         fprintf(stderr, "Link Count Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
 #endif
 
-        if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(oh, tid, hints, &kv, cs, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair for link count");
     }
     else {
-        if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(oh, tid, hints, &kv, NULL, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair for link count");
     }
 
 done:
@@ -588,6 +604,7 @@ H5VL_iod_insert_object_type(iod_handle_t oh, iod_trans_id_t tid, H5I_type_t obj_
 {
     char *key = NULL;
     iod_kv_t kv;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     key = strdup(H5VL_IOD_KEY_OBJ_TYPE);
@@ -607,12 +624,14 @@ H5VL_iod_insert_object_type(iod_handle_t oh, iod_trans_id_t tid, H5I_type_t obj_
         fprintf(stderr, "Object Type Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
 #endif
 
-        if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(oh, tid, hints, &kv, cs, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair for object type");
     }
     else {
-        if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(oh, tid, hints, &kv, NULL, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair for object type");
     }
 
 done:
@@ -643,6 +662,7 @@ H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
     void *value = NULL;
     iod_kv_t kv;
     size_t buf_size;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     /* insert group creation properties in Metadata KV */
@@ -672,12 +692,14 @@ H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
         fprintf(stderr, "Datatype Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
 #endif
 
-        if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(oh, tid, hints, &kv, cs, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair for datatype");
     }
     else {
-        if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(oh, tid, hints, &kv, NULL, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair for datatype");
     }
 
 done:
@@ -713,6 +735,7 @@ H5VL_iod_insert_datatype_with_key(iod_handle_t oh, iod_trans_id_t tid, hid_t typ
     void *value = NULL;
     iod_kv_t kv;
     size_t buf_size;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     /* determine the buffer size needed to store the encoded type */ 
@@ -739,12 +762,14 @@ H5VL_iod_insert_datatype_with_key(iod_handle_t oh, iod_trans_id_t tid, hid_t typ
         fprintf(stderr, "Map Datatype Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
 #endif
 
-        if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(oh, tid, hints, &kv, cs, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair for datatype");
     }
     else {
-        if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(oh, tid, hints, &kv, NULL, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair for datatype");
     }
 
 done:
@@ -776,6 +801,7 @@ H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
     void *value = NULL;
     iod_kv_t kv;
     size_t buf_size;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     /* insert group creation properties in Metadata KV */
@@ -805,12 +831,14 @@ H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
         fprintf(stderr, "Dataspace Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
 #endif
 
-        if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(oh, tid, hints, &kv, cs, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair for dataspace");
     }
     else {
-        if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(oh, tid, hints, &kv, NULL, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair for dataspace");
     }
 
 done:
@@ -847,6 +875,7 @@ H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_n
     void  *value = NULL;
     uint8_t *val_ptr = NULL;
     size_t value_len;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     switch(link_type) {
@@ -896,12 +925,14 @@ H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_n
         fprintf(stderr, "Link Type Checksums key = %016lX  value = %016lX\n", cs[0], cs[1]);
 #endif
 
-        if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(oh, tid, hints, &kv, cs, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair for link");
     }
     else {
-        if (iod_kv_set(oh, tid, hints, &kv, NULL, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(oh, tid, hints, &kv, NULL, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair for link");
     }
 
 done:
@@ -926,12 +957,13 @@ done:
  */
 herr_t 
 H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t md_type,
-                      const char *key, uint32_t cs_scope, iod_event_t *event, void *ret)
+                      const char *key, uint32_t cs_scope, iod_event_t *event, void *md_value)
 {
     iod_size_t key_size = strlen(key);
     iod_size_t val_size = 0;
     void *value = NULL;
     iod_checksum_t *iod_cs = NULL;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     if(cs_scope & H5_CHECKSUM_IOD) {
@@ -943,19 +975,21 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         {
             hid_t plist_id;
 
-            if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event) < 0)
-                HGOTO_ERROR_FF(FAIL, "lookup failed");
+            ret = iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event);
+            if(ret != 0)
+                HGOTO_ERROR_FF(ret, "plist lookup failed");
 
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR_FF(FAIL, "can't allocate value buffer");
 
-            if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
-                HGOTO_ERROR_FF(FAIL, "lookup failed");
+            ret = iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event);
+            if(ret != 0)
+                HGOTO_ERROR_FF(ret, "plist lookup failed");
 
             if((plist_id = H5Pdecode(value)) < 0)
                 HGOTO_ERROR_FF(FAIL, "failed to decode cpl");
 
-            *((hid_t *)ret) = plist_id;
+            *((hid_t *)md_value) = plist_id;
             break;
         }
     case H5VL_IOD_LINK_COUNT:
@@ -963,47 +997,52 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         if(NULL == (value = malloc((size_t)val_size)))
             HGOTO_ERROR_FF(FAIL, "can't allocate value buffer");
 
-        if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "link_count lookup failed");
+        ret = iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "link_count lookup failed");
 
-        memcpy(ret, value, val_size);
+        memcpy(md_value, value, val_size);
         break;
     case H5VL_IOD_DATATYPE:
         {
             hid_t type_id;
 
-            if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event) < 0)
-                HGOTO_ERROR_FF(FAIL, "lookup failed");
+            ret = iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event);
+            if(ret != 0)
+                HGOTO_ERROR_FF(ret, "datatype lookup failed");
 
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR_FF(FAIL, "can't allocate value buffer");
 
-            if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
-                HGOTO_ERROR_FF(FAIL, "lookup failed");
+            ret = iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event);
+            if(ret != 0)
+                HGOTO_ERROR_FF(ret, "datatype lookup failed");
 
             if((type_id = H5Tdecode(value)) < 0)
                 HGOTO_ERROR_FF(FAIL, "failed to decode datatype");
 
-            *((hid_t *)ret) = type_id;
+            *((hid_t *)md_value) = type_id;
             break;
         }
     case H5VL_IOD_DATASPACE:
         {
             hid_t space_id;
 
-            if(iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event) < 0)
-                HGOTO_ERROR_FF(FAIL, "lookup failed");
+            ret = iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event);
+            if(ret != 0)
+                HGOTO_ERROR_FF(ret, "dataspace lookup failed");
 
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR_FF(FAIL, "can't allocate value buffer");
 
-            if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
-                HGOTO_ERROR_FF(FAIL, "lookup failed");
+            ret = iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event);
+            if(ret != 0)
+                HGOTO_ERROR_FF(ret, "dataspace lookup failed");
 
             if((space_id = H5Sdecode(value)) < 0)
                 HGOTO_ERROR_FF(FAIL, "failed to decode dataspace");
 
-            *((hid_t *)ret) = space_id;
+            *((hid_t *)md_value) = space_id;
             break;
         }
     case H5VL_IOD_OBJECT_TYPE:
@@ -1011,26 +1050,27 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
         if(NULL == (value = malloc((size_t)val_size)))
             HGOTO_ERROR_FF(FAIL, "can't allocate value buffer");
 
-        if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
-            HGOTO_ERROR_FF(FAIL, "link_count lookup failed");
+        ret = iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "object type lookup failed");
 
-        memcpy(ret, value, val_size);
+        memcpy(md_value, value, val_size);
         break;
     case H5VL_IOD_LINK:
         {
-            H5VL_iod_link_t *iod_link = (H5VL_iod_link_t *)ret;
+            H5VL_iod_link_t *iod_link = (H5VL_iod_link_t *)md_value;
             uint8_t *val_ptr;
-            iod_ret_t iod_ret; 
 
-            if((iod_ret = iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event)) < 0) {
-                fprintf(stderr, "%d (%s).\n", iod_ret, strerror(-iod_ret));
-                HGOTO_ERROR_FF(FAIL, "lookup failed");
-            }
+            ret = iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event);
+            if(ret != 0)
+                HGOTO_ERROR_FF(ret, "link lookup failed");
+
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR_FF(FAIL, "can't allocate value buffer");
 
-            if(iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event) < 0)
-                HGOTO_ERROR_FF(FAIL, "lookup failed");
+            ret = iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event);
+            if(ret != 0)
+                HGOTO_ERROR_FF(ret, "link lookup failed");
 
             val_ptr = (uint8_t *)value;
 

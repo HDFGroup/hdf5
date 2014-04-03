@@ -70,6 +70,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     int step = 0;
     iod_hint_list_t *obj_create_hint = NULL;
     hbool_t enable_checksum = FALSE;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG
@@ -93,9 +94,10 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the datatype needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
-                                cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't traverse path");
+   ret = H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
+                                  cs_scope, &last_comp, &cur_id, &cur_oh);
+   if(ret != SUCCEED)
+       HGOTO_ERROR_FF(ret, "can't traverse path");
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Creating Datatype ID %"PRIx64" (CV %"PRIu64", TR %"PRIu64") ", 
@@ -108,26 +110,31 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* create the datatype */
-    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_BLOB, 
-                      NULL, NULL, &dtype_id, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't create BLOB");
+    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_BLOB, 
+                         NULL, NULL, &dtype_id, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't create BLOB");
 
-    if (iod_obj_open_read(coh, dtype_id, wtid, NULL, &dtype_oh.rd_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open BLOB");
-    if (iod_obj_open_write(coh, dtype_id, wtid, NULL, &dtype_oh.wr_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open BLOB");
+    ret = iod_obj_open_read(coh, dtype_id, wtid, NULL, &dtype_oh.rd_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open BLOB");
+    ret = iod_obj_open_write(coh, dtype_id, wtid, NULL, &dtype_oh.wr_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open BLOB");
 
     step ++;
 
     /* create the metadata KV object for the datatype */
-    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
-                      NULL, NULL, &mdkv_id, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't create metadata KV object");
+    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                         NULL, NULL, &mdkv_id, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't create metadata KV object");
 
     /* create the attribute KV object for the datatype */
-    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
-                      NULL, NULL, &attr_id, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't create attribute KV object");
+    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                         NULL, NULL, &attr_id, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't create attribute KV object");
 
     /* set values for the scratch pad object */
     sp[0] = mdkv_id;
@@ -140,17 +147,20 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         iod_checksum_t sp_cs;
 
         sp_cs = H5_checksum_crc64(&sp, sizeof(sp));
-        if (iod_obj_set_scratch(dtype_oh.wr_oh, wtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set scratch pad");
+        ret = iod_obj_set_scratch(dtype_oh.wr_oh, wtid, &sp, &sp_cs, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't set scratch pad");
     }
     else {
-        if (iod_obj_set_scratch(dtype_oh.wr_oh, wtid, &sp, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set scratch pad");
+        ret = iod_obj_set_scratch(dtype_oh.wr_oh, wtid, &sp, NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't set scratch pad");
     }
 
     /* Store Metadata in scratch pad */
-    if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open metadata KV object");
+    ret = iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open metadata KV object");
 
     step ++;
 
@@ -184,30 +194,35 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         dt_cs = H5_checksum_crc64(buf, buf_size);
 
         /* write the serialized type value to the BLOB object */
-        if(iod_blob_write(dtype_oh.wr_oh, wtid, NULL, mem_desc, file_desc,
-                          &dt_cs, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "unable to write BLOB object");
+        ret = iod_blob_write(dtype_oh.wr_oh, wtid, NULL, mem_desc, file_desc,
+                             &dt_cs, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "unable to write BLOB object");
     }
     else {
         /* write the serialized type value to the BLOB object */
-        if(iod_blob_write(dtype_oh.wr_oh, wtid, NULL, mem_desc, file_desc, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "unable to write BLOB object");
+        ret = iod_blob_write(dtype_oh.wr_oh, wtid, NULL, mem_desc, file_desc, NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "unable to write BLOB object");
     }
 
     free(mem_desc);
     free(file_desc);
 
     /* insert plist metadata */
-    if(H5VL_iod_insert_plist(mdkv_oh, wtid, tcpl_id, cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_plist(mdkv_oh, wtid, tcpl_id, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* insert link count metadata */
-    if(H5VL_iod_insert_link_count(mdkv_oh, wtid, (uint64_t)1, cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_link_count(mdkv_oh, wtid, (uint64_t)1, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* insert object type metadata */
-    if(H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_DATATYPE, cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_DATATYPE, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* store the datatype size */
     {
@@ -223,26 +238,30 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 
             cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
             cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
-            if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, cs, NULL) < 0)
-                HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+            ret = iod_kv_set(mdkv_oh, wtid, NULL, &kv, cs, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "can't set KV pair in parent");
         }
         else {
-            if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, NULL, NULL) < 0)
-                HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+            ret = iod_kv_set(mdkv_oh, wtid, NULL, &kv, NULL, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "can't set KV pair in parent");
         }
 
     }
 
     /* close the Metadata KV object */
-    if(iod_obj_close(mdkv_oh, NULL, NULL))
-        HGOTO_ERROR_FF(FAIL, "can't close object");
+    ret = iod_obj_close(mdkv_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close object");
 
     step --;
 
     /* add link in parent group to current object */
-    if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
-                                H5L_TYPE_HARD, &dtype_id, cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
+                                   H5L_TYPE_HARD, &dtype_id, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     output.iod_oh.rd_oh.cookie = dtype_oh.rd_oh.cookie;
     output.iod_oh.wr_oh.cookie = dtype_oh.wr_oh.cookie;
@@ -332,6 +351,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_size_t key_size=0, val_size=0;
     iod_checksum_t iod_cs[2];
     int step = 0;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG
@@ -340,18 +360,21 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* Traverse Path and open dtype */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, 
-                                 cs_scope, &dtype_id, &dtype_oh) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open object");
+    ret = H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, 
+                                    cs_scope, &dtype_id, &dtype_oh);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't open object");
 
     /* open a write handle on the ID. */
-    if (iod_obj_open_write(coh, dtype_id, rtid, NULL, &dtype_oh.wr_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open current datatype");
+    ret = iod_obj_open_write(coh, dtype_id, rtid, NULL, &dtype_oh.wr_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open current datatype");
     step ++;
 
     /* get scratch pad of the datatype */
-    if(iod_obj_get_scratch(dtype_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't get scratch pad for object");
+    ret = iod_obj_get_scratch(dtype_oh.rd_oh, rtid, &sp, &sp_cs, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't get scratch pad for object");
 
     if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
@@ -360,21 +383,24 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_read(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open scratch pad");
+    ret = iod_obj_open_read(coh, sp[0], rtid, NULL, &mdkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open scratch pad");
     step ++;
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
-                             cs_scope, NULL, &output.tcpl_id) < 0)
-        HGOTO_ERROR_FF(FAIL, "failed to retrieve tcpl");
+    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
+                                cs_scope, NULL, &output.tcpl_id);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "failed to retrieve tcpl");
 
     val_size = sizeof(iod_size_t);
     key_size = strlen(H5VL_IOD_KEY_DTYPE_SIZE);
 
     /* retrieve blob size metadata from scratch pad */
-    if(iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, key_size,
-                        &buf_size, &val_size, iod_cs, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "datatype size lookup failed");
+    ret = iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, key_size,
+                           &buf_size, &val_size, iod_cs, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "datatype size lookup failed");
 
     if(cs_scope & H5_CHECKSUM_IOD) {
         if(H5VL_iod_verify_kv_pair(H5VL_IOD_KEY_DTYPE_SIZE, key_size, 
@@ -386,8 +412,9 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR_FF(FAIL, "can't allocate BLOB read buffer");
 
     /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL))
-        HGOTO_ERROR_FF(FAIL, "can't close object");
+    ret = iod_obj_close(mdkv_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close object");
     step --;
 
     /* create memory descriptor for writing */
@@ -404,8 +431,9 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     file_desc->frag[0].len = (iod_size_t)buf_size;
 
     /* read the serialized type value from the BLOB object */
-    if(iod_blob_read(dtype_oh.rd_oh, rtid, NULL, mem_desc, file_desc, &blob_cs, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "unable to read from BLOB object");
+    ret = iod_blob_read(dtype_oh.rd_oh, rtid, NULL, mem_desc, file_desc, &blob_cs, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "unable to read from BLOB object");
 
     if(blob_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* calculate a checksum for the datatype */
@@ -489,6 +517,7 @@ H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine,
     dtype_close_in_t *input = (dtype_close_in_t *)op_data->input;
     iod_handles_t iod_oh = input->iod_oh;
     //iod_obj_id_t iod_id = input->iod_id; 
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG
@@ -500,10 +529,12 @@ H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR_FF(FAIL, "can't close object with invalid handle");
     }
 
-    if((iod_obj_close(iod_oh.rd_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close Read OH");
-    if((iod_obj_close(iod_oh.wr_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close Write OH");
+    ret = iod_obj_close(iod_oh.rd_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close Read OH");
+    ret = iod_obj_close(iod_oh.wr_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close Write OH");
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Done with dtype close, sending response to client\n");

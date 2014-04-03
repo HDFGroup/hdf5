@@ -53,6 +53,7 @@ H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t UNUSED axe_engine,
     uint32_t cs_scope = input->cs_scope;
     iod_handle_t mdkv_oh;
     iod_kv_t kv;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG 
@@ -60,8 +61,9 @@ H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* Open Metadata KV object for write */
-    if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open MDKV object");
+    ret = iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open MDKV object");
 
     kv.key = H5VL_IOD_IDX_PLUGIN_ID;
     kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_ID);
@@ -73,12 +75,14 @@ H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t UNUSED axe_engine,
 
         cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
         cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
-        if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, cs, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(mdkv_oh, wtid, NULL, &kv, cs, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair in parent");
     }
     else {
-        if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(mdkv_oh, wtid, NULL, &kv, NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair in parent");
     }
 
     kv.key = H5VL_IOD_IDX_PLUGIN_MD;
@@ -91,12 +95,14 @@ H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t UNUSED axe_engine,
 
         cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
         cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
-        if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, cs, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(mdkv_oh, wtid, NULL, &kv, cs, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair in parent");
     }
     else {
-        if (iod_kv_set(mdkv_oh, wtid, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set KV pair in parent");
+        ret = iod_kv_set(mdkv_oh, wtid, NULL, &kv, NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't set KV pair in parent");
     }
 
 #if H5_EFF_DEBUG
@@ -108,8 +114,9 @@ done:
         HDONE_ERROR_FF(FAIL, "can't send result of write to client");
 
     /* close the Metadata KV object */
-    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close object");
+    ret = iod_obj_close(mdkv_oh, NULL, NULL);
+    if(ret < 0)
+        HDONE_ERROR_FF(ret, "can't close object");
 
     input = (dset_set_index_info_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -156,8 +163,9 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* Open Metadata KV object for write */
-    if (iod_obj_open_read(coh, mdkv_id, rtid, NULL, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open MDKV object");
+    ret = iod_obj_open_read(coh, mdkv_id, rtid, NULL, &mdkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open MDKV object");
 
     if(cs_scope & H5_CHECKSUM_IOD) {
         iod_cs = (iod_checksum_t *)malloc(sizeof(iod_checksum_t) * 2);
@@ -180,8 +188,7 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
             HG_Handler_start_output(op_data->hg_handle, &output);
             HGOTO_DONE(SUCCEED);
         }
-        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
-        HGOTO_ERROR_FF(FAIL, "lookup failed");
+        HGOTO_ERROR_FF(ret, "lookup failed");
     }
     if(cs_scope & H5_CHECKSUM_IOD) {
         iod_checksum_t cs[2];
@@ -198,16 +205,18 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
     key_size = strlen(key);
     val_size = 0;
 
-    if(iod_kv_get_value(mdkv_oh, rtid, key, key_size, NULL, 
-                        &val_size, iod_cs, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "lookup failed");
+    ret = iod_kv_get_value(mdkv_oh, rtid, key, key_size, NULL, 
+                           &val_size, iod_cs, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "lookup failed");
 
     output.idx_metadata.buf_size = val_size;
     output.idx_metadata.buf = malloc(val_size);
 
-    if(iod_kv_get_value(mdkv_oh, rtid, key, key_size, (char *)output.idx_metadata.buf, 
-                        &val_size, iod_cs, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "lookup failed");
+    ret = iod_kv_get_value(mdkv_oh, rtid, key, key_size, (char *)output.idx_metadata.buf, 
+                           &val_size, iod_cs, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "lookup failed");
 
     if(cs_scope & H5_CHECKSUM_IOD) {
         iod_checksum_t cs[2];
@@ -246,8 +255,9 @@ done:
     }
 
     /* close the Metadata KV object */
-    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close object");
+    ret = iod_obj_close(mdkv_oh, NULL, NULL);
+    if(ret < 0)
+        HDONE_ERROR_FF(ret, "can't close object");
 
     input = (dset_get_index_info_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -291,24 +301,27 @@ H5VL_iod_server_dset_remove_index_info_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* Open Metadata KV object for write */
-    if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open MDKV object");
+    ret = iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open MDKV object");
 
     kv.key = H5VL_IOD_IDX_PLUGIN_ID;
     kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_ID);
     kvs.kv = &kv;
     kvs.cs = NULL;
     kvs.ret = &ret;
-    if(iod_kv_unlink_keys(mdkv_oh, wtid, NULL, 1, &kvs, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "Unable to unlink KV pair");
+    ret = iod_kv_unlink_keys(mdkv_oh, wtid, NULL, 1, &kvs, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "Unable to unlink KV pair");
 
     kv.key = H5VL_IOD_IDX_PLUGIN_MD;
     kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_MD);
     kvs.kv = &kv;
     kvs.cs = NULL;
     kvs.ret = &ret;
-    if(iod_kv_unlink_keys(mdkv_oh, wtid, NULL, 1, &kvs, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "Unable to unlink KV pair");
+    ret = iod_kv_unlink_keys(mdkv_oh, wtid, NULL, 1, &kvs, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "Unable to unlink KV pair");
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Done with dataset rm_index_info, sending response to client\n");
@@ -319,8 +332,9 @@ done:
         HDONE_ERROR_FF(FAIL, "can't send result of write to client");
 
     /* close the Metadata KV object */
-    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close object");
+    ret = iod_obj_close(mdkv_oh, NULL, NULL);
+    if(ret < 0)
+        HDONE_ERROR_FF(ret, "can't close object");
 
     input = (dset_rm_index_info_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);

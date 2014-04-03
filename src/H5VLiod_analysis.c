@@ -130,19 +130,31 @@ H5VL__iod_load_script(const char *script, const char *func_name)
     */
 
     /* Get reference to main */
-    if(NULL == (po_main = PyImport_AddModule("__main__")))
-        HGOTO_ERROR_FF(NULL, "can't get reference to main module");
+    if(NULL == (po_main = PyImport_AddModule("__main__"))) {
+        fprintf(stderr, "can't get reference to main module\n");
+        ret_value = NULL;
+        goto done;
+    }
 
-    if(NULL == (po_main_dict = PyModule_GetDict(po_main)))
-        HGOTO_ERROR_FF(NULL, "can't get dictionary from main module");
+    if(NULL == (po_main_dict = PyModule_GetDict(po_main))) {
+        fprintf(stderr, "can't get dictionary from main module\n");
+        ret_value = NULL;
+        goto done;
+    }
 
     /* Load script */
-    if(NULL == (po_rstring = PyRun_String(script, Py_file_input, po_main_dict, po_main_dict)))
-        HGOTO_ERROR_FF(NULL, "can't load script into main module");
+    if(NULL == (po_rstring = PyRun_String(script, Py_file_input, po_main_dict, po_main_dict))) {
+        fprintf(stderr, "can't load script into main module\n");
+        ret_value = NULL;
+        goto done;
+    }
 
     /* Get reference to function name */
-    if(NULL == (po_func = PyObject_GetAttrString(po_main, func_name)))
-        HGOTO_ERROR_FF(NULL, "can't get reference to function");
+    if(NULL == (po_func = PyObject_GetAttrString(po_main, func_name))) {
+        fprintf(stderr, "can't get reference to function\n");
+        ret_value = NULL;
+        goto done;
+    }
 
     ret_value = po_func;
 
@@ -273,8 +285,11 @@ H5VL__iod_create_numpy_array(size_t num_elmts, hid_t data_type_id, void *data)
     HDassert(data);
 
     /* Convert data_type to numpy type */
-    if(FAIL == H5VL__iod_translate_h5_type(data_type_id, &npy_type))
-        HGOTO_ERROR_FF(NULL, "unable to translate datatype to NPY type");
+    if(FAIL == H5VL__iod_translate_h5_type(data_type_id, &npy_type)) {
+        fprintf(stderr, "unable to translate datatype to NPY type\n");
+        ret_value = NULL;
+        goto done;
+    }
 
     ret_value = PyArray_SimpleNewFromData(1, dim, npy_type, data);
 
@@ -488,6 +503,7 @@ H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs)
     herr_t ret_value = SUCCEED; /* Return value */
     hg_request_t *hg_reqs = NULL;
     iod_handle_t *temp_cohs = NULL;
+    iod_ret_t ret;
     int i;
 
     if(NULL == (hg_reqs = (hg_request_t *)malloc(sizeof(hg_request_t) * (unsigned int) num_ions_g)))
@@ -505,8 +521,9 @@ H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs)
 
     /* open the container */
     printf("(%d) Calling iod_container_open on %s\n", my_rank_g, file_name);
-    if(iod_container_open(file_name, NULL, IOD_CONT_R, &temp_cohs[0], NULL))
-        HGOTO_ERROR_FF(FAIL, "can't open file");
+    ret = iod_container_open(file_name, NULL, IOD_CONT_R, &temp_cohs[0], NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open file");
 
     for(i = 1; i < num_ions_g; i++) {
         if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
@@ -539,6 +556,7 @@ H5VL__iod_request_container_close(iod_handle_t *cohs)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     hg_request_t *hg_reqs = NULL;
+    iod_ret_t ret;
     int i;
 
     if(NULL == (hg_reqs = (hg_request_t *)malloc(sizeof(hg_request_t) * (unsigned int) num_ions_g)))
@@ -552,8 +570,9 @@ H5VL__iod_request_container_close(iod_handle_t *cohs)
     }
 
     /* close the container */
-    if(iod_container_close(cohs[0], NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close container");
+    ret = iod_container_close(cohs[0], NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close container");
 
     for(i = 1; i < num_ions_g; i++) {
         if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
@@ -769,103 +788,123 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
 
     /* ****************** TEMP THING (as IOD requires collective container open) */
 
-    if(FAIL == H5VL__iod_request_container_open(file_name, &cohs))
-        HGOTO_ERROR_FF(FAIL, "can't request container open");
+    ret = H5VL__iod_request_container_open(file_name, &cohs);
+    if(SUCCEED != ret)
+        HGOTO_ERROR_FF(ret, "can't request container open");
 
     /* ***************** END TEMP THING */
 
-    if(iod_query_cont_trans_stat(cohs[0], &tids, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't get container tids status");
+    ret = iod_query_cont_trans_stat(cohs[0], &tids, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't get container tids status");
 
     rtid = tids->latest_rdable;
 
-    if(iod_free_cont_trans_stat(cohs[0], tids) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't free container transaction status object");
+    ret = iod_free_cont_trans_stat(cohs[0], tids);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't free container transaction status object");
 
-    if(iod_trans_start(cohs[0], &rtid, NULL, 0, IOD_TRANS_R, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't start transaction");
+    ret = iod_trans_start(cohs[0], &rtid, NULL, 0, IOD_TRANS_R, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't start transaction");
 
     root_handle.rd_oh.cookie = IOD_OH_UNDEFINED;
     root_handle.wr_oh.cookie = IOD_OH_UNDEFINED;
 
     /* Traverse Path to retrieve object ID, and open object */
-    if(H5VL_iod_server_open_path(cohs[0], ROOT_ID, root_handle, obj_name,
-                                 rtid, 7, &obj_id, &obj_oh) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open object");
+    ret = H5VL_iod_server_open_path(cohs[0], ROOT_ID, root_handle, obj_name,
+                                    rtid, 7, &obj_id, &obj_oh);
+    if(SUCCEED != ret)
+        HGOTO_ERROR_FF(ret, "can't open object");
 
-    printf("(%d) coh %"PRIu64" objoh %"PRIu64" objid %"PRIx64" rtid %"PRIu64"\n",
-           my_rank_g, cohs[0].cookie, obj_oh.rd_oh.cookie, obj_id, rtid);
+#if H5_EFF_DEBUG
+    fprintf(stderr, "(%d) coh %"PRIu64" objoh %"PRIu64" objid %"PRIx64" rtid %"PRIu64"\n",
+            my_rank_g, cohs[0].cookie, obj_oh.rd_oh.cookie, obj_id, rtid);
+    fprintf(stderr, "Calling  iod_obj_query_map\n");
+#endif
 
-    printf("Calling  iod_obj_query_map\n");
     ret = iod_obj_query_map(obj_oh.rd_oh, rtid, &obj_map, NULL);
-    if (ret != 0) {
-        printf("iod_obj_query_map failed, ret: %d (%s).\n", ret, strerror(-ret));
-        assert(0);
-    }
+    if (ret != 0)
+        HGOTO_ERROR_FF(ret, "iod_obj_query_map failed");
 
-    printf("(%d) %-10d\n", my_rank_g, obj_map->u_map.array_map.n_range);
+#if H5_EFF_DEBUG
+    fprintf(stderr, "(%d) %-10d\n", my_rank_g, obj_map->u_map.array_map.n_range);
+#endif
+
     for (i = 0; i < obj_map->u_map.array_map.n_range; i++) {
-        printf("(%d) range: %d, start: %zu %zu, "
-               "end: %zu %zu, n_cell: %zu, "
-               "loc: %s\n", my_rank_g, i,
-               obj_map->u_map.array_map.array_range[i].start_cell[0],
-               obj_map->u_map.array_map.array_range[i].start_cell[1],
-               obj_map->u_map.array_map.array_range[i].end_cell[0],
-               obj_map->u_map.array_map.array_range[i].end_cell[1],
-               obj_map->u_map.array_map.array_range[i].n_cell,
-               obj_map->u_map.array_map.array_range[i].loc);
+#if H5_EFF_DEBUG
+        fprintf(stderr, "(%d) range: %d, start: %zu %zu, "
+                "end: %zu %zu, n_cell: %zu, "
+                "loc: %s\n", my_rank_g, i,
+                obj_map->u_map.array_map.array_range[i].start_cell[0],
+                obj_map->u_map.array_map.array_range[i].start_cell[1],
+                obj_map->u_map.array_map.array_range[i].end_cell[0],
+                obj_map->u_map.array_map.array_range[i].end_cell[1],
+                obj_map->u_map.array_map.array_range[i].n_cell,
+                obj_map->u_map.array_map.array_range[i].loc);
+#endif
     }
 
     /* get scratch pad */
-    if(iod_obj_get_scratch(obj_oh.rd_oh, rtid, (char *) &sp, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't get scratch pad for object");
+    ret = iod_obj_get_scratch(obj_oh.rd_oh, rtid, (char *) &sp, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't get scratch pad for object");
 
     /* retrieve datatype and dataspace */
     /* MSC - This applies only to DATASETS for Q6 */
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_read(cohs[0], sp[0], rtid, NULL, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open scratch pad");
+    ret = iod_obj_open_read(cohs[0], sp[0], rtid, NULL, &mdkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open scratch pad");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
-                             H5VL_IOD_KEY_OBJ_DATATYPE,
-                             7, NULL, &type_id) < 0)
-        HGOTO_ERROR_FF(FAIL, "failed to retrieve datatype");
+    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
+                                H5VL_IOD_KEY_OBJ_DATATYPE, 7, NULL, &type_id);
+    if(SUCCEED != ret)
+        HGOTO_ERROR_FF(ret, "failed to retrieve datatype");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, 
-                             H5VL_IOD_KEY_OBJ_DATASPACE,
-                             7, NULL, &space_id) < 0)
+    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, 
+                                H5VL_IOD_KEY_OBJ_DATASPACE, 7, NULL, &space_id);
+    if(SUCCEED != ret)
         HGOTO_ERROR_FF(FAIL, "failed to retrieve dataspace");
 
     /*******************************************/
     /* Farm work */
-    if(FAIL == H5VL__iod_farm_work(obj_map, cohs, obj_id, rtid, space_id, type_id,
-                                   query_id, split_script, combine_script))
-        HGOTO_ERROR_FF(FAIL, "can't farm work");
+    ret = H5VL__iod_farm_work(obj_map, cohs, obj_id, rtid, space_id, type_id,
+                              query_id, split_script, combine_script);
+    if(SUCCEED != ret)
+        HGOTO_ERROR_FF(ret, "can't farm work");
 
     /********************************************/
 
-    iod_obj_free_map(obj_oh.rd_oh, obj_map);
+    ret = iod_obj_free_map(obj_oh.rd_oh, obj_map);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't free IOD map");
 
-    /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close object");
-    /* close object */
-    if(iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
-        HDONE_ERROR_FF(FAIL, "can't close Array object");
+    ret = iod_obj_close(mdkv_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close object");
 
-    if(iod_trans_finish(cohs[0], rtid, NULL, 0, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't finish transaction 0");
+    ret = iod_obj_close(obj_oh.rd_oh, NULL, NULL);
+    if(ret < 0)
+        HDONE_ERROR_FF(ret, "can't close Array object");
+
+    ret = iod_trans_finish(cohs[0], rtid, NULL, 0, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't finish transaction 0");
 
     /* ****************** TEMP THING (as IOD requires collective container open) */
 
-    printf("Closing container\n");
-    if(FAIL == H5VL__iod_request_container_close(cohs))
-        HGOTO_ERROR_FF(FAIL, "can't request container close");
+    ret = H5VL__iod_request_container_close(cohs);
+    if(SUCCEED != ret)
+        HGOTO_ERROR_FF(ret, "can't request container close");
 
     /* ***************** END TEMP THING */
 
-    printf("Analysis DONE\n");
+#if H5_EFF_DEBUG
+    fprintf(stderr, "Analysis DONE\n");
+#endif
+
     /* set output, and return to AS client */
     output.ret = ret_value;
     HG_Handler_start_output(op_data->hg_handle, &output);
@@ -913,7 +952,10 @@ H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
                                 type_id, &num_elmts, &data) < 0)
         HGOTO_ERROR_FF(FAIL, "can't read local data");
 
-    printf("(%d) Applying split on data\n", my_rank_g);
+#if H5_EFF_DEBUG
+    fprintf(stderr, "(%d) Applying split on data\n", my_rank_g);
+#endif
+
     /* Apply split python script on data from query */
 #ifdef H5_HAVE_PYTHON
     if(FAIL == H5VL__iod_split(split_script, data, num_elmts, type_id,
@@ -965,9 +1007,9 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
     hid_t split_type_id;
     herr_t ret_value = SUCCEED;
 
-    if(FAIL == H5VL__iod_farm_split(coh, obj_id, rtid, space_id, coords, num_cells,
-                                    type_id, query_id, split_script,
-                                    &split_data, &split_num_elmts, &split_type_id))
+    if(H5VL__iod_farm_split(coh, obj_id, rtid, space_id, coords, num_cells,
+                            type_id, query_id, split_script,
+                            &split_data, &split_num_elmts, &split_type_id) < 0)
         HGOTO_ERROR_FF(FAIL, "can't split in farmed job");
 
     /* allocate output struct */
@@ -1087,7 +1129,7 @@ H5VL__iod_get_space_layout(coords_t coords, iod_size_t num_cells, hid_t space_id
         count[i] = 1;
     }
 
-    if(H5Sselect_hyperslab(space_layout, H5S_SELECT_SET, start, NULL, count, block))
+    if(H5Sselect_hyperslab(space_layout, H5S_SELECT_SET, start, NULL, count, block) < 0)
         HGOTO_ERROR_FF(FAIL, "unable to add point to selection");
 
     ret_value = space_layout;
@@ -1125,9 +1167,11 @@ H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim,
     /* If element satisfies query, add it to the selection */
     if (result) {
         /* TODO remove that after demo */
-        printf("(%d) Element |%d| matches query\n", my_rank_g, *((int *) elem));
+#if H5_EFF_DEBUG
+        fprintf(stderr, "(%d) Element |%d| matches query\n", my_rank_g, *((int *) elem));
+#endif
         udata->num_elmts ++;
-        if(H5Sselect_elements(udata->space_query, H5S_SELECT_APPEND, 1, point))
+        if(H5Sselect_elements(udata->space_query, H5S_SELECT_APPEND, 1, point) < 0)
             HGOTO_ERROR_FF(FAIL, "unable to add point to selection")
     }
 
@@ -1158,6 +1202,7 @@ H5VL__iod_get_query_data(iod_handle_t coh, iod_obj_id_t dset_id,
     H5VL__iod_get_query_data_t udata;
     void *buf = NULL;
     hid_t space_query = FAIL, mem_space = FAIL;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     nelmts = (size_t) H5Sget_select_npoints(space_id);
@@ -1169,8 +1214,9 @@ H5VL__iod_get_query_data(iod_handle_t coh, iod_obj_id_t dset_id,
         HGOTO_ERROR_FF(FAIL, "can't allocate read buffer");
 
     /* read the data local on the ION specified in the layout selection */
-    if(H5VL__iod_read_selection(coh, dset_id, rtid, space_id, type_id, buf) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't read local data");
+    ret = H5VL__iod_read_selection(coh, dset_id, rtid, space_id, type_id, buf);
+    if(SUCCEED != ret)
+        HGOTO_ERROR_FF(ret, "can't read local data");
 
     dims[0] = (hsize_t)nelmts;
     /* create a 1-D selection to describe the data read in memory */
@@ -1231,24 +1277,28 @@ H5VL__iod_read_selection(iod_handle_t coh, iod_obj_id_t obj_id,
     iod_handle_t obj_oh;
     size_t buf_size=0;
     size_t elmt_size;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     /* open the array object */
-    if (iod_obj_open_read(coh, obj_id, rtid, NULL, &obj_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open array object fo read");
+    ret = iod_obj_open_read(coh, obj_id, rtid, NULL, &obj_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open array object fo read");
 
     /* read the data selection from IOD. */
     /* MSC - will need to do it in pieces, not it one shot. */
     elmt_size = H5Tget_size(type_id);
-    if(H5VL__iod_server_final_io(obj_oh, space_id, elmt_size, FALSE, 
-                                 buf, buf_size, (uint64_t)0, 0, rtid) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't read from array object");
+    ret = H5VL__iod_server_final_io(obj_oh, space_id, elmt_size, FALSE, 
+                                    buf, buf_size, (uint64_t)0, 0, rtid);
+    if(SUCCEED != ret)
+        HGOTO_ERROR_FF(ret, "can't read from array object");
 
 done:
-    if(obj_oh.cookie != IOD_OH_UNDEFINED && 
-       iod_obj_close(obj_oh, NULL, NULL) < 0)
-        HDONE_ERROR_FF(FAIL, "can't close Array object");
-
+    if(obj_oh.cookie != IOD_OH_UNDEFINED) {
+        ret = iod_obj_close(obj_oh, NULL, NULL);
+        if(ret < 0)
+            HDONE_ERROR_FF(ret, "can't close Array object");
+    }
     return ret_value;
 } /* end H5VL__iod_read_selection() */
 

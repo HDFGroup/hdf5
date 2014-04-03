@@ -46,14 +46,15 @@
 #define H5VL_IOD_IDX_PLUGIN_MD       "index_plugin_metadata"
 
 
-#define HGOTO_ERROR_FF(ret_val, string) {			      \
-   fprintf(stderr, "%s\n", string);                                           \
-   HGOTO_DONE_FF(ret_val)						              \
+#define HGOTO_ERROR_FF(ret_val, string) {			               \
+    fprintf(stderr, "%d (%s). --- %s\n", ret_value, strerror(-ret_value), string); \
+    fprintf(stderr, "%s\n", string);                                           \
+    HGOTO_DONE_FF(ret_val)						       \
 }
 
-#define HDONE_ERROR_FF(ret_val, string) {			      \
-   fprintf(stderr, "%s\n", string);                                           \
-   ret_value = ret_val;                                                       \
+#define HDONE_ERROR_FF(ret_val, string) {			               \
+    fprintf(stderr, "%d (%s). --- %s\n", ret_val, strerror(-ret_val), string); \
+    ret_value = ret_val;                                                       \
 }
 
 #define HGOTO_DONE_FF(ret_val) {ret_value = ret_val; goto done;}

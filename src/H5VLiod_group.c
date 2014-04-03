@@ -90,9 +90,10 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     /* the traversal will retrieve the location where the group needs
        to be created. The traversal will fail if an intermediate group
        does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, cs_scope,
-                                &last_comp, &cur_id, &cur_oh) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't traverse path");
+    ret = H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, cs_scope,
+                                   &last_comp, &cur_id, &cur_oh);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't traverse path");
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Creating Group ID %"PRIx64" (CV %"PRIu64", TR %"PRIu64") ", 
@@ -105,30 +106,31 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* create the group */
-    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
-                      NULL, NULL, &grp_id, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't create Group");
+    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                         NULL, NULL, &grp_id, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't create Group");
 
-    if((ret = iod_obj_open_read(coh, grp_id, wtid, NULL, &grp_oh.rd_oh, NULL)) < 0) {
-        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
-        HGOTO_ERROR_FF(FAIL, "can't open Group for read");
-    }
-    if((ret = iod_obj_open_write(coh, grp_id, wtid, NULL, &grp_oh.wr_oh, NULL)) < 0) {
-        fprintf(stderr, "%d (%s).\n", ret, strerror(-ret));
-        HGOTO_ERROR_FF(FAIL, "can't open Group for write");
-    }
+    ret = iod_obj_open_read(coh, grp_id, wtid, NULL, &grp_oh.rd_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open Group for read");
+    ret = iod_obj_open_write(coh, grp_id, wtid, NULL, &grp_oh.wr_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open Group for write");
 
     step += 1;
 
     /* create the metadata KV object for the group */
-    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
-                      NULL, NULL, &mdkv_id, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't create metadata KV object");
+    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                         NULL, NULL, &mdkv_id, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't create metadata KV object");
 
     /* create the attribute KV object for the group */
-    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
-                      NULL, NULL, &attrkv_id, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't create metadata KV object");
+    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+                         NULL, NULL, &attrkv_id, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't create metadata KV object");
 
     /* set values for the scratch pad object */
     sp[0] = mdkv_id;
@@ -141,46 +143,51 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
         iod_checksum_t sp_cs;
 
         sp_cs = H5_checksum_crc64(&sp, sizeof(sp));
-        if (iod_obj_set_scratch(grp_oh.wr_oh, wtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set scratch pad");
+        ret = iod_obj_set_scratch(grp_oh.wr_oh, wtid, &sp, &sp_cs, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't set scratch pad");
     }
     else {
-        if (iod_obj_set_scratch(grp_oh.wr_oh, wtid, &sp, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set scratch pad");
+        ret = iod_obj_set_scratch(grp_oh.wr_oh, wtid, &sp, NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't set scratch pad");
     }
 
     /* store metadata */
     /* Open Metadata KV object for write */
-    if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't create scratch pad");
+    ret = iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't create scratch pad");
 
     step ++;
 
     /* insert plist metadata */
-    if(H5VL_iod_insert_plist(mdkv_oh, wtid, gcpl_id, 
-                             cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_plist(mdkv_oh, wtid, gcpl_id, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* insert link count metadata */
-    if(H5VL_iod_insert_link_count(mdkv_oh, wtid, (uint64_t)1, 
-                                  cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_link_count(mdkv_oh, wtid, (uint64_t)1,cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* insert object type metadata */
-    if(H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_GROUP, 
-                                   cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_GROUP, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* close Metadata KV object */
-    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close object");
+    ret = iod_obj_close(mdkv_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close object");
 
     step --;
 
     /* add link in parent group to current object */
-    if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, H5L_TYPE_HARD, 
-                                &grp_id, cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, H5L_TYPE_HARD, 
+                                   &grp_id, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Done with group create, sending response to client\n");
@@ -269,6 +276,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
     int step = 0;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG
@@ -280,24 +288,28 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     if(0 == strcmp(name, "/")) {
         grp_id = ROOT_ID;
         /* open a write handle on the ID. */
-        if(iod_obj_open_read(coh, grp_id, rtid, NULL, &grp_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open current group");
+        ret = iod_obj_open_read(coh, grp_id, rtid, NULL, &grp_oh.rd_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open current group");
     }
     else {
         /* Traverse Path and open group */
-        if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, 
-                                     cs_scope, &grp_id, &grp_oh) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open object");
+        ret = H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, 
+                                        cs_scope, &grp_id, &grp_oh);
+        if(ret != SUCCEED)
+            HGOTO_ERROR_FF(ret, "can't open object");
     }
 
     /* open a write handle on the ID. */
-    if(iod_obj_open_write(coh, grp_id, rtid, NULL, &grp_oh.wr_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open current group");
+    ret = iod_obj_open_write(coh, grp_id, rtid, NULL, &grp_oh.wr_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open current group");
     step ++;
 
     /* get scratch pad of group */
-    if(iod_obj_get_scratch(grp_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't get scratch pad for object");
+    ret = iod_obj_get_scratch(grp_oh.rd_oh, rtid, &sp, &sp_cs, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't get scratch pad for object");
 
     if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
@@ -306,17 +318,20 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_read(coh, sp[0], rtid, NULL, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open scratch pad");
+    ret = iod_obj_open_read(coh, sp[0], rtid, NULL, &mdkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open scratch pad");
     step ++;
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL, 
-                             cs_scope, NULL, &output.gcpl_id) < 0)
-        HGOTO_ERROR_FF(FAIL, "failed to retrieve gcpl");
+    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL, 
+                                cs_scope, NULL, &output.gcpl_id);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "failed to retrieve gcpl");
 
     /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close meta data KV handle");
+    ret = iod_obj_close(mdkv_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close meta data KV handle");
     step --;
 
     output.iod_id = grp_id;
@@ -378,6 +393,7 @@ H5VL_iod_server_group_close_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     group_close_in_t *input = (group_close_in_t *)op_data->input;
     iod_handles_t iod_oh = input->iod_oh;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG
@@ -389,10 +405,12 @@ H5VL_iod_server_group_close_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR_FF(FAIL, "can't close object with invalid handle");
     }
 
-    if((iod_obj_close(iod_oh.rd_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close object");
-    if((iod_obj_close(iod_oh.wr_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close object");
+    ret = iod_obj_close(iod_oh.rd_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close object");
+    ret = iod_obj_close(iod_oh.wr_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close object");
 
 done:
 #if H5_EFF_DEBUG

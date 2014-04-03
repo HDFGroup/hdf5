@@ -69,11 +69,6 @@ typedef struct H5E_t H5E_t;
    HGOTO_DONE(ret_val)						              \
 }
 
-#define HGOTO_ERROR_FF(ret_val, string) {			              \
-   fprintf(stderr, "%s\n", string);                                           \
-   HGOTO_DONE(ret_val)						              \
-}
-
 /*
  * HGOTO_ERROR_TAG macro, used like HGOTO_ERROR between H5_BEGIN_TAG and
  * H5_END_TAG statements.  Resets the metadata tag before leaving the function.

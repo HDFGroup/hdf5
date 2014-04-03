@@ -163,9 +163,10 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
         /* the traversal will retrieve the location where the dataset needs
            to be created. The traversal will fail if an intermediate group
            does not exist. */
-        if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
-                                    cs_scope, &last_comp, &cur_id, &cur_oh) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't traverse path");
+        ret = H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, wtid, rtid, FALSE, 
+                                       cs_scope, &last_comp, &cur_id, &cur_oh);
+        if(ret != SUCCEED)
+            HGOTO_ERROR_FF(ret, "can't traverse path");
     }
     else {
         /* this is an anon dataset.. no link information */
@@ -233,25 +234,28 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     /* create the dataset */
     ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_ARRAY, NULL, 
                          &array, &dset_id, NULL);
-    if(ret != 0) {
-        fprintf(stderr, "ret: %d error: %s\n", ret, strerror(-ret));
-        HGOTO_ERROR_FF(FAIL, "can't create Array object");
-    }
+    if(ret != 0)
+        HGOTO_ERROR_FF(ret, "can't create Array object");
 
-    if (iod_obj_open_write(coh, dset_id, wtid, NULL, &dset_oh.wr_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open Dataset for Write");
-    if (iod_obj_open_read(coh, dset_id, wtid, NULL, &dset_oh.rd_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open Dataset for Read");
+    ret = iod_obj_open_write(coh, dset_id, wtid, NULL, &dset_oh.wr_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open Dataset for Write");
+
+    ret = iod_obj_open_read(coh, dset_id, wtid, NULL, &dset_oh.rd_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open Dataset for Read");
 
     step ++;
 
     /* create the attribute KV object for the dataset */
-    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, NULL, NULL, &attrkv_id, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't create attribute KV object");
+    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, NULL, NULL, &attrkv_id, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't create attribute KV object");
 
     /* create the metadata KV object for the dataset */
-    if(iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't create metadata KV object");
+    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't create metadata KV object");
 
     /* set values for the scratch pad object */
     sp[0] = mdkv_id;
@@ -265,59 +269,64 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 
         sp_cs = H5_checksum_crc64(&sp, sizeof(sp));
 
-        if (iod_obj_set_scratch(dset_oh.wr_oh, wtid, &sp, &sp_cs, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set scratch pad");
+        ret = iod_obj_set_scratch(dset_oh.wr_oh, wtid, &sp, &sp_cs, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't set scratch pad");
     }
     else {
-        if (iod_obj_set_scratch(dset_oh.wr_oh, wtid, &sp, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't set scratch pad");
+        ret = iod_obj_set_scratch(dset_oh.wr_oh, wtid, &sp, NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't set scratch pad");
     }
 
     /* Open Metadata KV object for write */
-    if (iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't create scratch pad");
+    ret = iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't create scratch pad");
 
     step ++;
 
     /* insert plist metadata */
-    if(H5VL_iod_insert_plist(mdkv_oh, wtid, dcpl_id, 
-                             cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_plist(mdkv_oh, wtid, dcpl_id, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* insert link count metadata */
-    if(H5VL_iod_insert_link_count(mdkv_oh, wtid, (uint64_t)1, 
-                                  cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_link_count(mdkv_oh, wtid, (uint64_t)1, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* insert object type metadata */
-    if(H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_DATASET, 
-                                   cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_object_type(mdkv_oh, wtid, H5I_DATASET, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* MSC - need to check size of datatype if it fits in
        entry otherwise create a BLOB*/
 
     /* insert datatype metadata */
-    if(H5VL_iod_insert_datatype(mdkv_oh, wtid, input->type_id, 
-                                cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_datatype(mdkv_oh, wtid, input->type_id, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* insert dataspace metadata */
-    if(H5VL_iod_insert_dataspace(mdkv_oh, wtid, space_id, 
-                                 cs_scope, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+    ret = H5VL_iod_insert_dataspace(mdkv_oh, wtid, space_id, cs_scope, NULL, NULL);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't insert KV value");
 
     /* close the Metadata KV object */
-    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close object");
+    ret = iod_obj_close(mdkv_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close object");
 
     step --;
 
     /* If dataset is not anonymous, add link in parent group to current object */
     if(name) {
-        if(H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
-                                    H5L_TYPE_HARD, &dset_id, cs_scope, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+        ret = H5VL_iod_insert_new_link(cur_oh.wr_oh, wtid, last_comp, 
+                                       H5L_TYPE_HARD, &dset_id, cs_scope, NULL, NULL);
+        if(ret != SUCCEED)
+            HGOTO_ERROR_FF(ret, "can't insert KV value");
     }
 
     output.iod_oh.rd_oh.cookie = dset_oh.rd_oh.cookie;
@@ -403,6 +412,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     scratch_pad sp;
     iod_checksum_t sp_cs = 0;
     int step = 0;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG
@@ -411,18 +421,21 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* Traverse Path and open dset */
-    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, 
-                                 cs_scope, &dset_id, &dset_oh) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open object");
+    ret = H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, 
+                                    cs_scope, &dset_id, &dset_oh);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't open object");
 
     /* open a write handle on the ID. */
-    if (iod_obj_open_write(coh, dset_id, rtid, NULL, &dset_oh.wr_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open current dset");
+    ret = iod_obj_open_write(coh, dset_id, rtid, NULL, &dset_oh.wr_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open current dset");
     step ++;
 
     /* get scratch pad of the dataset */
-    if(iod_obj_get_scratch(dset_oh.rd_oh, rtid, &sp, &sp_cs, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't get scratch pad for object");
+    ret = iod_obj_get_scratch(dset_oh.rd_oh, rtid, &sp, &sp_cs, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't get scratch pad for object");
 
     if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* verify scratch pad integrity */
@@ -431,25 +444,30 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* open the metadata scratch pad */
-    if (iod_obj_open_read(coh, sp[0], rtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't open scratch pad");
+    ret = iod_obj_open_read(coh, sp[0], rtid, NULL, &mdkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open scratch pad");
     step ++;
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
-                             cs_scope, NULL, &output.dcpl_id) < 0)
-        HGOTO_ERROR_FF(FAIL, "failed to retrieve dcpl");
+    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
+                                cs_scope, NULL, &output.dcpl_id);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "failed to retrieve dcpl");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, H5VL_IOD_KEY_OBJ_DATATYPE,
-                             cs_scope, NULL, &output.type_id) < 0)
-        HGOTO_ERROR_FF(FAIL, "failed to retrieve datatype");
+    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, H5VL_IOD_KEY_OBJ_DATATYPE,
+                                cs_scope, NULL, &output.type_id);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "failed to retrieve datatype");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
-                             cs_scope, NULL, &output.space_id) < 0)
-        HGOTO_ERROR_FF(FAIL, "failed to retrieve dataspace");
+    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
+                                cs_scope, NULL, &output.space_id);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "failed to retrieve dataspace");
 
     /* close the metadata scratch pad */
-    if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close object");
+    ret = iod_obj_close(mdkv_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close object");
     step --;
 
     output.iod_id = dset_id;
@@ -533,13 +551,15 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     hbool_t is_vl_data;
     size_t nelmts; /* number of elements selected to read */
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
+    iod_ret_t ret;
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the dset here or if it was already open */
     herr_t ret_value = SUCCEED;
 
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_read(coh, iod_id, rtid, NULL /*hints*/, &iod_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open current group");
+        ret = iod_obj_open_read(coh, iod_id, rtid, NULL, &iod_oh.rd_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open current group");
         opened_locally = TRUE;
     }
 
@@ -569,11 +589,8 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
        elements are of variable length, just return that they are in
        is_vl_data for special processing */
     if(H5VL__iod_server_adjust_buffer(dst_id, src_id, nelmts, dxpl_id, 
-                                      size, &buf, &is_vl_data, &buf_size) < 0) {
-        fprintf(stderr, "failed to setup write operation");
-        ret_value = FAIL;
-        goto done;
-    }
+                                      size, &buf, &is_vl_data, &buf_size) < 0)
+        HGOTO_ERROR_FF(FAIL, "failed to setup write operation");
 
     if(!is_vl_data) {
         size_t elmt_size;
@@ -592,12 +609,10 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
 
         /* If the data is not VL, we can read the data from the array the normal way */
         elmt_size = H5Tget_size(src_id);
-        if(H5VL__iod_server_final_io(iod_oh.rd_oh, space_id, elmt_size, FALSE, 
-                                     buf, buf_size, (uint64_t)0, raw_cs_scope, read_tid) < 0) {
-            fprintf(stderr, "can't read from array object\n");
-            ret_value = FAIL;
-            goto done;
-        }
+        ret = H5VL__iod_server_final_io(iod_oh.rd_oh, space_id, elmt_size, FALSE, 
+                                        buf, buf_size, (uint64_t)0, raw_cs_scope, read_tid);
+        if(ret != SUCCEED)
+            HGOTO_ERROR_FF(FAIL, "failed to read from array object");
 
         {
             hbool_t flag = FALSE;
@@ -626,9 +641,10 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     }
     else {
         /* If the data is of variable length, special access is required */
-        if(H5VL__iod_server_vl_data_read(coh, axe_engine, input->axe_id, nelmts, 
-                                         buf, dxpl_id, rtid) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't read from array object");
+        ret = H5VL__iod_server_vl_data_read(coh, axe_engine, input->axe_id, nelmts, 
+                                            buf, dxpl_id, rtid);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't read from array object");
     }
 
     /* Create a new block handle to write the data */
@@ -715,12 +731,14 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
     uint8_t *buf_ptr = NULL;
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the dset here or if it was already open */
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_write(coh, iod_id, rtid, NULL /*hints*/, &iod_oh.rd_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open current group");
+        ret = iod_obj_open_write(coh, iod_id, rtid, NULL, &iod_oh.rd_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open current group");
         opened_locally = TRUE;
     }
 
@@ -737,9 +755,10 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
     buf_size = nelmts * 8;//sizeof(size_t);
 
     /* read the array values containing the BLOB IDs and lengths */
-    if(H5VL__iod_server_final_io(iod_oh.rd_oh, space_id, elmt_size, FALSE, 
-                                 buf, buf_size, (uint64_t)0, cs_scope, rtid) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't read from array object");
+    ret = H5VL__iod_server_final_io(iod_oh.rd_oh, space_id, elmt_size, FALSE, 
+                                    buf, buf_size, (uint64_t)0, cs_scope, rtid);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't read from array object");
 
     /* MSC - create a bulk block handle. Mercury does not support
        segmented handles yet, so we need a temporrary buffer. */
@@ -878,12 +897,14 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     hbool_t flag = FALSE; /* temp flag to indicate whether corruption will be inserted */
     na_addr_t source = HG_Handler_get_addr(op_data->hg_handle); /* source address to pull data from */
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the dset here or if it was already open */
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.wr_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_write(coh, iod_id, wtid, NULL /*hints*/, &iod_oh.wr_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open dataset for write");
+        ret = iod_obj_open_write(coh, iod_id, wtid, NULL, &iod_oh.wr_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open dataset for write");
         opened_locally = TRUE;
     }
 
@@ -945,10 +966,11 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
         assert(segments);
 
 #if 1
-        if(H5VL__iod_server_vl_data_write(coh, iod_id, iod_oh, space_id, src_id, dst_id, type_info, 
-                                          nelmts, num_segments, segments, dxpl_id, wtid, rtid,
-                                          source, bulk_handle, raw_cs_scope) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't write VL data to array object");
+        ret = H5VL__iod_server_vl_data_write(coh, iod_id, iod_oh, space_id, src_id, dst_id, type_info, 
+                                             nelmts, num_segments, segments, dxpl_id, wtid, rtid,
+                                             source, bulk_handle, raw_cs_scope);
+        if(ret != SUCCEED)
+            HGOTO_ERROR_FF(ret, "can't write VL data to array object");
 
 #else
         {
@@ -1077,11 +1099,8 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
            elements are of variable length, just return that they are in
            is_vl_data for special processing */
         if(H5VL__iod_server_adjust_buffer(src_id, dst_id, nelmts, dxpl_id, 
-                                          size, &buf, &is_vl_data, &buf_size) < 0) {
-            fprintf(stderr, "failed to setup write operation");
-            ret_value = FAIL;
-            goto done;
-        }
+                                          size, &buf, &is_vl_data, &buf_size) < 0)
+            HGOTO_ERROR_FF(FAIL, "failed to setup write operation");
 
         /* convert data if needed */
         if(H5Tconvert(src_id, dst_id, nelmts, buf, NULL, dxpl_id) < 0)
@@ -1099,9 +1118,10 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
         elmt_size = H5Tget_size(dst_id);
-        if(H5VL__iod_server_final_io(iod_oh.wr_oh, space_id, elmt_size, TRUE, 
-                                     buf, buf_size, cs, raw_cs_scope, wtid) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't write to array object");
+        ret = H5VL__iod_server_final_io(iod_oh.wr_oh, space_id, elmt_size, TRUE, 
+                                        buf, buf_size, cs, raw_cs_scope, wtid);
+        if(ret != SUCCEED)
+            HGOTO_ERROR_FF(ret, "can't write to array object");
     }
 
 #if H5_EFF_DEBUG 
@@ -1164,6 +1184,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     uint32_t cs_scope = input->cs_scope;
     iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV object */
     /* int rank = input->dims.rank;  rank of dataset */
+    iod_ret_t ret;
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
 
@@ -1174,14 +1195,16 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.wr_oh.cookie == IOD_OH_UNDEFINED) {
-        if (iod_obj_open_write(coh, iod_id, wtid, NULL /*hints*/, &iod_oh.wr_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open current group");        
+        ret = iod_obj_open_write(coh, iod_id, wtid, NULL, &iod_oh.wr_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open current group");        
         opened_locally = TRUE;
     }
 
     /* extend along the first dimension only */
-    if(iod_array_extend(iod_oh.wr_oh, wtid, (iod_size_t)input->dims.size[0], NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't extend dataset");
+    ret = iod_array_extend(iod_oh.wr_oh, wtid, (iod_size_t)input->dims.size[0], NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't extend dataset");
 
     /* modify the dataspace of the dataset */
     {
@@ -1191,13 +1214,15 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
         iod_size_t array_dims[H5S_MAX_RANK], current_dims[H5S_MAX_RANK];
 
         /* open the metadata scratch pad */
-        if (iod_obj_open_write(coh, mdkv_id, wtid, NULL /*hints*/, &mdkv_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open scratch pad");
+        ret = iod_obj_open_write(coh, mdkv_id, wtid, NULL, &mdkv_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open scratch pad");
 
         /* get the stored dataset dataspace */
-        if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
-                                 cs_scope, NULL, &space_id) < 0)
-            HGOTO_ERROR_FF(FAIL, "failed to retrieve dataspace");
+        ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
+                                    cs_scope, NULL, &space_id);
+        if(ret != SUCCEED)
+            HGOTO_ERROR_FF(ret, "failed to retrieve dataspace");
 
         if((rank = H5Sget_simple_extent_dims(space_id, current_dims, array_dims)) < 0)
             HGOTO_ERROR_FF(FAIL, "can't get dimentions' sizes");
@@ -1207,13 +1232,15 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR_FF(FAIL, "unable to modify size of data space");
 
         /* insert dataspace metadata */
-        if(H5VL_iod_insert_dataspace(mdkv_oh, wtid, space_id, 
-                                     cs_scope, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't insert KV value");
+        ret = H5VL_iod_insert_dataspace(mdkv_oh, wtid, space_id, 
+                                        cs_scope, NULL, NULL);
+        if(ret != SUCCEED)
+            HGOTO_ERROR_FF(ret, "can't insert KV value");
 
         /* close the metadata scratch pad */
-        if(iod_obj_close(mdkv_oh, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't close object");
+        ret = iod_obj_close(mdkv_oh, NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't close object");
     }
 
 done:
@@ -1228,10 +1255,10 @@ done:
 
     /* close the dataset if we opened it in this routine */
     if(opened_locally) {
-        if(iod_obj_close(iod_oh.wr_oh, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't close Array object");
+        ret = iod_obj_close(iod_oh.wr_oh, NULL, NULL);
+        if(ret < 0)
+            HDONE_ERROR_FF(ret, "can't close IOD object");
     }
-
 } /* end H5VL_iod_server_dset_set_extent_cb() */
 
 
@@ -1258,6 +1285,7 @@ H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine,
     dset_close_in_t *input = (dset_close_in_t *)op_data->input;
     iod_handles_t iod_oh = input->iod_oh;
     //iod_obj_id_t iod_id = input->iod_id; 
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG
@@ -1265,10 +1293,12 @@ H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine,
             iod_oh.rd_oh.cookie, iod_oh.wr_oh.cookie);
 #endif
 
-    if(iod_obj_close(iod_oh.rd_oh, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close Read Array object");
-    if(iod_obj_close(iod_oh.wr_oh, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close Write Array object");
+    ret = iod_obj_close(iod_oh.rd_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close Read Array object");
+    ret = iod_obj_close(iod_oh.wr_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close Write Array object");
 
 done:
 #if H5_EFF_DEBUG
@@ -1406,18 +1436,14 @@ H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
     if(write_op) {
         /* write to array */
         ret = iod_array_write(iod_oh, tid, NULL, mem_desc, file_desc, cs_list, NULL);
-        if(ret != 0) {
-            fprintf(stderr, "ret: %d error: %s\n", ret, strerror(-ret));
-            HGOTO_ERROR_FF(FAIL, "can't write to array object");
-        }
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't write to array object");
     }
     else {
         /* Read from array */
         ret = iod_array_read(iod_oh, tid, NULL, mem_desc, file_desc, cs_list, NULL);
-        if(ret != 0) {
-            fprintf(stderr, "ret: %d error: %s\n", ret, strerror(-ret));
-            HGOTO_ERROR_FF(FAIL, "can't read from array object");
-        }
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't read from array object");
     }
 
     /* If this is a read operation, compute checksum for each IOD
@@ -1508,6 +1534,7 @@ H5VL__iod_server_vl_data_read(iod_handle_t coh, AXE_engine_t axe_engine, AXE_tas
     iod_ret_t *ret_list = NULL;
     iod_handle_t *blob_oh;
     size_t u, elmt_size;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     /* retrieve the buffer that contains the blob IDs and their sizes
@@ -1552,8 +1579,9 @@ H5VL__iod_server_vl_data_read(iod_handle_t coh, AXE_engine_t axe_engine, AXE_tas
                 u, blob_id, blob_size);
 #endif
 
-        if(iod_obj_open_read(coh, blob_id, rtid, NULL, &blob_oh[u], NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open BLOB for Read");
+        ret = iod_obj_open_read(coh, blob_id, rtid, NULL, &blob_oh[u], NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open BLOB for Read");
 
         /* create memory descriptor for reading */
         mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
@@ -1580,8 +1608,9 @@ H5VL__iod_server_vl_data_read(iod_handle_t coh, AXE_engine_t axe_engine, AXE_tas
     }
 
     /* Read list IO */
-    if(iod_blob_read_list(coh, rtid, (int)nelmts, io_blob, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't read from blob objects");
+    ret = iod_blob_read_list(coh, rtid, (int)nelmts, io_blob, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't read from blob objects");
 
     for(u=0 ; u<nelmts; u++) {
         if(ret_list[u] < 0)
@@ -1590,8 +1619,9 @@ H5VL__iod_server_vl_data_read(iod_handle_t coh, AXE_engine_t axe_engine, AXE_tas
         free(io_blob[u].mem_desc);
         free(io_blob[u].io_desc);
 
-        if(iod_obj_close(blob_oh[u], NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't close object");
+        ret = iod_obj_close(blob_oh[u], NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't close object");
     }
 
 done:
@@ -1650,6 +1680,7 @@ H5VL__iod_server_vl_data_write(iod_handle_t coh, iod_obj_id_t iod_id, iod_handle
     hg_bulk_request_t bulk_request;
     size_t buf_size = 0, u;
     void *buf = NULL;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     /* Print VL length DATA */
@@ -1779,13 +1810,11 @@ H5VL__iod_server_vl_data_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndi
                 created = TRUE;
             }
             ret = iod_obj_open_write(coh, blob_id, wtid, NULL, &blob_oh, NULL);
-            if(ret != 0) {
-                fprintf(stderr, "ret: %d error: %s %"PRIx64"\n", ret, strerror(-ret), blob_id);
-                HGOTO_ERROR_FF(FAIL, "Failed to open BLOB object");
-            }
+            if(ret != 0)
+                HGOTO_ERROR_FF(ret, "Failed to open BLOB object");
         }
         else 
-            HGOTO_ERROR_FF(FAIL, "Failed to create BLOB object");
+            HGOTO_ERROR_FF(ret, "Failed to create BLOB object");
     }
 
     buf_size = udata->segments[udata->cur_seg].size;
@@ -1806,8 +1835,9 @@ H5VL__iod_server_vl_data_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndi
     blob_desc->frag[0].len = (iod_size_t)buf_size;
 
     /* write the VL data to the blob */
-    if(iod_blob_write(blob_oh, wtid, NULL, mem_desc, blob_desc, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "unable to write BLOB object");
+    ret = iod_blob_write(blob_oh, wtid, NULL, mem_desc, blob_desc, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "unable to write BLOB object");
 
     free(mem_desc);
     mem_desc = NULL;
@@ -1815,8 +1845,9 @@ H5VL__iod_server_vl_data_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndi
     blob_desc = NULL;
 
     /* close BLOB */
-    if(iod_obj_close(blob_oh, NULL, NULL) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't close object");
+    ret = iod_obj_close(blob_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close object");
 
     if(created) {
         /* update the array element with the blob_id and sequence length */
@@ -1844,9 +1875,10 @@ H5VL__iod_server_vl_data_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndi
 #endif
 
         /* write the blob ID & size to the array element */
-        if(iod_array_write(iod_oh.wr_oh, wtid, NULL, 
-                           mem_desc, &file_desc, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't read from array object");
+        ret = iod_array_write(iod_oh.wr_oh, wtid, NULL, 
+                              mem_desc, &file_desc, NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't read from array object");
 
         free(mem_desc);
         mem_desc = NULL;

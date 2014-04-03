@@ -2261,7 +2261,6 @@ H5VL_iod_server_link_iterate(hg_handle_t UNUSED handle)
     op_data->input = (void *)input;
 #endif
 
-done:
     return ret_value;
 } /* end H5VL_iod_server_link_iterate() */
 
@@ -2650,7 +2649,6 @@ H5VL_iod_server_object_visit(hg_handle_t UNUSED handle)
     //op_data_t *op_data = NULL;
     int ret_value = HG_SUCCESS;
 
-done:
     return ret_value;
 } /* end H5VL_iod_server_object_visit() */
 
