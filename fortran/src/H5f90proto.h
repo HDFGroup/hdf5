@@ -27,7 +27,7 @@ H5_FCDLL void HD5packFstring(char *src, char *dest, size_t len);
 #endif /*H5_VMS*/
 
 /*
- * Storage struct used by H5Dread_multi and H5Dwrite_multi 
+ * Storage struct used by H5Dread_multi and H5Dwrite_multi, 
  * interoperable with Fortran.
  */
 typedef struct H5D_rw_multi_t_f {

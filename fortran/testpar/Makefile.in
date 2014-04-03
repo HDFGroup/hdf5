@@ -77,7 +77,8 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 # (Actually, we historically have bad luck combining shared libraries with
 # parallel code.  But you're welcome to try...)
 @FORTRAN_SHARED_CONDITIONAL_FALSE@am__append_1 = -static
-check_PROGRAMS = $(am__EXEEXT_1)
+@FORTRAN_2003_CONDITIONAL_F_TRUE@am__append_2 = parallel_test_F03
+check_PROGRAMS = $(am__EXEEXT_2)
 TESTS =
 subdir = fortran/testpar
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -88,7 +89,9 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__EXEEXT_1 = parallel_test$(EXEEXT)
+@FORTRAN_2003_CONDITIONAL_F_TRUE@am__EXEEXT_1 =  \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@	parallel_test_F03$(EXEEXT)
+am__EXEEXT_2 = parallel_test$(EXEEXT) $(am__EXEEXT_1)
 am_parallel_test_OBJECTS = ptest.$(OBJEXT) hyper.$(OBJEXT) \
 	mdset.$(OBJEXT)
 parallel_test_OBJECTS = $(am_parallel_test_OBJECTS)
@@ -99,6 +102,14 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+am__parallel_test_F03_SOURCES_DIST = ptest_F03.f90 multidsetrw_F03.f90
+@FORTRAN_2003_CONDITIONAL_F_TRUE@am_parallel_test_F03_OBJECTS =  \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@	ptest_F03.$(OBJEXT) \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@	multidsetrw_F03.$(OBJEXT)
+parallel_test_F03_OBJECTS = $(am_parallel_test_F03_OBJECTS)
+parallel_test_F03_LDADD = $(LDADD)
+parallel_test_F03_DEPENDENCIES = $(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) \
+	$(LIBHDF5)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -127,8 +138,9 @@ AM_V_FCLD = $(am__v_FCLD_@AM_V@)
 am__v_FCLD_ = $(am__v_FCLD_@AM_DEFAULT_V@)
 am__v_FCLD_0 = @echo "  FCLD    " $@;
 am__v_FCLD_1 = 
-SOURCES = $(parallel_test_SOURCES)
-DIST_SOURCES = $(parallel_test_SOURCES)
+SOURCES = $(parallel_test_SOURCES) $(parallel_test_F03_SOURCES)
+DIST_SOURCES = $(parallel_test_SOURCES) \
+	$(am__parallel_test_F03_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -428,10 +440,11 @@ TRACE = perl $(top_srcdir)/bin/trace
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog parf[12].h5
 
 # These are our main targets
-TEST_PROG_PARA = parallel_test
+TEST_PROG_PARA = parallel_test $(am__append_2)
 
 # Test source files
 parallel_test_SOURCES = ptest.f90 hyper.f90 mdset.f90
+@FORTRAN_2003_CONDITIONAL_F_TRUE@parallel_test_F03_SOURCES = ptest_F03.f90 multidsetrw_F03.f90
 
 # The tests depend on several libraries.
 LDADD = $(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
@@ -505,6 +518,9 @@ clean-checkPROGRAMS:
 parallel_test$(EXEEXT): $(parallel_test_OBJECTS) $(parallel_test_DEPENDENCIES) $(EXTRA_parallel_test_DEPENDENCIES) 
 	@rm -f parallel_test$(EXEEXT)
 	$(AM_V_FCLD)$(FCLINK) $(parallel_test_OBJECTS) $(parallel_test_LDADD) $(LIBS)
+parallel_test_F03$(EXEEXT): $(parallel_test_F03_OBJECTS) $(parallel_test_F03_DEPENDENCIES) $(EXTRA_parallel_test_F03_DEPENDENCIES) 
+	@rm -f parallel_test_F03$(EXEEXT)
+	$(AM_V_FCLD)$(FCLINK) $(parallel_test_F03_OBJECTS) $(parallel_test_F03_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

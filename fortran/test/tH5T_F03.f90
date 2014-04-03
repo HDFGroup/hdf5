@@ -3503,7 +3503,12 @@ SUBROUTINE multiple_dset_rw(total_error)
   INTEGER(HSIZE_T), DIMENSION(1:3) :: dimsmd ! dimension of the spaces
   INTEGER(HID_T) :: file_id, strtype ! handles
 
-  ALLOCATE(info_md(1:ndset))
+  ALLOCATE(info_md(1:ndset),stat=error)
+  IF (error .NE. 0) THEN
+     WRITE(*,*) 'allocate error'
+     total_error = total_error + 1
+     RETURN
+  ENDIF 
 
   CALL h5fcreate_f("multidset_rw.h5", H5F_ACC_TRUNC_F, file_id, error)
   CALL check("h5fcreate_f", error, total_error)

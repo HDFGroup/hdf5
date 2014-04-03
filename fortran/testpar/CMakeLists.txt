@@ -30,4 +30,24 @@ endif (WIN32 AND MSVC)
 set_target_properties (parallel_test PROPERTIES LINKER_LANGUAGE Fortran)
 set_target_properties (parallel_test PROPERTIES FOLDER test/fortran)
 
+#-- Adding test for parallel_test_F03
+if (HDF5_ENABLE_F2003)
+  add_executable (parallel_test_F03
+      ptest_F03.f90
+      multidsetrw_F03.f90
+  )
+  TARGET_NAMING (parallel_test_F03 ${LIB_TYPE})
+  TARGET_FORTRAN_PROPERTIES (parallel_test_F03 " " " ")
+  target_link_libraries (parallel_test_F03
+      ${HDF5_F90_TEST_LIB_TARGET}
+      ${HDF5_F90_LIB_TARGET}
+      ${HDF5_LIB_TARGET}
+  )
+  if (WIN32 AND MSVC)
+    target_link_libraries (parallel_test_F03 "ws2_32.lib")
+  endif (WIN32 AND MSVC)
+  set_target_properties (parallel_test_F03 PROPERTIES LINKER_LANGUAGE Fortran)
+  set_target_properties (parallel_test_F03 PROPERTIES FOLDER test/fortran)
+endif (HDF5_ENABLE_F2003)
+
 include (CMakeTests.cmake)
