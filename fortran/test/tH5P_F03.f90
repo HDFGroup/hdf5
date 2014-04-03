@@ -379,7 +379,7 @@ END SUBROUTINE test_genprop_class_callback
 SUBROUTINE test_h5p_file_image(total_error)
 
   USE HDF5
-  USE ISO_C_BINDING
+  USE, INTRINSIC :: iso_c_binding
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
   INTEGER(hid_t) ::   fapl_1 = -1
@@ -404,7 +404,7 @@ SUBROUTINE test_h5p_file_image(total_error)
   CALL check("h5pcreate_f", error, total_error)
 
   ! Test with NULL ptr
-  f_ptr2 = C_NULL_PTR
+  f_ptr2(1) = C_NULL_PTR
   temp_size = 1
   CALL h5pget_file_image_f(fapl_1, f_ptr2, temp_size, error)
   CALL check("h5pget_file_image_f", error, total_error)

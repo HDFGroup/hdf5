@@ -72,10 +72,10 @@ PROGRAM fortranlibtest
   CALL reopentest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Reopen test', total_error)
 
-  ret_total_error = 0
 !DEC$ if defined(H5_VMS)
   GOTO 8
 !DEC$ else
+  ret_total_error = 0
   CALL file_close(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' File open/close test', total_error)
 !DEC$ endif
@@ -179,10 +179,10 @@ PROGRAM fortranlibtest
   CALL external_test(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' External dataset test', total_error)
 
-  ret_total_error = 0
 !DEC$ if defined(H5_VMS)
   GOTO 9
 !DEC$ else
+  ret_total_error = 0
   CALL multi_file_test(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Multi file driver test', total_error)
 !DEC$ endif
