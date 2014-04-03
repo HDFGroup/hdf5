@@ -426,7 +426,7 @@ SUBROUTINE test_h5p_file_image(total_error)
   CALL check("h5pget_file_image_f", error, total_error)
 
   ! Check that sizes are the same, and that the buffers are identical but separate
-  CALL VERIFY("h5pget_file_image_f", temp_size, size, total_error)
+  CALL VERIFY("h5pget_file_image_f", INT(temp_size), INT(size), total_error)
   
   ! Verify the image data is correct
   DO i = 1, count
