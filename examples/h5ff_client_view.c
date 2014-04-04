@@ -267,6 +267,7 @@ test_view(const char *file_name, const char *dataset_name,
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
 
         ret = H5Vget_query(view_id, &query_id);
         assert(0 == ret);
@@ -288,6 +289,7 @@ test_view(const char *file_name, const char *dataset_name,
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
 
         r_ndims = H5Sget_simple_extent_dims(region_space, r_dims, NULL);
 
@@ -335,6 +337,7 @@ test_view(const char *file_name, const char *dataset_name,
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
 
         ret = H5Vget_query(view_id, &query_id);
         assert(0 == ret);
@@ -352,6 +355,7 @@ test_view(const char *file_name, const char *dataset_name,
         H5ESwait_all(e_stack, &status);
         H5ESclear(e_stack);
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
 
         for(i=0 ; i<reg_count ; i++) {
 
@@ -380,6 +384,7 @@ test_view(const char *file_name, const char *dataset_name,
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
+    assert(status == H5ES_STATUS_SUCCEED);
 
     H5Vclose(view_id);
 
