@@ -619,7 +619,7 @@ H5Qapply(hid_t query_id, hbool_t *result, hid_t type_id, const void *elem)
         HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
 
 done:
-    if (native_type)
+    if(native_type)
         H5T_close(native_type);
     FUNC_LEAVE_API(ret_value)
 } /* end H5Qapply() */
@@ -832,7 +832,7 @@ H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type, const void *valu
     H5T_t *query_type, *promoted_type;
     H5Q_match_type_t match_type;
     size_t type_size, query_type_size, promoted_type_size;
-    hid_t type_id, query_type_id, promoted_type_id;
+    hid_t type_id=FAIL, query_type_id=FAIL, promoted_type_id=FAIL;
     H5T_path_t *tpath;
     H5Q_match_op_t query_op;
     hbool_t query_result = FALSE;
@@ -867,9 +867,12 @@ H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type, const void *valu
     HDmemcpy(query_value_buf, query->query.select.elem.data_elem.value, query_type_size);
 
     /* Create temporary IDs for H5T_convert */
-    type_id = H5I_register(H5I_DATATYPE, type, FALSE);
-    query_type_id = H5I_register(H5I_DATATYPE, query_type, FALSE);
-    promoted_type_id = H5I_register(H5I_DATATYPE, promoted_type, FALSE);
+    if((type_id = H5I_register(H5I_DATATYPE, type, FALSE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
+    if((query_type_id = H5I_register(H5I_DATATYPE, query_type, FALSE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
+    if((promoted_type_id = H5I_register(H5I_DATATYPE, promoted_type, FALSE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
 
     /* Find the conversion function */
     if (NULL == (tpath = H5T_path_find(type, promoted_type, NULL, NULL, H5P_LST_DATASET_XFER_g, FALSE)))
@@ -917,9 +920,18 @@ done:
     H5MM_free(query_value_buf);
 
     /* Free temporary IDs */
-    H5I_remove(type_id);
-    H5I_remove(query_type_id);
-    H5I_remove(promoted_type_id);
+    if(promoted_type_id != FAIL) {
+        if(H5I_remove(promoted_type_id) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
+    }
+    if(query_type_id != FAIL) {
+        if(H5I_remove(query_type_id) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
+    }
+    if(type_id != FAIL) {
+        if(H5I_remove(type_id) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Q_apply_data_elem() */
