@@ -311,7 +311,7 @@ H5Vcreate_ff(hid_t loc_id, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, hid_t e
 #ifdef H5_HAVE_INDEXING
     void *idx_handle = NULL; /* index */
 #endif
-    hid_t dataspace_id;
+    hid_t dataspace_id = -1;
     H5VL_t  *vol_plugin;        /* VOL plugin information */
     hid_t ret_value;
 
@@ -375,7 +375,7 @@ H5Vcreate_ff(hid_t loc_id, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, hid_t e
 
     /* call the IOD specific private routine to create a view object */
     if(NULL == (view = H5VL_iod_view_create(obj, query_id, dataspace_id,
-            vcpl_id, rcxt_id, req)))
+                                            vcpl_id, rcxt_id, req)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create view")
 
     if(request && *req) {
@@ -388,11 +388,15 @@ H5Vcreate_ff(hid_t loc_id, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, hid_t e
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize view handle")
 
 done:
+    if(dataspace_id != -1) {
+        if(H5I_dec_ref(dataspace_id) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+    }
+
     if (ret_value < 0 && view) {
         if(H5V_close (view) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release view")
     }
-    H5I_dec_ref(dataspace_id);
     FUNC_LEAVE_API(ret_value)
 } /* end H5Vcreate_ff */
 

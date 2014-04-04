@@ -229,7 +229,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         iod_kv_t kv;
 
         kv.key = (void *)H5VL_IOD_KEY_DTYPE_SIZE;
-        kv.key_len = strlen(H5VL_IOD_KEY_DTYPE_SIZE);
+        kv.key_len = strlen(H5VL_IOD_KEY_DTYPE_SIZE) + 1;
         kv.value_len = sizeof(iod_size_t);
         kv.value = &buf_size;
 
@@ -394,7 +394,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR_FF(ret, "failed to retrieve tcpl");
 
     val_size = sizeof(iod_size_t);
-    key_size = strlen(H5VL_IOD_KEY_DTYPE_SIZE);
+    key_size = strlen(H5VL_IOD_KEY_DTYPE_SIZE) + 1;
 
     /* retrieve blob size metadata from scratch pad */
     ret = iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_DTYPE_SIZE, key_size,

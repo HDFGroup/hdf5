@@ -10056,7 +10056,7 @@ done:
  */
 void *
 H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t dataspace_id,
-        hid_t vcpl_id, hid_t rcxt_id, void **req)
+                     hid_t vcpl_id, hid_t rcxt_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the view */
     H5VL_iod_view_t *view = NULL; /* the view object that is created and passed to the user */
@@ -10134,8 +10134,7 @@ H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t dataspace_id,
 #endif
 
     /* If we already have a dataspace id, no need to ship */
-    if (H5I_object_verify(dataspace_id, H5I_DATASPACE)) {
-        printf("no ship\n");
+    if (dataspace_id != -1) {
         view->attr_info.count = 0;
         view->attr_info.tokens = NULL;
         view->obj_info.count = 0;

@@ -200,7 +200,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         kv.value_len = sizeof(uint64_t);
 
         kv.key = (void *)H5VL_IOD_KEY_KV_IDS_INDEX;
-        kv.key_len = strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
+        kv.key_len = 1 + strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
         if(cs_scope & H5_CHECKSUM_IOD) {
             iod_checksum_t cs[2];
 
@@ -217,7 +217,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         kv.key = (void *)H5VL_IOD_KEY_ARRAY_IDS_INDEX;
-        kv.key_len = strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
+        kv.key_len = 1 + strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
         if(cs_scope & H5_CHECKSUM_IOD) {
             iod_checksum_t cs[2];
 
@@ -234,7 +234,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         kv.key = (void *)H5VL_IOD_KEY_BLOB_IDS_INDEX;
-        kv.key_len = strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
+        kv.key_len = 1 + strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
         if(cs_scope & H5_CHECKSUM_IOD) {
             iod_checksum_t cs[2];
 
@@ -471,7 +471,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
             iod_cs = (iod_checksum_t *)malloc(sizeof(iod_checksum_t) * 2);
         }
 
-        key_size = strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
+        key_size = 1 + strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
         ret = iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_KV_IDS_INDEX, key_size,
                                &output.kv_oid_index, &val_size, iod_cs, NULL);
         if(ret < 0)
@@ -482,7 +482,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR_FF(FAIL, "Corruption detected when reading metadata from IOD");
         }
 
-        key_size = strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
+        key_size = 1 + strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
         ret = iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_ARRAY_IDS_INDEX, key_size,
                                &output.array_oid_index, &val_size, iod_cs, NULL);
         if(ret < 0)
@@ -493,7 +493,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR_FF(FAIL, "Corruption detected when reading metadata from IOD");
         }
 
-        key_size = strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
+        key_size = 1 + strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
         ret = iod_kv_get_value(mdkv_oh, rtid, H5VL_IOD_KEY_BLOB_IDS_INDEX, key_size,
                                &output.blob_oid_index, &val_size, iod_cs, NULL);
         if(ret < 0)
@@ -650,7 +650,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         kv.value = &input->max_kv_index;
         kv.value_len = sizeof(iod_obj_id_t);
         kv.key = (void *)H5VL_IOD_KEY_KV_IDS_INDEX;
-        kv.key_len = strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
+        kv.key_len = 1 + strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
         if(cs_scope & H5_CHECKSUM_IOD) {
             iod_checksum_t cs[2];
 
@@ -671,7 +671,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         kv.value = &input->max_array_index;
         kv.value_len = sizeof(iod_obj_id_t);
         kv.key = (void *)H5VL_IOD_KEY_ARRAY_IDS_INDEX;
-        kv.key_len = strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
+        kv.key_len = 1 + strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
         if(cs_scope & H5_CHECKSUM_IOD) {
             iod_checksum_t cs[2];
 
@@ -691,7 +691,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         kv.value = &input->max_blob_index;
         kv.value_len = sizeof(iod_obj_id_t);
         kv.key = (void *)H5VL_IOD_KEY_BLOB_IDS_INDEX;
-        kv.key_len = strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
+        kv.key_len = 1 + strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
         if(cs_scope & H5_CHECKSUM_IOD) {
             iod_checksum_t cs[2];
 

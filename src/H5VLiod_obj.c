@@ -214,7 +214,7 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
             iod_size_t key_size, val_size;
             iod_checksum_t iod_cs[2];
 
-            key_size = strlen(H5VL_IOD_KEY_DTYPE_SIZE);
+            key_size = 1 + strlen(H5VL_IOD_KEY_DTYPE_SIZE);
             val_size = sizeof(iod_size_t);
 
             ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
@@ -825,7 +825,7 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
         iod_kv_t kv;
 
         kv.key = H5VL_IOD_KEY_OBJ_COMMENT;
-        kv.key_len = strlen(H5VL_IOD_KEY_OBJ_COMMENT);
+        kv.key_len = 1 + strlen(H5VL_IOD_KEY_OBJ_COMMENT);
         kv.value_len = strlen(comment) + 1;
         kv.value = comment;
 
@@ -949,7 +949,7 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     comment.value = NULL;
     comment.size = length;
 
-    key_size = strlen(H5VL_IOD_KEY_OBJ_COMMENT);
+    key_size = 1 + strlen(H5VL_IOD_KEY_OBJ_COMMENT);
 
     if(cs_scope & H5_CHECKSUM_IOD) {
         iod_cs = (iod_checksum_t *)malloc(sizeof(iod_checksum_t) * 2);
@@ -1153,7 +1153,7 @@ H5VL_iod_server_object_open_by_addr_cb(AXE_engine_t UNUSED axe_engine,
             iod_size_t key_size, val_size;
             iod_checksum_t iod_cs[2];
 
-            key_size = strlen(H5VL_IOD_KEY_DTYPE_SIZE);
+            key_size = 1 + strlen(H5VL_IOD_KEY_DTYPE_SIZE);
             val_size = sizeof(iod_size_t);
 
             if(H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,

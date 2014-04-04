@@ -295,7 +295,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
         iod_checksum_t cs;
 
         kv.key = src_last_comp;
-        kv.key_len = strlen(src_last_comp);
+        kv.key_len = strlen(src_last_comp) + 1;
         kvs.kv = &kv;
         kvs.cs = &cs;
         kvs.ret = &ret;
@@ -460,7 +460,7 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* check the last component */
-    if(iod_kv_get_value(cur_oh.rd_oh, rtid, last_comp, (iod_size_t)strlen(last_comp),
+    if(iod_kv_get_value(cur_oh.rd_oh, rtid, last_comp, (iod_size_t)strlen(last_comp) + 1,
                         NULL, &val_size, NULL, NULL) < 0) {
         ret = FALSE;
     } /* end if */
@@ -781,7 +781,7 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
 
     /* unlink object from conainer */
     kv.key = last_comp;
-    kv.key_len = strlen(last_comp);
+    kv.key_len = strlen(last_comp) + 1;
     kvs.kv = &kv;
     kvs.cs = &cs;
     kvs.ret = &ret;

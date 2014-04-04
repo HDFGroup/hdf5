@@ -890,7 +890,7 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* get attribute ID */
-    if(iod_kv_get_value(attr_kv_oh, rtid, attr_name, (iod_size_t)strlen(attr_name), 
+    if(iod_kv_get_value(attr_kv_oh, rtid, attr_name, (iod_size_t)strlen(attr_name) + 1, 
                         NULL, &kv_size, NULL, NULL) < 0) {
         ret = FALSE;
     }
@@ -1020,7 +1020,7 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
 
     /* remove attribute with old name */
     kv.key = (void *)old_name;
-    kv.key_len = strlen(old_name);
+    kv.key_len = 1 + strlen(old_name);
     kvs.kv = &kv;
     kvs.cs = NULL;
     kvs.ret = &ret;
@@ -1186,7 +1186,7 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
 
     /* remove attribute */
     kv.key = (void *)attr_name;
-    kv.key_len = strlen(attr_name);
+    kv.key_len = 1 + strlen(attr_name);
     kvs.kv = &kv;
     kvs.cs = NULL;
     kvs.ret = &ret;

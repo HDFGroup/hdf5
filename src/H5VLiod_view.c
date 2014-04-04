@@ -291,7 +291,7 @@ H5VL__iod_get_elmt_region(iod_handle_t coh, iod_obj_id_t dset_id,
     /* iterate over every element and apply the query on it. If the
        query is not satisfied, then remove it from the query selection */
     if(H5Diterate(buf, type_id, space_id, H5VL__iod_get_query_data_cb, &udata) < 0)
-        HGOTO_ERROR_FF(FAIL, "failed to compute buffer size");
+        HGOTO_ERROR_FF(FAIL, "failed to apply query on Dataset");
 
     ret_value = udata.space_query;
 

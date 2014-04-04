@@ -66,7 +66,7 @@ H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR_FF(ret, "can't open MDKV object");
 
     kv.key = H5VL_IOD_IDX_PLUGIN_ID;
-    kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_ID);
+    kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_ID) + 1;
     kv.value = &input->idx_plugin_id;
     kv.value_len = (iod_size_t)sizeof(uint32_t);
 
@@ -86,7 +86,7 @@ H5VL_iod_server_dset_set_index_info_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     kv.key = H5VL_IOD_IDX_PLUGIN_MD;
-    kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_MD);
+    kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_MD) + 1;
     kv.value = input->idx_metadata.buf;
     kv.value_len = (iod_size_t)input->idx_metadata.buf_size;
 
@@ -172,7 +172,7 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     key = H5VL_IOD_IDX_PLUGIN_ID;
-    key_size = strlen(key);
+    key_size = strlen(key) + 1;
     val_size = sizeof(uint32_t);
 
     if((ret = iod_kv_get_value(mdkv_oh, rtid, key, key_size, &output.idx_plugin_id, 
@@ -202,7 +202,7 @@ H5VL_iod_server_dset_get_index_info_cb(AXE_engine_t UNUSED axe_engine,
 
 
     key = H5VL_IOD_IDX_PLUGIN_MD;
-    key_size = strlen(key);
+    key_size = strlen(key) + 1;
     val_size = 0;
 
     ret = iod_kv_get_value(mdkv_oh, rtid, key, key_size, NULL, 
@@ -306,7 +306,7 @@ H5VL_iod_server_dset_remove_index_info_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR_FF(ret, "can't open MDKV object");
 
     kv.key = H5VL_IOD_IDX_PLUGIN_ID;
-    kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_ID);
+    kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_ID) + 1;
     kvs.kv = &kv;
     kvs.cs = NULL;
     kvs.ret = &ret;
@@ -315,7 +315,7 @@ H5VL_iod_server_dset_remove_index_info_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR_FF(ret, "Unable to unlink KV pair");
 
     kv.key = H5VL_IOD_IDX_PLUGIN_MD;
-    kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_MD);
+    kv.key_len = (iod_size_t)strlen(H5VL_IOD_IDX_PLUGIN_MD) + 1;
     kvs.kv = &kv;
     kvs.cs = NULL;
     kvs.ret = &ret;

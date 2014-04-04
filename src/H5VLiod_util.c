@@ -493,7 +493,7 @@ H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
         HGOTO_ERROR_FF(FAIL, "failed to encode plist");
 
     kv.key = (void *)key;
-    kv.key_len = (iod_size_t)strlen(key);
+    kv.key_len = (iod_size_t)strlen(key) + 1;
     kv.value = value;
     kv.value_len = (iod_size_t)buf_size;
 
@@ -554,7 +554,7 @@ H5VL_iod_insert_link_count(iod_handle_t oh, iod_trans_id_t tid, uint64_t count,
     key = strdup(H5VL_IOD_KEY_OBJ_LINK_COUNT);
 
     kv.key = (void *)key;
-    kv.key_len = (iod_size_t)strlen(key);
+    kv.key_len = (iod_size_t)strlen(key) + 1;
     kv.value = &count;
     kv.value_len = sizeof(uint64_t);
 
@@ -610,7 +610,7 @@ H5VL_iod_insert_object_type(iod_handle_t oh, iod_trans_id_t tid, H5I_type_t obj_
     key = strdup(H5VL_IOD_KEY_OBJ_TYPE);
 
     kv.key = (void *)key;
-    kv.key_len = (iod_size_t)strlen(key);
+    kv.key_len = (iod_size_t)strlen(key) + 1;
     kv.value = &obj_type;
     kv.value_len = sizeof(int32_t);
 
@@ -678,7 +678,7 @@ H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
         HGOTO_ERROR_FF(FAIL, "failed to encode type");
 
     kv.key = (void *)key;
-    kv.key_len = (iod_size_t)strlen(key);
+    kv.key_len = (iod_size_t)strlen(key) + 1;
     kv.value = value;
     kv.value_len = (iod_size_t)buf_size;
 
@@ -748,7 +748,7 @@ H5VL_iod_insert_datatype_with_key(iod_handle_t oh, iod_trans_id_t tid, hid_t typ
         HGOTO_ERROR_FF(FAIL, "failed to encode type");
 
     kv.key = (void *)key;
-    kv.key_len = (iod_size_t)strlen(key);
+    kv.key_len = (iod_size_t)strlen(key) + 1;
     kv.value = value;
     kv.value_len = (iod_size_t)buf_size;
 
@@ -817,7 +817,7 @@ H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
         HGOTO_ERROR_FF(FAIL, "failed to encode space");
 
     kv.key = (void *)key;
-    kv.key_len = (iod_size_t)strlen(key);
+    kv.key_len = (iod_size_t)strlen(key) + 1;
     kv.value = value;
     kv.value_len = (iod_size_t)buf_size;
 
@@ -911,7 +911,7 @@ H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_n
     }
 
     kv.key = (void *)link_name;
-    kv.key_len = (iod_size_t)strlen(link_name);
+    kv.key_len = (iod_size_t)strlen(link_name) + 1;
     kv.value = value;
     kv.value_len = value_len;
 
@@ -959,7 +959,7 @@ herr_t
 H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t md_type,
                       const char *key, uint32_t cs_scope, iod_event_t *event, void *md_value)
 {
-    iod_size_t key_size = strlen(key);
+    iod_size_t key_size = strlen(key) + 1;
     iod_size_t val_size = 0;
     void *value = NULL;
     iod_checksum_t *iod_cs = NULL;
@@ -1368,8 +1368,6 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
             for(i=0 ; i<num_entries ; i++) {
                 kv[i].key = malloc(IOD_KV_KEY_MAXLEN);
                 kv[i].key_len = IOD_KV_KEY_MAXLEN;
-                //kv[i].value = malloc(sizeof(iod_obj_id_t));
-                //kv[i].value_len = sizeof(iod_obj_id_t);
                 kvs[i].kv = &kv[i];
                 kvs[i].cs = &oid_cs[i];
                 kvs[i].ret = &oid_ret[i];
@@ -1382,7 +1380,7 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
             for(i=0 ; i<num_entries ; i++) {
 
                 H5I_type_t otype;
-                iod_obj_id_t oid;// = *((iod_obj_id_t *)kv[i].value);
+                iod_obj_id_t oid;
                 H5VL_iod_link_t value;
 
                 /* lookup object in the current group */

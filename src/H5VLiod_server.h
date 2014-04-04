@@ -47,8 +47,7 @@
 
 
 #define HGOTO_ERROR_FF(ret_val, string) {			               \
-    fprintf(stderr, "%d (%s). --- %s\n", ret_value, strerror(-ret_value), string); \
-    fprintf(stderr, "%s\n", string);                                           \
+    fprintf(stderr, "%d (%s). --- %s\n", ret_val, strerror(-ret_val), string); \
     HGOTO_DONE_FF(ret_val)						       \
 }
 
