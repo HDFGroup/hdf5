@@ -1386,9 +1386,10 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
                 H5VL_iod_link_t value;
 
                 /* lookup object in the current group */
-                if(H5VL_iod_get_metadata(obj_oh, rtid, H5VL_IOD_LINK, 
-                                         (char *)(kv[i].key), cs_scope, NULL, &value) < 0)
-                    HGOTO_ERROR_FF(FAIL, "failed to retrieve link value");
+                ret = H5VL_iod_get_metadata(obj_oh, rtid, H5VL_IOD_LINK, 
+                                            (char *)(kv[i].key), cs_scope, NULL, &value);
+                if(SUCCEED != ret)
+                    HGOTO_ERROR_FF(ret, "failed to retrieve link value");
 
                 if(H5L_TYPE_SOFT == value.link_type) {
                     continue;

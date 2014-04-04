@@ -143,7 +143,7 @@ H5VL_iod_server_view_create_cb(AXE_engine_t UNUSED axe_engine,
 
         if(H5VL_iod_server_iterate(coh, loc_id, rtid, obj_type, cs_scope, 
                                    H5VL__iod_view_iterate_cb, &udata) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't iterate to create group");
+            HGOTO_ERROR_FF(FAIL, "can't iterate into group");
 
         output.region_info.count = udata.region_info.count;
         output.region_info.tokens = udata.region_info.tokens;

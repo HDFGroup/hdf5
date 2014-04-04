@@ -56,9 +56,16 @@ test_view(const char *file_name, const char *dataset_name,
     assert(0 == ret);
 
     /* acquire container version 1 - EXACT. */
-    version = 1;
-    rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(1 == version);
+    if(0 == my_rank) {
+        version = 1;
+        rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(1 == version);
+    }
+    MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
+    if(0 != my_rank) {
+        assert(version == 1);
+        rid1 = H5RCcreate(file_id, version);
+    }
 
     /* create transaction object */
     tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
@@ -200,16 +207,22 @@ test_view(const char *file_name, const char *dataset_name,
 
     MPI_Barrier(MPI_COMM_WORLD);
     /* acquire container version 2 - EXACT. */
-    version = 2;
-    rid2 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(rid2 > 0);
-    assert(2 == version);
+    if(0 == my_rank) {
+        version = 2;
+        rid2 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(2 == version);
+    }
+    MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
+    if(0 != my_rank) {
+        assert(version == 2);
+        rid2 = H5RCcreate(file_id, version);
+    }
 
-    /* release container version 0. */
-    ret = H5RCrelease(rid1, H5_EVENT_STACK_NULL);
-    assert(0 == ret);
-
-    MPI_Barrier(MPI_COMM_WORLD);
+    if(0 == my_rank) {
+        /* release container version 0. */
+        ret = H5RCrelease(rid1, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+    }
 
     /* Create a simple query */
     /* query = (39.1 < x < 42.1) || (295 < x < 298) */
@@ -250,6 +263,11 @@ test_view(const char *file_name, const char *dataset_name,
         ret = H5Vget_location_ff(view_id, &did1, e_stack);
         assert(0 == ret);
 
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
+
         ret = H5Vget_query(view_id, &query_id);
         assert(0 == ret);
 
@@ -258,11 +276,6 @@ test_view(const char *file_name, const char *dataset_name,
         assert(0 == attr_count);
         assert(0 == obj_count);
         assert(1 == reg_count);
-
-        H5ESget_count(e_stack, &num_events);
-        H5ESwait_all(e_stack, &status);
-        H5ESclear(e_stack);
-        printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
         ret = H5Dclose_ff(did1, H5_EVENT_STACK_NULL);
         assert(0 == ret);
@@ -305,17 +318,23 @@ test_view(const char *file_name, const char *dataset_name,
         hsize_t attr_count, obj_count, reg_count, i;
         hssize_t num_points;
         hid_t regions[3];
-        hid_t did[3];
+        hid_t did[3], gid_temp;
         int r_ndims;
         hsize_t r_dims[2];
 
         H5Qclose(query_id);
-        ret = H5Gclose_ff(gid1, e_stack);
-        assert(0 == ret);
 
-        ret = H5Vget_location_ff(view_id, &gid1, e_stack);
+        ret = H5Vget_location_ff(view_id, &gid_temp, e_stack);
         assert(0 == ret);
         assert(gid1 > 0);
+
+        ret = H5Gclose_ff(gid_temp, e_stack);
+        assert(0 == ret);
+
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
         ret = H5Vget_query(view_id, &query_id);
         assert(0 == ret);
@@ -385,8 +404,10 @@ test_view(const char *file_name, const char *dataset_name,
     assert(0 == ret);
 
     /* release container version 2. */
-    ret = H5RCrelease(rid2, H5_EVENT_STACK_NULL);
-    assert(0 == ret);
+    if(0 == my_rank) {
+        ret = H5RCrelease(rid2, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+    }
 
     ret = H5RCclose(rid1);
     assert(0 == ret);
