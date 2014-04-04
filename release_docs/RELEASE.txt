@@ -1191,12 +1191,6 @@ Supported Platforms
 
     Windows 8.1 x64               Visual Studio 2012 w/ Intel Fortran 14 (cmake)
 
-    Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
-    Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6
-    64-bit                        gfortran GNU Fortran (GCC) 4.6.2
-    (fred)                        Intel C (icc), Fortran (ifort), C++ (icpc)
-                                      12.1 Build 20120928
-
     Mac OS X Lion 10.7.3          gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.2.1
     32- and 64-bit                g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.2.1
     (duck)                        gfortran GNU Fortran (GCC) 4.6.2
@@ -1231,7 +1225,6 @@ Windows 7 Cygwin                        n        y/n    n        y    y     y
 Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 8                               y        y/y    n        y    y     y
 Windows 8     x64                       y        y/y    n        y    y     y
-Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
 Mac OS X Lion 10.7.3 32-bit             n        y/y    n        y    y     n
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
 Mac OS X Mountain Lion 10.8.1 64-bit    n        y/n    n        y    y     n
@@ -1255,7 +1248,6 @@ Windows 7 Cygwin                           n       n         n         y
 Windows 7 x64 Cygwin                       n       n         n         y
 Windows 8                                  y       y         y         y
 Windows 8 x64                              y       y         y         y
-Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
 Mac OS X Lion 10.7.3 32-bit                y       n         y         y        
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
 Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
