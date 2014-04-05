@@ -367,7 +367,7 @@ H5E_get_stack(void)
 #ifdef H5_HAVE_WIN_THREADS
         estack = (H5E_t *)LocalAlloc(LPTR, sizeof(H5E_t)); /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
 #else
-        estack = (H5E_t *)H5FL_MALLOC(sizeof(H5E_t));
+        estack = (H5E_t *)H5FL_MALLOC(H5E_t);
 #endif /* H5_HAVE_WIN_THREADS */
         HDassert(estack);
 
