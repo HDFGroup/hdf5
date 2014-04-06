@@ -31,8 +31,13 @@
 !
 !*****
 !
+MODULE TH5R
+
+CONTAINS
+
 SUBROUTINE refobjtest(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(OUT) :: total_error
@@ -66,7 +71,6 @@ SUBROUTINE refobjtest(cleanup, total_error)
 
   CHARACTER(LEN=7) :: buf        ! buffer to hold the region name
   CHARACTER(LEN=16) :: buf_big    ! buffer bigger then needed
-  CHARACTER(LEN=4) :: buf_small  ! buffer smaller then needed
   INTEGER(SIZE_T) :: buf_size     ! returned size of the region buffer name
 
   !
@@ -241,6 +245,7 @@ END SUBROUTINE refobjtest
 !
 SUBROUTINE refregtest(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 !  use iso_c_binding  ! NOTE: if this is uncommented, then need to move subroutine into another file.
 
   IMPLICIT NONE
@@ -478,3 +483,4 @@ SUBROUTINE refregtest(cleanup, total_error)
 
 END SUBROUTINE refregtest
 
+END MODULE TH5R

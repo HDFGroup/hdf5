@@ -27,8 +27,13 @@
 !
 !*****
 
+MODULE TH5VL
+
+CONTAINS
+
         SUBROUTINE vl_test_integer(cleanup, total_error)
         USE HDF5 ! This module contains all necessary modules
+        USE TH5_MISC
 
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup
@@ -54,6 +59,7 @@
           INTEGER     ::   error ! Error flag
 
           INTEGER     :: i, j    !general purpose integers
+          INTEGER(HSIZE_T) :: ih, jh    !general purpose integers
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims = (/5,6/)
           INTEGER(SIZE_T)  max_len
 
@@ -150,14 +156,14 @@
           CALL h5dread_vl_f(dset_id, vltype_id, vl_int_data_out, data_dims, len_out, &
                             error, mem_space_id = dspace_id, file_space_id = dspace_id)
               CALL check("h5dread_int_f", error, total_error)
-              do i = 1, data_dims(2)
-              do j = 1, len_out(i)
-              if(vl_int_data(j,i) .ne. vl_int_data_out(j,i))  then
+              do ih = 1, data_dims(2)
+              do jh = 1, len_out(ih)
+              if(vl_int_data(jh,ih) .ne. vl_int_data_out(jh,ih))  then
                   total_error = total_error + 1
                   write(*,*) "h5dread_vl_f returned incorrect data"
               endif
               enddo
-               if (len(i) .ne. len_out(i)) then
+               if (len(ih) .ne. len_out(ih)) then
                   total_error = total_error + 1
                   write(*,*) "h5dread_vl_f returned incorrect data"
               endif
@@ -189,6 +195,7 @@
 
         SUBROUTINE vl_test_real(cleanup, total_error)
         USE HDF5 ! This module contains all necessary modules
+        USE TH5_MISC
 
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup
@@ -214,10 +221,12 @@
           INTEGER     ::   error ! Error flag
 
           INTEGER     :: i, j    !general purpose integers
+          INTEGER(HSIZE_T)     :: ih, jh    !general purpose integers
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims = (/5,6/)
           INTEGER(SIZE_T)  max_len
           INTEGER(HID_T) ::  vl_type_id
           LOGICAL        ::  vl_flag
+          LOGICAL        ::  differ
 
           !
           ! Initialize the vl_int_data array.
@@ -320,14 +329,15 @@
           CALL h5dread_vl_f(dset_id, vltype_id, vl_real_data_out, data_dims, len_out, &
                             error, mem_space_id = dspace_id, file_space_id = dspace_id)
               CALL check("h5dread_real_f", error, total_error)
-              do i = 1, data_dims(2)
-              do j = 1, len_out(i)
-              if(vl_real_data(j,i) .ne. vl_real_data_out(j,i))  then
+              do ih = 1, data_dims(2)
+              do jh = 1, len_out(ih)
+              CALL compare_floats(vl_real_data(jh,ih), vl_real_data_out(jh,ih), differ)  
+              if(differ)  then
                   total_error = total_error + 1
                   write(*,*) "h5dread_vl_f returned incorrect data"
               endif
               enddo
-               if (len(i) .ne. len_out(i)) then
+               if (len(ih) .ne. len_out(ih)) then
                   total_error = total_error + 1
                   write(*,*) "h5dread_vl_f returned incorrect data"
               endif
@@ -360,6 +370,7 @@
 
         SUBROUTINE vl_test_string(cleanup, total_error)
         USE HDF5 ! This module contains all necessary modules
+        USE TH5_MISC
 
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup
@@ -383,7 +394,7 @@
           CHARACTER(LEN=10), DIMENSION(4) :: string_data_out     ! Data buffers
           INTEGER     ::   error ! Error flag
 
-          INTEGER     :: i    !general purpose integers
+          INTEGER(HSIZE_T) :: ih    !general purpose integers
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims = (/10,4/)
           INTEGER(HID_T) :: vl_type_id
           LOGICAL        :: vl_flag
@@ -474,13 +485,13 @@
           CALL h5dread_vl_f(dset_id, H5T_STRING, string_data_out, data_dims,  &
                             str_len_out, error)
               CALL check("h5dread_string_f", error, total_error)
-          do 100 i = 1, data_dims(2)
-             if(str_len(i) .ne. str_len_out(i)) then
+          do 100 ih = 1, data_dims(2)
+             if(str_len(ih) .ne. str_len_out(ih)) then
                 total_error=total_error + 1
                 write(*,*) 'Returned string length is incorrect'
                 goto 100
              endif
-             if(string_data(1)(1:str_len(i)) .ne. string_data_out(1)(1:str_len(i))) then
+             if(string_data(1)(1:str_len(ih)) .ne. string_data_out(1)(1:str_len(ih))) then
              write(*,*) ' Returned string is wrong'
              total_error = total_error + 1
              endif
@@ -506,4 +517,4 @@
 
           RETURN
         END SUBROUTINE vl_test_string
-
+END MODULE TH5VL

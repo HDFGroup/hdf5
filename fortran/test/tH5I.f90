@@ -26,12 +26,16 @@
 !  identifier_test
 !
 !*****
+MODULE TH5I
+
+CONTAINS
 
     SUBROUTINE identifier_test(cleanup, total_error)
 
 !   This subroutine tests following functionalities: h5iget_type_f
 
    USE HDF5 ! This module contains all necessary modules
+   USE TH5_MISC
 
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
@@ -311,3 +315,5 @@
 
      RETURN
      END SUBROUTINE identifier_test
+
+END MODULE TH5I

@@ -27,7 +27,9 @@
 !
 !
 !*****
+MODULE TH5A
 
+CONTAINS
     SUBROUTINE attribute_test(cleanup, total_error)
 
 !   This subroutine tests following functionalities:
@@ -36,7 +38,7 @@
 !
 
      USE HDF5 ! This module contains all necessary modules
-
+     USE TH5_MISC
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
      INTEGER, INTENT(OUT) :: total_error
@@ -100,7 +102,7 @@
      CHARACTER(LEN=35), DIMENSION(2) ::  aread_data ! Buffer to put read back
                                                ! string attr data
      CHARACTER ::  attr_character_data = 'A'
-     REAL(KIND=Fortran_DOUBLE),  DIMENSION(1) ::  attr_double_data = 3.459
+     REAL(KIND=Fortran_DOUBLE),  DIMENSION(1) ::  attr_double_data = 3.459D0
      REAL,         DIMENSION(1) ::  attr_real_data = 4.0
      INTEGER,      DIMENSION(1) ::  attr_integer_data = 5
      INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
@@ -127,6 +129,7 @@
      !data buffers
      !
      INTEGER, DIMENSION(NX,NY) :: data_in
+     LOGICAL :: differ
 
 
      !
@@ -516,7 +519,8 @@
      data_dims(1) = 1
      CALL h5aread_f(attr3_id, H5T_NATIVE_DOUBLE, aread_double_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
-     IF (aread_double_data(1) .NE. 3.459 ) THEN
+     CALL compare_floats(aread_double_data(1), 3.459D0, differ)
+     IF (differ) THEN
          WRITE(*,*) "Read back double attrbute is wrong", aread_double_data(1)
          total_error = total_error + 1
      END IF
@@ -526,7 +530,8 @@
      data_dims(1) = 1
      CALL h5aread_f(attr4_id, H5T_NATIVE_REAL, aread_real_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
-     IF (aread_real_data(1) .NE. 4.0 ) THEN
+     CALL compare_floats(aread_real_data(1), 4.0, differ) 
+     IF (differ) THEN
          WRITE(*,*) "Read back real attrbute is wrong ", aread_real_data
          total_error = total_error + 1
      END IF
@@ -624,3 +629,4 @@
 
      RETURN
      END SUBROUTINE attribute_test
+END MODULE TH5A

@@ -27,6 +27,10 @@
 !
 !*****
 
+MODULE TH5G
+
+CONTAINS
+
     SUBROUTINE group_test(cleanup, total_error)
 
 !   This subroutine tests following functionalities:
@@ -35,6 +39,7 @@
 !   h5gget_comment_f
 
      USE HDF5 ! This module contains all necessary modules
+     USE TH5_MISC
 
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
@@ -254,3 +259,5 @@
           if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
               CALL check("h5_cleanup_f", error, total_error)
   END SUBROUTINE group_test
+
+END MODULE TH5G

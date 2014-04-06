@@ -33,10 +33,14 @@
 !  dataspace_basic_test
 !
 !*****
+MODULE TH5S
+
+CONTAINS
 
         SUBROUTINE dataspace_basic_test(cleanup, total_error)
 
         USE HDF5 ! This module contains all necessary modules
+        USE TH5_MISC
 
           IMPLICIT NONE
           LOGICAL, INTENT(IN)  :: cleanup
@@ -289,3 +293,4 @@
           RETURN
         END SUBROUTINE dataspace_basic_test
 
+END MODULE TH5S

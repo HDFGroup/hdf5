@@ -28,18 +28,62 @@
 !
 !*****
 
+MODULE TH5_MISC
+
+
+INTERFACE compare_floats
+   MODULE PROCEDURE compare_floats_4
+   MODULE PROCEDURE compare_floats_8
+END INTERFACE
+
+CONTAINS
+
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: compare_floats_4
+!DEC$endif
+SUBROUTINE compare_floats_4(val1, val2, stat)
+  INTEGER, PARAMETER :: sp = SELECTED_REAL_KIND(6, 37) !should map to REAL*4 on most modern processors
+  REAL(sp) :: val1, val2
+  LOGICAL, INTENT(OUT) :: stat 
+  REAL(sp) :: EPS4 = 1.E-06
+  stat = .TRUE.
+  IF (ABS(val1 - val2) .LE. EPS4) THEN
+  stat = .FALSE.
+  ENDIF
+  RETURN
+END SUBROUTINE  compare_floats_4
+
+
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: compare_floats_8
+!DEC$endif
+SUBROUTINE compare_floats_8(val1, val2, stat)
+  INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(15, 307) !should map to REAL*8 on most modern processors
+  REAL(dp) :: val1, val2
+  LOGICAL, INTENT(OUT) :: stat 
+  REAL(dp) :: EPS8 = 1.D-12
+  stat = .TRUE.
+  IF (ABS(val1 - val2) .LE. EPS8) THEN
+  stat = .FALSE.
+  ENDIF
+  RETURN
+END SUBROUTINE  compare_floats_8
+
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: verify_real_kind_7
 !DEC$endif
 SUBROUTINE verify_real_kind_7(string,value,correct_value,total_error)
   USE HDF5
-	  
   INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_4) !should map to REAL*4 on most modern processors
   CHARACTER(LEN=*) :: string
   REAL(real_kind_7) :: value, correct_value
   INTEGER :: total_error
-  IF (value .NE. correct_value) THEN
+  LOGICAL :: differ
+  CALL compare_floats(value, correct_value, differ)
+  IF (differ) THEN
      total_error=total_error+1
      WRITE(*,*) "ERROR: INCORRECT REAL VALIDATION ", string
   ENDIF
@@ -121,7 +165,8 @@ SUBROUTINE verify_Fortran_INTEGER_4(string,value,correct_value,total_error)
   USE HDF5
   INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(Fortran_INTEGER_4)  ! should map to INTEGER*4 on most modern processors	
   CHARACTER(LEN=*) :: string
-  INTEGER(int_kind_8) :: value, correct_value, total_error
+  INTEGER(int_kind_8) :: value, correct_value
+  INTEGER :: total_error
   IF (value .NE. correct_value) THEN
      total_error=total_error+1
      WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
@@ -356,4 +401,4 @@ SUBROUTINE h5_env_nocleanup_f(HDF5_NOCLEANUP)
   ENDIF
 
 END SUBROUTINE h5_env_nocleanup_f
-
+END MODULE TH5_MISC

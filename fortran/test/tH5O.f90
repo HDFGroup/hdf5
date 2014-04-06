@@ -26,9 +26,13 @@
 !  test_h5o, test_h5o_link, test_h5o_plist
 !
 !*****
+MODULE TH5O
+
+CONTAINS
 
 SUBROUTINE test_h5o(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -54,6 +58,7 @@ END SUBROUTINE test_h5o
 SUBROUTINE test_h5o_link(total_error)
 
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: total_error
@@ -66,7 +71,6 @@ SUBROUTINE test_h5o_link(total_error)
   INTEGER(HID_T) :: fapl_id
   INTEGER(HID_T) :: lcpl_id
   INTEGER(HID_T) :: ocpypl_id
-  INTEGER(HID_T) :: mem_space_id, file_space_id, xfer_prp
   CHARACTER(LEN=11), PARAMETER :: TEST_FILENAME = 'TestFile.h5'
   INTEGER, PARAMETER :: TEST6_DIM1 = 2, TEST6_DIM2 = 5
 !EP  INTEGER(HSIZE_T), DIMENSION(1:2), PARAMETER :: dims = (/TEST6_DIM1,TEST6_DIM2/)
@@ -74,11 +78,11 @@ SUBROUTINE test_h5o_link(total_error)
 !EP  INTEGER, DIMENSION(1:TEST6_DIM1,1:TEST6_DIM2) :: wdata, rdata
   INTEGER, DIMENSION(TEST6_DIM1,TEST6_DIM2) :: wdata, rdata
 
-  INTEGER, PARAMETER :: TRUE = 1, FALSE = 0
+  INTEGER, PARAMETER :: TRUE = 1
 
   LOGICAL :: committed ! /* Whether the named datatype is committed 
 
-  INTEGER :: i, n, j
+  INTEGER :: i, j
   INTEGER ::  error  ! /* Value returned from API calls 
 
   CHARACTER(LEN=14) :: NAME_DATATYPE_SIMPLE="H5T_NATIVE_INT"
@@ -91,8 +95,7 @@ SUBROUTINE test_h5o_link(total_error)
   INTEGER          , PARAMETER :: dim0     = 4
 
   INTEGER(HSIZE_T), DIMENSION(1:1)    :: dims2 = (/dim0/) ! size read/write buffer
-  INTEGER         , DIMENSION(1:dim0) :: wdata2, &  ! Write buffer 
-                                         rdata2     ! Read buffer
+  INTEGER         , DIMENSION(1:dim0) :: wdata2   ! Write buffer 
   LOGICAL :: link_exists
   CHARACTER(LEN=8)  :: chr_exact
   CHARACTER(LEN=10) :: chr_lg
@@ -576,6 +579,7 @@ END SUBROUTINE test_h5o_link
 SUBROUTINE test_h5o_plist(total_error)
 
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: total_error
@@ -789,3 +793,5 @@ SUBROUTINE test_h5o_plist(total_error)
   CALL check("H5Pclose_f", error, total_error)
 
 END SUBROUTINE test_h5o_plist
+
+END MODULE TH5O

@@ -36,10 +36,14 @@
 !  
 !
 !*****
+MODULE TH5SSELECT
+
+CONTAINS
 
   SUBROUTINE test_select_hyperslab(cleanup, total_error)
 
     USE HDF5 ! This module contains all necessary modules
+    USE TH5_MISC
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN) :: cleanup
@@ -319,6 +323,7 @@
   SUBROUTINE test_select_element(cleanup, total_error)
 
     USE HDF5 ! This module contains all necessary modules
+    USE TH5_MISC
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
@@ -695,6 +700,7 @@
 
   SUBROUTINE test_basic_select(cleanup, total_error)
     USE HDF5 ! This module contains all necessary modules
+    USE TH5_MISC
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
@@ -804,8 +810,6 @@
      !
      INTEGER :: error
      INTEGER(HSIZE_T), DIMENSION(3) :: data_dims
-
-     INTEGER :: i
 
      !
      !initialize the coord array to give the selected points' position
@@ -1033,6 +1037,7 @@
 
 SUBROUTINE test_select_point(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules 
+  USE TH5_MISC
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -1073,10 +1078,10 @@ SUBROUTINE test_select_point(cleanup, total_error)
 !!$               *tbuf;       /* temporary buffer pointer */
   INTEGER :: i,j;        !/* Counters */
 !    struct pnt_iter pi;     /* Custom Pointer iterator struct */
-  INTEGER :: error		!/* Generic return value		*/
+  INTEGER :: error    !/* Generic return value		*/
   CHARACTER(LEN=9) :: filename = 'h5s_hyper'
   CHARACTER(LEN=80) :: fix_filename 
-  CHARACTER(LEN=1), DIMENSION(1:SPACE2_DIM1,1:SPACE2_DIM2) :: wbuf, rbuf
+  CHARACTER(LEN=1), DIMENSION(1:SPACE2_DIM1,1:SPACE2_DIM2) :: wbuf
 
   CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
   IF (error .NE. 0) THEN
@@ -1357,11 +1362,11 @@ END SUBROUTINE test_select_point
 !**
 !****************************************************************/
 
-SUBROUTINE test_select_combine(cleanup, total_error)
+SUBROUTINE test_select_combine(total_error)
   USE HDF5 ! This module contains all necessary modules 
+  USE TH5_MISC
   
   IMPLICIT NONE
-  LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(OUT) :: total_error
 
   INTEGER, PARAMETER :: SPACE7_RANK = 2
@@ -1779,11 +1784,11 @@ END SUBROUTINE test_select_combine
 !**
 !****************************************************************/
 
-SUBROUTINE test_select_bounds(cleanup, total_error)
+SUBROUTINE test_select_bounds(total_error)
   USE HDF5 ! This module contains all necessary modules 
+  USE TH5_MISC
   
   IMPLICIT NONE
-  LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(OUT) :: total_error
 
   INTEGER, PARAMETER :: SPACE11_RANK=2
@@ -1991,3 +1996,5 @@ SUBROUTINE test_select_bounds(cleanup, total_error)
   CALL check("h5sclose_f", error, total_error)
 
 END SUBROUTINE test_select_bounds
+
+END MODULE TH5SSELECT

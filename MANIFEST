@@ -363,6 +363,7 @@
 ./fortran/test/tH5G_1_8.f90
 ./fortran/test/tH5I.f90
 ./fortran/test/tH5L_F03.f90
+./fortran/test/tH5MISC_1_8.f90
 ./fortran/test/tH5O.f90
 ./fortran/test/tH5O_F03.f90
 ./fortran/test/tH5P_F03.f90
@@ -374,6 +375,9 @@
 ./fortran/test/tH5T.f90
 ./fortran/test/tH5VL.f90
 ./fortran/test/tH5Z.f90
+./fortran/test/tHDF5_1_8.f90
+./fortran/test/tHDF5_F03.f90
+./fortran/test/tHDF5.f90
 
 ./fortran/testpar/Makefile.am
 ./fortran/testpar/Makefile.in

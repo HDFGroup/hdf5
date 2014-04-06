@@ -14,23 +14,6 @@
 
 @SET_MAKE@
 
-#
-# Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
-# All rights reserved.
-#
-# This file is part of HDF5.  The full HDF5 copyright notice, including
-# terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
-#
-# HDF5-Fortran test/Makefile(.in)
-#
-
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -138,16 +121,15 @@ fflush2_OBJECTS = $(am_fflush2_OBJECTS)
 fflush2_LDADD = $(LDADD)
 fflush2_DEPENDENCIES = libh5test_fortran.la $(LIBH5TEST) $(LIBH5F) \
 	$(LIBHDF5)
-am_fortranlib_test_OBJECTS =  \
-	fortranlib_test-fortranlib_test.$(OBJEXT) \
-	fortranlib_test-tH5F.$(OBJEXT) fortranlib_test-tH5D.$(OBJEXT) \
-	fortranlib_test-tH5R.$(OBJEXT) fortranlib_test-tH5S.$(OBJEXT) \
-	fortranlib_test-tH5T.$(OBJEXT) fortranlib_test-tH5VL.$(OBJEXT) \
-	fortranlib_test-tH5Z.$(OBJEXT) \
+am_fortranlib_test_OBJECTS = fortranlib_test-tH5F.$(OBJEXT) \
+	fortranlib_test-tH5D.$(OBJEXT) fortranlib_test-tH5R.$(OBJEXT) \
+	fortranlib_test-tH5S.$(OBJEXT) fortranlib_test-tH5T.$(OBJEXT) \
+	fortranlib_test-tH5VL.$(OBJEXT) fortranlib_test-tH5Z.$(OBJEXT) \
 	fortranlib_test-tH5Sselect.$(OBJEXT) \
 	fortranlib_test-tH5P.$(OBJEXT) fortranlib_test-tH5A.$(OBJEXT) \
 	fortranlib_test-tH5I.$(OBJEXT) fortranlib_test-tH5G.$(OBJEXT) \
-	fortranlib_test-tH5E.$(OBJEXT)
+	fortranlib_test-tH5E.$(OBJEXT) fortranlib_test-tHDF5.$(OBJEXT) \
+	fortranlib_test-fortranlib_test.$(OBJEXT)
 fortranlib_test_OBJECTS = $(am_fortranlib_test_OBJECTS)
 fortranlib_test_LDADD = $(LDADD)
 fortranlib_test_DEPENDENCIES = libh5test_fortran.la $(LIBH5TEST) \
@@ -156,24 +138,26 @@ fortranlib_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=FC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(FCLD) \
 	$(fortranlib_test_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-am_fortranlib_test_1_8_OBJECTS = fortranlib_test_1_8.$(OBJEXT) \
-	tH5F.$(OBJEXT) tH5O.$(OBJEXT) tH5A_1_8.$(OBJEXT) \
-	tH5G_1_8.$(OBJEXT)
+am_fortranlib_test_1_8_OBJECTS = tH5F.$(OBJEXT) tH5O.$(OBJEXT) \
+	tH5A_1_8.$(OBJEXT) tH5G_1_8.$(OBJEXT) tH5MISC_1_8.$(OBJEXT) \
+	tHDF5_1_8.$(OBJEXT) fortranlib_test_1_8.$(OBJEXT)
 fortranlib_test_1_8_OBJECTS = $(am_fortranlib_test_1_8_OBJECTS)
 fortranlib_test_1_8_LDADD = $(LDADD)
 fortranlib_test_1_8_DEPENDENCIES = libh5test_fortran.la $(LIBH5TEST) \
 	$(LIBH5F) $(LIBHDF5)
-am__fortranlib_test_F03_SOURCES_DIST = fortranlib_test_F03.f90 \
-	tH5F.f90 tH5E_F03.f90 tH5F_F03.f90 tH5L_F03.f90 tH5O_F03.f90 \
-	tH5P_F03.f90 tH5T_F03.f90
-@FORTRAN_2003_CONDITIONAL_F_TRUE@am_fortranlib_test_F03_OBJECTS = fortranlib_test_F03.$(OBJEXT) \
+am__fortranlib_test_F03_SOURCES_DIST = tH5F.f90 tH5E_F03.f90 \
+	tH5F_F03.f90 tH5L_F03.f90 tH5O_F03.f90 tH5P_F03.f90 \
+	tH5T_F03.f90 tHDF5_F03.f90 fortranlib_test_F03.f90
+@FORTRAN_2003_CONDITIONAL_F_TRUE@am_fortranlib_test_F03_OBJECTS =  \
 @FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5F.$(OBJEXT) \
 @FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5E_F03.$(OBJEXT) \
 @FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5F_F03.$(OBJEXT) \
 @FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5L_F03.$(OBJEXT) \
 @FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5O_F03.$(OBJEXT) \
 @FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5P_F03.$(OBJEXT) \
-@FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5T_F03.$(OBJEXT)
+@FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5T_F03.$(OBJEXT) \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@	tHDF5_F03.$(OBJEXT) \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@	fortranlib_test_F03.$(OBJEXT)
 fortranlib_test_F03_OBJECTS = $(am_fortranlib_test_F03_OBJECTS)
 fortranlib_test_F03_LDADD = $(LDADD)
 fortranlib_test_F03_DEPENDENCIES = libh5test_fortran.la $(LIBH5TEST) \
@@ -763,15 +747,14 @@ libh5test_fortran_la_SOURCES = tf.f90 t.c
 # Automake will complain about this without the following workaround.
 fortranlib_test_FCFLAGS = $(AM_FCFLAGS)
 fortranlib_test_CFLAGS = $(AM_CFLAGS)
-fortranlib_test_SOURCES = fortranlib_test.f90 \
-        tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 \
-        tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90
+fortranlib_test_SOURCES = tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 \
+        tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90 tHDF5.f90 fortranlib_test.f90
 
-fortranlib_test_1_8_SOURCES = fortranlib_test_1_8.f90 \
-        tH5F.f90 tH5O.f90 tH5A_1_8.f90 tH5G_1_8.f90
+fortranlib_test_1_8_SOURCES = tH5F.f90 tH5O.f90 tH5A_1_8.f90 tH5G_1_8.f90 tH5MISC_1_8.f90 tHDF5_1_8.f90\
+        fortranlib_test_1_8.f90
 
-@FORTRAN_2003_CONDITIONAL_F_TRUE@fortranlib_test_F03_SOURCES = fortranlib_test_F03.f90 \
-@FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5F.f90 tH5E_F03.f90 tH5F_F03.f90 tH5L_F03.f90 tH5O_F03.f90 tH5P_F03.f90 tH5T_F03.f90
+@FORTRAN_2003_CONDITIONAL_F_TRUE@fortranlib_test_F03_SOURCES = tH5F.f90 tH5E_F03.f90 tH5F_F03.f90 tH5L_F03.f90 \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@        tH5O_F03.f90 tH5P_F03.f90 tH5T_F03.f90 tHDF5_F03.f90 fortranlib_test_F03.f90
 
 fflush1_SOURCES = fflush1.f90
 fflush2_SOURCES = fflush2.f90
@@ -920,12 +903,6 @@ distclean-compile:
 .f90.lo:
 	$(AM_V_FC)$(LTFCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
 
-fortranlib_test-fortranlib_test.o: fortranlib_test.f90
-	$(AM_V_FC)$(FC) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-fortranlib_test.o $(FCFLAGS_f90) `test -f 'fortranlib_test.f90' || echo '$(srcdir)/'`fortranlib_test.f90
-
-fortranlib_test-fortranlib_test.obj: fortranlib_test.f90
-	$(AM_V_FC)$(FC) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-fortranlib_test.obj $(FCFLAGS_f90) `if test -f 'fortranlib_test.f90'; then $(CYGPATH_W) 'fortranlib_test.f90'; else $(CYGPATH_W) '$(srcdir)/fortranlib_test.f90'; fi`
-
 fortranlib_test-tH5F.o: tH5F.f90
 	$(AM_V_FC)$(FC) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5F.o $(FCFLAGS_f90) `test -f 'tH5F.f90' || echo '$(srcdir)/'`tH5F.f90
 
@@ -1003,6 +980,18 @@ fortranlib_test-tH5E.o: tH5E.f90
 
 fortranlib_test-tH5E.obj: tH5E.f90
 	$(AM_V_FC)$(FC) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5E.obj $(FCFLAGS_f90) `if test -f 'tH5E.f90'; then $(CYGPATH_W) 'tH5E.f90'; else $(CYGPATH_W) '$(srcdir)/tH5E.f90'; fi`
+
+fortranlib_test-tHDF5.o: tHDF5.f90
+	$(AM_V_FC)$(FC) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tHDF5.o $(FCFLAGS_f90) `test -f 'tHDF5.f90' || echo '$(srcdir)/'`tHDF5.f90
+
+fortranlib_test-tHDF5.obj: tHDF5.f90
+	$(AM_V_FC)$(FC) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tHDF5.obj $(FCFLAGS_f90) `if test -f 'tHDF5.f90'; then $(CYGPATH_W) 'tHDF5.f90'; else $(CYGPATH_W) '$(srcdir)/tHDF5.f90'; fi`
+
+fortranlib_test-fortranlib_test.o: fortranlib_test.f90
+	$(AM_V_FC)$(FC) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-fortranlib_test.o $(FCFLAGS_f90) `test -f 'fortranlib_test.f90' || echo '$(srcdir)/'`fortranlib_test.f90
+
+fortranlib_test-fortranlib_test.obj: fortranlib_test.f90
+	$(AM_V_FC)$(FC) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-fortranlib_test.obj $(FCFLAGS_f90) `if test -f 'fortranlib_test.f90'; then $(CYGPATH_W) 'fortranlib_test.f90'; else $(CYGPATH_W) '$(srcdir)/fortranlib_test.f90'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -1400,6 +1389,25 @@ uninstall-am:
 	mostlyclean-local pdf pdf-am ps ps-am recheck tags tags-am \
 	uninstall uninstall-am
 
+
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+#
+# HDF5-Fortran test/Makefile(.in)
+#
+# Autoconf cannot figure out dependencies between modules; disable parallel make
+.NOTPARALLEL:
 
 # List all build rules defined by HDF5 Makefiles as "PHONY" targets here.
 # This tells the Makefiles that these targets are not files to be built but

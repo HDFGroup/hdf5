@@ -34,7 +34,6 @@
 ! *****************************************
 ! ***        H 5 P   T E S T S
 ! *****************************************
-
 MODULE test_genprop_cls_cb1_mod
 
   ! Callback subroutine for test_genprop_class_callback
@@ -70,6 +69,10 @@ CONTAINS
 
 END MODULE test_genprop_cls_cb1_mod
 
+MODULE TH5P_F03
+
+CONTAINS
+
 !/*-------------------------------------------------------------------------
 ! * Function:	test_create
 ! *
@@ -90,6 +93,7 @@ END MODULE test_genprop_cls_cb1_mod
 SUBROUTINE test_create(total_error)
 
   USE HDF5 
+  USE TH5_MISC
   USE ISO_C_BINDING
   IMPLICIT NONE
 
@@ -97,8 +101,7 @@ SUBROUTINE test_create(total_error)
   INTEGER(HID_T) :: fapl
 
   INTEGER(hid_t) :: file=-1, space=-1, dcpl=-1, comp_type_id=-1
-  INTEGER(hid_t) :: dset1=-1, dset2=-1, dset3=-1, dset4=-1, dset5=-1, &
-       dset6=-1, dset7=-1, dset8=-1, dset9=-1
+  INTEGER(hid_t) :: dset9=-1
   INTEGER(hsize_t), DIMENSION(1:5), PARAMETER :: cur_size = (/2, 8, 8, 4, 2/)
   INTEGER(hsize_t), DIMENSION(1:5), PARAMETER :: ch_size= (/1, 1, 1, 4, 1/)
   CHARACTER(LEN=14) :: filename ='test_create.h5'
@@ -112,15 +115,10 @@ SUBROUTINE test_create(total_error)
   END TYPE comp_datatype
 
   TYPE(comp_datatype), TARGET :: rd_c, fill_ctype
-
-  INTEGER(SIZE_T) :: type_sizei  ! Size of the integer datatype 
-  INTEGER(SIZE_T) :: type_sizer  ! Size of the real datatype 
-  INTEGER(SIZE_T) :: type_sized  ! Size of the double datatype 
-  INTEGER(SIZE_T) :: type_sizec  ! Size of the double datatype
-  INTEGER(SIZE_T) :: sizeof_compound ! total size of compound
   INTEGER :: error
   INTEGER(SIZE_T) :: h5off
   TYPE(C_PTR) :: f_ptr
+  LOGICAL :: differ1, differ2
   
   !/*
   ! * Create a file.
@@ -166,7 +164,7 @@ SUBROUTINE test_create(total_error)
   CALL H5Pget_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f",error, total_error)
 
-  fill_ctype%y = 4444.
+  fill_ctype%y = 4444.D0
   fill_ctype%z = 'S'
   fill_ctype%a = 5555.
   fill_ctype%x = 55
@@ -207,10 +205,12 @@ SUBROUTINE test_create(total_error)
   CALL H5Pget_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f", error, total_error)
 
-  IF( rd_c%a .NE. fill_ctype%a .OR. &
-       rd_c%y .NE. fill_ctype%y .OR. &
-       rd_c%x .NE. fill_ctype%x .OR. &
-       rd_c%z .NE. fill_ctype%z )THEN
+  CALL compare_floats(rd_c%a, fill_ctype%a, differ1)
+  CALL compare_floats(rd_c%y, fill_ctype%y, differ2)
+  IF( differ1 .OR. &
+      differ2 .OR. &
+      rd_c%x .NE. fill_ctype%x .OR. &
+      rd_c%z .NE. fill_ctype%z )THEN
 
      PRINT*,"***ERROR: Returned wrong fill value"
      total_error = total_error + 1
@@ -242,6 +242,7 @@ SUBROUTINE test_genprop_class_callback(total_error)
   !
 
   USE HDF5
+  USE TH5_MISC
   USE ISO_C_BINDING
   USE test_genprop_cls_cb1_mod
   IMPLICIT NONE
@@ -261,8 +262,8 @@ SUBROUTINE test_genprop_class_callback(total_error)
   TYPE(cb_struct), TARGET :: crt_cb_struct, cls_cb_struct
 
   CHARACTER(LEN=7) :: CLASS1_NAME = "Class 1"
-  TYPE(C_FUNPTR) :: f1, f3, f5
-  TYPE(C_PTR) :: f2, f4, f6
+  TYPE(C_FUNPTR) :: f1, f5
+  TYPE(C_PTR) :: f2, f6
 
   CHARACTER(LEN=10) :: PROP1_NAME = "Property 1"
   INTEGER(SIZE_T) :: PROP1_SIZE = 10
@@ -379,6 +380,7 @@ END SUBROUTINE test_genprop_class_callback
 SUBROUTINE test_h5p_file_image(total_error)
 
   USE HDF5
+  USE TH5_MISC
   USE, INTRINSIC :: iso_c_binding
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
@@ -451,6 +453,7 @@ END SUBROUTINE test_h5p_file_image
 SUBROUTINE external_test_offset(cleanup,total_error)
 
   USE ISO_C_BINDING
+  USE TH5_MISC
   USE HDF5 ! This module contains all necessary modules
 
   IMPLICIT NONE
@@ -547,7 +550,7 @@ SUBROUTINE external_test_offset(cleanup,total_error)
 
   CALL h5sclose_f(hs_space, error)
   CALL check("h5sclose_f", error, total_error)
-  DO i = hs_start(1)+1, hs_start(1)+hs_count(1)
+  DO i = INT(hs_start(1))+1, INT(hs_start(1)+hs_count(1))
      IF(whole(i) .NE. i-1)THEN
         WRITE(*,*) "Incorrect value(s) read."
         total_error =  total_error + 1
@@ -575,3 +578,4 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   CALL check("h5_cleanup_f", error, total_error)
 
 END SUBROUTINE external_test_offset
+END MODULE TH5P_F03
