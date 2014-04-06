@@ -33,7 +33,7 @@
 //		H5Object is H5File is not an HDF5 object, and renaming H5Object
 //		to H5Location will risk breaking user applications.
 //		-BMR
-
+//	Apr 2, 2014: Added wrapper getObjName for H5Iget_name 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
@@ -49,6 +49,12 @@ class H5_DLLCPP H5Object : public H5Location {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Copy constructor: makes copy of an H5Object object.
 	H5Object(const H5Object& original);
+
+	// Gets the name of this HDF5 object, i.e., Group, DataSet, or
+	// DataType.
+	ssize_t getObjName(char *obj_name, size_t buf_size = 0) const;
+	ssize_t getObjName(H5std_string& obj_name, size_t len = 0) const;
+	H5std_string getObjName() const;
 
 	// Noop destructor.
 	virtual ~H5Object();

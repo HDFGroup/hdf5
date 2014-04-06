@@ -327,7 +327,7 @@ ssize_t Attribute::getName(char* attr_name, size_t buf_size) const
     {
 	throw AttributeIException("Attribute::getName", "Attribute must have a name, name length is 0");
     }
-
+    // Return length of the name
     return(name_size);
 }
 
@@ -357,7 +357,7 @@ H5std_string Attribute::getName() const
     {
 	throw AttributeIException("Attribute::getName", "Attribute must have a name, name length is 0");
     }
-    // If attribute's name exists, calls C routine again to get it
+    // Attribute's name exists, retrieve it
     else if (name_size > 0)
     {
         char* name_C = new char[name_size+1];  // temporary C-string
@@ -391,7 +391,7 @@ H5std_string Attribute::getName() const
 // Programmer	Binh-Minh Ribler - Nov, 2001
 // Modification
 //	Mar 2014 - BMR
-//		Revised to allow buf_size to be skipped
+//		Revised to allow the argument "len" to be skipped
 //--------------------------------------------------------------------------
 ssize_t Attribute::getName(H5std_string& attr_name, size_t len) const
 {

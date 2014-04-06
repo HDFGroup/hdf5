@@ -742,13 +742,12 @@ cerr << "test_compound_7 in catch" << endl;
  *
  *-------------------------------------------------------------------------
  */
-#define	COMPFILE	"tcompound_types.h5"
+const H5std_string COMPFILE("tcompound_types.h5");
 static void test_compound_set_size()
 {
     typedef struct {
 	int a, b, c[4], d, e;
     } src_typ_t;
-    src_typ_t	  *s_ptr;
 
     // Output message about test being performed
     SUBTEST("Setting Size on Compound Datatype");
@@ -867,4 +866,5 @@ extern "C"
 #endif
 void cleanup_compound()
 {
+    HDremove(COMPFILE.c_str());
 }   // cleanup_file

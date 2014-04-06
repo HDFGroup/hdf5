@@ -292,6 +292,7 @@ static void test_attr_getname()
 	HDmemset(fattr1_name, 0, buf_size+1);
 	ssize_t name_size = 0; // actual length of attribute name
 	name_size = fattr1.getName(fattr1_name, buf_size+1);
+	verify_val(name_size, FATTR1_NAME.length(), "Attribute::getName", __LINE__, __FILE__);
 	verify_val((const char*)fattr1_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
 	delete []fattr1_name;
 
@@ -302,6 +303,7 @@ static void test_attr_getname()
 	fattr1_name = new char[buf_size+1];
 	HDmemset(fattr1_name, 0, buf_size+1);
 	name_size = fattr1.getName(fattr1_name, buf_size+1);
+	verify_val(name_size, FATTR1_NAME.length(), "Attribute::getName", __LINE__, __FILE__);
 	verify_val((const char*)fattr1_name, (const char*)short_name, "Attribute::getName", __LINE__, __FILE__);
 	delete []fattr1_name;
 
@@ -1590,6 +1592,10 @@ extern "C"
 #endif
 void cleanup_attr()
 {
-    //HDremove(FILENAME.c_str());
+    HDremove(FILE_BASIC.c_str());
+    HDremove(FILE_COMPOUND.c_str());
+    HDremove(FILE_SCALAR.c_str());
+    HDremove(FILE_MULTI.c_str());
+    HDremove(FILE_DTYPE.c_str());
 }
 
