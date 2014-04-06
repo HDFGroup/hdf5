@@ -271,7 +271,7 @@ CONTAINS
                                          !  H5P_ROOT_F
                                          !  H5P_FILE_CREATE_F
                                          !  H5P_FILE_ACCESS_F
-                                         !  H5PE_DATASET_CREATE_F 
+                                         !  H5P_DATASET_CREATE_F 
                                          !  H5P_DATASET_XFER_F
                                          !  H5P_FILE_MOUNT_F
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
