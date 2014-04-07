@@ -21,7 +21,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src, test, and c++/src directories
-INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/c++/src
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/c++/src
 
 # Shared C++ libraries aren't universally supported.
 if CXX_SHARED_CONDITIONAL
@@ -51,5 +51,8 @@ mostlyclean-local:
 	@if test -d ii_files; then                                       \
 	  $(RM) -rf ii_files;                                           \
 	fi
+# Temporary files
+CHECK_CLEANFILES+=tattr_multi.h5 tfattrs.h5 tattr_scalar.h5 tattr_compound.h5 \
+	tattr_dtype.h5 tattr_basic.h5
 
 include $(top_srcdir)/config/conclude.am

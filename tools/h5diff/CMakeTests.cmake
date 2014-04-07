@@ -255,7 +255,7 @@
   #
   # Overwrite system dependent files (Windows)
   #
-  if (WIN32 AND NOT CYGWIN)
+  if (WIN32)
     add_custom_command (
         TARGET     h5diff
         POST_BUILD
@@ -282,7 +282,7 @@
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_104w.txt ${PROJECT_BINARY_DIR}/testfiles/h5diff_104.txt
     )
-  endif (WIN32 AND NOT CYGWIN)
+  endif (WIN32)
   
 ##############################################################################
 ##############################################################################

@@ -21,7 +21,7 @@
 
 include $(top_srcdir)/config/commence.am
 
-INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs.  These are our main targets.
 #

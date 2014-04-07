@@ -21,7 +21,7 @@
 
 include $(top_srcdir)/config/commence.am
 
-INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
