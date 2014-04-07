@@ -728,7 +728,7 @@ TRACE = perl $(top_srcdir)/bin/trace
 # *.clog are from the MPE option.
 
 # Temporary files
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 *.raw
 
 # The Fortran test library
 noinst_LTLIBRARIES = libh5test_fortran.la
@@ -1303,14 +1303,14 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
+clean-am: clean-checkPROGRAMS clean-generic clean-libtool clean-local \
 	clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-tags
+	distclean-local distclean-tags
 
 dvi: dvi-am
 
@@ -1355,7 +1355,8 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
-maintainer-clean-am: distclean-am maintainer-clean-generic
+maintainer-clean-am: distclean-am maintainer-clean-generic \
+	maintainer-clean-local
 
 mostlyclean: mostlyclean-am
 
@@ -1376,15 +1377,16 @@ uninstall-am:
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local check check-TESTS \
 	check-am clean clean-checkPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES cscopelist-am ctags ctags-am distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
+	clean-local clean-noinstLTLIBRARIES cscopelist-am ctags \
+	ctags-am distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-local distclean-tags distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic maintainer-clean-local mostlyclean \
 	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
 	mostlyclean-local pdf pdf-am ps ps-am recheck tags tags-am \
 	uninstall uninstall-am
@@ -1419,6 +1421,17 @@ uninstall-am:
 
 help:
 	@$(top_srcdir)/bin/makehelp
+
+# Fortran module files can have different extensions and different names
+# (e.g., different capitalizations) on different platforms.  Write rules
+# for them explicitly rather than trying to teach automake about them.
+# They should be installed as headers and removed during clean.
+maintainer-clean-local: clean-local
+distclean-local: clean-local
+clean-local:
+	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	  $(RM) *.$(F9XMODEXT);                                         \
+	fi
 
 # fflush2 depends on files created by fflush1
 fflush2.chkexe_: fflush1.chkexe_

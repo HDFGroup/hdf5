@@ -79,8 +79,19 @@ fflush2_SOURCES=fflush2.f90
 LDADD=libh5test_fortran.la $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 
 # Temporary files
-CHECK_CLEANFILES+=*.h5
+CHECK_CLEANFILES+=*.h5 *.raw
 MOSTLYCLEANFILES=*.tmp
+
+# Fortran module files can have different extensions and different names
+# (e.g., different capitalizations) on different platforms.  Write rules
+# for them explicitly rather than trying to teach automake about them.
+# They should be installed as headers and removed during clean.
+maintainer-clean-local: clean-local
+distclean-local: clean-local
+clean-local:
+	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	  $(RM) *.$(F9XMODEXT);                                         \
+	fi
 
 # Mark this directory as part of the Fortran API (this affects output
 # from tests in conclude.am)
