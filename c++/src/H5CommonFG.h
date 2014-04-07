@@ -64,6 +64,12 @@ class H5_DLLCPP CommonFG {
 	ssize_t getObjnameByIdx(hsize_t idx, char* name, size_t size) const;
 	ssize_t getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) const;
 
+	// Retrieves the type of an object in this file or group, given the
+	// object's name
+	H5O_type_t childObjType(const H5std_string& objname) const;
+	H5O_type_t childObjType(const char* objname) const;
+	H5O_type_t childObjType(hsize_t index, H5_index_t index_type=H5_INDEX_NAME, H5_iter_order_t order=H5_ITER_INC, const char* objname=".") const;
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Returns the type of an object in this group, given the
 	// object's index.
