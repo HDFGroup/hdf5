@@ -44,7 +44,7 @@ CONTAINS
 
           IMPLICIT NONE
           LOGICAL, INTENT(IN)  :: cleanup
-          INTEGER, INTENT(OUT) :: total_error
+          INTEGER, INTENT(INOUT) :: total_error
 
           CHARACTER(LEN=10), PARAMETER :: filename1 = "basicspace" ! File1 name
           CHARACTER(LEN=9), PARAMETER :: filename2 = "copyspace"  ! File2 name

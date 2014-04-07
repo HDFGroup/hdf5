@@ -36,7 +36,7 @@ SUBROUTINE test_h5o(cleanup, total_error)
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   INTEGER :: error
 
   CALL test_h5o_plist(total_error) ! Test object creation properties
@@ -61,7 +61,7 @@ SUBROUTINE test_h5o_link(total_error)
   USE TH5_MISC
 
   IMPLICIT NONE
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
 
   INTEGER(HID_T) :: file_id
   INTEGER(HID_T) :: group_id
@@ -582,7 +582,7 @@ SUBROUTINE test_h5o_plist(total_error)
   USE TH5_MISC
 
   IMPLICIT NONE
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
 
   INTEGER(hid_t) :: fid                        ! HDF5 File ID      
   INTEGER(hid_t) :: grp, dset, dtype, dspace   ! Object identifiers 

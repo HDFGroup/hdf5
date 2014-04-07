@@ -41,7 +41,7 @@ SUBROUTINE external_test(cleanup, total_error)
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   
   CHARACTER(LEN=8), PARAMETER :: filename = "external"
   CHARACTER(LEN=80) :: fix_filename
@@ -158,7 +158,7 @@ SUBROUTINE multi_file_test(cleanup, total_error)
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN) :: cleanup
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   
   CHARACTER(LEN=9), PARAMETER :: filename = "multidset" ! File name
   CHARACTER(LEN=80) :: fix_filename
@@ -428,7 +428,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   
   CHARACTER(LEN=14), PARAMETER :: filename="chunk_cache"
   CHARACTER(LEN=80) :: fix_filename

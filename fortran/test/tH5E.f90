@@ -44,7 +44,7 @@ CONTAINS
 
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
-     INTEGER, INTENT(OUT) :: total_error
+     INTEGER, INTENT(INOUT) :: total_error
 
      CHARACTER(LEN=6), PARAMETER :: filename = "etestf" ! File name
      CHARACTER(LEN=80) :: fix_filename

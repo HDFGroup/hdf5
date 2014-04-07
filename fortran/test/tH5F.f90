@@ -1,4 +1,4 @@
-!****h* root/fortran/test/tH5F.f90
+!***rh* root/fortran/test/tH5F.f90
 !
 ! NAME
 !  tH5F.f90
@@ -43,7 +43,7 @@ CONTAINS
         USE TH5_MISC
           IMPLICIT NONE
           LOGICAL, INTENT(IN)  :: cleanup
-          INTEGER, INTENT(OUT) :: total_error
+          INTEGER, INTENT(INOUT) :: total_error
 
           !
           !the respective filename is "mount1.h5" and "mount2.h5"
@@ -249,7 +249,6 @@ CONTAINS
           do i = 1, NX
               do j = 1, NY
                   IF (data_out(i,j) .NE. data_in(i, j)) THEN
-                      write(*, *) "mounting test error occured"
                   END IF
               end do
           end do
@@ -300,7 +299,7 @@ CONTAINS
         USE TH5_MISC
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup
-          INTEGER, INTENT(OUT) :: total_error
+          INTEGER, INTENT(INOUT) :: total_error
 
           !
           CHARACTER(LEN=6), PARAMETER :: filename = "reopen"
@@ -487,7 +486,7 @@ CONTAINS
          USE TH5_MISC
           IMPLICIT NONE
           LOGICAL, INTENT(IN)  :: cleanup
-          INTEGER, INTENT(OUT) :: total_error
+          INTEGER, INTENT(INOUT) :: total_error
 
           !
           !file names are "plist1.h5" and "plist2.h5"
@@ -587,7 +586,7 @@ CONTAINS
         USE TH5_MISC
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup
-          INTEGER, INTENT(OUT) :: total_error
+          INTEGER, INTENT(INOUT) :: total_error
           INTEGER              :: error
 
           !
@@ -717,7 +716,7 @@ CONTAINS
           IMPLICIT NONE
           CHARACTER(*), INTENT(IN) :: filename
           LOGICAL, INTENT(IN) :: cleanup
-          INTEGER, INTENT(OUT) :: total_error
+          INTEGER, INTENT(INOUT) :: total_error
           INTEGER              :: error
           !
           CHARACTER(LEN=3), PARAMETER :: grpname = "grp"

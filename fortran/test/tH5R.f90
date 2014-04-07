@@ -40,7 +40,7 @@ SUBROUTINE refobjtest(cleanup, total_error)
   USE TH5_MISC
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
 
   CHARACTER(LEN=9), PARAMETER :: filename = "reference"
   CHARACTER(LEN=80) :: fix_filename
@@ -250,7 +250,7 @@ SUBROUTINE refregtest(cleanup, total_error)
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
 
   CHARACTER(LEN=6), PARAMETER :: filename = "Refreg"
   CHARACTER(LEN=80) :: fix_filename

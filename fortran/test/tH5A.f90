@@ -41,7 +41,7 @@ CONTAINS
      USE TH5_MISC
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
-     INTEGER, INTENT(OUT) :: total_error
+     INTEGER, INTENT(INOUT) :: total_error
 
      CHARACTER(LEN=5), PARAMETER :: filename = "atest"    !File name
      CHARACTER(LEN=80) :: fix_filename
@@ -519,7 +519,12 @@ CONTAINS
      data_dims(1) = 1
      CALL h5aread_f(attr3_id, H5T_NATIVE_DOUBLE, aread_double_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
-     CALL compare_floats(aread_double_data(1), 3.459D0, differ)
+     differ = .FALSE.
+     if(abs(aread_double_data(1)- 3.459D0) .ge. 1.D-08) then
+      differ = .TRUE.
+     endif
+     ! This is a temporary fix
+     !CALL compare_floats(aread_double_data(1), 3.459D0, differ)
      IF (differ) THEN
          WRITE(*,*) "Read back double attrbute is wrong", aread_double_data(1)
          total_error = total_error + 1

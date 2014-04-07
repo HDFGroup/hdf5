@@ -47,7 +47,7 @@ CONTAINS
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN) :: cleanup
-    INTEGER, INTENT(OUT) :: total_error
+    INTEGER, INTENT(INOUT) :: total_error
 
     CHARACTER(LEN=7), PARAMETER :: filename = "tselect"
     CHARACTER(LEN=80) :: fix_filename
@@ -327,7 +327,7 @@ CONTAINS
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
-    INTEGER, INTENT(OUT) :: total_error
+    INTEGER, INTENT(INOUT) :: total_error
 
     !
     !the dataset1 is stored in file "copy1.h5"
@@ -704,7 +704,7 @@ CONTAINS
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
-    INTEGER, INTENT(OUT) :: total_error
+    INTEGER, INTENT(INOUT) :: total_error
 
      !
      !the dataset is stored in file "testselect.h5"
@@ -1041,7 +1041,7 @@ SUBROUTINE test_select_point(cleanup, total_error)
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   INTEGER(HID_T) :: xfer_plist
   
   INTEGER, PARAMETER :: SPACE1_DIM1=3
@@ -1367,7 +1367,7 @@ SUBROUTINE test_select_combine(total_error)
   USE TH5_MISC
   
   IMPLICIT NONE
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
 
   INTEGER, PARAMETER :: SPACE7_RANK = 2
   INTEGER, PARAMETER :: SPACE7_DIM1 = 10
@@ -1789,7 +1789,7 @@ SUBROUTINE test_select_bounds(total_error)
   USE TH5_MISC
   
   IMPLICIT NONE
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
 
   INTEGER, PARAMETER :: SPACE11_RANK=2
   INTEGER, PARAMETER :: SPACE11_DIM1=100

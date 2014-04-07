@@ -528,7 +528,12 @@ CONTAINS
      CALL h5dread_f(dset_id, dt3_id, double_member_out, data_dims, error)
          CALL check("h5dread_f", error, total_error)
          do i = 1, dimsize
-            CALL compare_floats(double_member_out(i), double_member(i), differ)
+            differ = .FALSE.
+            if (abs(double_member_out(i) - double_member(i)) .ge. 1.D-08) THEN
+            differ = .TRUE.
+            endif
+            ! This is  temorary fix until we figure out how to compare floats
+            !CALL compare_floats(double_member_out(i), double_member(i), differ)
             if (differ) then
                 write(*,*) " Wrong double precision data is read back "
                 total_error = total_error + 1
