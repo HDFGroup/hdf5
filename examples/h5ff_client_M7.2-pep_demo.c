@@ -20,7 +20,6 @@ int use_daos_lustre = 1;   // Use DAOS Lustre - defaults to yes
 int verbose = 0;           // Verbose output - defaults to no
 int pause = 0;             // Pause to allow out-of-band space check - defaults to 0.
 int time_reads = 0;        // Time reads after container re-open
-int workaround = 1;        // Enable Q7 workaround for race conditions (added barriers) - defaults to 1.
 
 /* global variables and macros used to make timing easier */
 struct timeval tv_start;
@@ -44,7 +43,7 @@ void usage( const char* );
 int main( int argc, char **argv ) {
 
    /* MPI */
-   int my_rank, comm_size;
+    int my_rank, comm_size, acquire_rank;
    int provided;
 
    /* Container */
@@ -88,6 +87,11 @@ int main( int argc, char **argv ) {
       fprintf( stderr, "APP-r%d: Number of MPI processes = %d\n", my_rank, comm_size );
    }
 
+   if(comm_size > 3)
+       acquire_rank = 3;
+   else
+       acquire_rank = 0;
+
    /* Parse command-line options controlling behavior */
    if ( parse_options( argc, argv, my_rank ) != 0 ) {
       exit( 1 );
@@ -105,7 +109,11 @@ int main( int argc, char **argv ) {
 
    /* Get read context */
    version = 1;
-   rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET; assert( version == 1 );
+   if ( my_rank == 0 )
+       rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET; assert( version == 1 );
+   MPI_Bcast(&rc_id1, 1, MPI_INT, 0, MPI_COMM_WORLD );
+   if(0 != my_rank)
+       rc_id = H5RCcreate(file_id, version); ASSERT_RET;
 
    /****
     * Transaction 2: Rank 0 creates three H5Groups in the H5File 
@@ -149,7 +157,8 @@ int main( int argc, char **argv ) {
    } 
 
    /* Release the read handle and close read context on previous CV  */
-   ret = H5RCrelease( rc_id1, H5_EVENT_STACK_NULL); ASSERT_RET;
+   if ( my_rank == 0 )
+       ret = H5RCrelease( rc_id1, H5_EVENT_STACK_NULL); ASSERT_RET;
    ret = H5RCclose( rc_id1 ); ASSERT_RET;
 
    if ( verbose && ( my_rank == 0 ) ) print_container_contents( file_id, rc_id2, "/", my_rank );
@@ -205,24 +214,29 @@ int main( int argc, char **argv ) {
    version = 3;
    if ( verbose ) fprintf( stderr, "APP-r%d: rc %lu - Try to acquire\n", my_rank, version );
 
-   if ( workaround ) MPI_Barrier( MPI_COMM_WORLD );      
-   H5E_BEGIN_TRY { 
-      rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-      while ( rc_id3 < 0 ) {
-         if ( verbose ) fprintf( stderr, "APP-r%d: rc %lu - Failed to acquire; sleep then retry\n", my_rank, version );
-         sleep( 1 );
-         rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-      }
-   } H5E_END_TRY;
-   assert( rc_id3 >= 0 ); assert ( version == 3 );
+   if(acquire_rank == my_rank) {
+       H5E_BEGIN_TRY { 
+           rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
+           while ( rc_id3 < 0 ) {
+               if ( verbose ) fprintf( stderr, "APP-r%d: rc %lu - Failed to acquire; sleep then retry\n", my_rank, version );
+               sleep( 1 );
+               rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
+           }
+       } H5E_END_TRY;
+       assert( rc_id3 >= 0 ); assert ( version == 3 );
+   }
+
+   MPI_Bcast( &version, 1, MPI_UINT64_T, acquire_rank, MPI_COMM_WORLD );
+   if(acquire_rank != my_rank)
+       rc_id3 = H5RCcreate(file_id, version); ASSERT_RET;
    fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
 
    /* Release the read handle and close read context on previous CV  */
    if ( my_rank == 0 ) {
       ret = H5RCrelease( rc_id2, H5_EVENT_STACK_NULL); ASSERT_RET;
+      fprintf( stderr, "APP-r%d: rc 2 - Released\n", my_rank );
    }
    ret = H5RCclose( rc_id2 ); ASSERT_RET;
-   fprintf( stderr, "APP-r%d: rc 2 - Released\n", my_rank );
 
    /**** 
     * Rank 0 persists CV 3 
@@ -231,13 +245,11 @@ int main( int argc, char **argv ) {
     * from the BB to persistent storage.                           
     ****/
 
-   if ( workaround ) MPI_Barrier( MPI_COMM_WORLD );      
-   if ( my_rank == 0 ) {
+   if ( my_rank == acquire_rank ) {
       fprintf( stderr, "APP-r%d: cv 3 - Persist\n", my_rank );
       ret = H5RCpersist(rc_id3, H5_EVENT_STACK_NULL); ASSERT_RET; 
       print_container_contents( file_id, rc_id3, "/", my_rank );
    }
-   if ( workaround ) MPI_Barrier( MPI_COMM_WORLD );      
 
    if ( verbose ) print_container_contents( file_id, rc_id3, "/", my_rank );
 
@@ -273,24 +285,29 @@ int main( int argc, char **argv ) {
    /* If verbose mode, get RC 4 and print CV 4 */
    if ( verbose ) {
       version = 4;
-      fprintf( stderr, "APP-r%d: rc %lu - Try to acquire\n", my_rank, version );
-
-      if ( workaround ) MPI_Barrier( MPI_COMM_WORLD );      
-      H5E_BEGIN_TRY { 
-         rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-         while ( rc_id4 < 0 ) {
-            fprintf( stderr, "APP-r%d: rc %lu - Failed to acquire; sleep then retry\n", my_rank, version );
-            sleep( 1 );
-            rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-         }
-      } H5E_END_TRY;
-      assert( rc_id4 >= 0 ); assert ( version == 4 );
-      fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
-
+      if ( my_rank == 0 ) {
+          fprintf( stderr, "APP-r%d: rc %lu - Try to acquire\n", my_rank, version );
+          H5E_BEGIN_TRY { 
+              rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
+              while ( rc_id4 < 0 ) {
+                  fprintf( stderr, "APP-r%d: rc %lu - Failed to acquire; sleep then retry\n", my_rank, version );
+                  sleep( 1 );
+                  rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
+              }
+          } H5E_END_TRY;
+          assert( rc_id4 >= 0 ); assert ( version == 4 );
+          fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
+      }
+      MPI_Bcast( &version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
+      if ( my_rank != 0 )
+          rc_id4 = H5RCcreate(file_id, version); ASSERT_RET;
       print_container_contents( file_id, rc_id4, "/", my_rank );
 
       /* Release the read handle and close read context on CV 4 */
-      ret = H5RCrelease( rc_id4, H5_EVENT_STACK_NULL); ASSERT_RET;
+      MPI_Barrier( MPI_COMM_WORLD );
+      if ( my_rank == 0 ) {
+          ret = H5RCrelease( rc_id4, H5_EVENT_STACK_NULL); ASSERT_RET;
+      }
       ret = H5RCclose( rc_id4 ); ASSERT_RET;
       fprintf( stderr, "APP-r%d: rc 4 - Released\n", my_rank );
    }
@@ -326,22 +343,27 @@ int main( int argc, char **argv ) {
 
    /* Acquire a read handle for container version and create a read context. */
    version = 5;
-   if ( verbose ) fprintf( stderr, "APP-r%d: rc %lu - Try to acquire\n", my_rank, version );
 
-   if ( workaround ) MPI_Barrier( MPI_COMM_WORLD );      
-   H5E_BEGIN_TRY { 
-      rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-      while ( rc_id5 < 0 ) {
-         if ( verbose ) fprintf( stderr, "APP-r%d: rc %lu - Failed to acquire; sleep then retry\n", my_rank, version );
-         sleep( 1 );
-         rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
-      }
-   } H5E_END_TRY;
-   assert( rc_id5 >= 0 ); assert ( version == 5 );
-   fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
+   if ( my_rank == 0 ) {
+       if ( verbose ) fprintf( stderr, "APP-r%d: rc %lu - Try to acquire\n", my_rank, version );
+       H5E_BEGIN_TRY { 
+           rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
+           while ( rc_id5 < 0 ) {
+               if ( verbose ) fprintf( stderr, "APP-r%d: rc %lu - Failed to acquire; sleep then retry\n", my_rank, version );
+               sleep( 1 );
+               rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
+           }
+       } H5E_END_TRY;
+       assert( rc_id5 >= 0 ); assert ( version == 5 );
+       fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
+   }
+   MPI_Bcast( &version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
+   if ( my_rank != 0 )
+       rc_id5 = H5RCcreate(file_id, version); ASSERT_RET;
 
    /* Release the read handle and close read context on CV 3 */
-   ret = H5RCrelease( rc_id3, H5_EVENT_STACK_NULL); ASSERT_RET;
+   if ( my_rank == acquire_rank )
+       ret = H5RCrelease( rc_id3, H5_EVENT_STACK_NULL); ASSERT_RET;
    ret = H5RCclose( rc_id3 ); ASSERT_RET;
    fprintf( stderr, "APP-r%d: rc 3 - Released \n", my_rank );
 
@@ -366,7 +388,6 @@ int main( int argc, char **argv ) {
       MPI_Barrier( MPI_COMM_WORLD );
    }
 
-   if ( workaround ) MPI_Barrier( MPI_COMM_WORLD );      
    if ( my_rank == comm_size-1 ) {
       fprintf( stderr, "APP-r%d: cv 5 - Persist\n", my_rank );
       ret = H5RCpersist(rc_id5, H5_EVENT_STACK_NULL); ASSERT_RET; 
@@ -375,7 +396,6 @@ int main( int argc, char **argv ) {
       evict_group_members_updates( file_id, rc_id5, "/G-prefetched", my_rank );
       evict_group_members_updates( file_id, rc_id5, "/G-stored", my_rank );
    }
-   if ( workaround ) MPI_Barrier( MPI_COMM_WORLD );      
 
    /* Optionally, pause to show change in BB space using out-of-band check. All ranks paused. */
    if ( pause )  { 
@@ -392,7 +412,9 @@ int main( int argc, char **argv ) {
    if ( verbose ) print_container_contents( file_id, rc_id5, "/", my_rank ); 
 
    /* Release the read handle and close read context on CV 5 */
-   ret = H5RCrelease( rc_id5, H5_EVENT_STACK_NULL); ASSERT_RET;
+   MPI_Barrier( MPI_COMM_WORLD );
+   if ( my_rank == 0 )
+       ret = H5RCrelease( rc_id5, H5_EVENT_STACK_NULL); ASSERT_RET;
    ret = H5RCclose( rc_id5 ); ASSERT_RET;
    fprintf( stderr, "APP-r%d: rc 5 - Released \n", my_rank );
 
@@ -1234,9 +1256,6 @@ parse_options( int argc, char** argv, int my_rank ) {
             case 'v':   
                verbose = 1;
                break;
-            case 'w':   
-               workaround = 0;
-               break;
             default: 
                if ( my_rank == 0 ) {
                   usage( app );
@@ -1258,5 +1277,4 @@ usage( const char* app ) {
    printf( "\tp: pause to allow out-of-band BB space check\n" );
    printf( "\tt: time reads after container re-open, performing read sequence 'repeat_cnt' times\n" );
    printf( "\tv: verbose output\n" );
-   printf( "\tw: disable barriers added as Q7 workaround to race conditions\n" );
 }
