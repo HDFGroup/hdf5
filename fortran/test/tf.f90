@@ -24,71 +24,44 @@
 !
 ! CONTAINS SUBROUTINES
 !  write_test_status, check, verify, verifyLogical, verifyString, h5_fixname_f,
-!  h5_cleanup_f, h5_exit_f, h5_env_nocleanup_f
+!  h5_cleanup_f, h5_exit_f, h5_env_nocleanup_f,dreal_eqv
 !
 !*****
-
 MODULE TH5_MISC
 
-
-INTERFACE compare_floats
-   MODULE PROCEDURE compare_floats_4
-   MODULE PROCEDURE compare_floats_8
-END INTERFACE
+  INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(15, 307)
 
 CONTAINS
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: compare_floats_4
+!DEC$attributes dllexport :: dreal_eq
 !DEC$endif
-SUBROUTINE compare_floats_4(val1, val2, stat)
-  INTEGER, PARAMETER :: sp = SELECTED_REAL_KIND(6, 37) !should map to REAL*4 on most modern processors
-  REAL(sp) :: val1, val2
-  LOGICAL, INTENT(OUT) :: stat 
-  REAL(sp) :: EPS4 = 1.E-06
-  stat = .TRUE.
-  IF (ABS(val1 - val2) .LE. EPS4) THEN
-  stat = .FALSE.
-  ENDIF
-  RETURN
-END SUBROUTINE  compare_floats_4
+  LOGICAL FUNCTION dreal_eq(a,b)
 
+    ! Check if two double precision reals are equivalent
+    REAL(dp), INTENT (in):: a,b
+    REAL(dp), PARAMETER :: eps = 1.e-8
+    dreal_eq = ABS(a-b) .LT. eps
 
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: compare_floats_8
-!DEC$endif
-SUBROUTINE compare_floats_8(val1, val2, stat)
-  INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(15, 307) !should map to REAL*8 on most modern processors
-  REAL(dp) :: val1, val2
-  LOGICAL, INTENT(OUT) :: stat 
-  REAL(dp) :: EPS8 = 1.D-12
-  stat = .TRUE.
-  IF (ABS(val1 - val2) .LE. EPS8) THEN
-  stat = .FALSE.
-  ENDIF
-  RETURN
-END SUBROUTINE  compare_floats_8
+  END FUNCTION dreal_eq
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: verify_real_kind_7
 !DEC$endif
-SUBROUTINE verify_real_kind_7(string,value,correct_value,total_error)
-  USE HDF5
-  INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_4) !should map to REAL*4 on most modern processors
-  CHARACTER(LEN=*) :: string
-  REAL(real_kind_7) :: value, correct_value
-  INTEGER :: total_error
-  LOGICAL :: differ
-  CALL compare_floats(value, correct_value, differ)
-  IF (differ) THEN
-     total_error=total_error+1
-     WRITE(*,*) "ERROR: INCORRECT REAL VALIDATION ", string
-  ENDIF
-  RETURN
-END SUBROUTINE verify_real_kind_7
+  SUBROUTINE verify_real_kind_7(string,value,correct_value,total_error)
+    USE HDF5
+    INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_4) !should map to REAL*4 on most modern processors
+    CHARACTER(LEN=*) :: string
+    REAL(real_kind_7) :: value, correct_value
+    INTEGER :: total_error
+    IF (.NOT.dreal_eq( REAL(value,dp), REAL(correct_value, dp)) ) THEN
+       total_error=total_error+1
+       WRITE(*,*) "ERROR: INCORRECT REAL VALIDATION ", string
+    ENDIF
+    RETURN
+  END SUBROUTINE verify_real_kind_7
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -96,7 +69,7 @@ END SUBROUTINE verify_real_kind_7
 !DEC$endif
   SUBROUTINE write_test_status( test_result, test_title, total_error)
 
-! Writes the results of the tests
+    ! Writes the results of the tests
 
     IMPLICIT NONE
 
@@ -109,11 +82,11 @@ END SUBROUTINE verify_real_kind_7
 
 ! Controls the output style for reporting test results
 
-  CHARACTER(LEN=8) :: error_string
-  CHARACTER(LEN=8), PARAMETER :: success = ' PASSED '
-  CHARACTER(LEN=8), PARAMETER :: failure = '*FAILED*'
-  CHARACTER(LEN=8), PARAMETER :: skip    = '--SKIP--'
-
+    CHARACTER(LEN=8) :: error_string
+    CHARACTER(LEN=8), PARAMETER :: success = ' PASSED '
+    CHARACTER(LEN=8), PARAMETER :: failure = '*FAILED*'
+    CHARACTER(LEN=8), PARAMETER :: skip    = '--SKIP--'
+    
 
     error_string = failure
     IF (test_result ==  0) THEN
@@ -133,76 +106,76 @@ END SUBROUTINE verify_real_kind_7
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: check
 !DEC$endif
-SUBROUTINE check(string,error,total_error)
-  CHARACTER(LEN=*) :: string
-  INTEGER :: error, total_error
-  IF (error .LT. 0) THEN
-     total_error=total_error+1
-     WRITE(*,*) string, " FAILED"
-  ENDIF
-  RETURN
-END SUBROUTINE check
+  SUBROUTINE check(string,error,total_error)
+    CHARACTER(LEN=*) :: string
+    INTEGER :: error, total_error
+    IF (error .LT. 0) THEN
+       total_error=total_error+1
+       WRITE(*,*) string, " FAILED"
+    ENDIF
+    RETURN
+  END SUBROUTINE check
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: verify
 !DEC$endif
-SUBROUTINE verify(string,value,correct_value,total_error)
-  CHARACTER(LEN=*) :: string
-  INTEGER :: value, correct_value, total_error
-  IF (value .NE. correct_value) THEN
-     total_error=total_error+1
-     WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
-  ENDIF
-  RETURN
-END SUBROUTINE verify
+  SUBROUTINE VERIFY(string,value,correct_value,total_error)
+    CHARACTER(LEN=*) :: string
+    INTEGER :: value, correct_value, total_error
+    IF (value .NE. correct_value) THEN
+       total_error=total_error+1
+       WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
+    ENDIF
+    RETURN
+  END SUBROUTINE verify
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: verify_Fortran_INTEGER_4
 !DEC$endif
-SUBROUTINE verify_Fortran_INTEGER_4(string,value,correct_value,total_error)
-  USE HDF5
-  INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(Fortran_INTEGER_4)  ! should map to INTEGER*4 on most modern processors	
-  CHARACTER(LEN=*) :: string
-  INTEGER(int_kind_8) :: value, correct_value
-  INTEGER :: total_error
-  IF (value .NE. correct_value) THEN
-     total_error=total_error+1
-     WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
-  ENDIF
-  RETURN
-END SUBROUTINE verify_Fortran_INTEGER_4
+  SUBROUTINE verify_Fortran_INTEGER_4(string,value,correct_value,total_error)
+    USE HDF5
+    INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(Fortran_INTEGER_4)  ! should map to INTEGER*4 on most modern processors	
+    CHARACTER(LEN=*) :: string
+    INTEGER(int_kind_8) :: value, correct_value
+    INTEGER :: total_error
+    IF (value .NE. correct_value) THEN
+       total_error=total_error+1
+       WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
+    ENDIF
+    RETURN
+  END SUBROUTINE verify_Fortran_INTEGER_4
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: verifyLogical
 !DEC$endif
-SUBROUTINE verifyLogical(string,value,correct_value,total_error)
-  CHARACTER(LEN=*) :: string
-  LOGICAL :: value, correct_value
-  INTEGER :: total_error
-  IF (value .NEQV. correct_value) THEN
-     total_error = total_error + 1
-     WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
-  ENDIF
-  RETURN
-END SUBROUTINE verifyLogical
-
+  SUBROUTINE verifyLogical(string,value,correct_value,total_error)
+    CHARACTER(LEN=*) :: string
+    LOGICAL :: value, correct_value
+    INTEGER :: total_error
+    IF (value .NEQV. correct_value) THEN
+       total_error = total_error + 1
+       WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
+    ENDIF
+    RETURN
+  END SUBROUTINE verifyLogical
+  
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: verifyString
 !DEC$endif
-SUBROUTINE verifyString(string, value,correct_value,total_error)
-  CHARACTER*(*) :: string
-  CHARACTER*(*) :: value, correct_value
-  INTEGER :: total_error
-  IF (TRIM(value) .NE. TRIM(correct_value)) THEN
-     total_error = total_error + 1
-     WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
-  ENDIF
-  RETURN
-END SUBROUTINE verifyString
+  SUBROUTINE verifyString(string, value,correct_value,total_error)
+    CHARACTER*(*) :: string
+    CHARACTER*(*) :: value, correct_value
+    INTEGER :: total_error
+    IF (TRIM(value) .NE. TRIM(correct_value)) THEN
+       total_error = total_error + 1
+       WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
+    ENDIF
+    RETURN
+  END SUBROUTINE verifyString
 
 
 !----------------------------------------------------------------------
@@ -225,46 +198,46 @@ END SUBROUTINE verifyString
 !
 !
 !----------------------------------------------------------------------
-SUBROUTINE h5_fixname_f(base_name, full_name, fapl, hdferr)
+  SUBROUTINE h5_fixname_f(base_name, full_name, fapl, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: h5_fixname_f
 !DEC$endif
-  USE H5GLOBAL
-  IMPLICIT NONE
-  CHARACTER(LEN=*), INTENT(IN) :: base_name   ! base name
-  CHARACTER(LEN=*), INTENT(IN) :: full_name   ! full name
-  INTEGER, INTENT(OUT) :: hdferr         ! Error code
-  INTEGER(HID_T), INTENT(IN) :: fapl ! file access property list
+    USE H5GLOBAL
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(IN) :: base_name   ! base name
+    CHARACTER(LEN=*), INTENT(IN) :: full_name   ! full name
+    INTEGER, INTENT(OUT) :: hdferr         ! Error code
+    INTEGER(HID_T), INTENT(IN) :: fapl ! file access property list
 
-  INTEGER(SIZE_T) :: base_namelen ! Length of the base name character string
-  INTEGER(SIZE_T) :: full_namelen ! Length of the full name character string
+    INTEGER(SIZE_T) :: base_namelen ! Length of the base name character string
+    INTEGER(SIZE_T) :: full_namelen ! Length of the full name character string
 !            INTEGER(HID_T) :: fapl_default
 
-  INTERFACE
-     INTEGER FUNCTION h5_fixname_c(base_name, base_namelen, fapl, &
-          full_name, full_namelen)
-       USE H5GLOBAL
-       !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-       !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5_FIXNAME_C':: h5_fixname_c
-       !DEC$ ENDIF
-       !DEC$ATTRIBUTES reference :: base_name
-       !DEC$ATTRIBUTES reference :: full_name
-       CHARACTER(LEN=*), INTENT(IN) :: base_name
-       INTEGER(SIZE_T) :: base_namelen
-       INTEGER(HID_T), INTENT(IN) :: fapl
-       CHARACTER(LEN=*), INTENT(IN) :: full_name
-       INTEGER(SIZE_T) :: full_namelen
-     END FUNCTION h5_fixname_c
-  END INTERFACE
+    INTERFACE
+       INTEGER FUNCTION h5_fixname_c(base_name, base_namelen, fapl, &
+            full_name, full_namelen)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5_FIXNAME_C':: h5_fixname_c
+         !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: base_name
+         !DEC$ATTRIBUTES reference :: full_name
+         CHARACTER(LEN=*), INTENT(IN) :: base_name
+         INTEGER(SIZE_T) :: base_namelen
+         INTEGER(HID_T), INTENT(IN) :: fapl
+         CHARACTER(LEN=*), INTENT(IN) :: full_name
+         INTEGER(SIZE_T) :: full_namelen
+       END FUNCTION h5_fixname_c
+    END INTERFACE
 
-  base_namelen = LEN(base_name)
-  full_namelen = LEN(full_name)
-  hdferr = h5_fixname_c(base_name, base_namelen, fapl, &
-       full_name, full_namelen)
-
-END SUBROUTINE h5_fixname_f
+    base_namelen = LEN(base_name)
+    full_namelen = LEN(full_name)
+    hdferr = h5_fixname_c(base_name, base_namelen, fapl, &
+         full_name, full_namelen)
+  
+  END SUBROUTINE h5_fixname_f
 
 !----------------------------------------------------------------------
 ! Name:		h5_cleanup_f
@@ -285,37 +258,37 @@ END SUBROUTINE h5_fixname_f
 !
 !
 !----------------------------------------------------------------------
-SUBROUTINE h5_cleanup_f(base_name, fapl, hdferr)
+  SUBROUTINE h5_cleanup_f(base_name, fapl, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: h5_cleanup_f
 !DEC$endif
-  USE H5GLOBAL
-  IMPLICIT NONE
-  CHARACTER(LEN=*), INTENT(IN) :: base_name   ! base name
-  INTEGER, INTENT(OUT) :: hdferr         ! Error code
-  INTEGER(HID_T), INTENT(IN) :: fapl ! file access property list
+    USE H5GLOBAL
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(IN) :: base_name   ! base name
+    INTEGER, INTENT(OUT) :: hdferr         ! Error code
+    INTEGER(HID_T), INTENT(IN) :: fapl ! file access property list
+    
+    INTEGER(SIZE_T) :: base_namelen ! Length of the base name character string
 
-  INTEGER(SIZE_T) :: base_namelen ! Length of the base name character string
-
-  INTERFACE
-     INTEGER FUNCTION h5_cleanup_c(base_name, base_namelen, fapl)
-       USE H5GLOBAL
-       !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-       !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5_CLEANUP_C':: h5_cleanup_c
-       !DEC$ ENDIF
-       !DEC$ATTRIBUTES reference :: base_name
-       CHARACTER(LEN=*), INTENT(IN) :: base_name
-       INTEGER(SIZE_T) :: base_namelen
-       INTEGER(HID_T), INTENT(IN) :: fapl
-     END FUNCTION h5_cleanup_c
-  END INTERFACE
-
-  base_namelen = LEN(base_name)
-  hdferr = h5_cleanup_c(base_name, base_namelen, fapl)
-
-END SUBROUTINE h5_cleanup_f
+    INTERFACE
+       INTEGER FUNCTION h5_cleanup_c(base_name, base_namelen, fapl)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5_CLEANUP_C':: h5_cleanup_c
+         !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: base_name
+         CHARACTER(LEN=*), INTENT(IN) :: base_name
+         INTEGER(SIZE_T) :: base_namelen
+         INTEGER(HID_T), INTENT(IN) :: fapl
+       END FUNCTION h5_cleanup_c
+    END INTERFACE
+    
+    base_namelen = LEN(base_name)
+    hdferr = h5_cleanup_c(base_name, base_namelen, fapl)
+    
+  END SUBROUTINE h5_cleanup_f
 
 !----------------------------------------------------------------------
 ! Name:		h5_exit_f
@@ -337,27 +310,27 @@ END SUBROUTINE h5_cleanup_f
 !
 !
 !----------------------------------------------------------------------
-SUBROUTINE h5_exit_f(status)
+  SUBROUTINE h5_exit_f(status)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: h5_exit_f
 !DEC$endif
-  IMPLICIT NONE
-  INTEGER, INTENT(IN) :: status         ! Return code
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: status         ! Return code
 
-  INTERFACE
-     SUBROUTINE h5_exit_c(status)
-       !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-       !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5_EXIT_C':: h5_exit_c
-       !DEC$ ENDIF
-       INTEGER, INTENT(IN) :: status
-     END SUBROUTINE h5_exit_c
-  END INTERFACE
+    INTERFACE
+       SUBROUTINE h5_exit_c(status)
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5_EXIT_C':: h5_exit_c
+         !DEC$ ENDIF
+         INTEGER, INTENT(IN) :: status
+       END SUBROUTINE h5_exit_c
+    END INTERFACE
+    
+    CALL h5_exit_c(status)
 
-  CALL h5_exit_c(status)
-
-END SUBROUTINE h5_exit_f
+  END SUBROUTINE h5_exit_f
 
 !----------------------------------------------------------------------
 ! Name:		h5_env_nocleanup_f
@@ -374,31 +347,29 @@ END SUBROUTINE h5_exit_f
 !               September 30, 2008
 !
 !----------------------------------------------------------------------
-SUBROUTINE h5_env_nocleanup_f(HDF5_NOCLEANUP)
+  SUBROUTINE h5_env_nocleanup_f(HDF5_NOCLEANUP)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: h5_env_nocleanup_f
 !DEC$endif
-  IMPLICIT NONE
-  LOGICAL, INTENT(OUT) :: HDF5_NOCLEANUP ! Return code
-  INTEGER :: status
-
-  INTERFACE
-     SUBROUTINE h5_env_nocleanup_c(status)
-       !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-       !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5_ENV_NOCLEANUP_C':: h5_env_nocleanup_c
-       !DEC$ ENDIF
-       INTEGER :: status
-     END SUBROUTINE h5_env_nocleanup_c
-  END INTERFACE
-
-  CALL h5_env_nocleanup_c(status)
-
-  HDF5_NOCLEANUP = .FALSE.
-  IF(status.EQ.1)THEN
-     HDF5_NOCLEANUP = .TRUE.
-  ENDIF
-
-END SUBROUTINE h5_env_nocleanup_f
+    IMPLICIT NONE
+    LOGICAL, INTENT(OUT) :: HDF5_NOCLEANUP ! Return code
+    INTEGER :: status
+    
+    INTERFACE
+       SUBROUTINE h5_env_nocleanup_c(status)
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5_ENV_NOCLEANUP_C':: h5_env_nocleanup_c
+         !DEC$ ENDIF
+         INTEGER :: status
+       END SUBROUTINE h5_env_nocleanup_c
+    END INTERFACE
+    
+    CALL h5_env_nocleanup_c(status)
+    
+    HDF5_NOCLEANUP = .FALSE.
+    IF(status.EQ.1) HDF5_NOCLEANUP = .TRUE.
+    
+  END SUBROUTINE h5_env_nocleanup_f
 END MODULE TH5_MISC

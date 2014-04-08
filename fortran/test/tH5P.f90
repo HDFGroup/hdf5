@@ -474,8 +474,8 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("H5Pget_chunk_cache_f", error, total_error)
   CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_1), INT(nslots_4), total_error)
   CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_1), INT(nbytes_4), total_error)
-  CALL compare_floats(w0_1, w0_4, differ)
-  IF(differ)THEN
+
+  IF( .NOT.dreal_eq( REAL(w0_1,dp), REAL( w0_4, dp)) ) THEN
      CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
   ENDIF
 
@@ -533,8 +533,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("H5Pget_chunk_cache_f", error, total_error)
   CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
   CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
-  CALL compare_floats(w0_2, w0_4, differ)
-  IF(differ)THEN
+  IF( .NOT.dreal_eq( REAL(w0_2,dp), REAL( w0_4, dp)) ) THEN
      CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
   ENDIF
   CALL H5Pclose_f(dapl2,error) 
@@ -566,8 +565,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("H5Pget_chunk_cache_f", error, total_error)
   CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_3), INT(nslots_4), total_error)
   CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
-  CALL compare_floats(w0_3, w0_4, differ)
-  IF(differ)THEN
+  IF( .NOT.dreal_eq( REAL(w0_3,dp), REAL( w0_4, dp)) ) THEN
      CALL VERIFYlogical("H5Pget_chunk_cache_f4", .TRUE., .FALSE., total_error)
   ENDIF
   CALL H5Pclose_f(dapl2,error)
@@ -587,8 +585,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("H5Pget_chunk_cache_f", error, total_error)
   CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
   CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
-  CALL compare_floats(w0_2, w0_4, differ)
-  IF(differ)THEN
+  IF( .NOT.dreal_eq( REAL(w0_2,dp), REAL( w0_4, dp)) ) THEN
      CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
   ENDIF
   CALL H5Pclose_f(dapl2,error) 
@@ -608,8 +605,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("H5Pget_chunk_cache_f", error, total_error)
   CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
   CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
-  CALL compare_floats(w0_2, w0_4, differ)
-  IF(differ)THEN
+  IF( .NOT.dreal_eq( REAL(w0_2,dp), REAL( w0_4, dp)) ) THEN
      CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
   ENDIF
   ! Don't close dapl2, we will use it in the next section
@@ -646,8 +642,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("H5Pget_chunk_cache_f", error, total_error)
   CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
   CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
-  CALL compare_floats(w0_2, w0_4, differ)
-  IF(differ)THEN
+  IF( .NOT.dreal_eq( REAL(w0_2,dp), REAL( w0_4, dp)) ) THEN
      CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
   ENDIF
 
@@ -672,8 +667,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("H5Pget_chunk_cache_f", error, total_error)
   CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_3), INT(nslots_4), total_error)
   CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
-  CALL compare_floats(w0_3, w0_4, differ)
-  IF(differ)THEN
+  IF( .NOT.dreal_eq( REAL(w0_3,dp), REAL( w0_4, dp)) ) THEN
      CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
   ENDIF
 

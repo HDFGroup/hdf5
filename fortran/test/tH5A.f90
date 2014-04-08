@@ -519,27 +519,21 @@ CONTAINS
      data_dims(1) = 1
      CALL h5aread_f(attr3_id, H5T_NATIVE_DOUBLE, aread_double_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
-     differ = .FALSE.
-     if(abs(aread_double_data(1)- 3.459D0) .ge. 1.D-08) then
-      differ = .TRUE.
-     endif
-     ! This is a temporary fix
-     !CALL compare_floats(aread_double_data(1), 3.459D0, differ)
-     IF (differ) THEN
-         WRITE(*,*) "Read back double attrbute is wrong", aread_double_data(1)
-         total_error = total_error + 1
-     END IF
+
+     IF( .NOT.dreal_eq( REAL(aread_double_data(1),dp), 3.459_dp) )THEN
+        WRITE(*,*) "Read back double attrbute is wrong", aread_double_data(1)
+        total_error = total_error + 1
+     ENDIF
      !
      !read the real attribute data back to memory
      !
      data_dims(1) = 1
      CALL h5aread_f(attr4_id, H5T_NATIVE_REAL, aread_real_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
-     CALL compare_floats(aread_real_data(1), 4.0, differ) 
-     IF (differ) THEN
-         WRITE(*,*) "Read back real attrbute is wrong ", aread_real_data
-         total_error = total_error + 1
-     END IF
+     IF( .NOT.dreal_eq( REAL(aread_real_data(1),dp), 4.0_dp) )THEN
+        WRITE(*,*) "Read back real attrbute is wrong", aread_real_data(1)
+        total_error = total_error + 1
+     ENDIF
      !
      !read the Integer attribute data back to memory
      !

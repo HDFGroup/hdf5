@@ -528,13 +528,7 @@ CONTAINS
      CALL h5dread_f(dset_id, dt3_id, double_member_out, data_dims, error)
          CALL check("h5dread_f", error, total_error)
          do i = 1, dimsize
-            differ = .FALSE.
-            if (abs(double_member_out(i) - double_member(i)) .ge. 1.D-08) THEN
-            differ = .TRUE.
-            endif
-            ! This is  temorary fix until we figure out how to compare floats
-            !CALL compare_floats(double_member_out(i), double_member(i), differ)
-            if (differ) then
+            IF( .NOT.dreal_eq( REAL(double_member_out(i),dp), REAL( double_member(i), dp)) ) THEN
                 write(*,*) " Wrong double precision data is read back "
                 total_error = total_error + 1
             endif
@@ -551,13 +545,12 @@ CONTAINS
      !
      CALL h5dread_f(dset_id, dt4_id, real_member_out, data_dims, error)
          CALL check("h5dread_f", error, total_error)
-         do i = 1, dimsize
-            CALL compare_floats(real_member_out(i), real_member(i), differ)
-            if (differ) then
-                write(*,*) " Wrong real precision data is read back "
-                total_error = total_error + 1
-            endif
-         enddo
+         DO i = 1, dimsize
+            IF( .NOT.dreal_eq( REAL(real_member_out(i),dp), REAL( real_member(i), dp)) ) THEN
+               WRITE(*,*) " Wrong real precision data is read back "
+               total_error = total_error + 1
+            ENDIF
+         ENDDO
      !
      ! *-----------------------------------------------------------------------
      ! * Test encoding and decoding compound datatypes

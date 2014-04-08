@@ -90,7 +90,7 @@ SUBROUTINE test_array_compound_atomic(total_error)
 
   INTEGER :: error    !  Generic RETURN value 
   INTEGER :: namelen
-  LOGICAL :: flag, differ
+  LOGICAL :: flag
 
   TYPE(C_PTR) :: f_ptr ! Needed to pass the pointer, for g95 compiler to work
 
@@ -258,8 +258,7 @@ SUBROUTINE test_array_compound_atomic(total_error)
            PRINT*, 'ERROR: Wrong integer data is read back by H5Dread_f '
            total_error = total_error + 1
         ENDIF
-        CALL compare_floats(wdata(i,j)%f, rdata(i,j)%f, differ)
-        IF(differ)THEN
+        IF( .NOT.dreal_eq( REAL(wdata(i,j)%f,dp), REAL( rdata(i,j)%f, dp)) ) THEN
            PRINT*, 'ERROR: Wrong real data is read back by H5Dread_f '
            total_error = total_error + 1
         ENDIF
@@ -349,7 +348,6 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER(SIZE_T) :: attrlen    ! Length of the attribute string 
 
     TYPE(c_ptr) :: f_ptr
-    LOGICAL :: differ
 
     !  Initialize array data to write 
     DO i = 1, SPACE1_DIM1
@@ -622,8 +620,8 @@ END SUBROUTINE test_array_compound_atomic
              total_error = total_error + 1
           ENDIF
           DO k = 1, ARRAY2_DIM1
-             CALL compare_floats(wdata(i,j)%f(k), rdata(i,j)%f(k), differ)
-             IF(differ)THEN
+             
+             IF(wdata(i,j)%f(k).NE.rdata(i,j)%f(k))THEN
                 PRINT*, 'ERROR: Wrong real array data is read back by H5Dread_f '
                 total_error = total_error + 1
              ENDIF
@@ -722,7 +720,6 @@ END SUBROUTINE test_array_compound_atomic
 
     INTEGER :: error
     TYPE(c_ptr) :: f_ptr
-    LOGICAL :: differ
     
 !     Initialize the data 
 !     ------------------- 
@@ -834,13 +831,11 @@ END SUBROUTINE test_array_compound_atomic
              PRINT*, 'ERROR: Wrong integer data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
-          CALL compare_floats(cf(i)%b(j), cfr(i)%b(j), differ)
-          IF(differ)THEN
+          IF( .NOT.dreal_eq( REAL(cf(i)%b(j),dp), REAL( cfr(i)%b(j), dp)) ) THEN
              PRINT*, 'ERROR: Wrong real data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
-          CALL compare_floats(cf(i)%c(j), cfr(i)%c(j), differ)
-          IF(differ)THEN
+          IF( .NOT.dreal_eq( REAL(cf(i)%c(j),dp), REAL( cfr(i)%c(j), dp)) ) THEN
              PRINT*, 'ERROR: Wrong double data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
@@ -903,8 +898,7 @@ END SUBROUTINE test_array_compound_atomic
 
     DO i = 1, LENGTH
        DO j = 1, ALEN
-          CALL compare_floats(fld(i)%b(j), fldr(i)%b(j), differ)
-          IF(differ)THEN
+          IF( .NOT.dreal_eq( REAL(fld(i)%b(j),dp), REAL( fldr(i)%b(j), dp)) ) THEN
              PRINT*, 'ERROR: Wrong real data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
@@ -935,13 +929,11 @@ END SUBROUTINE test_array_compound_atomic
              PRINT*, 'ERROR: Wrong integer data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
-          CALL compare_floats(cf(i)%b(j), cfr(i)%b(j), differ)
-          IF(differ)THEN
+          IF( .NOT.dreal_eq( REAL(cf(i)%b(j),dp), REAL(cfr(i)%b(j), dp)) ) THEN
              PRINT*, 'ERROR: Wrong real data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
-          CALL compare_floats(cf(i)%c(j), cfr(i)%c(j), differ)
-          IF(differ)THEN
+          IF( .NOT.dreal_eq( REAL(cf(i)%c(j),dp), REAL(cfr(i)%c(j), dp)) ) THEN
              PRINT*, 'ERROR: Wrong double data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
@@ -995,13 +987,11 @@ END SUBROUTINE test_array_compound_atomic
              PRINT*, 'ERROR: Wrong integer data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
-          CALL compare_floats(cf(i)%b(j),cfr(i)%b(j), differ)
-          IF(differ)THEN
+          IF( .NOT.dreal_eq( REAL(cf(i)%b(j),dp), REAL(cfr(i)%b(j), dp)) ) THEN
              PRINT*, 'ERROR: Wrong real data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
-          CALL compare_floats(cf(i)%c(j), cfr(i)%c(j), differ)
-          IF(differ)THEN
+          IF( .NOT.dreal_eq( REAL(cf(i)%c(j),dp), REAL(cfr(i)%c(j), dp)) ) THEN
              PRINT*, 'ERROR: Wrong double data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
@@ -1184,7 +1174,7 @@ END SUBROUTINE test_array_compound_atomic
        CALL verify_Fortran_INTEGER_4("h5kind_to_type2",INT(dset_data_i4(i),int_kind_8),INT(data_out_i4(i),int_kind_8),total_error)
        CALL verify_Fortran_INTEGER_4("h5kind_to_type3",INT(dset_data_i8(i),int_kind_8),INT(data_out_i8(i),int_kind_8),total_error)
        CALL verify_Fortran_INTEGER_4("h5kind_to_type4",INT(dset_data_i16(i),int_kind_8),INT(data_out_i16(i),int_kind_8),total_error)
-
+       
        CALL verify_real_kind_7("h5kind_to_type5",REAL(dset_data_r(i),real_kind_7),REAL(data_out_r(i),real_kind_7),total_error)
        CALL verify_real_kind_7("h5kind_to_type6",REAL(dset_data_r7(i),real_kind_7),REAL(data_out_r7(i),real_kind_7),total_error)
        CALL verify_real_kind_7("h5kind_to_type7",REAL(dset_data_r15(i),real_kind_7),REAL(data_out_r15(i),real_kind_7),total_error)
@@ -3006,7 +2996,6 @@ SUBROUTINE test_nbit(total_error )
   LOGICAL :: status
   INTEGER(hsize_t) :: i, j
   TYPE(C_PTR) :: f_ptr
-  LOGICAL :: differ
 
   ! check to see if filter is available
   CALL H5Zfilter_avail_f(H5Z_FILTER_NBIT_F, status, error)
@@ -3079,8 +3068,7 @@ SUBROUTINE test_nbit(total_error )
   i_loop: DO i = 1, dims(1)
      j_loop: DO j = 1, dims(2)
         IF(.NOT.(orig_data(i,j).EQ.orig_data(i,j))) CYCLE  ! skip IF value is NaN
-        CALL compare_floats(new_data(i,j), orig_data(i,j), differ)
-        IF(differ)THEN
+        IF( .NOT.dreal_eq( REAL(new_data(i,j),dp), REAL( orig_data(i,j), dp)) ) THEN
            total_error = total_error + 1
            WRITE(*,'("    Read different values than written.")')
            WRITE(*,'("    At index ", 2(1X,I0))') i, j
