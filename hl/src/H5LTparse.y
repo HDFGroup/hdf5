@@ -14,12 +14,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 %{
-#include<stdio.h>
-#include<string.h>
-#include<hdf5.h>
+#include <stdio.h>
+#include <string.h>
+#include <hdf5.h>
 
 extern int yylex();
-extern int yyerror(char *);
+extern int yyerror(const char *);
 
 #define STACK_SIZE      16
 
@@ -51,7 +51,7 @@ int asindex = -1;               /*pointer to the top of array stack*/
 
 hbool_t     is_str_size = 0;        /*flag to lexer for string size*/
 hbool_t     is_str_pad = 0;         /*flag to lexer for string padding*/
-H5T_pad_t   str_pad;                /*variable for string padding*/
+H5T_str_t   str_pad;                /*variable for string padding*/
 H5T_cset_t  str_cset;               /*variable for string character set*/
 hbool_t     is_variable = 0;        /*variable for variable-length string*/
 size_t      str_size;               /*variable for string size*/
