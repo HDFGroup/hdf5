@@ -90,7 +90,7 @@ SUBROUTINE test_array_compound_atomic(total_error)
 
   INTEGER :: error    !  Generic RETURN value 
   INTEGER :: namelen
-  LOGICAL :: flag, differ
+  LOGICAL :: flag
 
   TYPE(C_PTR) :: f_ptr ! Needed to pass the pointer, for g95 compiler to work
 
@@ -258,8 +258,7 @@ SUBROUTINE test_array_compound_atomic(total_error)
            PRINT*, 'ERROR: Wrong integer data is read back by H5Dread_f '
            total_error = total_error + 1
         ENDIF
-        CALL compare_floats(wdata(i,j)%f, rdata(i,j)%f, differ)
-        IF(differ)THEN
+        IF( .NOT.( wdata(i,j)%f .REALEQ. rdata(i,j)%f) ) THEN
            PRINT*, 'ERROR: Wrong real data is read back by H5Dread_f '
            total_error = total_error + 1
         ENDIF
@@ -349,7 +348,6 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER(SIZE_T) :: attrlen    ! Length of the attribute string 
 
     TYPE(c_ptr) :: f_ptr
-    LOGICAL :: differ
 
     !  Initialize array data to write 
     DO i = 1, SPACE1_DIM1
@@ -622,8 +620,8 @@ END SUBROUTINE test_array_compound_atomic
              total_error = total_error + 1
           ENDIF
           DO k = 1, ARRAY2_DIM1
-             CALL compare_floats(wdata(i,j)%f(k), rdata(i,j)%f(k), differ)
-             IF(differ)THEN
+             
+             IF(wdata(i,j)%f(k).NE.rdata(i,j)%f(k))THEN
                 PRINT*, 'ERROR: Wrong real array data is read back by H5Dread_f '
                 total_error = total_error + 1
              ENDIF
@@ -722,7 +720,6 @@ END SUBROUTINE test_array_compound_atomic
 
     INTEGER :: error
     TYPE(c_ptr) :: f_ptr
-    LOGICAL :: differ
     
 !     Initialize the data 
 !     ------------------- 
@@ -834,13 +831,12 @@ END SUBROUTINE test_array_compound_atomic
              PRINT*, 'ERROR: Wrong integer data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
-          CALL compare_floats(cf(i)%b(j), cfr(i)%b(j), differ)
-          IF(differ)THEN
+
+          IF( .NOT.(cf(i)%b(j) .REALEQ. cfr(i)%b(j) ) ) THEN
              PRINT*, 'ERROR: Wrong real data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
-          CALL compare_floats(cf(i)%c(j), cfr(i)%c(j), differ)
-          IF(differ)THEN
+          IF( .NOT.(cf(i)%c(j) .REALEQ. cfr(i)%c(j) ) ) THEN
              PRINT*, 'ERROR: Wrong double data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
@@ -903,8 +899,7 @@ END SUBROUTINE test_array_compound_atomic
 
     DO i = 1, LENGTH
        DO j = 1, ALEN
-          CALL compare_floats(fld(i)%b(j), fldr(i)%b(j), differ)
-          IF(differ)THEN
+          IF( .NOT.(fld(i)%b(j) .REALEQ. fldr(i)%b(j) ) ) THEN
              PRINT*, 'ERROR: Wrong real data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
@@ -935,13 +930,11 @@ END SUBROUTINE test_array_compound_atomic
              PRINT*, 'ERROR: Wrong integer data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
-          CALL compare_floats(cf(i)%b(j), cfr(i)%b(j), differ)
-          IF(differ)THEN
+          IF( .NOT.(cf(i)%b(j) .REALEQ. cfr(i)%b(j) ) ) THEN
              PRINT*, 'ERROR: Wrong real data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
-          CALL compare_floats(cf(i)%c(j), cfr(i)%c(j), differ)
-          IF(differ)THEN
+          IF( .NOT.(cf(i)%c(j) .REALEQ. cfr(i)%c(j) ) ) THEN
              PRINT*, 'ERROR: Wrong double data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
@@ -995,13 +988,11 @@ END SUBROUTINE test_array_compound_atomic
              PRINT*, 'ERROR: Wrong integer data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
-          CALL compare_floats(cf(i)%b(j),cfr(i)%b(j), differ)
-          IF(differ)THEN
+          IF( .NOT.(cf(i)%b(j) .REALEQ. cfr(i)%b(j) ) ) THEN
              PRINT*, 'ERROR: Wrong real data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
-          CALL compare_floats(cf(i)%c(j), cfr(i)%c(j), differ)
-          IF(differ)THEN
+          IF( .NOT.(cf(i)%c(j) .REALEQ. cfr(i)%c(j) ) ) THEN
              PRINT*, 'ERROR: Wrong double data is read back by H5Dread_f '
              total_error = total_error + 1
           ENDIF
@@ -3006,7 +2997,6 @@ SUBROUTINE test_nbit(total_error )
   LOGICAL :: status
   INTEGER(hsize_t) :: i, j
   TYPE(C_PTR) :: f_ptr
-  LOGICAL :: differ
 
   ! check to see if filter is available
   CALL H5Zfilter_avail_f(H5Z_FILTER_NBIT_F, status, error)
@@ -3079,8 +3069,7 @@ SUBROUTINE test_nbit(total_error )
   i_loop: DO i = 1, dims(1)
      j_loop: DO j = 1, dims(2)
         IF(.NOT.(orig_data(i,j).EQ.orig_data(i,j))) CYCLE  ! skip IF value is NaN
-        CALL compare_floats(new_data(i,j), orig_data(i,j), differ)
-        IF(differ)THEN
+        IF( .NOT.(new_data(i,j) .REALEQ. orig_data(i,j) ) ) THEN
            total_error = total_error + 1
            WRITE(*,'("    Read different values than written.")')
            WRITE(*,'("    At index ", 2(1X,I0))') i, j
