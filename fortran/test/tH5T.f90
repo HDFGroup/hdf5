@@ -112,7 +112,7 @@ CONTAINS
      INTEGER(HID_T) :: decoded_tid1
 
      INTEGER(HID_T) :: fixed_str1, fixed_str2
-     LOGICAL :: are_equal
+     LOGICAL :: are_equal, differ
      INTEGER(SIZE_T), PARAMETER :: str_size = 10 
      INTEGER(SIZE_T) :: query_size
 
@@ -528,8 +528,13 @@ CONTAINS
      CALL h5dread_f(dset_id, dt3_id, double_member_out, data_dims, error)
          CALL check("h5dread_f", error, total_error)
          do i = 1, dimsize
-            
-            IF( .NOT.(double_member_out(i) .REALEQ. double_member(i)) ) THEN
+            differ = .FALSE.
+            if (abs(double_member_out(i) - double_member(i)) .ge. 1.D-08) THEN
+            differ = .TRUE.
+            endif
+            ! This is  temorary fix until we figure out how to compare floats
+            !CALL compare_floats(double_member_out(i), double_member(i), differ)
+            if (differ) then
                 write(*,*) " Wrong double precision data is read back "
                 total_error = total_error + 1
             endif
@@ -547,10 +552,11 @@ CONTAINS
      CALL h5dread_f(dset_id, dt4_id, real_member_out, data_dims, error)
          CALL check("h5dread_f", error, total_error)
          do i = 1, dimsize
-            IF( .NOT.(real_member_out(i) .REALEQ. real_member(i) ) ) THEN
-               WRITE(*,*) " Wrong real precision data is read back "
-               total_error = total_error + 1
-            ENDIF
+            CALL compare_floats(real_member_out(i), real_member(i), differ)
+            if (differ) then
+                write(*,*) " Wrong real precision data is read back "
+                total_error = total_error + 1
+            endif
          enddo
      !
      ! *-----------------------------------------------------------------------

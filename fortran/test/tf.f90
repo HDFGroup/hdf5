@@ -28,63 +28,13 @@
 !
 !*****
 
-! Define single, double and quadprecision
-
-MODULE h5_kinds
-  INTEGER, PARAMETER :: sp = SELECTED_REAL_KIND(6, 37)
-  INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(15, 307)
-  INTEGER, PARAMETER :: qp = SELECTED_REAL_KIND(33, 4931)
-END MODULE h5_kinds
-
-! Functions for Comparing two REAL numbers that
-! are quad, double and single precision.
-
-MODULE single_test_eqv
-  USE  h5_kinds, ONLY: wp => sp
-  IMPLICIT NONE
-CONTAINS
-  INCLUDE 'tf_include.f90'
-END MODULE single_test_eqv
-
-MODULE double_test_eqv
-  USE h5_kinds, ONLY: wp => dp
-  IMPLICIT NONE
-CONTAINS
-  INCLUDE 'tf_include.f90'
-END MODULE double_test_eqv
-
-MODULE quad_test_eqv
-  USE h5_kinds, ONLY: wp => qp
-  IMPLICIT NONE
-CONTAINS
-  INCLUDE 'tf_include.f90'
-END MODULE quad_test_eqv
-
-! Interface operator for comparing reals 
-
-MODULE generic_eqv
-
-  USE single_test_eqv, ONLY: test_eqv_1 => test_eqv
-  USE double_test_eqv, ONLY: test_eqv_2 => test_eqv
-  USE quad_test_eqv  , ONLY: test_eqv_3 => test_eqv
-  IMPLICIT NONE
-  PRIVATE
-  PUBLIC OPERATOR(.realeq.)
-  
-  INTERFACE OPERATOR(.realeq.)
-     MODULE PROCEDURE test_eqv_1, test_eqv_2, test_eqv_3
-  END INTERFACE
-  
-END MODULE generic_eqv
-
 MODULE TH5_MISC
 
-  USE generic_eqv
 
-  INTERFACE compare_floats
-     MODULE PROCEDURE compare_floats_4
-     MODULE PROCEDURE compare_floats_8
-  END INTERFACE
+INTERFACE compare_floats
+   MODULE PROCEDURE compare_floats_4
+   MODULE PROCEDURE compare_floats_8
+END INTERFACE
 
 CONTAINS
 

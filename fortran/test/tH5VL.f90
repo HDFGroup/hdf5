@@ -226,6 +226,7 @@ CONTAINS
           INTEGER(SIZE_T)  max_len
           INTEGER(HID_T) ::  vl_type_id
           LOGICAL        ::  vl_flag
+          LOGICAL        ::  differ
 
           !
           ! Initialize the vl_int_data array.
@@ -330,10 +331,11 @@ CONTAINS
               CALL check("h5dread_real_f", error, total_error)
               do ih = 1, data_dims(2)
               do jh = 1, len_out(ih)
-                 IF( .NOT.(vl_real_data(jh,ih) .REALEQ. vl_real_data_out(jh,ih)) ) THEN 
-                    total_error = total_error + 1
-                    WRITE(*,*) "h5dread_vl_f returned incorrect data"
-                 ENDIF
+              CALL compare_floats(vl_real_data(jh,ih), vl_real_data_out(jh,ih), differ)  
+              if(differ)  then
+                  total_error = total_error + 1
+                  write(*,*) "h5dread_vl_f returned incorrect data"
+              endif
               enddo
                if (len(ih) .ne. len_out(ih)) then
                   total_error = total_error + 1

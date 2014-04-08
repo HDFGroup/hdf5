@@ -118,6 +118,7 @@ SUBROUTINE test_create(total_error)
   INTEGER :: error
   INTEGER(SIZE_T) :: h5off
   TYPE(C_PTR) :: f_ptr
+  LOGICAL :: differ1, differ2
   
   !/*
   ! * Create a file.
@@ -204,8 +205,20 @@ SUBROUTINE test_create(total_error)
   CALL H5Pget_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f", error, total_error)
 
-  IF( .NOT.(rd_c%a .REALEQ. fill_ctype%a) .OR. &
-      .NOT.(rd_c%y .REALEQ. fill_ctype%y) .OR. &
+  differ1 = .FALSE.
+  differ2 = .FALSE.
+  if(abs(rd_c%a - fill_ctype%a) .ge. 1.D-08) then
+   differ1 = .TRUE.
+  endif
+  ! This is a workaround; needs to be fixed
+  !CALL compare_floats(rd_c%a, fill_ctype%a, differ1)
+  if(abs(rd_c%y - fill_ctype%y) .ge. 1.D-08) then
+   differ2 = .TRUE.
+  endif
+  ! This is a workaround; needs to be fixed
+  !CALL compare_floats(rd_c%y, fill_ctype%y, differ2)
+  IF( differ1 .OR. &
+      differ2 .OR. &
       rd_c%x .NE. fill_ctype%x .OR. &
       rd_c%z .NE. fill_ctype%z )THEN
 
