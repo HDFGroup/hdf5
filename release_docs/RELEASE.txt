@@ -57,7 +57,9 @@ New Features
 
     Configuration
     -------------
-    - None (XYZ YYYY/MM/DD)
+    - Autotools: Automake updated to 1.14.1 (ADB - 2014/04/08)
+    - CMake: Moved minimum CMake version to 2.8.11 which enables better library
+      include processing. (ADB - 2014/03/26)
     
     Library
     -------
@@ -102,11 +104,22 @@ Bug Fixes since HDF5-1.8.12
 
     Configuration
     -------------
-    - None
-
+    - CMake: When CMake commands are executed individually on the command line
+      and the external filters are being built, the CMAKE_BUILD_TYPE define
+      must be set to the same value as the configuration
+        (-DCMAKE_BUILD_TYPE:STRING=Release if using -C Release). This is needed 
+      by the the szip and zlib filter build commands. (ADB - HDFFV-8695)
+    - CMake: Remove use of XLATE_UTILITY program. (ADB - 2014/03/28 HDFFV-8640)
+    - CMake: Added missing quotes in setting the CMAKE_EXE_LINKER_FLAGS for the
+      MPI option. (ADB - 2014/02/27 HDFFV-8674)
+   
     Library
     -------
-    - None
+    - H5Z.c: H5Zfilter_avail(H5Z_filter_t id)
+      Added else block if the call to the internal H5Z_filter_avail(id) does not
+      fail and returns FALSE. This block calls the H5PL_load(H5PL_TYPE_FILTER, (int)id)
+      function to attempt to dynamically load the filter plugin. 
+      (ADB - 2014/03/03 HDFFV-8629)
 
     Parallel Library
     ----------------
@@ -118,7 +131,10 @@ Bug Fixes since HDF5-1.8.12
 
     Tools
     -----
-    - None
+    - h5repack: h5repack would not attempt to remove UD filters. Added a 
+      check to h5repack for UD filters that checks if the filter can 
+      be dynamically loaded. This will require a change in the library to
+      add the H5PL_load() to the H5Zfilter_avail(). (ADB - 2014/03/03 HDFFV-8629)
 
     F90 API
     -------
@@ -245,7 +261,7 @@ Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/y    n        y    y     y
 Windows 7                               y        y/y    n        y    y     y
 Windows 7 x64                           y        y/y    n        y    y     y
-Windows 7 Cygwin                        n        y/n    n        y    y     y
+Windows 7 Cygwin                        n        y/y    n        y    y     y
 Windows 8.1                             n        y/y    n        y    y     y
 Windows 8.1   x64                       n        y/y    n        y    y     y
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
@@ -313,7 +329,7 @@ The following platforms are not supported but have been tested for this release.
                                   g++ 4.6.1 20110527
                                   gfortran 4.6.1 20110527
 
-    Debian7.2.0 3.2.0-4-amd64 #1 SMP Debian 3.2.51-1 x86_64 GNU/Linux
+    Debian7.1.0 3.2.0-4-amd64 #1 SMP Debian 3.2.51-1 x86_64 GNU/Linux
                                   gcc (Debian 4.7.2-5) 4.7.2
                                   GNU Fortran (Debian 4.7.2-5) 4.7.2
                                   (cmake and autotools)

@@ -89,7 +89,7 @@ Notes: This short set of instructions is written for users who want to
          c:\MyHDFstuff\hdf5\build
       
       4. Configure the C library, tools and tests with this command:
-         cmake -G "Visual Studio 10" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..
+         cmake -G "Visual Studio 11" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..
          The two dots on the end of the command is the location of the source. 
          The CMAKE_BUILD_TYPE must match the configuration type.
       
@@ -103,7 +103,7 @@ Notes: This short set of instructions is written for users who want to
          cpack -C Release CPackConfig.cmake
       
       8. Install with this command:
-         HDF5-1.8.12-win32.exe
+         HDF5-1.8.13-win32.exe
         
    B. Linux Quick Step Building HDF5 Libraries with CMake Using GCC
 
@@ -133,7 +133,7 @@ Notes: This short set of instructions is written for users who want to
          cpack -C Release CPackConfig.cmake
       
       8. Install with this command:
-         HDF5-1.8.12-Linux.sh
+         HDF5-1.8.13-Linux.sh
       
 
 
@@ -184,7 +184,7 @@ III. Preconditions
       the settings for the developers' environment. Then the only options needed
       on the command line are those options that are different. Example using HDF
       default cache file:
-               cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 10" \
+               cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 11" \
                -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
 
@@ -262,22 +262,15 @@ These five steps are described in detail below.
         cmake -C <sourcepath>/config/cmake/cacheinit.cmake -G "<generator>"  [-D<options>]  <sourcepath>
         
         Where <generator> is    
-            * Borland Makefiles
-            * MSYS Makefiles
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles
+            * Visual Studio 12
+            * Visual Studio 12 Win64
             * Visual Studio 11
             * Visual Studio 11 Win64
             * Visual Studio 10
             * Visual Studio 10 Win64
-            * Visual Studio 6
-            * Visual Studio 7
-            * Visual Studio 7 .NET 2003
-            * Visual Studio 8 2005
-            * Visual Studio 8 2005 Win64
-            * Visual Studio 9 2008
-            * Visual Studio 9 2008 Win64
 
         <options> is:
             * SZIP_INCLUDE_DIR:PATH=<path to szip includes directory>
@@ -350,7 +343,7 @@ These five steps are described in detail below.
 
       2.2  Preferred command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
       
-               cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 10" \
+               cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 11" \
                -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
 
@@ -452,7 +445,7 @@ These five steps are described in detail below.
 
 
 ========================================================================
-V. All Options for HDF5 C/C++ Libraries with CMake
+V. More Options for HDF5 C/C++ Libraries with CMake
 ========================================================================
 
 In the options listed below, there are three columns of information: 
@@ -503,8 +496,6 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
     HDF5_ENABLE_TRACE          "Enable API tracing capability"               ON
 if (HDF5_TEST_VFD) 
     HDF5_TEST_FHEAP_VFD        "Execute fheap test with different VFDs"      ON
-if (WIN32 AND NOT CYGWIN) 
-    HDF_LEGACY_NAMING          "Use Legacy Names for Libraries and Programs" OFF
 
 ---------------- External Library Options ---------------------
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building"        "NO"
@@ -897,7 +888,7 @@ set(LOCAL_NO_PACKAGE "TRUE")
 #set(LOCAL_UPDATE "TRUE")
 set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/branches/hdf5_1_8")
 #uncomment to use a compressed source file *.zip
-#set(CTEST_USE_TAR_SOURCE "hdf5-1.8.12")
+#set(CTEST_USE_TAR_SOURCE "hdf5-1.8.13")
 ############################################
 
 ####  Change default configuration of options in config/cmake/cacheinit.cmake file ###
