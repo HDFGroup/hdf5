@@ -41,6 +41,9 @@ New Features
 
     Configuration:
     -------------
+    - Autotools: Automake updated to 1.14.1 (ADB - 2014/04/08)
+    - CMake: Moved minimum CMake version to 2.8.11 which enables better library
+      include processing. (ADB - 2014/03/26)
     - New configuration option added to change the default plugin path.
       configure option is --with-default-plugin=location
       cmake option is -DH5_DEFAULT_PLUGINDIR:PATH=location
@@ -428,6 +431,11 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - H5Z.c: H5Zfilter_avail(H5Z_filter_t id)
+           Added else block if the call to the internal H5Z_filter_avail(id) does not
+           fail and returns FALSE. This block calls the H5PL_load(H5PL_TYPE_FILTER, (int)id)
+           function to attempt to dynamically load the filter plugin. 
+           (ADB - 2014/03/03 HDFFV-8629)
       - Added const qualifier to source buffer parameters in H5Dgather and
             H5D_scatter_func_t (H5Dscatter callback).  (NAF - 2013/7/02)
       - Fixed an error involving failure to write fill values to the user's
@@ -678,11 +686,14 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
-    - When CMake commands are executed individually on the command line and the
-      external filters are being built, the CMAKE_BUILD_TYPE define must be set
-      to the same value as the configuration 
+    - CMake: When CMake commands are executed individually on the command line
+      and the external filters are being built, the CMAKE_BUILD_TYPE define
+      must be set to the same value as the configuration
         (-DCMAKE_BUILD_TYPE:STRING=Release if using -C Release). This is needed 
       by the the szip and zlib filter build commands. (ADB - HDFFV-8695)
+    - CMake: Remove use of XLATE_UTILITY program. (ADB - 2014/03/28 HDFFV-8640)
+    - CMake: Added missing quotes in setting the CMAKE_EXE_LINKER_FLAGS for the
+      MPI option. (ADB - 2014/02/27 HDFFV-8674)
     - Modified H5detect.c to scan floating point types for padding bits before
       analyzing the type further.  This should fix problems with gcc 4.8
       (NAF - 2013/09/19 - HDFFV-8523/HDFFV-8500)
@@ -786,6 +797,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5repack: h5repack would not attempt to remove UD filters. Added a 
+          check to h5repack for UD filters that checks if the filter can 
+          be dynamically loaded. This will require a change in the library to
+          add the H5PL_load() to the H5Zfilter_avail(). (ADB - 2014/03/03 HDFFV-8629)
         - h5repack: Fixed failure for converting a layout of small chunked dataset 
           (size < 1K) to contiguous layout.  HDFFV-8214 (JKM 2013/03/18)
         - h5diff: Fixed to return correct exit code 1 when detect unique extra

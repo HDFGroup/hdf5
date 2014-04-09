@@ -95,22 +95,15 @@ These steps are described in more detail below.
         cmake -G "<generator>"  [-D<options>]  <sourcepath>
         
         Where <generator> is    
-            * Borland Makefiles
-            * MSYS Makefiles
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles
+            * Visual Studio 12
+            * Visual Studio 12 Win64
             * Visual Studio 11
             * Visual Studio 11 Win64
             * Visual Studio 10
             * Visual Studio 10 Win64
-            * Visual Studio 6
-            * Visual Studio 7
-            * Visual Studio 7 .NET 2003
-            * Visual Studio 8 2005
-            * Visual Studio 8 2005 Win64
-            * Visual Studio 9 2008
-            * Visual Studio 9 2008 Win64
 
         <options> is:
             * BUILD_TESTING:BOOL=ON
@@ -138,7 +131,7 @@ These steps are described in more detail below.
 
       2.2  Alternative command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
       
-           cmake -G "Visual Studio 10" -DBUILD_TESTING:BOOL=ON -DUSE_SHARED_LIBS:BOOL=ON ..
+           cmake -G "Visual Studio 11" -DBUILD_TESTING:BOOL=ON -DUSE_SHARED_LIBS:BOOL=ON ..
 
    3. Build HDF5 Applications
    
