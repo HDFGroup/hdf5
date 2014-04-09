@@ -65,7 +65,11 @@ New Features
  
     Parallel Library
     ----------------
-    - None
+    - Removed MPI-POSIX VFD, as it wasn't helping anyone and was just
+        generating support questions.  Application developers performing
+        parallel I/O should always use the MPI-IO VFD.  (QAK - 2014/03/28)
+    - Improved parallel I/O support to allow collective I/O on point
+        selections. (QAK - 2014/03/15)
  
     Tools
     -----
