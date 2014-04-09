@@ -54,8 +54,6 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 	// Gets data transform expression.
 	ssize_t getDataTransform(char* exp, size_t buf_size=0) const;
 	H5std_string getDataTransform() const;
-	//H5std_string getDataTransform(const size_t buf_size=0) const;
-	// this will collide with the first one when exp=NULL
 
 	// Sets the dataset transfer property list status to TRUE or FALSE.
 	void setPreserve( bool status ) const;

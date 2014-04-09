@@ -264,7 +264,7 @@ FileAccPropList FileAccPropList::getFamily(hsize_t& memb_size) const
 /// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFaplSplit
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-void FileAccPropList::setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, const char* meta_ext, const char* raw_ext ) const
+void FileAccPropList::setSplit(const FileAccPropList& meta_plist, const FileAccPropList& raw_plist, const char* meta_ext, const char* raw_ext ) const
 {
    hid_t meta_pid = meta_plist.getId();
    hid_t raw_pid = raw_plist.getId();
@@ -287,7 +287,7 @@ void FileAccPropList::setSplit( FileAccPropList& meta_plist, FileAccPropList& ra
 ///\exception	H5::PropListIException
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-void FileAccPropList::setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, const H5std_string& meta_ext, const H5std_string& raw_ext ) const
+void FileAccPropList::setSplit(const FileAccPropList& meta_plist, const FileAccPropList& raw_plist, const H5std_string& meta_ext, const H5std_string& raw_ext ) const
 {
    setSplit( meta_plist, raw_plist, meta_ext.c_str(), raw_ext.c_str() );
 }

@@ -264,7 +264,7 @@ void DataType::p_commit(hid_t loc_id, const char* name)
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - Jan, 2007
 //--------------------------------------------------------------------------
-void DataType::commit(H5Location& loc, const char* name)
+void DataType::commit(const H5Location& loc, const char* name)
 {
    p_commit(loc.getId(), name);
 }
@@ -276,7 +276,7 @@ void DataType::commit(H5Location& loc, const char* name)
 ///		argument \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataType::commit(H5Location& loc, const H5std_string& name)
+void DataType::commit(const H5Location& loc, const H5std_string& name)
 {
    p_commit(loc.getId(), name.c_str());
 }
