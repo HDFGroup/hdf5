@@ -251,6 +251,12 @@ H5D_term_interface(void)
              */
 	    H5I_clear_type(H5I_DATASET, TRUE, FALSE);
 	} else {
+            /* Close public interface */
+            n += H5D__term_pub_interface();
+
+            /* Close deprecated interface */
+            n += H5D__term_deprec_interface();
+
 	    H5I_dec_type_ref(H5I_DATASET);
 	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/

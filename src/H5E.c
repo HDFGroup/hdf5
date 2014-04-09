@@ -322,6 +322,9 @@ H5E_term_interface(void)
             } /* end if */
 	} /* end if */
         else {
+            /* Close deprecated interface */
+            n += H5E__term_deprec_interface();
+
 	    /* Destroy the error class, message, and stack id groups */
 	    H5I_dec_type_ref(H5I_ERROR_STACK);
 	    H5I_dec_type_ref(H5I_ERROR_CLASS);

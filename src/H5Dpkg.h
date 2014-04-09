@@ -524,6 +524,8 @@ H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BTREE[1];
 /* Package Private Prototypes */
 /******************************/
 
+H5_DLL herr_t H5D__term_pub_interface(void);
+H5_DLL herr_t H5D__term_deprec_interface(void);
 H5_DLL H5D_t *H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space,
     hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id);
 H5_DLL H5D_t *H5D__create_named(const H5G_loc_t *loc, const char *name,

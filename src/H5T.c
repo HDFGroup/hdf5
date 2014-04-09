@@ -1487,6 +1487,10 @@ H5T_term_interface(void)
 	/* Unlock all datatypes, then free them */
 	/* note that we are ignoring the return value from H5I_iterate() */
 	H5I_iterate(H5I_DATATYPE, H5T_unlock_cb, NULL, FALSE);
+
+        /* Close deprecated interface */
+        n += H5T__term_deprec_interface();
+
 	H5I_dec_type_ref(H5I_DATATYPE);
 
         /* Reset all the datatype IDs */
