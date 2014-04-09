@@ -115,6 +115,19 @@ template <class Type1, class Type2>
     }
 }
 
+template <class Type1, class Type2>
+    void CHECK(Type1 x, Type2 value, const char* msg, int line, const char* file_name)
+{
+    if (x == value)
+    {
+	cerr << endl;
+        cerr << "*** Function " << msg << " FAILED at line " << line << endl;
+	IncTestNumErrs();
+	throw TestFailedException(file_name, msg);
+    }
+}
+
+
 /* Prototypes for the test routines */
 #ifdef __cplusplus
 extern "C" {

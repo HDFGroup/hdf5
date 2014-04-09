@@ -292,7 +292,8 @@ static void test_attr_getname()
 	HDmemset(fattr1_name, 0, buf_size+1);
 	ssize_t name_size = 0; // actual length of attribute name
 	name_size = fattr1.getName(fattr1_name, buf_size+1);
-	verify_val(name_size, FATTR1_NAME.length(), "Attribute::getName", __LINE__, __FILE__);
+	CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
+	verify_val((size_t)name_size, FATTR1_NAME.length(), "Attribute::getName", __LINE__, __FILE__);
 	verify_val((const char*)fattr1_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
 	delete []fattr1_name;
 
@@ -303,7 +304,8 @@ static void test_attr_getname()
 	fattr1_name = new char[buf_size+1];
 	HDmemset(fattr1_name, 0, buf_size+1);
 	name_size = fattr1.getName(fattr1_name, buf_size+1);
-	verify_val(name_size, FATTR1_NAME.length(), "Attribute::getName", __LINE__, __FILE__);
+	CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
+	verify_val((size_t)name_size, FATTR1_NAME.size(), "Attribute::getName", __LINE__, __FILE__);
 	verify_val((const char*)fattr1_name, (const char*)short_name, "Attribute::getName", __LINE__, __FILE__);
 	delete []fattr1_name;
 
@@ -312,6 +314,7 @@ static void test_attr_getname()
 	fattr1_name = new char[buf_size+1];
 	HDmemset(fattr1_name, 0, buf_size+1);
 	name_size = fattr1.getName(fattr1_name, buf_size+1);
+	CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
 	verify_val(fattr1_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
 	delete []fattr1_name;
 
@@ -609,7 +612,7 @@ static void test_attr_compound_read()
     size_t      size;   // Attribute datatype size as stored in file
     size_t      offset; // Attribute datatype field offset
     struct attr4_struct read_data4[ATTR4_DIM1][ATTR4_DIM2]; // Buffer for reading 4th attribute
-    int     i,j;
+    hsize_t i,j;
 
     // Output message about test being performed
     SUBTEST("Basic Attribute Functions");

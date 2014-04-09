@@ -793,7 +793,7 @@ static void test_compound_set_size()
 
 	// Verify setSize() actually set size
 	size_t new_size = dtype.getSize();
-	verify_val(new_size, 33, "DataType::getSize", __LINE__, __FILE__);
+	verify_val(new_size, (size_t)33, "DataType::getSize", __LINE__, __FILE__);
 
 	// Shrink the type, and verify that it became packed
 	dtype.setSize((size_t)32);
@@ -802,7 +802,7 @@ static void test_compound_set_size()
 
 	// Verify setSize() actually set size again
 	new_size = dtype.getSize();
-	verify_val(new_size, 32, "DataType::getSize", __LINE__, __FILE__);
+	verify_val(new_size, (size_t)32, "DataType::getSize", __LINE__, __FILE__);
 
 	/* Close types and file */
 	dtype_tmp.close();

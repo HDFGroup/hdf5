@@ -312,10 +312,14 @@ test_datasize(FileAccPropList &fapl)
 	// Get the dimension sizes.
 	hsize_t dims[2];
 	int n_dims = space.getSimpleExtentDims(dims);
+	if (n_dims < 0)
+	{
+	    throw Exception("test_compression", "DataSpace::getSimpleExtentDims() failed");
+	}
 
 	// Calculate the supposed size.  Size of each value is int (4), from
 	// test_simple_io.
-	int expected_size = 4 * dims[0] * dims[1];
+	size_t expected_size = 4 * dims[0] * dims[1];
 
 	// getInMemDataSize() returns the in memory size of the data.
 	size_t ds_size = dset.getInMemDataSize();
