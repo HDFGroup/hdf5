@@ -2329,14 +2329,9 @@ AC_TRY_COMPILE(,[
 ## Try to figure out how to print `long long'.  Some machines use `%lld'
 ## and others use `%qd'.  There may be more!  The final `l' is a
 ## default in case none of the others work.
-## Need to patch up LD_LIBRARY_PATH so that the execution can find all
-## the dynamic library.  The correct way to do it should be updating
-## LD_LIBRARY_PATH along with LDFLAGS or do it with the AC_TRY_RUN macro.
 ##
 AC_MSG_CHECKING([how to print long long])
 AC_CACHE_VAL([hdf5_cv_printf_ll], [
-LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo $AM_LDFLAGS $LDFLAGS | sed -e 's/-L/:/g' -e 's/ //g'`"
-export LD_LIBRARY_PATH
 
 for hdf5_cv_printf_ll in l ll L q unknown; do
    AC_TRY_RUN([

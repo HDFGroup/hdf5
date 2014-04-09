@@ -614,6 +614,9 @@ TRACE = perl $(top_srcdir)/bin/trace
 # *.clog are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog $(EXTLINK_DIRS) *.h5
 @BUILD_PARALLEL_CONDITIONAL_TRUE@EXAMPLE_PROG_PARA = ph5example
+INSTALL_SCRIPT_FILES = run-c-ex.sh
+INSTALL_TOP_SCRIPT_FILES = run-all-ex.sh
+INSTALL_TOP_FILES = README
 
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,
@@ -625,7 +628,8 @@ EXAMPLE_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
            h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers \
            h5_ref2reg h5_extlink h5_elink_unix2win h5_shared_mesg
 
-TEST_SCRIPT = testh5cc.sh
+TEST_SCRIPT = testh5cc.sh 
+TEST_EXAMPLES_SCRIPT = $(INSTALL_SCRIPT_FILES)
 
 # Install files
 # List all file that should be installed in examples directory
@@ -636,9 +640,6 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_reference.c h5_drivers.c h5_extlink.c h5_elink_unix2win.c   \
           h5_ref2reg.c h5_shared_mesg.c ph5example.c
 
-INSTALL_SCRIPT_FILES = run-c-ex.sh
-INSTALL_TOP_SCRIPT_FILES = run-all-ex.sh
-INSTALL_TOP_FILES = README
 
 # The external link examples demonstrate how to use paths; they need
 # directories to be created to do this.
@@ -1131,27 +1132,34 @@ install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
 uninstall-examples:
 	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then             \
 	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);                \
-        fi
+	fi
 	@if test -n "$(INSTALL_SCRIPT_FILES)" -a -d $(EXAMPLEDIR); then           \
 	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_SCRIPT_FILES);              \
-        fi
+	fi
 	@if test -n "$(INSTALL_TOP_FILES)" -a -d $(EXAMPLETOPDIR); then    \
 	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_FILES);       \
-        fi
+	fi
 	@if test -n "$(INSTALL_TOP_SCRIPT_FILES)" -a -d $(EXAMPLETOPDIR); then    \
 	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_SCRIPT_FILES);       \
-        fi
+	fi
 
 installcheck-local:
 	@if test "$(STATIC_SHARED)" = "static, shared"; then               \
 	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                \
 	  $(MAKE) $(AM_MAKEFLAGS) clean;                                   \
 	  H5CCFLAGS="" $(MAKE) $(AM_MAKEFLAGS) check;                      \
-	 elif test "$(STATIC_SHARED)" = "shared"; then                     \
+	elif test "$(STATIC_SHARED)" = "shared"; then                     \
 	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                \
-	 else                                                              \
+	else                                                              \
 	  $(MAKE) $(AM_MAKEFLAGS) check;                                   \
-	 fi
+	fi 
+	@if test "$(INSTALL_FILES)" -a $(TEST_EXAMPLES_SCRIPT) -a -d $(EXAMPLEDIR); then \
+	    echo "============================";                                         \
+	    echo "Testing $(TEST_EXAMPLES_SCRIPT)";                                      \
+	    echo "============================";                                         \
+	    (cd $(EXAMPLEDIR);                                                           \
+	     /bin/sh ./$(TEST_EXAMPLES_SCRIPT);)                                                   \
+	fi
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

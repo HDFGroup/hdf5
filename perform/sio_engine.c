@@ -333,7 +333,7 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
     subdir = (user ? user : login);
 
     if (subdir) {
-        for (i = 0; i < size && prefix[i]; i++)
+        for (i = 0; i < size-1 && prefix[i]; i++)
         fullname[i] = prefix[i];
 
         fullname[i++] = '/';
