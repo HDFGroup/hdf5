@@ -272,6 +272,7 @@ if (WIN32)
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5fortran_types.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5test_kind_sizeof_mod.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/hdf5.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5global.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5a.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5d.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5e.mod
@@ -305,6 +306,7 @@ else (WIN32)
       FILES
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5fortran_types.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/hdf5.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5global.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5f.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5a.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5d.mod
