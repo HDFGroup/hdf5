@@ -1148,7 +1148,6 @@
 ./testpar/COPYING
 ./testpar/Makefile.am
 ./testpar/Makefile.in
-./testpar/ph5mdsettest.c
 ./testpar/t_cache.c
 ./testpar/t_chunk_alloc.c
 ./testpar/t_coll_chunk.c
