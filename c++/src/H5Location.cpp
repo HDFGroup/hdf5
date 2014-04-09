@@ -730,6 +730,7 @@ hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_ty
 ///\param	loc - IN: Location of the referenced object
 ///\param	ref - IN: Reference pointer
 ///\param	ref_type - IN: Reference type
+///\param	plist - IN: Property list - default to PropList::DEFAULT
 ///\exception	H5::ReferenceException
 // Programmer	Binh-Minh Ribler - Oct, 2006
 // Modification
@@ -747,6 +748,7 @@ void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t 
 ///\param	attr - IN: Attribute specifying the location of the referenced object
 ///\param	ref - IN: Reference pointer
 ///\param	ref_type - IN: Reference type
+///\param	plist - IN: Property list - default to PropList::DEFAULT
 ///\exception	H5::ReferenceException
 // Programmer	Binh-Minh Ribler - Oct, 2006
 // Modification
