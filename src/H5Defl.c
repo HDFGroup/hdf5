@@ -97,8 +97,6 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
 #ifdef H5_HAVE_PARALLEL
     NULL,
     NULL,
-    NULL,
-    NULL,
 #endif /* H5_HAVE_PARALLEL */
     H5D__efl_readvv,
     H5D__efl_writevv,

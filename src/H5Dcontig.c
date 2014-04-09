@@ -127,8 +127,6 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
     H5D__contig_read,
     H5D__contig_write,
 #ifdef H5_HAVE_PARALLEL
-    NULL,
-    NULL,
     H5D__mdset_collective_read,
     H5D__mdset_collective_write,
 #endif /* H5_HAVE_PARALLEL */

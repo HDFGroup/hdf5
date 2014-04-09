@@ -97,7 +97,7 @@ typedef enum H5D_fill_value_t {
 /* parameter sturct for multi-dset Read/Write */
 typedef struct H5D_rw_multi_t
 {
-    hid_t dset_id;          /* dstaset ID */
+    hid_t dset_id;          /* dataset ID */
     hid_t dset_space_id;    /* dataset selection dataspace ID */
     hid_t mem_type_id;      /* memory datatype ID */
     hid_t mem_space_id;     /* memory selection dataspace ID */
@@ -151,7 +151,7 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 H5_DLL herr_t H5Dread_multi(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info);
 H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     hid_t file_space_id, hid_t plist_id, const void *buf);
-H5_DLL herr_t H5Dwrite_multi(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info);
+H5_DLL herr_t H5Dwrite_multi(hid_t file_id, hid_t dxpl_id, size_t count, const H5D_rw_multi_t *info);
 H5_DLL herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id,
     H5D_operator_t op, void *operator_data);
 H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);

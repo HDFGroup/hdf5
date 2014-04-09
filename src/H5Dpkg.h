@@ -142,10 +142,8 @@ typedef struct H5D_layout_ops_t {
     H5D_layout_read_func_t ser_read;    /* High-level I/O routine for reading data in serial */
     H5D_layout_write_func_t ser_write;  /* High-level I/O routine for writing data in serial */
 #ifdef H5_HAVE_PARALLEL
-    H5D_layout_read_func_t par_read;    /* High-level I/O routine for reading data in parallel */
-    H5D_layout_write_func_t par_write;  /* High-level I/O routine for writing data in parallel */
-    H5D_layout_read_md_func_t par_read_md; /* High-level I/O routine for reading data from multiple dsets in parallel */
-    H5D_layout_write_md_func_t par_write_md;  /* High-level I/O routine for writing data from multiple dsets in parallel */
+    H5D_layout_read_md_func_t par_read; /* High-level I/O routine for reading data in parallel */
+    H5D_layout_write_md_func_t par_write; /* High-level I/O routine for writing data in parallel */
 #endif /* H5_HAVE_PARALLEL */
     H5D_layout_readvv_func_t readvv;    /* Low-level I/O routine for reading data */
     H5D_layout_writevv_func_t writevv;  /* Low-level I/O routine for writing data */
@@ -247,7 +245,6 @@ typedef struct H5D_piece_info_t {
     struct H5D_dset_info_t *dset_info;  /* Pointer to dset_info */
 } H5D_piece_info_t;
 
-
 /* dset info for multiple dsets */
 typedef struct H5D_dset_info_t {
     H5D_t *dset;                /* Pointer to dataset being operated on */
@@ -282,10 +279,10 @@ typedef struct H5D_dset_info_t {
 
     hsize_t chunk_dim[H5O_LAYOUT_NDIMS];    /* Size of chunk in each dimension */
 
+    hid_t mem_type_id;          /* memory datatype ID */
     H5D_type_info_t type_info;
     hbool_t type_info_init; 
 } H5D_dset_info_t;
-
 
 typedef struct H5D_io_info_md_t {
 #ifndef H5_HAVE_PARALLEL

@@ -262,8 +262,6 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
     H5D__chunk_read,
     H5D__chunk_write,
 #ifdef H5_HAVE_PARALLEL
-    NULL,
-    NULL,
     H5D__mdset_collective_read,
     H5D__mdset_collective_write,
 #endif /* H5_HAVE_PARALLEL */
@@ -289,8 +287,6 @@ const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {{
     NULL,
     NULL,
 #ifdef H5_HAVE_PARALLEL
-    NULL,
-    NULL,
     NULL,
     NULL,
 #endif /* H5_HAVE_PARALLEL */
