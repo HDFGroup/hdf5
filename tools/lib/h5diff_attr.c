@@ -332,6 +332,8 @@ hsize_t diff_attr(hid_t loc1_id,
     size_t     msize2;          /* memory size of memory type */
     void       *buf1=NULL;      /* data buffer */
     void       *buf2=NULL;      /* data buffer */
+    int	       buf1hasdata=0;	/* buffer has data */
+    int	       buf2hasdata=0;	/* buffer has data */
     hsize_t    nelmts1;         /* number of elements in dataset */
     int        rank1;           /* rank of dataset */
     int        rank2;           /* rank of dataset */
@@ -455,8 +457,10 @@ hsize_t diff_attr(hid_t loc1_id,
         }
         if(H5Aread(attr1_id,mtype1_id,buf1) < 0)
             goto error;
+	buf1hasdata = 1;
         if(H5Aread(attr2_id,mtype2_id,buf2) < 0)
             goto error;
+	buf2hasdata = 1;
 
         /* format output string */
         HDsnprintf(np1, sizeof(np1), "%s of <%s>", name1, path1);
@@ -504,8 +508,8 @@ hsize_t diff_attr(hid_t loc1_id,
         if(TRUE == h5tools_detect_vlen(mtype1_id))
             H5Dvlen_reclaim(mtype1_id, space1_id, H5P_DEFAULT, buf1);
         HDfree(buf1);
-
         buf1 = NULL;
+
         if(TRUE == h5tools_detect_vlen(mtype2_id))
             H5Dvlen_reclaim(mtype2_id, space2_id, H5P_DEFAULT, buf2);
         HDfree(buf2);
@@ -539,12 +543,12 @@ hsize_t diff_attr(hid_t loc1_id,
 error:
     H5E_BEGIN_TRY {
         if(buf1) {
-            if(TRUE == h5tools_detect_vlen(mtype1_id))
+            if(buf1hasdata && TRUE == h5tools_detect_vlen(mtype1_id))
                 H5Dvlen_reclaim(mtype1_id, space1_id, H5P_DEFAULT, buf1);
             HDfree(buf1);
         } /* end if */
         if(buf2) {
-            if(TRUE == h5tools_detect_vlen(mtype2_id))
+            if(buf2hasdata && TRUE == h5tools_detect_vlen(mtype2_id))
                 H5Dvlen_reclaim(mtype2_id, space2_id, H5P_DEFAULT, buf2);
             HDfree(buf2);
         } /* end if */
