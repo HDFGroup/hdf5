@@ -244,6 +244,128 @@ static void test_attr_basic_write()
 
 /****************************************************************
 **
+**  test_attr_getname(): Test getting attribute name functions.
+**
+**  Test these functions:
+**  A. ssize_t Attribute::getName(char* attr_name, size_t buf_size)
+**	1. With arbitrary buf_size that is larger than the name size
+**	2. With arbitrary buf_size that is smaller than the name's length.
+**	3. With a buf_size that equals the name's length.
+**
+**  B. ssize_t Attribute::getName(H5std_string& attr_name, size_t buf_size)
+**	With buffer smaller than the actual name
+**
+**  C. H5std_string Attribute::getName() with file's and dataset's attrs.
+**
+**  D. ssize_t Attribute::getName(H5std_string& attr_name, size_t buf_size)
+**	With buffer size equals the name's length, i.e., buf_size=0
+**
+****************************************************************/
+static void test_attr_getname()
+{
+    // Output message about test being performed
+    SUBTEST("Testing all overloads of Attribute::getName");
+
+    try {
+	//
+	// Open the file FILE_BASIC and test getName with its attribute
+	//
+
+	// Open file
+	H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
+
+	// Check for existence of attribute FATTR1_NAME
+	bool attr_exists = fid1.attrExists(FATTR1_NAME);
+	if (attr_exists == false)
+	    throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
+
+	// Open attribute 
+	Attribute fattr1(fid1.openAttribute(FATTR1_NAME));
+
+	// A. Get attribute name with
+	// ssize_t Attribute::getName(char* attr_name, size_t buf_size)
+	// using different buffer sizes and verify against FATTR1_NAME (3 cases)
+
+	// 1. With arbitrary buf_size that is larger than the name size
+	size_t buf_size = FATTR1_NAME.length() + 10;
+	char* fattr1_name = new char[buf_size+1];
+	HDmemset(fattr1_name, 0, buf_size+1);
+	ssize_t name_size = 0; // actual length of attribute name
+	name_size = fattr1.getName(fattr1_name, buf_size+1);
+	CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
+	verify_val((size_t)name_size, FATTR1_NAME.length(), "Attribute::getName", __LINE__, __FILE__);
+	verify_val((const char*)fattr1_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+	delete []fattr1_name;
+
+	// 2. With arbitrary buf_size that is smaller than the name's length.
+	// Let's try 4 first characters in the name.
+	buf_size = 4;
+	char short_name[5] = "File"; // to verify the read name
+	fattr1_name = new char[buf_size+1];
+	HDmemset(fattr1_name, 0, buf_size+1);
+	name_size = fattr1.getName(fattr1_name, buf_size+1);
+	CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
+	verify_val((size_t)name_size, FATTR1_NAME.size(), "Attribute::getName", __LINE__, __FILE__);
+	verify_val((const char*)fattr1_name, (const char*)short_name, "Attribute::getName", __LINE__, __FILE__);
+	delete []fattr1_name;
+
+	// 3. With a buf_size that equals the name's length.
+	buf_size = FATTR1_NAME.length();
+	fattr1_name = new char[buf_size+1];
+	HDmemset(fattr1_name, 0, buf_size+1);
+	name_size = fattr1.getName(fattr1_name, buf_size+1);
+	CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
+	verify_val(fattr1_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+	delete []fattr1_name;
+
+	// B. Get attribute name with
+	// ssize_t Attribute::getName(H5std_string& attr_name, size_t buf_size)
+	// using buffer smaller than the actual name
+	buf_size = 4;
+	H5std_string fattr1_name2;
+	name_size = fattr1.getName(fattr1_name2, buf_size);
+
+	// C. Get file attribute's name with
+	// H5std_string Attribute::getName()
+	H5std_string fattr1_name3 = fattr1.getName();
+	verify_val(fattr1_name3, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+
+	//
+	// Open the dataset DSET1_NAME and test getName with its attribute
+	//
+
+	// Open dataset DSET1_NAME
+	DataSet dataset = fid1.openDataSet(DSET1_NAME);
+
+	// Check for existence of attribute
+	attr_exists = dataset.attrExists(ATTR1_NAME);
+	if (attr_exists == false)
+	    throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
+
+	// Open attribute
+	Attribute attr1(dataset.openAttribute(ATTR1_NAME));
+
+	// Get dataset attribute's name with
+	// H5std_string Attribute::getName()
+	H5std_string dattr_name1 = attr1.getName();
+	verify_val(dattr_name1, ATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+
+	// D. Get attribute name with
+	// H5std_string Attribute::getName(H5std_string attr_name, buf_size=0)
+	H5std_string dattr_name2;
+	name_size = attr1.getName(dattr_name2);
+	verify_val(dattr_name2, ATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+
+	PASSED();
+    } // end try block
+
+    catch (Exception E) {
+	issue_fail_msg("test_attr_getname()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}   // test_attr_getname()
+
+/****************************************************************
+**
 **  test_attr_rename(): Test renaming attribute function.
 **
 ****************************************************************/
@@ -490,7 +612,7 @@ static void test_attr_compound_read()
     size_t      size;   // Attribute datatype size as stored in file
     size_t      offset; // Attribute datatype field offset
     struct attr4_struct read_data4[ATTR4_DIM1][ATTR4_DIM2]; // Buffer for reading 4th attribute
-    int     i,j;
+    hsize_t i,j;
 
     // Output message about test being performed
     SUBTEST("Basic Attribute Functions");
@@ -1433,6 +1555,7 @@ void test_attr()
     MESSAGE(5, ("Testing Attributes\n"));
 
     test_attr_basic_write();	// Test basic H5A writing code
+    test_attr_getname();	// Test overloads of Attribute::getName
     test_attr_rename();		// Test renaming attribute
     test_attr_basic_read(); 	// Test basic H5A reading code
 
@@ -1472,6 +1595,10 @@ extern "C"
 #endif
 void cleanup_attr()
 {
-    //HDremove(FILENAME.c_str());
+    HDremove(FILE_BASIC.c_str());
+    HDremove(FILE_COMPOUND.c_str());
+    HDremove(FILE_SCALAR.c_str());
+    HDremove(FILE_MULTI.c_str());
+    HDremove(FILE_DTYPE.c_str());
 }
 

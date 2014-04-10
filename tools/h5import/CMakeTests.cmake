@@ -61,7 +61,7 @@
       textpfe.h5
   )
 
-  FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
   foreach (conf_file ${HDF5_REFERENCE_CONF_FILES})
     set (dest "${PROJECT_BINARY_DIR}/testfiles/${conf_file}")
     #message (STATUS " Copying ${conf_file}")

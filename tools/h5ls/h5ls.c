@@ -845,7 +845,7 @@ print_cmpd_type(h5tools_str_t *buffer, hid_t type, int ind)
         n = print_string(buffer, name, FALSE);
         h5tools_str_append(buffer, "\"%*s +%-4lu ", MAX(0, 16-n), "",
                (unsigned long)H5Tget_member_offset(type, i));
-        HDfree(name);
+        H5free_memory(name);
 
         /* Member's type */
         subtype = H5Tget_member_type(type, i);
@@ -927,7 +927,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
             if(H5Tconvert(super, native, (size_t)nmembs, value, NULL, H5P_DEFAULT) < 0) {
                 /* Release resources */
                 for(i = 0; i < (unsigned)nmembs; i++)
-                    HDfree(name[i]);
+                    H5free_memory(name[i]);
                 HDfree(name);
                 HDfree(value);
 
@@ -1154,7 +1154,7 @@ print_opaque_type(h5tools_str_t *buffer, hid_t type, int ind)
         h5tools_str_append(buffer, "\n%*s(tag = \"", ind, "");
         print_string(buffer, tag, FALSE);
         h5tools_str_append(buffer, "\")");
-        HDfree(tag);
+        H5free_memory(tag);
     }
     return TRUE;
 }

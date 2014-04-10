@@ -217,7 +217,6 @@ H5D__pre_read(hid_t file_id, hid_t dxpl_id, size_t count,
     H5D_dset_info_t *dset_info = NULL;
     size_t j;
     H5FD_mpio_xfer_t xfer_mode;
-    char fake_char;
     hbool_t broke_mdset = FALSE;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
@@ -281,20 +280,6 @@ H5D__pre_read(hid_t file_id, hid_t dxpl_id, size_t count,
 
         /* Get buffer */
         dset_info[j].u.rbuf = info[j].u.rbuf;
-
-        if(!dset_info[j].u.rbuf) {
-            if(H5S_ALL == info[j].dset_space_id || H5S_GET_SELECT_NPOINTS(dset_info[j].file_space) != 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
-
-            /* If the buffer is nil, and 0 element is selected, make a fake buffer.
-             * This is for some MPI package like ChaMPIon on NCSA's tungsten which
-             * doesn't support this feature.
-             * This is needed to prevent fail in H5F_block_read checking 
-             * buf address because buf is not provided if this process doesn't
-             * select any chunk.
-             */
-            dset_info[j].u.rbuf = &fake_char;
-        } /* end if */
 
         /* Multi-dset I/O currently supports CHUNKED and internal CONTIGUOUS
          * only, not external CONTIGUOUS (EFL) or COMPACT.  Fall back to
@@ -498,7 +483,6 @@ H5D__pre_write(hid_t file_id, hid_t dxpl_id, size_t count,
     hbool_t		    direct_write = FALSE;
     size_t j;
     H5FD_mpio_xfer_t xfer_mode;
-    char fake_char;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_STATIC
@@ -620,20 +604,6 @@ H5D__pre_write(hid_t file_id, hid_t dxpl_id, size_t count,
 
             /* Get buffer */
             dset_info[j].u.wbuf = info[j].u.wbuf;
-
-            if(!dset_info[j].u.wbuf) {
-                if(H5S_ALL == info[j].dset_space_id || H5S_GET_SELECT_NPOINTS(dset_info[j].file_space) != 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no input buffer")
-
-                /* If the buffer is nil, and 0 element is selected, make a fake buffer.
-                 * This is for some MPI package like ChaMPIon on NCSA's tungsten which
-                 * doesn't support this feature.
-                 * This is needed to prevent fail in H5F_block_write checking 
-                 * buf address because buf is not provided if this process doesn't
-                 * select any chunk.
-                 */
-                dset_info[j].u.wbuf = &fake_char;
-            } /* end if */
         } /* end for */
 
         if(xfer_mode == H5FD_MPIO_INDEPENDENT) {
@@ -756,6 +726,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
+    char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, dataset->oloc.addr, FAIL)
@@ -790,6 +761,19 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* Make certain that the number of elements in each selection is the same */
     if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
+
+    /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
+    if(NULL == buf) {
+        /* Check for any elements selected (which is invalid) */
+        if(nelmts > 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
+
+        /* If the buffer is nil, and 0 element is selected, make a fake buffer.
+         * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+         * doesn't support this feature.
+         */
+        buf = &fake_char;
+    } /* end if */
 
     /* Make sure that both selections have their extents set */
     if(!(H5S_has_extent(file_space)))
@@ -957,6 +941,7 @@ H5D__read_mdset(hid_t file_id, hid_t dxpl_id, size_t count,
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     void ** info_rbuf_ori;              /* Save original rbuf */
     size_t i;                           /* Local index variable */
+    char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
     FUNC_ENTER_STATIC
@@ -1019,6 +1004,19 @@ H5D__read_mdset(hid_t file_id, hid_t dxpl_id, size_t count,
         /* Make certain that the number of elements in each selection is the same */
         if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(dset_info[i].file_space))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
+
+        /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
+        if(NULL == dset_info[i].u.rbuf) {
+            /* Check for any elements selected (which is invalid) */
+            if(nelmts > 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
+
+            /* If the buffer is nil, and 0 element is selected, make a fake buffer.
+             * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+             * doesn't support this feature.
+             */
+            dset_info[i].u.rbuf = &fake_char;
+        } /* end if */
 
         /* Make sure that both selections have their extents set */
         if(!(H5S_has_extent(dset_info[i].file_space)))
@@ -1234,6 +1232,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
+    char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
     FUNC_ENTER_STATIC_TAG(dxpl_id, dataset->oloc.addr, FAIL)
@@ -1299,6 +1298,33 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     if(!mem_space)
         mem_space = file_space;
 
+    if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
+    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, hsize_t);
+
+    /* Make certain that the number of elements in each selection is the same */
+    if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
+
+    /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
+    if(NULL == buf) {
+        /* Check for any elements selected (which is invalid) */
+        if(nelmts > 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
+
+	/* If the buffer is nil, and 0 element is selected, make a fake buffer.
+	 * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+	 * doesn't support this feature.
+	 */
+        buf = &fake_char;
+    } /* end if */
+
+    /* Make sure that both selections have their extents set */
+    if(!(H5S_has_extent(file_space)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set")
+    if(!(H5S_has_extent(mem_space)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
+
     /* H5S_select_shape_same() has been modified to accept topologically 
      * identical selections with different rank as having the same shape 
      * (if the most rapidly changing coordinates match up), but the I/O 
@@ -1328,20 +1354,6 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         mem_space = projected_mem_space;
         buf = adj_buf;
     } /* end if */
-
-    if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
-    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, hsize_t);
-
-    /* Make certain that the number of elements in each selection is the same */
-    if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
-
-    /* Make sure that both selections have their extents set */
-    if(!(H5S_has_extent(file_space)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set")
-    if(!(H5S_has_extent(mem_space)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
 
     /* Retrieve dataset properties */
     /* <none needed currently> */
@@ -1477,6 +1489,7 @@ H5D__write_mdset(hid_t file_id, hid_t dxpl_id, size_t count,
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     const void **info_wbuf_ori = NULL;  /* save original wbuf */
     size_t i;                           /* Local index variable */
+    char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
     FUNC_ENTER_STATIC
@@ -1572,6 +1585,19 @@ H5D__write_mdset(hid_t file_id, hid_t dxpl_id, size_t count,
         /* Make certain that the number of elements in each selection is the same */
         if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(dset_info[i].file_space))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
+
+        /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
+        if(NULL == dset_info[i].u.wbuf) {
+            /* Check for any elements selected (which is invalid) */
+            if(nelmts > 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
+
+            /* If the buffer is nil, and 0 element is selected, make a fake buffer.
+             * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+             * doesn't support this feature.
+             */
+            dset_info[i].u.wbuf = &fake_char;
+        } /* end if */
 
         /* Make sure that both selections have their extents set */
         if(!(H5S_has_extent(dset_info[i].file_space)))

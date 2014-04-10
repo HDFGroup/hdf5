@@ -21,13 +21,14 @@
 SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, nerrors)
 
   USE iso_c_binding
+  USE TH5_MISC
   USE hdf5
   USE mpi
   IMPLICIT NONE
 
   LOGICAL, INTENT(in) :: do_collective              ! use collective IO
   LOGICAL, INTENT(in) :: do_chunk                   ! use chunking
-  INTEGER, INTENT(in) :: mpi_size                   ! number of processes in the group of communicator
+  INTEGER(SIZE_T), INTENT(in) :: mpi_size                   ! number of processes in the group of communicator
   INTEGER, INTENT(in) :: mpi_rank                   ! rank of the calling process in the communicator
   INTEGER, INTENT(inout) :: nerrors                 ! number of errors
   CHARACTER(LEN=80):: dsetname ! Dataset name
@@ -50,7 +51,7 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   INTEGER :: i, j, k, istart
   INTEGER :: error          ! Error flags
 
-  dimsf = (/5,mpi_size*8/)
+  dimsf = (/5_hsize_t,INT(mpi_size, hsize_t)*8_hsize_t/)
 
   ! 
   ! Setup file access property list with parallel I/O access.

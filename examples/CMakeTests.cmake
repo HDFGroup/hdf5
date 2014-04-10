@@ -4,7 +4,7 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-  FILE (MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/red ${PROJECT_BINARY_DIR}/blue ${PROJECT_BINARY_DIR}/u2w)
+  file (MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/red ${PROJECT_BINARY_DIR}/blue ${PROJECT_BINARY_DIR}/u2w)
 
   # Remove any output file left over from previous test run
   add_test (
@@ -56,10 +56,11 @@
     set (last_test "EXAMPLES-${example}")
   endforeach (example ${examples})
 
-  if (H5_HAVE_PARALLEL)
+### Windows pops up a modal permission dialog on this test
+  if (H5_HAVE_PARALLEL AND NOT WIN32)
     add_test (NAME EXAMPLES-ph5example COMMAND $<TARGET_FILE:ph5example>)
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (EXAMPLES-ph5example PROPERTIES DEPENDS ${last_test})
     endif (NOT "${last_test}" STREQUAL "")
     set (last_test "EXAMPLES-ph5example")
-  endif (H5_HAVE_PARALLEL)
+  endif (H5_HAVE_PARALLEL AND NOT WIN32)

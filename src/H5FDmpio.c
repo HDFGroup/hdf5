@@ -44,6 +44,10 @@
  */
 static hid_t H5FD_MPIO_g = 0;
 
+/* Whether to allow collective I/O operations */
+/* (Value can be set from environment variable also) */
+hbool_t H5FD_mpi_opt_types_g = TRUE;
+
 /*
  * The view is set to this value
  */
@@ -189,13 +193,10 @@ H5FD_mpio_init_interface(void)
  *		library.
  *
  * Return:	Success:	The driver ID for the mpio driver.
- *
  *		Failure:	Negative.
  *
  * Programmer:	Robb Matzke
  *              Thursday, August 5, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -203,37 +204,43 @@ hid_t
 H5FD_mpio_init(void)
 {
 #ifdef H5FDmpio_DEBUG
-    static int H5FD_mpio_Debug_inited=0;
+    static int H5FD_mpio_Debug_inited = 0;
 #endif /* H5FDmpio_DEBUG */
+    const char *s;              /* String for environment variables */
     hid_t ret_value;        	/* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (H5I_VFL!=H5I_get_type(H5FD_MPIO_g))
-        H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g,sizeof(H5FD_class_mpi_t),FALSE);
+    /* Register the MPI-IO VFD, if it isn't already */
+    if(H5I_VFL != H5I_get_type(H5FD_MPIO_g))
+        H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g, sizeof(H5FD_class_mpi_t), FALSE);
+
+    /* Allow MPI buf-and-file-type optimizations? */
+    s = HDgetenv("HDF5_MPI_OPT_TYPES");
+    if(s && HDisdigit(*s))
+        H5FD_mpi_opt_types_g = (hbool_t)HDstrtol(s, NULL, 0);
 
 #ifdef H5FDmpio_DEBUG
-    if (!H5FD_mpio_Debug_inited)
-    {
-	/* set debug mask */
-	/* Should this be done in H5F global initialization instead of here? */
-        const char *s = HDgetenv ("H5FD_mpio_Debug");
-        if (s) {
-	    while (*s){
+    if(!H5FD_mpio_Debug_inited) {
+        /* Retrieve MPI-IO debugging environment variable */
+        s = HDgetenv("H5FD_mpio_Debug");
+        if(s) {
+            /* Set debug mask */
+	    while(*s) {
 		H5FD_mpio_Debug[(int)*s]++;
 		s++;
-	    }
-        }
+	    } /* end while */
+        } /* end if */
 	H5FD_mpio_Debug_inited++;
-    }
+    } /* end if */
 #endif /* H5FDmpio_DEBUG */
 
     /* Set return value */
-    ret_value=H5FD_MPIO_g;
+    ret_value = H5FD_MPIO_g;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_mpio_init() */
 
 
 /*---------------------------------------------------------------------------

@@ -28,12 +28,12 @@
 PROGRAM fortranlibtest_F03
   
   USE HDF5
-  
+  USE THDF5_F03
+
   IMPLICIT NONE
   INTEGER :: total_error = 0
   INTEGER :: error
   INTEGER :: majnum, minnum, relnum
-  LOGICAL :: szip_flag
   INTEGER :: ret_total_error
   LOGICAL :: cleanup, status
 
@@ -152,6 +152,10 @@ PROGRAM fortranlibtest_F03
   ret_total_error = 0
   CALL multiple_dset_rw(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing multi-dataset reads and writes', total_error)
+
+  ret_total_error = 0
+  CALL test_h5p_file_image(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing h5pset/get file image', total_error)
 
 !     write(*,*)
 !     write(*,*) '========================================='

@@ -28,6 +28,7 @@
 #define FAMILY_SIZE2    (5*KB)
 #define MULTI_SIZE      128
 #define CORE_INCREMENT  (4*KB)
+#define CORE_PAGE_SIZE  (1024 * 1024)
 #define DSET1_NAME   "dset1"
 #define DSET1_DIM1   1024
 #define DSET1_DIM2   32
@@ -376,6 +377,8 @@ test_core(void)
     char        filename[1024];
     void        *fhandle=NULL;
     hsize_t     file_size;
+    hbool_t     use_write_tracking;
+    size_t      write_tracking_page_size;
     int    *points = NULL, *check = NULL, *p1, *p2;
     hid_t  dset1=-1, space1=-1;
     hsize_t  dims1[2];
@@ -386,6 +389,8 @@ test_core(void)
     /* Set property list and file name for CORE driver */
     fapl = h5_fileaccess();
     if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, TRUE) < 0)
+        TEST_ERROR;
+    if(H5Pset_core_write_tracking(fapl, TRUE, CORE_PAGE_SIZE) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
@@ -398,6 +403,14 @@ test_core(void)
 
     /* Check that the driver is correct */
     if(H5FD_CORE != H5Pget_driver(access_fapl))
+        TEST_ERROR;
+
+    /* Check that the backing store write tracking info was saved */
+    if(H5Pget_core_write_tracking(fapl, &use_write_tracking, &write_tracking_page_size) < 0)
+        TEST_ERROR;
+    if(TRUE != use_write_tracking)
+        TEST_ERROR;
+    if(CORE_PAGE_SIZE != write_tracking_page_size)
         TEST_ERROR;
 
     /* ...and close the property list */

@@ -36,18 +36,18 @@ if (H5_HAVE_PARALLEL)
   add_definitions ("-DMPICH_IGNORE_CXX_SEEK")
 endif (H5_HAVE_PARALLEL)
 
-ADD_SUBDIRECTORY (${HDF5_CPP_SOURCE_DIR}/src ${HDF5_CPP_BINARY_DIR}/src)
+add_subdirectory (${HDF5_CPP_SOURCE_DIR}/src ${HDF5_CPP_BINARY_DIR}/src)
 
 #-----------------------------------------------------------------------------
 # Build the CPP Examples
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_EXAMPLES)
-  ADD_SUBDIRECTORY (${HDF5_CPP_SOURCE_DIR}/examples ${HDF5_CPP_BINARY_DIR}/examples)
+  add_subdirectory (${HDF5_CPP_SOURCE_DIR}/examples ${HDF5_CPP_BINARY_DIR}/examples)
 endif (HDF5_BUILD_EXAMPLES)
 
 #-----------------------------------------------------------------------------
 # Build the CPP unit tests
 #-----------------------------------------------------------------------------
 if (BUILD_TESTING)
-  ADD_SUBDIRECTORY (${HDF5_CPP_SOURCE_DIR}/test ${HDF5_CPP_BINARY_DIR}/test)
+  add_subdirectory (${HDF5_CPP_SOURCE_DIR}/test ${HDF5_CPP_BINARY_DIR}/test)
 endif (BUILD_TESTING)

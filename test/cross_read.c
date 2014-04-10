@@ -50,8 +50,10 @@ const char *FILENAME[] = {
 #define DATASETNAME15      "Fletcher_float_data_be"
 #define DATASETNAME16      "Deflate_float_data_le"
 #define DATASETNAME17      "Deflate_float_data_be"
+#ifdef H5_HAVE_FILTER_SZIP
 #define DATASETNAME18      "Szip_float_data_le"
 #define DATASETNAME19      "Szip_float_data_be"
+#endif /* H5_HAVE_FILTER_SZIP */
 #define DATASETNAME20      "Shuffle_float_data_le"
 #define DATASETNAME21      "Shuffle_float_data_be"
 #define DATASETNAME22      "Nbit_float_data_le"

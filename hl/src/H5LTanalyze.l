@@ -16,7 +16,7 @@
 %{
 #include <stdlib.h>
 #include <string.h>
-#include<hdf5.h>
+#include <hdf5.h>
 #include "H5LTparse.h"
 
 int my_yyinput(char *, int);
@@ -30,7 +30,7 @@ int my_yyinput(char *, int);
 #define YY_BUF_SIZE        262144    /*Define read buffer to be 256K*/
 
 extern char *myinput;
-extern int  input_len;
+extern size_t input_len;
 
 #define STACK_SIZE      16
 
@@ -65,10 +65,6 @@ extern hbool_t is_opq_tag;
 
 hbool_t        first_quote = 1;
 
-/* For Lex and Yacc */
-/*int  input_len;
-char *myinput;*/
-    
 %}
 
 %s TAG_STRING
@@ -181,11 +177,11 @@ int my_yyinput(char *buf, int max_size)
    int ret;
     
    memcpy(buf, myinput, input_len); 
-   ret = input_len;
+   ret = (int)input_len;
    return ret;
 }
 
-int H5LTyyerror(char *msg)
+int H5LTyyerror(const char *msg)
 {
    printf("ERROR: %s before \"%s\".\n", msg, yytext);
    return 0;

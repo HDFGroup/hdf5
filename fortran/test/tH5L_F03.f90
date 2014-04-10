@@ -30,14 +30,13 @@
 !  test_iter_group
 !
 !*****
-
 MODULE liter_cb_mod
 
   USE HDF5
   USE ISO_C_BINDING
   IMPLICIT NONE
-    
-  TYPE iter_enum 
+
+  TYPE iter_enum
      INTEGER RET_ZERO
      INTEGER RET_TWO
      INTEGER RET_CHANGE
@@ -74,7 +73,7 @@ CONTAINS
     TYPE(iter_info) :: op_data
 
     INTEGER, SAVE :: count
-    INTEGER, SAVE :: count2 
+    INTEGER, SAVE :: count2
 
 !!$    
 !!$    iter_info *info = (iter_info *)op_data;
@@ -108,6 +107,10 @@ CONTAINS
   END FUNCTION liter_cb
 END MODULE liter_cb_mod
 
+MODULE TH5L_F03
+
+CONTAINS
+
 ! *****************************************
 ! ***        H 5 L   T E S T S
 ! *****************************************
@@ -121,34 +124,29 @@ END MODULE liter_cb_mod
 SUBROUTINE test_iter_group(total_error)
 
   USE HDF5 
+  USE TH5_MISC
   USE ISO_C_BINDING
   USE liter_cb_mod
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error
   INTEGER(HID_T) :: fapl
-  INTEGER(HID_T) :: file !  File ID 
+  INTEGER(HID_T) :: file             !  File ID 
   INTEGER(hid_t) :: dataset          ! Dataset ID 
   INTEGER(hid_t) :: datatype         ! Common datatype ID 
   INTEGER(hid_t) :: filespace        ! Common dataspace ID 
-  INTEGER(hid_t) :: root_group,grp   ! Root group ID 
-  INTEGER i,j                  ! counting variable 
-  INTEGER(hsize_t) idx            ! Index in the group 
+  INTEGER(hid_t) :: grp              ! Group ID 
+  INTEGER i,j                        ! counting variable 
+  INTEGER(hsize_t) idx               ! Index in the group 
   CHARACTER(LEN=11) :: DATAFILE = "titerate.h5"
   INTEGER, PARAMETER :: ndatasets = 50
   CHARACTER(LEN=10) :: name !  temporary name buffer 
   CHARACTER(LEN=10), DIMENSION(1:ndatasets+2) :: lnames !  Names of the links created 
-!!$    char dataset_name[NAMELEN];   dataset name 
 
   TYPE(iter_info), TARGET :: info
 
-!!$    iter_info info;          Custom iteration information 
-!!$    H5G_info_t ginfo;        Buffer for querying object's info 
-!!$    herr_t ret;		     Generic return value 
-
   INTEGER :: error
   INTEGER :: ret_value
-  TYPE(C_PTR) :: f_ptr
   TYPE(C_FUNPTR) :: f1
   TYPE(C_PTR) :: f2
   CHARACTER(LEN=2) :: ichr2
@@ -319,3 +317,5 @@ SUBROUTINE test_iter_group(total_error)
   CALL check("H5Fclose_f", error, total_error)
 
 END SUBROUTINE test_iter_group
+
+END MODULE TH5L_F03

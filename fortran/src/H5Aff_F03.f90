@@ -1065,17 +1065,16 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(INOUT) :: buf ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 
-    CALL h5aread_char_scalar_fix(attr_id, memtype_id, buf, LEN(buf), dims, hdferr)
+    CALL h5aread_char_scalar_fix(attr_id, memtype_id, buf, LEN(buf), hdferr)
 
   END SUBROUTINE h5aread_char_scalar
 
-  SUBROUTINE h5aread_char_scalar_fix(attr_id, memtype_id, buf, buf_len, dims, hdferr)
+  SUBROUTINE h5aread_char_scalar_fix(attr_id, memtype_id, buf, buf_len, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                              ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
     INTEGER, INTENT(IN)  :: buf_len
     CHARACTER(LEN=buf_len), INTENT(INOUT), TARGET :: buf ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr         ! Error code

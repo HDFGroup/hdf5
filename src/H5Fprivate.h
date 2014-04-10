@@ -462,6 +462,8 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_ACS_WANT_POSIX_FD_NAME              "want_posix_fd" /* Internal: query the file descriptor from the core VFD, instead of the memory address */
 #define H5F_ACS_EFC_SIZE_NAME                   "efc_size"      /* Size of external file cache */
 #define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
+#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME       "core_write_tracking_flag" /* Whether or not core VFD backing store write tracking is enabled */
+#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME  "core_write_tracking_page_size" /* The page size in kiB when core VFD write tracking is enabled */
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME 		"local"                 /* Whether absolute symlinks local to file. */

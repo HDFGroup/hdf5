@@ -165,6 +165,9 @@ H5R_term_interface(void)
 	if ((n=H5I_nmembers(H5I_REFERENCE))) {
 	    H5I_clear_type(H5I_REFERENCE, FALSE, FALSE);
 	} else {
+            /* Close deprecated interface */
+            n += H5R__term_deprec_interface();
+
 	    H5I_dec_type_ref(H5I_REFERENCE);
 	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/

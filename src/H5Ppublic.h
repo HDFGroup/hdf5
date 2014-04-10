@@ -159,11 +159,10 @@ typedef enum H5D_mpio_no_collective_cause_t {
     H5D_MPIO_SET_INDEPENDENT = 0x01,
     H5D_MPIO_DATATYPE_CONVERSION = 0x02,
     H5D_MPIO_DATA_TRANSFORMS = 0x04,
-    H5D_MPIO_SET_MPIPOSIX = 0x08,
+    H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED = 0x08,
     H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES = 0x10,
-    H5D_MPIO_POINT_SELECTIONS = 0x20,
-    H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET = 0x40,
-    H5D_MPIO_FILTERS = 0x80
+    H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET = 0x20,
+    H5D_MPIO_FILTERS = 0x40
 } H5D_mpio_no_collective_cause_t;
 
 /********************/
@@ -296,7 +295,6 @@ H5_DLL herr_t H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list
 H5_DLL herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold);
 H5_DLL herr_t H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold);
 
-
 /* File access property list (FAPL) routines */
 H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold,
     hsize_t alignment);
@@ -343,6 +341,9 @@ H5_DLL herr_t H5Pset_file_image_callbacks(hid_t fapl_id,
        H5FD_file_image_callbacks_t *callbacks_ptr);
 H5_DLL herr_t H5Pget_file_image_callbacks(hid_t fapl_id,
        H5FD_file_image_callbacks_t *callbacks_ptr);
+
+H5_DLL herr_t H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size_t page_size);
+H5_DLL herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, size_t *page_size);
 
 /* Dataset creation property list (DCPL) routines */
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);

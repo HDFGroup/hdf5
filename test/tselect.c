@@ -292,9 +292,13 @@ test_select_hyper(hid_t xfer_plist)
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
 
-    /* Exercise check for NULL buffer and valid selection */
+    /* Exercise checks for NULL buffer and valid selection */
     H5E_BEGIN_TRY {
         ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,NULL);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Dwrite");
+    H5E_BEGIN_TRY {
+        ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,H5S_ALL,H5S_ALL,xfer_plist,NULL);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Dwrite");
 
@@ -326,9 +330,13 @@ test_select_hyper(hid_t xfer_plist)
     ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
-    /* Exercise check for NULL buffer and valid selection */
+    /* Exercise checks for NULL buffer and valid selection */
     H5E_BEGIN_TRY {
         ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,NULL);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Dread");
+    H5E_BEGIN_TRY {
+        ret=H5Dread(dataset,H5T_NATIVE_UCHAR,H5S_ALL,H5S_ALL,xfer_plist,NULL);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Dread");
 
@@ -2734,7 +2742,6 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
     hid_t dset_type, hid_t xfer_plist)
 {
     hbool_t		data_ok;
-    hbool_t		start_in_checker[5];
     hid_t               fapl;                   /* File access property list */
     hid_t		fid;			/* HDF5 File IDs		*/
     hid_t		full_small_cube_sid;    /* Dataspace for small cube w/all selection */
@@ -2955,7 +2962,6 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
      * large cube.
      */
 
-    start_in_checker[0] = TRUE;
     u = 0;
     do {
         if(small_rank_offset > 0)
@@ -3063,7 +3069,6 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                                                              sel_start);
 
 
-    start_in_checker[0] = TRUE;
     u = 0;
     do {
         if(0 < small_rank_offset)
@@ -3207,7 +3212,6 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                                                              small_rank,
                                                              sel_start);
 
-    start_in_checker[0] = TRUE;
     u = 0;
     do {
         if(small_rank_offset > 0)
@@ -3340,7 +3344,6 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                                                              small_rank,
                                                              sel_start);
 
-    start_in_checker[0] = TRUE;
     u = 0;
     do {
         if(small_rank_offset > 0)

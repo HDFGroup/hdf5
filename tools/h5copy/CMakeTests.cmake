@@ -19,7 +19,7 @@
       ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_misc1.out
   )
 
-  FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
   foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
     GET_FILENAME_COMPONENT(fname "${listfiles}" NAME)

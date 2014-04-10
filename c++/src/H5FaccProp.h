@@ -62,18 +62,10 @@ class H5_DLLCPP FileAccPropList : public PropList {
 	FileAccPropList getFamily(hsize_t& memb_size) const;
 
 	// Emulates the old split file driver,
-	void setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist,
+	void setSplit(const FileAccPropList& meta_plist, const FileAccPropList& raw_plist,
 	     const char* meta_ext = ".meta", const char* raw_ext = ".raw" ) const;
-	void setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist,
+	void setSplit(const FileAccPropList& meta_plist, const FileAccPropList& raw_plist,
 	     const H5std_string& meta_ext, const H5std_string& raw_ext ) const;
-
-#ifdef H5_HAVE_STREAM // for Stream Virtual File Driver
-	// Modifies this file access property list to use the Stream driver.
-	void setStream(H5FD_stream_fapl_t &fapl) const;
-
-	// Retrieves the streaming I/O driver settings
-	H5FD_stream_fapl_t getStream() const;
-#endif
 
 	// Sets the maximum size of the data sieve buffer.
 	void setSieveBufSize(size_t bufsize) const;

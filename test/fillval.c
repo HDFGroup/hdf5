@@ -289,7 +289,7 @@ static int
 test_getset_vl(hid_t fapl)
 {
     hsize_t dims[1] = {2};
-    hid_t fileid = (-1), spaceid = (-1), typeid = (-1), datasetid = (-1), plistid = (-1);
+    hid_t fileid = (-1), spaceid = (-1), dtypeid = (-1), datasetid = (-1), plistid = (-1);
     char fill_value[] = "aaaa";
     char orig_fill_value[] = "aaaa";
     char *f1 = fill_value;
@@ -299,18 +299,18 @@ test_getset_vl(hid_t fapl)
     TESTING("property lists, with variable-length datatype");
 
     /* Create string type. */
-    if((typeid =  H5Tcopy(H5T_C_S1)) < 0) TEST_ERROR
-    if(H5Tset_size(typeid, H5T_VARIABLE) < 0) TEST_ERROR
+    if((dtypeid =  H5Tcopy(H5T_C_S1)) < 0) TEST_ERROR
+    if(H5Tset_size(dtypeid, H5T_VARIABLE) < 0) TEST_ERROR
 
     /* Set up dataset creation property list, with fill value */
     if((plistid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if(H5Pset_fill_value(plistid, typeid, &f1) < 0) TEST_ERROR
+    if(H5Pset_fill_value(plistid, dtypeid, &f1) < 0) TEST_ERROR
 
     /* Modify original fill value string */
     fill_value[0] = 'b';
 
     /* Retrieve fill value from property */
-    if(H5Pget_fill_value(plistid, typeid, &f2) < 0) TEST_ERROR
+    if(H5Pget_fill_value(plistid, dtypeid, &f2) < 0) TEST_ERROR
 
     /* Verify that the fill value is the original value */
     if(HDstrcmp(f2, orig_fill_value)) TEST_ERROR
@@ -324,7 +324,7 @@ test_getset_vl(hid_t fapl)
 
     /* Write an dataset of this type. */
     if((spaceid = H5Screate_simple(1, dims, NULL)) < 0) TEST_ERROR
-    if((datasetid = H5Dcreate2(fileid, "Dataset", typeid, spaceid, H5P_DEFAULT, plistid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((datasetid = H5Dcreate2(fileid, "Dataset", dtypeid, spaceid, H5P_DEFAULT, plistid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close IDs (except datatype) */
     if(H5Dclose(datasetid) < 0) TEST_ERROR
@@ -341,7 +341,7 @@ test_getset_vl(hid_t fapl)
     if((plistid = H5Dget_create_plist(datasetid)) < 0) TEST_ERROR
 
     /* Query fill value */
-    if(H5Pget_fill_value(plistid, typeid, &f2) < 0) TEST_ERROR
+    if(H5Pget_fill_value(plistid, dtypeid, &f2) < 0) TEST_ERROR
 
     /* Verify that the fill value is the original value */
     if(HDstrcmp(f2, orig_fill_value)) TEST_ERROR
@@ -353,7 +353,7 @@ test_getset_vl(hid_t fapl)
     if(H5Dclose(datasetid) < 0) TEST_ERROR
     if(H5Fclose(fileid) < 0) TEST_ERROR
     if(H5Pclose(plistid) < 0) TEST_ERROR
-    if(H5Tclose(typeid) < 0) TEST_ERROR
+    if(H5Tclose(dtypeid) < 0) TEST_ERROR
 
     PASSED();
     return 0;

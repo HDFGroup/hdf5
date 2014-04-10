@@ -28,12 +28,18 @@
 !  lapl_nlinks
 !
 !*****
+
+MODULE TH5G_1_8
+
+CONTAINS
+
 SUBROUTINE group_test(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
 
   INTEGER(HID_T) :: fapl, fapl2, my_fapl ! /* File access property lists */
 
@@ -134,9 +140,10 @@ END SUBROUTINE group_test
 SUBROUTINE group_info(cleanup, fapl, total_error)
 
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   INTEGER(HID_T), INTENT(IN) :: fapl
 
   INTEGER(HID_T) :: gcpl_id ! /* Group creation property list ID */
@@ -450,9 +457,10 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
    SUBROUTINE timestamps(cleanup, fapl, total_error)
 
      USE HDF5 ! This module contains all necessary modules
+     USE TH5_MISC
 
      IMPLICIT NONE
-     INTEGER, INTENT(OUT) :: total_error
+     INTEGER, INTENT(INOUT) :: total_error
      INTEGER(HID_T), INTENT(IN) :: fapl
 
      INTEGER(HID_T) :: file_id !/* File ID */
@@ -646,9 +654,10 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
    SUBROUTINE mklinks(fapl, total_error)
 
      USE HDF5 ! This module contains all necessary modules
+     USE TH5_MISC
 
      IMPLICIT NONE
-     INTEGER, INTENT(OUT) :: total_error
+     INTEGER, INTENT(INOUT) :: total_error
      INTEGER(HID_T), INTENT(IN) :: fapl
 
      INTEGER(HID_T) :: file, scalar, grp, d1
@@ -661,10 +670,10 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      INTEGER :: corder ! Specifies the link’s creation order position.
      LOGICAL :: f_corder_valid ! Indicates whether the value in corder is valid.
      INTEGER :: link_type ! Specifies the link class:
-     	                              !  H5L_TYPE_HARD_F      - Hard link
-     	                              !  H5L_TYPE_SOFT_F      - Soft link
-     	                              !  H5L_TYPE_EXTERNAL_F  - External link
-     	                              !  H5L_TYPE_ERROR _F    - Error
+                          !  H5L_TYPE_HARD_F      - Hard link
+                          !  H5L_TYPE_SOFT_F      - Soft link
+                          !  H5L_TYPE_EXTERNAL_F  - External link
+                          !  H5L_TYPE_ERROR _F    - Error
      INTEGER(HADDR_T) :: address  ! If the link is a hard link, address specifies the file address that the link points to
      INTEGER(SIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
 
@@ -741,9 +750,10 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
   SUBROUTINE test_move_preserves(fapl_id, total_error)
 
     USE HDF5 ! This module contains all necessary modules
+    USE TH5_MISC
 
     IMPLICIT NONE
-    INTEGER, INTENT(OUT) :: total_error
+    INTEGER, INTENT(INOUT) :: total_error
     INTEGER(HID_T), INTENT(IN) :: fapl_id
 
     INTEGER(HID_T):: file_id
@@ -768,10 +778,10 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
     INTEGER :: corder ! Specifies the link’s creation order position.
     LOGICAL :: f_corder_valid ! Indicates whether the value in corder is valid.
     INTEGER :: link_type ! Specifies the link class:
-     	                              !  H5L_TYPE_HARD_F      - Hard link
-     	                              !  H5L_TYPE_SOFT_F      - Soft link
-     	                              !  H5L_TYPE_EXTERNAL_F  - External link
-     	                              !  H5L_TYPE_ERROR _F    - Error
+                         !  H5L_TYPE_HARD_F      - Hard link
+                         !  H5L_TYPE_SOFT_F      - Soft link
+                         !  H5L_TYPE_EXTERNAL_F  - External link
+                         !  H5L_TYPE_ERROR _F    - Error
     INTEGER(HADDR_T) :: address  ! If the link is a hard link, address specifies the file address that the link points to
     INTEGER(SIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
 
@@ -948,9 +958,10 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 
 
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   INTEGER(HID_T), INTENT(IN) :: fapl2
   INTEGER :: error
 
@@ -962,8 +973,8 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
   INTEGER(size_t) :: lheap_size_hint !/* Local heap size hint */
   INTEGER :: max_compact            !/* Maximum # of links to store in group compactly */
   INTEGER :: min_dense              !/* Minimum # of links to store in group "densely" */
-  INTEGER :: est_num_entries	!/* Estimated # of entries in group */
-  INTEGER :: est_name_len		!/* Estimated length of entry name */
+  INTEGER :: est_num_entries        !/* Estimated # of entries in group */
+  INTEGER :: est_name_len           !/* Estimated length of entry name */
   CHARACTER(LEN=NAME_BUF_SIZE) :: filename = 'fixx.h5'
   INTEGER(SIZE_T) :: LIFECYCLE_LOCAL_HEAP_SIZE_HINT = 256
   INTEGER :: LIFECYCLE_MAX_COMPACT = 4
@@ -1096,9 +1107,10 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 
 !    USE ISO_C_BINDING
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   INTEGER(HID_T), INTENT(IN) :: fapl
   INTEGER :: error
 
@@ -1165,9 +1177,10 @@ END SUBROUTINE cklinks
 SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
 
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   INTEGER(HID_T), INTENT(IN) :: fapl
 
   INTEGER(HID_T) :: file_id  ! /* File ID */
@@ -1406,6 +1419,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
     hard_link, use_index, total_error)
 
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
@@ -1509,6 +1523,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   SUBROUTINE test_lcpl(cleanup, fapl, total_error)
 
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
@@ -1526,10 +1541,10 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   INTEGER :: corder ! Specifies the link’s creation order position.
   LOGICAL :: f_corder_valid ! Indicates whether the value in corder is valid.
   INTEGER :: link_type ! Specifies the link class:
-     	                              !  H5L_TYPE_HARD_F      - Hard link
-     	                              !  H5L_TYPE_SOFT_F      - Soft link
-     	                              !  H5L_TYPE_EXTERNAL_F  - External link
-     	                              !  H5L_TYPE_ERROR _F    - Error
+                       !  H5L_TYPE_HARD_F      - Hard link
+                       !  H5L_TYPE_SOFT_F      - Soft link
+                       !  H5L_TYPE_EXTERNAL_F  - External link
+                       !  H5L_TYPE_ERROR _F    - Error
   INTEGER(HADDR_T) :: address  ! If the link is a hard link, address specifies the file address that the link points to
   INTEGER(SIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
 
@@ -1635,13 +1650,11 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   CALL check("h5sget_simple_extent_dims_f",error, total_error)
 
   DO i = 1, 2
-     tmp1 = dimsout(i)
-     tmp2 = extend_dim(i)
-!EP     CALL VERIFY("H5Sget_simple_extent_dims", dimsout(i), extend_dim(i), total_error)
+     tmp1 = INT(dimsout(i))
+     tmp2 = INT(extend_dim(i))
      CALL VERIFY("H5Sget_simple_extent_dims", tmp1, tmp2, total_error)
-!EP     CALL VERIFY("H5Sget_simple_extent_dims", maxdimsout(i), dims(i), total_error)
-     tmp1 = maxdimsout(i)
-     tmp2 = dims(i)
+     tmp1 = INT(maxdimsout(i))
+     tmp2 = INT(dims(i))
      CALL VERIFY("H5Sget_simple_extent_dims", tmp1, tmp2, total_error)
   ENDDO
 
@@ -1822,6 +1835,7 @@ END SUBROUTINE test_lcpl
 SUBROUTINE objcopy(fapl, total_error)
 
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
@@ -1885,6 +1899,7 @@ END SUBROUTINE objcopy
 SUBROUTINE lapl_nlinks( fapl, total_error)
 
   USE HDF5
+  USE TH5_MISC
 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: fapl
@@ -2140,3 +2155,5 @@ SUBROUTINE lapl_nlinks( fapl, total_error)
   CALL check("H5Fclose_f", error, total_error)
 
 END SUBROUTINE lapl_nlinks
+
+END MODULE TH5G_1_8

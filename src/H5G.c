@@ -224,16 +224,19 @@ H5G_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	if((n = H5I_nmembers(H5I_GROUP)))
-	    H5I_clear_type(H5I_GROUP, FALSE, FALSE);
-	else {
-	    /* Destroy the group object id group */
-	    H5I_dec_type_ref(H5I_GROUP);
+        if((n = H5I_nmembers(H5I_GROUP)))
+            H5I_clear_type(H5I_GROUP, FALSE, FALSE);
+        else {
+            /* Close deprecated interface */
+            n += H5G__term_deprec_interface();
 
-	    /* Mark closed */
-	    H5_interface_initialize_g = 0;
-	    n = 1; /*H5I*/
-	} /* end else */
+            /* Destroy the group object id group */
+            H5I_dec_type_ref(H5I_GROUP);
+
+            /* Mark closed */
+            H5_interface_initialize_g = 0;
+            n = 1; /*H5I*/
+        } /* end else */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)

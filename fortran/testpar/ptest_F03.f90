@@ -19,6 +19,7 @@
 
 PROGRAM parallel_test_F03
   USE hdf5
+  USE TH5_MISC 
   USE mpi
   IMPLICIT NONE
 

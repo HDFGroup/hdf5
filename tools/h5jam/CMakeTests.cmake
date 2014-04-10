@@ -20,7 +20,7 @@
       twithub513.h5
   )
 
-  FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
     set (dest "${PROJECT_BINARY_DIR}/testfiles/${h5_file}")
     #message (STATUS " Copying ${h5_file}")

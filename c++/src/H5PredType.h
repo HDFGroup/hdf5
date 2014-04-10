@@ -233,11 +233,11 @@ class H5_DLLCPP PredType : public AtomType {
         /*! \brief This dummy function do not inherit from DataType - it will
             throw a DataTypeIException if invoked.
         */
-        void commit(H5Location& loc, const H5std_string& name );
+        void commit(const H5Location& loc, const H5std_string& name );
         /*! \brief This dummy function do not inherit from DataType - it will
             throw a DataTypeIException if invoked.
         */
-        void commit(H5Location& loc, const char* name );
+        void commit(const H5Location& loc, const char* name );
         /*! \brief This dummy function do not inherit from DataType - it will
             throw a DataTypeIException if invoked.
         */

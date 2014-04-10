@@ -43,9 +43,6 @@
 #define IS_H5FD_MPIO(f)	/* (H5F_t *f) */				    \
     (H5FD_MPIO==H5F_DRIVER_ID(f))
 
-#define IS_H5FD_MPIPOSIX(f) /* (H5F_t *f) */                                \
-    (H5FD_MPIPOSIX==H5F_DRIVER_ID(f))
-
 #ifdef H5_HAVE_PARALLEL
 /* ======== Temporary data transfer properties ======== */
 /* Definitions for memory MPI type property */

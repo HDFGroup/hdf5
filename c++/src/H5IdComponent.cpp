@@ -25,6 +25,7 @@
 #include "H5Library.h"
 #include "H5IdComponent.h"
 #include "H5DataSpace.h"
+#include "H5private.h"			// for HDmemset
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -129,7 +130,7 @@ int IdComponent::getCounter() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	hdfObjectType
+// Function:	getHDFObjType (static)
 ///\brief	Given an id, returns the type of the object.
 ///\return	a valid HDF object type, which may be one of the following:
 ///		\li \c H5I_FILE
@@ -151,6 +152,26 @@ H5I_type_t IdComponent::getHDFObjType(const hid_t obj_id)
 	return H5I_BADID; // invalid
     else
 	return id_type; // valid type
+}
+
+//--------------------------------------------------------------------------
+// Function:	getHDFObjType
+///\brief	Returns the type of the object.  It is an overloaded function
+///		of the above function.
+///\return	a valid HDF object type, which may be one of the following:
+///		\li \c H5I_FILE
+///		\li \c H5I_GROUP
+///		\li \c H5I_DATATYPE
+///		\li \c H5I_DATASPACE
+///		\li \c H5I_DATASET
+///		\li \c H5I_ATTR
+///		\li or \c H5I_BADID, if no valid type can be determined or the
+///				input object id is invalid.
+// Programmer   Binh-Minh Ribler - Mar, 2014
+//--------------------------------------------------------------------------
+H5I_type_t IdComponent::getHDFObjType() const
+{
+    return(getHDFObjType(getId()));
 }
 
 //--------------------------------------------------------------------------
@@ -289,6 +310,8 @@ H5std_string IdComponent::p_get_file_name() const
 
    // Call H5Fget_name again to get the actual file name
    char* name_C = new char[name_size+1];  // temporary C-string for C API
+   HDmemset(name_C, 0, name_size+1); // clear buffer
+
    name_size = H5Fget_name(temp_id, name_C, name_size+1);
 
    // Check for failure again

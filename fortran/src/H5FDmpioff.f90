@@ -131,6 +131,7 @@ CONTAINS
     INTEGER, EXTERNAL :: h5pset_dxpl_mpio_c
     hdferr = h5pset_dxpl_mpio_c(prp_id, data_xfer_mode)
   END SUBROUTINE h5pset_dxpl_mpio_f
+
 !****s* H5FDMPIO/h5pget_dxpl_mpio_f
 !
 ! NAME
@@ -163,76 +164,6 @@ CONTAINS
     INTEGER, EXTERNAL :: h5pget_dxpl_mpio_c
     hdferr = h5pget_dxpl_mpio_c(prp_id, data_xfer_mode)
   END SUBROUTINE h5pget_dxpl_mpio_f
-
-!****s* H5FDMPIO/h5pset_fapl_mpiposix_f
-!
-! NAME
-!  h5pset_fapl_mpiposix_f
-!
-! PURPOSE
-!  Stores MPI IO communicator information to the file
-!  access property list.
-!
-! INPUTS
-!  prp_id    - File access property list identifier.
-!  comm      - MPI-2 communicator.
-!  use_gpfs  - Logical flag to use the GPFS hints.
-! OUTPUTS
-!  hdferr    - Returns 0 if successful and -1 if fails.
-!
-! AUTHOR
-!  Elena Pourmal
-!  May 6, 2003
-!
-! Fortran90 Interface:
-  SUBROUTINE h5pset_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN)  :: prp_id
-    INTEGER,        INTENT(IN)  :: comm
-    LOGICAL,        INTENT(IN)  :: use_gpfs
-    INTEGER,        INTENT(OUT) :: hdferr
-!*****
-    INTEGER :: flag
-    INTEGER, EXTERNAL :: h5pset_fapl_mpiposix_c
-    flag = 0
-    IF(use_gpfs) flag = 1
-    hdferr = h5pset_fapl_mpiposix_c(prp_id, comm, flag)
-  END SUBROUTINE h5pset_fapl_mpiposix_f
-
-!****s* H5FDMPIO/h5pget_fapl_mpiposix_f
-!
-! NAME
-!  h5pget_fapl_mpiposix_f
-!
-! PURPOSE
-!  Returns MPI communicator information.
-!
-! INPUTS
-!  prp_id    - File access property list identifier.
-! OUTPUTS
-!  comm      - MPI-2 communicator.
-!  use_gpfs  - Flag to use GPFS hints.
-!  hdferr    - Returns 0 if successful and -1 if fails.
-! AUTHOR
-!  Elena Pourmal
-!  May 6, 2003
-!
-! Fortran90 Interface:
-  SUBROUTINE h5pget_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN)  :: prp_id
-    INTEGER,        INTENT(OUT) :: comm
-    LOGICAL,        INTENT(OUT) :: use_gpfs
-    INTEGER,        INTENT(OUT) :: hdferr
-!*****
-    INTEGER :: flag
-
-    INTEGER, EXTERNAL :: h5pget_fapl_mpiposix_c
-    hdferr = h5pget_fapl_mpiposix_c(prp_id, comm, flag)
-    use_gpfs = .FALSE.
-    IF (flag .EQ. 1) use_gpfs = .TRUE.
-  END SUBROUTINE h5pget_fapl_mpiposix_f
-
 
 !****s* H5P/h5pget_mpio_actual_io_mode_f
 ! NAME

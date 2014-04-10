@@ -19,7 +19,8 @@
 !//////////////////////////////////////////////////////////
 
 SUBROUTINE multiple_dset_write(length, do_collective, do_chunk, mpi_size, mpi_rank, nerrors)
-  USE hdf5
+  USE HDF5
+  USE TH5_MISC
   IMPLICIT NONE
   INCLUDE 'mpif.h'
 

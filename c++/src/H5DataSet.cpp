@@ -85,6 +85,7 @@ DataSet::DataSet(const DataSet& original) : AbstractDs(original), H5Object(origi
 ///			  object that the dataset is located within.
 ///\param	ref - IN: Reference pointer
 ///\param	ref_type - IN: Reference type - default to H5R_OBJECT
+///\param	plist - IN: Property list - default to PropList::DEFAULT
 ///\exception	H5::DataSetIException
 ///\par Description
 ///		\c loc can be DataSet, Group, H5File, or named DataType, that
@@ -106,6 +107,7 @@ DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, co
 ///\param	attr - IN: Specifying location where the referenced object is in
 ///\param	ref - IN: Reference pointer
 ///\param	ref_type - IN: Reference type - default to H5R_OBJECT
+///\param	plist - IN: Property list - default to PropList::DEFAULT
 ///\exception	H5::ReferenceException
 // Programmer	Binh-Minh Ribler - Oct, 2006
 // Modification
@@ -294,7 +296,7 @@ void DataSet::getSpaceStatus(H5D_space_status_t& status) const
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-hsize_t DataSet::getVlenBufSize( DataType& type, DataSpace& space ) const
+hsize_t DataSet::getVlenBufSize(const DataType& type, const DataSpace& space ) const
 {
    // Obtain identifiers for C API
    hid_t type_id = type.getId();
@@ -577,7 +579,7 @@ void DataSet::extend( const hsize_t* size ) const
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSet::fillMemBuf(const void *fill, DataType& fill_type, void *buf, DataType& buf_type, DataSpace& space)
+void DataSet::fillMemBuf(const void *fill, const DataType& fill_type, void *buf, const DataType& buf_type, const DataSpace& space)
 {
     hid_t fill_type_id = fill_type.getId();
     hid_t buf_type_id = buf_type.getId();
@@ -600,7 +602,7 @@ void DataSet::fillMemBuf(const void *fill, DataType& fill_type, void *buf, DataT
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSet::fillMemBuf(void *buf, DataType& buf_type, DataSpace& space)
+void DataSet::fillMemBuf(void *buf, const DataType& buf_type, const DataSpace& space)
 {
     hid_t buf_type_id = buf_type.getId();
     hid_t space_id = space.getId();
@@ -629,7 +631,7 @@ hid_t DataSet::getId() const
 
 //--------------------------------------------------------------------------
 // Function:	DataSet::p_read_fixed_len (private)
-// brief	Reads a fixed length \a H5std_string from an dataset.
+// brief	Reads a fixed length \a H5std_string from a dataset.
 // param	mem_type  - IN: DataSet datatype (in memory)
 // param	strg      - IN: Buffer for read string
 // exception	H5::DataSetIException
@@ -643,14 +645,14 @@ void DataSet::p_read_fixed_len(const hid_t mem_type_id, const hid_t mem_space_id
     // Only allocate for fixed-len string.
 
     // Get the size of the dataset's data
-    size_t attr_size = getInMemDataSize();
+    size_t data_size = getInMemDataSize();
 
     // If there is data, allocate buffer and read it.
-    if (attr_size > 0)
+    if (data_size > 0)
     {
-	char *strg_C = NULL;
+	char *strg_C = new char [data_size+1];
+	HDmemset(strg_C, 0, data_size+1); // clear buffer
 
-	strg_C = new char [(size_t)attr_size+1];
 	herr_t ret_value = H5Dread(id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, strg_C);
 
 	if( ret_value < 0 )

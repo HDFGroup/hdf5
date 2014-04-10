@@ -29,14 +29,12 @@
 
 #define FILEN		"testmeta.h5"
 
-#define MEMB_SIZE		100000000
 #define CHUNK_SIZE		512
 
 #define NDATAARRAYS		3
 /*#define NPOINTS			2048*/
 #define NPOINTS			20
 #define NEXTARRAYS		10
-#define NWATTRS			2
 #define NDATAOBJECTS	100000
 
 int main(void)

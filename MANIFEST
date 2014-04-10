@@ -77,6 +77,7 @@
 ./bin/runtest        _DO_NOT_DISTRIBUTE_
 ./bin/snapshot
 ./bin/snapshot_version      _DO_NOT_DISTRIBUTE_
+./bin/test-driver
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
@@ -362,6 +363,7 @@
 ./fortran/test/tH5G_1_8.f90
 ./fortran/test/tH5I.f90
 ./fortran/test/tH5L_F03.f90
+./fortran/test/tH5MISC_1_8.f90
 ./fortran/test/tH5O.f90
 ./fortran/test/tH5O_F03.f90
 ./fortran/test/tH5P_F03.f90
@@ -373,6 +375,9 @@
 ./fortran/test/tH5T.f90
 ./fortran/test/tH5VL.f90
 ./fortran/test/tH5Z.f90
+./fortran/test/tHDF5_1_8.f90
+./fortran/test/tHDF5_F03.f90
+./fortran/test/tHDF5.f90
 
 ./fortran/testpar/Makefile.am
 ./fortran/testpar/Makefile.in
@@ -497,12 +502,14 @@
 ./c++/test/h5cpputil.h
 ./c++/test/tattr.cpp
 ./c++/test/tcompound.cpp
+./c++/test/tdspl.cpp
 ./c++/test/testhdf5.cpp
 ./c++/test/tfile.cpp
 ./c++/test/tfilter.cpp
 ./c++/test/th5s.cpp
 ./c++/test/th5s.h5
 ./c++/test/tlinks.cpp
+./c++/test/tobject.cpp
 ./c++/test/ttypes.cpp
 ./c++/test/trefer.cpp
 ./c++/test/tvlstr.cpp
@@ -696,8 +703,6 @@
 ./src/H5FDmpi.h
 ./src/H5FDmpio.c
 ./src/H5FDmpio.h
-./src/H5FDmpiposix.c
-./src/H5FDmpiposix.h
 ./src/H5FDmulti.c
 ./src/H5FDmulti.h
 ./src/H5FDpkg.h
@@ -1161,14 +1166,12 @@
 ./testpar/t_pflush1.c
 ./testpar/t_pflush2.c
 ./testpar/t_pmulti_dset.c
-./testpar/t_posix_compliant.c
 ./testpar/t_prop.c
 ./testpar/t_shapesame.c
 ./testpar/t_span_tree.c
 ./testpar/testpar.h
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
-./testpar/testph5.sh.in
 
 ./tools/COPYING
 ./tools/Makefile.am
@@ -1263,6 +1266,7 @@
 # h5repack sources
 ./tools/h5repack/Makefile.am
 ./tools/h5repack/Makefile.in
+./tools/h5repack/dynlib_rpk.c
 ./tools/h5repack/h5repack.sh.in
 ./tools/h5repack/h5repack_plugin.sh.in
 ./tools/h5repack/h5repack.c

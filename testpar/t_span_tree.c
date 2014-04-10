@@ -261,7 +261,6 @@ void coll_write_test(int chunk_factor)
 
   int      *matrix_out, *matrix_out1, *vector;
 
-  hbool_t  use_gpfs = FALSE;
   int      mpi_size,mpi_rank;
 
   MPI_Comm comm = MPI_COMM_WORLD;
@@ -293,7 +292,7 @@ void coll_write_test(int chunk_factor)
   for (i = 1; i < MSPACE1_DIM*mpi_size - 1; i++) vector[i] = i;
 
   /* Grab file access property list */
-  facc_plist = create_faccess_plist(comm, info, facc_type, use_gpfs);
+  facc_plist = create_faccess_plist(comm, info, facc_type);
   VRFY((facc_plist >= 0),"");
 
   /*
@@ -474,7 +473,7 @@ void coll_write_test(int chunk_factor)
   ***/
 
   /* Obtain file access property list with MPI-IO driver */
-  facc_plist = create_faccess_plist(comm, info, facc_type, use_gpfs);
+  facc_plist = create_faccess_plist(comm, info, facc_type);
   VRFY((facc_plist >= 0),"");
 
   file = H5Fopen(filename, H5F_ACC_RDONLY, facc_plist);
@@ -724,7 +723,6 @@ coll_read_test(int chunk_factor)
 						       dataset */
 
 #endif
-  hbool_t  use_gpfs = FALSE;
   int      mpi_size,mpi_rank;
 
   MPI_Comm comm = MPI_COMM_WORLD;
@@ -749,7 +747,7 @@ coll_read_test(int chunk_factor)
   /*** For testing collective hyperslab selection read ***/
 
   /* Obtain file access property list */
-  facc_plist = create_faccess_plist(comm, info, facc_type, use_gpfs);
+  facc_plist = create_faccess_plist(comm, info, facc_type);
   VRFY((facc_plist >= 0),"");
 
    /*
@@ -1582,7 +1580,6 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
     hsize_t	  max_dims[32];
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
     const char   *filename;
-    hbool_t	  use_gpfs = FALSE;   /* Use GPFS hints */
     hbool_t	  data_ok = FALSE;
     hbool_t	  mis_match = FALSE;
     int           i;
@@ -1717,7 +1714,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
      * CREATE AN HDF5 FILE WITH PARALLEL ACCESS
      * ---------------------------------------*/
     /* setup file access template */
-    acc_tpl = create_faccess_plist(mpi_comm, mpi_info, facc_type, use_gpfs);
+    acc_tpl = create_faccess_plist(mpi_comm, mpi_info, facc_type);
     VRFY((acc_tpl >= 0), "create_faccess_plist() succeeded");
 
     /* create the file collectively */
@@ -2681,7 +2678,6 @@ link_chunk_collective_io_test(void)
     /* const char *fcnName = "link_chunk_collective_io_test()"; */
     const char *filename;
     hbool_t    mis_match = FALSE;
-    hbool_t    use_gpfs = FALSE;   /* Use GPFS hints */
     int	       i;
     int	       mrc;
     int        mpi_rank;
@@ -2718,7 +2714,7 @@ link_chunk_collective_io_test(void)
     HDassert( filename != NULL );
 
     /* setup file access template */
-    acc_tpl = create_faccess_plist(mpi_comm, mpi_info, facc_type, use_gpfs);
+    acc_tpl = create_faccess_plist(mpi_comm, mpi_info, facc_type);
     VRFY((acc_tpl >= 0), "create_faccess_plist() succeeded");
 
     /* create the file collectively */

@@ -200,12 +200,12 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
         ${HDF5_SOURCE_DIR}/release_docs/COPYING
         ${HDF5_SOURCE_DIR}/release_docs/RELEASE.txt
     )
-    if (WIN32 AND NOT CYGWIN)
+    if (WIN32)
       set (release_files
           ${release_files}
           ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_VS.txt
       )
-    endif (WIN32 AND NOT CYGWIN)
+    endif (WIN32)
     if (HDF5_PACK_INSTALL_DOCS)
       set (release_files
           ${release_files}
@@ -214,18 +214,17 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
           ${HDF5_SOURCE_DIR}/release_docs/INSTALL
       )
       if (WIN32)
-        if (NOT CYGWIN)
-          set (release_files
-              ${release_files}
-              ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Windows.txt
-          )
-        else (NOT CYGWIN)
-          set (release_files
-              ${release_files}
-              ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Cygwin.txt
-          )
-        endif (NOT CYGWIN)
+        set (release_files
+            ${release_files}
+            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Windows.txt
+        )
       endif (WIN32)
+      if (CYGWIN)
+        set (release_files
+            ${release_files}
+            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Cygwin.txt
+        )
+      endif (CYGWIN)
       if (HDF5_ENABLE_PARALLEL)
         set (release_files
             ${release_files}

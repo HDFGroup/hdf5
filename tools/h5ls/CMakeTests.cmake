@@ -92,7 +92,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes2be.ls
   )
 
-  FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
   # copy the list of test files
   foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})

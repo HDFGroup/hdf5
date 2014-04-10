@@ -112,6 +112,10 @@ CONTAINS
 
 END MODULE visit_cb
 
+
+MODULE TH5O_F03
+
+CONTAINS
 !/****************************************************************
 !**
 !**  test_h5o_refcount(): Test H5O refcounting functions.
@@ -121,6 +125,7 @@ END MODULE visit_cb
 SUBROUTINE test_h5o_refcount(total_error)
 
   USE HDF5 
+  USE TH5_MISC
   USE ISO_C_BINDING
   IMPLICIT NONE
 
@@ -259,6 +264,7 @@ END SUBROUTINE test_h5o_refcount
 SUBROUTINE obj_visit(total_error)
 
   USE HDF5
+  USE TH5_MISC
 
   USE visit_cb
   USE ISO_C_BINDING
@@ -268,7 +274,6 @@ SUBROUTINE obj_visit(total_error)
 
   TYPE(ovisit_ud_t), TARGET :: udata ! User-data for visiting
   INTEGER(hid_t) :: fid = -1
-  INTEGER(hid_t) :: gid = -1  ! Group ID
   TYPE(C_PTR) :: f_ptr
   TYPE(C_FUNPTR) :: fun_ptr
   CHARACTER(LEN=180) :: object_name
@@ -344,6 +349,7 @@ END SUBROUTINE obj_visit
 SUBROUTINE obj_info(total_error)
 
   USE HDF5
+  USE TH5_MISC
   USE ISO_C_BINDING
   IMPLICIT NONE
 
@@ -356,7 +362,6 @@ SUBROUTINE obj_info(total_error)
   TYPE(hobj_ref_t_f), TARGET :: wref     ! Reference to write 
   TYPE(hobj_ref_t_f), TARGET :: rref     ! Reference to read
   TYPE(H5O_info_t) :: oinfo              ! Object info struct 
-  INTEGER :: count = 0                   ! Count within iterated group 
   INTEGER :: error
   TYPE(C_PTR) :: f_ptr
 
@@ -477,6 +482,7 @@ END SUBROUTINE obj_info
 SUBROUTINE build_visit_file(fid)
 
   USE HDF5
+  USE TH5_MISC
   IMPLICIT NONE
 
   INTEGER(hid_t) :: fid                  ! File ID 
@@ -545,3 +551,5 @@ SUBROUTINE build_visit_file(fid)
   CALL H5Tclose_f(tid, error)
 
 END SUBROUTINE build_visit_file
+
+END MODULE TH5O_F03

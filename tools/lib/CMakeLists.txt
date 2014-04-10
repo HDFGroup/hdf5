@@ -47,7 +47,10 @@ H5_SET_LIB_OPTIONS (
   HDF5_TOOLS_LIB_NAME_DEBUG
 )
 #set_target_properties (${HDF5_TOOLS_LIB_TARGET} PROPERTIES COMPILE_DEFINITIONS H5DIFF_DEBUG)
-set_target_properties (${HDF5_TOOLS_LIB_TARGET} PROPERTIES FOLDER libraries/tools)
+set_target_properties (${HDF5_TOOLS_LIB_TARGET} PROPERTIES 
+    FOLDER libraries/tools
+    INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+)
 
 ##############################################################################
 ##############################################################################

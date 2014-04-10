@@ -1216,7 +1216,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
             /* Render the element */
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "<%sOpaqueType Tag=\"%s\" ",xmlnsprefix, mname);
-            HDfree(mname);
+            H5free_memory(mname);
             size = H5Tget_size(type);
             h5tools_str_append(&buffer, "Size=\"%lu\"/>", (unsigned long)size);
             h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
@@ -1265,7 +1265,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
                 h5tools_str_append(&buffer, "<%sField FieldName=\"%s\">",xmlnsprefix, t_fname);
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-                HDfree(mname);
+                H5free_memory(mname);
                 HDfree(t_fname);
                 dump_indent += COL;
                 ctx.indent_level++;
@@ -3623,7 +3623,8 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "\"%s\"", name);
             h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-
+            if(name)
+                H5free_memory(name);
             ctx.need_prefix = TRUE;
             h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
@@ -4526,7 +4527,7 @@ xml_print_enum(hid_t type)
 
     /* Release resources */
     for (i = 0; i < nmembs; i++)
-        HDfree(name[i]);
+        H5free_memory(name[i]);
 
     HDfree(name);
     HDfree(value);
