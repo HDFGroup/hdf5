@@ -819,7 +819,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
 #if H5_EFF_DEBUG
-    fprintf(stderr, "Done with file close, sending response to client\n");
+    fprintf(stderr, "Done with file close, sending response %d to client\n", ret_value);
 #endif
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR_FF(FAIL, "can't send result of file close to client");

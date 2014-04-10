@@ -2316,7 +2316,7 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED dxpl_id, void **req)
      */
     if(0 != file->my_rank) {
         MPI_Bcast(&ret_value, 1, MPI_INT, 0, file->comm);
-        if(ret_value == FAIL)
+        if(ret_value != SUCCEED)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Rank 0 Failed to close file");
     }
 
