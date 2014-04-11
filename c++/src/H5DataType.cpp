@@ -563,7 +563,7 @@ H5std_string DataType::getTag() const
     if( tag_Cstr != NULL )
     {
 	H5std_string tag = H5std_string(tag_Cstr); // C string to string object
-	HDfree(tag_Cstr); // free the C string
+	H5free_memory(tag_Cstr); // free the C string
 	return (tag); // return the tag
     }
     else

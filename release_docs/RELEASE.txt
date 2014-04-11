@@ -63,7 +63,16 @@ New Features
     
     Library
     -------
-    - None
+    - Added an H5free_memory API call. This should be used to free memory that
+      has been allocated by HDF5 API calls (e.g., H5Tget_member_name,
+      H5Pget_class_name, etc.). The main motivation for this call is Windows,
+      where it is common for application code and the HDF5 library to be using
+      different C run-time libraries. Using the new call ensures that the same
+      CRT handles both the allocation and free. This new function can also be
+      useful in any case where the library uses a different memory manager
+      than the application, such as when a debug memory manager is in use or
+      when the HDF5 library is wrapped for use in a managed language like
+      Python or Java. Fixes HDFFV-7710, 8519, and 8851. (DER - 2014/04/11)
  
     Parallel Library
     ----------------

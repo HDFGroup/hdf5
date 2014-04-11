@@ -334,6 +334,7 @@ H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum,
 				unsigned *relnum);
 H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
 			       unsigned relnum);
+H5_DLL herr_t H5free_memory(void *mem);
 
 #ifdef __cplusplus
 }

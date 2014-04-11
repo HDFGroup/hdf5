@@ -991,7 +991,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                         /* The name */
                         name = H5Tget_member_name(type, j);
                         h5tools_str_append(str, OPT(info->cmpd_name, ""), name);
-                        HDfree(name);
+                        H5free_memory(name);
 
                         /* The value */
                         offset = H5Tget_member_offset(type, j);

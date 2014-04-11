@@ -143,8 +143,8 @@ done:
  * NAME
  *  h5eget_major_c
  * PURPOSE
- *  Call H5Eget_major to get a character string
- *  describing an error specified by a major error number.
+ *  Get a character string describing an error specified by a
+ *  major error number.
  * INPUTS
  *  error_no - Major error number
  * OUTPUTS
@@ -173,7 +173,7 @@ nh5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen)
         HGOTO_DONE(FAIL)
 
     /*
-     * Call H5Eget_major function.
+     * Call H5Eget_msg function.
      */
     H5Eget_msg((hid_t)*error_no, NULL, c_name, c_namelen);
     HD5packFstring((char*)c_name, _fcdtocp(name), c_namelen);
@@ -191,8 +191,8 @@ done:
  * NAME
  *  h5eget_minor_c
  * PURPOSE
- *  Call H5Eget_minor to get a character string
- *  describing an error specified by a minor error number.
+ *  Get a character string describing an error specified by a
+ *  minor error number.
  * INPUTS
  *  error_no - Major error number
  * OUTPUTS
@@ -221,7 +221,7 @@ nh5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen)
         HGOTO_DONE(FAIL)
 
     /*
-     * Call H5Eget_minor function.
+     * Call H5Eget_msg function.
      */
     H5Eget_msg((hid_t)*error_no, NULL, c_name, c_namelen);
     HD5packFstring((char *)c_name, _fcdtocp(name), c_namelen);
