@@ -21,6 +21,8 @@
 
 include $(top_srcdir)/config/commence.am
 
+INSTALL_SCRIPT_FILES = run-c++-ex.sh
+
 # These are the programs that 'make all' or 'make prog' will build and
 # which 'make check' will run.  List them in the order they should be run.
 EXAMPLE_PROG=create readdata writedata compound extend_ds chunks h5group \
@@ -28,6 +30,7 @@ EXAMPLE_PROG=create readdata writedata compound extend_ds chunks h5group \
 	     h5tutr_crtgrp h5tutr_crtgrpd h5tutr_extend h5tutr_rdwt \
 	     h5tutr_subset
 TEST_SCRIPT=testh5c++.sh
+TEST_EXAMPLES_SCRIPT=$(INSTALL_SCRIPT_FILES)
 
 # These are the example files to be installed
 INSTALL_FILES=create.cpp readdata.cpp writedata.cpp compound.cpp \
@@ -35,7 +38,6 @@ INSTALL_FILES=create.cpp readdata.cpp writedata.cpp compound.cpp \
 	      h5tutr_cmprss.cpp h5tutr_crtatt.cpp h5tutr_crtdat.cpp \
 	      h5tutr_crtgrpar.cpp h5tutr_crtgrp.cpp h5tutr_crtgrpd.cpp \
 	      h5tutr_extend.cpp h5tutr_rdwt.cpp h5tutr_subset.cpp
-INSTALL_SCRIPT_FILES = run-c++-ex.sh
 
 # Some of the examples depend on files created by running other examples
 readdata.chkexe_: create.chkexe_

@@ -618,6 +618,8 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
 # Note: no '/' after DESTDIR.  Explanation in commence.am
 EXAMPLEDIR = ${DESTDIR}$(exec_prefix)/share/hdf5_examples/hl/c
 EXAMPLETOPDIR = ${DESTDIR}$(exec_prefix)/share/hdf5_examples/hl
+INSTALL_SCRIPT_FILES = run-hlc-ex.sh
+INSTALL_TOP_SCRIPT_FILES = run-hl-ex.sh
 
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,
@@ -630,6 +632,7 @@ EXAMPLE_PROG = ex_lite1 ex_lite2 ex_lite3 ptExampleFL \
             ex_table_09 ex_table_10 ex_table_11 ex_table_12 \
             ex_ds1
 
+TEST_EXAMPLES_SCRIPT = $(INSTALL_SCRIPT_FILES)
 
 # Install files
 # List all file that should be installed in examples directory
@@ -640,8 +643,6 @@ INSTALL_FILES = ex_lite1.c ex_lite2.c ex_lite3.c ptExampleFL.c \
                 ex_table_09.c ex_table_10.c ex_table_11.c ex_table_12.c      \
                 ex_ds1.c image24pixel.txt image8.txt pal_rgb.h
 
-INSTALL_SCRIPT_FILES = run-hlc-ex.sh
-INSTALL_TOP_SCRIPT_FILES = run-hl-ex.sh
 @BUILD_SHARED_SZIP_CONDITIONAL_TRUE@LD_LIBRARY_PATH = $(LL_PATH)
 
 # Assume that all tests in this directory are examples, and tell
@@ -1105,27 +1106,34 @@ install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
 uninstall-examples:
 	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then             \
 	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);                \
-        fi
+	fi
 	@if test -n "$(INSTALL_SCRIPT_FILES)" -a -d $(EXAMPLEDIR); then           \
 	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_SCRIPT_FILES);              \
-        fi
+	fi
 	@if test -n "$(INSTALL_TOP_FILES)" -a -d $(EXAMPLETOPDIR); then    \
 	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_FILES);       \
-        fi
+	fi
 	@if test -n "$(INSTALL_TOP_SCRIPT_FILES)" -a -d $(EXAMPLETOPDIR); then    \
 	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_SCRIPT_FILES);       \
-        fi
+	fi
 
 installcheck-local:
 	@if test "$(STATIC_SHARED)" = "static, shared"; then               \
 	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                \
 	  $(MAKE) $(AM_MAKEFLAGS) clean;                                   \
 	  H5CCFLAGS="" $(MAKE) $(AM_MAKEFLAGS) check;                      \
-	 elif test "$(STATIC_SHARED)" = "shared"; then                     \
+	elif test "$(STATIC_SHARED)" = "shared"; then                     \
 	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                \
-	 else                                                              \
+	else                                                              \
 	  $(MAKE) $(AM_MAKEFLAGS) check;                                   \
-	 fi
+	fi 
+	@if test "$(INSTALL_FILES)" -a $(TEST_EXAMPLES_SCRIPT) -a -d $(EXAMPLEDIR); then \
+	    echo "============================";                                         \
+	    echo "Testing $(TEST_EXAMPLES_SCRIPT)";                                      \
+	    echo "============================";                                         \
+	    (cd $(EXAMPLEDIR);                                                           \
+	     /bin/sh ./$(TEST_EXAMPLES_SCRIPT);)                                                   \
+	fi
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

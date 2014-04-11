@@ -616,6 +616,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
 # These are the programs that 'make all' or 'make prog' will build and
 # which 'make check' will run.  List them in the order they should be run.
 EXAMPLE_PROG = ptExampleFL
+TEST_EXAMPLES_SCRIPT = $(INSTALL_SCRIPT_FILES)
 
 # These are the example files to be installed
 INSTALL_FILES = ptExampleFL.cpp
@@ -1065,27 +1066,34 @@ install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
 uninstall-examples:
 	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then             \
 	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);                \
-        fi
+	fi
 	@if test -n "$(INSTALL_SCRIPT_FILES)" -a -d $(EXAMPLEDIR); then           \
 	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_SCRIPT_FILES);              \
-        fi
+	fi
 	@if test -n "$(INSTALL_TOP_FILES)" -a -d $(EXAMPLETOPDIR); then    \
 	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_FILES);       \
-        fi
+	fi
 	@if test -n "$(INSTALL_TOP_SCRIPT_FILES)" -a -d $(EXAMPLETOPDIR); then    \
 	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_SCRIPT_FILES);       \
-        fi
+	fi
 
 installcheck-local:
 	@if test "$(STATIC_SHARED)" = "static, shared"; then               \
 	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                \
 	  $(MAKE) $(AM_MAKEFLAGS) clean;                                   \
 	  H5CCFLAGS="" $(MAKE) $(AM_MAKEFLAGS) check;                      \
-	 elif test "$(STATIC_SHARED)" = "shared"; then                     \
+	elif test "$(STATIC_SHARED)" = "shared"; then                     \
 	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                \
-	 else                                                              \
+	else                                                              \
 	  $(MAKE) $(AM_MAKEFLAGS) check;                                   \
-	 fi
+	fi 
+	@if test "$(INSTALL_FILES)" -a $(TEST_EXAMPLES_SCRIPT) -a -d $(EXAMPLEDIR); then \
+	    echo "============================";                                         \
+	    echo "Testing $(TEST_EXAMPLES_SCRIPT)";                                      \
+	    echo "============================";                                         \
+	    (cd $(EXAMPLEDIR);                                                           \
+	     /bin/sh ./$(TEST_EXAMPLES_SCRIPT);)                                                   \
+	fi
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
