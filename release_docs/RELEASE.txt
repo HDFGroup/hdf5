@@ -166,8 +166,12 @@ Bug Fixes since HDF5-1.8.12
     - testhdf5 now exits EXIT_SUCCESS(0) if no errors, else EXIT_FAILURE(1).
       (AKC - 2014/01/27 - HDFFV-8572)
 
-    - The big test now pays attention to the HDF5_DRIVER environment variable
-      so it doesn't waste time when make check-vfd is run. (HDFFV-8554)
+    - The big test now pays attention to the HDF5_DRIVER environment variable.
+      Previously, it would run all tests with the family, stdio, and sec2
+      VFDs for each VFD in the check-vfd make target, regardless of the
+      variable setting. It now checks the variable and either runs the
+      appropriate VFD-specific tests or skips, as needed. This saves much
+      testing time. Fixes HDFFV-8554. (DER - 2014/04/11)
 
 Supported Platforms
 ===================
