@@ -124,6 +124,14 @@ Bug Fixes since HDF5-1.8.12
     - It is no longer necessary to specify --with-pthreads with
       --enable-threadsafe if the Pthreads library is in a standard location.
       Fixes HDFFV-8693. (DER - 2014/04/11)
+    - CMake: C++ and/or Fortran + thread-safe is enforced as a non-supported
+      configuration, which matches the autotools. (DER - 2014/04/11)
+    - CMake: Static + thread-safe + Win32 threads is not a supported configuration
+      due to the inability to automatically clean up thread-local storage. This is
+      expected to be fixed in a future release. In the meantime, a work-around
+      that uses internal functionality may allow the combination to be used without
+      resource leaks. Contact the help desk for more information.
+      (DER - 2014/04/11)
    
     Library
     -------
@@ -132,6 +140,11 @@ Bug Fixes since HDF5-1.8.12
       fail and returns FALSE. This block calls the H5PL_load(H5PL_TYPE_FILTER, (int)id)
       function to attempt to dynamically load the filter plugin. 
       (ADB - 2014/03/03 HDFFV-8629)
+    - The thread-safe library now no longer leaks thread-local storage
+      resources on Windows with Win32 threads. This cleanup can only be
+      performed when the library is built as a shared library so thread-safe
+      + Win32 threads + static is no longer a supported configuration. Fixes
+      HDFFV-8518. (DER - 2014/04/11)
 
     Parallel Library
     ----------------
