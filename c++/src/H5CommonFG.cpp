@@ -469,7 +469,7 @@ H5std_string CommonFG::getLinkval( const H5std_string& name, size_t size ) const
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void CommonFG::mount( const char* name, H5File& child, PropList& plist ) const
+void CommonFG::mount(const char* name, const H5File& child, const PropList& plist ) const
 {
    // Obtain identifiers for C API
    hid_t plist_id = plist.getId();
@@ -490,7 +490,7 @@ void CommonFG::mount( const char* name, H5File& child, PropList& plist ) const
 ///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void CommonFG::mount( const H5std_string& name, H5File& child, PropList& plist ) const
+void CommonFG::mount(const H5std_string& name, const H5File& child, const PropList& plist) const
 {
    mount( name.c_str(), child, plist );
 }
@@ -1082,7 +1082,7 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx) const
 ///		It differs from the above function because it also provides
 ///		the returned object type in text (char*)
 ///\param	idx       - IN: Transient index of the object
-///\param	type_name - IN: Object type in text
+///\param	type_name - OUT: Object type in text
 ///\return	Object type
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - May, 2010
@@ -1108,7 +1108,7 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, char* type_name) const
 ///		It differs from the above function because it also provides
 ///		the returned object type in text (H5std_string&)
 ///\param	idx       - IN: Transient index of the object
-///\param	type_name - IN: Object type in text
+///\param	type_name - OUT: Object type in text
 ///\return	Object type
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - January, 2003

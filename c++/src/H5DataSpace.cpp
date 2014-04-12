@@ -279,7 +279,7 @@ H5S_class_t DataSpace::getSimpleExtentType () const
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSpace::extentCopy ( DataSpace& dest_space ) const
+void DataSpace::extentCopy (const DataSpace& dest_space) const
 {
    hid_t dest_space_id = dest_space.getId();
    herr_t ret_value = H5Sextent_copy( dest_space_id, id );

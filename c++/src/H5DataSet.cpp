@@ -294,7 +294,7 @@ void DataSet::getSpaceStatus(H5D_space_status_t& status) const
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-hsize_t DataSet::getVlenBufSize( DataType& type, DataSpace& space ) const
+hsize_t DataSet::getVlenBufSize(const DataType& type, const DataSpace& space ) const
 {
    // Obtain identifiers for C API
    hid_t type_id = type.getId();
@@ -577,7 +577,7 @@ void DataSet::extend( const hsize_t* size ) const
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSet::fillMemBuf(const void *fill, DataType& fill_type, void *buf, DataType& buf_type, DataSpace& space)
+void DataSet::fillMemBuf(const void *fill, const DataType& fill_type, void *buf, const DataType& buf_type, const DataSpace& space)
 {
     hid_t fill_type_id = fill_type.getId();
     hid_t buf_type_id = buf_type.getId();
@@ -600,7 +600,7 @@ void DataSet::fillMemBuf(const void *fill, DataType& fill_type, void *buf, DataT
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSet::fillMemBuf(void *buf, DataType& buf_type, DataSpace& space)
+void DataSet::fillMemBuf(void *buf, const DataType& buf_type, const DataSpace& space)
 {
     hid_t buf_type_id = buf_type.getId();
     hid_t space_id = space.getId();

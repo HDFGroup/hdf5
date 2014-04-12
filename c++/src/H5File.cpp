@@ -442,7 +442,7 @@ void H5File::getObjIDs(unsigned types, size_t max_objs, hid_t *oid_list) const
 ///		closed and reopened or opened during a subsequent session.
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-void H5File::getVFDHandle(FileAccPropList& fapl, void **file_handle) const
+void H5File::getVFDHandle(const FileAccPropList& fapl, void **file_handle) const
 {
    hid_t fapl_id = fapl.getId();
    herr_t ret_value = H5Fget_vfd_handle(id, fapl_id, file_handle);
