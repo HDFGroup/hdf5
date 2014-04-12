@@ -220,6 +220,71 @@ static void test_get_objname_ontypes()
 }   // test_get_objname_ontypes
 
 /*-------------------------------------------------------------------------
+ * Function:	test_get_objtype
+ *
+ * Purpose:	Tests getting object type
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Binh-Minh Ribler
+ *		Friday, March 4, 2014
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_get_objtype()
+{
+    SUBTEST("H5File::childObjType and H5Group::childObjType");
+
+    try {
+	// Open file
+	H5File file(FILE_OBJECTS, H5F_ACC_RDWR);
+
+	// Open the top group
+	Group grp1 = file.openGroup(GROUP1);
+
+	// Create a datatype and save it
+	DataType dtype(PredType::STD_I32LE);
+	dtype.commit(grp1, "STD_I32LE");
+
+	// Get and verify object type with
+	// H5O_type_t childObjType(const H5std_string& objname)
+	H5O_type_t objtype = file.childObjType(DSET_IN_FILE);
+	verify_val(objtype, H5O_TYPE_DATASET, "DataSet::childObjType", __LINE__, __FILE__);
+
+	// Get and verify object type with
+	// H5O_type_t childObjType(const char* objname)
+	objtype = grp1.childObjType(GROUP1_1.c_str());
+	verify_val(objtype, H5O_TYPE_GROUP, "DataSet::childObjType", __LINE__, __FILE__);
+
+	// Get and verify object type with
+	// H5O_type_t childObjType(hsize_t index, H5_index_t index_type,
+	// H5_iter_order_t order, const char* objname=".")
+	objtype = grp1.childObjType((hsize_t)1, H5_INDEX_NAME, H5_ITER_INC);
+	verify_val(objtype, H5O_TYPE_NAMED_DATATYPE, "DataSet::childObjType", __LINE__, __FILE__);
+
+	// Get and verify object type with
+	// H5O_type_t childObjType(hsize_t index,
+	// H5_index_t index_type=H5_INDEX_NAME,
+	// H5_iter_order_t order=H5_ITER_INC, const char* objname=".")
+	objtype = grp1.childObjType((hsize_t)2);
+	verify_val(objtype, H5O_TYPE_GROUP, "DataSet::childObjType", __LINE__, __FILE__);
+
+	// Everything will be closed as they go out of scope
+
+	PASSED();
+    }	// try block
+
+    // catch all other exceptions
+    catch (Exception E)
+    {
+	issue_fail_msg("test_get_objtype", __LINE__, __FILE__);
+    }
+}   // test_get_objtype
+
+/*-------------------------------------------------------------------------
  * Function:	test_objects
  *
  * Purpose:	Tests HDF5 object related functionality
@@ -244,6 +309,7 @@ void test_object()
 
     test_get_objname();    // Test get object name from groups/datasets
     test_get_objname_ontypes();	// Test get object name from types
+    test_get_objtype();    // Test get object type
 
 }   // test_objects
 
