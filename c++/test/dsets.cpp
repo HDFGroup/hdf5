@@ -49,6 +49,7 @@
 
 const H5std_string	FILE1("dataset.h5");
 const H5std_string	DSET_DEFAULT_NAME("default");
+const H5std_string	DSET_DEFAULT_NAME_PATH("/default");
 const H5std_string	DSET_CHUNKED_NAME("chunked");
 const H5std_string	DSET_SIMPLE_IO_NAME("simple_io");
 const H5std_string	DSET_TCONV_NAME	("tconv");
@@ -96,6 +97,7 @@ test_create( H5File& file)
 	dataset = new DataSet (file.createDataSet
 		(DSET_DEFAULT_NAME, PredType::NATIVE_DOUBLE, space));
 
+
 	// Add a comment to the dataset
 	file.setComment (DSET_DEFAULT_NAME, "This is a dataset");
 
@@ -120,10 +122,15 @@ test_create( H5File& file)
 	// way to open an existing dataset for accessing.
 	dataset = new DataSet (file.openDataSet (DSET_DEFAULT_NAME));
 
+	// Get and verify the name of this dataset, using
+	// H5std_string getObjName()
+	H5std_string ds_name = dataset->getObjName();
+	verify_val(ds_name, DSET_DEFAULT_NAME_PATH, "DataSet::getObjName", __LINE__, __FILE__);
+
 	// Get and verify the comment from this dataset, using
 	// H5std_string getComment(const H5std_string& name, <buf_size=0, by default>)
 	H5std_string comment = file.getComment(DSET_DEFAULT_NAME);
-	verify_val(comment, "This is a dataset", "H5Location::getComment", __LINE__, __FILE__);
+	verify_val(comment, "This is a dataset", "DataSet::getComment", __LINE__, __FILE__);
 
 	// Close the dataset when accessing is completed
 	delete dataset;
@@ -1050,11 +1057,6 @@ void test_dset()
 
     try
     {
-	// Turn of the auto-printing when failure occurs so that we can
-	// handle the errors appropriately since sometime failures are
-	// caused deliberately and expected.
-	Exception::dontPrint();
-
 	// Use the file access template id to create a file access prop.
 	// list object to pass in H5File::H5File
 	FileAccPropList fapl(fapl_id);
@@ -1065,18 +1067,12 @@ void test_dset()
 	Group grp = file.createGroup( "emit diagnostics", 0);
 	grp.setComment("Causes diagnostic messages to be emitted");
 
-	nerrors += test_create(file)<0 	?1:0;
-	nerrors += test_simple_io(file)<0	?1:0;
-	nerrors += test_tconv(file)<0	?1:0;
-	nerrors += test_compression(file)<0	?1:0;
-	nerrors += test_multiopen (file)<0	?1:0;
-	nerrors += test_types(file)<0       ?1:0;
-
-	// Get part of the comment, random length using
-	// ssize_t getComment(const char* name, const size_t buf_size, char* comment)
-	char* comment = new char[11];
-	ssize_t comment_len = file.getComment("emit diagnostics", 11, comment);
-	verify_val((const char*)comment, "Causes dia", "H5Location::getComment", __LINE__, __FILE__);
+	nerrors += test_create(file) < 0 ? 1:0;
+	nerrors += test_simple_io(file) < 0 ? 1:0;
+	nerrors += test_tconv(file) < 0 ? 1:0;
+	nerrors += test_compression(file) < 0 ? 1:0;
+	nerrors += test_multiopen (file) < 0 ? 1:0;
+	nerrors += test_types(file) < 0 ? 1:0;
 
 	// Close group "emit diagnostics".
 	grp.close();
