@@ -700,6 +700,8 @@ void H5Location::reference(void* ref, const H5std_string& name, H5R_type_t ref_t
 //			 referenced object
 //		ref - IN: Reference pointer
 //		ref_type - IN: Reference type
+//		plist - IN: Property list - default to PropList::DEFAULT
+//		from_func - IN: Name of the calling function
 // Exception	H5::ReferenceException
 // Programmer	Binh-Minh Ribler - Oct, 2006
 // Modification

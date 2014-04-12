@@ -493,19 +493,6 @@ hsize_t H5File::getFileSize() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5File::getLocId
-// Purpose:	Get the id of this file
-// Description
-//		This function is a redefinition of CommonFG::getLocId.  It
-//		is used by CommonFG member functions to get the file id.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-hid_t H5File::getLocId() const
-{
-   return( getId() );
-}
-
-//--------------------------------------------------------------------------
 // Function:    H5File::getId
 ///\brief	Get the id of this file
 ///\return	File identifier
@@ -523,6 +510,19 @@ hid_t H5File::getId() const
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:	H5File::getLocId
+// Purpose:	Get the id of this file
+// Description
+//		This function is a redefinition of CommonFG::getLocId.  It
+//		is used by CommonFG member functions to get the file id.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+hid_t H5File::getLocId() const
+{
+   return( getId() );
+}
+
 //--------------------------------------------------------------------------
 // Function:	H5File::reopen
 // Purpose:	Reopens this file.
