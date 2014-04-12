@@ -489,6 +489,8 @@
 ./c++/src/h5c++.in
 ./c++/src/header.html
 ./c++/src/header_files/filelist.xml
+./c++/src/header_files/hdf_logo.jpg
+./c++/src/header_files/help.jpg
 ./c++/src/header_files/image001.jpg
 ./c++/src/header_files/image002.jpg
 
