@@ -36,11 +36,16 @@
 ! ***        H 5 F   T E S T S
 ! *****************************************
 
+MODULE TH5F_F03
+
+CONTAINS
+
 SUBROUTINE test_get_file_image(total_error)
   !
   !  Tests the wrapper for h5fget_file_image
   !
-  USE HDF5 
+  USE HDF5
+  USE TH5_MISC 
   USE ISO_C_BINDING
 
   IMPLICIT NONE
@@ -169,3 +174,5 @@ SUBROUTINE test_get_file_image(total_error)
   DEALLOCATE(file_image_ptr,image_ptr)
 
 END SUBROUTINE test_get_file_image
+
+END MODULE TH5F_F03

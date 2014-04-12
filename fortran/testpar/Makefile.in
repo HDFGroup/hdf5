@@ -399,7 +399,8 @@ AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 # Include files
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@ -I$(top_srcdir)/fortran/src \
 	-I$(top_srcdir)/fortran/test \
-	$(F9XMODFLAG)$(top_builddir)/fortran/src
+	$(F9XMODFLAG)$(top_builddir)/fortran/src \
+	$(F9XMODFLAG)$(top_builddir)/fortran/test
 AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@ $(am__append_1)
 AM_MAKEFLAGS = @AM_MAKEFLAGS@
 AR = @AR@

@@ -30,7 +30,9 @@
 !  test_attr_basic_write, test_attr_many, attr_open_check, 
 !
 !*****
+MODULE TH5A_1_8
 
+CONTAINS
 SUBROUTINE attribute_test_1_8(cleanup, total_error)
 
 !   This subroutine tests following 1.8 functionalities:
@@ -40,26 +42,11 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
 !
 
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(INOUT) :: total_error
-
-  CHARACTER(LEN=5), PARAMETER :: filename = "atest"    !File name
-  CHARACTER(LEN=9), PARAMETER :: dsetname = "atestdset"        !Dataset name
-  CHARACTER(LEN=11), PARAMETER :: aname = "attr_string"   !String Attribute name
-  CHARACTER(LEN=14), PARAMETER :: aname2 = "attr_character"!Character Attribute name
-  CHARACTER(LEN=11), PARAMETER :: aname3 = "attr_double"   !DOuble Attribute name
-  CHARACTER(LEN=9), PARAMETER :: aname4 = "attr_real"      !Real Attribute name
-  CHARACTER(LEN=12), PARAMETER :: aname5 = "attr_integer"  !Integer Attribute name
-  CHARACTER(LEN=9), PARAMETER :: aname6 = "attr_null"     !Null Attribute name
-
-  !
-  !data space rank and dimensions
-  !
-  INTEGER, PARAMETER :: RANK = 2
-  INTEGER, PARAMETER :: NX = 4
-  INTEGER, PARAMETER :: NY = 5
 
   !
   !general purpose integer
@@ -213,8 +200,10 @@ SUBROUTINE test_attr_corder_create_compact(fcpl,fapl, total_error)
 ! Needed for get_info_by_name
 
   USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
+
 ! - - - arg types - - -
 
   INTEGER(HID_T), INTENT(IN) :: fcpl
@@ -401,6 +390,8 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
 !**
 !****************************************************************/
   USE HDF5
+  USE TH5_MISC
+
   IMPLICIT NONE
 
   INTEGER(HID_T), INTENT(IN) :: fcpl
@@ -413,8 +404,6 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
   INTEGER(HID_T) :: dataset
 
   CHARACTER(LEN=8) :: DSET1_NAME = "Dataset1"
-  INTEGER, PARAMETER :: NUM_DSETS = 3
-
 
   INTEGER :: error
 
@@ -532,6 +521,7 @@ SUBROUTINE test_attr_create_by_name(new_format,fcpl,fapl, total_error)
 !****************************************************************/
 
   USE HDF5
+  USE TH5_MISC
 
   IMPLICIT NONE
 
@@ -746,6 +736,7 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
 !****************************************************************/
 
   USE HDF5
+  USE TH5_MISC
 
   IMPLICIT NONE
 
@@ -951,6 +942,7 @@ END SUBROUTINE test_attr_info_by_idx
 SUBROUTINE attr_info_by_idx_check(obj_id, attrname, n, use_index, total_error )
 
   USE HDF5
+  USE TH5_MISC
 
   IMPLICIT NONE
 
@@ -1091,6 +1083,7 @@ SUBROUTINE test_attr_shared_rename( fcpl, fapl, total_error)
 !****************************************************************/
 
   USE HDF5
+  USE TH5_MISC
 
   IMPLICIT NONE
 
@@ -1105,7 +1098,6 @@ SUBROUTINE test_attr_shared_rename( fcpl, fapl, total_error)
 
   CHARACTER(LEN=8) :: DSET1_NAME = "Dataset1"
   CHARACTER(LEN=8) :: DSET2_NAME = "Dataset2"
-  INTEGER, PARAMETER :: NUM_DSETS = 3
 
 
   INTEGER(HID_T) :: dataset, dataset2
@@ -1127,21 +1119,10 @@ SUBROUTINE test_attr_shared_rename( fcpl, fapl, total_error)
   CHARACTER(LEN=7) :: attrname
   CHARACTER(LEN=11) :: attrname2
 
-  CHARACTER(LEN=1), PARAMETER :: chr1 = '.'
-
   INTEGER :: u
-  INTEGER, PARAMETER :: SPACE1_RANK = 3
-  INTEGER, PARAMETER :: NX = 20
-  INTEGER, PARAMETER :: NY = 5
-  INTEGER, PARAMETER :: NZ = 10
   INTEGER(HID_T) :: my_fcpl
 
   CHARACTER(LEN=5), PARAMETER :: TYPE1_NAME = "/Type"
-
-  INTEGER, PARAMETER :: SPACE1_DIM1 = 4
-  INTEGER, PARAMETER :: SPACE1_DIM2 = 8
-  INTEGER, PARAMETER :: SPACE1_DIM3 = 10
-
 
   INTEGER :: test_shared
   INTEGER(HSIZE_T), DIMENSION(1) :: adims2 = (/1/) ! Attribute dimension
@@ -1412,6 +1393,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
 !****************************************************************/
 
   USE HDF5
+  USE TH5_MISC
 
   IMPLICIT NONE
 
@@ -1457,7 +1439,6 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
 
   INTEGER(SIZE_T) :: size
   CHARACTER(LEN=8) :: tmpname
-  CHARACTER(LEN=1), PARAMETER :: chr1 = '.'
 
   INTEGER :: idx_type
   INTEGER :: order
@@ -1773,6 +1754,7 @@ SUBROUTINE test_attr_shared_delete(fcpl, fapl, total_error)
 !****************************************************************/
 
   USE HDF5
+  USE TH5_MISC
 
   IMPLICIT NONE
 
@@ -1786,7 +1768,6 @@ SUBROUTINE test_attr_shared_delete(fcpl, fapl, total_error)
 
   CHARACTER(LEN=8) :: DSET1_NAME = "Dataset1"
   CHARACTER(LEN=8) :: DSET2_NAME = "Dataset2"
-  INTEGER, PARAMETER :: NUM_DSETS = 3
 
 
   INTEGER(HID_T) :: dataset, dataset2
@@ -1806,13 +1787,7 @@ SUBROUTINE test_attr_shared_delete(fcpl, fapl, total_error)
   INTEGER, DIMENSION(1) ::  attr_integer_data
   CHARACTER(LEN=7) :: attrname
 
-  CHARACTER(LEN=1), PARAMETER :: chr1 = '.'
-
   INTEGER :: u
-  INTEGER, PARAMETER :: SPACE1_RANK = 3
-  INTEGER, PARAMETER :: NX = 20
-  INTEGER, PARAMETER :: NY = 5
-  INTEGER, PARAMETER :: NZ = 10
   INTEGER(HID_T) :: my_fcpl
 
   CHARACTER(LEN=5), PARAMETER :: TYPE1_NAME = "/Type"
@@ -2056,6 +2031,7 @@ SUBROUTINE test_attr_dense_open( fcpl, fapl, total_error)
 !****************************************************************/
 
   USE HDF5
+  USE TH5_MISC
 
   IMPLICIT NONE
 
@@ -2207,6 +2183,7 @@ END SUBROUTINE test_attr_dense_open
 SUBROUTINE test_attr_dense_verify(loc_id, max_attr, total_error)
 
   USE HDF5
+  USE TH5_MISC
 
   IMPLICIT NONE
 
@@ -2302,6 +2279,7 @@ END SUBROUTINE test_attr_dense_verify
 SUBROUTINE test_attr_corder_create_basic( fcpl, fapl, total_error )
 
   USE HDF5
+  USE TH5_MISC
 
   IMPLICIT NONE
 
@@ -2424,6 +2402,7 @@ END SUBROUTINE test_attr_corder_create_basic
 SUBROUTINE test_attr_basic_write(fapl, total_error)
 
   USE HDF5
+  USE TH5_MISC
 
   IMPLICIT NONE
 
@@ -2444,8 +2423,6 @@ SUBROUTINE test_attr_basic_write(fapl, total_error)
 
   CHARACTER(LEN=25) :: check_name
   CHARACTER(LEN=18) :: chr_exact_size
-
-  INTEGER, PARAMETER :: SPACE1_RANK = 2
 
   CHARACTER(LEN=5), PARAMETER ::  ATTR1_NAME="Attr1"
   INTEGER, PARAMETER :: ATTR1_RANK = 1
@@ -2623,6 +2600,7 @@ END SUBROUTINE test_attr_basic_write
 SUBROUTINE test_attr_many(new_format, fcpl, fapl, total_error)
 
   USE HDF5
+  USE TH5_MISC
 
   IMPLICIT NONE
 
@@ -2740,6 +2718,7 @@ END SUBROUTINE test_attr_many
 SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
 
   USE HDF5
+  USE TH5_MISC
 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: fid
@@ -2750,7 +2729,6 @@ SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
 
   INTEGER :: u
   CHARACTER (LEN=8) :: attrname
-  INTEGER, PARAMETER :: NUM_DSETS = 3
   INTEGER :: error
   LOGICAL :: f_corder_valid ! Indicates whether the the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
@@ -2835,3 +2813,4 @@ SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
   ENDDO
 
 END SUBROUTINE attr_open_check
+END MODULE TH5A_1_8
