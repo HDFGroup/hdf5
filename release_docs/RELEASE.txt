@@ -73,6 +73,16 @@ New Features
       than the application, such as when a debug memory manager is in use or
       when the HDF5 library is wrapped for use in a managed language like
       Python or Java. Fixes HDFFV-7710, 8519, and 8851. (DER - 2014/04/11)
+    - The core VFD can now be configured to track dirty regions in the file
+      and only write out the changed regions on flush/close. Additionally,
+      a "page aggregation" size can be set that will aggregate small writes
+      into larger writes. e.g., setting a 1 MiB page aggregation size will
+      logically partition the the in-memory file into 1 MiB pages that will be
+      written out in their entirety if even a single byte is dirtied. The
+      feature is controlled via the new H5Pset/get_core_write_tracking() API
+      call. A new "core_paged" target has been added to the check-vfd target
+      in test/Makefile.am that exercises the feature over all HDF5 VFD-aware
+      tests. (DER - 2014/04/12)
  
     Parallel Library
     ----------------
