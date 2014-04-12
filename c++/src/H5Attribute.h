@@ -38,9 +38,9 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
 	H5std_string getFileName() const;
 
 	// Gets the name of this attribute.
-	ssize_t getName( size_t buf_size, H5std_string& attr_name ) const;
-	H5std_string getName( size_t buf_size ) const; // returns name, not its length
-	H5std_string getName() const; // returns name, no argument
+	ssize_t getName(char* attr_name, size_t buf_size = 0) const;
+	ssize_t getName(H5std_string& attr_name, size_t buf_size = 0) const;
+	H5std_string getName() const;
 
 	// Gets a copy of the dataspace for this attribute.
 	virtual DataSpace getSpace() const;
