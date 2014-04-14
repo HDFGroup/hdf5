@@ -83,7 +83,13 @@ New Features
 
     C++ API
     -------
-    - None 
+    - The following new features are added:
+      + Wrappers to get object's name
+      + Wrappers to get a child object's type from a group or file
+      + Wrappers for setting/getting transform property list
+      + Wrapper for setting size to compound datatype
+      + Additional wrapper to get comment as a char*
+
 
 
 Support for New Platforms, Languages, and Compilers
@@ -119,7 +125,17 @@ Bug Fixes since HDF5-1.8.13
 
     C++ API
     ------
-    - None
+    - There are significant changes to the Attribute::getName member functions
+      + Removed H5std_string Attribute::getName(size_t buf_size)
+      + Overloaded Atribute::getName to take a char* for the attribute name:
+          ssize_t Attribute::getName(char* attr_name, size_t buf_size=0) 
+      + Switched the arguments in this function:
+          ssize_t getName(size_t buf_size, H5std_string& attr_name)
+        so it became:
+          ssize_t getName(H5std_string& attr_name, size_t buf_size=0)
+        The second argument is then default to 0.
+    - Changed default value from 256 to 0 for two getComment methods
+    - Applied patches from user Jason Newton, where applicable.
 
     High-Level APIs:
     ------
