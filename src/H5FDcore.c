@@ -1381,16 +1381,26 @@ H5FD_core_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
     fprintf(stderr, "FLUSHING. DIRTY LIST:\n");
 #endif
             while(NULL != (item = (H5FD_core_region_t *)H5SL_remove_first(file->dirty_list))) {
-                size = (size_t)((item->end - item->start) + 1);
+
+                /* The file may have been truncated, so check for that
+                 * and skip or adjust as necessary.
+                 */
+                if(item->start < file->eof) {
+                    if(item->end >= file->eof)
+                        item->end = file->eof - 1;
+
+
+                    size = (size_t)((item->end - item->start) + 1);
 #ifdef DER
 fprintf(stderr, "(%llu, %llu : %lu)\n", item->start, item->end, size);
 #endif
-                if(H5FD_core_write_to_bstore(file, item->start, size) != SUCCEED)
-                    HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store")
-                item = H5FL_FREE(H5FD_core_region_t, item);
-            }
+                    if(H5FD_core_write_to_bstore(file, item->start, size) != SUCCEED)
+                        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store")
+                } /* end if */
 
- 
+                item = H5FL_FREE(H5FD_core_region_t, item);
+           } /* end while */
+
 #ifdef DER
 fprintf(stderr, "EOF: %llu\n", file->eof);
 fprintf(stderr, "EOA: %llu\n", file->eoa);
