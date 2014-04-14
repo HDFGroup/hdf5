@@ -190,7 +190,7 @@
 
   # test the output files repartitioned above.
   add_test (NAME H5REPART-h5repart_test COMMAND $<TARGET_FILE:h5repart_test>)
-  set_tests_properties (H5REPART-h5repart_test PROPERTIES DEPENDS H5REPART-clearall-objects DEPENDS H5REPART-h5repart_20K DEPENDS H5REPART-h5repart_5K DEPENDS H5REPART-h5repart_sec2)
+  set_tests_properties (H5REPART-h5repart_test PROPERTIES DEPENDS "H5REPART-clearall-objects;H5REPART-h5repart_20K;H5REPART-h5repart_5K;H5REPART-h5repart_sec2")
 
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
         h5repart_test
