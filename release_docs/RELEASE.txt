@@ -30,8 +30,8 @@ in 1.8.0?" document:
      http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes 
-from Release to Release" document, in the section "Release 1.8.13 (current 
-release) versus Release 1.8.12":
+from Release to Release" document, in the section "Release 1.8.14 (current 
+release) versus Release 1.8.13":
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
@@ -90,7 +90,7 @@ Support for New Platforms, Languages, and Compilers
 ===================================================
                                   
 
-Bug Fixes since HDF5-1.8.12
+Bug Fixes since HDF5-1.8.13
 ===========================
 
     Configuration
