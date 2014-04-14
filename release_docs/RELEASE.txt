@@ -4,22 +4,22 @@ HDF5 version 1.8.14-snap0 currently under development
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.12 and 
-HDF5-1.8.13-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.13-*. 
+This document describes the differences between HDF5-1.8.13 and 
+HDF5-1.8.14-*, and contains information on the platforms tested and 
+known problems in HDF5-1.8.14-*. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
-Links to the HDF5 1.8.12 source code, documentation, and additional materials
+Links to the HDF5 1.8.13 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
 
-The HDF5 1.8.12 release can be obtained from:
+The HDF5 1.8.13 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
-User documentation for 1.8.12 can be accessed directly at this location: 
+User documentation for 1.8.13 can be accessed directly at this location: 
 
      http://www.hdfgroup.org/HDF5/doc/
 
@@ -30,8 +30,8 @@ in 1.8.0?" document:
      http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes 
-from Release to Release" document, in the section "Release 1.8.12 (current 
-release) versus Release 1.8.11":
+from Release to Release" document, in the section "Release 1.8.13 (current 
+release) versus Release 1.8.12":
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
@@ -45,7 +45,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms, Languages, and Compilers
-- Bug Fixes since HDF5-1.8.12
+- Bug Fixes since HDF5-1.8.13
 - Supported Platforms
 - Supported Configuration Features Summary
 - More Tested Platforms
@@ -57,40 +57,17 @@ New Features
 
     Configuration
     -------------
-    - Autotools: Automake updated to 1.14.1 (ADB - 2014/04/08)
-    - CMake: Moved minimum CMake version to 2.8.11 which enables better library
-      include processing. (ADB - 2014/03/26)
+    - [Example] New feature 
+      (EIP - 2014/04/14)
+    - 
     
     Library
     -------
-    - Added an H5free_memory API call. This should be used to free memory that
-      has been allocated by HDF5 API calls (e.g., H5Tget_member_name,
-      H5Pget_class_name, etc.). The main motivation for this call is Windows,
-      where it is common for application code and the HDF5 library to be using
-      different C run-time libraries. Using the new call ensures that the same
-      CRT handles both the allocation and free. This new function can also be
-      useful in any case where the library uses a different memory manager
-      than the application, such as when a debug memory manager is in use or
-      when the HDF5 library is wrapped for use in a managed language like
-      Python or Java. Fixes HDFFV-7710, 8519, and 8851. (DER - 2014/04/11)
-    - The core VFD can now be configured to track dirty regions in the file
-      and only write out the changed regions on flush/close. Additionally,
-      a "page aggregation" size can be set that will aggregate small writes
-      into larger writes. e.g., setting a 1 MiB page aggregation size will
-      logically partition the the in-memory file into 1 MiB pages that will be
-      written out in their entirety if even a single byte is dirtied. The
-      feature is controlled via the new H5Pset/get_core_write_tracking() API
-      call. A new "core_paged" target has been added to the check-vfd target
-      in test/Makefile.am that exercises the feature over all HDF5 VFD-aware
-      tests. (DER - 2014/04/12)
+    - 
  
     Parallel Library
     ----------------
-    - Removed MPI-POSIX VFD, as it wasn't helping anyone and was just
-        generating support questions.  Application developers performing
-        parallel I/O should always use the MPI-IO VFD.  (QAK - 2014/03/28)
-    - Improved parallel I/O support to allow collective I/O on point
-        selections. (QAK - 2014/03/15)
+    - 
  
     Tools
     -----
@@ -111,11 +88,6 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    Mac OS X 10.6 Snow Leopard is not supported by Apple any more. In view of
-    the added support of Mac OS X 10.9, Mac OS X 10.6 is retired from HDF5
-    supported platforms. (AKC - 2014/03/14 HDFFV-8704)
-
-    Mac OS X 10.9 Mavericks is supported. (AKC - 2014/03/04 HDFFV-8694)
                                   
 
 Bug Fixes since HDF5-1.8.12
@@ -123,38 +95,11 @@ Bug Fixes since HDF5-1.8.12
 
     Configuration
     -------------
-    - CMake: When CMake commands are executed individually on the command line
-      and the external filters are being built, the CMAKE_BUILD_TYPE define
-      must be set to the same value as the configuration
-        (-DCMAKE_BUILD_TYPE:STRING=Release if using -C Release). This is needed 
-      by the the szip and zlib filter build commands. (ADB - HDFFV-8695)
-    - CMake: Remove use of XLATE_UTILITY program. (ADB - 2014/03/28 HDFFV-8640)
-    - CMake: Added missing quotes in setting the CMAKE_EXE_LINKER_FLAGS for the
-      MPI option. (ADB - 2014/02/27 HDFFV-8674)
-    - It is no longer necessary to specify --with-pthreads with
-      --enable-threadsafe if the Pthreads library is in a standard location.
-      Fixes HDFFV-8693. (DER - 2014/04/11)
-    - CMake: C++ and/or Fortran + thread-safe is enforced as a non-supported
-      configuration, which matches the autotools. (DER - 2014/04/11)
-    - CMake: Static + thread-safe + Win32 threads is not a supported configuration
-      due to the inability to automatically clean up thread-local storage. This is
-      expected to be fixed in a future release. In the meantime, a work-around
-      that uses internal functionality may allow the combination to be used without
-      resource leaks. Contact the help desk for more information.
-      (DER - 2014/04/11)
+    - 
    
     Library
     -------
-    - H5Z.c: H5Zfilter_avail(H5Z_filter_t id)
-      Added else block if the call to the internal H5Z_filter_avail(id) does not
-      fail and returns FALSE. This block calls the H5PL_load(H5PL_TYPE_FILTER, (int)id)
-      function to attempt to dynamically load the filter plugin. 
-      (ADB - 2014/03/03 HDFFV-8629)
-    - The thread-safe library now no longer leaks thread-local storage
-      resources on Windows with Win32 threads. This cleanup can only be
-      performed when the library is built as a shared library so thread-safe
-      + Win32 threads + static is no longer a supported configuration. Fixes
-      HDFFV-8518. (DER - 2014/04/11)
+    - 
 
     Parallel Library
     ----------------
@@ -166,10 +111,7 @@ Bug Fixes since HDF5-1.8.12
 
     Tools
     -----
-    - h5repack: h5repack would not attempt to remove UD filters. Added a 
-      check to h5repack for UD filters that checks if the filter can 
-      be dynamically loaded. This will require a change in the library to
-      add the H5PL_load() to the H5Zfilter_avail(). (ADB - 2014/03/03 HDFFV-8629)
+    - 
 
     F90 API
     -------
@@ -189,15 +131,8 @@ Bug Fixes since HDF5-1.8.12
 
     Testing
     -------
-    - testhdf5 now exits EXIT_SUCCESS(0) if no errors, else EXIT_FAILURE(1).
-      (AKC - 2014/01/27 - HDFFV-8572)
+    - 
 
-    - The big test now pays attention to the HDF5_DRIVER environment variable.
-      Previously, it would run all tests with the family, stdio, and sec2
-      VFDs for each VFD in the check-vfd make target, regardless of the
-      variable setting. It now checks the variable and either runs the
-      appropriate VFD-specific tests or skips, as needed. This saves much
-      testing time. Fixes HDFFV-8554. (DER - 2014/04/11)
 
 Supported Platforms
 ===================
