@@ -13,8 +13,15 @@
 #include "mpi.h"
 #include "hdf5.h"
 
+
+/* define filename for this app, and max size after username prepended */
+#define FILENAME_APP "m6.2-eff_container.h5"
+#define FILENAME_SIZE 256
+
+/* max length of attributes */
 #define ATTR_STR_LEN 128
 
+/* macros related to error reporting */
 #define STATUS (ret >= 0) ? "OK" : "FAILED"
 #define ASSERT_RET assert( ret >= 0 )
 
@@ -35,7 +42,9 @@ void print_container_contents( hid_t, hid_t, const char*, int );
 int  parse_options( int, char**, int );
 
 int main( int argc, char **argv ) {
-   const char file_name[]="m6.2-eff_container.h5";
+
+   char *user_name;                 /* We'll prepend username to make filename unique */
+   char file_name[FILENAME_SIZE];   /* Actual filename to be opened will be user_name + FILENAME_APP */
 
    int my_rank, comm_size;
    int provided;
@@ -68,6 +77,8 @@ int main( int argc, char **argv ) {
    EFF_init( MPI_COMM_WORLD, MPI_INFO_NULL );
 
    /* Specify that the IOD VOL plugin should be used and create H5File (EFF container) */
+   user_name = getenv( "USER" );
+   snprintf( file_name, FILENAME_SIZE, "%s_%s", user_name, FILENAME_APP );
    fprintf( stderr, "M6.2-r%d: Create the container %s (Step 2)\n", my_rank, file_name );
    fapl_id = H5Pcreate( H5P_FILE_ACCESS ); assert( fapl_id >= 0 );
    ret = H5Pset_fapl_iod( fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL ); ASSERT_RET;

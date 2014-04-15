@@ -11,6 +11,10 @@
 #include "mpi.h"
 #include "hdf5.h"
 
+/* define filename for this app, and max size after username prepended */
+#define FILENAME_APP "eff_pep.h5"
+#define FILENAME_SIZE 256
+
 /* macros related to error reporting */
 #define STATUS (ret >= 0) ? " " : " - FAILED"
 #define ASSERT_RET assert( ret >= 0 )
@@ -43,11 +47,12 @@ void usage( const char* );
 int main( int argc, char **argv ) {
 
    /* MPI */
-    int my_rank, comm_size, acquire_rank;
+   int my_rank, comm_size, acquire_rank;
    int provided;
 
    /* Container */
-   const char file_name[]="eff_pep.h5";
+   char *user_name;                 /* We'll prepend username to make filename unique */
+   char file_name[FILENAME_SIZE];   /* Actual filename to be opened will be user_name + FILENAME_APP */
    hid_t  fapl_id;         
    hid_t  file_id;
 
@@ -87,10 +92,11 @@ int main( int argc, char **argv ) {
       fprintf( stderr, "APP-r%d: Number of MPI processes = %d\n", my_rank, comm_size );
    }
 
-   if(comm_size > 3)
+   if ( comm_size > 3 ) {
        acquire_rank = 3;
-   else
+   } else {
        acquire_rank = 0;
+   }
 
    /* Parse command-line options controlling behavior */
    if ( parse_options( argc, argv, my_rank ) != 0 ) {
@@ -102,6 +108,8 @@ int main( int argc, char **argv ) {
    EFF_init( MPI_COMM_WORLD, MPI_INFO_NULL );
 
    /* Specify the IOD VOL plugin should be used and create H5File (EFF container) */
+   user_name = getenv( "USER" );
+   snprintf( file_name, FILENAME_SIZE, "%s_%s", user_name, FILENAME_APP );
    fprintf( stderr, "APP-r%d: Create %s\n", my_rank, file_name );
    fapl_id = H5Pcreate( H5P_FILE_ACCESS ); assert( fapl_id >= 0 );
    ret = H5Pset_fapl_iod( fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL ); ASSERT_RET;
