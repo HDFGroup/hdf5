@@ -102,7 +102,8 @@ New Features
 
     Fortran API
     -----------
-    - None
+    - Wrappers H5Pset_file_image_f and H5Pget_file_image_f were added to the 
+      library (MSB - 2014/1/2014)
 
     C++ API
     -------
@@ -156,9 +157,15 @@ Bug Fixes since HDF5-1.8.12
       + Win32 threads + static is no longer a supported configuration. Fixes
       HDFFV-8518. (DER - 2014/04/11)
 
+    - H5R.c: H5Rget_name
+      Changed the behavior of H5Rget_name for the returned value of the function 
+      when name is NULL. If name is NULL then size is ignored and the function 
+      returns the size of the name buffer (not including the NULL terminator), 
+      H5Rget_name still returns negative on failure. (MSB - 2014/01/22 HDFFV-8620)
+
     Parallel Library
     ----------------
-    - None
+    - Fixed missing H5F_Provisional module in HDF5mpio.f90 (MSB - 2014/2/7 HDFFV-8651)
 
     Performance
     -------------
@@ -173,7 +180,8 @@ Bug Fixes since HDF5-1.8.12
 
     F90 API
     -------
-    - None
+    - H5D_CHUNK_CACHE_NSLOTS_DFLT_F and H5D_CHUNK_CACHE_NBYTES_DFLT_F were changed
+      from default KIND for INTEGER to INTEGER of KIND size_t (MSB - 2014/3/31 HDFFV-8689)
 
     C++ API
     ------
@@ -396,6 +404,15 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* Due to an Intel compiler bug introduced in version 14.0.1, the HDF5 FORTRAN
+  wrappers do not work with configure option --enable-fortran2003. 
+  However, option --enable-fortran works with Intel 14.0.1. The compiler bug was 
+  fixed in Intel version 14.0.2 and resolved the issue. (MSB - 2014/4/15)
+
+* Due to a PGI compiler bug introduced in versions < 13.3 and versions > 14.2, 
+  the FORTRAN test 'Testing get file image' will fail. (MSB - 2014/4/15)
+
+
 * On CYGWIN, when building the library dynmically, testing will fail on dynamically
   loaded filters. The test process will build dynamic filter libraries with the
   *.dll.a extension and the hdf5 library will be looking for *.so libraries. Entered
