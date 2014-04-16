@@ -559,6 +559,12 @@ H5P_term_interface(void)
                 } /* end if */
             } /* end if */
         } else {
+            /* Close public interface */
+            n += H5P__term_pub_interface();
+
+            /* Close deprecated interface */
+            n += H5P__term_deprec_interface();
+
             H5I_dec_type_ref(H5I_GENPROP_LST);
             n++; /*H5I*/
             H5I_dec_type_ref(H5I_GENPROP_CLS);

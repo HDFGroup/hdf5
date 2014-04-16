@@ -106,6 +106,30 @@ H5D__init_deprec_interface(void)
     FUNC_LEAVE_NOAPI(H5D_init())
 } /* H5D__init_deprec_interface() */
 
+
+/*--------------------------------------------------------------------------
+NAME
+   H5D__term_deprec_interface -- Terminate interface
+USAGE
+    herr_t H5D__term_deprec_interface()
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Terminates interface.  (Just resets H5_interface_initialize_g
+    currently).
+
+--------------------------------------------------------------------------*/
+herr_t
+H5D__term_deprec_interface(void)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Mark closed */
+    H5_interface_initialize_g = 0;
+
+    FUNC_LEAVE_NOAPI(0)
+} /* H5D__term_deprec_interface() */
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
