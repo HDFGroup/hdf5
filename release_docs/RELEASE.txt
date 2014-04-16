@@ -765,6 +765,16 @@ Bug Fixes since HDF5-1.8.0 release
       is included in libhdf5.settings now. AKC - 2008/10/21
     - "make DESTDIR=xxx install" failed to install some tools and files
       (e.g., h5cc and fortran modules). Fixed. AKC - 2008/10/8.
+    - Autotools: An export of LD_LIBRARY_PATH=<szip library location> was
+      removed from configure and make installcheck was revised to run
+      scripts installed in share/hdf5_examples to use the installed h5cc, etc. 
+      to compile and run example source files also installed there. Make
+      installcheck will now fail when a shared szip or other external lib file
+      cannot be found in the same manner that executables compiled and linked
+      with h5cc will fail to run when those lib files cannot be found after
+      install.  Make installcheck should pass after setting LD_LIBRARY_PATH to the
+      szip location.
+      (LRK - 2014/04/16)
 
     Performance
     -------------
@@ -1149,33 +1159,38 @@ Supported Platforms
 
     Linux 2.6.18-308.13.1.el5PAE  GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP i686 i686 i386         compilers for 32-bit applications;
-    (jam)                             Version 4.1.2 20080704 (Red Hat 4.1.2-52)
-                                      Version 4.6.3
+    (jam)                             Version 4.1.2 20080704 (Red Hat 4.1.2-54)
+                                      Version 4.8.2
                                   PGI C, Fortran, C++ Compilers for 32-bit
                                   applications;
-                                      Version 11.9-0
+                                      Version 13.7-0
                                   Intel(R) C, C++, Fortran Compiler for 32-bit
                                   applications;
-                                      Version 12.1
-                                  MPICH mpich2-1.4.1p1 compiled with
-                                      gcc 4.1.2 and gfortran 4.1.2
+                                      Version 14.0.2 (Build 20140120)
 
-    Linux 2.6.18-308.16.1.el5     GNU C (gcc), Fortran (gfortran), C++ (g++)
-    #1 SMP x86_64 GNU/Linux       compilers for 32-bit applications;
-    (koala)                           Version 4.1.2 20080704 (Red Hat 4.1.2-52)
-                                      Version 4.6.3
+    Linux 2.6.18-371.6.1.el5      GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers for 64-bit applications;
+    (koala)                           Version 4.1.2 20080704 (Red Hat 4.1.2-54)
+                                      Version 4.8.2
                                   PGI C, Fortran, C++ for 64-bit target on 
                                   x86-64;
-                                      Version 11.9-0 
-                                      Version 12.5-0
+                                      Version 13.7-0 
                                   Intel(R) C, C++, Fortran Compilers for 
                                   applications running on Intel(R) 64; 
-                                      Version 12.1 (Build 20110811)
-                                      Version 12.1 (Build 20120212)
-                                  MPICH mpich2-1.4.1p1 compiled with
-                                      gcc 4.1.2 and gfortran 4.1.2
+                                      Version 14.0.2 (Build 20140120)
 
-    Linux 2.6.32-358.2.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
+    Linux 2.6.32-431.11.2.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (platypus)                       Version 4.4.7 20120313
+                                     Version 4.8.2
+                                  PGI C, Fortran, C++ for 64-bit target on 
+                                  x86-64;
+                                      Version 13.7-0 
+                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                  compilers:
+                                     Version 14.0.2 (Build 20140120)
+
+    Linux 2.6.32-431.11.2.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
     #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
     (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
                                   IBM XL C/C++ V11.1
@@ -1242,15 +1257,18 @@ Windows 8                               y        y/y    n        y    y     y
 Windows 8     x64                       y        y/y    n        y    y     y
 Mac OS X Lion 10.7.3 32-bit             n        y/y    n        y    y     n
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
-Mac OS X Mountain Lion 10.8.1 64-bit    n        y/n    n        y    y     n
-AIX 5.3 32- and 64-bit                  y        y/n    y        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 PGI    n        y/y    n        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 GNU      y        y/y    y        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 PGI      n        y/y    n        y    y     y
-Linux 2.6.32-358.2.1.el6.ppc64          n        y/n    n        y    y     y
+Mac OS X Mountain Lion 10.8.1 64-bit    n        y/y    n        y    y     y
+Mac OS X Mavericks 10.9.1 64-bit        n        y/y    n        y    y     ?
+AIX 5.3 32- and 64-bit                  n        y/n    n        y    y     y
+CentOS 5.9 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
+CentOS 5.9 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
+CentOS 5.9 Linux 2.6.18-308 i686 PGI    n        y/y    n        y    y     y
+CentOS 5.9 Linux 2.6.18 x86_64 GNU      n        y/y    n        y    y     y
+CentOS 5.9 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
+CentOS 6.4 Linux 2.6.32 x86_64 GNU      y        y/y    y        y    y     y
+CentOS 6.4 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
+CentOS 6.4 Linux 2.6.32 x86_64 PGI      n        y/y    n        y    y     y
+Linux 2.6.32-431.11.2.el6.ppc64         n        y/n    n        y    y     y
 
 
 Platform                                 Shared  Shared    Shared    Thread-  
@@ -1266,14 +1284,17 @@ Windows 8 x64                              y       y         y         y
 Mac OS X Lion 10.7.3 32-bit                y       n         y         y        
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
 Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
-AIX 5.3 32- and 64-bit                     n       n         n         y        
-CentOS 5.5 Linux 2.6.18-308 i686 GNU       y       y         y         y        
-CentOS 5.5 Linux 2.6.18-308 i686 Intel     y       y         y         n        
-CentOS 5.5 Linux 2.6.18-308 i686 PGI       y       y         y         n        
-CentOS 5.5 Linux 2.6.18 x86_64 GNU         y       y         y         y        
-CentOS 5.5 Linux 2.6.18 x86_64 Intel       y       y         y         n        
-CentOS 5.5 Linux 2.6.18 x86_64 PGI         y       y         y         n        
-Linux 2.6.32-358.2.1.el6.ppc64             y       y         y         n 
+Mac OS X Mavericks 10.9.1 64-bit           y       n         y         y
+AIX 5.3 32- and 64-bit                     y       n         n         y        
+CentOS 5.9 Linux 2.6.18-308 i686 GNU       y       y         y         y        
+CentOS 5.9 Linux 2.6.18-308 i686 Intel     y       y         y         n        
+CentOS 5.9 Linux 2.6.18-308 i686 PGI       y       y         y         n        
+CentOS 5.9 Linux 2.6.18 x86_64 GNU         y       y         y         y        
+CentOS 5.9 Linux 2.6.18 x86_64 Intel       y       y         y         n        
+CentOS 6.4 Linux 2.6.32 x86_64 GNU         y       y         y         n
+CentOS 6.4 Linux 2.6.32 x86_64 Intel       y       y         y         n
+CentOS 6.4 Linux 2.6.32 x86_64 PGI         y       y         y         n     
+Linux 2.6.32-431.11.2.el6.ppc64            y       y         y         n 
 
 Compiler versions for each platform are listed in the preceding
 "Supported Platforms" table.
@@ -1282,6 +1303,14 @@ Compiler versions for each platform are listed in the preceding
 More Tested Platforms
 =====================
 The following platforms are not supported but have been tested for this release.
+
+    Linux 2.6.18-308.13.1.el5PAE  MPICH mpich 3.1 compiled with
+    #1 SMP i686 i686 i386             gcc 4.8.2 and gfortran 4.8.2
+    (jam)                         g95 (GCC 4.0.3 (g95 0.94!)
+
+    Linux 2.6.18-431.11.2.el6     MPICH mpich 3.1 compiled with
+    #1 SMP x86_64 GNU/Linux           gcc 4.8.2 and gfortran 4.8.2
+    (platypus)                    g95 (GCC 4.0.3 (g95 0.94!)   
 
     FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
     (loyalty)                     gcc 4.6.1 20110422
