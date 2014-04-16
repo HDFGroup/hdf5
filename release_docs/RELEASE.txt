@@ -58,9 +58,14 @@ New Features
     Configuration
     -------------
     - Autotools: Automake updated to 1.14.1 (ADB - 2014/04/08)
+
     - CMake: Moved minimum CMake version to 2.8.11 which enables better library
       include processing. (ADB - 2014/03/26)
     
+    - When configuring thread-safe HDF5 library it is no longer necessary to specify
+      --enable-threadsafe with --with-ptreads if the Pthreads library is in 
+      a standard location.  (DER - 2014/04/11 HDFFV-8693)
+
     Library
     -------
     - Added an H5free_memory API call. This should be used to free memory that
@@ -73,6 +78,7 @@ New Features
       than the application, such as when a debug memory manager is in use or
       when the HDF5 library is wrapped for use in a managed language like
       Python or Java. Fixes HDFFV-7710, 8519, and 8851. (DER - 2014/04/11)
+
     - The core VFD can now be configured to track dirty regions in the file
       and only write out the changed regions on flush/close. Additionally,
       a "page aggregation" size can be set that will aggregate small writes
@@ -87,10 +93,12 @@ New Features
     Parallel Library
     ----------------
     - Removed MPI-POSIX VFD, as it wasn't helping anyone and was just
-        generating support questions.  Application developers performing
-        parallel I/O should always use the MPI-IO VFD.  (QAK - 2014/03/28)
+      generating support questions.  Application developers performing
+      parallel I/O should always use the MPI-IO VFD.
+     (QAK - 2014/03/28 HDFFV-8659)
+
     - Improved parallel I/O support to allow collective I/O on point
-        selections. (QAK - 2014/03/15)
+      selections. (QAK - 2014/03/15)
  
     Tools
     -----
@@ -164,20 +172,28 @@ Bug Fixes since HDF5-1.8.12
       must be set to the same value as the configuration
         (-DCMAKE_BUILD_TYPE:STRING=Release if using -C Release). This is needed 
       by the the szip and zlib filter build commands. (ADB - HDFFV-8695)
-    - CMake: Remove use of XLATE_UTILITY program. (ADB - 2014/03/28 HDFFV-8640)
+
+    - CMake: Removed use of XLATE_UTILITY program. (ADB - 2014/03/28 HDFFV-8640)
+
     - CMake: Added missing quotes in setting the CMAKE_EXE_LINKER_FLAGS for the
       MPI option. (ADB - 2014/02/27 HDFFV-8674)
-    - It is no longer necessary to specify --with-pthreads with
-      --enable-threadsafe if the Pthreads library is in a standard location.
-      Fixes HDFFV-8693. (DER - 2014/04/11)
-    - CMake: C++ and/or Fortran + thread-safe is enforced as a non-supported
+
+    - CMake: Configuration of the HDF5 C++ or Fortran libraries with the 
+      thread-safety feature.
+
+      C++ and/or Fortran + thread-safe is enforced as a non-supported
       configuration, which matches the autotools. (DER - 2014/04/11)
-    - CMake: Static + thread-safe + Win32 threads is not a supported configuration
+
+    - CMake: Configuration of static HDF5 C library with the thread-safety
+      feature. 
+
+      Static + thread-safe + Win32 threads is not a supported configuration
       due to the inability to automatically clean up thread-local storage. This is
       expected to be fixed in a future release. In the meantime, a work-around
       that uses internal functionality may allow the combination to be used without
       resource leaks. Contact the help desk for more information.
       (DER - 2014/04/11)
+
     - Autotools: An export of LD_LIBRARY_PATH=<szip library location> was
       removed from configure and make installcheck was revised to run
       scripts installed in share/hdf5_examples to use the installed h5cc, etc. 
@@ -191,26 +207,48 @@ Bug Fixes since HDF5-1.8.12
 
     Library
     -------
-    - H5R.c: H5Rget_name
-      Changed the behavior of H5Rget_name for the returned value of the function 
-      when name is NULL. If name is NULL then size is ignored and the function 
-      returns the size of the name buffer (not including the NULL terminator), 
-      H5Rget_name still returns negative on failure. (MSB - 2014/01/22 HDFFV-8620)
-    - H5Z.c: H5Zfilter_avail(H5Z_filter_t id)
-      Added else block if the call to the internal H5Z_filter_avail(id) does not
-      fail and returns FALSE. This block calls the H5PL_load(H5PL_TYPE_FILTER, (int)id)
-      function to attempt to dynamically load the filter plugin. 
+    - H5R.c: H5Rget_name gave an assertion failure if the "name" parameter was
+      NULL.
+
+      Fixed H5Rget_name to return the size of the buffer needed to read a
+      name of the referenced object in this case. The size doesn't include 
+      the NULL terminator. H5Rget_name returns negative on failure. 
+      (MSB - 2014/01/22 HDFFV-8620)
+
+    - H5Z.c: H5Zfilter_avail didn't check if a filter was available as a
+      dynamically loaded filter. The error manifested itself in the h5repack
+      tool when removing user-defined dynamically loaded filter.
+
+      Added a code to find the filter among the dynamically loaded filters after
+      the function fails to find it among the registered filters. 
       (ADB - 2014/03/03 HDFFV-8629)
-    - The thread-safe library now no longer leaks thread-local storage
-      resources on Windows with Win32 threads. This cleanup can only be
-      performed when the library is built as a shared library so thread-safe
-      + Win32 threads + static is no longer a supported configuration. Fixes
-      HDFFV-8518. (DER - 2014/04/11)
-    - Improve handling of NULL pointers to H5Dread/H5Dwrite calls.  Credit
+
+    - Memory leak: a memory leak was observed in conjunction to the 
+      H5TS_errstk_key_g thread-local variable allocated in the H5E_get_stack 
+      function in H5E.c 
+
+      The shared HDF5 thread-safe library now no longer leaks thread-local storage
+      resources on Windows with Win32 threads. Currently there is no solution
+      for this problem when HDF5 is statically built.
+      We disabled build of the static HDF5 thread-safe library with 
+      Win32 threads.
+      (DER - 2014/04/11 HDFFV-8518)
+
+    - H5Dio.c: Improved handling of NULL pointers to H5Dread/H5Dwrite calls.  Credit
       to Jason Newton (nevion@gmail.com) for the original patch.
-      (QAK - 2014/04/16)
-    - Improve handling of closing library and re-accessing it with
-      deprecated routine.  (QAK - 2014/04/16, for NAF)
+
+      H5Dwrite/read failed when NULL pointer was passed for a data buffer and 
+      0 elements were selected. Fixed.
+      (QAK - 2014/04/16 HDFFV-8705)
+
+    - Deprecated API (1_6 API): Improve handling of closing library and
+      re-accessing it with deprecated routine.
+
+      When program used deprecated API (e.g., H5Gcreate1), closed the library
+      and reopened it again to acces group, dataset, datatype, dataspace, 
+      attribute, or property list, HDF5 failed to provide an identifier for 
+      the object. Fixed.
+      (NAF, QAK - 2014/04/16 HDFFV-8232)
 
     Parallel Library
     ----------------
@@ -222,10 +260,11 @@ Bug Fixes since HDF5-1.8.12
 
     Tools
     -----
-    - h5repack: h5repack would not attempt to remove UD filters. Added a 
-      check to h5repack for UD filters that checks if the filter can 
-      be dynamically loaded. This will require a change in the library to
-      add the H5PL_load() to the H5Zfilter_avail(). (ADB - 2014/03/03 HDFFV-8629)
+    - h5repack: h5repack would not remove user-defined filters.
+
+      Fixed by modifying h5repack to check if the filter is registered or can be 
+      dynamically loaded. 
+      (ADB - 2014/03/03 HDFFV-8629)
 
     F90 API
     -------
