@@ -146,6 +146,11 @@ Bug Fixes since HDF5-1.8.12
    
     Library
     -------
+    - H5R.c: H5Rget_name
+      Changed the behavior of H5Rget_name for the returned value of the function 
+      when name is NULL. If name is NULL then size is ignored and the function 
+      returns the size of the name buffer (not including the NULL terminator), 
+      H5Rget_name still returns negative on failure. (MSB - 2014/01/22 HDFFV-8620)
     - H5Z.c: H5Zfilter_avail(H5Z_filter_t id)
       Added else block if the call to the internal H5Z_filter_avail(id) does not
       fail and returns FALSE. This block calls the H5PL_load(H5PL_TYPE_FILTER, (int)id)
@@ -156,12 +161,11 @@ Bug Fixes since HDF5-1.8.12
       performed when the library is built as a shared library so thread-safe
       + Win32 threads + static is no longer a supported configuration. Fixes
       HDFFV-8518. (DER - 2014/04/11)
-
-    - H5R.c: H5Rget_name
-      Changed the behavior of H5Rget_name for the returned value of the function 
-      when name is NULL. If name is NULL then size is ignored and the function 
-      returns the size of the name buffer (not including the NULL terminator), 
-      H5Rget_name still returns negative on failure. (MSB - 2014/01/22 HDFFV-8620)
+    - Improve handling of NULL pointers to H5Dread/H5Dwrite calls.  Credit
+      to Jason Newton (nevion@gmail.com) for the original patch.
+      (QAK - 2014/04/16)
+    - Improve handling of closing library and re-accessing it with
+      deprecated routine.  (QAK - 2014/04/16, for NAF)
 
     Parallel Library
     ----------------

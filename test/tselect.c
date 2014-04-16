@@ -292,9 +292,13 @@ test_select_hyper(hid_t xfer_plist)
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
 
-    /* Exercise check for NULL buffer and valid selection */
+    /* Exercise checks for NULL buffer and valid selection */
     H5E_BEGIN_TRY {
         ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,NULL);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Dwrite");
+    H5E_BEGIN_TRY {
+        ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,H5S_ALL,H5S_ALL,xfer_plist,NULL);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Dwrite");
 
@@ -326,9 +330,13 @@ test_select_hyper(hid_t xfer_plist)
     ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
-    /* Exercise check for NULL buffer and valid selection */
+    /* Exercise checks for NULL buffer and valid selection */
     H5E_BEGIN_TRY {
         ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,NULL);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Dread");
+    H5E_BEGIN_TRY {
+        ret=H5Dread(dataset,H5T_NATIVE_UCHAR,H5S_ALL,H5S_ALL,xfer_plist,NULL);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Dread");
 
