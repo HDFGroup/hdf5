@@ -107,7 +107,42 @@ New Features
 
     C++ API
     -------
-    - None 
+    - The following new features are added:
+      + Wrappers to class H5Object to get object's name (HDFFV-8548)
+          ssize_t getObjName(char *obj_name, size_t buf_size = 0)
+          ssize_t getObjName(H5std_string& obj_name, size_t len = 0)
+          H5std_string getObjName()
+      + Wrappers to class H5CommonFG to get a child object's type from a
+	group or file (HDFFV-8367)
+          H5O_type_t childObjType(const H5std_string& objname)
+          H5O_type_t childObjType(const char* objname)
+          H5O_type_t childObjType(hsize_t index,
+                H5_index_t index_type=H5_INDEX_NAME,
+                H5_iter_order_t order=H5_ITER_INC, const char* objname=".")
+      + Wrappers to class DSetMemXferPropList for setting/getting transform
+	property list (HDFFV-7907)
+          DSetMemXferPropList(const char* expression);
+          void setDataTransform(const char* expression)
+          void setDataTransform(const H5std_string& expression)
+          ssize_t getDataTransform(char* exp, size_t buf_size=0)
+          H5std_string getDataTransform()
+      + Wrapper to CompType for setting size to compound datatype (HDFFV-8642)
+          void setSize(size_t size)
+      + Overloaded functions to provide prototypes that declares constant
+	arguments const (HDFFV-3384).  These include:
+	DataSet::fillMemBuf
+	DataSet::getVlenBufSize
+	DataSpace::extentCopy
+	DataType::commit
+	FileAccPropList::setSplit
+	H5File::getVFDHandle
+      + Additional overload to class H5Location to get comment as a char*
+          ssize_t getComment(const char* name, size_t buf_size, char* comment)
+      + Additional overloads to class Attribute to get attribute's name for
+	convenience:
+          ssize_t Attribute::getName(char* attr_name, size_t buf_size=0)
+          ssize_t getName(H5std_string& attr_name, size_t buf_size=0)
+      (BMR, 2014/04/15)
 
 
 Support for New Platforms, Languages, and Compilers
@@ -199,7 +234,10 @@ Bug Fixes since HDF5-1.8.12
 
     C++ API
     ------
-    - None
+    - Applied user's patch: added throw() to exception destructors.
+      (HDFFV-8623) (BMR - 2014/4/15)
+    - Changed default value from 256 to 0 because it makes more sense. (BMR -
+      2014/4/15)
 
     High-Level APIs:
     ------
