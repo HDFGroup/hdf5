@@ -62,38 +62,40 @@ New Features
     - CMake: Moved minimum CMake version to 2.8.11 which enables better library
       include processing. (ADB - 2014/03/26)
     
-    - When configuring thread-safe HDF5 library it is no longer necessary to specify
-      --enable-threadsafe with --with-ptreads if the Pthreads library is in 
-      a standard location.  (DER - 2014/04/11 HDFFV-8693)
+    - When configuring a thread-safe HDF5 Library it is no longer necessary 
+      to specify --enable-threadsafe with --with-ptreads if the Pthreads 
+      library is in a standard location.  (DER - 2014/04/11 HDFFV-8693)
 
     Library
     -------
-    - Added an H5free_memory API call. This should be used to free memory that
-      has been allocated by HDF5 API calls (e.g., H5Tget_member_name,
-      H5Pget_class_name, etc.). The main motivation for this call is Windows,
-      where it is common for application code and the HDF5 library to be using
-      different C run-time libraries. Using the new call ensures that the same
-      CRT handles both the allocation and free. This new function can also be
-      useful in any case where the library uses a different memory manager
-      than the application, such as when a debug memory manager is in use or
-      when the HDF5 library is wrapped for use in a managed language like
-      Python or Java. Fixes HDFFV-7710, 8519, and 8851. (DER - 2014/04/11)
+    - Added an H5free_memory API call. This should be used to free memory 
+      that has been allocated by HDF5 API calls. H5Tget_member_name and 
+      H5Pget_class_name are two examples. The main motivation for this call 
+      is Windows, where it is common for application code and the HDF5 Library 
+      to be using different C run-time libraries (CRT). Using the new call 
+      ensures that the same CRT handles both the allocation and free. This 
+      new function can also be useful in any case where the library uses a 
+      different memory manager than the application, such as when a debug 
+      memory manager is in use or when the HDF5 Library is wrapped for use 
+      in a managed language like Python or Java. Fixes HDFFV-7710, 8519, 
+      and 8851. (DER - 2014/04/11)
 
-    - The core VFD can now be configured to track dirty regions in the file
-      and only write out the changed regions on flush/close. Additionally,
-      a "page aggregation" size can be set that will aggregate small writes
-      into larger writes. e.g., setting a 1 MiB page aggregation size will
-      logically partition the the in-memory file into 1 MiB pages that will be
-      written out in their entirety if even a single byte is dirtied. The
-      feature is controlled via the new H5Pset/get_core_write_tracking() API
-      call. A new "core_paged" target has been added to the check-vfd target
-      in test/Makefile.am that exercises the feature over all HDF5 VFD-aware
+    - The Core VFD (aka Memory VFD) can now be configured to track dirty 
+      regions in the file and only write out the changed regions on 
+      flush/close. Additionally, a "page aggregation" size can be set that 
+      will aggregate small writes into larger writes. For example, setting 
+      a 1 MiB page aggregation size will logically partition the the 
+      in-memory file into 1 MiB pages that will be written out in their 
+      entirety if even a single byte is dirtied. The feature is controlled 
+      via the new H5Pset/get_core_write_tracking() API call. A new 
+      "core_paged" target has been added to the check-vfd target in 
+      test/Makefile.am that exercises the feature over all HDF5 VFD-aware
       tests. (DER - 2014/04/12)
  
     Parallel Library
     ----------------
     - Removed MPI-POSIX VFD, as it wasn't helping anyone and was just
-      generating support questions.  Application developers performing
+      generating support questions. Application developers performing
       parallel I/O should always use the MPI-IO VFD.
      (QAK - 2014/03/28 HDFFV-8659)
 
@@ -110,47 +112,47 @@ New Features
 
     Fortran API
     -----------
-    - Wrappers H5Pset_file_image_f and H5Pget_file_image_f were added to the 
-      library (MSB - 2014/1/2014)
+    - Wrappers h5pset_file_image_f and h5pget_file_image_f were added to the 
+      library. (MSB - 2014/1/2014)
 
     C++ API
     -------
     - The following new features are added:
-      + Wrappers to class H5Object to get object's name (HDFFV-8548)
-          ssize_t getObjName(char *obj_name, size_t buf_size = 0)
-          ssize_t getObjName(H5std_string& obj_name, size_t len = 0)
-          H5std_string getObjName()
+      + Wrappers to class H5Object to get an object's name (HDFFV-8548).
+            ssize_t getObjName(char *obj_name, size_t buf_size = 0)
+            ssize_t getObjName(H5std_string& obj_name, size_t len = 0)
+            H5std_string getObjName()
       + Wrappers to class H5CommonFG to get a child object's type from a
-	group or file (HDFFV-8367)
-          H5O_type_t childObjType(const H5std_string& objname)
-          H5O_type_t childObjType(const char* objname)
-          H5O_type_t childObjType(hsize_t index,
+        group or file (HDFFV-8367).
+            H5O_type_t childObjType(const H5std_string& objname)
+            H5O_type_t childObjType(const char* objname)
+            H5O_type_t childObjType(hsize_t index,
                 H5_index_t index_type=H5_INDEX_NAME,
                 H5_iter_order_t order=H5_ITER_INC, const char* objname=".")
-      + Wrappers to class DSetMemXferPropList for setting/getting transform
-	property list (HDFFV-7907)
-          DSetMemXferPropList(const char* expression);
-          void setDataTransform(const char* expression)
-          void setDataTransform(const H5std_string& expression)
-          ssize_t getDataTransform(char* exp, size_t buf_size=0)
-          H5std_string getDataTransform()
-      + Wrapper to CompType for setting size to compound datatype (HDFFV-8642)
-          void setSize(size_t size)
-      + Overloaded functions to provide prototypes that declares constant
-	arguments const (HDFFV-3384).  These include:
-	DataSet::fillMemBuf
-	DataSet::getVlenBufSize
-	DataSpace::extentCopy
-	DataType::commit
-	FileAccPropList::setSplit
-	H5File::getVFDHandle
-      + Additional overload to class H5Location to get comment as a char*
-          ssize_t getComment(const char* name, size_t buf_size, char* comment)
-      + Additional overloads to class Attribute to get attribute's name for
-	convenience:
-          ssize_t Attribute::getName(char* attr_name, size_t buf_size=0)
-          ssize_t getName(H5std_string& attr_name, size_t buf_size=0)
-      (BMR, 2014/04/15)
+      + Wrappers to class DSetMemXferPropList for setting/getting a transform 
+        property list (HDFFV-7907).
+            DSetMemXferPropList(const char* expression);
+            void setDataTransform(const char* expression)
+            void setDataTransform(const H5std_string& expression)
+            ssize_t getDataTransform(char* exp, size_t buf_size=0)
+            H5std_string getDataTransform()
+      + Wrapper to CompType for setting size to compound datatype (HDFFV-8642).
+            void setSize(size_t size)
+      + Overloaded functions to provide prototypes that declare constant 
+        arguments const (HDFFV-3384).  These include:
+            DataSet::fillMemBuf
+            DataSet::getVlenBufSize
+            DataSpace::extentCopy
+            DataType::commit
+            FileAccPropList::setSplit
+            H5File::getVFDHandle
+      + Additional overload to class H5Location to get a comment as a char*
+            ssize_t getComment(const char* name, size_t buf_size, char* comment)
+      + Additional overloads to class Attribute to get an attribute's name for
+        convenience:
+            ssize_t Attribute::getName(char* attr_name, size_t buf_size=0)
+            ssize_t getName(H5std_string& attr_name, size_t buf_size=0)
+            (BMR, 2014/04/15)
 
 
 Support for New Platforms, Languages, and Compilers
@@ -170,10 +172,11 @@ Bug Fixes since HDF5-1.8.12
     - CMake: When CMake commands are executed individually on the command line
       and the external filters are being built, the CMAKE_BUILD_TYPE define
       must be set to the same value as the configuration
-        (-DCMAKE_BUILD_TYPE:STRING=Release if using -C Release). This is needed 
+      (-DCMAKE_BUILD_TYPE:STRING=Release if using -C Release). This is needed 
       by the the szip and zlib filter build commands. (ADB - HDFFV-8695)
 
-    - CMake: Removed use of XLATE_UTILITY program. (ADB - 2014/03/28 HDFFV-8640)
+    - CMake: Removed use of the XLATE_UTILITY program. 
+      (ADB - 2014/03/28 HDFFV-8640)
 
     - CMake: Added missing quotes in setting the CMAKE_EXE_LINKER_FLAGS for the
       MPI option. (ADB - 2014/02/27 HDFFV-8674)
@@ -182,17 +185,17 @@ Bug Fixes since HDF5-1.8.12
       thread-safety feature.
 
       C++ and/or Fortran + thread-safe is enforced as a non-supported
-      configuration, which matches the autotools. (DER - 2014/04/11)
+      configuration. This matches the autotools. (DER - 2014/04/11)
 
     - CMake: Configuration of static HDF5 C library with the thread-safety
       feature. 
 
       Static + thread-safe + Win32 threads is not a supported configuration
-      due to the inability to automatically clean up thread-local storage. This is
-      expected to be fixed in a future release. In the meantime, a work-around
-      that uses internal functionality may allow the combination to be used without
-      resource leaks. Contact the help desk for more information.
-      (DER - 2014/04/11)
+      due to the inability to automatically clean up thread-local storage. 
+      This is expected to be fixed in a future release. In the meantime, a 
+      work-around that uses internal functionality may allow the combination 
+      to be used without resource leaks. Contact the help desk for more 
+      information. (DER - 2014/04/11)
 
     - Autotools: An export of LD_LIBRARY_PATH=<szip library location> was
       removed from configure and make installcheck was revised to run
@@ -201,14 +204,13 @@ Bug Fixes since HDF5-1.8.12
       installcheck will now fail when a shared szip or other external lib file
       cannot be found in the same manner that executables compiled and linked
       with h5cc will fail to run when those lib files cannot be found after
-      install.  Make installcheck should pass after setting LD_LIBRARY_PATH to the
-      szip location.
-      (LRK - 2014/04/16)
+      install.  Make installcheck should pass after setting LD_LIBRARY_PATH 
+      to the szip location. (LRK - 2014/04/16)
 
     Library
     -------
-    - H5R.c: H5Rget_name gave an assertion failure if the "name" parameter was
-      NULL.
+    - H5R.c: H5Rget_name gave an assertion failure if the "name" parameter 
+      was NULL.
 
       Fixed H5Rget_name to return the size of the buffer needed to read a
       name of the referenced object in this case. The size doesn't include 
@@ -219,40 +221,39 @@ Bug Fixes since HDF5-1.8.12
       dynamically loaded filter. The error manifested itself in the h5repack
       tool when removing user-defined dynamically loaded filter.
 
-      Added a code to find the filter among the dynamically loaded filters after
-      the function fails to find it among the registered filters. 
+      Added a code to find the filter among the dynamically loaded filters 
+      after the function fails to find it among the registered filters. 
       (ADB - 2014/03/03 HDFFV-8629)
 
     - Memory leak: a memory leak was observed in conjunction to the 
       H5TS_errstk_key_g thread-local variable allocated in the H5E_get_stack 
-      function in H5E.c 
+      function in H5E.c. 
 
-      The shared HDF5 thread-safe library now no longer leaks thread-local storage
-      resources on Windows with Win32 threads. Currently there is no solution
-      for this problem when HDF5 is statically built.
-      We disabled build of the static HDF5 thread-safe library with 
-      Win32 threads.
-      (DER - 2014/04/11 HDFFV-8518)
+      The shared HDF5 thread-safe library now no longer leaks thread-local 
+      storage resources on Windows with Win32 threads. Currently, there is 
+      no solution for this problem when HDF5 is statically built. We 
+      disabled the build of the static HDF5 thread-safe library with 
+      Win32 threads. (DER - 2014/04/11 HDFFV-8518)
 
-    - H5Dio.c: Improved handling of NULL pointers to H5Dread/H5Dwrite calls.  Credit
-      to Jason Newton (nevion@gmail.com) for the original patch.
+    - H5Dio.c: Improved handling of NULL pointers to H5Dread/H5Dwrite 
+      calls. Credit to Jason Newton (nevion@gmail.com) for the original patch.
 
-      H5Dwrite/read failed when NULL pointer was passed for a data buffer and 
-      0 elements were selected. Fixed.
-      (QAK - 2014/04/16 HDFFV-8705)
+      H5Dwrite/read failed when a NULL pointer was passed for a data buffer 
+      and 0 elements were selected. Fixed. (QAK - 2014/04/16 HDFFV-8705)
 
-    - Deprecated API (1_6 API): Improve handling of closing library and
-      re-accessing it with deprecated routine.
+    - Deprecated API (1_6 API): Improved handling of closing the library and
+      re-accessing it with a deprecated routine.
 
-      When program used deprecated API (e.g., H5Gcreate1), closed the library
-      and reopened it again to acces group, dataset, datatype, dataspace, 
-      attribute, or property list, HDF5 failed to provide an identifier for 
-      the object. Fixed.
+      When a program used a deprecated API (for example, H5Gcreate1), 
+      closed the library, and reopened it again to access a group, dataset, 
+      datatype, dataspace, attribute, or property list, HDF5 failed to 
+      provide an identifier for the object. Fixed.
       (NAF, QAK - 2014/04/16 HDFFV-8232)
 
     Parallel Library
     ----------------
-    - Fixed missing H5F_Provisional module in HDF5mpio.f90 (MSB - 2014/2/7 HDFFV-8651)
+    - Fixed a missing H5F_Provisional module in HDF5mpio.f90 
+      (MSB - 2014/2/7 HDFFV-8651)
 
     Performance
     -------------
@@ -262,21 +263,21 @@ Bug Fixes since HDF5-1.8.12
     -----
     - h5repack: h5repack would not remove user-defined filters.
 
-      Fixed by modifying h5repack to check if the filter is registered or can be 
-      dynamically loaded. 
-      (ADB - 2014/03/03 HDFFV-8629)
+      Fixed by modifying h5repack to check if the filter is registered or 
+      can be dynamically loaded. (ADB - 2014/03/03 HDFFV-8629)
 
     F90 API
     -------
-    - H5D_CHUNK_CACHE_NSLOTS_DFLT_F and H5D_CHUNK_CACHE_NBYTES_DFLT_F were changed
-      from default KIND for INTEGER to INTEGER of KIND size_t (MSB - 2014/3/31 HDFFV-8689)
+    - H5D_CHUNK_CACHE_NSLOTS_DFLT_F and H5D_CHUNK_CACHE_NBYTES_DFLT_F were 
+      changed from the default KIND for INTEGER to INTEGER of KIND size_t. 
+      (MSB - 2014/3/31 HDFFV-8689)
 
     C++ API
     ------
     - Applied user's patch: added throw() to exception destructors.
-      (HDFFV-8623) (BMR - 2014/4/15)
-    - Changed default value from 256 to 0 because it makes more sense. (BMR -
-      2014/4/15)
+      (BMR - 2014/4/15 HDFFV-8623)
+    - Changed the default value from 256 to 0 because it makes more sense. 
+      (BMR - 2014/4/15)
 
     High-Level APIs:
     ------
@@ -288,15 +289,15 @@ Bug Fixes since HDF5-1.8.12
 
     Testing
     -------
-    - testhdf5 now exits EXIT_SUCCESS(0) if no errors, else EXIT_FAILURE(1).
-      (AKC - 2014/01/27 - HDFFV-8572)
+    - testhdf5 now exits with EXIT_SUCCESS(0) if no errors, else 
+      EXIT_FAILURE(1). (AKC - 2014/01/27 HDFFV-8572)
 
     - The big test now pays attention to the HDF5_DRIVER environment variable.
       Previously, it would run all tests with the family, stdio, and sec2
-      VFDs for each VFD in the check-vfd make target, regardless of the
-      variable setting. It now checks the variable and either runs the
-      appropriate VFD-specific tests or skips, as needed. This saves much
-      testing time. Fixes HDFFV-8554. (DER - 2014/04/11)
+      virtual file drivers (VFDs) for each VFD in the check-vfd make target, 
+      regardless of the variable setting. It now checks the variable and 
+      either runs the appropriate VFD-specific tests or skips as needed. 
+      This saves much testing time. Fixes HDFFV-8554. (DER - 2014/04/11)
 
 Supported Platforms
 ===================
@@ -497,24 +498,26 @@ Known Problems
 ==============
 * Due to an Intel compiler bug introduced in version 14.0.1, the HDF5 FORTRAN
   wrappers do not work with configure option --enable-fortran2003. 
-  However, option --enable-fortran works with Intel 14.0.1. The compiler bug was 
-  fixed in Intel version 14.0.2 and resolved the issue. (MSB - 2014/4/15)
+  However, the option --enable-fortran works with Intel 14.0.1. The compiler 
+  bug was fixed in Intel version 14.0.2 and resolved the issue. 
+  (MSB - 2014/4/15)
 
-* Due to a PGI compiler bug introduced in versions < 13.3 and versions > 14.2, 
-  the FORTRAN test 'Testing get file image' will fail. (MSB - 2014/4/15)
+* Due to a PGI compiler bug introduced in versions before 13.3 and versions 
+  after 14.2, the FORTRAN test 'Testing get file image' will fail. 
+  (MSB - 2014/4/15)
 
-
-* On CYGWIN, when building the library dynmically, testing will fail on dynamically
-  loaded filters. The test process will build dynamic filter libraries with the
-  *.dll.a extension and the hdf5 library will be looking for *.so libraries. Entered
-  as issue HDFFV-8736. (ADB - 2014/04/14)
+* On CYGWIN, when building the library dynamically, testing will fail on 
+  dynamically loaded filters. The test process will build dynamic filter 
+  libraries with the *.dll.a extension, and the HDF5 Library will be looking 
+  for *.so libraries. Entered as issue HDFFV-8736. (ADB - 2014/04/14)
   
 * CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
-  catches some undefined behavior in the alignment algorithm of the macro DETECT_I
-  in H5detect.c (Issue 8147).  Since the algorithm is trying to detect the alignment
-  of integers, ideally the flag -fcatch-undefined-behavior shouldn't to be used for
-  H5detect.c. In the future, we can separate flags for H5detect.c from the rest of
-  the library. (SLU - 2013/10/16)
+  catches some undefined behavior in the alignment algorithm of the macro 
+  DETECT_I in H5detect.c (Issue 8147). Since the algorithm is trying to 
+  detect the alignment of integers, ideally the flag 
+  -fcatch-undefined-behavior should not to be used for H5detect.c. In the 
+  future, we can separate flags for H5detect.c from the rest of the library. 
+  (SLU - 2013/10/16)
 
 * Make provided by Solaris fails in "make check". Solaris users should use
   gmake to build and install the HDF5 software. (AKC - 2013/10/08 - HDFFV-8534)
