@@ -273,12 +273,42 @@ void DataType::commit(const H5Location& loc, const char* name)
 
 //--------------------------------------------------------------------------
 // Function:	DataType::commit
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const's.  This wrapper will be removed in future release.
+///\param	loc - IN: A location (file, dataset, datatype, or group)
+///\param	name - IN: Name of the datatype
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Jan, 2007
+//--------------------------------------------------------------------------
+void DataType::commit(H5Location& loc, const char* name)
+{
+   p_commit(loc.getId(), name);
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::commit
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function only in the type of the
 ///		argument \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataType::commit(const H5Location& loc, const H5std_string& name)
+{
+   p_commit(loc.getId(), name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::commit
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const's.  This wrapper will be removed in future release.
+///\param	loc - IN: A location (file, dataset, datatype, or group)
+///\param	name - IN: Name of the datatype
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Jan, 2007
+//--------------------------------------------------------------------------
+void DataType::commit(H5Location& loc, const H5std_string& name)
 {
    p_commit(loc.getId(), name.c_str());
 }

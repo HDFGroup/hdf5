@@ -454,6 +454,23 @@ void H5File::getVFDHandle(const FileAccPropList& fapl, void **file_handle) const
 
 //--------------------------------------------------------------------------
 // Function:	H5File::getVFDHandle
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const.  This wrapper will be removed in future release.
+///\param	fapl        - File access property list
+///\param	file_handle - Pointer to the file handle being used by
+///			      the low-level virtual file driver
+///\exception	H5::FileIException
+// Programmer   Binh-Minh Ribler - May 2004
+// Note:	Retiring April, 2014
+//--------------------------------------------------------------------------
+void H5File::getVFDHandle(FileAccPropList& fapl, void **file_handle) const
+{
+    getVFDHandle((const FileAccPropList)fapl, file_handle);
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::getVFDHandle
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function only in what arguments it
 ///		accepts.

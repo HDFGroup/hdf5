@@ -295,12 +295,12 @@ const char* Exception::getCFuncName() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	Exception::printError
+// Function:	Exception::printError (static)
 ///\brief	Prints the error stack in a default manner.
 ///\param	stream - IN: File pointer
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::printError( FILE* stream ) const
+void Exception::printError( FILE* stream )
 {
    herr_t ret_value = H5Eprint2( H5E_DEFAULT, stream ); // print to stderr
    if( ret_value < 0 )

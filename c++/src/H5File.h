@@ -67,8 +67,9 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 	void getObjIDs(unsigned types, size_t max_objs, hid_t *oid_list) const;
 
 	// Returns the pointer to the file handle of the low-level file driver.
-	void getVFDHandle(const FileAccPropList& fapl, void **file_handle) const;
 	void getVFDHandle(void **file_handle) const;
+	void getVFDHandle(const FileAccPropList& fapl, void **file_handle) const;
+	void getVFDHandle(FileAccPropList& fapl, void **file_handle) const; // kept for backward compatibility
 
 	// Determines if a file, specified by its name, is in HDF5 format
 	static bool isHdf5(const char* name );

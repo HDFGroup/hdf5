@@ -101,7 +101,9 @@ class H5_DLLCPP CommonFG {
 
 	// Mounts the file 'child' onto this location.
 	void mount(const char* name, const H5File& child, const PropList& plist) const;
+	void mount(const char* name, H5File& child, PropList& plist) const; // backward compatibility
 	void mount(const H5std_string& name, const H5File& child, const PropList& plist) const;
+	void mount(const H5std_string& name, H5File& child, PropList& plist) const; // backward compatibility
 
 	// Unmounts the file named 'name' from this parent location.
 	void unmount(const char* name) const;
