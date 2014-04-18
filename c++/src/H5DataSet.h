@@ -37,9 +37,12 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
 	void extend( const hsize_t* size ) const;
 
 	// Fills a selection in memory with a value
-	void fillMemBuf(const void *fill, const DataType& fill_type, void *buf, const DataType& buf_type, const DataSpace& space);
+	void fillMemBuf(const void *fill, const DataType& fill_type, void *buf, const DataType& buf_type, const DataSpace& space) const;
+	void fillMemBuf(const void *fill, DataType& fill_type, void *buf, DataType& buf_type, DataSpace& space); // kept for backward compatibility
+
 	// Fills a selection in memory with zero
-	void fillMemBuf(void *buf, const DataType& buf_type, const DataSpace& space);
+	void fillMemBuf(void *buf, const DataType& buf_type, const DataSpace& space) const;
+	void fillMemBuf(void *buf, DataType& buf_type, DataSpace& space); // kept for backward compatibility
 
 	// Gets the creation property list of this dataset.
 	DSetCreatPropList getCreatePlist() const;
@@ -61,6 +64,7 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
 
 	// Returns the number of bytes required to store VL data.
 	hsize_t getVlenBufSize(const DataType& type, const DataSpace& space ) const;
+	hsize_t getVlenBufSize(DataType& type, DataSpace& space) const; // kept for backward compatibility
 
 	// Reclaims VL datatype memory buffers.
 	static void vlenReclaim(const DataType& type, const DataSpace& space, const DSetMemXferPropList& xfer_plist, void* buf );

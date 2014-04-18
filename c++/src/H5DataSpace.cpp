@@ -290,6 +290,20 @@ void DataSpace::extentCopy (const DataSpace& dest_space) const
 }
 
 //--------------------------------------------------------------------------
+// Function:	DataSpace::extentCopy
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const.  This wrapper will be removed in future release.
+///\param	dest_space  - IN: Dataspace to copy from
+///\exception	H5::DataSpaceIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void DataSpace::extentCopy( DataSpace& dest_space ) const
+{
+    extentCopy((const DataSpace)dest_space);
+}
+
+//--------------------------------------------------------------------------
 // Function:	DataSpace::setExtentSimple
 ///\brief	Sets or resets the size of an existing dataspace.
 ///\param	rank  - IN: Rank of the dataspace
