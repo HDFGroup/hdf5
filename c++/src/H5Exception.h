@@ -72,7 +72,7 @@ class H5_DLLCPP Exception {
 				H5E_walk2_t func, void* client_data);
 
 	// Prints the error stack in a default manner.
-	virtual void printError( FILE* stream = NULL ) const;
+	static void printError( FILE* stream = NULL );
 
 	// Default constructor
 	Exception();

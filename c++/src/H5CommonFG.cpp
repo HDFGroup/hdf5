@@ -467,7 +467,7 @@ H5std_string CommonFG::getLinkval( const H5std_string& name, size_t size ) const
 ///\param	child - IN: File to mount
 ///\param	plist - IN: Property list to use
 ///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
+// Programmer	Binh-Minh Ribler - 2014 (original 2000)
 //--------------------------------------------------------------------------
 void CommonFG::mount(const char* name, const H5File& child, const PropList& plist ) const
 {
@@ -485,14 +485,41 @@ void CommonFG::mount(const char* name, const H5File& child, const PropList& plis
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::mount
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const's.  This wrapper will be removed in future release.
+///\param	name  - IN: Name of the group
+///\param	child - IN: File to mount
+///\param	plist - IN: Property list to use
+///\exception	H5::FileIException or H5::GroupIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void CommonFG::mount(const char* name, H5File& child, PropList& plist) const
+{
+   mount(name, (const H5File)child, (const PropList)plist);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::mount
 ///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name.
+///		It takes an \c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void CommonFG::mount(const H5std_string& name, const H5File& child, const PropList& plist) const
 {
-   mount( name.c_str(), child, plist );
+   mount(name.c_str(), child, plist);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::mount
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const's.  This wrapper will be removed in future release.
+// Programmer	Binh-Minh Ribler - 2014
+//--------------------------------------------------------------------------
+void CommonFG::mount(const H5std_string& name, H5File& child, PropList& plist) const
+{
+   mount(name.c_str(), (const H5File)child, (const PropList)plist);
 }
 
 //--------------------------------------------------------------------------
