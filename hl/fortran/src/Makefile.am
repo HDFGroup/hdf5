@@ -49,8 +49,11 @@ endif
 libhdf5hl_fortran_la_SOURCES=H5DSfc.c H5LTfc.c  H5IMfc.c H5IMcc.c H5TBfc.c \
 	H5DSff.f90 H5LTff.f90 H5IMff.f90 H5TBff.f90
 
-# HDF5 HL Fortran library depends on HDF5 HL Library and HDF5 Fortran Library.
+# HDF5 HL Fortran library depends on HDF5 Library.  However, only add the dependency
+# if --enable-sharedlib-rpath is yes.
+if LT_ADD_LIBHDF5_DEPENDENCY
 libhdf5hl_fortran_la_LIBADD=$(LIBH5_HL) $(LIBH5F)
+endif
 
 # Fortran module files can have different extensions and different names
 # (e.g., different capitalizations) on different platforms.  Write rules
