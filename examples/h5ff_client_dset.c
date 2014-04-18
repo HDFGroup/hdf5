@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
     hid_t gid1, gid2, gid3;
     hid_t sid, scalar, dtid;
     hid_t did1, did2, did3;
-    hid_t tid1, tid2, tid3, rid1, rid2, rid3, rid4;
+    hid_t tid1, tid2, tid3, rid1, rid2, rid3;
     hid_t fapl_id, trspl_id, dxpl_id;
     hid_t e_stack;
     hid_t esid;
@@ -134,15 +134,20 @@ int main(int argc, char **argv) {
     /* acquire container version 1 - EXACT.  
        This can be asynchronous, but here we need the acquired ID 
        right after the call to start the transaction so we make synchronous. */
-    version = 1;
-    rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    if(0 == my_rank) {
+        version = 1;
+        rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    }
+    MPI_Bcast( &version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
     assert(1 == version);
+    if (my_rank != 0)
+        rid1 = H5RCcreate(file_id, version);
 
     /* create transaction object */
     tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
     assert(tid1);
 
-    /* start transaction 1 with default Leader/Delegate model. Leader
+    /* start transaction 2 with default Leader/Delegate model. Leader
        which is rank 0 here starts the transaction. It can be
        asynchronous, but we make it synchronous here so that the
        Leader can tell its delegates that the transaction is
@@ -319,8 +324,10 @@ int main(int argc, char **argv) {
     assert(0 == ret);
 
     /* release container version 1. This is async. */
-    ret = H5RCrelease(rid1, e_stack);
-    assert(0 == ret);
+    if(0 == my_rank) {
+        ret = H5RCrelease(rid1, e_stack);
+        assert(0 == ret);
+    }
 
     H5ESget_count(e_stack, &num_events);
     H5ESwait_all(e_stack, &status);
@@ -441,11 +448,10 @@ int main(int argc, char **argv) {
     printf("Rank %d read value %d\n", my_rank, element);
     assert(element == 450);
 
-#if 0
-    /* create & start transaction 2 with num_peers = my_size. This
+    /* create & start transaction 3 with num_peers = my_size. This
        means all processes are transaction leaders, and all have to
        call start and finish on the transaction. */
-    tid2 = H5TRcreate(file_id, rid2, (uint64_t)2);
+    tid2 = H5TRcreate(file_id, rid2, (uint64_t)3);
     assert(tid2);
     trspl_id = H5Pcreate (H5P_TR_START);
     ret = H5Pset_trspl_num_peers(trspl_id, my_size);
@@ -457,30 +463,12 @@ int main(int argc, char **argv) {
 
     /* Do more updates on transaction 2 */
 
-    if(0 == my_rank) {
+    {
         extent = nelem+10;
 
         ret = H5Dset_extent_ff(did1, &extent, tid2, e_stack);
         assert(ret == 0);
     }
-
-    if((my_size > 1 && 1 == my_rank) || 
-       (my_size == 1 && 0 == my_rank)) {
-        extent = 30;
-        ret = H5Dset_extent_ff(did2, &extent, tid2, e_stack);
-        assert(ret == 0);
-    }
-
-    if((my_size > 2 && 2 == my_rank) || 
-       (my_size == 1 && 0 == my_rank)) {
-        extent = 60;
-        ret = H5Dset_extent_ff(did3, &extent, tid2, e_stack);
-        assert(ret == 0);
-    }
-
-    /* finish transaction 2 - all have to call */
-    ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
-    assert(0 == ret);
 
     H5ESget_count(e_stack, &num_events);
     H5ESwait_all(e_stack, &status);
@@ -488,38 +476,21 @@ int main(int argc, char **argv) {
     H5ESclear(e_stack);
     MPI_Barrier(MPI_COMM_WORLD);
 
-    version = 2;
-    rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(2 == version);
-
-    tid3 = H5TRcreate(file_id, rid3, (uint64_t)3);
-    assert(tid3);
-    trspl_id = H5Pcreate (H5P_TR_START);
-    ret = H5Pset_trspl_num_peers(trspl_id, my_size);
-    assert(0 == ret);
-    ret = H5TRstart(tid3, trspl_id, e_stack);
-    assert(0 == ret);
-    ret = H5Pclose(trspl_id);
-    assert(0 == ret);
-
     esid = H5Dget_space(did1);
-
     ex_wdata = malloc (sizeof(int32_t)*(nelem+10));
     ex_rdata = malloc (sizeof(int32_t)*(nelem+10));
 
-    if(0 == my_rank) {
-        for(i=0;i<extent;++i) {
-            ex_wdata[i] = i;
-            ex_rdata[i] = 0;
-        }
-
-        ret = H5Dwrite_ff(did1, dtid, esid, esid, H5P_DEFAULT, 
-                          ex_wdata, tid3, e_stack);
-        assert(ret == 0);
+    for(i=0;i<nelem+10;++i) {
+        ex_wdata[i] = i;
+        ex_rdata[i] = 0;
     }
 
+    ret = H5Dwrite_ff(did1, dtid, esid, esid, H5P_DEFAULT, 
+                      ex_wdata, tid2, e_stack);
+    assert(ret == 0);
+
     /* finish transaction 3 */
-    ret = H5TRfinish(tid3, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
+    ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 
     H5ESget_count(e_stack, &num_events);
@@ -529,36 +500,32 @@ int main(int argc, char **argv) {
     H5ESclear(e_stack);
     MPI_Barrier(MPI_COMM_WORLD);
 
-    version = 3;
-    rid4 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(3 == version);
-
-    {
-        esid = H5Dget_space(did1);
-
-        ret = H5Dread_ff(did1, dtid, esid, esid, H5P_DEFAULT, ex_rdata, 
-                         rid4, H5_EVENT_STACK_NULL);
-        assert(ret == 0);
-
-        printf("Printing all Extended Dataset values: ");
-        for(i=0 ; i<nelem+10 ; ++i)
-            printf("%d ", ex_rdata[i]);
-        printf("\n");
-
-        H5Sclose(esid);
+    if(0 == my_rank) {
+        version = 3;
+        rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
     }
+    MPI_Bcast( &version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
+    assert(3 == version);
+    if (my_rank != 0)
+        rid3 = H5RCcreate(file_id, version);
 
-    /* release container version 3. This is async. */
-    ret = H5RCrelease(rid3, e_stack);
-    assert(0 == ret);
-    ret = H5RCrelease(rid4, e_stack);
-    assert(0 == ret);
+    ret = H5Dread_ff(did1, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, ex_rdata, 
+                     rid3, H5_EVENT_STACK_NULL);
+    assert(ret == 0);
 
-#endif
+    printf("Printing all Extended Dataset values: ");
+    for(i=0 ; i<nelem+10 ; ++i) {
+        printf("%d ", ex_rdata[i]);
+        assert(ex_rdata[i] == ex_wdata[i]);
+    }
+    printf("\n");
+
+    H5Sclose(esid);
 
     MPI_Barrier(MPI_COMM_WORLD);    
     if(my_rank == 0) {
-        /* release container version 2. This is async. */
+        ret = H5RCrelease(rid3, e_stack);
+        assert(0 == ret);
         ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);
     }

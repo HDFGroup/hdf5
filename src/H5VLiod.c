@@ -3702,48 +3702,50 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[],
     FUNC_ENTER_NOAPI_NOINIT
 
     /* If there is information needed about the dataset that is not present locally, wait */
-    if(-1 == dset->remote_dset.space_id) {
+    if(-1 == dset->remote_dset.dcpl_id ||
+       -1 == dset->remote_dset.type_id ||
+       -1 == dset->remote_dset.space_id) {
         /* Synchronously wait on the request attached to the dataset */
         if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
             HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
         dset->common.request = NULL;
     }
 
+    input.dims.rank = H5Sget_simple_extent_ndims(dset->remote_dset.space_id);
+    if(0 == input.dims.rank)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't extend dataset with scalar dataspace");
+
     /* get the transaction ID */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
     if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
-
     /* get the TR object */
     if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
 
-    if(H5VL_iod_get_obj_requests((H5VL_iod_object_t *)dset, &num_parents, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get num requests");
+    if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
 
-    if(num_parents) {
-        if(NULL == (parent_reqs = (H5VL_iod_request_t **)H5MM_malloc
-                    (sizeof(H5VL_iod_request_t *) * num_parents)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array of parent reqs");
-        if(H5VL_iod_get_obj_requests((H5VL_iod_object_t *)dset, &num_parents, 
-                                     parent_reqs) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get parent requests");
-    }
+    /* retrieve parent requests */
+    if(H5VL_iod_get_parent_requests((H5VL_iod_object_t *)dset, (H5VL_iod_req_info_t *)tr, 
+                                    parent_reqs, &num_parents) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
 
     /* Fill input structure */
     input.coh = dset->common.file->remote_file.coh;
     input.iod_oh = dset->remote_dset.iod_oh;
     input.iod_id = dset->remote_dset.iod_id;
     input.mdkv_id = dset->remote_dset.mdkv_id;
-    input.dims.rank = H5Sget_simple_extent_ndims(dset->remote_dset.space_id);
     input.dims.size = size;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;
     input.cs_scope = dset->common.file->md_integrity_scope;
 
 #if H5_EFF_DEBUG
-    printf("Dataset Set Extent, axe id %"PRIu64"\n", g_axe_id);
+    printf("Dataset Set Extent (rank %d size %zu), axe id %"PRIu64"\n",
+           input.dims.rank, input.dims.size[0], g_axe_id);
 #endif
 
     status = (int *)malloc(sizeof(int));

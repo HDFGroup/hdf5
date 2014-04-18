@@ -190,6 +190,7 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
+    assert(status == H5ES_STATUS_SUCCEED);
 
     if(0 == my_rank) {
         /* create transaction object */
@@ -238,6 +239,7 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
+    assert(status == H5ES_STATUS_SUCCEED);
 
     /* Tell other procs that container version 3 is acquired */
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
@@ -282,6 +284,7 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
+    assert(status == H5ES_STATUS_SUCCEED);
 
     /* barrier so root knows all are done reading */
     MPI_Barrier(MPI_COMM_WORLD);
@@ -307,6 +310,7 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
+    assert(status == H5ES_STATUS_SUCCEED);
 
     ret = H5RCclose(rid1);
     assert(0 == ret);

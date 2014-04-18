@@ -431,25 +431,35 @@ H5VL__iod_combine(const char *combine_script, void **split_data, size_t *split_n
 
     PyObject *po_func = NULL, *po_numpy_arrays = NULL, *po_args_tup = NULL;
     PyObject *po_numpy_array_combine = NULL;
-    size_t i;
+    size_t count = 0;
+    size_t i, k = 0;
 
     if(!numpy_initialized) H5VL__iod_numpy_init();
 
+    for(i = 0; i < num_targets; i++) {
+        if(0 != split_num_elmts[i])
+            count ++;
+    }
+
     /* Create numpy arrays */
-    if(NULL == (po_numpy_arrays = PyList_New((Py_ssize_t) num_targets)))
+    if(NULL == (po_numpy_arrays = PyList_New((Py_ssize_t) count)))
         HGOTO_ERROR_FF(FAIL, "can't create list of arrays")
+
     for(i = 0; i < num_targets; i++) {
         PyObject *po_numpy_array = NULL;
         int py_ret = 0;
 
-        if(NULL == (po_numpy_array = 
-                    H5VL__iod_create_numpy_array(split_num_elmts[i],
-                                                 data_type_id, 
-                                                 split_data[i])))
-            HGOTO_ERROR_FF(FAIL, "can't create numpy array from data")
+        if(0 != split_num_elmts[i]) {
+            if(NULL == (po_numpy_array = 
+                        H5VL__iod_create_numpy_array(split_num_elmts[i],
+                                                     data_type_id, 
+                                                     split_data[i])))
+                HGOTO_ERROR_FF(FAIL, "can't create numpy array from data")
 
-        if(0 != (py_ret = PyList_SetItem(po_numpy_arrays, (Py_ssize_t) i, po_numpy_array)))
-            HGOTO_ERROR_FF(FAIL, "can't set item to array list")
+            if(0 != (py_ret = PyList_SetItem(po_numpy_arrays, (Py_ssize_t) k, po_numpy_array)))
+                HGOTO_ERROR_FF(FAIL, "can't set item to array list")
+            k ++;
+        }
     }
 
     /* Load script */
@@ -477,7 +487,7 @@ done:
     /* Cleanup */
     Py_XDECREF(po_func);
     Py_XDECREF(po_args_tup);
-    for(i = 0; i < num_targets; i++) {
+    for(i = 0; i < count; i++) {
         Py_XDECREF(po_numpy_arrays + i);
     }
     Py_XDECREF(po_numpy_array_combine);
@@ -520,7 +530,9 @@ H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs)
     }
 
     /* open the container */
-    printf("(%d) Calling iod_container_open on %s\n", my_rank_g, file_name);
+#if H5_EFF_DEBUG 
+    fprintf(stderr, "(%d) Calling iod_container_open on %s\n", my_rank_g, file_name);
+#endif
     ret = iod_container_open(file_name, NULL, IOD_CONT_R, &temp_cohs[0], NULL);
     if(ret < 0)
         HGOTO_ERROR_FF(ret, "can't open file");
@@ -606,7 +618,7 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
                     const char *split_script, const char *combine_script)
 {
     herr_t ret_value = SUCCEED; /* Return value */
-    void **split_data;
+    void **split_data = NULL;
     size_t *split_num_elmts;
     void *combine_data;
     size_t combine_num_elmts;
@@ -621,7 +633,8 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
     if(NULL == (hg_reqs = (hg_request_t *) malloc(sizeof(hg_request_t) * num_targets)))
         HGOTO_ERROR_FF(FAIL, "can't allocate HG requests");
 
-    if(NULL == (farm_output = (analysis_farm_out_t *) malloc(sizeof(analysis_farm_out_t) * num_targets)))
+    if(NULL == (farm_output = (analysis_farm_out_t *) malloc
+                (sizeof(analysis_farm_out_t) * num_targets)))
         HGOTO_ERROR_FF(FAIL, "can't allocate HG requests");
 
     if(NULL == (split_data = (void **) malloc(sizeof(void *) * num_targets)))
@@ -649,7 +662,9 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
             if (0 == strcmp(obj_map->u_map.array_map.array_range[i].loc,
                     server_loc_g[j])) {
                 server_idx = j;
-                printf("(%d) Server %d owns this object\n", my_rank_g, server_idx);
+#if H5_EFF_DEBUG 
+                fprintf(stderr, "(%d) Server %d owns this object\n", my_rank_g, server_idx);
+#endif
                 break;
             }
         }
@@ -676,7 +691,8 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
     for (i = 0; i < num_targets; i++) {
         if (hg_reqs[i] == HG_REQUEST_NULL) {
             /* No request / was local */
-        } else {
+        } 
+        else {
             analysis_transfer_in_t transfer_input;
             analysis_transfer_out_t transfer_output;
             hg_bulk_t bulk_handle;
@@ -687,35 +703,41 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
             if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
                 HGOTO_ERROR_FF(FAIL, "HG_Wait Failed");
 
-            /* Get split type ID and num_elemts (all the arrays should have the same native type id) */
-            server_idx = farm_output[i].server_idx;
-            split_type_id = farm_output[i].type_id;
-            split_num_elmts[i] = farm_output[i].num_elmts;
-            split_data_size = split_num_elmts[i] * H5Tget_size(split_type_id);
-//            printf("Getting %d elements of size %zu from server %zu\n",
-//                    split_num_elmts[i], H5Tget_size(split_type_id), server_idx);
+            if(0 != farm_output[i].num_elmts) {
+                /* Get split type ID and num_elemts 
+                   (all the arrays should have the same native type id) */
+                server_idx = farm_output[i].server_idx;
+                split_type_id = farm_output[i].type_id;
+                split_num_elmts[i] = farm_output[i].num_elmts;
+                split_data_size = split_num_elmts[i] * H5Tget_size(split_type_id);
+                //            fprintf(stderr, "Getting %d elements of size %zu from server %zu\n",
+                //                    split_num_elmts[i], H5Tget_size(split_type_id), server_idx);
 
-            if(NULL == (split_data[i] = malloc(split_data_size)))
-                HGOTO_ERROR_FF(FAIL, "can't allocate farm buffer");
+                if(NULL == (split_data[i] = malloc(split_data_size)))
+                    HGOTO_ERROR_FF(FAIL, "can't allocate farm buffer");
 
-            HG_Bulk_handle_create(split_data[i], split_data_size,
-                    HG_BULK_READWRITE, &bulk_handle);
+                HG_Bulk_handle_create(split_data[i], split_data_size,
+                                      HG_BULK_READWRITE, &bulk_handle);
 
-            transfer_input.axe_id = farm_output[i].axe_id;
-            transfer_input.bulk_handle = bulk_handle;
+                transfer_input.axe_id = farm_output[i].axe_id;
+                transfer_input.bulk_handle = bulk_handle;
 
-            /* forward a free call to the target server */
-            if(HG_Forward(server_addr_g[server_idx], H5VL_EFF_ANALYSIS_FARM_TRANSFER,
-                    &transfer_input, &transfer_output, &hg_reqs[i]) < 0)
-                HGOTO_ERROR_FF(FAIL, "failed to ship operation");
+                /* forward a free call to the target server */
+                if(HG_Forward(server_addr_g[server_idx], H5VL_EFF_ANALYSIS_FARM_TRANSFER,
+                              &transfer_input, &transfer_output, &hg_reqs[i]) < 0)
+                    HGOTO_ERROR_FF(FAIL, "failed to ship operation");
 
-            /* Wait for the farmed work to complete */
-            if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
-                HGOTO_ERROR_FF(FAIL, "HG_Wait Failed");
+                /* Wait for the farmed work to complete */
+                if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
+                    HGOTO_ERROR_FF(FAIL, "HG_Wait Failed");
 
-            /* Free bulk handle */
-            HG_Bulk_handle_free(bulk_handle);
-
+                /* Free bulk handle */
+                HG_Bulk_handle_free(bulk_handle);
+            }
+            else {
+                split_num_elmts[i] = 0;
+                split_data[i] = NULL;
+            }
             /* Free Mercury request */
             if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
                 HGOTO_ERROR_FF(FAIL, "Can't Free Mercury Request");
@@ -726,8 +748,9 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
         free(hg_reqs);
     if(farm_output)
         free(farm_output);
-
-    printf("(%d) Applying combine on data\n", my_rank_g);
+#if H5_EFF_DEBUG 
+    fprintf(stderr, "(%d) Applying combine on data\n", my_rank_g);
+#endif
 #ifdef H5_HAVE_PYTHON
     if (H5VL__iod_combine(combine_script, split_data, split_num_elmts,
             num_targets, split_type_id, &combine_data,
@@ -738,12 +761,18 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
     /* free farm data */
     if (split_data) {
         for (i = 0; i < num_targets; i++) {
-            free(split_data[i]);
+            if(split_data[i]) {
+                free(split_data[i]);
+                split_data[i] = NULL;
+            }
         }
         free(split_data);
+        split_data = NULL;
     }
-    free(split_num_elmts);
-
+    if(split_num_elmts) {
+        free(split_num_elmts);
+        split_num_elmts = NULL;
+    }
 done:
     return ret_value;
 } /* end H5VL__iod_farm_work */
@@ -874,7 +903,7 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
                               query_id, split_script, combine_script);
     if(SUCCEED != ret)
         HGOTO_ERROR_FF(ret, "can't farm work");
-
+    fprintf(stderr, "DONE with combine phase\n");
     /********************************************/
 
     ret = iod_obj_free_map(obj_oh.rd_oh, obj_map);
@@ -941,7 +970,7 @@ H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
                      size_t *split_num_elmts, hid_t *split_type_id)
 {
     void *data = NULL;
-    size_t num_elmts;
+    size_t num_elmts = 0;
     herr_t ret_value = SUCCEED;
     hid_t space_layout;
 
@@ -958,21 +987,24 @@ H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
 
     /* Apply split python script on data from query */
 #ifdef H5_HAVE_PYTHON
-    if(FAIL == H5VL__iod_split(split_script, data, num_elmts, type_id,
-                               split_data, split_num_elmts, split_type_id))
-        HGOTO_ERROR_FF(FAIL, "can't apply split script to data");
+    if(num_elmts) {
+        if(FAIL == H5VL__iod_split(split_script, data, num_elmts, type_id,
+                                   split_data, split_num_elmts, split_type_id))
+            HGOTO_ERROR_FF(FAIL, "can't apply split script to data");
+    }
 #endif
 
     /* Free the data after split operation */
-    H5MM_free(data);
-    data = NULL;
-
+    if(data) {
+        H5MM_free(data);
+        data = NULL;
+    }
 done:
     if(space_layout)
         H5Sclose(space_layout);
 
     return ret_value;
-} /* end H5VL__iod_farm_work */
+} /* end H5VL__iod_farm_split */
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_analysis_farm_cb
@@ -1003,8 +1035,8 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
     const char *split_script = input->split_script;
     iod_size_t num_cells = input->num_cells;
     void *split_data = NULL;
-    size_t split_num_elmts;
-    hid_t split_type_id;
+    size_t split_num_elmts = 0;
+    hid_t split_type_id = FAIL;
     herr_t ret_value = SUCCEED;
 
     if(H5VL__iod_farm_split(coh, obj_id, rtid, space_id, coords, num_cells,
@@ -1028,6 +1060,10 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
     HG_Handler_start_output(op_data->hg_handle, &output->farm_out);
 
 done:
+    if(0 == split_num_elmts) {
+        output = (H5VLiod_farm_data_t *)H5MM_xfree(output);
+        op_data = (op_data_t *)H5MM_xfree(op_data);
+    }
     input = (analysis_farm_in_t *)H5MM_xfree(input);
 
 } /* end H5VL_iod_server_analysis_farm_cb() */
@@ -1066,8 +1102,9 @@ H5VL_iod_server_analysis_transfer_cb(AXE_engine_t axe_engine,
     farm_output = (H5VLiod_farm_data_t *)farm_op_data->output;
 
     data_size = HG_Bulk_handle_get_size(input->bulk_handle);
-    printf("(%d) Transferring split data back to master\n", my_rank_g);
-
+#if H5_EFF_DEBUG 
+    fprintf(stderr, "(%d) Transferring split data back to master\n", my_rank_g);
+#endif
     HG_Bulk_handle_create(farm_output->data, data_size, HG_BULK_READ_ONLY,
             &bulk_block_handle);
 
@@ -1093,7 +1130,7 @@ done:
     input = (analysis_transfer_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-} /* end H5VL_iod_server_analysis_farm_cb() */
+} /* end H5VL_iod_server_analysis_transfer_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__iod_get_space_layout
@@ -1120,8 +1157,8 @@ H5VL__iod_get_space_layout(coords_t coords, iod_size_t num_cells, hid_t space_id
     ndims = H5Sget_simple_extent_ndims(space_id);
 
     /* copy the original dataspace and reset selection to NONE */
-    if(FAIL == (space_layout = H5Scopy(space_id)))
-        HGOTO_ERROR_FF(FAIL, "unable to copy dataspace");
+    if((space_layout = H5Scopy(space_id)) < 0)
+        HGOTO_ERROR_FF(FAIL, "unable to copy dataspace")
 
     for(i=0 ; i<ndims ; i++) {
         start[i] = coords.start_cell[i];
