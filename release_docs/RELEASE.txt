@@ -63,7 +63,7 @@ New Features
       include processing. (ADB - 2014/03/26)
     
     - When configuring a thread-safe HDF5 Library it is no longer necessary 
-      to specify --enable-threadsafe with --with-ptreads if the Pthreads 
+      to specify --enable-threadsafe with --with-pthreads if the Pthreads 
       library is in a standard location.  (DER - 2014/04/11 HDFFV-8693)
 
     Library
