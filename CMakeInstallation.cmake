@@ -112,6 +112,24 @@ install (
 )
 
 #-----------------------------------------------------------------------------
+# Create pkgconfig files
+#-----------------------------------------------------------------------------
+foreach (libs ${LINK_LIBS})
+  set (LIBS "${LIBS} -l${libs}")
+endforeach (libs ${LINK_LIBS})
+foreach (libs ${HDF5_LIBRARIES_TO_EXPORT})
+  set (HDF5LIBS "${HDF5LIBS} -l${libs}")
+endforeach (libs ${HDF5_LIBRARIES_TO_EXPORT})
+configure_file (
+    ${HDF5_RESOURCES_DIR}/libhdf5.pc.in
+    ${HDF5_BINARY_DIR}/CMakeFiles/libhdf5.pc @ONLY
+)
+install (
+    FILES ${HDF5_BINARY_DIR}/CMakeFiles/libhdf5.pc
+    DESTINATION ${HDF5_INSTALL_LIB_DIR}/pkgconfig
+)
+
+#-----------------------------------------------------------------------------
 # Configure the HDF518_Examples.cmake file and the examples
 #-----------------------------------------------------------------------------
 option (HDF5_PACK_EXAMPLES  "Package the HDF5 Library Examples Compressed File" OFF)
@@ -240,6 +258,19 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
   endif (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")
 endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  if (CMAKE_HOST_UNIX)
+    set (CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
+      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+  else (CMAKE_HOST_UNIX)
+    GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
+    set (CMAKE_INSTALL_PREFIX
+      "${CMAKE_GENERIC_PROGRAM_FILES}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
+      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+    set (CMAKE_GENERIC_PROGRAM_FILES)
+  endif (CMAKE_HOST_UNIX)
+endif (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
 #-----------------------------------------------------------------------------
 # Set the cpack variables
 #-----------------------------------------------------------------------------
@@ -292,10 +323,8 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
   elseif (APPLE)
     LIST (APPEND CPACK_GENERATOR "DragNDrop") 
     set (CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
-    set (CPACK_PACKAGE_DEFAULT_LOCATION "/opt/${CPACK_PACKAGE_NAME}")
-    set (CPACK_PACKAGING_INSTALL_PREFIX "/")
+    set (CPACK_PACKAGING_INSTALL_PREFIX "/${CPACK_PACKAGE_INSTALL_DIRECTORY}")
     set (CPACK_PACKAGE_ICON "${HDF5_RESOURCES_DIR}/hdf.icns")
-    set (CPACK_SET_DESTDIR TRUE) # Required when packaging, and set CMAKE_INSTALL_PREFIX to "/".
     
     if (HDF5_PACK_MACOSX_BUNDLE)
       LIST (APPEND CPACK_GENERATOR "Bundle")
