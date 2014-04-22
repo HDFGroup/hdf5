@@ -33,7 +33,8 @@ if BUILD_EFF_CONDITIONAL
                 h5ff_client_dset h5ff_client_attr h5ff_client_links h5ff_client_view \
                 h5ff_client_vl_data h5ff_python_exec h5ff_client_analysis \
                 h5ff_client_evict_deltas h5ff_client_prefetch \
-                h5ff_client_M6.2_demo h5ff_client_M7.2-pep_demo
+                h5ff_client_M6.2_demo h5ff_client_M7.2-pep_demo \
+                h5ff_client_timings
 endif
 
 # Example programs.
