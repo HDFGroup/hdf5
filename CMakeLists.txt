@@ -213,22 +213,6 @@ set (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
 set (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 
 #-----------------------------------------------------------------------------
-# Set Install folder value
-#-----------------------------------------------------------------------------
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  if (CMAKE_HOST_UNIX)
-    set (CMAKE_INSTALL_PREFIX "/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
-      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
-  else (CMAKE_HOST_UNIX)
-    GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
-    set (CMAKE_INSTALL_PREFIX
-      "${CMAKE_GENERIC_PROGRAM_FILES}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
-      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
-    set (CMAKE_GENERIC_PROGRAM_FILES)
-  endif (CMAKE_HOST_UNIX)
-endif (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-
-#-----------------------------------------------------------------------------
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
 include (${HDF5_RESOURCES_DIR}/HDFMacros.cmake)
@@ -716,7 +700,7 @@ endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 # Note: Currently CMake only allows configuring of threadsafe on 
 # non-Cygwin WINDOWS.
 #-----------------------------------------------------------------------------
-if (WIN32 AND NOT CYGWIN)
+if (WIN32)
   option (HDF5_ENABLE_THREADSAFE "Enable thread-safety" OFF)
   if (HDF5_ENABLE_THREADSAFE)
     # check for unsupported options
@@ -743,7 +727,7 @@ if (WIN32 AND NOT CYGWIN)
       endif (NOT H5_HAVE_PTHREAD_H)
     endif (H5_HAVE_IOEO)
   endif (HDF5_ENABLE_THREADSAFE)
-endif (WIN32 AND NOT CYGWIN)
+endif (WIN32)
 
 #-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
