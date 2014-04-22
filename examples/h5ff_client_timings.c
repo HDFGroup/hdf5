@@ -741,6 +741,7 @@ int main( int argc, char **argv ) {
          fprintf( stderr, "APP-r%d: iter %d - Time to Evict Replica of /G-prefetched/D: %lu usec\n", 
                   my_rank, iteration, ELAPSED_TIME );
 
+         START_TIME;
          ret = H5Mevict_ff( map_p_id, version, mapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  
          END_TIME;
          fprintf( stderr, "APP-r%d: iter %d - Time to Evict Replica of /G-prefetched/M (currently no-op for IOD): %lu usec\n", 
