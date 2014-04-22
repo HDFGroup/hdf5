@@ -14,12 +14,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 %{
-#include<stdio.h>
-#include<string.h>
-#include<hdf5.h>
+#include <stdio.h>
+#include <string.h>
+#include <hdf5.h>
 
 extern int yylex();
-extern int yyerror(char *);
+extern int yyerror(const char *);
 
 #define STACK_SIZE      16
 
