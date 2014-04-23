@@ -16,7 +16,7 @@
 %{
 #include <stdlib.h>
 #include <string.h>
-#include<hdf5.h>
+#include <hdf5.h>
 #include "H5LTparse.h"
 
 int my_yyinput(char *, int);
@@ -181,7 +181,7 @@ int my_yyinput(char *buf, int max_size)
    return ret;
 }
 
-int H5LTyyerror(char *msg)
+int H5LTyyerror(const char *msg)
 {
    printf("ERROR: %s before \"%s\".\n", msg, yytext);
    return 0;
