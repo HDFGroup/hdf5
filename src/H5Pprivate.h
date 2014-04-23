@@ -46,6 +46,10 @@
 /* Library Private Typedefs */
 /****************************/
 
+/* Forward declarations (for prototypes & type definitions) */
+struct H5O_fill_t;
+struct H5T_t;
+
 /* Forward declarations for anonymous H5P objects */
 typedef struct H5P_genplist_t H5P_genplist_t;
 typedef struct H5P_genclass_t H5P_genclass_t;
@@ -71,10 +75,6 @@ typedef enum H5P_plist_type_t {
     H5P_TYPE_LINK_ACCESS       = 17,
     H5P_TYPE_MAX_TYPE
 } H5P_plist_type_t;
-
-/* Forward declarations (for prototypes & struct definitions) */
-struct H5O_fill_t;
-struct H5T_t;
 
 /*****************************/
 /* Library Private Variables */

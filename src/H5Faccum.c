@@ -95,7 +95,7 @@ H5FL_BLK_DEFINE_STATIC(meta_accum);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_accum_read
+ * Function:	H5F__accum_read
  *
  * Purpose:	Attempts to read some data from the metadata accumulator for
  *              a file into a buffer.
@@ -113,111 +113,111 @@ H5FL_BLK_DEFINE_STATIC(meta_accum);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
+H5F__accum_read(const H5F_io_info_t *fio_info, H5FD_mem_t type, haddr_t addr,
     size_t size, void *buf/*out*/)
 {
-    H5P_genplist_t *dxpl;               /* DXPL object */
     H5FD_mem_t  map_type;               /* Mapped memory type */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(f->shared);
+    HDassert(fio_info);
+    HDassert(fio_info->f);
+    HDassert(fio_info->dxpl);
     HDassert(buf);
 
     /* Treat global heap as raw data */
     map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
 
-    /* Get the DXPL plist object for DXPL ID */
-    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-
     /* Check if this information is in the metadata accumulator */
-    if((f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && map_type != H5FD_MEM_DRAW) {
+    if((fio_info->f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && map_type != H5FD_MEM_DRAW) {
+        H5F_meta_accum_t *accum;     /* Alias for file's metadata accumulator */
+
+        /* Set up alias for file's metadata accumulator info */
+        accum = &fio_info->f->shared->accum;
+
         if(size < H5F_ACCUM_MAX_SIZE) {
             /* Sanity check */
-            HDassert(!f->shared->accum.buf || (f->shared->accum.alloc_size >= f->shared->accum.size));
+            HDassert(!accum->buf || (accum->alloc_size >= accum->size));
 
             /* Current read adjoins or overlaps with metadata accumulator */
-            if(H5F_addr_overlap(addr, size, f->shared->accum.loc, f->shared->accum.size)
-                    || ((addr + size) == f->shared->accum.loc)
-                    || (f->shared->accum.loc + f->shared->accum.size) == addr) {
+            if(H5F_addr_overlap(addr, size, accum->loc, accum->size)
+                    || ((addr + size) == accum->loc)
+                    || (accum->loc + accum->size) == addr) {
                 size_t amount_before;       /* Amount to read before current accumulator */
                 haddr_t new_addr;           /* New address of the accumulator buffer */
                 size_t new_size;            /* New size of the accumulator buffer */
 
                 /* Compute new values for accumulator */
-                new_addr = MIN(addr, f->shared->accum.loc);
-                new_size = (size_t)(MAX((addr + size), (f->shared->accum.loc + f->shared->accum.size))
-                        - new_addr);
+                new_addr = MIN(addr, accum->loc);
+                new_size = (size_t)(MAX((addr + size), (accum->loc + accum->size)) - new_addr);
 
                 /* Check if we need more buffer space */
-                if(new_size > f->shared->accum.alloc_size) {
+                if(new_size > accum->alloc_size) {
                     size_t new_alloc_size;        /* New size of accumulator */
 
                     /* Adjust the buffer size to be a power of 2 that is large enough to hold data */
                     new_alloc_size = (size_t)1 << (1 + H5VM_log2_gen((uint64_t)(new_size - 1)));
 
                     /* Reallocate the metadata accumulator buffer */
-                    if(NULL == (f->shared->accum.buf = H5FL_BLK_REALLOC(meta_accum, f->shared->accum.buf, new_alloc_size)))
+                    if(NULL == (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, new_alloc_size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
 
                     /* Note the new buffer size */
-                    f->shared->accum.alloc_size = new_alloc_size;
+                    accum->alloc_size = new_alloc_size;
 #ifdef H5_CLEAR_MEMORY
-    HDmemset(f->shared->accum.buf + f->shared->accum.size, 0, (f->shared->accum.alloc_size - f->shared->accum.size));
+    HDmemset(accum->buf + accum->size, 0, (accum->alloc_size - accum->size));
 #endif /* H5_CLEAR_MEMORY */
                 } /* end if */
 
                 /* Read the part before the metadata accumulator */
-                if(addr < f->shared->accum.loc) {
+                if(addr < accum->loc) {
                     /* Set the amount to read */
-                    H5_ASSIGN_OVERFLOW(amount_before, (f->shared->accum.loc - addr), hsize_t, size_t);
+                    H5_ASSIGN_OVERFLOW(amount_before, (accum->loc - addr), hsize_t, size_t);
 
                     /* Make room for the metadata to read in */
-                    HDmemmove(f->shared->accum.buf + amount_before, f->shared->accum.buf, f->shared->accum.size);
+                    HDmemmove(accum->buf + amount_before, accum->buf, accum->size);
 
                     /* Adjust dirty region tracking info, if present */
-                    if(f->shared->accum.dirty)
-                        f->shared->accum.dirty_off += amount_before;
+                    if(accum->dirty)
+                        accum->dirty_off += amount_before;
 
                     /* Dispatch to driver */
-                    if(H5FD_read(f->shared->lf, dxpl, map_type, addr, amount_before, f->shared->accum.buf) < 0)
+                    if(H5FD_read(fio_info->f->shared->lf, fio_info->dxpl, map_type, addr, amount_before, accum->buf) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
                 } /* end if */
                 else
                     amount_before = 0;
 
                 /* Read the part after the metadata accumulator */
-                if((addr + size) > (f->shared->accum.loc + f->shared->accum.size)) {
+                if((addr + size) > (accum->loc + accum->size)) {
                     size_t amount_after;         /* Amount to read at a time */
 
                     /* Set the amount to read */
-                    H5_ASSIGN_OVERFLOW(amount_after, ((addr + size) - (f->shared->accum.loc + f->shared->accum.size)), hsize_t, size_t);
+                    H5_ASSIGN_OVERFLOW(amount_after, ((addr + size) - (accum->loc + accum->size)), hsize_t, size_t);
 
                     /* Dispatch to driver */
-                    if(H5FD_read(f->shared->lf, dxpl, map_type, (f->shared->accum.loc + f->shared->accum.size), amount_after, (f->shared->accum.buf + f->shared->accum.size + amount_before)) < 0)
+                    if(H5FD_read(fio_info->f->shared->lf, fio_info->dxpl, map_type, (accum->loc + accum->size), amount_after, (accum->buf + accum->size + amount_before)) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
                 } /* end if */
 
                 /* Copy the data out of the buffer */
-                HDmemcpy(buf, f->shared->accum.buf + (addr - new_addr), size);
+                HDmemcpy(buf, accum->buf + (addr - new_addr), size);
 
                 /* Adjust the accumulator address & size */
-                f->shared->accum.loc = new_addr;
-                f->shared->accum.size = new_size;
+                accum->loc = new_addr;
+                accum->size = new_size;
             } /* end if */
             /* Current read doesn't overlap with metadata accumulator, read it from file */
             else {
                 /* Dispatch to driver */
-                if(H5FD_read(f->shared->lf, dxpl, map_type, addr, size, buf) < 0)
+                if(H5FD_read(fio_info->f->shared->lf, fio_info->dxpl, map_type, addr, size, buf) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
             } /* end else */
         } /* end if */
         else {
             /* Read the data */
-            if(H5FD_read(f->shared->lf, dxpl, map_type, addr, size, buf) < 0)
+            if(H5FD_read(fio_info->f->shared->lf, fio_info->dxpl, map_type, addr, size, buf) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
 
             /* Check for overlap w/dirty accumulator */
@@ -225,9 +225,9 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
              *  information in the accumulator with [some of] the information
              *  just read in. -QAK)
              */
-            if(f->shared->accum.dirty &&
-                    H5F_addr_overlap(addr, size, f->shared->accum.loc + f->shared->accum.dirty_off, f->shared->accum.dirty_len)) {
-                haddr_t dirty_loc = f->shared->accum.loc + f->shared->accum.dirty_off;  /* File offset of dirty information */
+            if(accum->dirty &&
+                    H5F_addr_overlap(addr, size, accum->loc + accum->dirty_off, accum->dirty_len)) {
+                haddr_t dirty_loc = accum->loc + accum->dirty_off;  /* File offset of dirty information */
                 size_t buf_off;         /* Offset of dirty region in buffer */
                 size_t dirty_off;       /* Offset within dirty region */
                 size_t overlap_size;    /* Size of overlap with dirty region */
@@ -241,32 +241,32 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
                     dirty_off = 0;
 
                     /* Check for read ending within dirty region */
-                    if(H5F_addr_lt(addr + size, dirty_loc + f->shared->accum.dirty_len))
+                    if(H5F_addr_lt(addr + size, dirty_loc + accum->dirty_len))
                         overlap_size = (size_t)((addr + size) - buf_off);
                     else        /* Access covers whole dirty region */
-                        overlap_size = f->shared->accum.dirty_len;
+                        overlap_size = accum->dirty_len;
                 } /* end if */
                 else { /* Read starts after beginning of dirty region */
                     /* Compute dirty offset within buffer and overlap size */
                     buf_off = 0;
                     dirty_off = (size_t)(addr - dirty_loc);
-                    overlap_size = (size_t)((dirty_loc + f->shared->accum.dirty_len) - addr);
+                    overlap_size = (size_t)((dirty_loc + accum->dirty_len) - addr);
                 } /* end else */
 
                 /* Copy the dirty region to buffer */
-                HDmemcpy((unsigned char *)buf + buf_off, (unsigned char *)f->shared->accum.buf + f->shared->accum.dirty_off + dirty_off, overlap_size);
+                HDmemcpy((unsigned char *)buf + buf_off, (unsigned char *)accum->buf + accum->dirty_off + dirty_off, overlap_size);
             } /* end if */
         } /* end else */
     } /* end if */
     else {
         /* Read the data */
-        if(H5FD_read(f->shared->lf, dxpl, map_type, addr, size, buf) < 0)
+        if(H5FD_read(fio_info->f->shared->lf, fio_info->dxpl, map_type, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_accum_read() */
+} /* end H5F__accum_read() */
 
 
 /*-------------------------------------------------------------------------

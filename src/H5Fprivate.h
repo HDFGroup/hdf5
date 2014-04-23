@@ -30,17 +30,9 @@
 #include "H5VMprivate.h"		/* Vectors and arrays */
 
 
-/****************************/
-/* Library Private Typedefs */
-/****************************/
-
-/* Main file structure */
-typedef struct H5F_t H5F_t;
-typedef struct H5F_file_t H5F_file_t;
-
-/* Block aggregation structure */
-typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
-
+/**************************/
+/* Library Private Macros */
+/**************************/
 
 /*
  * Encode and decode macros for file meta-data.
@@ -549,11 +541,42 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5SM_LIST_MAGIC                 "SMLI"          /* Shared Message List */
 
 
-/* Forward declarations for prototype arguments */
+/****************************/
+/* Library Private Typedefs */
+/****************************/
+
+/* Forward declarations (for prototypes & type definitions) */
 struct H5B_class_t;
 struct H5UC_t;
 struct H5O_loc_t;
 struct H5HG_heap_t;
+struct H5P_genplist_t;
+
+/* Forward declarations for anonymous H5F objects */
+
+/* Main file structures */
+typedef struct H5F_t H5F_t;
+typedef struct H5F_file_t H5F_file_t;
+
+/* Block aggregation structure */
+typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
+
+/* I/O Info for an operation */
+typedef struct H5F_io_info_t {
+    const H5F_t *f;                     /* File object */
+    const struct H5P_genplist_t *dxpl;         /* DXPL object */
+} H5F_io_info_t;
+
+
+/*****************************/
+/* Library-private Variables */
+/*****************************/
+
+
+/***************************************/
+/* Library-private Function Prototypes */
+/***************************************/
+
 
 /* Private functions */
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,

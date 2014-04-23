@@ -38,6 +38,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 
 
 /****************/
@@ -95,6 +96,7 @@ herr_t
 H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     hid_t dxpl_id, void *buf/*out*/)
 {
+    H5F_io_info_t fio_info;             /* I/O info for operation */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -108,8 +110,13 @@ H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     if(H5F_addr_le(f->shared->tmp_addr, (addr + size)))
         HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "attempting I/O in temporary file space")
 
+    /* Set up I/O info for operation */
+    fio_info.f = f;
+    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
     /* Pass through metadata accumulator layer */
-    if(H5F_accum_read(f, dxpl_id, type, addr, size, buf) < 0)
+    if(H5F__accum_read(&fio_info, type, addr, size, buf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read through metadata accumulator failed")
 
 done:
