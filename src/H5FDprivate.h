@@ -24,6 +24,7 @@
 #include "H5FDpublic.h"
 
 /* Private headers needed by this file */
+#include "H5Pprivate.h"		/* Property lists			*/
 
 /*
  * The MPI drivers are needed because there are
@@ -132,9 +133,9 @@ H5_DLL haddr_t H5FD_get_eof(const H5FD_t *file);
 H5_DLL haddr_t H5FD_get_maxaddr(const H5FD_t *file);
 H5_DLL herr_t H5FD_get_feature_flags(const H5FD_t *file, unsigned long *feature_flags);
 H5_DLL herr_t H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map);
-H5_DLL herr_t H5FD_read(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type,
+H5_DLL herr_t H5FD_read(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type,
     haddr_t addr, size_t size, void *buf/*out*/);
-H5_DLL herr_t H5FD_write(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type,
+H5_DLL herr_t H5FD_write(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type,
     haddr_t addr, size_t size, const void *buf);
 H5_DLL herr_t H5FD_flush(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t H5FD_truncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);

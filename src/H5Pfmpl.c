@@ -35,6 +35,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* Files		  	        */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 
@@ -75,10 +76,13 @@ static herr_t H5P_fmnt_reg_prop(H5P_genclass_t *pclass);
 const H5P_libclass_t H5P_CLS_FMNT[1] = {{
     "file mount",		/* Class name for debugging     */
     H5P_TYPE_FILE_MOUNT,        /* Class type                   */
-    &H5P_CLS_ROOT_g,		/* Parent class ID              */
-    &H5P_CLS_FILE_MOUNT_g,	/* Pointer to class ID          */
-    &H5P_LST_FILE_MOUNT_g,	/* Pointer to default property list ID */
+
+    &H5P_CLS_ROOT_g,		/* Parent class                 */
+    &H5P_CLS_FILE_MOUNT_g,	/* Pointer to class             */
+    &H5P_CLS_FILE_MOUNT_ID_g,	/* Pointer to class ID          */
+    &H5P_LST_FILE_MOUNT_ID_g,	/* Pointer to default property list ID */
     H5P_fmnt_reg_prop,		/* Default property registration routine */
+
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
     NULL,			/* Class copy callback          */

@@ -42,7 +42,6 @@
 #include "H5Fprivate.h"         /* File access				*/
 #include "H5FDpkg.h"		/* File Drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Pprivate.h"		/* Property lists			*/
 
 
 /****************/
@@ -117,7 +116,7 @@ H5FD_int_init_interface(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_read(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
+H5FD_read(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr,
     size_t size, void *buf/*out*/)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
@@ -125,8 +124,7 @@ H5FD_read(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file && file->cls);
-    HDassert(H5I_GENPROP_LST == H5I_get_type(dxpl_id));
-    HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
+    HDassert(TRUE == H5P_class_isa(H5P_CLASS(dxpl), H5P_CLS_DATASET_XFER_g));
     HDassert(buf);
 
 #ifndef H5_HAVE_PARALLEL
@@ -138,7 +136,7 @@ H5FD_read(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
 #endif /* H5_HAVE_PARALLEL */
 
     /* Dispatch to driver */
-    if((file->cls->read)(file, type, dxpl_id, addr + file->base_addr, size, buf) < 0)
+    if((file->cls->read)(file, type, H5P_PLIST_ID(dxpl), addr + file->base_addr, size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
 
 done:
@@ -160,7 +158,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_write(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
+H5FD_write(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr,
     size_t size, const void *buf)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
@@ -168,8 +166,7 @@ H5FD_write(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file && file->cls);
-    HDassert(H5I_GENPROP_LST == H5I_get_type(dxpl_id));
-    HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
+    HDassert(TRUE == H5P_class_isa(H5P_CLASS(dxpl), H5P_CLS_DATASET_XFER_g));
     HDassert(buf);
 
 #ifndef H5_HAVE_PARALLEL
@@ -181,7 +178,7 @@ H5FD_write(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
 #endif /* H5_HAVE_PARALLEL */
 
     /* Dispatch to driver */
-    if((file->cls->write)(file, type, dxpl_id, addr + file->base_addr, size, buf) < 0)
+    if((file->cls->write)(file, type, H5P_PLIST_ID(dxpl), addr + file->base_addr, size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed")
 
 done:

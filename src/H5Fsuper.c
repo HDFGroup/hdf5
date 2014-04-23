@@ -117,6 +117,7 @@ H5F_init_super_interface(void)
 herr_t
 H5F_locate_signature(H5FD_t *file, hid_t dxpl_id, haddr_t *sig_addr)
 {
+    H5P_genplist_t *dxpl;               /* DXPL object */
     haddr_t         addr, eoa;
     uint8_t         buf[H5F_SIGNATURE_LEN];
     unsigned        n, maxpow;
@@ -131,6 +132,10 @@ H5F_locate_signature(H5FD_t *file, hid_t dxpl_id, haddr_t *sig_addr)
         addr >>= 1;
     maxpow = MAX(maxpow, 9);
 
+    /* Get the DXPL plist object for DXPL ID */
+    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
     /*
      * Search for the file signature at format address zero followed by
      * powers of two larger than 9.
@@ -139,7 +144,7 @@ H5F_locate_signature(H5FD_t *file, hid_t dxpl_id, haddr_t *sig_addr)
         addr = (8 == n) ? 0 : (haddr_t)1 << n;
         if(H5FD_set_eoa(file, H5FD_MEM_SUPER, addr + H5F_SIGNATURE_LEN) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to set EOA value for file signature")
-        if(H5FD_read(file, dxpl_id, H5FD_MEM_SUPER, addr, (size_t)H5F_SIGNATURE_LEN, buf) < 0)
+        if(H5FD_read(file, dxpl, H5FD_MEM_SUPER, addr, (size_t)H5F_SIGNATURE_LEN, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to read file signature")
         if(!HDmemcmp(buf, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN))
             break;

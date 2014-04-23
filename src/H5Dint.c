@@ -176,7 +176,7 @@ H5D__init_interface(void)
     /* Get the default dataset creation property list values and initialize the
      * default dataset with them.
      */
-    if(NULL == (def_dcpl = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_CREATE_g)))
+    if(NULL == (def_dcpl = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_CREATE_ID_g)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't get default dataset creation property list")
 
     /* Get the default data storage layout */

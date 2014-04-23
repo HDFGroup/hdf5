@@ -338,7 +338,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     HDassert(f);
 
     /* Make a copy of the default file access property list */
-    if(NULL == (old_plist = (H5P_genplist_t *)H5I_object(H5P_LST_FILE_ACCESS_g)))
+    if(NULL == (old_plist = (H5P_genplist_t *)H5I_object(H5P_LST_FILE_ACCESS_ID_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
     if((ret_value = H5P_copy_plist(old_plist, app_ref)) < 0)
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "can't copy file access property list")
@@ -2765,7 +2765,7 @@ H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
 
         /* read in the file image */
         /* (Note compensation for base address addition in internal routine) */
-        if(H5FD_read(fd_ptr, H5AC_ind_dxpl_id, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
+        if(H5FD_read(fd_ptr, H5AC_ind_dxpl_g, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "file image read request failed")
     } /* end if */
     

@@ -37,17 +37,17 @@
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* Files		  	*/
+#include "H5Fprivate.h"		/* Files		  	        */
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"        /* Memory Management    */
+#include "H5MMprivate.h"        /* Memory Management                    */
 #include "H5Ppkg.h"		/* Property lists		  	*/
 
 /* Includes needed to set as default file driver */
 #include "H5FDsec2.h"		/* Posix unbuffered I/O	file driver	*/
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
 #ifdef H5_HAVE_WINDOWS
-#include "H5FDwindows.h"        /* Windows buffered I/O     */
+#include "H5FDwindows.h"        /* Windows buffered I/O                 */
 #endif
 
 
@@ -213,10 +213,13 @@ static herr_t H5P__facc_multi_type_dec(const void **_pp, void *value);
 const H5P_libclass_t H5P_CLS_FACC[1] = {{
     "file access",		/* Class name for debugging     */
     H5P_TYPE_FILE_ACCESS,       /* Class type                   */
-    &H5P_CLS_ROOT_g,		/* Parent class ID              */
-    &H5P_CLS_FILE_ACCESS_g,	/* Pointer to class ID          */
-    &H5P_LST_FILE_ACCESS_g,	/* Pointer to default property list ID */
+
+    &H5P_CLS_ROOT_g,		/* Parent class                 */
+    &H5P_CLS_FILE_ACCESS_g,	/* Pointer to class             */
+    &H5P_CLS_FILE_ACCESS_ID_g,	/* Pointer to class ID          */
+    &H5P_LST_FILE_ACCESS_ID_g,	/* Pointer to default property list ID */
     H5P_facc_reg_prop,		/* Default property registration routine */
+
     H5P_facc_create,		/* Class creation callback      */
     NULL,		        /* Class creation callback info */
     H5P_facc_copy,		/* Class copy callback          */
@@ -1124,7 +1127,7 @@ H5Pset_cache(hid_t plist_id, int UNUSED mdc_nelmts,
              rdcc_w0);
 
     /* Check arguments */
-    if(rdcc_w0 < 0.0 || rdcc_w0 > 1.0)
+    if(rdcc_w0 < (double)0.0f || rdcc_w0 > (double)1.0f)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "raw data cache w0 value must be between 0.0 and 1.0 inclusive")
 
     /* Get the plist structure */

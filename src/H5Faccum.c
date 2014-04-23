@@ -40,7 +40,8 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
-#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5VMprivate.h"	/* Vectors and arrays 			*/
 
 
 /****************/
@@ -115,6 +116,7 @@ herr_t
 H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
     size_t size, void *buf/*out*/)
 {
+    H5P_genplist_t *dxpl;               /* DXPL object */
     H5FD_mem_t  map_type;               /* Mapped memory type */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -126,6 +128,10 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
 
     /* Treat global heap as raw data */
     map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
+
+    /* Get the DXPL plist object for DXPL ID */
+    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Check if this information is in the metadata accumulator */
     if((f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && map_type != H5FD_MEM_DRAW) {
@@ -177,7 +183,7 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
                         f->shared->accum.dirty_off += amount_before;
 
                     /* Dispatch to driver */
-                    if(H5FD_read(f->shared->lf, dxpl_id, map_type, addr, amount_before, f->shared->accum.buf) < 0)
+                    if(H5FD_read(f->shared->lf, dxpl, map_type, addr, amount_before, f->shared->accum.buf) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
                 } /* end if */
                 else
@@ -191,7 +197,7 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
                     H5_ASSIGN_OVERFLOW(amount_after, ((addr + size) - (f->shared->accum.loc + f->shared->accum.size)), hsize_t, size_t);
 
                     /* Dispatch to driver */
-                    if(H5FD_read(f->shared->lf, dxpl_id, map_type, (f->shared->accum.loc + f->shared->accum.size), amount_after, (f->shared->accum.buf + f->shared->accum.size + amount_before)) < 0)
+                    if(H5FD_read(f->shared->lf, dxpl, map_type, (f->shared->accum.loc + f->shared->accum.size), amount_after, (f->shared->accum.buf + f->shared->accum.size + amount_before)) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
                 } /* end if */
 
@@ -205,13 +211,13 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
             /* Current read doesn't overlap with metadata accumulator, read it from file */
             else {
                 /* Dispatch to driver */
-                if(H5FD_read(f->shared->lf, dxpl_id, map_type, addr, size, buf) < 0)
+                if(H5FD_read(f->shared->lf, dxpl, map_type, addr, size, buf) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
             } /* end else */
         } /* end if */
         else {
             /* Read the data */
-            if(H5FD_read(f->shared->lf, dxpl_id, map_type, addr, size, buf) < 0)
+            if(H5FD_read(f->shared->lf, dxpl, map_type, addr, size, buf) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
 
             /* Check for overlap w/dirty accumulator */
@@ -254,7 +260,7 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
     } /* end if */
     else {
         /* Read the data */
-        if(H5FD_read(f->shared->lf, dxpl_id, map_type, addr, size, buf) < 0)
+        if(H5FD_read(f->shared->lf, dxpl, map_type, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
     } /* end else */
 
@@ -280,6 +286,7 @@ static herr_t
 H5F_accum_adjust(H5F_meta_accum_t *accum, H5FD_t *lf, hid_t dxpl_id,
     H5F_accum_adjust_t adjust, size_t size)
 {
+    H5P_genplist_t *dxpl;               /* DXPL object */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -289,6 +296,10 @@ H5F_accum_adjust(H5F_meta_accum_t *accum, H5FD_t *lf, hid_t dxpl_id,
     HDassert(H5F_ACCUM_APPEND == adjust || H5F_ACCUM_PREPEND == adjust);
     HDassert(size > 0);
     HDassert(size <= H5F_ACCUM_MAX_SIZE);
+
+    /* Get the DXPL plist object for DXPL ID */
+    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Check if we need more buffer space */
     if((size + accum->size) > accum->alloc_size) {
@@ -343,7 +354,7 @@ H5F_accum_adjust(H5F_meta_accum_t *accum, H5FD_t *lf, hid_t dxpl_id,
                     /* Check if the dirty region overlaps the region to eliminate from the accumulator */
                     if((accum->size - shrink_size) < (accum->dirty_off + accum->dirty_len)) {
                         /* Write out the dirty region from the metadata accumulator, with dispatch to driver */
-                        if(H5FD_write(lf, dxpl_id, H5FD_MEM_DEFAULT, (accum->loc + accum->dirty_off), accum->dirty_len, (accum->buf + accum->dirty_off)) < 0)
+                        if(H5FD_write(lf, dxpl, H5FD_MEM_DEFAULT, (accum->loc + accum->dirty_off), accum->dirty_len, (accum->buf + accum->dirty_off)) < 0)
                             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "file write failed")
 
                         /* Reset accumulator dirty flag */
@@ -354,7 +365,7 @@ H5F_accum_adjust(H5F_meta_accum_t *accum, H5FD_t *lf, hid_t dxpl_id,
                     /* Check if the dirty region overlaps the region to eliminate from the accumulator */
                     if(shrink_size > accum->dirty_off) {
                         /* Write out the dirty region from the metadata accumulator, with dispatch to driver */
-                        if(H5FD_write(lf, dxpl_id, H5FD_MEM_DEFAULT, (accum->loc + accum->dirty_off), accum->dirty_len, (accum->buf + accum->dirty_off)) < 0)
+                        if(H5FD_write(lf, dxpl, H5FD_MEM_DEFAULT, (accum->loc + accum->dirty_off), accum->dirty_len, (accum->buf + accum->dirty_off)) < 0)
                             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "file write failed")
 
                         /* Reset accumulator dirty flag */
@@ -419,6 +430,7 @@ herr_t
 H5F_accum_write(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
     size_t size, const void *buf)
 {
+    H5P_genplist_t *dxpl;               /* DXPL object */
     H5FD_mem_t  map_type;               /* Mapped memory type */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -431,6 +443,10 @@ H5F_accum_write(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
 
     /* Treat global heap as raw data */
     map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
+
+    /* Get the DXPL plist object for DXPL ID */
+    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Check for accumulating metadata */
     if((f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && map_type != H5FD_MEM_DRAW) {
@@ -636,7 +652,7 @@ HDmemset(f->shared->accum.buf + size, 0, (f->shared->accum.alloc_size - size));
                 else {
                     /* Write out the existing metadata accumulator, with dispatch to driver */
                     if(f->shared->accum.dirty) {
-                        if(H5FD_write(f->shared->lf, dxpl_id, H5FD_MEM_DEFAULT, f->shared->accum.loc + f->shared->accum.dirty_off, f->shared->accum.dirty_len, f->shared->accum.buf + f->shared->accum.dirty_off) < 0)
+                        if(H5FD_write(f->shared->lf, dxpl, H5FD_MEM_DEFAULT, f->shared->accum.loc + f->shared->accum.dirty_off, f->shared->accum.dirty_len, f->shared->accum.buf + f->shared->accum.dirty_off) < 0)
                             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
 
                         /* Reset accumulator dirty flag */
@@ -727,7 +743,7 @@ HDmemset(f->shared->accum.buf + size, 0, (f->shared->accum.alloc_size - size));
         } /* end if */
         else {
             /* Write the data */
-            if(H5FD_write(f->shared->lf, dxpl_id, map_type, addr, size, buf) < 0)
+            if(H5FD_write(f->shared->lf, dxpl, map_type, addr, size, buf) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
 
             /* Check for overlap w/accumulator */
@@ -812,7 +828,7 @@ HDmemset(f->shared->accum.buf + size, 0, (f->shared->accum.alloc_size - size));
     } /* end if */
     else {
         /* Write the data */
-        if(H5FD_write(f->shared->lf, dxpl_id, map_type, addr, size, buf) < 0)
+        if(H5FD_write(f->shared->lf, dxpl, map_type, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
     } /* end else */
 
@@ -839,12 +855,17 @@ herr_t
 H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t UNUSED type, haddr_t addr,
     hsize_t size)
 {
+    H5P_genplist_t *dxpl;               /* DXPL object */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(f);
+
+    /* Get the DXPL plist object for DXPL ID */
+    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Adjust the metadata accumulator to remove the freed block, if it overlaps */
     if((f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA)
@@ -918,7 +939,7 @@ H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t UNUSED type, haddr_t addr,
                     /* Check if block to free is entirely before dirty region */
                     if(H5F_addr_le(tail_addr, dirty_start)) {
                         /* Write out the entire dirty region of the accumulator */
-                        if(H5FD_write(f->shared->lf, dxpl_id, H5FD_MEM_DEFAULT, dirty_start, f->shared->accum.dirty_len, f->shared->accum.buf + f->shared->accum.dirty_off) < 0)
+                        if(H5FD_write(f->shared->lf, dxpl, H5FD_MEM_DEFAULT, dirty_start, f->shared->accum.dirty_len, f->shared->accum.buf + f->shared->accum.dirty_off) < 0)
                             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
                     } /* end if */
                     /* Block to free overlaps with some/all of dirty region */
@@ -933,7 +954,7 @@ H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t UNUSED type, haddr_t addr,
                         HDassert(write_size > 0);
 
                         /* Write out the unfreed dirty region of the accumulator */
-                        if(H5FD_write(f->shared->lf, dxpl_id, H5FD_MEM_DEFAULT, dirty_start + dirty_delta, write_size, f->shared->accum.buf + f->shared->accum.dirty_off + dirty_delta) < 0)
+                        if(H5FD_write(f->shared->lf, dxpl, H5FD_MEM_DEFAULT, dirty_start + dirty_delta, write_size, f->shared->accum.buf + f->shared->accum.dirty_off + dirty_delta) < 0)
                             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
                     } /* end if */
 
@@ -953,7 +974,7 @@ H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t UNUSED type, haddr_t addr,
                         HDassert(write_size > 0);
 
                         /* Write out the unfreed end of the dirty region of the accumulator */
-                        if(H5FD_write(f->shared->lf, dxpl_id, H5FD_MEM_DEFAULT, dirty_start + dirty_delta, write_size, f->shared->accum.buf + f->shared->accum.dirty_off + dirty_delta) < 0)
+                        if(H5FD_write(f->shared->lf, dxpl, H5FD_MEM_DEFAULT, dirty_start + dirty_delta, write_size, f->shared->accum.buf + f->shared->accum.dirty_off + dirty_delta) < 0)
                             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
                     } /* end if */
 
@@ -1005,8 +1026,14 @@ H5F_accum_flush(const H5F_t *f, hid_t dxpl_id)
 
     /* Check if we need to flush out the metadata accumulator */
     if((f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && f->shared->accum.dirty) {
+        H5P_genplist_t *dxpl;               /* DXPL object */
+
+        /* Get the DXPL plist object for DXPL ID */
+        if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
         /* Flush the metadata contents */
-        if(H5FD_write(f->shared->lf, dxpl_id, H5FD_MEM_DEFAULT, f->shared->accum.loc + f->shared->accum.dirty_off, f->shared->accum.dirty_len, f->shared->accum.buf + f->shared->accum.dirty_off) < 0)
+        if(H5FD_write(f->shared->lf, dxpl, H5FD_MEM_DEFAULT, f->shared->accum.loc + f->shared->accum.dirty_off, f->shared->accum.dirty_len, f->shared->accum.buf + f->shared->accum.dirty_off) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
 
         /* Reset the dirty flag */
