@@ -47,6 +47,64 @@ hg_id_t H5VL_EFF_CLOSE_CONTAINER;
 hg_id_t H5VL_EFF_ANALYSIS_FARM;
 hg_id_t H5VL_EFF_ANALYSIS_FARM_TRANSFER;
 
+#define H5VL_RPC_CB(func_name, handle) \
+    static hg_return_t \
+    func_name ## _thread_cb(hg_handle_t handle)
+
+/* Assuming func_name_cb is defined, calling H5VL_AXE_TASK_CB(func_name, struct_name)
+ * will define func_name_thread and func_name_thread_cb that can be used
+ * to execute RPC callback from a thread
+ */
+#define H5VL_AXE_TASK_CB(func_name, struct_name) \
+        static HG_THREAD_RETURN_TYPE \
+        func_name ## _thread \
+        (void *arg) \
+        { \
+            hg_handle_t handle = (hg_handle_t) arg; \
+            hg_thread_ret_t thread_ret = (hg_thread_ret_t) 0; \
+            \
+            func_name ## _thread_cb(handle); \
+            \
+            return thread_ret; \
+        } \
+        hg_return_t \
+        func_name ## _cb(hg_handle_t handle) \
+        { \
+            op_data_t *op_data = NULL; \
+            attr_rename_in_t *input = NULL; \
+            hg_return_t ret = HG_SUCCESS; \
+            \
+            FUNC_ENTER_NOAPI_NOINIT \
+            \
+            if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t)))) \
+            HGOTO_ERROR2(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct"); \
+            \
+            if(NULL == (input = (struct_name *) H5MM_malloc(sizeof(struct_name)))) \
+            HGOTO_ERROR2(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding"); \
+            \
+            if(HG_FAIL == HG_Handler_get_input(handle, input)) \
+            HGOTO_ERROR2(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters"); \
+            \
+            if(NULL == engine) \
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started"); \
+            \
+            if(input->axe_info.count && \
+               H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range, \
+                                                 input->axe_info.count) < 0) \
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks"); \
+            \
+            op_data->hg_handle = handle; \
+            op_data->input = (void *)input; \
+            \
+            if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, \
+                                              input->axe_info.num_parents, input->axe_info.parent_axe_ids, \
+                                              0, NULL, func_name ## _thread, op_data, NULL)) \
+                HGOTO_ERROR2(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine"); \
+            \
+        done: \
+            FUNC_LEAVE_NOAPI(ret_value) \
+        }
+
 void 
 EFF__mercury_register_callbacks(void)
 {
