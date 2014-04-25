@@ -32,6 +32,7 @@ int rows_per_rank = DEFAULT_ROWS_PER_RANK;
 int prefetched_dset = 0;         /* Create DP - defaults to no */
 int stored_dset = 0;             /* Create DS - defaults to no */
 int num_iterations = 1;          /* Number of times to perform the commit/persist/evict/prefetch/read/evict cycle */
+int enable_checksums = 0;        /* Enable checksums on raw data - defaults to no */
 int verbose = 0;                 /* Verbose output - defaults to no */
 
 /* global variables and macros used to make timing easier */
@@ -71,9 +72,14 @@ int main( int argc, char **argv ) {
    hsize_t  dset_size[2];
    hid_t    space_id; 
 
+   /* Data creation and transfer properties */
+   hid_t    dcpl_id;
+   hid_t    dxpl_l_id;
+   hid_t    dxpl_p_id;
+   hid_t    dxpl_s_id;
+
    /* Replicas and related properties */
    hrpl_t   dset_p_replica;
-   hid_t    dxpl_p_id;
    hid_t    dapl_p_id;
 
    /* Container Version & Read Contexts */
@@ -186,6 +192,14 @@ int main( int argc, char **argv ) {
       tr_id = H5TRcreate( file_id, rc_id, tr_num ); assert( tr_id >= 0 );
       ret = H5TRstart( tr_id, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
+      /* Set Dataset Creation Property List to control use of checksums at IOD level */
+      dcpl_id = H5Pcreate( H5P_DATASET_CREATE );
+      if ( enable_checksums ) {
+         /* enabled by default */
+      } else {
+         H5Pset_ocpl_enable_checksum( dcpl_id, 0 );
+      }
+
       /* Create Dataspace for Datasets */
       dset_size[0] = rows_per_rank * comm_size;
       dset_size[1] = cols_per_row;
@@ -194,16 +208,16 @@ int main( int argc, char **argv ) {
       /* Add updates to the transaction for Dataset creates */
       fprintf( stderr, "APP-r%d: tr %d - Create Dataset(s)\n", my_rank, tr_num );
 
-      dset_l_id = H5Dcreate_ff( file_id, "DL", H5T_NATIVE_UINT64, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tr_id,
+      dset_l_id = H5Dcreate_ff( file_id, "DL", H5T_NATIVE_UINT64, space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT, tr_id,
                                 H5_EVENT_STACK_NULL ); assert( dset_l_id >= 0 );
 
       if ( prefetched_dset ) {
-         dset_p_id = H5Dcreate_ff( file_id, "DP", H5T_NATIVE_UINT64, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tr_id,
+         dset_p_id = H5Dcreate_ff( file_id, "DP", H5T_NATIVE_UINT64, space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT, tr_id,
                                    H5_EVENT_STACK_NULL ); assert( dset_p_id >= 0 );
       }
 
       if ( stored_dset ) {
-         dset_s_id = H5Dcreate_ff( file_id, "DS", H5T_NATIVE_UINT64, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tr_id,
+         dset_s_id = H5Dcreate_ff( file_id, "DS", H5T_NATIVE_UINT64, space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT, tr_id,
                                    H5_EVENT_STACK_NULL ); assert( dset_s_id >= 0 );
       }
 
@@ -300,9 +314,30 @@ int main( int argc, char **argv ) {
    rank_space_id = H5Screate_simple( 1, rank_mbuf_size, rank_mbuf_size ); assert( rank_space_id >= 0 );
 
    /* Create property lists that will be used */
+   dxpl_l_id = H5Pcreate( H5P_DATASET_XFER );                              
+   if ( enable_checksums ) {
+      ret = H5Pset_rawdata_integrity_scope( dxpl_l_id, H5_CHECKSUM_ALL ); ASSERT_RET;
+   } else {
+      ret = H5Pset_rawdata_integrity_scope( dxpl_l_id, H5_CHECKSUM_NONE ); ASSERT_RET;
+   }
+
    if ( prefetched_dset ) {
       dxpl_p_id = H5Pcreate( H5P_DATASET_XFER );                              
+      if ( enable_checksums ) {
+         ret = H5Pset_rawdata_integrity_scope( dxpl_p_id, H5_CHECKSUM_ALL ); ASSERT_RET;
+      } else {
+         ret = H5Pset_rawdata_integrity_scope( dxpl_p_id, H5_CHECKSUM_NONE ); ASSERT_RET;
+      }
       dapl_p_id = H5Pcreate( H5P_DATASET_ACCESS );
+   }
+
+   if ( stored_dset ) {
+      dxpl_s_id = H5Pcreate( H5P_DATASET_XFER );                              
+      if ( enable_checksums ) {
+         ret = H5Pset_rawdata_integrity_scope( dxpl_s_id, H5_CHECKSUM_ALL ); ASSERT_RET;
+      } else {
+         ret = H5Pset_rawdata_integrity_scope( dxpl_s_id, H5_CHECKSUM_NONE ); ASSERT_RET;
+      }
    }
 
    for ( iteration = 0; iteration < num_iterations; iteration++ ) {
@@ -340,7 +375,7 @@ int main( int argc, char **argv ) {
 
       /* Add dataset updates to transaction */
       START_TIME;
-      ret = H5Dwrite_ff( dset_l_id, H5T_NATIVE_UINT64, rank_space_id, space_l_id, H5P_DEFAULT, mbuf, tr_id, H5_EVENT_STACK_NULL ); 
+      ret = H5Dwrite_ff( dset_l_id, H5T_NATIVE_UINT64, rank_space_id, space_l_id, dxpl_l_id, mbuf, tr_id, H5_EVENT_STACK_NULL ); 
       ASSERT_RET;
       END_TIME;
       fprintf( stderr, "APP-r%d: iter %05d step 01: Time to add Write updates for /DL (%lu bytes): %lu usec\n", 
@@ -348,7 +383,7 @@ int main( int argc, char **argv ) {
 
       if ( prefetched_dset ) {
          START_TIME;
-         ret = H5Dwrite_ff( dset_p_id, H5T_NATIVE_UINT64, rank_space_id, space_p_id, H5P_DEFAULT, mbuf, tr_id, 
+         ret = H5Dwrite_ff( dset_p_id, H5T_NATIVE_UINT64, rank_space_id, space_p_id, dxpl_p_id, mbuf, tr_id, 
                             H5_EVENT_STACK_NULL ); 
          ASSERT_RET;
          END_TIME;
@@ -358,7 +393,7 @@ int main( int argc, char **argv ) {
 
       if ( stored_dset ) {
          START_TIME;
-         ret = H5Dwrite_ff( dset_s_id, H5T_NATIVE_UINT64, rank_space_id, space_s_id, H5P_DEFAULT, mbuf, tr_id, 
+         ret = H5Dwrite_ff( dset_s_id, H5T_NATIVE_UINT64, rank_space_id, space_s_id, dxpl_s_id, mbuf, tr_id, 
                             H5_EVENT_STACK_NULL ); 
          ASSERT_RET;
          END_TIME;
@@ -453,7 +488,7 @@ int main( int argc, char **argv ) {
 
       /* Datasets */
       START_TIME;
-      ret = H5Dread_ff( dset_l_id, H5T_NATIVE_UINT64, rank_space_id, space_l_id, H5P_DEFAULT, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
+      ret = H5Dread_ff( dset_l_id, H5T_NATIVE_UINT64, rank_space_id, space_l_id, dxpl_l_id, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
       ASSERT_RET;
       END_TIME;
       fprintf( stderr, "APP-r%d: iter %05d step 08: Time to Read my rank entries for /DL (%lu bytes): %lu usec\n", 
@@ -476,7 +511,7 @@ int main( int argc, char **argv ) {
 
       if ( stored_dset ) {
          START_TIME;
-         ret = H5Dread_ff( dset_s_id, H5T_NATIVE_UINT64, rank_space_id, space_s_id, H5P_DEFAULT, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
+         ret = H5Dread_ff( dset_s_id, H5T_NATIVE_UINT64, rank_space_id, space_s_id, dxpl_s_id, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
          ASSERT_RET;
          END_TIME;
          fprintf( stderr, "APP-r%d: iter %05d step 10: Time to Read my rank entries for /DS (%lu bytes): %lu usec\n", 
@@ -492,7 +527,7 @@ int main( int argc, char **argv ) {
 
       /* Datasets */
       START_TIME;
-      ret = H5Dread_ff( dset_l_id, H5T_NATIVE_UINT64, rank_space_id, neighbor_space_l_id, H5P_DEFAULT, mbuf, rc_id, 
+      ret = H5Dread_ff( dset_l_id, H5T_NATIVE_UINT64, rank_space_id, neighbor_space_l_id, dxpl_l_id, mbuf, rc_id, 
                         H5_EVENT_STACK_NULL ); 
       ASSERT_RET;
       END_TIME;
@@ -517,7 +552,7 @@ int main( int argc, char **argv ) {
 
       if ( stored_dset ) {
          START_TIME;
-         ret = H5Dread_ff( dset_s_id, H5T_NATIVE_UINT64, rank_space_id, neighbor_space_s_id, H5P_DEFAULT, mbuf, rc_id, 
+         ret = H5Dread_ff( dset_s_id, H5T_NATIVE_UINT64, rank_space_id, neighbor_space_s_id, dxpl_s_id, mbuf, rc_id, 
                            H5_EVENT_STACK_NULL ); 
          ASSERT_RET;
          END_TIME;
@@ -534,7 +569,7 @@ int main( int argc, char **argv ) {
 
       /* Datasets */
       START_TIME;
-      ret = H5Dread_ff( dset_l_id, H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, H5P_DEFAULT, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
+      ret = H5Dread_ff( dset_l_id, H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, dxpl_l_id, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
       ASSERT_RET;
       END_TIME;
       fprintf( stderr, "APP-r%d: iter %05d step 14: Time to Read all entries for /DL (%lu bytes): %lu usec\n", 
@@ -557,7 +592,7 @@ int main( int argc, char **argv ) {
 
       if ( stored_dset ) {
          START_TIME;
-         ret = H5Dread_ff( dset_s_id, H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, H5P_DEFAULT, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
+         ret = H5Dread_ff( dset_s_id, H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, dxpl_s_id, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
          ASSERT_RET;
          END_TIME;
          fprintf( stderr, "APP-r%d: iter %05d step 16: Time to Read all entries for /DS (%lu bytes): %lu usec\n", 
@@ -614,7 +649,6 @@ int main( int argc, char **argv ) {
       ret = H5Sclose( space_s_id ); ASSERT_RET;
       ret = H5Sclose( neighbor_space_s_id ); ASSERT_RET;
    }
-
 
 
    /* Release the read handle and close read context  */
@@ -687,6 +721,7 @@ print_container_contents( hid_t file_id, hid_t rc_id, int my_rank )
          hsize_t current_size[2];
          hsize_t max_size[2];
          hsize_t totalSize;
+         hid_t dxpl_id;
          uint64_t *data;              
          uint64_t u, e;
 
@@ -700,7 +735,14 @@ print_container_contents( hid_t file_id, hid_t rc_id, int my_rank )
          totalSize = current_size[0] * current_size[1];
          data = (uint64_t *)calloc( totalSize, sizeof(uint64_t) );
 
-         ret = H5Dread_ff( dset_id, H5T_NATIVE_UINT64, space_id, space_id, H5P_DEFAULT, data, rc_id, H5_EVENT_STACK_NULL ); 
+         dxpl_id = H5Pcreate( H5P_DATASET_XFER );                              
+         if ( enable_checksums ) {
+            ret = H5Pset_rawdata_integrity_scope( dxpl_id, H5_CHECKSUM_ALL ); ASSERT_RET;
+         } else {
+            ret = H5Pset_rawdata_integrity_scope( dxpl_id, H5_CHECKSUM_NONE ); ASSERT_RET;
+         }
+
+         ret = H5Dread_ff( dset_id, H5T_NATIVE_UINT64, space_id, space_id, dxpl_id, data, rc_id, H5_EVENT_STACK_NULL ); 
          ASSERT_RET;
 
          /* note that by printing piece-by-piece, other output may be interspersed.  trade-off since won't know line size */
@@ -777,6 +819,9 @@ parse_options( int argc, char** argv, int my_rank, int comm_size ) {
                   num_iterations = atoi( *argv );
                }
                break;
+            case 'e':   
+               enable_checksums = 1;
+               break;
             case 'p':   
                prefetched_dset = 1;
                break;
@@ -802,10 +847,11 @@ parse_options( int argc, char** argv, int my_rank, int comm_size ) {
  */
 void
 usage( const char* app ) {
-   printf( "Usage: %s [-c cols_per_row] [-r rows_per_rank] [-i num_iterations] [-p] [-s] [-v] \n", app  );
-   printf( "\tc: number of columns in each row of created H5Datasets\n" );
+   printf( "Usage: %s [-r rows_per_rank] [-c cols_per_row] [-i num_iterations] [-e] [-p] [-s] [-v] \n", app  );
    printf( "\tr: number of rows each rank writes in created H5Datasets (total rows = this * # of ranks)\n" );
+   printf( "\tc: number of columns in each row of created H5Datasets\n" );
    printf( "\ti: number of iterations to do update/commit/persist/evict/prefetch/read/evict\n" );
+   printf( "\te: enable checksums on raw data in H5Datasets\n" );
    printf( "\tp: create /DP dataset - data will be evicted, replica prefetched, reads from replica\n" );
    printf( "\ts: create /DS dataset - data will be evicted, reads from storage (DAOS)\n" );
    printf( "\tv: verbose output\n" );
