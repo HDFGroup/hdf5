@@ -295,16 +295,33 @@ const char* Exception::getCFuncName() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	Exception::printError (static)
+// Function:	Exception::printErrorStack (static)
 ///\brief	Prints the error stack in a default manner.
-///\param	stream - IN: File pointer
+///\param	stream    - IN: File pointer, default to stderr
+///\param	err_stack - IN: Error stack ID, default to H5E_DEFAULT(0)
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::printError( FILE* stream )
+void Exception::printErrorStack(FILE* stream, hid_t err_stack)
 {
-   herr_t ret_value = H5Eprint2( H5E_DEFAULT, stream ); // print to stderr
+   herr_t ret_value = H5Eprint2(err_stack, stream);
    if( ret_value < 0 )
-      throw Exception( "Exception::printError", "H5Eprint failed" );
+      throw Exception( "Printing error stack", "H5Eprint2 failed" );
+}
+
+//--------------------------------------------------------------------------
+// Function:	Exception::printError
+///\brief	Prints the error stack in a default manner.  This member
+///		function is replaced by the static function printErrorStack
+///		and will be removed from the next major release.
+///\param	stream - IN: File pointer
+// Programmer	Binh-Minh Ribler - 2000
+// Description:
+//		This function can be removed in next major release.
+//		-BMR, 2014/04/24
+//--------------------------------------------------------------------------
+void Exception::printError(FILE* stream) const
+{
+    Exception::printErrorStack(stream, H5E_DEFAULT);
 }
 
 //--------------------------------------------------------------------------
