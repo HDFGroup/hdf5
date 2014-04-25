@@ -53,10 +53,6 @@
 #  undef H5F_DEBUG
 #endif
 
-/* Define the HDF5 file signature */
-#define H5F_SIGNATURE	  "\211HDF\r\n\032\n"
-#define H5F_SIGNATURE_LEN 8
-
 /* Superblock status flags */
 #define H5F_SUPER_WRITE_ACCESS          0x01
 #define H5F_SUPER_FILE_OK               0x02
@@ -292,7 +288,6 @@ H5_DLLVAR const H5AC_class_t H5AC_SUPERBLOCK[1];
 /* General routines */
 H5_DLL herr_t H5F_init(void);
 H5_DLL herr_t H5F__term_deprec_interface(void);
-H5_DLL herr_t H5F_locate_signature(H5FD_t *file, hid_t dxpl_id, haddr_t *sig_addr);
 H5_DLL herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing);
 
 /* File mount related routines */
@@ -314,14 +309,14 @@ H5_DLL herr_t H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hid_t dxpl_id,
     hbool_t was_created);
 
 /* Metadata accumulator routines */
-H5_DLL herr_t H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
+H5_DLL herr_t H5F__accum_read(const H5F_io_info_t *fio_info, H5FD_mem_t type,
     haddr_t addr, size_t size, void *buf);
-H5_DLL herr_t H5F_accum_write(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
+H5_DLL herr_t H5F__accum_write(const H5F_io_info_t *fio_info, H5FD_mem_t type,
     haddr_t addr, size_t size, const void *buf);
-H5_DLL herr_t H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
+H5_DLL herr_t H5F__accum_free(const H5F_io_info_t *fio_info, H5FD_mem_t type,
     haddr_t addr, hsize_t size);
-H5_DLL herr_t H5F_accum_flush(const H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5F_accum_reset(const H5F_t *f, hid_t dxpl_id, hbool_t flush);
+H5_DLL herr_t H5F__accum_flush(const H5F_io_info_t *fio_info);
+H5_DLL herr_t H5F__accum_reset(const H5F_io_info_t *fio_info, hbool_t flush);
 
 /* Shared file list related routines */
 H5_DLL herr_t H5F_sfile_add(H5F_file_t *shared);

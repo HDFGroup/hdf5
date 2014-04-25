@@ -349,7 +349,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     HDassert(f);
 
     /* Make a copy of the default file access property list */
-    if(NULL == (old_plist = (H5P_genplist_t *)H5I_object(H5P_LST_FILE_ACCESS_g)))
+    if(NULL == (old_plist = (H5P_genplist_t *)H5I_object(H5P_LST_FILE_ACCESS_ID_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
     if((ret_value = H5P_copy_plist(old_plist, app_ref)) < 0)
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "can't copy file access property list")
@@ -861,7 +861,7 @@ H5Fis_hdf5(const char *name)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
-    if(H5F_locate_signature(file, H5AC_ind_dxpl_id, &sig_addr) < 0)
+    if(H5FD_locate_signature(file, H5AC_ind_dxpl_g, &sig_addr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
     ret_value = (HADDR_UNDEF != sig_addr);
 
@@ -1076,6 +1076,8 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
     HDassert(f->shared);
 
     if(1 == f->shared->nrefs) {
+        H5F_io_info_t fio_info;             /* I/O info for operation */
+
         /* Flush at this point since the file will be closed.
          * Only try to flush the file if it was opened with write access, and if
          * the caller requested a flush.
@@ -1133,8 +1135,13 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
             f->shared->root_grp = NULL;
         } /* end if */
 
+        /* Set up I/O info for operation */
+        fio_info.f = f;
+        if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HDONE_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
         /* Destroy other components of the file */
-        if(H5F_accum_reset(f, dxpl_id, TRUE) < 0)
+        if(H5F__accum_reset(&fio_info, TRUE) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
         if(H5FO_dest(f) < 0)
@@ -1744,6 +1751,7 @@ done:
 herr_t
 H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing)
 {
+    H5F_io_info_t fio_info;             /* I/O info for operation */
     herr_t   ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1771,8 +1779,13 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
 
+    /* Set up I/O info for operation */
+    fio_info.f = f;
+    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HDONE_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
     /* Flush out the metadata accumulator */
-    if(H5F_accum_flush(f, dxpl_id) < 0)
+    if(H5F__accum_flush(&fio_info) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
 
@@ -2760,7 +2773,7 @@ H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
 
         /* read in the file image */
         /* (Note compensation for base address addition in internal routine) */
-        if(H5FD_read(fd_ptr, H5AC_ind_dxpl_id, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
+        if(H5FD_read(fd_ptr, H5AC_ind_dxpl_g, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "file image read request failed")
     } /* end if */
     

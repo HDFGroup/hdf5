@@ -34,6 +34,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Cprivate.h"		/* Cache				*/
 #include "H5Fprivate.h"		/* File access				*/
+#include "H5Pprivate.h"		/* Property lists			*/
 
 #ifdef H5_METADATA_TRACE_FILE
 #define H5AC__TRACE_FILE_ENABLED	1
@@ -193,6 +194,7 @@ extern hid_t H5AC_dxpl_id;
 /* Dataset transfer property list for independent metadata I/O calls */
 /* (just "library internal" set - i.e. independent transfer mode) */
 /* (Global variable declaration, definition is in H5AC.c) */
+extern H5P_genplist_t *H5AC_ind_dxpl_g;
 extern hid_t H5AC_ind_dxpl_id;
 
 
