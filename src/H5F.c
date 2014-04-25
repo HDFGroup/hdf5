@@ -850,7 +850,7 @@ H5Fis_hdf5(const char *name)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
-    if(H5F_locate_signature(file, H5AC_ind_dxpl_id, &sig_addr) < 0)
+    if(H5FD_locate_signature(file, H5AC_ind_dxpl_g, &sig_addr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
     ret_value = (HADDR_UNDEF != sig_addr);
 

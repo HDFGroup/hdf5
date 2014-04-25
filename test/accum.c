@@ -57,7 +57,7 @@ void accum_printf(void);
 /* Private Test H5Faccum Function Wrappers */
 #define accum_write(a,s,b) H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), H5P_DATASET_XFER_DEFAULT, (b))
 #define accum_read(a,s,b)  H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), H5P_DATASET_XFER_DEFAULT, (b))
-#define accum_free(a,s)  H5F_accum_free(f, H5P_DATASET_XFER_DEFAULT, H5FD_MEM_DEFAULT, (haddr_t)(a), (hsize_t)(s))
+#define accum_free(fio_info,a,s)  H5F__accum_free(fio_info, H5FD_MEM_DEFAULT, (haddr_t)(a), (hsize_t)(s))
 #define accum_flush(fio_info)   H5F__accum_flush(fio_info)
 #define accum_reset(fio_info)   H5F__accum_reset(fio_info, TRUE)
 
@@ -351,38 +351,38 @@ test_free(const H5F_io_info_t *fio_info)
 
     if(accum_write(0, 256 * sizeof(int32_t), wbuf) < 0) FAIL_STACK_ERROR;
 
-    if(accum_free(0, 256 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
+    if(accum_free(fio_info, 0, 256 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
 
     /* Free an empty accumulator */
-    if(accum_free(0, 256 * 1024 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
+    if(accum_free(fio_info, 0, 256 * 1024 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
 
     /* Write second quarter of the accumulator */
     if(accum_write(64 * sizeof(int32_t), 64 * sizeof(int32_t), wbuf) < 0) FAIL_STACK_ERROR;
 
     /* Free the second quarter of the accumulator, the requested area 
      * is bigger than the data region on the right side. */
-    if(accum_free(64 * sizeof(int32_t), 65 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
+    if(accum_free(fio_info, 64 * sizeof(int32_t), 65 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
 
 
     /* Write half of the accumulator. */ 
     if(accum_write(0, 128 * sizeof(int32_t), wbuf) < 0) FAIL_STACK_ERROR;
 
     /* Free the first block of 4B */
-    if(accum_free(0, sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
+    if(accum_free(fio_info, 0, sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if(accum_read(1 * sizeof(int32_t), 127 * sizeof(int32_t), rbuf) < 0) FAIL_STACK_ERROR;
     if(HDmemcmp(wbuf + 1, rbuf, 127 * sizeof(int32_t)) != 0) TEST_ERROR;
 
     /* Free the block of 4B at 127*4B */
-    if(accum_free(127 * sizeof(int32_t), sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
+    if(accum_free(fio_info, 127 * sizeof(int32_t), sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if(accum_read(1 * sizeof(int32_t), 126 * sizeof(int32_t), rbuf) < 0) FAIL_STACK_ERROR;
     if(HDmemcmp(wbuf + 1, rbuf, 126 * sizeof(int32_t)) != 0) TEST_ERROR;
 
     /* Free the block of 4B at 2*4B */
-    if(accum_free(2 * sizeof(int32_t), sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
+    if(accum_free(fio_info, 2 * sizeof(int32_t), sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if(accum_read(1 * sizeof(int32_t), 1 * sizeof(int32_t), rbuf) < 0) FAIL_STACK_ERROR;
@@ -398,7 +398,7 @@ test_free(const H5F_io_info_t *fio_info)
     if(accum_flush(fio_info) < 0) FAIL_STACK_ERROR;
     if(accum_write(68 * sizeof(int32_t), 4 * sizeof(int32_t), wbuf) < 0) FAIL_STACK_ERROR;
     HDmemcpy(expect + 68, wbuf, 4 * sizeof(int32_t));
-    if(accum_free(62 * sizeof(int32_t), 4 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
+    if(accum_free(fio_info, 62 * sizeof(int32_t), 4 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if(accum_read(66 * sizeof(int32_t), 126 * sizeof(int32_t), rbuf) < 0) FAIL_STACK_ERROR;
@@ -412,7 +412,7 @@ test_free(const H5F_io_info_t *fio_info)
     if(accum_flush(fio_info) < 0) FAIL_STACK_ERROR;
     if(accum_write(68 * sizeof(int32_t), 4 * sizeof(int32_t), wbuf) < 0) FAIL_STACK_ERROR;
     HDmemcpy(expect + 68, wbuf, 4 * sizeof(int32_t));
-    if(accum_free(62 * sizeof(int32_t), 16 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
+    if(accum_free(fio_info, 62 * sizeof(int32_t), 16 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if(accum_read(78 * sizeof(int32_t), 114 * sizeof(int32_t), rbuf) < 0) FAIL_STACK_ERROR;
@@ -426,7 +426,7 @@ test_free(const H5F_io_info_t *fio_info)
     if(accum_flush(fio_info) < 0) FAIL_STACK_ERROR;
     if(accum_write(72 * sizeof(int32_t), 4 * sizeof(int32_t), wbuf) < 0) FAIL_STACK_ERROR;
     HDmemcpy(expect + 72, wbuf, 4 * sizeof(int32_t));
-    if(accum_free(66 * sizeof(int32_t), 4 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
+    if(accum_free(fio_info, 66 * sizeof(int32_t), 4 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if(accum_read(70 * sizeof(int32_t), 122 * sizeof(int32_t), rbuf) < 0) FAIL_STACK_ERROR;
@@ -440,7 +440,7 @@ test_free(const H5F_io_info_t *fio_info)
     if(accum_flush(fio_info) < 0) FAIL_STACK_ERROR;
     if(accum_write(72 * sizeof(int32_t), 4 * sizeof(int32_t), wbuf) < 0) FAIL_STACK_ERROR;
     HDmemcpy(expect + 72, wbuf, 4 * sizeof(int32_t));
-    if(accum_free(70 * sizeof(int32_t), 4 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
+    if(accum_free(fio_info, 70 * sizeof(int32_t), 4 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if(accum_read(74 * sizeof(int32_t), 118 * sizeof(int32_t), rbuf) < 0) FAIL_STACK_ERROR;
@@ -454,7 +454,7 @@ test_free(const H5F_io_info_t *fio_info)
     if(accum_flush(fio_info) < 0) FAIL_STACK_ERROR;
     if(accum_write(72 * sizeof(int32_t), 4 * sizeof(int32_t), wbuf) < 0) FAIL_STACK_ERROR;
     HDmemcpy(expect + 72, wbuf, 4 * sizeof(int32_t));
-    if(accum_free(70 * sizeof(int32_t), 8 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
+    if(accum_free(fio_info, 70 * sizeof(int32_t), 8 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if(accum_read(78 * sizeof(int32_t), 114 * sizeof(int32_t), rbuf) < 0) FAIL_STACK_ERROR;
@@ -468,7 +468,7 @@ test_free(const H5F_io_info_t *fio_info)
     if(accum_flush(fio_info) < 0) FAIL_STACK_ERROR;
     if(accum_write(72 * sizeof(int32_t), 8 * sizeof(int32_t), wbuf) < 0) FAIL_STACK_ERROR;
     HDmemcpy(expect + 72, wbuf, 8 * sizeof(int32_t));
-    if(accum_free(72 * sizeof(int32_t), 4 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
+    if(accum_free(fio_info, 72 * sizeof(int32_t), 4 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if(accum_read(76 * sizeof(int32_t), 116 * sizeof(int32_t), rbuf) < 0) FAIL_STACK_ERROR;

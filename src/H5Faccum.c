@@ -40,7 +40,6 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
 
 
@@ -832,7 +831,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_accum_free
+ * Function:    H5F__accum_free
  *
  * Purpose:     Check for free space invalidating [part of] a metadata
  *              accumulator.
@@ -846,24 +845,25 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t UNUSED type, haddr_t addr,
+H5F__accum_free(const H5F_io_info_t *fio_info, H5FD_mem_t UNUSED type, haddr_t addr,
     hsize_t size)
 {
-    H5P_genplist_t *dxpl;               /* DXPL object */
+    H5F_meta_accum_t *accum;            /* Alias for file's metadata accumulator */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(f);
+    HDassert(fio_info);
+    HDassert(fio_info->f);
+    HDassert(fio_info->dxpl);
 
-    /* Get the DXPL plist object for DXPL ID */
-    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    /* Set up alias for file's metadata accumulator info */
+    accum = &fio_info->f->shared->accum;
 
     /* Adjust the metadata accumulator to remove the freed block, if it overlaps */
-    if((f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA)
-            && H5F_addr_overlap(addr, size, f->shared->accum.loc, f->shared->accum.size)) {
+    if((fio_info->f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA)
+            && H5F_addr_overlap(addr, size, accum->loc, accum->size)) {
         size_t overlap_size;        /* Size of overlap with accumulator */
 
         /* Sanity check */
@@ -872,57 +872,57 @@ H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t UNUSED type, haddr_t addr,
         HDassert(H5FD_MEM_GHEAP != type); /* (global heap data is being treated as raw data currently) */
 
         /* Check for overlapping the beginning of the accumulator */
-        if(H5F_addr_le(addr, f->shared->accum.loc)) {
+        if(H5F_addr_le(addr, accum->loc)) {
             /* Check for completely overlapping the accumulator */
-            if(H5F_addr_ge(addr + size, f->shared->accum.loc + f->shared->accum.size)) {
+            if(H5F_addr_ge(addr + size, accum->loc + accum->size)) {
                 /* Reset the accumulator, but don't free buffer */
-                f->shared->accum.loc = HADDR_UNDEF;
-                f->shared->accum.size = 0;
-                f->shared->accum.dirty = FALSE;
+                accum->loc = HADDR_UNDEF;
+                accum->size = 0;
+                accum->dirty = FALSE;
             } /* end if */
             /* Block to free must end within the accumulator */
             else {
                 size_t new_accum_size;      /* Size of new accumulator buffer */
 
                 /* Calculate the size of the overlap with the accumulator, etc. */
-                H5_ASSIGN_OVERFLOW(overlap_size, (addr + size) - f->shared->accum.loc, haddr_t, size_t);
-                new_accum_size = f->shared->accum.size - overlap_size;
+                H5_ASSIGN_OVERFLOW(overlap_size, (addr + size) - accum->loc, haddr_t, size_t);
+                new_accum_size = accum->size - overlap_size;
 
                 /* Move the accumulator buffer information to eliminate the freed block */
-                HDmemmove(f->shared->accum.buf, f->shared->accum.buf + overlap_size, new_accum_size);
+                HDmemmove(accum->buf, accum->buf + overlap_size, new_accum_size);
 
                 /* Adjust the accumulator information */
-                f->shared->accum.loc += overlap_size;
-                f->shared->accum.size = new_accum_size;
+                accum->loc += overlap_size;
+                accum->size = new_accum_size;
 
                 /* Adjust the dirty region and possibly mark accumulator clean */
-                if(f->shared->accum.dirty) {
+                if(accum->dirty) {
                     /* Check if block freed is entirely before dirty region */
-                    if(overlap_size < f->shared->accum.dirty_off)
-                        f->shared->accum.dirty_off -= overlap_size;
+                    if(overlap_size < accum->dirty_off)
+                        accum->dirty_off -= overlap_size;
                     else {
                         /* Check if block freed ends within dirty region */
-                        if(overlap_size < (f->shared->accum.dirty_off + f->shared->accum.dirty_len)) {
-                            f->shared->accum.dirty_len = (f->shared->accum.dirty_off + f->shared->accum.dirty_len) - overlap_size;
-                            f->shared->accum.dirty_off = 0;
+                        if(overlap_size < (accum->dirty_off + accum->dirty_len)) {
+                            accum->dirty_len = (accum->dirty_off + accum->dirty_len) - overlap_size;
+                            accum->dirty_off = 0;
                         } /* end if */
                         /* Block freed encompasses dirty region */
                         else
-                            f->shared->accum.dirty = FALSE;
+                            accum->dirty = FALSE;
                     } /* end else */
                 } /* end if */
             } /* end else */
         } /* end if */
         /* Block to free must start within the accumulator */
         else {
-            haddr_t dirty_end = f->shared->accum.loc + f->shared->accum.dirty_off + f->shared->accum.dirty_len;
-            haddr_t dirty_start = f->shared->accum.loc + f->shared->accum.dirty_off;
+            haddr_t dirty_end = accum->loc + accum->dirty_off + accum->dirty_len;
+            haddr_t dirty_start = accum->loc + accum->dirty_off;
 
             /* Calculate the size of the overlap with the accumulator */
-            H5_ASSIGN_OVERFLOW(overlap_size, (f->shared->accum.loc + f->shared->accum.size) - addr, haddr_t, size_t);
+            H5_ASSIGN_OVERFLOW(overlap_size, (accum->loc + accum->size) - addr, haddr_t, size_t);
 
             /* Check if block to free begins before end of dirty region */
-            if(f->shared->accum.dirty && H5F_addr_lt(addr, dirty_end)) {
+            if(accum->dirty && H5F_addr_lt(addr, dirty_end)) {
                 haddr_t tail_addr;
 
                 /* Calculate the address of the tail to write */
@@ -933,7 +933,7 @@ H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t UNUSED type, haddr_t addr,
                     /* Check if block to free is entirely before dirty region */
                     if(H5F_addr_le(tail_addr, dirty_start)) {
                         /* Write out the entire dirty region of the accumulator */
-                        if(H5FD_write(f->shared->lf, dxpl, H5FD_MEM_DEFAULT, dirty_start, f->shared->accum.dirty_len, f->shared->accum.buf + f->shared->accum.dirty_off) < 0)
+                        if(H5FD_write(fio_info->f->shared->lf, fio_info->dxpl, H5FD_MEM_DEFAULT, dirty_start, accum->dirty_len, accum->buf + accum->dirty_off) < 0)
                             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
                     } /* end if */
                     /* Block to free overlaps with some/all of dirty region */
@@ -943,17 +943,17 @@ H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t UNUSED type, haddr_t addr,
                         size_t dirty_delta;
 
                         write_size = (size_t)(dirty_end - tail_addr);
-                        dirty_delta = f->shared->accum.dirty_len - write_size;
+                        dirty_delta = accum->dirty_len - write_size;
 
                         HDassert(write_size > 0);
 
                         /* Write out the unfreed dirty region of the accumulator */
-                        if(H5FD_write(f->shared->lf, dxpl, H5FD_MEM_DEFAULT, dirty_start + dirty_delta, write_size, f->shared->accum.buf + f->shared->accum.dirty_off + dirty_delta) < 0)
+                        if(H5FD_write(fio_info->f->shared->lf, fio_info->dxpl, H5FD_MEM_DEFAULT, dirty_start + dirty_delta, write_size, accum->buf + accum->dirty_off + dirty_delta) < 0)
                             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
                     } /* end if */
 
                     /* Reset dirty flag */
-                    f->shared->accum.dirty = FALSE;
+                    accum->dirty = FALSE;
                 } /* end if */
                 /* Block to free begins at beginning of or in middle of dirty region */
                 else {
@@ -963,36 +963,36 @@ H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t UNUSED type, haddr_t addr,
                         size_t dirty_delta;
 
                         write_size = (size_t)(dirty_end - tail_addr);
-                        dirty_delta = f->shared->accum.dirty_len - write_size;
+                        dirty_delta = accum->dirty_len - write_size;
 
                         HDassert(write_size > 0);
 
                         /* Write out the unfreed end of the dirty region of the accumulator */
-                        if(H5FD_write(f->shared->lf, dxpl, H5FD_MEM_DEFAULT, dirty_start + dirty_delta, write_size, f->shared->accum.buf + f->shared->accum.dirty_off + dirty_delta) < 0)
+                        if(H5FD_write(fio_info->f->shared->lf, fio_info->dxpl, H5FD_MEM_DEFAULT, dirty_start + dirty_delta, write_size, accum->buf + accum->dirty_off + dirty_delta) < 0)
                             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
                     } /* end if */
 
                     /* Check for block to free beginning at same location as dirty region */
                     if(H5F_addr_eq(addr, dirty_start)) {
                         /* Reset dirty flag */
-                        f->shared->accum.dirty = FALSE;
+                        accum->dirty = FALSE;
                     } /* end if */
                     /* Block to free eliminates end of dirty region */
                     else {
-                        f->shared->accum.dirty_len = (size_t)(addr - dirty_start);
+                        accum->dirty_len = (size_t)(addr - dirty_start);
                     } /* end else */
                 } /* end else */
 
             } /* end if */
 
             /* Adjust the accumulator information */
-            f->shared->accum.size = f->shared->accum.size - overlap_size;
+            accum->size = accum->size - overlap_size;
         } /* end else */
     } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_accum_free() */
+} /* end H5F__accum_free() */
 
 
 /*-------------------------------------------------------------------------

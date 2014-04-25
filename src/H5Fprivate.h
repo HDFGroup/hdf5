@@ -466,6 +466,10 @@
 #define H5_PAR_META_WRITE 0
 #endif /* H5_HAVE_PARALLEL */
 
+/* Define the HDF5 file signature */
+#define H5F_SIGNATURE	  "\211HDF\r\n\032\n"
+#define H5F_SIGNATURE_LEN 8
+
 /* Version #'s of the major components of the file format */
 #define HDF5_SUPERBLOCK_VERSION_DEF	0	/* The default super block format	  */
 #define HDF5_SUPERBLOCK_VERSION_1	1	/* Version with non-default B-tree 'K' value */

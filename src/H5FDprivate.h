@@ -109,6 +109,7 @@ struct H5P_genplist_t;
 struct H5F_t;
 
 H5_DLL int H5FD_term_interface(void);
+H5_DLL herr_t H5FD_locate_signature(H5FD_t *file, const H5P_genplist_t *dxpl, haddr_t *sig_addr);
 H5_DLL H5FD_class_t *H5FD_get_class(hid_t id);
 H5_DLL hsize_t H5FD_sb_size(H5FD_t *file);
 H5_DLL herr_t H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf);
