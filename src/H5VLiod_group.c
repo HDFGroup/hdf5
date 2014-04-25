@@ -62,7 +62,6 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t cur_id;
     char *last_comp = NULL; /* the name of the group obtained from traversal function */
     iod_hint_list_t *obj_create_hint = NULL;
-    hbool_t enable_checksum = FALSE;
     hid_t gcpl_id;
     scratch_pad sp;
     iod_ret_t ret;
@@ -77,11 +76,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
         input->gcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
     gcpl_id = input->gcpl_id;
 
-    /* get the scope for data integrity checks */
-    if(H5Pget_ocpl_enable_checksum(gcpl_id, &enable_checksum) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't get scope for data integrity checks");
-
-    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
+    if(cs_scope & H5_CHECKSUM_IOD) {
         obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
         obj_create_hint->num_hint = 1;
         obj_create_hint->hint[0].key = "iod_hint_obj_enable_cksum";
@@ -99,7 +94,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Creating Group ID %"PRIx64" (CV %"PRIu64", TR %"PRIu64") ", 
             grp_id, rtid, wtid);
     fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh.cookie, cur_id);
-    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum)
+    if(cs_scope & H5_CHECKSUM_IOD)
         fprintf(stderr, "with Data integrity ENABLED\n");
     else
         fprintf(stderr, "with Data integrity DISABLED\n");

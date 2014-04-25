@@ -140,7 +140,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     int step = 0;
     hbool_t enable_checksum = FALSE;
     H5T_class_t dt_class;
-    iod_hint_list_t *obj_create_hint = NULL;
+    iod_hint_list_t *obj_create_hint = NULL, *md_obj_create_hint = NULL;
     iod_size_t array_dims[H5S_MAX_RANK], current_dims[H5S_MAX_RANK];
     herr_t ret_value = SUCCEED;
 
@@ -185,10 +185,16 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
         fprintf(stderr, "with Data integrity DISABLED\n");
 #endif
 
-    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
+    if(enable_checksum) {
         obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
         obj_create_hint->num_hint = 1;
         obj_create_hint->hint[0].key = "iod_hint_obj_enable_cksum";
+    }
+
+    if((cs_scope & H5_CHECKSUM_IOD)) {
+        md_obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
+        md_obj_create_hint->num_hint = 1;
+        md_obj_create_hint->hint[0].key = "iod_hint_obj_enable_cksum";
     }
 
     dt_class = H5Tget_class(input->type_id);
@@ -248,12 +254,12 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     step ++;
 
     /* create the attribute KV object for the dataset */
-    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, NULL, NULL, &attrkv_id, NULL);
+    ret = iod_obj_create(coh, wtid, md_obj_create_hint, IOD_OBJ_KV, NULL, NULL, &attrkv_id, NULL);
     if(ret < 0)
         HGOTO_ERROR_FF(ret, "can't create attribute KV object");
 
     /* create the metadata KV object for the dataset */
-    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL);
+    ret = iod_obj_create(coh, wtid, md_obj_create_hint, IOD_OBJ_KV, NULL, NULL, &mdkv_id, NULL);
     if(ret < 0)
         HGOTO_ERROR_FF(ret, "can't create metadata KV object");
 
@@ -369,6 +375,11 @@ done:
     if(obj_create_hint) {
         free(obj_create_hint);
         obj_create_hint = NULL;
+    }
+
+    if(md_obj_create_hint) {
+        free(md_obj_create_hint);
+        md_obj_create_hint = NULL;
     }
 
     last_comp = (char *)H5MM_xfree(last_comp);

@@ -69,7 +69,6 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     scratch_pad sp;
     int step = 0;
     iod_hint_list_t *obj_create_hint = NULL;
-    hbool_t enable_checksum = FALSE;
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
@@ -81,11 +80,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         input->tcpl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT);
     tcpl_id = input->tcpl_id;
 
-    /* get the scope for data integrity checks for raw data */
-    if(H5Pget_ocpl_enable_checksum(tcpl_id, &enable_checksum) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't get scope for data integrity checks");
-
-   if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
+   if(cs_scope & H5_CHECKSUM_IOD) {
         obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
         obj_create_hint->num_hint = 1;
         obj_create_hint->hint[0].key = "iod_hint_obj_enable_cksum";
@@ -103,7 +98,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Creating Datatype ID %"PRIx64" (CV %"PRIu64", TR %"PRIu64") ", 
             dtype_id, rtid, wtid);
     fprintf(stderr, "at (OH %"PRIu64" ID %"PRIx64") ", cur_oh.wr_oh.cookie, cur_id);
-    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum)
+    if(cs_scope & H5_CHECKSUM_IOD)
         fprintf(stderr, "with Data integrity ENABLED\n");
     else
         fprintf(stderr, "with Data integrity DISABLED\n");

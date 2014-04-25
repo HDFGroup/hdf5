@@ -67,7 +67,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t cur_id;
     char *last_comp; /* the name of the group obtained from traversal function */
     hid_t mcpl_id;
-    iod_hint_list_t *obj_create_hint = NULL;
+    iod_hint_list_t *obj_create_hint = NULL, *md_obj_create_hint = NULL;
     hbool_t enable_checksum = FALSE;
     int step = 0;
     scratch_pad sp;
@@ -87,10 +87,16 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     if(H5Pget_ocpl_enable_checksum(mcpl_id, &enable_checksum) < 0)
         HGOTO_ERROR_FF(FAIL, "can't get scope for data integrity checks");
 
-    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
+    if(enable_checksum) {
         obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
         obj_create_hint->num_hint = 1;
         obj_create_hint->hint[0].key = "iod_hint_obj_enable_cksum";
+    }
+
+    if((cs_scope & H5_CHECKSUM_IOD)) {
+        md_obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
+        md_obj_create_hint->num_hint = 1;
+        md_obj_create_hint->hint[0].key = "iod_hint_obj_enable_cksum";
     }
 
     /* the traversal will retrieve the location where the map needs
@@ -127,13 +133,13 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     step ++;
 
     /* create the metadata KV object for the map */
-    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+    ret = iod_obj_create(coh, wtid, md_obj_create_hint, IOD_OBJ_KV, 
                          NULL, NULL, &mdkv_id, NULL);
     if(ret < 0)
         HGOTO_ERROR_FF(ret, "can't create metadata KV object");
 
     /* create the attribute KV object for the root group */
-    ret = iod_obj_create(coh, wtid, obj_create_hint, IOD_OBJ_KV, 
+    ret = iod_obj_create(coh, wtid, md_obj_create_hint, IOD_OBJ_KV, 
                          NULL, NULL, &attr_id, NULL);
     if(ret < 0)
         HGOTO_ERROR_FF(ret, "can't create metadata KV object");
@@ -246,6 +252,10 @@ done:
     if(obj_create_hint) {
         free(obj_create_hint);
         obj_create_hint = NULL;
+    }
+    if(md_obj_create_hint) {
+        free(md_obj_create_hint);
+        md_obj_create_hint = NULL;
     }
 
     last_comp = (char *)H5MM_xfree(last_comp);
@@ -541,8 +551,6 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
         if(H5Tconvert(val_memtype_id, val_maptype_id, 1, val_buf, NULL, dxpl_id) < 0)
             HGOTO_ERROR_FF(FAIL, "data type conversion failed");
     }
-
-    /* MSC - do IOD checksum - can't now */
 
     kv.key = key.buf;
     kv.key_len = key_size;
