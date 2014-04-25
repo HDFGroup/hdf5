@@ -1081,6 +1081,7 @@ case "X-$RPATH" in
     runpath_var=
     hardcode_libdir_flag_spec=
     hardcode_libdir_flag_spec_ld=
+    hardcode_into_libs=no
     ;;
   X-|X-yes)
     AC_MSG_RESULT([yes])
@@ -1090,15 +1091,6 @@ case "X-$RPATH" in
     AC_MSG_ERROR([\'$enableval\' is not a valid rpath type])
     ;;
 esac
-## ----------------------------------------------------------------------
-## When sharedlib-rpath is disabled, setting runpath_var to "" above, don't
-## add libhdf5 as a dependency for the other hdf5 libs, either.  This keeps 
-## the rpath to libhdf5 out of the lib files as well as the executables.
-AM_CONDITIONAL([LT_ADD_LIBHDF5_DEPENDENCY], [test "X$runpath_var" != X])
-
-AC_SUBST([LT_ADD_LIBHDF5_DEPENDENCY])
-
-AC_MSG_CHECKING([make])
 
 ## ----------------------------------------------------------------------
 ## Sometimes makes think the `.PATH:' appearing before the first rule

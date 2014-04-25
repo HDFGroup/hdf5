@@ -144,8 +144,7 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@libhdf5_hl_cpp_la_DEPENDENCIES =  \
-@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@	$(LIBH5_HL) $(LIBH5CPP)
+libhdf5_hl_cpp_la_DEPENDENCIES = $(LIBH5_HL) $(LIBH5CPP)
 am_libhdf5_hl_cpp_la_OBJECTS = H5PacketTable.lo
 libhdf5_hl_cpp_la_OBJECTS = $(am_libhdf5_hl_cpp_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -505,7 +504,6 @@ LIPO = @LIPO@
 LL_PATH = @LL_PATH@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
-LT_ADD_LIBHDF5_DEPENDENCY = @LT_ADD_LIBHDF5_DEPENDENCY@
 LT_STATIC_EXEC = @LT_STATIC_EXEC@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
@@ -689,9 +687,8 @@ libhdf5_hl_cpp_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISIO
 # At the moment, only the H5PT Packet Table has a C++ API.
 libhdf5_hl_cpp_la_SOURCES = H5PacketTable.cpp
 
-# HDF5 HL C++ library depends on HDF5 Library.  However, only add the dependency
-# if --enable-sharedlib-rpath is yes.
-@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@libhdf5_hl_cpp_la_LIBADD = $(LIBH5_HL) $(LIBH5CPP)
+# HDF5 HL C++ library depends on HDF5 Library.
+libhdf5_hl_cpp_la_LIBADD = $(LIBH5_HL) $(LIBH5CPP)
 
 # Public headers
 include_HEADERS = H5PacketTable.h
