@@ -53,7 +53,6 @@ for compressing the resulting tar archive (if none are given then
 "tar md5" is assumed):
 
     tar		-- use tar and don't do any compressing.
-    compress	-- use compress and append ".Z" to the output name.
     gzip	-- use gzip with "-9" and append ".gz" to the output name.
     bzip2       -- use bzip2 with "-9" and append ".bz2" to the output name.
     zip		-- convert all text files to DOS style and form a zip file for Windows use.
@@ -69,7 +68,7 @@ Examples:
     $ release gzip
     releases/hdf5-1.0.38.tar.gz
 
-    $ release -d /tmp tar compress gzip bzip2 md5
+    $ release -d /tmp tar gzip zip md5
     /tmp/hdf5-1.0.38.tar
     /tmp/hdf5-1.0.38.tar.Z
     /tmp/hdf5-1.0.38.tar.gz
@@ -293,10 +292,6 @@ for comp in $methods; do
 	tar)
 	    cp -p $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.tar
 	    ;;
-	compress)
-	    test "$verbose" && echo "   Running compress..." 1>&2
-	    compress -c <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.Z
-	    ;;
 	gzip)
 	    test "$verbose" && echo "   Running gzip..." 1>&2
 	    gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
@@ -326,6 +321,10 @@ for comp in $methods; do
 	    mv $tmpdir/trunk $tmpdir/${HDF5_VERS}_docs
 	    (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs)
 	    mv $tmpdir/${HDF5_VERS}_docs.tar $DEST
+	    ;;
+	*)
+	    echo "***Error*** Unknown method $comp"
+	    exit 1
 	    ;;
     esac
 done
