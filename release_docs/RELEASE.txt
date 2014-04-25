@@ -153,6 +153,11 @@ New Features
             ssize_t getName(char* attr_name, size_t buf_size=0)
             ssize_t getName(H5std_string& attr_name, size_t buf_size=0)
             (BMR, 2014/04/15)
+      + A static wrapper to Exception for printing the error stack without an 
+	instance of Exception
+	    static void printErrorStack(FILE* stream = stderr,
+						hid_t err_stack = H5E_DEFAULT);
+	    (BMR, 2014/04/25)
 
 
 Support for New Platforms, Languages, and Compilers
