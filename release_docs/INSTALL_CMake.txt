@@ -148,7 +148,13 @@ III. Preconditions
    2. If you plan to use Zlib or Szip:
       A. Download the binary packages and install them in a central location. 
          For example on Windows, create a folder extlibs and install the 
-         packages there.
+         packages there. Add the following CMake options:
+         -DZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib
+         -DZLIB_INCLUDE_DIR:PATH=some_location/include
+         -DSZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib
+         -DSZIP_INCLUDE_DIR:PATH=some_location/include
+         where "some_location" is the full path to the extlibs folder. 
+
       B. Use source packages from an SVN server by adding the following CMake 
          options:
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="SVN"
@@ -156,6 +162,7 @@ III. Preconditions
             SZIP_SVN_URL:STRING="http://some_location/szip/trunk"
          where "some_location" is the URL to the SVN repository. Also set
          CMAKE_BUILD_TYPE to the configuration type.
+         
       C. Use source packages from a compressed file by adding the following 
          CMake options:
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
