@@ -23,6 +23,9 @@ This short set of instructions is written for users who want to quickly
 build the HDF5 Library and tools from the HDF5 source code package 
 using the CMake tools. HDF Group recommends using a ctest script to build
 HDF5.
+NOTE: The files referenced below are available at the HDF web site:
+    http://www.hdfgroup.org/HDF5/release/cmakebuild.html
+    (See Section VII: APPENDIX for instructions)
 
 To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 
@@ -35,10 +38,10 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
        building with external libraries; do not uncompress them.
        
     4. Download or create the CTestScript.cmake file in your development 
-       directory, (See Section VII: APPENDIX for instructions and an example).   
+       directory, (See Section VII.A: APPENDIX for an example).   
           
     5. Download or create a platform configuration file in your development 
-       directory, (See Section VII: APPENDIX for instructions and an example). 
+       directory, (See Section VII.B: APPENDIX for an example). 
        This file calls CTestScript.cmake; the platform configuration file can 
        be modified. CTestScript.cmake file should not be modified.    
 
@@ -47,8 +50,13 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 
         ctest -S <configuration file>,<hdf5src> -C RelWithDebInfo -VV -O hdf5.log
 
-    7. This will create an install package in the myhdfstuff/hdf5-1.8/build folder.
-
+    7. This will configure, build, test and create an install package in the 
+       myhdfstuff/hdf5-1.8/build folder. 
+       On windows, execute:
+                HDF5-1.8.13-win32.exe
+       On Linux, change to the install destination and execute:
+                <path-to>/myhdfstuff/hdf5-1.8/build/HDF5-1.8.13-Linux.sh
+                
     Where:
         "configuration file" is the platform configuration file from step6;
           HDF518WindowsRWDICMake.cmake, HDF518LinuxRWDICMake.cmake, or 
@@ -148,7 +156,13 @@ III. Preconditions
    2. If you plan to use Zlib or Szip:
       A. Download the binary packages and install them in a central location. 
          For example on Windows, create a folder extlibs and install the 
-         packages there.
+         packages there. Add the following CMake options:
+         -DZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib
+         -DZLIB_INCLUDE_DIR:PATH=some_location/include
+         -DSZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib
+         -DSZIP_INCLUDE_DIR:PATH=some_location/include
+         where "some_location" is the full path to the extlibs folder. 
+
       B. Use source packages from an SVN server by adding the following CMake 
          options:
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="SVN"
@@ -156,6 +170,7 @@ III. Preconditions
             SZIP_SVN_URL:STRING="http://some_location/szip/trunk"
          where "some_location" is the URL to the SVN repository. Also set
          CMAKE_BUILD_TYPE to the configuration type.
+         
       C. Use source packages from a compressed file by adding the following 
          CMake options:
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
@@ -553,7 +568,7 @@ NOTE: these files are available at the HDF web site:
 
 
 ========================================================================
-CTestScript.cmake                                                       
+VII.A CTestScript.cmake                                                       
 ========================================================================
 
 The CTestScript.cmake script, shown below, is a common ctest script that 
@@ -841,7 +856,7 @@ message("DONE:CTestScript")
 
 
 ========================================================================
-ctest
+VII.B ctest
 ========================================================================
 
 Below is an example of the ctest script used by The HDF Group. The
