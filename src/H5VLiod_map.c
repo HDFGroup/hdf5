@@ -259,6 +259,9 @@ done:
     }
 
     last_comp = (char *)H5MM_xfree(last_comp);
+
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (map_create_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -307,8 +310,9 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
             name, loc_handle.rd_oh.cookie, loc_id);
 #endif
 
-    output.keytype_id = -1;
-    output.valtype_id = -1;
+    output.keytype_id = FAIL;
+    output.valtype_id = FAIL;
+    output.mcpl_id = FAIL;
 
     /* Traverse Path and open map */
     ret = H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, rtid, 
@@ -375,6 +379,13 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
+    if(FAIL != output.keytype_id)
+        H5Tclose(output.keytype_id);
+    if(FAIL != output.valtype_id)
+        H5Tclose(output.valtype_id);
+    if(FAIL != output.mcpl_id)
+        H5Pclose(output.mcpl_id);
+
     if(ret_value < 0) {
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
@@ -395,6 +406,8 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (map_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -472,19 +485,26 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     if(NULL == (val_buf = malloc(val_size)))
         HGOTO_ERROR_FF(FAIL, "can't allocate read buffer");
 
-    /* create a Mercury block handle for transfer */
-    HG_Bulk_handle_create(val_buf, val_size, HG_BULK_READWRITE, &bulk_block_handle);
+    /* Create bulk handle */
+    if(HG_SUCCESS != HG_Bulk_handle_create(1, &val_buf, &val_size, 
+                                           HG_BULK_READWRITE, &bulk_block_handle))
+            HGOTO_ERROR_FF(FAIL, "can't create bulk handle");
 
-    /* Write bulk data here and wait for the data to be there  */
-    if(HG_SUCCESS != HG_Bulk_read_all(source, value_handle, bulk_block_handle, &bulk_request))
-        HGOTO_ERROR_FF(FAIL, "can't get data from function shipper");
-    /* wait for it to complete */
+    /* Pull data from the client */
+    if(HG_SUCCESS != HG_Bulk_transfer(HG_BULK_PULL, source, value_handle, 0, 
+                                      bulk_block_handle, 0, val_size, &bulk_request))
+        HGOTO_ERROR_FF(FAIL, "Transfer data failed");
+
+    /* Wait for bulk data read to complete */
     if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-        HGOTO_ERROR_FF(FAIL, "can't get data from function shipper");
+        HGOTO_ERROR_FF(FAIL, "can't wait for bulk data operation");
 
-    /* free the bds block handle */
-    if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
-        HGOTO_ERROR_FF(FAIL, "can't free bds block handle");
+#if 0
+    /* get  mercury buffer where data is */
+    if(HG_SUCCESS != HG_Bulk_handle_access(bulk_block_handle, 0, val_size,
+                                           HG_BULK_READWRITE, 1, &val_buf, &val_size, NULL))
+            HGOTO_ERROR_FF(FAIL, "Could not access handle");
+#endif
 
     /* get the scope for data integrity checks for raw data */
     if(H5Pget_rawdata_integrity_scope(dxpl_id, &raw_cs_scope) < 0)
@@ -578,11 +598,17 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR_FF(FAIL, "can't send result of write to client");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (map_set_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    if(val_buf)
-        free(val_buf);
+    if(val_buf) {
+        /* free block handle */
+        if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
+            HGOTO_ERROR_FF(FAIL, "can't free bds block handle");
+        val_buf = NULL;
+    }
 
     /* close the map if we opened it in this routine */
     if(opened_locally) {
@@ -694,10 +720,24 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
     if(val_is_vl) {
         output.ret = ret_value;
         output.val_size = src_size;
+#if H5_EFF_DEBUG
         fprintf(stderr, "val size = %zu\n", src_size);
+#endif
         if(client_val_buf_size) {
             if(NULL == (val_buf = malloc((size_t)src_size)))
                 HGOTO_ERROR_FF(FAIL, "can't allocate buffer");
+
+            /* Create bulk handle */
+            if(HG_SUCCESS != HG_Bulk_handle_create(1, &val_buf, &src_size, 
+                                                   HG_BULK_READWRITE, &bulk_block_handle))
+                HGOTO_ERROR_FF(FAIL, "can't create bulk handle");
+
+#if 0
+            /* get  mercury buffer where data is */
+            if(HG_SUCCESS != HG_Bulk_handle_access(bulk_block_handle, 0, src_size,
+                                                   HG_BULK_READ_ONLY, 1, &val_buf, &src_size, NULL))
+                HGOTO_ERROR_FF(FAIL, "Could not access handle");
+#endif
 
             ret = iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, val_buf, 
                                    &src_size, kv_cs, NULL);
@@ -722,19 +762,14 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
             }
 #endif
 
-            /* Create a new block handle to write the data */
-            HG_Bulk_handle_create(val_buf, (size_t)src_size, HG_BULK_READ_ONLY, &bulk_block_handle);
+            /* Push data to the client */
+            if(HG_SUCCESS != HG_Bulk_transfer(HG_BULK_PUSH, dest, value_handle, 0, 
+                                              bulk_block_handle, 0, src_size, &bulk_request))
+                HGOTO_ERROR_FF(FAIL, "Transfer data failed");
 
-            /* Write bulk data here and wait for the data to be there  */
-            if(HG_SUCCESS != HG_Bulk_write_all(dest, value_handle, bulk_block_handle, &bulk_request))
-                HGOTO_ERROR_FF(FAIL, "can't read from array object");
-            /* wait for it to complete */
+            /* Wait for bulk data read to complete */
             if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-                HGOTO_ERROR_FF(FAIL, "can't read from array object");
-
-            /* free block handle */
-            if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
-                HGOTO_ERROR_FF(FAIL, "can't free bds block handle");
+                HGOTO_ERROR_FF(FAIL, "can't wait for bulk data operation");
         }
     }
     else {
@@ -743,6 +778,18 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
 
         if(NULL == (val_buf = malloc((size_t)src_size)))
             HGOTO_ERROR_FF(FAIL, "can't allocate buffer");
+
+        /* Create bulk handle */
+        if(HG_SUCCESS != HG_Bulk_handle_create(1, &val_buf, &src_size, 
+                                               HG_BULK_READWRITE, &bulk_block_handle))
+            HGOTO_ERROR_FF(FAIL, "can't create bulk handle");
+
+#if 0
+        /* get  mercury buffer where data is */
+        if(HG_SUCCESS != HG_Bulk_handle_access(bulk_block_handle, 0, src_size,
+                                               HG_BULK_READ_ONLY, 1, &val_buf, &src_size, NULL))
+            HGOTO_ERROR_FF(FAIL, "Could not access handle");
+#endif
 
         ret = iod_kv_get_value(iod_oh, rtid, key.buf, (iod_size_t)key.buf_size, val_buf, 
                                &src_size, kv_cs, NULL);
@@ -784,19 +831,14 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
         output.val_size = val_size;
         output.ret = ret_value;
 
-        /* Create a new block handle to write the data */
-        HG_Bulk_handle_create(val_buf, val_size, HG_BULK_READ_ONLY, &bulk_block_handle);
+        /* Push data to the client */
+        if(HG_SUCCESS != HG_Bulk_transfer(HG_BULK_PUSH, dest, value_handle, 0, 
+                                          bulk_block_handle, 0, src_size, &bulk_request))
+            HGOTO_ERROR_FF(FAIL, "Transfer data failed");
 
-        /* Write bulk data here and wait for the data to be there  */
-        if(HG_SUCCESS != HG_Bulk_write_all(dest, value_handle, bulk_block_handle, &bulk_request))
-            HGOTO_ERROR_FF(FAIL, "can't read from array object");
-        /* wait for it to complete */
+        /* Wait for bulk data read to complete */
         if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-            HGOTO_ERROR_FF(FAIL, "can't read from array object");
-
-        /* free block handle */
-        if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
-            HGOTO_ERROR_FF(FAIL, "can't free bds block handle");
+            HGOTO_ERROR_FF(FAIL, "can't wait for bulk data operation");
     }
 
 #if H5_EFF_DEBUG 
@@ -816,9 +858,15 @@ done:
             HDONE_ERROR_FF(FAIL, "can't send result of map get");
     }
 
-    if(val_buf) 
-        free(val_buf);
+    if(val_buf) {
+        /* free block handle */
+        if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
+            HGOTO_ERROR_FF(FAIL, "can't free bds block handle");
+        val_buf = NULL;
+    }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (map_get_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -897,6 +945,8 @@ done:
             HDONE_ERROR_FF(FAIL, "can't send result of map get_count");
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (map_get_count_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -987,6 +1037,8 @@ done:
             HDONE_ERROR_FF(FAIL, "can't send result of map exists");
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (map_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -1071,6 +1123,8 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR_FF(FAIL, "can't send result of map delete");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (map_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -1128,6 +1182,8 @@ done:
 
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (map_close_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 

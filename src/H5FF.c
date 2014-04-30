@@ -3398,6 +3398,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_comment_by_name_ff() */
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:    H5Ocopy_ff
@@ -3480,6 +3481,7 @@ H5Ocopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ocopy_ff() */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -4252,6 +4254,121 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 }/* end H5DOget_ff */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Aprefetch_ff
+ *
+ * Purpose:	Prefetched a Dataset from Central Storage to Burst Buffer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              February 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Aprefetch_ff(hid_t attr_id, hid_t rcxt_id, hrpl_t *replica_id,
+                             hid_t aapl_id, hid_t estack_id)
+{
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void    *attr = NULL;       /* pointer to attr object */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* get the map object */
+    if(NULL == (attr = (void *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    if(H5P_DEFAULT != aapl_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "attribute access property list must be H5P_DEFAULT")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
+    }
+
+    /* Get the data through the IOD VOL */
+    if((ret_value = H5VL_iod_prefetch(attr, rcxt_id, replica_id, aapl_id, req)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch attribute")
+
+    if(request && *req) {
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Aprefetch_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Aevict_ff
+ *
+ * Purpose:	Evicts a Dataset from Burst Buffer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              February 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Aevict_ff(hid_t attr_id, uint64_t c_version, hid_t aapl_id, hid_t estack_id)
+{
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void    **req = NULL;       /* pointer to plugin generated request pointer */
+    void    *attr = NULL;       /* pointer to attr object */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* get the map object */
+    if(NULL == (attr = (void *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    if(H5P_DEFAULT != aapl_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "attribute access property list must be H5P_DEFAULT")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+        vol_plugin->nrefs ++;
+    }
+
+    /* Get the data through the IOD VOL */
+    if((ret_value = H5VL_iod_evict(attr, c_version, aapl_id, req)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict attribute")
+
+    if(request && *req) {
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Aevict_ff() */
 
 
 /*-------------------------------------------------------------------------

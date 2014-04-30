@@ -198,6 +198,8 @@ done:
     if(output.attr_info.tokens)
         free(output.attr_info.tokens);
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (view_create_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -516,6 +518,8 @@ done:
     if(ret_value < 0)
         HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (view_create_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -594,6 +598,8 @@ done:
     if(ret_value < 0)
         HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (view_create_in_t *)H5MM_xfree(input);
     output = (view_create_out_t *)H5MM_xfree(output);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -650,6 +656,8 @@ done:
     if(ret_value < 0)
         HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (object_op_in_t *)H5MM_xfree(input);
     //op_data = (op_data_t *)H5MM_xfree(op_data);
 

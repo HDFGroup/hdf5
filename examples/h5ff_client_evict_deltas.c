@@ -214,14 +214,12 @@ int main(int argc, char **argv) {
     did = H5Oopen_ff(gid,"D1", H5P_DEFAULT, rid2);
     assert(did);
     map = H5Oopen_ff(file_id,"MAP1", H5P_DEFAULT, rid2);
-    assert(did);
+    assert(map);
 
     if(0 == my_rank) {
         ret = H5RCpersist(rid2, H5_EVENT_STACK_NULL);
         assert(ret == 0);
     }
-
-    MPI_Barrier(MPI_COMM_WORLD);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -234,6 +232,9 @@ int main(int argc, char **argv) {
         assert(0 == ret);
 
         ret = H5Mevict_ff(map, 3, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+
+        ret = H5Gevict_ff(gid, 3, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
         /* see if we can read after evicting */

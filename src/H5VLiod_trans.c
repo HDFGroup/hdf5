@@ -180,6 +180,8 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (rc_acquire_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -223,6 +225,8 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         fprintf(stderr, "Failed to Release Read context\n");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (rc_release_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -331,6 +335,8 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         fprintf(stderr, "Failed to Persist Read context\n");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (rc_persist_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -376,6 +382,8 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         fprintf(stderr, "Failed to Snapshot Read context\n");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (rc_snapshot_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -433,6 +441,8 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         fprintf(stderr, "Failed to Start Transaction\n");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (tr_start_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -546,6 +556,8 @@ done:
         iod_obj_close(oidkv_oh, NULL, NULL);
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (tr_finish_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -595,6 +607,8 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         fprintf(stderr, "Failed to Set_Dependency between Transactions\n");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (tr_set_depend_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -645,6 +659,8 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         fprintf(stderr, "Failed to Skip Transaction\n");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (tr_skip_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -695,6 +711,8 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         fprintf(stderr, "Failed to Abort Transaction\n");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (tr_abort_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -752,6 +770,8 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &replica_id))
         fprintf(stderr, "Failed to Prefetch Object\n");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (prefetch_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -779,13 +799,16 @@ H5VL_iod_server_evict_cb(AXE_engine_t UNUSED axe_engine,
 {
     op_data_t *op_data = (op_data_t *)_op_data;
     evict_in_t *input = (evict_in_t *)op_data->input;
-    //iod_handle_t coh = input->coh; /* the container handle */
+    iod_handle_t coh = input->coh; /* the container handle */
     iod_trans_id_t tid = input->rcxt_num;
     iod_handles_t iod_oh = input->iod_oh; /* object handle */
     iod_obj_id_t iod_id = input->iod_id; /* OID */
+    iod_obj_id_t mdkv_id = input->mdkv_id; /* OID */
+    iod_obj_id_t attrkv_id = input->attrkv_id; /* OID */
     //H5I_type_t obj_type = input->obj_type;
     //hid_t apl_id = input->apl_id;
     iod_trans_id_t replica_id = input->replica_id;
+    iod_handle_t mdkv_oh, attrkv_oh;
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
@@ -797,6 +820,41 @@ H5VL_iod_server_evict_cb(AXE_engine_t UNUSED axe_engine,
     else {
         fprintf(stderr, "Evict Object (OID %"PRIx64" OH %"PRIu64") at Version %"PRIu64"\n", 
                 iod_id, iod_oh.rd_oh.cookie, tid);
+
+        /* open the metadata KV */
+        ret = iod_obj_open_read(coh, mdkv_id, tid, NULL, &mdkv_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open metadata KV");
+
+        ret = iod_obj_purge(mdkv_oh, tid, NULL, NULL);
+        if(ret < 0) {
+            iod_obj_close(mdkv_oh, NULL, NULL);
+            HGOTO_ERROR_FF(ret, "can't evict object");
+        }
+
+        /* close the metadata KV */
+        ret = iod_obj_close(mdkv_oh, NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't close object");
+
+        if(IOD_OBJ_INVALID != attrkv_id) {
+            /* open the attribute KV */
+            ret = iod_obj_open_read(coh, attrkv_id, tid, NULL, &attrkv_oh, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "can't open metadata KV");
+
+            ret = iod_obj_purge(attrkv_oh, tid, NULL, NULL);
+            if(ret < 0) {
+                iod_obj_close(attrkv_oh, NULL, NULL);
+                HGOTO_ERROR_FF(ret, "can't evict object");
+            }
+
+            /* close the attribute KV */
+            ret = iod_obj_close(attrkv_oh, NULL, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "can't close object");
+        }
+
         ret = iod_obj_purge(iod_oh.rd_oh, tid, NULL, NULL);
     }
 
@@ -811,6 +869,8 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         fprintf(stderr, "Failed to Evict Object\n");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (evict_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 

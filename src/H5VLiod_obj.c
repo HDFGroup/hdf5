@@ -78,6 +78,8 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &obj_oh);
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (object_token_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -116,6 +118,10 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_checksum_t sp_cs = 0;
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
+
+    output.cpl_id = FAIL;
+    output.id1 = FAIL;
+    output.id2 = FAIL;
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start Object Open on %s (OH %"PRIu64" ID %"PRIx64")\n", 
@@ -298,6 +304,18 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
+
+    if(FAIL != output.cpl_id)
+        H5Pclose(output.cpl_id);
+    if(FAIL != output.id1)
+        H5Tclose(output.id1);
+    if(FAIL != output.id2) {
+        if(H5I_DATASET == output.obj_type)
+            H5Sclose(output.id2);
+        else if(H5I_MAP == output.obj_type)
+            H5Tclose(output.id2);
+    }
+
     if(ret_value < 0) {
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
@@ -308,11 +326,15 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (object_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
 } /* end H5VL_iod_server_object_open_cb() */
 
+/* MSC - NEED IOD & a lot more work*/
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_object_copy_cb
@@ -356,9 +378,6 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start object copy\n");
 #endif
-
-    /* MSC - NEED IOD & a lot more work*/
-#if 0
 
     /* Traverse Path and open object */
     if(H5VL_iod_server_open_path(coh, input->src_loc_id, input->src_loc_oh, input->src_loc_name, 
@@ -508,8 +527,6 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
         iod_obj_close(dst_oh, NULL, NULL);
     }
 
-#endif
-
 done:
 #if H5_EFF_DEBUG
     fprintf(stderr, "Done with object Copy, sending response to client\n");
@@ -519,10 +536,14 @@ done:
 
     if(new_name)
         free(new_name);
+
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (object_copy_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
 } /* end H5VL_iod_server_object_copy_cb() */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -587,6 +608,8 @@ done:
 
     HG_Handler_start_output(op_data->hg_handle, &ret);
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (object_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -742,7 +765,9 @@ done:
         oinfo.num_attrs = 0;
         HG_Handler_start_output(op_data->hg_handle, &oinfo);
     }
-        
+
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (object_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -863,6 +888,8 @@ done:
 
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (object_set_comment_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -1018,6 +1045,8 @@ done:
         iod_cs = NULL;
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (object_get_comment_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -1247,6 +1276,8 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (object_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 

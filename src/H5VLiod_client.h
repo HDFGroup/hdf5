@@ -62,7 +62,7 @@ typedef enum H5RQ_type_t {
     HG_DTYPE_CLOSE,
     HG_LINK_CREATE,
     HG_LINK_MOVE,
-    HG_LINK_ITERATE,
+    //HG_LINK_ITERATE,
     HG_LINK_EXISTS,
     HG_LINK_GET_INFO,
     HG_LINK_GET_VAL,
@@ -73,13 +73,13 @@ typedef enum H5RQ_type_t {
     HG_MAP_GET,
     HG_MAP_GET_COUNT,
     HG_MAP_EXISTS,
-    HG_MAP_ITERATE,
+    //HG_MAP_ITERATE,
     HG_MAP_DELETE,
     HG_MAP_CLOSE,
     HG_OBJECT_OPEN_BY_TOKEN,
     HG_OBJECT_OPEN,
-    HG_OBJECT_COPY,
-    HG_OBJECT_VISIT,
+    //HG_OBJECT_COPY,
+    //HG_OBJECT_VISIT,
     HG_OBJECT_EXISTS,
     HG_OBJECT_SET_COMMENT,
     HG_OBJECT_GET_COMMENT,
@@ -95,10 +95,12 @@ typedef enum H5RQ_type_t {
     HG_TR_ABORT,
     HG_PREFETCH,
     HG_EVICT,
-    HG_VIEW_CREATE,
+#ifdef H5_HAVE_INDEXING
     HG_DSET_SET_INDEX_INFO,
     HG_DSET_GET_INDEX_INFO,
-    HG_DSET_RM_INDEX_INFO
+    HG_DSET_RM_INDEX_INFO,
+#endif
+    HG_VIEW_CREATE
 } H5RQ_type_t;
 
 /* the client IOD VOL request struct */
@@ -305,7 +307,6 @@ typedef struct H5VL_iod_write_info_t {
     void *status;
     hg_bulk_t *bulk_handle;
     hg_bulk_t *vl_len_bulk_handle;
-    hg_bulk_segment_t *vl_segments;
     char *vl_lengths;
 #ifdef H5_HAVE_INDEXING
     void *idx_handle;
@@ -432,7 +433,6 @@ H5_DLL herr_t H5VL_iod_pre_write(hid_t type_id, H5S_t *space, const void *buf,
                                  /*out*/uint64_t *_vlen_checksum, 
                                  /*out*/hg_bulk_t *bulk_handle,
                                  /*out*/hg_bulk_t *vl_len_bulk_handle,
-                                 /*out*/hg_bulk_segment_t **_vl_segments,
                                  /*out*/char **_vl_lengths);
 H5_DLL herr_t H5VL_iod_pre_read(hid_t type_id, struct H5S_t *space, const void *buf, 
                                 hssize_t nelmts, /*out*/hg_bulk_t *bulk_handle);
@@ -455,8 +455,8 @@ H5_DLL herr_t H5VL_iod_map_get_types(void *map, hid_t *key_type_id, hid_t *val_t
 H5_DLL herr_t H5VL_iod_map_get_count(void *map, hsize_t *count, hid_t rcxt_id, void **req);
 H5_DLL herr_t H5VL_iod_map_exists(void *map, hid_t key_mem_type_id, const void *key, 
                                   hbool_t *exists, hid_t rcxt_id, void **req);
-H5_DLL herr_t H5VL_iod_map_iterate(void *map, hid_t key_mem_type_id, hid_t value_mem_type_id, 
-                                   H5M_iterate_func_t callback_func, void *context);
+//H5_DLL herr_t H5VL_iod_map_iterate(void *map, hid_t key_mem_type_id, hid_t value_mem_type_id, 
+//H5M_iterate_func_t callback_func, void *context);
 H5_DLL herr_t H5VL_iod_map_delete(void *map, hid_t key_mem_type_id, const void *key, 
                                   hid_t trans_id, void **req);
 H5_DLL herr_t H5VL_iod_map_close(void *map, void **req);

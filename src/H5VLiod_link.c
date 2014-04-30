@@ -199,6 +199,9 @@ done:
 
     src_last_comp = (char *)H5MM_xfree(src_last_comp);
     dst_last_comp = (char *)H5MM_xfree(dst_last_comp);
+
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (link_create_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -401,6 +404,9 @@ done:
 
     src_last_comp = (char *)H5MM_xfree(src_last_comp);
     dst_last_comp = (char *)H5MM_xfree(dst_last_comp);
+
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (link_move_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -503,8 +509,11 @@ done:
 
     HG_Handler_start_output(op_data->hg_handle, &ret);
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (link_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
+
     last_comp = (char *)H5MM_xfree(last_comp);
 
 } /* end H5VL_iod_server_link_exists_cb() */
@@ -602,8 +611,11 @@ done:
         iod_obj_close(cur_oh.wr_oh, NULL, NULL);
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (link_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
+
     last_comp = (char *)H5MM_xfree(last_comp);
 
     if(iod_link.link_type == H5L_TYPE_SOFT) {
@@ -704,8 +716,11 @@ done:
         iod_obj_close(cur_oh.wr_oh, NULL, NULL);
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (link_get_val_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
+
     last_comp = (char *)H5MM_xfree(last_comp);
 
     if(output.value.val)
@@ -903,6 +918,9 @@ done:
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     last_comp = (char *)H5MM_xfree(last_comp);
+
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (link_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 

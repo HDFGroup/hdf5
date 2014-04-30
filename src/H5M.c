@@ -733,6 +733,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Mexists_ff */
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5Miterate_ff
@@ -778,6 +779,7 @@ H5Miterate_ff(hid_t map_id, hid_t key_mem_type_id, hid_t value_mem_type_id,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Miterate */
+#endif
 
 
 /*-------------------------------------------------------------------------

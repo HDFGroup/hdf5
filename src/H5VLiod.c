@@ -43,78 +43,6 @@
 
 #define H5VL_IOD_MAX_ADDR_NAME 256
 
-/* function shipper IDs for different routines */
-static hg_id_t H5VL_EFF_INIT_ID;
-static hg_id_t H5VL_EFF_FINALIZE_ID;
-static hg_id_t H5VL_ANALYSIS_EXECUTE_ID;
-static hg_id_t H5VL_FILE_CREATE_ID;
-static hg_id_t H5VL_FILE_OPEN_ID;
-static hg_id_t H5VL_FILE_CLOSE_ID;
-static hg_id_t H5VL_ATTR_CREATE_ID;
-static hg_id_t H5VL_ATTR_OPEN_ID;
-static hg_id_t H5VL_ATTR_READ_ID;
-static hg_id_t H5VL_ATTR_WRITE_ID;
-static hg_id_t H5VL_ATTR_EXISTS_ID;
-static hg_id_t H5VL_ATTR_ITERATE_ID;
-static hg_id_t H5VL_ATTR_RENAME_ID;
-static hg_id_t H5VL_ATTR_REMOVE_ID;
-static hg_id_t H5VL_ATTR_CLOSE_ID;
-static hg_id_t H5VL_GROUP_CREATE_ID;
-static hg_id_t H5VL_GROUP_OPEN_ID;
-static hg_id_t H5VL_GROUP_CLOSE_ID;
-static hg_id_t H5VL_MAP_CREATE_ID;
-static hg_id_t H5VL_MAP_OPEN_ID;
-static hg_id_t H5VL_MAP_SET_ID;
-static hg_id_t H5VL_MAP_GET_ID;
-static hg_id_t H5VL_MAP_GET_COUNT_ID;
-static hg_id_t H5VL_MAP_EXISTS_ID;
-static hg_id_t H5VL_MAP_ITERATE_ID;
-static hg_id_t H5VL_MAP_DELETE_ID;
-static hg_id_t H5VL_MAP_CLOSE_ID;
-static hg_id_t H5VL_DSET_CREATE_ID;
-static hg_id_t H5VL_DSET_OPEN_ID;
-static hg_id_t H5VL_DSET_READ_ID;
-static hg_id_t H5VL_DSET_GET_VL_SIZE_ID;
-static hg_id_t H5VL_DSET_WRITE_ID;
-static hg_id_t H5VL_DSET_SET_EXTENT_ID;
-static hg_id_t H5VL_DSET_CLOSE_ID;
-static hg_id_t H5VL_DTYPE_COMMIT_ID;
-static hg_id_t H5VL_DTYPE_OPEN_ID;
-static hg_id_t H5VL_DTYPE_CLOSE_ID;
-static hg_id_t H5VL_LINK_CREATE_ID;
-static hg_id_t H5VL_LINK_MOVE_ID;
-static hg_id_t H5VL_LINK_ITERATE_ID;
-static hg_id_t H5VL_LINK_EXISTS_ID;
-static hg_id_t H5VL_LINK_GET_INFO_ID;
-static hg_id_t H5VL_LINK_GET_VAL_ID;
-static hg_id_t H5VL_LINK_REMOVE_ID;
-static hg_id_t H5VL_OBJECT_OPEN_BY_TOKEN_ID;
-static hg_id_t H5VL_OBJECT_OPEN_ID;
-static hg_id_t H5VL_OBJECT_COPY_ID;
-static hg_id_t H5VL_OBJECT_EXISTS_ID;
-static hg_id_t H5VL_OBJECT_VISIT_ID;
-static hg_id_t H5VL_OBJECT_SET_COMMENT_ID;
-static hg_id_t H5VL_OBJECT_GET_COMMENT_ID;
-static hg_id_t H5VL_OBJECT_GET_INFO_ID;
-static hg_id_t H5VL_RC_ACQUIRE_ID;
-static hg_id_t H5VL_RC_RELEASE_ID;
-static hg_id_t H5VL_RC_PERSIST_ID;
-static hg_id_t H5VL_RC_SNAPSHOT_ID;
-static hg_id_t H5VL_TR_START_ID;
-static hg_id_t H5VL_TR_FINISH_ID;
-static hg_id_t H5VL_TR_SET_DEPEND_ID;
-static hg_id_t H5VL_TR_SKIP_ID;
-static hg_id_t H5VL_TR_ABORT_ID;
-static hg_id_t H5VL_PREFETCH_ID;
-static hg_id_t H5VL_EVICT_ID;
-static hg_id_t H5VL_CANCEL_OP_ID;
-static hg_id_t H5VL_VIEW_CREATE_ID;
-#ifdef H5_HAVE_INDEXING
-static hg_id_t H5VL_DSET_SET_INDEX_INFO_ID;
-static hg_id_t H5VL_DSET_GET_INDEX_INFO_ID;
-static hg_id_t H5VL_DSET_RM_INDEX_INFO_ID;
-#endif
-
 /* global AXE list struct */
 typedef struct H5VL_iod_axe_list_t {
     H5VL_iod_request_t *head;
@@ -177,19 +105,19 @@ static herr_t H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *ob
 static herr_t H5VL_iod_link_move(void *src_obj, H5VL_loc_params_t loc_params1,
                                  void *dst_obj, H5VL_loc_params_t loc_params2,
                                  hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL_iod_link_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
-                                    H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
-                                    H5L_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
+//static herr_t H5VL_iod_link_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
+//H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
+//H5L_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_iod_link_remove(void *obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, void **req);
 
 /* Object callbacks */
 static void *H5VL_iod_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
-static herr_t H5VL_iod_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
-                                   void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
-                                   hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL_iod_object_visit(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
-                                    H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
+//static herr_t H5VL_iod_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
+//void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
+//hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
+//static herr_t H5VL_iod_object_visit(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
+//H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_iod_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments);
 
@@ -262,14 +190,14 @@ static H5VL_class_t H5VL_iod_g = {
     {                                           /* link_cls */
         H5VL_iod_link_create,                   /* create */
         H5VL_iod_link_move,                     /* move */
-        H5VL_iod_link_iterate,                  /* iterate */
+        NULL,                                   /* iterate */
         H5VL_iod_link_get,                      /* get */
         H5VL_iod_link_remove                    /* remove */
     },
     {                                           /* object_cls */
         H5VL_iod_object_open,                   /* open */
-        H5VL_iod_object_copy,                   /* copy */
-        H5VL_iod_object_visit,                  /* visit */
+        NULL,                                   /* copy */
+        NULL,                                   /* visit */
         H5VL_iod_object_get,                    /* get */
         H5VL_iod_object_misc,                   /* misc */
         NULL,                                   /* optional */
@@ -682,6 +610,7 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
 
     /* initialize Mercury stuff */
     network_class = NA_MPI_Init(NULL, 0);
+    //network_class = NA_Initialize("tcp@mpi://0.0.0.0:0", 0);
 
     if (HG_SUCCESS != HG_Init(network_class)) {
         fprintf(stderr, "Failed to initialize Mercury\n");
@@ -695,101 +624,7 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     PEER = ion_target;
 
     /* Register function and encoding/decoding functions */
-    H5VL_EFF_INIT_ID     = MERCURY_REGISTER("eff_init", eff_init_in_t, ret_t);
-    H5VL_EFF_FINALIZE_ID = MERCURY_REGISTER("eff_finalize", ret_t, ret_t);
-
-    H5VL_ANALYSIS_EXECUTE_ID = MERCURY_REGISTER("analysis_execute", 
-                                                analysis_execute_in_t, 
-                                                analysis_execute_out_t);
-
-    H5VL_FILE_CREATE_ID = MERCURY_REGISTER("file_create", file_create_in_t, file_create_out_t);
-    H5VL_FILE_OPEN_ID   = MERCURY_REGISTER("file_open", file_open_in_t, file_open_out_t);
-    H5VL_FILE_CLOSE_ID  = MERCURY_REGISTER("file_close", file_close_in_t, ret_t);
-
-    H5VL_ATTR_CREATE_ID = MERCURY_REGISTER("attr_create", attr_create_in_t, attr_create_out_t);
-    H5VL_ATTR_OPEN_ID   = MERCURY_REGISTER("attr_open", attr_open_in_t, attr_open_out_t);
-    H5VL_ATTR_READ_ID   = MERCURY_REGISTER("attr_read", attr_io_in_t, ret_t);
-    H5VL_ATTR_WRITE_ID  = MERCURY_REGISTER("attr_write", attr_io_in_t, ret_t);
-    H5VL_ATTR_EXISTS_ID = MERCURY_REGISTER("attr_exists", attr_op_in_t, htri_t);
-    H5VL_ATTR_ITERATE_ID = MERCURY_REGISTER("attr_iterate", attr_op_in_t, ret_t);
-    H5VL_ATTR_RENAME_ID = MERCURY_REGISTER("attr_rename", attr_rename_in_t, ret_t);
-    H5VL_ATTR_REMOVE_ID = MERCURY_REGISTER("attr_remove", attr_op_in_t, ret_t);
-    H5VL_ATTR_CLOSE_ID  = MERCURY_REGISTER("attr_close", attr_close_in_t, ret_t);
-
-    H5VL_GROUP_CREATE_ID = MERCURY_REGISTER("group_create", group_create_in_t, group_create_out_t);
-    H5VL_GROUP_OPEN_ID   = MERCURY_REGISTER("group_open", group_open_in_t, group_open_out_t);
-    H5VL_GROUP_CLOSE_ID  = MERCURY_REGISTER("group_close", group_close_in_t, ret_t);
-
-    H5VL_MAP_CREATE_ID = MERCURY_REGISTER("map_create", map_create_in_t, map_create_out_t);
-    H5VL_MAP_OPEN_ID   = MERCURY_REGISTER("map_open", map_open_in_t, map_open_out_t);
-    H5VL_MAP_SET_ID    = MERCURY_REGISTER("map_set", map_set_in_t, ret_t);
-    H5VL_MAP_GET_ID    = MERCURY_REGISTER("map_get", map_get_in_t, map_get_out_t);
-    H5VL_MAP_GET_COUNT_ID = MERCURY_REGISTER("map_get_count", map_get_count_in_t, int64_t);
-    H5VL_MAP_ITERATE_ID   = MERCURY_REGISTER("map_iterate", map_op_in_t, ret_t);
-    H5VL_MAP_EXISTS_ID = MERCURY_REGISTER("map_exists", map_op_in_t, hbool_t);
-    H5VL_MAP_DELETE_ID = MERCURY_REGISTER("map_delete", map_op_in_t, ret_t);
-    H5VL_MAP_CLOSE_ID  = MERCURY_REGISTER("map_close", map_close_in_t, ret_t);
-
-    H5VL_DSET_CREATE_ID = MERCURY_REGISTER("dset_create", dset_create_in_t, dset_create_out_t);
-    H5VL_DSET_OPEN_ID   = MERCURY_REGISTER("dset_open", dset_open_in_t, dset_open_out_t);
-    H5VL_DSET_READ_ID   = MERCURY_REGISTER("dset_read", dset_io_in_t, dset_read_out_t);
-    H5VL_DSET_GET_VL_SIZE_ID = MERCURY_REGISTER("dset_get_vl_size", dset_io_in_t, dset_read_out_t);
-    H5VL_DSET_WRITE_ID  = MERCURY_REGISTER("dset_write", dset_io_in_t, ret_t);
-    H5VL_DSET_SET_EXTENT_ID = MERCURY_REGISTER("dset_set_extent", 
-                                               dset_set_extent_in_t, ret_t);
-    H5VL_DSET_CLOSE_ID  = MERCURY_REGISTER("dset_close", dset_close_in_t, ret_t);
-
-    H5VL_DTYPE_COMMIT_ID = MERCURY_REGISTER("dtype_commit", dtype_commit_in_t, dtype_commit_out_t);
-    H5VL_DTYPE_OPEN_ID   = MERCURY_REGISTER("dtype_open", dtype_open_in_t, dtype_open_out_t);
-    H5VL_DTYPE_CLOSE_ID  = MERCURY_REGISTER("dtype_close", dtype_close_in_t, ret_t);
-
-    H5VL_LINK_CREATE_ID  = MERCURY_REGISTER("link_create", link_create_in_t, ret_t);
-    H5VL_LINK_MOVE_ID    = MERCURY_REGISTER("link_move", link_move_in_t, ret_t);
-    H5VL_LINK_EXISTS_ID  = MERCURY_REGISTER("link_exists", link_op_in_t, htri_t);
-    H5VL_LINK_GET_INFO_ID = MERCURY_REGISTER("link_get_info", link_op_in_t, linfo_t);
-    H5VL_LINK_GET_VAL_ID  = MERCURY_REGISTER("link_get_val", link_get_val_in_t, 
-                                             link_get_val_out_t);
-    H5VL_LINK_ITERATE_ID = MERCURY_REGISTER("link_iterate", link_op_in_t, ret_t);
-    H5VL_LINK_REMOVE_ID  = MERCURY_REGISTER("link_remove", link_op_in_t, ret_t);
-
-    H5VL_OBJECT_OPEN_BY_TOKEN_ID = MERCURY_REGISTER("object_open_by_token", 
-                                                    object_token_in_t, iod_handles_t);
-    H5VL_OBJECT_OPEN_ID   = MERCURY_REGISTER("object_open", object_op_in_t, object_open_out_t);
-    H5VL_OBJECT_COPY_ID   = MERCURY_REGISTER("object_copy", object_copy_in_t, ret_t);
-    H5VL_OBJECT_EXISTS_ID = MERCURY_REGISTER("object_exists", object_op_in_t, htri_t);
-    H5VL_OBJECT_VISIT_ID  = MERCURY_REGISTER("object_visit", object_op_in_t, ret_t);
-    H5VL_OBJECT_SET_COMMENT_ID = MERCURY_REGISTER("set_comment", object_set_comment_in_t, ret_t);
-    H5VL_OBJECT_GET_COMMENT_ID = MERCURY_REGISTER("get_comment", object_get_comment_in_t, 
-                                                  object_get_comment_out_t);
-    H5VL_OBJECT_GET_INFO_ID = MERCURY_REGISTER("object_get_info", object_op_in_t, oinfo_t);
-
-    H5VL_RC_ACQUIRE_ID      = MERCURY_REGISTER("read_context_acquire", 
-                                               rc_acquire_in_t, rc_acquire_out_t);
-    H5VL_RC_RELEASE_ID      = MERCURY_REGISTER("read_context_release", rc_release_in_t, ret_t);
-    H5VL_RC_PERSIST_ID      = MERCURY_REGISTER("read_context_persist", rc_persist_in_t, ret_t);
-    H5VL_RC_SNAPSHOT_ID     = MERCURY_REGISTER("read_context_snapshot", rc_snapshot_in_t, ret_t);
-
-    H5VL_TR_START_ID        = MERCURY_REGISTER("transaction_start", tr_start_in_t, ret_t);
-    H5VL_TR_FINISH_ID       = MERCURY_REGISTER("transaction_finish", tr_finish_in_t, ret_t);
-    H5VL_TR_SET_DEPEND_ID   = MERCURY_REGISTER("transaction_set_depend",tr_set_depend_in_t, ret_t);
-    H5VL_TR_SKIP_ID         = MERCURY_REGISTER("transaction_skip", tr_skip_in_t, ret_t);
-    H5VL_TR_ABORT_ID        = MERCURY_REGISTER("transaction_abort",tr_abort_in_t, ret_t);
-
-    H5VL_PREFETCH_ID = MERCURY_REGISTER("prefetch", prefetch_in_t, hrpl_t);
-    H5VL_EVICT_ID    = MERCURY_REGISTER("evict", evict_in_t, ret_t);
-
-    H5VL_VIEW_CREATE_ID = MERCURY_REGISTER("view_create", view_create_in_t, view_create_out_t);
-
-#ifdef H5_HAVE_INDEXING
-    H5VL_DSET_SET_INDEX_INFO_ID = MERCURY_REGISTER("dset_set_index_info",
-                                                   dset_set_index_info_in_t, ret_t);
-    H5VL_DSET_GET_INDEX_INFO_ID = MERCURY_REGISTER("dset_get_index_info",
-                                                   dset_get_index_info_in_t, dset_get_index_info_out_t);
-    H5VL_DSET_RM_INDEX_INFO_ID = MERCURY_REGISTER("dset_rm_index_info",
-                                                  dset_rm_index_info_in_t, ret_t);
-#endif
-
-    H5VL_CANCEL_OP_ID = MERCURY_REGISTER("cancel_op", uint64_t, uint8_t);
+    EFF__mercury_register_callbacks();
 
     /* forward the init call to the ION and wait for its completion */
     if(HG_SUCCESS != HG_Forward(PEER, H5VL_EFF_INIT_ID, &num_procs, &ret_value, &hg_req)) {
@@ -3328,7 +3163,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
             HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate vlen lengths buffer");
 
         /* Register vl_lengths buffer */
-        HG_Bulk_handle_create(vl_lengths, vl_lengths_size, HG_BULK_READWRITE, bulk_handle);
+        HG_Bulk_handle_create(1, &vl_lengths, &vl_lengths_size, HG_BULK_READWRITE, bulk_handle);
     } /* end if */
     else {
         /* for non vlen data, create the bulk handle to recieve the data in */
@@ -3464,7 +3299,6 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     H5P_genplist_t *plist = NULL;
     hg_bulk_t *bulk_handle = NULL;
     hg_bulk_t *vl_len_bulk_handle = NULL;
-    hg_bulk_segment_t *vl_segments = NULL;
     char *vl_lengths = NULL;
     H5S_t *mem_space = NULL;
     H5S_t *file_space = NULL;
@@ -3584,7 +3418,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if(raw_cs_scope) {
         /* compute checksum and create bulk handle */
         if(H5VL_iod_pre_write(mem_type_id, mem_space, buf, &internal_cs, &vl_len_cs, 
-                              bulk_handle, vl_len_bulk_handle, &vl_segments, &vl_lengths) < 0)
+                              bulk_handle, vl_len_bulk_handle, &vl_lengths) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't generate write parameters");
     }
     else {
@@ -3593,7 +3427,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 #endif
         /* compute checksum and create bulk handle */
         if(H5VL_iod_pre_write(mem_type_id, mem_space, buf, NULL, NULL, bulk_handle, 
-                              vl_len_bulk_handle, &vl_segments, &vl_lengths) < 0)
+                              vl_len_bulk_handle, &vl_lengths) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't generate write parameters");
         internal_cs = 0;
     }
@@ -3652,7 +3486,6 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     info->bulk_handle = bulk_handle;
     info->vl_len_bulk_handle = vl_len_bulk_handle;
     info->vl_lengths = vl_lengths;
-    info->vl_segments = vl_segments;
 #ifdef H5_HAVE_INDEXING
     /* setup extra info required for the index post_update operation */
     info->idx_handle = dset->idx_handle;
@@ -4852,7 +4685,7 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
 	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
 
     /* Register memory with bulk_handle */
-    if(HG_SUCCESS != HG_Bulk_handle_create(buf, size, HG_BULK_READWRITE, bulk_handle))
+    if(HG_SUCCESS != HG_Bulk_handle_create(1, &buf, &size, HG_BULK_READWRITE, bulk_handle))
         HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
 
     if(NULL == (parent_reqs = (H5VL_iod_request_t **)
@@ -4983,7 +4816,7 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
 	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "can't allocate a bulk data transfer handle");
 
     /* Register memory */
-    if(HG_SUCCESS != HG_Bulk_handle_create(buf, size, HG_BULK_READ_ONLY, bulk_handle))
+    if(HG_SUCCESS != HG_Bulk_handle_create(1, &buf, &size, HG_BULK_READ_ONLY, bulk_handle))
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't create Bulk Data Handle");
 
     if(NULL == (parent_reqs = (H5VL_iod_request_t **)
@@ -5849,7 +5682,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_link_move() */
-
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_link_iterate
@@ -5878,7 +5711,7 @@ static herr_t H5VL_iod_link_iterate(void UNUSED *_obj, H5VL_loc_params_t UNUSED 
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_iod_link_iterate() */
-
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_link_get
@@ -7589,7 +7422,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_object_open_by_addr */
 #endif
-
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_object_copy
@@ -7672,7 +7505,8 @@ H5VL_iod_object_copy(void *_src_obj, H5VL_loc_params_t UNUSED loc_params1, const
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_object_copy() */
-
+#endif
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_object_visit
@@ -7700,7 +7534,7 @@ static herr_t H5VL_iod_object_visit(void UNUSED *_obj, H5VL_loc_params_t UNUSED 
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_iod_object_visit() */
-
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_object_misc
@@ -8461,12 +8295,12 @@ H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key,
     if(H5T_VLEN == val_type_class) {
         /* if this is a VL type buffer, set the buffer pointer to the
            actual data (the p pointer) */
-        if(HG_SUCCESS != HG_Bulk_handle_create(((const hvl_t *)value)->p, val_size, 
+        if(HG_SUCCESS != HG_Bulk_handle_create(1, &((const hvl_t *)value)->p, &val_size, 
                                                HG_BULK_READ_ONLY, value_handle))
             HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't create Bulk Data Handle");
     }
     else {
-        if(HG_SUCCESS != HG_Bulk_handle_create(value, val_size, HG_BULK_READ_ONLY, value_handle))
+        if(HG_SUCCESS != HG_Bulk_handle_create(1, &value, &val_size, HG_BULK_READ_ONLY, value_handle))
             HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't create Bulk Data Handle");
     }
     /* get the TR object */
@@ -8571,13 +8405,14 @@ H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key,
        create the bulk handle */
     if(!val_is_vl) {
         /* Register memory with bulk_handle */
-        if(HG_SUCCESS != HG_Bulk_handle_create(value, val_size, 
+        if(HG_SUCCESS != HG_Bulk_handle_create(1, &value, &val_size, 
                                                HG_BULK_READWRITE, value_handle))
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
     }
     else {
+        size_t temp_size = 1;
         /* Register memory with bulk_handle */
-        if(HG_SUCCESS != HG_Bulk_handle_create(value, (size_t)1, 
+        if(HG_SUCCESS != HG_Bulk_handle_create(1, &value, &temp_size, 
                                                HG_BULK_READWRITE, &dummy_handle))
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
     }
@@ -8820,17 +8655,6 @@ H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_map_exists() */
-
-herr_t 
-H5VL_iod_map_iterate(void UNUSED *map, hid_t UNUSED key_mem_type_id, hid_t UNUSED value_mem_type_id, 
-                     H5M_iterate_func_t UNUSED callback_func, void UNUSED *context)
-{
-    //herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5VL_iod_map_iterate() */
 
 herr_t 
 H5VL_iod_map_delete(void *_map, hid_t key_mem_type_id, const void *key, 
@@ -9764,6 +9588,8 @@ H5VL_iod_evict(void *_obj, uint64_t c_version, hid_t apl_id, void **req)
             H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)obj;
             input.iod_id = dset->remote_dset.iod_id;
             input.iod_oh = dset->remote_dset.iod_oh;
+            input.mdkv_id = dset->remote_dset.mdkv_id;
+            input.attrkv_id = dset->remote_dset.attrkv_id;
             break;
         }
     case H5I_DATATYPE:
@@ -9771,6 +9597,8 @@ H5VL_iod_evict(void *_obj, uint64_t c_version, hid_t apl_id, void **req)
             H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)obj;
             input.iod_id = dtype->remote_dtype.iod_id;
             input.iod_oh = dtype->remote_dtype.iod_oh;
+            input.mdkv_id = dtype->remote_dtype.mdkv_id;
+            input.attrkv_id = dtype->remote_dtype.attrkv_id;
             break;
         }
     case H5I_GROUP:
@@ -9778,6 +9606,8 @@ H5VL_iod_evict(void *_obj, uint64_t c_version, hid_t apl_id, void **req)
             H5VL_iod_group_t *group = (H5VL_iod_group_t *)obj;
             input.iod_id = group->remote_group.iod_id;
             input.iod_oh = group->remote_group.iod_oh;
+            input.mdkv_id = group->remote_group.mdkv_id;
+            input.attrkv_id = group->remote_group.attrkv_id;
             break;
         }
     case H5I_MAP:
@@ -9785,6 +9615,8 @@ H5VL_iod_evict(void *_obj, uint64_t c_version, hid_t apl_id, void **req)
             H5VL_iod_map_t *map = (H5VL_iod_map_t *)obj;
             input.iod_id = map->remote_map.iod_id;
             input.iod_oh = map->remote_map.iod_oh;
+            input.mdkv_id = map->remote_map.mdkv_id;
+            input.attrkv_id = map->remote_map.attrkv_id;
             break;
         }
     case H5I_ATTR:
@@ -9792,6 +9624,8 @@ H5VL_iod_evict(void *_obj, uint64_t c_version, hid_t apl_id, void **req)
             H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)obj;
             input.iod_id = attr->remote_attr.iod_id;
             input.iod_oh = attr->remote_attr.iod_oh;
+            input.mdkv_id = attr->remote_attr.mdkv_id;
+            input.attrkv_id = IOD_OBJ_INVALID;
             break;
         }
     case H5I_UNINIT:

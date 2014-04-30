@@ -716,7 +716,7 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
                 if(NULL == (split_data[i] = malloc(split_data_size)))
                     HGOTO_ERROR_FF(FAIL, "can't allocate farm buffer");
 
-                HG_Bulk_handle_create(split_data[i], split_data_size,
+                HG_Bulk_handle_create(1, &split_data[i], &split_data_size,
                                       HG_BULK_READWRITE, &bulk_handle);
 
                 transfer_input.axe_id = farm_output[i].axe_id;
@@ -947,6 +947,8 @@ done:
     if(type_id)
         H5Tclose(type_id);
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (analysis_execute_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -1060,12 +1062,16 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
     HG_Handler_start_output(op_data->hg_handle, &output->farm_out);
 
 done:
+
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
+
     if(0 == split_num_elmts) {
         output = (H5VLiod_farm_data_t *)H5MM_xfree(output);
         op_data = (op_data_t *)H5MM_xfree(op_data);
     }
-    input = (analysis_farm_in_t *)H5MM_xfree(input);
 
+    input = (analysis_farm_in_t *)H5MM_xfree(input);
 } /* end H5VL_iod_server_analysis_farm_cb() */
 
 /*-------------------------------------------------------------------------
@@ -1105,17 +1111,19 @@ H5VL_iod_server_analysis_transfer_cb(AXE_engine_t axe_engine,
 #if H5_EFF_DEBUG 
     fprintf(stderr, "(%d) Transferring split data back to master\n", my_rank_g);
 #endif
-    HG_Bulk_handle_create(farm_output->data, data_size, HG_BULK_READ_ONLY,
-            &bulk_block_handle);
+    /* Create bulk handle */
+    if(HG_SUCCESS != HG_Bulk_handle_create(1, &farm_output->data, &data_size, 
+                                           HG_BULK_READ_ONLY, &bulk_block_handle))
+        HGOTO_ERROR_FF(FAIL, "can't create bulk handle");
 
-    /* Write bulk data here and wait for the data to be there  */
-    if(HG_SUCCESS != HG_Bulk_write_all(source,
-            input->bulk_handle, bulk_block_handle, &bulk_request))
-        HGOTO_ERROR_FF(FAIL, "can't get data from function shipper");
+    /* Push data to the client */
+    if(HG_SUCCESS != HG_Bulk_transfer(HG_BULK_PUSH, source, input->bulk_handle, 0, 
+                                      bulk_block_handle, 0, data_size, &bulk_request))
+        HGOTO_ERROR_FF(FAIL, "Transfer data failed");
 
-    /* wait for it to complete */
+    /* Wait for bulk data read to complete */
     if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-        HGOTO_ERROR_FF(FAIL, "can't get data from function shipper");
+        HGOTO_ERROR_FF(FAIL, "can't wait for bulk data operation");
 
     /* free the bds block handle */
     if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
@@ -1127,9 +1135,10 @@ H5VL_iod_server_analysis_transfer_cb(AXE_engine_t axe_engine,
 done:
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (analysis_transfer_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
-
 } /* end H5VL_iod_server_analysis_transfer_cb() */
 
 /*-------------------------------------------------------------------------

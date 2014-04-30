@@ -118,6 +118,8 @@ done:
     if(ret < 0)
         HDONE_ERROR_FF(ret, "can't close object");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (dset_set_index_info_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -259,6 +261,8 @@ done:
     if(ret < 0)
         HDONE_ERROR_FF(ret, "can't close object");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (dset_get_index_info_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -336,6 +340,8 @@ done:
     if(ret < 0)
         HDONE_ERROR_FF(ret, "can't close object");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (dset_rm_index_info_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 

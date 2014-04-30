@@ -246,7 +246,7 @@ int main(int argc, char **argv) {
     printf("%d events in event stack. H5ESwait_all Completion status = %d\n", num_events, status);
     H5ESclear(e_stack);
 
-    /* Tell other procs that container version 1 is acquired */
+    /* Tell other procs that container version 2 is acquired */
     version = 2;
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
 
@@ -257,10 +257,11 @@ int main(int argc, char **argv) {
         assert(rid2 > 0);
     }
 
-    /* read data from datasets with read version 1. */
+    /* read data from datasets with read version 2. */
     ret = H5Dread_ff(did1, vl_dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata, 
                      rid2, H5_EVENT_STACK_NULL);
     assert(ret == 0);
+
     ret = H5Dread_ff(did2, str_dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, str_rdata, 
                      rid2, H5_EVENT_STACK_NULL);
     assert(ret == 0);
@@ -272,7 +273,6 @@ int main(int argc, char **argv) {
         assert(0 == ret);
     }
 
-    
     /* Print VL DATA */
     for(i = 0; i < 5; i++) {
         int temp = i*increment + increment;

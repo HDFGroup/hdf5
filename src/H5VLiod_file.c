@@ -279,6 +279,8 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &ret_value);
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (file_create_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -333,6 +335,8 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start file open %s %d %d\n", input->name, input->flags, input->fapl_id);
 #endif
+
+    output.fcpl_id = FAIL;
 
     if(H5F_ACC_RDWR == mode)
         mode = IOD_CONT_RW;
@@ -544,12 +548,15 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
+    if(FAIL != output.fcpl_id)
+        H5Pclose(output.fcpl_id);
+
     if(ret_value < 0) {
         output.coh.cookie = IOD_OH_UNDEFINED;
         output.root_id = IOD_OBJ_INVALID;
         output.root_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.root_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
-        output.fcpl_id = H5P_FILE_CREATE_DEFAULT;
+        output.fcpl_id = FAIL;
         output.kv_oid_index = 0;
         output.array_oid_index = 0;
         output.blob_oid_index = 0;
@@ -557,6 +564,8 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (file_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -824,6 +833,8 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR_FF(FAIL, "can't send result of file close to client");
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (file_close_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 

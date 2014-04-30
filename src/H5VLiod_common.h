@@ -32,6 +32,78 @@
 #define IOD_COUNT_UNDEFINED ((uint64_t)(-1))//(pow(2.0,64.0) - 1)
 #define H5_EFF_DEBUG 1
 
+/* function shipper IDs for different routines */
+hg_id_t H5VL_EFF_INIT_ID;
+hg_id_t H5VL_EFF_FINALIZE_ID;
+hg_id_t H5VL_ANALYSIS_EXECUTE_ID;
+hg_id_t H5VL_FILE_CREATE_ID;
+hg_id_t H5VL_FILE_OPEN_ID;
+hg_id_t H5VL_FILE_CLOSE_ID;
+hg_id_t H5VL_ATTR_CREATE_ID;
+hg_id_t H5VL_ATTR_OPEN_ID;
+hg_id_t H5VL_ATTR_READ_ID;
+hg_id_t H5VL_ATTR_WRITE_ID;
+hg_id_t H5VL_ATTR_EXISTS_ID;
+//hg_id_t H5VL_ATTR_ITERATE_ID;
+hg_id_t H5VL_ATTR_RENAME_ID;
+hg_id_t H5VL_ATTR_REMOVE_ID;
+hg_id_t H5VL_ATTR_CLOSE_ID;
+hg_id_t H5VL_GROUP_CREATE_ID;
+hg_id_t H5VL_GROUP_OPEN_ID;
+hg_id_t H5VL_GROUP_CLOSE_ID;
+hg_id_t H5VL_MAP_CREATE_ID;
+hg_id_t H5VL_MAP_OPEN_ID;
+hg_id_t H5VL_MAP_SET_ID;
+hg_id_t H5VL_MAP_GET_ID;
+hg_id_t H5VL_MAP_GET_COUNT_ID;
+hg_id_t H5VL_MAP_EXISTS_ID;
+//hg_id_t H5VL_MAP_ITERATE_ID;
+hg_id_t H5VL_MAP_DELETE_ID;
+hg_id_t H5VL_MAP_CLOSE_ID;
+hg_id_t H5VL_DSET_CREATE_ID;
+hg_id_t H5VL_DSET_OPEN_ID;
+hg_id_t H5VL_DSET_READ_ID;
+hg_id_t H5VL_DSET_GET_VL_SIZE_ID;
+hg_id_t H5VL_DSET_WRITE_ID;
+hg_id_t H5VL_DSET_SET_EXTENT_ID;
+hg_id_t H5VL_DSET_CLOSE_ID;
+hg_id_t H5VL_DTYPE_COMMIT_ID;
+hg_id_t H5VL_DTYPE_OPEN_ID;
+hg_id_t H5VL_DTYPE_CLOSE_ID;
+hg_id_t H5VL_LINK_CREATE_ID;
+hg_id_t H5VL_LINK_MOVE_ID;
+//hg_id_t H5VL_LINK_ITERATE_ID;
+hg_id_t H5VL_LINK_EXISTS_ID;
+hg_id_t H5VL_LINK_GET_INFO_ID;
+hg_id_t H5VL_LINK_GET_VAL_ID;
+hg_id_t H5VL_LINK_REMOVE_ID;
+hg_id_t H5VL_OBJECT_OPEN_BY_TOKEN_ID;
+hg_id_t H5VL_OBJECT_OPEN_ID;
+//hg_id_t H5VL_OBJECT_COPY_ID;
+//hg_id_t H5VL_OBJECT_VISIT_ID;
+hg_id_t H5VL_OBJECT_EXISTS_ID;
+hg_id_t H5VL_OBJECT_SET_COMMENT_ID;
+hg_id_t H5VL_OBJECT_GET_COMMENT_ID;
+hg_id_t H5VL_OBJECT_GET_INFO_ID;
+hg_id_t H5VL_RC_ACQUIRE_ID;
+hg_id_t H5VL_RC_RELEASE_ID;
+hg_id_t H5VL_RC_PERSIST_ID;
+hg_id_t H5VL_RC_SNAPSHOT_ID;
+hg_id_t H5VL_TR_START_ID;
+hg_id_t H5VL_TR_FINISH_ID;
+hg_id_t H5VL_TR_SET_DEPEND_ID;
+hg_id_t H5VL_TR_SKIP_ID;
+hg_id_t H5VL_TR_ABORT_ID;
+hg_id_t H5VL_PREFETCH_ID;
+hg_id_t H5VL_EVICT_ID;
+hg_id_t H5VL_CANCEL_OP_ID;
+hg_id_t H5VL_VIEW_CREATE_ID;
+#ifdef H5_HAVE_INDEXING
+hg_id_t H5VL_DSET_SET_INDEX_INFO_ID;
+hg_id_t H5VL_DSET_GET_INDEX_INFO_ID;
+hg_id_t H5VL_DSET_RM_INDEX_INFO_ID;
+#endif
+
 /* Structure for a span of fixed-length data in a type */
  typedef struct H5VL_iod_fl_span_t {
     size_t offset;          /* Offset of start of span in type */
@@ -123,19 +195,91 @@ typedef binary_buf_t loc_info_t;
 H5_DLL int H5VL_iod_get_type_info(hid_t type_id, H5VL_iod_type_info_t *type_info);
 H5_DLL void H5VL_iod_type_info_reset(H5VL_iod_type_info_t *type_info);
 H5_DLL int H5VL_iod_create_segments_send(char *buf, H5VL_iod_type_info_t *type_info,
-           size_t nelem, hg_bulk_segment_t **segments, size_t *num_segments,
+           size_t nelem, void ***addrs, size_t **sizes, size_t *num_segments,
            char **vl_lengths, size_t *vl_lengths_nused, void ***free_list,
            size_t *free_list_len);
 H5_DLL int H5VL_iod_create_segments_recv(char *buf, H5VL_iod_type_info_t *type_info,
-           size_t nelem, hg_bulk_segment_t **segments, size_t *num_segments,
+           size_t nelem, void ***addrs, size_t **sizes, size_t *num_segments,
            char *vl_lengths, size_t vl_lengths_nused, void ***free_list,
            size_t *free_list_len);
 H5_DLL void H5VL_iod_free_list_free(void **free_list, size_t free_list_len);
 
 #ifdef H5_HAVE_EFF
 
+H5_DLL void EFF__mercury_register_callbacks(void);
+
+#ifdef H5_HAVE_INDEXING
+H5_DLL int H5VL_iod_server_dset_set_index_info(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_get_index_info(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_remove_index_info(hg_handle_t handle);
+#endif
+
+H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_eff_finalize(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_analysis_execute(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_file_create(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_file_open(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_file_close(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_create(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_open(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_read(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_write(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_exists(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_rename(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_remove(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_close(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_group_create(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_group_open(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_group_close(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_map_create(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_map_open(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_map_set(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_map_get(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_map_get_count(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_map_exists(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_map_delete(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_map_close(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_create(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_open(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_read(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_get_vl_size(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_write(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_set_extent(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_close(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dtype_commit(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dtype_open(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dtype_close(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_link_create(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_link_move(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_link_exists(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_link_get_info(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_link_get_val(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_link_remove(hg_handle_t handle);
+//H5_DLL int H5VL_iod_server_link_iterate(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_open_by_token(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_open(hg_handle_t handle);
+//H5_DLL int H5VL_iod_server_object_copy(hg_handle_t handle);
+//H5_DLL int H5VL_iod_server_object_visit(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_exists(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_set_comment(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_get_comment(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_get_info(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_rcxt_acquire(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_rcxt_release(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_rcxt_persist(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_rcxt_snapshot(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_trans_start(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_trans_finish(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_trans_set_dependency(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_trans_skip(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_trans_abort(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_prefetch(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_evict(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_view_create(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_cancel_op(hg_handle_t handle);
+
 H5_DLL uint64_t H5_checksum_crc64(const void *buf, size_t buf_size);
-H5_DLL uint64_t H5_checksum_crc64_segments(hg_bulk_segment_t *segments, size_t count);
+H5_DLL uint64_t H5_checksum_crc64_segments(void **addrs, size_t *sizes, size_t count);
 H5_DLL uint64_t H5_checksum_crc64_fragments(void **buf, size_t *buf_size, size_t count);
 
 H5_DLL int hg_proc_ret_t(hg_proc_t proc, void *data);
@@ -746,7 +890,9 @@ MERCURY_GEN_PROC(evict_in_t,
                  //((hid_t)(apl_id))
                  ((int32_t)(obj_type))
                  ((iod_handles_t)(iod_oh))
-                 ((iod_obj_id_t)(iod_id)))
+                 ((iod_obj_id_t)(iod_id))
+                 ((iod_obj_id_t)(mdkv_id))
+                 ((iod_obj_id_t)(attrkv_id)))
 
 MERCURY_GEN_PROC(view_create_in_t, 
                  ((axe_t)(axe_info))

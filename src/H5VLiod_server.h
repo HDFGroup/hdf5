@@ -110,82 +110,10 @@ extern hg_id_t H5VL_EFF_ANALYSIS_FARM_TRANSFER;
 typedef herr_t (*H5VL_operator_t)(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
                                   H5I_type_t obj_type, uint32_t cs_scope, void *operator_data);
 
-H5_DLL void EFF__mercury_register_callbacks(void);
-
-H5_DLL int H5VL_iod_server_analysis_execute(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_analysis_farm(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_analysis_transfer(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_container_open(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_container_close(hg_handle_t handle);
-
-#ifdef H5_HAVE_INDEXING
-H5_DLL int H5VL_iod_server_dset_set_index_info(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_get_index_info(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_remove_index_info(hg_handle_t handle);
-#endif
-
-H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_eff_finalize(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_file_create(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_file_open(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_file_close(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_attr_create(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_attr_open(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_attr_read(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_attr_write(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_attr_exists(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_attr_rename(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_attr_remove(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_attr_close(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_group_create(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_group_open(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_group_close(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_map_create(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_map_open(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_map_set(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_map_get(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_map_get_count(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_map_exists(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_map_delete(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_map_close(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_create(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_open(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_read(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_get_vl_size(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_write(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_set_extent(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_close(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_dtype_commit(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_dtype_open(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_dtype_close(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_cancel_op(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_link_create(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_link_move(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_link_exists(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_link_get_info(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_link_get_val(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_link_remove(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_link_iterate(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_object_open_by_token(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_object_open(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_object_copy(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_object_visit(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_object_exists(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_object_set_comment(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_object_get_comment(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_object_get_info(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_rcxt_acquire(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_rcxt_release(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_rcxt_persist(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_rcxt_snapshot(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_trans_start(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_trans_finish(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_trans_set_dependency(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_trans_skip(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_trans_abort(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_prefetch(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_evict(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_view_create(hg_handle_t handle);
 
 H5_DLL void H5VL_iod_server_analysis_execute_cb(AXE_engine_t axe_engine, 
                                                 size_t num_n_parents, AXE_task_t n_parents[], 

@@ -74,12 +74,12 @@ static int H5VL_iod_cmpd_qsort_cb(const void *_memb1, const void *_memb2);
 static int H5VL_iod_get_type_info_helper(hid_t type_id,
     H5VL_iod_type_info_t *type_info, size_t offset, size_t *vls_nalloc);
 static int H5VL_iod_cs_send_helper(char *buf, H5VL_iod_type_info_t *type_info,
-    size_t nelem, hg_bulk_segment_t **segments, size_t *num_segments,
+    size_t nelem, void ***addrs, size_t **sizes, size_t *num_segments,
     size_t *segments_nalloc, char **vl_lengths, size_t *vl_lengths_nused,
     size_t *vl_lengths_nalloc, void ***free_list, size_t *free_list_len,
     size_t *free_list_nalloc);
 static int H5VL_iod_cs_recv_helper(char *buf, H5VL_iod_type_info_t *type_info,
-    size_t nelem, hg_bulk_segment_t **segments, size_t *num_segments,
+    size_t nelem, void ***addrs, size_t **sizes, size_t *num_segments,
     size_t *segments_nalloc, char *vl_lengths, size_t *vl_lengths_loc,
     size_t vl_lengths_nused, void ***free_list, size_t *free_list_len,
     size_t *free_list_nalloc);
@@ -104,7 +104,6 @@ static int H5VL_iod_cs_recv_helper(char *buf, H5VL_iod_type_info_t *type_info,
             (NALLOC) = _tmp_nalloc; \
         } /* end if */ \
     } while(0)
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_iod_cmpd_qsort_cb
@@ -503,7 +502,7 @@ H5VL_iod_type_info_reset(H5VL_iod_type_info_t *type_info)
  */
 static int
 H5VL_iod_cs_send_helper(char *buf, H5VL_iod_type_info_t *type_info,
-    size_t nelem, hg_bulk_segment_t **segments, size_t *num_segments,
+    size_t nelem, void ***addrs, size_t **sizes, size_t *num_segments,
     size_t *segments_nalloc, char **vl_lengths, size_t *vl_lengths_nused,
     size_t *vl_lengths_nalloc, void ***free_list, size_t *free_list_len,
     size_t *free_list_nalloc)
@@ -535,8 +534,22 @@ H5VL_iod_cs_send_helper(char *buf, H5VL_iod_type_info_t *type_info,
                     if(wrapped)
                         wrapped = FALSE;
                     else {
-                        /* Add fixed-length segment to segments array */
-                        H5VL_IOD_ARR_ADD(hg_bulk_segment_t, *segments, *num_segments, *segments_nalloc, 256);
+                        /* Add segment to segments array */
+                        if(*segments_nalloc == *num_segments) {
+                            size_t tmp_nalloc;
+
+                            tmp_nalloc = (*num_segments) ? (*num_segments) * 2 : (256);
+
+                            if(NULL == (*addrs = (void **)realloc
+                                        (*addrs, tmp_nalloc * sizeof(void *))))
+                                ERROR("failed to reallocate array");
+
+                            if(NULL == (*sizes = (size_t *)realloc
+                                        (*sizes, tmp_nalloc * sizeof(size_t))))
+                                ERROR("failed to reallocate array");
+
+                            *segments_nalloc = tmp_nalloc;
+                        } /* end if */
 
                         /* Check if we can wrap this segment */
                         if((j == (type_info->num_fl_spans - 1)) && wrappable
@@ -548,8 +561,9 @@ H5VL_iod_cs_send_helper(char *buf, H5VL_iod_type_info_t *type_info,
                             span_size = type_info->fl_spans[j].size;
 
                         /* Add segment */
-                        (*segments)[*num_segments].address = (hg_ptr_t)(buf + (i * type_info->size) + type_info->fl_spans[j].offset);
-                        (*segments)[*num_segments].size = span_size;
+                        (*addrs)[*num_segments] = (void *)(buf + (i * type_info->size) + 
+                                                           type_info->fl_spans[j].offset);
+                        (*sizes)[*num_segments] = span_size;
                         (*num_segments)++;
                     } /* end else */
         } /* end if */
@@ -579,7 +593,10 @@ H5VL_iod_cs_send_helper(char *buf, H5VL_iod_type_info_t *type_info,
                         } /* end if */
 
                         /* Recurse into vlen data */
-                        if(H5VL_iod_cs_send_helper((char *)vl.p, type_info->vls[j].base_type, vl.len, segments, num_segments, segments_nalloc, vl_lengths, vl_lengths_nused, vl_lengths_nalloc, free_list, free_list_len, free_list_nalloc) < 0)
+                        if(H5VL_iod_cs_send_helper((char *)vl.p, type_info->vls[j].base_type, 
+                                                   vl.len, addrs, sizes, num_segments, segments_nalloc, 
+                                                   vl_lengths, vl_lengths_nused, vl_lengths_nalloc, 
+                                                   free_list, free_list_len, free_list_nalloc) < 0)
                             ERROR("failed to build segments");
                     } /* end if */
                 } /* end if */
@@ -618,10 +635,26 @@ H5VL_iod_cs_send_helper(char *buf, H5VL_iod_type_info_t *type_info,
                          * include null terminator in segment length so it is not
                          * transmitted. */
                         if(vl_s_len > 1) {
-                            H5VL_IOD_ARR_ADD(hg_bulk_segment_t, *segments, *num_segments, *segments_nalloc, 256);
+                            /* Add segment to segments array */
+                            if(*segments_nalloc == *num_segments) {
+                                size_t tmp_nalloc;
 
-                            (*segments)[*num_segments].address = (hg_ptr_t)vl_s;
-                            (*segments)[*num_segments].size = vl_s_len - 1;
+                                tmp_nalloc = (*num_segments) ? (*num_segments) * 2 : (256);
+
+                                if(NULL == (*addrs = (void **)realloc
+                                            (*addrs, tmp_nalloc * sizeof(void *))))
+                                    ERROR("failed to reallocate array");
+
+                                if(NULL == (*sizes = (size_t *)realloc
+                                            (*sizes, tmp_nalloc * sizeof(size_t))))
+                                    ERROR("failed to reallocate array");
+
+                                *segments_nalloc = tmp_nalloc;
+                            } /* end if */
+
+                            /* Add segment */
+                            (*addrs)[*num_segments] = (void *)vl_s;
+                            (*sizes)[*num_segments] = vl_s_len - 1;
                             (*num_segments)++;
                         } /* end if */
                     } /* end if */
@@ -629,10 +662,25 @@ H5VL_iod_cs_send_helper(char *buf, H5VL_iod_type_info_t *type_info,
     } /* end if */
     else {
         /* No vlens, just add entire buffer to segments array */
-        H5VL_IOD_ARR_ADD(hg_bulk_segment_t, *segments, *num_segments, *segments_nalloc, 256);
+        if(*segments_nalloc == *num_segments) {
+            size_t tmp_nalloc;
 
-        (*segments)[*num_segments].address = (hg_ptr_t)buf;
-        (*segments)[*num_segments].size = nelem * type_info->size;
+            tmp_nalloc = (*num_segments) ? (*num_segments) * 2 : (256);
+
+            if(NULL == (*addrs = (void **)realloc
+                        (*addrs, tmp_nalloc * sizeof(void *))))
+                ERROR("failed to reallocate array");
+
+            if(NULL == (*sizes = (size_t *)realloc
+                        (*sizes, tmp_nalloc * sizeof(size_t))))
+                ERROR("failed to reallocate array");
+
+            *segments_nalloc = tmp_nalloc;
+        } /* end if */
+
+        /* Add segment */
+        (*addrs)[*num_segments] = (void *)buf;
+        (*sizes)[*num_segments] = nelem * type_info->size;
         (*num_segments)++;
     } /* end else */
 
@@ -659,7 +707,7 @@ error:
  */
 int
 H5VL_iod_create_segments_send(char *buf, H5VL_iod_type_info_t *type_info,
-    size_t nelem, hg_bulk_segment_t **segments, size_t *num_segments,
+    size_t nelem, void ***addrs, size_t **sizes, size_t *num_segments,
     char **vl_lengths, size_t *vl_lengths_size, void ***free_list,
     size_t *free_list_len)
 {
@@ -671,8 +719,6 @@ H5VL_iod_create_segments_send(char *buf, H5VL_iod_type_info_t *type_info,
     assert(type_info);
     assert(type_info->vls);
     assert(nelem > 0);
-    assert(segments);
-    assert(!*segments);
     assert(num_segments);
     assert(*num_segments == 0);
     assert(vl_lengths);
@@ -684,7 +730,9 @@ H5VL_iod_create_segments_send(char *buf, H5VL_iod_type_info_t *type_info,
     assert(!free_list_len || (*free_list_len == 0));
 
     /* Call the real (recursive) function */
-    if(H5VL_iod_cs_send_helper(buf, type_info, nelem, segments, num_segments, &segments_nalloc, vl_lengths, vl_lengths_size, &vl_lengths_nalloc, free_list, free_list_len, &free_list_nalloc) < 0)
+    if(H5VL_iod_cs_send_helper(buf, type_info, nelem, addrs, sizes, num_segments, &segments_nalloc, 
+                               vl_lengths, vl_lengths_size, &vl_lengths_nalloc, 
+                               free_list, free_list_len, &free_list_nalloc) < 0)
         ERROR("failed to build segments");
 
     return(SUCCEED);
@@ -711,7 +759,7 @@ error:
  */
 static int
 H5VL_iod_cs_recv_helper(char *buf, H5VL_iod_type_info_t *type_info,
-    size_t nelem, hg_bulk_segment_t **segments, size_t *num_segments,
+    size_t nelem, void ***addrs, size_t **sizes, size_t *num_segments,
     size_t *segments_nalloc, char *vl_lengths, size_t *vl_lengths_loc,
     size_t vl_lengths_size, void ***free_list, size_t *free_list_len,
     size_t *free_list_nalloc)
@@ -744,7 +792,21 @@ H5VL_iod_cs_recv_helper(char *buf, H5VL_iod_type_info_t *type_info,
                         wrapped = FALSE;
                     else {
                         /* Add fixed-length segment to segments array */
-                        H5VL_IOD_ARR_ADD(hg_bulk_segment_t, *segments, *num_segments, *segments_nalloc, 256);
+                        if(*segments_nalloc == *num_segments) {
+                            size_t tmp_nalloc;
+
+                            tmp_nalloc = (*num_segments) ? (*num_segments) * 2 : (256);
+
+                            if(NULL == (*addrs = (void **)realloc
+                                        (*addrs, tmp_nalloc * sizeof(void *))))
+                                ERROR("failed to reallocate array");
+
+                            if(NULL == (*sizes = (size_t *)realloc
+                                        (*sizes, tmp_nalloc * sizeof(size_t))))
+                                ERROR("failed to reallocate array");
+
+                            *segments_nalloc = tmp_nalloc;
+                        } /* end if */
 
                         /* Check if we can wrap this segment */
                         if((j == (type_info->num_fl_spans - 1)) && wrappable
@@ -756,8 +818,9 @@ H5VL_iod_cs_recv_helper(char *buf, H5VL_iod_type_info_t *type_info,
                             span_size = type_info->fl_spans[j].size;
 
                         /* Add segment */
-                        (*segments)[*num_segments].address = (hg_ptr_t)(buf + (i * type_info->size) + type_info->fl_spans[j].offset);
-                        (*segments)[*num_segments].size = span_size;
+                        (*addrs)[*num_segments] = (void *)(buf + (i * type_info->size) + 
+                                                           type_info->fl_spans[j].offset);
+                        (*sizes)[*num_segments] = span_size;
                         (*num_segments)++;
                     } /* end else */
         } /* end if */
@@ -793,7 +856,11 @@ H5VL_iod_cs_recv_helper(char *buf, H5VL_iod_type_info_t *type_info,
                         } /* end if */
 
                         /* Recurse into vlen data */
-                        if(H5VL_iod_cs_recv_helper(vl->p, type_info->vls[j].base_type, (size_t)vl_length, segments, num_segments, segments_nalloc, vl_lengths, vl_lengths_loc, vl_lengths_size, free_list, free_list_len, free_list_nalloc) < 0)
+                        if(H5VL_iod_cs_recv_helper(vl->p, type_info->vls[j].base_type, 
+                                                   (size_t)vl_length, addrs, sizes, 
+                                                   num_segments, segments_nalloc, 
+                                                   vl_lengths, vl_lengths_loc, vl_lengths_size, 
+                                                   free_list, free_list_len, free_list_nalloc) < 0)
                             ERROR("failed to build segments");
                     } /* end if */
                 } /* end if */
@@ -826,10 +893,26 @@ H5VL_iod_cs_recv_helper(char *buf, H5VL_iod_type_info_t *type_info,
                         /* Add vl string to segments array, if length is greater
                          * than 1 (including null terminator) */
                         if(vl_s_len > 1) {
-                            H5VL_IOD_ARR_ADD(hg_bulk_segment_t, *segments, *num_segments, *segments_nalloc, 256);
+                            /* Add segment to segments array */
+                            if(*segments_nalloc == *num_segments) {
+                                size_t tmp_nalloc;
 
-                            (*segments)[*num_segments].address = (hg_ptr_t)*vl_s;
-                            (*segments)[*num_segments].size = (size_t)vl_s_len - 1;
+                                tmp_nalloc = (*num_segments) ? (*num_segments) * 2 : (256);
+
+                                if(NULL == (*addrs = (void **)realloc
+                                            (*addrs, tmp_nalloc * sizeof(void *))))
+                                    ERROR("failed to reallocate array");
+
+                                if(NULL == (*sizes = (size_t *)realloc
+                                            (*sizes, tmp_nalloc * sizeof(size_t))))
+                                    ERROR("failed to reallocate array");
+
+                                *segments_nalloc = tmp_nalloc;
+                            } /* end if */
+
+                            /* Add segment */
+                            (*addrs)[*num_segments] = (void *)*vl_s;
+                            (*sizes)[*num_segments] = vl_s_len - 1;
                             (*num_segments)++;
                         } /* end if */
 
@@ -840,10 +923,25 @@ H5VL_iod_cs_recv_helper(char *buf, H5VL_iod_type_info_t *type_info,
     } /* end if */
     else {
         /* No vlens, just add entire buffer to segments array */
-        H5VL_IOD_ARR_ADD(hg_bulk_segment_t, *segments, *num_segments, *segments_nalloc, 256);
+        if(*segments_nalloc == *num_segments) {
+            size_t tmp_nalloc;
 
-        (*segments)[*num_segments].address = (hg_ptr_t)buf;
-        (*segments)[*num_segments].size = nelem * type_info->size;
+            tmp_nalloc = (*num_segments) ? (*num_segments) * 2 : (256);
+
+            if(NULL == (*addrs = (void **)realloc
+                        (*addrs, tmp_nalloc * sizeof(void *))))
+                ERROR("failed to reallocate array");
+
+            if(NULL == (*sizes = (size_t *)realloc
+                        (*sizes, tmp_nalloc * sizeof(size_t))))
+                ERROR("failed to reallocate array");
+
+            *segments_nalloc = tmp_nalloc;
+        } /* end if */
+
+        /* Add segment */
+        (*addrs)[*num_segments] = (void *)buf;
+        (*sizes)[*num_segments] = nelem * type_info->size;
         (*num_segments)++;
     } /* end else */
 
@@ -871,7 +969,7 @@ error:
  */
 int
 H5VL_iod_create_segments_recv(char *buf, H5VL_iod_type_info_t *type_info,
-    size_t nelem, hg_bulk_segment_t **segments, size_t *num_segments,
+    size_t nelem, void ***addrs, size_t **sizes, size_t *num_segments,
     char *vl_lengths, size_t vl_lengths_size, void ***free_list,
     size_t *free_list_len)
 {
@@ -883,8 +981,6 @@ H5VL_iod_create_segments_recv(char *buf, H5VL_iod_type_info_t *type_info,
     assert(type_info);
     assert(type_info->vls);
     assert(nelem > 0);
-    assert(segments);
-    assert(!*segments);
     assert(num_segments);
     assert(*num_segments == 0);
     assert(vl_lengths);
@@ -894,7 +990,9 @@ H5VL_iod_create_segments_recv(char *buf, H5VL_iod_type_info_t *type_info,
     assert(!free_list_len || (*free_list_len == 0));
 
     /* Call the real (recursive) function */
-    if(H5VL_iod_cs_recv_helper(buf, type_info, nelem, segments, num_segments, &segments_nalloc, vl_lengths, &vl_lengths_loc, vl_lengths_size, free_list, free_list_len, &free_list_nalloc) < 0)
+    if(H5VL_iod_cs_recv_helper(buf, type_info, nelem, addrs, sizes, num_segments, &segments_nalloc, 
+                               vl_lengths, &vl_lengths_loc, vl_lengths_size, 
+                               free_list, free_list_len, &free_list_nalloc) < 0)
         ERROR("failed to build segments");
 
     return(SUCCEED);
@@ -957,7 +1055,7 @@ H5_checksum_crc64(const void *buf, size_t buf_size)
 }
 
 uint64_t 
-H5_checksum_crc64_segments(hg_bulk_segment_t *segments, size_t count)
+H5_checksum_crc64_segments(void **addrs, size_t *sizes, size_t count)
 {
     const char *hash_method = "crc64";
     size_t hash_size;
@@ -970,7 +1068,7 @@ H5_checksum_crc64_segments(hg_bulk_segment_t *segments, size_t count)
 
     /* Update checksum */
     for (i = 0; i < count; i++) {
-        mchecksum_update(checksum, segments[i].address, segments[i].size);
+        mchecksum_update(checksum, addrs[i], sizes[i]);
     }
 
     /* Get size of checksum */
@@ -1017,4 +1115,169 @@ H5_checksum_crc64_fragments(void **buf, size_t *buf_size, size_t count)
 
     return ret_value;
 }
+
+void 
+EFF__mercury_register_callbacks(void)
+{
+    /* Register function and encoding/decoding functions */
+    H5VL_EFF_INIT_ID     = MERCURY_REGISTER("eff_init", eff_init_in_t, ret_t,
+                                            H5VL_iod_server_eff_init);
+    H5VL_EFF_FINALIZE_ID = MERCURY_REGISTER("eff_finalize", ret_t, ret_t,
+                                            H5VL_iod_server_eff_finalize);
+
+    H5VL_ANALYSIS_EXECUTE_ID = MERCURY_REGISTER("analysis_execute", 
+                                                analysis_execute_in_t, 
+                                                analysis_execute_out_t,
+                                                H5VL_iod_server_analysis_execute);
+
+    H5VL_FILE_CREATE_ID = MERCURY_REGISTER("file_create", file_create_in_t, file_create_out_t,
+                                           H5VL_iod_server_file_create);
+    H5VL_FILE_OPEN_ID   = MERCURY_REGISTER("file_open", file_open_in_t, file_open_out_t,
+                                           H5VL_iod_server_file_open);
+    H5VL_FILE_CLOSE_ID  = MERCURY_REGISTER("file_close", file_close_in_t, ret_t,
+                                           H5VL_iod_server_file_close);
+
+    H5VL_ATTR_CREATE_ID = MERCURY_REGISTER("attr_create", attr_create_in_t, attr_create_out_t,
+                                           H5VL_iod_server_attr_create);
+    H5VL_ATTR_OPEN_ID   = MERCURY_REGISTER("attr_open", attr_open_in_t, attr_open_out_t,
+                                           H5VL_iod_server_attr_open);
+    H5VL_ATTR_READ_ID   = MERCURY_REGISTER("attr_read", attr_io_in_t, ret_t,
+                                           H5VL_iod_server_attr_read);
+    H5VL_ATTR_WRITE_ID  = MERCURY_REGISTER("attr_write", attr_io_in_t, ret_t,
+                                           H5VL_iod_server_attr_write);
+    H5VL_ATTR_EXISTS_ID = MERCURY_REGISTER("attr_exists", attr_op_in_t, htri_t,
+                                           H5VL_iod_server_attr_exists);
+    //H5VL_ATTR_ITERATE_ID = MERCURY_REGISTER("attr_iterate", attr_op_in_t, ret_t);
+    H5VL_ATTR_RENAME_ID = MERCURY_REGISTER("attr_rename", attr_rename_in_t, ret_t,
+                                           H5VL_iod_server_attr_rename);
+    H5VL_ATTR_REMOVE_ID = MERCURY_REGISTER("attr_remove", attr_op_in_t, ret_t,
+                                           H5VL_iod_server_attr_remove);
+    H5VL_ATTR_CLOSE_ID  = MERCURY_REGISTER("attr_close", attr_close_in_t, ret_t,
+                                           H5VL_iod_server_attr_close);
+
+    H5VL_GROUP_CREATE_ID = MERCURY_REGISTER("group_create", group_create_in_t, group_create_out_t,
+                                            H5VL_iod_server_group_create);
+    H5VL_GROUP_OPEN_ID   = MERCURY_REGISTER("group_open", group_open_in_t, group_open_out_t,
+                                            H5VL_iod_server_group_open);
+    H5VL_GROUP_CLOSE_ID  = MERCURY_REGISTER("group_close", group_close_in_t, ret_t,
+                                            H5VL_iod_server_group_close);
+
+    H5VL_MAP_CREATE_ID = MERCURY_REGISTER("map_create", map_create_in_t, map_create_out_t,
+                                          H5VL_iod_server_map_create);
+    H5VL_MAP_OPEN_ID   = MERCURY_REGISTER("map_open", map_open_in_t, map_open_out_t,
+                                          H5VL_iod_server_map_open);
+    H5VL_MAP_SET_ID    = MERCURY_REGISTER("map_set", map_set_in_t, ret_t,
+                                          H5VL_iod_server_map_set);
+    H5VL_MAP_GET_ID    = MERCURY_REGISTER("map_get", map_get_in_t, map_get_out_t,
+                                          H5VL_iod_server_map_get);
+    H5VL_MAP_GET_COUNT_ID = MERCURY_REGISTER("map_get_count", map_get_count_in_t, int64_t,
+                                             H5VL_iod_server_map_get_count);
+    //H5VL_MAP_ITERATE_ID   = MERCURY_REGISTER("map_iterate", map_op_in_t, ret_t);
+    H5VL_MAP_EXISTS_ID = MERCURY_REGISTER("map_exists", map_op_in_t, hbool_t,
+                                          H5VL_iod_server_map_exists);
+    H5VL_MAP_DELETE_ID = MERCURY_REGISTER("map_delete", map_op_in_t, ret_t,
+                                          H5VL_iod_server_map_delete);
+    H5VL_MAP_CLOSE_ID  = MERCURY_REGISTER("map_close", map_close_in_t, ret_t,
+                                          H5VL_iod_server_map_close);
+
+    H5VL_DSET_CREATE_ID = MERCURY_REGISTER("dset_create", dset_create_in_t, dset_create_out_t,
+                                           H5VL_iod_server_dset_create);
+    H5VL_DSET_OPEN_ID   = MERCURY_REGISTER("dset_open", dset_open_in_t, dset_open_out_t,
+                                           H5VL_iod_server_dset_open);
+    H5VL_DSET_READ_ID   = MERCURY_REGISTER("dset_read", dset_io_in_t, dset_read_out_t,
+                                           H5VL_iod_server_dset_read);
+    H5VL_DSET_GET_VL_SIZE_ID = MERCURY_REGISTER("dset_get_vl_size", dset_io_in_t, dset_read_out_t,
+                                                H5VL_iod_server_dset_get_vl_size);
+    H5VL_DSET_WRITE_ID  = MERCURY_REGISTER("dset_write", dset_io_in_t, ret_t,
+                                           H5VL_iod_server_dset_write);
+    H5VL_DSET_SET_EXTENT_ID = MERCURY_REGISTER("dset_set_extent", 
+                                               dset_set_extent_in_t, ret_t,
+                                               H5VL_iod_server_dset_set_extent);
+    H5VL_DSET_CLOSE_ID  = MERCURY_REGISTER("dset_close", dset_close_in_t, ret_t,
+                                           H5VL_iod_server_dset_close);
+
+    H5VL_DTYPE_COMMIT_ID = MERCURY_REGISTER("dtype_commit", dtype_commit_in_t, dtype_commit_out_t,
+                                            H5VL_iod_server_dtype_commit);
+    H5VL_DTYPE_OPEN_ID   = MERCURY_REGISTER("dtype_open", dtype_open_in_t, dtype_open_out_t,
+                                            H5VL_iod_server_dtype_open);
+    H5VL_DTYPE_CLOSE_ID  = MERCURY_REGISTER("dtype_close", dtype_close_in_t, ret_t,
+                                            H5VL_iod_server_dtype_close);
+
+    H5VL_LINK_CREATE_ID  = MERCURY_REGISTER("link_create", link_create_in_t, ret_t,
+                                            H5VL_iod_server_link_create);
+    H5VL_LINK_MOVE_ID    = MERCURY_REGISTER("link_move", link_move_in_t, ret_t,
+                                            H5VL_iod_server_link_move);
+    H5VL_LINK_EXISTS_ID  = MERCURY_REGISTER("link_exists", link_op_in_t, htri_t,
+                                            H5VL_iod_server_link_exists);
+    H5VL_LINK_GET_INFO_ID = MERCURY_REGISTER("link_get_info", link_op_in_t, linfo_t,
+                                             H5VL_iod_server_link_get_info);
+    H5VL_LINK_GET_VAL_ID  = MERCURY_REGISTER("link_get_val", link_get_val_in_t, 
+                                             link_get_val_out_t, H5VL_iod_server_link_get_val);
+    //H5VL_LINK_ITERATE_ID = MERCURY_REGISTER("link_iterate", link_op_in_t, ret_t);
+    H5VL_LINK_REMOVE_ID  = MERCURY_REGISTER("link_remove", link_op_in_t, ret_t,
+                                            H5VL_iod_server_link_remove);
+
+    H5VL_OBJECT_OPEN_BY_TOKEN_ID = MERCURY_REGISTER("object_open_by_token", 
+                                                    object_token_in_t, iod_handles_t,
+                                                    H5VL_iod_server_object_open_by_token);
+    H5VL_OBJECT_OPEN_ID   = MERCURY_REGISTER("object_open", object_op_in_t, object_open_out_t,
+                                             H5VL_iod_server_object_open);
+    //H5VL_OBJECT_COPY_ID   = MERCURY_REGISTER("object_copy", object_copy_in_t, ret_t);
+    H5VL_OBJECT_EXISTS_ID = MERCURY_REGISTER("object_exists", object_op_in_t, htri_t,
+                                             H5VL_iod_server_object_exists);
+    //H5VL_OBJECT_VISIT_ID  = MERCURY_REGISTER("object_visit", object_op_in_t, ret_t,);
+    H5VL_OBJECT_SET_COMMENT_ID = MERCURY_REGISTER("set_comment", object_set_comment_in_t, ret_t,
+                                                  H5VL_iod_server_object_set_comment);
+    H5VL_OBJECT_GET_COMMENT_ID = MERCURY_REGISTER("get_comment", object_get_comment_in_t, 
+                                                  object_get_comment_out_t,
+                                                  H5VL_iod_server_object_get_comment);
+    H5VL_OBJECT_GET_INFO_ID = MERCURY_REGISTER("object_get_info", object_op_in_t, oinfo_t,
+                                               H5VL_iod_server_object_get_info);
+
+    H5VL_RC_ACQUIRE_ID      = MERCURY_REGISTER("read_context_acquire", 
+                                               rc_acquire_in_t, rc_acquire_out_t,
+                                               H5VL_iod_server_rcxt_acquire);
+    H5VL_RC_RELEASE_ID      = MERCURY_REGISTER("read_context_release", rc_release_in_t, ret_t,
+                                               H5VL_iod_server_rcxt_release);
+    H5VL_RC_PERSIST_ID      = MERCURY_REGISTER("read_context_persist", rc_persist_in_t, ret_t,
+                                               H5VL_iod_server_rcxt_persist);
+    H5VL_RC_SNAPSHOT_ID     = MERCURY_REGISTER("read_context_snapshot", rc_snapshot_in_t, ret_t,
+                                               H5VL_iod_server_rcxt_snapshot);
+
+    H5VL_TR_START_ID        = MERCURY_REGISTER("transaction_start", tr_start_in_t, ret_t,
+                                               H5VL_iod_server_trans_start);
+    H5VL_TR_FINISH_ID       = MERCURY_REGISTER("transaction_finish", tr_finish_in_t, ret_t,
+                                               H5VL_iod_server_trans_finish);
+    H5VL_TR_SET_DEPEND_ID   = MERCURY_REGISTER("transaction_set_depend",tr_set_depend_in_t, ret_t,
+                                               H5VL_iod_server_trans_set_dependency);
+    H5VL_TR_SKIP_ID         = MERCURY_REGISTER("transaction_skip", tr_skip_in_t, ret_t,
+                                               H5VL_iod_server_trans_skip);
+    H5VL_TR_ABORT_ID        = MERCURY_REGISTER("transaction_abort",tr_abort_in_t, ret_t,
+                                               H5VL_iod_server_trans_abort);
+
+    H5VL_PREFETCH_ID = MERCURY_REGISTER("prefetch", prefetch_in_t, hrpl_t,
+                                        H5VL_iod_server_prefetch);
+    H5VL_EVICT_ID    = MERCURY_REGISTER("evict", evict_in_t, ret_t,
+                                        H5VL_iod_server_evict);
+
+    H5VL_VIEW_CREATE_ID = MERCURY_REGISTER("view_create", view_create_in_t, view_create_out_t,
+                                           H5VL_iod_server_view_create);
+
+#ifdef H5_HAVE_INDEXING
+    H5VL_DSET_SET_INDEX_INFO_ID = MERCURY_REGISTER("dset_set_index_info",
+                                                   dset_set_index_info_in_t, ret_t,
+                                                   H5VL_iod_server_dset_set_index_info);
+    H5VL_DSET_GET_INDEX_INFO_ID = MERCURY_REGISTER("dset_get_index_info",
+                                                   dset_get_index_info_in_t, 
+                                                   dset_get_index_info_out_t,
+                                                   H5VL_iod_server_dset_get_index_info);
+    H5VL_DSET_RM_INDEX_INFO_ID = MERCURY_REGISTER("dset_rm_index_info",
+                                                  dset_rm_index_info_in_t, ret_t,
+                                                  H5VL_iod_server_dset_remove_index_info);
+#endif
+
+    H5VL_CANCEL_OP_ID = MERCURY_REGISTER("cancel_op", uint64_t, uint8_t,
+                                         H5VL_iod_server_cancel_op);
+}
+
 #endif /* H5_HAVE_EFF */

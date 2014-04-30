@@ -808,7 +808,7 @@ int hg_proc_hid_t(hg_proc_t proc, void *data)
     op = hg_proc_get_op(proc);
 
     if (HG_ENCODE == op || HG_FREE == op) {
-        if(FAIL == id)
+        if(FAIL == id || H5P_DEFAULT == id)
             type = H5I_UNINIT;
         else
             type = H5Iget_type(id);

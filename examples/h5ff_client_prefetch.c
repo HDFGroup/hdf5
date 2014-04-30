@@ -217,7 +217,7 @@ int main(int argc, char **argv) {
     did = H5Oopen_ff(gid,"D1", H5P_DEFAULT, rid2);
     assert(did);
     map = H5Oopen_ff(file_id,"MAP1", H5P_DEFAULT, rid2);
-    assert(did);
+    assert(map);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -231,14 +231,17 @@ int main(int argc, char **argv) {
 
         ret = H5Mevict_ff(map, 3, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
+
+        ret = H5Gevict_ff(gid, 3, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
 
     if((my_size > 1 && 1 == my_rank) || 
        (my_size == 1 && 0 == my_rank)) {
-        hid_t mapl_id, tapl_id, dapl_id;
-        hrpl_t map_replica, dt_replica, dset_replica;
+        hid_t mapl_id, tapl_id, dapl_id, gapl_id;
+        hrpl_t map_replica, dt_replica, dset_replica, grp_replica;
 
         /* prefetch objects */
         ret = H5Mprefetch_ff(map, rid2, &map_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL);
@@ -250,6 +253,9 @@ int main(int argc, char **argv) {
         ret = H5Dprefetch_ff(did, rid2, &dset_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
         printf("prefetched dataset with replica id %"PRIx64"\n", dset_replica);
+        ret = H5Gprefetch_ff(gid, rid2, &grp_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        printf("prefetched group with replica id %"PRIx64"\n", grp_replica);
 
         /* Read from prefetched Replicas */
 	/* set dxpl to read from replica in BB */
@@ -297,6 +303,13 @@ int main(int argc, char **argv) {
         ret = H5Mevict_ff(map, 3, mapl_id, H5_EVENT_STACK_NULL);
         assert(0 == ret);
         H5Pclose(mapl_id);
+
+        gapl_id = H5Pcreate (H5P_GROUP_ACCESS);
+        ret = H5Pset_evict_replica(gapl_id, grp_replica);
+        assert(0 == ret);
+        ret = H5Gevict_ff(gid, 3, gapl_id, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        H5Pclose(gapl_id);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);

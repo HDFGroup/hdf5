@@ -696,11 +696,6 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                     HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "unable to issue index post_update operation");
             }
 #endif
-
-            if(info->vl_segments) {
-                free(info->vl_segments);
-                info->vl_segments = NULL;
-            }
             if(info->vl_lengths) {
                 free(info->vl_lengths);
                 info->vl_lengths = NULL;
@@ -798,7 +793,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 hid_t rcxt_id;
                 H5RC_t *rc;
                 H5P_genplist_t *plist = NULL;
-                hg_bulk_segment_t *segments = NULL;
+                void **addrs = NULL;
+                size_t *sizes = NULL;
                 size_t num_segments = 0;
                 hg_request_t hg_req;
                 hg_status_t hg_status;
@@ -808,16 +804,16 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
                 /* Create segments from vl lengths */
                 if(H5VL_iod_create_segments_recv((char *)info->buf_ptr, info->type_info, 
-                                                 (size_t)info->nelmts, &segments, &num_segments, 
+                                                 (size_t)info->nelmts, &addrs, &sizes, &num_segments, 
                                                  info->vl_lengths, info->vl_lengths_size, 
                                                  NULL, NULL) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create segments for bulk data transfer");
-                HDassert(segments);
+                HDassert(addrs);
+                HDassert(sizes);
 
                 /* Register non-contiguous memory segments */
-                if(HG_SUCCESS != HG_Bulk_handle_create_segments(segments, num_segments, 
-                                                                HG_BULK_READWRITE, 
-                                                                info->bulk_handle))
+                if(HG_SUCCESS != HG_Bulk_handle_create(num_segments, addrs, sizes,
+                                                       HG_BULK_READWRITE, info->bulk_handle))
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data handle");
 
                 /* get the context ID */
@@ -862,12 +858,20 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                     req->state = H5VL_IOD_COMPLETED;
                 }
 
-                HG_Request_free(hg_req);
-                HG_Bulk_handle_free(*info->bulk_handle);
+                if(addrs) {
+                    free(addrs);
+                    addrs = NULL;
+                }
+                if(sizes) {
+                    free(sizes);
+                    sizes = NULL;
+                }
 
-                if(segments) {
-                    free(segments);
-                    segments = NULL;
+                HG_Request_free(hg_req);
+                if(HG_SUCCESS != HG_Bulk_handle_free(*info->bulk_handle)) {
+                    HERROR(H5E_FUNC, H5E_CANTINIT, "failed to free attribute bulk handle\n");
+                    req->status = H5ES_STATUS_FAIL;
+                    req->state = H5VL_IOD_COMPLETED;
                 }
             }
 
@@ -875,6 +879,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 HDfree(info->vl_lengths);
                 info->vl_lengths = NULL;
             }
+
             if(H5Sclose(info->file_space_id) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
             if(H5Tclose(info->mem_type_id) < 0)
@@ -1061,7 +1066,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                             HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate VL recieve buffer");
 
                         /* Register memory with bulk_handle */
-                        if(HG_SUCCESS != HG_Bulk_handle_create(value_buf, output->val_size, 
+                        if(HG_SUCCESS != HG_Bulk_handle_create(1, &value_buf, &output->val_size, 
                                                                HG_BULK_READWRITE, info->value_handle))
                             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
 
@@ -1429,7 +1434,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     case HG_LINK_MOVE:
     case HG_LINK_REMOVE:
     case HG_OBJECT_SET_COMMENT:
-    case HG_OBJECT_COPY:
+    //case HG_OBJECT_COPY:
         {
             int *status = (int *)req->data;
 
@@ -1751,9 +1756,9 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             break;
         }
 #endif /* H5_HAVE_INDEXING */
-    case HG_LINK_ITERATE:
-    case HG_OBJECT_VISIT:
-    case HG_MAP_ITERATE:
+        //case HG_LINK_ITERATE:
+        //case HG_OBJECT_VISIT:
+        //case HG_MAP_ITERATE:
     default:
         req->status = H5ES_STATUS_FAIL;
         req->state = H5VL_IOD_COMPLETED;
@@ -1809,10 +1814,6 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 fprintf(stderr, "failed to free bulk handle\n");
             }
 
-            if(info->vl_segments) {
-                HDfree(info->vl_segments);
-                info->vl_segments = NULL;
-            }
             if(info->vl_lengths) {
                 HDfree(info->vl_lengths);
                 info->vl_lengths = NULL;
@@ -2114,7 +2115,7 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     case HG_LINK_MOVE:
     case HG_LINK_REMOVE:
     case HG_OBJECT_SET_COMMENT:
-    case HG_OBJECT_COPY:
+    //case HG_OBJECT_COPY:
         {
             int *status = (int *)req->data;
 
@@ -2197,9 +2198,9 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         req->data = NULL;
         H5VL_iod_request_delete(file, req);
         break;
-    case HG_LINK_ITERATE:
-    case HG_OBJECT_VISIT:
-    case HG_MAP_ITERATE:
+        //case HG_LINK_ITERATE:
+        //case HG_OBJECT_VISIT:
+        //case HG_MAP_ITERATE:
     default:
         H5VL_iod_request_delete(file, req);
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Request Type not supported");
@@ -2430,7 +2431,6 @@ H5VL_iod_pre_write(hid_t type_id, H5S_t *space, const void *buf,
                    /*out*/uint64_t *_vlen_checksum, 
                    /*out*/hg_bulk_t *bulk_handle,
                    /*out*/hg_bulk_t *vl_len_bulk_handle,
-                   /*out*/hg_bulk_segment_t **_vl_segments,
                    /*out*/char **_vl_lengths)
 {
     hsize_t buf_size = 0;
@@ -2448,38 +2448,41 @@ H5VL_iod_pre_write(hid_t type_id, H5S_t *space, const void *buf,
     nelmts = (size_t)H5S_GET_SELECT_NPOINTS(space);
 
     if(type_info.vls) {
-        hg_bulk_segment_t *segments = NULL;
         size_t num_segments = 0;
         char *vl_lengths = NULL;
+        void **addrs = NULL;
+        size_t *sizes = NULL;
         size_t vl_lengths_size = 0;
 
-        HDassert(_vl_segments);
         HDassert(_vl_lengths);
 
         /* Create segments and vl lengths */
-        if(H5VL_iod_create_segments_send((char *)buf, &type_info, nelmts, &segments, &num_segments, 
+        if(H5VL_iod_create_segments_send((char *)buf, &type_info, nelmts, 
+                                         &addrs, &sizes, &num_segments, 
                                          &vl_lengths, &vl_lengths_size, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create segments for bulk data transfer");
-        HDassert(segments);
         HDassert(vl_lengths);
+        HDassert(addrs);
+        HDassert(sizes);
 
         /* Register vl lengths */
-        if(HG_SUCCESS != HG_Bulk_handle_create(vl_lengths, vl_lengths_size, 
+        if(HG_SUCCESS != HG_Bulk_handle_create(1, &vl_lengths, &vl_lengths_size, 
                                                HG_BULK_READ_ONLY, vl_len_bulk_handle))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create Bulk Data Handle for vlen lengths");
 
         /* Register non-contiguous memory segments */
-        if(HG_SUCCESS != HG_Bulk_handle_create_segments(segments, num_segments, 
-                                                        HG_BULK_READ_ONLY, bulk_handle))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create Bulk Data handle");
+        if(HG_SUCCESS != HG_Bulk_handle_create(num_segments, addrs, sizes,
+                                               HG_BULK_READ_ONLY, bulk_handle))
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data handle");
 
         if(_checksum)
-            checksum = H5_checksum_crc64_segments(segments, num_segments);
+            checksum = H5_checksum_crc64_segments(addrs, sizes, num_segments);
         if(_vlen_checksum)
             *_vlen_checksum = H5_checksum_crc64(vl_lengths, vl_lengths_size);
 
-        *_vl_segments = segments;
         *_vl_lengths = vl_lengths;
+        free(addrs); addrs = NULL;
+        free(sizes); sizes = NULL;
     }
     else {
         H5T_t *dt = NULL;
@@ -2500,7 +2503,7 @@ H5VL_iod_pre_write(hid_t type_id, H5S_t *space, const void *buf,
         /* If the memory selection is contiguous, create simple HG Bulk Handle */
         if(H5S_select_is_contiguous(space)) {
             /* Register memory with bulk_handle */
-            if(HG_SUCCESS != HG_Bulk_handle_create(buf, (size_t)buf_size, 
+            if(HG_SUCCESS != HG_Bulk_handle_create(1, &buf, &buf_size, 
                                                    HG_BULK_READ_ONLY, bulk_handle))
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
         }
@@ -2511,7 +2514,6 @@ H5VL_iod_pre_write(hid_t type_id, H5S_t *space, const void *buf,
             size_t *len = NULL; /* array that contains the length of a contiguous block at each address */
             size_t count = 0; /* number of offset/length entries in selection */
             size_t i;
-            hg_bulk_segment_t *bulk_segments = NULL;
             uint8_t *start_offset = (uint8_t *) buf;
 
             /* generate the offsets/lengths pair arrays from the memory dataspace selection */
@@ -2519,21 +2521,16 @@ H5VL_iod_pre_write(hid_t type_id, H5S_t *space, const void *buf,
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't retrieve offets/lengths of memory space");
 
             /* Register memory with segmented HG handle */
-            bulk_segments = (hg_bulk_segment_t *)malloc(count * sizeof(hg_bulk_segment_t));
             for (i = 0; i < count ; i++) {
-                bulk_segments[i].address = (void *)(start_offset + off[i]);
-                bulk_segments[i].size = len[i];
+                off[i] = start_offset + off[i];
             }
 
             /* create Bulk handle */
-            if (HG_SUCCESS != HG_Bulk_handle_create_segments(bulk_segments, count, 
-                                                             HG_BULK_READ_ONLY, bulk_handle))
+            if (HG_SUCCESS != HG_Bulk_handle_create(count, off, len, HG_BULK_READ_ONLY, bulk_handle))
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
 
             /* cleanup */
             if(count) {
-                free(bulk_segments);
-                bulk_segments = NULL;
                 free(len);
                 len = NULL;
                 free(off);
@@ -2588,7 +2585,7 @@ H5VL_iod_pre_read(hid_t type_id, H5S_t *space, const void *buf, hssize_t nelmts,
     /* If the memory selection is contiguous, create simple HG Bulk Handle */
     if(H5S_select_is_contiguous(space)) {
         /* Register memory with bulk_handle */
-        if(HG_SUCCESS != HG_Bulk_handle_create(buf, buf_size, 
+        if(HG_SUCCESS != HG_Bulk_handle_create(1, &buf, &buf_size, 
                                                HG_BULK_READWRITE, bulk_handle))
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
     }
@@ -2599,7 +2596,6 @@ H5VL_iod_pre_read(hid_t type_id, H5S_t *space, const void *buf, hssize_t nelmts,
         size_t *len = NULL; /* array that contains the length of a contiguous block at each address */
         size_t count = 0; /* number of offset/length entries in selection */
         size_t i;
-        hg_bulk_segment_t *bulk_segments = NULL;
         uint8_t *start_offset = (uint8_t *) buf;
 
         /* generate the offsets/lengths pair arrays from the memory dataspace selection */
@@ -2607,21 +2603,16 @@ H5VL_iod_pre_read(hid_t type_id, H5S_t *space, const void *buf, hssize_t nelmts,
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't retrieve offets/lengths of memory space");
 
         /* Register memory with segmented HG handle */
-        bulk_segments = (hg_bulk_segment_t *)malloc(count * sizeof(hg_bulk_segment_t));
         for (i = 0; i < count ; i++) {
-            bulk_segments[i].address = (void *)(start_offset + off[i]);
-            bulk_segments[i].size = len[i];
+            off[i] = start_offset + off[i];
         }
 
         /* create Bulk handle */
-        if (HG_SUCCESS != HG_Bulk_handle_create_segments(bulk_segments, count, 
-                                                         HG_BULK_READWRITE, bulk_handle))
+        if (HG_SUCCESS != HG_Bulk_handle_create(count, off, len, HG_BULK_READWRITE, bulk_handle))
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
 
         /* cleanup */
         if(count) {
-            free(bulk_segments);
-            bulk_segments = NULL;
             free(len);
             len = NULL;
             free(off);

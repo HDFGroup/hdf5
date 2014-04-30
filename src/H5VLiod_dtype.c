@@ -297,11 +297,13 @@ done:
         obj_create_hint = NULL;
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (dtype_commit_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
+
     last_comp = (char *)H5MM_xfree(last_comp);
     free(buf);
-
 } /* end H5VL_iod_server_dtype_commit_cb() */
 
 
@@ -348,6 +350,9 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     int step = 0;
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
+
+    output.tcpl_id = FAIL;
+    output.type_id = FAIL;
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start datatype open %s at (OH %"PRIu64" ID %"PRIx64")\n", 
@@ -464,6 +469,11 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
+    if(FAIL != output.type_id)
+        H5Tclose(output.type_id);
+    if(FAIL != output.tcpl_id)
+        H5Pclose(output.tcpl_id);
+
     if(ret_value < 0) {
         output.iod_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.iod_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
@@ -483,9 +493,10 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (dtype_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
-
 } /* end H5VL_iod_server_dtype_open_cb() */
 
 
@@ -537,6 +548,8 @@ H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine,
 done:
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
     input = (dtype_close_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
