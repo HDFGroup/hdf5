@@ -659,6 +659,8 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
         farm_input.coords.end_cell = obj_map->u_map.array_map.array_range[i].end_cell;
 
         for (j = 0; j < (unsigned int) num_ions_g; j++) {
+#if 0
+            /* MSC - update IOD new layout callshere */
             if (0 == strcmp(obj_map->u_map.array_map.array_range[i].loc,
                     server_loc_g[j])) {
                 server_idx = j;
@@ -667,6 +669,7 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
 #endif
                 break;
             }
+#endif
         }
 
         farm_input.server_idx = server_idx;
@@ -861,7 +864,7 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     for (i = 0; i < obj_map->u_map.array_map.n_range; i++) {
-#if H5_EFF_DEBUG
+#if 0//H5_EFF_DEBUG
         fprintf(stderr, "(%d) range: %d, start: %zu %zu, "
                 "end: %zu %zu, n_cell: %zu, "
                 "loc: %s\n", my_rank_g, i,
@@ -870,6 +873,7 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
                 obj_map->u_map.array_map.array_range[i].end_cell[0],
                 obj_map->u_map.array_map.array_range[i].end_cell[1],
                 obj_map->u_map.array_map.array_range[i].n_cell,
+                /* MSC - update IOD new layout callshere */
                 obj_map->u_map.array_map.array_range[i].loc);
 #endif
     }

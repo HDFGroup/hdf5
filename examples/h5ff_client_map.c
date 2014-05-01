@@ -10,7 +10,7 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name[]="eff_file_map.h5";
+    char file_name[50];
     hid_t file_id;
     hid_t gid1, gid2, dtid1, dtid2;
     hid_t map1, map2, map3;
@@ -46,6 +46,8 @@ int main(int argc, char **argv) {
     hsize_t count = -1;
     int key, value;
     hbool_t exists;
+
+    sprintf(file_name, "%s_%s", getenv("USER"), "eff_file_map.h5");
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {

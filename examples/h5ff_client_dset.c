@@ -39,8 +39,7 @@ checksum_crc64(const void *buf, size_t buf_size)
 }
 
 int main(int argc, char **argv) {
-    const char file_name[]="eff_file_dset.h5";
-
+    char file_name[50];
     hid_t file_id;
     hid_t gid1, gid2, gid3;
     hid_t sid, scalar, dtid;
@@ -75,6 +74,8 @@ int main(int argc, char **argv) {
     uint64_t array_cs = 0, elmt_cs = 0, read1_cs = 0, read2_cs = 0;
     uint32_t cs_scope = 0;
     herr_t ret;
+
+    sprintf(file_name, "%s_%s", getenv("USER"), "eff_file_dset.h5");
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {

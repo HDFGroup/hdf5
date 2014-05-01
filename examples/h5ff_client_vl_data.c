@@ -10,7 +10,7 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name[]="eff_file_vl_dset.h5";
+    char file_name[50];
 
     hid_t file_id;
     hid_t sid, vl_dtid, str_dtid;
@@ -47,6 +47,8 @@ int main(int argc, char **argv) {
     unsigned int i = 0;
     uint32_t cs_scope = 0;
     herr_t ret;
+
+    sprintf(file_name, "%s_%s", getenv("USER"), "eff_file_vl_data.h5");
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {

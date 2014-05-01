@@ -10,7 +10,7 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name[]="acg_file.h5";
+    char file_name[]="acg_file.h5";
     hid_t file_id;
     hid_t       dsid = -1;      /* Dataset ID */
     hid_t       sid = -1;       /* Dataspace ID */

@@ -10,7 +10,7 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name[]="eff_file_obj.h5";
+    char file_name[50];
     hid_t file_id;
     hid_t gid;
     hid_t did, map;
@@ -33,6 +33,8 @@ int main(int argc, char **argv) {
     H5ES_status_t status;
     size_t num_events = 0;
     herr_t ret;
+
+    sprintf(file_name, "%s_%s", getenv("USER"), "eff_file_obj.h5");
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {

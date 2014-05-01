@@ -12,8 +12,8 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name1[]="eff_file_1";
-    const char file_name2[]="eff_file_2";
+    char file_name1[50];
+    char file_name2[50];
     hid_t fid1, fid2;
     hid_t gid1, gid2;
     hid_t did1, did2;
@@ -40,6 +40,9 @@ int main(int argc, char **argv) {
     H5ES_status_t status;
     size_t num_events = 0;
     herr_t ret;
+
+    sprintf(file_name1, "%s_%s", getenv("USER"), "eff_file_2.h5");
+    sprintf(file_name2, "%s_%s", getenv("USER"), "eff_file_1.h5");
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {

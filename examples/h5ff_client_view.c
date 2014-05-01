@@ -434,7 +434,7 @@ test_view(const char *file_name, const char *dataset_name,
 int
 main(int argc, char **argv)
 {
-    const char *file_name="eff_file_view.h5";
+    char file_name[50];
     const char *dataset_name="D1";
     hsize_t ntuples = NTUPLES;
     hsize_t ncomponents = 3;
@@ -443,6 +443,8 @@ main(int argc, char **argv)
     hsize_t i, j;
 
     int provided;
+
+    sprintf(file_name, "%s_%s", getenv("USER"), "eff_file_view.h5");
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {
