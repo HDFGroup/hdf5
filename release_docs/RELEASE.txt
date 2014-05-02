@@ -272,14 +272,14 @@ Bug Fixes since HDF5-1.8.12
 
     Tools
     -----
-    - The h5diff tool would report datafile compared with an exact copy of
-      the same datafile had differences. This was due to the same issue
-      below of reading un-written chunks.  This problem is also fixed.
+    - The h5diff tool would report that a datafile compared with an exact copy of
+      the same datafile had differences. This was due to the issue
+      below of reading un-written chunks. This problem is also fixed.
       (AKC - 2014/05/01 HDFFV-8637)
 
     - The h5dump and h5diff utilities occasionally produced different output
       between Linux and Windows systems. This happened to datasets that
-      used chunked storage, with default fill values and some of the chunks
+      used chunked storage, with default fill values, and some of the chunks
       had not been written. When the dataset was read, the library failed
       to write the default fill values to parts of the use buffer that
       were associated with the unwritten chunks. This has been fixed.
