@@ -21,7 +21,7 @@ Section VIII: Options for platform configuration files
 I. Preconditions
 ========================================================================
 Obtaining HDF5 source code 
-   1. Create a directory for your development, for example, "myhdfstuff".
+   1. Create a directory for your development; for example, "myhdfstuff".
 
    2. Obtain compressed (*.tar or *.zip) HDF5 source from
         http://www.hdfgroup.org/ftp/HDF5/current/src/
@@ -77,7 +77,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 
          ctest -S <configuration file> -C RelWithDebInfo -VV -O hdf5.log
 
-      The command above will configure, build, test and create an install 
+      The command above will configure, build, test, and create an install 
       package in the myhdfstuff/hdf5-1.8/build folder.
 
       The -S option uses the script version of ctest.
@@ -244,7 +244,7 @@ Notes: CMake in General
 
 
 ========================================================================
-V. Options for building HDF5 Libraries with CMake command line
+V. Options for Building HDF5 Libraries with the CMake Command Line
 ========================================================================
 
 To build the HDF5 Libraries with CMake, go through these five steps:
@@ -277,7 +277,7 @@ These five steps are described in detail below.
       RECOMMENDED:
         Users can perform the configuration step without using the visual 
         cmake-gui program. We use the file cacheinit.cmake in the 
-        config/cmake source folder for our testing. This file enables all the 
+        config/cmake source folder for our testing. This file enables all of the 
         basic options and we turn specific options on or off for testing 
         using the following command line within the build directory:
         
@@ -466,7 +466,7 @@ These five steps are described in detail below.
 
 
 ========================================================================
-VI. CMake option defaults for HDF5
+VI. CMake Option Defaults for HDF5
 ========================================================================
 
 In the options listed below, there are three columns of information: 
@@ -551,7 +551,7 @@ UserMacros.cmake file. Then enable the option to the CMake configuration,
 build and test process.
 
 ========================================================================
-VIII. Options for platform configuration files
+VIII. Options for Platform Configuration Files
 ========================================================================
 
 Below is the HDF518LinuxRWDICmake.cmake ctest script with extra comments.
