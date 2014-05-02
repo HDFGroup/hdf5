@@ -917,7 +917,7 @@ static void check_ion_corruptions(iod_trans_id_t trans_num)
                 printf("CORRUPTING CS at step %d, ARRAY ID %"PRIx64"\n", 
                        step, oid);
 
-            ret = corrupt_data("eff_vpic", oid, trans_num, 20, cor_data);
+            ret = corrupt_data("mohamad.chaarawi.eff_vpic", oid, trans_num, 20, cor_data);
             if(ret < 0) {
                 fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
             }
@@ -945,7 +945,7 @@ static void check_ion_corruptions(iod_trans_id_t trans_num)
                 printf("CORRUPTING CS at step %d, BLOB ID %"PRIx64"\n", 
                        step, oid);
 
-            ret = corrupt_data("eff_vpic", oid, trans_num, 5, cor_data);
+            ret = corrupt_data("mohamad.chaarawi.eff_vpic", oid, trans_num, 5, cor_data);
             if(ret < 0) {
                 fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
             }
@@ -973,7 +973,7 @@ static void check_ion_corruptions(iod_trans_id_t trans_num)
                 printf("CORRUPTING CS at step %d, KV ID %"PRIx64"\n", 
                        step, oid);
 
-            ret = corrupt_kv("eff_vpic", oid, trans_num, step*2+1, cor_data);
+            ret = corrupt_kv("mohamad.chaarawi.eff_vpic", oid, trans_num, step*2+1, cor_data);
             if(ret < 0) {
                 fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
             }
@@ -1119,7 +1119,7 @@ static void check_daos_corruptions(iod_hint_list_t *chint, iod_trans_id_t trans_
                        step, oid);
             }
 
-            ret = corrupt_kv("eff_vpic", oid, trans_num, step*2+1, cor_data);
+            ret = corrupt_kv("mohamad.chaarawi.eff_vpic", oid, trans_num, step*2+1, cor_data);
             if(ret < 0) {
                 fprintf(stderr, "cant't corrupt data. %d (%s).\n", ret, strerror(-ret));
             }

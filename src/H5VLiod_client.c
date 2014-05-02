@@ -222,7 +222,9 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
     while(1) {
         HDassert(request->state == H5VL_IOD_PENDING);
         /* test the operation status */
+        FUNC_LEAVE_API_THREADSAFE;
         ret = HG_Wait(*((hg_request_t *)request->req), 0, &status);
+        FUNC_ENTER_API_THREADSAFE;
         if(HG_FAIL == ret) {
             HERROR(H5E_FUNC, H5E_CANTINIT, "failed to wait on request\n");
             request->status = H5ES_STATUS_FAIL;
@@ -249,7 +251,9 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
                     tmp_req = cur_req->file_next;
 
                     HDassert(cur_req->state == H5VL_IOD_PENDING);
+                    FUNC_LEAVE_API_THREADSAFE;
                     ret = HG_Wait(*((hg_request_t *)cur_req->req), 0, &tmp_status);
+                    FUNC_ENTER_API_THREADSAFE;
                     if(HG_FAIL == ret) {
                         HERROR(H5E_FUNC, H5E_CANTINIT, "failed to wait on request\n");
                         cur_req->status = H5ES_STATUS_FAIL;
@@ -309,7 +313,9 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
         tmp_req = cur_req->file_next;
 
         HDassert(cur_req->state == H5VL_IOD_PENDING);
+        FUNC_LEAVE_API_THREADSAFE;
         ret = HG_Wait(*((hg_request_t *)cur_req->req), HG_MAX_IDLE_TIME, &status);
+        FUNC_ENTER_API_THREADSAFE;
         if(HG_FAIL == ret) {
             HERROR(H5E_FUNC, H5E_CANTINIT, "failed to wait on request\n");
             cur_req->status = H5ES_STATUS_FAIL;
@@ -369,8 +375,10 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
         /* If the request is pending on the object we want, complete it */
         if(cur_req->obj == object && 
            cur_req->state == H5VL_IOD_PENDING) {
+            FUNC_LEAVE_API_THREADSAFE;
             ret = HG_Wait(*((hg_request_t *)cur_req->req), HG_MAX_IDLE_TIME, 
                           &status);
+            FUNC_ENTER_API_THREADSAFE;
             if(HG_FAIL == ret) {
                 HERROR(H5E_FUNC, H5E_CANTINIT, "failed to wait on request\n");
                 cur_req->status = H5ES_STATUS_FAIL;
@@ -852,11 +860,13 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 if(HG_Forward(info->ion_target, info->read_id, &input, info->status, &hg_req) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship operation");
 
+                FUNC_LEAVE_API_THREADSAFE;
                 if(HG_FAIL ==  HG_Wait(hg_req, HG_MAX_IDLE_TIME, &hg_status)) {
                     fprintf(stderr, "failed to wait on request\n");
                     req->status = H5ES_STATUS_FAIL;
                     req->state = H5VL_IOD_COMPLETED;
                 }
+                FUNC_ENTER_API_THREADSAFE;
 
                 if(addrs) {
                     free(addrs);

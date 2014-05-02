@@ -52,7 +52,7 @@ typedef struct H5VL_iod_axe_list_t {
 
 static na_addr_t PEER;
 static na_class_t *network_class = NULL;
-
+static int coresident = 0;
 static AXE_task_t g_axe_id;
 static H5VL_iod_axe_list_t axe_list;
 
@@ -489,7 +489,9 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
             hg_status_t status;
 
             /* test the operation status */
+            FUNC_LEAVE_API_THREADSAFE;
             ret = HG_Wait(*((hg_request_t *)request->req), HG_MAX_IDLE_TIME, &status);
+            FUNC_ENTER_API_THREADSAFE;
             if(HG_FAIL == ret) {
                 fprintf(stderr, "failed to wait on request\n");
                 request->status = H5ES_STATUS_FAIL;
@@ -545,6 +547,7 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     na_addr_t ion_target;
     double axe_seed;
     char addr_name[H5VL_IOD_MAX_ADDR_NAME];
+    char *coresident_s = NULL;
     herr_t ret_value = SUCCEED;
 
     MPI_Comm_size(comm, &num_procs);
@@ -560,65 +563,97 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     axe_list.head = NULL;
     axe_list.tail = NULL;
 
-    /* MSC - This is a temporary solution for connecting to the server
-       using mercury */
-    /* Only rank 0 reads file */
-    if (my_rank == 0) {
-        int count, line=0, num_ions;
-        FILE *config;
-        char config_addr_name[H5VL_IOD_MAX_ADDR_NAME];
+    coresident_s = getenv ("H5ENV_CORESIDENT");
+    if(NULL != coresident_s)
+        coresident = atoi(coresident_s);
 
-        config = fopen("port.cfg", "r");
 
-        fscanf(config, "%d\n", &num_ions);
+    if(1 != coresident) {
+        /* MSC - This is a temporary solution for connecting to the server
+           using mercury */
+        /* Only rank 0 reads file */
+        if (my_rank == 0) {
+            int count, line=0, num_ions;
+            FILE *config;
+            char config_addr_name[H5VL_IOD_MAX_ADDR_NAME];
+            char cwd[1024];
+
+            if (getcwd(cwd, sizeof(cwd)) != NULL)
+                fprintf(stdout, "Reading port.cfg from: %s\n", cwd);
+            else {
+                fprintf(stderr, "etcwd() error\n");
+                return FAIL;
+            }
+
+            config = fopen("port.cfg", "r");
+            if (config == NULL) {
+                fprintf(stderr, "could not open port.cfg file.");
+                return FAIL;
+            }
+
+            fscanf(config, "%d\n", &num_ions);
 
 #if H5_EFF_DEBUG
-        printf("Found %d servers\n", num_ions);
+            printf("Found %d servers\n", num_ions);
 #endif
 
-        /* read a line */
-        if(fgets(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, config) != NULL) {
-            strncpy(addr_name, config_addr_name, H5VL_IOD_MAX_ADDR_NAME);
-            count = 1;
-            while(num_procs > line + (count*num_ions)) {
-                MPI_Send(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, MPI_BYTE, 
-                         line + (count*num_ions), tag, comm);
-                count ++;
+            /* read a line */
+            if(fgets(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, config) != NULL) {
+                strncpy(addr_name, config_addr_name, H5VL_IOD_MAX_ADDR_NAME);
+                count = 1;
+                while(num_procs > line + (count*num_ions)) {
+                    MPI_Send(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, MPI_BYTE, 
+                             line + (count*num_ions), tag, comm);
+                    count ++;
+                }
+                line++;
             }
-            line++;
-        }
 
-        while (fgets(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, config) != NULL) {
-            count = 0;
-            while(num_procs > line + (count*num_ions)) {
-                MPI_Send(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, MPI_BYTE, 
-                         line + (count*num_ions), tag, comm);
-                count ++;
+            while (fgets(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, config) != NULL) {
+                count = 0;
+                while(num_procs > line + (count*num_ions)) {
+                    MPI_Send(config_addr_name, H5VL_IOD_MAX_ADDR_NAME, MPI_BYTE, 
+                             line + (count*num_ions), tag, comm);
+                    count ++;
+                }
+                line ++;
             }
-            line ++;
+            fclose(config);
         }
-        fclose(config);
-    }
-    else {
-        MPI_Recv(addr_name, H5VL_IOD_MAX_ADDR_NAME, MPI_BYTE, 
-                 0, tag, comm, MPI_STATUS_IGNORE);
-    }
+        else {
+            MPI_Recv(addr_name, H5VL_IOD_MAX_ADDR_NAME, MPI_BYTE, 
+                     0, tag, comm, MPI_STATUS_IGNORE);
+        }
 
 #if H5_EFF_DEBUG
-    printf("CN %d Connecting to ION %s\n", my_rank, addr_name);
+        printf("CN %d Connecting to ION %s\n", my_rank, addr_name);
 #endif
+    }
 
     /* initialize Mercury stuff */
-    network_class = NA_MPI_Init(NULL, 0);
-    //network_class = NA_Initialize("tcp@mpi://0.0.0.0:0", 0);
+    //network_class = NA_MPI_Init(NULL, 0);
+    network_class = NA_Initialize("tcp@mpi://0.0.0.0:0", 0);
 
     if (HG_SUCCESS != HG_Init(network_class)) {
         fprintf(stderr, "Failed to initialize Mercury\n");
         return FAIL;
     }
-    if (NA_SUCCESS !=  NA_Addr_lookup_wait(network_class, addr_name, &ion_target))  {
-        fprintf(stderr, "Server lookup failed\n");
-        return FAIL;
+
+    if(coresident == 1) {
+        ret_value = EFF_setup_coresident(comm, MPI_INFO_NULL);
+        if(ret_value != SUCCEED)
+            return FAIL;
+
+        if (NA_SUCCESS !=  NA_Addr_self(network_class, &ion_target))  {
+            fprintf(stderr, "Server lookup failed\n");
+            return FAIL;
+        }
+    }
+    else {
+        if (NA_SUCCESS !=  NA_Addr_lookup_wait(network_class, addr_name, &ion_target))  {
+            fprintf(stderr, "Server lookup failed\n");
+            return FAIL;
+        }
     }
 
     PEER = ion_target;
@@ -685,11 +720,19 @@ EFF_finalize(void)
     if(HG_Forward(PEER, H5VL_EFF_FINALIZE_ID, &ret_value, &ret_value, &hg_req) < 0)
         return FAIL;
 
+    FUNC_LEAVE_API_THREADSAFE;
     HG_Wait(hg_req, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE);
+    FUNC_ENTER_API_THREADSAFE;
 
     /* Free Mercury request */
     if(HG_Request_free(hg_req) != HG_SUCCESS)
         return FAIL;
+
+    if(coresident == 1) {
+        ret_value = EFF_terminate_coresident();
+        if(ret_value != SUCCEED)
+            return FAIL;
+    }
 
     /* Free addr id */
     if (NA_SUCCESS != NA_Addr_free(network_class, PEER))
@@ -9712,7 +9755,9 @@ H5VL_iod_cancel(void **req, H5ES_status_t *status)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute write");
 
     /* Wait on the cancel request to return */
+    FUNC_LEAVE_API_THREADSAFE;
     ret = HG_Wait(hg_req, HG_MAX_IDLE_TIME, &hg_status);
+    FUNC_ENTER_API_THREADSAFE;
 
     /* If the actual wait Fails, then the status of the cancel
        operation is unknown */
@@ -9787,7 +9832,9 @@ H5VL_iod_test(void **req, H5ES_status_t *status)
 
     /* Test completion of the request if is still pending */
     if(H5VL_IOD_PENDING == request->state) {
+        FUNC_LEAVE_API_THREADSAFE;
         ret = HG_Wait(*((hg_request_t *)request->req), 0, &hg_status);
+        FUNC_ENTER_API_THREADSAFE;
         if(HG_FAIL == ret) {
             fprintf(stderr, "failed to wait on request\n");
             request->status = H5ES_STATUS_FAIL;

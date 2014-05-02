@@ -101,7 +101,8 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
 
     /******************* Initialize mercury ********************/
     /* initialize the netwrok class */
-    network_class = NA_MPI_Init(NULL, MPI_INIT_SERVER);
+    //network_class = NA_MPI_Init(NULL, MPI_INIT_SERVER);
+    network_class = NA_Initialize("tcp@mpi://0.0.0.0:0", 1);
 
     /* Allocate table addrs */
     na_addr_table = (char**) malloc((size_t)num_ions_g * sizeof(char*));
@@ -121,6 +122,15 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
 
     /* Only rank 0 writes file */
     if (my_rank_g == 0) {
+        char cwd[1024];
+
+        if (getcwd(cwd, sizeof(cwd)) != NULL)
+            fprintf(stdout, "Writing port.cfg to: %s\n", cwd);
+        else {
+            fprintf(stderr, "etcwd() error\n");
+            return FAIL;
+        }
+
         config = fopen("port.cfg", "w+");
         if (config != NULL) {
             fprintf(config, "%d\n", num_ions_g);
@@ -130,8 +140,8 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
             fclose(config);
         }
 	else {
-	  fprintf(stderr, "could not open port.cfg file.\n");
-	  return FAIL;
+            fprintf(stderr, "could not open port.cfg file.\n");
+            return FAIL;
 	}
     }
 
@@ -344,6 +354,67 @@ done:
     HG_Handler_start_output(handle, &ret_value);
     return ret_value;
 } /* end H5VL_iod_server_eff_finalize() */
+
+herr_t
+EFF_setup_coresident(MPI_Comm comm, MPI_Info UNUSED info)
+{
+    AXE_engine_attr_t engine_attr;
+    herr_t ret_value = SUCCEED;
+
+    MPI_Comm_size(comm, &num_ions_g);
+    MPI_Comm_rank(comm, &my_rank_g);
+
+    iod_comm = comm;
+
+    /* register server specific callbacks */
+    H5VL_EFF_OPEN_CONTAINER = MERCURY_REGISTER("container_open", hg_const_string_t, iod_handle_t,
+                                               H5VL_iod_server_container_open);
+    H5VL_EFF_CLOSE_CONTAINER = MERCURY_REGISTER("container_close", iod_handle_t, ret_t,
+                                                H5VL_iod_server_container_close);
+    H5VL_EFF_ANALYSIS_FARM = MERCURY_REGISTER("analysis_farm", analysis_farm_in_t, 
+                                              analysis_farm_out_t, H5VL_iod_server_analysis_farm);
+    H5VL_EFF_ANALYSIS_FARM_TRANSFER = MERCURY_REGISTER("analysis_transfer", analysis_transfer_in_t, 
+                                                       analysis_transfer_out_t,
+                                                       H5VL_iod_server_analysis_transfer);
+
+    /* Initialize engine attribute */
+    if(AXEengine_attr_init(&engine_attr) != AXE_SUCCEED)
+        return FAIL;
+
+    /* Set number of threads in AXE engine */
+    if(AXEset_num_threads(&engine_attr, 16) != AXE_SUCCEED)
+        return FAIL;
+
+    /* Create AXE engine */
+    if(AXEcreate_engine(&engine, &engine_attr) != AXE_SUCCEED)
+        return FAIL;
+
+    if(AXEengine_attr_destroy(&engine_attr) != AXE_SUCCEED)
+        return FAIL;
+
+    /* Initialize Python runtime */
+#ifdef H5_HAVE_PYTHON
+    Py_Initialize();
+#endif
+
+    return ret_value;
+}
+
+herr_t 
+EFF_terminate_coresident(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    /* Finalize Python runtime */
+#ifdef H5_HAVE_PYTHON
+    Py_Finalize();
+#endif
+
+    if(AXE_SUCCEED != AXEterminate_engine(engine, TRUE))
+        return FAIL;
+
+    return ret_value;
+}
 
 H5VL_AXE_TASK_CB(H5VL_iod_server_analysis_execute, analysis_execute_in_t)
 H5VL_AXE_TASK_CB(H5VL_iod_server_file_create, file_create_in_t)

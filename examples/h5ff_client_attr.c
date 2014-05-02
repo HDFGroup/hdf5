@@ -96,19 +96,18 @@ int main(int argc, char **argv) {
     ret = H5Tset_strpad(stype_id, H5T_STR_NULLTERM ); assert( ret == 0 );
     ret = H5Tset_size(stype_id, 128); assert( ret == 0 );
 
-    /* acquire container version 1 - EXACT.  
-       This can be asynchronous, but here we need the acquired ID 
-       right after the call to start the transaction so we make synchronous. */
-    version = 1;
-    rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(1 == version);
-
     /* start transaction 2 with default Leader/Delegate model. Leader
        which is rank 0 here starts the transaction. It can be
        asynchronous, but we make it synchronous here so that the
        Leader can tell its delegates that the transaction is
        started. */
     if(0 == my_rank) {
+        /* acquire container version 1 - EXACT.  
+           This can be asynchronous, but here we need the acquired ID 
+           right after the call to start the transaction so we make synchronous. */
+        version = 1;
+        rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+
         /* create transaction object */
         tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
         assert(tid1);
@@ -178,25 +177,26 @@ int main(int argc, char **argv) {
         /* make this synchronous so we know the container version has been acquired */
         ret = H5TRfinish(tid1, H5P_DEFAULT, &rid2, H5_EVENT_STACK_NULL);
         assert(0 == ret);
-        /* Local op */
-        ret = H5TRclose(tid1);
+
+        /* release container version 1. This is async. */
+        ret = H5RCrelease(rid1, e_stack);
         assert(0 == ret);
     }
-
-    /* release container version 1. This is async. */
-    ret = H5RCrelease(rid1, e_stack);
-    assert(0 == ret);
 
     H5ESget_count(e_stack, &num_events);
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
-    assert(status == H5ES_STATUS_SUCCEED);
+    if(0 != num_events) assert(status == H5ES_STATUS_SUCCEED);
 
     if(0 == my_rank) {
+        /* Local op */
+        ret = H5TRclose(tid1);
+        assert(0 == ret);
+
         /* create transaction object */
         tid2 = H5TRcreate(file_id, rid2, (uint64_t)3);
-        assert(tid1);
+        assert(tid2);
         ret = H5TRstart(tid2, H5P_DEFAULT, e_stack);
         assert(0 == ret);
 
@@ -225,9 +225,6 @@ int main(int argc, char **argv) {
         /* make this synchronous so we know the container version has been acquired */
         ret = H5TRfinish(tid2, H5P_DEFAULT, &rid3, H5_EVENT_STACK_NULL);
         assert(0 == ret);
-        /* Local op */
-        ret = H5TRclose(tid2);
-        assert(0 == ret);
 
         /* release container version 2. This is async. */
         ret = H5RCrelease(rid2, e_stack);
@@ -240,7 +237,7 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
-    assert(status == H5ES_STATUS_SUCCEED);
+    if(0 != num_events) assert(status == H5ES_STATUS_SUCCEED);
 
     /* Tell other procs that container version 3 is acquired */
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
@@ -285,12 +282,16 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
-    assert(status == H5ES_STATUS_SUCCEED);
+    if(0 != num_events) assert(status == H5ES_STATUS_SUCCEED);
 
     /* barrier so root knows all are done reading */
     MPI_Barrier(MPI_COMM_WORLD);
 
     if(my_rank == 0) {
+        /* Local op */
+        ret = H5TRclose(tid2);
+        assert(0 == ret);
+
         /* release container version 3. This is async. */
         ret = H5RCrelease(rid3, e_stack);
         assert(0 == ret);
@@ -311,11 +312,12 @@ int main(int argc, char **argv) {
     H5ESwait_all(e_stack, &status);
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
-    assert(status == H5ES_STATUS_SUCCEED);
+    if(0 != num_events) assert(status == H5ES_STATUS_SUCCEED);
 
-    ret = H5RCclose(rid1);
-    assert(0 == ret);
+
     if(0 == my_rank) {
+        ret = H5RCclose(rid1);
+        assert(0 == ret);
         ret = H5RCclose(rid2);
         assert(0 == ret);
     }

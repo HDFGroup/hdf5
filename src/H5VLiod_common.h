@@ -206,6 +206,8 @@ H5_DLL void H5VL_iod_free_list_free(void **free_list, size_t free_list_len);
 
 #ifdef H5_HAVE_EFF
 
+H5_DLL herr_t EFF_setup_coresident(MPI_Comm comm, MPI_Info info);
+H5_DLL herr_t EFF_terminate_coresident(void);
 H5_DLL void EFF__mercury_register_callbacks(void);
 
 #ifdef H5_HAVE_INDEXING
