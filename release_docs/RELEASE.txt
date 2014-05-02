@@ -272,8 +272,8 @@ Bug Fixes since HDF5-1.8.12
 
     Tools
     -----
-    - The h5diff tool would report that a datafile compared with an exact copy of
-      the same datafile had differences. This was due to the issue
+    - The h5diff tool would report that a datafile compared with an exact
+      copy of the same datafile had differences. This was due to the issue
       below of reading un-written chunks. This problem is also fixed.
       (AKC - 2014/05/01 HDFFV-8637)
 
@@ -531,6 +531,17 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* When reading or writing a dataset (H5Dread/H5Dwrite) with a large selection
+  size (e.g., 2GB ~= 500 million of 4 bytes integers or floating point
+  numbers), some I/O systems may not be able to process it correctly.
+  We advise users to find out system limits before using large selections. If
+  I/O size limits exist, application should use HDF5 partial I/O capabilities
+  (e.g., H5Sselect_hyperslab(...)) to divide large requests into smaller sizes.
+  In this case we also advise users not to use chunk storage sizes larger that
+  2GB since the HDF5 library performs I/O on the entire chunk.  We will work
+  on the HDF5 library to divide large data requests to smaller I/O requests.
+  (AKC 2014/05/02 HDFFV-8479)
+
 * Due to an Intel compiler bug introduced in version 14.0.1, the HDF5 FORTRAN
   wrappers do not work with configure option --enable-fortran2003. 
   However, the option --enable-fortran works with Intel 14.0.1. The compiler 
