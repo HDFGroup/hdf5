@@ -224,7 +224,7 @@ int main( int argc, char **argv ) {
    version = 3;
    if ( verbose ) fprintf( stderr, "APP-r%d: rc %lu - Try to acquire\n", my_rank, version );
 
-   if(acquire_rank == my_rank) {
+   if ( acquire_rank == my_rank ) {
        H5E_BEGIN_TRY { 
            rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
            while ( rc_id3 < 0 ) {
@@ -237,7 +237,7 @@ int main( int argc, char **argv ) {
    }
 
    MPI_Bcast( &version, 1, MPI_UINT64_T, acquire_rank, MPI_COMM_WORLD );
-   if(acquire_rank != my_rank)
+   if ( acquire_rank != my_rank )
        rc_id3 = H5RCcreate(file_id, version); ASSERT_RET;
    fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
 
