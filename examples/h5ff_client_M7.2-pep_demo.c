@@ -115,24 +115,19 @@ int main( int argc, char **argv ) {
    ret = H5Pset_fapl_iod( fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL ); ASSERT_RET;
    file_id = H5Fcreate_ff( file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, H5_EVENT_STACK_NULL ); assert( file_id >= 0 );
 
-   /* Get read context */
-   version = 1;
-   if ( my_rank == 0 ) {
-       rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET; assert( version == 1 );
-   }
-   MPI_Bcast( &rc_id1, 1, MPI_INT, 0, MPI_COMM_WORLD );
-   if ( 0 != my_rank ) {
-       rc_id = H5RCcreate(file_id, version); ASSERT_RET;
-   }
-
    /****
     * Transaction 2: Rank 0 creates three H5Groups in the H5File 
     ****/
 
    if ( my_rank == 0 ) {
-      tr_num = 2;
+      /* Get read context use for Tr 2 */ 
+      version = 1;
+      rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+      assert( rc_id1 >= 0 ); assert( version == 1 );
+      fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
 
       /* Create a local transaction for transaction number and start it with a single tr leader (the default). */
+      tr_num = 2;
       fprintf( stderr, "APP-r%d: tr %lu - Start\n", my_rank, tr_num );
       tr_id = H5TRcreate( file_id, rc_id1, tr_num ); assert( tr_id >= 0 );
       ret = H5TRstart( tr_id, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
@@ -149,29 +144,30 @@ int main( int argc, char **argv ) {
       /* Finish and commit TR and get RC */
       fprintf( stderr, "APP-r%d: tr %lu - Finish\n", my_rank, tr_num );
       ret = H5TRfinish( tr_id, H5P_DEFAULT, &rc_id2, H5_EVENT_STACK_NULL ); ASSERT_RET;
-      ret = H5TRclose( tr_id ); ASSERT_RET;
-      version = 2;
       assert( rc_id2 >= 0 ); 
-      fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, tr_num );
+      version = 2;
+      fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
+      ret = H5TRclose( tr_id ); ASSERT_RET;
+
+      /* Release the read handle & close read context on previous CV - only held by rank 0 */
+      ret = H5RCrelease( rc_id1, H5_EVENT_STACK_NULL); ASSERT_RET;
+      ret = H5RCclose( rc_id1 ); ASSERT_RET;
+
+      /* If verbose, rank 0 prints the container contents */
+      if ( verbose ) print_container_contents( file_id, rc_id2, "/", my_rank );
    }
 
-   /* Rank 0 tells others that RC has been acquired; they create local RC object and open the Groups */
+   /* Rank 0 tells others that RC 2 has been acquired; they create local RC object and open the Groups */
    MPI_Bcast( &version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
    if ( my_rank != 0 ) {
       rc_id2 = H5RCcreate( file_id, version );
       assert( rc_id2 >= 0 ); assert ( version == 2 );
+      fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
 
       grp_l_id = H5Gopen_ff( file_id, "G-logged", H5P_DEFAULT, rc_id2, H5_EVENT_STACK_NULL ); assert( grp_l_id >= 0 );
       grp_p_id = H5Gopen_ff( file_id, "G-prefetched", H5P_DEFAULT, rc_id2, H5_EVENT_STACK_NULL ); assert( grp_p_id >= 0 );
       grp_s_id = H5Gopen_ff( file_id, "G-stored", H5P_DEFAULT, rc_id2, H5_EVENT_STACK_NULL ); assert( grp_s_id >= 0 );
    } 
-
-   /* Release the read handle and close read context on previous CV  */
-   if ( my_rank == 0 )
-       ret = H5RCrelease( rc_id1, H5_EVENT_STACK_NULL); ASSERT_RET;
-   ret = H5RCclose( rc_id1 ); ASSERT_RET;
-
-   if ( verbose && ( my_rank == 0 ) ) print_container_contents( file_id, rc_id2, "/", my_rank );
 
    /****
     * Transaction 3 - In each of the 3 Groups, create "D"(rnk 0), "M"(rnk 1 or 0), "T" (rnk 2 or 1 or 0)
@@ -219,7 +215,6 @@ int main( int argc, char **argv ) {
       ret = H5Pclose( trspl_id ); ASSERT_RET;
    }
 
-
    /* Acquire a read handle for container version and create a read context. */
    version = 3;
    if ( verbose ) fprintf( stderr, "APP-r%d: rc %lu - Try to acquire\n", my_rank, version );
@@ -233,12 +228,13 @@ int main( int argc, char **argv ) {
                rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
            }
        } H5E_END_TRY;
-       assert( rc_id3 >= 0 ); assert ( version == 3 );
    }
 
    MPI_Bcast( &version, 1, MPI_UINT64_T, acquire_rank, MPI_COMM_WORLD );
-   if ( acquire_rank != my_rank )
-       rc_id3 = H5RCcreate(file_id, version); ASSERT_RET;
+   if ( acquire_rank != my_rank ) {
+       rc_id3 = H5RCcreate( file_id, version ); 
+   }
+   assert( rc_id3 >= 0 ); assert ( version == 3 );
    fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
 
    /* Release the read handle and close read context on previous CV  */
@@ -255,7 +251,7 @@ int main( int argc, char **argv ) {
     * from the BB to persistent storage.                           
     ****/
 
-   if ( my_rank == acquire_rank ) {
+   if ( my_rank == 0 ) {
       fprintf( stderr, "APP-r%d: cv 3 - Persist\n", my_rank );
       ret = H5RCpersist(rc_id3, H5_EVENT_STACK_NULL); ASSERT_RET; 
       print_container_contents( file_id, rc_id3, "/", my_rank );
@@ -305,12 +301,13 @@ int main( int argc, char **argv ) {
                   rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
               }
           } H5E_END_TRY;
-          assert( rc_id4 >= 0 ); assert ( version == 4 );
-          fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
       }
       MPI_Bcast( &version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
-      if ( my_rank != 0 )
-          rc_id4 = H5RCcreate(file_id, version); ASSERT_RET;
+      if ( my_rank != 0 ) {
+          rc_id4 = H5RCcreate(file_id, version); 
+      }
+      assert( rc_id4 >= 0 ); assert ( version == 4 );
+      fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
       print_container_contents( file_id, rc_id4, "/", my_rank );
 
       /* Release the read handle and close read context on CV 4 */
@@ -364,16 +361,18 @@ int main( int argc, char **argv ) {
                rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL );
            }
        } H5E_END_TRY;
-       assert( rc_id5 >= 0 ); assert ( version == 5 );
-       fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
    }
    MPI_Bcast( &version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
-   if ( my_rank != 0 )
-       rc_id5 = H5RCcreate(file_id, version); ASSERT_RET;
+   if ( my_rank != 0 ) {
+       rc_id5 = H5RCcreate( file_id, version ); 
+   }
+   assert( rc_id5 >= 0 ); assert ( version == 5 );
+   fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
 
    /* Release the read handle and close read context on CV 3 */
-   if ( my_rank == acquire_rank )
+   if ( my_rank == acquire_rank ) {
        ret = H5RCrelease( rc_id3, H5_EVENT_STACK_NULL); ASSERT_RET;
+   }
    ret = H5RCclose( rc_id3 ); ASSERT_RET;
    fprintf( stderr, "APP-r%d: rc 3 - Released \n", my_rank );
 
@@ -423,8 +422,9 @@ int main( int argc, char **argv ) {
 
    /* Release the read handle and close read context on CV 5 */
    MPI_Barrier( MPI_COMM_WORLD );
-   if ( my_rank == 0 )
+   if ( my_rank == 0 ) {
        ret = H5RCrelease( rc_id5, H5_EVENT_STACK_NULL); ASSERT_RET;
+   }
    ret = H5RCclose( rc_id5 ); ASSERT_RET;
    fprintf( stderr, "APP-r%d: rc 5 - Released \n", my_rank );
 
