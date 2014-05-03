@@ -86,13 +86,13 @@ int main( int argc, char **argv ) {
 
    /* Acquire a read handle for container version 1 and create a read context. */
    version = 1;
-   if(0 == my_rank) {
+   if ( 0 == my_rank ) {
        fprintf( stderr, "M6.2-r%d: Acquire read context for container version %d (Step 3)\n", my_rank, (int)version );
-       rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET; assert( version == 1 );
+       rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+   } else {
+       rc_id1 = H5RCcreate( file_id, version); 
    }
-   else {
-       rc_id1 = H5RCcreate(file_id, version); ASSERT_RET; assert( version == 1 );
-   }
+   assert( rc_id1 >= 0 ); assert( version == 1 );
    MPI_Barrier( MPI_COMM_WORLD );
 
    /* Print container contents at this point */
@@ -154,7 +154,7 @@ int main( int argc, char **argv ) {
 
    /* Acquire a read handle for container version 2 and create a read context. */
    version = 2;
-   if(0 == my_rank) {
+   if ( 0 == my_rank ) {
        fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 7)\n", my_rank, (int)version );
        H5E_BEGIN_TRY { 
            rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
@@ -165,21 +165,20 @@ int main( int argc, char **argv ) {
                rc_id2 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
            }
        } H5E_END_TRY;
+   } else {
+       rc_id2 = H5RCcreate( file_id, version ); 
    }
-   else {
-       rc_id2 = H5RCcreate(file_id, version); ASSERT_RET;
-   }
-   MPI_Barrier( MPI_COMM_WORLD );
-
    assert( rc_id2 >= 0 ); assert ( version == 2 );
    fprintf( stderr, "M6.2-r%d: Acquired read context for cv 2\n", my_rank );
+   MPI_Barrier( MPI_COMM_WORLD );
+
    fprintf( stderr, "M6.2-r%d: 3rd call to print container contents (Step 8)\n", my_rank );
-   if (verbose) print_container_contents( file_id, rc_id2, "/", my_rank ); ASSERT_RET;
+   if (verbose) print_container_contents( file_id, rc_id2, "/", my_rank ); 
 
    MPI_Barrier( MPI_COMM_WORLD );
    /* Release the read handle and close read context on cv 1 */
    fprintf( stderr, "M6.2-r%d: Release read handle on cv 1 (Step 9)\n", my_rank );
-   if(0 == my_rank) {
+   if ( 0 == my_rank ) {
        ret = H5RCrelease( rc_id1, H5_EVENT_STACK_NULL); ASSERT_RET;
    }
    ret = H5RCclose( rc_id1 ); ASSERT_RET;
@@ -260,10 +259,10 @@ int main( int argc, char **argv ) {
    }
 
    fprintf( stderr, "M6.2-r%d: 4th call to print container contents (Step 11)\n", my_rank );
-   if (verbose) print_container_contents( file_id, rc_id2, "/", my_rank ); ASSERT_RET;
+   if (verbose) print_container_contents( file_id, rc_id2, "/", my_rank ); 
 
    version = 3;
-   if(0 == my_rank) {
+   if ( 0 == my_rank ) {
        fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 12)\n", my_rank, (int)version );
        H5E_BEGIN_TRY { 
            rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
@@ -274,21 +273,20 @@ int main( int argc, char **argv ) {
                rc_id3 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
            }
        } H5E_END_TRY;
+   } else {
+       rc_id3 = H5RCcreate( file_id, version ); 
    }
-   else {
-       rc_id3 = H5RCcreate(file_id, version); ASSERT_RET;
-   }
-   MPI_Barrier( MPI_COMM_WORLD );
-
    assert( rc_id3 >= 0 ); assert( version == 3 );
    fprintf( stderr, "M6.2-r%d: Acquired read context for cv 3\n", my_rank );
+   MPI_Barrier( MPI_COMM_WORLD );
+
    fprintf( stderr, "M6.2-r%d: 5th call to print container contents (Step 13)\n", my_rank );
-   if (verbose) print_container_contents( file_id, rc_id3, "/", my_rank ); ASSERT_RET;
+   if (verbose) print_container_contents( file_id, rc_id3, "/", my_rank ); 
 
    MPI_Barrier( MPI_COMM_WORLD );
    /* Release the read handle and close read context on cv 2 */
    fprintf( stderr, "M6.2-r%d: Release read handle on cv 2 (Step 14)\n", my_rank );
-   if(0 == my_rank) {
+   if ( 0 == my_rank) {
        ret = H5RCrelease( rc_id2, H5_EVENT_STACK_NULL); ASSERT_RET;
    }
    ret = H5RCclose( rc_id2 ); ASSERT_RET;
@@ -410,7 +408,7 @@ int main( int argc, char **argv ) {
       int max_tries = 4;
       int current_try = 0;
       version = 4;
-      if(0 == my_rank) {
+      if ( 0 == my_rank ) {
           fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 15c)\n", my_rank, (int)version );
           H5E_BEGIN_TRY { 
               rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
@@ -424,26 +422,29 @@ int main( int argc, char **argv ) {
           } H5E_END_TRY;
       }
 
-      MPI_Bcast(&rc_id4, 1, MPI_INT, 0, MPI_COMM_WORLD );
+      MPI_Bcast( &rc_id4, 1, MPI_INT, 0, MPI_COMM_WORLD );
 
       if ( rc_id4 >= 0 ) {
-          if(0 != my_rank)
-              rc_id4 = H5RCcreate(file_id, version); ASSERT_RET;
-
+         if ( 0 != my_rank ) {
+              rc_id4 = H5RCcreate( file_id, version ); 
+         }
          assert( version == 4 );
          fprintf( stderr, "M6.2-r%d: Acquired read context for cv 4\n", my_rank );
+
          fprintf( stderr, "M6.2-r%d: 6th call to print container contents (Step 15d)\n", my_rank );
          if (verbose) print_container_contents( file_id, rc_id4, "/", my_rank ); ASSERT_RET;
 
-         MPI_Barrier( MPI_COMM_WORLD );
          /* Release read handle & close read context for CV 4 */
          fprintf( stderr, "M6.2-r%d: Release read handle on cv 4 (Step 15e)\n", my_rank );
-         if(0 == my_rank)
+         MPI_Barrier( MPI_COMM_WORLD );
+         if ( 0 == my_rank ) {
              ret = H5RCrelease( rc_id4, H5_EVENT_STACK_NULL ); ASSERT_RET;
+         }
          ret = H5RCclose( rc_id4 ); ASSERT_RET;
       } else {
-          if(0 == my_rank)
+          if ( 0 == my_rank ) {
               fprintf( stderr, "M6.2-r%d: Failed %d times to aquire read context for cv 4 - continuing\n", my_rank, max_tries );
+          }
       }
          
       /*    15) /GB/GB/GA added in Tr 5 by rank 1  */
@@ -466,7 +467,7 @@ int main( int argc, char **argv ) {
 
       /* Get read context for CV 5, then print the contents of the container */
       version = 5;
-      if(0 == my_rank) {
+      if ( 0 == my_rank) {
           fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d (Step 15f)\n", my_rank, (int)version );
           H5E_BEGIN_TRY { 
               rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
@@ -477,25 +478,24 @@ int main( int argc, char **argv ) {
                   rc_id5 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
               }
           } H5E_END_TRY;
+      } else {
+          rc_id5 = H5RCcreate(file_id, version); 
       }
-      else {
-          rc_id5 = H5RCcreate(file_id, version); ASSERT_RET;
-      }
-      MPI_Barrier( MPI_COMM_WORLD );
-
       assert( rc_id5 >= 0 ); assert( version == 5 );
       fprintf( stderr, "M6.2-r%d: Acquired read context for cv 5\n", my_rank );
+      MPI_Barrier( MPI_COMM_WORLD );
+
       fprintf( stderr, "M6.2-r%d: 7th call to print container contents (Step 15g)\n", my_rank );
       if (verbose) print_container_contents( file_id, rc_id5, "/", my_rank ); ASSERT_RET;
 
 
       /* 
-       * Get read context for CV 4. 
+       * Get read context for CV 4 from rank 0.
        * Should be there first time if Transaction 4 was finished & committed (because we know Transaction 5 is done)
        * If Transaction 4 was aborted, it will never be there.
        */
       version = 4;
-      if(0 == my_rank) {
+      if ( 0 == my_rank) {
           fprintf( stderr, "M6.2-r%d: Once again, try to acquire read context for cv %d (Step 15h)\n", my_rank, (int)version );
           rc_id4 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
           if ( rc_id4 < 0 ) {
@@ -505,6 +505,7 @@ int main( int argc, char **argv ) {
               fprintf( stderr, "M6.2-r%d: Acquired read context for cv 4\n", my_rank );
               fprintf( stderr, "M6.2-r%d: 8th call to print container contents (Step 15i)\n", my_rank );
               if (verbose) print_container_contents( file_id, rc_id4, "/", my_rank ); ASSERT_RET;
+
               /* Release read handle & close read context for CV 4 */
               fprintf( stderr, "M6.2-r%d: Release read handle on cv 4 (Step 15j)\n", my_rank );
               ret = H5RCrelease( rc_id4, H5_EVENT_STACK_NULL ); ASSERT_RET;
@@ -520,17 +521,19 @@ int main( int argc, char **argv ) {
        */
    
    }
-
    MPI_Barrier( MPI_COMM_WORLD );
+
    /* Release the read handle and close read context on open CVs */
    fprintf( stderr, "M6.2-r%d: Release read handle on cv 3 (Step 16)\n", my_rank );
-   if(0 == my_rank)
+   if ( 0 == my_rank ) {
        ret = H5RCrelease( rc_id3, H5_EVENT_STACK_NULL ); ASSERT_RET;
+   }
    ret = H5RCclose( rc_id3 ); ASSERT_RET;
    
    fprintf( stderr, "M6.2-r%d: Release read handle on cv 5\n", my_rank );
-   if(0 == my_rank)
+   if ( 0 == my_rank ) {
        ret = H5RCrelease( rc_id5, H5_EVENT_STACK_NULL ); ASSERT_RET;
+   }
    ret = H5RCclose( rc_id5 ); ASSERT_RET;
 
    /* Close the file, then barrier to make sure all have closed it. */
@@ -538,7 +541,6 @@ int main( int argc, char **argv ) {
    ret = H5Fclose_ff( file_id, 1, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
    MPI_Barrier( MPI_COMM_WORLD );
-
 
    /* Now, reopen file and show contents of all available CVs */
    hid_t last_rc_id;
@@ -560,33 +562,35 @@ int main( int argc, char **argv ) {
    }
    for ( v; v <= last_version; v++ ) {
       version = v;
-      if(0 == my_rank) {
+      if ( 0 == my_rank ) {
           fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d\n", my_rank, (int)version );
           H5E_BEGIN_TRY 
               rc_id = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
           H5E_END_TRY
       }
 
-      MPI_Bcast(&rc_id, 1, MPI_INT, 0, MPI_COMM_WORLD );
+      MPI_Bcast( &rc_id, 1, MPI_INT, 0, MPI_COMM_WORLD );
 
       if ( rc_id < 0 ) {
-          if(0 == my_rank)
+          if ( 0 == my_rank ) {
               fprintf( stderr, "M6.2-r%d: Failed to acquire read context for cv %d\n", my_rank, (int)v );
-      } 
-      else {
-          if(0 != my_rank)
-              rc_id = H5RCcreate(file_id, version); ASSERT_RET;
+          }
+      } else {
+          if ( 0 != my_rank ) {
+              rc_id = H5RCcreate( file_id, version ); 
+          }
           assert ( version == v );
           print_container_contents( file_id, rc_id, "/", my_rank );
 
           MPI_Barrier( MPI_COMM_WORLD );
-          if(0 == my_rank)
+          if ( 0 == my_rank ) {
               ret = H5RCrelease( rc_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
+          }
           ret = H5RCclose( rc_id ); ASSERT_RET;
       }
    }
 
-   /* Release the read handle and close read context on cv obtained from H5Fopen_ff */
+   /* Release the read handle and close read context on cv obtained from H5Fopen_ff (by all ranks) */
    ret = H5RCrelease( last_rc_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
    ret = H5RCclose( last_rc_id ); ASSERT_RET;
 
