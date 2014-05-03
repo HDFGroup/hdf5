@@ -202,19 +202,23 @@ Bug Fixes since HDF5-1.8.12
       to be used without resource leaks. Contact the help desk for more 
       information. (DER - 2014/04/11)
 
-    - Autotools: An export of LD_LIBRARY_PATH=<szip library location> was
-      removed from configure and make installcheck was revised to run
+    - Autotools: Several changes were done to configure and installcheck. 
+
+      An export of LD_LIBRARY_PATH=<szip library location> was
+      removed from configure; make installcheck was revised to run
       scripts installed in share/hdf5_examples to use the installed h5cc, etc. 
-      to compile and run example source files also installed there. Make
-      installcheck will now fail when a shared szip or other external lib file
-      cannot be found in the same manner that executables compiled and linked
-      with h5cc will fail to run when those lib files cannot be found after
-      install.  Make installcheck should pass after setting LD_LIBRARY_PATH 
-      to the szip location. (LRK - 2014/04/16)
+      to compile and run example source files also installed there. 
+
+      Make installcheck will now fail when a shared szip or other external lib 
+      file cannot be found in the same manner that executables compiled and 
+      linked with h5cc will fail to run when those lib files cannot be found 
+      after install. Make installcheck should pass after setting 
+      LD_LIBRARY_PATH to the szip location. (LRK - 2014/04/16)
 
     Library
     -------
     - A Gnu Make directive (.NOTPARALLEL) is added to fortran/test/Makefile.
+
       AIX native make does not support this directive and would fail if
       parallel make (e.g. make -j4) is used to build the library. AIX users
       either do not use parallel make or install Gnu Make to build the library.
@@ -278,12 +282,13 @@ Bug Fixes since HDF5-1.8.12
       (AKC - 2014/05/01 HDFFV-8637)
 
     - The h5dump and h5diff utilities occasionally produced different output
-      between Linux and Windows systems. This happened to datasets that
-      used chunked storage, with default fill values, and some of the chunks
-      had not been written. When the dataset was read, the library failed
-      to write the default fill values to parts of the use buffer that
-      were associated with the unwritten chunks. This has been fixed.
-      (JP - 2014/05/01 HDFFV-8247)
+      between Linux and Windows systems. This has been fixed.
+ 
+      This happened to datasets that used chunked storage, with default fill 
+      values, and some of the chunks had not been written. 
+      When the dataset was read, the library failed to write the default fill 
+      values to parts of the use buffer that were associated with the unwritten 
+      chunks.  (JP - 2014/05/01 HDFFV-8247)
 
     - The compress option is retired from bin/release.
       (AKC - 2014/04/25 HDFFV-8755)
@@ -291,11 +296,16 @@ Bug Fixes since HDF5-1.8.12
     - bin/release has a new option "zip" that produces a release zip file for
       the Windows platform. (AKC - 2014/04/24 HDFFV-8433)
 
-    - h5diff: Several failures relating to handling of attributes of variable
-      length strings type are fixed. (AKC - 2014/04/18 HDFFV-8625, 8639, 8745)
+    - h5diff: Several failures relating to handling of strings attributes 
+      are fixed. 
+
+      The tool crashed or gave an error message when one of the strings had
+      fixed size type and another variable-length size type. h5diff now flags such
+      strings as "not comparable". We plan to enhance the tool to handle
+      strings of the different types in the future releases.
+      (AKC - 2014/04/18 HDFFV-8625, 8639, 8745)
 
     - h5repack: h5repack would not remove user-defined filters.
-
       Fixed by modifying h5repack to check if the filter is registered or 
       can be dynamically loaded. (ADB - 2014/03/03 HDFFV-8629)
 
@@ -412,9 +422,6 @@ They are built with the configure process unless specified otherwise.
     64-bit    			  gfortran GNU Fortran (GCC) 4.8.2
     (wren/quail)                  Intel icc/icpc/ifort version 14.0.2
 
-    OpenVMS  IA64 V8.4            HP C V7.3-018         
-    (Boeing)                      HP Fortran V8.2-104939-50H96
-                                  HP C++ V7.4-004 
 
 Tested Configuration Features Summary
 =====================================
