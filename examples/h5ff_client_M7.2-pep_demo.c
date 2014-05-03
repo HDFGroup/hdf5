@@ -117,11 +117,13 @@ int main( int argc, char **argv ) {
 
    /* Get read context */
    version = 1;
-   if ( my_rank == 0 )
+   if ( my_rank == 0 ) {
        rc_id1 = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET; assert( version == 1 );
-   MPI_Bcast(&rc_id1, 1, MPI_INT, 0, MPI_COMM_WORLD );
-   if(0 != my_rank)
+   }
+   MPI_Bcast( &rc_id1, 1, MPI_INT, 0, MPI_COMM_WORLD );
+   if ( 0 != my_rank ) {
        rc_id = H5RCcreate(file_id, version); ASSERT_RET;
+   }
 
    /****
     * Transaction 2: Rank 0 creates three H5Groups in the H5File 
