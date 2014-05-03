@@ -187,7 +187,7 @@ int main( int argc, char **argv ) {
 
       /* Acquire read context for CV 1 */
       version = 1;
-      rc_id = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET; assert( version == 1 );
+      rc_id = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); assert( rc_id >= 0); assert( version == 1 );
       fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
 
       /* Start a transaction with a single leader (the default) */
@@ -429,11 +429,12 @@ int main( int argc, char **argv ) {
          assert( rc_idH >= 0 ); assert ( versionH == tr_num );
          fprintf( stderr, "APP-r%d: iter %d rc %lu - Acquired\n", my_rank, iteration, versionH );
       } else {
-         /* Won't wait here for rank 0 to acquire, because we'll wait later before rc_idH is used by other ranks */
          rc_idH = H5RCcreate( file_id, versionH );  
          assert( rc_idH >= 0 ); assert ( versionH == tr_num );
          fprintf( stderr, "APP-r%d: iter %d rc %lu - Created\n", my_rank, iteration, versionH );
       }
+      MPI_Barrier( MPI_COMM_WORLD );   /* Wait to make sure rank 0 has acquired from IOD before proceeding */
+
       /* Release previous Read Context */
       if ( my_rank == 0 ) {
          ret = H5RCrelease( rc_id, H5_EVENT_STACK_NULL); ASSERT_RET;
@@ -500,6 +501,8 @@ int main( int argc, char **argv ) {
       MPI_Bcast( &map_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
       ret = H5Pset_read_replica( mxpl_p_id, map_p_replica );  ASSERT_RET;
       ret = H5Pset_evict_replica( mapl_p_id, map_p_replica ); ASSERT_RET;
+
+      MPI_Barrier( MPI_COMM_WORLD );         /* Make sure all are here before continuing */
 
       /* 
        * All ranks read the same values they updated in last transaction
@@ -734,6 +737,7 @@ int main( int argc, char **argv ) {
    
 
       /* Rank 0 evicts the replicas */
+      MPI_Barrier( MPI_COMM_WORLD );            /* Make sure all ranks done reading replicas before evict */
       if ( my_rank == 0 ) {
          START_TIME;
          ret = H5Devict_ff( dset_p_id, version, dapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  
@@ -787,6 +791,7 @@ int main( int argc, char **argv ) {
    ret = H5Gclose_ff( grp_s_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
    /* Release the read handle and close read context  */
+   MPI_Barrier( MPI_COMM_WORLD );         /* Make sure all ranks done with RC */
    if ( my_rank == 0 ) {
       ret = H5RCrelease( rc_id, H5_EVENT_STACK_NULL); ASSERT_RET;
       fprintf( stderr, "APP-r%d: rc %lu - Released\n", my_rank, version );
@@ -1102,7 +1107,7 @@ usage( const char* app ) {
    ret = H5TRclose( tr_id ); ASSERT_RET;
    ret = H5Pclose( trspl_id ); ASSERT_RET;
 
-   // RUTH _ FIX THIS, for now just want to see if data updated.
+   /* NEEDS more work if actually used at some point */
    MPI_Barrier( MPI_COMM_WORLD ); 
    if ( my_rank == 0 ) {
       version = tr_num;

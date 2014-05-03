@@ -183,7 +183,7 @@ int main( int argc, char **argv ) {
 
       /* Acquire read context for CV 1 */
       version = 1;
-      rc_id = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET; assert( version == 1 );
+      rc_id = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); assert( rc_id >= 0); assert( version == 1 );
       fprintf( stderr, "APP-r%d: rc %lu - Acquired\n", my_rank, version );
 
       /* Start a transaction with a single leader (the default) */
