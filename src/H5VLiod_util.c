@@ -1141,7 +1141,7 @@ done:
  */
 herr_t
 H5VL__iod_server_adjust_buffer(hid_t mem_type_id, hid_t dset_type_id, size_t nelmts, 
-                               hid_t UNUSED dxpl_id, size_t size, void **buf, 
+                               hid_t UNUSED dxpl_id, na_bool_t is_coresident, size_t size, void **buf, 
                                hbool_t *is_vl_data, size_t *_buf_size)
 {
     herr_t ret_value = SUCCEED;
@@ -1178,8 +1178,21 @@ H5VL__iod_server_adjust_buffer(hid_t mem_type_id, hid_t dset_type_id, size_t nel
                 if(mem_type_size < dset_type_size) {
                     buf_size = dset_type_size * nelmts;
 
-                    if(NULL == (*buf = realloc(*buf, (size_t)buf_size)))
-                        HGOTO_ERROR_FF(FAIL, "Can't adjust buffer for DT conversion");
+                    /* if we are coresident, and buffer extension is
+                       required, make a new buffer so we don't mess
+                       with the user buffer. */
+                    if(is_coresident) {
+                        void *new_buf = NULL;
+
+                        if(NULL == (new_buf = malloc((size_t)buf_size)))
+                            HGOTO_ERROR_FF(FAIL, "Can't malloc new buffer for DT conversion");
+                        memcpy(new_buf, *buf, *_buf_size);
+                        *buf = new_buf;
+                    }
+                    else {
+                        if(NULL == (*buf = realloc(*buf, (size_t)buf_size)))
+                            HGOTO_ERROR_FF(FAIL, "Can't adjust buffer for DT conversion");
+                    }
 #if H5_EFF_DEBUG
                     fprintf(stderr, "Adjusted Buffer size for dt conversion from %zu to %lld\n", 
                             size, buf_size);

@@ -493,6 +493,8 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     int ndims; /* dataset's rank/number of dimensions */
     hssize_t num_descriptors = 0; /* number of IOD file descriptors needed to describe filespace selection */
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
+    na_class_t *na_class = HG_Handler_get_na_class(op_data->hg_handle); /* NA transfer class */
+    na_bool_t is_coresident = NA_Addr_is_self(na_class, dest);
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the attribute here or if it was already open */
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
@@ -693,6 +695,8 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     iod_checksum_t attr_cs = 0;
     hssize_t num_descriptors = 0; /* number of IOD file descriptors needed to describe filespace selection*/
     na_addr_t source = HG_Handler_get_addr(op_data->hg_handle); /* source address to pull data from */
+    na_class_t *na_class = HG_Handler_get_na_class(op_data->hg_handle); /* NA transfer class */
+    na_bool_t is_coresident = NA_Addr_is_self(na_class, source);
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the attribute here or if it was already opened */
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;

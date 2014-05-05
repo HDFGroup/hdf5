@@ -450,6 +450,8 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
     na_addr_t source = HG_Handler_get_addr(op_data->hg_handle); /* source address to pull data from */
+    na_class_t *na_class = HG_Handler_get_na_class(op_data->hg_handle); /* NA transfer class */
+    na_bool_t is_coresident = NA_Addr_is_self(na_class, source);
     hg_bulk_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     size_t key_size, val_size, new_val_size;
@@ -529,11 +531,11 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     /* adjust buffers for datatype conversion */
-    if(H5VL__iod_server_adjust_buffer(key_memtype_id, key_maptype_id, 1, dxpl_id, 
+    if(H5VL__iod_server_adjust_buffer(key_memtype_id, key_maptype_id, 1, dxpl_id, is_coresident,
                                       key.buf_size, &key.buf, &key_is_vl_data, &key_size) < 0) 
         HGOTO_ERROR_FF(FAIL, "data type conversion failed");
 
-    if(H5VL__iod_server_adjust_buffer(val_memtype_id, val_maptype_id, 1, dxpl_id, 
+    if(H5VL__iod_server_adjust_buffer(val_memtype_id, val_maptype_id, 1, dxpl_id, is_coresident,
                                       val_size, &val_buf, &val_is_vl_data, &new_val_size) < 0)
         HGOTO_ERROR_FF(FAIL, "data type conversion failed");
 
@@ -668,6 +670,8 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
     hg_bulk_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
+    na_class_t *na_class = HG_Handler_get_na_class(op_data->hg_handle); /* NA transfer class */
+    na_bool_t is_coresident = NA_Addr_is_self(na_class, dest);
     hbool_t opened_locally = FALSE;
     iod_checksum_t kv_cs[2];
     iod_ret_t ret;
@@ -708,7 +712,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR_FF(FAIL, "can't get scope for data integrity checks");
 
     /* adjust buffers for datatype conversion */
-    if(H5VL__iod_server_adjust_buffer(key_memtype_id, key_maptype_id, 1, dxpl_id, 
+    if(H5VL__iod_server_adjust_buffer(key_memtype_id, key_maptype_id, 1, dxpl_id, 0,
                                       key.buf_size, &key.buf, &key_is_vl, &key_size) < 0) 
         HGOTO_ERROR_FF(FAIL, "data type conversion failed");
 
@@ -810,7 +814,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
         }
 
         /* adjust buffers for datatype conversion */
-        if(H5VL__iod_server_adjust_buffer(val_memtype_id, val_maptype_id, 1, dxpl_id, 
+        if(H5VL__iod_server_adjust_buffer(val_memtype_id, val_maptype_id, 1, dxpl_id, is_coresident,
                                           (size_t)src_size, &val_buf, &val_is_vl, &val_size) < 0) 
             HGOTO_ERROR_FF(FAIL, "data type conversion failed");
 
@@ -1010,7 +1014,7 @@ H5VL_iod_server_map_exists_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* adjust buffers for datatype conversion */
-    if(H5VL__iod_server_adjust_buffer(key_memtype_id, key_maptype_id, 1, H5P_DEFAULT, 
+    if(H5VL__iod_server_adjust_buffer(key_memtype_id, key_maptype_id, 1, H5P_DEFAULT, 0,
                                       key.buf_size, &key.buf, &is_vl_data, &key_size) < 0) 
         HGOTO_ERROR_FF(FAIL, "data type conversion failed");
 
@@ -1101,7 +1105,7 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* adjust buffers for datatype conversion */
-    if(H5VL__iod_server_adjust_buffer(key_memtype_id, key_maptype_id, 1, H5P_DEFAULT, 
+    if(H5VL__iod_server_adjust_buffer(key_memtype_id, key_maptype_id, 1, H5P_DEFAULT, 0,
                                       key.buf_size, &key.buf, &is_vl_data, &key_size) < 0) 
         HGOTO_ERROR_FF(FAIL, "data type conversion failed");
 

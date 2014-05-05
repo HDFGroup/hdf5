@@ -382,7 +382,7 @@ EFF_setup_coresident(MPI_Comm comm, MPI_Info UNUSED info)
         return FAIL;
 
     /* Set number of threads in AXE engine */
-    if(AXEset_num_threads(&engine_attr, 16) != AXE_SUCCEED)
+    if(AXEset_num_threads(&engine_attr, 2) != AXE_SUCCEED)
         return FAIL;
 
     /* Create AXE engine */
