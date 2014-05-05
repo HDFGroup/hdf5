@@ -587,6 +587,10 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the dset here or if it was already open */
     herr_t ret_value = SUCCEED;
 
+    /* MSC - for now do memcpy if segment count > 1 */
+    if(is_coresident && 1 != HG_Bulk_handle_get_segment_count(bulk_handle))
+        is_coresident = NA_FALSE;
+
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.rd_oh.cookie == IOD_OH_UNDEFINED) {
         ret = iod_obj_open_read(coh, iod_id, rtid, NULL, &iod_oh.rd_oh, NULL);
@@ -610,14 +614,27 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     /* retrieve size of bulk data asked for to be read */
     size = HG_Bulk_handle_get_size(bulk_handle);
 
-    /* allocate buffer to hold data */
-    if(NULL == (buf = malloc(size)))
-        HGOTO_ERROR_FF(FAIL, "can't allocate read buffer");
+    if(is_coresident) {
+        size_t bulk_size = 0;
 
-    /* Create bulk handle */
-    if(HG_SUCCESS != HG_Bulk_handle_create(1, &buf, &size, 
-                                           HG_BULK_READWRITE, &bulk_block_handle))
-        HGOTO_ERROR_FF(FAIL, "can't create bulk handle");
+        bulk_block_handle = bulk_handle;
+        /* get  mercury buffer where data is */
+        if(HG_SUCCESS != HG_Bulk_handle_access(bulk_block_handle, 0, size,
+                                               HG_BULK_READWRITE, 1, &buf, &bulk_size, NULL))
+            HGOTO_ERROR_FF(FAIL, "Could not access handle");
+
+        assert(size == bulk_size);
+    }
+    else {
+        /* allocate buffer to hold data */
+        if(NULL == (buf = malloc(size)))
+            HGOTO_ERROR_FF(FAIL, "can't allocate read buffer");
+
+        /* Create bulk handle */
+        if(HG_SUCCESS != HG_Bulk_handle_create(1, &buf, &size, 
+                                               HG_BULK_READWRITE, &bulk_block_handle))
+            HGOTO_ERROR_FF(FAIL, "can't create bulk handle");
+    }
 
     /* get the number of points selected */
     nelmts = (size_t)H5Sget_select_npoints(space_id);
@@ -625,13 +642,19 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     /* Adjust buffer is type conversion is needed. If the data
        elements are of variable length, just return that they are in
        is_vl_data for special processing */
+    if(H5VL__iod_server_type_is_vl(src_id, &is_vl_data) < 0)
+        HGOTO_ERROR_FF(FAIL, "failed to check dataype");
+    
+    /*
     if(H5VL__iod_server_adjust_buffer(dst_id, src_id, nelmts, dxpl_id, is_coresident,
                                       size, &buf, &is_vl_data, &buf_size) < 0)
-        HGOTO_ERROR_FF(FAIL, "failed to setup write operation");
-
+        HGOTO_ERROR_FF(FAIL, "failed to setup read operation");
+    */
     if(!is_vl_data) {
         size_t elmt_size;
         iod_trans_id_t read_tid;
+
+        buf_size = H5Tget_size(src_id) * nelmts;
 
         /* get replica ID from dxpl */
         if(H5Pget_read_replica(dxpl_id, &read_tid) < 0)
@@ -684,18 +707,20 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
             HGOTO_ERROR_FF(ret, "can't read from array object");
     }
 
-    /* Push data to the client */
-    if(HG_SUCCESS != HG_Bulk_transfer(HG_BULK_PUSH, dest, bulk_handle, 0, 
-                                      bulk_block_handle, 0, size, &bulk_request))
-        HGOTO_ERROR_FF(FAIL, "Transfer data failed");
+    if(!is_coresident) {
+        /* Push data to the client */
+        if(HG_SUCCESS != HG_Bulk_transfer(HG_BULK_PUSH, dest, bulk_handle, 0, 
+                                          bulk_block_handle, 0, size, &bulk_request))
+            HGOTO_ERROR_FF(FAIL, "Transfer data failed");
 
-    /* Wait for bulk data read to complete */
-    if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-        HGOTO_ERROR_FF(FAIL, "can't wait for bulk data operation");
+        /* Wait for bulk data read to complete */
+        if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
+            HGOTO_ERROR_FF(FAIL, "can't wait for bulk data operation");
 
-    /* free block handle */
-    if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
-        HGOTO_ERROR_FF(FAIL, "can't free bds block handle");
+        /* free block handle */
+        if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
+            HGOTO_ERROR_FF(FAIL, "can't free bds block handle");
+    }
 
 #if H5_EFF_DEBUG 
     fprintf(stderr, "Done with dset read, checksum %016lX, sending response to client\n", cs);
@@ -717,7 +742,7 @@ done:
     input = (dset_io_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    if(buf) {
+    if(!is_coresident && buf) {
         free(buf);
         buf = NULL;
     }
@@ -808,14 +833,27 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
         unsigned u;
         H5VL_iod_type_info_t type_info;
 
-        /* allocate buffer to hold data */
-        if(NULL == (temp_buf = malloc(buf_size)))
-            HGOTO_ERROR_FF(FAIL, "can't allocate read buffer");
+        if(is_coresident) {
+            size_t bulk_size = 0;
 
-        /* Create bulk handle */
-        if(HG_SUCCESS != HG_Bulk_handle_create(1, &temp_buf, &buf_size, 
-                                               HG_BULK_READWRITE, &bulk_block_handle))
-            HGOTO_ERROR_FF(FAIL, "can't create bulk handle");
+            bulk_block_handle = bulk_handle;
+            /* get  mercury buffer where data is */
+            if(HG_SUCCESS != HG_Bulk_handle_access(bulk_block_handle, 0, buf_size,
+                                                   HG_BULK_READWRITE, 1, &temp_buf, &bulk_size, NULL))
+                HGOTO_ERROR_FF(FAIL, "Could not access handle");
+
+            assert(buf_size == bulk_size);
+        }
+        else {
+            /* allocate buffer to hold data */
+            if(NULL == (temp_buf = malloc(buf_size)))
+                HGOTO_ERROR_FF(FAIL, "can't allocate read buffer");
+
+            /* Create bulk handle */
+            if(HG_SUCCESS != HG_Bulk_handle_create(1, &temp_buf, &buf_size, 
+                                                   HG_BULK_READWRITE, &bulk_block_handle))
+                HGOTO_ERROR_FF(FAIL, "can't create bulk handle");
+        }
 
         buf_ptr = (uint8_t *)buf;
         temp_ptr = (uint8_t *)temp_buf;
@@ -850,22 +888,24 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
 
         H5VL_iod_type_info_reset(&type_info);
 
-        /* Push data to the client */
-        if(HG_SUCCESS != HG_Bulk_transfer(HG_BULK_PUSH, dest, bulk_handle, 0, 
-                                          bulk_block_handle, 0, buf_size, &bulk_request))
-            HGOTO_ERROR_FF(FAIL, "Transfer data failed");
+        if(!is_coresident) {
+            /* Push data to the client */
+            if(HG_SUCCESS != HG_Bulk_transfer(HG_BULK_PUSH, dest, bulk_handle, 0, 
+                                              bulk_block_handle, 0, buf_size, &bulk_request))
+                HGOTO_ERROR_FF(FAIL, "Transfer data failed");
 
-        /* Wait for bulk data read to complete */
-        if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-            HGOTO_ERROR_FF(FAIL, "can't wait for bulk data operation");
+            /* Wait for bulk data read to complete */
+            if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
+                HGOTO_ERROR_FF(FAIL, "can't wait for bulk data operation");
 
-        /* free block handle */
-        if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
-            HGOTO_ERROR_FF(FAIL, "can't free bds block handle");
+            /* free block handle */
+            if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
+                HGOTO_ERROR_FF(FAIL, "can't free bds block handle");
 
-        if(temp_buf) {
-            free(temp_buf);
-            temp_buf = NULL;
+            if(temp_buf) {
+                free(temp_buf);
+                temp_buf = NULL;
+            }
         }
     }
 

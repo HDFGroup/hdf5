@@ -280,7 +280,9 @@ int main(int argc, char **argv) {
         value = -1;
         ret = H5Mget_ff(map, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
                         dxpl_id, rid2, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
         printf("Value recieved = %d\n", value);
+        assert(1000 == value);
 
 	H5Pclose(dxpl_id);
 

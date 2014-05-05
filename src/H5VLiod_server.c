@@ -315,6 +315,8 @@ H5VL_iod_server_eff_init(hg_handle_t handle)
 
 done:
     HG_Handler_start_output(handle, &ret_value);
+    HG_Handler_free(handle);
+
     return ret_value;
 } /* end H5VL_iod_server_eff_init() */
 
@@ -352,6 +354,7 @@ H5VL_iod_server_eff_finalize(hg_handle_t handle)
 
 done:
     HG_Handler_start_output(handle, &ret_value);
+    HG_Handler_free(handle);
     return ret_value;
 } /* end H5VL_iod_server_eff_finalize() */
 

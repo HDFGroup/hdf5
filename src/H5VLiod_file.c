@@ -289,6 +289,10 @@ done:
         con_open_hint = NULL;
     }
 
+    if(obj_create_hint) {
+        free(obj_create_hint);
+        obj_create_hint = NULL;
+    }
 } /* end H5VL_iod_server_file_create_cb() */
 
 

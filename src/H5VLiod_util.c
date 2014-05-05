@@ -1146,7 +1146,82 @@ H5VL__iod_server_adjust_buffer(hid_t mem_type_id, hid_t dset_type_id, size_t nel
 {
     herr_t ret_value = SUCCEED;
 
-    switch(H5Tget_class(dset_type_id)) {
+    if(H5VL__iod_server_type_is_vl(dset_type_id, is_vl_data) < 0)
+        HGOTO_ERROR_FF(FAIL, "failed to check dataype");
+
+    if(!(*is_vl_data)) {
+        hsize_t buf_size = 0;
+        size_t mem_type_size, dset_type_size;
+
+        /* retrieve source and destination datatype sizes for data conversion */
+        mem_type_size = H5Tget_size(mem_type_id);
+        dset_type_size = H5Tget_size(dset_type_id);
+
+        /* adjust buffer size for data conversion */
+        if(mem_type_size < dset_type_size) {
+            buf_size = dset_type_size * nelmts;
+
+            /* if we are coresident, and buffer extension is
+               required, make a new buffer so we don't mess
+               with the user buffer. */
+            if(is_coresident) {
+                void *new_buf = NULL;
+
+                if(NULL == (new_buf = malloc((size_t)buf_size)))
+                    HGOTO_ERROR_FF(FAIL, "Can't malloc new buffer for DT conversion");
+                memcpy(new_buf, *buf, size);
+                *buf = new_buf;
+            }
+            else {
+                if(NULL == (*buf = realloc(*buf, (size_t)buf_size)))
+                    HGOTO_ERROR_FF(FAIL, "Can't adjust buffer for DT conversion");
+            }
+#if H5_EFF_DEBUG
+            fprintf(stderr, "Adjusted Buffer size for dt conversion from %zu to %lld\n", 
+                    size, buf_size);
+#endif
+        }
+        else {
+            buf_size = mem_type_size * nelmts;
+            if(buf_size != size)
+                HGOTO_ERROR_FF(FAIL, "Incoming data size is not equal to expected size");
+        }
+
+        *_buf_size = buf_size;
+    }
+    else {
+        *_buf_size = size;
+    }
+
+done:
+    return ret_value;
+} /* end H5VL__iod_server_adjust_buffer */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_server_type_is_vl
+ *
+ *              Checks datatypes to see if it's Variable length.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              August, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL__iod_server_type_is_vl(hid_t type_id, hbool_t *is_vl_data)
+{
+    herr_t ret_value = SUCCEED;
+
+    switch(H5Tget_class(type_id)) {
+        case H5T_STRING:
+            if(H5Tis_variable_str(type_id)) {
+                *is_vl_data = TRUE;
+                break;
+            }
         case H5T_INTEGER:
         case H5T_FLOAT:
         case H5T_TIME:
@@ -1155,62 +1230,13 @@ H5VL__iod_server_adjust_buffer(hid_t mem_type_id, hid_t dset_type_id, size_t nel
         case H5T_ENUM:
         case H5T_ARRAY:
         case H5T_NO_CLASS:
-        case H5T_STRING:
-            if(H5Tis_variable_str(dset_type_id)) {
-                *is_vl_data = TRUE;
-                *_buf_size = size;
-                break;
-            }
         case H5T_REFERENCE:
         case H5T_NCLASSES:
         case H5T_COMPOUND:
-            {
-                hsize_t buf_size = 0;
-                size_t mem_type_size, dset_type_size;
-
-                *is_vl_data = FALSE;
-
-                /* retrieve source and destination datatype sizes for data conversion */
-                mem_type_size = H5Tget_size(mem_type_id);
-                dset_type_size = H5Tget_size(dset_type_id);
-
-                /* adjust buffer size for data conversion */
-                if(mem_type_size < dset_type_size) {
-                    buf_size = dset_type_size * nelmts;
-
-                    /* if we are coresident, and buffer extension is
-                       required, make a new buffer so we don't mess
-                       with the user buffer. */
-                    if(is_coresident) {
-                        void *new_buf = NULL;
-
-                        if(NULL == (new_buf = malloc((size_t)buf_size)))
-                            HGOTO_ERROR_FF(FAIL, "Can't malloc new buffer for DT conversion");
-                        memcpy(new_buf, *buf, *_buf_size);
-                        *buf = new_buf;
-                    }
-                    else {
-                        if(NULL == (*buf = realloc(*buf, (size_t)buf_size)))
-                            HGOTO_ERROR_FF(FAIL, "Can't adjust buffer for DT conversion");
-                    }
-#if H5_EFF_DEBUG
-                    fprintf(stderr, "Adjusted Buffer size for dt conversion from %zu to %lld\n", 
-                            size, buf_size);
-#endif
-                }
-                else {
-                    buf_size = mem_type_size * nelmts;
-                    if(buf_size != size)
-                        HGOTO_ERROR_FF(FAIL, "Incoming data size is not equal to expected size");
-                }
-
-                *_buf_size = buf_size;
-
-                break;
-            }
+            *is_vl_data = FALSE;
+            break;
         case H5T_VLEN:
             *is_vl_data = TRUE;
-            *_buf_size = size;
             break;
         default:
             HGOTO_ERROR_FF(FAIL, "unsupported datatype");
@@ -1218,7 +1244,7 @@ H5VL__iod_server_adjust_buffer(hid_t mem_type_id, hid_t dset_type_id, size_t nel
 
 done:
     return ret_value;
-} /* end H5VL__iod_server_adjust_buffer */
+} /* end H5VL__iod_server_type_is_vl */
 
 
 /*-------------------------------------------------------------------------

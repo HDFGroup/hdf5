@@ -407,6 +407,7 @@ H5_DLL herr_t H5VL__iod_server_adjust_buffer(hid_t from_type_id, hid_t to_type_i
                                              hid_t dxpl_id, na_bool_t is_coresident,
                                              size_t size, void **buf, 
                                              hbool_t *is_vl_data, size_t *_buf_size);
+H5_DLL herr_t H5VL__iod_server_type_is_vl(hid_t type_id, hbool_t *is_vl_data);
 H5_DLL herr_t H5VL_iod_verify_scratch_pad(scratch_pad *sp, iod_checksum_t iod_cs);
 H5_DLL herr_t H5VL_iod_verify_kv_pair(void *key, iod_size_t key_size, void *value, iod_size_t val_size, 
                                       iod_checksum_t *iod_cs);

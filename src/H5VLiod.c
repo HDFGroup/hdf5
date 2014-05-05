@@ -740,7 +740,10 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     }
 
     /* Wait for it to compete */
-    HG_Wait(hg_req, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE);
+    if(HG_FAIL == HG_Wait(hg_req, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE)) {
+        fprintf(stderr, "Failed to initialize Stack\n");
+        return FAIL;
+    }
 
     /* Free Mercury request */
     if(HG_Request_free(hg_req) != HG_SUCCESS)

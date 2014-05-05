@@ -2871,7 +2871,7 @@ H5VL_iod_map_dtype_info(hid_t type_id, /*out*/ hbool_t *is_vl, /*out*/size_t *si
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_map_get_size */
+} /* end H5VL_iod_map_dtype_info */
 
 #if 0
 static herr_t
