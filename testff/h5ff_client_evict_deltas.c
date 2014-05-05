@@ -10,7 +10,7 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name[]="eff_file_deltas.h5";
+    char file_name[50];
     hid_t file_id;
     hid_t gid;
     hid_t did, map;
@@ -35,6 +35,8 @@ int main(int argc, char **argv) {
     H5ES_status_t status;
     size_t num_events = 0;
     herr_t ret;
+
+    sprintf(file_name, "%s_%s", getenv("USER"), "eff_file_evdt.h5");
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {
@@ -88,12 +90,12 @@ int main(int argc, char **argv) {
     sid = H5Screate_simple(1, dims, NULL);
     dtid = H5Tcopy(H5T_STD_I32LE);
 
-    /* acquire container version 0 - EXACT.  
+    /* acquire container version 1 - EXACT.  
        This can be asynchronous, but here we need the acquired ID 
        right after the call to start the transaction so we make synchronous. */
-    version = 0;
+    version = 1;
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(0 == version);
+    assert(1 == version);
 
     /* start transaction 1 with default Leader/Delegate model. Leader
        which is rank 0 here starts the transaction. It can be
@@ -104,7 +106,7 @@ int main(int argc, char **argv) {
         hid_t rid_temp;
 
         /* create transaction object */
-        tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
+        tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
         assert(tid1);
         ret = H5TRstart(tid1, H5P_DEFAULT, e_stack);
         assert(0 == ret);
@@ -153,7 +155,7 @@ int main(int argc, char **argv) {
         assert(0 == ret);
 
         /* create transaction object */
-        tid2 = H5TRcreate(file_id, rid_temp, (uint64_t)2);
+        tid2 = H5TRcreate(file_id, rid_temp, (uint64_t)3);
         assert(tid2);
         ret = H5TRstart(tid2, H5P_DEFAULT, e_stack);
         assert(0 == ret);
@@ -169,16 +171,16 @@ int main(int argc, char **argv) {
         assert(H5Tclose_ff(dtid, e_stack) == 0);
         assert(H5Dclose_ff(did, e_stack) == 0);
 
-        /* release container version 1. This is async. */
+        /* release container version 2. This is async. */
         ret = H5RCrelease(rid_temp, e_stack);
         assert(0 == ret);
         ret = H5RCclose(rid_temp);
         assert(0 == ret);
 
-        version = 2;
+        version = 3;
     }
 
-    /* release container version 0. This is async. */
+    /* release container version 1. This is async. */
     ret = H5RCrelease(rid1, e_stack);
     assert(0 == ret);
 
@@ -198,7 +200,7 @@ int main(int argc, char **argv) {
 
     /* Process 0 tells other procs that container version 2 is acquired */
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
-    assert(2 == version);
+    assert(3 == version);
 
     /* other processes just create a read context object; no need to
        acquire it */
@@ -214,7 +216,7 @@ int main(int argc, char **argv) {
     did = H5Oopen_ff(gid,"D1", H5P_DEFAULT, rid2);
     assert(did);
     map = H5Oopen_ff(file_id,"MAP1", H5P_DEFAULT, rid2);
-    assert(did);
+    assert(map);
 
     if(0 == my_rank) {
         ret = H5RCpersist(rid2, H5_EVENT_STACK_NULL);
@@ -223,17 +225,18 @@ int main(int argc, char **argv) {
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
     if((my_size > 1 && 1 == my_rank) || 
        (my_size == 1 && 0 == my_rank)) {
-        ret = H5Tevict_ff(dtid, 2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        ret = H5Tevict_ff(dtid, 3, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
-        ret = H5Devict_ff(did, 2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        ret = H5Devict_ff(did, 3, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
-        ret = H5Mevict_ff(map, 2, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        ret = H5Mevict_ff(map, 3, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+
+        ret = H5Gevict_ff(gid, 3, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
         /* see if we can read after evicting */
@@ -254,7 +257,7 @@ int main(int argc, char **argv) {
     MPI_Barrier(MPI_COMM_WORLD);
 
     if(my_rank == 0) {
-        /* release container version 2. This is async. */
+        /* release container version 3. This is async. */
         ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);
     }

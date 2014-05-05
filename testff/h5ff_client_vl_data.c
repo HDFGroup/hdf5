@@ -10,7 +10,7 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name[]="eff_file_vl_dset.h5";
+    char file_name[50];
 
     hid_t file_id;
     hid_t sid, vl_dtid, str_dtid;
@@ -48,6 +48,8 @@ int main(int argc, char **argv) {
     uint32_t cs_scope = 0;
     herr_t ret;
 
+    sprintf(file_name, "%s_%s", getenv("USER"), "eff_file_vl_data.h5");
+
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {
         fprintf(stderr, "MPI does not have MPI_THREAD_MULTIPLE support\n");
@@ -78,15 +80,15 @@ int main(int argc, char **argv) {
     file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, H5_EVENT_STACK_NULL);
     assert(file_id > 0);
 
-    /* acquire container version 0 - EXACT.  
+    /* acquire container version 1 - EXACT.  
        This can be asynchronous, but here we need the acquired ID 
        right after the call to start the transaction so we make synchronous. */
-    version = 0;
+    version = 1;
     rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(0 == version);
+    assert(1 == version);
 
     /* create transaction object */
-    tid1 = H5TRcreate(file_id, rid1, (uint64_t)1);
+    tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
     assert(tid1);
 
     /* Create datatypes */
@@ -105,7 +107,7 @@ int main(int argc, char **argv) {
        Leader can tell its delegates that the transaction is
        started. */
     if(0 == my_rank) {
-        trans_num = 1;
+        trans_num = 2;
         ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
@@ -161,7 +163,7 @@ int main(int argc, char **argv) {
        while others wait for the ibcast to complete */
     if(0 != my_rank) {
         MPI_Wait(&mpi_req, MPI_STATUS_IGNORE);
-        assert(1 == trans_num);
+        assert(2 == trans_num);
 
         /* recieve the token sizes */ 
         MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD, &mpi_reqs[0]);
@@ -246,8 +248,8 @@ int main(int argc, char **argv) {
     printf("%d events in event stack. H5ESwait_all Completion status = %d\n", num_events, status);
     H5ESclear(e_stack);
 
-    /* Tell other procs that container version 1 is acquired */
-    version = 1;
+    /* Tell other procs that container version 2 is acquired */
+    version = 2;
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
 
     /* other processes just create a read context object; no need to
@@ -257,22 +259,22 @@ int main(int argc, char **argv) {
         assert(rid2 > 0);
     }
 
-    /* read data from datasets with read version 1. */
+    /* read data from datasets with read version 2. */
     ret = H5Dread_ff(did1, vl_dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata, 
                      rid2, H5_EVENT_STACK_NULL);
     assert(ret == 0);
+
     ret = H5Dread_ff(did2, str_dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, str_rdata, 
                      rid2, H5_EVENT_STACK_NULL);
     assert(ret == 0);
 
     MPI_Barrier(MPI_COMM_WORLD);
     if(my_rank == 0) {
-        /* release container version 1. This is async. */
+        /* release container version 2. This is async. */
         ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);
     }
 
-    
     /* Print VL DATA */
     for(i = 0; i < 5; i++) {
         int temp = i*increment + increment;
