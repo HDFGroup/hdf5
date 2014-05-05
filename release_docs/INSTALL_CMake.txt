@@ -38,9 +38,10 @@ CMake version
 II. Quick Step Building HDF5 Libraries with CMake Script Mode
 ========================================================================
 This short set of instructions is written for users who want to quickly 
-build the HDF5 Library and tools from the HDF5 source code package 
-using the CMake tools. HDF Group recommends using the ctest script mode 
-to build HDF5.
+build the HDF5 C, C++, Fortran, and High-level shared libraries and tools
+from the HDF5 source code package using the CMake tools. This procedure 
+will use the default settings in the config/cmake/cacheinit.cmake file.
+HDF Group recommends using the ctest script mode to build HDF5.
 
 The following files referenced below are available at the HDF web site:
     http://www.hdfgroup.org/HDF5/release/cmakebuild.html
@@ -53,10 +54,10 @@ External compression szip and zlib libraries:
     ZLib.tar.gz
     
 Platform configuration files:
-    HDF518Windows64RWDICMake.cmake
-    HDF518Windows32RWDICMake.cmake
-    HDF518LinuxRWDICMake.cmake
-    HDF518MacRWDICMake.cmake
+    HDF518Windows64CMake.cmake
+    HDF518Windows32CMake.cmake
+    HDF518LinuxCMake.cmake
+    HDF518MacCMake.cmake
 
 To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 
@@ -75,14 +76,14 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
    5. From the "myhdfstuff" directory execute the CTest Script with the 
       following options:
 
-         ctest -S <configuration file> -C RelWithDebInfo -VV -O hdf5.log
+         ctest -S <configuration file> -C Release -VV -O hdf5.log
 
       The command above will configure, build, test, and create an install 
       package in the myhdfstuff/hdf5-1.8/build folder.
 
       The -S option uses the script version of ctest.
         
-      The value for the -C option (as shown above, "-C RelWithDebInfo") must 
+      The value for the -C option (as shown above, "-C Release") must 
       match the setting for CTEST_BUILD_CONFIGURATION in the platform 
       configuration file.
         
@@ -94,21 +95,56 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
  
       On Windows, execute:
                 HDF5-1.8."X"-win32.exe or HDF5-1.8."X"-win64.exe
+      By default this program will install the hdf5 library into the
+      "C:\Program Files" directory and will create the following 
+      directory structure:
+         HDF_Group
+         --HDF5
+         ----1.8."X"
+         ------bin
+         ------include
+         ------lib
+         ------cmake
 
       On Linux, change to the install destination directory 
-      (create if doesn't exist) and execute:
+      (create it if doesn't exist) and execute:
                 <path-to>/myhdfstuff/hdf5-1.8/build/HDF5-1.8."X"-Linux.sh
+      After accepting the license, the script will prompt:
+        By default the HDF5 will be installed in:
+        "<current directory>/HDF5-1.8."X"-Linux"
+        Do you want to include the subdirectory HDF5-1.8."X"-Linux?
+        Saying no will install in: "<current directory>" [Yn]: 
+      Note that the script will create the following directory structure
+      relative to the install point:
+         HDF_Group
+         --HDF5
+         ----1.8."X"
+         ------bin
+         ------include
+         ------lib
+         ------share
                 
       On Mac you will find HDF5-1.8."X"-Darwin.dmg in the build folder. Click
-      on the dmg file to proceed with installation.
+      on the dmg file to proceed with installation. After accepting the license,
+      there will be a folder with the following structure:      
+         HDF_Group
+         --HDF5
+         ----1.8."X"
+         ------bin
+         ------include
+         ------lib
+         ------share
+      
+      By default the installation will create the bin, include, lib and cmake
+      folders in the <install destination directory>/HDF_Group/HDF5/1.8.
 
 
 ========================================================================
-III. Quick Step Building HDF5 Libraries with CMake
+III. Quick Step Building HDF5 C Static Libraries and Tools with CMake
 ========================================================================
 Notes: This short set of instructions is written for users who want to 
-       quickly build the HDF5 Library and tools from the HDF5 source code 
-       package using the CMake command line tools.
+       quickly build the just the HDF5 C static library and tools from 
+       the HDF5 source code package using the CMake command line tools.
        
    Go through these steps:
 
@@ -145,13 +181,45 @@ Notes: This short set of instructions is written for users who want to
       9. To install 
          On Windows, execute:
                 HDF5-1.8."X"-win32.exe or HDF5-1.8."X"-win64.exe
+         By default this program will install the hdf5 library into the
+         "C:\Program Files" directory and will create the following 
+         directory structure:
+            HDF_Group
+            --HDF5
+            ----1.8."X"
+            ------bin
+            ------include
+            ------lib
+            ------cmake
 
          On Linux, change to the install destination directory 
          (create if doesn't exist) and execute:
                 <path-to>/myhdfstuff/build/HDF5-1.8."X"-Linux.sh
+         After accepting the license, the script will prompt:
+           By default the HDF5 will be installed in:
+           "<current directory>/HDF5-1.8."X"-Linux"
+           Do you want to include the subdirectory HDF5-1.8."X"-Linux?
+           Saying no will install in: "<current directory>" [Yn]: 
+         Note that the script will create the following directory structure
+         relative to the install point:
+            HDF_Group
+            --HDF5
+            ----1.8."X"
+            ------bin
+            ------include
+            ------lib
+            ------share
                 
          On Mac you will find HDF5-1.8."X"-Darwin.dmg in the build folder. Click
-         on the dmg file to proceed with installation.
+         on the dmg file to proceed with installation. After accepting the license,
+         there will be a folder with the following structure:      
+            HDF_Group
+            --HDF5
+            ----1.8."X"
+            ------bin
+            ------include
+            ------lib
+            ------share
 
 
 ========================================================================
@@ -470,7 +538,8 @@ VI. CMake Option Defaults for HDF5
 ========================================================================
 
 In the options listed below, there are three columns of information: 
-Option Name, Option Description, and Option Default.
+Option Name, Option Description, and Option Default. 
+The config/cmake/cacheinit.cmake file overrides the following values.
 
 ---------------- General Build Options ---------------------
 BUILD_SHARED_LIBS  "Build Shared Libraries"    OFF
@@ -554,23 +623,23 @@ build and test process.
 VIII. Options for Platform Configuration Files
 ========================================================================
 
-Below is the HDF518LinuxRWDICmake.cmake ctest script with extra comments.
+Below is the HDF518LinuxCmake.cmake ctest script with extra comments.
 The example is for a linux machine, but the same scripts can be used on 
 a Windows machine by adjusting the CTEST_CMAKE_GENERATOR option in the
 platform configuration script.
 
 
 ############################################################################
-# Product specific script, HDF518LinuxRWDICmake.cmake, that uses the 
+# Product specific script, HDF518LinuxCmake.cmake, that uses the 
 # CTestScript.cmake file. Usage:
-# "ctest -S HDF518LinuxRWDICmake.cmake -C Release -O hdf518static.log"
+# "ctest -S HDF518LinuxCmake.cmake -C Release -O hdf518shared.log"
 ############################################################################
 cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
 
 # this is the location of the source hardcoded to hdf5-1.8.13
 set(CTEST_SOURCE_NAME hdf5-1.8.13)
 # this is the location of the source with ctest parameter hdf5src
-# "ctest -S HDF518LinuxRWDICmake.cmake,hdf5src -C Release -O hdf518static.log"
+# "ctest -S HDF518LinuxCmake.cmake,hdf5src -C Release -O hdf518static.log"
 set(CTEST_SOURCE_NAME ${CTEST_SCRIPT_ARG})
 
 # this is the location of the build directory
@@ -588,7 +657,7 @@ set(CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_BINARY_NAME}")
 
 ###################################################################
 ### Following Line is one of [Release, RelWithDebInfo, Debug] #####
-set(CTEST_BUILD_CONFIGURATION "RelWithDebInfo")
+set(CTEST_BUILD_CONFIGURATION "Release")
 ###################################################################
 
 ###################################################################
@@ -610,7 +679,7 @@ set(MODEL "Experimental")
 ##  Set the following to unique id your computer  ##
 set(CTEST_SITE "LINUX.XXXX")
 ##    following is optional to describe build     ##
-set(SITE_BUILDNAME_SUFFIX "RWDI-SHARED")
+set(SITE_BUILDNAME_SUFFIX "SHARED")
 
 #########   Following controls CDash submission          ##########
 #set(LOCAL_SUBMIT "TRUE")
@@ -619,7 +688,7 @@ set(SITE_BUILDNAME_SUFFIX "RWDI-SHARED")
 #set(LOCAL_MEMCHECK_TEST "TRUE")
 #set(LOCAL_COVERAGE_TEST "TRUE")
 #########   Following controls cpack command             ##########
-set(LOCAL_NO_PACKAGE "TRUE")
+#set(LOCAL_NO_PACKAGE "TRUE")
 #########   Following controls source update             ##########
 #set(LOCAL_UPDATE "TRUE")
 #########   Following controls source repository         ##########
