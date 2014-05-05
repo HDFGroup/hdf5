@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
     uint64_t version;
     uint64_t trans_num;
 
-    int32_t *wdata1 = NULL, *wdata2 = NULL;
+    int32_t *wdata1 = NULL;
     int16_t *wdata3 = NULL;
     int32_t *ex_wdata = NULL, *ex_rdata = NULL;
     int32_t *rdata1 = NULL, *rdata2 = NULL;
@@ -96,17 +96,15 @@ int main(int argc, char **argv) {
 
     /* allocate and initialize arrays for dataset I/O */
     wdata1 = malloc (sizeof(int32_t)*nelem);
-    wdata2 = malloc (sizeof(int32_t)*nelem);
     wdata3 = malloc (sizeof(int16_t)*nelem);
     rdata1 = malloc (sizeof(int32_t)*nelem);
     rdata2 = malloc (sizeof(int32_t)*nelem);
-    rdata3 = malloc (sizeof(int16_t)*nelem);
+    rdata3 = malloc (sizeof(int32_t)*nelem);
     for(i=0;i<nelem;++i) {
         rdata1[i] = 0;
         rdata2[i] = 0;
         rdata3[i] = 0;
         wdata1[i]=i;
-        wdata2[i]=i;
         wdata3[i]=i;
     }
 
@@ -384,20 +382,19 @@ int main(int argc, char **argv) {
     H5Pset_dxpl_inject_corruption(dxpl_id, 1);
     /* Give a location to the DXPL to store the checksum once the read has completed */
     H5Pset_dxpl_checksum_ptr(dxpl_id, &read2_cs);
-
     ret = H5Dread_ff(did1, dtid, H5S_ALL, H5S_ALL, dxpl_id, rdata2, rid2, e_stack);
     assert(ret == 0);
+    H5Pclose(dxpl_id);
 
-    /* tell HDF5 to disable all data integrity checks for this write */
+    dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+    /* tell HDF5 to disable all data integrity checks for this read */
     cs_scope = 0;
     ret = H5Pset_rawdata_integrity_scope(dxpl_id, cs_scope);
     assert(ret == 0);
-
     /* Raw data read on D3. This is asynchronous.  Note that the type
        is different than the dataset type. */
     ret = H5Dread_ff(did3, H5T_STD_I16BE, H5S_ALL, H5S_ALL, dxpl_id, rdata3, rid2, e_stack);
     assert(ret == 0);
-
     H5Pclose(dxpl_id);
 
     /* Raw data read on D1. This is asynchronous.  The read is done into a 
@@ -541,7 +538,7 @@ int main(int argc, char **argv) {
     ret = H5Gclose_ff(gid1, e_stack);
     assert(ret == 0);
 
-    H5Fclose_ff(file_id, 0, H5_EVENT_STACK_NULL);
+    H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL);
 
     H5ESget_count(e_stack, &num_events);
 
@@ -587,7 +584,7 @@ int main(int argc, char **argv) {
     assert(read1_cs == array_cs);
     assert(read2_cs != array_cs);
 
-    printf("Read Data3 (32 LE converted to 16 bit BE order): ");
+    printf("Read Data3 with datatype conversion (expect to see same as others since it is converted twice): \n");
     for(i=0;i<nelem;++i)
         printf("%d ",rdata3[i]);
     printf("\n");
@@ -596,7 +593,6 @@ int main(int argc, char **argv) {
     assert(ret == 0);
 
     free(wdata1);
-    free(wdata2);
     free(wdata3);
     free(rdata1);
     free(rdata2);
