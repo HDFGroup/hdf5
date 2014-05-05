@@ -105,9 +105,6 @@ typedef struct H5FD_core_fapl_t {
 /* Allocate memory in multiples of this size by default */
 #define H5FD_CORE_INCREMENT 8192
 
-/* Define the block size for aggregation */
-//#define H5FD_CORE_BLOCK_SIZE 524288 /* 512 K */
-
 /* These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
  *
@@ -223,9 +220,6 @@ H5FD_core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
 fprintf(stderr, "Add region: (%llu, %llu)\n", start, end);
 #endif
 
-//    /* Adjust the dirty region to the nearest block boundaries */
-//    if(start % H5FD_CORE_BLOCK_SIZE != 0) {
-//        start = (start / H5FD_CORE_BLOCK_SIZE) * H5FD_CORE_BLOCK_SIZE;
     /* Adjust the dirty region to the nearest block boundaries */
     if(start % file->bstore_page_size != 0) {
         start = (start / file->bstore_page_size) * file->bstore_page_size;
@@ -233,8 +227,6 @@ fprintf(stderr, "Add region: (%llu, %llu)\n", start, end);
         was_adjusted = TRUE;
 #endif
     }
-//    if(end % H5FD_CORE_BLOCK_SIZE != (H5FD_CORE_BLOCK_SIZE - 1)) {
-//        end = (((end / H5FD_CORE_BLOCK_SIZE) + 1) * H5FD_CORE_BLOCK_SIZE) - 1;
     if(end % file->bstore_page_size != (file->bstore_page_size - 1)) {
         end = (((end / file->bstore_page_size) + 1) * file->bstore_page_size) - 1;
         if(end > file->eof){
