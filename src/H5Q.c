@@ -191,7 +191,7 @@ H5Q_init_interface(void)
 
     /* Initialize the atom group for the QUERY IDs */
     if (H5I_register_type(H5I_QUERY_CLS) < 0)
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTINIT, FAIL, "unable to initialize interface")
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -264,6 +264,7 @@ H5Qcreate(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
 
     switch (query_type) {
         case H5Q_TYPE_DATA_ELEM:
+        case H5Q_TYPE_ATTR_VALUE:
         {
             H5T_t *datatype = NULL;
             hid_t datatype_id;
@@ -275,11 +276,11 @@ H5Qcreate(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
 
             /* Get type */
             if (NULL == (datatype = (H5T_t *) H5I_object_verify(datatype_id, H5I_DATATYPE)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
             /* Create a new query object */
             if (NULL == (query = H5Q_create(query_type, match_op, datatype, value)))
-                HGOTO_ERROR(H5E_QUERY, H5E_CANTCREATE, FAIL, "unable to create query")
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCREATE, FAIL, "unable to create query");
         }
         break;
         case H5Q_TYPE_ATTR_NAME:
@@ -291,7 +292,7 @@ H5Qcreate(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
 
             /* Create a new query object */
             if (NULL == (query = H5Q_create(query_type, match_op, attr_name)))
-                HGOTO_ERROR(H5E_QUERY, H5E_CANTCREATE, FAIL, "unable to create query")
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCREATE, FAIL, "unable to create query");
         }
         break;
         case H5Q_TYPE_LINK_NAME:
@@ -303,12 +304,12 @@ H5Qcreate(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
 
             /* Create a new query object */
             if (NULL == (query = H5Q_create(query_type, match_op, link_name)))
-                HGOTO_ERROR(H5E_QUERY, H5E_CANTCREATE, FAIL, "unable to create query")
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCREATE, FAIL, "unable to create query");
         }
         break;
         default:
         {
-            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type")
+            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
         }
         break;
     }
@@ -317,7 +318,7 @@ H5Qcreate(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
 
     /* Register the new query object to get an ID for it */
     if ((ret_value = H5I_register(H5I_QUERY, query, TRUE)) < 0)
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "can't register query handle")
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "can't register query handle");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -346,7 +347,7 @@ H5Q_create(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
 
     /* Allocate query struct */
     if (NULL == (query = H5FL_CALLOC(H5Q_t)))
-        HGOTO_ERROR(H5E_QUERY, H5E_NOSPACE, NULL, "can't allocate query structure")
+        HGOTO_ERROR(H5E_QUERY, H5E_NOSPACE, NULL, "can't allocate query structure");
 
     query->is_combined = FALSE;
     query->ref_count = 1;
@@ -354,6 +355,7 @@ H5Q_create(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
     query->query.select.match_op = match_op;
     switch (query_type) {
         case H5Q_TYPE_DATA_ELEM:
+        case H5Q_TYPE_ATTR_VALUE:
             {
                 H5T_t *datatype = NULL;
                 H5T_t *native_datatype = NULL;
@@ -366,14 +368,14 @@ H5Q_create(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
 
                 /* Only use native type */
                 if (NULL == (native_datatype = H5T_get_native_type(datatype, H5T_DIR_DEFAULT, NULL, NULL, NULL)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve native type")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve native type");
                 query->query.select.elem.data_elem.type = native_datatype;
                 if (0 == (datatype_size = H5T_get_size(native_datatype)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid size")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid size");
                 query->query.select.elem.data_elem.type_size = datatype_size;
                 if (NULL == (value_buf = H5MM_malloc(datatype_size)))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL,
-                            "can't allocate value buffer")
+                            "can't allocate value buffer");
                 HDmemcpy(value_buf, value, datatype_size);
                 query->query.select.elem.data_elem.value = value_buf;
             }
@@ -395,7 +397,7 @@ H5Q_create(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
             }
             break;
         default:
-            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, NULL, "unsupported/unrecognized query type")
+            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, NULL, "unsupported/unrecognized query type");
             break;
     } /* end switch */
 
@@ -414,7 +416,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Qclose
  *
- * Purpose: Close a query object.
+ * Purpose: The H5Qclose routine terminates access to a query object,
+ * given by query_id.
  *
  * Return:  Non-negative on success/Negative on failure
  *
@@ -430,7 +433,7 @@ H5Qclose(hid_t query_id)
 
     /* Check args */
     if (NULL == H5I_object_verify(query_id, H5I_QUERY))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
 
     if (H5I_dec_app_ref(query_id) < 0)
     	HGOTO_ERROR(H5E_QUERY, H5E_CANTDEC, FAIL, "unable to decrement ref count on query");
@@ -457,19 +460,20 @@ H5Q_close(H5Q_t *query)
 
     HDassert(query);
 
-    query->ref_count--;
-    if (query->ref_count) HGOTO_DONE(SUCCEED)
+    if (--query->ref_count)
+        HGOTO_DONE(SUCCEED)
 
     if (query->is_combined) {
         if (FAIL == H5Q_close(query->query.combine.l_query))
-            HGOTO_ERROR(H5E_QUERY, H5E_CANTFREE, FAIL, "unable to free query")
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTFREE, FAIL, "unable to free query");
             query->query.combine.l_query = NULL;
         if (FAIL == H5Q_close(query->query.combine.r_query))
-            HGOTO_ERROR(H5E_QUERY, H5E_CANTFREE, FAIL, "unable to free query")
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTFREE, FAIL, "unable to free query");
             query->query.combine.r_query = NULL;
     } else {
         switch (query->query.select.type) {
             case H5Q_TYPE_DATA_ELEM:
+            case H5Q_TYPE_ATTR_VALUE:
                 if (FAIL == H5T_close(query->query.select.elem.data_elem.type))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTFREE, FAIL, "unable to free datatype");
                 query->query.select.elem.data_elem.type = NULL;
@@ -485,7 +489,7 @@ H5Q_close(H5Q_t *query)
                 query->query.select.elem.link_name.name = NULL;
                 break;
             default:
-                HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type")
+                HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
                 break;
         }
     }
@@ -500,7 +504,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Qcombine
  *
- * Purpose: Combine query objects to create a new query object.
+ * Purpose: The H5Qcombine routine creates a new compound query object by
+ * combining two query objects (given by query1 and query2), using the
+ * combination operator combine_op. Valid combination operators are:
+ *      - H5Q_COMBINE_AND
+ *      - H5Q_COMBINE_OR
  *
  * Return:  Success:    The ID for a new combined query.
  *          Failure:    FAIL
@@ -508,27 +516,27 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Qcombine(hid_t query_id1, H5Q_combine_op_t combine_op, hid_t query_id2)
+H5Qcombine(hid_t query1_id, H5Q_combine_op_t combine_op, hid_t query2_id)
 {
     H5Q_t *query = NULL, *query1 = NULL, *query2 = NULL;
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("i", "iQci", query_id1, combine_op, query_id2);
+    H5TRACE3("i", "iQci", query1_id, combine_op, query2_id);
 
     /* Check args and get the query objects */
-    if(NULL == (query1 = (H5Q_t *) H5I_object_verify(query_id1, H5I_QUERY)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID")
-    if(NULL == (query2 = (H5Q_t *) H5I_object_verify(query_id2, H5I_QUERY)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID")
+    if (NULL == (query1 = (H5Q_t *) H5I_object_verify(query1_id, H5I_QUERY)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
+    if (NULL == (query2 = (H5Q_t *) H5I_object_verify(query2_id, H5I_QUERY)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
 
     /* Combine query objects */
     if (NULL == (query = H5Q_combine(query1, combine_op, query2)))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTCREATE, FAIL, "unable to combine query objects")
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCREATE, FAIL, "unable to combine query objects");
 
     /* Register the new query object to get an ID for it */
     if ((ret_value = H5I_register(H5I_QUERY, query, TRUE)) < 0)
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "can't register query handle")
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "can't register query handle");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -554,7 +562,7 @@ H5Q_combine(H5Q_t *query1, H5Q_combine_op_t combine_op, H5Q_t *query2)
 
     /* Allocate query struct */
     if (NULL == (query = H5FL_CALLOC(H5Q_t)))
-        HGOTO_ERROR(H5E_QUERY, H5E_NOSPACE, NULL, "can't allocate query structure")
+        HGOTO_ERROR(H5E_QUERY, H5E_NOSPACE, NULL, "can't allocate query structure");
 
     switch (combine_op) {
         case H5Q_COMBINE_AND:
@@ -562,7 +570,7 @@ H5Q_combine(H5Q_t *query1, H5Q_combine_op_t combine_op, H5Q_t *query2)
             query->query.combine.op = combine_op;
             break;
         default:
-            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, NULL, "unsupported/unrecognized combine op")
+            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, NULL, "unsupported/unrecognized combine op");
             break;
     }
     query->is_combined = TRUE;
@@ -581,6 +589,457 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Q_combine() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Qget_match_info
+ *
+ * Purpose: The H5Qget_match_info routine queries a singleton query object,
+ * given by query_id, for its match information, originally provided to
+ * H5Qcreate. Match information is returned through the match_type and
+ * match_op parameters, either of which may be NULL to avoid retrieving that
+ * information. See H5Qcreate for a table listing the complete set of values
+ * that may be returned for match_type and match_op.
+ * It is an error to perform this call on a compound query object (one which
+ * was created with H5Qcombine).
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Qget_match_info(hid_t query_id, H5Q_type_t *query_type, H5Q_match_op_t *match_op)
+{
+    H5Q_t *query = NULL;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args and get the query objects */
+    if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
+
+    /* Get match info */
+    if (FAIL == H5Q_get_match_info(query, query_type, match_op))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get match info");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Qget_match_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q_get_match_info
+ *
+ * Purpose: Private function for H5Qget_match_info.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Q_get_match_info(H5Q_t *query, H5Q_type_t *query_type, H5Q_match_op_t *match_op)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(query);
+
+    if (query->is_combined)
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "cannot retrieve info from combined query");
+
+    if (query_type) *query_type = query->query.select.type;
+    if (match_op) *match_op = query->query.select.match_op;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q_get_match_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Qget_components
+ *
+ * Purpose: The H5Qget_components routine queries a compound query object,
+ * given by query_id, for its component queries.  The component queries are
+ * returned in sub_query1_id and sub_query2_id, both of which must be closed
+ * with H5Qclose.
+ * It is an error to apply H5Qget_components to a singleton query object (one
+ * which was created with H5Qcreate).
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Qget_components(hid_t query_id, hid_t *sub_query1_id, hid_t *sub_query2_id)
+{
+    H5Q_t *query = NULL, *sub_query1 = NULL, *sub_query2 = NULL;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args and get the query objects */
+    if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
+    if (!sub_query1_id || !sub_query2_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer to query_id");
+
+    /* Get components */
+    if (FAIL == H5Q_get_components(query, &sub_query1, &sub_query2))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get components");
+
+    /* Register the type and return the ID */
+    if ((ret_value = H5I_register(H5I_QUERY, sub_query1, TRUE)) < 0)
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "unable to register query");
+    if ((ret_value = H5I_register(H5I_QUERY, sub_query2, TRUE)) < 0)
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "unable to register query")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Qget_components() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q_get_components
+ *
+ * Purpose: Private function for H5Qget_components.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Q_get_components(H5Q_t *query, H5Q_t **sub_query1, H5Q_t **sub_query2)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(query);
+    HDassert(sub_query1);
+    HDassert(sub_query2);
+
+    if (!query->is_combined)
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "not a combined query");
+
+    *sub_query1 = query->query.combine.l_query;
+    *sub_query2 = query->query.combine.r_query;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q_get_components() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Qget_combine_op
+ *
+ * Purpose: The H5Qget_combine_op routine queries a query object, given by
+ * query_id, for its operator type. The possible operator types returned are:
+ *      - H5Q_SINGLETON
+ *      - H5Q_COMBINE_AND
+ *      - H5Q_COMBINE_OR
+ * H5Q_COMBINE_AND and H5Q_COMBINE_OR are only returned for query objects
+ * produced with H5Qcombine and H5Q_SINGLETON is returned for query objects
+ * produced with H5Qcreate.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Qget_combine_op(hid_t query_id, H5Q_combine_op_t *op_type)
+{
+    H5Q_t *query = NULL;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args and get the query objects */
+    if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
+    if (!op_type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer to op type");
+
+    /* Get combine op */
+    if (FAIL == H5Q_get_combine_op(query, op_type))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get combine op");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Qget_combine_op() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q_get_combine_op
+ *
+ * Purpose: Private function for H5Qget_combine_op.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Q_get_combine_op(H5Q_t *query, H5Q_combine_op_t *op_type)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(query);
+    HDassert(op_type);
+
+    if (!query->is_combined)
+        *op_type = H5Q_SINGLETON;
+    else
+        *op_type = query->query.combine.op;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q_get_combine_op() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Qencode
+ *
+ * Purpose: Given a query ID, serialize the query into buf.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Qencode(hid_t query_id, void *buf, size_t *nalloc)
+{
+    H5Q_t *query = NULL;
+    herr_t ret_value;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*x*z", query_id, buf, nalloc);
+
+    /* Check argument and retrieve object */
+    if (NULL == (query = (H5Q_t *)H5I_object_verify(query_id, H5I_QUERY)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
+    if (nalloc == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for buffer size");
+
+    /* Encode the query */
+    if ((ret_value = H5Q_encode(query, (unsigned char *)buf, nalloc)) < 0)
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTENCODE, FAIL, "can't encode query");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Qencode() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q_encode
+ *
+ * Purpose: Private function for H5Qencode.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc)
+{
+    size_t buf_size = 0;
+    herr_t ret_value = SUCCEED;
+    unsigned char *buf_ptr = buf;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(query);
+    HDassert(nalloc);
+
+    H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->is_combined, sizeof(hbool_t));
+    if (query->is_combined) {
+        size_t l_buf_size = 0, r_buf_size = 0;
+
+        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.combine.op, sizeof(H5Q_combine_op_t));
+        H5Q_encode(query->query.combine.l_query, buf_ptr, &l_buf_size);
+        buf_size += l_buf_size;
+        if (buf_ptr) buf_ptr += l_buf_size;
+        H5Q_encode(query->query.combine.r_query, buf_ptr, &r_buf_size);
+        buf_size += r_buf_size;
+        if (buf_ptr) buf_ptr += r_buf_size;
+    } else {
+        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.select.type, sizeof(H5Q_type_t));
+        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.select.match_op, sizeof(H5Q_match_op_t));
+        switch (query->query.select.type) {
+            case H5Q_TYPE_DATA_ELEM:
+            case H5Q_TYPE_ATTR_VALUE:
+            {
+                size_t type_id_nalloc = 0;
+                H5T_t *type = query->query.select.elem.data_elem.type;
+                size_t type_size = query->query.select.elem.data_elem.type_size;
+                void *value_buf = query->query.select.elem.data_elem.value;
+
+                if (FAIL == H5T_encode(type, NULL, &type_id_nalloc))
+                    HGOTO_ERROR(H5E_QUERY, H5E_CANTENCODE, FAIL, "can't get encoding size for datatype");
+                H5Q_encode_memcpy(&buf_ptr, &buf_size, &type_id_nalloc, sizeof(size_t));
+                if (FAIL == H5T_encode(type, buf_ptr, &type_id_nalloc))
+                    HGOTO_ERROR(H5E_QUERY, H5E_CANTENCODE, FAIL, "can't encode datatype");
+                buf_size += type_id_nalloc;
+                if (buf_ptr) buf_ptr += type_id_nalloc;
+                H5Q_encode_memcpy(&buf_ptr, &buf_size, &type_size, sizeof(size_t));
+                H5Q_encode_memcpy(&buf_ptr, &buf_size, value_buf, type_size);
+            }
+                break;
+            case H5Q_TYPE_ATTR_NAME:
+            {
+                size_t name_len = HDstrlen(query->query.select.elem.attr_name.name) + 1;
+                char *name = query->query.select.elem.attr_name.name;
+
+                H5Q_encode_memcpy(&buf_ptr, &buf_size, &name_len, sizeof(size_t));
+                H5Q_encode_memcpy(&buf_ptr, &buf_size, name, name_len);
+            }
+                break;
+            case H5Q_TYPE_LINK_NAME:
+            {
+                size_t name_len = HDstrlen(query->query.select.elem.link_name.name) + 1;
+                char *name = query->query.select.elem.attr_name.name;
+
+                H5Q_encode_memcpy(&buf_ptr, &buf_size, &name_len, sizeof(size_t));
+                H5Q_encode_memcpy(&buf_ptr, &buf_size, name, name_len);
+            }
+                break;
+            default:
+                HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
+                break;
+        }
+    }
+
+    *nalloc = buf_size;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q_encode() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Qdecode
+ *
+ * Purpose: Deserialize the buffer and return a new query handle. The handle
+ * must be closed using H5Qclose.
+ *
+ * Return:  Success:    query ID (non-negative)
+ *
+ *          Failure:    negative
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Qdecode(const void *buf)
+{
+    H5Q_t *query;
+    hid_t ret_value;      /* Return value */
+    const unsigned char *buf_ptr = (const unsigned char *) buf;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("i", "*x", buf);
+
+    /* Check args */
+    if (buf == NULL) HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer");
+
+    /* Create datatype by decoding buffer */
+    if (NULL == (query = H5Q_decode(&buf_ptr)))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTDECODE, FAIL, "can't decode object");
+
+    /* Register the type and return the ID */
+    if ((ret_value = H5I_register(H5I_QUERY, query, TRUE)) < 0)
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "unable to register query");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Qdecode() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q_decode
+ *
+ * Purpose: Private function for H5Qdecode.
+ *
+ * Return:  Success:    Pointer to the decoded query
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5Q_t *
+H5Q_decode(const unsigned char **buf_ptr)
+{
+    H5Q_t *ret_value = NULL;
+    H5Q_t *query = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(*buf_ptr);
+
+    /* Allocate query struct */
+    if (NULL == (query = H5FL_CALLOC(H5Q_t)))
+        HGOTO_ERROR(H5E_QUERY, H5E_NOSPACE, NULL, "can't allocate query structure");
+
+    /* Set ref count */
+    query->ref_count = 1;
+
+    H5Q_decode_memcpy(&query->is_combined, sizeof(hbool_t), buf_ptr);
+    if (query->is_combined) {
+        H5Q_decode_memcpy(&query->query.combine.op, sizeof(H5Q_combine_op_t), buf_ptr);
+        query->query.combine.l_query = H5Q_decode(buf_ptr);
+        query->query.combine.r_query = H5Q_decode(buf_ptr);
+    } else {
+        H5Q_decode_memcpy(&query->query.select.type, sizeof(H5Q_type_t), buf_ptr);
+        H5Q_decode_memcpy(&query->query.select.match_op, sizeof(H5Q_match_op_t), buf_ptr);
+        switch (query->query.select.type) {
+            case H5Q_TYPE_DATA_ELEM:
+            case H5Q_TYPE_ATTR_VALUE:
+            {
+                size_t type_id_nalloc = 0;
+                H5T_t *type;
+                size_t type_size;
+                void *value_buf;
+
+                H5Q_decode_memcpy(&type_id_nalloc, sizeof(size_t), buf_ptr);
+                if (NULL == (type = H5T_decode(*buf_ptr)))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode datatype");
+                query->query.select.elem.data_elem.type = type;
+                *buf_ptr += type_id_nalloc;
+
+                H5Q_decode_memcpy(&type_size, sizeof(size_t), buf_ptr);
+                query->query.select.elem.data_elem.type_size = type_size;
+                if (NULL == (value_buf = H5MM_malloc(type_size)))
+                    HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL, "can't allocate value buffer");
+                H5Q_decode_memcpy(value_buf, type_size, buf_ptr);
+                query->query.select.elem.data_elem.value = value_buf;
+            }
+            break;
+            case H5Q_TYPE_ATTR_NAME:
+            {
+                size_t name_len;
+                char *name;
+
+                H5Q_decode_memcpy(&name_len, sizeof(size_t), buf_ptr);
+                if (NULL == (name = H5MM_malloc(name_len)))
+                    HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL,
+                            "can't allocate value buffer");
+                H5Q_decode_memcpy(name, name_len, buf_ptr);
+                query->query.select.elem.attr_name.name = name;
+            }
+            break;
+            case H5Q_TYPE_LINK_NAME:
+            {
+                size_t name_len;
+                char *name;
+
+                H5Q_decode_memcpy(&name_len, sizeof(size_t), buf_ptr);
+                if (NULL == (name = H5MM_malloc(name_len)))
+                    HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL,
+                            "can't allocate value buffer");
+                H5Q_decode_memcpy(name, name_len, buf_ptr);
+                query->query.select.elem.link_name.name = name;
+            }
+            break;
+            default:
+                HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, NULL, "unsupported/unrecognized query type");
+                break;
+        }
+    }
+
+    ret_value = query;
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q_decode() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Qapply
@@ -604,22 +1063,22 @@ H5Qapply(hid_t query_id, hbool_t *result, hid_t type_id, const void *elem)
 
     /* Check args and get the query objects */
     if (!result)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for result")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for result");
     if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID")
-    if(NULL == (type = (H5T_t *) H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
+    if (NULL == (type = (H5T_t *) H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     /* Only use native type */
     if (NULL == (native_type = H5T_get_native_type(type, H5T_DIR_DEFAULT, NULL, NULL, NULL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot retrieve native type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot retrieve native type");
 
     /* Apply query */
     if (FAIL == (ret_value = H5Q_apply(query, result, native_type, elem)))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
 
 done:
-    if(native_type)
+    if (native_type)
         H5T_close(native_type);
     FUNC_LEAVE_API(ret_value)
 } /* end H5Qapply() */
@@ -645,10 +1104,10 @@ H5Q_apply(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem)
 
     if (query->is_combined) {
         if (FAIL == (ret_value = H5Q_apply_combine(query, result, type, elem)))
-            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
     } else {
         if (FAIL == (ret_value = H5Q_apply_select(query, result, type, elem)))
-            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
     }
 
 done:
@@ -676,9 +1135,9 @@ H5Q_apply_combine(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem)
     HDassert(query->is_combined == TRUE);
 
     if (FAIL == H5Q_apply(query->query.combine.l_query, &result1, type, elem))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
     if (FAIL == H5Q_apply(query->query.combine.r_query, &result2, type, elem))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
 
     switch (query->query.combine.op) {
         case H5Q_COMBINE_AND:
@@ -688,7 +1147,7 @@ H5Q_apply_combine(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem)
             *result = result1 || result2;
             break;
         default:
-            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized combine op")
+            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized combine op");
             break;
     }
 
@@ -717,21 +1176,22 @@ H5Q_apply_select(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem)
 
     switch (query->query.select.type) {
         case H5Q_TYPE_DATA_ELEM:
+        case H5Q_TYPE_ATTR_VALUE:
             if (FAIL == (ret_value = H5Q_apply_data_elem(query, result, type, elem)))
-                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply data element query")
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply data element query");
             break;
         case H5Q_TYPE_ATTR_NAME:
             /* TODO pass non NULL string */
             if (FAIL == (ret_value = H5Q_apply_attr_name(query, result, NULL)))
-                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply attribute name query")
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply attribute name query");
             break;
         case H5Q_TYPE_LINK_NAME:
             /* TODO pass non NULL string */
             if (FAIL == (ret_value = H5Q_apply_link_name(query, result, NULL)))
-                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply link name query")
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply link name query");
             break;
         default:
-            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type")
+            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
             break;
     }
 
@@ -761,9 +1221,9 @@ H5Q_promote_type(H5T_t *type1, H5T_t *type2, H5Q_match_type_t *match_type)
 
     /* Get class of types */
     if (H5T_NO_CLASS == (type1_class = H5T_get_class(type1, FALSE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class");
     if (H5T_NO_CLASS == (type2_class = H5T_get_class(type2, FALSE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class");
 
      if ((type1_class == H5T_FLOAT) || (type2_class == H5T_FLOAT)) {
          promoted_type_class = H5T_FLOAT;
@@ -789,7 +1249,7 @@ H5Q_promote_type(H5T_t *type1, H5T_t *type2, H5Q_match_type_t *match_type)
                  *match_type = H5Q_NATIVE_INT_MATCH_CHAR;
                  promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_SCHAR_g);
              } else {
-                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid type")
+                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid type");
              }
              break;
          case H5T_FLOAT:
@@ -800,11 +1260,11 @@ H5Q_promote_type(H5T_t *type1, H5T_t *type2, H5Q_match_type_t *match_type)
                  *match_type = H5Q_NATIVE_FLOAT_MATCH_FLOAT;
                  promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_FLOAT_g);
              } else {
-                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid type")
+                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid type");
              }
              break;
          default:
-             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class")
+             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class");
              break;
      }
 
@@ -832,7 +1292,7 @@ H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type, const void *valu
     H5T_t *query_type, *promoted_type;
     H5Q_match_type_t match_type;
     size_t type_size, query_type_size, promoted_type_size;
-    hid_t type_id=FAIL, query_type_id=FAIL, promoted_type_id=FAIL;
+    hid_t type_id = FAIL, query_type_id = FAIL, promoted_type_id = FAIL;
     H5T_path_t *tpath;
     H5Q_match_op_t query_op;
     hbool_t query_result = FALSE;
@@ -840,11 +1300,12 @@ H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type, const void *valu
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(query);
-    HDassert(query->query.select.type == H5Q_TYPE_DATA_ELEM);
+    HDassert((query->query.select.type == H5Q_TYPE_DATA_ELEM) ||
+            (query->query.select.type == H5Q_TYPE_ATTR_VALUE));
 
     /* Keep a copy of elem to work on */
     if (0 == (type_size = H5T_get_size(type)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid size")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid size");
 
     /* Keep a copy of the query value */
     query_type = query->query.select.elem.data_elem.type;
@@ -854,36 +1315,36 @@ H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type, const void *valu
     /* Promote type to compare elements with query */
     promoted_type = H5Q_promote_type(type, query_type, &match_type);
     if (0 == (promoted_type_size = H5T_get_size(promoted_type)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid size")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid size");
 
     /* Resize value and query value buf for convert
      * (promoted_type_size is always bigger) */
     if (NULL == (value_buf = H5MM_malloc(promoted_type_size)))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, FAIL, "can't allocate value buffer")
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, FAIL, "can't allocate value buffer");
     HDmemcpy(value_buf, value, type_size);
 
     if (NULL == (query_value_buf = H5MM_malloc(promoted_type_size)))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, FAIL, "can't allocate value buffer")
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, FAIL, "can't allocate value buffer");
     HDmemcpy(query_value_buf, query->query.select.elem.data_elem.value, query_type_size);
 
     /* Create temporary IDs for H5T_convert */
-    if((type_id = H5I_register(H5I_DATATYPE, type, FALSE)) < 0)
+    if ((type_id = H5I_register(H5I_DATATYPE, type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
-    if((query_type_id = H5I_register(H5I_DATATYPE, query_type, FALSE)) < 0)
+    if ((query_type_id = H5I_register(H5I_DATATYPE, query_type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
-    if((promoted_type_id = H5I_register(H5I_DATATYPE, promoted_type, FALSE)) < 0)
+    if ((promoted_type_id = H5I_register(H5I_DATATYPE, promoted_type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
 
     /* Find the conversion function */
     if (NULL == (tpath = H5T_path_find(type, promoted_type, NULL, NULL, H5P_LST_DATASET_XFER_g, FALSE)))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTINIT, FAIL, "unable to find type info")
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTINIT, FAIL, "unable to find type info");
     if (FAIL == (H5T_convert(tpath, type_id, promoted_type_id, 1, (size_t)0, (size_t)0, value_buf, NULL, H5P_LST_DATASET_XFER_g)))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTCONVERT, FAIL, "can't convert value")
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCONVERT, FAIL, "can't convert value");
 
     if (NULL == (tpath = H5T_path_find(query_type, promoted_type, NULL, NULL, H5P_LST_DATASET_XFER_g, FALSE)))
-          HGOTO_ERROR(H5E_QUERY, H5E_CANTINIT, FAIL, "unable to find type info")
+          HGOTO_ERROR(H5E_QUERY, H5E_CANTINIT, FAIL, "unable to find type info");
     if (FAIL == (H5T_convert(tpath, query_type_id, promoted_type_id, 1, (size_t)0, (size_t)0, query_value_buf, NULL, H5P_LST_DATASET_XFER_g)))
-         HGOTO_ERROR(H5E_QUERY, H5E_CANTCONVERT, FAIL, "can't convert query value")
+         HGOTO_ERROR(H5E_QUERY, H5E_CANTCONVERT, FAIL, "can't convert query value");
 
     /* Could also use BOOST preprocessor for that but not really nice */
     switch (match_type) {
@@ -909,7 +1370,7 @@ H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type, const void *valu
             H5Q_CMP_DATA_ELEM(query_result, query_op, double, value_buf, query_value_buf);
             break;
         default:
-            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "unsupported/unrecognized datatype")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "unsupported/unrecognized datatype");
             break;
     }
 
@@ -920,18 +1381,12 @@ done:
     H5MM_free(query_value_buf);
 
     /* Free temporary IDs */
-    if(promoted_type_id != FAIL) {
-        if(H5I_remove(promoted_type_id) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
-    }
-    if(query_type_id != FAIL) {
-        if(H5I_remove(query_type_id) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
-    }
-    if(type_id != FAIL) {
-        if(H5I_remove(type_id) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
-    }
+    if ((promoted_type_id != FAIL) && !H5I_remove(promoted_type_id))
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTFREE, FAIL, "problem freeing id");
+    if ((query_type_id != FAIL) && !H5I_remove(query_type_id))
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTFREE, FAIL, "problem freeing id");
+    if ((type_id != FAIL) && !H5I_remove(type_id))
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTFREE, FAIL, "problem freeing id");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Q_apply_data_elem() */
@@ -983,250 +1438,3 @@ H5Q_apply_link_name(H5Q_t *query, hbool_t *result, const char *name)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Q_apply_link_name() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5Qencode
- *
- * Purpose: Given a query ID, serialize the query into buf.
- *
- * Return:  Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Qencode(hid_t query_id, void *buf, size_t *nalloc)
-{
-    H5Q_t *query = NULL;
-    herr_t ret_value;
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*x*z", query_id, buf, nalloc);
-
-    /* Check argument and retrieve object */
-    if(NULL == (query = (H5Q_t *)H5I_object_verify(query_id, H5I_QUERY)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID")
-    if(nalloc == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for buffer size")
-
-    /* Encode the query */
-    if((ret_value = H5Q_encode(query, (unsigned char *)buf, nalloc)) < 0)
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTENCODE, FAIL, "can't encode query")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Qencode() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5Q_encode
- *
- * Purpose: Private function for H5Qencode.
- *
- * Return:  Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc)
-{
-    size_t buf_size = 0;
-    herr_t ret_value = SUCCEED;
-    unsigned char *buf_ptr = buf;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(query);
-    HDassert(nalloc);
-
-    H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->is_combined, sizeof(hbool_t));
-    if (query->is_combined) {
-        size_t l_buf_size = 0, r_buf_size = 0;
-
-        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.combine.op, sizeof(H5Q_combine_op_t));
-        H5Q_encode(query->query.combine.l_query, buf_ptr, &l_buf_size);
-        buf_size += l_buf_size;
-        if (buf_ptr) buf_ptr += l_buf_size;
-        H5Q_encode(query->query.combine.r_query, buf_ptr, &r_buf_size);
-        buf_size += r_buf_size;
-        if (buf_ptr) buf_ptr += r_buf_size;
-    } else {
-        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.select.type, sizeof(H5Q_type_t));
-        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.select.match_op, sizeof(H5Q_match_op_t));
-        switch (query->query.select.type) {
-            case H5Q_TYPE_DATA_ELEM:
-            {
-                size_t type_id_nalloc = 0;
-                H5T_t *type = query->query.select.elem.data_elem.type;
-                size_t type_size = query->query.select.elem.data_elem.type_size;
-                void *value_buf = query->query.select.elem.data_elem.value;
-
-                if (FAIL == H5T_encode(type, NULL, &type_id_nalloc))
-                    HGOTO_ERROR(H5E_QUERY, H5E_CANTENCODE, FAIL, "can't get encoding size for datatype");
-                H5Q_encode_memcpy(&buf_ptr, &buf_size, &type_id_nalloc, sizeof(size_t));
-                if (FAIL == H5T_encode(type, buf_ptr, &type_id_nalloc))
-                    HGOTO_ERROR(H5E_QUERY, H5E_CANTENCODE, FAIL, "can't encode datatype");
-                buf_size += type_id_nalloc;
-                if (buf_ptr) buf_ptr += type_id_nalloc;
-                H5Q_encode_memcpy(&buf_ptr, &buf_size, &type_size, sizeof(size_t));
-                H5Q_encode_memcpy(&buf_ptr, &buf_size, value_buf, type_size);
-            }
-                break;
-            case H5Q_TYPE_ATTR_NAME:
-            {
-                size_t name_len = HDstrlen(query->query.select.elem.attr_name.name) + 1;
-                char *name = query->query.select.elem.attr_name.name;
-
-                H5Q_encode_memcpy(&buf_ptr, &buf_size, &name_len, sizeof(size_t));
-                H5Q_encode_memcpy(&buf_ptr, &buf_size, name, name_len);
-            }
-                break;
-            case H5Q_TYPE_LINK_NAME:
-            {
-                size_t name_len = HDstrlen(query->query.select.elem.link_name.name) + 1;
-                char *name = query->query.select.elem.attr_name.name;
-
-                H5Q_encode_memcpy(&buf_ptr, &buf_size, &name_len, sizeof(size_t));
-                H5Q_encode_memcpy(&buf_ptr, &buf_size, name, name_len);
-            }
-                break;
-            default:
-                HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type")
-                break;
-        }
-    }
-
-    *nalloc = buf_size;
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_encode() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5Qdecode
- *
- * Purpose: Deserialize the buffer and return a new query handle.
- *
- * Return:  Success:    query ID (non-negative)
- *
- *          Failure:    negative
- *-------------------------------------------------------------------------
- */
-hid_t
-H5Qdecode(const void *buf)
-{
-    H5Q_t *query;
-    hid_t ret_value;      /* Return value */
-    const unsigned char *buf_ptr = (const unsigned char *) buf;
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("i", "*x", buf);
-
-    /* Check args */
-    if(buf == NULL) HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")
-
-    /* Create datatype by decoding buffer */
-    if(NULL == (query = H5Q_decode(&buf_ptr)))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTDECODE, FAIL, "can't decode object")
-
-    /* Register the type and return the ID */
-    if((ret_value = H5I_register(H5I_QUERY, query, TRUE)) < 0)
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "unable to register query")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Qdecode() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5Q_decode
- *
- * Purpose: Private function for H5Qdecode.
- *
- * Return:  Success:    Pointer to the decoded query
- *          Failure:    NULL
- *
- *-------------------------------------------------------------------------
- */
-H5Q_t *
-H5Q_decode(const unsigned char **buf_ptr)
-{
-    H5Q_t *ret_value = NULL;
-    H5Q_t *query = NULL;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(*buf_ptr);
-
-    /* Allocate query struct */
-    if (NULL == (query = H5FL_CALLOC(H5Q_t)))
-        HGOTO_ERROR(H5E_QUERY, H5E_NOSPACE, NULL, "can't allocate query structure")
-
-    /* Set ref count */
-    query->ref_count = 1;
-
-    H5Q_decode_memcpy(&query->is_combined, sizeof(hbool_t), buf_ptr);
-    if (query->is_combined) {
-        H5Q_decode_memcpy(&query->query.combine.op, sizeof(H5Q_combine_op_t), buf_ptr);
-        query->query.combine.l_query = H5Q_decode(buf_ptr);
-        query->query.combine.r_query = H5Q_decode(buf_ptr);
-    } else {
-        H5Q_decode_memcpy(&query->query.select.type, sizeof(H5Q_type_t), buf_ptr);
-        H5Q_decode_memcpy(&query->query.select.match_op, sizeof(H5Q_match_op_t), buf_ptr);
-        switch (query->query.select.type) {
-            case H5Q_TYPE_DATA_ELEM:
-            {
-                size_t type_id_nalloc = 0;
-                H5T_t *type;
-                size_t type_size;
-                void *value_buf;
-
-                H5Q_decode_memcpy(&type_id_nalloc, sizeof(size_t), buf_ptr);
-                if (NULL == (type = H5T_decode(*buf_ptr)))
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode datatype");
-                query->query.select.elem.data_elem.type = type;
-                *buf_ptr += type_id_nalloc;
-
-                H5Q_decode_memcpy(&type_size, sizeof(size_t), buf_ptr);
-                query->query.select.elem.data_elem.type_size = type_size;
-                if (NULL == (value_buf = H5MM_malloc(type_size)))
-                    HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL, "can't allocate value buffer")
-                H5Q_decode_memcpy(value_buf, type_size, buf_ptr);
-                query->query.select.elem.data_elem.value = value_buf;
-            }
-            break;
-            case H5Q_TYPE_ATTR_NAME:
-            {
-                size_t name_len;
-                char *name;
-
-                H5Q_decode_memcpy(&name_len, sizeof(size_t), buf_ptr);
-                if (NULL == (name = H5MM_malloc(name_len)))
-                    HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL,
-                            "can't allocate value buffer")
-                H5Q_decode_memcpy(name, name_len, buf_ptr);
-                query->query.select.elem.attr_name.name = name;
-            }
-            break;
-            case H5Q_TYPE_LINK_NAME:
-            {
-                size_t name_len;
-                char *name;
-
-                H5Q_decode_memcpy(&name_len, sizeof(size_t), buf_ptr);
-                if (NULL == (name = H5MM_malloc(name_len)))
-                    HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL,
-                            "can't allocate value buffer")
-                H5Q_decode_memcpy(name, name_len, buf_ptr);
-                query->query.select.elem.link_name.name = name;
-            }
-            break;
-            default:
-                HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, NULL, "unsupported/unrecognized query type")
-                break;
-        }
-    }
-
-    ret_value = query;
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_decode() */
