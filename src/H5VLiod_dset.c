@@ -611,8 +611,15 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     if(H5Pget_rawdata_integrity_scope(dxpl_id, &raw_cs_scope) < 0)
         HGOTO_ERROR_FF(FAIL, "can't get scope for data integrity checks");
 
+    /* get the number of points selected */
+    nelmts = (size_t)H5Sget_select_npoints(space_id);
+
     /* retrieve size of bulk data asked for to be read */
     size = HG_Bulk_handle_get_size(bulk_handle);
+
+    /* check for vl datatypes */
+    if(H5VL__iod_server_type_is_vl(src_id, &is_vl_data) < 0)
+        HGOTO_ERROR_FF(FAIL, "failed to check dataype");
 
     if(is_coresident) {
         size_t bulk_size = 0;
@@ -627,7 +634,18 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     }
     else {
         /* allocate buffer to hold data */
-        if(NULL == (buf = malloc(size)))
+
+        /* get a bigger buffer if datatype conversion is required */
+        if(!is_vl_data) {
+            buf_size = H5Tget_size(src_id) * nelmts;
+            if(size > buf_size)
+                buf_size = size;
+        }
+        else {
+            buf_size = size;
+        }
+
+        if(NULL == (buf = malloc(buf_size)))
             HGOTO_ERROR_FF(FAIL, "can't allocate read buffer");
 
         /* Create bulk handle */
@@ -635,15 +653,6 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
                                                HG_BULK_READWRITE, &bulk_block_handle))
             HGOTO_ERROR_FF(FAIL, "can't create bulk handle");
     }
-
-    /* get the number of points selected */
-    nelmts = (size_t)H5Sget_select_npoints(space_id);
-
-    /* Adjust buffer is type conversion is needed. If the data
-       elements are of variable length, just return that they are in
-       is_vl_data for special processing */
-    if(H5VL__iod_server_type_is_vl(src_id, &is_vl_data) < 0)
-        HGOTO_ERROR_FF(FAIL, "failed to check dataype");
     
     /*
     if(H5VL__iod_server_adjust_buffer(dst_id, src_id, nelmts, dxpl_id, is_coresident,
@@ -653,8 +662,6 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     if(!is_vl_data) {
         size_t elmt_size;
         iod_trans_id_t read_tid;
-
-        buf_size = H5Tget_size(src_id) * nelmts;
 
         /* get replica ID from dxpl */
         if(H5Pget_read_replica(dxpl_id, &read_tid) < 0)
