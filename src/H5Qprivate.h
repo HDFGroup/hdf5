@@ -92,9 +92,14 @@ H5_DLL herr_t H5Q_init(void);
 H5_DLL H5Q_t *H5Q_create(H5Q_type_t query_type, H5Q_match_op_t match_op, ...);
 H5_DLL herr_t H5Q_close(H5Q_t *query);
 H5_DLL H5Q_t *H5Q_combine(H5Q_t *query1, H5Q_combine_op_t combine_op, H5Q_t *query2);
-H5_DLL herr_t H5Q_apply(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem);
+H5_DLL herr_t H5Q_get_match_info(H5Q_t *query, H5Q_type_t *query_type, H5Q_match_op_t *match_op);
+H5_DLL herr_t H5Q_get_components(H5Q_t *query, H5Q_t **sub_query1, H5Q_t **sub_query2);
+H5_DLL herr_t H5Q_get_combine_op(H5Q_t *query, H5Q_combine_op_t *op_type);
 
 H5_DLL herr_t H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc);
 H5_DLL H5Q_t *H5Q_decode(const unsigned char **buf);
+
+/* Apply query (TODO should go) */
+H5_DLL herr_t H5Q_apply(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem);
 
 #endif /* _H5Qprivate_H */

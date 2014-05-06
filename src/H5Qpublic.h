@@ -35,6 +35,7 @@
 /* Query type */
 typedef enum H5Q_type_t {
     H5Q_TYPE_DATA_ELEM,  /* selects data elements */
+    H5Q_TYPE_ATTR_VALUE, /* selects attribute values */
     H5Q_TYPE_ATTR_NAME,  /* selects attributes */
     H5Q_TYPE_LINK_NAME   /* selects objects */
 } H5Q_type_t;
@@ -50,7 +51,8 @@ typedef enum H5Q_match_op_t {
 /* Query combine operators */
 typedef enum H5Q_combine_op_t {
     H5Q_COMBINE_AND,
-    H5Q_COMBINE_OR
+    H5Q_COMBINE_OR,
+    H5Q_SINGLETON
 } H5Q_combine_op_t;
 
 /********************/
@@ -67,15 +69,20 @@ extern "C" {
 /* Function prototypes */
 H5_DLL hid_t H5Qcreate(H5Q_type_t query_type, H5Q_match_op_t match_op, ...);
 H5_DLL herr_t H5Qclose(hid_t query_id);
-H5_DLL hid_t H5Qcombine(hid_t query_id1, H5Q_combine_op_t combine_op, hid_t query_id2);
-H5_DLL herr_t H5Qapply(hid_t query_id, hbool_t *result, hid_t type_id, const void *elem);
-/* or return dataspace and have
- * hid_t H5Qapply(query_id, result, enum data_elem/link/attr, nelem, void*);
- */
+H5_DLL hid_t H5Qcombine(hid_t query1_id, H5Q_combine_op_t combine_op, hid_t query2_id);
+H5_DLL herr_t H5Qget_match_info(hid_t query_id, H5Q_type_t *query_type, H5Q_match_op_t *match_op);
+H5_DLL herr_t H5Qget_components(hid_t query_id, hid_t *sub_query1_id, hid_t *sub_query2_id);
+H5_DLL herr_t H5Qget_combine_op(hid_t query_id, H5Q_combine_op_t *op_type);
 
 /* Encode / decode */
 H5_DLL herr_t H5Qencode(hid_t query_id, void *buf, size_t *nalloc);
 H5_DLL hid_t H5Qdecode(const void *buf);
+
+/* Apply query (TODO should go) */
+H5_DLL herr_t H5Qapply(hid_t query_id, hbool_t *result, hid_t type_id, const void *elem);
+/* or return dataspace and have
+ * hid_t H5Qapply(query_id, result, enum data_elem/link/attr, nelem, void*);
+ */
 
 #ifdef __cplusplus
 }
