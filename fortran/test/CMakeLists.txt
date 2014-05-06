@@ -83,7 +83,6 @@ set_target_properties (testhdf5_fortran PROPERTIES FOLDER test/fortran)
 #-- Adding test for testhdf5_fortran_1_8
 add_executable (testhdf5_fortran_1_8
     fortranlib_test_1_8.f90
-    tH5F.f90
     tH5O.f90
     tH5A_1_8.f90
     tH5G_1_8.f90
@@ -107,7 +106,6 @@ set_target_properties (testhdf5_fortran_1_8 PROPERTIES FOLDER test/fortran)
 if (HDF5_ENABLE_F2003)
   add_executable (fortranlib_test_F03
       fortranlib_test_F03.f90
-      tH5F.f90
       tH5E_F03.f90
       tH5F_F03.f90
       tH5L_F03.f90
