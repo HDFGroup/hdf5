@@ -2171,10 +2171,10 @@ H5Lmove_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
            const char *dst_name, hid_t lcpl_id, hid_t lapl_id, hid_t trans_id, hid_t estack_id)
 {
     void    *obj1 = NULL;        /* object token of src_id */
-    H5VL_t  *vol_plugin1;        /* VOL plugin information */
+    H5VL_t  *vol_plugin1 = NULL;        /* VOL plugin information */
     H5VL_loc_params_t loc_params1;
     void    *obj2 = NULL;        /* object token of dst_id */
-    H5VL_t  *vol_plugin2;        /* VOL plugin information */
+    H5VL_t  *vol_plugin2 = NULL;        /* VOL plugin information */
     H5VL_loc_params_t loc_params2;
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5P_genplist_t *plist ;     /* Property list pointer */
@@ -2270,10 +2270,10 @@ H5Lcopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
            const char *dst_name, hid_t lcpl_id, hid_t lapl_id, hid_t trans_id, hid_t estack_id)
 {
     void    *obj1 = NULL;        /* object token of src_id */
-    H5VL_t  *vol_plugin1;        /* VOL plugin information */
+    H5VL_t  *vol_plugin1 = NULL;        /* VOL plugin information */
     H5VL_loc_params_t loc_params1;
     void    *obj2 = NULL;        /* object token of dst_id */
-    H5VL_t  *vol_plugin2;        /* VOL plugin information */
+    H5VL_t  *vol_plugin2 = NULL;        /* VOL plugin information */
     H5VL_loc_params_t loc_params2;
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5P_genplist_t *plist ;     /* Property list pointer */
@@ -4269,7 +4269,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Aprefetch_ff(hid_t attr_id, hid_t rcxt_id, hrpl_t *replica_id,
-                             hid_t aapl_id, hid_t estack_id)
+                             hid_t dxpl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -4286,8 +4286,12 @@ H5_DLL herr_t H5Aprefetch_ff(hid_t attr_id, hid_t rcxt_id, hrpl_t *replica_id,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    if(H5P_DEFAULT != aapl_id)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "attribute access property list must be H5P_DEFAULT")
+    /* Get correct property list */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
@@ -4301,7 +4305,7 @@ H5_DLL herr_t H5Aprefetch_ff(hid_t attr_id, hid_t rcxt_id, hrpl_t *replica_id,
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_prefetch(attr, rcxt_id, replica_id, aapl_id, req)) < 0)
+    if((ret_value = H5VL_iod_prefetch(attr, rcxt_id, replica_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch attribute")
 
     if(request && *req) {
@@ -4326,7 +4330,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Aevict_ff(hid_t attr_id, uint64_t c_version, hid_t aapl_id, hid_t estack_id)
+H5_DLL herr_t H5Aevict_ff(hid_t attr_id, uint64_t c_version, hid_t dxpl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generated request pointer */
@@ -4343,8 +4347,12 @@ H5_DLL herr_t H5Aevict_ff(hid_t attr_id, uint64_t c_version, hid_t aapl_id, hid_
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    if(H5P_DEFAULT != aapl_id)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "attribute access property list must be H5P_DEFAULT")
+    /* Get correct property list */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
@@ -4358,7 +4366,7 @@ H5_DLL herr_t H5Aevict_ff(hid_t attr_id, uint64_t c_version, hid_t aapl_id, hid_
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_evict(attr, c_version, aapl_id, req)) < 0)
+    if((ret_value = H5VL_iod_evict(attr, c_version, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict attribute")
 
     if(request && *req) {
@@ -4384,7 +4392,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Dprefetch_ff(hid_t dset_id, hid_t rcxt_id, hrpl_t *replica_id,
-                          hid_t dapl_id, hid_t estack_id)
+                          hid_t dxpl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -4402,10 +4410,10 @@ H5_DLL herr_t H5Dprefetch_ff(hid_t dset_id, hid_t rcxt_id, hrpl_t *replica_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get correct property list */
-    if(H5P_DEFAULT == dapl_id)
-        dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(dapl_id, H5P_DATASET_ACCESS))
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     if(estack_id != H5_EVENT_STACK_NULL) {
@@ -4420,7 +4428,7 @@ H5_DLL herr_t H5Dprefetch_ff(hid_t dset_id, hid_t rcxt_id, hrpl_t *replica_id,
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_prefetch(dset, rcxt_id, replica_id, dapl_id, req)) < 0)
+    if((ret_value = H5VL_iod_prefetch(dset, rcxt_id, replica_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch dataset")
 
     if(request && *req) {
@@ -4445,7 +4453,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Devict_ff(hid_t dset_id, uint64_t c_version, hid_t dapl_id, hid_t estack_id)
+H5_DLL herr_t H5Devict_ff(hid_t dset_id, uint64_t c_version, hid_t dxpl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generated request pointer */
@@ -4463,10 +4471,10 @@ H5_DLL herr_t H5Devict_ff(hid_t dset_id, uint64_t c_version, hid_t dapl_id, hid_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get correct property list */
-    if(H5P_DEFAULT == dapl_id)
-        dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(dapl_id, H5P_DATASET_ACCESS))
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     if(estack_id != H5_EVENT_STACK_NULL) {
@@ -4481,7 +4489,7 @@ H5_DLL herr_t H5Devict_ff(hid_t dset_id, uint64_t c_version, hid_t dapl_id, hid_
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_evict(dset, c_version, dapl_id, req)) < 0)
+    if((ret_value = H5VL_iod_evict(dset, c_version, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict dataset")
 
     if(request && *req) {
@@ -4507,7 +4515,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Gprefetch_ff(hid_t grp_id, hid_t rcxt_id, hrpl_t *replica_id,
-                          hid_t gapl_id, hid_t estack_id)
+                          hid_t dxpl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -4525,11 +4533,11 @@ H5_DLL herr_t H5Gprefetch_ff(hid_t grp_id, hid_t rcxt_id, hrpl_t *replica_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get correct property list */
-    if(H5P_DEFAULT == gapl_id)
-        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
@@ -4543,7 +4551,7 @@ H5_DLL herr_t H5Gprefetch_ff(hid_t grp_id, hid_t rcxt_id, hrpl_t *replica_id,
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_prefetch(grp, rcxt_id, replica_id, gapl_id, req)) < 0)
+    if((ret_value = H5VL_iod_prefetch(grp, rcxt_id, replica_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch group")
 
     if(request && *req) {
@@ -4568,7 +4576,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Gevict_ff(hid_t grp_id, uint64_t c_version, hid_t gapl_id, hid_t estack_id)
+H5_DLL herr_t H5Gevict_ff(hid_t grp_id, uint64_t c_version, hid_t dxpl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generated request pointer */
@@ -4586,11 +4594,11 @@ H5_DLL herr_t H5Gevict_ff(hid_t grp_id, uint64_t c_version, hid_t gapl_id, hid_t
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get correct property list */
-    if(H5P_DEFAULT == gapl_id)
-        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
@@ -4604,7 +4612,7 @@ H5_DLL herr_t H5Gevict_ff(hid_t grp_id, uint64_t c_version, hid_t gapl_id, hid_t
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_evict(grp, c_version, gapl_id, req)) < 0)
+    if((ret_value = H5VL_iod_evict(grp, c_version, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict group")
 
     if(request && *req) {
@@ -4630,7 +4638,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Tprefetch_ff(hid_t dtype_id, hid_t rcxt_id, hrpl_t *replica_id,
-                          hid_t tapl_id, hid_t estack_id)
+                          hid_t dxpl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;  /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -4654,11 +4662,11 @@ H5_DLL herr_t H5Tprefetch_ff(hid_t dtype_id, hid_t rcxt_id, hrpl_t *replica_id,
     }
 
     /* Get correct property list */
-    if(H5P_DEFAULT == tapl_id)
-        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dtype_id)))
@@ -4679,7 +4687,7 @@ H5_DLL herr_t H5Tprefetch_ff(hid_t dtype_id, hid_t rcxt_id, hrpl_t *replica_id,
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_prefetch(dtype, rcxt_id, replica_id, tapl_id, req)) < 0)
+    if((ret_value = H5VL_iod_prefetch(dtype, rcxt_id, replica_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch datatype")
 
     if(request && *req) {
@@ -4704,7 +4712,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Tevict_ff(hid_t dtype_id, uint64_t c_version, hid_t tapl_id, hid_t estack_id)
+H5_DLL herr_t H5Tevict_ff(hid_t dtype_id, uint64_t c_version, hid_t dxpl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;  /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -4728,11 +4736,11 @@ H5_DLL herr_t H5Tevict_ff(hid_t dtype_id, uint64_t c_version, hid_t tapl_id, hid
     }
 
     /* Get correct property list */
-    if(H5P_DEFAULT == tapl_id)
-        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dtype_id)))
@@ -4753,7 +4761,7 @@ H5_DLL herr_t H5Tevict_ff(hid_t dtype_id, uint64_t c_version, hid_t tapl_id, hid
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_evict(dtype, c_version, tapl_id, req)) < 0)
+    if((ret_value = H5VL_iod_evict(dtype, c_version, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict datatype")
 
     if(request && *req) {

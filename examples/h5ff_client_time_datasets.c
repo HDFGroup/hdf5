@@ -78,9 +78,8 @@ int main( int argc, char **argv ) {
    hid_t    dxpl_p_id;
    hid_t    dxpl_s_id;
 
-   /* Replicas and related properties */
+   /* Replicas */
    hrpl_t   dset_p_replica;
-   hid_t    dapl_p_id;
 
    /* Container Version & Read Contexts */
    uint64_t version, versionH;
@@ -328,7 +327,6 @@ int main( int argc, char **argv ) {
       } else {
          ret = H5Pset_rawdata_integrity_scope( dxpl_p_id, H5_CHECKSUM_NONE ); ASSERT_RET;
       }
-      dapl_p_id = H5Pcreate( H5P_DATASET_ACCESS );
    }
 
    if ( stored_dset ) {
@@ -476,8 +474,7 @@ int main( int argc, char **argv ) {
 
       if ( prefetched_dset ) { 
          MPI_Bcast( &dset_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
-         ret = H5Pset_read_replica( dxpl_p_id, dset_p_replica ); ASSERT_RET;
-         ret = H5Pset_evict_replica( dapl_p_id, dset_p_replica ); ASSERT_RET;
+         ret = H5Pset_dxpl_replica( dxpl_p_id, dset_p_replica ); ASSERT_RET;
       } 
 
       MPI_Barrier( MPI_COMM_WORLD );      /* Make sure all are here before continuing, (esp in case of no prefetch Bcast) */
@@ -607,7 +604,7 @@ int main( int argc, char **argv ) {
       if ( my_rank == 0 ) {
          if ( prefetched_dset ) {
             START_TIME;
-            ret = H5Devict_ff( dset_p_id, version, dapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  
+            ret = H5Devict_ff( dset_p_id, version, dxpl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  
             END_TIME;
             fprintf( stderr, "APP-r%d: iter %05d step 17: Time to Evict Replica of /DP (%lu bytes): %lu usec\n", 
                      my_rank, iteration, bytesPerDataset, ELAPSED_TIME );
@@ -628,7 +625,6 @@ int main( int argc, char **argv ) {
    /* Close the dataset property lists */
    if ( prefetched_dset ) {
       ret = H5Pclose( dxpl_p_id ); ASSERT_RET;
-      ret = H5Pclose( dapl_p_id ); ASSERT_RET;
    }
 
    /* Close the memory dataspace for the rank */

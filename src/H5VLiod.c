@@ -1025,79 +1025,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_evict_replica
- *
- * Purpose:     Set the replica ID to be used when accessing an object 
- *              using this access plist.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi
- *              February, 2014
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_evict_replica(hid_t lapl_id, hrpl_t replica_id)
-{
-    H5P_genplist_t *plist = NULL;    /* Property list pointer */
-    herr_t ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iRp", lapl_id, replica_id);
-
-    if(lapl_id == H5P_DEFAULT)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
-
-    /* Check arguments */
-    if(NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a lapl")
-
-    /* Set the transfer mode */
-    if(H5P_set(plist, H5O_ACS_REPLICA_ID_NAME, &replica_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_evict_replica() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pget_evict_replica
- *
- * Purpose:     Retrieve the replica ID from this access plist.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi
- *              February, 2014
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pget_evict_replica(hid_t lapl_id, hrpl_t *replica_id/*out*/)
-{
-    H5P_genplist_t *plist = NULL;       /* Property list pointer */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", lapl_id, replica_id);
-
-    if(NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a lapl")
-
-    /* Get the transfer mode */
-    if(replica_id)
-        if(H5P_get(plist, H5O_ACS_REPLICA_ID_NAME, replica_id) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_evict_replica() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pset_read_replica
+ * Function:	H5Pset_dxpl_replica
  *
  * Purpose:     Set the replica ID to be used when accessing an object 
  *              using this transfer plist.
@@ -1110,7 +1038,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_read_replica(hid_t dxpl_id, hrpl_t replica_id)
+H5Pset_dxpl_replica(hid_t dxpl_id, hrpl_t replica_id)
 {
     H5P_genplist_t *plist = NULL;    /* Property list pointer */
     herr_t ret_value = SUCCEED;      /* Return value */
@@ -1126,16 +1054,16 @@ H5Pset_read_replica(hid_t dxpl_id, hrpl_t replica_id)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
 
     /* Set the transfer mode */
-    if(H5P_set(plist, H5O_ACS_REPLICA_ID_NAME, &replica_id) < 0)
+    if(H5P_set(plist, H5O_XFER_REPLICA_ID_NAME, &replica_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_read_replica() */
+} /* end H5Pset_dxpl_replica() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_read_replica
+ * Function:	H5Pget_dxpl_replica
  *
  * Purpose:     Retrieve the replica ID from this access plist.
  *
@@ -1147,7 +1075,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_read_replica(hid_t dxpl_id, hrpl_t *replica_id/*out*/)
+H5Pget_dxpl_replica(hid_t dxpl_id, hrpl_t *replica_id/*out*/)
 {
     H5P_genplist_t *plist = NULL;       /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -1160,12 +1088,12 @@ H5Pget_read_replica(hid_t dxpl_id, hrpl_t *replica_id/*out*/)
 
     /* Get the transfer mode */
     if(replica_id)
-        if(H5P_get(plist, H5O_ACS_REPLICA_ID_NAME, replica_id) < 0)
+        if(H5P_get(plist, H5O_XFER_REPLICA_ID_NAME, replica_id) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_read_replica() */
+} /* end H5Pget_dxpl_replica() */
 
 
 /*-------------------------------------------------------------------------
@@ -9550,7 +9478,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_iod_prefetch(void *_obj, hid_t rcxt_id, hrpl_t *replica_id, hid_t apl_id, void **req)
+H5VL_iod_prefetch(void *_obj, hid_t rcxt_id, hrpl_t *replica_id, hid_t dxpl_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     prefetch_in_t input;
@@ -9578,7 +9506,7 @@ H5VL_iod_prefetch(void *_obj, hid_t rcxt_id, hrpl_t *replica_id, hid_t apl_id, v
     input.coh = obj->file->remote_file.coh;
     input.rcxt_num  = rc->c_version;
     input.cs_scope = obj->file->md_integrity_scope;
-    input.apl_id = apl_id;
+    input.dxpl_id = dxpl_id;
     input.obj_type = obj->obj_type;
 
     switch(obj->obj_type) {
@@ -9668,7 +9596,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_iod_evict(void *_obj, uint64_t c_version, hid_t apl_id, void **req)
+H5VL_iod_evict(void *_obj, uint64_t c_version, hid_t dxpl_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     evict_in_t input;
@@ -9690,15 +9618,15 @@ H5VL_iod_evict(void *_obj, uint64_t c_version, hid_t apl_id, void **req)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
     }
 
-    if(NULL == (plist = H5P_object_verify(apl_id, H5P_LINK_ACCESS)))
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not an access plist");
-    if(H5P_get(plist, H5O_ACS_REPLICA_ID_NAME, &input.replica_id) < 0)
+    if(H5P_get(plist, H5O_XFER_REPLICA_ID_NAME, &input.replica_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value");
 
     input.coh = obj->file->remote_file.coh;
     input.rcxt_num = c_version;
     input.cs_scope = obj->file->md_integrity_scope;
-    //input.apl_id = apl_id;
+    //input.dxpl_id = dxpl_id;
 
     switch(obj->obj_type) {
     case H5I_DATASET:

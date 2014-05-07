@@ -708,7 +708,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
         iod_trans_id_t read_tid;
 
         /* get replica ID from dxpl */
-        if(H5Pget_read_replica(dxpl_id, &read_tid) < 0)
+        if(H5Pget_dxpl_replica(dxpl_id, &read_tid) < 0)
             HGOTO_ERROR_FF(FAIL, "can't get replica ID from dxpl");
 
         if(read_tid) {

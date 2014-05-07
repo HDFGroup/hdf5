@@ -963,7 +963,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Mprefetch_ff(hid_t map_id, hid_t rcxt_id, hrpl_t *replica_id,
-                          hid_t mapl_id, hid_t estack_id)
+                          hid_t dxpl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -981,11 +981,11 @@ H5_DLL herr_t H5Mprefetch_ff(hid_t map_id, hid_t rcxt_id, hrpl_t *replica_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get correct property list */
-    if(H5P_DEFAULT == mapl_id)
-        mapl_id = H5P_MAP_ACCESS_DEFAULT;
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(mapl_id, H5P_MAP_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not map access property list")
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
@@ -999,7 +999,7 @@ H5_DLL herr_t H5Mprefetch_ff(hid_t map_id, hid_t rcxt_id, hrpl_t *replica_id,
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_prefetch(map, rcxt_id, replica_id, mapl_id, req)) < 0)
+    if((ret_value = H5VL_iod_prefetch(map, rcxt_id, replica_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch map")
 
     if(request && *req) {
@@ -1024,7 +1024,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Mevict_ff(hid_t map_id, uint64_t c_version, hid_t mapl_id, hid_t estack_id)
+H5_DLL herr_t H5Mevict_ff(hid_t map_id, uint64_t c_version, hid_t dxpl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generated request pointer */
@@ -1042,11 +1042,11 @@ H5_DLL herr_t H5Mevict_ff(hid_t map_id, uint64_t c_version, hid_t mapl_id, hid_t
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get correct property list */
-    if(H5P_DEFAULT == mapl_id)
-        mapl_id = H5P_MAP_ACCESS_DEFAULT;
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(mapl_id, H5P_MAP_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not map access property list")
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
@@ -1060,7 +1060,7 @@ H5_DLL herr_t H5Mevict_ff(hid_t map_id, uint64_t c_version, hid_t mapl_id, hid_t
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_evict(map, c_version, mapl_id, req)) < 0)
+    if((ret_value = H5VL_iod_evict(map, c_version, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict map")
 
     if(request && *req) {

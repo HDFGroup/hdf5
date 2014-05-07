@@ -745,7 +745,6 @@ H5VL_iod_server_prefetch_cb(AXE_engine_t UNUSED axe_engine,
     iod_handles_t iod_oh = input->iod_oh; /* object handle */
     iod_obj_id_t iod_id = input->iod_id; /* OID */
     //H5I_type_t obj_type = input->obj_type;
-    //hid_t apl_id = input->apl_id;
     iod_trans_id_t replica_id;
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
@@ -806,7 +805,6 @@ H5VL_iod_server_evict_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t mdkv_id = input->mdkv_id; /* OID */
     iod_obj_id_t attrkv_id = input->attrkv_id; /* OID */
     //H5I_type_t obj_type = input->obj_type;
-    //hid_t apl_id = input->apl_id;
     iod_trans_id_t replica_id = input->replica_id;
     iod_handle_t mdkv_oh, attrkv_oh;
     iod_ret_t ret;
