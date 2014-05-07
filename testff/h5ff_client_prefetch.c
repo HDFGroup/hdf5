@@ -93,9 +93,14 @@ int main(int argc, char **argv) {
     /* acquire container version 1 - EXACT.  
        This can be asynchronous, but here we need the acquired ID 
        right after the call to start the transaction so we make synchronous. */
-    version = 1;
-    rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    if(0 == my_rank) {
+        version = 1;
+        rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    }
+    MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
     assert(1 == version);
+    if (my_rank != 0)
+        rid1 = H5RCcreate(file_id, version);
 
     /* start transaction 2 with default Leader/Delegate model. Leader
        which is rank 0 here starts the transaction. It can be
@@ -180,9 +185,11 @@ int main(int argc, char **argv) {
         version = 3;
     }
 
-    /* release container version 1. This is async. */
-    ret = H5RCrelease(rid1, e_stack);
-    assert(0 == ret);
+    if(0 == my_rank) {
+        /* release container version 1. This is async. */
+        ret = H5RCrelease(rid1, e_stack);
+        assert(0 == ret);
+    }
 
     /* wait on all requests and print completion status */
     H5ESget_count(e_stack, &num_events);
@@ -262,20 +269,19 @@ int main(int argc, char **argv) {
         /* Read from prefetched Replicas */
 	/* set dxpl to read from replica in BB */
 	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-	ret = H5Pset_read_replica(dxpl_id, dset_replica);
+	ret = H5Pset_dxpl_replica(dxpl_id, dset_replica);
 	assert(0 == ret);
-
 	ret = H5Dread_ff(did, dtid, H5S_ALL, H5S_ALL, dxpl_id, rdata1, rid2, H5_EVENT_STACK_NULL);
 	assert(ret == 0);
 	printf("Read Data1: ");
 	for(i=0;i<nelem;++i)
 	  printf("%d ",rdata1[i]);
 	printf("\n");
+	H5Pclose(dxpl_id);
 
 	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-	ret = H5Pset_read_replica(dxpl_id, map_replica);
+	ret = H5Pset_dxpl_replica(dxpl_id, map_replica);
 	assert(0 == ret);
-
         key = 1;
         value = -1;
         ret = H5Mget_ff(map, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
@@ -283,37 +289,36 @@ int main(int argc, char **argv) {
         assert(0 == ret);
         printf("Value recieved = %d\n", value);
         assert(1000 == value);
-
 	H5Pclose(dxpl_id);
 
         /* evict Replicas */
-        tapl_id = H5Pcreate (H5P_DATATYPE_ACCESS);
-        ret = H5Pset_evict_replica(tapl_id, dt_replica);
+	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+	ret = H5Pset_dxpl_replica(dxpl_id, dset_replica);
+	assert(0 == ret);
+        ret = H5Tevict_ff(dtid, 3, dxpl_id, H5_EVENT_STACK_NULL);
         assert(0 == ret);
-        ret = H5Tevict_ff(dtid, 3, tapl_id, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-        H5Pclose(tapl_id);
+        H5Pclose(dxpl_id);
 
-        dapl_id = H5Pcreate (H5P_DATASET_ACCESS);
-        ret = H5Pset_evict_replica(dapl_id, dset_replica);
+	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+        ret = H5Pset_dxpl_replica(dxpl_id, dset_replica);
         assert(0 == ret);
-        ret = H5Devict_ff(did, 3, dapl_id, H5_EVENT_STACK_NULL);
+        ret = H5Devict_ff(did, 3, dxpl_id, H5_EVENT_STACK_NULL);
         assert(0 == ret);
-        H5Pclose(dapl_id);
+        H5Pclose(dxpl_id);
 
-        mapl_id = H5Pcreate (H5P_MAP_ACCESS);
-        ret = H5Pset_evict_replica(mapl_id, map_replica);
+	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+        ret = H5Pset_dxpl_replica(dxpl_id, map_replica);
         assert(0 == ret);
-        ret = H5Mevict_ff(map, 3, mapl_id, H5_EVENT_STACK_NULL);
+        ret = H5Mevict_ff(map, 3, dxpl_id, H5_EVENT_STACK_NULL);
         assert(0 == ret);
-        H5Pclose(mapl_id);
+        H5Pclose(dxpl_id);
 
-        gapl_id = H5Pcreate (H5P_GROUP_ACCESS);
-        ret = H5Pset_evict_replica(gapl_id, grp_replica);
+	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+        ret = H5Pset_dxpl_replica(dxpl_id, grp_replica);
         assert(0 == ret);
-        ret = H5Gevict_ff(gid, 3, gapl_id, H5_EVENT_STACK_NULL);
+        ret = H5Gevict_ff(gid, 3, dxpl_id, H5_EVENT_STACK_NULL);
         assert(0 == ret);
-        H5Pclose(gapl_id);
+        H5Pclose(dxpl_id);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);

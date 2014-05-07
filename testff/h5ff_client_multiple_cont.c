@@ -114,11 +114,17 @@ int main(int argc, char **argv) {
     /* acquire container version 1 on both containers - EXACT 
        This can be asynchronous, but here we need the acquired ID 
        right after the call to start the transaction so we make synchronous. */
-    version = 1;
-    rid1 = H5RCacquire(fid1, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    if(0 == my_rank) {
+        version = 1;
+        rid1 = H5RCacquire(fid1, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        rid2 = H5RCacquire(fid2, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    }
+    MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
     assert(1 == version);
-    rid2 = H5RCacquire(fid2, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    assert(1 == version);
+    if (my_rank != 0) {
+        rid1 = H5RCcreate(fid1, version);
+        rid2 = H5RCcreate(fid2, version);
+    }
 
     /* create transaction objects */
     tid1 = H5TRcreate(fid1, rid1, (uint64_t)2);
@@ -300,22 +306,31 @@ int main(int argc, char **argv) {
     ret = H5TRclose(tid2);
     assert(0 == ret);
 
-    /* release container version 1. This is async. */
-    ret = H5RCrelease(rid1, H5_EVENT_STACK_NULL);
-    assert(0 == ret);
-    ret = H5RCrelease(rid2, H5_EVENT_STACK_NULL);
-    assert(0 == ret);
+    /* release container version 1. */
+    if(0 == my_rank) {
+        ret = H5RCrelease(rid1, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        ret = H5RCrelease(rid2, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+    }
 
     ret = H5RCclose(rid1);
     assert(0 == ret);
     ret = H5RCclose(rid2);
     assert(0 == ret);
 
-    version = 2;
-    rid1 = H5RCacquire(fid1, &version, H5P_DEFAULT, e_stack);
+
+    if(0 == my_rank) {
+        version = 2;
+        rid1 = H5RCacquire(fid1, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        rid2 = H5RCacquire(fid2, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    }
+    MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
     assert(2 == version);
-    rid2 = H5RCacquire(fid2, &version, H5P_DEFAULT, e_stack);
-    assert(2 == version);
+    if (my_rank != 0) {
+        rid1 = H5RCcreate(fid1, version);
+        rid2 = H5RCcreate(fid2, version);
+    }
 
     {
         hid_t dxpl_id;
@@ -352,10 +367,12 @@ int main(int argc, char **argv) {
 
     MPI_Barrier(MPI_COMM_WORLD);
     /* release container version 2. This is async. */
-    ret = H5RCrelease(rid1, e_stack);
-    assert(0 == ret);
-    ret = H5RCrelease(rid2, e_stack);
-    assert(0 == ret);
+    if(0 == my_rank) {
+        ret = H5RCrelease(rid1, e_stack);
+        assert(0 == ret);
+        ret = H5RCrelease(rid2, e_stack);
+        assert(0 == ret);
+    }
 
     H5ESget_count(e_stack, &num_events);
     H5ESwait_all(e_stack, &status);

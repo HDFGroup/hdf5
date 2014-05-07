@@ -97,13 +97,10 @@ int main(int argc, char **argv) {
     /* allocate and initialize arrays for dataset I/O */
     wdata1 = malloc (sizeof(int32_t)*nelem);
     wdata3 = malloc (sizeof(int16_t)*nelem);
-    rdata1 = malloc (sizeof(int32_t)*nelem);
-    rdata2 = malloc (sizeof(int32_t)*nelem);
-    rdata3 = malloc (sizeof(int32_t)*nelem);
+    rdata1 = calloc (nelem, sizeof(int32_t));
+    rdata2 = calloc (nelem, sizeof(int32_t));
+    rdata3 = calloc (nelem, sizeof(int32_t));
     for(i=0;i<nelem;++i) {
-        rdata1[i] = 0;
-        rdata2[i] = 0;
-        rdata3[i] = 0;
         wdata1[i]=i;
         wdata3[i]=i;
     }
@@ -522,9 +519,9 @@ int main(int argc, char **argv) {
 
     MPI_Barrier(MPI_COMM_WORLD);    
     if(my_rank == 0) {
-        ret = H5RCrelease(rid3, e_stack);
-        assert(0 == ret);
         ret = H5RCrelease(rid2, e_stack);
+        assert(0 == ret);
+        ret = H5RCrelease(rid3, e_stack);
         assert(0 == ret);
     }
 
@@ -538,7 +535,7 @@ int main(int argc, char **argv) {
     ret = H5Gclose_ff(gid1, e_stack);
     assert(ret == 0);
 
-    H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL);
+    H5Fclose_ff(file_id, 0, H5_EVENT_STACK_NULL);
 
     H5ESget_count(e_stack, &num_events);
 
@@ -586,7 +583,7 @@ int main(int argc, char **argv) {
 
     printf("Read Data3 with datatype conversion (expect to see same as others since it is converted twice): \n");
     for(i=0;i<nelem;++i)
-        printf("%d ",rdata3[i]);
+        printf("%"PRId16" ",rdata3[i]);
     printf("\n");
 
     ret = H5ESclose(e_stack);

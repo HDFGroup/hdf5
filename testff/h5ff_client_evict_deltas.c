@@ -93,9 +93,14 @@ int main(int argc, char **argv) {
     /* acquire container version 1 - EXACT.  
        This can be asynchronous, but here we need the acquired ID 
        right after the call to start the transaction so we make synchronous. */
-    version = 1;
-    rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    if(0 == my_rank) {
+        version = 1;
+        rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    }
+    MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
     assert(1 == version);
+    if (my_rank != 0)
+        rid1 = H5RCcreate(file_id, version);
 
     /* start transaction 1 with default Leader/Delegate model. Leader
        which is rank 0 here starts the transaction. It can be
@@ -181,8 +186,10 @@ int main(int argc, char **argv) {
     }
 
     /* release container version 1. This is async. */
-    ret = H5RCrelease(rid1, e_stack);
-    assert(0 == ret);
+    if(0 == my_rank) {
+        ret = H5RCrelease(rid1, e_stack);
+        assert(0 == ret);
+    }
 
     /* wait on all requests and print completion status */
     H5ESget_count(e_stack, &num_events);

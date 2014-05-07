@@ -450,19 +450,17 @@ int main( int argc, char **argv ) {
    hid_t space_l_id, space_p_id, space_s_id;
    hrpl_t dset_p_replica;
    hid_t dxpl_p_id;
-   hid_t dapl_p_id;
    int data_l[4], data_p[4], data_s[4];              
 
    hid_t map_l_id, map_p_id, map_s_id;
    hrpl_t map_p_replica;
    hid_t mxpl_p_id;
-   hid_t mapl_p_id;
    int map_entries;                       /* know same number in all maps */
    int *value_l, *value_p, *value_s;              
 
    hid_t type_l_id, type_p_id, type_s_id;
    hrpl_t type_p_replica;
-   hid_t tapl_p_id;
+   hid_t txpl_p_id;
 
    /* Event stack */
    hid_t         d_es_id;        /* for prefetch of Dataset */
@@ -546,10 +544,8 @@ int main( int argc, char **argv ) {
          fprintf( stderr, "APP-r%d: asynchronous prefetch of D completed with status %d\n", my_rank, status );
       }
       MPI_Bcast( &dset_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
-      dxpl_p_id = H5Pcreate( H5P_DATASET_XFER );                              /* Used in Read */
-      ret = H5Pset_read_replica( dxpl_p_id, dset_p_replica ); ASSERT_RET;
-      dapl_p_id = H5Pcreate( H5P_DATASET_ACCESS );                            /* Used in Evict */
-      ret = H5Pset_evict_replica( dapl_p_id, dset_p_replica ); ASSERT_RET;
+      dxpl_p_id = H5Pcreate( H5P_DATASET_XFER );                              /* Used in Read & Evict*/
+      ret = H5Pset_dxpl_replica( dxpl_p_id, dset_p_replica ); ASSERT_RET;
 
       /* After both map and datatype prefetches complete, bcast the replica IDs and set up properties */
       if ( my_rank == 0 ) {
@@ -557,22 +553,18 @@ int main( int argc, char **argv ) {
          fprintf( stderr, "APP-r%d: asynchronous prefetch of M and T completed with status %d\n", my_rank, status );
       }
       MPI_Bcast( &map_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
-      mxpl_p_id = H5Pcreate( H5P_DATASET_XFER );                              /* Used in Get */
-      ret = H5Pset_read_replica( mxpl_p_id, map_p_replica );  ASSERT_RET;
-      mapl_p_id = H5Pcreate( H5P_MAP_ACCESS );                                /* Used in Evict */
-      ret = H5Pset_evict_replica( mapl_p_id, map_p_replica ); ASSERT_RET;
+      mxpl_p_id = H5Pcreate( H5P_DATASET_XFER );                              /* Used in Get & Evict*/
+      ret = H5Pset_dxpl_replica( mxpl_p_id, map_p_replica );  ASSERT_RET;
 
       MPI_Bcast( &type_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
-      tapl_p_id = H5Pcreate( H5P_DATATYPE_ACCESS );                           /* Used in Evict */
-      ret = H5Pset_evict_replica( tapl_p_id, type_p_replica ); ASSERT_RET;
+      txpl_p_id = H5Pcreate( H5P_DATASET_XFER );                           /* Used in Evict */
+      ret = H5Pset_dxpl_replica( txpl_p_id, type_p_replica ); ASSERT_RET;
 
    } else {
       /* Without daos-lustre, we don't do prefetch, so default properties */
       dxpl_p_id = H5P_DEFAULT;
-      dapl_p_id = H5P_DEFAULT;
       mxpl_p_id = H5P_DEFAULT;
-      mapl_p_id = H5P_DEFAULT;
-      tapl_p_id = H5P_DEFAULT;
+      txpl_p_id = H5P_DEFAULT;
    }
 
    /* Optionally, pause to show change in BB space using out-of-band check. All ranks paused. */
@@ -733,13 +725,13 @@ int main( int argc, char **argv ) {
    if ( my_rank == 0 ) {
       if ( use_daos_lustre ) {
          fprintf( stderr, "APP-r%d: Evict replica of /G-prefetched/D\n", my_rank );
-         ret = H5Devict_ff( dset_p_id, version, dapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  /* Note: CV redundant for replica */
+         ret = H5Devict_ff( dset_p_id, version, dxpl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  /* Note: CV redundant for replica */
 
          fprintf( stderr, "APP-r%d: Evict replica of /G-prefetched/M (Q7 note: currently a no-op in IOD)\n", my_rank );
-         ret = H5Mevict_ff( map_p_id, version, mapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;   /* Note: CV redundant for replica */
+         ret = H5Mevict_ff( map_p_id, version, mxpl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;   /* Note: CV redundant for replica */
 
          fprintf( stderr, "APP-r%d: Evict replica of /G-prefetched/T\n", my_rank );
-         ret = H5Tevict_ff( type_p_id, version, tapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  /* Note: CV redundant for replica */
+         ret = H5Tevict_ff( type_p_id, version, txpl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  /* Note: CV redundant for replica */
       } else {
          fprintf( stderr, "APP-r%d DAOS-POSIX - No replicas to evict\n", my_rank );
       }
@@ -759,10 +751,9 @@ int main( int argc, char **argv ) {
    /* Close Objects*/
 
    if ( use_daos_lustre ) {
-      ret = H5Pclose( mapl_p_id ); ASSERT_RET;
       ret = H5Pclose( mxpl_p_id ); ASSERT_RET;
-      ret = H5Pclose( dapl_p_id ); ASSERT_RET;
       ret = H5Pclose( dxpl_p_id ); ASSERT_RET;
+      ret = H5Pclose( txpl_p_id ); ASSERT_RET;
    }
 
    ret = H5Dclose_ff( dset_l_id, H5_EVENT_STACK_NULL ); ASSERT_RET;

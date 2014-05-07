@@ -96,10 +96,8 @@ int main( int argc, char **argv ) {
    /* Replicas and related properties */
    hrpl_t   dset_p_replica;
    hid_t    dxpl_p_id;
-   hid_t    dapl_p_id;
    hrpl_t   map_p_replica;
    hid_t    mxpl_p_id;
-   hid_t    mapl_p_id;
 
    /* Container Version & Read Contexts */
    uint64_t version, versionH;
@@ -324,9 +322,7 @@ int main( int argc, char **argv ) {
 
    /* Create property lists that will be used */
    dxpl_p_id = H5Pcreate( H5P_DATASET_XFER );                              
-   mxpl_p_id = H5Pcreate( H5P_DATASET_XFER );                             
-   dapl_p_id = H5Pcreate( H5P_DATASET_ACCESS );
-   mapl_p_id = H5Pcreate( H5P_MAP_ACCESS );
+   mxpl_p_id = H5Pcreate( H5P_DATASET_XFER );
 
    for ( iteration = 0; iteration < num_iterations; iteration++ ) {
 
@@ -495,12 +491,10 @@ int main( int argc, char **argv ) {
 
       /* This Bcast will make sure no nodes go ahead to use the RC before rank 0 has acquired it */
       MPI_Bcast( &dset_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
-      ret = H5Pset_read_replica( dxpl_p_id, dset_p_replica ); ASSERT_RET;
-      ret = H5Pset_evict_replica( dapl_p_id, dset_p_replica ); ASSERT_RET;
+      ret = H5Pset_dxpl_replica( dxpl_p_id, dset_p_replica ); ASSERT_RET;
 
       MPI_Bcast( &map_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
-      ret = H5Pset_read_replica( mxpl_p_id, map_p_replica );  ASSERT_RET;
-      ret = H5Pset_evict_replica( mapl_p_id, map_p_replica ); ASSERT_RET;
+      ret = H5Pset_dxpl_replica( mxpl_p_id, map_p_replica );  ASSERT_RET;
 
       MPI_Barrier( MPI_COMM_WORLD );         /* Make sure all are here before continuing */
 
@@ -740,13 +734,13 @@ int main( int argc, char **argv ) {
       MPI_Barrier( MPI_COMM_WORLD );            /* Make sure all ranks done reading replicas before evict */
       if ( my_rank == 0 ) {
          START_TIME;
-         ret = H5Devict_ff( dset_p_id, version, dapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  
+         ret = H5Devict_ff( dset_p_id, version, dxpl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  
          END_TIME;
          fprintf( stderr, "APP-r%d: iter %d - Time to Evict Replica of /G-prefetched/D: %lu usec\n", 
                   my_rank, iteration, ELAPSED_TIME );
 
          START_TIME;
-         ret = H5Mevict_ff( map_p_id, version, mapl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  
+         ret = H5Mevict_ff( map_p_id, version, mxpl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  
          END_TIME;
          fprintf( stderr, "APP-r%d: iter %d - Time to Evict Replica of /G-prefetched/M (currently no-op for IOD): %lu usec\n", 
                   my_rank, iteration, ELAPSED_TIME );
@@ -766,8 +760,6 @@ int main( int argc, char **argv ) {
    /* Close the dataset and map property lists */
    ret = H5Pclose( dxpl_p_id ); ASSERT_RET;
    ret = H5Pclose( mxpl_p_id ); ASSERT_RET;
-   ret = H5Pclose( dapl_p_id ); ASSERT_RET;
-   ret = H5Pclose( mapl_p_id ); ASSERT_RET;
 
    /* Close the memory dataspace for the rank */
    ret = H5Sclose( rank_space_id ); ASSERT_RET;         
