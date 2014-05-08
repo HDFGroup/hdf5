@@ -318,7 +318,7 @@ int main( int argc, char **argv ) {
 
    /* Create the memory dataspace for a rank - always first part of memory buffer */
    rank_mbuf_size[0] = rows_per_rank * cols_per_row;
-   rank_space_id = H5Screate_simple( 1, rank_mbuf_size, rank_mbuf_size ); assert( space_id >= 0 );
+   rank_space_id = H5Screate_simple( 1, rank_mbuf_size, rank_mbuf_size ); assert( rank_space_id >= 0 );
 
    /* Create property lists that will be used */
    dxpl_p_id = H5Pcreate( H5P_DATASET_XFER );                              
