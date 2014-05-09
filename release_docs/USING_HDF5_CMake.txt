@@ -175,8 +175,8 @@ These steps are described in more detail below.
 III. Minimum C Project Files for CMake
 ========================================================================
 
-   6. Create a CMakeLists.txt file at the source root. Include the 
-      following text in the file:
+Create a CMakeLists.txt file at the source root. Include the 
+following text in the file:
 
 ##########################################################
 cmake_minimum_required (VERSION 2.8.12)
