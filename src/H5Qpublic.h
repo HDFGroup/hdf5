@@ -78,11 +78,8 @@ H5_DLL herr_t H5Qget_combine_op(hid_t query_id, H5Q_combine_op_t *op_type);
 H5_DLL herr_t H5Qencode(hid_t query_id, void *buf, size_t *nalloc);
 H5_DLL hid_t H5Qdecode(const void *buf);
 
-/* Apply query (TODO should go) */
-H5_DLL herr_t H5Qapply(hid_t query_id, hbool_t *result, hid_t type_id, const void *elem);
-/* or return dataspace and have
- * hid_t H5Qapply(query_id, result, enum data_elem/link/attr, nelem, void*);
- */
+/* Apply query (convenience) */
+H5_DLL herr_t H5Qapply(hid_t query_id, hbool_t *result, ...);
 
 #ifdef __cplusplus
 }

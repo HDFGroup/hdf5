@@ -93,10 +93,6 @@ typedef enum H5Q_match_type_t { /* The different kinds of native types we can ma
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5Q_apply_combine(H5Q_t *query, hbool_t *result, H5T_t *type,
-        const void *elem);
-static herr_t H5Q_apply_select(H5Q_t *query, hbool_t *result, H5T_t *type,
-        const void *elem);
 static herr_t H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type,
         const void *elem);
 static herr_t H5Q_apply_attr_name(H5Q_t *query, hbool_t *result,
@@ -687,9 +683,9 @@ H5Qget_components(hid_t query_id, hid_t *sub_query1_id, hid_t *sub_query2_id)
         HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get components");
 
     /* Register the type and return the ID */
-    if ((ret_value = H5I_register(H5I_QUERY, sub_query1, TRUE)) < 0)
+    if ((*sub_query1_id = H5I_register(H5I_QUERY, sub_query1, TRUE)) < 0)
         HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "unable to register query");
-    if ((ret_value = H5I_register(H5I_QUERY, sub_query2, TRUE)) < 0)
+    if ((*sub_query2_id = H5I_register(H5I_QUERY, sub_query2, TRUE)) < 0)
         HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "unable to register query")
 
 done:
@@ -720,7 +716,9 @@ H5Q_get_components(H5Q_t *query, H5Q_t **sub_query1, H5Q_t **sub_query2)
         HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "not a combined query");
 
     *sub_query1 = query->query.combine.l_query;
+    query->query.combine.l_query->ref_count++;
     *sub_query2 = query->query.combine.r_query;
+    query->query.combine.r_query->ref_count++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1044,19 +1042,22 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Qapply
  *
- * Purpose: Apply a query to an element elem of type type_id.
- * TODO modify prototype for attr/link name support
+ * Purpose: Apply a query and return the result. Parameters, which the
+ * query applies to, are determined by the type of the query.
+ * It is an error to apply H5Qapply to a combined query object (one
+ * which was created with H5Qcombine).
  *
  * Return:  Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Qapply(hid_t query_id, hbool_t *result, hid_t type_id, const void *elem)
+H5Qapply(hid_t query_id, hbool_t *result, ...)
 {
     H5Q_t *query = NULL;
-    H5T_t *type = NULL, *native_type = NULL;
+    H5T_t *native_type = NULL;
     hid_t ret_value;
+    va_list ap;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*bi*x", query_id, result, type_id, elem);
@@ -1066,16 +1067,69 @@ H5Qapply(hid_t query_id, hbool_t *result, hid_t type_id, const void *elem)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for result");
     if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
-    if (NULL == (type = (H5T_t *) H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
-    /* Only use native type */
-    if (NULL == (native_type = H5T_get_native_type(type, H5T_DIR_DEFAULT, NULL, NULL, NULL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot retrieve native type");
+    if (query->is_combined)
+        HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "cannot apply to combined query");
 
-    /* Apply query */
-    if (FAIL == (ret_value = H5Q_apply(query, result, native_type, elem)))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+    va_start(ap, result);
+
+    switch (query->query.select.type) {
+        case H5Q_TYPE_DATA_ELEM:
+        case H5Q_TYPE_ATTR_VALUE:
+        {
+            H5T_t *type = NULL;
+            hid_t type_id;
+            const void *value;
+
+            /* Get arguments */
+            type_id = va_arg(ap, hid_t);
+            value = va_arg(ap, const void *);
+
+            /* Get type */
+            if (NULL == (type = (H5T_t *) H5I_object_verify(type_id, H5I_DATATYPE)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+
+            /* Only use native type */
+            if (NULL == (native_type = H5T_get_native_type(type, H5T_DIR_DEFAULT, NULL, NULL, NULL)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot retrieve native type");
+
+            /* Apply query */
+            if (FAIL == (ret_value = H5Q_apply(query, result, native_type, value)))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+        }
+        break;
+        case H5Q_TYPE_ATTR_NAME:
+        {
+            const char *attr_name;
+
+            /* Get arguments */
+            attr_name = va_arg(ap, const char *);
+
+            /* Apply query */
+            if (FAIL == (ret_value = H5Q_apply(query, result, attr_name)))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+        }
+        break;
+        case H5Q_TYPE_LINK_NAME:
+        {
+            const char *link_name;
+
+            /* Get arguments */
+            link_name = va_arg(ap, const char *);
+
+            /* Apply query */
+            if (FAIL == (ret_value = H5Q_apply(query, result, link_name)))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+        }
+        break;
+        default:
+        {
+            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
+        }
+        break;
+    }
+
+    va_end(ap);
 
 done:
     if (native_type)
@@ -1093,111 +1147,56 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Q_apply(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem)
+H5Q_apply(H5Q_t *query, hbool_t *result, ...)
 {
     herr_t ret_value = SUCCEED; /* Return value */
+    va_list ap;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(query);
     HDassert(result);
-
-    if (query->is_combined) {
-        if (FAIL == (ret_value = H5Q_apply_combine(query, result, type, elem)))
-            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
-    } else {
-        if (FAIL == (ret_value = H5Q_apply_select(query, result, type, elem)))
-            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_apply() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5Q_apply_combine
- *
- * Purpose: Private function for H5Qapply (combine query).
- *
- * Return:  Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5Q_apply_combine(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-    hbool_t result1, result2;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(query);
-    HDassert(query->is_combined == TRUE);
-
-    if (FAIL == H5Q_apply(query->query.combine.l_query, &result1, type, elem))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
-    if (FAIL == H5Q_apply(query->query.combine.r_query, &result2, type, elem))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
-
-    switch (query->query.combine.op) {
-        case H5Q_COMBINE_AND:
-            *result = result1 && result2;
-            break;
-        case H5Q_COMBINE_OR:
-            *result = result1 || result2;
-            break;
-        default:
-            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized combine op");
-            break;
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_apply_combine() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5Q_apply_select
- *
- * Purpose: Private function for H5Qapply (select query).
- *
- * Return:  Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5Q_apply_select(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(query);
     HDassert(query->is_combined == FALSE);
+
+    va_start(ap, result);
 
     switch (query->query.select.type) {
         case H5Q_TYPE_DATA_ELEM:
         case H5Q_TYPE_ATTR_VALUE:
+        {
+            H5T_t *type = va_arg(ap, H5T_t*);
+            const void *elem = va_arg(ap, const void *);
+
             if (FAIL == (ret_value = H5Q_apply_data_elem(query, result, type, elem)))
                 HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply data element query");
             break;
+        }
         case H5Q_TYPE_ATTR_NAME:
-            /* TODO pass non NULL string */
-            if (FAIL == (ret_value = H5Q_apply_attr_name(query, result, NULL)))
+        {
+            const char *attr_name = va_arg(ap, const char *);
+
+            if (FAIL == (ret_value = H5Q_apply_attr_name(query, result, attr_name)))
                 HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply attribute name query");
             break;
+        }
         case H5Q_TYPE_LINK_NAME:
-            /* TODO pass non NULL string */
-            if (FAIL == (ret_value = H5Q_apply_link_name(query, result, NULL)))
+        {
+            const char *link_name = va_arg(ap, const char *);
+
+            if (FAIL == (ret_value = H5Q_apply_link_name(query, result, link_name)))
                 HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply link name query");
             break;
+        }
         default:
             HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
             break;
     }
 
+    va_end(ap);
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_apply_select() */
+} /* end H5Q_apply() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Q_promote_type
