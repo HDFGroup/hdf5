@@ -99,7 +99,7 @@ H5_DLL herr_t H5Q_get_combine_op(H5Q_t *query, H5Q_combine_op_t *op_type);
 H5_DLL herr_t H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc);
 H5_DLL H5Q_t *H5Q_decode(const unsigned char **buf);
 
-/* Apply query (TODO should go) */
-H5_DLL herr_t H5Q_apply(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem);
+/* Apply query (convenience) */
+H5_DLL herr_t H5Q_apply(H5Q_t *query, hbool_t *result, ...);
 
 #endif /* _H5Qprivate_H */
