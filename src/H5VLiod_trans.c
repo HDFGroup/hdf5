@@ -638,18 +638,42 @@ H5VL_iod_server_trans_skip_cb(AXE_engine_t UNUSED axe_engine,
     tr_skip_in_t *input = (tr_skip_in_t *)op_data->input;
     iod_handle_t coh = input->coh; /* the container handle */
     iod_trans_id_t start_trans_num = input->start_trans_num;
+    iod_trans_id_t tid;
     uint64_t count = input->count;
-    iod_trans_range_desc_t skip_ranges;
+    iod_trans_range_desc_t *skip_ranges = NULL;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Transaction Skip %"PRIu64" starting at %"PRIu64"\n", count, start_trans_num);
 #endif
 
-    /* MSC - set skip ranges */
-    skip_ranges.n_range = 1;
-    //if(iod_trans_skip(coh, skip_ranges, NULL) < 0)
-    //HGOTO_ERROR_FF(FAIL, "can't skip transactions");
+    skip_ranges = (iod_trans_range_desc_t *)malloc(sizeof(iod_trans_range_desc_t) + 
+                                                   sizeof(iod_trans_range_t));
+    skip_ranges->n_range = 1;
+    skip_ranges->range[0].lower_tid = start_trans_num;
+    skip_ranges->range[0].higher_tid = start_trans_num + count;
+
+    /* MSC - right now, skip by starting and finishing the
+       transactions, since iod skip does not update latest_writing */
+#if 0 
+    if(iod_trans_skip(coh, skip_ranges, NULL) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't skip transactions");
+#endif
+    tid = start_trans_num;
+    while(count) {
+        ret = iod_trans_start(coh, &tid, NULL, 0, IOD_TRANS_W, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't start transaction");
+
+        /* Finish  the transaction */
+        ret = iod_trans_finish(coh, tid, NULL, IOD_TRANS_ABORT_DEPENDENT, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't finish transaction");
+
+        tid ++;
+        count --;
+    }
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Done with Transaction Skip\n");
@@ -661,6 +685,11 @@ done:
 
     HG_Handler_free_input(op_data->hg_handle, input);
     HG_Handler_free(op_data->hg_handle);
+
+    if(skip_ranges) {
+        free(skip_ranges);
+        skip_ranges = NULL;
+    }
     input = (tr_skip_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -744,8 +773,14 @@ H5VL_iod_server_prefetch_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t tid = input->rcxt_num;
     iod_handles_t iod_oh = input->iod_oh; /* object handle */
     iod_obj_id_t iod_id = input->iod_id; /* OID */
-    //H5I_type_t obj_type = input->obj_type;
+    H5I_type_t obj_type = input->obj_type;
+    H5FF_layout_t layout_type = input->layout_type;
     iod_trans_id_t replica_id;
+    iod_layout_t *layout = NULL;
+    iod_obj_partition_t *partition = NULL;
+    iod_kv_partition_t *kv_parts = NULL;
+    iod_hyperslab_t *hslabs = NULL; /* IOD hyperslab generated from HDF5 filespace */
+    hssize_t num_descriptors = 0, n; /* number of IOD hslabs needed to describe dataset selection */
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
@@ -754,7 +789,146 @@ H5VL_iod_server_prefetch_cb(AXE_engine_t UNUSED axe_engine,
             iod_id, iod_oh.rd_oh.cookie, tid);
 #endif
 
-    ret = iod_obj_fetch(iod_oh.rd_oh, tid, NULL, NULL, NULL, &replica_id, NULL);
+    /* non-default layout (fetch to local ION) */
+    if(H5_LOCAL_NODE == layout_type) {
+#if H5_EFF_DEBUG
+        fprintf(stderr, "Prefetch object to local ION with rank %d\n", my_rank_g);
+#endif
+        if(NULL == (layout = (iod_layout_t *)malloc(sizeof(iod_layout_t))))
+            HGOTO_ERROR_FF(FAIL, "can't allocate layout buffer");
+        layout->loc = IOD_LOC_BB;
+        layout->type = IOD_LAYOUT_LOGGED;
+        layout->dims_seq = NULL;
+        layout->target_start = my_rank_g;
+        layout->target_num = 1;
+        layout->stripe_size = IOD_MAX_STRIPE_SIZE;
+    }
+
+    switch(obj_type) {
+    case H5I_GROUP:
+    case H5I_ATTR:
+    case H5I_DATATYPE:
+        break;
+    case H5I_DATASET:
+        {
+            hid_t selection = input->selection;
+            int ndims, i;  /* dataset's rank/number of dimensions */
+            if(-1 != selection) {
+                if(NULL == (partition = (iod_obj_partition_t *)malloc(sizeof(iod_obj_partition_t))))
+                    HGOTO_ERROR_FF(FAIL, "can't allocate partition buffer");
+
+                if((ndims = H5Sget_simple_extent_ndims(selection)) < 0)
+                    HGOTO_ERROR_FF(FAIL, "unable to get dataspace dimesnsion");
+
+                /* handle scalar dataspace */
+                if(0 == ndims) {
+                    ndims = 1;
+                    /* allocate the IOD hyperslab descriptors needed */
+                    if(NULL == (hslabs = (iod_hyperslab_t *)malloc(sizeof(iod_hyperslab_t))))
+                        HGOTO_ERROR_FF(FAIL, "can't allocate iod array descriptors");
+
+                    hslabs[0].start = (iod_size_t *)malloc(sizeof(iod_size_t));
+                    hslabs[0].stride = (iod_size_t *)malloc(sizeof(iod_size_t));
+                    hslabs[0].block = (iod_size_t *)malloc(sizeof(iod_size_t));
+                    hslabs[0].count = (iod_size_t *)malloc(sizeof(iod_size_t));
+
+                    num_descriptors = 1;
+                    hslabs[0].start[0] = 0;
+                    hslabs[0].count[0] = 1;
+                    hslabs[0].block[0] = 1;
+                    hslabs[0].stride[0] = 1;
+                }
+                else {
+                    /* get the number of decriptors required, i.e. the numbers of iod
+                       I/O operations needed */
+                    if(H5VL_iod_get_file_desc(selection, &num_descriptors, NULL) < 0)
+                        HGOTO_ERROR_FF(FAIL, "unable to generate IOD file descriptor from dataspace selection");
+
+                    if(1 != num_descriptors)
+                        HGOTO_ERROR_FF(FAIL, "can't prefetch an irregular hyperslab");
+
+                    /* allocate the IOD hyperslab descriptors needed */
+                    if(NULL == (hslabs = (iod_hyperslab_t *)malloc
+                                (sizeof(iod_hyperslab_t) * (size_t)num_descriptors)))
+                        HGOTO_ERROR_FF(FAIL, "can't allocate iod array descriptors");
+
+                    for(n=0 ; n<num_descriptors ; n++) {
+                        hslabs[n].start = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
+                        hslabs[n].stride = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
+                        hslabs[n].block = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
+                        hslabs[n].count = (iod_size_t *)malloc(sizeof(iod_size_t) * (size_t)ndims);
+                    }
+
+                    /* generate the descriptors after allocating the array */
+                    if(H5VL_iod_get_file_desc(selection, &num_descriptors, hslabs) < 0)
+                        HGOTO_ERROR_FF(FAIL, "unable to generate IOD file descriptor from dataspace selection");
+                }
+                partition->obj_type = IOD_OBJ_ARRAY;
+                partition->u_parts.array_parts = hslabs[0];
+
+#if H5_EFF_DEBUG 
+                fprintf(stderr, "Prefetch a Hyperslab of the Dataset:\n");
+                for(i=0 ; i<ndims ; i++) {
+                    fprintf(stderr, "Dim %d:  start %zu   stride %zu   block %zu   count %zu\n", 
+                            i, (size_t)hslabs[0].start[i], (size_t)hslabs[0].stride[i], 
+                            (size_t)hslabs[0].block[i], (size_t)hslabs[0].count[i]);
+                }
+#endif
+            }
+            break;
+        }
+    case H5I_MAP:
+        {
+            hid_t key_type = input->key_type;
+            binary_buf_t low_key = input->low_key;
+            binary_buf_t high_key = input->high_key;
+
+            if(-1 != key_type) {
+                if(NULL == (partition = (iod_obj_partition_t *)malloc
+                            (sizeof(iod_obj_partition_t) + 2 * sizeof(iod_kv_t))))
+                    HGOTO_ERROR_FF(FAIL, "can't allocate partition buffer");
+
+                kv_parts = &partition->u_parts.kv_parts;
+
+                partition->obj_type = IOD_OBJ_KV;
+                kv_parts->nparts = 1;
+                kv_parts->sub_partition = 1;
+                kv_parts->kv[0].key = low_key.buf;
+                kv_parts->kv[0].key_len = low_key.buf_size;
+                kv_parts->kv[1].key = high_key.buf;
+                kv_parts->kv[1].key_len = high_key.buf_size;
+
+#if H5_EFF_DEBUG 
+                fprintf(stderr, "Prefetch a Range of the Map:\n");
+                fprintf(stderr, "Low Key: %d, High Key: %d\n", 
+                        *((int *)low_key.buf), *((int *)high_key.buf));
+#endif
+            }
+            break;
+        }
+    case H5I_UNINIT:
+    case H5I_BADID:
+    case H5I_FILE:
+    case H5I_DATASPACE:
+    case H5I_REFERENCE:
+    case H5I_VFL:
+    case H5I_VOL:
+    case H5I_ES:
+    case H5I_RC:
+    case H5I_TR:
+    case H5I_QUERY:
+    case H5I_VIEW:
+    case H5I_GENPROP_CLS:
+    case H5I_GENPROP_LST:
+    case H5I_ERROR_CLASS:
+    case H5I_ERROR_MSG:
+    case H5I_ERROR_STACK:
+    case H5I_NTYPES:
+    default:
+        HGOTO_ERROR_FF(FAIL, "not a valid object to prefetch");
+    }
+
+    ret = iod_obj_fetch(iod_oh.rd_oh, tid, NULL, partition, layout, &replica_id, NULL);
     if(ret != 0)
         HGOTO_ERROR_FF(ret, "can't prefetch object");
 
@@ -768,6 +942,31 @@ done:
 
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &replica_id))
         fprintf(stderr, "Failed to Prefetch Object\n");
+
+    /* free allocated descriptors */
+    for(n=0 ; n<num_descriptors ; n++) {
+        free(hslabs[n].start);
+        hslabs[n].start = NULL;
+        free(hslabs[n].stride);
+        hslabs[n].stride = NULL;
+        free(hslabs[n].block);
+        hslabs[n].block = NULL;
+        free(hslabs[n].count);
+        hslabs[n].count = NULL;
+    }
+    if(hslabs) {
+        free(hslabs);
+        hslabs = NULL;
+    }
+
+    if(layout) {
+        free(layout);
+        layout = NULL;
+    }
+    if(partition) {
+        free(partition);
+        partition = NULL;
+    }
 
     HG_Handler_free_input(op_data->hg_handle, input);
     HG_Handler_free(op_data->hg_handle);

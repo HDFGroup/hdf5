@@ -56,6 +56,24 @@
 #define H5O_XFER_REPLICA_ID_ENC     H5P__encode_uint64_t
 #define H5O_XFER_REPLICA_ID_DEC     H5P__decode_uint64_t
 
+/* layout type of prefetched data */
+#define H5O_XFER_LAYOUT_TYPE_SIZE    sizeof(int32_t)
+#define H5O_XFER_LAYOUT_TYPE_DEF  H5_DEFAULT_LAYOUT
+#define H5O_XFER_LAYOUT_TYPE_ENC     H5P__encode_uint32_t
+#define H5O_XFER_LAYOUT_TYPE_DEC     H5P__decode_uint32_t
+/* Definitions for dataspace selections for prefetched datasets */
+#define H5O_XFER_SELECTION_SIZE         sizeof(unsigned)
+#define H5O_XFER_SELECTION_DEF          -1
+/* Definitions for datatypes for MAPS */
+#define H5O_XFER_KEY_TYPE_SIZE           sizeof(unsigned)
+#define H5O_XFER_KEY_TYPE_DEF            -1
+/* Definitions for map low key buffer property */
+#define H5O_XFER_LOW_KEY_BUF_SIZE           sizeof(void *)
+#define H5O_XFER_LOW_KEY_BUF_DEF            NULL
+/* Definitions for map high key buffer property */
+#define H5O_XFER_HIGH_KEY_BUF_SIZE          sizeof(void *)
+#define H5O_XFER_HIGH_KEY_BUF_DEF           NULL
+
 #define H5D_XFER_INJECT_CORRUPTION_SIZE		sizeof(hbool_t)
 #define H5D_XFER_INJECT_CORRUPTION_DEF  	FALSE
 #define H5D_XFER_INJECT_CORRUPTION_ENC          H5P__encode_hbool_t
@@ -272,7 +290,12 @@ static const hbool_t H5D_def_inject_corruption_g = H5D_XFER_INJECT_CORRUPTION_DE
 static const uint64_t H5D_def_checksum_g = H5D_XFER_CHECKSUM_DEF;
 static const uint64_t *H5D_def_checksum_ptr_g = H5D_XFER_CHECKSUM_PTR_DEF;
 static const uint32_t H5D_def_checksum_scope_g = H5D_XFER_CHECKSUM_SCOPE_DEF;
-static const hrpl_t H5O_replica_id_g = H5O_XFER_REPLICA_ID_DEF; /* Default replica ID */
+static const hrpl_t H5O_def_replica_id_g = H5O_XFER_REPLICA_ID_DEF; /* Default replica ID */
+static const H5FF_layout_t H5O_def_layout_type_g = H5O_XFER_LAYOUT_TYPE_DEF;
+static const hid_t H5O_def_selection_g = H5O_XFER_SELECTION_DEF;
+static const hid_t H5O_def_key_type_g = H5O_XFER_KEY_TYPE_DEF;
+static const void *H5O_def_low_key_g = H5O_XFER_LOW_KEY_BUF_DEF;
+static const void *H5O_def_high_key_g = H5O_XFER_HIGH_KEY_BUF_DEF;
 #endif /* H5_HAVE_EFF */
 
 /* Property value defaults */
@@ -332,14 +355,15 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
 #ifdef H5_HAVE_EFF
 
     if(H5P_register_real(pclass, H5O_XFER_REPLICA_ID_NAME, H5O_XFER_REPLICA_ID_SIZE, 
-                         &H5O_replica_id_g,
+                         &H5O_def_replica_id_g,
                          NULL, NULL, NULL, H5O_XFER_REPLICA_ID_ENC, H5O_XFER_REPLICA_ID_DEC, 
                          NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     if(H5P_register_real(pclass, H5D_XFER_INJECT_CORRUPTION_NAME, H5D_XFER_INJECT_CORRUPTION_SIZE, 
                          &H5D_def_inject_corruption_g,
-                         NULL, NULL, NULL, H5D_XFER_INJECT_CORRUPTION_ENC, H5D_XFER_INJECT_CORRUPTION_DEC, 
+                         NULL, NULL, NULL, 
+                         H5D_XFER_INJECT_CORRUPTION_ENC, H5D_XFER_INJECT_CORRUPTION_DEC, 
                          NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -360,6 +384,37 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
                          NULL, NULL, NULL, NULL, NULL, 
                          NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    if(H5P_register_real(pclass, H5O_XFER_LAYOUT_TYPE_NAME, H5O_XFER_LAYOUT_TYPE_SIZE, 
+                         &H5O_def_layout_type_g,
+                         NULL, NULL, NULL, H5O_XFER_LAYOUT_TYPE_ENC, H5O_XFER_LAYOUT_TYPE_DEC, 
+                         NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    if(H5P_register_real(pclass, H5O_XFER_SELECTION_NAME, H5O_XFER_SELECTION_SIZE, 
+                         &H5O_def_selection_g,
+                         NULL, NULL, NULL, NULL, NULL, 
+                         NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    if(H5P_register_real(pclass, H5O_XFER_KEY_TYPE_NAME, H5O_XFER_KEY_TYPE_SIZE, 
+                         &H5O_def_key_type_g,
+                         NULL, NULL, NULL, NULL, NULL, 
+                         NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    if(H5P_register_real(pclass, H5O_XFER_LOW_KEY_BUF_NAME, H5O_XFER_LOW_KEY_BUF_SIZE, 
+                         &H5O_def_low_key_g,
+                         NULL, NULL, NULL, NULL, NULL, 
+                         NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    if(H5P_register_real(pclass, H5O_XFER_HIGH_KEY_BUF_NAME, H5O_XFER_HIGH_KEY_BUF_SIZE, 
+                         &H5O_def_high_key_g,
+                         NULL, NULL, NULL, NULL, NULL, 
+                         NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
 
 #endif /* H5_HAVE_EFF */
 

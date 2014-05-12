@@ -49,12 +49,12 @@
 /* Definitions for create intermediate groups flag */
 #define H5V_CRT_ELMT_SCOPE_SIZE         sizeof(unsigned)
 #define H5V_CRT_ELMT_SCOPE_DEF          -1
-#define H5V_CRT_ELMT_SCOPE_ENC          H5P_vcrt_elmt_scope_enc
-#define H5V_CRT_ELMT_SCOPE_DEC          H5P_vcrt_elmt_scope_dec
-#define H5V_CRT_ELMT_SCOPE_DEL		H5P_vcrt_elmt_scope_del
-#define H5V_CRT_ELMT_SCOPE_COPY        	H5P_vcrt_elmt_scope_copy
-#define H5V_CRT_ELMT_SCOPE_CMP        	H5P_vcrt_elmt_scope_cmp
-#define H5V_CRT_ELMT_SCOPE_CLOSE       	H5P_vcrt_elmt_scope_close
+#define H5V_CRT_ELMT_SCOPE_ENC          H5P_dataspace_enc
+#define H5V_CRT_ELMT_SCOPE_DEC          H5P_dataspace_dec
+#define H5V_CRT_ELMT_SCOPE_DEL		H5P_dataspace_del
+#define H5V_CRT_ELMT_SCOPE_COPY        	H5P_dataspace_copy
+#define H5V_CRT_ELMT_SCOPE_CMP        	H5P_dataspace_cmp
+#define H5V_CRT_ELMT_SCOPE_CLOSE       	H5P_dataspace_close
 
 /******************/
 /* Local Typedefs */
@@ -72,13 +72,6 @@
 
 /* Property class callbacks */
 static herr_t H5P_vcrt_reg_prop(H5P_genclass_t *pclass);
-
-static herr_t H5P_vcrt_elmt_scope_enc(const void *value, void **_pp, size_t *size);
-static herr_t H5P_vcrt_elmt_scope_dec(const void **_pp, void *value);
-static herr_t H5P_vcrt_elmt_scope_del(hid_t prop_id, const char* name, size_t size, void* value);
-static herr_t H5P_vcrt_elmt_scope_copy(const char* name, size_t size, void* value);
-static int H5P_vcrt_elmt_scope_cmp(const void *value1, const void *value2, size_t size);
-static herr_t H5P_vcrt_elmt_scope_close(const char* name, size_t size, void* value);
 
 /*********************/
 /* Package Variables */
@@ -145,7 +138,7 @@ done:
 
 
 /*--------------------------------------------------------------------------
- * Function:	H5P_vcrt_elmt_scope_del
+ * Function:	H5P_dataspace_del
  *
  * Purpose:	Close the dataspace for vcpl
  *
@@ -158,8 +151,8 @@ done:
  *--------------------------------------------------------------------------
  */
 /* ARGSUSED */
-static herr_t
-H5P_vcrt_elmt_scope_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
+herr_t
+H5P_dataspace_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
 {
     hid_t          space_id;
     herr_t         ret_value = SUCCEED;
@@ -175,11 +168,11 @@ H5P_vcrt_elmt_scope_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UN
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_vcrt_elmt_scope_del() */
+} /* end H5P_dataspace_del() */
 
 
 /*--------------------------------------------------------------------------
- * Function:	H5P_vcrt_elmt_scope_copy
+ * Function:	H5P_dataspace_copy
  *
  * Purpose:	Copy the dataspace
  *
@@ -192,8 +185,8 @@ done:
  *--------------------------------------------------------------------------
  */
 /* ARGSUSED */
-static herr_t
-H5P_vcrt_elmt_scope_copy(const char UNUSED *name, size_t UNUSED size, void *value)
+herr_t
+H5P_dataspace_copy(const char UNUSED *name, size_t UNUSED size, void *value)
 {
     hid_t          space_id;
     herr_t         ret_value = SUCCEED;
@@ -221,11 +214,11 @@ H5P_vcrt_elmt_scope_copy(const char UNUSED *name, size_t UNUSED size, void *valu
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_vcrt_elmt_scope_copy() */
+} /* end H5P_dataspace_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_vcrt_elmt_scope_cmp
+ * Function:    H5P_dataspace_cmp
  *
  * Purpose:     Callback routine which is called whenever the elmt dataspace 
  *              region property in the vcpl
@@ -237,8 +230,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static int
-H5P_vcrt_elmt_scope_cmp(const void *value1, const void *value2, size_t UNUSED size)
+int
+H5P_dataspace_cmp(const void *value1, const void *value2, size_t UNUSED size)
 {
     const hid_t *space1_id = (const hid_t *)value1;
     const hid_t *space2_id = (const hid_t *)value2;
@@ -264,11 +257,11 @@ H5P_vcrt_elmt_scope_cmp(const void *value1, const void *value2, size_t UNUSED si
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_vcrt_elmt_scope_cmp() */
+} /* end H5P_dataspace_cmp() */
 
 
 /*--------------------------------------------------------------------------
- * Function:	H5P_vcrt_elmt_scope_close
+ * Function:	H5P_dataspace_close
  *
  * Purpose:	Close the dataspace for vcpl
  *
@@ -281,8 +274,8 @@ done:
  *--------------------------------------------------------------------------
  */
 /* ARGSUSED */
-static herr_t
-H5P_vcrt_elmt_scope_close(const char UNUSED *name, size_t UNUSED size, void *value)
+herr_t
+H5P_dataspace_close(const char UNUSED *name, size_t UNUSED size, void *value)
 {
     hid_t          space_id;
     herr_t         ret_value = SUCCEED;
@@ -298,11 +291,11 @@ H5P_vcrt_elmt_scope_close(const char UNUSED *name, size_t UNUSED size, void *val
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_vcrt_elmt_scope_close() */
+} /* end H5P_dataspace_close() */
 
 
 /*-------------------------------------------------------------------------
- * Function:       H5P_vcrt_elmt_scope_enc
+ * Function:       H5P_dataspace_enc
  *
  * Purpose:        Callback routine which is called whenever the dataspace scope
  *                 property in the vcpl is encoded
@@ -315,19 +308,19 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5P_vcrt_elmt_scope_enc(const void *value, void **_pp, size_t *size)
+herr_t
+H5P_dataspace_enc(const void *value, void **_pp, size_t *size)
 {
     const hid_t *space_id = (const hid_t *)value;     /* Property to encode */
     uint8_t **pp = (uint8_t **)_pp;
     H5S_t *space;
-    hbool_t non_default_space = FALSE;   /* Whether the FAPL is non-default */
-    size_t enc_size = 0;                /* FAPL's encoded size */
+    hbool_t non_default_space = FALSE;   /* Whether the property is non-default */
+    size_t enc_size = 0;                /* property's encoded size */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Check for non-default FAPL */
+    /* Check for non-default property */
     if(*space_id != -1) {
         if(NULL == (space = (H5S_t *)H5I_object_verify(*space_id, H5I_DATASPACE)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get dataspace")
@@ -335,7 +328,7 @@ H5P_vcrt_elmt_scope_enc(const void *value, void **_pp, size_t *size)
     } /* end if */
 
     if(NULL != *pp) {
-        /* Store whether the FAPL is non-default */
+        /* Store whether the property is non-default */
         *(*pp)++ = (uint8_t)non_default_space;
     } /* end if */
 
@@ -352,11 +345,11 @@ H5P_vcrt_elmt_scope_enc(const void *value, void **_pp, size_t *size)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_vcrt_elmt_scope_enc() */
+} /* end H5P_dataspace_enc() */
 
 
 /*-------------------------------------------------------------------------
- * Function:       H5P_vcrt_elmt_scope_dec
+ * Function:       H5P_dataspace_dec
  *
  * Purpose:        Callback routine which is called whenever the dataspace scope
  *                 property in the vcpl is decoded
@@ -369,12 +362,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5P_vcrt_elmt_scope_dec(const void **_pp, void *_value)
+herr_t
+H5P_dataspace_dec(const void **_pp, void *_value)
 {
-    hid_t *space_id = (hid_t *)_value;        /* The elink FAPL value */
+    hid_t *space_id = (hid_t *)_value;        /* The elink property value */
     const uint8_t **pp = (const uint8_t **)_pp;
-    hbool_t non_default_space;           /* Whether the FAPL is non-default */
+    hbool_t non_default_space;           /* Whether the property is non-default */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -384,7 +377,7 @@ H5P_vcrt_elmt_scope_dec(const void **_pp, void *_value)
     HDassert(space_id);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
-    /* Determine if the FAPL is non-default */
+    /* Determine if the property is non-default */
     non_default_space = (hbool_t)*(*pp)++;
 
     if(non_default_space) {
@@ -410,4 +403,4 @@ H5P_vcrt_elmt_scope_dec(const void **_pp, void *_value)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_vcrt_elmt_scope_dec() */
+} /* end H5P_dataspace_dec() */

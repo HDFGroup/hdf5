@@ -2748,7 +2748,8 @@ H5VL_iod_map_get_size(hid_t type_id, const void *buf,
                 buf_size = HDstrlen((const char*)buf) + 1;
 
                 /* compute checksum */
-                *checksum = H5_checksum_crc64(buf, buf_size);
+                if(checksum)
+                    *checksum = H5_checksum_crc64(buf, buf_size);
                 break;
             }
         case H5T_INTEGER:
@@ -2769,7 +2770,8 @@ H5VL_iod_map_get_size(hid_t type_id, const void *buf,
             buf_size = H5T_get_size(dt);
 
             /* compute checksum */
-            *checksum = H5_checksum_crc64(buf, buf_size);
+            if(checksum)
+                *checksum = H5_checksum_crc64(buf, buf_size);
             break;
 
             /* If this is a variable length datatype, iterate over it */
@@ -2786,7 +2788,8 @@ H5VL_iod_map_get_size(hid_t type_id, const void *buf,
                 buf_size = H5T_get_size(super) * vl->len;
 
                 /* compute checksum */
-                *checksum = H5_checksum_crc64(vl->p, buf_size);
+                if(checksum)
+                    *checksum = H5_checksum_crc64(vl->p, buf_size);
                 H5T_close(super);
                 break;
             }

@@ -224,6 +224,13 @@ H5_DLL herr_t H5P__decode_uint32_t(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_hbool_t(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_double(const void **_pp, void *value);
 
+H5_DLL herr_t H5P_dataspace_enc(const void *value, void **_pp, size_t *size);
+H5_DLL herr_t H5P_dataspace_dec(const void **_pp, void *value);
+H5_DLL herr_t H5P_dataspace_del(hid_t prop_id, const char* name, size_t size, void* value);
+H5_DLL herr_t H5P_dataspace_copy(const char* name, size_t size, void* value);
+H5_DLL int H5P_dataspace_cmp(const void *value1, const void *value2, size_t size);
+H5_DLL herr_t H5P_dataspace_close(const char* name, size_t size, void* value);
+
 /* Testing functions */
 #ifdef H5P_TESTING
 H5_DLL char *H5P_get_class_path_test(hid_t pclass_id);

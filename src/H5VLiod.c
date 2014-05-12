@@ -1097,6 +1097,154 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Pset_prefetch_layout
+ *
+ * Purpose:     Set the prefetch layout to be used when accessing an object 
+ *              using this transfer plist.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_prefetch_layout(hid_t dxpl_id, H5FF_layout_t layout)
+{
+    H5P_genplist_t *plist = NULL;    /* Property list pointer */
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(dxpl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+
+    /* Check arguments */
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Set the transfer mode */
+    if(H5P_set(plist, H5O_XFER_LAYOUT_TYPE_NAME, &layout) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_prefetch_layout() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_prefetch_layout
+ *
+ * Purpose:     Retrieve the prefetch layout from this access plist.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_prefetch_layout(hid_t dxpl_id, H5FF_layout_t *layout/*out*/)
+{
+    H5P_genplist_t *plist = NULL;       /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Get the transfer mode */
+    if(layout)
+        if(H5P_get(plist, H5O_XFER_LAYOUT_TYPE_NAME, layout) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_prefetch_layout() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_prefetch_selection
+ *
+ * Purpose:     Set the prefetch selection to be used when accessing an object 
+ *              using this transfer plist.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_prefetch_selection(hid_t dxpl_id, hid_t selection)
+{
+    H5P_genplist_t *plist = NULL;    /* Property list pointer */
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(dxpl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+
+    /* Check arguments */
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Set the transfer mode */
+    if(H5P_set(plist, H5O_XFER_SELECTION_NAME, &selection) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_prefetch_selection() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_prefetch_range
+ *
+ * Purpose:     Set the prefetch range to be used when accessing an object 
+ *              using this transfer plist.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_prefetch_range(hid_t dxpl_id, hid_t keymem_type, const void *low_key, const void *high_key)
+{
+    H5P_genplist_t *plist = NULL;    /* Property list pointer */
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(dxpl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+
+    /* Check arguments */
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Set the transfer mode */
+    if(H5P_set(plist, H5O_XFER_KEY_TYPE_NAME, &keymem_type) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+    if(H5P_set(plist, H5O_XFER_LOW_KEY_BUF_NAME, &low_key) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+    if(H5P_set(plist, H5O_XFER_HIGH_KEY_BUF_NAME, &high_key) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_prefetch_range() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_dxpl_checksum
  *
  * Purpose:     Modify the dataset transfer property list to set a
@@ -9482,6 +9630,7 @@ H5VL_iod_prefetch(void *_obj, hid_t rcxt_id, hrpl_t *replica_id, hid_t dxpl_id, 
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     prefetch_in_t input;
+    H5P_genplist_t *plist = NULL;
     H5RC_t *rc = NULL;
     herr_t ret_value = SUCCEED;
 
@@ -9503,18 +9652,33 @@ H5VL_iod_prefetch(void *_obj, hid_t rcxt_id, hrpl_t *replica_id, hid_t dxpl_id, 
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID");
 
+    /* get the plist pointer */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
     input.coh = obj->file->remote_file.coh;
     input.rcxt_num  = rc->c_version;
     input.cs_scope = obj->file->md_integrity_scope;
-    input.dxpl_id = dxpl_id;
     input.obj_type = obj->obj_type;
-
+    input.layout_type = -1;
+    input.selection = -1;
+    input.key_type = -1;
+    input.low_key.buf_size = 0;
+    input.low_key.buf = NULL;
+    input.high_key.buf_size = 0;
+    input.high_key.buf = NULL;
+    
     switch(obj->obj_type) {
     case H5I_DATASET:
         {
             H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)obj;
+
             input.iod_id = dset->remote_dset.iod_id;
             input.iod_oh = dset->remote_dset.iod_oh;
+            if(H5P_get(plist, H5O_XFER_LAYOUT_TYPE_NAME, &input.layout_type) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+            if(H5P_get(plist, H5O_XFER_SELECTION_NAME, &input.selection) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
             break;
         }
     case H5I_DATATYPE:
@@ -9534,8 +9698,33 @@ H5VL_iod_prefetch(void *_obj, hid_t rcxt_id, hrpl_t *replica_id, hid_t dxpl_id, 
     case H5I_MAP:
         {
             H5VL_iod_map_t *map = (H5VL_iod_map_t *)obj;
+            size_t low_key_size = 0, high_key_size = 0;
+            void *low_key = NULL, *high_key = NULL;
+
             input.iod_id = map->remote_map.iod_id;
             input.iod_oh = map->remote_map.iod_oh;
+
+            if(H5P_get(plist, H5O_XFER_LAYOUT_TYPE_NAME, &input.layout_type) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+            if(H5P_get(plist, H5O_XFER_KEY_TYPE_NAME, &input.key_type) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+
+            if(input.key_type != -1) {
+                if(H5P_get(plist, H5O_XFER_LOW_KEY_BUF_NAME, &low_key) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+                if(H5P_get(plist, H5O_XFER_HIGH_KEY_BUF_NAME, &high_key) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+
+                if(H5VL_iod_map_get_size(input.key_type, low_key, NULL, &low_key_size, NULL) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get key size");
+                if(H5VL_iod_map_get_size(input.key_type, high_key, NULL, &high_key_size, NULL) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get key size");
+
+                input.low_key.buf_size = low_key_size;
+                input.low_key.buf = low_key;
+                input.high_key.buf_size = high_key_size;
+                input.high_key.buf = high_key;
+            }
             break;
         }
     case H5I_ATTR:

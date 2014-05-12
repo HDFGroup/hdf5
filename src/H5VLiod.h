@@ -53,6 +53,17 @@ extern "C" {
 #define H5D_CRT_APPEND_ONLY_NAME "append_only"
 #define H5O_CRT_ENABLE_CHECKSUM_NAME "enable_obj_checksum"
 #define H5O_XFER_REPLICA_ID_NAME "replica_id"
+#define H5O_XFER_LAYOUT_TYPE_NAME "layout_type"
+#define H5O_XFER_SELECTION_NAME "prefetched_selection"
+#define H5O_XFER_KEY_TYPE_NAME "prefetched_keytype"
+#define H5O_XFER_LOW_KEY_BUF_NAME "low_key_range"
+#define H5O_XFER_HIGH_KEY_BUF_NAME "high_key_range"
+
+typedef enum H5FF_layout_t {
+    H5_DEFAULT_LAYOUT = 0,
+    H5_LOCAL_NODE,
+    H5_CONTROLLED_LAYOUT
+} H5FF_layout_t;
 
 H5_DLL H5VL_class_t *H5VL_iod_init(void);
 H5_DLL herr_t H5Pset_fapl_iod(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
@@ -62,6 +73,15 @@ H5_DLL herr_t EFF_finalize(void);
 
 H5_DLL herr_t H5Pset_dxpl_replica(hid_t dxpl_id, hrpl_t replica_id);
 H5_DLL herr_t H5Pget_dxpl_replica(hid_t dxpl_id, hrpl_t *replica_id);
+H5_DLL herr_t H5Pset_prefetch_layout(hid_t dxpl_id, H5FF_layout_t layout);
+H5_DLL herr_t H5Pget_prefetch_layout(hid_t dxpl_id, H5FF_layout_t *layout);
+H5_DLL herr_t H5Pset_prefetch_selection(hid_t dxpl_id, hid_t file_space);
+    //H5_DLL herr_t H5Pget_prefetch_selection(hid_t dxpl_id, hid_t *file_space);
+H5_DLL herr_t H5Pset_prefetch_range(hid_t dxpl_id, hid_t keymem_type, 
+                                    const void *low_key, const void *high_key);
+    //H5_DLL herr_t H5Pget_prefetch_range(hid_t dxpl_id, hid_t *keymem_type, 
+    //void **low_key, void **high_key);
+
 H5_DLL herr_t H5Pset_ocpl_enable_checksum(hid_t ocpl_id, hbool_t flag);
 H5_DLL herr_t H5Pget_ocpl_enable_checksum(hid_t ocpl_id, hbool_t *flag);
 H5_DLL herr_t H5Pset_dxpl_checksum(hid_t dxpl_id, uint64_t value);
@@ -74,6 +94,7 @@ H5_DLL herr_t H5Pset_rawdata_integrity_scope(hid_t dxpl_id, uint32_t scope);
 H5_DLL herr_t H5Pget_rawdata_integrity_scope(hid_t dxpl_id, uint32_t *scope);
 H5_DLL herr_t H5Pset_dxpl_inject_corruption(hid_t dxpl_id, hbool_t flag);
 H5_DLL herr_t H5Pget_dxpl_inject_corruption(hid_t dxpl_id, hbool_t *flag);
+
 H5_DLL herr_t H5Pset_dcpl_append_only(hid_t dcpl_id, hbool_t flag);
 H5_DLL herr_t H5Pget_dcpl_append_only(hid_t dcpl_id, hbool_t *flag);
 

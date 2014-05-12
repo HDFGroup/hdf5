@@ -344,6 +344,8 @@ int hg_proc_binary_buf_t(hg_proc_t proc, void *data)
                 return ret;
             }
         }
+        else 
+            struct_data->buf = NULL;
         break;
     case HG_FREE:
         if(struct_data->buf_size != 0) {
