@@ -313,7 +313,7 @@
   # copy test files from source dir to test dir
   #
   foreach (tst_h5_file ${HDF5_REFERENCE_TEST_FILES})
-    GET_FILENAME_COMPONENT(fname "${tst_h5_file}" NAME)
+    get_filename_component (fname "${tst_h5_file}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/std/${fname}")
     #message (STATUS " Copying ${tst_h5_file}")
     add_custom_command (
@@ -339,7 +339,7 @@
   endforeach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
 
   foreach (tst_other_file ${HDF5_REFERENCE_FILES})
-    GET_FILENAME_COMPONENT(fname "${tst_other_file}" NAME)
+    get_filename_component (fname "${tst_other_file}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/std/${fname}")
     #message (STATUS " Copying ${tst_other_file}")
     add_custom_command (
@@ -351,7 +351,7 @@
   endforeach (tst_other_file ${HDF5_REFERENCE_FILES})
 
   foreach (tst_error_file ${HDF5_ERROR_REFERENCE_TEST_FILES})
-    GET_FILENAME_COMPONENT(fname "${tst_error_file}" NAME)
+    get_filename_component (fname "${tst_error_file}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/std/${fname}")
     #message (STATUS " Copying ${tst_error_file}")
     add_custom_command (
