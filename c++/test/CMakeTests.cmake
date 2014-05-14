@@ -57,7 +57,7 @@ if (HDF5_TEST_VFD)
             -D "TEST_EXPECT=${resultcode}"
             -D "TEST_OUTPUT=cpp_testhdf5"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-            -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
+            -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       set_tests_properties (CPP_VFD-${vfdname}-cpp_testhdf5 PROPERTIES DEPENDS CPP_VFD-${vfdname}-cpp_testhdf5-clear-objects)
     endif (NOT HDF5_ENABLE_USING_MEMCHECKER)

@@ -48,7 +48,7 @@ if (HDF5_TEST_VFD)
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_OUTPUT=${test}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
         )
       endforeach (test ${H5P_VFD_TESTS})
     endif (NOT HDF5_ENABLE_USING_MEMCHECKER)

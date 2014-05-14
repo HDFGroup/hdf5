@@ -4,7 +4,7 @@ PROJECT (HDF5_SRC C CXX)
 #-----------------------------------------------------------------------------
 # Apply Definitions to compiler in this directory and below
 #-----------------------------------------------------------------------------
-add_definitions (${HDF5_EXTRA_C_FLAGS})
+add_definitions (${HDF_EXTRA_C_FLAGS})
 
 #-----------------------------------------------------------------------------
 # List Source Files
@@ -768,8 +768,16 @@ set (H5_PRIVATE_HEADERS
 # Setup the H5Detect utility which generates H5Tinit with platform
 # specific type checks inside
 #-----------------------------------------------------------------------------
-add_executable (H5detect ${HDF5_SRC_DIR}/H5detect.c)
-TARGET_C_PROPERTIES (H5detect " " " ")
+#add_executable (H5detect ${HDF5_SRC_DIR}/H5detect.c)
+#TARGET_C_PROPERTIES (H5detect " " " ")
+IF (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+  SET (LOCAL_OPT_FLAG "-O0")
+ELSE (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+  SET (LOCAL_OPT_FLAG " ")
+ENDIF (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+ADD_EXECUTABLE (H5detect ${HDF5_SRC_DIR}/H5detect.c)
+TARGET_C_PROPERTIES (H5detect ${LOCAL_OPT_FLAG} " ")
+
 if (MSVC OR MINGW)
   target_link_libraries (H5detect "ws2_32.lib")
 endif (MSVC OR MINGW)
