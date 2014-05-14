@@ -609,6 +609,7 @@ H5Qget_match_info(hid_t query_id, H5Q_type_t *query_type, H5Q_match_op_t *match_
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*Qt*Qm", query_id, query_type, match_op);
 
     /* Check args and get the query objects */
     if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
@@ -671,6 +672,7 @@ H5Qget_components(hid_t query_id, hid_t *sub_query1_id, hid_t *sub_query2_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*i*i", query_id, sub_query1_id, sub_query2_id);
 
     /* Check args and get the query objects */
     if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
@@ -747,6 +749,7 @@ H5Qget_combine_op(hid_t query_id, H5Q_combine_op_t *op_type)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Qc", query_id, op_type);
 
     /* Check args and get the query objects */
     if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
@@ -1060,7 +1063,7 @@ H5Qapply(hid_t query_id, hbool_t *result, ...)
     va_list ap;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*bi*x", query_id, result, type_id, elem);
+    H5TRACE2("e", "i*b", query_id, result);
 
     /* Check args and get the query objects */
     if (!result)

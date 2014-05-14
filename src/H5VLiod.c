@@ -1152,6 +1152,7 @@ H5Pget_prefetch_layout(hid_t dxpl_id, H5FF_layout_t *layout/*out*/)
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", dxpl_id, layout);
 
     if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
@@ -1186,6 +1187,7 @@ H5Pset_prefetch_selection(hid_t dxpl_id, hid_t selection)
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", dxpl_id, selection);
 
     if(dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
@@ -1223,6 +1225,7 @@ H5Pset_prefetch_range(hid_t dxpl_id, hid_t keymem_type, const void *low_key, con
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "ii*x*x", dxpl_id, keymem_type, low_key, high_key);
 
     if(dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
