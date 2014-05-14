@@ -888,12 +888,14 @@ done:
     }
 
     if(!is_coresident) {
-        /* free block handle */
-        if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
-            HGOTO_ERROR_FF(FAIL, "can't free bds block handle");
-        if(val_buf) {
-            free(val_buf);
-            val_buf = NULL;
+        if(!val_is_vl || (val_is_vl && client_val_buf_size)) {
+            /* free block handle */
+            if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
+                HGOTO_ERROR_FF(FAIL, "can't free bds block handle");
+            if(val_buf) {
+                free(val_buf);
+                val_buf = NULL;
+            }
         }
     }
 
