@@ -2429,6 +2429,7 @@
 
 # CMake-specific Files
 ./config/cmake/cacheinit.cmake
+./config/cmake/ConversionTests.c
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CTestCustom.cmake
 ./config/cmake/FindHDF5.cmake.in
@@ -2447,7 +2448,6 @@
 
 ./config/cmake_ext_mod/CheckTypeSize.cmake
 ./config/cmake_ext_mod/ConfigureChecks.cmake
-./config/cmake_ext_mod/ConversionTests.c
 ./config/cmake_ext_mod/CPack.Info.plist.in
 ./config/cmake_ext_mod/CTestCustom.cmake
 ./config/cmake_ext_mod/FindMPI.cmake
