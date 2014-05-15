@@ -100,6 +100,9 @@ static void prefetch (int local_ion, int sub_obj, hid_t rcxt)
     }
     H5Pclose(dxpl_id);
 
+    /* wait for all reads to complete before evicting */
+    MPI_Barrier(MPI_COMM_WORLD);
+
     if(0 == my_rank) {
         /* evict Replicas */
         dxpl_id = H5Pcreate (H5P_DATASET_XFER);
