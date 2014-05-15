@@ -721,6 +721,9 @@ int main( int argc, char **argv ) {
    free( value_p );
    free( value_s );
 
+   /* wait for all ranks to complete read before evicting replicas */
+   MPI_Barrier( MPI_COMM_WORLD );
+
    /* Rank 0 evicts replicas */
    if ( my_rank == 0 ) {
       if ( use_daos_lustre ) {
