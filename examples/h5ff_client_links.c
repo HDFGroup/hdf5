@@ -301,6 +301,7 @@ int main(int argc, char **argv) {
     H5Pclose(fapl_id);
     H5ESclose(e_stack);
 
+    MPI_Barrier(MPI_COMM_WORLD);
     /* This finalizes the EFF stack. ships a terminate and IOD finalize to the server 
        and shutsdown the FS server (when all clients send the terminate request) 
        and client */
