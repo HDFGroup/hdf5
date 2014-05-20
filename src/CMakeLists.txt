@@ -805,25 +805,36 @@ add_custom_command (
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}
 )
 
+set (CMDPERL perl)
 add_custom_command (
-    TARGET ${HDF5_BINARY_DIR}/H5Edefin.h
+    OUTPUT ${HDF5_BINARY_DIR}/H5Edefin.h
     PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E perl ${HDF5_SOURCE_DIR}/bin/make_err ${HDF5_SOURCE_DIR}/src/H5err.txt
-    COMMENT " Creating err headers"
+    COMMAND ${CMDPERL}
+    ARGS ${HDF5_SOURCE_DIR}/bin/make_err ${HDF5_SOURCE_DIR}/src/H5err.txt
+    DEPENDS ${HDF5_SOURCE_DIR}/src/H5err.txt
+    COMMENT " Creating err header"
 )
 
 add_custom_command (
-    TARGET ${HDF5_BINARY_DIR}/H5version.h
+    OUTPUT ${HDF5_BINARY_DIR}/H5version.h
     PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E perl ${HDF5_SOURCE_DIR}/bin/make_vers ${HDF5_SOURCE_DIR}/src/H5vers.txt
+    COMMAND ${CMDPERL}
+    ARGS ${HDF5_SOURCE_DIR}/bin/make_vers ${HDF5_SOURCE_DIR}/src/H5vers.txt
+    DEPENDS ${HDF5_SOURCE_DIR}/src/H5vers.txt
     COMMENT " Creating API version macro"
 )
 
 add_custom_command (
-    TARGET ${HDF5_BINARY_DIR}/H5overflow.h
+    OUTPUT ${HDF5_BINARY_DIR}/H5overflow.h
     PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E perl ${HDF5_SOURCE_DIR}/bin/make_overflow ${HDF5_SOURCE_DIR}/src/H5overflow.txt
+    COMMAND ${CMDPERL}
+    ARGS ${HDF5_SOURCE_DIR}/bin/make_overflow ${HDF5_SOURCE_DIR}/src/H5overflow.txt
+    DEPENDS ${HDF5_SOURCE_DIR}/src/H5overflow.txt
     COMMENT " Creating Assignment overflow macro"
+)
+
+add_custom_target(run_perl_scripts ALL
+    DEPENDS ${HDF5_BINARY_DIR}/H5Edefin.h ${HDF5_BINARY_DIR}/H5version.h ${HDF5_BINARY_DIR}/H5overflow.h
 )
 
 #-----------------------------------------------------------------------------
