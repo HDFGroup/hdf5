@@ -458,8 +458,9 @@ H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t o
             }
         }
         else if(H5Q_TYPE_LINK_NAME == q_type) {
-            if(H5Qapply(qid, result, link_name) < 0)
-                HGOTO_ERROR_FF(FAIL, "can't apply link name query");
+            if(obj_type != H5I_ATTR)
+                if(H5Qapply(qid, result, link_name) < 0)
+                    HGOTO_ERROR_FF(FAIL, "can't apply link name query");
         }
         else if(H5Q_TYPE_ATTR_NAME == q_type) {
             size_t i;
