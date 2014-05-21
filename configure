@@ -26926,7 +26926,7 @@ $as_echo_n "checking for iodp libraries... " >&6; }
 $as_echo "suppressed" >&6; }
     ;;
   *)
-    HAVE_IOD="yes"
+    HAVE_IODP="yes"
     case "$withval" in
       *,*)
         iod_inc="`echo $withval |cut -f1 -d,`"

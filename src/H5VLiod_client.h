@@ -202,6 +202,15 @@ typedef struct H5VL_iod_remote_dtype_t {
     hid_t type_id;
 } H5VL_iod_remote_dtype_t;
 
+/* strucy that contains info recieved from the server to construct the view */
+typedef struct  H5VL_iod_remote_view_t {
+    /* Do NOT change the order of the parameters */
+    hbool_t valid_view; /* indicates whether the view constructed is valid or not */
+    obj_info_t obj_info; /* struct containing object info from link queries in view */
+    attr_info_t attr_info; /* struct containing attr info from attribute queries in view */
+    region_info_t region_info; /* struct containing dataset tokens and region dataspace IDs of view */
+} H5VL_iod_remote_view_t;
+
 /* struct that contains the information about a generic IOD object */
 typedef struct H5VL_iod_remote_object_t {
     /* Do NOT change the order of the parameters */
@@ -286,10 +295,7 @@ typedef struct H5VL_iod_dtype_t {
 typedef struct H5VL_iod_view_t {
     /* Do NOT change the order of the parameters */
     H5VL_iod_object_t common; /* must be first */
-    hbool_t valid_view; /* indicates whether the view constructed is valid or not */
-    region_info_t region_info; /* struct containing dataset tokens and region dataspace IDs of view */
-    obj_info_t obj_info; /* struct containing object info from link queries in view */
-    attr_info_t attr_info; /* struct containing attr info from attribute queries in view */
+    H5VL_iod_remote_view_t remote_view;
     loc_info_t loc_info; /* token for the location object where the view was constructed */
     uint64_t c_version;
     hid_t query_id; 

@@ -19,13 +19,14 @@
  */
 
 #include "H5FFpublic.h"
-#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppublic.h"
 #include "H5Qpublic.h"
 #include "H5Spublic.h"
 #include "H5VLiod_common.h"     /* IOD Common Header			*/
 
 #ifdef H5_HAVE_EFF
+
+#define MIN(a,b)    (((a)<(b)) ? (a) : (b))
 
 int hg_proc_size_t(hg_proc_t proc, void *data)
 {
@@ -498,7 +499,7 @@ static int hg_proc_plist_t(hg_proc_t proc, hid_t *data)
         }
 
         if(plist_size) {
-            buf = H5MM_malloc(plist_size);
+            buf = malloc(plist_size);
             if(H5Pencode(plist_id, buf, &plist_size) < 0) {
                 HG_ERROR_DEFAULT("PLIST encode Proc error");
                 return HG_FAIL;
@@ -518,7 +519,7 @@ static int hg_proc_plist_t(hg_proc_t proc, hid_t *data)
                 ret = HG_FAIL;
                 return ret;
             }
-            H5MM_xfree(buf);
+            free(buf);
         }
         break;
     case HG_DECODE:
@@ -529,7 +530,7 @@ static int hg_proc_plist_t(hg_proc_t proc, hid_t *data)
             return ret;
         }
         if(plist_size) {
-            buf = H5MM_malloc(plist_size);
+            buf = malloc(plist_size);
             ret = hg_proc_raw(proc, buf, plist_size);
             if (ret != HG_SUCCESS) {
                 HG_ERROR_DEFAULT("Proc error");
@@ -540,7 +541,7 @@ static int hg_proc_plist_t(hg_proc_t proc, hid_t *data)
                 HG_ERROR_DEFAULT("PLIST decode Proc error");
                 return HG_FAIL;
             }
-            H5MM_xfree(buf);
+            free(buf);
         }
         else
             plist_id = H5P_DEFAULT;
@@ -582,7 +583,7 @@ static int hg_proc_dtype_t(hg_proc_t proc, hid_t *data)
             return HG_FAIL;
         }
         if(dtype_size) {
-            buf = H5MM_malloc(dtype_size);
+            buf = malloc(dtype_size);
             if(H5Tencode(dtype_id, buf, &dtype_size) < 0) {
                 HG_ERROR_DEFAULT("DTYPE encode Proc error");
                 return HG_FAIL;
@@ -602,7 +603,7 @@ static int hg_proc_dtype_t(hg_proc_t proc, hid_t *data)
                 ret = HG_FAIL;
                 return ret;
             }
-            H5MM_xfree(buf);
+            free(buf);
         }
         break;
     case HG_DECODE:
@@ -613,7 +614,7 @@ static int hg_proc_dtype_t(hg_proc_t proc, hid_t *data)
             return ret;
         }
         if(dtype_size) {
-            buf = H5MM_malloc(dtype_size);
+            buf = malloc(dtype_size);
             ret = hg_proc_raw(proc, buf, dtype_size);
             if (ret != HG_SUCCESS) {
                 HG_ERROR_DEFAULT("Proc error");
@@ -624,7 +625,7 @@ static int hg_proc_dtype_t(hg_proc_t proc, hid_t *data)
                 HG_ERROR_DEFAULT("DTYPE decode Proc error");
                 return HG_FAIL;
             }
-            H5MM_xfree(buf);
+            free(buf);
         }
         *data = dtype_id;
         break;
@@ -661,7 +662,7 @@ static int hg_proc_dspace_t(hg_proc_t proc, hid_t *data)
             return HG_FAIL;
         }
         if(dspace_size) {
-            buf = H5MM_malloc(dspace_size);
+            buf = malloc(dspace_size);
             if(H5Sencode(dspace_id, buf, &dspace_size) < 0) {
                 HG_ERROR_DEFAULT("DSPACE encode Proc error");
                 return HG_FAIL;
@@ -681,7 +682,7 @@ static int hg_proc_dspace_t(hg_proc_t proc, hid_t *data)
                 ret = HG_FAIL;
                 return ret;
             }
-            H5MM_xfree(buf);
+            free(buf);
         }
         break;
     case HG_DECODE:
@@ -692,7 +693,8 @@ static int hg_proc_dspace_t(hg_proc_t proc, hid_t *data)
             return ret;
         }
         if(dspace_size) {
-            buf = H5MM_malloc(dspace_size);
+            if(NULL == (buf = malloc(dspace_size)))
+                HG_ERROR_DEFAULT("can't allocate buffer");
             ret = hg_proc_raw(proc, buf, dspace_size);
             if (ret != HG_SUCCESS) {
                 HG_ERROR_DEFAULT("Proc error");
@@ -703,7 +705,7 @@ static int hg_proc_dspace_t(hg_proc_t proc, hid_t *data)
                 HG_ERROR_DEFAULT("DSPACE decode Proc error");
                 return HG_FAIL;
             }
-            H5MM_xfree(buf);
+            free(buf);
         }
         *data = dspace_id;
         break;
@@ -740,7 +742,7 @@ static int hg_proc_query_t(hg_proc_t proc, hid_t *data)
             return HG_FAIL;
         }
         if(query_size) {
-            buf = H5MM_malloc(query_size);
+            buf = malloc(query_size);
             if(H5Qencode(query_id, buf, &query_size) < 0) {
                 HG_ERROR_DEFAULT("QUERY encode Proc error");
                 return HG_FAIL;
@@ -760,7 +762,7 @@ static int hg_proc_query_t(hg_proc_t proc, hid_t *data)
                 ret = HG_FAIL;
                 return ret;
             }
-            H5MM_xfree(buf);
+            free(buf);
         }
         break;
     case HG_DECODE:
@@ -771,7 +773,7 @@ static int hg_proc_query_t(hg_proc_t proc, hid_t *data)
             return ret;
         }
         if(query_size) {
-            buf = H5MM_malloc(query_size);
+            buf = malloc(query_size);
             ret = hg_proc_raw(proc, buf, query_size);
             if (ret != HG_SUCCESS) {
                 HG_ERROR_DEFAULT("Proc error");
@@ -782,7 +784,7 @@ static int hg_proc_query_t(hg_proc_t proc, hid_t *data)
                 HG_ERROR_DEFAULT("QUERY decode Proc error");
                 return HG_FAIL;
             }
-            H5MM_xfree(buf);
+            free(buf);
         }
         *data = query_id;
         break;
@@ -810,7 +812,7 @@ int hg_proc_hid_t(hg_proc_t proc, void *data)
     op = hg_proc_get_op(proc);
 
     if (HG_ENCODE == op || HG_FREE == op) {
-        if(FAIL == id || H5P_DEFAULT == id)
+        if(-1 == id || H5P_DEFAULT == id)
             type = H5I_UNINIT;
         else
             type = H5Iget_type(id);
@@ -941,17 +943,16 @@ int hg_proc_coords_t(hg_proc_t proc, void *data)
 int hg_proc_region_info_t(hg_proc_t proc, void *data)
 {
     int ret = HG_SUCCESS;
-    hsize_t i;
+    size_t i;
     hg_proc_op_t op;
     region_info_t *region_info = (region_info_t *) data;
 
-    ret = hg_proc_uint64_t(proc, &region_info->count);
+    ret = hg_proc_size_t(proc, &region_info->count);
     if (ret != HG_SUCCESS) {
         HG_ERROR_DEFAULT("Proc error");
         ret = HG_FAIL;
         return ret;
     }
-
     op = hg_proc_get_op(proc);
 
     switch(op) {
@@ -973,9 +974,9 @@ int hg_proc_region_info_t(hg_proc_t proc, void *data)
         break;
     case HG_DECODE:
         if(region_info->count) {
-            region_info->tokens = (binary_buf_t *)malloc 
-                (sizeof(binary_buf_t) * (size_t)region_info->count);
-            region_info->regions = (hid_t *)malloc (sizeof(hid_t) * (size_t)region_info->count);
+            region_info->tokens = (binary_buf_t *)calloc 
+                (region_info->count, sizeof(binary_buf_t));
+            region_info->regions = (hid_t *)calloc (region_info->count, sizeof(hid_t));
         }
         for(i=0 ; i<region_info->count ; i++) {
             ret = hg_proc_binary_buf_t(proc, &region_info->tokens[i]);
@@ -1024,11 +1025,11 @@ int hg_proc_region_info_t(hg_proc_t proc, void *data)
 int hg_proc_obj_info_t(hg_proc_t proc, void *data)
 {
     int ret = HG_SUCCESS;
-    hsize_t i;
+    size_t i;
     hg_proc_op_t op;
     obj_info_t *obj_info = (obj_info_t *) data;
 
-    ret = hg_proc_uint64_t(proc, &obj_info->count);
+    ret = hg_proc_size_t(proc, &obj_info->count);
     if (ret != HG_SUCCESS) {
         HG_ERROR_DEFAULT("Proc error");
         ret = HG_FAIL;
@@ -1050,8 +1051,8 @@ int hg_proc_obj_info_t(hg_proc_t proc, void *data)
         break;
     case HG_DECODE:
         if(obj_info->count) {
-            obj_info->tokens = (binary_buf_t *)malloc 
-                (sizeof(binary_buf_t) * (size_t)obj_info->count);
+            obj_info->tokens = (binary_buf_t *)calloc 
+                (obj_info->count, sizeof(binary_buf_t));
         }
         for(i=0 ; i<obj_info->count ; i++) {
             ret = hg_proc_binary_buf_t(proc, &obj_info->tokens[i]);
@@ -1074,11 +1075,11 @@ int hg_proc_obj_info_t(hg_proc_t proc, void *data)
 int hg_proc_attr_info_t(hg_proc_t proc, void *data)
 {
     int ret = HG_SUCCESS;
-    hsize_t i;
+    size_t i;
     hg_proc_op_t op;
     attr_info_t *attr_info = (attr_info_t *) data;
 
-    ret = hg_proc_uint64_t(proc, &attr_info->count);
+    ret = hg_proc_size_t(proc, &attr_info->count);
     if (ret != HG_SUCCESS) {
         HG_ERROR_DEFAULT("Proc error");
         ret = HG_FAIL;
@@ -1100,8 +1101,8 @@ int hg_proc_attr_info_t(hg_proc_t proc, void *data)
         break;
     case HG_DECODE:
         if(attr_info->count) {
-            attr_info->tokens = (binary_buf_t *)malloc 
-                (sizeof(binary_buf_t) * (size_t)attr_info->count);
+            attr_info->tokens = (binary_buf_t *)calloc 
+                (attr_info->count, sizeof(binary_buf_t));
         }
         for(i=0 ; i<attr_info->count ; i++) {
             ret = hg_proc_binary_buf_t(proc, &attr_info->tokens[i]);

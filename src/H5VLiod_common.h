@@ -173,18 +173,18 @@ typedef struct iod_handles_t {
 } iod_handles_t;
 
 typedef struct region_info_t {
-    hsize_t count;
+    size_t count;
     binary_buf_t *tokens;
     hid_t *regions;
 } region_info_t;
 
 typedef struct attr_info_t {
-    hsize_t count;
+    size_t count;
     binary_buf_t *tokens;
 } attr_info_t;
 
 typedef struct obj_info_t {
-    hsize_t count;
+    size_t count;
     binary_buf_t *tokens;
 } obj_info_t;
 
@@ -758,7 +758,6 @@ MERCURY_GEN_PROC(link_get_val_out_t,
 
 MERCURY_GEN_PROC(object_token_in_t, 
                  ((axe_t)(axe_info))
-                 ((uint32_t)(cs_scope)) 
                  ((iod_handle_t)(coh))
                  ((iod_obj_id_t)(iod_id))
                  ((uint64_t)(trans_num)))
@@ -907,6 +906,7 @@ MERCURY_GEN_PROC(view_create_in_t,
                  ((iod_handles_t)(loc_oh))
                  ((iod_obj_id_t)(loc_id))
                  ((iod_obj_id_t)(loc_mdkv_id))
+                 ((iod_obj_id_t)(loc_attrkv_id))
                  ((uint64_t)(rcxt_num))
                  ((int32_t)(obj_type))
                  ((hid_t)(vcpl_id))
@@ -914,9 +914,9 @@ MERCURY_GEN_PROC(view_create_in_t,
 
 MERCURY_GEN_PROC(view_create_out_t, 
                  ((hbool_t)(valid_view))
-                 ((region_info_t)(region_info))
                  ((obj_info_t)(obj_info))
-                 ((attr_info_t)(attr_info)))
+                 ((attr_info_t)(attr_info))
+                 ((region_info_t)(region_info)))
 
 #ifdef H5_HAVE_INDEXING
 

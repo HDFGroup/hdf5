@@ -1371,23 +1371,25 @@ done:
  */
 herr_t 
 H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
-                        H5I_type_t obj_type, uint32_t cs_scope, 
-                        H5VL_operator_t op, void *op_data)
+                        H5I_type_t obj_type, const char *link_name, const char *attr_name, 
+                        uint32_t cs_scope, H5VL_iterate_op_t op, void *op_data)
 {
     iod_handle_t obj_oh;
     herr_t ret;
     herr_t ret_value = SUCCEED;
 
-    ret = (*op)(coh, obj_id, rtid, obj_type, cs_scope, op_data);
+    ret = (*op)(coh, obj_id, rtid, obj_type, link_name, attr_name, cs_scope, op_data);
+    if(ret != 0)
+        HGOTO_ERROR_FF(FAIL, "can't apply iterate callback on current object");
+
+    if (iod_obj_open_read(coh, obj_id, rtid, NULL, &obj_oh, NULL) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't open current group");
 
     /* Get the object type, if it is not a group do not check for links */
-    if(H5I_GROUP == obj_type) {
-        int num_entries;
+    if(H5I_GROUP == obj_type || H5I_FILE == obj_type) {
+        int num_entries = 0;
 
         /* Get the object ID and iterate into every member in the group */
-        if (iod_obj_open_read(coh, obj_id, rtid, NULL, &obj_oh, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't open current group");
-
         ret = iod_kv_get_num(obj_oh, rtid, &num_entries, NULL);
         if(ret != 0)
             HGOTO_ERROR_FF(FAIL, "can't get number of KV entries");
@@ -1417,7 +1419,6 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
                 HGOTO_ERROR_FF(FAIL, "can't get list of keys");
 
             for(i=0 ; i<num_entries ; i++) {
-
                 H5I_type_t otype;
                 iod_obj_id_t oid;
                 H5VL_iod_link_t value;
@@ -1442,13 +1443,13 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
                 if((otype = H5VL__iod_get_h5_obj_type(oid, coh, rtid, cs_scope)) < 0)
                     HGOTO_ERROR_FF(FAIL, "can't get object type");
 
-                if(H5VL_iod_server_iterate(coh, oid, rtid, otype, cs_scope, op, op_data) < 0)
-                    HGOTO_ERROR_FF(FAIL, "can't iterate");
+                if(H5VL_iod_server_iterate(coh, oid, rtid, otype, ((char *)kv[i].key), 
+                                           NULL, cs_scope, op, op_data) < 0)
+                    HGOTO_ERROR_FF(FAIL, "can't iterate into current object");
             }
 
             for(i=0 ; i<num_entries ; i++) {
                 free(kv[i].key);
-                //free(kv[i].value);
             }
 
             free(kv);
@@ -1456,15 +1457,14 @@ H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
             free(oid_ret);
             free(kvs);
         }
-
-        if(iod_obj_close(obj_oh, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't close current object handle");
     }
 
     ret_value = ret;
+
 done:
+    iod_obj_close(obj_oh, NULL, NULL);
     return ret_value;
-}
+} /* H5VL_iod_server_iterate */
 
 #if 0
 herr_t

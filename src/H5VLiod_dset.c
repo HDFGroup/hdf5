@@ -341,7 +341,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_oh.wr_oh.cookie = dset_oh.wr_oh.cookie;
 
 #if H5_EFF_DEBUG 
-    fprintf(stderr, "Done with dset create, sending response to client\n");
+    fprintf(stderr, "Done with dset create, sending %d response to client\n", ret_value);
 #endif
 
     HG_Handler_start_output(op_data->hg_handle, &output);

@@ -1655,7 +1655,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             H5VL_iod_view_t *view = (H5VL_iod_view_t *)req->data;
 
-            if(FALSE == view->valid_view) {
+            if(FALSE == view->remote_view.valid_view) {
                 HERROR(H5E_FUNC, H5E_CANTINIT, "failed to create view\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
@@ -1744,11 +1744,15 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 }
             }
 
+            if(HG_Request_free(*((hg_request_t *)req->req)) != HG_SUCCESS)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't Free Mercury Request");
+
             output = (dset_get_index_info_out_t *)H5MM_xfree(output);
             idx_info = (H5VL_iod_dataset_get_index_info_t *)H5MM_xfree(idx_info);
             req->data = NULL;
             H5VL_iod_request_delete(file, req);
-            break;
+            HGOTO_DONE(ret_value);
+            //break;
         }
     case HG_DSET_RM_INDEX_INFO:
         {

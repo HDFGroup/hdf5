@@ -10,34 +10,34 @@
 #include <assert.h>
 #include <string.h>
 
-#define NTUPLES 256
+#define NTUPLES 32
+#define NCOMP 3
 static int my_rank = 0, my_size = 1;
 
 static void
-test_view(const char *file_name, const char *dataset_name,
-          hsize_t total, hsize_t ncomponents, hid_t datatype_id,
-          hsize_t ntuples, hsize_t start, void *buf)
+test_view(const char *file_name, void *buf)
 {
     hid_t       file_id, view_id;
-    hid_t       did1, did2, did3, gid1;
-    hid_t       file_space_id, mem_space_id;
-    hid_t       tid1, rid1, rid2, trspl_id;
+    hid_t       did1, did2, did3, did4, did5, did6;
+    hid_t       gid1, gid2, gid3;
+    hid_t       aid1, aid2, aid3;
+    hid_t       file_space_id;
+    hid_t       tid, rid1, rid2, trspl_id;
     hid_t       fapl_id;
-    hsize_t     dims[2] = {total, ncomponents};
-    hsize_t     offset[2] = {start, 0};
-    hsize_t     count[2] = {ntuples, ncomponents};
-    int         rank = (ncomponents == 1) ? 1 : 2;
+    hsize_t     dims[2] = {NTUPLES, NCOMP};
+    int         rank = 2;
     uint64_t    version;
     herr_t      ret;
     void        *dset_token1, *dset_token2, *dset_token3;
     size_t      token_size1, token_size2, token_size3;
-    double lower_bound1 = 39.1, upper_bound1 = 42.1;
+    double      lower_bound1 = 9.1, upper_bound1 = 19.1;
     int lower_bound2 = 295, upper_bound2 = 298;
     hid_t  query_id1, query_id2, query_id3, query_id4, query_id5, query_id6;
     hid_t  query_id;
     hid_t  e_stack;
     H5ES_status_t status;
     size_t num_events = 0;
+    hid_t datatype_id = H5T_NATIVE_INT;
     MPI_Request mpi_reqs[6];
 
     /* Choose the IOD VOL plugin to use with this file. */
@@ -55,174 +55,146 @@ test_view(const char *file_name, const char *dataset_name,
     ret = H5Pclose(fapl_id);
     assert(0 == ret);
 
-    /* acquire container version 1 - EXACT. */
     if(0 == my_rank) {
+        /* acquire container version 1 - EXACT. */
         version = 1;
-        rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, e_stack);
         assert(1 == version);
-    }
-    MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
-    if(0 != my_rank) {
-        assert(version == 1);
-        rid1 = H5RCcreate(file_id, version);
-    }
 
-    /* create transaction object */
-    tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
-    assert(tid1);
+        /* create transaction object */
+        tid = H5TRcreate(file_id, rid1, (uint64_t)2);
+        assert(tid);
+        ret = H5TRstart(tid, H5P_DEFAULT, e_stack);
+        assert(0 == ret);
 
-    trspl_id = H5Pcreate(H5P_TR_START);
-    ret = H5Pset_trspl_num_peers(trspl_id, (unsigned int) my_size);
-    assert(0 == ret);
-    ret = H5TRstart(tid1, trspl_id, H5_EVENT_STACK_NULL);
-    assert(0 == ret);
-    ret = H5Pclose(trspl_id);
-    assert(0 == ret);
+        file_space_id = H5Screate_simple(rank, dims, NULL);
+        assert(file_space_id);
 
-    /* Create the data space for the first dataset. */
-    file_space_id = H5Screate_simple(rank, dims, NULL);
-    assert(file_space_id);
-
-    if(0 == my_rank) {
-        /* create a group */
+        /* create a groups */
         gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
-                            tid1, H5_EVENT_STACK_NULL);
+                            tid, e_stack);
         assert(gid1 > 0);
+        aid1 = H5Acreate_ff(gid1, "ATTR1", datatype_id, file_space_id, 
+                            H5P_DEFAULT, H5P_DEFAULT, tid, e_stack);
+        assert(aid1);
 
-        /* Create a dataset. */
-        did1 = H5Dcreate_ff(gid1, "D1", datatype_id, file_space_id,
-                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, H5_EVENT_STACK_NULL);
+        gid2 = H5Gcreate_ff(file_id, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
+                            tid, e_stack);
+        assert(gid1 > 0);
+        aid2 = H5Acreate_ff(gid2, "ATTR2", datatype_id, file_space_id, 
+                            H5P_DEFAULT, H5P_DEFAULT, tid, e_stack);
+        assert(aid2);
+
+        gid3 = H5Gcreate_ff(file_id, "G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
+                            tid, e_stack);
+        assert(gid1 > 0);
+        aid3 = H5Acreate_ff(gid3, "ATTR3", datatype_id, file_space_id, 
+                            H5P_DEFAULT, H5P_DEFAULT, tid, e_stack);
+        assert(aid3);
+
+        /* Create datasets */
+        did1 = H5Dcreate_ff(gid1, "temp", datatype_id, file_space_id,
+                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid, e_stack);
         assert(did1);
-
-        /* Create a dataset. */
-        did2 = H5Dcreate_ff(gid1, "D2", datatype_id, file_space_id,
-                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, H5_EVENT_STACK_NULL);
+        did2 = H5Dcreate_ff(gid1, "pres", datatype_id, file_space_id,
+                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid, e_stack);
+        assert(did2);
+        did3 = H5Dcreate_ff(gid2, "temp", datatype_id, file_space_id,
+                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid, e_stack);
+        assert(did1);
+        did4 = H5Dcreate_ff(gid2, "pres", datatype_id, file_space_id,
+                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid, e_stack);
+        assert(did2);
+        did5 = H5Dcreate_ff(gid3, "temp", datatype_id, file_space_id,
+                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid, e_stack);
+        assert(did1);
+        did6 = H5Dcreate_ff(gid3, "pres", datatype_id, file_space_id,
+                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid, e_stack);
         assert(did2);
 
-        /* Create a dataset. */
-        did3 = H5Dcreate_ff(gid1, "D3", datatype_id, file_space_id,
-                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, H5_EVENT_STACK_NULL);
-        assert(did3);
+        /*write to attributes */
+        ret = H5Awrite_ff(aid1, datatype_id, buf, tid, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        ret = H5Awrite_ff(aid2, datatype_id, buf, tid, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        ret = H5Awrite_ff(aid3, datatype_id, buf, tid, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
 
-        ret = H5Gclose_ff(gid1, H5_EVENT_STACK_NULL);
+        /* Write to the datasets. */
+        ret = H5Dwrite_ff(did1, datatype_id, H5S_ALL, H5S_ALL,
+                          H5P_DEFAULT, buf, tid, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        ret = H5Dwrite_ff(did2, datatype_id, H5S_ALL, H5S_ALL,
+                          H5P_DEFAULT, buf, tid, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        ret = H5Dwrite_ff(did3, datatype_id, H5S_ALL, H5S_ALL,
+                          H5P_DEFAULT, buf, tid, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        ret = H5Dwrite_ff(did4, datatype_id, H5S_ALL, H5S_ALL,
+                          H5P_DEFAULT, buf, tid, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        ret = H5Dwrite_ff(did5, datatype_id, H5S_ALL, H5S_ALL,
+                          H5P_DEFAULT, buf, tid, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        ret = H5Dwrite_ff(did6, datatype_id, H5S_ALL, H5S_ALL,
+                          H5P_DEFAULT, buf, tid, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
-        /* get the token size of each dset */
-        ret = H5Oget_token(did1, NULL, &token_size1);
+
+        ret = H5Gclose_ff(gid1, e_stack);
         assert(0 == ret);
-        ret = H5Oget_token(did2, NULL, &token_size2);
+        ret = H5Gclose_ff(gid2, e_stack);
         assert(0 == ret);
-        ret = H5Oget_token(did3, NULL, &token_size3);
+        ret = H5Gclose_ff(gid3, e_stack);
+        assert(0 == ret);
+        ret = H5Aclose_ff(aid1, e_stack);
+        assert(0 == ret);
+        ret = H5Aclose_ff(aid2, e_stack);
+        assert(0 == ret);
+        ret = H5Aclose_ff(aid3, e_stack);
+        assert(0 == ret);
+        ret = H5Dclose_ff(did1, e_stack);
+        assert(0 == ret);
+        ret = H5Dclose_ff(did2, e_stack);
+        assert(0 == ret);
+        ret = H5Dclose_ff(did3, e_stack);
+        assert(0 == ret);
+        ret = H5Dclose_ff(did4, e_stack);
+        assert(0 == ret);
+        ret = H5Dclose_ff(did5, e_stack);
+        assert(0 == ret);
+        ret = H5Dclose_ff(did6, e_stack);
         assert(0 == ret);
 
-        /* allocate buffers for each token */
-        dset_token1 = malloc(token_size1);
-        dset_token2 = malloc(token_size2);
-        dset_token3 = malloc(token_size3);
-
-        /* get the token buffer */
-        ret = H5Oget_token(did1, dset_token1, &token_size1);
-        assert(0 == ret);
-        ret = H5Oget_token(did2, dset_token2, &token_size2);
-        assert(0 == ret);
-        ret = H5Oget_token(did3, dset_token3, &token_size3);
+        ret = H5TRfinish(tid, H5P_DEFAULT, &rid2, e_stack);
         assert(0 == ret);
 
-        /* bcast the token sizes and the tokens */ 
-        MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD,
-                &mpi_reqs[0]);
-        MPI_Ibcast(&token_size2, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD,
-                &mpi_reqs[1]);
-        MPI_Ibcast(&token_size3, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD,
-                &mpi_reqs[2]);
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
 
-        MPI_Ibcast(dset_token1, token_size1, MPI_BYTE, 0, MPI_COMM_WORLD,
-                &mpi_reqs[3]);
-        MPI_Ibcast(dset_token2, token_size2, MPI_BYTE, 0, MPI_COMM_WORLD,
-                &mpi_reqs[4]);
-        MPI_Ibcast(dset_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD,
-                &mpi_reqs[5]);
-        MPI_Waitall(6, mpi_reqs, MPI_STATUS_IGNORE);
-    }
-    else {
-        /* recieve the token size */
-        MPI_Ibcast(&token_size1, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD,
-                &mpi_reqs[0]);
-        MPI_Ibcast(&token_size2, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD,
-                &mpi_reqs[1]);
-        MPI_Ibcast(&token_size3, sizeof(size_t), MPI_BYTE, 0, MPI_COMM_WORLD,
-                &mpi_reqs[2]);
-        MPI_Waitall(3, mpi_reqs, MPI_STATUS_IGNORE);
-
-        /* allocate buffer for token */
-        dset_token1 = malloc(token_size1);
-        dset_token2 = malloc(token_size2);
-        dset_token3 = malloc(token_size3);
-
-        /* recieve the token */
-        MPI_Ibcast(dset_token1, token_size1, MPI_BYTE, 0, MPI_COMM_WORLD,
-                &mpi_reqs[0]);
-        MPI_Ibcast(dset_token2, token_size2, MPI_BYTE, 0, MPI_COMM_WORLD,
-                &mpi_reqs[1]);
-        MPI_Ibcast(dset_token3, token_size3, MPI_BYTE, 0, MPI_COMM_WORLD,
-                &mpi_reqs[2]);
-        MPI_Waitall(3, mpi_reqs, MPI_STATUS_IGNORE);
-
-        did1 = H5Oopen_by_token(dset_token1, tid1, H5_EVENT_STACK_NULL);
-        did2 = H5Oopen_by_token(dset_token2, tid1, H5_EVENT_STACK_NULL);
-        did3 = H5Oopen_by_token(dset_token3, tid1, H5_EVENT_STACK_NULL);
-    }
-    free(dset_token1);
-    free(dset_token2);
-    free(dset_token3);
-
-    mem_space_id = H5Screate_simple(rank, count, NULL);
-    assert(mem_space_id);
-
-    /* write data to datasets */
-    ret = H5Sselect_hyperslab(file_space_id, H5S_SELECT_SET, offset,
-                              NULL, count, NULL);
-    assert(0 == ret);
-
-    /* Write to the datasets. */
-    ret = H5Dwrite_ff(did1, datatype_id, mem_space_id, file_space_id,
-                      H5P_DEFAULT, buf, tid1, H5_EVENT_STACK_NULL);
-    assert(0 == ret);
-
-    ret = H5Dwrite_ff(did2, datatype_id, mem_space_id, file_space_id,
-                      H5P_DEFAULT, buf, tid1, H5_EVENT_STACK_NULL);
-    assert(0 == ret);
-
-    ret = H5Dwrite_ff(did3, datatype_id, mem_space_id, file_space_id,
-                      H5P_DEFAULT, buf, tid1, H5_EVENT_STACK_NULL);
-    assert(0 == ret);
-
-    /* Close the data space for the first dataset. */
-    ret = H5Sclose(mem_space_id);
-    assert(0 == ret);
-
-    /* Finish transaction 2. */
-    ret = H5TRfinish(tid1, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
-    assert(0 == ret);
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    /* acquire container version 2 - EXACT. */
-    if(0 == my_rank) {
-        version = 2;
-        rid2 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-        assert(2 == version);
-    }
-    MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
-    if(0 != my_rank) {
-        assert(version == 2);
-        rid2 = H5RCcreate(file_id, version);
-    }
-
-    if(0 == my_rank) {
-        /* release container version 0. */
         ret = H5RCrelease(rid1, H5_EVENT_STACK_NULL);
         assert(0 == ret);
+
+        ret = H5RCclose(rid1);
+        assert(0 == ret);
+        ret = H5TRclose(tid);
+        assert(0 == ret);
+
+        ret = H5Sclose(file_space_id);
+        assert(0 == ret);
+
+        H5RCget_version(rid2, &version);
     }
+
+    
+    MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
+    assert(2 == version);
+
+    if (my_rank != 0)
+        rid2 = H5RCcreate(file_id, version);
 
     /* Create a simple query */
     /* query = (39.1 < x < 42.1) || (295 < x < 298) */
@@ -234,20 +206,6 @@ test_view(const char *file_name, const char *dataset_name,
     assert(query_id2);
     query_id3 = H5Qcombine(query_id1, H5Q_COMBINE_AND, query_id2);
     assert(query_id3);
-    query_id4 = H5Qcreate(H5Q_TYPE_DATA_ELEM, H5Q_MATCH_GREATER_THAN,
-            H5T_NATIVE_INT, &lower_bound2);
-    assert(query_id4);
-    query_id5 = H5Qcreate(H5Q_TYPE_DATA_ELEM, H5Q_MATCH_LESS_THAN,
-            H5T_NATIVE_INT, &upper_bound2);
-    assert(query_id5);
-    query_id6 = H5Qcombine(query_id4, H5Q_COMBINE_AND, query_id5);
-    assert(query_id6);
-    query_id = H5Qcombine(query_id3, H5Q_COMBINE_OR, query_id6);
-    assert(query_id);
-
-    /* create a view on D1 */
-    view_id = H5Vcreate_ff(did1, query_id, H5P_DEFAULT, rid2, e_stack);
-    assert(view_id > 0);
 
     {
         hsize_t attr_count, obj_count, reg_count;
@@ -256,7 +214,14 @@ test_view(const char *file_name, const char *dataset_name,
         int r_ndims;
         hsize_t r_dims[2];
 
-        H5Qclose(query_id);
+        did1 = H5Dopen_ff(file_id, "G1/temp", H5P_DEFAULT, rid2, e_stack);
+        assert(did1);
+
+        /* create a view on D1 */
+        view_id = H5Vcreate_ff(did1, query_id3, H5P_DEFAULT, rid2, e_stack);
+        assert(view_id > 0);
+
+        H5Qclose(query_id3);
         ret = H5Dclose_ff(did1, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
@@ -269,7 +234,7 @@ test_view(const char *file_name, const char *dataset_name,
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
         assert(status == H5ES_STATUS_SUCCEED);
 
-        ret = H5Vget_query(view_id, &query_id);
+        ret = H5Vget_query(view_id, &query_id3);
         assert(0 == ret);
 
         ret = H5Vget_counts(view_id, &attr_count, &obj_count, &reg_count);
@@ -294,27 +259,28 @@ test_view(const char *file_name, const char *dataset_name,
         r_ndims = H5Sget_simple_extent_dims(region_space, r_dims, NULL);
 
         assert(2 == r_ndims);
-        assert(total == r_dims[0]);
-        assert(ncomponents == r_dims[1]);
-
+        assert(NTUPLES == r_dims[0]);
+        assert(NCOMP == r_dims[1]);
+        /*
         num_points = H5Sget_select_elem_npoints(region_space);
         if(my_size > 1)
             assert(15 == num_points);
         else
             assert(9 == num_points);
-
+        */
         ret = H5Sclose(region_space);
         assert(0 == ret);
+
+        ret = H5Dclose_ff(did1, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        H5Vclose(view_id);
     }
+    MPI_Barrier(MPI_COMM_WORLD);
 
-    H5Vclose(view_id);
-
-    gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, rid2, e_stack);
-    assert(gid1 > 0);
-
-    /* create a view on all datasets under G1 */
-    view_id = H5Vcreate_ff(gid1, query_id, H5P_DEFAULT, rid2, e_stack);
-    assert(view_id > 0);
+    query_id4 = H5Qcreate(H5Q_TYPE_LINK_NAME, H5Q_MATCH_EQUAL, "temp");
+    assert(query_id4);
+    query_id5 = H5Qcombine(query_id4, H5Q_COMBINE_AND, query_id3);
+    assert(query_id5);
 
     {
         hsize_t attr_count, obj_count, reg_count, i;
@@ -324,11 +290,15 @@ test_view(const char *file_name, const char *dataset_name,
         int r_ndims;
         hsize_t r_dims[2];
 
-        H5Qclose(query_id);
+        /* create a view on all objects*/
+        view_id = H5Vcreate_ff(file_id, query_id5, H5P_DEFAULT, rid2, e_stack);
+        assert(view_id > 0);
+
+        H5Qclose(query_id5);
 
         ret = H5Vget_location_ff(view_id, &gid_temp, e_stack);
         assert(0 == ret);
-        assert(gid1 > 0);
+        assert(gid_temp > 0);
 
         ret = H5Gclose_ff(gid_temp, e_stack);
         assert(0 == ret);
@@ -339,7 +309,7 @@ test_view(const char *file_name, const char *dataset_name,
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
         assert(status == H5ES_STATUS_SUCCEED);
 
-        ret = H5Vget_query(view_id, &query_id);
+        ret = H5Vget_query(view_id, &query_id5);
         assert(0 == ret);
 
         ret = H5Vget_counts(view_id, &attr_count, &obj_count, &reg_count);
@@ -366,47 +336,168 @@ test_view(const char *file_name, const char *dataset_name,
             r_ndims = H5Sget_simple_extent_dims(regions[i], r_dims, NULL);
 
             assert(2 == r_ndims);
-            assert(total == r_dims[0]);
-            assert(ncomponents == r_dims[1]);
+            assert(NTUPLES == r_dims[0]);
+            assert(NCOMP == r_dims[1]);
 
             num_points = H5Sget_select_elem_npoints(regions[i]);
+            /*
             if(my_size > 1)
                 assert(15 == num_points);
             else
                 assert(9 == num_points);
-
+            */
             ret = H5Sclose(regions[i]);
             assert(0 == ret);
         }
+
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
+
+        H5Vclose(view_id);
     }
 
-    H5ESget_count(e_stack, &num_events);
-    H5ESwait_all(e_stack, &status);
-    H5ESclear(e_stack);
-    printf("%d events in event stack. Completion status = %d\n", num_events, status);
-    assert(status == H5ES_STATUS_SUCCEED);
-
-    H5Vclose(view_id);
-
-    H5Qclose(query_id);
-    H5Qclose(query_id6);
     H5Qclose(query_id5);
     H5Qclose(query_id4);
     H5Qclose(query_id3);
     H5Qclose(query_id2);
     H5Qclose(query_id1);
+    MPI_Barrier(MPI_COMM_WORLD);
 
-    ret = H5Gclose_ff(gid1, H5_EVENT_STACK_NULL);
-    assert(0 == ret);
+    query_id1 = H5Qcreate(H5Q_TYPE_LINK_NAME, H5Q_MATCH_NOT_EQUAL, "BLA");
+    assert(query_id1);
 
-    ret = H5Dclose_ff(did1, H5_EVENT_STACK_NULL);
-    assert(0 == ret);
-    ret = H5Dclose_ff(did2, H5_EVENT_STACK_NULL);
-    assert(0 == ret);
-    ret = H5Dclose_ff(did3, H5_EVENT_STACK_NULL);
-    assert(0 == ret);
-    ret = H5Sclose(file_space_id);
-    assert(0 == ret);
+    {
+        hsize_t attr_count, obj_count, reg_count, i;
+        hid_t objs[10], gid_temp;
+
+        /* create a view on all objects*/
+        view_id = H5Vcreate_ff(file_id, query_id1, H5P_DEFAULT, rid2, e_stack);
+        assert(view_id > 0);
+
+        H5Qclose(query_id1);
+
+        ret = H5Vget_location_ff(view_id, &gid_temp, e_stack);
+        assert(0 == ret);
+        assert(gid_temp > 0);
+
+        ret = H5Gclose_ff(gid_temp, e_stack);
+        assert(0 == ret);
+
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
+
+        ret = H5Vget_query(view_id, &query_id1);
+        assert(0 == ret);
+
+        ret = H5Vget_counts(view_id, &attr_count, &obj_count, &reg_count);
+        assert(0 == ret);
+        assert(0 == attr_count);
+        assert(10 == obj_count);
+        assert(0 == reg_count);
+
+        ret = H5Vget_objs_ff(view_id, 0, reg_count, objs, e_stack);
+        assert(0 == ret);
+
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
+
+        for(i=0 ; i<reg_count ; i++) {
+
+            assert(objs[i] > 0);
+            switch(H5Iget_type(objs[i])) {
+            case H5I_DATASET:
+                ret = H5Dclose_ff(objs[i], e_stack);
+                assert(0 == ret);
+                break;
+            case H5I_GROUP:
+                ret = H5Gclose_ff(objs[i], e_stack);
+                assert(0 == ret);
+                break;
+            case H5I_ATTR:
+                ret = H5Aclose_ff(objs[i], e_stack);
+                assert(0 == ret);
+                break;
+            case H5I_MAP:
+                ret = H5Mclose_ff(objs[i], e_stack);
+                assert(0 == ret);
+                break;
+            default:
+                assert(0);
+            }
+        }
+
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
+
+        H5Vclose(view_id);
+    }
+
+    H5Qclose(query_id1);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    query_id1 = H5Qcreate(H5Q_TYPE_ATTR_VALUE, H5Q_MATCH_GREATER_THAN,
+            H5T_NATIVE_DOUBLE, &lower_bound1);
+    assert(query_id1);
+    query_id2 = H5Qcreate(H5Q_TYPE_ATTR_VALUE, H5Q_MATCH_LESS_THAN,
+            H5T_NATIVE_DOUBLE, &upper_bound1);
+    assert(query_id2);
+    query_id3 = H5Qcombine(query_id1, H5Q_COMBINE_AND, query_id2);
+    assert(query_id3);
+
+    {
+        hsize_t attr_count, obj_count, reg_count, i;
+        hid_t attrs[10];
+
+        /* create a view */
+        view_id = H5Vcreate_ff(file_id, query_id3, H5P_DEFAULT, rid2, e_stack);
+        assert(view_id > 0);
+
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
+
+        ret = H5Vget_query(view_id, &query_id3);
+        assert(0 == ret);
+
+        ret = H5Vget_counts(view_id, &attr_count, &obj_count, &reg_count);
+        assert(0 == ret);
+        assert(3 == attr_count);
+        assert(0 == obj_count);
+        assert(0 == reg_count);
+
+        ret = H5Vget_attrs_ff(view_id, 0, reg_count, attrs, e_stack);
+        assert(0 == ret);
+
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
+
+        for(i=0 ; i<reg_count ; i++) {
+            assert(attrs[i] > 0);
+            ret = H5Aclose_ff(attrs[i], e_stack);
+            assert(ret == 0);
+        }
+        H5Vclose(view_id);
+    }
+
+    H5Qclose(query_id3);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     /* release container version 2. */
     if(0 == my_rank) {
@@ -414,11 +505,7 @@ test_view(const char *file_name, const char *dataset_name,
         assert(0 == ret);
     }
 
-    ret = H5RCclose(rid1);
-    assert(0 == ret);
     ret = H5RCclose(rid2);
-    assert(0 == ret);
-    ret = H5TRclose(tid1);
     assert(0 == ret);
 
     ret = H5ESclose(e_stack);
@@ -436,9 +523,6 @@ main(int argc, char **argv)
 {
     char file_name[50];
     const char *dataset_name="D1";
-    hsize_t ntuples = NTUPLES;
-    hsize_t ncomponents = 3;
-    hsize_t start, total;
     int *data;
     hsize_t i, j;
 
@@ -452,30 +536,23 @@ main(int argc, char **argv)
         exit(1);
     }
 
-    /* Call EFF_init to initialize the EFF stack. */
-    EFF_init(MPI_COMM_WORLD, MPI_INFO_NULL);
-
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
     fprintf(stderr, "APP processes = %d, my rank is %d\n", my_size, my_rank);
 
-    start = ntuples * (hsize_t) my_rank;
-    total = ntuples * (hsize_t) my_size;
+    /* Call EFF_init to initialize the EFF stack. */
+    EFF_init(MPI_COMM_WORLD, MPI_INFO_NULL);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     /* Initialize the dataset. */
-    data = (int *) malloc(sizeof(int) * ncomponents * ntuples);
-    for (i = 0; i < ntuples; i++) {
-       for (j = 0; j < ncomponents; j++) {
-          data[ncomponents * i + j] = my_rank * ntuples + i;
+    data = (int *) malloc(sizeof(int) * NCOMP * NTUPLES);
+    for (i = 0; i < NTUPLES; i++) {
+       for (j = 0; j < NCOMP; j++) {
+          data[NCOMP * i + j] = my_rank * NTUPLES + i;
        }
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    test_view(file_name, dataset_name, total, ncomponents, H5T_NATIVE_INT,
-              ntuples, start, data);
-
-    MPI_Barrier(MPI_COMM_WORLD);
+    test_view(file_name, data);
 
     free(data);
 

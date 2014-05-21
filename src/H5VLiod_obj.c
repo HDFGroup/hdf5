@@ -178,19 +178,19 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
                                     H5VL_IOD_KEY_MAP_KEY_TYPE,
                                     cs_scope, NULL, &output.id1);
         if(ret != SUCCEED)
-            HGOTO_ERROR_FF(ret, "failed to retrieve link count");
+            HGOTO_ERROR_FF(ret, "failed to retrieve map keytype");
 
         ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
                                     H5VL_IOD_KEY_MAP_VALUE_TYPE,
                                     cs_scope, NULL, &output.id2);
         if(ret != SUCCEED)
-            HGOTO_ERROR_FF(ret, "failed to retrieve link count");
+            HGOTO_ERROR_FF(ret, "failed to retrieve map valtype");
         break;
     case H5I_GROUP:
         ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
                                     cs_scope, NULL, &output.cpl_id);
         if(ret != SUCCEED)
-            HGOTO_ERROR_FF(ret, "failed to retrieve dcpl");
+            HGOTO_ERROR_FF(ret, "failed to retrieve gcpl");
         output.id1 = FAIL;
         output.id2 = FAIL;
         break;

@@ -2105,7 +2105,7 @@ case $withval in
     AC_MSG_RESULT([suppressed])
     ;;
   *)
-    HAVE_IOD="yes"
+    HAVE_IODP="yes"
     case "$withval" in
       *,*)
         iod_inc="`echo $withval |cut -f1 -d,`"

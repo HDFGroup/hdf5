@@ -1412,7 +1412,18 @@ H5Q_apply_attr_name(H5Q_t *query, hbool_t *result, const char *name)
     HDassert(query);
     HDassert(query->query.select.type == H5Q_TYPE_ATTR_NAME);
 
-    *result = (0 == HDstrcmp(name, query->query.select.elem.attr_name.name));
+    if(query->query.select.match_op == H5Q_MATCH_EQUAL) {
+        if(name)
+            *result = (0 == HDstrcmp(name, query->query.select.elem.attr_name.name));
+        else
+            *result = FALSE;
+    }
+    else {
+        if(name)
+            *result = (0 != HDstrcmp(name, query->query.select.elem.attr_name.name));
+        else
+            *result = TRUE;
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Q_apply_attr_name() */
@@ -1436,7 +1447,18 @@ H5Q_apply_link_name(H5Q_t *query, hbool_t *result, const char *name)
     HDassert(query);
     HDassert(query->query.select.type == H5Q_TYPE_LINK_NAME);
 
-    *result = (0 == HDstrcmp(name, query->query.select.elem.link_name.name));
+    if(query->query.select.match_op == H5Q_MATCH_EQUAL) {
+        if(name)
+            *result = (0 == HDstrcmp(name, query->query.select.elem.link_name.name));
+        else
+            *result = FALSE;
+    }
+    else {
+        if(name)
+            *result = (0 != HDstrcmp(name, query->query.select.elem.link_name.name));
+        else
+            *result = TRUE;
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Q_apply_link_name() */
