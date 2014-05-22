@@ -81,7 +81,7 @@ test_view(const char *file_name, void *buf)
         gid2 = H5Gcreate_ff(file_id, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
                             tid, e_stack);
         assert(gid1 > 0);
-        aid2 = H5Acreate_ff(gid2, "ATTR2", datatype_id, file_space_id, 
+        aid2 = H5Acreate_ff(gid2, "ATTR1", datatype_id, file_space_id, 
                             H5P_DEFAULT, H5P_DEFAULT, tid, e_stack);
         assert(aid2);
 
@@ -401,7 +401,7 @@ test_view(const char *file_name, void *buf)
         assert(10 == obj_count);
         assert(0 == reg_count);
 
-        ret = H5Vget_objs_ff(view_id, 0, reg_count, objs, e_stack);
+        ret = H5Vget_objs_ff(view_id, 0, obj_count, objs, e_stack);
         assert(0 == ret);
 
         H5ESget_count(e_stack, &num_events);
@@ -410,7 +410,7 @@ test_view(const char *file_name, void *buf)
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
         assert(status == H5ES_STATUS_SUCCEED);
 
-        for(i=0 ; i<reg_count ; i++) {
+        for(i=0 ; i<obj_count ; i++) {
 
             assert(objs[i] > 0);
             switch(H5Iget_type(objs[i])) {
@@ -458,7 +458,7 @@ test_view(const char *file_name, void *buf)
 
     {
         hsize_t attr_count, obj_count, reg_count, i;
-        hid_t attrs[10];
+        hid_t attrs[3];
 
         /* create a view */
         view_id = H5Vcreate_ff(file_id, query_id3, H5P_DEFAULT, rid2, e_stack);
@@ -479,7 +479,7 @@ test_view(const char *file_name, void *buf)
         assert(0 == obj_count);
         assert(0 == reg_count);
 
-        ret = H5Vget_attrs_ff(view_id, 0, reg_count, attrs, e_stack);
+        ret = H5Vget_attrs_ff(view_id, 0, attr_count, attrs, e_stack);
         assert(0 == ret);
 
         H5ESget_count(e_stack, &num_events);
@@ -488,7 +488,7 @@ test_view(const char *file_name, void *buf)
         printf("%d events in event stack. Completion status = %d\n", num_events, status);
         assert(status == H5ES_STATUS_SUCCEED);
 
-        for(i=0 ; i<reg_count ; i++) {
+        for(i=0 ; i<attr_count ; i++) {
             assert(attrs[i] > 0);
             ret = H5Aclose_ff(attrs[i], e_stack);
             assert(ret == 0);
@@ -497,6 +497,70 @@ test_view(const char *file_name, void *buf)
     }
 
     H5Qclose(query_id3);
+    H5Qclose(query_id2);
+    H5Qclose(query_id1);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    query_id1 = H5Qcreate(H5Q_TYPE_ATTR_VALUE, H5Q_MATCH_GREATER_THAN,
+            H5T_NATIVE_DOUBLE, &lower_bound1);
+    assert(query_id1);
+    query_id2 = H5Qcreate(H5Q_TYPE_ATTR_VALUE, H5Q_MATCH_LESS_THAN,
+            H5T_NATIVE_DOUBLE, &upper_bound1);
+    assert(query_id2);
+    query_id3 = H5Qcombine(query_id1, H5Q_COMBINE_AND, query_id2);
+    assert(query_id3);
+
+    query_id4 = H5Qcreate(H5Q_TYPE_LINK_NAME, H5Q_MATCH_EQUAL, "G1");
+    assert(query_id1);
+
+    query_id5 = H5Qcombine(query_id4, H5Q_COMBINE_AND, query_id3);
+    assert(query_id5);
+
+    {
+        hsize_t attr_count, obj_count, reg_count, i;
+        hid_t attrs[2];
+
+        /* create a view */
+        view_id = H5Vcreate_ff(file_id, query_id5, H5P_DEFAULT, rid2, e_stack);
+        assert(view_id > 0);
+
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
+
+        ret = H5Vget_query(view_id, &query_id5);
+        assert(0 == ret);
+
+        ret = H5Vget_counts(view_id, &attr_count, &obj_count, &reg_count);
+        assert(0 == ret);
+        assert(1 == attr_count);
+        assert(0 == obj_count);
+        assert(0 == reg_count);
+
+        ret = H5Vget_attrs_ff(view_id, 0, attr_count, attrs, e_stack);
+        assert(0 == ret);
+
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        assert(status == H5ES_STATUS_SUCCEED);
+
+        for(i=0 ; i<attr_count ; i++) {
+            assert(attrs[i] > 0);
+            ret = H5Aclose_ff(attrs[i], e_stack);
+            assert(ret == 0);
+        }
+        H5Vclose(view_id);
+    }
+
+    H5Qclose(query_id5);
+    H5Qclose(query_id4);
+    H5Qclose(query_id3);
+    H5Qclose(query_id2);
+    H5Qclose(query_id1);
     MPI_Barrier(MPI_COMM_WORLD);
 
     /* release container version 2. */

@@ -58,6 +58,13 @@ typedef struct {
     H5VL_iod_view_obj_t *view;
 } H5VL_build_view_t;
 
+/* Enum for Query results */
+typedef enum qresult_t {
+    QFALSE = -1,
+    QNEUTRAL,
+    QTRUE
+} qresult_t;
+
 static herr_t
 H5VL__iod_get_token(iod_handle_t coh, H5I_type_t obj_type, iod_obj_id_t iod_id, 
                     iod_trans_id_t rtid, uint32_t cs_scope, size_t *_token_size, void **_token);
@@ -66,7 +73,7 @@ H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t o
                       iod_trans_id_t rtid, H5I_type_t obj_type, 
                       const char *link_name, const char *attr_name,
                       size_t num_attrs, char *attr_list[],
-                      uint32_t cs_scope, hbool_t *result, hid_t *region);
+                      uint32_t cs_scope, qresult_t *result, hid_t *region);
 static herr_t 
 H5VL__iod_build_view_cb(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
                         H5I_type_t obj_type, const char *link_name, const char *attr_name,
@@ -245,7 +252,7 @@ H5VL__iod_build_view_cb(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
                         uint32_t cs_scope, void *_op_data)
 {
     H5VL_build_view_t *op_data = (H5VL_build_view_t *)_op_data;
-    hbool_t result = FALSE;
+    qresult_t result = QFALSE;
     herr_t ret;
     hid_t region = FAIL;
     char **attr_list = NULL;
@@ -369,7 +376,7 @@ H5VL__iod_build_view_cb(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
     if(attr_list)
         free(attr_list);
 
-    if(result) {
+    if(result > 0) {
         H5VL_iod_view_entry_t *entry = NULL;
 
         entry = (H5VL_iod_view_entry_t *)calloc(1, sizeof(H5VL_iod_view_entry_t));
@@ -403,7 +410,7 @@ H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t o
                       iod_trans_id_t rtid, H5I_type_t obj_type, 
                       const char *link_name, const char *attr_name,
                       size_t num_attrs, char *attr_list[],
-                      uint32_t cs_scope, hbool_t *result, hid_t *region)
+                      uint32_t cs_scope, qresult_t *result, hid_t *region)
 {
     H5Q_combine_op_t comb_type;
     H5Q_match_op_t match_op;
@@ -411,7 +418,7 @@ H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t o
     herr_t ret;
     herr_t ret_value = SUCCEED;
 
-    *result = FALSE;
+    *result = QFALSE;
 
     if(H5Qget_combine_op(qid, &comb_type) < 0)
         HGOTO_ERROR_FF(FAIL, "can't get query op type");
@@ -430,7 +437,7 @@ H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t o
 
                 fprintf(stderr, "Found %zu Entries in subquery\n", H5Sget_select_npoints(sid));
                 if(H5Sget_select_npoints(sid) > 0) {
-                    *result = TRUE;
+                    *result = QTRUE;
                     *region = sid;
                 }
 
@@ -450,7 +457,7 @@ H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t o
                     HGOTO_ERROR_FF(FAIL, "can't get region from query");
 
                 if(H5Sget_select_npoints(sid) > 0) {
-                    *result = TRUE;
+                    *result = QTRUE;
                 }
 
                 if(H5Sclose(sid) < 0)
@@ -458,29 +465,40 @@ H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t o
             }
         }
         else if(H5Q_TYPE_LINK_NAME == q_type) {
-            if(obj_type != H5I_ATTR)
-                if(H5Qapply(qid, result, link_name) < 0)
-                    HGOTO_ERROR_FF(FAIL, "can't apply link name query");
+            hbool_t temp_result;
+
+            if(H5Qapply(qid, &temp_result, link_name) < 0)
+                HGOTO_ERROR_FF(FAIL, "can't apply link name query");
+
+            if(TRUE == temp_result && H5I_ATTR == obj_type)
+                *result = QNEUTRAL;
+            else if(TRUE == temp_result)
+                *result = QTRUE;
         }
         else if(H5Q_TYPE_ATTR_NAME == q_type) {
             size_t i;
+            hbool_t temp_result;
 
             for (i=0 ; i<num_attrs ; i++) {
-                if(H5Qapply(qid, result, attr_list[i]) < 0)
+                if(H5Qapply(qid, &temp_result, attr_list[i]) < 0)
                     HGOTO_ERROR_FF(FAIL, "can't apply attr name query");
-                if(TRUE == *result)
+                if(TRUE == temp_result) {
+                    *result = QTRUE;
                     break;
+                }
             }
             if(H5I_ATTR == obj_type && attr_name) {
-                if(H5Qapply(qid, result, attr_name) < 0)
+                if(H5Qapply(qid, &temp_result, attr_name) < 0)
                     HGOTO_ERROR_FF(FAIL, "can't apply attr name query");
+                if(TRUE == temp_result)
+                    *result = QNEUTRAL;
             }
         }
         else
             HGOTO_ERROR_FF(FAIL, "invalid query type");
     }
     else {
-        hbool_t result1, result2;
+        qresult_t result1, result2;
         hid_t qid1, qid2;
         hid_t sid1 = FAIL , sid2 = FAIL;
 
@@ -496,8 +514,8 @@ H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t o
 
         /* if the result of the first query is empty, 
            no need to apply the second one if they are anded */
-        if(result1 == FALSE && H5Q_COMBINE_AND == comb_type) {
-            *result = FALSE;
+        if(result1 == QFALSE && H5Q_COMBINE_AND == comb_type) {
+            *result = QFALSE;
         }
         else {
             ret = H5VL__iod_apply_query(qid2, vcpl_id, coh, obj_id, rtid, 
@@ -510,7 +528,8 @@ H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t o
             /* combine result1 and result2 */
             if(H5Q_COMBINE_AND == comb_type) {
                 fprintf(stderr, "ANDing %d and %d\n", result1, result2);
-                *result = result1 && result2;
+
+                *result = result1 + result2;
 
                 if(sid1!=FAIL && sid2!=FAIL) {
                     /* MSC - AND the selections when API is available */
@@ -523,7 +542,9 @@ H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t o
             }
             else if(H5Q_COMBINE_OR == comb_type) {
                 fprintf(stderr, "ORing %d and %d\n", result1, result2);
-                *result = result1 || result2;
+
+                *result = result1 + result2 + 1;
+
                 if(sid1!=FAIL && sid2!=FAIL) {
                     /* MSC - OR the selections when API is available */
 
