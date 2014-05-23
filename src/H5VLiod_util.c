@@ -1062,15 +1062,19 @@ H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t m
             uint8_t *val_ptr;
 
             ret = iod_kv_get_value(oh, tid, key, key_size, NULL, &val_size, NULL, event);
-            if(ret != 0)
+            if(ret != 0) {
+                fprintf(stderr, "failed to get link %s\n", key);
                 HGOTO_ERROR_FF(ret, "link lookup failed");
+            }
 
             if(NULL == (value = malloc((size_t)val_size)))
                 HGOTO_ERROR_FF(FAIL, "can't allocate value buffer");
 
             ret = iod_kv_get_value(oh, tid, key, key_size, (char *)value, &val_size, iod_cs, event);
-            if(ret != 0)
+            if(ret != 0){
+                fprintf(stderr, "failed to get link %s\n", key);
                 HGOTO_ERROR_FF(ret, "link lookup failed");
+            }
 
             val_ptr = (uint8_t *)value;
 
