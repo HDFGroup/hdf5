@@ -79,6 +79,7 @@
 #endif /* H5_HAVE_ALARM */
 #define HDasctime(T)            asctime(T)
 #define HDasin(X)               asin(X)
+#define HDasprintf              asprintf /*varargs*/
 #define HDassert(X)             assert(X)
 #define HDatan(X)               atan(X)
 #define HDatan2(X,Y)            atan2(X,Y)

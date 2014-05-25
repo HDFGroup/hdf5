@@ -2197,7 +2197,7 @@ AC_CHECK_FUNCS([gethostname getpwuid getrusage lstat])
 AC_CHECK_FUNCS([rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
-AC_CHECK_FUNCS([tmpfile vasprintf waitpid])
+AC_CHECK_FUNCS([tmpfile asprintf vasprintf waitpid])
 
 ## Check for vsnprintf() separately, so we can detect situations where it
 ## doesn't return the correct size for formatted strings that are too large

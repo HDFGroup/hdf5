@@ -405,6 +405,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #define H5_HAVE_UNISTD_H 1
 
+/* Define to 1 if you have the `asprintf' function. */
+/* #undef H5_HAVE_ASPRINTF */
+
 /* Define to 1 if you have the `vasprintf' function. */
 /* #undef H5_HAVE_VASPRINTF */
 

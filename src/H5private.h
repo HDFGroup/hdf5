@@ -542,6 +542,9 @@ typedef struct {
 #ifndef HDasin
     #define HDasin(X)    asin(X)
 #endif /* HDasin */
+#ifndef HDasprintf
+    #define HDasprintf    asprintf /*varargs*/
+#endif /* HDasprintf */
 #ifndef HDassert
     #define HDassert(X)    assert(X)
 #endif /* HDassert */
