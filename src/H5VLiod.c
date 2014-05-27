@@ -50,7 +50,7 @@ typedef struct H5VL_iod_axe_list_t {
     AXE_task_t last_released_task;
 } H5VL_iod_axe_list_t;
 
-static na_addr_t PEER;
+na_addr_t PEER;
 static na_class_t *network_class = NULL;
 static int coresident = 0;
 static AXE_task_t g_axe_id;

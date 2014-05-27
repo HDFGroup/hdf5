@@ -133,18 +133,6 @@ H5VL_iod_server_view_create_cb(AXE_engine_t UNUSED axe_engine,
     vcpl_id = input->vcpl_id;
 
     view = (H5VL_iod_view_obj_t *)calloc(1, sizeof(H5VL_iod_view_obj_t));
-#if 0
-    /* init udata */
-    view.region_list.head = NULL;
-    view.region_list.tail = NULL;
-    view.region_list.num_entries = 0;
-    view.attr_list.head = NULL;
-    view.attr_list.tail = NULL;
-    view.attr_list.num_entries = 0;
-    view.obj_list.head = NULL;
-    view.obj_list.tail = NULL;
-    view.obj_list.num_entries = 0;
-#endif
 
     udata.view = view;
     udata.query_id = query_id;

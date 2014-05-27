@@ -30,11 +30,12 @@
  * Purpose:	The IOD plugin server side routines.
  */
 
-static AXE_engine_t engine;
+static AXE_engine_t engine, engine_self;
 static MPI_Comm iod_comm;
 static int num_peers = 0;
 static int terminate_requests = 0;
 static hbool_t shutdown = FALSE;
+static int coresident_g = 0;
 
 iod_obj_id_t ROOT_ID = 0;
 
@@ -53,6 +54,7 @@ hg_id_t H5VL_EFF_ANALYSIS_FARM_TRANSFER;
         { \
             op_data_t *op_data = NULL; \
             struct_name *input = NULL;     \
+            AXE_engine_t axe_engine = engine; \
             int ret_value = HG_SUCCESS; \
             \
             if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t)))) \
@@ -64,18 +66,29 @@ hg_id_t H5VL_EFF_ANALYSIS_FARM_TRANSFER;
             if(HG_FAIL == HG_Handler_get_input(handle, input)) \
                 HGOTO_ERROR_FF(HG_FAIL, "can't get input parameters");  \
             \
-            if(NULL == engine) \
-                HGOTO_ERROR_FF(HG_FAIL, "AXE engine not started");      \
-            \
-            if(input->axe_info.count && \
-               H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range, \
-                                                 input->axe_info.count) < 0) \
-                HGOTO_ERROR_FF(HG_FAIL, "Unable to cleanup AXE tasks"); \
-            \
             op_data->hg_handle = handle; \
             op_data->input = (void *)input; \
             \
-            if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, \
+            if(!coresident_g) {                              \
+                na_class_t *na_class = NULL;                 \
+                na_bool_t is_self;                           \
+                na_addr_t src;                               \
+                src = HG_Handler_get_addr(handle);           \
+                na_class = HG_Handler_get_na_class(handle);  \
+                is_self =  NA_Addr_is_self(na_class, src);   \
+                if(is_self) \
+                    axe_engine = engine_self; \
+            } \
+            \
+            if(NULL == axe_engine) \
+                HGOTO_ERROR_FF(HG_FAIL, "AXE engine not started");      \
+            \
+            if(input->axe_info.count && \
+               H5VL__iod_server_finish_axe_tasks(axe_engine, input->axe_info.start_range, \
+                                                 input->axe_info.count) < 0) \
+                HGOTO_ERROR_FF(HG_FAIL, "Unable to cleanup AXE tasks"); \
+            \
+            if (AXE_SUCCEED != AXEcreate_task(axe_engine, input->axe_info.axe_id, \
                                               input->axe_info.num_parents, \
                                               input->axe_info.parent_axe_ids, \
                                               0, NULL, func_name ## _cb, op_data, NULL)) \
@@ -94,6 +107,7 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
     const char *addr_name;
     char **na_addr_table = NULL;
     FILE *config = NULL;
+    char *coresident_s = NULL;
     herr_t ret_value = SUCCEED;
 
     MPI_Comm_size(comm, &num_ions_g);
@@ -198,22 +212,48 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
                                                        analysis_transfer_out_t,
                                                        H5VL_iod_server_analysis_transfer);
 
+    coresident_s = getenv ("H5ENV_CORESIDENT");
+    if(NULL != coresident_s)
+        coresident_g = atoi(coresident_s);
+
+    /* Create 2 engines, one for clients and one local for the
+       server */
+
     /* Initialize engine attribute */
     if(AXEengine_attr_init(&engine_attr) != AXE_SUCCEED)
         return FAIL;
-
     /* Set number of threads in AXE engine */
     if(AXEset_num_threads(&engine_attr, 16) != AXE_SUCCEED)
         return FAIL;
-
     /* Create AXE engine */
     if(AXEcreate_engine(&engine, &engine_attr) != AXE_SUCCEED)
+        return FAIL;
+    if(AXEengine_attr_destroy(&engine_attr) != AXE_SUCCEED)
+        return FAIL;
+
+    /* Initialize engine attribute */
+    if(AXEengine_attr_init(&engine_attr) != AXE_SUCCEED)
+        return FAIL;
+    /* Set number of threads in AXE engine */
+    if(AXEset_num_threads(&engine_attr, 2) != AXE_SUCCEED)
+        return FAIL;
+    /* Create AXE engine */
+    if(AXEcreate_engine(&engine_self, &engine_attr) != AXE_SUCCEED)
+        return FAIL;
+    if(AXEengine_attr_destroy(&engine_attr) != AXE_SUCCEED)
         return FAIL;
 
     /* Initialize Python runtime */
 #ifdef H5_HAVE_PYTHON
     Py_Initialize();
 #endif
+
+    /* initialize server as a mercury client too so it can do
+       coresident HDF5 calls to itself*/
+    if (NA_SUCCESS !=  NA_Addr_self(network_class, &PEER))  {
+        fprintf(stderr, "Server lookup failed\n");
+        return FAIL;
+    }
 
     /* Loop to receive requests from clients */
     while(1) {
@@ -229,8 +269,7 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
 
     if(AXE_SUCCEED != AXEterminate_engine(engine, TRUE))
         return FAIL;
-
-    if(AXEengine_attr_destroy(&engine_attr) != AXE_SUCCEED)
+    if(AXE_SUCCEED != AXEterminate_engine(engine_self, TRUE))
         return FAIL;
 
     /******************* Finalize mercury ********************/
@@ -243,6 +282,9 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
         NA_Addr_free(network_class, server_addr_g[i]);
     }
     free(server_addr_g);
+
+    if (NA_SUCCESS != NA_Addr_free(network_class, PEER))
+        return FAIL;
 
     if(HG_SUCCESS != HG_Finalize())
         return FAIL;
@@ -422,6 +464,7 @@ EFF_terminate_coresident(void)
 H5VL_AXE_TASK_CB(H5VL_iod_server_analysis_execute, analysis_execute_in_t)
 H5VL_AXE_TASK_CB(H5VL_iod_server_file_create, file_create_in_t)
 H5VL_AXE_TASK_CB(H5VL_iod_server_file_open, file_open_in_t)
+H5VL_AXE_TASK_CB(H5VL_iod_server_file_close, file_close_in_t)
 H5VL_AXE_TASK_CB(H5VL_iod_server_attr_create, attr_create_in_t)
 H5VL_AXE_TASK_CB(H5VL_iod_server_attr_open, attr_open_in_t)
 H5VL_AXE_TASK_CB(H5VL_iod_server_attr_read, attr_io_in_t)
@@ -670,56 +713,5 @@ done:
     HG_Handler_start_output(handle, &status);
     return ret_value;
 } /* end H5VL_iod_server_cancel_op() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_iod_server_file_close
- *
- * Purpose:	Function shipper registered call for File Close.
- *              Inserts the real worker routine into the Async Engine.
- *
- * Return:	Success:	HG_SUCCESS 
- *		Failure:	Negative
- *
- * Programmer:  Mohamad Chaarawi
- *              January, 2013
- *
- *-------------------------------------------------------------------------
- */
-int
-H5VL_iod_server_file_close(hg_handle_t handle)
-{
-    op_data_t *op_data = NULL;
-    file_close_in_t *input = NULL;
-    int ret_value = HG_SUCCESS;
-
-    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
-	HGOTO_ERROR_FF(FAIL, "can't allocate axe op_data struct");
-
-    if(NULL == (input = (file_close_in_t *)
-                H5MM_malloc(sizeof(file_close_in_t))))
-	HGOTO_ERROR_FF(FAIL, "can't allocate input struct for decoding");
-
-    if(HG_FAIL == HG_Handler_get_input(handle, input))
-	HGOTO_ERROR_FF(FAIL, "can't get input parameters");
-
-    if(NULL == engine)
-        HGOTO_ERROR_FF(FAIL, "AXE engine not started");
-
-    if(input->axe_info.count && 
-       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
-                                         input->axe_info.count) < 0)
-        HGOTO_ERROR_FF(FAIL, "Unable to cleanup AXE tasks");
-
-    op_data->hg_handle = handle;
-    op_data->input = (void *)input;
-
-    if (AXE_SUCCEED != AXEcreate_barrier_task(engine, input->axe_info.axe_id,
-                                              H5VL_iod_server_file_close_cb, op_data, NULL))
-        HGOTO_ERROR_FF(FAIL, "can't insert task into async engine");
-
-done:
-    return ret_value;
-} /* end H5VL_iod_server_file_close() */
 
 #endif /* H5_HAVE_EFF */

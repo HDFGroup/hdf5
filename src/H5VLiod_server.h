@@ -107,6 +107,7 @@ extern hg_id_t H5VL_EFF_OPEN_CONTAINER;
 extern hg_id_t H5VL_EFF_CLOSE_CONTAINER;
 extern hg_id_t H5VL_EFF_ANALYSIS_FARM;
 extern hg_id_t H5VL_EFF_ANALYSIS_FARM_TRANSFER;
+extern na_addr_t PEER;
 
 /* Define the operator function pointer for H5Diterate() */
 typedef herr_t (*H5VL_operator_t)(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
