@@ -48,56 +48,55 @@ hg_id_t H5VL_EFF_CLOSE_CONTAINER;
 hg_id_t H5VL_EFF_ANALYSIS_FARM;
 hg_id_t H5VL_EFF_ANALYSIS_FARM_TRANSFER;
 
-#define H5VL_AXE_TASK_CB(func_name, struct_name) \
-        int \
-        func_name(hg_handle_t handle) \
-        { \
-            op_data_t *op_data = NULL; \
-            struct_name *input = NULL;     \
-            AXE_engine_t axe_engine = engine; \
-            int ret_value = HG_SUCCESS; \
-            \
-            if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t)))) \
-                HGOTO_ERROR_FF(HG_FAIL, "can't allocate axe op_data struct"); \
-            \
-            if(NULL == (input = (struct_name *) H5MM_malloc(sizeof(struct_name)))) \
-                HGOTO_ERROR_FF(HG_FAIL, "can't allocate input struct for decoding"); \
-            \
-            if(HG_FAIL == HG_Handler_get_input(handle, input)) \
-                HGOTO_ERROR_FF(HG_FAIL, "can't get input parameters");  \
-            \
-            op_data->hg_handle = handle; \
-            op_data->input = (void *)input; \
-            \
-            if(!coresident_g) {                              \
-                na_class_t *na_class = NULL;                 \
-                na_bool_t is_self;                           \
-                na_addr_t src;                               \
-                src = HG_Handler_get_addr(handle);           \
-                na_class = HG_Handler_get_na_class(handle);  \
-                is_self =  NA_Addr_is_self(na_class, src);   \
-                if(is_self) \
-                    axe_engine = engine_self; \
-            } \
-            \
-            if(NULL == axe_engine) \
-                HGOTO_ERROR_FF(HG_FAIL, "AXE engine not started");      \
-            \
-            if(input->axe_info.count && \
-               H5VL__iod_server_finish_axe_tasks(axe_engine, input->axe_info.start_range, \
-                                                 input->axe_info.count) < 0) \
-                HGOTO_ERROR_FF(HG_FAIL, "Unable to cleanup AXE tasks"); \
-            \
-            if (AXE_SUCCEED != AXEcreate_task(axe_engine, input->axe_info.axe_id, \
-                                              input->axe_info.num_parents, \
-                                              input->axe_info.parent_axe_ids, \
-                                              0, NULL, func_name ## _cb, op_data, NULL)) \
-                HGOTO_ERROR_FF(HG_FAIL, "can't insert task into async engine"); \
-            \
-        done: \
-            return ret_value; \
-        }
-
+#define H5VL_AXE_TASK_CB(func_name, struct_name)        \
+    int                                                 \
+    func_name(hg_handle_t handle)                       \
+    {                                                   \
+        op_data_t *op_data = NULL;                      \
+        struct_name *input = NULL;                      \
+        AXE_engine_t axe_engine = engine;                               \
+        int ret_value = HG_SUCCESS;                                     \
+                                                                        \
+        if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t)))) \
+            HGOTO_ERROR_FF(HG_FAIL, "can't allocate axe op_data struct"); \
+                                                                        \
+        if(NULL == (input = (struct_name *) H5MM_malloc(sizeof(struct_name)))) \
+            HGOTO_ERROR_FF(HG_FAIL, "can't allocate input struct for decoding"); \
+                                                                        \
+        if(HG_FAIL == HG_Handler_get_input(handle, input))              \
+            HGOTO_ERROR_FF(HG_FAIL, "can't get input parameters");      \
+                                                                        \
+        op_data->hg_handle = handle;                                    \
+        op_data->input = (void *)input;                                 \
+                                                                        \
+        if(!coresident_g) {                                             \
+            na_class_t *na_class = NULL;                                \
+            na_bool_t is_self;                                          \
+            na_addr_t src;                                              \
+            src = HG_Handler_get_addr(handle);                          \
+            na_class = HG_Handler_get_na_class(handle);                 \
+            is_self =  NA_Addr_is_self(na_class, src);                  \
+            if(is_self)                                                 \
+                axe_engine = engine_self;                               \
+        }                                                               \
+                                                                        \
+        if(NULL == axe_engine)                                          \
+            HGOTO_ERROR_FF(HG_FAIL, "AXE engine not started");          \
+                                                                        \
+        if(input->axe_info.count &&                                     \
+           H5VL__iod_server_finish_axe_tasks(axe_engine, input->axe_info.start_range, \
+                                             input->axe_info.count) < 0) \
+            HGOTO_ERROR_FF(HG_FAIL, "Unable to cleanup AXE tasks");     \
+                                                                        \
+        if (AXE_SUCCEED != AXEcreate_task(axe_engine, input->axe_info.axe_id, \
+                                          input->axe_info.num_parents,  \
+                                          input->axe_info.parent_axe_ids, \
+                                          0, NULL, func_name ## _cb, op_data, NULL)) \
+            HGOTO_ERROR_FF(HG_FAIL, "can't insert task into async engine"); \
+                                                                        \
+    done:                                                               \
+        return ret_value;                                               \
+    }
 herr_t
 EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
 {
@@ -404,6 +403,7 @@ herr_t
 EFF_setup_coresident(MPI_Comm comm, MPI_Info UNUSED info)
 {
     AXE_engine_attr_t engine_attr;
+    char *coresident_s = NULL;
     herr_t ret_value = SUCCEED;
 
     MPI_Comm_size(comm, &num_ions_g);
@@ -422,18 +422,19 @@ EFF_setup_coresident(MPI_Comm comm, MPI_Info UNUSED info)
                                                        analysis_transfer_out_t,
                                                        H5VL_iod_server_analysis_transfer);
 
+    coresident_s = getenv ("H5ENV_CORESIDENT");
+    if(NULL != coresident_s)
+        coresident_g = atoi(coresident_s);
+
     /* Initialize engine attribute */
     if(AXEengine_attr_init(&engine_attr) != AXE_SUCCEED)
         return FAIL;
-
     /* Set number of threads in AXE engine */
     if(AXEset_num_threads(&engine_attr, 16) != AXE_SUCCEED)
         return FAIL;
-
     /* Create AXE engine */
     if(AXEcreate_engine(&engine, &engine_attr) != AXE_SUCCEED)
         return FAIL;
-
     if(AXEengine_attr_destroy(&engine_attr) != AXE_SUCCEED)
         return FAIL;
 
