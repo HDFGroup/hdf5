@@ -777,7 +777,7 @@ print_container_contents( hid_t file_id, hid_t rc_id, int my_rank )
          assert( nDims == 2 );
 
          totalSize = current_size[0] * current_size[1];
-         data = (uint64_t *)calloc( totalSize, sizeof(uint64_t) );
+         data = (uint64_t *)calloc( totalSize, sizeof(uint64_t) ); assert( data != NULL );
 
          dxpl_id = H5Pcreate( H5P_DATASET_XFER );                              
          if ( enable_checksums ) {
