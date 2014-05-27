@@ -110,6 +110,10 @@ int main( int argc, char **argv ) {
    herr_t   ret;
    uint64_t u, r, c;
    uint64_t bytesPerCell, bytesPerRank, bytesPerDataset, bytesPerContainer;
+   double   megabytesPerRank, megabytesPerDataset, megabytesPerContainer;
+   ulong    elapsed_time;
+   double   rate;
+   
    int      i;
    int      iteration;
 
@@ -127,24 +131,21 @@ int main( int argc, char **argv ) {
    /* Find MPI rank & communicator size */
    MPI_Comm_rank( MPI_COMM_WORLD, &my_rank );
    MPI_Comm_size( MPI_COMM_WORLD, &comm_size );
-   if ( my_rank == 0 ) {
-      fprintf( stderr, "APP-r%d: Number of MPI processes = %d\n", my_rank, comm_size );
-   }
 
    /* Parse command-line options controlling behavior */
    if ( parse_options( argc, argv, my_rank, comm_size ) != 0 ) {
       exit( 1 );
    }    
    if ( my_rank == 0 ) {
-      fprintf( stderr, "APP-r0: Number of MPI processes = %d\n", comm_size );
-      fprintf( stderr, "APP-r0: Datasets will have %d rows (%d per rank).\n", (rows_per_rank*comm_size), rows_per_rank );
-      fprintf( stderr, "APP-r0: Datasets will have %d columns.\n", cols_per_row );
-      fprintf( stderr, "APP-r0: There will be %d iterations.\n", num_iterations );
+      fprintf( stderr, "APP-r%d: Number of MPI processes = %d\n", my_rank, comm_size );
+      fprintf( stderr, "APP-r%d: Datasets will have %d rows (%d per rank).\n", my_rank, (rows_per_rank*comm_size), rows_per_rank );
+      fprintf( stderr, "APP-r%d: Datasets will have %d columns.\n", my_rank, cols_per_row );
+      fprintf( stderr, "APP-r%d: There will be %d iterations.\n", my_rank, num_iterations );
       if ( prefetched_dset ) {
-         fprintf( stderr, "APP-r0: /DP will be created\n" );
+         fprintf( stderr, "APP-r%d: /DP will be created\n", my_rank );
       }
       if ( stored_dset ) {
-         fprintf( stderr, "APP-r0: /DS will be created\n" );
+         fprintf( stderr, "APP-r%d: /DS will be created\n", my_rank );
       }
    }
 
@@ -172,7 +173,21 @@ int main( int argc, char **argv ) {
       bytesPerContainer += bytesPerDataset;
    }
 
-   mbuf = (uint64_t *) calloc( (rows_per_rank * comm_size * cols_per_row), bytesPerCell );
+   megabytesPerRank = (double)bytesPerRank/(1024*1024);
+   megabytesPerDataset = (double)bytesPerDataset/(1024*1024);
+   megabytesPerContainer = (double)bytesPerContainer/(1024*1024);
+
+   if ( my_rank == 0 ) {
+      fprintf( stderr, "APP-r%d: MB per Rank = %f\n", my_rank, megabytesPerRank );
+      fprintf( stderr, "APP-r%d: MB per Dataset = %f\n", my_rank, megabytesPerDataset );
+      fprintf( stderr, "APP-r%d: MB per Container = %f\n", my_rank, megabytesPerContainer );
+   }
+
+   mbuf = (uint64_t *) calloc( bytesPerContainer, 1 );
+   if ( mbuf == NULL ) {
+      fprintf( stderr, "APP-r%d: calloc failed when trying to allocate %lu bytes\n", my_rank, bytesPerContainer );
+      exit( -1 );
+   }
 
    /****
     * Transaction 2: Rank 0 creates H5Objects in the container 
@@ -364,7 +379,7 @@ int main( int argc, char **argv ) {
       u = 0;
       for ( r = 0; r < rows_per_rank; r++ ) {
          for ( c = 0; c < cols_per_row; c++ ) {
-            mbuf[u] = (my_rank*rows_per_rank+r)*1000000 + c*100 + tr_num;
+            mbuf[u] = ((my_rank*rows_per_rank)+r)*1000000 + c*100 + tr_num;
             u++;
          }
       }
@@ -376,8 +391,10 @@ int main( int argc, char **argv ) {
       ret = H5Dwrite_ff( dset_l_id, H5T_NATIVE_UINT64, rank_space_id, space_l_id, dxpl_l_id, mbuf, tr_id, H5_EVENT_STACK_NULL ); 
       ASSERT_RET;
       END_TIME;
-      fprintf( stderr, "APP-r%d: iter %05d step 01: Time to add Write updates for /DL (%lu bytes): %lu usec\n", 
-               my_rank, iteration, bytesPerRank, ELAPSED_TIME );
+      elapsed_time = ELAPSED_TIME;
+      rate = megabytesPerRank/((double)elapsed_time/1000000);
+      fprintf( stderr, "APP-r%d: iter %05d step 01: Time to add Write updates for /DL (%lu bytes): %lu usec - %f MB/sec\n", 
+               my_rank, iteration, bytesPerRank, elapsed_time, rate );
 
       if ( prefetched_dset ) {
          START_TIME;
@@ -385,8 +402,10 @@ int main( int argc, char **argv ) {
                             H5_EVENT_STACK_NULL ); 
          ASSERT_RET;
          END_TIME;
-         fprintf( stderr, "APP-r%d: iter %05d step 02: Time to add Write updates for /DP (%lu bytes): %lu usec\n", 
-                  my_rank, iteration, bytesPerRank, ELAPSED_TIME );
+         elapsed_time = ELAPSED_TIME;
+         rate = megabytesPerRank/((double)elapsed_time/1000000);
+         fprintf( stderr, "APP-r%d: iter %05d step 02: Time to add Write updates for /DP (%lu bytes): %lu usec - %f MB/sec\n", 
+                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
      }
 
       if ( stored_dset ) {
@@ -395,8 +414,10 @@ int main( int argc, char **argv ) {
                             H5_EVENT_STACK_NULL ); 
          ASSERT_RET;
          END_TIME;
-         fprintf( stderr, "APP-r%d: iter %05d step 03: Time to add Write updates for /DS (%lu bytes): %lu usec\n", 
-                  my_rank, iteration, bytesPerRank, ELAPSED_TIME );
+         elapsed_time = ELAPSED_TIME;
+         rate = megabytesPerRank/((double)elapsed_time/1000000);
+         fprintf( stderr, "APP-r%d: iter %05d step 03: Time to add Write updates for /DS (%lu bytes): %lu usec - %f MB/sec\n", 
+                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
       }
 
       /* Finish, (commit), and close transaction */
@@ -442,35 +463,42 @@ int main( int argc, char **argv ) {
          START_TIME;
          ret = H5RCpersist( rc_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
          END_TIME;
-         fprintf( stderr, "APP-r%d: iter %05d step 04: Time to Persist container (%lu bytes + KVs): %lu usec\n", 
-                  my_rank, iteration, bytesPerContainer, ELAPSED_TIME );
+         elapsed_time = ELAPSED_TIME;
+         rate = megabytesPerContainer/((double)elapsed_time/1000000);
+         fprintf( stderr, "APP-r%d: iter %05d step 04: Time to Persist container (%lu bytes + KVs): %lu usec - %f MB/sec\n", 
+                  my_rank, iteration, bytesPerContainer, elapsed_time, rate );
 
          if ( prefetched_dset ) {
             START_TIME;
             ret = H5Devict_ff( dset_p_id, version, H5P_DEFAULT, H5_EVENT_STACK_NULL );  ASSERT_RET;
             END_TIME;
-            fprintf( stderr, "APP-r%d: iter %05d step 05: Time to Evict /DP (%lu bytes): %lu usec\n", 
-                     my_rank, iteration, bytesPerDataset, ELAPSED_TIME );
+            elapsed_time = ELAPSED_TIME;
+            rate = megabytesPerDataset/((double)elapsed_time/1000000);
+            fprintf( stderr, "APP-r%d: iter %05d step 05: Time to Evict /DP (%lu bytes): %lu usec - %f MB/sec\n", 
+                     my_rank, iteration, bytesPerDataset, elapsed_time, rate );
          }
 
          if ( stored_dset ) {
             START_TIME;
             ret = H5Devict_ff( dset_s_id, version, H5P_DEFAULT, H5_EVENT_STACK_NULL );  ASSERT_RET;
             END_TIME;
-            fprintf( stderr, "APP-r%d: iter %05d step 06: Time to Evict /DS (%lu bytes): %lu usec\n", 
-                     my_rank, iteration, bytesPerDataset, ELAPSED_TIME );
+            elapsed_time = ELAPSED_TIME;
+            rate = megabytesPerDataset/((double)elapsed_time/1000000);
+            fprintf( stderr, "APP-r%d: iter %05d step 06: Time to Evict /DS (%lu bytes): %lu usec - %f MB/sec\n", 
+                     my_rank, iteration, bytesPerDataset, elapsed_time, rate );
          }
 
          if ( prefetched_dset ) {
             START_TIME;
             ret = H5Dprefetch_ff( dset_p_id, rc_id, &dset_p_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
             END_TIME;
-            fprintf( stderr, "APP-r%d: iter %05d step 07: Time to Prefetch (%lu bytes) /DP: %lu usec\n", 
-                     my_rank, iteration, bytesPerDataset, ELAPSED_TIME );
+            elapsed_time = ELAPSED_TIME;
+            rate = megabytesPerDataset/((double)elapsed_time/1000000);
+            fprintf( stderr, "APP-r%d: iter %05d step 07: Time to Prefetch (%lu bytes) /DP: %lu usec - %f MB/sec\n", 
+                     my_rank, iteration, bytesPerDataset, elapsed_time, rate );
          }
 
       } 
-
 
       if ( prefetched_dset ) { 
          MPI_Bcast( &dset_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
@@ -488,8 +516,10 @@ int main( int argc, char **argv ) {
       ret = H5Dread_ff( dset_l_id, H5T_NATIVE_UINT64, rank_space_id, space_l_id, dxpl_l_id, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
       ASSERT_RET;
       END_TIME;
-      fprintf( stderr, "APP-r%d: iter %05d step 08: Time to Read my rank entries for /DL (%lu bytes): %lu usec\n", 
-               my_rank, iteration, bytesPerRank, ELAPSED_TIME );
+      elapsed_time = ELAPSED_TIME;
+      rate = megabytesPerRank/((double)elapsed_time/1000000);
+      fprintf( stderr, "APP-r%d: iter %05d step 08: Time to Read my entries for /DL (%lu bytes): %lu usec - %f MB/sec\n", 
+               my_rank, iteration, bytesPerRank, elapsed_time, rate );
       if ( verbose ) { 
          fprintf( stderr, "APP-r%d: my first updated value in /DL: %09lu\n", my_rank, mbuf[0] ); 
       }
@@ -499,8 +529,10 @@ int main( int argc, char **argv ) {
          ret = H5Dread_ff( dset_p_id, H5T_NATIVE_UINT64, rank_space_id, space_p_id, dxpl_p_id, mbuf, rc_id, H5_EVENT_STACK_NULL );
          ASSERT_RET;
          END_TIME;
-         fprintf( stderr, "APP-r%d: iter %05d step 09: Time to Read my rank entries for /DP (%lu bytes): %lu usec\n", 
-                  my_rank, iteration, bytesPerRank, ELAPSED_TIME );
+         elapsed_time = ELAPSED_TIME;
+         rate = megabytesPerRank/((double)elapsed_time/1000000);
+         fprintf( stderr, "APP-r%d: iter %05d step 09: Time to Read my entries for /DP (%lu bytes): %lu usec - %f MB/sec\n", 
+                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
          if ( verbose ) { 
             fprintf( stderr, "APP-r%d: my first updated value in /DP: %09lu\n", my_rank, mbuf[0] ); 
          }
@@ -511,8 +543,10 @@ int main( int argc, char **argv ) {
          ret = H5Dread_ff( dset_s_id, H5T_NATIVE_UINT64, rank_space_id, space_s_id, dxpl_s_id, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
          ASSERT_RET;
          END_TIME;
-         fprintf( stderr, "APP-r%d: iter %05d step 10: Time to Read my rank entries for /DS (%lu bytes): %lu usec\n", 
-                  my_rank, iteration, bytesPerRank, ELAPSED_TIME );
+         elapsed_time = ELAPSED_TIME;
+         rate = megabytesPerRank/((double)elapsed_time/1000000);
+         fprintf( stderr, "APP-r%d: iter %05d step 10: Time to Read my entries for /DS (%lu bytes): %lu usec - %f MB/sec\n", 
+                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
          if ( verbose ) { 
             fprintf( stderr, "APP-r%d: my first updated value in /DS: %09lu\n", my_rank, mbuf[0] ); 
          }
@@ -528,8 +562,10 @@ int main( int argc, char **argv ) {
                         H5_EVENT_STACK_NULL ); 
       ASSERT_RET;
       END_TIME;
-      fprintf( stderr, "APP-r%d: iter %05d step 11: Time to Read neighbor's entries for /DL (%lu bytes): %lu usec\n", 
-               my_rank, iteration, bytesPerRank, ELAPSED_TIME );
+      elapsed_time = ELAPSED_TIME;
+      rate = megabytesPerRank/((double)elapsed_time/1000000);
+      fprintf( stderr, "APP-r%d: iter %05d step 11: Time to Read neighbor's entries for /DL (%lu bytes): %lu usec - %f MB/sec\n", 
+               my_rank, iteration, bytesPerRank, elapsed_time, rate );
       if ( verbose ) { 
          fprintf( stderr, "APP-r%d: neighbor's first updated value in /DL: %09lu\n", my_rank, mbuf[0] ); 
       }
@@ -540,8 +576,10 @@ int main( int argc, char **argv ) {
                            H5_EVENT_STACK_NULL );
          ASSERT_RET;
          END_TIME;
-         fprintf( stderr, "APP-r%d: iter %05d step 12: Time to Read neighbor's entries for /DP (%lu bytes): %lu usec\n", 
-                  my_rank, iteration, bytesPerRank, ELAPSED_TIME );
+         elapsed_time = ELAPSED_TIME;
+         rate = megabytesPerRank/((double)elapsed_time/1000000);
+         fprintf( stderr, "APP-r%d: iter %05d step 12: Time to Read neighbor's entries for /DP (%lu bytes): %lu usec - %f MB/sec\n", 
+                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
          if ( verbose ) { 
             fprintf( stderr, "APP-r%d: neighbor's first updated value in /DP: %09lu\n", my_rank, mbuf[0]); 
          }
@@ -553,8 +591,10 @@ int main( int argc, char **argv ) {
                            H5_EVENT_STACK_NULL ); 
          ASSERT_RET;
          END_TIME;
-         fprintf( stderr, "APP-r%d: iter %05d step 13: Time to Read neighbor's entries for /DS (%lu bytes): %lu usec\n", 
-                  my_rank, iteration, bytesPerRank, ELAPSED_TIME );
+         elapsed_time = ELAPSED_TIME;
+         rate = megabytesPerRank/((double)elapsed_time/1000000);
+         fprintf( stderr, "APP-r%d: iter %05d step 13: Time to Read neighbor's entries for /DS (%lu bytes): %lu usec - %f MB/sec\n", 
+                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
          if ( verbose ) { 
             fprintf( stderr, "APP-r%d: neighbor's first updated value in /DS: %09lu\n", my_rank, mbuf[0] ); 
          }
@@ -569,8 +609,10 @@ int main( int argc, char **argv ) {
       ret = H5Dread_ff( dset_l_id, H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, dxpl_l_id, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
       ASSERT_RET;
       END_TIME;
-      fprintf( stderr, "APP-r%d: iter %05d step 14: Time to Read all entries for /DL (%lu bytes): %lu usec\n", 
-               my_rank, iteration, bytesPerDataset, ELAPSED_TIME );
+      elapsed_time = ELAPSED_TIME;
+      rate = megabytesPerDataset/((double)elapsed_time/1000000);
+      fprintf( stderr, "APP-r%d: iter %05d step 14: Time to Read all entries for /DL (%lu bytes): %lu usec - %f MB/sec\n", 
+               my_rank, iteration, bytesPerDataset, elapsed_time, rate );
       if ( verbose ) { 
          fprintf( stderr, "APP-r%d: first value in /DL: %09lu\n", my_rank, mbuf[0] ); 
       }
@@ -580,8 +622,10 @@ int main( int argc, char **argv ) {
          ret = H5Dread_ff( dset_p_id, H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, dxpl_p_id, mbuf, rc_id, H5_EVENT_STACK_NULL );
          ASSERT_RET;
          END_TIME;
-         fprintf( stderr, "APP-r%d: iter %05d step 15: Time to Read all entries for /DP (%lu bytes): %lu usec\n", 
-                  my_rank, iteration, bytesPerDataset, ELAPSED_TIME );
+         elapsed_time = ELAPSED_TIME;
+         rate = megabytesPerDataset/((double)elapsed_time/1000000);
+         fprintf( stderr, "APP-r%d: iter %05d step 15: Time to Read all entries for /DP (%lu bytes): %lu usec - %f MB/sec\n", 
+                  my_rank, iteration, bytesPerDataset, elapsed_time, rate );
          if ( verbose ) { 
             fprintf( stderr, "APP-r%d: first value in /DP: %09lu\n", my_rank, mbuf[0] ); 
          }
@@ -592,8 +636,10 @@ int main( int argc, char **argv ) {
          ret = H5Dread_ff( dset_s_id, H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, dxpl_s_id, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
          ASSERT_RET;
          END_TIME;
-         fprintf( stderr, "APP-r%d: iter %05d step 16: Time to Read all entries for /DS (%lu bytes): %lu usec\n", 
-                  my_rank, iteration, bytesPerDataset, ELAPSED_TIME );
+         elapsed_time = ELAPSED_TIME;
+         rate = megabytesPerDataset/((double)elapsed_time/1000000);
+         fprintf( stderr, "APP-r%d: iter %05d step 16: Time to Read all entries for /DS (%lu bytes): %lu usec - %f MB/sec\n", 
+                  my_rank, iteration, bytesPerDataset, elapsed_time, rate );
          if ( verbose ) { 
             fprintf( stderr, "APP-r%d: first value in /DS: %09lu\n", my_rank, mbuf[0] ); 
          }
@@ -606,8 +652,10 @@ int main( int argc, char **argv ) {
             START_TIME;
             ret = H5Devict_ff( dset_p_id, version, dxpl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  
             END_TIME;
-            fprintf( stderr, "APP-r%d: iter %05d step 17: Time to Evict Replica of /DP (%lu bytes): %lu usec\n", 
-                     my_rank, iteration, bytesPerDataset, ELAPSED_TIME );
+            elapsed_time = ELAPSED_TIME;
+            rate = megabytesPerDataset/((double)elapsed_time/1000000);
+            fprintf( stderr, "APP-r%d: iter %05d step 17: Time to Evict Replica of /DP (%lu bytes): %lu usec - %f MB/sec\n", 
+                     my_rank, iteration, bytesPerDataset, elapsed_time, rate );
          }
       }
 
