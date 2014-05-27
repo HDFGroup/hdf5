@@ -29,7 +29,7 @@
             -D "TEST_EXPECT=${resultcode}"
             -D "TEST_OUTPUT=h5repacktest"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-            -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
+            -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK-VFD-${vfdname}-h5repacktest PROPERTIES DEPENDS ${last_test})
@@ -136,7 +136,7 @@
               -D "TEST_OUTPUT=h5repack-${testname}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=h5repack-${testname}.txt"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES DEPENDS "H5REPACK-h5repack-${testname}-clear-objects")
     endif (HDF5_ENABLE_USING_MEMCHECKER)
@@ -215,7 +215,7 @@
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_FILTER:STRING=${testfilter}"
                 -D "TEST_REFERENCE=${resultfile}.tst"
-                -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
       endif (HDF5_ENABLE_USING_MEMCHECKER)
       if (NOT "${last_test}" STREQUAL "")
@@ -250,7 +250,7 @@
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_REFERENCE=${testname}.${resultfile}.ddl"
-                -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
         set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES DEPENDS "H5REPACK_DMP-${testname}")
       endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
@@ -290,7 +290,7 @@
                   -D "TEST_EXPECT=${resultcode}"
                   -D "TEST_FILTER:STRING=${testfilter}"
                   -D "TEST_REFERENCE=${testfilter}"
-                  -P "${HDF5_RESOURCES_DIR}/grepTest.cmake"
+                  -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
           )
           set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF)
         else (${resultcode} STREQUAL "0")
@@ -313,7 +313,7 @@
                   -D "TEST_EXPECT=${resultcode}"
                   -D "TEST_FILTER:STRING=${nottestfilter}"
                   -D "TEST_REFERENCE=${testfilter}"
-                  -P "${HDF5_RESOURCES_DIR}/grepTest.cmake"
+                  -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
           )
           set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF)
         endif (${resultcode} STREQUAL "0")
@@ -365,7 +365,7 @@
               -D "TEST_REFERENCE=${testname}.${resultfile}.tst"
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK_UD-${testname} PROPERTIES DEPENDS H5REPACK_UD-${testname}-clearall-objects)
       add_test (
@@ -379,7 +379,7 @@
               -D "TEST_REFERENCE=${resultfile}-${testname}.ddl"
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK_UD-h5dump-${testname} PROPERTIES DEPENDS "H5REPACK_UD-${testname}")
     endif (HDF5_BUILD_TOOLS AND NOT HDF5_ENABLE_USING_MEMCHECKER)

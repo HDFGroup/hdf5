@@ -119,7 +119,7 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_MASK_MOD=true"
               -D "TEST_REFERENCE=${resultfile}.ls"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5MKGRP-${resultfile}-h5ls PROPERTIES DEPENDS H5MKGRP-${resultfile})
     endif (HDF5_ENABLE_USING_MEMCHECKER)
@@ -147,7 +147,7 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.txt"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5MKGRP_CMP-${resultfile} PROPERTIES DEPENDS H5MKGRP_CMP-${resultfile}-clear-objects)
     endif (HDF5_ENABLE_USING_MEMCHECKER)
