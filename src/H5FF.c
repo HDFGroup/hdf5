@@ -53,6 +53,7 @@
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod.h"		/* IOD plugin - tmp      		*/
 #include "H5VLiod_client.h"	/* Client IOD - tmp			*/
+#include "H5VLiod_server.h"	/* Server IOD - tmp			*/
 #include "H5Xprivate.h"       /* Indexing */
 
 #ifdef H5_HAVE_EFF
@@ -3664,6 +3665,7 @@ H5Oclose_ff(hid_t object_id, hid_t estack_id)
         case H5I_RC:
         case H5I_TR:
         case H5I_QUERY:
+        case H5I_VIEW:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
@@ -4772,5 +4774,230 @@ H5_DLL herr_t H5Tevict_ff(hid_t dtype_id, uint64_t c_version, hid_t dxpl_id, hid
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tevict_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VLiod_get_file_id
+ *
+ * Purpose:	wraps and hid_t around a container handle from IOD.
+ *
+ * Return:	Success:	The ID for a new file.
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		May 28, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5VLiod_get_file_id(const char *filename, iod_handle_t coh, hid_t fapl_id, hid_t *rcxt_id)
+{
+    H5VL_iod_file_t *file = NULL;            /* file token from VOL plugin */
+    H5P_genplist_t  *plist;          /* Property list pointer */
+    H5VL_class_t    *vol_cls;        /* VOL class attached to fapl_id */
+    H5VL_t  *vol_plugin;             /* VOL plugin information */
+    iod_handles_t root_oh;           /* root object handle */
+    iod_cont_trans_stat_t *tids = NULL;
+    iod_trans_id_t rtid;
+    uint64_t kv_oid_index, array_oid_index, blob_oid_index;
+    iod_handle_t mdkv_oh;
+    iod_checksum_t *iod_cs = NULL;
+    iod_size_t key_size = 0, val_size = 0;
+    hid_t fcpl_id;
+    uint32_t cs_scope;
+    iod_ret_t ret;
+    scratch_pad sp;
+    iod_checksum_t sp_cs = 0;
+    iod_obj_id_t root_id = 0;
+    hid_t ret_value;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check/fix arguments */
+    if(!filename || !*filename)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
+
+    /* get info from the fapl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID");
+    if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, &cs_scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+
+    /* Build the vol plugin struct */
+    if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    vol_plugin->cls = vol_cls;
+    vol_plugin->nrefs = 1;
+    if((vol_plugin->container_name = H5MM_xstrdup(filename)) == NULL)
+        HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,FAIL,"memory allocation failed");
+
+    /* allocate the file object that is returned to the user */
+    if(NULL == (file = H5FL_CALLOC(H5VL_iod_file_t)))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate IOD file struct");
+
+    file->remote_file.coh = coh;
+    file->my_rank = 0;
+    file->num_procs = 1;
+    /* Duplicate communicator and Info object. */
+    if(FAIL == H5FD_mpi_comm_info_dup(MPI_COMM_SELF, MPI_INFO_NULL, &file->comm, &file->info))
+	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, FAIL, "Communicator/Info duplicate failed");
+
+    ret = iod_query_cont_trans_stat(coh, &tids, NULL);
+    if(ret < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get container tids status");
+    rtid = tids->latest_rdable;
+    file->remote_file.c_version = rtid;
+    ret = iod_free_cont_trans_stat(coh, tids);
+    if(ret < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't free container transaction status object");
+
+    ret = iod_trans_start(coh, &rtid, NULL, 0, IOD_TRANS_R, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't start transaction");
+
+    /* open the root group */
+    IOD_OBJID_SETOWNER_APP(root_id)
+    IOD_OBJID_SETTYPE(root_id, IOD_OBJ_KV)
+    file->remote_file.root_id = root_id;
+    file->remote_file.root_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
+    file->remote_file.root_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
+
+    if ((ret = iod_obj_open_read(coh, root_id, rtid, NULL, &root_oh.rd_oh, NULL)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't open root object for read");
+
+    /* get scratch pad of root group */
+    if((ret = iod_obj_get_scratch(root_oh.rd_oh, rtid, &sp, &sp_cs, NULL)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get scratch pad for root object");
+    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+        /* verify scratch pad integrity */
+        if(H5VL_iod_verify_scratch_pad(&sp, sp_cs) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Scratch Pad failed integrity check");
+    }
+
+    file->remote_file.mdkv_id = sp[0];
+    file->remote_file.attrkv_id = sp[1];
+    file->remote_file.oidkv_id = sp[2];
+
+    /* open the metadata KV object */
+    ret = iod_obj_open_read(coh, sp[0], rtid, NULL, &mdkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't open MD KV");
+
+    /* retrieve all metadata from scratch pad */
+    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
+                                cs_scope, NULL, &fcpl_id);
+    if(SUCCEED != ret)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "failed to retrieve fcpl");
+    file->remote_file.fcpl_id = fcpl_id;
+
+    file->remote_file.kv_oid_index = 0;
+    file->remote_file.array_oid_index = 0;
+    file->remote_file.blob_oid_index = 0;
+
+    /* close the metadata KV */
+    ret = iod_obj_close(mdkv_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't close MD KV");
+
+    ret = iod_obj_close(root_oh.rd_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't close root group");
+
+    file->file_name = HDstrdup(filename);
+    file->flags = H5F_ACC_RDONLY;
+    file->md_integrity_scope = cs_scope;
+    if((file->fapl_id = H5Pcopy(fapl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, FAIL, "failed to copy fapl");
+    file->nopen_objs = 1;
+    file->num_req = 0;
+    file->persist_on_close = TRUE;
+
+    /* initialize head and tail of the container's linked list of requests */
+    file->request_list_head = NULL;
+    file->request_list_tail = NULL;
+
+    file->common.obj_type = H5I_FILE;
+    /* The name of the location is the root's object name "\" */
+    file->common.obj_name = HDstrdup("/");
+    file->common.obj_name[1] = '\0';
+    file->common.file = file;
+
+    /* Get an atom for the file with the VOL information as the auxilary struct*/
+    if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+
+    /* determine if we want to acquire the latest readable version
+       when the file is opened */
+    if(rcxt_id) {
+        H5RC_t *rc = NULL;
+
+        /* create a new read context object (if user requested it) */
+        if(NULL == (rc = H5RC_create(file, rtid)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create read context");
+
+        /* Get an atom for the event queue with the VOL information as the auxilary struct */
+        if((*rcxt_id = H5I_register2(H5I_RC, rc, vol_plugin, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize read context handle");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLiod_get_file_id() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VLiod_close_file_id
+ *
+ * Purpose:	wraps and hid_t around a container handle from IOD.
+ *
+ * Return:	Success:	The ID for a new file.
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		May 28, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLiod_close_file_id(hid_t file_id)
+{
+    H5VL_iod_file_t *file = NULL;            /* file token from VOL plugin */
+    H5VL_t  *vol_plugin;             /* VOL plugin information */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+    vol_plugin->nrefs --;
+    if (0 == vol_plugin->nrefs) {
+        vol_plugin->container_name = (const char *)H5MM_xfree(vol_plugin->container_name);
+        vol_plugin = (H5VL_t *)H5MM_xfree(vol_plugin);
+    }
+
+    /* get the file object */
+    if(NULL == (file = (H5VL_iod_file_t *)H5I_remove_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    free(file->file_name);
+    free(file->common.obj_name);
+    if(H5FD_mpi_comm_info_free(&file->comm, &file->info) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "Communicator/Info free failed");
+    if(file->common.comment)
+        HDfree(file->common.comment);
+    if(file->fapl_id != H5P_FILE_ACCESS_DEFAULT && H5Pclose(file->fapl_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "failed to close plist");
+    if(file->remote_file.fcpl_id != H5P_FILE_CREATE_DEFAULT && 
+       H5Pclose(file->remote_file.fcpl_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "failed to close plist");
+    file = H5FL_FREE(H5VL_iod_file_t, file);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLiod_close_file_id() */
 
 #endif /* H5_HAVE_EFF */

@@ -449,6 +449,10 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
         if(ret != 0)
             HGOTO_ERROR_FF(ret, "can't get KV list from OID KV");
 
+        output.kv_oid_index = 0;
+        output.array_oid_index = 0;
+        output.blob_oid_index = 0;
+
         for(i=0 ; i<num_entries ; i++) {
             uint64_t *oid_index = (uint64_t *)kv[i].value;
 

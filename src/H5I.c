@@ -147,7 +147,6 @@ H5FL_DEFINE_STATIC(H5I_class_t);
 
 /*--------------------- Local function prototypes ---------------------------*/
 static int H5I__destroy_type(H5I_type_t type);
-static void *H5I__remove_verify(hid_t id, H5I_type_t id_type);
 static void *H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id);
 static int H5I__inc_type_ref(H5I_type_t type);
 static int H5I__get_type_ref(H5I_type_t type);
@@ -1197,7 +1196,7 @@ done:
  *
  * Purpose:	Removes the specified ID from its type, first checking that the
  *			type of the ID and the type type are the same.  Public interface to
- *			H5I__remove_verify.
+ *			H5I_remove_verify.
  *
  * Return:	Success:	A pointer to the object that was removed, the
  *				same pointer which would have been found by
@@ -1220,7 +1219,7 @@ H5Iremove_verify(hid_t id, H5I_type_t id_type)
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type")
 
     /* Remove the id */
-    ret_value = H5I__remove_verify(id, id_type);
+    ret_value = H5I_remove_verify(id, id_type);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1228,7 +1227,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5I__remove_verify
+ * Function:	H5I_remove_verify
  *
  * Purpose:	Removes the specified ID from its type, first checking that
  *			the ID's type is the same as the ID type supplied as an argument
@@ -1244,11 +1243,11 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5I__remove_verify(hid_t id, H5I_type_t id_type)
+H5I_remove_verify(hid_t id, H5I_type_t id_type)
 {
     void * ret_value = NULL;	/*return value			*/
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Argument checking will be performed by H5I_remove() */
 
@@ -1256,8 +1255,9 @@ H5I__remove_verify(hid_t id, H5I_type_t id_type)
     if(id_type == H5I_TYPE(id))
         ret_value = H5I_remove(id);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5I__remove_verify() */
+} /* end H5I_remove_verify() */
 
 
 /*-------------------------------------------------------------------------

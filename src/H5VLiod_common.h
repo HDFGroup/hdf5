@@ -636,6 +636,7 @@ MERCURY_GEN_PROC(dset_set_extent_in_t,
                  ((iod_handles_t)(iod_oh)) 
                  ((iod_obj_id_t)(iod_id))
                  ((iod_obj_id_t)(mdkv_id)) 
+                 ((hid_t)(space_id))
                  ((dims_t)(dims)))
 MERCURY_GEN_PROC(dset_io_in_t, 
                  ((axe_t)(axe_info))

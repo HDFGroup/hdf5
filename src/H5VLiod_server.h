@@ -41,11 +41,9 @@
 #define H5VL_IOD_KEY_OBJ_DATASPACE   "object_dataspace"
 #define H5VL_IOD_KEY_MAP_KEY_TYPE    "map_keytype"
 #define H5VL_IOD_KEY_MAP_VALUE_TYPE  "map_valtype"
-
 #define H5VL_IOD_IDX_PLUGIN_ID       "index_plugin_id"
 #define H5VL_IOD_IDX_PLUGIN_MD       "index_plugin_metadata"
 
-//#define ERFILE ((strrchr(__FILE__, '/') ? : __FILE__- 1) + 1)
 #define ERFILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
 #define HGOTO_ERROR_FF(ret_val, string) {			               \
@@ -59,6 +57,9 @@
 }
 
 #define HGOTO_DONE_FF(ret_val) {ret_value = ret_val; goto done;}
+
+/* the IOD scratch pad type */
+typedef iod_obj_id_t scratch_pad[4];
 
 /* Enum for metadata types stored in MD KV for HDF5->IOD objects */
 typedef enum H5VL_iod_metadata_t {
@@ -77,9 +78,6 @@ typedef struct op_data_t {
     AXE_task_t axe_id;
     hg_handle_t hg_handle;
 } op_data_t;
-
-/* the IOD scratch pad type */
-typedef iod_obj_id_t scratch_pad[4];
 
 /* the link value stored in KV stores */
 typedef struct H5VL_iod_link_t {

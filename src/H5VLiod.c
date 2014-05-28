@@ -813,10 +813,7 @@ EFF_finalize(void)
     if (NA_SUCCESS != NA_Addr_free(network_class, PEER))
         return FAIL;
 
-    /* Finalize interface */
-    //if (HG_SUCCESS != HG_Bulk_finalize())
-    //return FAIL;
-
+    /* Finalize mercury */
     if (HG_SUCCESS != HG_Finalize())
         return FAIL;
 
@@ -3769,6 +3766,7 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[],
     input.iod_oh = dset->remote_dset.iod_oh;
     input.iod_id = dset->remote_dset.iod_id;
     input.mdkv_id = dset->remote_dset.mdkv_id;
+    input.space_id = dset->remote_dset.space_id;
     input.dims.size = size;
     input.trans_num = tr->trans_num;
     input.rcxt_num  = tr->c_version;

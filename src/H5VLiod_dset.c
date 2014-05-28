@@ -1268,6 +1268,7 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t rtid = input->rcxt_num;
     uint32_t cs_scope = input->cs_scope;
     iod_obj_id_t mdkv_id = input->mdkv_id; /* The ID of the metadata KV object */
+    hid_t space_id = input->space_id;
     /* int rank = input->dims.rank;  rank of dataset */
     iod_ret_t ret;
     hbool_t opened_locally = FALSE;
@@ -1294,7 +1295,6 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     /* modify the dataspace of the dataset */
     {
         int rank;
-        hid_t space_id;
         iod_handle_t mdkv_oh;
         iod_size_t array_dims[H5S_MAX_RANK], current_dims[H5S_MAX_RANK];
 
@@ -1303,11 +1303,13 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
         if(ret < 0)
             HGOTO_ERROR_FF(ret, "can't open scratch pad");
 
+#if 0
         /* get the stored dataset dataspace */
         ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, H5VL_IOD_KEY_OBJ_DATASPACE,
                                     cs_scope, NULL, &space_id);
         if(ret != SUCCEED)
             HGOTO_ERROR_FF(ret, "failed to retrieve dataspace");
+#endif
 
         if((rank = H5Sget_simple_extent_dims(space_id, current_dims, array_dims)) < 0)
             HGOTO_ERROR_FF(FAIL, "can't get dimentions' sizes");
