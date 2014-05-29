@@ -100,6 +100,7 @@ H5_DLL herr_t H5Pget_dcpl_append_only(hid_t dcpl_id, hbool_t *flag);
 
 H5_DLL hid_t H5VLiod_get_file_id(const char *filename, iod_handle_t coh, hid_t fapl_id, hid_t *rcxt_id);
 H5_DLL herr_t H5VLiod_close_file_id(hid_t file_id);
+H5_DLL hid_t H5Dquery_ff(hid_t dset_id, hid_t query_id, hid_t scope_id, hid_t rcxt_id);
 
 #endif /* H5_HAVE_EFF */
 

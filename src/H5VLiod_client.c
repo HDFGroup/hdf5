@@ -221,6 +221,7 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
        container to avoid deadlock. */
     while(1) {
         HDassert(request->state == H5VL_IOD_PENDING);
+
         /* test the operation status */
         FUNC_LEAVE_API_THREADSAFE;
         ret = HG_Wait(*((hg_request_t *)request->req), 0, &status);

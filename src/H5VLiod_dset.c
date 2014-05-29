@@ -653,7 +653,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
                                                HG_BULK_READWRITE, &bulk_block_handle))
             HGOTO_ERROR_FF(FAIL, "can't create bulk handle");
     }
-    
+
     /*
     if(H5VL__iod_server_adjust_buffer(dst_id, src_id, nelmts, dxpl_id, is_coresident,
                                       size, &buf, &is_vl_data, &buf_size) < 0)

@@ -1194,42 +1194,6 @@ done:
 } /* end H5VL__iod_get_space_layout() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL__iod_get_query_data_cb
- *
- *
- * Return:	Success:	SUCCEED 
- *		Failure:	Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t 
-H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim, 
-                            const hsize_t *point, void *_udata)
-{
-    H5VL__iod_get_query_data_t *udata = (H5VL__iod_get_query_data_t *)_udata;
-    hbool_t result;
-    herr_t ret_value = SUCCEED;
-
-    /* Apply the query */
-    if(H5Qapply(udata->query_id, &result, type_id, elem) < 0)
-        HGOTO_ERROR_FF(FAIL, "unable to apply query to data element");
-
-    /* If element satisfies query, add it to the selection */
-    if (result) {
-        /* TODO remove that after demo */
-#if 0
-        fprintf(stderr, "(%d) Element |%d| matches query\n", my_rank_g, *((int *) elem));
-#endif
-        udata->num_elmts ++;
-        if(H5Sselect_elements(udata->space_query, H5S_SELECT_APPEND, 1, point) < 0)
-            HGOTO_ERROR_FF(FAIL, "unable to add point to selection")
-    }
-
-done:
-    return ret_value;
-} /* end H5VL__iod_get_query_data_cb */
-
-/*-------------------------------------------------------------------------
  * Function:    H5VL__iod_get_query_data
  *
  * Purpose:     Generates a dataspace from the query specified. The dataspace 

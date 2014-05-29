@@ -6369,7 +6369,7 @@ H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, H5I_type_t *opened_type, 
         dset->common.obj_name = NULL;
 
 #if H5_EFF_DEBUG
-        printf("Dataset open by token %"PRIu64": ID %"PRIu64"\n", 
+        printf("Dataset open by token %"PRIu64": ID %"PRIx64"\n", 
                g_axe_id, input.iod_id);
 #endif
 
@@ -10227,11 +10227,11 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t dataspace_id,
-                     hid_t vcpl_id, hid_t rcxt_id, void **req)
+H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the view */
     H5VL_iod_view_t *view = NULL; /* the view object that is created and passed to the user */
+    view_create_in_t input;
     iod_obj_id_t iod_id, mdkv_id, attrkv_id;
     iod_handles_t iod_oh;
     H5VL_iod_request_t **parent_reqs = NULL;
@@ -10305,52 +10305,33 @@ H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t dataspace_id,
            iod_id, g_axe_id);
 #endif
 
-    /* If we already have a dataspace id, no need to ship */
-    if (dataspace_id != -1) {
-        view->remote_view.attr_info.count = 0;
-        view->remote_view.attr_info.tokens = NULL;
-        view->remote_view.obj_info.count = 0;
-        view->remote_view.obj_info.tokens = NULL;
-        view->remote_view.region_info.count = 0;
-//        view->remote_view.region_info.regions = H5MM_malloc(sizeof(hid_t));
-//        view->remote_view.region_info.regions[0] = H5Scopy(dataspace_id);
-//        H5Sclose(dataspace_id);
-        /* TODO fix that */
-        view->remote_view.region_info.tokens = NULL;
-        view->remote_view.region_info.regions = NULL;
+    /* Initialize the view types to be obtained from server */
+    view->remote_view.attr_info.count = 0;
+    view->remote_view.attr_info.tokens = NULL;
+    view->remote_view.obj_info.count = 0;
+    view->remote_view.obj_info.tokens = NULL;
+    view->remote_view.region_info.count = 0;
+    view->remote_view.region_info.tokens = NULL;
+    view->remote_view.region_info.regions = NULL;
+    view->remote_view.valid_view = FALSE;
 
-        view->remote_view.valid_view = TRUE;
-    } else {
-        view_create_in_t input;
+    /* set the input structure for the HG encode routine */
+    input.coh = obj->file->remote_file.coh;
+    input.loc_id = iod_id;
+    input.loc_oh = iod_oh;
+    input.loc_mdkv_id = mdkv_id;
+    input.loc_attrkv_id = attrkv_id;
+    input.query_id = query_id;
+    input.vcpl_id = vcpl_id;
+    input.obj_type = obj->obj_type;
+    input.rcxt_num  = rc->c_version;
+    input.cs_scope = obj->file->md_integrity_scope;
 
-        /* Initialize the view types to be obtained from server */
-        view->remote_view.attr_info.count = 0;
-        view->remote_view.attr_info.tokens = NULL;
-        view->remote_view.obj_info.count = 0;
-        view->remote_view.obj_info.tokens = NULL;
-        view->remote_view.region_info.count = 0;
-        view->remote_view.region_info.tokens = NULL;
-        view->remote_view.region_info.regions = NULL;
-        view->remote_view.valid_view = FALSE;
-
-        /* set the input structure for the HG encode routine */
-        input.coh = obj->file->remote_file.coh;
-        input.loc_id = iod_id;
-        input.loc_oh = iod_oh;
-        input.loc_mdkv_id = mdkv_id;
-        input.loc_attrkv_id = attrkv_id;
-        input.query_id = query_id;
-        input.vcpl_id = vcpl_id;
-        input.obj_type = obj->obj_type;
-        input.rcxt_num  = rc->c_version;
-        input.cs_scope = obj->file->md_integrity_scope;
-
-        if(H5VL__iod_create_and_forward(H5VL_VIEW_CREATE_ID, HG_VIEW_CREATE,
-                (H5VL_iod_object_t *)view, 1, num_parents, parent_reqs,
-                (H5VL_iod_req_info_t *)rc, &input, &view->remote_view,
-                view, req) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship view create");
-    }
+    if(H5VL__iod_create_and_forward(H5VL_VIEW_CREATE_ID, HG_VIEW_CREATE,
+                                    (H5VL_iod_object_t *)view, 1, num_parents, parent_reqs,
+                                    (H5VL_iod_req_info_t *)rc, &input, &view->remote_view,
+                                    view, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship view create");
 
     ret_value = (void *)view;
 

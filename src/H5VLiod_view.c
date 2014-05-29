@@ -24,6 +24,8 @@
 #include "H5VLiod_server.h"
 
 #include "H5Qpublic.h"
+#include "H5RCpublic.h"
+#include "H5TRpublic.h"
 #include "H5Vpublic.h"
 
 #ifdef H5_HAVE_EFF
@@ -55,6 +57,8 @@ typedef struct {
 typedef struct {
     hid_t query_id;
     hid_t vcpl_id;
+    hid_t file_id;
+    hid_t rcxt_id;
     H5VL_iod_view_obj_t *view;
 } H5VL_build_view_t;
 
@@ -69,7 +73,8 @@ static herr_t
 H5VL__iod_get_token(iod_handle_t coh, H5I_type_t obj_type, iod_obj_id_t iod_id, 
                     iod_trans_id_t rtid, uint32_t cs_scope, size_t *_token_size, void **_token);
 static herr_t 
-H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t obj_id, 
+H5VL__iod_apply_query(hid_t file_id, hid_t rcxt_id, hid_t qid, hid_t vcpl_id, 
+                      iod_handle_t coh, iod_obj_id_t obj_id, 
                       iod_trans_id_t rtid, H5I_type_t obj_type, 
                       const char *link_name, const char *attr_name,
                       size_t num_attrs, char *attr_list[],
@@ -122,11 +127,19 @@ H5VL_iod_server_view_create_cb(AXE_engine_t UNUSED axe_engine,
     H5VL_build_view_t udata;
     H5VL_iod_view_entry_t *entry = NULL;
     H5VL_iod_view_obj_t *view = NULL;
+    hid_t file_id, rcxt_id, fapl_id;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG 
     fprintf(stderr, "Start View create on OID %"PRIx64"\n", loc_id);
 #endif
+
+    /* wrap a file hid_t around the iod container handle */
+    fapl_id = H5Pcreate (H5P_FILE_ACCESS);
+    H5Pset_fapl_iod(fapl_id, MPI_COMM_SELF, MPI_INFO_NULL);
+    if((file_id = H5VLiod_get_file_id("bla", coh, fapl_id, &rcxt_id)) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't get file ID");
+    H5Pclose(fapl_id);
 
     if(H5P_DEFAULT == input->vcpl_id)
         input->vcpl_id = H5Pcopy(H5P_VIEW_CREATE_DEFAULT);
@@ -137,6 +150,8 @@ H5VL_iod_server_view_create_cb(AXE_engine_t UNUSED axe_engine,
     udata.view = view;
     udata.query_id = query_id;
     udata.vcpl_id = vcpl_id;
+    udata.file_id = file_id;
+    udata.rcxt_id = rcxt_id;
 
     if(H5VL_iod_server_iterate(coh, loc_id, rtid, obj_type, NULL, NULL, cs_scope, 
                                H5VL__iod_build_view_cb, &udata) < 0)
@@ -198,6 +213,13 @@ H5VL_iod_server_view_create_cb(AXE_engine_t UNUSED axe_engine,
             entry = entry->next;
         }
     }
+
+    /* free the file ID and release the read context */
+    if(H5RCrelease(rcxt_id, H5_EVENT_STACK_NULL) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't release read context");
+    H5RCclose(rcxt_id);
+    if(H5VLiod_close_file_id(file_id) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't release file id");
 
 done:
 
@@ -352,7 +374,8 @@ H5VL__iod_build_view_cb(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rt
             HGOTO_ERROR_FF(ret, "can't close object");
     }
 
-    ret = H5VL__iod_apply_query(op_data->query_id, op_data->vcpl_id, 
+    ret = H5VL__iod_apply_query(op_data->file_id, op_data->rcxt_id, 
+                                op_data->query_id, op_data->vcpl_id, 
                                 coh, obj_id, rtid, obj_type, 
                                 link_name, attr_name, (size_t)num_attrs, attr_list, 
                                 cs_scope, &result, &region);
@@ -394,7 +417,8 @@ done:
 }
 
 static herr_t 
-H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t obj_id, 
+H5VL__iod_apply_query(hid_t file_id, hid_t rcxt_id, hid_t qid, hid_t vcpl_id,
+                      iod_handle_t coh, iod_obj_id_t obj_id, 
                       iod_trans_id_t rtid, H5I_type_t obj_type, 
                       const char *link_name, const char *attr_name,
                       size_t num_attrs, char *attr_list[],
@@ -417,11 +441,39 @@ H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t o
 
         if(H5Q_TYPE_DATA_ELEM == q_type) {
             if(H5I_DATASET == obj_type) {
-                hid_t sid;
+                hid_t sid, scope_id;
+                hid_t dset_id, trans_id;
+                size_t token_size = 0;
+                void *token = NULL;
+
+                if(H5VL__iod_get_token(coh, obj_type, obj_id, rtid, cs_scope,
+                                       &token_size, &token) < 0)
+                    HGOTO_ERROR_FF(FAIL, "failed to get object token");
+
+                trans_id = H5TRcreate(file_id, rcxt_id, rtid);
+                if((dset_id = H5Oopen_by_token(token, trans_id, H5_EVENT_STACK_NULL)) < 0)
+                    HGOTO_ERROR_FF(FAIL, "failed to open dataset by token");
+                H5TRclose(trans_id);
+
+                /* Check if VCPL has a dataspace specified; otherwise, read the entire dataset. */
+                if(H5Pget_view_elmt_scope(vcpl_id, &scope_id) < 0)
+                    HGOTO_ERROR_FF(FAIL, "can't retrieve vcpl region scope");
+
+                sid = H5Dquery_ff(dset_id, qid, scope_id, rcxt_id);
+                if(FAIL == sid)
+                    HGOTO_ERROR_FF(FAIL, "failed to apply query on dataset region");
+
+                if(H5Dclose_ff(dset_id, H5_EVENT_STACK_NULL) < 0)
+                    HGOTO_ERROR_FF(FAIL, "failed to close dataset");
+
+                if(token) {
+                    free(token);
+                    token = NULL;
+                }
 
                 /* add object to view with region if region is not NONE */
-                if((sid = H5VL__iod_get_elmt_region(coh, obj_id, rtid, qid, vcpl_id, cs_scope)) < 0)
-                    HGOTO_ERROR_FF(FAIL, "can't get region from query");
+                //if((sid = H5VL__iod_get_elmt_region(coh, obj_id, rtid, qid, vcpl_id, cs_scope)) < 0)
+                //HGOTO_ERROR_FF(FAIL, "can't get region from query");
 
                 fprintf(stderr, "Found %zu Entries in subquery\n", H5Sget_select_npoints(sid));
                 if(H5Sget_select_npoints(sid) > 0) {
@@ -493,7 +545,7 @@ H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t o
         if(H5Qget_components(qid, &qid1, &qid2) < 0)
             HGOTO_ERROR_FF(FAIL, "can't get query components");
 
-        ret = H5VL__iod_apply_query(qid1, vcpl_id, coh, obj_id, rtid, 
+        ret = H5VL__iod_apply_query(file_id, rcxt_id, qid1, vcpl_id, coh, obj_id, rtid, 
                                     obj_type, link_name, attr_name, 
                                     num_attrs, attr_list, cs_scope, 
                                     &result1, &sid1);
@@ -506,7 +558,7 @@ H5VL__iod_apply_query(hid_t qid, hid_t vcpl_id, iod_handle_t coh, iod_obj_id_t o
             *result = QFALSE;
         }
         else {
-            ret = H5VL__iod_apply_query(qid2, vcpl_id, coh, obj_id, rtid, 
+            ret = H5VL__iod_apply_query(file_id, rcxt_id, qid2, vcpl_id, coh, obj_id, rtid, 
                                         obj_type, link_name, attr_name, 
                                         num_attrs, attr_list, cs_scope, 
                                         &result2, &sid2);
@@ -875,7 +927,7 @@ H5VL__iod_get_elmt_region(iod_handle_t coh, iod_obj_id_t dset_id, iod_trans_id_t
 
     /* Check if VCPL has a dataspace specified; otherwise, read the entire dataset. */
     if(H5Pget_view_elmt_scope(vcpl_id, &space_id) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't retrieve vcpl region scope");;
+        HGOTO_ERROR_FF(FAIL, "can't retrieve vcpl region scope");
 
     /* open the array object */
     if(iod_obj_open_read(coh, dset_id, rtid, NULL, &dset_oh, NULL) < 0)
@@ -922,7 +974,6 @@ H5VL__iod_get_elmt_region(iod_handle_t coh, iod_obj_id_t dset_id, iod_trans_id_t
         HGOTO_ERROR_FF(FAIL, "can't allocate read buffer");
 
     /* read the data selection from IOD. */
-    elmt_size = H5Tget_size(type_id);
     if(H5VL__iod_server_final_io(dset_oh, space_id, elmt_size, FALSE, 
                                  buf, buf_size, (uint64_t)0, 0, rtid) < 0)
         HGOTO_ERROR_FF(FAIL, "can't read from array object");
@@ -960,6 +1011,41 @@ done:
 
     return ret_value;
 } /* end H5VL__iod_get_elmt_region() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_get_query_data_cb
+ *
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim, 
+                            const hsize_t *point, void *_udata)
+{
+    H5VL__iod_get_query_data_t *udata = (H5VL__iod_get_query_data_t *)_udata;
+    hbool_t result;
+    herr_t ret_value = SUCCEED;
+
+    /* Apply the query */
+    if(H5Qapply(udata->query_id, &result, type_id, elem) < 0)
+        HGOTO_ERROR_FF(FAIL, "unable to apply query to data element");
+
+    /* If element satisfies query, add it to the selection */
+    if (result) {
+#if 0
+        fprintf(stderr, "(%d) Element |%d| matches query\n", my_rank_g, *((int *) elem));
+#endif
+        udata->num_elmts ++;
+        if(H5Sselect_elements(udata->space_query, H5S_SELECT_APPEND, 1, point) < 0)
+            HGOTO_ERROR_FF(FAIL, "unable to add point to selection")
+    }
+
+done:
+    return ret_value;
+} /* end H5VL__iod_get_query_data_cb */
 
 static void
 H5VL__iod_add_entry(H5VL_iod_view_list_t *list, H5VL_iod_view_entry_t* entry)
