@@ -131,8 +131,12 @@ H5X_init_interface(void)
 
 //#ifdef H5_HAVE_INDEX_PLUGIN_DUMMY
     if (H5X_register(H5X_DUMMY) < 0)
-        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register dummy index plugin")
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register dummy index plugin");
 //#endif /* H5_HAVE_INDEX_PLUGIN_DUMMY */
+#ifdef H5_HAVE_ALACRITY
+    if (H5X_register(H5X_ALACRITY) < 0)
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register alacrity index plugin");
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -227,7 +231,7 @@ H5Xregister(const H5X_class_t *index_class)
 
     /* Do or do not. There is no try. */
     if (H5X_register(index_class) < 0)
-        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register index")
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register index");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -265,7 +269,7 @@ H5X_register(const H5X_class_t *index_class)
             size_t n = MAX(H5X_MAX_NPLUGINS, 2 * H5X_table_alloc_g);
             H5X_class_t *table = (H5X_class_t *) H5MM_realloc(H5X_table_g,
                     n * sizeof(H5X_class_t));
-            if(!table)
+            if (!table)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend index plugin table");
             H5X_table_g = table;
             H5X_table_alloc_g = n;

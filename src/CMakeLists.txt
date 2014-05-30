@@ -656,6 +656,12 @@ IF (HDF5_ENABLE_EFF)
         ${HDF5_SRC_DIR}/H5Pxxpl.c
         ${HDF5_SRC_DIR}/H5VLiod_index.c
       )
+      IF (ALACRITY_FOUND)
+        set (H5FF_SRCS
+          ${H5FF_SRCS}
+          ${HDF5_SRC_DIR}/H5Xalacrity.c
+        )
+      ENDIF (ALACRITY_FOUND)
     ENDIF (HDF5_ENABLE_INDEXING)
     set (H5FF_HDRS
         ${HDF5_SRC_DIR}/H5ASpublic.h
