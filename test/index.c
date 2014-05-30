@@ -29,9 +29,14 @@ write_dataset(hid_t file_id, const char *dataset_name,
     herr_t      ret;
 
     /* acquire container version 1 - EXACT. */
-    version = 1;
-    rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, estack_id);
+    if(0 == my_rank) {
+        version = 1;
+        rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    }
+    MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
     assert(1 == version);
+    if (my_rank != 0)
+        rid1 = H5RCcreate(file_id, version);
 
     /* create transaction object */
     tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
@@ -55,7 +60,7 @@ write_dataset(hid_t file_id, const char *dataset_name,
     assert(dataset_id);
 
     /* Add indexing information */
-    ret = H5Xcreate_ff(file_id, H5X_PLUGIN_DUMMY, dataset_id, H5P_DEFAULT,
+    ret = H5Xcreate_ff(file_id, H5X_PLUGIN_ALACRITY, dataset_id, H5P_DEFAULT,
             tid1, estack_id);
     assert(0 == ret);
 
@@ -83,8 +88,10 @@ write_dataset(hid_t file_id, const char *dataset_name,
     assert(0 == ret);
 
     /* release container version 0. */
-    ret = H5RCrelease(rid1, estack_id);
-    assert(0 == ret);
+    if (my_rank == 0) {
+        ret = H5RCrelease(rid1, estack_id);
+        assert(0 == ret);
+    }
 
     ret = H5RCclose(rid1);
     assert(0 == ret);
@@ -186,6 +193,7 @@ main(int argc, char **argv)
     herr_t ret;
     hsize_t i, j;
 
+    getchar();
     MPI_Init(&argc, &argv);
 
     /* Call EFF_init to initialize the EFF stack. */
