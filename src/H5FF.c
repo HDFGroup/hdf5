@@ -5033,10 +5033,12 @@ H5Dquery_ff(hid_t dset_id, hid_t query_id, hid_t scope_id, hid_t rcxt_id)
 
 #ifdef H5_HAVE_INDEXING
     /* Use indexing query callback if it exists */
-    if (!(plugin_id = H5VL_iod_dataset_get_index_plugin_id(dset))) {
+    if (H5X_PLUGIN_NONE != (plugin_id = H5VL_iod_dataset_get_index_plugin_id(dset))) {
         void *idx_handle = NULL; /* index */
         H5X_class_t *idx_class = NULL;
 
+        if (NULL == (idx_handle = H5VL_iod_dataset_get_index(dset)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index handle from dataset");
         if (NULL == (idx_class = H5X_registered(plugin_id)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
 
