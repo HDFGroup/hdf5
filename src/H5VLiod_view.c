@@ -471,11 +471,6 @@ H5VL__iod_apply_query(hid_t file_id, hid_t rcxt_id, hid_t qid, hid_t vcpl_id,
                     token = NULL;
                 }
 
-                /* add object to view with region if region is not NONE */
-                //if((sid = H5VL__iod_get_elmt_region(coh, obj_id, rtid, qid, vcpl_id, cs_scope)) < 0)
-                //HGOTO_ERROR_FF(FAIL, "can't get region from query");
-
-                fprintf(stderr, "Found %zu Entries in subquery\n", H5Sget_select_npoints(sid));
                 if(H5Sget_select_npoints(sid) > 0) {
                     *result = QTRUE;
                     *region = sid;

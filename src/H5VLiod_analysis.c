@@ -859,24 +859,67 @@ H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine,
     if (ret != 0)
         HGOTO_ERROR_FF(ret, "iod_obj_query_map failed");
 
-#if H5_EFF_DEBUG
-    fprintf(stderr, "(%d) %-10d\n", my_rank_g, obj_map->u_map.array_map.n_range);
-#endif
-
-    for (i = 0; i < obj_map->u_map.array_map.n_range; i++) {
 #if 0//H5_EFF_DEBUG
-        fprintf(stderr, "(%d) range: %d, start: %zu %zu, "
-                "end: %zu %zu, n_cell: %zu, "
-                "loc: %s\n", my_rank_g, i,
-                obj_map->u_map.array_map.array_range[i].start_cell[0],
-                obj_map->u_map.array_map.array_range[i].start_cell[1],
-                obj_map->u_map.array_map.array_range[i].end_cell[0],
-                obj_map->u_map.array_map.array_range[i].end_cell[1],
-                obj_map->u_map.array_map.array_range[i].n_cell,
-                /* MSC - update IOD new layout callshere */
-                obj_map->u_map.array_map.array_range[i].loc);
-#endif
+    fprintf(stderr, "MAP: oid: %"PRIx64"   type: %d\n", obj_map->oid, obj_map->type);
+    fprintf(stderr, "n_bb_loc %d:\n", obj_map->n_bb_loc);
+    for (i = 0; i < obj_map->n_bb_loc ; i++) {
+        iod_bb_loc_info_t *info = obj_map->bb_loc_infos[i];
+        int j;
+
+        fprintf(stderr, "Shadow path: %s  nrank = %d:\n", info->shadow_path, info->nrank);
+        for(j=0 ; j<nrank; j++)
+            fprintf(stderr, "%d ", info->direct_ranks[j]);
+        fprintf(stderr, "\n");
     }
+    fprintf(stderr, "n_central_loc %d:\n", obj_map->n_central_loc);
+    for (i = 0; i < obj_map->n_central_loc ; i++) {
+        iod_central_loc_info_t *info = obj_map->central_loc_infos[i];
+        int j;
+
+        fprintf(stderr, "Shard ID: %u  nrank = %d:\n", info->shard_id, info->nrank);
+        for(j=0 ; j<nrank; j++)
+            fprintf(stderr, "%d ", info->nearest_ranks[j]);
+        fprintf(stderr, "\n");
+    }
+    switch(obj_map->type) {
+    case IOD_OBJ_BLOB:
+        {
+            iod_blob_map_t blob_map = obj_map->blob_map;
+
+            fprintf(stderr, "nranges = %d\n", blob_map.n_range);
+            for(i = 0; i < blob_map.n_range ; i++) {
+                fprintf(stderr, 
+                        "offset: %"PRIu64"  length: %zu  location: %d  index: %d  nearest rank: %d",
+                        blob_map.blob_range[i].offset, blob_map.blob_range[i].len,
+                        blob_map.blob_range[i].loc_type, blob_map.blob_range[i].loc_index,
+                        blob_map.blob_range[i].nearest_rank);
+            }
+            break;
+        }
+    case IOD_OBJ_ARRAY:
+        {
+            iod_array_map_t array_map = obj_map->array_map;
+
+            fprintf(stderr, "nranges = %d\n", array_map.n_range);
+            for(i = 0; i < array_map.n_range ; i++) {
+                fprintf(stderr, 
+                        "location: %d  index: %d  nearest rank: %d",
+                        array_map.array_range[i].loc_type, array_map.array_range[i].loc_index,
+                        array_map.array_range[i].nearest_rank);
+                fprintf(stderr, "start [%"PRIu64"] end [%"PRIu64"]\n",
+                        array_map.array_range[i].start_cell[0],
+                        array_map.array_range[i].end_cell[0])
+            }
+            break;
+        }
+        break;
+    case IOD_OBJ_KV:
+    case IOD_OBJ_INVALID:
+    case IOD_OBJ_ANY:
+    default:
+        break;
+    }
+#endif
 
     /* get scratch pad */
     ret = iod_obj_get_scratch(obj_oh.rd_oh, rtid, (char *) &sp, NULL, NULL);
