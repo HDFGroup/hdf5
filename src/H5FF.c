@@ -1061,6 +1061,7 @@ herr_t
 H5Dclose_ff(hid_t dset_id, hid_t estack_id)
 {
 #ifdef H5_HAVE_INDEXING
+    unsigned plugin_id;
     void *idx_handle = NULL;
 #endif
     void *dset;
@@ -1088,6 +1089,8 @@ H5Dclose_ff(hid_t dset_id, hid_t estack_id)
 #ifdef H5_HAVE_INDEXING
     /* Get the index handle if there is one */
     idx_handle = H5VL_iod_dataset_get_index(dset);
+    if (idx_handle && !(plugin_id = H5VL_iod_dataset_get_index_plugin_id(dset)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin ID from dataset");
 #endif
 
     /*
@@ -1107,10 +1110,7 @@ H5Dclose_ff(hid_t dset_id, hid_t estack_id)
 	 */
 	if (idx_handle && (FAIL == H5I_get_ref(dset_id, FALSE))) {
         H5X_class_t *idx_class = NULL;
-        unsigned plugin_id;
 
-        if (!(plugin_id = H5VL_iod_dataset_get_index_plugin_id(dset)))
-            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin ID from dataset");
         if (NULL == (idx_class = H5X_registered(plugin_id)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
 
@@ -2968,6 +2968,8 @@ H5Oopen_by_token(const void *token, hid_t trans_id, hid_t estack_id)
 
     if(NULL == (opened_obj = H5VL_iod_obj_open_token(token, tr, &opened_type, req)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object");
+
+    /* TODO add indexing part from H5Dopen */
 
     if(request && *req) {
         /* insert in stack */
