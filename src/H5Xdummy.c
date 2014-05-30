@@ -104,7 +104,7 @@ H5X__dummy_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim,
 /* Dummy index class */
 const H5X_class_t H5X_DUMMY[1] = {{
     H5X_CLASS_T_VERS,       /* (From the H5Xpublic.h header file) */
-    1,                      /* (Or whatever number is assigned) */
+    H5X_PLUGIN_DUMMY,       /* (Or whatever number is assigned) */
     "dummy index plugin",   /* Whatever name desired */
     H5X_TYPE_DATA_ELEM,     /* This plugin operates on dataset elements */
     H5X_dummy_create,       /* create */
