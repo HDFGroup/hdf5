@@ -486,6 +486,19 @@ if (H5_HAVE_PARALLEL)
   endif (MPI_C_LINK_FLAGS)
 endif (H5_HAVE_PARALLEL)
 
+#-----------------------------------------------------------------------------
+# Option to use ALACRITY
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_ALACRITY_SUPPORT "Enable ALACRITY for indexing." OFF)
+if (HDF5_ENABLE_ALACRITY_SUPPORT)
+  find_package (ALACRITY)
+  if (ALACRITY_FOUND)
+    set (H5_HAVE_ALACRITY 1)
+    include_directories (${ALACRITY_INCLUDE_DIR})
+    set (LINK_LIBS ${LINK_LIBS} ${ALACRITY_LIBRARIES})
+  endif (ALACRITY_FOUND)
+endif (HDF5_ENABLE_ALACRITY_SUPPORT)
+
 set (DEFAULT_API_VERSION "v110")
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API

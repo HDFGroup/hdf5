@@ -22,12 +22,16 @@
 /* Include private header file */
 #include "H5Xprivate.h" /* Plugin functions                */
 
-//#ifdef H5_HAVE_INDEX_DUMMY
 /*
  * Dummy plugin
  */
 H5_DLLVAR const H5X_class_t H5X_DUMMY[1];
-//#endif /* H5_HAVE_INDEX_DUMMY */
+
+/*
+ * Alacrity plugin
+ */
+#ifdef H5_HAVE_ALACRITY
+H5_DLLVAR const H5X_class_t H5X_ALACRITY[1];
+#endif
 
 #endif /* _H5Xpkg_H */
-
