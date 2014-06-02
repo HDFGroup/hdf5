@@ -33,9 +33,6 @@
 #include "H5Vprivate.h" 	/* Views				*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod_client.h"	/* IOD VOL plugin			*/
-#ifdef H5_HAVE_INDEXING
-#include "H5Xprivate.h"     /* Indexing */
-#endif
 
 #ifdef H5_HAVE_EFF
 
