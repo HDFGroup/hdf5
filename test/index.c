@@ -20,32 +20,30 @@ write_dataset(hid_t file_id, const char *dataset_name,
 {
     hid_t       dataset_id;
     hid_t       file_space_id, mem_space_id;
-    hid_t       tid1, rid1, trspl_id;
+    hid_t       trans_id, rcxt_id, trspl_id;
     hsize_t     dims[2] = {total, ncomponents};
     hsize_t     offset[2] = {start, 0};
     hsize_t     count[2] = {ntuples, ncomponents};
     int         rank = (ncomponents == 1) ? 1 : 2;
-    uint64_t    version;
+    uint64_t    version = 1;
     herr_t      ret;
 
     /* acquire container version 1 - EXACT. */
     if(0 == my_rank) {
-        version = 1;
-        rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+        rcxt_id = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    } else {
+        rcxt_id = H5RCcreate(file_id, version);
     }
-    MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
     assert(1 == version);
-    if (my_rank != 0)
-        rid1 = H5RCcreate(file_id, version);
 
     /* create transaction object */
-    tid1 = H5TRcreate(file_id, rid1, (uint64_t)2);
-    assert(tid1);
+    trans_id = H5TRcreate(file_id, rcxt_id, version + 1);
+    assert(trans_id);
 
     trspl_id = H5Pcreate(H5P_TR_START);
     ret = H5Pset_trspl_num_peers(trspl_id, (unsigned int) my_size);
     assert(0 == ret);
-    ret = H5TRstart(tid1, trspl_id, estack_id);
+    ret = H5TRstart(trans_id, trspl_id, estack_id);
     assert(0 == ret);
     ret = H5Pclose(trspl_id);
     assert(0 == ret);
@@ -56,20 +54,15 @@ write_dataset(hid_t file_id, const char *dataset_name,
 
     /* Create a dataset. */
     dataset_id = H5Dcreate_ff(file_id, dataset_name, datatype_id, file_space_id,
-            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, estack_id);
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, trans_id, estack_id);
     assert(dataset_id);
-
-    /* Add indexing information */
-    ret = H5Xcreate_ff(file_id, H5X_PLUGIN_ALACRITY, dataset_id, H5P_DEFAULT,
-            tid1, estack_id);
-    assert(0 == ret);
 
     mem_space_id = H5Screate_simple(rank, count, NULL);
     assert(mem_space_id);
 
     /* Write the first dataset. */
     ret = H5Dwrite_ff(dataset_id, datatype_id, mem_space_id, file_space_id,
-            H5P_DEFAULT, buf, tid1, estack_id);
+            H5P_DEFAULT, buf, trans_id, estack_id);
     assert(0 == ret);
 
     /* Close the data space for the first dataset. */
@@ -84,19 +77,76 @@ write_dataset(hid_t file_id, const char *dataset_name,
     assert(0 == ret);
 
     /* Finish transaction 0. */
-    ret = H5TRfinish(tid1, H5P_DEFAULT, NULL, estack_id);
+    ret = H5TRfinish(trans_id, H5P_DEFAULT, NULL, estack_id);
     assert(0 == ret);
 
     /* release container version 0. */
     if (my_rank == 0) {
-        ret = H5RCrelease(rid1, estack_id);
+        ret = H5RCrelease(rcxt_id, estack_id);
         assert(0 == ret);
     }
 
-    ret = H5RCclose(rid1);
+    ret = H5RCclose(rcxt_id);
     assert(0 == ret);
 
-    ret = H5TRclose(tid1);
+    ret = H5TRclose(trans_id);
+    assert(0 == ret);
+}
+
+static void
+create_index(hid_t file_id, const char *dataset_name, hid_t estack_id)
+{
+    hid_t dataset_id, trans_id, rcxt_id;
+    hid_t trspl_id;
+    uint64_t version = 2;
+    herr_t ret;
+
+    /* acquire container version 1 - EXACT. */
+    if(0 == my_rank) {
+        rcxt_id = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    } else {
+        rcxt_id = H5RCcreate(file_id, version);
+    }
+    assert(2 == version);
+
+    /* create transaction object */
+    trans_id = H5TRcreate(file_id, rcxt_id, version + 1);
+    assert(trans_id);
+
+    trspl_id = H5Pcreate(H5P_TR_START);
+    ret = H5Pset_trspl_num_peers(trspl_id, (unsigned int) my_size);
+    assert(0 == ret);
+    ret = H5TRstart(trans_id, trspl_id, estack_id);
+    assert(0 == ret);
+    ret = H5Pclose(trspl_id);
+    assert(0 == ret);
+
+    dataset_id = H5Dopen_ff(file_id, dataset_name, H5P_DEFAULT, rcxt_id,
+            estack_id);
+
+    /* Add indexing information */
+    ret = H5Xcreate_ff(file_id, H5X_PLUGIN_ALACRITY, dataset_id, H5P_DEFAULT,
+            trans_id, estack_id);
+    assert(0 == ret);
+
+    /* Close the first dataset. */
+    ret = H5Dclose_ff(dataset_id, estack_id);
+    assert(0 == ret);
+
+    /* Finish transaction 0. */
+    ret = H5TRfinish(trans_id, H5P_DEFAULT, NULL, estack_id);
+    assert(0 == ret);
+
+    /* release container version 0. */
+    if (my_rank == 0) {
+        ret = H5RCrelease(rcxt_id, estack_id);
+        assert(0 == ret);
+    }
+
+    ret = H5RCclose(rcxt_id);
+    assert(0 == ret);
+
+    ret = H5TRclose(trans_id);
     assert(0 == ret);
 }
 
@@ -108,8 +158,8 @@ query_and_view(hid_t file_id, const char *dataset_name, hid_t estack_id)
     hid_t  query_id1, query_id2, query_id3, query_id4, query_id5, query_id6;
     hid_t query_id, view_id;
     hid_t dataset_id;
-    hid_t rid2;
-    uint64_t version;
+    hid_t rcxt_id;
+    uint64_t version = 3;
     herr_t ret;
 
     /* Create a simple query */
@@ -140,32 +190,33 @@ query_and_view(hid_t file_id, const char *dataset_name, hid_t estack_id)
     assert(query_id);
 
     /* acquire container version 2 - EXACT. */
-    version = 2;
-    rid2 = H5RCacquire(file_id, &version, H5P_DEFAULT, estack_id);
-    assert(rid2 > 0);
-    assert(2 == version);
+    version = 3;
+    rcxt_id = H5RCacquire(file_id, &version, H5P_DEFAULT, estack_id);
+    assert(rcxt_id > 0);
+    assert(3 == version);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    dataset_id = H5Dopen_ff(file_id, dataset_name, H5P_DEFAULT, rid2,
+    dataset_id = H5Dopen_ff(file_id, dataset_name, H5P_DEFAULT, rcxt_id,
             estack_id);
 
-    view_id = H5Vcreate_ff(dataset_id, query_id, H5P_DEFAULT, rid2,
-            estack_id);
-    assert(view_id > 0);
+//    view_id = H5Vcreate_ff(dataset_id, query_id, H5P_DEFAULT, rid2,
+//            estack_id);
+//    assert(view_id > 0);
+    H5Dquery_ff(dataset_id, query_id, -1, rcxt_id);
 
     /* TODO use view_id for analysis shipping etc */
 
-    H5Vclose(view_id);
+//    H5Vclose(view_id);
 
     ret = H5Dclose_ff(dataset_id, estack_id);
     assert(0 == ret);
 
     /* release container version 2. */
-    ret = H5RCrelease(rid2, estack_id);
+    ret = H5RCrelease(rcxt_id, estack_id);
     assert(0 == ret);
 
-    ret = H5RCclose(rid2);
+    ret = H5RCclose(rcxt_id);
     assert(0 == ret);
 
     H5Qclose(query_id);
@@ -234,6 +285,10 @@ main(int argc, char **argv)
 
     write_dataset(file_id, dataset_name, total, ncomponents, H5T_NATIVE_INT,
             ntuples, start, data, estack_id);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    create_index(file_id, dataset_name, estack_id);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
