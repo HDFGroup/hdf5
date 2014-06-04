@@ -257,7 +257,7 @@ SUBROUTINE test_h5s_encode(cleanup, total_error)
   ! /* Verify the decoded dataspace */
   CALL h5sget_simple_extent_npoints_f(decoded_sid1, n, error)
   CALL check("h5sget_simple_extent_npoints_f", error, total_error)
-  CALL VERIFY("h5sget_simple_extent_npoints_f", INT(n), SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3, &
+  CALL VERIFY("h5sget_simple_extent_npoints_f", INT(n), INT(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3), &
        total_error)
 
   !
