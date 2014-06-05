@@ -238,7 +238,7 @@ main(int argc, char **argv)
     hsize_t ntuples = NTUPLES;
     hsize_t ncomponents = 3;
     hsize_t start, total;
-    int *data;
+    float *data;
     hid_t file_id, fapl_id;
     hid_t estack_id = H5_EVENT_STACK_NULL;
     herr_t ret;
@@ -263,10 +263,11 @@ main(int argc, char **argv)
     total = ntuples;
 
     /* Initialize the dataset. */
-    data = (int *) malloc(sizeof(int) * ncomponents * ntuples);
+    data = (float *) malloc(sizeof(float) * ncomponents * ntuples);
+
     for (i = 0; i < ntuples; i++) {
        for (j = 0; j < ncomponents; j++) {
-          data[ncomponents * i + j] = my_rank * ntuples + i;
+          data[ncomponents * i + j] = (float) (my_rank * ntuples + i);
        }
     }
 
@@ -283,7 +284,7 @@ main(int argc, char **argv)
     ret = H5Pclose(fapl_id);
     assert(0 == ret);
 
-    write_dataset(file_id, dataset_name, total, ncomponents, H5T_NATIVE_INT,
+    write_dataset(file_id, dataset_name, total, ncomponents, H5T_NATIVE_FLOAT,
             ntuples, start, data, estack_id);
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -305,6 +306,7 @@ main(int argc, char **argv)
     MPI_Barrier(MPI_COMM_WORLD);
 
     EFF_finalize();
+
     MPI_Finalize();
 
     return 0;
