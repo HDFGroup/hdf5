@@ -429,12 +429,12 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     HDassert(req->state == H5VL_IOD_COMPLETED);
 
     switch(req->type) {
-    case HG_ANALYSIS_EXECUTE:
+    case HG_ANALYSIS_INVOKE:
         {
-            analysis_execute_out_t *output = (analysis_execute_out_t *)req->data;
+            analysis_invoke_out_t *output = (analysis_invoke_out_t *)req->data;
 
             if(SUCCEED != output->ret) {
-                HERROR(H5E_FUNC, H5E_CANTINIT, "Analysis Execute failed at the server\n");
+                HERROR(H5E_FUNC, H5E_CANTINIT, "Analysis Invoke failed at the server\n");
                 req->status = H5ES_STATUS_FAIL;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -1811,9 +1811,9 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     HDassert(req->state == H5VL_IOD_CANCELLED);
 
     switch(req->type) {
-    case HG_ANALYSIS_EXECUTE:
+    case HG_ANALYSIS_INVOKE:
         {
-            analysis_execute_out_t *output = (analysis_execute_out_t *)req->data;
+            analysis_invoke_out_t *output = (analysis_invoke_out_t *)req->data;
 
             free(output);
             req->data = NULL;
@@ -2880,6 +2880,54 @@ H5VL_iod_map_dtype_info(hid_t type_id, /*out*/ hbool_t *is_vl, /*out*/size_t *si
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_map_dtype_info */
+
+herr_t
+H5VLiod_query_map(hid_t obj_id, iod_trans_id_t rtid, iod_obj_map_t **obj_map)
+{
+    iod_obj_id_t iod_id;
+    iod_handles_t iod_oh;
+    H5VL_iod_object_t *obj = NULL;
+    herr_t ret, ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if(NULL == (obj = (H5VL_iod_object_t *)H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "invalid object identifier");
+
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object iod location info");
+
+    ret = iod_obj_query_map(iod_oh.rd_oh, rtid, obj_map, NULL);
+    if (ret != 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object IOD map");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+herr_t
+H5VLiod_close_map(hid_t obj_id, iod_obj_map_t *obj_map)
+{
+    iod_obj_id_t iod_id;
+    iod_handles_t iod_oh;
+    H5VL_iod_object_t *obj = NULL;
+    herr_t ret, ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if(NULL == (obj = (H5VL_iod_object_t *)H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "invalid object identifier");
+
+    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object iod location info");
+
+    ret = iod_obj_free_map(iod_oh.rd_oh, obj_map);
+    if (ret != 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't free object IOD map");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
 
 #if 0
 static herr_t

@@ -35,7 +35,7 @@ struct H5VL_iod_object_t;
 
 /* enum for types of requests */
 typedef enum H5RQ_type_t {
-    HG_ANALYSIS_EXECUTE,
+    HG_ANALYSIS_INVOKE,
     HG_FILE_CREATE,
     HG_FILE_OPEN,
     HG_FILE_CLOSE,
@@ -494,9 +494,9 @@ H5_DLL void * H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t vcpl_id,
                                    hid_t rcxt_id, void **req);
 H5_DLL herr_t H5VL_iod_view_close(H5VL_iod_view_t *view);
 
-H5_DLL herr_t H5VL_iod_analysis_execute(const char *file_name, const char *obj_name,
-        hid_t query_id, const char *split_script, const char *combine_script,
-        void **req);
+H5_DLL herr_t H5VL_iod_analysis_invoke(const char *file_name, hid_t query_id, 
+                                       const char *split_script, const char *combine_script,
+                                       const char *integrate_script, void **req);
 
 /* private routines for X */
 H5_DLL herr_t H5VL_iod_dataset_set_index(void *dset, void *idx_handle);

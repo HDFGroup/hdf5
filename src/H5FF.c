@@ -244,7 +244,7 @@ H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id,
     /* Open the file through the VOL layer */
     if(NULL == (file = H5VL_file_open(&vol_plugin, filename, flags, fapl_id, 
                                       H5AC_dxpl_id, estack_id)))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
+	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
 
     if(rcxt_id) {
         /* attach VOL information to the ID */

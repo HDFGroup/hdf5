@@ -396,6 +396,8 @@ int main( int argc, char **argv ) {
          }
       MPI_Barrier( MPI_COMM_WORLD );
    }
+   else 
+       MPI_Barrier( MPI_COMM_WORLD );
 
    if ( my_rank == comm_size-1 ) {
       fprintf( stderr, "APP-r%d: cv 5 - Persist\n", my_rank );
@@ -416,7 +418,9 @@ int main( int argc, char **argv ) {
       }
       MPI_Barrier( MPI_COMM_WORLD );
    }
-   
+   else 
+       MPI_Barrier( MPI_COMM_WORLD );
+
    /* All ranks print container here.  For rank == comm_size, this will be after objects have been evicted */
    if ( verbose ) print_container_contents( file_id, rc_id5, "/", my_rank ); 
 

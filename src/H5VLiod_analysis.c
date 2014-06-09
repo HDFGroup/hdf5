@@ -19,6 +19,7 @@
 
 #include "H5VLiod_server.h"
 #include "H5Qpublic.h"
+#include "H5RCpublic.h"
 #include "H5Vpublic.h"
 
 #ifdef H5_HAVE_PYTHON
@@ -65,22 +66,186 @@ herr_t H5VL__iod_combine(const char *combine_script,
                          hid_t *combine_data_type_id);
 #endif
 
+static herr_t H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs);
+static herr_t H5VL__iod_request_container_close(iod_handle_t *cohs);
+
+static herr_t H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
+                                  hid_t dset_id, hid_t region, iod_trans_id_t rtid,
+                                  const char *split_script, const char *combine_script,
+                                  void **combine_data, size_t *combine_num_elmts, 
+                                  hid_t *combine_type_id);
+
 static herr_t H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid, 
-                                   hid_t space_id, coords_t coords, iod_size_t num_cells,
-                                   hid_t type_id, hid_t query_id, 
+                                   hid_t space_id, iod_size_t num_cells, hid_t type_id, 
                                    const char *split_script, void **split_data, 
                                    size_t *split_num_elmts, hid_t *split_type_id);
 
-static hid_t H5VL__iod_get_space_layout(coords_t coords, iod_size_t num_cells, hid_t space_id);
-
-static herr_t H5VL__iod_get_query_data(iod_handle_t coh, iod_obj_id_t dset_id, 
-                                       iod_trans_id_t rtid, hid_t query_id, 
-                                       hid_t space_id, hid_t type_id, 
-                                       size_t *num_elmts, void **data);
+static hid_t H5VL__iod_get_space_layout(coords_t coords, hid_t space_id);
 
 static herr_t H5VL__iod_read_selection(iod_handle_t coh, iod_obj_id_t obj_id, 
                                        iod_trans_id_t rtid, hid_t space_id,
                                        hid_t type_id, void *buf);
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_analysis_invoke_cb
+ *
+ * Purpose:     Invokes analysis on a given container, query, 
+ *              and python scripts.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VL_iod_server_analysis_invoke_cb(AXE_engine_t UNUSED axe_engine, 
+                                   size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                                   size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                                   void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    analysis_invoke_in_t *input = (analysis_invoke_in_t *)op_data->input;
+    analysis_invoke_out_t output;
+    const char *file_name = input->file_name;
+    hid_t query_id = input->query_id;
+    const char *split_script = input->split_script;
+    const char *combine_script = input->combine_script;
+    const char *integrate_script = input->integrate_script;
+    iod_handle_t *cohs; /* the container handles */
+    hid_t file_id = FAIL, rcxt_id = FAIL, fapl_id = FAIL, view_id = FAIL;
+    hsize_t attr_count, obj_count, reg_count;
+    herr_t ret, ret_value = SUCCEED;
+    iod_trans_id_t rtid;
+
+    /* ****************** TEMP THING (as IOD requires collective container open) */
+    ret = H5VL__iod_request_container_open(file_name, &cohs);
+    if(SUCCEED != ret)
+        HGOTO_ERROR_FF(ret, "can't request container open");
+    /* ***************** END TEMP THING */
+
+    /* get an hid_t from the IOD container handle */
+    fapl_id = H5Pcreate (H5P_FILE_ACCESS);
+    H5Pset_fapl_iod(fapl_id, MPI_COMM_SELF, MPI_INFO_NULL);
+    file_id = H5VLiod_get_file_id(file_name, cohs[0], fapl_id, &rcxt_id);
+    if(FAIL == file_id)
+        HGOTO_ERROR_FF(FAIL, "cannot open H5 file");
+    H5Pclose(fapl_id);
+
+    if(H5RCget_version(rcxt_id, &rtid) < 0)
+        HGOTO_ERROR_FF(FAIL, "cannot get container version");
+
+    /* create a view from the query on the entire container
+       leveraging any indexing on the datasets */
+    view_id = H5Vcreate_ff(file_id, query_id, H5P_DEFAULT, rcxt_id, H5_EVENT_STACK_NULL);
+    if(FAIL == view_id)
+        HGOTO_ERROR_FF(FAIL, "cannot create view");
+
+    ret = H5Vget_counts(view_id, &attr_count, &obj_count, &reg_count);
+    if(ret < 0)
+        HGOTO_ERROR_FF(FAIL, "cannot retrieve View component counts");
+
+#if H5_EFF_DEBUG 
+    fprintf(stderr, "found %zu region counts\n", (size_t)reg_count);
+#endif
+
+    if(reg_count != 0) {
+        hid_t *dset_ids = NULL;
+        hid_t *region_ids = NULL;
+        hsize_t i;
+        void **combine_data;
+        size_t *combine_num_elmts;
+        hid_t *combine_type_id;
+
+        if(NULL == (dset_ids = (hid_t *)malloc (sizeof(hid_t) * reg_count)))
+            HGOTO_ERROR_FF(FAIL, "Can't allocate space");
+        if(NULL == (region_ids = (hid_t *)malloc (sizeof(hid_t) * reg_count)))
+            HGOTO_ERROR_FF(FAIL, "Can't allocate space");
+        if(NULL == (combine_type_id = (hid_t *)malloc (sizeof(hid_t) * reg_count)))
+            HGOTO_ERROR_FF(FAIL, "Can't allocate space");
+        if(NULL == (combine_num_elmts = (size_t *)malloc (sizeof(size_t) * reg_count)))
+            HGOTO_ERROR_FF(FAIL, "Can't allocate space");
+        if(NULL == (combine_data = (void **)malloc (sizeof(void *) * reg_count)))
+            HGOTO_ERROR_FF(FAIL, "Can't allocate space");
+
+        /* get all the datasets and regions from the View */
+        ret = H5Vget_elem_regions_ff(view_id, 0, reg_count, dset_ids, 
+                                     region_ids, H5_EVENT_STACK_NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(FAIL, "cannot retrieve Datasets and regions");
+
+        /* Farm work for each dataset/region */
+        for(i=0 ; i<reg_count ; i++) {
+            hid_t dset_id = dset_ids[i];
+            hid_t region = region_ids[i];
+            iod_obj_map_t *obj_map = NULL;
+
+            /* retrieve the IOD layout */
+            if(H5VLiod_query_map(dset_id, rtid, &obj_map) < 0)
+                HGOTO_ERROR_FF(FAIL, "can't obtain object map");
+
+            assert(obj_map->type == IOD_OBJ_ARRAY);
+
+            if(H5VL__iod_farm_work(obj_map, cohs, dset_id, region, rtid,
+                                   split_script, combine_script,
+                                   &combine_data[i], &combine_num_elmts[i], 
+                                   &combine_type_id[i]) < 0)
+                HGOTO_ERROR_FF(FAIL, "can't farm work to workers");
+
+            if(H5VLiod_close_map(dset_id, obj_map) < 0)
+                HGOTO_ERROR_FF(FAIL, "can't obtain dset identifier");
+        }
+
+        /* MSC - apply Integrate script */
+
+        for(i=0 ; i<reg_count ; i++) {
+            if(H5Dclose(dset_ids[i]) < 0)
+                HGOTO_ERROR_FF(FAIL, "cannot close dataset");
+            if(H5Sclose(region_ids[i]) < 0)
+                HGOTO_ERROR_FF(FAIL, "cannot close region");
+            if(combine_data[i]) {
+                free(combine_data[i]);
+                combine_data[i] = NULL;
+            }
+        }
+
+        free(dset_ids);
+        dset_ids = NULL;
+        free(region_ids);
+        region_ids = NULL;
+        free(combine_type_id);
+        combine_type_id= NULL;
+        free(combine_num_elmts);
+        combine_num_elmts = NULL;
+        free(combine_data);
+        combine_data = NULL;
+    }
+
+    if(H5RCrelease(rcxt_id, H5_EVENT_STACK_NULL) < 0)
+        HGOTO_ERROR_FF(FAIL, "cannot release read context");
+    if(H5VLiod_close_file_id(file_id) < 0)
+        HGOTO_ERROR_FF(FAIL, "cannot release file_id");
+
+    /* ****************** TEMP THING (as IOD requires collective container open) */
+    ret = H5VL__iod_request_container_close(cohs);
+    if(SUCCEED != ret)
+        HGOTO_ERROR_FF(ret, "can't request container close");
+    /* ***************** END TEMP THING */
+
+done:
+    output.ret = ret_value;
+    HG_Handler_start_output(op_data->hg_handle, &output);
+
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
+    input = (analysis_invoke_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+
+    if(view_id != FAIL && H5Vclose(view_id) < 0)
+        HGOTO_ERROR_FF(FAIL, "cannot close view");
+    if(rcxt_id != FAIL && H5RCclose(rcxt_id) < 0)
+        HGOTO_ERROR_FF(FAIL, "cannot close view");
+
+} /* end H5VL_iod_server_analysis_invoke_cb() */
 
 #ifdef H5_HAVE_PYTHON
 
@@ -533,7 +698,7 @@ H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs)
 #if H5_EFF_DEBUG 
     fprintf(stderr, "(%d) Calling iod_container_open on %s\n", my_rank_g, file_name);
 #endif
-    ret = iod_container_open(file_name, NULL, IOD_CONT_R, &temp_cohs[0], NULL);
+    ret = iod_container_open(file_name, NULL, IOD_CONT_RW, &temp_cohs[0], NULL);
     if(ret < 0)
         HGOTO_ERROR_FF(ret, "can't open file");
 
@@ -613,19 +778,18 @@ done:
  */
 static herr_t
 H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
-                    iod_obj_id_t obj_id, iod_trans_id_t rtid,
-                    hid_t space_id, hid_t type_id, hid_t query_id,
-                    const char *split_script, const char *combine_script)
+                    hid_t dset_id, hid_t region, iod_trans_id_t rtid,
+                    const char *split_script, const char *combine_script,
+                    void **combine_data, size_t *combine_num_elmts, hid_t *combine_type_id)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     void **split_data = NULL;
     size_t *split_num_elmts;
-    void *combine_data;
-    size_t combine_num_elmts;
-    hid_t split_type_id = FAIL, combine_type_id = FAIL;
+    hid_t split_type_id = FAIL;
     hg_request_t *hg_reqs = NULL;
-    unsigned int i;
+    uint32_t u;
     unsigned int num_targets = obj_map->u_map.array_map.n_range;
+    coords_t coords;
     analysis_farm_in_t farm_input;
     analysis_farm_out_t *farm_output = NULL;
 
@@ -643,56 +807,52 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
     if(NULL == (split_num_elmts = (size_t *) malloc(sizeof(size_t) * num_targets)))
         HGOTO_ERROR_FF(FAIL, "can't allocate array for num elmts");
 
-    farm_input.obj_id = obj_id;
+    farm_input.obj_id = obj_map->oid;
     farm_input.rtid = rtid;
-    farm_input.space_id = space_id;
-    farm_input.type_id = type_id;
-    farm_input.query_id = query_id;
+    farm_input.type_id = H5Dget_type(dset_id);
     farm_input.split_script = split_script;
 
-    for (i = 0; i < obj_map->u_map.array_map.n_range; i++) {
-        unsigned int j;
-        unsigned int server_idx = 0;
-        farm_input.num_cells =  obj_map->u_map.array_map.array_range[i].n_cell;
-        farm_input.coords.rank = H5Sget_simple_extent_ndims(space_id);
-        farm_input.coords.start_cell = obj_map->u_map.array_map.array_range[i].start_cell;
-        farm_input.coords.end_cell = obj_map->u_map.array_map.array_range[i].end_cell;
+    coords.rank = H5Sget_simple_extent_ndims(region);
 
-        for (j = 0; j < (unsigned int) num_ions_g; j++) {
-#if 0
-            /* MSC - update IOD new layout callshere */
-            if (0 == strcmp(obj_map->u_map.array_map.array_range[i].loc,
-                    server_loc_g[j])) {
-                server_idx = j;
-#if H5_EFF_DEBUG 
-                fprintf(stderr, "(%d) Server %d owns this object\n", my_rank_g, server_idx);
-#endif
-                break;
-            }
-#endif
-        }
+    /* farm work for a specific range on a specific node */
+    for(u = 0; u < obj_map->u_map.array_map.n_range ; u++) {
+        hid_t space_layout;
+        uint32_t worker = obj_map->u_map.array_map.array_range[u].nearest_rank;
 
-        farm_input.server_idx = server_idx;
-        farm_input.coh = cohs[server_idx];
+        farm_input.num_cells =  obj_map->u_map.array_map.array_range[u].n_cell;
+        coords.start_cell = obj_map->u_map.array_map.array_range[u].start_cell;
+        coords.end_cell = obj_map->u_map.array_map.array_range[u].end_cell;
+
+        if(FAIL == (space_layout = H5VL__iod_get_space_layout(coords, region)))
+            HGOTO_ERROR_FF(FAIL, "can't generate local dataspace selection");
+
+        /* MSC - AND region and space_layout */
+
+        farm_input.space_id = space_layout;
+        farm_input.coh = cohs[worker];
 
         /* forward the call to the target server */
-        if (server_idx == 0) {
-            hg_reqs[i] = HG_REQUEST_NULL;
+        if (u == 0) {
+            hg_reqs[u] = HG_REQUEST_NULL;
             /* Do a local split */
-            if(FAIL == H5VL__iod_farm_split(cohs[0], obj_id, rtid, space_id,
-                    farm_input.coords, farm_input.num_cells, type_id, query_id, split_script,
-                    &split_data[i], &split_num_elmts[i], &split_type_id))
+            if(FAIL == H5VL__iod_farm_split(cohs[0], obj_map->oid, rtid, space_layout,
+                                            farm_input.num_cells, farm_input.type_id, split_script,
+                                            &split_data[u], &split_num_elmts[u], &split_type_id))
                 HGOTO_ERROR_FF(FAIL, "can't split in farmed job");
         } else {
-            if(HG_Forward(server_addr_g[server_idx],
-                    H5VL_EFF_ANALYSIS_FARM, &farm_input, &farm_output[i],
-                    &hg_reqs[i]) < 0)
+            if(HG_Forward(server_addr_g[worker], H5VL_EFF_ANALYSIS_FARM, &farm_input, 
+                          &farm_output[u], &hg_reqs[u]) < 0)
                 HGOTO_ERROR_FF(FAIL, "failed to ship operation");
         }
+
+        if(H5Sclose(space_layout) < 0)
+            HGOTO_ERROR_FF(FAIL, "cannot close region");
     }
 
-    for (i = 0; i < num_targets; i++) {
-        if (hg_reqs[i] == HG_REQUEST_NULL) {
+    for(u = 0; u < obj_map->u_map.array_map.n_range ; u++) {
+        int worker = obj_map->u_map.array_map.array_range[u].nearest_rank;
+
+        if (hg_reqs[u] == HG_REQUEST_NULL) {
             /* No request / was local */
         } 
         else {
@@ -700,73 +860,72 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
             analysis_transfer_out_t transfer_output;
             hg_bulk_t bulk_handle;
             size_t split_data_size;
-            unsigned int server_idx;
 
             /* Wait for the farmed work to complete */
-            if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
+            if(HG_Wait(hg_reqs[u], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
                 HGOTO_ERROR_FF(FAIL, "HG_Wait Failed");
 
-            if(0 != farm_output[i].num_elmts) {
+            if(0 != farm_output[u].num_elmts) {
                 /* Get split type ID and num_elemts 
                    (all the arrays should have the same native type id) */
-                server_idx = farm_output[i].server_idx;
-                split_type_id = farm_output[i].type_id;
-                split_num_elmts[i] = farm_output[i].num_elmts;
-                split_data_size = split_num_elmts[i] * H5Tget_size(split_type_id);
-                //            fprintf(stderr, "Getting %d elements of size %zu from server %zu\n",
-                //                    split_num_elmts[i], H5Tget_size(split_type_id), server_idx);
+                split_type_id = farm_output[u].type_id;
+                split_num_elmts[u] = farm_output[u].num_elmts;
+                split_data_size = split_num_elmts[u] * H5Tget_size(split_type_id);
 
-                if(NULL == (split_data[i] = malloc(split_data_size)))
+                if(NULL == (split_data[u] = malloc(split_data_size)))
                     HGOTO_ERROR_FF(FAIL, "can't allocate farm buffer");
 
-                HG_Bulk_handle_create(1, &split_data[i], &split_data_size,
+                HG_Bulk_handle_create(1, &split_data[u], &split_data_size,
                                       HG_BULK_READWRITE, &bulk_handle);
 
-                transfer_input.axe_id = farm_output[i].axe_id;
+                transfer_input.axe_id = farm_output[u].axe_id;
                 transfer_input.bulk_handle = bulk_handle;
 
                 /* forward a free call to the target server */
-                if(HG_Forward(server_addr_g[server_idx], H5VL_EFF_ANALYSIS_FARM_TRANSFER,
-                              &transfer_input, &transfer_output, &hg_reqs[i]) < 0)
+                if(HG_Forward(server_addr_g[worker], H5VL_EFF_ANALYSIS_FARM_TRANSFER,
+                              &transfer_input, &transfer_output, &hg_reqs[u]) < 0)
                     HGOTO_ERROR_FF(FAIL, "failed to ship operation");
 
                 /* Wait for the farmed work to complete */
-                if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
+                if(HG_Wait(hg_reqs[u], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
                     HGOTO_ERROR_FF(FAIL, "HG_Wait Failed");
 
                 /* Free bulk handle */
                 HG_Bulk_handle_free(bulk_handle);
             }
             else {
-                split_num_elmts[i] = 0;
-                split_data[i] = NULL;
+                split_num_elmts[u] = 0;
+                split_data[u] = NULL;
             }
             /* Free Mercury request */
-            if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
+            if(HG_Request_free(hg_reqs[u]) != HG_SUCCESS)
                 HGOTO_ERROR_FF(FAIL, "Can't Free Mercury Request");
         }
     }
 
-    if(hg_reqs)
-        free(hg_reqs);
-    if(farm_output)
-        free(farm_output);
 #if H5_EFF_DEBUG 
     fprintf(stderr, "(%d) Applying combine on data\n", my_rank_g);
 #endif
 #ifdef H5_HAVE_PYTHON
     if (H5VL__iod_combine(combine_script, split_data, split_num_elmts,
-            num_targets, split_type_id, &combine_data,
-            &combine_num_elmts, &combine_type_id) < 0)
+            num_targets, split_type_id, combine_data,
+            combine_num_elmts, combine_type_id) < 0)
         HGOTO_ERROR_FF(FAIL, "can't combine split data");
 #endif
 
+done:
+
+    if(hg_reqs)
+        free(hg_reqs);
+    if(farm_output)
+        free(farm_output);
+
     /* free farm data */
     if (split_data) {
-        for (i = 0; i < num_targets; i++) {
-            if(split_data[i]) {
-                free(split_data[i]);
-                split_data[i] = NULL;
+        for (u = 0; u < num_targets; u++) {
+            if(split_data[u]) {
+                free(split_data[u]);
+                split_data[u] = NULL;
             }
         }
         free(split_data);
@@ -776,230 +935,9 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
         free(split_num_elmts);
         split_num_elmts = NULL;
     }
-done:
+
     return ret_value;
 } /* end H5VL__iod_farm_work */
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_iod_server_analysis_execute_cb
- *
- * Purpose:	Retrieves layout of object
- *
- * Return:	Success:	SUCCEED 
- *		Failure:	Negative
- *
- *-------------------------------------------------------------------------
- */
-void
-H5VL_iod_server_analysis_execute_cb(AXE_engine_t UNUSED axe_engine, 
-                                    size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                                    size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
-                                    void *_op_data)
-{
-    op_data_t *op_data = (op_data_t *)_op_data;
-    analysis_execute_in_t *input = (analysis_execute_in_t *)op_data->input;
-    analysis_execute_out_t output;
-    const char *file_name = input->file_name;
-    const char *obj_name = input->obj_name;
-    hid_t query_id = input->query_id;
-    const char *split_script = input->split_script;
-    const char *combine_script = input->combine_script;
-    hid_t space_id = FAIL, type_id = FAIL;
-    iod_cont_trans_stat_t *tids = NULL;
-    iod_trans_id_t rtid;
-    iod_handle_t *cohs; /* the container handle */
-    iod_handles_t root_handle; /* root handle */
-    iod_obj_id_t obj_id; /* The ID of the object */
-    iod_handles_t obj_oh; /* object handle */
-    iod_handle_t mdkv_oh;
-    scratch_pad sp;
-    iod_obj_map_t *obj_map = NULL;
-    unsigned int i;
-    iod_ret_t ret;
-    herr_t ret_value = SUCCEED;
-
-    /* ****************** TEMP THING (as IOD requires collective container open) */
-
-    ret = H5VL__iod_request_container_open(file_name, &cohs);
-    if(SUCCEED != ret)
-        HGOTO_ERROR_FF(ret, "can't request container open");
-
-    /* ***************** END TEMP THING */
-
-    ret = iod_query_cont_trans_stat(cohs[0], &tids, NULL);
-    if(ret < 0)
-        HGOTO_ERROR_FF(ret, "can't get container tids status");
-
-    rtid = tids->latest_rdable;
-
-    ret = iod_free_cont_trans_stat(cohs[0], tids);
-    if(ret < 0)
-        HGOTO_ERROR_FF(ret, "can't free container transaction status object");
-
-    ret = iod_trans_start(cohs[0], &rtid, NULL, 0, IOD_TRANS_R, NULL);
-    if(ret < 0)
-        HGOTO_ERROR_FF(ret, "can't start transaction");
-
-    root_handle.rd_oh.cookie = IOD_OH_UNDEFINED;
-    root_handle.wr_oh.cookie = IOD_OH_UNDEFINED;
-
-    /* Traverse Path to retrieve object ID, and open object */
-    ret = H5VL_iod_server_open_path(cohs[0], ROOT_ID, root_handle, obj_name,
-                                    rtid, 7, &obj_id, &obj_oh);
-    if(SUCCEED != ret)
-        HGOTO_ERROR_FF(ret, "can't open object");
-
-#if H5_EFF_DEBUG
-    fprintf(stderr, "(%d) coh %"PRIu64" objoh %"PRIu64" objid %"PRIx64" rtid %"PRIu64"\n",
-            my_rank_g, cohs[0].cookie, obj_oh.rd_oh.cookie, obj_id, rtid);
-    fprintf(stderr, "Calling  iod_obj_query_map\n");
-#endif
-
-    ret = iod_obj_query_map(obj_oh.rd_oh, rtid, &obj_map, NULL);
-    if (ret != 0)
-        HGOTO_ERROR_FF(ret, "iod_obj_query_map failed");
-
-#if 0//H5_EFF_DEBUG
-    fprintf(stderr, "MAP: oid: %"PRIx64"   type: %d\n", obj_map->oid, obj_map->type);
-    fprintf(stderr, "n_bb_loc %d:\n", obj_map->n_bb_loc);
-    for (i = 0; i < obj_map->n_bb_loc ; i++) {
-        iod_bb_loc_info_t *info = obj_map->bb_loc_infos[i];
-        int j;
-
-        fprintf(stderr, "Shadow path: %s  nrank = %d:\n", info->shadow_path, info->nrank);
-        for(j=0 ; j<nrank; j++)
-            fprintf(stderr, "%d ", info->direct_ranks[j]);
-        fprintf(stderr, "\n");
-    }
-    fprintf(stderr, "n_central_loc %d:\n", obj_map->n_central_loc);
-    for (i = 0; i < obj_map->n_central_loc ; i++) {
-        iod_central_loc_info_t *info = obj_map->central_loc_infos[i];
-        int j;
-
-        fprintf(stderr, "Shard ID: %u  nrank = %d:\n", info->shard_id, info->nrank);
-        for(j=0 ; j<nrank; j++)
-            fprintf(stderr, "%d ", info->nearest_ranks[j]);
-        fprintf(stderr, "\n");
-    }
-    switch(obj_map->type) {
-    case IOD_OBJ_BLOB:
-        {
-            iod_blob_map_t blob_map = obj_map->blob_map;
-
-            fprintf(stderr, "nranges = %d\n", blob_map.n_range);
-            for(i = 0; i < blob_map.n_range ; i++) {
-                fprintf(stderr, 
-                        "offset: %"PRIu64"  length: %zu  location: %d  index: %d  nearest rank: %d",
-                        blob_map.blob_range[i].offset, blob_map.blob_range[i].len,
-                        blob_map.blob_range[i].loc_type, blob_map.blob_range[i].loc_index,
-                        blob_map.blob_range[i].nearest_rank);
-            }
-            break;
-        }
-    case IOD_OBJ_ARRAY:
-        {
-            iod_array_map_t array_map = obj_map->array_map;
-
-            fprintf(stderr, "nranges = %d\n", array_map.n_range);
-            for(i = 0; i < array_map.n_range ; i++) {
-                fprintf(stderr, 
-                        "location: %d  index: %d  nearest rank: %d",
-                        array_map.array_range[i].loc_type, array_map.array_range[i].loc_index,
-                        array_map.array_range[i].nearest_rank);
-                fprintf(stderr, "start [%"PRIu64"] end [%"PRIu64"]\n",
-                        array_map.array_range[i].start_cell[0],
-                        array_map.array_range[i].end_cell[0])
-            }
-            break;
-        }
-        break;
-    case IOD_OBJ_KV:
-    case IOD_OBJ_INVALID:
-    case IOD_OBJ_ANY:
-    default:
-        break;
-    }
-#endif
-
-    /* get scratch pad */
-    ret = iod_obj_get_scratch(obj_oh.rd_oh, rtid, (char *) &sp, NULL, NULL);
-    if(ret < 0)
-        HGOTO_ERROR_FF(ret, "can't get scratch pad for object");
-
-    /* retrieve datatype and dataspace */
-    /* MSC - This applies only to DATASETS for Q6 */
-
-    /* open the metadata scratch pad */
-    ret = iod_obj_open_read(cohs[0], sp[0], rtid, NULL, &mdkv_oh, NULL);
-    if(ret < 0)
-        HGOTO_ERROR_FF(ret, "can't open scratch pad");
-
-    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATATYPE, 
-                                H5VL_IOD_KEY_OBJ_DATATYPE, 7, NULL, &type_id);
-    if(SUCCEED != ret)
-        HGOTO_ERROR_FF(ret, "failed to retrieve datatype");
-
-    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_DATASPACE, 
-                                H5VL_IOD_KEY_OBJ_DATASPACE, 7, NULL, &space_id);
-    if(SUCCEED != ret)
-        HGOTO_ERROR_FF(FAIL, "failed to retrieve dataspace");
-
-    /*******************************************/
-    /* Farm work */
-    ret = H5VL__iod_farm_work(obj_map, cohs, obj_id, rtid, space_id, type_id,
-                              query_id, split_script, combine_script);
-    if(SUCCEED != ret)
-        HGOTO_ERROR_FF(ret, "can't farm work");
-    fprintf(stderr, "DONE with combine phase\n");
-    /********************************************/
-
-    ret = iod_obj_free_map(obj_oh.rd_oh, obj_map);
-    if(ret < 0)
-        HGOTO_ERROR_FF(ret, "can't free IOD map");
-
-    ret = iod_obj_close(mdkv_oh, NULL, NULL);
-    if(ret < 0)
-        HGOTO_ERROR_FF(ret, "can't close object");
-
-    ret = iod_obj_close(obj_oh.rd_oh, NULL, NULL);
-    if(ret < 0)
-        HDONE_ERROR_FF(ret, "can't close Array object");
-
-    ret = iod_trans_finish(cohs[0], rtid, NULL, 0, NULL);
-    if(ret < 0)
-        HGOTO_ERROR_FF(ret, "can't finish transaction 0");
-
-    /* ****************** TEMP THING (as IOD requires collective container open) */
-
-    ret = H5VL__iod_request_container_close(cohs);
-    if(SUCCEED != ret)
-        HGOTO_ERROR_FF(ret, "can't request container close");
-
-    /* ***************** END TEMP THING */
-
-#if H5_EFF_DEBUG
-    fprintf(stderr, "Analysis DONE\n");
-#endif
-
-    /* set output, and return to AS client */
-    output.ret = ret_value;
-    HG_Handler_start_output(op_data->hg_handle, &output);
-
-done:
-    if(ret_value < 0)
-        HG_Handler_start_output(op_data->hg_handle, &ret_value);
-
-    if(space_id)
-        H5Sclose(space_id);
-    if(type_id)
-        H5Tclose(type_id);
-
-    HG_Handler_free_input(op_data->hg_handle, input);
-    HG_Handler_free(op_data->hg_handle);
-    input = (analysis_execute_in_t *)H5MM_xfree(input);
-    op_data = (op_data_t *)H5MM_xfree(op_data);
-
-} /* end H5VL_iod_server_analysis_execute_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__iod_farm_split
@@ -1013,22 +951,30 @@ done:
  */
 static herr_t
 H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid, 
-                     hid_t space_id, coords_t coords, iod_size_t num_cells,
-                     hid_t type_id, hid_t query_id, 
+                     hid_t space_id, iod_size_t num_cells, hid_t type_id, 
                      const char *split_script, void **split_data, 
                      size_t *split_num_elmts, hid_t *split_type_id)
 {
     void *data = NULL;
-    size_t num_elmts = 0;
-    herr_t ret_value = SUCCEED;
-    hid_t space_layout;
+    size_t elmt_size, buf_size;
+    size_t nelmts;
+    herr_t ret, ret_value = SUCCEED;
 
-    if(FAIL == (space_layout = H5VL__iod_get_space_layout(coords, num_cells, space_id)))
-        HGOTO_ERROR_FF(FAIL, "can't generate local dataspace selection");
+    nelmts = (size_t) H5Sget_select_npoints(space_id);
+    elmt_size = H5Tget_size(type_id);
+    buf_size = nelmts * elmt_size;
 
-    if(H5VL__iod_get_query_data(coh, obj_id, rtid, query_id, space_layout,
-                                type_id, &num_elmts, &data) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't read local data");
+    assert(num_cells == nelmts);
+
+    /* allocate buffer to hold data */
+    if(NULL == (data = malloc(buf_size)))
+        HGOTO_ERROR_FF(FAIL, "can't allocate read buffer");
+
+    /* read the data local on the ION specified in the layout selection */
+    ret = H5VL__iod_read_selection(coh, obj_id, rtid, space_id, type_id, data);
+    if(SUCCEED != ret)
+        HGOTO_ERROR_FF(ret, "can't read local data");
+
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "(%d) Applying split on data\n", my_rank_g);
@@ -1036,8 +982,8 @@ H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
 
     /* Apply split python script on data from query */
 #ifdef H5_HAVE_PYTHON
-    if(num_elmts) {
-        if(FAIL == H5VL__iod_split(split_script, data, num_elmts, type_id,
+    if(nelmts) {
+        if(FAIL == H5VL__iod_split(split_script, data, nelmts, type_id,
                                    split_data, split_num_elmts, split_type_id))
             HGOTO_ERROR_FF(FAIL, "can't apply split script to data");
     }
@@ -1045,13 +991,10 @@ H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
 
     /* Free the data after split operation */
     if(data) {
-        H5MM_free(data);
+        free(data);
         data = NULL;
     }
 done:
-    if(space_layout)
-        H5Sclose(space_layout);
-
     return ret_value;
 } /* end H5VL__iod_farm_split */
 
@@ -1075,12 +1018,10 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
     analysis_farm_in_t *input = (analysis_farm_in_t *)op_data->input;
     H5VLiod_farm_data_t *output = NULL;
     iod_handle_t coh = input->coh;
-    hid_t query_id = input->query_id;
     hid_t space_id = input->space_id;
     hid_t type_id = input->type_id;
     iod_trans_id_t rtid = input->rtid;
     iod_obj_id_t obj_id = input->obj_id; /* The ID of the object */
-    coords_t coords = input->coords;
     const char *split_script = input->split_script;
     iod_size_t num_cells = input->num_cells;
     void *split_data = NULL;
@@ -1088,8 +1029,7 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
     hid_t split_type_id = FAIL;
     herr_t ret_value = SUCCEED;
 
-    if(H5VL__iod_farm_split(coh, obj_id, rtid, space_id, coords, num_cells,
-                            type_id, query_id, split_script,
+    if(H5VL__iod_farm_split(coh, obj_id, rtid, space_id, num_cells, type_id, split_script,
                             &split_data, &split_num_elmts, &split_type_id) < 0)
         HGOTO_ERROR_FF(FAIL, "can't split in farmed job");
 
@@ -1100,7 +1040,6 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
     /* set output, and return to master */
     output->farm_out.ret = ret_value;
     output->farm_out.axe_id = op_data->axe_id;
-    output->farm_out.server_idx = input->server_idx;
     output->farm_out.num_elmts = split_num_elmts;
     output->farm_out.type_id = split_type_id;
     output->data = split_data;
@@ -1200,23 +1139,20 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL__iod_get_space_layout(coords_t coords, iod_size_t num_cells, hid_t space_id)
+H5VL__iod_get_space_layout(coords_t coords, hid_t space_id)
 {
-    int ndims, i;
+    int i;
     hsize_t start[H5S_MAX_RANK];
     hsize_t block[H5S_MAX_RANK];
     hsize_t count[H5S_MAX_RANK];
 
     hid_t space_layout = FAIL, ret_value = FAIL;
 
-    /* retrieve number of dimensions and dimensions. */
-    ndims = H5Sget_simple_extent_ndims(space_id);
-
     /* copy the original dataspace and reset selection to NONE */
     if((space_layout = H5Scopy(space_id)) < 0)
         HGOTO_ERROR_FF(FAIL, "unable to copy dataspace")
 
-    for(i=0 ; i<ndims ; i++) {
+    for(i=0 ; i<coords.rank ; i++) {
         start[i] = coords.start_cell[i];
         block[i] = (coords.end_cell[i] - coords.start_cell[i]) + 1;
         count[i] = 1;
@@ -1235,86 +1171,6 @@ done:
 
     return ret_value;
 } /* end H5VL__iod_get_space_layout() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5VL__iod_get_query_data
- *
- * Purpose:     Generates a dataspace from the query specified. The dataspace 
- *              returned must be closed with H5Sclose().
- *
- * Return:	Success:	space id
- *		Failure:	FAIL
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5VL__iod_get_query_data(iod_handle_t coh, iod_obj_id_t dset_id, 
-                         iod_trans_id_t rtid, hid_t query_id, 
-                         hid_t space_id, hid_t type_id, 
-                         size_t *num_elmts, void **data)
-{
-    hsize_t dims[1];
-    size_t nelmts;
-    size_t elmt_size=0, buf_size=0;
-    H5VL__iod_get_query_data_t udata;
-    void *buf = NULL;
-    hid_t space_query = FAIL, mem_space = FAIL;
-    iod_ret_t ret;
-    herr_t ret_value = SUCCEED;
-
-    nelmts = (size_t) H5Sget_select_npoints(space_id);
-    elmt_size = H5Tget_size(type_id);
-    buf_size = nelmts * elmt_size;
-
-    /* allocate buffer to hold data */
-    if(NULL == (buf = malloc(buf_size)))
-        HGOTO_ERROR_FF(FAIL, "can't allocate read buffer");
-
-    /* read the data local on the ION specified in the layout selection */
-    ret = H5VL__iod_read_selection(coh, dset_id, rtid, space_id, type_id, buf);
-    if(SUCCEED != ret)
-        HGOTO_ERROR_FF(ret, "can't read local data");
-
-    dims[0] = (hsize_t)nelmts;
-    /* create a 1-D selection to describe the data read in memory */
-    if(FAIL == (mem_space = H5Screate_simple(1, dims, NULL)))
-        HGOTO_ERROR_FF(FAIL, "can't create simple dataspace");
-
-    if(FAIL == (space_query = H5Scopy(mem_space)))
-        HGOTO_ERROR_FF(FAIL, "unable to copy dataspace");
-
-    udata.query_id = query_id;
-    udata.space_query = space_query;
-    udata.num_elmts = 0;
-
-    /* iterate over every element and apply the query on it. If the
-       query is not satisfied, then remove it from the query selection */
-    if(H5Diterate(buf, type_id, mem_space, H5VL__iod_get_query_data_cb, &udata) < 0)
-        HGOTO_ERROR_FF(FAIL, "failed to compute buffer size");
-
-    if(udata.num_elmts) {
-        buf_size = udata.num_elmts * elmt_size;
-
-        /* allocate buffer to hold data */
-        if(NULL == (*data = malloc(buf_size)))
-            HGOTO_ERROR_FF(FAIL, "can't allocate data buffer");
-
-        if(H5Dgather(space_query, buf, type_id, buf_size, *data, NULL, NULL) < 0)
-            HGOTO_ERROR_FF(FAIL, "gather failed")
-    }
-
-    *num_elmts = udata.num_elmts;
-
-done:
-    if(space_query && H5Sclose(space_query) < 0)
-        HDONE_ERROR_FF(FAIL, "unable to release dataspace")
-    if(mem_space && H5Sclose(mem_space) < 0)
-        HDONE_ERROR_FF(FAIL, "unable to release dataspace")
-    if(buf != NULL)
-        free(buf);
-
-    return ret_value;
-} /* end H5VL__iod_get_query_data() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__iod_read_selection

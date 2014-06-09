@@ -12,7 +12,7 @@
 
 /* #define USE_NATIVE */
 
-#define NTUPLES 256
+#define NTUPLES 64
 
 static int my_rank = 0, my_size = 1;
 
@@ -221,8 +221,8 @@ ship_analysis(const char *file_name, const char *dataset_name)
     assert(query_id);
 
     /* Issue an anlysis shipping request */
-    ret = H5ASexecute(file_name, dataset_name, query_id, split_script, combine_script,
-            H5_EVENT_STACK_NULL);
+    ret = H5ASinvoke(file_name, query_id, split_script, combine_script,
+                     combine_script, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 
     H5Qclose(query_id);

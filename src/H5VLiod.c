@@ -59,7 +59,7 @@ static H5VL_iod_axe_list_t axe_list;
 /* function shipper IDs for different routines */
 hg_id_t H5VL_EFF_INIT_ID;
 hg_id_t H5VL_EFF_FINALIZE_ID;
-hg_id_t H5VL_ANALYSIS_EXECUTE_ID;
+hg_id_t H5VL_ANALYSIS_INVOKE_ID;
 hg_id_t H5VL_FILE_CREATE_ID;
 hg_id_t H5VL_FILE_OPEN_ID;
 hg_id_t H5VL_FILE_CLOSE_ID;
@@ -504,7 +504,7 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
         request->trans_info = req_info;
 
     /* add request to container's linked list */
-    if(HG_ANALYSIS_EXECUTE != op_type)
+    if(HG_ANALYSIS_INVOKE != op_type)
         H5VL_iod_request_add(request_obj->file, request);
 
     /* update the parent information in the request */
@@ -556,7 +556,7 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
         if(track)
             request_obj->request = NULL;
 
-        if(HG_ANALYSIS_EXECUTE == op_type) {
+        if(HG_ANALYSIS_INVOKE == op_type) {
             int ret;
             hg_status_t status;
 
@@ -1718,7 +1718,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_analysis_execute
+ * Function:	H5VL_iod_analysis_invoke
  *
  * Purpose:	Creates a file as a iod HDF5 file.
  *
@@ -1730,40 +1730,39 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5VL_iod_analysis_execute(const char *file_name, const char *obj_name,
-        hid_t query_id, const char *split_script, const char *combine_script,
-        void **req)
+herr_t 
+H5VL_iod_analysis_invoke(const char *file_name, hid_t query_id, 
+                         const char *split_script, const char *combine_script,
+                         const char *integrate_script, void **req)
 {
-    analysis_execute_in_t input;
-    analysis_execute_out_t *output;
+    analysis_invoke_in_t input;
+    analysis_invoke_out_t *output;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* set the input structure for the HG encode routine */
     input.file_name = file_name;
-    input.obj_name = obj_name;
     input.query_id = query_id;
     input.split_script = split_script;
     input.combine_script = combine_script;
+    input.integrate_script = integrate_script;
 
 #if H5_EFF_DEBUG
-    printf("Analysis Execute on file %s Object %s\n", 
-           input.file_name, input.obj_name);
+    printf("Analysis Invoke on file %s\n", input.file_name);
 #endif
 
-    if(NULL == (output = (analysis_execute_out_t *)H5MM_malloc(sizeof(analysis_execute_out_t))))
+    if(NULL == (output = (analysis_invoke_out_t *)H5MM_malloc(sizeof(analysis_invoke_out_t))))
 	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate analysis output struct");
 
-    if(H5VL__iod_create_and_forward(H5VL_ANALYSIS_EXECUTE_ID, HG_ANALYSIS_EXECUTE, 
+    if(H5VL__iod_create_and_forward(H5VL_ANALYSIS_INVOKE_ID, HG_ANALYSIS_INVOKE, 
                                     NULL, 0, 0, NULL,
                                     NULL, &input, output, output, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship file create");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_analysis_execute() */
+} /* end H5VL_iod_analysis_invoke() */
 
 
 /*-------------------------------------------------------------------------

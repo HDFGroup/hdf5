@@ -9,6 +9,8 @@
 #include "mpi.h"
 #include "hdf5.h"
 
+#define NUM_KEYS 20
+
 int main(int argc, char **argv) {
     char file_name[50];
     hid_t file_id;
@@ -163,23 +165,25 @@ int main(int argc, char **argv) {
 
         /* write some KV pairs to each map object. */
         {
-            key = 1;
-            value = 1000;
-            ret = H5Mset_ff(map1, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                            H5P_DEFAULT, tid1, e_stack);
-            assert(ret == 0);
+            for(i=0 ; i<NUM_KEYS ; i++) {
+                key = i;
+                value = 1000 + i;
+                ret = H5Mset_ff(map1, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
+                                H5P_DEFAULT, tid1, H5_EVENT_STACK_NULL);
+                assert(ret == 0);
+            }
 
             for(i=0 ; i<5 ; i++) {
                 key = i;
                 ret = H5Mset_ff(map2, H5T_STD_I32LE, &key, dtid1, &wdata[i],
-                                H5P_DEFAULT, tid1, e_stack);
+                                H5P_DEFAULT, tid1, H5_EVENT_STACK_NULL);
                 assert(ret == 0);
             }
 
             for(i=0 ; i<5 ; i++) {
                 key = i;
                 ret = H5Mset_ff(map3, H5T_STD_I32LE, &key, dtid2, str_wdata[i],
-                                H5P_DEFAULT, tid1, e_stack);
+                                H5P_DEFAULT, tid1, H5_EVENT_STACK_NULL);
                 assert(ret == 0);
             }
         }
@@ -396,16 +400,17 @@ int main(int argc, char **argv) {
         int key, value;
         int increment=4, j=0;
 
-        key = 1;
-        value = -1;
-        ret = H5Mget_ff(map1, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        H5P_DEFAULT, rid2, e_stack);
+        for(i=0 ; i<NUM_KEYS ; i++) {
+            key = i;
+            value = -1;
+            ret = H5Mget_ff(map1, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
+                            H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
 
-        H5ESwait(e_stack, 0, &status);
-        printf("H5Mget Completion status = %d\n", status);
-        assert (status);
-
-        printf("Value recieved = %d\n", value);
+            if(value != 1000+i) {
+                printf("Key %d: Value recieved = %d\n", key, value);
+                assert(0);
+            }
+        }
 
         for(i=0 ; i<5 ; i++) {
             key = i;

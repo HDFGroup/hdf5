@@ -1125,10 +1125,10 @@ EFF__mercury_register_callbacks(void)
     H5VL_EFF_FINALIZE_ID = MERCURY_REGISTER("eff_finalize", ret_t, ret_t,
                                             H5VL_iod_server_eff_finalize);
 
-    H5VL_ANALYSIS_EXECUTE_ID = MERCURY_REGISTER("analysis_execute", 
-                                                analysis_execute_in_t, 
-                                                analysis_execute_out_t,
-                                                H5VL_iod_server_analysis_execute);
+    H5VL_ANALYSIS_INVOKE_ID = MERCURY_REGISTER("analysis_invoke", 
+                                                analysis_invoke_in_t, 
+                                                analysis_invoke_out_t,
+                                                H5VL_iod_server_analysis_invoke);
 
     H5VL_FILE_CREATE_ID = MERCURY_REGISTER("file_create", file_create_in_t, file_create_out_t,
                                            H5VL_iod_server_file_create);

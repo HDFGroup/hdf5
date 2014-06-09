@@ -462,7 +462,7 @@ EFF_terminate_coresident(void)
     return ret_value;
 }
 
-H5VL_AXE_TASK_CB(H5VL_iod_server_analysis_execute, analysis_execute_in_t)
+H5VL_AXE_TASK_CB(H5VL_iod_server_analysis_invoke, analysis_invoke_in_t)
 H5VL_AXE_TASK_CB(H5VL_iod_server_file_create, file_create_in_t)
 H5VL_AXE_TASK_CB(H5VL_iod_server_file_open, file_open_in_t)
 H5VL_AXE_TASK_CB(H5VL_iod_server_file_close, file_close_in_t)

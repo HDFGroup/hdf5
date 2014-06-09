@@ -1470,6 +1470,71 @@ done:
     return ret_value;
 } /* H5VL_iod_server_iterate */
 
+void
+print_iod_obj_map(iod_obj_map_t *obj_map)
+{
+    int i;
+    uint32_t u;
+
+    fprintf(stderr, "MAP: oid: %"PRIx64"   type: %d\n", obj_map->oid, obj_map->type);
+    fprintf(stderr, "n_bb_loc %d:\n", obj_map->n_bb_loc);
+    for (i = 0; i < obj_map->n_bb_loc ; i++) {
+        iod_bb_loc_info_t *info = obj_map->bb_loc_infos[i];
+        int j;
+
+        fprintf(stderr, "Shadow path: %s  nrank = %d:\n", info->shadow_path, info->nrank);
+        for(j=0 ; j<info->nrank; j++)
+            fprintf(stderr, "%d ", info->direct_ranks[j]);
+        fprintf(stderr, "\n");
+    }
+    fprintf(stderr, "n_central_loc %d:\n", obj_map->n_central_loc);
+    for (i = 0; i < obj_map->n_central_loc ; i++) {
+        iod_central_loc_info_t *info = obj_map->central_loc_infos[i];
+        int j;
+
+        fprintf(stderr, "Shard ID: %u  nrank = %d:\n", info->shard_id, info->nrank);
+        for(j=0 ; j<info->nrank; j++)
+            fprintf(stderr, "%d ", info->nearest_ranks[j]);
+        fprintf(stderr, "\n");
+    }
+    switch(obj_map->type) {
+    case IOD_OBJ_BLOB:
+        {
+            fprintf(stderr, "nranges = %d\n", obj_map->u_map.blob_map.n_range);
+            for(u = 0; u < obj_map->u_map.blob_map.n_range ; u++) {
+                fprintf(stderr, 
+                        "offset: %"PRIu64"  length: %zu  location: %d  index: %d  nearest rank: %d\n",
+                        obj_map->u_map.blob_map.blob_range[u].offset, 
+                        obj_map->u_map.blob_map.blob_range[u].len,
+                        obj_map->u_map.blob_map.blob_range[u].loc_type, 
+                        obj_map->u_map.blob_map.blob_range[u].loc_index,
+                        obj_map->u_map.blob_map.blob_range[u].nearest_rank);
+            }
+            break;
+        }
+    case IOD_OBJ_ARRAY:
+        {
+            fprintf(stderr, "nranges = %d\n", obj_map->u_map.array_map.n_range);
+            for(u = 0; u < obj_map->u_map.array_map.n_range ; u++) {
+                fprintf(stderr, 
+                        "location: %d  index: %d  nearest rank: %d\n",
+                        obj_map->u_map.array_map.array_range[u].loc_type,
+                        obj_map->u_map.array_map.array_range[u].loc_index,
+                        obj_map->u_map.array_map.array_range[u].nearest_rank);
+                fprintf(stderr, "start [%"PRIu64"] end [%"PRIu64"]\n",
+                        obj_map->u_map.array_map.array_range[u].start_cell[0],
+                        obj_map->u_map.array_map.array_range[u].end_cell[0]);
+            }
+            break;
+        }
+        break;
+    case IOD_OBJ_KV:
+    case IOD_OBJ_INVALID:
+    case IOD_OBJ_ANY:
+    default:
+        break;
+    }
+}
 #if 0
 herr_t
 H5VL_iod_map_type_convert(hid_t src_id, hid_t dst_id, void *buf, size_t buf_size)

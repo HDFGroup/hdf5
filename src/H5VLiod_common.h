@@ -35,7 +35,7 @@
 /* function shipper IDs for different routines */
 extern hg_id_t H5VL_EFF_INIT_ID;
 extern hg_id_t H5VL_EFF_FINALIZE_ID;
-extern hg_id_t H5VL_ANALYSIS_EXECUTE_ID;
+extern hg_id_t H5VL_ANALYSIS_INVOKE_ID;
 extern hg_id_t H5VL_FILE_CREATE_ID;
 extern hg_id_t H5VL_FILE_OPEN_ID;
 extern hg_id_t H5VL_FILE_CLOSE_ID;
@@ -218,7 +218,7 @@ H5_DLL int H5VL_iod_server_dset_remove_index_info(hg_handle_t handle);
 
 H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_eff_finalize(hg_handle_t handle);
-H5_DLL int H5VL_iod_server_analysis_execute(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_analysis_invoke(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_file_create(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_file_open(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_file_close(hg_handle_t handle);
@@ -306,30 +306,25 @@ H5_DLL int hg_proc_region_info_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_obj_info_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_attr_info_t(hg_proc_t proc, void *data);
 
-MERCURY_GEN_PROC(analysis_execute_in_t, 
+MERCURY_GEN_PROC(analysis_invoke_in_t, 
                  ((axe_t)(axe_info))
                  ((hid_t)(query_id)) 
                  ((hg_const_string_t)(file_name))
-                 ((hg_const_string_t)(obj_name))
                  ((hg_const_string_t)(split_script))
-                 ((hg_const_string_t)(combine_script)))
-MERCURY_GEN_PROC(analysis_execute_out_t, ((int32_t)(ret)))
+                 ((hg_const_string_t)(combine_script))
+                 ((hg_const_string_t)(integrate_script)))
+MERCURY_GEN_PROC(analysis_invoke_out_t, ((int32_t)(ret)))
 MERCURY_GEN_PROC(analysis_farm_in_t, 
                  ((iod_handle_t)(coh)) 
-                 ((hid_t)(query_id)) 
                  ((hid_t)(space_id))
                  ((hid_t)(type_id)) 
                  ((uint64_t)(rtid)) 
                  ((iod_obj_id_t)(obj_id))
                  ((size_t)(num_cells))
-                 ((coords_t)(coords))
-                 ((uint32_t)(server_idx))
                  ((hg_const_string_t)(split_script)))
 MERCURY_GEN_PROC(analysis_farm_out_t, 
                  ((int32_t)(ret)) 
                  ((uint64_t)(axe_id))
-                 ((uint32_t)(server_idx))
-                 ((hg_bulk_t)(bulk_handle))
                  ((hid_t)(type_id))
                  ((size_t)(num_elmts)))
 MERCURY_GEN_PROC(analysis_transfer_in_t,

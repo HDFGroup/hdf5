@@ -40,8 +40,8 @@
 /* Library Private Prototypes */
 /******************************/
 
-H5_DLL herr_t H5AS_execute(const char *file_name, const char *dataset_name,
-        hid_t query_id, const char *split_script, const char *combine_script,
-        hid_t estack_id);
+H5_DLL herr_t H5AS_invoke(const char *file_name, hid_t query_id,
+                          const char *split_script, const char *combine_script,
+                          const char *integrate_script, hid_t estack_id);
 
 #endif /* _H5ASprivate_H */

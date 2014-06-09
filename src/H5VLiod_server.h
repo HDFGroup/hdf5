@@ -121,10 +121,10 @@ H5_DLL int H5VL_iod_server_analysis_transfer(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_container_open(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_container_close(hg_handle_t handle);
 
-H5_DLL void H5VL_iod_server_analysis_execute_cb(AXE_engine_t axe_engine, 
-                                                size_t num_n_parents, AXE_task_t n_parents[], 
-                                                size_t num_s_parents, AXE_task_t s_parents[], 
-                                                void *_op_data);
+H5_DLL void H5VL_iod_server_analysis_invoke_cb(AXE_engine_t axe_engine, 
+                                               size_t num_n_parents, AXE_task_t n_parents[], 
+                                               size_t num_s_parents, AXE_task_t s_parents[], 
+                                               void *_op_data);
 H5_DLL void H5VL_iod_server_analysis_farm_cb(AXE_engine_t axe_engine, 
                                              size_t num_n_parents, AXE_task_t n_parents[], 
                                              size_t num_s_parents, AXE_task_t s_parents[], 
@@ -428,5 +428,8 @@ H5_DLL herr_t H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod
 
 H5_DLL herr_t H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim, 
                                           const hsize_t *point, void *_udata);
+
+H5_DLL void print_iod_obj_map(iod_obj_map_t *obj_map);
+
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_server_H */

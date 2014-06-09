@@ -47,9 +47,9 @@ extern "C" {
 #endif
 
 /* Function prototypes */
-H5_DLL herr_t H5ASexecute(const char *file_name, const char *dataset_name,
-        hid_t query_id, const char *split_script, const char *combine_script,
-        hid_t estack_id);
+H5_DLL herr_t H5ASinvoke(const char *file_name, hid_t query_id, 
+                         const char *split_script, const char *combine_script,
+                         const char *integrate_script, hid_t estack_id);
 
 #ifdef __cplusplus
 }
