@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
 #     ctest -S HDF518_Examples.cmake,HDF5Examples-0.1.1-Source -C Release -O test.log
 ###############################################################################################################
 
-set(INSTALLDIR "@CMAKE_INSTALL_PREFIX@/@HDF5_PACKAGE_VERSION@")
+set(INSTALLDIR "@CMAKE_INSTALL_PREFIX@/HDF_Group/@HDF5_PACKAGE_NAME@/@HDF5_PACKAGE_VERSION@")
 set(CTEST_CMAKE_GENERATOR "@CMAKE_GENERATOR@")
 set(STATICLIBRARIES "@H5_ENABLE_STATIC_LIB@")
 set(CTEST_SOURCE_NAME ${CTEST_SCRIPT_ARG})

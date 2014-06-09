@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5stat h5stat_idx.h5'
-#############################
 Filename: h5stat_idx.h5
 File information
 	# of unique groups: 1

@@ -26,42 +26,50 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
     MPI_Request req[2];
     MPI_Status status;
     hid_t pl;                   /* Decoded property list */
-    void *buf = NULL;
-    size_t buf_size = 0;
+    void *send_buf = NULL;
+    size_t send_size = 0;
     herr_t ret;         	/* Generic return value */
 
     if(mpi_rank == 0) {
+
         /* first call to encode returns only the size of the buffer needed */
-        ret = H5Pencode(orig_pl, NULL, &buf_size);
+        ret = H5Pencode(orig_pl, NULL, &send_size);
         VRFY((ret >= 0), "H5Pencode succeeded");
 
-        buf = (uint8_t *)HDmalloc(buf_size);
+        send_buf = (uint8_t *)HDmalloc(send_size);
 
-        ret = H5Pencode(orig_pl, buf, &buf_size);
+        ret = H5Pencode(orig_pl, send_buf, &send_size);
         VRFY((ret >= 0), "H5Pencode succeeded");
 
-        MPI_Isend(&buf_size, 1, MPI_INT, recv_proc, 123, MPI_COMM_WORLD, &req[0]);
-        MPI_Isend(buf, (int)buf_size, MPI_BYTE, recv_proc, 124, MPI_COMM_WORLD, &req[1]);
+        MPI_Isend(&send_size, 1, MPI_INT, recv_proc, 123, MPI_COMM_WORLD, &req[0]);
+        MPI_Isend(send_buf, (int)send_size, MPI_BYTE, recv_proc, 124, MPI_COMM_WORLD, &req[1]);
     } /* end if */
-    if(mpi_rank == recv_proc) {
-        MPI_Recv(&buf_size, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
-        buf = (uint8_t *)HDmalloc(buf_size);
-        MPI_Recv(buf, (int)buf_size, MPI_BYTE, 0, 124, MPI_COMM_WORLD, &status);
 
-        pl = H5Pdecode(buf);
+    if(mpi_rank == recv_proc) {
+        void *recv_buf = NULL;
+        size_t recv_size = 0;
+
+        MPI_Recv(&recv_size, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
+        recv_buf = (uint8_t *)HDmalloc(recv_size);
+        MPI_Recv(recv_buf, (int)recv_size, MPI_BYTE, 0, 124, MPI_COMM_WORLD, &status);
+
+        pl = H5Pdecode(recv_buf);
         VRFY((pl >= 0), "H5Pdecode succeeded");
 
         VRFY(H5Pequal(orig_pl, pl), "Property List Equal Succeeded");
 
         ret = H5Pclose(pl);
         VRFY((ret >= 0), "H5Pclose succeeded");
+
+        if(NULL != recv_buf)
+            HDfree(recv_buf);
     } /* end if */
 
-    if(0 == mpi_rank)
+    if(mpi_rank == 0) {
         MPI_Waitall(2, req, MPI_STATUSES_IGNORE);
-
-    if(NULL != buf)
-        HDfree(buf);
+        if(NULL != send_buf)
+            HDfree(send_buf);
+    }
 
     MPI_Barrier(MPI_COMM_WORLD);
 

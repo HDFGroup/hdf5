@@ -46,16 +46,17 @@ CONTAINS
 ! PURPOSE
 !  Retrieves a copy of the image of an existing, open file. 
 !
-! Inputs:
+! INPUTS
 !  file_id    - Target file identifier.
 !  buf_ptr    - Pointer to the buffer into which the image of the HDF5 file is to be copied.
 !  buf_len    - Size of the supplied buffer.
 !
-! Outputs:
+! OUTPUTS
 !  hdferr     - error code:
 !                 0 on success and -1 on failure
-! Optional:  
-!  buf_size   - The size in bytes of the buffer required to store the file image.
+! OPTIONAL PARAMETERS  
+!  buf_size   - Returns the size in bytes of the buffer required to store the file image,
+!               no data will be copied.
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
@@ -65,11 +66,11 @@ CONTAINS
   SUBROUTINE h5fget_file_image_f(file_id, buf_ptr, buf_len, hdferr, buf_size)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
-    INTEGER(HID_T)  , INTENT(IN)    :: file_id
-    TYPE(C_PTR)     , INTENT(INOUT) :: buf_ptr
-    INTEGER(SIZE_T) , INTENT(IN)    :: buf_len
-    INTEGER(SIZE_T) , INTENT(OUT), OPTIONAL :: buf_size
-    INTEGER         , INTENT(OUT)   :: hdferr
+    INTEGER(HID_T) , INTENT(IN)              :: file_id
+    TYPE(C_PTR)    , INTENT(INOUT)           :: buf_ptr
+    INTEGER(SIZE_T), INTENT(IN)              :: buf_len
+    INTEGER        , INTENT(OUT)             :: hdferr
+    INTEGER(SIZE_T), INTENT(OUT)  , OPTIONAL :: buf_size
 !*****
 
     INTEGER(SIZE_T) :: buf_size_default
