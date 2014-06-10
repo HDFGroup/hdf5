@@ -10318,8 +10318,6 @@ H5VL_iod_view_create(void *_obj, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, v
     input.coh = obj->file->remote_file.coh;
     input.loc_id = iod_id;
     input.loc_oh = iod_oh;
-    input.loc_mdkv_id = mdkv_id;
-    input.loc_attrkv_id = attrkv_id;
     input.query_id = query_id;
     input.vcpl_id = vcpl_id;
     input.obj_type = obj->obj_type;

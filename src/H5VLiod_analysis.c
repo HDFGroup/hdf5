@@ -37,7 +37,9 @@ typedef struct {
 
 #ifdef H5_HAVE_PYTHON
 
+pthread_mutex_t h5python_mutex;
 static hbool_t numpy_initialized = FALSE;
+
 static void H5VL__iod_numpy_init(void);
 
 static PyObject *H5VL__iod_load_script(const char *script, const char *func_name);
@@ -182,7 +184,9 @@ H5VL_iod_server_analysis_invoke_cb(AXE_engine_t UNUSED axe_engine,
             /* retrieve the IOD layout */
             if(H5VLiod_query_map(dset_id, rtid, &obj_map) < 0)
                 HGOTO_ERROR_FF(FAIL, "can't obtain object map");
-
+#if H5_EFF_DEBUG 
+            print_iod_obj_map(obj_map);
+#endif
             assert(obj_map->type == IOD_OBJ_ARRAY);
 
             if(H5VL__iod_farm_work(obj_map, cohs, dset_id, region, rtid,
@@ -324,7 +328,7 @@ H5VL__iod_load_script(const char *script, const char *func_name)
     ret_value = po_func;
 
 done:
-    Py_DECREF(po_rstring);
+    //Py_DECREF(po_rstring);
 
     return ret_value;
 } /* end H5VL__iod_load_script() */
@@ -569,10 +573,10 @@ H5VL__iod_split(const char *split_script, void *data, size_t num_elmts,
 
 done:
     /* Cleanup */
-    Py_XDECREF(po_func);
-    Py_XDECREF(po_args_tup);
-    Py_XDECREF(po_numpy_array);
-    Py_XDECREF(po_numpy_array_split);
+    //Py_XDECREF(po_func);
+    //Py_XDECREF(po_args_tup);
+    //Py_XDECREF(po_numpy_array);
+    //Py_XDECREF(po_numpy_array_split);
 
     return ret_value;
 } /* end H5VL__iod_split() */
@@ -650,12 +654,12 @@ H5VL__iod_combine(const char *combine_script, void **split_data, size_t *split_n
 
 done:
     /* Cleanup */
-    Py_XDECREF(po_func);
-    Py_XDECREF(po_args_tup);
+    //Py_XDECREF(po_func);
+    //Py_XDECREF(po_args_tup);
     for(i = 0; i < count; i++) {
-        Py_XDECREF(po_numpy_arrays + i);
+        //Py_XDECREF(po_numpy_arrays + i);
     }
-    Py_XDECREF(po_numpy_array_combine);
+    //Py_XDECREF(po_numpy_array_combine);
 
     return ret_value;
 }
@@ -681,6 +685,9 @@ H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs)
     iod_ret_t ret;
     int i;
 
+    if(pthread_mutex_init(&h5python_mutex, NULL)) 
+        HGOTO_ERROR_FF(FAIL, "can't init AS mutex");
+    
     if(NULL == (hg_reqs = (hg_request_t *)malloc(sizeof(hg_request_t) * (unsigned int) num_ions_g)))
         HGOTO_ERROR_FF(FAIL, "can't allocate HG requests");
 
@@ -762,6 +769,8 @@ H5VL__iod_request_container_close(iod_handle_t *cohs)
     free(hg_reqs);
     free(cohs);
 
+    if(pthread_mutex_destroy(&h5python_mutex))
+        HGOTO_ERROR_FF(FAIL, "can't destroy AS mutex");
 done:
     return ret_value;
 } /* end H5VL__iod_request_container_close */
@@ -819,6 +828,9 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
         hid_t space_layout;
         uint32_t worker = obj_map->u_map.array_map.array_range[u].nearest_rank;
 
+#if H5_EFF_DEBUG 
+        fprintf(stderr, "Farming to %d\n", worker);
+#endif
         farm_input.num_cells =  obj_map->u_map.array_map.array_range[u].n_cell;
         coords.start_cell = obj_map->u_map.array_map.array_range[u].start_cell;
         coords.end_cell = obj_map->u_map.array_map.array_range[u].end_cell;
@@ -832,7 +844,7 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
         farm_input.coh = cohs[worker];
 
         /* forward the call to the target server */
-        if (u == 0) {
+        if (worker == 0) {
             hg_reqs[u] = HG_REQUEST_NULL;
             /* Do a local split */
             if(FAIL == H5VL__iod_farm_split(cohs[0], obj_map->oid, rtid, space_layout,
@@ -983,9 +995,13 @@ H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
     /* Apply split python script on data from query */
 #ifdef H5_HAVE_PYTHON
     if(nelmts) {
+        if (pthread_mutex_lock(&h5python_mutex))
+            HGOTO_ERROR_FF(FAIL, "can't lock AS mutex");
         if(FAIL == H5VL__iod_split(split_script, data, nelmts, type_id,
                                    split_data, split_num_elmts, split_type_id))
             HGOTO_ERROR_FF(FAIL, "can't apply split script to data");
+        if (pthread_mutex_unlock(&h5python_mutex))
+            HGOTO_ERROR_FF(FAIL, "can't unlock AS mutex");
     }
 #endif
 
@@ -1214,5 +1230,53 @@ done:
     }
     return ret_value;
 } /* end H5VL__iod_read_selection() */
+
+int
+H5VL_iod_server_container_open(hg_handle_t handle)
+{
+    const char *file_name;
+    iod_handle_t coh;
+    int ret_value = HG_SUCCESS;
+
+    if(pthread_mutex_init(&h5python_mutex, NULL)) 
+        HGOTO_ERROR_FF(FAIL, "can't init AS mutex");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, &file_name))
+	HGOTO_ERROR_FF(FAIL, "can't get input parameters");
+
+    /* open the container */
+    printf("Calling iod_container_open on %s\n", file_name);
+    if(iod_container_open(file_name, NULL, IOD_CONT_R, &coh, NULL))
+        HGOTO_ERROR_FF(FAIL, "can't open file");
+
+    HG_Handler_start_output(handle, &coh);
+
+done:
+    if(ret_value < 0) {
+        coh.cookie = IOD_OH_UNDEFINED;
+        HG_Handler_start_output(handle, &coh);
+    }
+    return ret_value;
+} /* end H5VL_iod_server_container_open() */
+
+int
+H5VL_iod_server_container_close(hg_handle_t handle)
+{
+    iod_handle_t coh;
+    int ret_value = HG_SUCCESS;
+
+    if(HG_FAIL == HG_Handler_get_input(handle, &coh))
+	HGOTO_ERROR_FF(FAIL, "can't get input parameters");
+
+    /* open the container */
+    if(iod_container_close(coh, NULL, NULL))
+        HGOTO_ERROR_FF(FAIL, "can't open file");
+
+    if(pthread_mutex_destroy(&h5python_mutex))
+        HGOTO_ERROR_FF(FAIL, "can't destroy AS mutex");
+done:
+    HG_Handler_start_output(handle, &ret_value);
+    return ret_value;
+} /* end H5VL_iod_server_container_open() */
 
 #endif /* H5_HAVE_EFF */

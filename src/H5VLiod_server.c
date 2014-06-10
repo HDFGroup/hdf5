@@ -222,7 +222,7 @@ EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
     if(AXEengine_attr_init(&engine_attr) != AXE_SUCCEED)
         return FAIL;
     /* Set number of threads in AXE engine */
-    if(AXEset_num_threads(&engine_attr, 16) != AXE_SUCCEED)
+    if(AXEset_num_threads(&engine_attr, 2) != AXE_SUCCEED)
         return FAIL;
     /* Create AXE engine */
     if(AXEcreate_engine(&engine, &engine_attr) != AXE_SUCCEED)
@@ -430,7 +430,7 @@ EFF_setup_coresident(MPI_Comm comm, MPI_Info UNUSED info)
     if(AXEengine_attr_init(&engine_attr) != AXE_SUCCEED)
         return FAIL;
     /* Set number of threads in AXE engine */
-    if(AXEset_num_threads(&engine_attr, 16) != AXE_SUCCEED)
+    if(AXEset_num_threads(&engine_attr, 2) != AXE_SUCCEED)
         return FAIL;
     /* Create AXE engine */
     if(AXEcreate_engine(&engine, &engine_attr) != AXE_SUCCEED)
@@ -623,50 +623,6 @@ H5VL_iod_server_analysis_transfer(hg_handle_t handle)
 done:
     return ret_value;
 } /* end H5VL_iod_server_analysis_transfer() */
-
-int
-H5VL_iod_server_container_open(hg_handle_t handle)
-{
-    const char *file_name;
-    iod_handle_t coh;
-    int ret_value = HG_SUCCESS;
-
-    if(HG_FAIL == HG_Handler_get_input(handle, &file_name))
-	HGOTO_ERROR_FF(FAIL, "can't get input parameters");
-
-    /* open the container */
-    printf("Calling iod_container_open on %s\n", file_name);
-    if(iod_container_open(file_name, NULL, IOD_CONT_R, &coh, NULL))
-        HGOTO_ERROR_FF(FAIL, "can't open file");
-
-    HG_Handler_start_output(handle, &coh);
-
-done:
-    if(ret_value < 0) {
-        coh.cookie = IOD_OH_UNDEFINED;
-        HG_Handler_start_output(handle, &coh);
-    }
-    return ret_value;
-} /* end H5VL_iod_server_container_open() */
-
-int
-H5VL_iod_server_container_close(hg_handle_t handle)
-{
-    iod_handle_t coh;
-    int ret_value = HG_SUCCESS;
-
-    if(HG_FAIL == HG_Handler_get_input(handle, &coh))
-	HGOTO_ERROR_FF(FAIL, "can't get input parameters");
-
-    /* open the container */
-    if(iod_container_close(coh, NULL, NULL))
-        HGOTO_ERROR_FF(FAIL, "can't open file");
-
-done:
-    HG_Handler_start_output(handle, &ret_value);
-    return ret_value;
-} /* end H5VL_iod_server_container_open() */
-
 
 
 /*-------------------------------------------------------------------------

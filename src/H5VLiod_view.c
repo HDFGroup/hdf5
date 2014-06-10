@@ -116,8 +116,6 @@ H5VL_iod_server_view_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* the container handle */
     //iod_handles_t loc_handle = input->loc_oh; /* The handle for current object - could be undefined */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
-    //iod_obj_id_t mdkv_id = input->loc_mdkv_id; /* The ID of the metadata KV of the location */
-    //iod_obj_id_t attrkv_id = input->loc_attrkv_id; /* The ID of the attribute KV of the location */
     H5I_type_t obj_type = input->obj_type;
     hid_t query_id = input->query_id;
     iod_trans_id_t rtid = input->rcxt_num;
@@ -1021,7 +1019,7 @@ H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim,
                             const hsize_t *point, void *_udata)
 {
     H5VL__iod_get_query_data_t *udata = (H5VL__iod_get_query_data_t *)_udata;
-    hbool_t result;
+    hbool_t result = FALSE;
     herr_t ret_value = SUCCEED;
 
     /* Apply the query */
