@@ -214,7 +214,7 @@
           NAME H5IMPORT-DUMP-${testname}-H5DFF
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-              -D "TEST_ARGS:STRING=-v;d${testfile};testfiles/${testfile};${datasetname};${datasetname}"
+              -D "TEST_ARGS:STRING=-r;d${testfile};testfiles/${testfile};${datasetname};${datasetname}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=d${testfile}.dff"
               -D "TEST_EXPECT=0"
