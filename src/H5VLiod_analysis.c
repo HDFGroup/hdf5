@@ -823,6 +823,64 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
 
     coords.rank = H5Sget_simple_extent_ndims(region);
 
+#if 0
+    /* Farm work to the IONs and combine the result */
+    for(i=0 ; i<num_ions_g ; i++) {
+        hid_t space_id;
+
+        farm_input.num_cells = 0;
+
+        /* Get all ranges that are on Node i into a dataspace */
+        for(u = 0; u < obj_map->u_map.array_map.n_range ; u++) {
+            uint32_t worker = obj_map->u_map.array_map.array_range[u].nearest_rank;
+
+            if(i == worker) {
+                hid_t space_layout;
+
+                coords.start_cell = obj_map->u_map.array_map.array_range[u].start_cell;
+                coords.end_cell = obj_map->u_map.array_map.array_range[u].end_cell;
+
+                if(FAIL == (space_layout = H5VL__iod_get_space_layout(coords, region)))
+                    HGOTO_ERROR_FF(FAIL, "can't generate local dataspace selection");
+
+                if(0 == farm_input.num_cells) {
+                    space_id = H5Scopy(space_layout);
+                }
+                else {
+                    /* MSC - OR the space with the current one */
+                }
+
+                farm_input.num_cells += obj_map->u_map.array_map.array_range[u].n_cell;
+
+                if(H5Sclose(space_layout) < 0)
+                    HGOTO_ERROR_FF(FAIL, "cannot close region");
+            }
+        }
+
+        if(farm_input.num_cells) {
+            farm_input.space_id = space_id;
+            farm_input.coh = cohs[i];
+
+            /* forward the call to the target server */
+            if (i == 0) {
+                hg_reqs[i] = HG_REQUEST_NULL;
+                /* Do a local split */
+                if(FAIL == H5VL__iod_farm_split(cohs[0], obj_map->oid, rtid, space_layout,
+                                                farm_input.num_cells, farm_input.type_id, split_script,
+                                                &split_data[i], &split_num_elmts[i], &split_type_id))
+                    HGOTO_ERROR_FF(FAIL, "can't split in farmed job");
+            } else {
+                if(HG_Forward(server_addr_g[i], H5VL_EFF_ANALYSIS_FARM, &farm_input, 
+                              &farm_output[i], &hg_reqs[i]) < 0)
+                    HGOTO_ERROR_FF(FAIL, "failed to ship operation");
+            }
+
+            if(H5Sclose(space_id) < 0)
+                HGOTO_ERROR_FF(FAIL, "cannot close region");
+        }
+    }
+#endif
+
     /* farm work for a specific range on a specific node */
     for(u = 0; u < obj_map->u_map.array_map.n_range ; u++) {
         hid_t space_layout;
