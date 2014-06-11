@@ -197,7 +197,6 @@ test_view(const char *file_name, void *buf)
         rid2 = H5RCcreate(file_id, version);
 
     /* Create a simple query */
-    /* query = (39.1 < x < 42.1) || (295 < x < 298) */
     query_id1 = H5Qcreate(H5Q_TYPE_DATA_ELEM, H5Q_MATCH_GREATER_THAN,
             H5T_NATIVE_DOUBLE, &lower_bound1);
     assert(query_id1);
@@ -261,8 +260,10 @@ test_view(const char *file_name, void *buf)
         assert(2 == r_ndims);
         assert(NTUPLES == r_dims[0]);
         assert(NCOMP == r_dims[1]);
+
+        num_points = H5Sget_select_npoints(region_space);
+        printf("%zu elements in Region\n", (size_t)num_points);
         /*
-        num_points = H5Sget_select_elem_npoints(region_space);
         if(my_size > 1)
             assert(15 == num_points);
         else
@@ -339,7 +340,9 @@ test_view(const char *file_name, void *buf)
             assert(NTUPLES == r_dims[0]);
             assert(NCOMP == r_dims[1]);
 
-            num_points = H5Sget_select_elem_npoints(regions[i]);
+
+            num_points = H5Sget_select_npoints(regions[i]);
+            printf("%zu elements in Region\n", (size_t)num_points);
             /*
             if(my_size > 1)
                 assert(15 == num_points);

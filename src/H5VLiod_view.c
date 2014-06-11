@@ -1028,11 +1028,17 @@ H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim,
 
     /* If element satisfies query, add it to the selection */
     if (result) {
+        hsize_t count[H5S_MAX_RANK], i;
 #if 0
         fprintf(stderr, "(%d) Element |%d| matches query\n", my_rank_g, *((int *) elem));
 #endif
+
         udata->num_elmts ++;
-        if(H5Sselect_elements(udata->space_query, H5S_SELECT_APPEND, 1, point) < 0)
+        for(i=0 ; i<H5S_MAX_RANK ; i++)
+            count[i] = 1;
+
+        if(H5Sselect_hyperslab(udata->space_query, H5S_SELECT_OR, point, NULL, count, NULL) < 0)
+        //if(H5Sselect_elements(udata->space_query, H5S_SELECT_APPEND, 1, point) < 0)
             HGOTO_ERROR_FF(FAIL, "unable to add point to selection")
     }
 
