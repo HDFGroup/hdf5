@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
     hid_t gid;
     hid_t did, map;
     hid_t sid, dtid;
-    hid_t tid1, tid2, rid1, rid2;
+    hid_t tid1, tid2, rc_id, rid1, rid2;
     hid_t fapl_id, dxpl_id;
     hid_t e_stack;
     hbool_t exists = -1;
@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
         assert(H5Tclose_ff(dtid, e_stack) == 0);
         assert(H5Dclose_ff(did, e_stack) == 0);
 
-        /* release container version 2. This is async. */
+        /* release container version 2. */
         ret = H5RCrelease(rid_temp, e_stack);
         assert(0 == ret);
         ret = H5RCclose(rid_temp);
@@ -185,7 +185,7 @@ int main(int argc, char **argv) {
         version = 3;
     }
 
-    /* release container version 1. This is async. */
+    /* release container version 1. */
     if(0 == my_rank) {
         ret = H5RCrelease(rid1, e_stack);
         assert(0 == ret);
@@ -264,7 +264,7 @@ int main(int argc, char **argv) {
     MPI_Barrier(MPI_COMM_WORLD);
 
     if(my_rank == 0) {
-        /* release container version 3. This is async. */
+        /* release container version 3. */
         ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);
     }
@@ -285,9 +285,32 @@ int main(int argc, char **argv) {
     H5ESclear(e_stack);
     printf("%d events in event stack. Completion status = %d\n", num_events, status);
 
+    if(my_rank == 0) {
+        ret = H5TRskip(file_id, 4, 10, e_stack);
+        assert(0 == ret);
+    }
+
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
     assert(H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL) == 0);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    file_id = H5Fopen_ff(file_name, H5F_ACC_RDONLY, fapl_id, &rc_id, H5_EVENT_STACK_NULL); 
+    assert(file_id);
+
+    H5RCget_version( rc_id, &version );
+    fprintf(stderr, "APP-r%d: Re-open %s version %d\n", my_rank, file_name, (int)version);
+    assert(14 == version);
+
+    /* release container version. */
+    ret = H5RCrelease(rc_id, H5_EVENT_STACK_NULL);
+    assert(0 == ret);
+    ret = H5RCclose(rc_id);
+    assert(0 == ret);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    assert(H5Fclose_ff(file_id, 0, H5_EVENT_STACK_NULL) == 0);
 
     H5Sclose(sid);
     H5Pclose(fapl_id);

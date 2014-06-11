@@ -9,28 +9,149 @@
 #include "mpi.h"
 #include "hdf5.h"
 
+#define NELEM 60
+#define NKVP 10
+
+static hid_t gid=-1, did=-1, map=-1, dtid=-1, sid=-1;
+int my_rank, my_size;
+
+static void prefetch (int local_ion, int sub_obj, hid_t rcxt)
+{
+    hrpl_t map_replica, dt_replica, dset_replica, grp_replica;
+    hid_t dxpl_id;
+    int key, value, i;
+    int32_t rdata1[NELEM];
+    herr_t ret;
+
+    if((my_size > 1 && 1 == my_rank) || 
+    (my_size == 1 && 0 == my_rank)) {
+        /* prefetch objects */
+        dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+        if(sub_obj) {
+            hsize_t start=0, count=NELEM/2;
+            H5Sselect_hyperslab(sid, H5S_SELECT_SET, &start, NULL, &count, NULL);
+            H5Pset_prefetch_selection(dxpl_id, sid);
+        }
+        if(local_ion)
+            H5Pset_prefetch_layout(dxpl_id, H5_LOCAL_NODE);
+
+        ret = H5Dprefetch_ff(did, rcxt, &dset_replica, dxpl_id, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        printf("prefetched dataset with replica id %"PRIx64"\n", dset_replica);
+        H5Pclose(dxpl_id);
+
+        /* prefetch objects */
+        dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+        if(sub_obj) {
+            int low_key = 3;
+            int high_key = 8;
+            H5Pset_prefetch_range(dxpl_id, H5T_STD_I32LE, &low_key, &high_key);
+        }
+        if(local_ion)
+            H5Pset_prefetch_layout(dxpl_id, H5_LOCAL_NODE);
+        ret = H5Mprefetch_ff(map, rcxt, &map_replica, dxpl_id, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        printf("prefetched map with replica id %"PRIx64"\n", map_replica);
+        H5Pclose(dxpl_id);
+
+        dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+        if(local_ion)
+            H5Pset_prefetch_layout(dxpl_id, H5_LOCAL_NODE);
+        ret = H5Tprefetch_ff(dtid, rcxt, &dt_replica, dxpl_id, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        printf("prefetched datatype with replica id %"PRIx64"\n", dt_replica);
+        ret = H5Gprefetch_ff(gid, rcxt, &grp_replica, dxpl_id, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        printf("prefetched group with replica id %"PRIx64"\n", grp_replica);
+        H5Pclose(dxpl_id);
+    }
+
+    if(my_size > 1) {
+        MPI_Bcast(&map_replica, 1, MPI_UINT64_T, 1, MPI_COMM_WORLD);
+        MPI_Bcast(&dt_replica, 1, MPI_UINT64_T, 1, MPI_COMM_WORLD);
+        MPI_Bcast(&dset_replica, 1, MPI_UINT64_T, 1, MPI_COMM_WORLD);
+        MPI_Bcast(&grp_replica, 1, MPI_UINT64_T, 1, MPI_COMM_WORLD);
+    }
+
+    /* Read from prefetched Replicas */
+    /* set dxpl to read from replica in BB */
+    dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+    ret = H5Pset_dxpl_replica(dxpl_id, dset_replica);
+    assert(0 == ret);
+    ret = H5Dread_ff(did, dtid, H5S_ALL, H5S_ALL, dxpl_id, rdata1, rcxt, H5_EVENT_STACK_NULL);
+    assert(ret == 0);
+    printf("Read Data1: ");
+    for(i=0;i<NELEM;++i)
+        printf("%d ",rdata1[i]);
+    printf("\n");
+    H5Pclose(dxpl_id);
+
+    dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+    ret = H5Pset_dxpl_replica(dxpl_id, map_replica);
+    assert(0 == ret);
+    for(i=0; i<NKVP; i++){
+        key = i;
+        value = -i;
+        ret = H5Mget_ff(map, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
+                        dxpl_id, rcxt, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        printf("Value recieved = %d\n", value);
+        assert(1000*i == value);
+    }
+    H5Pclose(dxpl_id);
+
+    /* wait for all reads to complete before evicting */
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if(0 == my_rank) {
+        /* evict Replicas */
+        dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+        ret = H5Pset_dxpl_replica(dxpl_id, dset_replica);
+        assert(0 == ret);
+        ret = H5Tevict_ff(dtid, 3, dxpl_id, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        H5Pclose(dxpl_id);
+
+        dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+        ret = H5Pset_dxpl_replica(dxpl_id, dset_replica);
+        assert(0 == ret);
+        ret = H5Devict_ff(did, 3, dxpl_id, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        H5Pclose(dxpl_id);
+
+        dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+        ret = H5Pset_dxpl_replica(dxpl_id, map_replica);
+        assert(0 == ret);
+        ret = H5Mevict_ff(map, 3, dxpl_id, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        H5Pclose(dxpl_id);
+
+        dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+        ret = H5Pset_dxpl_replica(dxpl_id, grp_replica);
+        assert(0 == ret);
+        ret = H5Gevict_ff(gid, 3, dxpl_id, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        H5Pclose(dxpl_id);
+    }
+}
+
 int main(int argc, char **argv) {
     char file_name[50];
     hid_t file_id;
-    hid_t gid;
-    hid_t did, map;
-    hid_t sid, dtid;
     hid_t tid1, tid2, rid1, rid2;
     hid_t fapl_id, dxpl_id;
     hid_t e_stack;
     hbool_t exists = -1;
 
-    const unsigned int nelem=60;
     hsize_t dims[1];
 
     uint64_t version;
     uint64_t trans_num;
 
-    int my_rank, my_size;
     int provided;
     MPI_Request mpi_req;
 
-    int32_t *wdata1 = NULL, *rdata1 = NULL;
+    int32_t wdata1[NELEM],rdata1[NELEM];
     int key, value, i;
     H5ES_status_t status;
     size_t num_events = 0;
@@ -55,9 +176,7 @@ int main(int argc, char **argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
     fprintf(stderr, "APP processes = %d, my rank is %d\n", my_size, my_rank);
 
-    wdata1 = malloc (sizeof(int32_t)*nelem);
-    rdata1 = malloc (sizeof(int32_t)*nelem);
-    for(i=0;i<nelem;++i) {
+    for(i=0;i<NELEM;++i) {
         wdata1[i]=i;
 	rdata1[i] = 0;
     }
@@ -86,7 +205,7 @@ int main(int argc, char **argv) {
     assert(file_id > 0);
 
     /* create 1-D dataspace with 60 elements */
-    dims [0] = nelem;
+    dims [0] = NELEM;
     sid = H5Screate_simple(1, dims, NULL);
     dtid = H5Tcopy(H5T_STD_I32LE);
 
@@ -137,13 +256,12 @@ int main(int argc, char **argv) {
         assert(map >= 0);
 
         /* write some KV pairs to each map object. */
-        {
-            key = 1;
-            value = 1000;
+        for(i=0; i<NKVP; i++){
+            key = i;
+            value = 1000*i;
             ret = H5Mset_ff(map, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                            H5P_DEFAULT, tid1, e_stack);
+                            H5P_DEFAULT, tid1, H5_EVENT_STACK_NULL);
             assert(ret == 0);
-
         }
 
         ret = H5TRfinish(tid1, H5P_DEFAULT, &rid_temp, e_stack);
@@ -247,80 +365,36 @@ int main(int argc, char **argv) {
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    if((my_size > 1 && 1 == my_rank) || 
-       (my_size == 1 && 0 == my_rank)) {
-        hid_t mapl_id, tapl_id, dapl_id, gapl_id;
-        hrpl_t map_replica, dt_replica, dset_replica, grp_replica;
-
-        /* prefetch objects */
-        ret = H5Mprefetch_ff(map, rid2, &map_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-        printf("prefetched map with replica id %"PRIx64"\n", map_replica);
-        ret = H5Tprefetch_ff(dtid, rid2, &dt_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-        printf("prefetched datatype with replica id %"PRIx64"\n", dt_replica);
-        ret = H5Dprefetch_ff(did, rid2, &dset_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-        printf("prefetched dataset with replica id %"PRIx64"\n", dset_replica);
-        ret = H5Gprefetch_ff(gid, rid2, &grp_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-        printf("prefetched group with replica id %"PRIx64"\n", grp_replica);
-
-        /* Read from prefetched Replicas */
-	/* set dxpl to read from replica in BB */
-	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-	ret = H5Pset_dxpl_replica(dxpl_id, dset_replica);
-	assert(0 == ret);
-	ret = H5Dread_ff(did, dtid, H5S_ALL, H5S_ALL, dxpl_id, rdata1, rid2, H5_EVENT_STACK_NULL);
-	assert(ret == 0);
-	printf("Read Data1: ");
-	for(i=0;i<nelem;++i)
-	  printf("%d ",rdata1[i]);
-	printf("\n");
-	H5Pclose(dxpl_id);
-
-	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-	ret = H5Pset_dxpl_replica(dxpl_id, map_replica);
-	assert(0 == ret);
-        key = 1;
-        value = -1;
-        ret = H5Mget_ff(map, H5T_STD_I32LE, &key, H5T_STD_I32LE, &value,
-                        dxpl_id, rid2, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-        printf("Value recieved = %d\n", value);
-        assert(1000 == value);
-	H5Pclose(dxpl_id);
-
-        /* evict Replicas */
-	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-	ret = H5Pset_dxpl_replica(dxpl_id, dset_replica);
-	assert(0 == ret);
-        ret = H5Tevict_ff(dtid, 3, dxpl_id, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-        H5Pclose(dxpl_id);
-
-	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-        ret = H5Pset_dxpl_replica(dxpl_id, dset_replica);
-        assert(0 == ret);
-        ret = H5Devict_ff(did, 3, dxpl_id, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-        H5Pclose(dxpl_id);
-
-	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-        ret = H5Pset_dxpl_replica(dxpl_id, map_replica);
-        assert(0 == ret);
-        ret = H5Mevict_ff(map, 3, dxpl_id, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-        H5Pclose(dxpl_id);
-
-	dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-        ret = H5Pset_dxpl_replica(dxpl_id, grp_replica);
-        assert(0 == ret);
-        ret = H5Gevict_ff(gid, 3, dxpl_id, H5_EVENT_STACK_NULL);
-        assert(0 == ret);
-        H5Pclose(dxpl_id);
+    if(0 == my_rank) {
+        printf("***************************************************************\n");
+        printf("TESTING Prefetch - Default layout, Default partition\n");
     }
+    MPI_Barrier(MPI_COMM_WORLD);
+    prefetch(0, 0, rid2);
+    MPI_Barrier(MPI_COMM_WORLD);
 
+    if(0 == my_rank) {
+        printf("***************************************************************\n");
+        printf("TESTING Prefetch - NON-Default layout, Default partition\n");
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    prefetch(1, 0, rid2);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if(0 == my_rank) {
+        printf("***************************************************************\n");
+        printf("TESTING Prefetch - Default layout, NON-Default partition\n");
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    prefetch(0, 1, rid2);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if(0 == my_rank) {
+        printf("***************************************************************\n");
+        printf("TESTING Prefetch - NON-Default layout, NON-Default partition\n");
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    prefetch(1, 1, rid2);
     MPI_Barrier(MPI_COMM_WORLD);
 
     if(my_rank == 0) {
@@ -352,9 +426,6 @@ int main(int argc, char **argv) {
     H5Sclose(sid);
     H5Pclose(fapl_id);
     H5ESclose(e_stack);
-
-    free(wdata1);
-    free(rdata1);
 
     /* This finalizes the EFF stack. ships a terminate and IOD finalize to the server 
        and shutsdown the FS server (when all clients send the terminate request) 

@@ -871,7 +871,7 @@ append_dataset2( hid_t obj_id, const char* dset_name, hid_t tr_id, hid_t rc_id, 
          hid_t memspace_id;
          
          nCols = current_size[1];
-         data = (int *)calloc( nCols, sizeof(int) );    // Write 1 column
+         data = (int *)calloc( nCols, sizeof(int) ); assert( data != NULL );   
 
          /* set data value, create memory data space, then select the element to update */
          for ( i = 0; i < nCols; i++ ) {
@@ -1007,7 +1007,7 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
          } else {
             totalSize = current_size[0] * current_size[1];
          }
-         data = (int *)calloc( totalSize, sizeof(int) ); 
+         data = (int *)calloc( totalSize, sizeof(int) ); assert( data != NULL );
 
          ret = H5Dread_ff( dset_id, H5T_NATIVE_INT, space_id, space_id, H5P_DEFAULT, data, rc_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 

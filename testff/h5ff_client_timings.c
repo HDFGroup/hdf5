@@ -175,7 +175,7 @@ int main( int argc, char **argv ) {
 
    /* Create the memory buffer that will be used in many places - both for writing and reading */
    bytesPerCell = sizeof( uint64_t );
-   mbuf = (uint64_t *) calloc( (rows_per_rank * comm_size * cols_per_row), bytesPerCell );
+   mbuf = (uint64_t *) calloc( (rows_per_rank * comm_size * cols_per_row), bytesPerCell ); assert( mbuf != NULL );
 
    /****
     * Transaction 2: Rank 0 creates H5Objects in the container 
@@ -318,7 +318,7 @@ int main( int argc, char **argv ) {
 
    /* Create the memory dataspace for a rank - always first part of memory buffer */
    rank_mbuf_size[0] = rows_per_rank * cols_per_row;
-   rank_space_id = H5Screate_simple( 1, rank_mbuf_size, rank_mbuf_size ); assert( space_id >= 0 );
+   rank_space_id = H5Screate_simple( 1, rank_mbuf_size, rank_mbuf_size ); assert( rank_space_id >= 0 );
 
    /* Create property lists that will be used */
    dxpl_p_id = H5Pcreate( H5P_DATASET_XFER );                              
@@ -860,7 +860,7 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
       assert( nDims == 2 );
 
       totalSize = current_size[0] * current_size[1];
-      data = (uint64_t *)calloc( totalSize, sizeof(uint64_t) );
+      data = (uint64_t *)calloc( totalSize, sizeof(uint64_t) ); assert( data != NULL );
 
       ret = H5Dread_ff( dset_id, H5T_NATIVE_UINT64, space_id, space_id, H5P_DEFAULT, data, rc_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
@@ -896,7 +896,7 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
       assert( map_id >= 0 );
 
       ret = H5Mget_count_ff( map_id, &totalCount, rc_id, H5_EVENT_STACK_NULL );  ASSERT_RET;
-      value = (uint64_t *)calloc( totalCount, sizeof(uint64_t) ); 
+      value = (uint64_t *)calloc( totalCount, sizeof(uint64_t) );  assert( value != NULL );
 
       for ( u = 0; u < totalCount; u++ ) {
          ret = H5Mget_ff( map_id, H5T_NATIVE_UINT64, &u, H5T_NATIVE_UINT64, &value[u], H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 

@@ -250,8 +250,7 @@ int main(int argc, char **argv) {
 
     /* check if an object exists. This is asynchronous, so checking
        the value should be done after the wait */
-    ret = H5Oexists_by_name_ff(file_id, "G1", &exists, 
-                               H5P_DEFAULT, rid2, e_stack);
+    ret = H5Oexists_by_name_ff(file_id, "G1", &exists, H5P_DEFAULT, rid2, e_stack);
     assert(ret == 0);
 
     if(my_rank == 0) {

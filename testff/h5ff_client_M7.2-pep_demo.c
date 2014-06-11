@@ -396,6 +396,8 @@ int main( int argc, char **argv ) {
          }
       MPI_Barrier( MPI_COMM_WORLD );
    }
+   else 
+       MPI_Barrier( MPI_COMM_WORLD );
 
    if ( my_rank == comm_size-1 ) {
       fprintf( stderr, "APP-r%d: cv 5 - Persist\n", my_rank );
@@ -416,7 +418,9 @@ int main( int argc, char **argv ) {
       }
       MPI_Barrier( MPI_COMM_WORLD );
    }
-   
+   else 
+       MPI_Barrier( MPI_COMM_WORLD );
+
    /* All ranks print container here.  For rank == comm_size, this will be after objects have been evicted */
    if ( verbose ) print_container_contents( file_id, rc_id5, "/", my_rank ); 
 
@@ -580,9 +584,9 @@ int main( int argc, char **argv ) {
 
    /* Find entries in first Map, then use to create value vectors for all three Map objects - we know they have same size. */
    ret = H5Mget_count_ff( map_l_id, &map_entries, rc_id, H5_EVENT_STACK_NULL );  ASSERT_RET;
-   value_l = (int *)calloc( map_entries, sizeof(int) ); 
-   value_p = (int *)calloc( map_entries, sizeof(int) ); 
-   value_s = (int *)calloc( map_entries, sizeof(int) ); 
+   value_l = (int *)calloc( map_entries, sizeof(int) ); assert( value_l != NULL );
+   value_p = (int *)calloc( map_entries, sizeof(int) ); assert( value_p != NULL );
+   value_s = (int *)calloc( map_entries, sizeof(int) ); assert( value_s != NULL );
 
    /* Read Datasets and then Maps in all 3 Groups, measuring time it takes to read data for each*/
 
@@ -720,6 +724,9 @@ int main( int argc, char **argv ) {
    free( value_l );
    free( value_p );
    free( value_s );
+
+   /* wait for all ranks to complete read before evicting replicas */
+   MPI_Barrier( MPI_COMM_WORLD );
 
    /* Rank 0 evicts replicas */
    if ( my_rank == 0 ) {
@@ -1136,7 +1143,7 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
       assert( nDims == 1 );
 
       totalSize = current_size[0];
-      data = (int *)calloc( totalSize, sizeof(int) ); 
+      data = (int *)calloc( totalSize, sizeof(int) ); assert( data != NULL );
 
       ret = H5Dread_ff( dset_id, H5T_NATIVE_INT, space_id, space_id, H5P_DEFAULT, data, rc_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
 
@@ -1166,7 +1173,7 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
       assert( map_id >= 0 );
 
       ret = H5Mget_count_ff( map_id, &totalCount, rc_id, H5_EVENT_STACK_NULL );  ASSERT_RET;
-      value = (int *)calloc( totalCount, sizeof(int) ); 
+      value = (int *)calloc( totalCount, sizeof(int) ); assert( value != NULL );
 
       for ( i = 0; i < totalCount; i++ ) {
          ret = H5Mget_ff( map_id, H5T_STD_I32LE, &i, H5T_STD_I32LE, &value[i], H5P_DEFAULT, rc_id, H5_EVENT_STACK_NULL ); 
