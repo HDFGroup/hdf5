@@ -800,7 +800,7 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
         unsigned plugin_id;
         size_t metadata_size;
         size_t idx_count;
-        void *metadata;
+        void *metadata = NULL;
         H5P_genplist_t *xapl_plist; /* Property list pointer */
         hid_t xapl_id = H5P_INDEX_ACCESS_DEFAULT;
 
@@ -832,6 +832,8 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
             if (FAIL == H5VL_iod_dataset_set_index_plugin_id(dset, plugin_id))
                 HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "cannot set index plugin ID to dataset");
         }
+        /* No longer need metadata */
+        H5MM_free(metadata);
     }
 #endif /* H5_HAVE_INDEXING */
 
