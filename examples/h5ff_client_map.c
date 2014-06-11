@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     hid_t file_id;
     hid_t gid1, gid2, dtid1, dtid2;
     hid_t map1, map2, map3;
-    hid_t tid1, tid2, rid1, rid2, rid3;
+    hid_t tid1, tid2, tid3, tid4, rid1, rid2, rid3;
     hid_t fapl_id, dxpl_id, trspl_id;
     hid_t e_stack;
 
@@ -328,13 +328,21 @@ int main(int argc, char **argv) {
     ret = H5Mexists_ff(map1, H5T_STD_I32LE, &key, &exists, rid2, e_stack);
     assert(ret == 0);
 
-    /* create & start transaction 3 with Multiple Leader - No Delegate Model. */
+    /* create & start transaction 3, 4, and 5 with Multiple Leader - No Delegate Model. */
     tid2 = H5TRcreate(file_id, rid2, (uint64_t)3);
     assert(tid2);
+    tid3 = H5TRcreate(file_id, rid2, (uint64_t)4);
+    assert(tid3);
+    tid4 = H5TRcreate(file_id, rid2, (uint64_t)5);
+    assert(tid4);
     trspl_id = H5Pcreate (H5P_TR_START);
     ret = H5Pset_trspl_num_peers(trspl_id, my_size);
     assert(0 == ret);
     ret = H5TRstart(tid2, trspl_id, H5_EVENT_STACK_NULL);
+    assert(0 == ret);
+    ret = H5TRstart(tid3, trspl_id, H5_EVENT_STACK_NULL);
+    assert(0 == ret);
+    ret = H5TRstart(tid4, trspl_id, H5_EVENT_STACK_NULL);
     assert(0 == ret);
     ret = H5Pclose(trspl_id);
     assert(0 == ret);
@@ -355,16 +363,29 @@ int main(int argc, char **argv) {
             assert(H5Gclose_ff(temp_id, H5_EVENT_STACK_NULL) ==0);
     }
 
-    /* finish transaction 3 */
+    /* finish transaction 3, 4, 5 */
     if(my_rank == 0) {
+        /* set dependencies from 4 and 5 on 3 */
+        ret = H5TRset_dependency(tid3, (uint64_t)3, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+        ret = H5TRset_dependency(tid4, (uint64_t)3, H5_EVENT_STACK_NULL);
+        assert(0 == ret);
+
         ret = H5TRabort(tid2, H5_EVENT_STACK_NULL);
         assert(0 == ret);
     }
     else {
         ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
         if(ret < 0)
-            fprintf(stderr, "Transaction finish failed (aborted)\n");
+            fprintf(stderr, "Transaction finish failed as expected (aborted)\n");
     }
+
+    ret = H5TRfinish(tid3, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
+    if(ret < 0)
+        fprintf(stderr, "Transaction finish failed (aborted)\n");
+    ret = H5TRfinish(tid4, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
+    if(ret < 0)
+        fprintf(stderr, "Transaction finish failed (aborted)\n");
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -381,12 +402,22 @@ int main(int argc, char **argv) {
     assert(0 == ret);
     ret = H5TRclose(tid2);
     assert(0 == ret);
+    ret = H5TRclose(tid3);
+    assert(0 == ret);
+    ret = H5TRclose(tid4);
+    assert(0 == ret);
 
     /* Barrier so all processes are guranteed to have finished/aborted transaction 2 */
     MPI_Barrier(MPI_COMM_WORLD);
 
-    /* acquire container version 3 - EXACT  (Should Fail since 2 is aborted) */
+    /* acquire container version 3, 4, 5 - EXACT  (Should Fail since 2 is aborted) */
     version = 3;
+    rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    assert(rid3 < 0);
+    version = 4;
+    rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    assert(rid3 < 0);
+    version = 5;
     rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
     assert(rid3 < 0);
 

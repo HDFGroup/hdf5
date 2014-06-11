@@ -586,7 +586,10 @@ H5VL_iod_server_trans_set_dependency_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     tr_set_depend_in_t *input = (tr_set_depend_in_t *)op_data->input;
     iod_handle_t coh = input->coh; /* the container handle */
-    iod_trans_depend_desc_t depends;
+    iod_trans_id_t lower = input->parent_trans_num;
+    iod_trans_id_t higher = input->child_trans_num;
+    iod_trans_depend_desc_t *depends;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG
@@ -594,10 +597,15 @@ H5VL_iod_server_trans_set_dependency_cb(AXE_engine_t UNUSED axe_engine,
             input->child_trans_num, input->parent_trans_num);
 #endif
 
-    /* MSC - set depends */
+    depends = (iod_trans_depend_desc_t *)malloc(sizeof(iod_trans_depend_desc_t) + 
+                                                sizeof(iod_trans_range_t));
+    depends->n_depend = 1;
+    depends->depend[0].lower_tid  = lower;
+    depends->depend[0].higher_tid = higher;
 
-    //if(iod_trans_depend(coh, depends, NULL) < 0)
-    //HGOTO_ERROR_FF(FAIL, "can't set dependency between transactions");
+    ret = iod_trans_depend(coh, depends, NULL);
+    if(ret != 0 && -IOD_EC_TRANS_DISCARDED != ret)
+        HGOTO_ERROR_FF(FAIL, "can't set dependency between transactions");
 
 #if H5_EFF_DEBUG
     fprintf(stderr, "Done with Transaction Set_Dependency\n");
@@ -606,6 +614,11 @@ H5VL_iod_server_trans_set_dependency_cb(AXE_engine_t UNUSED axe_engine,
 done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         fprintf(stderr, "Failed to Set_Dependency between Transactions\n");
+
+    if(depends) {
+        free(depends);
+        depends = NULL;
+    }
 
     HG_Handler_free_input(op_data->hg_handle, input);
     HG_Handler_free(op_data->hg_handle);
