@@ -1158,7 +1158,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5VM_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *down,
     hsize_t *coords)
 {
