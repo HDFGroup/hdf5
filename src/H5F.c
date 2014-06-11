@@ -171,6 +171,9 @@ H5F_term_interface(void)
             /* Make certain we've cleaned up all the shared file objects */
             H5F_sfile_assert_num(0);
 
+            /* Close deprecated interface */
+            n += H5F__term_deprec_interface();
+
 	    H5I_dec_type_ref(H5I_FILE);
 	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
@@ -289,6 +292,7 @@ H5F_get_all_count_cb(void UNUSED *obj_ptr, hid_t UNUSED obj_id, void *key)
 
     *(udata->obj_count) = *(udata->obj_count)+1; 
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_get_all_count_cb */
 
@@ -553,7 +557,7 @@ H5Fis_accessible(const char *name, hid_t fapl_id)
         if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
-    if(H5VL_file_misc(NULL, NULL, H5VL_FILE_IS_ACCESSIBLE, H5AC_dxpl_id, H5_EVENT_STACK_NULL, 
+    if(H5VL_file_misc(NULL, NULL, H5VL_FILE_IS_ACCESSIBLE, H5AC_ind_dxpl_g, H5_EVENT_STACK_NULL, 
                       fapl_id, name, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file handle")
 

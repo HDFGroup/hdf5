@@ -17,7 +17,8 @@
 #
 # HDF5-Fortran test/Makefile(.in)
 #
-
+# Autoconf cannot figure out dependencies between modules; disable parallel make
+.NOTPARALLEL:
 include $(top_srcdir)/config/commence.am
 
 # Include files
@@ -59,16 +60,15 @@ libh5test_fortran_la_SOURCES= tf.f90 t.c
 fortranlib_test_FCFLAGS=$(AM_FCFLAGS)
 fortranlib_test_CFLAGS=$(AM_CFLAGS)
 
-fortranlib_test_SOURCES = fortranlib_test.f90 \
-        tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 \
-        tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90
+fortranlib_test_SOURCES = tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 \
+        tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90 tHDF5.f90 fortranlib_test.f90
 
-fortranlib_test_1_8_SOURCES = fortranlib_test_1_8.f90 \
-        tH5F.f90 tH5O.f90 tH5A_1_8.f90 tH5G_1_8.f90
+fortranlib_test_1_8_SOURCES = tH5O.f90 tH5A_1_8.f90 tH5G_1_8.f90 tH5MISC_1_8.f90 tHDF5_1_8.f90\
+        fortranlib_test_1_8.f90
 
 if FORTRAN_2003_CONDITIONAL_F
-   fortranlib_test_F03_SOURCES = fortranlib_test_F03.f90 \
-	tH5F.f90 tH5E_F03.f90 tH5F_F03.f90 tH5L_F03.f90 tH5O_F03.f90 tH5P_F03.f90 tH5T_F03.f90
+   fortranlib_test_F03_SOURCES = tH5E_F03.f90 tH5F_F03.f90 tH5L_F03.f90 \
+        tH5O_F03.f90 tH5P_F03.f90 tH5T_F03.f90 tHDF5_F03.f90 fortranlib_test_F03.f90
 endif
 
 
@@ -79,8 +79,19 @@ fflush2_SOURCES=fflush2.f90
 LDADD=libh5test_fortran.la $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 
 # Temporary files
-CHECK_CLEANFILES+=*.h5
+CHECK_CLEANFILES+=*.h5 *.raw
 MOSTLYCLEANFILES=*.tmp
+
+# Fortran module files can have different extensions and different names
+# (e.g., different capitalizations) on different platforms.  Write rules
+# for them explicitly rather than trying to teach automake about them.
+# They should be installed as headers and removed during clean.
+maintainer-clean-local: clean-local
+distclean-local: clean-local
+clean-local:
+	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	  $(RM) *.$(F9XMODEXT);                                         \
+	fi
 
 # Mark this directory as part of the Fortran API (this affects output
 # from tests in conclude.am)

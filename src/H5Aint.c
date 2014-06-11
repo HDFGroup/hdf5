@@ -820,7 +820,7 @@ H5A_get_create_plist(H5A_t* attr)
     hid_t               ret_value;
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(H5P_LST_ATTRIBUTE_CREATE_g)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(H5P_LST_ATTRIBUTE_CREATE_ID_g)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get default ACPL")
 
     /* Create the property list object to return */

@@ -119,7 +119,7 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_MASK_MOD=true"
               -D "TEST_REFERENCE=${resultfile}.ls"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5MKGRP-${resultfile}-h5ls PROPERTIES DEPENDS H5MKGRP-${resultfile})
     endif (HDF5_ENABLE_USING_MEMCHECKER)
@@ -147,7 +147,7 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.txt"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5MKGRP_CMP-${resultfile} PROPERTIES DEPENDS H5MKGRP_CMP-${resultfile}-clear-objects)
     endif (HDF5_ENABLE_USING_MEMCHECKER)
@@ -190,7 +190,7 @@
 
   # test the output files repartitioned above.
   add_test (NAME H5REPART-h5repart_test COMMAND $<TARGET_FILE:h5repart_test>)
-  set_tests_properties (H5REPART-h5repart_test PROPERTIES DEPENDS H5REPART-clearall-objects DEPENDS H5REPART-h5repart_20K DEPENDS H5REPART-h5repart_5K DEPENDS H5REPART-h5repart_sec2)
+  set_tests_properties (H5REPART-h5repart_test PROPERTIES DEPENDS "H5REPART-clearall-objects;H5REPART-h5repart_20K;H5REPART-h5repart_5K;H5REPART-h5repart_sec2")
 
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
         h5repart_test

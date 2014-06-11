@@ -23,7 +23,7 @@ endforeach (h5_file ${HDF5_TEST_FILES})
 
   # Remove any output file left over from previous test run
   add_test (
-      NAME hl_ex-clear-objects
+      NAME HL_ex-clear-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
     ex_lite1.h5
@@ -47,14 +47,14 @@ endforeach (h5_file ${HDF5_TEST_FILES})
     ex_ds1.h5
   )
   if (NOT "${last_test}" STREQUAL "")
-    set_tests_properties (hl_ex-clear-objects PROPERTIES DEPENDS ${last_test})
+    set_tests_properties (HL_ex-clear-objects PROPERTIES DEPENDS ${last_test})
   endif (NOT "${last_test}" STREQUAL "")
-  set (last_test "hl_ex-clear-objects")
+  set (last_test "HL_ex-clear-objects")
 
 foreach (example ${examples})
-  add_test (NAME hl_ex_${example} COMMAND $<TARGET_FILE:hl_ex_${example}>)
+  add_test (NAME HL_ex_${example} COMMAND $<TARGET_FILE:hl_ex_${example}>)
     if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (hl_ex_${example} PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (HL_ex_${example} PROPERTIES DEPENDS ${last_test})
     endif (NOT "${last_test}" STREQUAL "")
-    set (last_test "hl_ex_${example}")
+    set (last_test "HL_ex_${example}")
 endforeach (example ${examples})

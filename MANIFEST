@@ -364,6 +364,7 @@
 ./fortran/test/tH5G_1_8.f90
 ./fortran/test/tH5I.f90
 ./fortran/test/tH5L_F03.f90
+./fortran/test/tH5MISC_1_8.f90
 ./fortran/test/tH5O.f90
 ./fortran/test/tH5O_F03.f90
 ./fortran/test/tH5P_F03.f90
@@ -375,6 +376,9 @@
 ./fortran/test/tH5T.f90
 ./fortran/test/tH5VL.f90
 ./fortran/test/tH5Z.f90
+./fortran/test/tHDF5_1_8.f90
+./fortran/test/tHDF5_F03.f90
+./fortran/test/tHDF5.f90
 
 ./fortran/testpar/Makefile.am
 ./fortran/testpar/Makefile.in
@@ -486,6 +490,8 @@
 ./c++/src/h5c++.in
 ./c++/src/header.html
 ./c++/src/header_files/filelist.xml
+./c++/src/header_files/hdf_logo.jpg
+./c++/src/header_files/help.jpg
 ./c++/src/header_files/image001.jpg
 ./c++/src/header_files/image002.jpg
 
@@ -504,6 +510,7 @@
 ./c++/test/th5s.cpp
 ./c++/test/th5s.h5
 ./c++/test/tlinks.cpp
+./c++/test/tobject.cpp
 ./c++/test/ttypes.cpp
 ./c++/test/trefer.cpp
 ./c++/test/tvlstr.cpp
@@ -2138,6 +2145,12 @@
 ./tools/h5diff/testfiles/compounds_array_vlen2.h5
 ./tools/h5diff/testfiles/non_comparables1.h5
 ./tools/h5diff/testfiles/non_comparables2.h5
+./tools/h5diff/testfiles/tmptest2.he5
+./tools/h5diff/testfiles/tmpSingleSiteBethe.reference.h5
+./tools/h5diff/testfiles/h5diff_tmp1.txt
+./tools/h5diff/testfiles/tmptest.he5
+./tools/h5diff/testfiles/h5diff_tmp2.txt
+./tools/h5diff/testfiles/tmpSingleSiteBethe.output.h5
 
 #test files for h5repack
 ./tools/h5repack/testfiles/h5repack_attr.h5
@@ -2424,42 +2437,45 @@
 ./vms/tools/testfiles/tperror.ddl
 
 # CMake-specific Files
-./config/cmake/FindSZIP.cmake
+./config/cmake/cacheinit.cmake
 ./config/cmake/ConversionTests.c
-./config/cmake/GetTimeOfDayTest.cpp
-./config/cmake/HDF5CXXTests.cpp
-./config/cmake/HDF5Tests.c
-./config/cmake/CheckTypeSize.cmake
+./config/cmake/ConfigureChecks.cmake
+./config/cmake/CTestCustom.cmake
+./config/cmake/FindHDF5.cmake.in
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
-./config/cmake/FindHDF5.cmake.in
-./config/cmake/FindMPI.cmake
 ./config/cmake/hdf5-config.cmake.build.in
 ./config/cmake/hdf5-config.cmake.install.in
 ./config/cmake/hdf5-config-version.cmake.in
-./config/cmake/HDFMacros.cmake
-./config/cmake/HDFLibMacros.cmake
 ./config/cmake/HDF5Macros.cmake
-./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/libhdf5.settings.cmake.in
-./config/cmake/cacheinit.cmake
 ./config/cmake/mccacheinit.cmake
-./config/cmake/grepTest.cmake
-./config/cmake/prunTest.cmake
-./config/cmake/runTest.cmake
+./config/cmake/PkgInfo.in
+./config/cmake/README.txt.cmake.in
 ./config/cmake/userblockTest.cmake
 ./config/cmake/vfdTest.cmake
-./config/cmake/CTestCustom.cmake
-./config/cmake/ConfigureChecks.cmake
-./config/cmake/CPack.Info.plist.in
-./config/cmake/hdf.bmp
-./config/cmake/hdf.icns
-./config/cmake/hdf.ico
-./config/cmake/PkgInfo.in
-./config/cmake/version.plist.in
-./config/cmake/NSIS.template.in
-./config/cmake/NSIS.InstallOptions.ini.in
-./config/cmake/README.txt.cmake.in
+
+./config/cmake_ext_mod/CheckTypeSize.cmake
+./config/cmake_ext_mod/ConfigureChecks.cmake
+./config/cmake_ext_mod/CPack.Info.plist.in
+./config/cmake_ext_mod/CTestCustom.cmake
+./config/cmake_ext_mod/FindMPI.cmake
+./config/cmake_ext_mod/FindSZIP.cmake
+./config/cmake_ext_mod/GetTimeOfDayTest.cpp
+./config/cmake_ext_mod/grepTest.cmake
+./config/cmake_ext_mod/hdf.bmp
+./config/cmake_ext_mod/hdf.icns
+./config/cmake_ext_mod/hdf.ico
+./config/cmake_ext_mod/HDFCXXTests.cpp
+./config/cmake_ext_mod/HDFLibMacros.cmake
+./config/cmake_ext_mod/HDFMacros.cmake
+./config/cmake_ext_mod/HDFTests.c
+./config/cmake_ext_mod/HDFUseFortran.cmake
+./config/cmake_ext_mod/NSIS.InstallOptions.ini.in
+./config/cmake_ext_mod/NSIS.template.in
+./config/cmake_ext_mod/prunTest.cmake
+./config/cmake_ext_mod/runTest.cmake
+./config/cmake_ext_mod/version.plist.in
 
 # CMake-specific User Files
 ./config/cmake/UserMacros/Windows_MT.cmake

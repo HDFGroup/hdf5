@@ -467,9 +467,9 @@ H5std_string CommonFG::getLinkval( const H5std_string& name, size_t size ) const
 ///\param	child - IN: File to mount
 ///\param	plist - IN: Property list to use
 ///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
+// Programmer	Binh-Minh Ribler - 2014 (original 2000)
 //--------------------------------------------------------------------------
-void CommonFG::mount( const char* name, H5File& child, PropList& plist ) const
+void CommonFG::mount(const char* name, const H5File& child, const PropList& plist ) const
 {
    // Obtain identifiers for C API
    hid_t plist_id = plist.getId();
@@ -485,14 +485,41 @@ void CommonFG::mount( const char* name, H5File& child, PropList& plist ) const
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::mount
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name.
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const's.  This wrapper will be removed in future release.
+///\param	name  - IN: Name of the group
+///\param	child - IN: File to mount
+///\param	plist - IN: Property list to use
+///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void CommonFG::mount( const H5std_string& name, H5File& child, PropList& plist ) const
+void CommonFG::mount(const char* name, H5File& child, PropList& plist) const
 {
-   mount( name.c_str(), child, plist );
+   mount(name, (const H5File)child, (const PropList)plist);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::mount
+///\brief	This is an overloaded member function, provided for convenience.
+///		It takes an \c H5std_string for \a name.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void CommonFG::mount(const H5std_string& name, const H5File& child, const PropList& plist) const
+{
+   mount(name.c_str(), child, plist);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::mount
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const's.  This wrapper will be removed in future release.
+// Programmer	Binh-Minh Ribler - 2014
+//--------------------------------------------------------------------------
+void CommonFG::mount(const H5std_string& name, H5File& child, PropList& plist) const
+{
+   mount(name.c_str(), (const H5File)child, (const PropList)plist);
 }
 
 //--------------------------------------------------------------------------
@@ -939,7 +966,125 @@ ssize_t CommonFG::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) 
    return (name_len);
 }
 
+//--------------------------------------------------------------------------
+// Function:	CommonFG::childObjType
+///\brief	Returns the type of an object in this file/group, given the
+///		object's name.
+///\param	objname - IN: Name of the object
+///\return	Object type, which can have the following values for group,
+///		dataset, and named datatype
+///		\li \c H5O_TYPE_GROUP
+///		\li \c H5O_TYPE_DATASET
+///		\li \c H5O_TYPE_NAMED_DATATYPE
+///		Refer to the C API documentation for more details:
+///		http://www.hdfgroup.org/HDF5/doc/RM/RM_H5O.html#Object-GetInfo
+///\exception	H5::FileIException or H5::GroupIException
+///		Exception will be thrown when:
+///		- an error returned by the C API
+///		- object type is not one of the valid values above
+// Programmer	Binh-Minh Ribler - April, 2014
+//--------------------------------------------------------------------------
+H5O_type_t CommonFG::childObjType(const char* objname) const
+{
+    H5O_info_t objinfo;
+    H5O_type_t objtype = H5O_TYPE_UNKNOWN;
+
+    // Use C API to get information of the object
+    herr_t ret_value = H5Oget_info_by_name(getLocId(), objname, &objinfo, H5P_DEFAULT);
+
+    // Throw exception if C API returns failure
+    if (ret_value < 0)
+	throwException("childObjType", "H5Oget_info_by_name failed");
+    // Return a valid type or throw an exception for unknown type
+    else
+      switch (objinfo.type)
+      {
+	case H5O_TYPE_GROUP:
+	case H5O_TYPE_DATASET:
+	case H5O_TYPE_NAMED_DATATYPE:
+	    objtype = objinfo.type;
+	    break;
+	default:
+	    throwException("childObjType", "Unknown type of object");
+      }
+    return(objtype);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::childObjType
+///\brief	This is an overloaded member function, provided for convenience.
+///		It takes an \a H5std_string for the object's name.
+///\brief	Returns the type of an object in this group, given the
+///		object's name.
+///\param	objname - IN: Name of the object (H5std_string&)
+///\exception	H5::FileIException or H5::GroupIException
+// Programmer	Binh-Minh Ribler - April, 2014
+//--------------------------------------------------------------------------
+H5O_type_t CommonFG::childObjType(const H5std_string& objname) const
+{
+    // Use overloaded function
+    H5O_type_t objtype = childObjType(objname.c_str());
+    return(objtype);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::childObjType
+///\brief	Returns the type of an object in this file/group, given the
+///		object's index and its type and order.
+///\param	index - IN: Position of the object
+///\param	index_type - IN: Type of the index, default to H5_INDEX_NAME
+///\param	order - IN: Traversing order, default to H5_ITER_INC
+///\param	objname - IN: Name of the object, default to "."
+///\return	Object type, which can have the following values for group,
+///		dataset, and named datatype
+///		\li \c H5O_TYPE_GROUP
+///		\li \c H5O_TYPE_DATASET
+///		\li \c H5O_TYPE_NAMED_DATATYPE
+///		Refer to the C API documentation for more details:
+///		http://www.hdfgroup.org/HDF5/doc/RM/RM_H5O.html#Object-GetInfo
+///\exception	H5::FileIException or H5::GroupIException
+///		Exception will be thrown when:
+///		- an error returned by the C API
+///		- object type is not one of the valid values above
+// Developer's Notes:
+//	- this overload uses H5Oget_info_by_idx instead of H5Oget_info_by_name
+//	  like the previous childObjType()
+//	- index is the required argument so, first
+//	- objname is last because it's more likely the location is already
+//	  fully specified
+//	- Leave property list out for now because C API is not using it, it
+//	  can be added later when needed.
+// Programmer	Binh-Minh Ribler - April, 2014
+//--------------------------------------------------------------------------
+H5O_type_t CommonFG::childObjType(hsize_t index, H5_index_t index_type, H5_iter_order_t order, const char* objname) const
+{
+    herr_t ret_value;
+    H5O_info_t objinfo;
+    H5O_type_t objtype = H5O_TYPE_UNKNOWN;
+
+    // Use C API to get information of the object
+    ret_value = H5Oget_info_by_idx(getLocId(), objname, index_type, order, index, &objinfo, H5P_DEFAULT);
+
+    // Throw exception if C API returns failure
+    if (ret_value < 0)
+	throwException("childObjType", "H5Oget_info_by_idx failed");
+    // Return a valid type or throw an exception for unknown type
+    else
+      switch (objinfo.type)
+      {
+	case H5O_TYPE_GROUP:
+	case H5O_TYPE_DATASET:
+	case H5O_TYPE_NAMED_DATATYPE:
+	    objtype = objinfo.type;
+	    break;
+	default:
+	    throwException("childObjType", "Unknown type of object");
+      }
+    return(objtype);
+}
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:	CommonFG::getObjTypeByIdx
 ///\brief	Returns the type of an object in this group, given the
@@ -964,7 +1109,7 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx) const
 ///		It differs from the above function because it also provides
 ///		the returned object type in text (char*)
 ///\param	idx       - IN: Transient index of the object
-///\param	type_name - IN: Object type in text
+///\param	type_name - OUT: Object type in text
 ///\return	Object type
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - May, 2010
@@ -990,7 +1135,7 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, char* type_name) const
 ///		It differs from the above function because it also provides
 ///		the returned object type in text (H5std_string&)
 ///\param	idx       - IN: Transient index of the object
-///\param	type_name - IN: Object type in text
+///\param	type_name - OUT: Object type in text
 ///\return	Object type
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - January, 2003
@@ -1010,6 +1155,7 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, H5std_string& type_name) const
    }
    return (obj_type);
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

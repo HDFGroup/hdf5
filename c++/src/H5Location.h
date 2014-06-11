@@ -104,9 +104,9 @@ class H5_DLLCPP H5Location : public IdComponent {
 	void setComment(const H5std_string& comment) const;
 
 	// Retrieves comment for the HDF5 object specified by its name.
-	ssize_t getComment(const char* name, const size_t buf_size, char* comment) const;
-	H5std_string getComment(const char* name, const size_t buf_size=0) const;
-	H5std_string getComment(const H5std_string& name, const size_t buf_size=0) const;
+	ssize_t getComment(const char* name, size_t buf_size, char* comment) const;
+	H5std_string getComment(const char* name, size_t buf_size=0) const;
+	H5std_string getComment(const H5std_string& name, size_t buf_size=0) const;
 
 	// Removes the comment for the HDF5 object specified by its name.
 	void removeComment(const char* name) const;

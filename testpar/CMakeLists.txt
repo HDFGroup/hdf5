@@ -4,7 +4,7 @@ PROJECT (HDF5_TEST_PAR)
 #-----------------------------------------------------------------------------
 # Apply Definitions to compiler in this directory and below
 #-----------------------------------------------------------------------------
-add_definitions (${HDF5_EXTRA_C_FLAGS})
+add_definitions (${HDF_EXTRA_C_FLAGS})
 
 INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
 INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib )

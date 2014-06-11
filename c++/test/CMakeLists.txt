@@ -20,6 +20,7 @@ set (CPP_TEST_SRCS
     ${HDF5_CPP_TEST_SOURCE_DIR}/tfilter.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/th5s.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/tlinks.cpp
+    ${HDF5_CPP_TEST_SOURCE_DIR}/tobject.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/trefer.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/ttypes.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/tvlstr.cpp

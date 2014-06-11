@@ -470,75 +470,81 @@ static herr_t trav_grp_symlinks(const char *path, const H5L_info_t *linfo,
 
     switch(linfo->type)
     {
-    case H5L_TYPE_SOFT:
-        ret = H5tools_get_symlink_info(tinfo->fid, path, &lnk_info, opts->follow_links);
-        /* error */
-        if (ret < 0)
-            goto done;
-        /* no dangling link option given and detect dangling link */
-        else if (ret == 0)
-        {
-            tinfo->symlink_visited.dangle_link = TRUE;
-            trav_info_visit_lnk(path, linfo, tinfo);
-            if (opts->no_dangle_links)
-                opts->err_stat = 1; /* make dgangling link is error */
-            goto done;
-        }
+        case H5L_TYPE_SOFT:
+            ret = H5tools_get_symlink_info(tinfo->fid, path, &lnk_info, opts->follow_links);
+            /* error */
+            if (ret < 0)
+                goto done;
+            /* no dangling link option given and detect dangling link */
+            else if (ret == 0)
+            {
+                tinfo->symlink_visited.dangle_link = TRUE;
+                trav_info_visit_lnk(path, linfo, tinfo);
+                if (opts->no_dangle_links)
+                    opts->err_stat = 1; /* make dgangling link is error */
+                goto done;
+            }
 
-        /* check if already visit the target object */        
-        if(symlink_is_visited( &(tinfo->symlink_visited), linfo->type, NULL, lnk_info.trg_path)) 
-            goto done;
+            /* check if already visit the target object */        
+            if(symlink_is_visited( &(tinfo->symlink_visited), linfo->type, NULL, lnk_info.trg_path)) 
+                goto done;
 
-        /* add this link as visited link */
-        if(symlink_visit_add( &(tinfo->symlink_visited), linfo->type, NULL, lnk_info.trg_path) < 0) 
-            goto done;
-                
-        if(h5trav_visit(tinfo->fid, path, TRUE, TRUE,
-                     trav_grp_objs,trav_grp_symlinks, tinfo) < 0)
-        {
-            parallel_print("Error: Could not get file contents\n");
+            /* add this link as visited link */
+            if(symlink_visit_add( &(tinfo->symlink_visited), linfo->type, NULL, lnk_info.trg_path) < 0) 
+                goto done;
+                    
+            if(h5trav_visit(tinfo->fid, path, TRUE, TRUE,
+                         trav_grp_objs,trav_grp_symlinks, tinfo) < 0)
+            {
+                parallel_print("Error: Could not get file contents\n");
+                opts->err_stat = 1;
+                goto done;
+            }
+            break;
+        
+        case H5L_TYPE_EXTERNAL:    
+            ret = H5tools_get_symlink_info(tinfo->fid, path, &lnk_info, opts->follow_links);
+            /* error */
+            if (ret < 0)
+                goto done;
+            /* no dangling link option given and detect dangling link */
+            else if (ret == 0)
+            {
+                tinfo->symlink_visited.dangle_link = TRUE;
+                trav_info_visit_lnk(path, linfo, tinfo);
+                if (opts->no_dangle_links)
+                    opts->err_stat = 1; /* make dgangling link is error */
+                goto done;
+            }
+
+            if(H5Lunpack_elink_val(lnk_info.trg_path, linfo->u.val_size, NULL, &ext_fname, &ext_path) < 0) 
+                goto done;
+
+            /* check if already visit the target object */        
+            if(symlink_is_visited( &(tinfo->symlink_visited), linfo->type, ext_fname, ext_path)) 
+                goto done;
+
+            /* add this link as visited link */
+            if(symlink_visit_add( &(tinfo->symlink_visited), linfo->type, ext_fname, ext_path) < 0) 
+                goto done;
+                    
+            if(h5trav_visit(tinfo->fid, path, TRUE, TRUE,
+                            trav_grp_objs,trav_grp_symlinks, tinfo) < 0)
+            {
+                parallel_print("Error: Could not get file contents\n");
+                opts->err_stat = 1;
+                goto done;
+            }
+            break;
+
+        case H5L_TYPE_HARD:
+        case H5L_TYPE_MAX:
+        case H5L_TYPE_ERROR:
+        default:
+            parallel_print("Error: Invalid link type\n");
             opts->err_stat = 1;
             goto done;
-        }
-        break;
-    
-    case H5L_TYPE_EXTERNAL:    
-        ret = H5tools_get_symlink_info(tinfo->fid, path, &lnk_info, opts->follow_links);
-        /* error */
-        if (ret < 0)
-            goto done;
-        /* no dangling link option given and detect dangling link */
-        else if (ret == 0)
-        {
-            tinfo->symlink_visited.dangle_link = TRUE;
-            trav_info_visit_lnk(path, linfo, tinfo);
-            if (opts->no_dangle_links)
-                opts->err_stat = 1; /* make dgangling link is error */
-            goto done;
-        }
-
-        if(H5Lunpack_elink_val(lnk_info.trg_path, linfo->u.val_size, NULL, &ext_fname, &ext_path) < 0) 
-            goto done;
-
-        /* check if already visit the target object */        
-        if(symlink_is_visited( &(tinfo->symlink_visited), linfo->type, ext_fname, ext_path)) 
-            goto done;
-
-        /* add this link as visited link */
-        if(symlink_visit_add( &(tinfo->symlink_visited), linfo->type, ext_fname, ext_path) < 0) 
-            goto done;
-                
-        if(h5trav_visit(tinfo->fid, path, TRUE, TRUE,
-                        trav_grp_objs,trav_grp_symlinks, tinfo) < 0)
-        {
-            parallel_print("Error: Could not get file contents\n");
-            opts->err_stat = 1;
-            goto done;
-        }
-        break;
-    default:
-        ;
-        break;
+            break;
     } /* end of switch */
 
 done:    
@@ -572,7 +578,6 @@ hsize_t h5diff(const char *fname1,
     hid_t        file2_id = (-1);
     char         filenames[2][MAX_FILENAME];
     hsize_t      nfound = 0;
-    int i;
     int l_ret1 = -1;
     int l_ret2 = -1;
     char * obj1fullname = NULL;
@@ -653,27 +658,37 @@ hsize_t h5diff(const char *fname1,
     /* if any object is specified */
     if (objname1)
     {
-        /* malloc 2 more for "/" and end-of-line */
-        obj1fullname = (char*)HDcalloc(HDstrlen(objname1) + 2, sizeof(char));
-        obj2fullname = (char*)HDcalloc(HDstrlen(objname2) + 2, sizeof(char));
-
         /* make the given object1 fullpath, start with "/"  */
         if (HDstrncmp(objname1, "/", 1))
         {
+#ifdef H5_HAVE_ASPRINTF
+            /* Use the asprintf() routine, since it does what we're trying to do below */
+            HDasprintf(&obj1fullname, "/%s", objname1);
+#else /* H5_HAVE_ASPRINTF */
+            /* (malloc 2 more for "/" and end-of-line) */
+            obj1fullname = (char*)HDmalloc(HDstrlen(objname1) + 2);
             HDstrcpy(obj1fullname, "/");
             HDstrcat(obj1fullname, objname1);
+#endif /* H5_HAVE_ASPRINTF */
         }
         else
-            HDstrcpy(obj1fullname, objname1);
+            obj1fullname = HDstrdup(objname1);
 
         /* make the given object2 fullpath, start with "/" */
         if (HDstrncmp(objname2, "/", 1))
         {
+#ifdef H5_HAVE_ASPRINTF
+            /* Use the asprintf() routine, since it does what we're trying to do below */
+            HDasprintf(&obj2fullname, "/%s", objname2);
+#else /* H5_HAVE_ASPRINTF */
+            /* (malloc 2 more for "/" and end-of-line) */
+            obj2fullname = (char*)HDmalloc(HDstrlen(objname2) + 2);
             HDstrcpy(obj2fullname, "/");
             HDstrcat(obj2fullname, objname2);
+#endif /* H5_HAVE_ASPRINTF */
         }
         else
-            HDstrcpy(obj2fullname, objname2);
+            obj2fullname = HDstrdup(objname2);
 
         /*----------------------------------------------------------
          * check if obj1 is root, group, single object or symlink
@@ -706,7 +721,8 @@ hsize_t h5diff(const char *fname1,
              */
             if(src_linfo1.type == H5L_TYPE_HARD)
             {
-                int idx = 0;
+                size_t idx;
+
                 /* optional data pass */
                 info1_obj->opts = (diff_opt_t*)options;
 
@@ -716,7 +732,7 @@ hsize_t h5diff(const char *fname1,
                     options->err_stat = 1;
                     goto out;
                 }
-                obj1type = oinfo1.type;
+                obj1type = (h5trav_type_t)oinfo1.type;
                 trav_info_add(info1_obj, obj1fullname, obj1type);
                 idx = info1_obj->nused - 1;
                 info1_obj->paths[idx].objno = oinfo1.addr;
@@ -765,7 +781,8 @@ hsize_t h5diff(const char *fname1,
              */
             if(src_linfo2.type == H5L_TYPE_HARD)
             {
-                int idx = 0;
+                size_t idx;
+
                 /* optional data pass */
                 info2_obj->opts = (diff_opt_t*)options;
 
@@ -775,7 +792,7 @@ hsize_t h5diff(const char *fname1,
                     options->err_stat = 1;
                     goto out;
                 }
-                obj2type = oinfo2.type;
+                obj2type = (h5trav_type_t)oinfo2.type;
                 trav_info_add(info2_obj, obj2fullname, obj2type);
                 idx = info2_obj->nused - 1;
                 info2_obj->paths[idx].objno = oinfo2.addr;
@@ -798,11 +815,9 @@ hsize_t h5diff(const char *fname1,
     {
         h5difftrace("h5diff no object specified\n");
         /* set root group */
-        obj1fullname = (char*)HDcalloc((size_t)2, sizeof(char));
-        HDstrcat(obj1fullname, "/");
+        obj1fullname = (char*)HDstrdup("/");
         obj1type = H5TRAV_TYPE_GROUP;
-        obj2fullname = (char*)HDcalloc((size_t)2, sizeof(char));
-        HDstrcat(obj2fullname, "/");
+        obj2fullname = (char*)HDstrdup("/");
         obj2type = H5TRAV_TYPE_GROUP;
     }
 
@@ -856,12 +871,13 @@ hsize_t h5diff(const char *fname1,
         }
         else if(l_ret1 != 2) /* symbolic link */
         {
-            obj1type = trg_linfo1.trg_type;
+            obj1type = (h5trav_type_t)trg_linfo1.trg_type;
             h5difftrace("h5diff ... ... trg_linfo1.trg_type == H5L_TYPE_HARD\n");
             if (info1_lp != NULL) {
-                int idx = info1_lp->nused - 1;
+                size_t idx = info1_lp->nused - 1;
+
                 h5difftrace("h5diff ... ... ... info1_obj not null\n");
-                info1_lp->paths[idx].type = trg_linfo1.trg_type;
+                info1_lp->paths[idx].type = (h5trav_type_t)trg_linfo1.trg_type;
                 info1_lp->paths[idx].objno = trg_linfo1.objno;
                 info1_lp->paths[idx].fileno = trg_linfo1.fileno;
             }
@@ -904,11 +920,12 @@ hsize_t h5diff(const char *fname1,
         }
         else if(l_ret2 != 2)  /* symbolic link */
         {
-            obj2type = trg_linfo2.trg_type;
+            obj2type = (h5trav_type_t)trg_linfo2.trg_type;
             if (info2_lp != NULL) {
-                int idx = info2_lp->nused - 1;
+                size_t idx = info2_lp->nused - 1;
+
                 h5difftrace("h5diff ... ... ... info2_obj not null\n");
-                info2_lp->paths[idx].type = trg_linfo2.trg_type;
+                info2_lp->paths[idx].type = (h5trav_type_t)trg_linfo2.trg_type;
                 info2_lp->paths[idx].objno = trg_linfo2.objno;
                 info2_lp->paths[idx].fileno = trg_linfo2.fileno;
             }
@@ -972,6 +989,8 @@ hsize_t h5diff(const char *fname1,
 #ifdef H5_HAVE_PARALLEL
     if(g_Parallel)
     {
+        int i;
+
         if((HDstrlen(fname1) > MAX_FILENAME) || (HDstrlen(fname2) > MAX_FILENAME))
         {
             HDfprintf(stderr, "The parallel diff only supports path names up to %d characters\n", MAX_FILENAME);
@@ -997,6 +1016,8 @@ hsize_t h5diff(const char *fname1,
          */
          if(options->m_verbose)
          {
+             unsigned u;
+
              parallel_print("\n");
              /* if given objects is group under root */
              if (HDstrcmp (obj1fullname,"/") || HDstrcmp (obj2fullname,"/"))
@@ -1004,12 +1025,12 @@ hsize_t h5diff(const char *fname1,
              else
                  parallel_print("file1     file2\n");
              parallel_print("---------------------------------------\n");
-             for(i = 0; i < match_list->nobjs; i++)
+             for(u = 0; u < match_list->nobjs; u++)
              {
                  char c1, c2;
-                 c1 = (match_list->objs[i].flags[0]) ? 'x' : ' ';
-                 c2 = (match_list->objs[i].flags[1]) ? 'x' : ' ';
-                 parallel_print("%5c %6c    %-15s\n", c1, c2, match_list->objs[i].name);
+                 c1 = (match_list->objs[u].flags[0]) ? 'x' : ' ';
+                 c2 = (match_list->objs[u].flags[1]) ? 'x' : ' ';
+                 parallel_print("%5c %6c    %-15s\n", c1, c2, match_list->objs[u].name);
              } /* end for */
              parallel_print ("\n");
          } /* end if */
@@ -1092,8 +1113,8 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
     hsize_t      nfound = 0;
     unsigned     i;
 
-    char * grp1_path = "";
-    char * grp2_path = "";
+    const char * grp1_path = "";
+    const char * grp2_path = "";
     char * obj1_fullpath = NULL;
     char * obj2_fullpath = NULL;
     diff_args_t argdata;
@@ -1106,10 +1127,10 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
      * if not root, prepare object name to be pre-appended to group path to
      * make full path
      */
-    if (HDstrcmp (grp1, "/"))
-        grp1_path = (char *)grp1;
-    if (HDstrcmp (grp2, "/"))
-        grp2_path = (char *)grp2;
+    if(HDstrcmp(grp1, "/"))
+        grp1_path = grp1;
+    if(HDstrcmp(grp2, "/"))
+        grp2_path = grp2;
 
     /*-------------------------------------------------------------------------
     * regarding the return value of h5diff (0, no difference in files, 1 difference )
@@ -1163,22 +1184,32 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
         if( table->objs[i].flags[0] && table->objs[i].flags[1])
         {
             /* make full path for obj1 */
-            obj1_fullpath = (char*)HDcalloc (HDstrlen(grp1_path) + strlen (table->objs[i].name) + 1, sizeof (char));
+#ifdef H5_HAVE_ASPRINTF
+            /* Use the asprintf() routine, since it does what we're trying to do below */
+            HDasprintf(&obj1_fullpath, "%s%s", grp1_path, table->objs[i].name);
+#else /* H5_HAVE_ASPRINTF */
+            obj1_fullpath = (char*)HDmalloc(HDstrlen(grp1_path) + HDstrlen(table->objs[i].name) + 1);
             HDstrcpy(obj1_fullpath, grp1_path);
             HDstrcat(obj1_fullpath, table->objs[i].name);
+#endif /* H5_HAVE_ASPRINTF */
 
             /* make full path for obj2 */
-            obj2_fullpath = (char*)HDcalloc (HDstrlen(grp2_path) + strlen (table->objs[i].name) + 1, sizeof (char));
+#ifdef H5_HAVE_ASPRINTF
+            /* Use the asprintf() routine, since it does what we're trying to do below */
+            HDasprintf(&obj2_fullpath, "%s%s", grp2_path, table->objs[i].name);
+#else /* H5_HAVE_ASPRINTF */
+            obj2_fullpath = (char*)HDmalloc(HDstrlen(grp2_path) + HDstrlen(table->objs[i].name) + 1);
             HDstrcpy(obj2_fullpath, grp2_path);
             HDstrcat(obj2_fullpath, table->objs[i].name);
+#endif /* H5_HAVE_ASPRINTF */
 
             /* get index to figure out type of the object in file1 */
-            while ( info1->paths[idx1].path && 
-                    (HDstrcmp (obj1_fullpath, info1->paths[idx1].path) != 0) )
+            while(info1->paths[idx1].path && 
+                    (HDstrcmp(obj1_fullpath, info1->paths[idx1].path) != 0))
                 idx1++;
             /* get index to figure out type of the object in file2 */
-            while ( info2->paths[idx2].path &&
-                    (HDstrcmp (obj2_fullpath, info2->paths[idx2].path) != 0) )
+            while(info2->paths[idx2].path &&
+                    (HDstrcmp(obj2_fullpath, info2->paths[idx2].path) != 0))
                 idx2++;
 
             /* Set argdata to pass other args into diff() */
@@ -1363,10 +1394,10 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                 } /* end if */
             } /* end else */
 #endif /* H5_HAVE_PARALLEL */
-            if (obj1_fullpath)
-                HDfree (obj1_fullpath);
-            if (obj2_fullpath)                
-                HDfree (obj2_fullpath);
+            if(obj1_fullpath)
+                HDfree(obj1_fullpath);
+            if(obj2_fullpath)                
+                HDfree(obj2_fullpath);
         } /* end if */
     } /* end for */
     h5difftrace("done with for loop\n");
@@ -1586,12 +1617,12 @@ hsize_t diff(hid_t file1_id,
         if (options->follow_links)
         {
             if (linkinfo1.linfo.type == H5L_TYPE_SOFT ||
-                linkinfo1.linfo.type == H5L_TYPE_EXTERNAL)
-                argdata->type[0] = linkinfo1.trg_type;
+                    linkinfo1.linfo.type == H5L_TYPE_EXTERNAL)
+                argdata->type[0] = (h5trav_type_t)linkinfo1.trg_type;
 
             if (linkinfo2.linfo.type == H5L_TYPE_SOFT ||
-                linkinfo2.linfo.type == H5L_TYPE_EXTERNAL)
-                argdata->type[1] = linkinfo2.trg_type;
+                    linkinfo2.linfo.type == H5L_TYPE_EXTERNAL)
+                argdata->type[1] = (h5trav_type_t)linkinfo2.trg_type;
         }
     }
     /* if objects are not the same type */
@@ -1633,29 +1664,30 @@ hsize_t diff(hid_t file1_id,
             {
                 switch(object_type)
                 {
-                case H5TRAV_TYPE_DATASET:
-                    do_print_objname("dataset", path1, path2, options);
-                    break; 
-                case H5TRAV_TYPE_NAMED_DATATYPE:
-                    do_print_objname("datatype", path1, path2, options);
-                    break;
-                case H5TRAV_TYPE_GROUP:
-                    do_print_objname("group", path1, path2, options);
-                    break;
-                case H5TRAV_TYPE_LINK:
-                    do_print_objname("link", path1, path2, options);
-                    break;
-                case H5TRAV_TYPE_UDLINK:
-                    if(linkinfo1.linfo.type == H5L_TYPE_EXTERNAL && linkinfo2.linfo.type == H5L_TYPE_EXTERNAL)
-                        do_print_objname("external link", path1, path2, options);
-                    else
-                        do_print_objname ("user defined link", path1, path2, options);
-                    break; 
-                default:
-                    parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n",
-                        path1, path2, get_type(object_type) );
-                    options->not_cmp = 1;
-                    break;
+                    case H5TRAV_TYPE_DATASET:
+                        do_print_objname("dataset", path1, path2, options);
+                        break; 
+                    case H5TRAV_TYPE_NAMED_DATATYPE:
+                        do_print_objname("datatype", path1, path2, options);
+                        break;
+                    case H5TRAV_TYPE_GROUP:
+                        do_print_objname("group", path1, path2, options);
+                        break;
+                    case H5TRAV_TYPE_LINK:
+                        do_print_objname("link", path1, path2, options);
+                        break;
+                    case H5TRAV_TYPE_UDLINK:
+                        if(linkinfo1.linfo.type == H5L_TYPE_EXTERNAL && linkinfo2.linfo.type == H5L_TYPE_EXTERNAL)
+                            do_print_objname("external link", path1, path2, options);
+                        else
+                            do_print_objname ("user defined link", path1, path2, options);
+                        break; 
+                    case H5TRAV_TYPE_UNKNOWN:
+                    default:
+                        parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n",
+                            path1, path2, get_type(object_type) );
+                        options->not_cmp = 1;
+                        break;
                 } /* switch(type)*/
 
                 print_found(nfound);
@@ -1862,6 +1894,7 @@ hsize_t diff(hid_t file1_id,
             }
             break;
 
+        case H5TRAV_TYPE_UNKNOWN:
         default:
             if(options->m_verbose)
                 parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n",

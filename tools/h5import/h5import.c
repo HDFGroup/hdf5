@@ -874,12 +874,9 @@ static int processStrData(FILE *strm, struct Input *in, hid_t file_id)
      *-------------------------------------------------------------------------
      */
 
-    while (!HDfeof(strm)) {
-        c = HDfgetc(strm);
-
+    while(EOF != (c = HDfgetc(strm)))
         if (c == 10)    /* eol */
             nlines++;
-    }
 
     if (!nlines)
         return 0;
@@ -940,9 +937,7 @@ static int processStrData(FILE *strm, struct Input *in, hid_t file_id)
 
     line = 0;
 
-    while (!HDfeof(strm)) {
-        c = HDfgetc(strm);
-
+    while(EOF != (c = HDfgetc(strm))) {
         str[i] = (char)c;
 
         i++;

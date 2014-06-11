@@ -181,7 +181,7 @@ H5D__init_interface(void)
     /* Get the default dataset creation property list values and initialize the
      * default dataset with them.
      */
-    if(NULL == (def_dcpl = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_CREATE_g)))
+    if(NULL == (def_dcpl = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_CREATE_ID_g)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't get default dataset creation property list")
 
     /* Get the default data storage layout */
@@ -256,6 +256,12 @@ H5D_term_interface(void)
              */
 	    H5I_clear_type(H5I_DATASET, TRUE, FALSE);
 	} else {
+            /* Close public interface */
+            n += H5D__term_pub_interface();
+
+            /* Close deprecated interface */
+            n += H5D__term_deprec_interface();
+
 	    H5I_dec_type_ref(H5I_DATASET);
 	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
@@ -2603,17 +2609,17 @@ H5D_get_access_plist(H5D_t *dset)
 {
     H5P_genplist_t      *old_plist;     /* Default DAPL */
     H5P_genplist_t      *new_plist;     /* New DAPL */
-    hid_t               new_id = FAIL;
+    hid_t               new_dapl_id = FAIL;
     hid_t               ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Make a copy of the default dataset access property list */
-    if (NULL == (old_plist = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_ACCESS_g)))
+    if (NULL == (old_plist = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_ACCESS_ID_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-    if ((new_id = H5P_copy_plist(old_plist, TRUE)) < 0)
+    if ((new_dapl_id = H5P_copy_plist(old_plist, TRUE)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "can't copy dataset access property list")
-    if (NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_id)))
+    if (NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_dapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* If the dataset is chunked then copy the rdcc parameters */
@@ -2627,12 +2633,12 @@ H5D_get_access_plist(H5D_t *dset)
     } /* end if */
 
     /* Set the return value */
-    ret_value = new_id;
+    ret_value = new_dapl_id;
 
 done:
     if(ret_value < 0) {
-        if(new_id > 0)
-            if(H5I_dec_app_ref(new_id) < 0)
+        if(new_dapl_id > 0)
+            if(H5I_dec_app_ref(new_dapl_id) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't free")
     } /* end if */
 

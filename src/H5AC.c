@@ -114,6 +114,7 @@ static hid_t H5AC_noblock_dxpl_id=(-1);
 /* Dataset transfer property list for independent metadata I/O calls */
 /* (just "library internal" set - i.e. independent transfer mode) */
 /* (Global variable definition, declaration is in H5ACprivate.h also) */
+H5P_genplist_t *H5AC_ind_dxpl_g = NULL;
 hid_t H5AC_ind_dxpl_id=(-1);
 
 
@@ -165,8 +166,7 @@ static herr_t H5AC_log_moved_entry(const H5F_t * f,
                                      haddr_t old_addr,
                                      haddr_t new_addr);
 
-static herr_t H5AC_log_inserted_entry(H5F_t * f,
-                                      H5AC_t * cache_ptr,
+static herr_t H5AC_log_inserted_entry(H5AC_t * cache_ptr,
                                       H5AC_info_t * entry_ptr);
 
 static herr_t H5AC_propagate_and_apply_candidate_list(H5F_t  * f,
@@ -256,30 +256,25 @@ static herr_t
 H5AC_init_interface(void)
 {
 #ifdef H5_HAVE_PARALLEL
-    H5P_genclass_t  *xfer_pclass;   /* Dataset transfer property list class object */
     H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
     unsigned block_before_meta_write; /* "block before meta write" property value */
     unsigned coll_meta_write;       /* "collective metadata write" property value */
-    unsigned library_internal=1;    /* "library internal" property value */
-    H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
-    herr_t ret_value=SUCCEED;           /* Return value */
+    unsigned library_internal = 1;  /* "library internal" property value */
+#endif /* H5_HAVE_PARALLEL */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#ifdef H5_HAVE_PARALLEL
     /* Sanity check */
-    HDassert(H5P_CLS_DATASET_XFER_g!=(-1));
-
-    /* Get the dataset transfer property list class object */
-    if (NULL == (xfer_pclass = H5I_object(H5P_CLS_DATASET_XFER_g)))
-        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get property list class")
-
+    HDassert(H5P_CLS_DATASET_XFER_g != NULL);
 
     /* Get an ID for the blocking, collective H5AC dxpl */
-    if ((H5AC_dxpl_id=H5P_create_id(xfer_pclass,FALSE)) < 0)
+    if((H5AC_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
     /* Get the property list object */
-    if (NULL == (xfer_plist = H5I_object(H5AC_dxpl_id)))
+    if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
 
     /* Insert 'block before metadata write' property */
@@ -301,11 +296,11 @@ H5AC_init_interface(void)
 
 
     /* Get an ID for the non-blocking, collective H5AC dxpl */
-    if ((H5AC_noblock_dxpl_id=H5P_create_id(xfer_pclass,FALSE)) < 0)
+    if((H5AC_noblock_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
     /* Get the property list object */
-    if (NULL == (xfer_plist = H5I_object(H5AC_noblock_dxpl_id)))
+    if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_noblock_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
 
     /* Insert 'block before metadata write' property */
@@ -327,45 +322,45 @@ H5AC_init_interface(void)
 
 
     /* Get an ID for the non-blocking, independent H5AC dxpl */
-    if ((H5AC_ind_dxpl_id=H5P_create_id(xfer_pclass,FALSE)) < 0)
+    if((H5AC_ind_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
     /* Get the property list object */
-    if (NULL == (xfer_plist = H5I_object(H5AC_ind_dxpl_id)))
+    if(NULL == (H5AC_ind_dxpl_g = (H5P_genplist_t *)H5I_object(H5AC_ind_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
 
     /* Insert 'block before metadata write' property */
     block_before_meta_write=0;
-    if(H5P_insert(xfer_plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,H5AC_BLOCK_BEFORE_META_WRITE_SIZE,&block_before_meta_write,
-                  NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_insert(H5AC_ind_dxpl_g, H5AC_BLOCK_BEFORE_META_WRITE_NAME, H5AC_BLOCK_BEFORE_META_WRITE_SIZE, &block_before_meta_write,
+                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Insert 'library internal' property */
-    if(H5P_insert(xfer_plist,H5AC_LIBRARY_INTERNAL_NAME,H5AC_LIBRARY_INTERNAL_SIZE,&library_internal,
-                  NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_insert(H5AC_ind_dxpl_g, H5AC_LIBRARY_INTERNAL_NAME, H5AC_LIBRARY_INTERNAL_SIZE, &library_internal,
+                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Insert 'collective metadata write' property */
     coll_meta_write = 0;
-    if(H5P_insert(xfer_plist, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
+    if(H5P_insert(H5AC_ind_dxpl_g, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
                   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-
 #else /* H5_HAVE_PARALLEL */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
     /* Sanity check */
-    HDassert(H5P_LST_DATASET_XFER_g!=(-1));
+    HDassert(H5P_LST_DATASET_XFER_ID_g!=(-1));
 
     H5AC_dxpl_id = H5P_DATASET_XFER_DEFAULT;
     H5AC_noblock_dxpl_id = H5P_DATASET_XFER_DEFAULT;
     H5AC_ind_dxpl_id = H5P_DATASET_XFER_DEFAULT;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    /* Get the property list objects for the IDs */
+    if (NULL == (H5AC_ind_dxpl_g = (H5P_genplist_t *)H5I_object(H5AC_ind_dxpl_id)))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get property list object")
 #endif /* H5_HAVE_PARALLEL */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5AC_init_interface() */
 
 
@@ -1013,7 +1008,7 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
 
     if(NULL != (aux_ptr = (H5AC_aux_t *)f->shared->cache->aux_ptr)) {
         /* Log the new entry */
-        if(H5AC_log_inserted_entry(f, f->shared->cache, (H5AC_info_t *)thing) < 0)
+        if(H5AC_log_inserted_entry(f->shared->cache, (H5AC_info_t *)thing) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5AC_log_inserted_entry() failed")
 
         /* Check if we should try to flush */
@@ -1631,7 +1626,6 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     hbool_t		dirtied;
     hbool_t		deleted;
 #ifdef H5_HAVE_PARALLEL
-    hbool_t		size_changed = FALSE;
     H5AC_aux_t        * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
 #if H5AC__TRACE_FILE_ENABLED
@@ -1746,7 +1740,7 @@ H5AC_set_sync_point_done_callback(H5C_t * cache_ptr,
 {
     H5AC_aux_t * aux_ptr;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(cache_ptr && (cache_ptr->magic == H5C__H5C_T_MAGIC));
 
@@ -1783,7 +1777,7 @@ H5AC_set_write_done_callback(H5C_t * cache_ptr,
 {
     H5AC_aux_t * aux_ptr;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(cache_ptr && (cache_ptr->magic == H5C__H5C_T_MAGIC));
 
@@ -2631,7 +2625,6 @@ H5AC_broadcast_candidate_list(H5AC_t * cache_ptr,
                               int * num_entries_ptr,
                               haddr_t ** haddr_buf_ptr_ptr)
 {
-    herr_t		 result;
     hbool_t		 success = FALSE;
     H5AC_aux_t         * aux_ptr = NULL;
     haddr_t            * haddr_buf_ptr = NULL;
@@ -2801,7 +2794,7 @@ H5AC_broadcast_clean_list(H5AC_t * cache_ptr)
          */
         if ( aux_ptr->sync_point_done != NULL ) {
 
-            addr_buf_ptr = H5MM_malloc((size_t)(num_entries * sizeof(haddr_t)));
+            addr_buf_ptr = H5MM_malloc((size_t)num_entries * sizeof(haddr_t));
 
             if ( addr_buf_ptr == NULL ) {
 
@@ -2899,7 +2892,7 @@ done:
     if(buf_ptr != NULL)
         buf_ptr = (MPI_Offset *)H5MM_xfree((void *)buf_ptr);
     if(addr_buf_ptr != NULL)
-        addr_buf_ptr = (MPI_Offset *)H5MM_xfree((void *)addr_buf_ptr);
+        addr_buf_ptr = (haddr_t *)H5MM_xfree((void *)addr_buf_ptr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_broadcast_clean_list() */
@@ -3633,8 +3626,7 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_log_inserted_entry(H5F_t * f,
-                        H5AC_t * cache_ptr,
+H5AC_log_inserted_entry(H5AC_t * cache_ptr,
                         H5AC_info_t * entry_ptr)
 {
     H5AC_aux_t         * aux_ptr;

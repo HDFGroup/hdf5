@@ -316,6 +316,15 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 /* Definitions for misc. test #30 */
 #define MISC30_FILE             "tmisc30.h5"
 
+/* Definitions for misc. test #31 */
+#define MISC31_FILE             "tmisc31.h5"
+#define MISC31_DSETNAME         "dset"
+#define MISC31_ATTRNAME1        "attr1"
+#define MISC31_ATTRNAME2        "attr2"
+#define MISC31_GROUPNAME        "group"
+#define MISC31_PROPNAME         "misc31_prop"
+#define MISC31_DTYPENAME        "dtype"
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -5195,6 +5204,105 @@ test_misc30(void)
     VERIFY(file_size[0], file_size[1], "test_misc30");
 } /* end test_misc30() */
 
+
+/****************************************************************
+**
+**  test_misc31(): Test reentering library through deprecated
+*                  routines that register an id after calling
+*                  H5close().
+**
+****************************************************************/
+static void
+test_misc31(void)
+{
+    hid_t file_id;              /* File id */
+    hid_t space_id;             /* Dataspace id */
+    hid_t dset_id;              /* Dataset id */
+    hid_t attr_id;              /* Attribute id */
+    hid_t group_id;             /* Group id */
+    hid_t dtype_id;             /* Datatype id */
+    herr_t ret;                 /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Deprecated routines initialize after H5close()\n"));
+
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    file_id = H5Fcreate(MISC31_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fcreate");
+
+    /* Test dataset package */
+    space_id = H5Screate(H5S_SCALAR);
+    CHECK(space_id, FAIL, "H5Screate");
+    dset_id = H5Dcreate1(file_id, MISC31_DSETNAME, H5T_NATIVE_INT, space_id, H5P_DEFAULT);
+    CHECK(dset_id, FAIL, "H5Dcreate1");
+    ret = H5close();
+    CHECK(ret, FAIL, "H5close");
+    file_id = H5Fopen(MISC31_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fopen");
+    dset_id = H5Dopen1(file_id, MISC31_DSETNAME);
+    CHECK(dset_id, FAIL, "H5Dopen1");
+
+    /* Test attribute package */
+    space_id = H5Screate(H5S_SCALAR);
+    CHECK(space_id, FAIL, "H5Screate");
+    attr_id = H5Acreate1(dset_id, MISC31_ATTRNAME1, H5T_NATIVE_INT, space_id, H5P_DEFAULT);
+    CHECK(attr_id, FAIL, "H5Acreate1");
+    ret = H5close();
+    CHECK(ret, FAIL, "H5close");
+    file_id = H5Fopen(MISC31_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fopen");
+    dset_id = H5Dopen1(file_id, MISC31_DSETNAME);
+    CHECK(dset_id, FAIL, "H5Dopen1");
+    space_id = H5Screate(H5S_SCALAR);
+    CHECK(space_id, FAIL, "H5Screate");
+    attr_id = H5Acreate1(dset_id, MISC31_ATTRNAME2, H5T_NATIVE_INT, space_id, H5P_DEFAULT);
+    CHECK(attr_id, FAIL, "H5Acreate1");
+
+    /* Test group package */
+    group_id = H5Gcreate1(file_id, MISC31_GROUPNAME, 0);
+    CHECK(group_id, FAIL, "H5Gcreate1");
+    ret = H5close();
+    CHECK(ret, FAIL, "H5close");
+    file_id = H5Fopen(MISC31_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fopen");
+    group_id = H5Gopen1(file_id, MISC31_GROUPNAME);
+    CHECK(group_id, FAIL, "H5Gopen1");
+
+    /* Test property list package */
+    ret = H5Pregister1(H5P_OBJECT_CREATE, MISC31_PROPNAME, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK(ret, FAIL, "H5Pregister1");
+    ret = H5close();
+    CHECK(ret, FAIL, "H5close");
+    ret = H5Pregister1(H5P_OBJECT_CREATE, MISC31_PROPNAME, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK(ret, FAIL, "H5Pregister1");
+    ret = H5close();
+    CHECK(ret, FAIL, "H5close");
+
+    /* Test datatype package */
+    file_id = H5Fopen(MISC31_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fopen");
+    dtype_id = H5Tcopy(H5T_NATIVE_INT);
+    CHECK(dtype_id, FAIL, "H5Tcopy");
+    ret = H5Tcommit1(file_id, MISC31_DTYPENAME, dtype_id);
+    CHECK(ret, FAIL, "H5Tcommit1");
+    ret = H5close();
+    CHECK(ret, FAIL, "H5close");
+    file_id = H5Fopen(MISC31_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fopen");
+    dtype_id = H5Topen1(file_id, MISC31_DTYPENAME);
+    CHECK(ret, FAIL, "H5Topen1");
+    ret = H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Tclose(dtype_id);
+    CHECK(ret, FAIL, "H5Tclose");
+    
+#else /* H5_NO_DEPRECATED_SYMBOLS */
+    /* Output message about test being skipped */
+    MESSAGE(5, (" ...Skipped"));
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+} /* end test_misc31() */
+
+
 /****************************************************************
 **
 **  test_misc(): Main misc. test routine.
@@ -5240,6 +5348,7 @@ test_misc(void)
     test_misc28();      /* Test that chunks are cached appropriately */
     test_misc29();      /* Test that speculative metadata reads are handled correctly */
     test_misc30();      /* Exercise local heap loading bug where free lists were getting dropped */
+    test_misc31();      /* Test Reentering library through deprecated routines after H5close() */
 
 } /* test_misc() */
 
@@ -5296,5 +5405,6 @@ cleanup_misc(void)
     HDremove(MISC28_FILE);
     HDremove(MISC29_COPY_FILE);
     HDremove(MISC30_FILE);
+    HDremove(MISC31_FILE);
 }
 

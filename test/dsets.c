@@ -6677,8 +6677,17 @@ test_zero_dims(hid_t file)
     if(H5Pset_chunk(dcpl, 1, &csize) < 0) FAIL_STACK_ERROR
     if((d = H5Dcreate2(file, ZERODIM_DATASET, H5T_NATIVE_INT, s, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-    /* Just a no-op */
+    /* Various no-op writes */
     if(H5Dwrite(d, H5T_NATIVE_INT, s, s, H5P_DEFAULT, (void*)911) < 0) FAIL_STACK_ERROR
+    if(H5Dwrite(d, H5T_NATIVE_INT, s, s, H5P_DEFAULT, NULL) < 0) FAIL_STACK_ERROR
+    if(H5Dwrite(d, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void*)911) < 0) FAIL_STACK_ERROR
+    if(H5Dwrite(d, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, NULL) < 0) FAIL_STACK_ERROR
+
+    /* Various no-op reads */
+    if(H5Dread(d, H5T_NATIVE_INT, s, s, H5P_DEFAULT, (void*)911) < 0) FAIL_STACK_ERROR
+    if(H5Dread(d, H5T_NATIVE_INT, s, s, H5P_DEFAULT, NULL) < 0) FAIL_STACK_ERROR
+    if(H5Dread(d, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void*)911) < 0) FAIL_STACK_ERROR
+    if(H5Dread(d, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, NULL) < 0) FAIL_STACK_ERROR
 
     if(H5Dclose(d) < 0) FAIL_STACK_ERROR
     if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR

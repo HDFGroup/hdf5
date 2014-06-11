@@ -103,6 +103,13 @@ void parse_command_line(int argc,
     /* NaNs are handled by default */
     options->do_nans = 1;
 
+    /* not Listing objects that are not comparable */
+    options->m_list_not_cmp = 0;
+
+    /* initially no not-comparable. */
+    /**this is bad in mixing option with results**/
+    options->not_cmp=0;
+
     /* init for exclude-path option */
     exclude_head = NULL;
 

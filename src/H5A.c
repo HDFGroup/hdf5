@@ -183,6 +183,9 @@ H5A_term_interface(void)
 	if((n = H5I_nmembers(H5I_ATTR))>0) {
 	    (void)H5I_clear_type(H5I_ATTR, FALSE, FALSE);
 	} else {
+            /* Close deprecated interface */
+            n += H5A__term_deprec_interface();
+
 	    (void)H5I_dec_type_ref(H5I_ATTR);
 	    H5_interface_initialize_g = 0;
 	    n = 1;
@@ -810,7 +813,7 @@ H5Aget_create_plist(hid_t attr_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", attr_id);
 
-    HDassert(H5P_LST_ATTRIBUTE_CREATE_g != -1);
+    HDassert(H5P_LST_ATTRIBUTE_CREATE_ID_g != -1);
 
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
@@ -820,7 +823,8 @@ H5Aget_create_plist(hid_t attr_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
 
     /* get the acpl through the VOL */
-    if(H5VL_attr_get(attr, vol_plugin, H5VL_ATTR_GET_ACPL, H5AC_dxpl_id, H5_EVENT_STACK_NULL, &ret_value) < 0)
+    if(H5VL_attr_get(attr, vol_plugin, H5VL_ATTR_GET_ACPL, H5AC_dxpl_id, 
+	H5_EVENT_STACK_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get acpl")
 
 done:

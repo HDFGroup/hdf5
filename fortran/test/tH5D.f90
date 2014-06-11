@@ -34,8 +34,12 @@
 !*****
 
 !
+MODULE TH5D
+
+CONTAINS
         SUBROUTINE datasettest(cleanup, total_error)
         USE HDF5 ! This module contains all necessary modules
+        USE TH5_MISC
 
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup
@@ -204,7 +208,7 @@
               do j = 1, 6
                   IF (data_out(i,j) .NE. dset_data(i, j)) THEN
                       write(*, *) "dataset test error occured"
-                      write(*,*) "data read is not the same as the data writen"
+                      write(*,*) "data read is not the same as the data written"
                   END IF
               end do
           end do
@@ -252,8 +256,10 @@
 
         SUBROUTINE extenddsettest(cleanup, total_error)
         USE HDF5 ! This module contains all necessary modules
+        USE TH5_MISC
 
           IMPLICIT NONE
+
           LOGICAL, INTENT(IN)  :: cleanup
           INTEGER, INTENT(OUT) :: total_error
 
@@ -308,6 +314,7 @@
           !general purpose integer
           !
           INTEGER :: i, j
+          INTEGER(HSIZE_T) :: ih, jh
 
           !
           !flag to check operation success
@@ -484,9 +491,9 @@
           !
           !Compare the data.
           !
-          do i = 1, dims1(1)
-              do j = 1, dims1(2)
-                  IF (data_out(i,j) .NE. data_in(i, j)) THEN
+          do ih = 1, dims1(1)
+              do jh = 1, dims1(2)
+                  IF (data_out(ih,jh) .NE. data_in(ih, jh)) THEN
                       write(*, *) "extend dataset test error occured"
                       write(*, *) "read value is not the same as the written values"
                   END IF
@@ -527,5 +534,5 @@
 
           RETURN
         END SUBROUTINE extenddsettest
-
+END MODULE TH5D
 

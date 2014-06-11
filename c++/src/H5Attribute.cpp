@@ -327,7 +327,7 @@ ssize_t Attribute::getName(char* attr_name, size_t buf_size) const
     {
 	throw AttributeIException("Attribute::getName", "Attribute must have a name, name length is 0");
     }
-
+    // Return length of the name
     return(name_size);
 }
 
@@ -357,7 +357,7 @@ H5std_string Attribute::getName() const
     {
 	throw AttributeIException("Attribute::getName", "Attribute must have a name, name length is 0");
     }
-    // If attribute's name exists, calls C routine again to get it
+    // Attribute's name exists, retrieve it
     else if (name_size > 0)
     {
         char* name_C = new char[name_size+1];  // temporary C-string
@@ -379,6 +379,27 @@ H5std_string Attribute::getName() const
 
 //--------------------------------------------------------------------------
 // Function:	Attribute::getName
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function in that it takes an integer
+///		specifying a desired length to be retrieved of the name.
+///\return	Name (or part of name) of the attribute
+///\param	len  -  IN: Desired length of the name
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - 2000
+// Modification
+//	Mar 2014 - BMR
+//		Revised to use the new getName() below
+//--------------------------------------------------------------------------
+H5std_string Attribute::getName(size_t len) const
+{
+   H5std_string attr_name;
+   ssize_t name_size = getName(attr_name, len);
+   return(attr_name);
+   // let caller catch exception if any
+}
+
+//--------------------------------------------------------------------------
+// Function:	Attribute::getName
 ///\brief	Gets the name of this attribute, returning its length.
 ///\param	attr_name - OUT: Buffer for the name string as \a H5std_string
 ///\param	len  -  IN: Desired length of the name, default to 0
@@ -391,7 +412,8 @@ H5std_string Attribute::getName() const
 // Programmer	Binh-Minh Ribler - Nov, 2001
 // Modification
 //	Mar 2014 - BMR
-//		Revised to allow buf_size to be skipped
+//		Added to replace getName(size_t, H5std_string&) so that it'll
+//		allow the argument "len" to be skipped.
 //--------------------------------------------------------------------------
 ssize_t Attribute::getName(H5std_string& attr_name, size_t len) const
 {
@@ -422,6 +444,24 @@ ssize_t Attribute::getName(H5std_string& attr_name, size_t len) const
 
     // Return name size
     return(name_size);
+}
+
+//--------------------------------------------------------------------------
+// Function:    Attribute::getName
+///\brief       This function is replaced by the previous function, which
+///		provides more convenient prototype.  It will be removed
+///		in future release.
+///\param       len  -  IN: Desired length of the name
+///\param       attr_name - OUT: Buffer for the name string
+///\return      Actual length of the attribute name
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - Nov, 2001
+// Modification
+//		Modified to call its replacement. -BMR, 2014/04/16
+//--------------------------------------------------------------------------
+ssize_t Attribute::getName( size_t len, H5std_string& attr_name ) const
+{
+    return (getName(attr_name, len));
 }
 
 //--------------------------------------------------------------------------
@@ -566,6 +606,7 @@ void Attribute::p_read_variable_len(const DataType& mem_type, H5std_string& strg
     HDfree(strg_C);
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    Attribute::p_setId
 ///\brief       Sets the identifier of this object to a new value.
@@ -590,6 +631,7 @@ void Attribute::p_setId(const hid_t new_id)
    // reset object's id to the given id
    id = new_id;
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	Attribute::close

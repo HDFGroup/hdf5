@@ -77,7 +77,7 @@
               -D "TEST_OUTPUT=${expectfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=testfiles/${expectfile}.txt"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5JAM-${expectfile} PROPERTIES DEPENDS H5JAM-${expectfile}-clear-objects)
     endif (HDF5_ENABLE_USING_MEMCHECKER)
@@ -111,7 +111,7 @@
               -D "TEST_OUTPUT=${expectfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=testfiles/${expectfile}.txt"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5JAM-UNJAM-${expectfile} PROPERTIES DEPENDS H5JAM-UNJAM-${expectfile}-clear-objects)
     endif (HDF5_ENABLE_USING_MEMCHECKER)
@@ -140,7 +140,7 @@
               -D "TEST_EXPECT=0"
               -D "TEST_FILTER=(^(HDF5)[^\n]*)"
               -D "TEST_SKIP_COMPARE=TRUE"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5JAM-${testname}-CHECKFILE-H5DMP PROPERTIES DEPENDS H5JAM-${testname}-CHECKFILE-clear-objects)
       add_test (
@@ -153,7 +153,7 @@
               -D "TEST_EXPECT=0"
               -D "TEST_FILTER=(^(HDF5)[^\n]*)"
               -D "TEST_REFERENCE=${actual}.new"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5JAM-${testname}-CHECKFILE-H5DMP_CMP PROPERTIES DEPENDS H5JAM-${testname}-CHECKFILE-H5DMP)
     endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
@@ -200,7 +200,7 @@
                   -D "TEST_OUTPUT=${outfile}.ufile.txt"
                   -D "TEST_EXPECT=0"
                   -D "TEST_SKIP_COMPARE=TRUE"
-                  -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+                  -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
           )
           set_tests_properties (H5JAM-${testname}-UNJAM PROPERTIES DEPENDS H5JAM-${testname}-UNJAM_D-clear-objects)
           set (compare_test "${outfile}.ufile.txt")
@@ -231,7 +231,7 @@
                 -D "TEST_UFILE=${compare_test}"
                 -D "TEST_EXPECT=0"
                 -D "TEST_OFILE="
-                -P "${HDF5_RESOURCES_DIR}/userblockTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/userblockTest.cmake"
         )
         set_tests_properties (H5JAM-${testname}-UNJAM-CHECK_UB_1 PROPERTIES DEPENDS H5JAM-${testname}-UNJAM-CHECK_UB_1-clear-objects)
       endif (NOT "${compare_test}" STREQUAL "")
@@ -247,7 +247,7 @@
               -D "TEST_EXPECT=0"
               -D "TEST_UFILE=NULL"
               -D "TEST_OFILE=NULL"
-              -P "${HDF5_RESOURCES_DIR}/userblockTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/userblockTest.cmake"
       )
       if (NOT "${compare_test}" STREQUAL "")
         set_tests_properties (H5JAM-${testname}-UNJAM-CHECK_NOUB PROPERTIES DEPENDS H5JAM-${testname}-UNJAM-CHECK_UB_1)
@@ -295,7 +295,7 @@
               -D "TEST_UFILE=testfiles/${jamfile}"
               -D "TEST_EXPECT=0"
               -D "TEST_OFILE=${compare_orig}"
-              -P "${HDF5_RESOURCES_DIR}/userblockTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/userblockTest.cmake"
       )
       set_tests_properties (H5JAM-${testname}-CHECK_UB_1 PROPERTIES DEPENDS H5JAM-${testname}-CHECK_UB_1-clear-objects)
       CHECKFILE (${testname} "H5JAM-${testname}-CHECK_UB_1" ${chkfile} ${outfile})
@@ -350,7 +350,7 @@
               -D "TEST_UFILE=testfiles/${jamfile}"
               -D "TEST_EXPECT=0"
               -D "TEST_OFILE=${compare_orig}"
-              -P "${HDF5_RESOURCES_DIR}/userblockTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/userblockTest.cmake"
       )
       set_tests_properties (H5JAM-${testname}_NONE-CHECK_UB_1 PROPERTIES DEPENDS H5JAM-${testname}_NONE-CHECK_UB_1-clear-objects)
       CHECKFILE (${testname} "H5JAM-${testname}_NONE-CHECK_UB_1" ${infile} ${chkfile})

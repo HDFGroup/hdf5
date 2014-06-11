@@ -816,8 +816,6 @@ print_float_type(h5tools_str_t *buffer, hid_t type, int ind)
  * Programmer: Robb Matzke
  *              Thursday, November  5, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -832,8 +830,7 @@ print_cmpd_type(h5tools_str_t *buffer, hid_t type, int ind)
 
     if(H5T_COMPOUND != H5Tget_class(type))
         return FALSE;
-    nmembs = H5Tget_nmembers(type);
-    if(nmembs <= 0)
+    if((nmembs = H5Tget_nmembers(type)) < 0)
         return FALSE;
 
     h5tools_str_append(buffer, "struct {");
@@ -855,6 +852,7 @@ print_cmpd_type(h5tools_str_t *buffer, hid_t type, int ind)
     size = H5Tget_size(type);
     h5tools_str_append(buffer, "\n%*s} %lu byte%s",
                 ind, "", (unsigned long)size, 1==size?"":"s");
+
     return TRUE;
 }
 
@@ -883,8 +881,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
 
     if(H5T_ENUM != H5Tget_class(type))
         return FALSE;
-    nmembs = H5Tget_nmembers(type);
-    if(nmembs < 0)
+    if((nmembs = H5Tget_nmembers(type)) < 0)
         return FALSE;
 
     super = H5Tget_super(type);

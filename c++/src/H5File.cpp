@@ -447,7 +447,7 @@ void H5File::getObjIDs(unsigned types, size_t max_objs, hid_t *oid_list) const
 ///		closed and reopened or opened during a subsequent session.
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-void H5File::getVFDHandle(FileAccPropList& fapl, void **file_handle) const
+void H5File::getVFDHandle(const FileAccPropList& fapl, void **file_handle) const
 {
    hid_t fapl_id = fapl.getId();
    herr_t ret_value = H5Fget_vfd_handle(id, fapl_id, file_handle);
@@ -455,6 +455,23 @@ void H5File::getVFDHandle(FileAccPropList& fapl, void **file_handle) const
    {
       throw FileIException("H5File::getVFDHandle", "H5Fget_vfd_handle failed");
    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::getVFDHandle
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const.  This wrapper will be removed in future release.
+///\param	fapl        - File access property list
+///\param	file_handle - Pointer to the file handle being used by
+///			      the low-level virtual file driver
+///\exception	H5::FileIException
+// Programmer   Binh-Minh Ribler - May 2004
+// Note:	Retiring April, 2014
+//--------------------------------------------------------------------------
+void H5File::getVFDHandle(FileAccPropList& fapl, void **file_handle) const
+{
+    getVFDHandle((const FileAccPropList)fapl, file_handle);
 }
 
 //--------------------------------------------------------------------------
@@ -498,19 +515,6 @@ hsize_t H5File::getFileSize() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5File::getLocId
-// Purpose:	Get the id of this file
-// Description
-//		This function is a redefinition of CommonFG::getLocId.  It
-//		is used by CommonFG member functions to get the file id.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-hid_t H5File::getLocId() const
-{
-   return( getId() );
-}
-
-//--------------------------------------------------------------------------
 // Function:    H5File::getId
 ///\brief	Get the id of this file
 ///\return	File identifier
@@ -528,6 +532,19 @@ hid_t H5File::getId() const
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:	H5File::getLocId
+// Purpose:	Get the id of this file
+// Description
+//		This function is a redefinition of CommonFG::getLocId.  It
+//		is used by CommonFG member functions to get the file id.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+hid_t H5File::getLocId() const
+{
+   return( getId() );
+}
+
 //--------------------------------------------------------------------------
 // Function:	H5File::reopen
 // Purpose:	Reopens this file.

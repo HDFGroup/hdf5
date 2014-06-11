@@ -98,6 +98,7 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object()
 ///\param       loc - IN: Location referenced object is in
 ///\param	ref - IN: Reference pointer
 ///\param	ref_type - IN: Reference type - default to H5R_OBJECT
+///\param	plist - IN: Property list - default to PropList::DEFAULT
 ///\exception	H5::ReferenceException
 // Programmer	Binh-Minh Ribler - Oct, 2006
 // Modification
@@ -116,6 +117,7 @@ DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, 
 ///\param       attr - IN: Specifying location where the referenced object is in
 ///\param	ref - IN: Reference pointer
 ///\param	ref_type - IN: Reference type - default to H5R_OBJECT
+///\param	plist - IN: Property list - default to PropList::DEFAULT
 ///\exception	H5::ReferenceException
 // Programmer	Binh-Minh Ribler - Oct, 2006
 // Modification
@@ -264,6 +266,21 @@ void DataType::p_commit(hid_t loc_id, const char* name)
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - Jan, 2007
 //--------------------------------------------------------------------------
+void DataType::commit(const H5Location& loc, const char* name)
+{
+   p_commit(loc.getId(), name);
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::commit
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const's.  This wrapper will be removed in future release.
+///\param	loc - IN: A location (file, dataset, datatype, or group)
+///\param	name - IN: Name of the datatype
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Jan, 2007
+//--------------------------------------------------------------------------
 void DataType::commit(H5Location& loc, const char* name)
 {
    p_commit(loc.getId(), name);
@@ -275,6 +292,21 @@ void DataType::commit(H5Location& loc, const char* name)
 ///		It differs from the above function only in the type of the
 ///		argument \a name.
 // Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void DataType::commit(const H5Location& loc, const H5std_string& name)
+{
+   p_commit(loc.getId(), name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::commit
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const's.  This wrapper will be removed in future release.
+///\param	loc - IN: A location (file, dataset, datatype, or group)
+///\param	name - IN: Name of the datatype
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Jan, 2007
 //--------------------------------------------------------------------------
 void DataType::commit(H5Location& loc, const H5std_string& name)
 {
@@ -333,7 +365,7 @@ H5T_conv_t DataType::find( const DataType& dest, H5T_cdata_t **pcdata ) const
 ///\param	buf        - IN/OUT: Array containing pre- and post-conversion
 ///				values
 ///\param	background - IN: Optional backgroud buffer
-///\param	plist      - IN: Dataset transfer property list
+///\param	plist - IN: Property list - default to PropList::DEFAULT
 ///\return	Pointer to a suitable conversion function
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000

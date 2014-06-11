@@ -23,7 +23,7 @@ set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
 
 add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf.f90)
 set (SHARED_LINK_FLAGS " ")
-if (WIN32 AND NOT CYGWIN)
+if (WIN32)
   if (BUILD_SHARED_LIBS)
     set_property (TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS BUILD_HDF5_DLL)
     if (MSVC)
@@ -31,7 +31,7 @@ if (WIN32 AND NOT CYGWIN)
     endif (MSVC)
   endif (BUILD_SHARED_LIBS)
   set_property (TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS HDF5F90_WINDOWS)
-endif (WIN32 AND NOT CYGWIN)
+endif (WIN32)
 TARGET_FORTRAN_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET} " " ${SHARED_LINK_FLAGS})
 set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES LINKER_LANGUAGE Fortran)
 target_link_libraries (${HDF5_F90_TEST_LIB_TARGET}
@@ -65,6 +65,7 @@ add_executable (testhdf5_fortran
     tH5T.f90
     tH5VL.f90
     tH5Z.f90
+    tHDF5.f90
 )
 TARGET_NAMING (testhdf5_fortran ${LIB_TYPE})
 TARGET_FORTRAN_PROPERTIES (testhdf5_fortran " " " ")
@@ -82,10 +83,11 @@ set_target_properties (testhdf5_fortran PROPERTIES FOLDER test/fortran)
 #-- Adding test for testhdf5_fortran_1_8
 add_executable (testhdf5_fortran_1_8
     fortranlib_test_1_8.f90
-    tH5F.f90
     tH5O.f90
     tH5A_1_8.f90
     tH5G_1_8.f90
+    tH5MISC_1_8.f90
+    tHDF5_1_8.f90
 )
 TARGET_NAMING (testhdf5_fortran_1_8 ${LIB_TYPE})
 TARGET_FORTRAN_PROPERTIES (testhdf5_fortran_1_8 " " " ")
@@ -104,13 +106,13 @@ set_target_properties (testhdf5_fortran_1_8 PROPERTIES FOLDER test/fortran)
 if (HDF5_ENABLE_F2003)
   add_executable (fortranlib_test_F03
       fortranlib_test_F03.f90
-      tH5F.f90
       tH5E_F03.f90
       tH5F_F03.f90
       tH5L_F03.f90
       tH5O_F03.f90
       tH5P_F03.f90
       tH5T_F03.f90
+      tHDF5_F03.f90
   )
   TARGET_NAMING (fortranlib_test_F03 ${LIB_TYPE})
   TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03 " " " ")

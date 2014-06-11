@@ -51,7 +51,7 @@
 /****************************/
 
 /* Structure to store information about each filter's parameters */
-typedef struct {
+typedef struct H5Z_filter_info_t {
     H5Z_filter_t	id;		/*filter identification number	     */
     unsigned		flags;		/*defn and invocation flags	     */
     char		_name[H5Z_COMMON_NAME_LEN];	/*internal filter name		     */

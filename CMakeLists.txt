@@ -136,7 +136,8 @@ set (HDF5_HL_F90_C_LIB_TARGET     ${HDF5_HL_F90_C_LIB_CORENAME})
 #-----------------------------------------------------------------------------
 # Define some CMake variables for use later in the project
 #-----------------------------------------------------------------------------
-set (HDF5_RESOURCES_DIR      ${HDF5_SOURCE_DIR}/config/cmake)
+set (HDF_RESOURCES_DIR       ${HDF5_SOURCE_DIR}/config/cmake)
+set (HDF_RESOURCES_EXT_DIR   ${HDF5_SOURCE_DIR}/config/cmake_ext_mod)
 set (HDF5_SRC_DIR            ${HDF5_SOURCE_DIR}/src)
 set (HDF5_TEST_SRC_DIR       ${HDF5_SOURCE_DIR}/test)
 set (HDF5_CPP_SRC_DIR        ${HDF5_SOURCE_DIR}/c++)
@@ -213,27 +214,11 @@ set (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
 set (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 
 #-----------------------------------------------------------------------------
-# Set Install folder value
-#-----------------------------------------------------------------------------
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  if (CMAKE_HOST_UNIX)
-    set (CMAKE_INSTALL_PREFIX "/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
-      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
-  else (CMAKE_HOST_UNIX)
-    GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
-    set (CMAKE_INSTALL_PREFIX
-      "${CMAKE_GENERIC_PROGRAM_FILES}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
-      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
-    set (CMAKE_GENERIC_PROGRAM_FILES)
-  endif (CMAKE_HOST_UNIX)
-endif (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-
-#-----------------------------------------------------------------------------
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
-include (${HDF5_RESOURCES_DIR}/HDFMacros.cmake)
-include (${HDF5_RESOURCES_DIR}/HDFLibMacros.cmake)
-include (${HDF5_RESOURCES_DIR}/HDF5Macros.cmake)
+include (${HDF_RESOURCES_EXT_DIR}/HDFMacros.cmake)
+include (${HDF_RESOURCES_EXT_DIR}/HDFLibMacros.cmake)
+include (${HDF_RESOURCES_DIR}/HDF5Macros.cmake)
 
 #-----------------------------------------------------------------------------
 # Setup output Directories
@@ -280,7 +265,7 @@ set (EXTERNAL_LIBRARYDLL_LIST "")
 #-----------------------------------------------------------------------------
 # Run all the CMake configuration tests for our build environment
 #-----------------------------------------------------------------------------
-include (${HDF5_RESOURCES_DIR}/ConfigureChecks.cmake)
+include (${HDF_RESOURCES_DIR}/ConfigureChecks.cmake)
 
 set (CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 
@@ -449,9 +434,9 @@ if (HDF5_DISABLE_COMPILER_WARNINGS)
     string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
   endif (MSVC)
-  if (WIN32 AND NOT CYGWIN)
+  if (WIN32)
     add_definitions (-D_CRT_SECURE_NO_WARNINGS)
-  endif (WIN32 AND NOT CYGWIN)
+  endif (WIN32)
   # Borland uses -w- to suppress warnings.
   if (BORLAND)
     set (HDF5_WARNINGS_BLOCKED 1)
@@ -648,7 +633,7 @@ INCLUDE_DIRECTORIES (${HDF5_BINARY_DIR} ${HDF5_SRC_DIR} ${CMAKE_RUNTIME_OUTPUT_D
 #-----------------------------------------------------------------------------
 # Option to Enable MPI Parallel
 #-----------------------------------------------------------------------------
-set (CMAKE_MODULE_PATH ${HDF5_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
+set (CMAKE_MODULE_PATH ${HDF_RESOURCES_DIR} ${HDF_RESOURCES_EXT_DIR} ${CMAKE_MODULE_PATH})
 option (HDF5_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
 if (HDF5_ENABLE_PARALLEL)
   include (FindMPI)
@@ -726,18 +711,21 @@ endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 # Note: Currently CMake only allows configuring of threadsafe on 
 # non-Cygwin WINDOWS.
 #-----------------------------------------------------------------------------
-if (WIN32 AND NOT CYGWIN)
+if (WIN32)
   option (HDF5_ENABLE_THREADSAFE "Enable thread-safety" OFF)
   if (HDF5_ENABLE_THREADSAFE)
     # check for unsupported options
+    if (H5_BUILT_AS_STATIC_LIB)
+      message (FATAL_ERROR " **** thread-safety option not supported with static library **** ")
+    endif (H5_BUILT_AS_STATIC_LIB)
     if (HDF5_ENABLE_PARALLEL)
-      message (FATAL_ERROR " **** parallel and thread-safety options are mutually exclusive **** ")
+      message (FATAL_ERROR " **** parallel and thread-safety options are not supported **** ")
     endif (HDF5_ENABLE_PARALLEL)
     if (HDF5_BUILD_FORTRAN)
-      message (FATAL_ERROR " **** Fortran and thread-safety options are mutually exclusive **** ")
+      message (FATAL_ERROR " **** Fortran and thread-safety options are not supported **** ")
     endif (HDF5_BUILD_FORTRAN)
     if (HDF5_BUILD_CPP_LIB)
-      message (FATAL_ERROR " **** C++ and thread-safety options are mutually exclusive **** ")
+      message (FATAL_ERROR " **** C++ and thread-safety options are not supported **** ")
     endif (HDF5_BUILD_CPP_LIB)
     set (H5_HAVE_THREADSAFE 1)
     if (H5_HAVE_IOEO)
@@ -750,7 +738,7 @@ if (WIN32 AND NOT CYGWIN)
       endif (NOT H5_HAVE_PTHREAD_H)
     endif (H5_HAVE_IOEO)
   endif (HDF5_ENABLE_THREADSAFE)
-endif (WIN32 AND NOT CYGWIN)
+endif (WIN32)
 
 # -----------------------------------------------------------------------
 # wrapper script variables
@@ -806,7 +794,7 @@ if (BUILD_TESTING)
   endif (HDF5_TEST_VFD)
   
   include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
-  configure_file (${HDF5_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
+  configure_file (${HDF_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
 endif (BUILD_TESTING)
 
 #-----------------------------------------------------------------------------
@@ -824,7 +812,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
       message (FATAL_ERROR " **** Shared FORTRAN libraries are unsupported **** ")
     endif (BUILD_SHARED_LIBS AND APPLE)
     option (HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" OFF)
-    include (${HDF5_RESOURCES_DIR}/HDF5UseFortran.cmake)
+    include (${HDF_RESOURCES_EXT_DIR}/HDFUseFortran.cmake)
     if (HDF5_ENABLE_F2003)
       if (NOT FORTRAN_HAVE_ISO_C_BINDING)
         set (HDF5_ENABLE_F2003 OFF)
@@ -897,6 +885,6 @@ endif (EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
 #-----------------------------------------------------------------------------
 # Generate the H5pubconf.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
-configure_file (${HDF5_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_BINARY_DIR}/H5pubconf.h @ONLY)
+configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_BINARY_DIR}/H5pubconf.h @ONLY)
 
 include (CMakeInstallation.cmake)

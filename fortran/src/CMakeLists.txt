@@ -272,6 +272,7 @@ if (WIN32)
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5fortran_types.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5test_kind_sizeof_mod.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/hdf5.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5global.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5a.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5d.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5e.mod
@@ -279,6 +280,7 @@ if (WIN32)
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5g.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5i.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5l.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5lib.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5o.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5p.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5r.mod
@@ -290,6 +292,7 @@ if (WIN32)
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5e_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5f_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5l_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5lib_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5o_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5p_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5r_provisional.mod
@@ -305,6 +308,7 @@ else (WIN32)
       FILES
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5fortran_types.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/hdf5.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5global.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5f.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5a.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5d.mod
@@ -313,6 +317,7 @@ else (WIN32)
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5g.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5i.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5l.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5lib.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5o.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5p.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5r.mod
@@ -324,6 +329,7 @@ else (WIN32)
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5e_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5e_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5l_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5lib_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5o_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5p_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5r_provisional.mod
