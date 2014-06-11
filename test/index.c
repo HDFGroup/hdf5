@@ -22,11 +22,13 @@ write_dataset(hid_t file_id, const char *dataset_name,
     hid_t       file_space_id, mem_space_id;
     hid_t       trans_id, rcxt_id, trspl_id;
     hsize_t     dims[2] = {total, ncomponents};
-    hsize_t     offset[2] = {start, 0};
+    /* hsize_t     offset[2] = {start, 0}; */
     hsize_t     count[2] = {ntuples, ncomponents};
     int         rank = (ncomponents == 1) ? 1 : 2;
     uint64_t    version = 1;
     herr_t      ret;
+
+    (void) start;
 
     /* acquire container version 1 - EXACT. */
     if(0 == my_rank) {
@@ -150,13 +152,12 @@ create_index(hid_t file_id, const char *dataset_name, hid_t estack_id)
     assert(0 == ret);
 }
 
-static hid_t
+static void
 query_and_view(hid_t file_id, const char *dataset_name, hid_t estack_id)
 {
-    double lower_bound1 = 39.1, upper_bound1 = 42.1;
-    int lower_bound2 = 295, upper_bound2 = 298;
-    hid_t  query_id1, query_id2, query_id3, query_id4, query_id5, query_id6;
-    hid_t query_id, view_id;
+    float query_lb, query_ub;
+    hid_t  query_id1, query_id2;
+    hid_t query_id;
     hid_t dataset_id;
     hid_t rcxt_id;
     uint64_t version = 3;
@@ -164,29 +165,18 @@ query_and_view(hid_t file_id, const char *dataset_name, hid_t estack_id)
 
     /* Create a simple query */
     /* query = (39.1 < x < 42.1) || (295 < x < 298) */
+    query_lb = (my_rank == 0) ? 39.1f : 295.f;
+    query_ub = (my_rank == 0) ? 42.1f : 298.f;
+
     query_id1 = H5Qcreate(H5Q_TYPE_DATA_ELEM, H5Q_MATCH_GREATER_THAN,
-            H5T_NATIVE_DOUBLE, &lower_bound1);
+            H5T_NATIVE_FLOAT, &query_lb);
     assert(query_id1);
 
     query_id2 = H5Qcreate(H5Q_TYPE_DATA_ELEM, H5Q_MATCH_LESS_THAN,
-            H5T_NATIVE_DOUBLE, &upper_bound1);
+            H5T_NATIVE_FLOAT, &query_ub);
     assert(query_id2);
 
-    query_id3 = H5Qcombine(query_id1, H5Q_COMBINE_AND, query_id2);
-    assert(query_id3);
-
-    query_id4 = H5Qcreate(H5Q_TYPE_DATA_ELEM, H5Q_MATCH_GREATER_THAN,
-            H5T_NATIVE_INT, &lower_bound2);
-    assert(query_id4);
-
-    query_id5 = H5Qcreate(H5Q_TYPE_DATA_ELEM, H5Q_MATCH_LESS_THAN,
-            H5T_NATIVE_INT, &upper_bound2);
-    assert(query_id5);
-
-    query_id6 = H5Qcombine(query_id4, H5Q_COMBINE_AND, query_id5);
-    assert(query_id6);
-
-    query_id = H5Qcombine(query_id3, H5Q_COMBINE_OR, query_id6);
+    query_id = H5Qcombine(query_id1, H5Q_COMBINE_AND, query_id2);
     assert(query_id);
 
     /* acquire container version 2 - EXACT. */
@@ -220,14 +210,8 @@ query_and_view(hid_t file_id, const char *dataset_name, hid_t estack_id)
     assert(0 == ret);
 
     H5Qclose(query_id);
-    H5Qclose(query_id6);
-    H5Qclose(query_id5);
-    H5Qclose(query_id4);
-    H5Qclose(query_id3);
     H5Qclose(query_id2);
     H5Qclose(query_id1);
-
-    return query_id;
 }
 
 int
@@ -244,7 +228,6 @@ main(int argc, char **argv)
     herr_t ret;
     hsize_t i, j;
 
-    getchar();
     MPI_Init(&argc, &argv);
 
     /* Call EFF_init to initialize the EFF stack. */
@@ -267,7 +250,7 @@ main(int argc, char **argv)
 
     for (i = 0; i < ntuples; i++) {
        for (j = 0; j < ncomponents; j++) {
-          data[ncomponents * i + j] = (float) (my_rank * ntuples + i);
+          data[ncomponents * i + j] = (float) (((hsize_t) my_rank) * ntuples + i);
        }
     }
 
