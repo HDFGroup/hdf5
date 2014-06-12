@@ -1141,6 +1141,99 @@ done:
 } /* end H5Qapply() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Qapply_combine
+ *
+ * Purpose: Apply a query and return the result. Parameters, which the
+ * query applies to, are determined by the type of the query.
+ * It is an error to apply H5Qapply to a combined query object (one
+ * which was created with H5Qcombine).
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Qapply_combine(hid_t query_id, hbool_t *result, hid_t type_id, const void *value)
+{
+    H5Q_t *query = NULL;
+    H5T_t *type = NULL, *native_type = NULL;
+    hid_t ret_value;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*b", query_id, result);
+
+    /* Check args and get the query objects */
+    if (!result)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for result");
+    if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
+
+    /* Get type */
+    if (NULL == (type = (H5T_t *) H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+
+    /* Only use native type */
+    if (NULL == (native_type = H5T_get_native_type(type, H5T_DIR_DEFAULT, NULL, NULL, NULL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot retrieve native type");
+
+    /* Apply query */
+    if (FAIL == (ret_value = H5Q_apply_combine(query, result, native_type, value)))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+
+done:
+    if (native_type)
+        H5T_close(native_type);
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Qapply_combine() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q_apply_combine
+ *
+ * Purpose: Private function for H5Qapply_combine.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Q_apply_combine(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(query);
+    HDassert(result);
+
+    if (query->is_combined) {
+        hbool_t result1, result2;
+
+        if (FAIL == H5Q_apply_combine(query->query.combine.l_query, &result1, type, elem))
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
+        if (FAIL == H5Q_apply_combine(query->query.combine.r_query, &result2, type, elem))
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
+
+         switch (query->query.combine.op) {
+             case H5Q_COMBINE_AND:
+                 *result = result1 && result2;
+                 break;
+             case H5Q_COMBINE_OR:
+                 *result = result1 || result2;
+                 break;
+             default:
+                 HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized combine op")
+                 break;
+         }
+    } else {
+        if (FAIL == (ret_value = H5Q_apply(query, result, type, elem)))
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q_apply_combine() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Q_apply
  *
  * Purpose: Private function for H5Qapply.

@@ -81,6 +81,9 @@ H5_DLL hid_t H5Qdecode(const void *buf);
 /* Apply query (convenience) */
 H5_DLL herr_t H5Qapply(hid_t query_id, hbool_t *result, ...);
 
+/* Apply on combine query of data elements */
+H5_DLL herr_t H5Qapply_combine(hid_t query_id, hbool_t *result, hid_t type_id, const void *value);
+
 #ifdef __cplusplus
 }
 #endif
