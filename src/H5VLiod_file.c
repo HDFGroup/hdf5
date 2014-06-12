@@ -71,6 +71,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "with attrKV %"PRIx64"\n", attrkv_id);
     fprintf(stderr, "with OIDKV %"PRIx64"\n", oidkv_id);
 #endif
+    coh.cookie = IOD_OH_UNDEFINED;
 
     /* convert HDF5 flags to IOD flags */
     mode = (input->flags&H5F_ACC_RDWR) ? IOD_CONT_RW : IOD_CONT_R;
@@ -103,8 +104,10 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Create the Container */
     ret = iod_container_open(input->name, con_open_hint, mode, &coh, NULL);
-    if(ret < 0)
+    if(ret < 0) {
+        coh.cookie = IOD_OH_UNDEFINED;
         HGOTO_ERROR_FF(ret, "can't create container");
+    }
 
     /* MSC - skip transaction 0 since it can't be persisted */
     ret = iod_trans_start(coh, &first_tid, NULL, num_peers, IOD_TRANS_W, NULL);
@@ -273,6 +276,10 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
+        if(coh.cookie != IOD_OH_UNDEFINED) {
+            if((ret = iod_container_close(coh, NULL, NULL)) < 0)
+                HDONE_ERROR_FF(ret, "can't close container");
+        }
         output.coh.cookie = IOD_OH_UNDEFINED;
         output.root_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.root_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
@@ -339,7 +346,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 #if H5_EFF_DEBUG
     fprintf(stderr, "Start file open %s %d %d\n", input->name, input->flags, input->fapl_id);
 #endif
-
+    coh.cookie = IOD_OH_UNDEFINED;
     output.fcpl_id = FAIL;
 
     if(H5F_ACC_RDWR == mode)
@@ -366,9 +373,10 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* open the container */
     ret = iod_container_open(input->name, con_open_hint, mode, &coh, NULL);
-    if(ret < 0)
+    if(ret < 0) {
+        coh.cookie = IOD_OH_UNDEFINED;
         HGOTO_ERROR_FF(ret, "can't open file");
-
+    }
     ret = iod_query_cont_trans_stat(coh, &tids, NULL);
     if(ret < 0)
         HGOTO_ERROR_FF(ret, "can't get container tids status");
@@ -378,6 +386,17 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     ret = iod_free_cont_trans_stat(coh, tids);
     if(ret < 0)
         HGOTO_ERROR_FF(ret, "can't free container transaction status object");
+
+    if(rtid == -1) {
+        if((ret = iod_container_close(coh, NULL, NULL)) < 0)
+            HGOTO_ERROR_FF(ret, "can't close container");
+        coh.cookie = IOD_OH_UNDEFINED;
+        ret = iod_container_unlink(input->name, 0, NULL);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't unlink container");
+
+        HGOTO_ERROR_FF(FAIL, "Container is not an HDF5 container, removed it");
+    }
 
     ret = iod_trans_start(coh, &rtid, NULL, num_peers, IOD_TRANS_R, NULL);
     if(ret < 0)
@@ -560,6 +579,10 @@ done:
         H5Pclose(output.fcpl_id);
 
     if(ret_value < 0) {
+        if(coh.cookie != IOD_OH_UNDEFINED) {
+            if((ret = iod_container_close(coh, NULL, NULL)) < 0)
+                HDONE_ERROR_FF(ret, "can't close container");
+        }
         output.coh.cookie = IOD_OH_UNDEFINED;
         output.root_id = IOD_OBJ_INVALID;
         output.root_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
