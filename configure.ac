@@ -3082,6 +3082,79 @@ case "X-$enableval" in
     ;;
 esac
 
+## ----------------------------------------------------------------------
+## Check for ALACRITY
+##
+AC_ARG_WITH([alacrity],
+            [AS_HELP_STRING([--with-alacrity=DIR],
+                            [Use ALACRITY [default=no]])],,
+            [withval=no])
+
+case $withval in
+  yes)
+    HAVE_ALACRITY="yes"
+    AC_CHECK_HEADERS([alacrity.h])
+    AC_CHECK_LIB([alacrity], [ALEncode],[MYALACRITY_LIBS="-lalacrity -lridcompress"], [unset HAVE_ALACRITY])
+    AC_SUBST([MYALACRITY_LIBS])
+    if test -z "$HAVE_ALACRITY" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find ALACRITY library])
+    fi
+    ;;
+  no)
+    HAVE_ALACRITY="no"
+    AC_MSG_CHECKING([for ALACRITY library])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_ALACRITY="yes"
+    case "$withval" in
+      *,*)
+        alacrity_inc="`echo $withval |cut -f1 -d,`"
+        alacrity_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          alacrity_inc="$withval/include"
+          alacrity_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$alacrity_inc" = "X/usr/include"; then
+      alacrity_inc=""
+    fi
+    if test "X$alacrity_lib" = "X/usr/lib"; then
+      alacrity_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$alacrity_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$alacrity_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$alacrity_inc"
+    fi
+
+    AC_CHECK_HEADERS([alacrity.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+
+    if test -n "$alacrity_lib"; then
+      LDFLAGS="$LDFLAGS -L$alacrity_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$alacrity_lib"
+    fi
+
+    AC_CHECK_LIB([alacrity], [ALEncode],, 
+        [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_ALACRITY],
+        )
+
+    if test -z "$HAVE_ALACRITY" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find ALACRITY library])
+    fi
+    ;;
+esac
 
 ## ----------------------------------------------------------------------
 ## Check for python devel

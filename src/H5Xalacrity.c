@@ -36,11 +36,14 @@
 #include "H5VMprivate.h"
 /* TODO using private headers but could use public ones */
 
+#ifdef H5_HAVE_ALACRITY
+
 #include <alacrity.h>
 
 /****************/
 /* Local Macros */
 /****************/
+//#define H5X_ALACRITY_USE_COMPRESSION
 #define H5X_ALACRITY_DEBUG
 
 #ifdef H5X_ALACRITY_DEBUG
@@ -409,6 +412,13 @@ H5X__alacrity_create_index(H5X_alacrity_t *alacrity, hid_t file_id,
 
     if (ALErrorNone != ALEncode(&alacrity->config, buf, nelmts, alacrity->output))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTENCODE, FAIL, "ALACRITY encoder failed");
+
+    /* Compress index */
+#ifdef H5X_ALACRITY_USE_COMPRESSION
+    if (ALErrorNone != ALConvertIndexForm(&alacrity->output->metadata,
+            &alacrity->output->index, ALCompressedInvertedIndex))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCONVERT, FAIL, "can't compress index");
+#endif
 
     /* Get sizes */
     if (0 == (metadata_size = ALGetMetadataSize(&alacrity->output->metadata)))
@@ -808,6 +818,14 @@ H5X__alacrity_read_index(H5X_alacrity_t *alacrity, bin_id_t start_bin,
             file_space_id, H5P_DEFAULT, *al_index, rcxt_id, H5_EVENT_STACK_NULL))
         HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
 
+    /* Convert index if it was compressed */
+#ifdef H5X_ALACRITY_USE_COMPRESSION
+    if (meta->indexMeta.indexForm == ALCompressedInvertedIndex &&
+            (ALErrorNone != ALConvertPartialIndexForm(meta, al_index,
+                    ALInvertedIndex, start_bin, end_bin)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCONVERT, FAIL, "can't convert index to ALInvertedIndex");
+#endif
+
     *al_index_size = bin_read_len;
 
 done:
@@ -1199,3 +1217,5 @@ done:
     H5X_ALACRITY_LOG_DEBUG("Leave");
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_alacrity_query() */
+
+#endif /* H5_HAVE_ALACRITY */
