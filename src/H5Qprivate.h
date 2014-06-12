@@ -101,5 +101,6 @@ H5_DLL H5Q_t *H5Q_decode(const unsigned char **buf);
 
 /* Apply query (convenience) */
 H5_DLL herr_t H5Q_apply(H5Q_t *query, hbool_t *result, ...);
+H5_DLL herr_t H5Q_apply_combine(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem);
 
 #endif /* _H5Qprivate_H */
