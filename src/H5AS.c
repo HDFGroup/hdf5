@@ -78,6 +78,8 @@ H5ASinvoke(const char *file_name, hid_t query_id, const char *split_script,
     herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "*si*s*s*si", file_name, query_id, split_script, combine_script,
+             integrate_script, estack_id);
 
     /* Check argument and retrieve object */
     if(file_name == NULL)

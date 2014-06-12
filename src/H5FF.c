@@ -4969,6 +4969,7 @@ H5VLiod_close_file_id(hid_t file_id)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", file_id);
 
 
     /* get the plugin pointer */
@@ -5029,6 +5030,7 @@ H5Dquery_ff(hid_t dset_id, hid_t query_id, hid_t scope_id, hid_t rcxt_id)
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("i", "iiii", dset_id, query_id, scope_id, rcxt_id);
 
     if(NULL == (dset = (void *)H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");

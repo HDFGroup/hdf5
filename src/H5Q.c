@@ -1160,7 +1160,7 @@ H5Qapply_combine(hid_t query_id, hbool_t *result, hid_t type_id, const void *val
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*b", query_id, result);
+    H5TRACE4("e", "i*bi*x", query_id, result, type_id, value);
 
     /* Check args and get the query objects */
     if (!result)

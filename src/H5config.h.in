@@ -55,6 +55,9 @@
 /* Define if gettimeofday() populates the tz pointer passed in */
 #undef GETTIMEOFDAY_GIVES_TZ
 
+/* Define to 1 if you have the <alacrity.h> header file. */
+#undef HAVE_ALACRITY_H
+
 /* Define to 1 if you have the `alarm' function. */
 #undef HAVE_ALARM
 
@@ -213,6 +216,9 @@
 
 /* Define to 1 if you have the <io.h> header file. */
 #undef HAVE_IO_H
+
+/* Define to 1 if you have the `alacrity' library (-lalacrity). */
+#undef HAVE_LIBALACRITY
 
 /* Define to 1 if you have the `axe' library (-laxe). */
 #undef HAVE_LIBAXE

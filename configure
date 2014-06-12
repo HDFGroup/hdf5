@@ -698,6 +698,7 @@ PYTHON_VERSION
 PYTHON_LIB
 PYTHON_INCLUDE_DIR
 PYTHON_BIN
+MYALACRITY_LIBS
 CLEARFILEBUF
 INSTRUMENT_LIBRARY
 TRACE_API
@@ -954,6 +955,7 @@ enable_trace
 enable_instrument
 enable_clear_file_buffers
 enable_indexing
+with_alacrity
 enable_python
 enable_eff
 enable_using_memchecker
@@ -1723,6 +1725,7 @@ Optional Packages:
                           [default=no]
   --with-pthread=DIR      Specify alternative path to Pthreads library when
                           thread-safe capability is built
+  --with-alacrity=DIR     Use ALACRITY [default=no]
   --with-mpe=DIR          Use MPE instrumentation [default=no]
   --with-default-vfd=driver
                           Specify default file driver [default=sec2]
@@ -29517,6 +29520,210 @@ $as_echo "no" >&6; }
     ;;
 esac
 
+## ----------------------------------------------------------------------
+## Check for ALACRITY
+##
+
+# Check whether --with-alacrity was given.
+if test "${with_alacrity+set}" = set; then :
+  withval=$with_alacrity;
+else
+  withval=no
+fi
+
+
+case $withval in
+  yes)
+    HAVE_ALACRITY="yes"
+    for ac_header in alacrity.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "alacrity.h" "ac_cv_header_alacrity_h" "$ac_includes_default"
+if test "x$ac_cv_header_alacrity_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_ALACRITY_H 1
+_ACEOF
+
+fi
+
+done
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ALEncode in -lalacrity" >&5
+$as_echo_n "checking for ALEncode in -lalacrity... " >&6; }
+if ${ac_cv_lib_alacrity_ALEncode+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lalacrity  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char ALEncode ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return ALEncode ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_alacrity_ALEncode=yes
+else
+  ac_cv_lib_alacrity_ALEncode=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_alacrity_ALEncode" >&5
+$as_echo "$ac_cv_lib_alacrity_ALEncode" >&6; }
+if test "x$ac_cv_lib_alacrity_ALEncode" = xyes; then :
+  MYALACRITY_LIBS="-lalacrity -lridcompress"
+else
+  unset HAVE_ALACRITY
+fi
+
+
+    if test -z "$HAVE_ALACRITY" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find ALACRITY library" "$LINENO" 5
+    fi
+    ;;
+  no)
+    HAVE_ALACRITY="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ALACRITY library" >&5
+$as_echo_n "checking for ALACRITY library... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
+$as_echo "suppressed" >&6; }
+    ;;
+  *)
+    HAVE_ALACRITY="yes"
+    case "$withval" in
+      *,*)
+        alacrity_inc="`echo $withval |cut -f1 -d,`"
+        alacrity_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          alacrity_inc="$withval/include"
+          alacrity_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$alacrity_inc" = "X/usr/include"; then
+      alacrity_inc=""
+    fi
+    if test "X$alacrity_lib" = "X/usr/lib"; then
+      alacrity_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$alacrity_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$alacrity_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$alacrity_inc"
+    fi
+
+    for ac_header in alacrity.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "alacrity.h" "ac_cv_header_alacrity_h" "$ac_includes_default"
+if test "x$ac_cv_header_alacrity_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_ALACRITY_H 1
+_ACEOF
+
+else
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+fi
+
+done
+
+
+    if test -n "$alacrity_lib"; then
+      LDFLAGS="$LDFLAGS -L$alacrity_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$alacrity_lib"
+    fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ALEncode in -lalacrity" >&5
+$as_echo_n "checking for ALEncode in -lalacrity... " >&6; }
+if ${ac_cv_lib_alacrity_ALEncode+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lalacrity  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char ALEncode ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return ALEncode ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_alacrity_ALEncode=yes
+else
+  ac_cv_lib_alacrity_ALEncode=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_alacrity_ALEncode" >&5
+$as_echo "$ac_cv_lib_alacrity_ALEncode" >&6; }
+if test "x$ac_cv_lib_alacrity_ALEncode" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBALACRITY 1
+_ACEOF
+
+  LIBS="-lalacrity $LIBS"
+
+else
+  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_ALACRITY
+fi
+
+
+    if test -z "$HAVE_ALACRITY" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find ALACRITY library" "$LINENO" 5
+    fi
+    ;;
+esac
 
 ## ----------------------------------------------------------------------
 ## Check for python devel

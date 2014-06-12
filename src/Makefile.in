@@ -195,12 +195,12 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5Oname.lo H5Onull.lo H5Opline.lo H5Orefcount.lo H5Osdspace.lo \
 	H5Oshared.lo H5Ostab.lo H5Oshmesg.lo H5Otest.lo H5Ounknown.lo \
 	H5P.lo H5Pacpl.lo H5Pdapl.lo H5Pdcpl.lo H5Pxapl.lo H5Pxcpl.lo \
-	H5Pxxpl.lo H5X.lo H5Xdummy.lo H5Pdeprec.lo H5Pdxpl.lo \
-	H5Pencdec.lo H5Pfapl.lo H5Pfcpl.lo H5Pfmpl.lo H5Pgcpl.lo \
-	H5Pvcpl.lo H5Pmcpl.lo H5Pmapl.lo H5Pint.lo H5Prcapl.lo \
-	H5Ptrspl.lo H5Ptrfpl.lo H5Plapl.lo H5Plcpl.lo H5Pocpl.lo \
-	H5Pocpypl.lo H5Pstrcpl.lo H5Ptest.lo H5PL.lo H5Q.lo H5R.lo \
-	H5Rdeprec.lo H5UC.lo H5RS.lo H5S.lo H5Sall.lo H5Sdbg.lo \
+	H5Pxxpl.lo H5X.lo H5Xdummy.lo H5Xalacrity.lo H5Pdeprec.lo \
+	H5Pdxpl.lo H5Pencdec.lo H5Pfapl.lo H5Pfcpl.lo H5Pfmpl.lo \
+	H5Pgcpl.lo H5Pvcpl.lo H5Pmcpl.lo H5Pmapl.lo H5Pint.lo \
+	H5Prcapl.lo H5Ptrspl.lo H5Ptrfpl.lo H5Plapl.lo H5Plcpl.lo \
+	H5Pocpl.lo H5Pocpypl.lo H5Pstrcpl.lo H5Ptest.lo H5PL.lo H5Q.lo \
+	H5R.lo H5Rdeprec.lo H5UC.lo H5RS.lo H5S.lo H5Sall.lo H5Sdbg.lo \
 	H5Shyper.lo H5Smpio.lo H5Snone.lo H5Spoint.lo H5Sselect.lo \
 	H5Stest.lo H5SL.lo H5SM.lo H5SMbtree2.lo H5SMcache.lo \
 	H5SMmessage.lo H5SMtest.lo H5ST.lo H5T.lo H5Tarray.lo \
@@ -589,6 +589,7 @@ MERCURY_LIBS = @MERCURY_LIBS@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
 MPI_GET_SIZE = @MPI_GET_SIZE@
+MYALACRITY_LIBS = @MYALACRITY_LIBS@
 MYAXE_LIBS = @MYAXE_LIBS@
 MYDAOS_LIBS = @MYDAOS_LIBS@
 MYIODP_LIBS = @MYIODP_LIBS@
@@ -835,7 +836,7 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Osdspace.c H5Oshared.c H5Ostab.c \
         H5Oshmesg.c H5Otest.c H5Ounknown.c \
         H5P.c H5Pacpl.c H5Pdapl.c H5Pdcpl.c \
-        H5Pxapl.c H5Pxcpl.c H5Pxxpl.c H5X.c H5Xdummy.c \
+        H5Pxapl.c H5Pxcpl.c H5Pxxpl.c H5X.c H5Xdummy.c H5Xalacrity.c \
         H5Pdeprec.c H5Pdxpl.c H5Pencdec.c \
         H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
         H5Pgcpl.c H5Pvcpl.c H5Pmcpl.c H5Pmapl.c H5Pint.c H5Prcapl.c H5Ptrspl.c H5Ptrfpl.c \
@@ -1305,6 +1306,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5VM.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5WB.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5X.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Xalacrity.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Xdummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Z.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Zdeflate.Plo@am__quote@
