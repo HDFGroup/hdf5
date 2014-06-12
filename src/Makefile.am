@@ -92,6 +92,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Pgcpl.c H5Pint.c \
         H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c \
         H5PL.c \
+        H5Pxapl.c H5Pxcpl.c H5Pxxpl.c \
         H5Q.c \
         H5R.c H5Rdeprec.c \
         H5UC.c \
@@ -108,6 +109,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Topaque.c \
         H5Torder.c \
         H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c H5Tvlen.c H5TS.c H5VM.c H5WB.c H5Z.c  \
+        H5X.c H5Xdummy.c H5Xalacrity.c \
         H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c \
         H5Zscaleoffset.c H5Zszip.c H5Ztrans.c
 
@@ -134,7 +136,7 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5PLextern.h H5PLpublic.h \
         H5Qpublic.h \
         H5Rpublic.h H5Spublic.h \
-        H5Tpublic.h H5Zpublic.h
+        H5Tpublic.h H5Xpublic.h H5Zpublic.h
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)

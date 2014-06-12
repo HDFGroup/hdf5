@@ -10,8 +10,11 @@ find_path(ALACRITY_INCLUDE_DIR alacrity.h
 find_library(ALACRITY_LIBRARY NAMES alacrity
   PATHS /usr/local/lib /usr/lib)
 
+find_library(ALACRITY_RIDCOMPRESS_LIBRARY NAMES ridcompress
+  PATHS /usr/local/lib /usr/lib)
+
 set(ALACRITY_INCLUDE_DIRS ${ALACRITY_INCLUDE_DIR})
-set(ALACRITY_LIBRARIES ${ALACRITY_LIBRARY})
+set(ALACRITY_LIBRARIES ${ALACRITY_LIBRARY} ${ALACRITY_RIDCOMPRESS_LIBRARY})
 
 include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set ALACRITY_FOUND to TRUE
@@ -19,4 +22,4 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(ALACRITY DEFAULT_MSG
                                   ALACRITY_INCLUDE_DIR ALACRITY_LIBRARY)
 
-mark_as_advanced(ALACRITY_INCLUDE_DIR ALACRITY_LIBRARY)
+mark_as_advanced(ALACRITY_INCLUDE_DIR ALACRITY_LIBRARY ALACRITY_RIDCOMPRESS_LIBRARY)
