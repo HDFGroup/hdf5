@@ -1002,8 +1002,6 @@ done:
     return ret_value;
 }
 
-
-#ifdef NEW_HYPERSLAB_API
 /****if* H5Sf/h5scombine_hyperslab_c
  * NAME
  *        h5scombine_hyperslab_c
@@ -1163,7 +1161,7 @@ nh5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
   ret_value = 0;
   return ret_value;
 }
-#endif /*NEW_HYPERSLAB_API*/
+
 /****if* H5Sf/h5sget_select_type_c
  * NAME
  *        h5sget_select_type_c
