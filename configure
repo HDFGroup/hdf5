@@ -699,6 +699,8 @@ PYTHON_LIB
 PYTHON_INCLUDE_DIR
 PYTHON_BIN
 MYALACRITY_LIBS
+BUILD_INDEXING_CONDITIONAL_FALSE
+BUILD_INDEXING_CONDITIONAL_TRUE
 CLEARFILEBUF
 INSTRUMENT_LIBRARY
 TRACE_API
@@ -29519,6 +29521,14 @@ $as_echo "#define HAVE_INDEXING 1" >>confdefs.h
 $as_echo "no" >&6; }
     ;;
 esac
+ if test "X-$INDEXING" = "X-yes"; then
+  BUILD_INDEXING_CONDITIONAL_TRUE=
+  BUILD_INDEXING_CONDITIONAL_FALSE='#'
+else
+  BUILD_INDEXING_CONDITIONAL_TRUE='#'
+  BUILD_INDEXING_CONDITIONAL_FALSE=
+fi
+
 
 ## ----------------------------------------------------------------------
 ## Check for ALACRITY
@@ -29722,6 +29732,10 @@ fi
     if test -z "$HAVE_ALACRITY" -a -n "$HDF5_CONFIG_ABORT"; then
       as_fn_error $? "couldn't find ALACRITY library" "$LINENO" 5
     fi
+
+
+$as_echo "#define HAVE_ALACRITY 1" >>confdefs.h
+
     ;;
 esac
 
@@ -36311,6 +36325,10 @@ fi
 
 if test -z "${BUILD_SHARED_SZIP_CONDITIONAL_TRUE}" && test -z "${BUILD_SHARED_SZIP_CONDITIONAL_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_SHARED_SZIP_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_INDEXING_CONDITIONAL_TRUE}" && test -z "${BUILD_INDEXING_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_INDEXING_CONDITIONAL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_PYTHON_CONDITIONAL_TRUE}" && test -z "${BUILD_PYTHON_CONDITIONAL_FALSE}"; then

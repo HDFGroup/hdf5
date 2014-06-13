@@ -650,6 +650,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog $(EXTLINK_DIRS) *.h5
 @BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_M6.2_demo h5ff_client_M7.2-pep_demo \
 @BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_timings h5ff_client_time_datasets
 
+@BUILD_INDEXING_CONDITIONAL_TRUE@EXAMPLE_PROG_INDEXING = h5ff_client_index
 
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,
@@ -690,11 +691,11 @@ EXAMPLETOPDIR = ${DESTDIR}$(exec_prefix)/share/hdf5_examples
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.
-EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA) $(EXAMPLE_PROG_EFF)
+EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA) $(EXAMPLE_PROG_EFF) $(EXAMPLE_PROG_INDEXING)
 
 # We need to tell automake what to clean
 MOSTLYCLEANFILES = *.raw *.meta *.o
-CLEANFILES = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA) $(EXAMPLE_PROG_EFF)
+CLEANFILES = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA) $(EXAMPLE_PROG_EFF) $(EXAMPLE_PROG_INDEXING)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

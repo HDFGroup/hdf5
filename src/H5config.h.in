@@ -55,6 +55,9 @@
 /* Define if gettimeofday() populates the tz pointer passed in */
 #undef GETTIMEOFDAY_GIVES_TZ
 
+/* Define if ALACRITY indexing is supported. */
+#undef HAVE_ALACRITY
+
 /* Define to 1 if you have the <alacrity.h> header file. */
 #undef HAVE_ALACRITY_H
 

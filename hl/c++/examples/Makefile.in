@@ -658,11 +658,11 @@ EXAMPLEDIR = ${DESTDIR}$(exec_prefix)/share/hdf5_examples/hl/c++
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.
-EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA) $(EXAMPLE_PROG_EFF)
+EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA) $(EXAMPLE_PROG_EFF) $(EXAMPLE_PROG_INDEXING)
 
 # We need to tell automake what to clean
 MOSTLYCLEANFILES = *.raw *.meta *.o
-CLEANFILES = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA) $(EXAMPLE_PROG_EFF)
+CLEANFILES = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA) $(EXAMPLE_PROG_EFF) $(EXAMPLE_PROG_INDEXING)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
