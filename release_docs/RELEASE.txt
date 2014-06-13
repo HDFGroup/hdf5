@@ -115,7 +115,15 @@ Bug Fixes since HDF5-1.8.13
 
     Library
     -------
-    - 
+    - Removal of DllMain() from static Windows builds. 
+      A DllMain() function was added in HDF5 1.8.13 in order to handle win32 thread
+      cleanup. The preprocessor #ifdefs around the DllMain function allowed it
+      to be compiled when the static library is built, which is incorrect behavior
+      and can cause linkage problems in clients.
+      The fix was to change the preprocessor #ifdefs to exclude compiling DllMain()
+      in static builds. Our DllMain function is now only compiled when the shared, 
+      thread-safe library is built on Windows.
+      (DER - 2014/06/13 HDFFV-8837)
 
     Parallel Library
     ----------------
