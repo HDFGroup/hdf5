@@ -143,7 +143,7 @@ H5D__term_deprec_interface(void)
  *		properties (DCPL_ID).
  *
  *		All arguments are copied into the dataset, so the caller is
- *		allowed to derive new types, data spaces, and creation
+ *		allowed to derive new types, dataspaces, and creation
  *		parameters from the old ones and reuse them in calls to
  *		create other datasets.
  *
@@ -368,9 +368,9 @@ H5D__extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
     if((rank = H5S_get_simple_extent_dims(space, curr_dims, NULL)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
 
-    /* Increase the size of the data space */
+    /* Increase the size of the dataspace */
     if((changed = H5S_extend(space, size)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to increase size of data space")
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to increase size of dataspace")
 
     /* Updated the dataset's info if the dataspace was successfully extended */
     if(changed) {

@@ -217,6 +217,7 @@ MINOR, DSPACE, H5E_CANTSELECT, Can't select hyperslab
 MINOR, DSPACE, H5E_CANTNEXT, Can't move to next iterator location
 MINOR, DSPACE, H5E_BADSELECT, Invalid selection
 MINOR, DSPACE, H5E_CANTCOMPARE, Can't compare objects
+MINOR, DSPACE, H5E_INCONSISTENTSTATE, Internal states are inconsistent
 
 # Property list errors
 MINOR, PLIST, H5E_CANTGET, Can't get value

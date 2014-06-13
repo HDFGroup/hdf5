@@ -455,7 +455,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__get_space_status
  *
- * Purpose:     Returns the status of data space allocation.
+ * Purpose:     Returns the status of dataspace allocation.
  *
  * Return:
  *              Success:        Non-negative
@@ -2172,16 +2172,16 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
     if(H5D__check_filters(dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't apply filters")
 
-    /* Get the data space */
+    /* Get the dataspace */
     space = dset->shared->space;
 
     /* Check if we are shrinking or expanding any of the dimensions */
     if((rank = H5S_get_simple_extent_dims(space, curr_dims, NULL)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
 
-    /* Modify the size of the data space */
+    /* Modify the size of the dataspace */
     if((changed = H5S_set_extent(space, size)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
 
     /* Don't bother updating things, unless they've changed */
     if(changed) {
