@@ -28,12 +28,12 @@
 PROGRAM fortranlibtest_F03
   
   USE HDF5
-  
+  USE THDF5_F03
+
   IMPLICIT NONE
   INTEGER :: total_error = 0
   INTEGER :: error
   INTEGER :: majnum, minnum, relnum
-  LOGICAL :: szip_flag
   INTEGER :: ret_total_error
   LOGICAL :: cleanup, status
 

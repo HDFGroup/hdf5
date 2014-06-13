@@ -326,12 +326,16 @@ hsize_t diff_attr(hid_t loc1_id,
     hid_t      space2_id=-1;    /* space ID */
     hid_t      ftype1_id=-1;    /* file data type ID */
     hid_t      ftype2_id=-1;    /* file data type ID */
+    int	       vstrtype1=0;     /* ftype1 is a variable string */
+    int	       vstrtype2=0;     /* ftype2 is a variable string */
     hid_t      mtype1_id=-1;    /* memory data type ID */
     hid_t      mtype2_id=-1;    /* memory data type ID */
     size_t     msize1;          /* memory size of memory type */
     size_t     msize2;          /* memory size of memory type */
     void       *buf1=NULL;      /* data buffer */
     void       *buf2=NULL;      /* data buffer */
+    int	       buf1hasdata=0;	/* buffer has data */
+    int	       buf2hasdata=0;	/* buffer has data */
     hsize_t    nelmts1;         /* number of elements in dataset */
     int        rank1;           /* rank of dataset */
     int        rank2;           /* rank of dataset */
@@ -376,8 +380,19 @@ hsize_t diff_attr(hid_t loc1_id,
         /* get the datatypes  */
         if((ftype1_id = H5Aget_type(attr1_id)) < 0)
             goto error;
+	vstrtype1 = H5Tis_variable_str(ftype1_id);
         if((ftype2_id = H5Aget_type(attr2_id)) < 0)
             goto error;
+	vstrtype2 = H5Tis_variable_str(ftype2_id);
+	/* no compare if either one but not both are variable string type */
+	if (vstrtype1 != vstrtype2){
+	    if ((options->m_verbose||options->m_list_not_cmp))
+		parallel_print("Not comparable: one of attribute <%s/%s> or <%s/%s> is of variable length type\n",
+		    path1, name1, path2, name2);
+	    options->not_cmp = 1;
+	    return 0;
+	}
+
         if((mtype1_id = h5tools_get_native_type(ftype1_id))<0)
             goto error;
         if((mtype2_id = h5tools_get_native_type(ftype2_id))<0)
@@ -449,14 +464,20 @@ hsize_t diff_attr(hid_t loc1_id,
 
         buf1 = (void *)HDmalloc((size_t)(nelmts1 * msize1));
         buf2 = (void *)HDmalloc((size_t)(nelmts1 * msize2));
-        if(buf1 == NULL || buf2 == NULL) {
+        if(buf1 == NULL || buf2 == NULL){
             parallel_print( "cannot read into memory\n" );
             goto error;
         }
-        if(H5Aread(attr1_id,mtype1_id,buf1) < 0)
-            goto error;
-        if(H5Aread(attr2_id,mtype2_id,buf2) < 0)
-            goto error;
+        if(H5Aread(attr1_id,mtype1_id,buf1) < 0){
+	    parallel_print("Failed reading attribute1 %s/%s\n", path1, name1);
+	    goto error;
+	}else
+	    buf1hasdata = 1;
+        if(H5Aread(attr2_id,mtype2_id,buf2) < 0){
+	    parallel_print("Failed reading attribute2 %s/%s\n", path2, name2);
+	    goto error;
+	}else
+	    buf2hasdata = 1;
 
         /* format output string */
         HDsnprintf(np1, sizeof(np1), "%s of <%s>", name1, path1);
@@ -504,8 +525,8 @@ hsize_t diff_attr(hid_t loc1_id,
         if(TRUE == h5tools_detect_vlen(mtype1_id))
             H5Dvlen_reclaim(mtype1_id, space1_id, H5P_DEFAULT, buf1);
         HDfree(buf1);
-
         buf1 = NULL;
+
         if(TRUE == h5tools_detect_vlen(mtype2_id))
             H5Dvlen_reclaim(mtype2_id, space2_id, H5P_DEFAULT, buf2);
         HDfree(buf2);
@@ -539,12 +560,12 @@ hsize_t diff_attr(hid_t loc1_id,
 error:
     H5E_BEGIN_TRY {
         if(buf1) {
-            if(TRUE == h5tools_detect_vlen(mtype1_id))
+            if(buf1hasdata && TRUE == h5tools_detect_vlen(mtype1_id))
                 H5Dvlen_reclaim(mtype1_id, space1_id, H5P_DEFAULT, buf1);
             HDfree(buf1);
         } /* end if */
         if(buf2) {
-            if(TRUE == h5tools_detect_vlen(mtype2_id))
+            if(buf2hasdata && TRUE == h5tools_detect_vlen(mtype2_id))
                 H5Dvlen_reclaim(mtype2_id, space2_id, H5P_DEFAULT, buf2);
             HDfree(buf2);
         } /* end if */

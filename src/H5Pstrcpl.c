@@ -34,6 +34,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* Files */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 
@@ -80,10 +81,13 @@ static herr_t H5P__strcrt_char_encoding_dec(const void **_pp, void *value);
 const H5P_libclass_t H5P_CLS_STRCRT[1] = {{
     "string create",		/* Class name for debugging     */
     H5P_TYPE_STRING_CREATE,     /* Class type                   */
-    &H5P_CLS_ROOT_g,		/* Parent class ID              */
-    &H5P_CLS_STRING_CREATE_g,	/* Pointer to class ID          */
+
+    &H5P_CLS_ROOT_g,		/* Parent class                 */
+    &H5P_CLS_STRING_CREATE_g,	/* Pointer to class             */
+    &H5P_CLS_STRING_CREATE_ID_g,	/* Pointer to class ID          */
     NULL,			/* Pointer to default property list ID */
     H5P__strcrt_reg_prop,	/* Default property registration routine */
+
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
     NULL,			/* Class copy callback          */

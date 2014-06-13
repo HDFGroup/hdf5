@@ -511,64 +511,71 @@ h5_fileaccess(void)
     /* First use the environment variable, then the constant */
     val = HDgetenv("HDF5_DRIVER");
 #ifdef HDF5_DRIVER
-    if (!val) val = HDF5_DRIVER;
+    if (!val)
+        val = HDF5_DRIVER;
 #endif
 
-    if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0) return -1;
-    if (!val || !*val) return fapl; /*use default*/
+    if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0)
+        return -1;
+    if (!val || !*val)
+        return fapl; /*use default*/
 
     HDstrncpy(s, val, sizeof s);
     s[sizeof(s)-1] = '\0';
     if (NULL==(name=HDstrtok(s, " \t\n\r"))) return fapl;
 
     if (!HDstrcmp(name, "sec2")) {
-  /* Unix read() and write() system calls */
-  if (H5Pset_fapl_sec2(fapl)<0) return -1;
+        /* Unix read() and write() system calls */
+        if (H5Pset_fapl_sec2(fapl)<0) return -1;
     } else if (!HDstrcmp(name, "stdio")) {
-  /* Standard C fread() and fwrite() system calls */
-  if (H5Pset_fapl_stdio(fapl)<0) return -1;
+        /* Standard C fread() and fwrite() system calls */
+        if (H5Pset_fapl_stdio(fapl)<0) return -1;
     } else if (!HDstrcmp(name, "core")) {
-  /* In-core temporary file with 1MB increment */
-  if (H5Pset_fapl_core(fapl, (size_t)1, TRUE)<0) return -1;
-    } else if (!HDstrcmp(name, "split")) {
-  /* Split meta data and raw data each using default driver */
-  if (H5Pset_fapl_split(fapl,
+        /* In-memory driver settings (backing store on, 1 MB increment) */
+        if (H5Pset_fapl_core(fapl, (size_t)1, TRUE)<0) return -1;
+    } else if (!HDstrcmp(name, "core_paged")) {
+        /* In-memory driver with write tracking and paging on */
+        if (H5Pset_fapl_core(fapl, (size_t)1, TRUE)<0) return -1;
+        if (H5Pset_core_write_tracking(fapl, TRUE, (size_t)4096)<0) return -1;
+     } else if (!HDstrcmp(name, "split")) {
+        /* Split meta data and raw data each using default driver */
+        if (H5Pset_fapl_split(fapl,
             "-m.h5", H5P_DEFAULT,
             "-r.h5", H5P_DEFAULT)<0)
-      return -1;
+            return -1;
     } else if (!HDstrcmp(name, "multi")) {
-  /* Multi-file driver, general case of the split driver */
-  H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
-  hid_t memb_fapl[H5FD_MEM_NTYPES];
-  const char *memb_name[H5FD_MEM_NTYPES];
-  char sv[H5FD_MEM_NTYPES][1024];
-  haddr_t memb_addr[H5FD_MEM_NTYPES];
+        /* Multi-file driver, general case of the split driver */
+        H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
+        hid_t memb_fapl[H5FD_MEM_NTYPES];
+        const char *memb_name[H5FD_MEM_NTYPES];
+        char sv[H5FD_MEM_NTYPES][1024];
+        haddr_t memb_addr[H5FD_MEM_NTYPES];
         H5FD_mem_t  mt;
 
-  HDmemset(memb_map, 0, sizeof memb_map);
-  HDmemset(memb_fapl, 0, sizeof memb_fapl);
-  HDmemset(memb_name, 0, sizeof memb_name);
-  HDmemset(memb_addr, 0, sizeof memb_addr);
+        HDmemset(memb_map, 0, sizeof memb_map);
+        HDmemset(memb_fapl, 0, sizeof memb_fapl);
+        HDmemset(memb_name, 0, sizeof memb_name);
+        HDmemset(memb_addr, 0, sizeof memb_addr);
 
-  HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
-  for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
-      memb_fapl[mt] = H5P_DEFAULT;
-      sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
-      memb_name[mt] = sv[mt];
-      memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
-  } /* end for */
+        HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+          memb_fapl[mt] = H5P_DEFAULT;
+            sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
+            memb_name[mt] = sv[mt];
+            memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
+        } /* end for */
 
-  if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
-            memb_addr, FALSE)<0) {
-      return -1;
-  }
+        if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
+          memb_addr, FALSE)<0) {
+            return -1;
+        }
     } else if (!HDstrcmp(name, "family")) {
         hsize_t fam_size = 100*1024*1024; /*100 MB*/
 
-  /* Family of files, each 1MB and using the default driver */
-  if ((val=HDstrtok(NULL, " \t\n\r")))
-      fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024);
-  if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
+        /* Family of files, each 1MB and using the default driver */
+        if ((val=HDstrtok(NULL, " \t\n\r")))
+            fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024);
+        if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
             return -1;
     } else if (!HDstrcmp(name, "log")) {
         unsigned log_flags = H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC;
@@ -578,20 +585,21 @@ h5_fileaccess(void)
             log_flags = (unsigned)HDstrtol(val, NULL, 0);
 
         if (H5Pset_fapl_log(fapl, NULL, log_flags, (size_t)0) < 0)
-      return -1;
+            return -1;
     } else if (!HDstrcmp(name, "direct")) {
 #ifdef H5_HAVE_DIRECT
-  /* Linux direct read() and write() system calls.  Set memory boundary, file block size,
-   * and copy buffer size to the default values. */
-  if (H5Pset_fapl_direct(fapl, 1024, 4096, 8*4096)<0) return -1;
+        /* Linux direct read() and write() system calls.  Set memory boundary, file block size,
+         * and copy buffer size to the default values. */
+        if (H5Pset_fapl_direct(fapl, 1024, 4096, 8*4096)<0)
+            return -1;
 #endif
     } else if(!HDstrcmp(name, "latest")) {
-  /* use the latest format */
-  if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        /* use the latest format */
+        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
             return -1;
     } else {
-  /* Unknown driver */
-  return -1;
+        /* Unknown driver */
+        return -1;
     }
 
     return fapl;

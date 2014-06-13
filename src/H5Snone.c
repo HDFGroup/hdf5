@@ -17,7 +17,7 @@
  * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
  *              Tuesday, November 10, 1998
  *
- * Purpose:	"None" selection data space I/O functions.
+ * Purpose:	"None" selection dataspace I/O functions.
  */
 
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
@@ -850,7 +850,7 @@ H5Sselect_none(hid_t spaceid)
 
     /* Check args */
     if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     /* Change to "none" selection */
     if(H5S_select_none(space) < 0)

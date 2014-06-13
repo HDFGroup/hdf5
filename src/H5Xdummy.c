@@ -33,6 +33,7 @@
 #include "H5RCprivate.h"
 #include "H5TRprivate.h"
 #include "H5Qprivate.h"
+#include "H5Sprivate.h"
 /* TODO using private headers but could use public ones */
 
 /****************/

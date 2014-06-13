@@ -18,6 +18,7 @@
  */
 
 #include "h5test.h"
+#include "H5ACprivate.h"
 #include "H5Pprivate.h"
 
 static int
@@ -380,6 +381,8 @@ main(void)
     if((H5Pset_multi_type(fapl, H5FD_MEM_GHEAP)) < 0)
         FAIL_STACK_ERROR
     if((H5Pset_mdc_config(fapl, &my_cache_config)) < 0)
+        FAIL_STACK_ERROR
+    if((H5Pset_core_write_tracking(fapl, TRUE, 1024 * 1024)) < 0)
         FAIL_STACK_ERROR
 
     /* Test encoding & decoding property list */

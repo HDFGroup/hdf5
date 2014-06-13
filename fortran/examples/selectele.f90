@@ -64,14 +64,13 @@
      INTEGER :: i, j
 
      INTEGER :: error  ! Error flag
-     LOGICAL :: status
      INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
 
 
-   !
-   ! Create two files containing identical datasets. Write 0's to one
-   ! and 1's to the other.
-   !
+     !
+     ! Create two files containing identical datasets. Write 0's to one
+     ! and 1's to the other.
+     !
 
      !
      ! Data initialization.

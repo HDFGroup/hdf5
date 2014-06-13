@@ -30,9 +30,9 @@
 /*****************/
 
 /* Macros used to "unset" chunk cache configuration parameters */
-#define H5D_CHUNK_CACHE_NSLOTS_DEFAULT     ((size_t) -1)
+#define H5D_CHUNK_CACHE_NSLOTS_DEFAULT      ((size_t) -1)
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT      ((size_t) -1)
-#define H5D_CHUNK_CACHE_W0_DEFAULT          -1.
+#define H5D_CHUNK_CACHE_W0_DEFAULT          (-1.0f)
 
 /* Property names for H5LTDdirect_chunk_write */   
 #define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME	        "direct_chunk_flag"

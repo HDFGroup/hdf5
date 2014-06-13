@@ -71,9 +71,10 @@ static herr_t H5P__macc_reg_prop(H5P_genclass_t *pclass);
 const H5P_libclass_t H5P_CLS_MACC[1] = {{
     "map access",		/* Class name for debugging     */
     H5P_TYPE_MAP_ACCESS,        /* Class type                   */
-    &H5P_CLS_LINK_ACCESS_g,	/* Parent class ID              */
-    &H5P_CLS_MAP_ACCESS_g,	/* Pointer to class ID          */
-    &H5P_LST_MAP_ACCESS_g,	/* Pointer to default property list ID */
+    &H5P_CLS_LINK_ACCESS_g,     /* Parent class                 */
+    &H5P_CLS_MAP_CREATE_g,      /* Pointer to class             */
+    &H5P_CLS_MAP_ACCESS_ID_g,	/* Pointer to class ID          */
+    &H5P_LST_MAP_ACCESS_ID_g,	/* Pointer to default property list ID */
     H5P__macc_reg_prop,		/* Default property registration routine */
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */

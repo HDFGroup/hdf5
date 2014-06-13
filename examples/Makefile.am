@@ -41,6 +41,10 @@ if BUILD_INDEXING_CONDITIONAL
   EXAMPLE_PROG_INDEXING = h5ff_client_index
 endif
 
+INSTALL_SCRIPT_FILES = run-c-ex.sh run_ff_tests.sh
+INSTALL_TOP_SCRIPT_FILES = run-all-ex.sh
+INSTALL_TOP_FILES = README
+
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,
 # it would try to compile them instead of using the h5cc script.
@@ -51,7 +55,8 @@ EXAMPLE_PROG = #h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
            #h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers \
            #h5_ref2reg h5_extlink h5_elink_unix2win h5_shared_mesg \
            #h5_external_log_native_vol
-TEST_SCRIPT=testh5cc.sh
+TEST_SCRIPT=testh5cc.sh 
+TEST_EXAMPLES_SCRIPT=$(INSTALL_SCRIPT_FILES)
 
 # Install files
 # List all file that should be installed in examples directory
@@ -63,10 +68,6 @@ INSTALL_FILES = #h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           #h5_ref2reg.c h5_shared_mesg.c ph5example.c \
           #h5_external_log_native_vol.c
 
-INSTALL_SCRIPT_FILES = run-c-ex.sh run_ff_tests.sh
-
-INSTALL_TOP_SCRIPT_FILES = run-all-ex.sh
-INSTALL_TOP_FILES = README
 
 # How to build examples, using installed version of h5cc
 if BUILD_PARALLEL_CONDITIONAL

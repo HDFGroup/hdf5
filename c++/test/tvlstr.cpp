@@ -50,10 +50,6 @@ const H5std_string FILENAME("tvlstr.h5");
 const int SPACE1_RANK = 1;
 const hsize_t SPACE1_DIM1 = 4;
 
-// Utility functions - not used now, later though.
-void *test_vlstr_alloc_custom(size_t size, void *info);
-void test_vlstr_free_custom(void *mem, void *info);
-
 /****************************************************************
 **
 **  test_vlstr_alloc_custom(): Test VL datatype custom memory
@@ -62,9 +58,9 @@ void test_vlstr_free_custom(void *mem, void *info);
 **	allocated.  It is passed into setVlenMemManager.
 **
 **  Note: exact copy from the C version.
-**
+**  (Not used now)
 ****************************************************************/
-void *test_vlstr_alloc_custom(size_t size, void *info)
+static void *test_vlstr_alloc_custom(size_t size, void *info)
 {
     void *ret_value=NULL;	// Pointer to return
     size_t *mem_used=(size_t *)info;  // Get the pointer to the memory used
@@ -94,9 +90,9 @@ void *test_vlstr_alloc_custom(size_t size, void *info)
 **	allocated.  It is passed into setVlenMemManager.
 **
 **  Note: exact copy from the C version.
-**
+**  (Not used now)
 ****************************************************************/
-void test_vlstr_free_custom(void *_mem, void *info)
+static void test_vlstr_free_custom(void *_mem, void *info)
 {
     unsigned char *mem;
     size_t *mem_used=(size_t *)info;  // Get the pointer to the memory used

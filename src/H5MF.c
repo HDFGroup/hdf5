@@ -38,8 +38,9 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFpkg.h"		/* File memory management		*/
-#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"	/* Vectors and arrays 			*/
 
 
 /****************/
@@ -600,6 +601,7 @@ herr_t
 H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
     hsize_t size)
 {
+    H5F_io_info_t fio_info;             /* I/O info for operation */
     H5MF_free_section_t *node = NULL;   /* Free space section pointer */
     H5MF_sect_ud_t udata;               /* User data for callback */
     H5FD_mem_t fs_type;                 /* Free space type (mapped from allocation type) */
@@ -620,8 +622,13 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
     if(H5F_addr_le(f->shared->tmp_addr, addr))
         HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, FAIL, "attempting to free temporary file space")
 
+    /* Set up I/O info for operation */
+    fio_info.f = f;
+    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
     /* Check if the space to free intersects with the file's metadata accumulator */
-    if(H5F_accum_free(f, dxpl_id, alloc_type, addr, size) < 0)
+    if(H5F__accum_free(&fio_info, alloc_type, addr, size) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't check free space intersection w/metadata accumulator")
 
     /* Get free space type from allocation type */
@@ -843,7 +850,7 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id, hsize_t *tot_space, hsize_t *meta_si
     hsize_t tot_fs_size = 0;    /* Amount of all free space managed */
     hsize_t tot_meta_size = 0;  /* Amount of metadata for free space managers */
     H5FD_mem_t type;            /* Memory type for iteration */
-    H5FD_mem_t fs_started[H5FD_MEM_NTYPES]; /* Indicate whether the free-space manager has been started */
+    hbool_t fs_started[H5FD_MEM_NTYPES]; /* Indicate whether the free-space manager has been started */
     hbool_t eoa_shrank;		/* Whether an EOA shrink occurs */
     herr_t ret_value = SUCCEED; /* Return value */
 

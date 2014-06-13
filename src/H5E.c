@@ -325,6 +325,9 @@ H5E_term_interface(void)
             } /* end if */
 	} /* end if */
         else {
+            /* Close deprecated interface */
+            n += H5E__term_deprec_interface();
+
 	    /* Destroy the error class, message, and stack id groups */
 	    H5I_dec_type_ref(H5I_ERROR_STACK);
 	    H5I_dec_type_ref(H5I_ERROR_CLASS);
@@ -366,8 +369,12 @@ H5E_get_stack(void)
     estack = (H5E_t *)H5TS_get_thread_local_value(H5TS_errstk_key_g);
 
     if(!estack) {
-        /* no associated value with current thread - create one */
+        /* No associated value with current thread - create one */
+#ifdef H5_HAVE_WIN_THREADS
+        estack = (H5E_t *)LocalAlloc(LPTR, sizeof(H5E_t)); /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
+#else
         estack = (H5E_t *)H5FL_MALLOC(H5E_t);
+#endif /* H5_HAVE_WIN_THREADS */
         HDassert(estack);
 
         /* Set the thread-specific info */

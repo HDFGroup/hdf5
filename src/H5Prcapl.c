@@ -75,10 +75,11 @@ static herr_t H5P__rcacc_reg_prop(H5P_genclass_t *pclass);
 /* Read Context acquire property list class library initialization object */
 const H5P_libclass_t H5P_CLS_RCACC[1] = {{
     "read context acquire",	        /* Class name for debugging     */
-    H5P_TYPE_READ_CONTEXT_ACQUIRE,       /* Class type                   */
-    &H5P_CLS_ROOT_g,            	/* Parent class ID              */
-    &H5P_CLS_READ_CONTEXT_ACQUIRE_g,	/* Pointer to class ID          */
-    &H5P_LST_READ_CONTEXT_ACQUIRE_g,	/* Pointer to default property list ID */
+    H5P_TYPE_READ_CONTEXT_ACQUIRE,      /* Class type                   */
+    &H5P_CLS_ROOT_g,                    /* Parent class                 */
+    &H5P_CLS_READ_CONTEXT_ACQUIRE_g,    /* Pointer to class             */
+    &H5P_CLS_READ_CONTEXT_ACQUIRE_ID_g,	/* Pointer to class ID          */
+    &H5P_LST_READ_CONTEXT_ACQUIRE_ID_g,	/* Pointer to default property list ID */
     H5P__rcacc_reg_prop,		/* Default property registration routine */
     NULL,		                /* Class creation callback      */
     NULL,		                /* Class creation callback info */

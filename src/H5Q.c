@@ -1431,14 +1431,14 @@ H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type, const void *valu
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
 
     /* Find the conversion function */
-    if (NULL == (tpath = H5T_path_find(type, promoted_type, NULL, NULL, H5P_LST_DATASET_XFER_g, FALSE)))
+    if (NULL == (tpath = H5T_path_find(type, promoted_type, NULL, NULL, H5P_LST_DATASET_XFER_ID_g, FALSE)))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTINIT, FAIL, "unable to find type info");
-    if (FAIL == (H5T_convert(tpath, type_id, promoted_type_id, 1, (size_t)0, (size_t)0, value_buf, NULL, H5P_LST_DATASET_XFER_g)))
+    if (FAIL == (H5T_convert(tpath, type_id, promoted_type_id, 1, (size_t)0, (size_t)0, value_buf, NULL, H5P_LST_DATASET_XFER_ID_g)))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTCONVERT, FAIL, "can't convert value");
 
-    if (NULL == (tpath = H5T_path_find(query_type, promoted_type, NULL, NULL, H5P_LST_DATASET_XFER_g, FALSE)))
+    if (NULL == (tpath = H5T_path_find(query_type, promoted_type, NULL, NULL, H5P_LST_DATASET_XFER_ID_g, FALSE)))
           HGOTO_ERROR(H5E_QUERY, H5E_CANTINIT, FAIL, "unable to find type info");
-    if (FAIL == (H5T_convert(tpath, query_type_id, promoted_type_id, 1, (size_t)0, (size_t)0, query_value_buf, NULL, H5P_LST_DATASET_XFER_g)))
+    if (FAIL == (H5T_convert(tpath, query_type_id, promoted_type_id, 1, (size_t)0, (size_t)0, query_value_buf, NULL, H5P_LST_DATASET_XFER_ID_g)))
          HGOTO_ERROR(H5E_QUERY, H5E_CANTCONVERT, FAIL, "can't convert query value");
 
     /* Could also use BOOST preprocessor for that but not really nice */

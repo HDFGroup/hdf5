@@ -4348,7 +4348,7 @@ H5VL_iod_datatype_get(void UNUSED *obj, H5VL_datatype_get_t get_type,
                 hid_t tcpl_id;
 
                 /* Copy the default datatype creation property list */
-                if(NULL == (tcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_DATATYPE_CREATE_g)))
+                if(NULL == (tcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_DATATYPE_CREATE_ID_g)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get default creation property list")
                 if((tcpl_id = H5P_copy_plist(tcpl_plist, TRUE)) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to copy the creation property list")

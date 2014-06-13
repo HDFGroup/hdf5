@@ -27,6 +27,7 @@
 PROGRAM fortranlibtest
 
   USE HDF5
+  USE THDF5
 
   IMPLICIT NONE
   INTEGER :: total_error = 0
@@ -72,14 +73,9 @@ PROGRAM fortranlibtest
   CALL reopentest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Reopen test', total_error)
 
-!DEC$ if defined(H5_VMS)
-  GOTO 8
-!DEC$ else
   ret_total_error = 0
   CALL file_close(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' File open/close test', total_error)
-!DEC$ endif
-8 CONTINUE
 
   ret_total_error = 0
   CALL file_space("file_space",cleanup, ret_total_error)
@@ -143,11 +139,11 @@ PROGRAM fortranlibtest
   CALL write_test_status(ret_total_error, ' Element selection functions test ', total_error)
 
   ret_total_error = 0
-  CALL test_select_combine(cleanup, ret_total_error)
+  CALL test_select_combine(ret_total_error)
   CALL write_test_status(ret_total_error, ' Selection combinations test ', total_error)
 
   ret_total_error = 0
-  CALL test_select_bounds(cleanup, ret_total_error)
+  CALL test_select_bounds(ret_total_error)
   CALL write_test_status(ret_total_error, ' Selection bounds test ', total_error)
   
 !     write(*,*)
@@ -155,7 +151,7 @@ PROGRAM fortranlibtest
 !     write(*,*) 'Testing DATATYPE interface               '
 !     write(*,*) '========================================='
   ret_total_error = 0
-  CALL basic_data_type_test(cleanup, ret_total_error)
+  CALL basic_data_type_test(ret_total_error)
   CALL write_test_status(ret_total_error, ' Basic datatype test', total_error)
 
   ret_total_error = 0
@@ -179,14 +175,9 @@ PROGRAM fortranlibtest
   CALL external_test(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' External dataset test', total_error)
 
-!DEC$ if defined(H5_VMS)
-  GOTO 9
-!DEC$ else
   ret_total_error = 0
   CALL multi_file_test(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Multi file driver test', total_error)
-!DEC$ endif
-9 CONTINUE
 
   ret_total_error = 0
   CALL test_chunk_cache (cleanup, ret_total_error)
@@ -211,7 +202,7 @@ PROGRAM fortranlibtest
   CALL write_test_status(ret_total_error, ' Identifier test', total_error)
 
   ret_total_error = 0
-  CALL filters_test(cleanup, ret_total_error)
+  CALL filters_test(ret_total_error)
   CALL write_test_status(ret_total_error, ' Filters test', total_error)
 
   ret_total_error = 0

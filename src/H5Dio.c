@@ -97,14 +97,14 @@ H5FL_BLK_DEFINE(type_conv);
  *		passed to this function with the PLIST_ID argument.
  *
  *		The FILE_SPACE_ID can be the constant H5S_ALL which indicates
- *		that the entire file data space is to be referenced.
+ *		that the entire file dataspace is to be referenced.
  *
  *		The MEM_SPACE_ID can be the constant H5S_ALL in which case
- *		the memory data space is the same as the file data space
+ *		the memory dataspace is the same as the file dataspace
  *		defined when the dataset was created.
  *
- *		The number of elements in the memory data space must match
- *		the number of elements in the file data space.
+ *		The number of elements in the memory dataspace must match
+ *		the number of elements in the file dataspace.
  *
  *		The PLIST_ID can be the constant H5P_DEFAULT in which
  *		case the default data transfer properties are used.
@@ -120,8 +120,8 @@ herr_t
 H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
 {
-    H5VL_t     *vol_plugin;
-    void       *dset;
+    H5VL_t     *vol_plugin = NULL;
+    void       *dset = NULL;
     herr_t      ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -129,7 +129,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
              plist_id, buf);
 
     if(mem_space_id < 0 || file_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == plist_id)
@@ -168,14 +168,14 @@ done:
  *		PLIST_ID argument.
  *
  *		The FILE_SPACE_ID can be the constant H5S_ALL which indicates
- *		that the entire file data space is to be referenced.
+ *		that the entire file dataspace is to be referenced.
  *
  *		The MEM_SPACE_ID can be the constant H5S_ALL in which case
- *		the memory data space is the same as the file data space
+ *		the memory dataspace is the same as the file dataspace
  *		defined when the dataset was created.
  *
- *		The number of elements in the memory data space must match
- *		the number of elements in the file data space.
+ *		The number of elements in the memory dataspace must match
+ *		the number of elements in the file dataspace.
  *
  *		The PLIST_ID can be the constant H5P_DEFAULT in which
  *		case the default data transfer properties are used.
@@ -312,7 +312,7 @@ H5D__pre_write(H5D_t *dset, hid_t mem_type_id, const H5S_t *mem_space,
         /* write raw data */
         if(H5D__write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
-    } 
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -342,7 +342,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
     H5S_t * projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
                                         /* projection of the supplied mem_space to a new  */
-                                        /* data space with rank equal to that of          */
+                                        /* dataspace with rank equal to that of          */
                                         /* file_space.                                    */
                                         /*                                                */
                                         /* This field is only used if                     */
@@ -362,6 +362,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
+    char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, dataset->oloc.addr, FAIL)
@@ -395,7 +396,20 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     /* Make certain that the number of elements in each selection is the same */
     if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest dataspaces have different sizes")
+
+    /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
+    if(NULL == buf) {
+        /* Check for any elements selected (which is invalid) */
+        if(nelmts > 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
+
+	/* If the buffer is nil, and 0 element is selected, make a fake buffer.
+	 * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+	 * doesn't support this feature.
+	 */
+        buf = &fake_char;
+    } /* end if */
 
     /* Make sure that both selections have their extents set */
     if(!(H5S_has_extent(file_space)))
@@ -544,7 +558,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
     H5S_t * projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
                                         /* projection of the supplied mem_space to a new  */
-                                        /* data space with rank equal to that of          */
+                                        /* dataspace with rank equal to that of          */
                                         /* file_space.                                    */
                                         /*                                                */
                                         /* This field is only used if                     */
@@ -564,6 +578,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
+    char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
     FUNC_ENTER_STATIC_TAG(dxpl_id, dataset->oloc.addr, FAIL)
@@ -629,6 +644,33 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     if(!mem_space)
         mem_space = file_space;
 
+    if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
+    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, hsize_t);
+
+    /* Make certain that the number of elements in each selection is the same */
+    if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest dataspaces have different sizes")
+
+    /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
+    if(NULL == buf) {
+        /* Check for any elements selected (which is invalid) */
+        if(nelmts > 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
+
+	/* If the buffer is nil, and 0 element is selected, make a fake buffer.
+	 * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+	 * doesn't support this feature.
+	 */
+        buf = &fake_char;
+    } /* end if */
+
+    /* Make sure that both selections have their extents set */
+    if(!(H5S_has_extent(file_space)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set")
+    if(!(H5S_has_extent(mem_space)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
+
     /* H5S_select_shape_same() has been modified to accept topologically 
      * identical selections with different rank as having the same shape 
      * (if the most rapidly changing coordinates match up), but the I/O 
@@ -659,24 +701,10 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         buf = adj_buf;
     } /* end if */
 
-    if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
-    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, hsize_t);
-
-    /* Make certain that the number of elements in each selection is the same */
-    if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
-
-    /* Make sure that both selections have their extents set */
-    if(!(H5S_has_extent(file_space)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set")
-    if(!(H5S_has_extent(mem_space)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
-
     /* Retrieve dataset properties */
     /* <none needed currently> */
 
-    /* Allocate data space and initialize it if it hasn't been. */
+    /* Allocate dataspace and initialize it if it hasn't been. */
     if(nelmts > 0 && dataset->shared->dcpl_cache.efl.nused == 0 &&
             !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)) {
         hssize_t file_nelmts;   /* Number of elements in file dataset's dataspace */
@@ -881,7 +909,7 @@ H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     } /* end else */
 
     /*
-     * Locate the type conversion function and data space conversion
+     * Locate the type conversion function and dataspace conversion
      * functions, and set up the element numbering information. If a data
      * type conversion is necessary then register datatype atoms. Data type
      * conversion is necessary if the user has set the `need_bkg' to a high

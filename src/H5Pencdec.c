@@ -24,8 +24,10 @@
 
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 
+#ifdef NOT_YET
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5P_init_encdec_interface
+#endif /* NOT_YET */
 
 
 /***********/
@@ -33,9 +35,11 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* Files		  	        */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
+#include "H5VMprivate.h"        /* Vector functions			*/
 
 
 /****************/
@@ -78,6 +82,7 @@ typedef struct {
 /*******************/
 
 
+#ifdef NOT_YET
 
 /*--------------------------------------------------------------------------
 NAME
@@ -98,6 +103,7 @@ H5P_init_encdec_interface(void)
 
     FUNC_LEAVE_NOAPI(H5P_init())
 } /* H5P_init_encdec_interface() */
+#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------

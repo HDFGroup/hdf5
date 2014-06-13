@@ -17,7 +17,7 @@
  *	       	Thursday, April 24, 2008
  *
  * Purpose:	Abstract indexed (chunked) I/O functions.  The logical
- *		multi-dimensional data space is regularly partitioned into
+ *		multi-dimensional dataspace is regularly partitioned into
  *		same-sized "chunks", the first of which is aligned with the
  *		logical origin.  The chunks are indexed by different methods,
  *		that map a chunk index to disk address.  Each chunk can be
@@ -319,7 +319,7 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsiz
 
     FUNC_ENTER_STATIC_TAG(dxpl_id, dset->oloc.addr, FAIL)
 
-    /* Allocate data space and initialize it if it hasn't been. */
+    /* Allocate dataspace and initialize it if it hasn't been. */
     if(!(*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
  	/* Allocate storage */
         if(H5D__alloc_storage(dset, dxpl_id, H5D_ALLOC_WRITE, FALSE, NULL) < 0)
@@ -385,10 +385,9 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsiz
     if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.addr, data_size, dxpl_id, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 
-
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-}
+} /* end H5D__chunk_direct_write() */
 
 
 /*-------------------------------------------------------------------------
@@ -2798,7 +2797,7 @@ void *
 H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     hbool_t relax)
 {
-    const H5D_t *dset = io_info->dset;          /* Local pointer to the dataset info */
+    const H5D_t         *dset = io_info->dset;  /* Local pointer to the dataset info */
     const H5O_pline_t   *pline = &(dset->shared->dcpl_cache.pline); /* I/O pipeline info - always equal to the pline passed to H5D__chunk_alloc */
     const H5O_layout_t  *layout = &(dset->shared->layout); /* Dataset layout */
     const H5O_fill_t    *fill = &(dset->shared->dcpl_cache.fill); /* Fill value info */

@@ -34,10 +34,8 @@
 ! *****************************************
 ! ***        H 5 E   T E S T S
 ! *****************************************
-
 MODULE test_my_hdf5_error_handler
 
-  IMPLICIT NONE
 
 CONTAINS
 
@@ -56,9 +54,8 @@ CONTAINS
     IMPLICIT NONE
 
     ! estack_id is always passed from C as: H5E_DEFAULT
-    INTEGER(HID_T) :: estack_id 
+    INTEGER(HID_T) :: estack_id
     ! data that was registered with H5Eset_auto_f
-!    INTEGER, DIMENSION(1:2) :: data_inout
     INTEGER :: data_inout
 
     PRINT*, " "
@@ -82,10 +79,10 @@ CONTAINS
     IMPLICIT NONE
 
     ! estack_id is always passed from C as: H5E_DEFAULT
-    INTEGER(HID_T) :: estack_id 
+    INTEGER(HID_T) :: estack_id
     ! data that was registered with H5Eset_auto_f
     TYPE(C_PTR) :: data_inout
-    
+
     PRINT*, " "
     PRINT*, " Subtest: H5Eset_auto_f custom error message with callback, NO DATA"
     PRINT*, "         -This message should be written to standard out-  "
@@ -94,12 +91,19 @@ CONTAINS
     my_hdf5_error_handler_nodata = 1 ! this is not used by the C routine
 
   END FUNCTION my_hdf5_error_handler_nodata
-  
+
 END MODULE test_my_hdf5_error_handler
+
+
+
+MODULE TH5E_F03
+
+CONTAINS
 
 SUBROUTINE test_error(total_error)
 
   USE HDF5 
+  USE TH5_MISC
   USE ISO_C_BINDING
   USE test_my_hdf5_error_handler
 
@@ -109,27 +113,17 @@ SUBROUTINE test_error(total_error)
   INTEGER :: total_error
   INTEGER(hid_t) :: file
   INTEGER(hid_t) :: dataset, space
-  INTEGER(hid_t)  :: estack_id
   INTEGER(hsize_t), DIMENSION(1:2) :: dims
-  CHARACTER(LEN=10) :: FUNC_test_error = "test_error"
-  TYPE(C_FUNPTR) :: old_func
-  TYPE(C_PTR) :: old_data, null_data
   INTEGER :: error
-  TYPE(C_FUNPTR) :: op
-  INTEGER, DIMENSION(1:100,1:200), TARGET :: ipoints2
-  !!    INTEGER, DIMENSION(1:2), TARGET :: my_hdf5_error_handler_data
   INTEGER, DIMENSION(:), POINTER :: ptr_data
   INTEGER, TARGET :: my_hdf5_error_handler_data
   TYPE(C_PTR) :: f_ptr
   TYPE(C_FUNPTR) :: func
 
   TYPE(C_PTR), TARGET :: f_ptr1
-  TYPE(C_FUNPTR), TARGET :: func1
 
   INTEGER, DIMENSION(1:1) :: array_shape
-  LOGICAL :: is_associated
 
-  !    my_hdf5_error_handler_data(1:2) =(/1,2/)
   my_hdf5_error_handler_data = 99
   CALL h5fcreate_f("terror.h5", H5F_ACC_TRUNC_F, file, error)
   CALL check("h5fcreate_f", error, total_error)
@@ -208,3 +202,5 @@ SUBROUTINE test_error(total_error)
   CALL h5dcreate_f(FAKE_ID,"a_dataset",H5T_NATIVE_INTEGER, space, dataset, error)
 
 END SUBROUTINE test_error
+
+END MODULE TH5E_F03

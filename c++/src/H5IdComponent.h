@@ -46,6 +46,9 @@ class H5_DLLCPP IdComponent {
 	// Returns an HDF5 object type, given the object id.
 	static H5I_type_t getHDFObjType(const hid_t obj_id);
 
+	// Returns an HDF5 object type of this object.
+	H5I_type_t getHDFObjType() const;
+
 	// Assignment operator.
 	IdComponent& operator=( const IdComponent& rhs );
 

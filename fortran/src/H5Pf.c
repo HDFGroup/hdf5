@@ -418,18 +418,18 @@ nh5pset_fill_valuec_c (hid_t_f *prp_id, hid_t_f *type_id, _fcd fillvalue)
 
 /****if* H5Pf/h5pset_fill_value_c
  * NAME
- *        h5pset_fill_value_c
+ *  h5pset_fill_value_c
  * PURPOSE
- *     Call H5Pset_fill_value to set a fillvalue for a dataset
+ *  Call H5Pset_fill_value to set a fillvalue for a dataset
  * INPUTS
- *      prp_id - property list identifier
- *              type_id - datatype identifier (fill value is of type type_id)
- *              fillvalue - fillvalue
+ *  prp_id     - property list identifier
+ *  type_id    - datatype identifier (fill value is of type type_id)
+ *  fillvalue - fillvalue
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Saturday, August 14, 1999
+ *  Saturday, August 14, 1999
  * SOURCE
 */
 int_f
@@ -445,7 +445,7 @@ nh5pset_fill_value_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
       * Call H5Pset_fill_value function.
       */
      c_prp_id = (hid_t)*prp_id;
-     c_type_id = (int)*type_id;
+     c_type_id = (hid_t)*type_id;
      ret = H5Pset_fill_value(c_prp_id, c_type_id, fillvalue);
 
      if (ret < 0) return ret_value;

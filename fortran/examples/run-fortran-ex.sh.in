@@ -63,19 +63,15 @@ RunTest()
     ./$TEST_EXEC
 }
 
-
+F2003_ENABLED=@HAVE_FORTRAN_2003@
 
 ##################  MAIN  ##################
 
 # Run tests
 if [ $? -eq 0 ]
 then
-    if (RunTest h5_cmprss &&\
-        rm h5_cmprss &&\
-        RunTest h5_crtdat &&\
+    if (RunTest h5_crtdat &&\
         rm h5_crtdat &&\
-        RunTest h5_extend &&\
-        rm h5_extend &&\
         RunTest h5_rdwt &&\
         rm h5_rdwt &&\
         RunTest h5_crtatt &&\
@@ -86,14 +82,16 @@ then
         rm h5_crtgrpar &&\
         RunTest h5_crtgrpd &&\
         rm h5_crtgrpd &&\
+        RunTest h5_extend &&\
+        rm h5_extend &&\
         RunTest h5_subset &&\
         rm h5_subset &&\
+        RunTest h5_cmprss &&\
+        rm h5_cmprss &&\
         RunTest hyperslab &&\
         rm hyperslab &&\
         RunTest selectele &&\
         rm selectele &&\
-        RunTest grpit &&\
-        rm grpit &&\
         RunTest refobjexample &&\
         rm refobjexample &&\
         RunTest refregexample &&\
@@ -107,6 +105,24 @@ then
         EXIT_VALUE=${EXIT_FAILURE}
     fi
 fi
+
+if [ $EXIT_VALUE -eq ${EXIT_SUCCESS} -a "$F2003_ENABLED" = "yes" ]
+then
+# Add attention tests for Fortran 2003 features
+    if (RunTest rwdset_fortran2003 &&\
+        rm rwdset_fortran2003 &&\
+        RunTest nested_derived_type &&\
+        rm nested_derived_type &&\
+        RunTest compound_fortran2003 &&\
+        rm compound_fortran2003 &&\
+        RunTest compound_complex_fortran2003 &&\
+        rm compound_complex_fortran2003); then
+        EXIT_VALUE=${EXIT_SUCCESS}
+    else
+        EXIT_VALUE=${EXIT_FAILURE}
+    fi
+fi
+  
 
 # Cleanup
 rm *.o

@@ -30,6 +30,7 @@
      PROGRAM FFLUSH1EXAMPLE
 
      USE HDF5 ! This module contains all necessary modules
+     USE TH5_MISC
 
      IMPLICIT NONE
 
@@ -149,7 +150,7 @@
      IF (total_error .ne. 0) CALL h5_exit_f (1)
 
 
-     001 STOP
+     STOP
 
 
      END PROGRAM FFLUSH1EXAMPLE

@@ -34,7 +34,9 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Gprivate.h"         /* Groups                               */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 
 
@@ -81,10 +83,13 @@ static herr_t H5P__gcrt_link_info_dec(const void **_pp, void *value);
 const H5P_libclass_t H5P_CLS_GCRT[1] = {{
     "group create",		/* Class name for debugging     */
     H5P_TYPE_GROUP_CREATE,      /* Class type                   */
-    &H5P_CLS_OBJECT_CREATE_g,	/* Parent class ID              */
-    &H5P_CLS_GROUP_CREATE_g,	/* Pointer to class ID          */
-    &H5P_LST_GROUP_CREATE_g,	/* Pointer to default property list ID */
+
+    &H5P_CLS_OBJECT_CREATE_g,	/* Parent class                 */
+    &H5P_CLS_GROUP_CREATE_g,	/* Pointer to class             */
+    &H5P_CLS_GROUP_CREATE_ID_g,	/* Pointer to class ID          */
+    &H5P_LST_GROUP_CREATE_ID_g,	/* Pointer to default property list ID */
     H5P__gcrt_reg_prop,		/* Default property registration routine */
+
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
     NULL,			/* Class copy callback          */

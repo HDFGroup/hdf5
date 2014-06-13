@@ -83,12 +83,16 @@ H5CS_get_stack(void)
 
     fstack = H5TS_get_thread_local_value(H5TS_funcstk_key_g);
     if (!fstack) {
-        /* no associated value with current thread - create one */
-        fstack = (H5CS_t *)HDmalloc(sizeof(H5CS_t));  /* Don't use H5MM_malloc() here, it causes infinite recursion */
+        /* No associated value with current thread - create one */
+#ifdef H5_HAVE_WIN_THREADS
+        fstack = (H5CS_t *)LocalAlloc(LPTR, sizeof(H5CS_t)); /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
+#else
+        fstack = (H5CS_t *)HDmalloc(sizeof(H5CS_t)); /* Don't use H5MM_malloc() here, it causes infinite recursion */
+#endif /* H5_HAVE_WIN_THREADS */
         HDassert(fstack);
 
         /* Set the thread-specific info */
-	fstack->nused=0;
+        fstack->nused=0;
 
         /* (It's not necessary to release this in this API, it is
          *      released by the "key destructor" set up in the H5TS

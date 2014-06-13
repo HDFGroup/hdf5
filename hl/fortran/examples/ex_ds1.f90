@@ -86,7 +86,7 @@ PROGRAM example_ds
 
   ! Test if dimension Scale Attached 
   CALL H5DSis_attached_f(did, dsid, DIM1, is_attached, err)
-  WRITE(*,'(/,5X 3(A,1X),I0,A,L1)') 'Is',TRIM(DS_1_NAME),&
+  WRITE(*,'(/,5X,3(A,1X),I0,A,L1)') 'Is',TRIM(DS_1_NAME),&
        'attached to dimension',DIM1,' ... ',is_attached
   
 

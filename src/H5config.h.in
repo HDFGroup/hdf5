@@ -64,6 +64,9 @@
 /* Define to 1 if you have the `alarm' function. */
 #undef HAVE_ALARM
 
+/* Define to 1 if you have the `asprintf' function. */
+#undef HAVE_ASPRINTF
+
 /* Define if the __attribute__(()) extension is present */
 #undef HAVE_ATTRIBUTE
 
