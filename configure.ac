@@ -3081,6 +3081,7 @@ case "X-$enableval" in
       AC_MSG_RESULT([no])
     ;;
 esac
+AM_CONDITIONAL([BUILD_INDEXING_CONDITIONAL], [test "X-$INDEXING" = "X-yes"])
 
 ## ----------------------------------------------------------------------
 ## Check for ALACRITY
@@ -3153,6 +3154,9 @@ case $withval in
     if test -z "$HAVE_ALACRITY" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find ALACRITY library])
     fi
+
+    AC_DEFINE([HAVE_ALACRITY], [1],
+            [Define if ALACRITY indexing is supported.])
     ;;
 esac
 

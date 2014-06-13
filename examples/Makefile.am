@@ -37,6 +37,10 @@ if BUILD_EFF_CONDITIONAL
                 h5ff_client_timings h5ff_client_time_datasets
 endif
 
+if BUILD_INDEXING_CONDITIONAL
+  EXAMPLE_PROG_INDEXING = h5ff_client_index
+endif
+
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,
 # it would try to compile them instead of using the h5cc script.
