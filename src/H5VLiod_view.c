@@ -566,7 +566,9 @@ H5VL__iod_apply_query(hid_t file_id, hid_t rcxt_id, hid_t qid, hid_t vcpl_id,
 
                 if(sid1!=FAIL && sid2!=FAIL) {
                     /* MSC - AND the selections when API is available */
-                    *region = H5Scopy(sid1);                    
+                    if(FAIL == (*region = H5Scopy(sid1)))
+                        HGOTO_ERROR_FF(ret, "Unable to AND 2 dataspace selections");
+
                 }
                 else if(sid1!=FAIL)
                     *region = H5Scopy(sid1);

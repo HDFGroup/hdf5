@@ -671,6 +671,35 @@ H5P_term_interface(void)
 
                 /* Reset the default property lists, if they've been closed */
                 if(H5I_nmembers(H5I_GENPROP_CLS)==0) {
+                        H5P_CLS_ROOT_g =
+                        H5P_CLS_OBJECT_CREATE_g =
+                        H5P_CLS_FILE_CREATE_g =
+                        H5P_CLS_FILE_ACCESS_g =
+                        H5P_CLS_DATASET_CREATE_g =
+                        H5P_CLS_DATASET_ACCESS_g =
+                        H5P_CLS_DATASET_XFER_g =
+                        H5P_CLS_GROUP_CREATE_g =
+                        H5P_CLS_GROUP_ACCESS_g =
+                        H5P_CLS_MAP_CREATE_g =
+                        H5P_CLS_MAP_ACCESS_g =
+                        H5P_CLS_DATATYPE_CREATE_g =
+                        H5P_CLS_DATATYPE_ACCESS_g =
+                        H5P_CLS_STRING_CREATE_g =
+                        H5P_CLS_ATTRIBUTE_CREATE_g =
+                        H5P_CLS_OBJECT_COPY_g =
+                        H5P_CLS_LINK_CREATE_g =
+                        H5P_CLS_LINK_ACCESS_g =
+                        H5P_CLS_READ_CONTEXT_ACQUIRE_g = 
+                        H5P_CLS_TRANSACTION_START_g =
+                        H5P_CLS_TRANSACTION_FINISH_g = 
+                        H5P_CLS_VIEW_CREATE_g =
+#ifdef H5_HAVE_INDEXING
+                        H5P_CLS_INDEX_CREATE_g =
+                        H5P_CLS_INDEX_ACCESS_g =
+                        H5P_CLS_INDEX_XFER_g =
+#endif
+                        H5P_CLS_FILE_MOUNT_g = NULL;
+
                         H5P_CLS_ROOT_ID_g =
                         H5P_CLS_OBJECT_CREATE_ID_g =
                         H5P_CLS_FILE_CREATE_ID_g =
@@ -5165,11 +5194,11 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
             break;
 
         case H5P_TYPE_MAP_CREATE:
-            class_id = H5P_CLS_MAP_CREATE_g;
+            class_id = H5P_CLS_MAP_CREATE_ID_g;
             break;
 
         case H5P_TYPE_MAP_ACCESS:
-            class_id = H5P_CLS_MAP_ACCESS_g;
+            class_id = H5P_CLS_MAP_ACCESS_ID_g;
             break;
 
         case H5P_TYPE_DATATYPE_CREATE:

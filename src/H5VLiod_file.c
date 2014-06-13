@@ -17,6 +17,10 @@
 
 #ifdef H5_HAVE_EFF
 
+static herr_t
+setup_eff_container(iod_handle_t coh, uint32_t cs_scope, unsigned num_peers, hbool_t acquire,
+                    hid_t fcpl_id, iod_obj_id_t root_id, iod_obj_id_t mdkv_id, 
+                    iod_obj_id_t attrkv_id, iod_obj_id_t oidkv_id, iod_handles_t *_root_oh);
 /*
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
  *              February, 2013
@@ -163,7 +167,8 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 
         /* create the KV object to hold each client's indexes for
            object OIDs after each trans_finish and file_close */
-        ret = iod_obj_create(coh, first_tid, NULL, IOD_OBJ_KV, NULL, NULL, &oidkv_id, NULL);
+        ret = iod_obj_create(coh, first_tid, obj_create_hint, IOD_OBJ_KV, 
+                             NULL, NULL, &oidkv_id, NULL);
         if(ret != 0)
             HGOTO_ERROR_FF(ret, "can't create array for OID indexes");
 
@@ -388,14 +393,48 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR_FF(ret, "can't free container transaction status object");
 
     if(rtid == -1) {
-        if((ret = iod_container_close(coh, NULL, NULL)) < 0)
-            HGOTO_ERROR_FF(ret, "can't close container");
-        coh.cookie = IOD_OH_UNDEFINED;
-        ret = iod_container_unlink(input->name, 0, NULL);
-        if(ret != 0)
-            HGOTO_ERROR_FF(ret, "can't unlink container");
 
-        HGOTO_ERROR_FF(FAIL, "Container is not an HDF5 container, removed it");
+        output.fcpl_id = H5Pcopy(H5P_FILE_CREATE_DEFAULT);
+        output.kv_oid_index = 4;
+        output.array_oid_index = 0;
+        output.blob_oid_index = 0;
+
+        output.root_id = 0;
+        output.mdkv_id = 1*num_peers;
+        output.attrkv_id = 2*num_peers;
+        output.oidkv_id = 3*num_peers;
+
+        IOD_OBJID_SETTYPE(output.root_id, IOD_OBJ_KV)
+        IOD_OBJID_SETOWNER_APP(output.root_id)
+        IOD_OBJID_SETTYPE(output.mdkv_id, IOD_OBJ_KV)
+        IOD_OBJID_SETOWNER_APP(output.mdkv_id)
+        IOD_OBJID_SETTYPE(output.attrkv_id, IOD_OBJ_KV)
+        IOD_OBJID_SETOWNER_APP(output.attrkv_id)
+        IOD_OBJID_SETTYPE(output.oidkv_id, IOD_OBJ_KV)
+        IOD_OBJID_SETOWNER_APP(output.oidkv_id)
+
+        output.coh.cookie = coh.cookie;
+
+        fprintf(stderr, "Recreating Container HDF5 metadata ");
+        fprintf(stderr, "with MDKV %"PRIx64" ", output.mdkv_id);
+        fprintf(stderr, "with attrKV %"PRIx64" ", output.attrkv_id);
+        fprintf(stderr, "with OIDKV %"PRIx64"\n", output.oidkv_id);
+
+        if(setup_eff_container(coh, cs_scope, num_peers, acquire, output.fcpl_id,
+                               output.root_id, output.mdkv_id, 
+                               output.attrkv_id, output.oidkv_id, &root_oh) < 0)
+            HGOTO_ERROR_FF(FAIL, "can't create container metadata");
+
+
+        output.root_oh.rd_oh = root_oh.rd_oh;
+        output.root_oh.wr_oh = root_oh.wr_oh;
+        if(acquire == TRUE)
+            output.c_version = 1;
+        else
+            output.c_version = IOD_TID_UNKNOWN;
+
+        HG_Handler_start_output(op_data->hg_handle, &output);
+        goto done;
     }
 
     ret = iod_trans_start(coh, &rtid, NULL, num_peers, IOD_TRANS_R, NULL);
@@ -487,6 +526,10 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
             free(kv[i].key);
             free(kv[i].value);
         }
+
+        fprintf(stderr, "OID KV index: %d\n", (int)output.kv_oid_index);
+        fprintf(stderr, "OID ARRAY index: %d\n", (int)output.array_oid_index);
+        fprintf(stderr, "OID BLOB index: %d\n", (int)output.blob_oid_index);
 
         free(kv);
         free(oid_cs);
@@ -871,4 +914,197 @@ done:
 
 } /* end H5VL_iod_server_file_close_cb() */
 
+#if 1
+static herr_t
+setup_eff_container(iod_handle_t coh, uint32_t cs_scope, unsigned num_peers, hbool_t acquire,
+                    hid_t fcpl_id, iod_obj_id_t root_id, iod_obj_id_t mdkv_id, 
+                    iod_obj_id_t attrkv_id, iod_obj_id_t oidkv_id, iod_handles_t *_root_oh)
+{
+    iod_handles_t root_oh; /* root object handle */
+    iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
+    iod_ret_t ret, root_ret;
+    iod_trans_id_t first_tid = 0;
+    iod_hint_list_t *obj_create_hint = NULL;
+    hbool_t enable_checksum = FALSE;
+    herr_t ret_value = SUCCEED;
+
+    if(H5Pget_ocpl_enable_checksum(fcpl_id, &enable_checksum) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't get scope for data integrity checks");
+
+    /* root group integrity */
+    if((cs_scope & H5_CHECKSUM_IOD) && enable_checksum) {
+        obj_create_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
+        obj_create_hint->num_hint = 1;
+        obj_create_hint->hint[0].key = "iod_hint_obj_enable_cksum";
+    }
+
+    /* MSC - skip transaction 0 since it can't be persisted */
+    ret = iod_trans_start(coh, &first_tid, NULL, num_peers, IOD_TRANS_W, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't start transaction 0");
+
+    /* Finish  the transaction */
+    ret = iod_trans_finish(coh, first_tid, NULL, 0, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't finish transaction 0");
+
+    first_tid = 1;
+
+    /* Take transaction 1 to create root group */
+    ret = iod_trans_start(coh, &first_tid, NULL, num_peers, IOD_TRANS_W, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't start transaction 1");
+
+    /* create the root group */
+    root_ret = iod_obj_create(coh, first_tid, obj_create_hint, IOD_OBJ_KV, 
+                              NULL, NULL, &root_id, NULL);
+    if(0 == root_ret || -EEXIST == root_ret) {
+        /* root group has been created, open it */
+        ret = iod_obj_open_write(coh, root_id, first_tid, NULL, &root_oh.wr_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open root group for write");
+        ret = iod_obj_open_read(coh, root_id, first_tid, NULL, &root_oh.rd_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open root group for read");
+    }
+    else {
+        HGOTO_ERROR_FF(root_ret, "can't create root group");
+    }
+
+    /* for the process that succeeded in creating the group, create
+       the scratch pad for it too. */
+    if(0 == root_ret) {
+        scratch_pad sp;
+        iod_kv_t kv;
+        uint64_t value = 1;
+
+        /* create the metadata KV object for the root group */
+        ret = iod_obj_create(coh, first_tid, obj_create_hint, IOD_OBJ_KV, 
+                             NULL, NULL, &mdkv_id, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't create metadata KV object");
+
+        /* create the attribute KV object for the root group */
+        ret = iod_obj_create(coh, first_tid, obj_create_hint, IOD_OBJ_KV, 
+                             NULL, NULL, &attrkv_id, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't create attribute KV object");
+
+        /* create the KV object to hold each client's indexes for
+           object OIDs after each trans_finish and file_close */
+        ret = iod_obj_create(coh, first_tid, obj_create_hint, IOD_OBJ_KV, 
+                             NULL, NULL, &oidkv_id, NULL);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "can't create array for OID indexes");
+
+        /* set values for the scratch pad object */
+        sp[0] = mdkv_id;
+        sp[1] = attrkv_id;
+        sp[2] = oidkv_id;
+        sp[3] = IOD_OBJ_INVALID;
+
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t sp_cs;
+
+            sp_cs = H5_checksum_crc64(&sp, sizeof(sp));
+
+            /* set scratch pad in root group */
+            ret = iod_obj_set_scratch(root_oh.wr_oh, first_tid, &sp, &sp_cs, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "can't set scratch pad");
+        }
+        else {
+            ret = iod_obj_set_scratch(root_oh.wr_oh, first_tid, &sp, NULL, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "can't set scratch pad");
+        }
+
+        /* Store Metadata in scratch pad */
+        ret = iod_obj_open_write(coh, mdkv_id, first_tid, NULL, &mdkv_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open metadata KV");
+
+        /* insert plist metadata */
+        ret = H5VL_iod_insert_plist(mdkv_oh, first_tid, fcpl_id, cs_scope, NULL, NULL);
+        if(SUCCEED != ret)
+            HGOTO_ERROR_FF(ret, "can't insert link count KV value");
+
+        kv.value = &value;
+        kv.value_len = sizeof(uint64_t);
+
+        kv.key = (void *)H5VL_IOD_KEY_KV_IDS_INDEX;
+        kv.key_len = 1 + strlen(H5VL_IOD_KEY_KV_IDS_INDEX);
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t cs[2];
+
+            cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+            cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+            ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, cs, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "can't set KV pair in parent");
+        }
+        else {
+            ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "can't set KV pair in parent");
+        }
+
+        kv.key = (void *)H5VL_IOD_KEY_ARRAY_IDS_INDEX;
+        kv.key_len = 1 + strlen(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t cs[2];
+
+            cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+            cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+            ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, cs, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "can't set KV pair in parent");
+        }
+        else {
+            ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "can't set KV pair in parent");
+        }
+
+        kv.key = (void *)H5VL_IOD_KEY_BLOB_IDS_INDEX;
+        kv.key_len = 1 + strlen(H5VL_IOD_KEY_BLOB_IDS_INDEX);
+        if(cs_scope & H5_CHECKSUM_IOD) {
+            iod_checksum_t cs[2];
+
+            cs[0] = H5_checksum_crc64(kv.key, kv.key_len);
+            cs[1] = H5_checksum_crc64(kv.value, kv.value_len);
+            ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, cs, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "can't set KV pair in parent");
+        }
+        else {
+            ret = iod_kv_set(mdkv_oh, first_tid, NULL, &kv, NULL, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "can't set KV pair in parent");
+        }
+
+        ret = iod_obj_close(mdkv_oh, NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't close root object handle");
+    }
+
+    _root_oh->rd_oh.cookie = root_oh.rd_oh.cookie;
+    _root_oh->wr_oh.cookie = root_oh.wr_oh.cookie;
+
+    /* If the user did not ask to acquire the latest readable version, finish it here */
+    if(TRUE != acquire) {
+        /* Finish  the transaction */
+        ret = iod_trans_finish(coh, first_tid, NULL, 0, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't finish transaction 1");
+    }
+
+done:
+    if(obj_create_hint) {
+        free(obj_create_hint);
+        obj_create_hint = NULL;
+    }
+    return ret_value;
+}
+#endif
 #endif /* H5_HAVE_EFF */
