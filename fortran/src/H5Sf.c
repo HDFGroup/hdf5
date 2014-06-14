@@ -1125,11 +1125,11 @@ nh5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t
   ret_value = 0;
   return ret_value;
 }
-/****if* H5Sf/h5sselect_select_c
+/****if* H5Sf/h5smodify_select_c
  * NAME
- *        h5sselect_select_c
+ *        h5smodify_select_c
  * PURPOSE
- *     Call H5Sselect_ select
+ *     Call H5Smodify_select
  * INPUTS
  *      space1_id - identifier of the first dataspace  to modify
  *              operator - defines how the new selection is combined
@@ -1145,7 +1145,7 @@ nh5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t
 */
 
 int_f
-nh5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
+nh5smodify_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
 /******/
 {
   int ret_value = -1;
@@ -1157,7 +1157,7 @@ nh5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
 
   c_space1_id = (hid_t)*space1_id;
   c_space2_id = (hid_t)*space2_id;
-  if( H5Sselect_select(c_space1_id, c_op, c_space2_id)< 0) return ret_value;
+  if( H5Smodify_select(c_space1_id, c_op, c_space2_id)< 0) return ret_value;
   ret_value = 0;
   return ret_value;
 }

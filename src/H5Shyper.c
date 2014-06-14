@@ -86,7 +86,7 @@ static herr_t H5S_fill_in_hyperslab(H5S_t *old_space, H5S_seloper_t op,
 static herr_t H5S_fill_in_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2,
     H5S_t **result);
 static H5S_t *H5S_combine_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
-static herr_t H5S_select_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
+static herr_t H5S_modify_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
 static herr_t H5S_hyper_get_seq_list_gen(const H5S_t *space, H5S_sel_iter_t *iter,
     size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem, hsize_t *off,
     size_t *len);
@@ -7845,7 +7845,7 @@ H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     /* Note: currently, the offset of each dataspace is ignored */
 #if 0
     /* Check that both dataspaces have the same offset */
-    /* Same note as in H5Sselect_select */
+    /* Same note as in H5Smodify_select */
     for(u=0; u<space1->extent.rank; u++) {
         if(space1->select.offset[u] != space2->select.offset[u])
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspaces not same offset")
@@ -7873,9 +7873,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_select_select
+ * Function:	H5S_modify_select
  *
- * Purpose:	Internal version of H5Sselect_select().
+ * Purpose:	Internal version of H5Smodify_select().
  *
  * Return:	New dataspace on success/NULL on failure
  *
@@ -7888,7 +7888,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_select_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
+H5S_modify_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
@@ -7930,17 +7930,17 @@ H5S_select_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_select_select() */
+} /* end H5S_modify_select() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Sselect_select
+    H5Smodify_select
  PURPOSE
     Refine a hyperslab selection with an operation using a second hyperslab
     to modify it
  USAGE
-    herr_t H5Sselect_select(space1, op, space2)
+    herr_t H5Smodify_select(space1, op, space2)
         hid_t space1;           IN/OUT: First Dataspace ID
         H5S_seloper_t op;       IN: Selection operation
         hid_t space2;           IN: Second Dataspace ID
@@ -7956,7 +7956,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sselect_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
+H5Smodify_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
 {
     H5S_t	*space1;                /* First Dataspace */
     H5S_t	*space2;                /* Second Dataspace */
@@ -8007,12 +8007,12 @@ H5Sselect_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspaces don't have hyperslab selections")
 
     /* Go refine the first selection */
-    if(H5S_select_select(space1, op, space2) < 0)
+    if(H5S_modify_select(space1, op, space2) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to modify hyperslab selection")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Sselect_select() */
+} /* end H5Smodify_select() */
 
 
 /*--------------------------------------------------------------------------

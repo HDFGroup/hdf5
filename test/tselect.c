@@ -4935,7 +4935,7 @@ test_select_hyper_union(void)
 **
 **  test_select_hyper_union_stagger(): Test basic H5S (dataspace) selection code.
 **      Tests unions of staggered hyperslabs.  (Uses H5Scombine_hyperslab
-**      and H5Sselect_select instead of H5Sselect_hyperslab)
+**      and H5Smodify_select instead of H5Sselect_hyperslab)
 **
 ****************************************************************/
 static void
@@ -5039,8 +5039,8 @@ test_select_hyper_union_stagger(void)
     CHECK(error, FAIL, "H5Sselect_hyperslab");
 
     /* Combine the copied dataspace with the temporary dataspace */
-    error=H5Sselect_select(tmp_space,H5S_SELECT_OR,tmp2_space);
-    CHECK(error, FAIL, "H5Sselect_select");
+    error=H5Smodify_select(tmp_space,H5S_SELECT_OR,tmp2_space);
+    CHECK(error, FAIL, "H5Smodify_select");
 
     /* Create Memory Dataspace */
     memspace=H5Screate_simple(memrank,dimsm,NULL);
@@ -5292,7 +5292,7 @@ test_select_hyper_union_3d(void)
 **
 **  test_select_hyper_valid_combination(): Tests invalid and valid
 **  combinations of selections on dataspace for H5Scombine_select
-**  and H5Sselect_select.
+**  and H5Smodify_select.
 **
 ****************************************************************/
 static void
@@ -5307,10 +5307,10 @@ test_select_hyper_valid_combination(void)
 	hsize_t	dims3D[] = {SPACE4_DIM1, SPACE4_DIM2, SPACE4_DIM3};
 	
     hsize_t	coord1[1][SPACE2_RANK]; /* Coordinates for single point selection */
-    hsize_t     start[SPACE9_RANK]; /* Hyperslab start */
-    hsize_t     stride[SPACE9_RANK]; /* Hyperslab stride */
-    hsize_t     count[SPACE9_RANK]; /* Hyperslab block count */
-    hsize_t     block[SPACE9_RANK]; /* Hyperslab block size */
+    hsize_t     start[SPACE4_RANK]; /* Hyperslab start */
+    hsize_t     stride[SPACE4_RANK]; /* Hyperslab stride */
+    hsize_t     count[SPACE4_RANK]; /* Hyperslab block count */
+    hsize_t     block[SPACE4_RANK]; /* Hyperslab block size */
     herr_t	ret;		/* Generic return value	*/
 
     /* Output message about test being performed */
@@ -5357,29 +5357,29 @@ test_select_hyper_valid_combination(void)
 	tmp_sid = H5Scombine_select(single_pt_sid, H5S_SELECT_AND, single_hyper_sid);
 	VERIFY(tmp_sid, FAIL, "H5Scombine_select");
 	
-	tmp_sid = H5Sselect_select(single_pt_sid, H5S_SELECT_AND, single_hyper_sid);
-	VERIFY(tmp_sid, FAIL, "H5Sselect_select");
+	tmp_sid = H5Smodify_select(single_pt_sid, H5S_SELECT_AND, single_hyper_sid);
+	VERIFY(tmp_sid, FAIL, "H5Smodify_select");
 	
 	/* Test the invalid combination between two hyperslab but of different dimension size */
 	tmp_sid = H5Scombine_select(single_hyper_sid, H5S_SELECT_AND, regular_hyper_sid);
 	VERIFY(tmp_sid, FAIL, "H5Scombine_select");
 	
-	tmp_sid = H5Sselect_select(single_hyper_sid, H5S_SELECT_AND, regular_hyper_sid);
-	VERIFY(tmp_sid, FAIL, "H5Sselect_select");
+	tmp_sid = H5Smodify_select(single_hyper_sid, H5S_SELECT_AND, regular_hyper_sid);
+	VERIFY(tmp_sid, FAIL, "H5Smodify_select");
 	
 	/* Test invalid operation inputs to the two functions */
 	tmp_sid = H5Scombine_select(single_hyper_sid, H5S_SELECT_SET, single_hyper_sid);
 	VERIFY(tmp_sid, FAIL, "H5Scombine_select");
 	
-	tmp_sid = H5Sselect_select(single_hyper_sid, H5S_SELECT_SET, single_hyper_sid);
-	VERIFY(tmp_sid, FAIL, "H5Sselect_select");
+	tmp_sid = H5Smodify_select(single_hyper_sid, H5S_SELECT_SET, single_hyper_sid);
+	VERIFY(tmp_sid, FAIL, "H5Smodify_select");
 	
 	/* Test inputs in case of non-existent space ids */
 	tmp_sid = H5Scombine_select(single_hyper_sid, H5S_SELECT_AND, non_existent_sid);
 	VERIFY(tmp_sid, FAIL, "H5Scombine_select");
 	
-	tmp_sid = H5Sselect_select(single_hyper_sid, H5S_SELECT_AND, non_existent_sid);
-	VERIFY(tmp_sid, FAIL, "H5Sselect_select");
+	tmp_sid = H5Smodify_select(single_hyper_sid, H5S_SELECT_AND, non_existent_sid);
+	VERIFY(tmp_sid, FAIL, "H5Smodify_select");
 
 	/* Close dataspaces */
     ret = H5Sclose(single_pt_sid);
