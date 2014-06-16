@@ -217,7 +217,7 @@ query_and_view(hid_t file_id, const char *dataset_name, hid_t estack_id)
 int
 main(int argc, char **argv)
 {
-    const char *file_name="eff_file_index.h5";
+    char file_name[50];
     char dataset_name[64];
     hsize_t ntuples = NTUPLES;
     hsize_t ncomponents = 3;
@@ -227,6 +227,8 @@ main(int argc, char **argv)
     hid_t estack_id = H5_EVENT_STACK_NULL;
     herr_t ret;
     hsize_t i, j;
+
+    sprintf(file_name, "%s_%s", getenv("USER"), "eff_file_index.h5");
 
     MPI_Init(&argc, &argv);
 
