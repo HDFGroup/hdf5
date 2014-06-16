@@ -317,8 +317,11 @@
 /* Define if we have Indexing support */
 #cmakedefine H5_HAVE_INDEXING @H5_HAVE_INDEXING@
 
-/* Define if we have support for Alacrity */
+/* Define if we have support for ALACRITY */
 #cmakedefine H5_HAVE_ALACRITY @H5_HAVE_ALACRITY@
+
+/* Define if we have support for FastBit */
+#cmakedefine H5_HAVE_FASTBIT @H5_HAVE_FASTBIT@
 
 /* Define to 1 if you have the <pthread.h> header file. */
 #cmakedefine H5_HAVE_PTHREAD_H @H5_HAVE_PTHREAD_H@

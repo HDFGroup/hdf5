@@ -3179,6 +3179,83 @@ case $withval in
 esac
 
 ## ----------------------------------------------------------------------
+## Check for FastBit
+##
+AC_ARG_WITH([fastbit],
+            [AS_HELP_STRING([--with-fastbit=DIR],
+                            [Use FastBit [default=no]])],,
+            [withval=no])
+
+case $withval in
+  yes)
+    HAVE_ALACRITY="yes"
+    AC_CHECK_HEADERS([iapi.h])
+    AC_CHECK_LIB([fastbit], [fastbit_selection_create],[MYFASTBIT_LIBS="-lfastbit"], [unset HAVE_FASTBIT])
+    AC_SUBST([MYFASTBIT_LIBS])
+    if test -z "$HAVE_FASTBIT" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find FastBit library])
+    fi
+    ;;
+  no)
+    HAVE_FASTBIT="no"
+    AC_MSG_CHECKING([for FastBit library])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_FASTBIT="yes"
+    case "$withval" in
+      *,*)
+        fastbit_inc="`echo $withval |cut -f1 -d,`"
+        fastbit_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          fastbit_inc="$withval/include"
+          fastbit_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$fastbit_inc" = "X/usr/include"; then
+      fastbit_inc=""
+    fi
+    if test "X$fastbit_lib" = "X/usr/lib"; then
+      fastbit_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$fastbit_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$fastbit_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$fastbit_inc"
+    fi
+
+    AC_CHECK_HEADERS([iapi.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+
+    if test -n "$fastbit_lib"; then
+      LDFLAGS="$LDFLAGS -L$fastbit_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$fastbit_lib"
+    fi
+
+    AC_CHECK_LIB([fastbit], [fastbit_selection_create],, 
+        [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_FASTBIT],
+        )
+
+    if test -z "$HAVE_FASTBIT" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find FastBit library])
+    fi
+
+    AC_DEFINE([HAVE_FASTBIT], [1],
+            [Define if FastBit indexing is supported.])
+    ;;
+esac
+
+## ----------------------------------------------------------------------
 ## Check for python devel
 ##
 AC_MSG_CHECKING([whether to enable the python scripting environment])

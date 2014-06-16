@@ -129,13 +129,15 @@ H5X_init_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-//#ifdef H5_HAVE_INDEX_PLUGIN_DUMMY
     if (H5X_register(H5X_DUMMY) < 0)
         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register dummy index plugin");
-//#endif /* H5_HAVE_INDEX_PLUGIN_DUMMY */
 #ifdef H5_HAVE_ALACRITY
     if (H5X_register(H5X_ALACRITY) < 0)
-        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register alacrity index plugin");
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register ALACRITY index plugin");
+#endif
+#ifdef H5_HAVE_FASTBIT
+    if (H5X_register(H5X_FASTBIT) < 0)
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register FastBit index plugin");
 #endif
 
 done:

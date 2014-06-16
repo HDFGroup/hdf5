@@ -28,10 +28,17 @@
 H5_DLLVAR const H5X_class_t H5X_DUMMY[1];
 
 /*
- * Alacrity plugin
+ * ALACRITY plugin
  */
 #ifdef H5_HAVE_ALACRITY
 H5_DLLVAR const H5X_class_t H5X_ALACRITY[1];
+#endif
+
+/*
+ * FastBit plugin
+ */
+#ifdef H5_HAVE_FASTBIT
+H5_DLLVAR const H5X_class_t H5X_FASTBIT[1];
 #endif
 
 #endif /* _H5Xpkg_H */
