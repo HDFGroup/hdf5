@@ -642,7 +642,12 @@ if (ALACRITY_FOUND)
       ${HDF5_SRC_DIR}/H5Xalacrity.c
   )
 endif (ALACRITY_FOUND)
-
+if (FASTBIT_FOUND)
+  set (H5X_SRCS
+      ${H5X_SRCS}
+      ${HDF5_SRC_DIR}/H5Xfastbit.c
+  )
+endif (FASTBIT_FOUND)
 set (H5X_HDRS
     ${HDF5_SRC_DIR}/H5Xpublic.h
 )

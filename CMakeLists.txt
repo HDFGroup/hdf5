@@ -499,6 +499,19 @@ if (HDF5_ENABLE_ALACRITY_SUPPORT)
   endif (ALACRITY_FOUND)
 endif (HDF5_ENABLE_ALACRITY_SUPPORT)
 
+#-----------------------------------------------------------------------------
+# Option to use FastBit
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_FASTBIT_SUPPORT "Enable FastBit for indexing." OFF)
+if (HDF5_ENABLE_FASTBIT_SUPPORT)
+  find_package (FASTBIT)
+  if (FASTBIT_FOUND)
+    set (H5_HAVE_FASTBIT 1)
+    include_directories (${FASTBIT_INCLUDE_DIR})
+    set (LINK_LIBS ${LINK_LIBS} ${FASTBIT_LIBRARIES})
+  endif (FASTBIT_FOUND)
+endif (HDF5_ENABLE_FASTBIT_SUPPORT)
+
 set (DEFAULT_API_VERSION "v110")
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
