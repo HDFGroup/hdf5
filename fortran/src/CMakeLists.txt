@@ -19,19 +19,25 @@ endif (WIN32)
 
 #-----------------------------------------------------------------------------
 # Setup the Fortran auto-detection utilities
-# H5test_kind(_SIZEOF).f90 used to generate H5fortran_detect.f90
+# H5test_kind(_SIZEOF,_STORAGE_SIZE).f90 used to generate H5fortran_detect.f90
 # H5fortran_detect.f90     used to generate H5fort_type_defines.h
 # H5fort_type_defines.h    used to generate H5f90i_gen.h + H5fortran_types.f90
 #-----------------------------------------------------------------------------
-if (FORTRAN_HAVE_SIZEOF)
+if (FORTRAN_HAVE_STORAGE_SIZE)
   add_executable (H5test_FortranHavekind
-      ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind_SIZEOF.f90
+      ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind_STORAGE_SIZE.f90
   )
-else (FORTRAN_HAVE_SIZEOF)
-  add_executable (H5test_FortranHavekind
-      ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind.f90
-  )
-endif (FORTRAN_HAVE_SIZEOF)
+else (FORTRAN_HAVE_STORAGE_SIZE)
+    if (FORTRAN_HAVE_SIZEOF)
+      add_executable (H5test_FortranHavekind
+          ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind_SIZEOF.f90
+    )
+    else (FORTRAN_HAVE_SIZEOF)
+      add_executable (H5test_FortranHavekind
+          ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind.f90
+    )
+    endif (FORTRAN_HAVE_SIZEOF)
+endif (FORTRAN_HAVE_STORAGE_SIZE)
 if (WIN32 AND MSVC)
   if (BUILD_SHARED_LIBS)
     set_target_properties (H5test_FortranHavekind

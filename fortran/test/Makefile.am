@@ -53,7 +53,19 @@ endif
 
 check_PROGRAMS=$(TEST_PROG)
 
-libh5test_fortran_la_SOURCES= tf.f90 t.c
+if FORTRAN_HAVE_STORAGE_SIZE
+if FORTRAN_HAVE_C_SIZEOF
+    libh5test_fortran_la_SOURCES = tf_F08.f90
+else
+    libh5test_fortran_la_SOURCES = tf_F03.f90
+endif
+else
+  libh5test_fortran_la_SOURCES = tf_F03.f90
+endif
+
+# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
+# compiled first
+libh5test_fortran_la_SOURCES += tf.f90 t.c
 
 # Source files are used for both the library and fortranlib_test.
 # Automake will complain about this without the following workaround.
