@@ -353,6 +353,7 @@
 ./fortran/test/t.c
 ./fortran/test/t.h
 ./fortran/test/tf.f90
+./fortran/test/tf_F90.f90
 ./fortran/test/tf_F03.f90
 ./fortran/test/tf_F08.f90
 ./fortran/test/tH5A.f90

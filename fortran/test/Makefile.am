@@ -60,7 +60,11 @@ else
     libh5test_fortran_la_SOURCES = tf_F03.f90
 endif
 else
+if FORTRAN_2003_CONDITIONAL_F
   libh5test_fortran_la_SOURCES = tf_F03.f90
+else
+  libh5test_fortran_la_SOURCES = tf_F90.f90
+endif
 endif
 
 # tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
