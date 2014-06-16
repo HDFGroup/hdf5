@@ -123,6 +123,9 @@
 /* Define if library information should be embedded in the executables */
 #undef HAVE_EMBEDDED_LIBINFO
 
+/* Define if FastBit indexing is supported. */
+#undef HAVE_FASTBIT
+
 /* Define to 1 if you have the <features.h> header file. */
 #undef HAVE_FEATURES_H
 
@@ -195,6 +198,9 @@
 /* Define to 1 if you have the `get_fpc_csr' function. */
 #undef HAVE_GET_FPC_CSR
 
+/* Define to 1 if you have the <iapi.h> header file. */
+#undef HAVE_IAPI_H
+
 /* Define id indexing code should be enabled. */
 #undef HAVE_INDEXING
 
@@ -237,6 +243,9 @@
 
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #undef HAVE_LIBDMALLOC
+
+/* Define to 1 if you have the `fastbit' library (-lfastbit). */
+#undef HAVE_LIBFASTBIT
 
 /* Define to 1 if you have the `iod' library (-liod). */
 #undef HAVE_LIBIOD

@@ -698,6 +698,7 @@ PYTHON_VERSION
 PYTHON_LIB
 PYTHON_INCLUDE_DIR
 PYTHON_BIN
+MYFASTBIT_LIBS
 MYALACRITY_LIBS
 BUILD_INDEXING_CONDITIONAL_FALSE
 BUILD_INDEXING_CONDITIONAL_TRUE
@@ -959,6 +960,7 @@ enable_instrument
 enable_clear_file_buffers
 enable_indexing
 with_alacrity
+with_fastbit
 enable_python
 enable_eff
 enable_using_memchecker
@@ -1729,6 +1731,7 @@ Optional Packages:
   --with-pthread=DIR      Specify alternative path to Pthreads library when
                           thread-safe capability is built
   --with-alacrity=DIR     Use ALACRITY [default=no]
+  --with-fastbit=DIR      Use FastBit [default=no]
   --with-mpe=DIR          Use MPE instrumentation [default=no]
   --with-default-vfd=driver
                           Specify default file driver [default=sec2]
@@ -29798,6 +29801,215 @@ fi
 
 
 $as_echo "#define HAVE_ALACRITY 1" >>confdefs.h
+
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Check for FastBit
+##
+
+# Check whether --with-fastbit was given.
+if test "${with_fastbit+set}" = set; then :
+  withval=$with_fastbit;
+else
+  withval=no
+fi
+
+
+case $withval in
+  yes)
+    HAVE_ALACRITY="yes"
+    for ac_header in iapi.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "iapi.h" "ac_cv_header_iapi_h" "$ac_includes_default"
+if test "x$ac_cv_header_iapi_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_IAPI_H 1
+_ACEOF
+
+fi
+
+done
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fastbit_selection_create in -lfastbit" >&5
+$as_echo_n "checking for fastbit_selection_create in -lfastbit... " >&6; }
+if ${ac_cv_lib_fastbit_fastbit_selection_create+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lfastbit  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char fastbit_selection_create ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return fastbit_selection_create ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_fastbit_fastbit_selection_create=yes
+else
+  ac_cv_lib_fastbit_fastbit_selection_create=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_fastbit_fastbit_selection_create" >&5
+$as_echo "$ac_cv_lib_fastbit_fastbit_selection_create" >&6; }
+if test "x$ac_cv_lib_fastbit_fastbit_selection_create" = xyes; then :
+  MYFASTBIT_LIBS="-lfastbit"
+else
+  unset HAVE_FASTBIT
+fi
+
+
+    if test -z "$HAVE_FASTBIT" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find FastBit library" "$LINENO" 5
+    fi
+    ;;
+  no)
+    HAVE_FASTBIT="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for FastBit library" >&5
+$as_echo_n "checking for FastBit library... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
+$as_echo "suppressed" >&6; }
+    ;;
+  *)
+    HAVE_FASTBIT="yes"
+    case "$withval" in
+      *,*)
+        fastbit_inc="`echo $withval |cut -f1 -d,`"
+        fastbit_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          fastbit_inc="$withval/include"
+          fastbit_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$fastbit_inc" = "X/usr/include"; then
+      fastbit_inc=""
+    fi
+    if test "X$fastbit_lib" = "X/usr/lib"; then
+      fastbit_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$fastbit_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$fastbit_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$fastbit_inc"
+    fi
+
+    for ac_header in iapi.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "iapi.h" "ac_cv_header_iapi_h" "$ac_includes_default"
+if test "x$ac_cv_header_iapi_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_IAPI_H 1
+_ACEOF
+
+else
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+fi
+
+done
+
+
+    if test -n "$fastbit_lib"; then
+      LDFLAGS="$LDFLAGS -L$fastbit_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$fastbit_lib"
+    fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fastbit_selection_create in -lfastbit" >&5
+$as_echo_n "checking for fastbit_selection_create in -lfastbit... " >&6; }
+if ${ac_cv_lib_fastbit_fastbit_selection_create+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lfastbit  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char fastbit_selection_create ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return fastbit_selection_create ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_fastbit_fastbit_selection_create=yes
+else
+  ac_cv_lib_fastbit_fastbit_selection_create=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_fastbit_fastbit_selection_create" >&5
+$as_echo "$ac_cv_lib_fastbit_fastbit_selection_create" >&6; }
+if test "x$ac_cv_lib_fastbit_fastbit_selection_create" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBFASTBIT 1
+_ACEOF
+
+  LIBS="-lfastbit $LIBS"
+
+else
+  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_FASTBIT
+fi
+
+
+    if test -z "$HAVE_FASTBIT" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find FastBit library" "$LINENO" 5
+    fi
+
+
+$as_echo "#define HAVE_FASTBIT 1" >>confdefs.h
 
     ;;
 esac
