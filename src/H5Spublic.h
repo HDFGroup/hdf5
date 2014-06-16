@@ -118,7 +118,7 @@ H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op,
 				   const hsize_t _stride[],
 				   const hsize_t count[],
 				   const hsize_t _block[]);
-H5_DLL herr_t H5Sselect_select(hid_t space1_id, H5S_seloper_t op,
+H5_DLL herr_t H5Smodify_select(hid_t space1_id, H5S_seloper_t op,
                                   hid_t space2_id);
 H5_DLL hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op,
                                   hid_t space2_id);
