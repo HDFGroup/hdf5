@@ -189,11 +189,11 @@ H5fortran_detect_LDADD = $(LDADD)
 H5match_types_SOURCES = H5match_types.c
 H5match_types_OBJECTS = H5match_types.$(OBJEXT)
 H5match_types_LDADD = $(LDADD)
-am__H5test_kind_SOURCES_DIST = H5test_kind.f90 H5test_kind_SIZEOF.f90
-@FORTRAN_HAVE_SIZEOF_FALSE@am_H5test_kind_OBJECTS =  \
-@FORTRAN_HAVE_SIZEOF_FALSE@	H5test_kind.$(OBJEXT)
-@FORTRAN_HAVE_SIZEOF_TRUE@am_H5test_kind_OBJECTS =  \
-@FORTRAN_HAVE_SIZEOF_TRUE@	H5test_kind_SIZEOF.$(OBJEXT)
+am__H5test_kind_SOURCES_DIST = H5test_kind.f90 H5test_kind_SIZEOF.f90 \
+	H5test_kind_STORAGE_SIZE.f90
+@FORTRAN_HAVE_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_H5test_kind_OBJECTS = H5test_kind.$(OBJEXT)
+@FORTRAN_HAVE_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_H5test_kind_OBJECTS = H5test_kind_SIZEOF.$(OBJEXT)
+@FORTRAN_HAVE_STORAGE_SIZE_TRUE@am_H5test_kind_OBJECTS = H5test_kind_STORAGE_SIZE.$(OBJEXT)
 H5test_kind_OBJECTS = $(am_H5test_kind_OBJECTS)
 H5test_kind_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -799,11 +799,12 @@ BUILT_SOURCES = H5f90i_gen.h
 # Automake knows how to build fortran programs if we tell it the source
 # files.
 H5fortran_detect_SOURCES = H5fortran_detect.f90
-@FORTRAN_HAVE_SIZEOF_FALSE@H5test_kind_SOURCES = H5test_kind.f90
+@FORTRAN_HAVE_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@H5test_kind_SOURCES = H5test_kind.f90
+@FORTRAN_HAVE_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@H5test_kind_SOURCES = H5test_kind_SIZEOF.f90
 
 # H5test_kind.f90 is included in the distribution, and Automake knows
 # how to compile a fortran program given its sources.
-@FORTRAN_HAVE_SIZEOF_TRUE@H5test_kind_SOURCES = H5test_kind_SIZEOF.f90
+@FORTRAN_HAVE_STORAGE_SIZE_TRUE@H5test_kind_SOURCES = H5test_kind_STORAGE_SIZE.f90
 
 # Mark this directory as part of the Fortran API
 FORTRAN_API = yes
