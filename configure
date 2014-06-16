@@ -739,6 +739,10 @@ FORTRAN_DEFAULT_REALisDBLE_F_FALSE
 FORTRAN_DEFAULT_REALisDBLE_F_TRUE
 FORTRAN_2003_CONDITIONAL_F_FALSE
 FORTRAN_2003_CONDITIONAL_F_TRUE
+FORTRAN_HAVE_STORAGE_SIZE_FALSE
+FORTRAN_HAVE_STORAGE_SIZE_TRUE
+FORTRAN_HAVE_C_SIZEOF_FALSE
+FORTRAN_HAVE_C_SIZEOF_TRUE
 FORTRAN_HAVE_SIZEOF_FALSE
 FORTRAN_HAVE_SIZEOF_TRUE
 FCLIBS
@@ -5360,6 +5364,8 @@ else
 fi
 
 HAVE_SIZEOF="no"
+HAVE_C_SIZEOF="no"
+HAVE_STORAGE_SIZE="no"
 FORTRAN_DEFAULT_REALisDBLE="no"
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
@@ -6699,6 +6705,71 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
 fi
 
 
+  ## See if the fortran compiler supports the intrinsic function "C_SIZEOF"
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler supports intrinsic C_SIZEOF" >&5
+$as_echo_n "checking if Fortran compiler supports intrinsic C_SIZEOF... " >&6; }
+  if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat > conftest.$ac_ext <<_ACEOF
+
+   PROGRAM main
+     USE ISO_C_BINDING
+     INTEGER(C_INT) :: a
+     INTEGER(C_SIZE_T) :: result
+     result = C_SIZEOF(a)
+   END PROGRAM
+
+_ACEOF
+if ac_fn_fc_try_run "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+     	HAVE_C_SIZEOF="yes"
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+
+  ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler supports intrinsic STORAGE_SIZE" >&5
+$as_echo_n "checking if Fortran compiler supports intrinsic STORAGE_SIZE... " >&6; }
+  if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat > conftest.$ac_ext <<_ACEOF
+
+   PROGRAM main
+     INTEGER :: a
+     INTEGER :: result
+     result = STORAGE_SIZE(a)
+   END PROGRAM
+
+_ACEOF
+if ac_fn_fc_try_run "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+     	HAVE_STORAGE_SIZE="yes"
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+
   ## Check to see if -r8 was specified to determine if we need to
   ## compile the DOUBLE PRECISION interfaces.
 
@@ -6807,6 +6878,22 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 else
   FORTRAN_HAVE_SIZEOF_TRUE='#'
   FORTRAN_HAVE_SIZEOF_FALSE=
+fi
+
+ if test "X$HAVE_C_SIZEOF" = "Xyes"; then
+  FORTRAN_HAVE_C_SIZEOF_TRUE=
+  FORTRAN_HAVE_C_SIZEOF_FALSE='#'
+else
+  FORTRAN_HAVE_C_SIZEOF_TRUE='#'
+  FORTRAN_HAVE_C_SIZEOF_FALSE=
+fi
+
+ if test "X$HAVE_STORAGE_SIZE" = "Xyes"; then
+  FORTRAN_HAVE_STORAGE_SIZE_TRUE=
+  FORTRAN_HAVE_STORAGE_SIZE_FALSE='#'
+else
+  FORTRAN_HAVE_STORAGE_SIZE_TRUE='#'
+  FORTRAN_HAVE_STORAGE_SIZE_FALSE=
 fi
 
  if test "X$HAVE_FORTRAN_2003" = "Xyes"; then
@@ -33380,6 +33467,14 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${FORTRAN_HAVE_SIZEOF_TRUE}" && test -z "${FORTRAN_HAVE_SIZEOF_FALSE}"; then
   as_fn_error $? "conditional \"FORTRAN_HAVE_SIZEOF\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${FORTRAN_HAVE_C_SIZEOF_TRUE}" && test -z "${FORTRAN_HAVE_C_SIZEOF_FALSE}"; then
+  as_fn_error $? "conditional \"FORTRAN_HAVE_C_SIZEOF\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${FORTRAN_HAVE_STORAGE_SIZE_TRUE}" && test -z "${FORTRAN_HAVE_STORAGE_SIZE_FALSE}"; then
+  as_fn_error $? "conditional \"FORTRAN_HAVE_STORAGE_SIZE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${FORTRAN_2003_CONDITIONAL_F_TRUE}" && test -z "${FORTRAN_2003_CONDITIONAL_F_FALSE}"; then
