@@ -1,0 +1,54 @@
+#!/bin/sh
+##
+## Copyright by the Board of Trustees of the University of Illinois.
+## All rights reserved.
+##
+## This file is part of HDF5.  The full HDF5 copyright notice, including
+## terms governing use, modification, and redistribution, is contained in
+## the files COPYING and Copyright.html.  COPYING can be found at the root
+## of the source code distribution tree; Copyright.html can be found at the
+## root level of an installed copy of the electronic HDF5 document set and
+## is linked from the top-level documents page.  It can also be found at
+## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+##
+# regenerate hl/src/H5LTanalyze.c
+
+# HDF5 currently uses the following versions of the bison flex:
+BISON_VERSION="bison (GNU Bison) 2.7"
+FLEX_VERSION="flex 2.5.37"
+
+# If paths to bison flex are not specified by the user, assume tools are
+# running on jam in /mnt/hdf/packages and set paths accordingly.
+if test -z ${BISON}; then
+  BISON=/usr/hdf/bin/bison
+fi
+if test -z ${FLEX}; then
+  FLEX=/usr/hdf/bin/flex
+fi
+
+# Check version numbers of all bison flex against the "correct" versions
+BI_VERS=`${BISON} --version 2>&1 | grep "^${BISON_VERSION}"`
+if test -z "${BI_VERS}"; then
+   echo "${BISON} version is not ${BISON_VERSION}"
+   exit 1
+fi
+FL_VERS=`${FLEX} --version 2>&1 | grep "^${FLEX_VERSION}"`
+if test -z "${FL_VERS}"; then
+   echo "${FLEX} version is not ${FLEX_VERSION}"
+   exit 1
+fi
+
+# Make sure that the tools are in the path.
+BISON_DIR=`dirname ${BISON}`
+FLEX_DIR=`dirname ${FLEX}`
+
+# Main body
+cd hl/src
+echo "Generate hl/src/H5LTparse.c from hl/src/H5LTparse.y"
+bison -pH5LTyy -o H5LTparse.c -d H5LTparse.y
+echo "Generate hl/src/H5LTanalyze.c from hl/src/H5LTanalyze.l"
+flex -PH5LTyy -oH5LTanalyze.c H5LTanalyze.l
+cd ../..
+
+exit 0

@@ -143,4 +143,10 @@ echo
 echo "    Running API version generation script:"
 bin/make_vers src/H5vers.txt || exit 1
 
+# Run flex
+# automatically generates the lexical file for hl/src/H5LTanalyze.c
+echo
+echo "    Running flex generation script:"
+bin/genltanalyze || exit 1
+
 exit 0
