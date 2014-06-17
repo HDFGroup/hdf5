@@ -44,7 +44,7 @@
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 
 /****************/
@@ -229,7 +229,7 @@ HDfprintf(stderr, "%s: sblock->block_off = %Hu\n", FUNC, sblock->block_off);
     sblock->addr = sblock_addr;
 
     /* Reset data block addresses to "undefined" address value */
-    H5V_array_fill(sblock->dblk_addrs, &tmp_addr, sizeof(haddr_t), sblock->ndblks);
+    H5VM_array_fill(sblock->dblk_addrs, &tmp_addr, sizeof(haddr_t), sblock->ndblks);
 
     /* Cache the new extensible array super block */
     if(H5AC_insert_entry(hdr->f, dxpl_id, H5AC_EARRAY_SBLOCK, sblock_addr, sblock, H5AC__NO_FLAGS_SET) < 0)

@@ -365,7 +365,7 @@ HDfprintf(stderr, "%s: ent->proxy_addr = %a\n", FUNC, ent->proxy_addr);
     /* Create a flush dependency between the proxy (as the child) and the
      *  metadata object in the index (as the parent).
      */
-    if((supported = (dset->shared->layout.storage.u.chunk.ops->support)(&idx_info, (H5D_chunk_common_ud_t *)udata, (H5AC_info_t *)proxy)) < 0)
+    if((supported = (dset->shared->layout.storage.u.chunk.ops->support)(&idx_info, (H5D_chunk_ud_t *)udata, (H5AC_info_t *)proxy)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency for chunk proxy")
     proxy->supported = (hbool_t)supported;
 

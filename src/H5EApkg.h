@@ -148,7 +148,7 @@
 #define H5EA_SIZEOF_OFFSET_BITS(b)      (((b) + 7) / 8)
 
 /* Compute the first super block index that will hold a certain # of data block pointers */
-#define H5EA_SBLK_FIRST_IDX(m)          (2 * H5V_log2_of2((uint32_t)m))
+#define H5EA_SBLK_FIRST_IDX(m)          (2 * H5VM_log2_of2((uint32_t)m))
 
 /****************************/
 /* Package Private Typedefs */

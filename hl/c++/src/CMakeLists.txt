@@ -7,24 +7,24 @@ PROJECT (HDF5_HL_CPP_SRC)
 INCLUDE_DIRECTORIES (${HDF5_HL_SRC_DIR}/src)
 INCLUDE_DIRECTORIES (${HDF5_HL_CPP_SRC_SOURCE_DIR})
 
-SET (HDF5_HL_CPP_SRCS ${HDF5_HL_CPP_SRC_SOURCE_DIR}/H5PacketTable.cpp)
-SET (HDF5_HL_CPP_HDRS ${HDF5_HL_CPP_SRC_SOURCE_DIR}/H5PacketTable.h)
+set (HDF5_HL_CPP_SRCS ${HDF5_HL_CPP_SRC_SOURCE_DIR}/H5PacketTable.cpp)
+set (HDF5_HL_CPP_HDRS ${HDF5_HL_CPP_SRC_SOURCE_DIR}/H5PacketTable.h)
 
-ADD_LIBRARY (${HDF5_HL_CPP_LIB_TARGET} ${LIB_TYPE} ${HDF5_HL_CPP_SRCS})
+add_library (${HDF5_HL_CPP_LIB_TARGET} ${LIB_TYPE} ${HDF5_HL_CPP_SRCS})
 TARGET_C_PROPERTIES (${HDF5_HL_CPP_LIB_TARGET} " " " ")
-TARGET_LINK_LIBRARIES (
+target_link_libraries (
     ${HDF5_HL_CPP_LIB_TARGET}
     ${HDF5_HL_LIB_TARGET}
     ${HDF5_LIB_TARGET}
 )
-SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_CPP_LIB_TARGET}")
+set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_CPP_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_HL_CPP_LIB_TARGET} ${HDF5_HL_CPP_LIB_NAME} ${LIB_TYPE})
-SET_TARGET_PROPERTIES (${HDF5_HL_CPP_LIB_TARGET} PROPERTIES FOLDER libraries/hl)
+set_target_properties (${HDF5_HL_CPP_LIB_TARGET} PROPERTIES FOLDER libraries/hl)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install 
 #-----------------------------------------------------------------------------
-INSTALL (
+install (
     FILES
         ${HDF5_HL_CPP_HDRS}
     DESTINATION
@@ -36,12 +36,12 @@ INSTALL (
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
-IF (HDF5_EXPORTED_TARGETS)
-  IF (BUILD_SHARED_LIBS)
+if (HDF5_EXPORTED_TARGETS)
+  if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_HL_CPP_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} hlcpplibraries)
-  ENDIF (BUILD_SHARED_LIBS)
+  endif (BUILD_SHARED_LIBS)
   
-  INSTALL (
+  install (
       TARGETS
           ${HDF5_HL_CPP_LIB_TARGET}
       EXPORT
@@ -50,4 +50,4 @@ IF (HDF5_EXPORTED_TARGETS)
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT hlcpplibraries
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hlcpplibraries
   )
-ENDIF (HDF5_EXPORTED_TARGETS)
+endif (HDF5_EXPORTED_TARGETS)

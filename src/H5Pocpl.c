@@ -1495,7 +1495,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
         /* encode nused value */
         enc_value = (uint64_t)pline->nused;
-        enc_size = H5V_limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -1525,7 +1525,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
             /* encode cd_nelmts */
             enc_value = (uint64_t)pline->filter[u].cd_nelmts;
-            enc_size = H5V_limit_enc_size(enc_value);
+            enc_size = H5VM_limit_enc_size(enc_value);
             HDassert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -1538,12 +1538,12 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
     /* calculate size required for encoding */
     *size += 1;
-    *size += (1 + H5V_limit_enc_size((uint64_t)pline->nused));
+    *size += (1 + H5VM_limit_enc_size((uint64_t)pline->nused));
     for(u = 0; u < pline->nused; u++) {
         *size += (sizeof(int32_t) + sizeof(unsigned) + 1);
         if(NULL != pline->filter[u].name)
             *size += H5Z_COMMON_NAME_LEN;
-        *size += (1 + H5V_limit_enc_size((uint64_t)pline->filter[u].cd_nelmts));
+        *size += (1 + H5VM_limit_enc_size((uint64_t)pline->filter[u].cd_nelmts));
         *size += pline->filter[u].cd_nelmts * sizeof(unsigned);
     } /* end for */
 

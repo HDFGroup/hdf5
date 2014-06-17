@@ -33,13 +33,13 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"      /* Generic Functions                        */
-#include "H5ACprivate.h"    /* Metadata cache                           */
-#include "H5Eprivate.h"     /* Error handling                           */
-#include "H5FSpkg.h"        /* File free space                          */
-#include "H5MFprivate.h"    /* File memory management                   */
-#include "H5Vprivate.h"     /* Vectors and arrays                       */
-#include "H5WBprivate.h"    /* Wrapped Buffers                          */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"        /* Metadata cache                       */
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FSpkg.h"		/* File free space			*/
+#include "H5MFprivate.h"	/* File memory management		*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 /****************/
 /* Local Macros */
@@ -607,7 +607,7 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata
         unsigned sect_cnt_size;         /* The size of the section size counts */
 
         /* Compute the size of the section counts */
-        sect_cnt_size = H5V_limit_enc_size((uint64_t)udata->fspace->serial_sect_count);
+        sect_cnt_size = H5VM_limit_enc_size((uint64_t)udata->fspace->serial_sect_count);
 
         /* Reset the section count, the "add" routine will update it */
         old_tot_sect_count = udata->fspace->tot_sect_count;
@@ -856,7 +856,7 @@ H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H
         /* Set up user data for iterator */
         udata.sinfo = sinfo;
         udata.p = &p;
-        udata.sect_cnt_size = H5V_limit_enc_size((uint64_t)sinfo->fspace->serial_sect_count);
+        udata.sect_cnt_size = H5VM_limit_enc_size((uint64_t)sinfo->fspace->serial_sect_count);
 
         /* Iterate over all the bins */
         for(bin = 0; bin < sinfo->nbins; bin++) {

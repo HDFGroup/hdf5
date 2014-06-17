@@ -9,42 +9,42 @@ INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_F90_BINARY_DIR} ${
 #-----------------------------------------------------------------------------
 # Add Test Lib
 #-----------------------------------------------------------------------------
-ADD_LIBRARY (${HDF5_F90_C_TEST_LIB_TARGET} ${LIB_TYPE} t.c)
+add_library (${HDF5_F90_C_TEST_LIB_TARGET} ${LIB_TYPE} t.c)
 TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIB_TARGET} " " " ")
-TARGET_LINK_LIBRARIES (${HDF5_F90_C_TEST_LIB_TARGET}
+target_link_libraries (${HDF5_F90_C_TEST_LIB_TARGET}
     ${HDF5_F90_C_LIB_TARGET}
     ${HDF5_TEST_LIB_TARGET}
 )
 H5_SET_LIB_OPTIONS (${HDF5_F90_C_TEST_LIB_TARGET} ${HDF5_F90_C_TEST_LIB_NAME} ${LIB_TYPE})
-SET_TARGET_PROPERTIES (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test/fortran)
+set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test/fortran)
 
-ADD_LIBRARY (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf.f90)
-SET (SHARED_LINK_FLAGS " ")
-IF (WIN32 AND NOT CYGWIN)
-  IF (BUILD_SHARED_LIBS)
-    SET_PROPERTY (TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS BUILD_HDF5_DLL)
-    IF (MSVC)
-      SET (SHARED_LINK_FLAGS "/DLL")
-    ENDIF (MSVC)
-  ENDIF (BUILD_SHARED_LIBS)
-  SET_PROPERTY (TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS HDF5F90_WINDOWS)
-ENDIF (WIN32 AND NOT CYGWIN)
+add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf.f90)
+set (SHARED_LINK_FLAGS " ")
+if (WIN32 AND NOT CYGWIN)
+  if (BUILD_SHARED_LIBS)
+    set_property (TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS BUILD_HDF5_DLL)
+    if (MSVC)
+      set (SHARED_LINK_FLAGS "/DLL")
+    endif (MSVC)
+  endif (BUILD_SHARED_LIBS)
+  set_property (TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS HDF5F90_WINDOWS)
+endif (WIN32 AND NOT CYGWIN)
 TARGET_FORTRAN_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET} " " ${SHARED_LINK_FLAGS})
-SET_TARGET_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES LINKER_LANGUAGE Fortran)
-TARGET_LINK_LIBRARIES (${HDF5_F90_TEST_LIB_TARGET}
+set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES LINKER_LANGUAGE Fortran)
+target_link_libraries (${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_C_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}
     ${HDF5_LIB_TARGET}
 )
 H5_SET_LIB_OPTIONS (${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_TEST_LIB_NAME} ${LIB_TYPE})
-SET_TARGET_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test/fortran)
+set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test/fortran)
 
 #-----------------------------------------------------------------------------
 # Add Tests
 #-----------------------------------------------------------------------------
 
 #-- Adding test for testhdf5_fortran
-ADD_EXECUTABLE (testhdf5_fortran
+add_executable (testhdf5_fortran
     fortranlib_test.f90
     tH5A.f90
     tH5D.f90
@@ -62,19 +62,19 @@ ADD_EXECUTABLE (testhdf5_fortran
 )
 TARGET_NAMING (testhdf5_fortran ${LIB_TYPE})
 TARGET_FORTRAN_PROPERTIES (testhdf5_fortran " " " ")
-TARGET_LINK_LIBRARIES (testhdf5_fortran 
+target_link_libraries (testhdf5_fortran 
     ${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}
     ${HDF5_LIB_TARGET}
 )
-IF (WIN32 AND MSVC)
-  TARGET_LINK_LIBRARIES (testhdf5_fortran "ws2_32.lib")
-ENDIF (WIN32 AND MSVC)
-SET_TARGET_PROPERTIES (testhdf5_fortran PROPERTIES LINKER_LANGUAGE Fortran)
-SET_TARGET_PROPERTIES (testhdf5_fortran PROPERTIES FOLDER test/fortran)
+if (WIN32 AND MSVC)
+  target_link_libraries (testhdf5_fortran "ws2_32.lib")
+endif (WIN32 AND MSVC)
+set_target_properties (testhdf5_fortran PROPERTIES LINKER_LANGUAGE Fortran)
+set_target_properties (testhdf5_fortran PROPERTIES FOLDER test/fortran)
 
 #-- Adding test for testhdf5_fortran_1_8
-ADD_EXECUTABLE (testhdf5_fortran_1_8
+add_executable (testhdf5_fortran_1_8
     fortranlib_test_1_8.f90
     tH5F.f90
     tH5O.f90
@@ -83,20 +83,20 @@ ADD_EXECUTABLE (testhdf5_fortran_1_8
 )
 TARGET_NAMING (testhdf5_fortran_1_8 ${LIB_TYPE})
 TARGET_FORTRAN_PROPERTIES (testhdf5_fortran_1_8 " " " ")
-TARGET_LINK_LIBRARIES (testhdf5_fortran_1_8 
+target_link_libraries (testhdf5_fortran_1_8 
     ${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}
     ${HDF5_LIB_TARGET}
 )
-IF (WIN32 AND MSVC)
-  TARGET_LINK_LIBRARIES (testhdf5_fortran_1_8 "ws2_32.lib")
-ENDIF (WIN32 AND MSVC)
-SET_TARGET_PROPERTIES (testhdf5_fortran_1_8 PROPERTIES LINKER_LANGUAGE Fortran)
-SET_TARGET_PROPERTIES (testhdf5_fortran_1_8 PROPERTIES FOLDER test/fortran)
+if (WIN32 AND MSVC)
+  target_link_libraries (testhdf5_fortran_1_8 "ws2_32.lib")
+endif (WIN32 AND MSVC)
+set_target_properties (testhdf5_fortran_1_8 PROPERTIES LINKER_LANGUAGE Fortran)
+set_target_properties (testhdf5_fortran_1_8 PROPERTIES FOLDER test/fortran)
 
 #-- Adding test for fortranlib_test_F03
-IF (HDF5_ENABLE_F2003)
-  ADD_EXECUTABLE (fortranlib_test_F03
+if (HDF5_ENABLE_F2003)
+  add_executable (fortranlib_test_F03
       fortranlib_test_F03.f90
       tH5F.f90
       tH5E_F03.f90
@@ -108,46 +108,46 @@ IF (HDF5_ENABLE_F2003)
   )
   TARGET_NAMING (fortranlib_test_F03 ${LIB_TYPE})
   TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03 " " " ")
-  TARGET_LINK_LIBRARIES (fortranlib_test_F03 
+  target_link_libraries (fortranlib_test_F03 
       ${HDF5_F90_TEST_LIB_TARGET}
       ${HDF5_F90_LIB_TARGET}
       ${HDF5_LIB_TARGET}
   )
-  IF (WIN32 AND MSVC)
-    TARGET_LINK_LIBRARIES (fortranlib_test_F03 "ws2_32.lib")
-  ENDIF (WIN32 AND MSVC)
-  SET_TARGET_PROPERTIES (fortranlib_test_F03 PROPERTIES LINKER_LANGUAGE Fortran)
-  SET_TARGET_PROPERTIES (fortranlib_test_F03 PROPERTIES FOLDER test/fortran)
-ENDIF (HDF5_ENABLE_F2003)
+  if (WIN32 AND MSVC)
+    target_link_libraries (fortranlib_test_F03 "ws2_32.lib")
+  endif (WIN32 AND MSVC)
+  set_target_properties (fortranlib_test_F03 PROPERTIES LINKER_LANGUAGE Fortran)
+  set_target_properties (fortranlib_test_F03 PROPERTIES FOLDER test/fortran)
+endif (HDF5_ENABLE_F2003)
 
 #-- Adding test for fflush1
-ADD_EXECUTABLE (fflush1 fflush1.f90)
+add_executable (fflush1 fflush1.f90)
 TARGET_NAMING (fflush1 ${LIB_TYPE})
 TARGET_FORTRAN_PROPERTIES (fflush1 " " " ")
-TARGET_LINK_LIBRARIES (fflush1 
+target_link_libraries (fflush1 
     ${HDF5_F90_LIB_TARGET}
     ${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_LIB_TARGET}
 )
-IF (WIN32 AND MSVC)
-  TARGET_LINK_LIBRARIES (fflush1 "ws2_32.lib")
-ENDIF (WIN32 AND MSVC)
-SET_TARGET_PROPERTIES (fflush1 PROPERTIES LINKER_LANGUAGE Fortran)
-SET_TARGET_PROPERTIES (fflush1 PROPERTIES FOLDER test/fortran)
+if (WIN32 AND MSVC)
+  target_link_libraries (fflush1 "ws2_32.lib")
+endif (WIN32 AND MSVC)
+set_target_properties (fflush1 PROPERTIES LINKER_LANGUAGE Fortran)
+set_target_properties (fflush1 PROPERTIES FOLDER test/fortran)
 
 #-- Adding test for fflush2
-ADD_EXECUTABLE (fflush2 fflush2.f90)
+add_executable (fflush2 fflush2.f90)
 TARGET_NAMING (fflush2 ${LIB_TYPE})
 TARGET_FORTRAN_PROPERTIES (fflush2 " " " ")
-TARGET_LINK_LIBRARIES (fflush2 
+target_link_libraries (fflush2 
     ${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}
     ${HDF5_LIB_TARGET}
 )
-IF (WIN32 AND MSVC)
-  TARGET_LINK_LIBRARIES (fflush2 "ws2_32.lib")
-ENDIF (WIN32 AND MSVC)
-SET_TARGET_PROPERTIES (fflush2 PROPERTIES LINKER_LANGUAGE Fortran)
-SET_TARGET_PROPERTIES (fflush2 PROPERTIES FOLDER test/fortran)
+if (WIN32 AND MSVC)
+  target_link_libraries (fflush2 "ws2_32.lib")
+endif (WIN32 AND MSVC)
+set_target_properties (fflush2 PROPERTIES LINKER_LANGUAGE Fortran)
+set_target_properties (fflush2 PROPERTIES FOLDER test/fortran)
 
-INCLUDE (CMakeTests.cmake)
+include (CMakeTests.cmake)

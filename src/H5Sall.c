@@ -27,7 +27,7 @@
 #include "H5Eprivate.h"		/* Error handling		        */
 #include "H5Iprivate.h"		/* ID Functions		                */
 #include "H5Spkg.h"		/* Dataspace functions			*/
-#include "H5Vprivate.h"         /* Vector functions                     */
+#include "H5VMprivate.h"         /* Vector functions                     */
 
 /* Static function prototypes */
 
@@ -162,7 +162,7 @@ H5S_all_iter_coords (const H5S_sel_iter_t *iter, hsize_t *coords)
     HDassert (coords);
 
     /* Calculate the coordinates for the current iterator offset */
-    if(H5V_array_calc(iter->u.all.elmt_offset,iter->rank,iter->dims,coords)<0)
+    if(H5VM_array_calc(iter->u.all.elmt_offset,iter->rank,iter->dims,coords)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve coordinates");
 
 done:

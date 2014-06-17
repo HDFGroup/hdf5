@@ -4,16 +4,16 @@ PROJECT (HDF5_HL C CXX)
 #-----------------------------------------------------------------------------
 # Apply Definitions to compiler in this directory and below
 #-----------------------------------------------------------------------------
-ADD_DEFINITIONS (${HDF5_EXTRA_C_FLAGS})
+add_definitions (${HDF5_EXTRA_C_FLAGS})
 
 #-----------------------------------------------------------------------------
 # Shared Libs
 #-----------------------------------------------------------------------------
-IF (BUILD_SHARED_LIBS)
-  SET (HL_BUILT_AS_DYNAMIC_LIB 1)
-ELSE (BUILD_SHARED_LIBS)
-  SET (HL_BUILT_AS_STATIC_LIB 1)
-ENDIF (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS)
+  set (HL_BUILT_AS_DYNAMIC_LIB 1)
+else (BUILD_SHARED_LIBS)
+  set (HL_BUILT_AS_STATIC_LIB 1)
+endif (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
 # List Source files
@@ -23,22 +23,22 @@ INCLUDE_DIRECTORIES (${HDF5_HL_SOURCE_DIR}/src )
 ADD_SUBDIRECTORY (${HDF5_HL_SOURCE_DIR}/src ${HDF5_HL_BINARY_DIR}/src)
 
 #-- Build the High level Tools
-IF (HDF5_BUILD_TOOLS)
+if (HDF5_BUILD_TOOLS)
   ADD_SUBDIRECTORY (${HDF5_HL_SOURCE_DIR}/tools ${HDF5_HL_BINARY_DIR}/tools)
-ENDIF (HDF5_BUILD_TOOLS)
+endif (HDF5_BUILD_TOOLS)
 
 #-- Add High Level Examples
-IF (HDF5_BUILD_EXAMPLES)
+if (HDF5_BUILD_EXAMPLES)
   ADD_SUBDIRECTORY (${HDF5_HL_SOURCE_DIR}/examples ${HDF5_HL_BINARY_DIR}/examples)
-ENDIF (HDF5_BUILD_EXAMPLES)
+endif (HDF5_BUILD_EXAMPLES)
 
 #-- Build the Unit testing if requested
-IF (NOT HDF5_EXTERNALLY_CONFIGURED)
-  IF (BUILD_TESTING)
+if (NOT HDF5_EXTERNALLY_CONFIGURED)
+  if (BUILD_TESTING)
     ADD_SUBDIRECTORY (${HDF5_HL_SOURCE_DIR}/test ${HDF5_HL_BINARY_DIR}/test)
-  ENDIF (BUILD_TESTING)
-ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
+  endif (BUILD_TESTING)
+endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 
-IF (HDF5_BUILD_CPP_LIB)
+if (HDF5_BUILD_CPP_LIB)
   ADD_SUBDIRECTORY (${HDF5_HL_SOURCE_DIR}/c++ ${HDF5_HL_BINARY_DIR}/c++)
-ENDIF (HDF5_BUILD_CPP_LIB)
+endif (HDF5_BUILD_CPP_LIB)

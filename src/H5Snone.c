@@ -27,7 +27,7 @@
 #include "H5Eprivate.h"
 #include "H5Iprivate.h"
 #include "H5Spkg.h"
-#include "H5Vprivate.h"
+#include "H5VMprivate.h"
 #include "H5Dprivate.h"
 
 /* Static function prototypes */

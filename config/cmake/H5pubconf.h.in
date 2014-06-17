@@ -569,7 +569,7 @@
 #define H5_PACKAGE_URL "@HDF5_PACKAGE_URL@"
 
 /* Define to the version of this package. */
-#define H5_PACKAGE_VERSION "@HDF5_PACKAGE_VERSION@"
+#define H5_PACKAGE_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #cmakedefine H5_PRINTF_LL_WIDTH @H5_PRINTF_LL_WIDTH@
@@ -754,7 +754,7 @@
 #cmakedefine H5_USING_MEMCHECKER @H5_USING_MEMCHECKER@
 
 /* Version number of package */
-#define H5_VERSION "@HDF5_PACKAGE_VERSION@"
+#define H5_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
 
 /* Define if vsnprintf() returns the correct value for formatted strings that
    don't fit into size allowed */

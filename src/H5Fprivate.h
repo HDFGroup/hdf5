@@ -27,7 +27,7 @@
 #include "H5FDpublic.h"		/* File drivers				*/
 
 /* Private headers needed by this file */
-#include "H5Vprivate.h"		/* Vectors and arrays */
+#include "H5VMprivate.h"		/* Vectors and arrays */
 
 
 /****************************/
@@ -119,7 +119,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 /* (Assumes that the high bits of the integer are zero) */
 #  define UINT64ENCODE_VARLEN(p, n) {					      \
    uint64_t __n = (uint64_t)(n);							      \
-   unsigned _s = H5V_limit_enc_size(__n);				      \
+   unsigned _s = H5VM_limit_enc_size(__n);				      \
 									      \
    *(p)++ = (uint8_t)_s;						      \
    UINT64ENCODE_VAR(p, __n, _s);						      \

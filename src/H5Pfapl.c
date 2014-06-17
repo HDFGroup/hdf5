@@ -2606,7 +2606,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
         H5_ENCODE_UNSIGNED(*pp, config->set_initial_size);
 
         enc_value = (uint64_t)config->initial_size;
-        enc_size = H5V_limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -2614,13 +2614,13 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
         H5_ENCODE_DOUBLE(*pp, config->min_clean_fraction);
 
         enc_value = (uint64_t)config->max_size;
-        enc_size = H5V_limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
         enc_value = (uint64_t)config->min_size;
-        enc_size = H5V_limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -2638,7 +2638,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
         H5_ENCODE_UNSIGNED(*pp, config->apply_max_increment);
 
         enc_value = (uint64_t)config->max_increment;
-        enc_size = H5V_limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -2660,7 +2660,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
         H5_ENCODE_UNSIGNED(*pp, config->apply_max_decrement);
 
         enc_value = (uint64_t)config->max_decrement;
-        enc_size = H5V_limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -2681,15 +2681,15 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 
     /* Compute encoded size of variably-encoded values */
     enc_value = (uint64_t)config->initial_size;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    *size += 1 + H5VM_limit_enc_size(enc_value);
     enc_value = (uint64_t)config->max_size;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    *size += 1 + H5VM_limit_enc_size(enc_value);
     enc_value = (uint64_t)config->min_size;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    *size += 1 + H5VM_limit_enc_size(enc_value);
     enc_value = (uint64_t)config->max_increment;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    *size += 1 + H5VM_limit_enc_size(enc_value);
     enc_value = (uint64_t)config->max_decrement;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    *size += 1 + H5VM_limit_enc_size(enc_value);
 
     /* Compute encoded size of fixed-size values */
     *size += (5 + (sizeof(unsigned) * 8) + (sizeof(double) * 8) +

@@ -35,7 +35,7 @@
 #include "H5Dpkg.h"		/* Datasets				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MFprivate.h"     	/* File space management                */
-#include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5VMprivate.h"	/* Vector and array functions		*/
 
 
 /****************/
@@ -300,7 +300,7 @@ H5D_bt2_crt_context(void *_udata)
      * Compute the size required for encoding the size of a chunk,
      * allowing for an extra byte, in case the filter makes the chunk larger.
      */
-    ctx->chunk_size_len = 1 + ((H5V_log2_gen((uint64_t)udata->chunk_size) + 8) / 8);
+    ctx->chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)udata->chunk_size) + 8) / 8);
     if(ctx->chunk_size_len > 8)
         ctx->chunk_size_len = 8;
 
@@ -396,7 +396,7 @@ H5D_bt2_compare(const void *_udata, const void *_rec2)
     HDassert(rec2);
 
     /* Compare the offsets but ignore the other fields */
-    ret_value = H5V_vector_cmp_u(udata->ndims, rec1->offset, rec2->offset);
+    ret_value = H5VM_vector_cmp_u(udata->ndims, rec1->offset, rec2->offset);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_bt2_compare() */
@@ -642,7 +642,7 @@ H5D_bt2_filt_compare(const void *_udata, const void *_rec2)
     HDassert(rec2);
 
     /* Compare the offsets but ignore the other fields */
-    ret_value = H5V_vector_cmp_u(udata->ndims, rec1->offset, rec2->offset);
+    ret_value = H5VM_vector_cmp_u(udata->ndims, rec1->offset, rec2->offset);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_bt2_filt_compare() */
@@ -1078,7 +1078,7 @@ H5D_bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
 	 * Compute the size required for encoding the size of a chunk,
          * allowing for an extra byte, in case the filter makes the chunk larger.
          */
-        chunk_size_len = 1 + ((H5V_log2_gen((uint64_t)idx_info->layout->size) + 8) / 8);
+        chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)idx_info->layout->size) + 8) / 8);
         if(chunk_size_len > 8)
             chunk_size_len = 8;
 
@@ -1237,12 +1237,12 @@ H5D_bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 	 * Compute the size required for encoding the size of a chunk,
          * allowing for an extra byte, in case the filter makes the chunk larger.
          */
-        allow_chunk_size_len = 1 + ((H5V_log2_gen((uint64_t)idx_info->layout->size) + 8) / 8);
+        allow_chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)idx_info->layout->size) + 8) / 8);
         if(allow_chunk_size_len > 8)
             allow_chunk_size_len = 8;
 
         /* Compute encoded size of chunk */
-        new_chunk_size_len = (H5V_log2_gen((uint64_t)udata->nbytes) + 8) / 8;
+        new_chunk_size_len = (H5VM_log2_gen((uint64_t)udata->nbytes) + 8) / 8;
         if(new_chunk_size_len > 8)
             HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "encoded chunk size is more than 8 bytes?!?")
 

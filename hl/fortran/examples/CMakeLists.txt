@@ -10,27 +10,27 @@ INCLUDE_DIRECTORIES (
     ${HDF5_F90_SRC_DIR}/src
 )
 
-SET (examples
+set (examples
     exlite
     ex_ds1
 )
 
-FOREACH (example ${examples})
-  ADD_EXECUTABLE (hl_f90_ex_${example} ${HDF5_HL_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
+foreach (example ${examples})
+  add_executable (hl_f90_ex_${example} ${HDF5_HL_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
   TARGET_NAMING (hl_f90_ex_${example} ${LIB_TYPE})
   TARGET_FORTRAN_PROPERTIES (hl_f90_ex_${example} " " " ")
-  TARGET_LINK_LIBRARIES (hl_f90_ex_${example} 
+  target_link_libraries (hl_f90_ex_${example} 
       ${HDF5_HL_F90_LIB_TARGET}
       ${HDF5_F90_LIB_TARGET}
       ${HDF5_LIB_TARGET}
   )
-  SET_TARGET_PROPERTIES (hl_f90_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
-  SET_TARGET_PROPERTIES (hl_f90_ex_${example} PROPERTIES FOLDER examples/hl/fortran)
+  set_target_properties (hl_f90_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
+  set_target_properties (hl_f90_ex_${example} PROPERTIES FOLDER examples/hl/fortran)
 
-ENDFOREACH (example ${examples})
+endforeach (example ${examples})
 
-IF (BUILD_TESTING)
+if (BUILD_TESTING)
 
-  INCLUDE (CMakeTests.cmake)
+  include (CMakeTests.cmake)
 
-ENDIF (BUILD_TESTING)
+endif (BUILD_TESTING)

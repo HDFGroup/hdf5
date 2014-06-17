@@ -31,7 +31,7 @@
 #include "H5Gprivate.h"
 #include "H5Oprivate.h"
 #include "H5Pprivate.h"
-#include "H5Vprivate.h"
+#include "H5VMprivate.h"
 
 const char *FILENAME[] = {
     "istore",
@@ -308,7 +308,7 @@ test_extend(hid_t f, const char *prefix,
     if((fspace=H5Dget_space(dataset)) < 0) TEST_ERROR;
 
     for (ctr = 0;
-	 H5V_vector_lt_u((unsigned)ndims, max_corner, whole_size);
+	 H5VM_vector_lt_u((unsigned)ndims, max_corner, whole_size);
 	 ctr++) {
 
 	/* Size and location */
@@ -388,9 +388,9 @@ test_extend(hid_t f, const char *prefix,
         if(H5Sclose(mspace) < 0) TEST_ERROR;
 
 	/* Write to `whole' buffer for later checking */
-	H5V_hyper_copy((unsigned)ndims, size,
+	H5VM_hyper_copy((unsigned)ndims, size,
 		       whole_size, offset, whole,	/*dst*/
-		       size, H5V_ZERO, buf);		/*src*/
+		       size, H5VM_ZERO, buf);		/*src*/
 
 	/* Update max corner */
 	for (i=0; i<(size_t)ndims; i++)

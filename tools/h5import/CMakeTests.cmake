@@ -5,7 +5,7 @@
 ##############################################################################
 ##############################################################################
 
-  SET (HDF5_REFERENCE_CONF_FILES
+  set (HDF5_REFERENCE_CONF_FILES
       binfp64.conf
       binin8.conf
       binin8w.conf
@@ -23,7 +23,7 @@
       textpfe.conf
       txtstr.conf
   )
-  SET (HDF5_REFERENCE_TXT_FILES
+  set (HDF5_REFERENCE_TXT_FILES
       txtfp32.txt
       txtfp64.txt
       txtuin16.txt
@@ -42,7 +42,7 @@
       dbinuin32.h5.txt
       dtxtstr.h5.txt
   )
-  SET (HDF5_REFERENCE_TEST_FILES
+  set (HDF5_REFERENCE_TEST_FILES
       binfp64.h5
       binin8.h5
       binin8w.h5
@@ -62,38 +62,38 @@
   )
 
   FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-  FOREACH (conf_file ${HDF5_REFERENCE_CONF_FILES})
-    SET (dest "${PROJECT_BINARY_DIR}/testfiles/${conf_file}")
-    #MESSAGE (STATUS " Copying ${conf_file}")
-    ADD_CUSTOM_COMMAND (
+  foreach (conf_file ${HDF5_REFERENCE_CONF_FILES})
+    set (dest "${PROJECT_BINARY_DIR}/testfiles/${conf_file}")
+    #message (STATUS " Copying ${conf_file}")
+    add_custom_command (
         TARGET     h5import
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5IMPORT_SOURCE_DIR}/testfiles/${conf_file} ${dest}
     )
-  ENDFOREACH (conf_file ${HDF5_REFERENCE_CONF_FILES})
+  endforeach (conf_file ${HDF5_REFERENCE_CONF_FILES})
 
-  FOREACH (txt_file ${HDF5_REFERENCE_TXT_FILES})
-    SET (dest "${PROJECT_BINARY_DIR}/testfiles/${txt_file}")
-    #MESSAGE (STATUS " Copying ${txt_file}")
-    ADD_CUSTOM_COMMAND (
+  foreach (txt_file ${HDF5_REFERENCE_TXT_FILES})
+    set (dest "${PROJECT_BINARY_DIR}/testfiles/${txt_file}")
+    #message (STATUS " Copying ${txt_file}")
+    add_custom_command (
         TARGET     h5import
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5IMPORT_SOURCE_DIR}/testfiles/${txt_file} ${dest}
     )
-  ENDFOREACH (txt_file ${HDF5_REFERENCE_TXT_FILES})
+  endforeach (txt_file ${HDF5_REFERENCE_TXT_FILES})
 
-  FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    SET (dest "${PROJECT_BINARY_DIR}/testfiles/${h5_file}")
-    #MESSAGE (STATUS " Copying ${h5_file}")
-    ADD_CUSTOM_COMMAND (
+  foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
+    set (dest "${PROJECT_BINARY_DIR}/testfiles/${h5_file}")
+    #message (STATUS " Copying ${h5_file}")
+    add_custom_command (
         TARGET     h5import
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5IMPORT_SOURCE_DIR}/testfiles/${h5_file} ${dest}
     )
-  ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
+  endforeach (h5_file ${HDF5_REFERENCE_TEST_FILES})
   
 ##############################################################################
 ##############################################################################
@@ -102,13 +102,13 @@
 ##############################################################################
   MACRO (ADD_H5_TEST testname importfile conffile testfile)
     # If using memchecker skip macro based tests
-    IF (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
-      IF (NOT "${last_test}" STREQUAL "")
-        SET_TESTS_PROPERTIES (H5IMPORT-${testname} PROPERTIES DEPENDS H5IMPORT-h5importtest)
-      ENDIF (NOT "${last_test}" STREQUAL "")
-    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (H5IMPORT-${testname} PROPERTIES DEPENDS H5IMPORT-h5importtest)
+      endif (NOT "${last_test}" STREQUAL "")
+    else (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
           NAME H5IMPORT-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove
@@ -118,12 +118,12 @@
               ${testfile}.out
               ${testfile}.out.err
       )
-      SET_TESTS_PROPERTIES (H5IMPORT-${testname}-clear-objects PROPERTIES DEPENDS H5IMPORT-h5importtest)
+      set_tests_properties (H5IMPORT-${testname}-clear-objects PROPERTIES DEPENDS H5IMPORT-h5importtest)
 
-      ADD_TEST (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
-      SET_TESTS_PROPERTIES (H5IMPORT-${testname} PROPERTIES DEPENDS H5IMPORT-${testname}-clear-objects)
+      add_test (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
+      set_tests_properties (H5IMPORT-${testname} PROPERTIES DEPENDS H5IMPORT-${testname}-clear-objects)
 
-      ADD_TEST (
+      add_test (
           NAME H5IMPORT-${testname}-H5DMP
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
@@ -135,8 +135,8 @@
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5IMPORT-${testname}-H5DMP PROPERTIES DEPENDS H5IMPORT-${testname})
-      ADD_TEST (
+      set_tests_properties (H5IMPORT-${testname}-H5DMP PROPERTIES DEPENDS H5IMPORT-${testname})
+      add_test (
           NAME H5IMPORT-${testname}-H5DMP_CMP
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
@@ -148,14 +148,14 @@
               -D "TEST_REFERENCE=${testfile}.new"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5IMPORT-${testname}-H5DMP_CMP PROPERTIES DEPENDS H5IMPORT-${testname}-H5DMP)
-    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+      set_tests_properties (H5IMPORT-${testname}-H5DMP_CMP PROPERTIES DEPENDS H5IMPORT-${testname}-H5DMP)
+    endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_TEST testname importfile conffile testfile)
 
   MACRO (ADD_H5_DUMPTEST testname datasetname testfile)
     # If using memchecker skip tests
-    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
           NAME H5IMPORT-DUMP-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove
@@ -168,10 +168,10 @@
               d${testfile}.dff
               d${testfile}.dff.err
       )
-      SET_TESTS_PROPERTIES (H5IMPORT-DUMP-${testname}-clear-objects PROPERTIES DEPENDS H5IMPORT-h5importtest)
+      set_tests_properties (H5IMPORT-DUMP-${testname}-clear-objects PROPERTIES DEPENDS H5IMPORT-h5importtest)
 
-      IF ("${ARGN}" STREQUAL "BINARY")
-        ADD_TEST (
+      if ("${ARGN}" STREQUAL "BINARY")
+        add_test (
             NAME H5IMPORT-DUMP-${testname}-H5DMP
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
@@ -182,8 +182,8 @@
                 -D "TEST_SKIP_COMPARE=TRUE"
                 -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
         )
-      ELSE ("${ARGN}" STREQUAL "BINARY")
-        ADD_TEST (
+      else ("${ARGN}" STREQUAL "BINARY")
+        add_test (
             NAME H5IMPORT-DUMP-${testname}-H5DMP
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
@@ -194,10 +194,10 @@
                 -D "TEST_SKIP_COMPARE=TRUE"
                 -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
         )
-      ENDIF ("${ARGN}" STREQUAL "BINARY")
-      SET_TESTS_PROPERTIES (H5IMPORT-DUMP-${testname}-H5DMP PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}-clear-objects")
+      endif ("${ARGN}" STREQUAL "BINARY")
+      set_tests_properties (H5IMPORT-DUMP-${testname}-H5DMP PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}-clear-objects")
       
-      ADD_TEST (
+      add_test (
           NAME H5IMPORT-DUMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5import>"
@@ -208,9 +208,9 @@
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5IMPORT-DUMP-${testname} PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}-H5DMP")
+      set_tests_properties (H5IMPORT-DUMP-${testname} PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}-H5DMP")
 
-      ADD_TEST (
+      add_test (
           NAME H5IMPORT-DUMP-${testname}-H5DFF
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
@@ -222,25 +222,25 @@
               -D "TEST_REFERENCE=testfiles/d${testfile}.txt"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5IMPORT-DUMP-${testname}-H5DFF PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}")
-    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      set_tests_properties (H5IMPORT-DUMP-${testname}-H5DFF PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}")
+    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_DUMPTEST testname datasetname testfile)
 
   MACRO (ADD_H5_SKIP_DUMPTEST testname datasetname testfile)
-    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
           NAME H5IMPORT-DUMP-${testname}-SKIPPED
           COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname} ${datasetname} ${testfile} --- DEFLATE filter not available"
       )
-    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_SKIP_DUMPTEST testname datasetname testfile)
 
   # --------------------------------------------------------------------
   # Determine if filter is available for h5diff
   # --------------------------------------------------------------------
-  IF (H5_HAVE_FILTER_DEFLATE)
-    SET (USE_FILTER_DEFLATE "true")
-  ENDIF (H5_HAVE_FILTER_DEFLATE)
+  if (H5_HAVE_FILTER_DEFLATE)
+    set (USE_FILTER_DEFLATE "true")
+  endif (H5_HAVE_FILTER_DEFLATE)
 
 ##############################################################################
 ##############################################################################
@@ -248,9 +248,9 @@
 ##############################################################################
 ##############################################################################
 
-  IF (HDF5_ENABLE_USING_MEMCHECKER)
+  if (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run
-    ADD_TEST (
+    add_test (
         NAME H5IMPORT-clear-objects
         COMMAND    ${CMAKE_COMMAND}
             -E remove 
@@ -406,10 +406,10 @@
             dtxtstr.h5.dff
             dtxtstr.h5.dff.err
     )
-    SET (last_test "H5IMPORT-clear-objects")
-  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    set (last_test "H5IMPORT-clear-objects")
+  endif (HDF5_ENABLE_USING_MEMCHECKER)
 
-  ADD_TEST (
+  add_test (
       NAME H5IMPORT-h5importtest-clear-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
@@ -421,13 +421,13 @@
           binuin16.bin
           binuin32.bin
   )
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5IMPORT-h5importtest-clear-objects PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "H5IMPORT-clear-objects")
+  if (NOT "${last_test}" STREQUAL "")
+    set_tests_properties (H5IMPORT-h5importtest-clear-objects PROPERTIES DEPENDS ${last_test})
+  endif (NOT "${last_test}" STREQUAL "")
+  set (last_test "H5IMPORT-clear-objects")
 
-  ADD_TEST (NAME H5IMPORT-h5importtest COMMAND $<TARGET_FILE:h5importtest>)
-  SET_TESTS_PROPERTIES (H5IMPORT-h5importtest PROPERTIES DEPENDS H5IMPORT-h5importtest-clear-objects)
+  add_test (NAME H5IMPORT-h5importtest COMMAND $<TARGET_FILE:h5importtest>)
+  set_tests_properties (H5IMPORT-h5importtest PROPERTIES DEPENDS H5IMPORT-h5importtest-clear-objects)
 
   # ----- TESTING "ASCII I32 rank 3 - Output BE " ;
   ADD_H5_TEST (ASCII_I32 testfiles/txtin32.txt testfiles/txtin32.conf txtin32.h5)
@@ -452,19 +452,19 @@
 
   # ----- TESTING "BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed " 
   ADD_H5_TEST (BINARY_F64 binfp64.bin testfiles/binfp64.conf binfp64.h5)
-  IF (NOT USE_FILTER_DEFLATE)
+  if (NOT USE_FILTER_DEFLATE)
     ADD_H5_SKIP_DUMPTEST (BINARY_F64 "/fp/bin/64-bit" binfp64.h5 BINARY)
-  ELSE (NOT USE_FILTER_DEFLATE)
+  else (NOT USE_FILTER_DEFLATE)
     ADD_H5_DUMPTEST (BINARY_F64 "/fp/bin/64-bit" binfp64.h5 BINARY)
-  ENDIF (NOT USE_FILTER_DEFLATE)
+  endif (NOT USE_FILTER_DEFLATE)
 
   # ----- TESTING "BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed " 
   ADD_H5_TEST (BINARY_I8 binin8.bin testfiles/binin8.conf binin8.h5)
-  IF (NOT USE_FILTER_DEFLATE)
+  if (NOT USE_FILTER_DEFLATE)
     ADD_H5_SKIP_DUMPTEST (BINARY_I8 "/int/bin/8-bit" binin8.h5 BINARY)
-  ELSE (NOT USE_FILTER_DEFLATE)
+  else (NOT USE_FILTER_DEFLATE)
     ADD_H5_DUMPTEST (BINARY_I8 "/int/bin/8-bit" binin8.h5 BINARY)
-  ENDIF (NOT USE_FILTER_DEFLATE)
+  endif (NOT USE_FILTER_DEFLATE)
 
   # ----- TESTING "BINARY I16 - rank 3 - Output order LE + CHUNKED + extended " 
   ADD_H5_TEST (BINARY_I16 binin16.bin testfiles/binin16.conf binin16.h5)

@@ -7,7 +7,7 @@
   FILE (MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/red ${PROJECT_BINARY_DIR}/blue ${PROJECT_BINARY_DIR}/u2w)
 
   # Remove any output file left over from previous test run
-  ADD_TEST (
+  add_test (
       NAME EXAMPLES-clear-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
@@ -43,23 +43,23 @@
           red/prefix_target.h5
           u2w/u2w_target.h5
   )
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (EXAMPLES-clear-objects PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "EXAMPLES-clear-objects")
+  if (NOT "${last_test}" STREQUAL "")
+    set_tests_properties (EXAMPLES-clear-objects PROPERTIES DEPENDS ${last_test})
+  endif (NOT "${last_test}" STREQUAL "")
+  set (last_test "EXAMPLES-clear-objects")
 
-  FOREACH (example ${examples})
-    ADD_TEST (NAME EXAMPLES-${example} COMMAND $<TARGET_FILE:${example}>)
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (EXAMPLES-${example} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "EXAMPLES-${example}")
-  ENDFOREACH (example ${examples})
+  foreach (example ${examples})
+    add_test (NAME EXAMPLES-${example} COMMAND $<TARGET_FILE:${example}>)
+    if (NOT "${last_test}" STREQUAL "")
+      set_tests_properties (EXAMPLES-${example} PROPERTIES DEPENDS ${last_test})
+    endif (NOT "${last_test}" STREQUAL "")
+    set (last_test "EXAMPLES-${example}")
+  endforeach (example ${examples})
 
-  IF (H5_HAVE_PARALLEL)
-    ADD_TEST (NAME EXAMPLES-ph5example COMMAND $<TARGET_FILE:ph5example>)
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (EXAMPLES-ph5example PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "EXAMPLES-ph5example")
-  ENDIF (H5_HAVE_PARALLEL)
+  if (H5_HAVE_PARALLEL)
+    add_test (NAME EXAMPLES-ph5example COMMAND $<TARGET_FILE:ph5example>)
+    if (NOT "${last_test}" STREQUAL "")
+      set_tests_properties (EXAMPLES-ph5example PROPERTIES DEPENDS ${last_test})
+    endif (NOT "${last_test}" STREQUAL "")
+    set (last_test "EXAMPLES-ph5example")
+  endif (H5_HAVE_PARALLEL)

@@ -38,7 +38,7 @@
 #include "H5FAprivate.h"	/* Fixed arrays		  		*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MFprivate.h"	/* File space management		*/
-#include "H5Vprivate.h"         /* Vector functions			*/
+#include "H5VMprivate.h"         /* Vector functions			*/
 
 
 /****************/
@@ -256,7 +256,7 @@ H5D_farray_crt_context(void *_udata)
     /* Compute the size required for encoding the size of a chunk, allowing
      *      for an extra byte, in case the filter makes the chunk larger.
      */
-    ctx->chunk_size_len = 1 + ((H5V_log2_gen(udata->chunk_size) + 8) / 8);
+    ctx->chunk_size_len = 1 + ((H5VM_log2_gen(udata->chunk_size) + 8) / 8);
     if(ctx->chunk_size_len > 8)
         ctx->chunk_size_len = 8;
 
@@ -322,7 +322,7 @@ H5D_farray_fill(void *nat_blk, size_t nelmts)
     HDassert(nat_blk);
     HDassert(nelmts);
 
-    H5V_array_fill(nat_blk, &fill_val, H5FA_CLS_CHUNK->nat_elmt_size, nelmts);
+    H5VM_array_fill(nat_blk, &fill_val, H5FA_CLS_CHUNK->nat_elmt_size, nelmts);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_farray_fill() */
@@ -580,7 +580,7 @@ H5D_farray_filt_fill(void *nat_blk, size_t nelmts)
     HDassert(nelmts);
     HDassert(sizeof(fill_val) == H5FA_CLS_FILT_CHUNK->nat_elmt_size);
 
-    H5V_array_fill(nat_blk, &fill_val, H5FA_CLS_FILT_CHUNK->nat_elmt_size, nelmts);
+    H5VM_array_fill(nat_blk, &fill_val, H5FA_CLS_FILT_CHUNK->nat_elmt_size, nelmts);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_farray_filt_fill() */
@@ -809,7 +809,7 @@ H5D_farray_idx_create(const H5D_chk_idx_info_t *idx_info)
         /* Compute the size required for encoding the size of a chunk, allowing
          *      for an extra byte, in case the filter makes the chunk larger.
          */
-        chunk_size_len = 1 + ((H5V_log2_gen(idx_info->layout->size) + 8) / 8);
+        chunk_size_len = 1 + ((H5VM_log2_gen(idx_info->layout->size) + 8) / 8);
         if(chunk_size_len > 8)
             chunk_size_len = 8;
 
@@ -916,7 +916,7 @@ H5D_farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     fa = idx_info->storage->u.farray.fa;
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
+    if(H5VM_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Check for filters on chunks */
@@ -929,12 +929,12 @@ H5D_farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
         /* Compute the size required for encoding the size of a chunk, allowing
          *      for an extra byte, in case the filter makes the chunk larger.
          */
-        allow_chunk_size_len = 1 + ((H5V_log2_gen(idx_info->layout->size) + 8) / 8);
+        allow_chunk_size_len = 1 + ((H5VM_log2_gen(idx_info->layout->size) + 8) / 8);
         if(allow_chunk_size_len > 8)
             allow_chunk_size_len = 8;
 
         /* Compute encoded size of chunk */
-        new_chunk_size_len = (H5V_log2_gen(udata->nbytes) + 8) / 8;
+        new_chunk_size_len = (H5VM_log2_gen(udata->nbytes) + 8) / 8;
         if(new_chunk_size_len > 8)
             HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "encoded chunk size is more than 8 bytes?!?")
 
@@ -1067,7 +1067,7 @@ H5D_farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
     fa = idx_info->storage->u.farray.fa;
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
+    if(H5VM_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Check for filters on chunks */
@@ -1123,7 +1123,7 @@ H5D_farray_idx_iterate_cb(hsize_t UNUSED idx, const void *_elmt, void *_udata)
     int curr_dim;                   /* Current dimension */
     int ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Compose generic chunk record for callback */
     if(udata->filtered) {
@@ -1286,7 +1286,7 @@ H5D_farray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t 
     fa = idx_info->storage->u.farray.fa;
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
+    if(H5VM_chunk_index((idx_info->layout->ndims - 1), udata->offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Check for filters on chunks */

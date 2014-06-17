@@ -41,7 +41,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MFprivate.h"	/* File space management		*/
-#include "H5Vprivate.h"         /* Vector functions			*/
+#include "H5VMprivate.h"         /* Vector functions			*/
 
 
 /****************/
@@ -210,7 +210,7 @@ H5D_none_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     HDassert(udata);
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
+    if(H5VM_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     HDassert(!H5F_addr_defined(udata->addr));
@@ -257,7 +257,7 @@ H5D_none_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
+    if(H5VM_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Calculate the address of the chunk */
@@ -321,7 +321,7 @@ H5D_none_iterate(const H5D_chk_idx_info_t *idx_info,
     /* Iterate over all the chunks in the dataset's dataspace */
     for(u = 0; u < idx_info->layout->nchunks; u++) {
 	/* Calculate the index of this chunk */
-	if(H5V_chunk_index(ndims, chunk_rec.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
+	if(H5VM_chunk_index(ndims, chunk_rec.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
 	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
 	/* Calculate the address of the chunk */

@@ -272,12 +272,13 @@ H5_DLL herr_t H5S_select_iter_release(H5S_sel_iter_t *sel_iter);
 /* (Defined in H5S.c) */
 H5_DLLVAR hbool_t		H5S_mpi_opt_types_g;
 
-H5_DLL herr_t
-H5S_mpio_space_type( const H5S_t *space, size_t elmt_size,
-     /* out: */
-     MPI_Datatype *new_type,
-     int *count,
-     hbool_t *is_derived_type );
+H5_DLL herr_t H5S_mpio_space_type(const H5S_t *space, size_t elmt_size,
+    /* out: */  MPI_Datatype *new_type,
+                int *count,
+                hbool_t *is_derived_type,
+                hbool_t do_permute, 
+                hsize_t **permute_map,
+                hbool_t * is_permuted);
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* _H5Sprivate_H */

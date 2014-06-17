@@ -26,7 +26,7 @@
 #include "h5test.h"
 #include "H5srcdir.h"
 #include "H5Dpublic.h"
-#include "H5Vprivate.h"
+#include "H5VMprivate.h"
 #ifdef H5_HAVE_SZLIB_H
 #   include "szlib.h"
 #endif
@@ -8313,11 +8313,11 @@ test_chunk_fast(hid_t fapl)
 
     /* Initialize chunk dimensions */
     fill = EARRAY_CHUNK_DIM;
-    H5V_array_fill(chunk_dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
+    H5VM_array_fill(chunk_dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
 
     /* Initialize hyperslab size */
     fill = 1;
-    H5V_array_fill(hs_size, &fill, sizeof(fill), EARRAY_MAX_RANK);
+    H5VM_array_fill(hs_size, &fill, sizeof(fill), EARRAY_MAX_RANK);
 
     /* Loop over using SWMR access to write */
     for(swmr = FALSE; swmr <= TRUE; swmr++) {
@@ -8375,12 +8375,12 @@ test_chunk_fast(hid_t fapl)
 
                         /* Create n-D dataspace */
                         fill = EARRAY_DSET_DIM;
-                        H5V_array_fill(dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
+                        H5VM_array_fill(dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
                         fill = EARRAY_DSET_DIM;
-                        H5V_array_fill(max_dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
+                        H5VM_array_fill(max_dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
                         max_dim[unlim_dim] = H5S_UNLIMITED;
                         fill = EARRAY_DSET_DIM;
-                        H5V_array_fill(swizzled_dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
+                        H5VM_array_fill(swizzled_dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
                         if((sid = H5Screate_simple((int)ndims, dim, max_dim)) < 0) FAIL_STACK_ERROR
 
                         /* Get the number of points in the dataspace */
@@ -8388,7 +8388,7 @@ test_chunk_fast(hid_t fapl)
                         npoints = (hsize_t)snpoints;
 
                         /* Compute the "down" dimension values */
-                        if(H5V_array_down(ndims, dim, down) < 0) FAIL_STACK_ERROR
+                        if(H5VM_array_down(ndims, dim, down) < 0) FAIL_STACK_ERROR
 
                         /* Create chunked dataset */
                         if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_UINT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -8410,10 +8410,10 @@ test_chunk_fast(hid_t fapl)
                         /* Fill existing elements */
                         for(u = 0; u < npoints; u++) {
                             /* Compute the coordinate from the linear offset */
-                            if(H5V_array_calc_pre(u, ndims, down, hs_offset) < 0) FAIL_STACK_ERROR
+                            if(H5VM_array_calc_pre(u, ndims, down, hs_offset) < 0) FAIL_STACK_ERROR
 
                             /* Un-swizzle hyperslab offset in same way as swizzled dimensions */
-                            H5V_unswizzle_coords(hsize_t, hs_offset, unlim_dim);
+                            H5VM_unswizzle_coords(hsize_t, hs_offset, unlim_dim);
 
                             /* Select a single element in the dataset */
                             if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0) FAIL_STACK_ERROR
@@ -8460,10 +8460,10 @@ test_chunk_fast(hid_t fapl)
                             /* Fill new elements */
                             for(u = npoints; u < new_npoints; u++) {
                                 /* Compute the coordinate from the linear offset */
-                                if(H5V_array_calc(u, ndims, swizzled_dim, hs_offset) < 0) FAIL_STACK_ERROR
+                                if(H5VM_array_calc(u, ndims, swizzled_dim, hs_offset) < 0) FAIL_STACK_ERROR
 
                                 /* Un-swizzle hyperslab offset in same way as swizzled dimensions */
-                                H5V_unswizzle_coords(hsize_t, hs_offset, unlim_dim);
+                                H5VM_unswizzle_coords(hsize_t, hs_offset, unlim_dim);
 
                                 /* Select a single element in the dataset */
                                 if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0) FAIL_STACK_ERROR
@@ -8527,18 +8527,18 @@ test_chunk_fast(hid_t fapl)
                         if(H5Sget_simple_extent_dims(sid, swizzled_dim, NULL) < 0) FAIL_STACK_ERROR
 
                         /* Generate the swizzled dimensions */
-                        H5V_swizzle_coords(hsize_t, swizzled_dim, unlim_dim);
+                        H5VM_swizzle_coords(hsize_t, swizzled_dim, unlim_dim);
 
                         /* Compute the "down" dimension values */
-                        if(H5V_array_down(ndims, swizzled_dim, down) < 0) FAIL_STACK_ERROR
+                        if(H5VM_array_down(ndims, swizzled_dim, down) < 0) FAIL_STACK_ERROR
 
                         /* Read elements */
                         for(u = 0; u < npoints; u++) {
                             /* Compute the coordinate from the linear offset */
-                            if(H5V_array_calc_pre(u, ndims, down, hs_offset) < 0) FAIL_STACK_ERROR
+                            if(H5VM_array_calc_pre(u, ndims, down, hs_offset) < 0) FAIL_STACK_ERROR
 
                             /* Unswizzle hyperslab offset in same way as swizzled dimensions */
-                            H5V_unswizzle_coords(hsize_t, hs_offset, unlim_dim);
+                            H5VM_unswizzle_coords(hsize_t, hs_offset, unlim_dim);
 
                             /* Select a single element in the dataset */
                             if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0) FAIL_STACK_ERROR

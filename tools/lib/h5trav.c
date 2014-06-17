@@ -49,7 +49,9 @@ typedef struct {
 } trav_print_udata_t;
 
 /* format for hsize_t */
+#ifdef H5TRAV_PRINT_SPACE
 #define HSIZE_T_FORMAT   "%" H5_PRINTF_LL_WIDTH "u"
+#endif /* H5TRAV_PRINT_SPACE */
 
 /*-------------------------------------------------------------------------
  * local functions
@@ -680,11 +682,11 @@ h5trav_getindext(const char *name, const trav_table_t *table)
     for(i = 0; i < table->nobjs; i++) {
         /* Check for object name having full path (with leading '/') */
         if(HDstrcmp(name, table->objs[i].name) == 0)
-            return(i);
+            return((int)i);
 
         /* Check for object name without leading '/' */
         if(HDstrcmp(name, table->objs[i].name + 1) == 0)
-            return(i);
+            return((int)i);
 
         /* search also in the list of links */
         if(table->objs[i].nlinks) {
@@ -693,11 +695,11 @@ h5trav_getindext(const char *name, const trav_table_t *table)
             for ( j=0; j<table->objs[i].nlinks; j++) {
                 /* Check for object name having full path (with leading '/') */
                 if(HDstrcmp(name, table->objs[i].links[j].new_name) == 0)
-                    return(i);
+                    return((int)i);
 
                 /* Check for object name without leading '/' */
                 if(HDstrcmp(name, table->objs[i].links[j].new_name + 1) == 0)
-                    return(i);
+                    return((int)i);
             } /* end for */
         } /* end if */
     } /* end for */
@@ -807,7 +809,7 @@ void trav_table_addflags(unsigned *flags,
                          h5trav_type_t type,
                          trav_table_t *table)
 {
-    unsigned int new_obj;
+    size_t new_obj;
 
     if(table->nobjs == table->size) {
         table->size = MAX(1, table->size * 2);
@@ -995,6 +997,8 @@ trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
             printf(" %-10s %s", "datatype", path);
             break;
 
+        case H5O_TYPE_UNKNOWN:
+        case H5O_TYPE_NTYPES:
         default:
             printf(" %-10s %s", "unknown object type", path);
             break;
@@ -1005,7 +1009,7 @@ trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
         /* Finish printing line about object */
         printf("\n");
         if(trav_verbosity > 0)
-            H5Aiterate_by_name(print_udata->fid, path, trav_index_by, trav_index_order, NULL, trav_attr, path, H5P_DEFAULT);
+            H5Aiterate_by_name(print_udata->fid, path, trav_index_by, trav_index_order, NULL, trav_attr, (void *)path, H5P_DEFAULT);
     }
     else
         /* Print the link's original name */
@@ -1040,7 +1044,8 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
                 char *targbuf = (char*)HDmalloc(linfo->u.val_size + 1);
                 HDassert(targbuf);
 
-                H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT);
+                if(H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT) < 0)
+                    targbuf[0] = 0;
                 printf(" %-10s %s -> %s\n", "link", path, targbuf);
                 HDfree(targbuf);
             } /* end if */
@@ -1051,21 +1056,28 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
         case H5L_TYPE_EXTERNAL:
             if(linfo->u.val_size > 0) {
                 char *targbuf;
-                const char *filename;
-                const char *objname;
+                const char *filename = NULL;
+                const char *objname = NULL;
 
                 targbuf = (char*)HDmalloc(linfo->u.val_size + 1);
                 HDassert(targbuf);
 
-                H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT);
-                H5Lunpack_elink_val(targbuf, linfo->u.val_size, NULL, &filename, &objname);
-                printf(" %-10s %s -> %s %s\n", "ext link", path, filename, objname);
+                if(H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT) < 0)
+                    targbuf[0] = 0;
+                if(H5Lunpack_elink_val(targbuf, linfo->u.val_size, NULL, &filename, &objname) >= 0)
+                    printf(" %-10s %s -> %s %s\n", "ext link", path, filename, objname);
                 HDfree(targbuf);
             } /* end if */
             else
                 printf(" %-10s %s ->\n", "ext link", path);
             break;
 
+        case H5L_TYPE_HARD:
+            /* Should be handled elsewhere */
+            return(-1);
+
+        case H5L_TYPE_ERROR:
+        case H5L_TYPE_MAX:
         default:
             printf(" %-10s %s -> ???\n", "unknown type of UD link", path);
             break;

@@ -146,7 +146,7 @@ nh5_exit_c(int_f *status)
  *                       0 - HDF5_NOCLEANUP is not set
  * Returns:     none
  * Programmer:  M.S. Breitenfeld
- *              September 30, 3008
+ *              September 30, 2008
  * Modifications:
  *---------------------------------------------------------------------------*/
 void

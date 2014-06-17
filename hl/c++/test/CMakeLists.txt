@@ -15,10 +15,10 @@ INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
 INCLUDE_DIRECTORIES (${HDF5_HL_SRC_DIR}/test)
 INCLUDE_DIRECTORIES (${HDF5_CPP_SRC_DIR}/src)
 
-ADD_EXECUTABLE (hl_ptableTest ${HDF5_HL_CPP_TEST_SOURCE_DIR}/ptableTest.cpp)
+add_executable (hl_ptableTest ${HDF5_HL_CPP_TEST_SOURCE_DIR}/ptableTest.cpp)
 TARGET_C_PROPERTIES (hl_ptableTest " " " ")
 TARGET_NAMING (hl_ptableTest ${LIB_TYPE})
-TARGET_LINK_LIBRARIES (
+target_link_libraries (
     hl_ptableTest
     ${HDF5_LIB_TARGET}
     ${HDF5_TEST_LIB_TARGET}
@@ -26,6 +26,6 @@ TARGET_LINK_LIBRARIES (
     ${HDF5_HL_LIB_TARGET}
     ${HDF5_HL_CPP_LIB_TARGET}
 )
-SET_TARGET_PROPERTIES (hl_ptableTest PROPERTIES FOLDER test/hl/cpp)
+set_target_properties (hl_ptableTest PROPERTIES FOLDER test/hl/cpp)
 
-INCLUDE (CMakeTests.cmake)
+include (CMakeTests.cmake)
