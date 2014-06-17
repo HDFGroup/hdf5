@@ -9374,7 +9374,13 @@ H5Sselect_is_regular(hid_t space_id)
     if(H5S_GET_SELECT_TYPE(space) != H5S_SEL_HYPERSLABS)
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "not a hyperslab selection")
 
-    if(space->select.sel_info.hslab->diminfo_valid)
+    /* Rebuild diminfo if it is invalid and has not been confirmed to be
+     * impossible */
+    if(space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_NO) {
+        (void)H5S_hyper_rebuild((H5S_t *)space);
+    }
+
+    if(space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES)
         ret_value = TRUE;
     else
         ret_value = FALSE;
@@ -9391,7 +9397,7 @@ done:
     retrieve the start, stride, count, block arrays of a regular 
     hyperslab selection
  RETURNS
-    TRUE/FALSE/FAIL
+    SUCCESS/FAIL
 --------------------------------------------------------------------------*/
 herr_t
 H5Sget_reg_hyperslab_params(hid_t space_id, hsize_t start[], hsize_t stride[],
@@ -9407,10 +9413,20 @@ H5Sget_reg_hyperslab_params(hid_t space_id, hsize_t start[], hsize_t stride[],
     H5TRACE5("e", "i*h*h*h*h", space_id, start, stride, count, block);
 
     /* Check args */
-        if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+    if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-    if(!space->select.sel_info.hslab->diminfo_valid)
+    if(space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_IMPOSSIBLE)
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "not a regular hyperslab selection")
+
+    /* Rebuild diminfo if it is invalid and has not been confirmed to be
+     * impossible */
+    if(space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_NO) {
+        (void)H5S_hyper_rebuild((H5S_t *)space);
+    }
+
+    if(space->select.sel_info.hslab->diminfo_valid != H5S_DIMINFO_VALID_YES) {
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "not a regular hyperslab selection")
+    }
 
     diminfo = space->select.sel_info.hslab->opt_diminfo;
     ndims = space->extent.rank;

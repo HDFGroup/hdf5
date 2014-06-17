@@ -417,7 +417,7 @@ H5_DLL herr_t H5VL__iod_server_type_is_vl(hid_t type_id, hbool_t *is_vl_data);
 H5_DLL herr_t H5VL_iod_verify_scratch_pad(scratch_pad *sp, iod_checksum_t iod_cs);
 H5_DLL herr_t H5VL_iod_verify_kv_pair(void *key, iod_size_t key_size, void *value, iod_size_t val_size, 
                                       iod_checksum_t *iod_cs);
-H5_DLL herr_t H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
+H5_DLL herr_t H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
                                         hbool_t write_op, void *buf, size_t buf_size, 
                                         iod_checksum_t cs, uint32_t cs_scope, iod_trans_id_t tid);
 

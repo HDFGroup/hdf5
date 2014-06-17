@@ -29,6 +29,11 @@
  * Purpose:	The IOD plugin server side dataset routines.
  */
 
+/* offsetof */
+#ifndef offsetof
+# define offsetof(typ, memb)      ((long)((char *)&(((typ *)0)->memb)))
+#endif
+
 /* User data for VL traverssal */
 typedef struct {
     iod_handle_t coh;
@@ -676,7 +681,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
 
         /* If the data is not VL, we can read the data from the array the normal way */
         elmt_size = H5Tget_size(src_id);
-        ret = H5VL__iod_server_final_io(iod_oh.rd_oh, space_id, elmt_size, FALSE, 
+        ret = H5VL__iod_server_final_io(coh, iod_oh.rd_oh, space_id, elmt_size, FALSE, 
                                         buf, buf_size, (uint64_t)0, raw_cs_scope, read_tid);
         if(ret != SUCCEED)
             HGOTO_ERROR_FF(FAIL, "failed to read from array object");
@@ -828,7 +833,7 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine,
     buf_size = nelmts * 8;//sizeof(size_t);
 
     /* read the array values containing the BLOB IDs and lengths */
-    ret = H5VL__iod_server_final_io(iod_oh.rd_oh, space_id, elmt_size, FALSE, 
+    ret = H5VL__iod_server_final_io(coh, iod_oh.rd_oh, space_id, elmt_size, FALSE, 
                                     buf, buf_size, (uint64_t)0, cs_scope, rtid);
     if(ret != SUCCEED)
         HGOTO_ERROR_FF(ret, "can't read from array object");
@@ -1195,7 +1200,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR_FF(FAIL, "data type conversion failed")
 
         elmt_size = H5Tget_size(dst_id);
-        ret = H5VL__iod_server_final_io(iod_oh.wr_oh, space_id, elmt_size, TRUE, 
+        ret = H5VL__iod_server_final_io(coh, iod_oh.wr_oh, space_id, elmt_size, TRUE, 
                                         buf, buf_size, cs, raw_cs_scope, wtid);
 
         /* free the block handle */
@@ -1421,8 +1426,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
-                          hbool_t write_op, void *buf, 
+H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id, 
+                          size_t elmt_size, hbool_t write_op, void *buf, 
                           size_t UNUSED buf_size, iod_checksum_t UNUSED cs, 
                           uint32_t cs_scope, iod_trans_id_t tid)
 {
@@ -1432,6 +1437,8 @@ H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
     iod_array_iodesc_t *file_desc; /* file descriptor used to do IO */
     iod_hyperslab_t *hslabs = NULL; /* IOD hyperslab generated from HDF5 filespace */
     iod_checksum_t *cs_list = NULL;
+    iod_ret_t *ret_list = NULL;
+    iod_array_io_t *array_io = NULL;
     uint8_t *buf_ptr = NULL;
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
@@ -1480,6 +1487,71 @@ H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
         if(H5VL_iod_get_file_desc(space_id, &num_descriptors, hslabs) < 0)
             HGOTO_ERROR_FF(FAIL, "unable to generate IOD file descriptor from dataspace selection");
     }
+
+
+
+    if(NULL == (array_io = (iod_array_io_t *)calloc
+                    (sizeof(iod_array_io_t), (size_t)num_descriptors)))
+        HGOTO_ERROR_FF(FAIL, "can't allocate list array");
+    if(NULL == (ret_list = (iod_ret_t *)calloc
+                (sizeof(iod_ret_t), (size_t)num_descriptors)))
+        HGOTO_ERROR_FF(FAIL, "can't allocate return array");
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        /* allocate cs array */
+        if(NULL == (cs_list = (iod_checksum_t *)calloc
+                    (sizeof(iod_checksum_t), (size_t)num_descriptors)))
+            HGOTO_ERROR_FF(FAIL, "can't allocate checksum array");
+    }
+
+    buf_ptr = (uint8_t *)buf;
+    for(n=0 ; n<num_descriptors ; n++) {
+        hsize_t num_bytes = 0;
+        hsize_t num_elems = 1;
+
+        mem_desc = malloc(offsetof(iod_mem_desc_t, frag[1]));
+
+        /* determine how many bytes the current descriptor holds */
+        for(i=0 ; i<ndims ; i++) {
+            num_elems *= (hslabs[n].count[i] * hslabs[n].block[i]);
+        }
+        num_bytes = num_elems * elmt_size;
+
+        mem_desc->nfrag = 1;
+        mem_desc->frag[0].addr = (void *)buf_ptr;
+        mem_desc->frag[0].len = (iod_size_t)num_bytes;
+
+        if(write_op && (cs_scope & H5_CHECKSUM_IOD))
+            cs_list[n] = H5_checksum_crc64(buf_ptr, (size_t)num_bytes);
+
+        array_io[n].oh = iod_oh;
+        array_io[n].hints = NULL;
+        array_io[n].mem_desc = mem_desc;
+        array_io[n].io_desc = &hslabs[n];
+        if(cs_scope & H5_CHECKSUM_IOD)
+            array_io[n].cs = &cs_list[n];
+        else
+            array_io[n].cs = NULL;
+        array_io[n].ret = &ret_list[n];
+
+        buf_ptr += num_bytes;
+    }
+
+    if(write_op) {
+        /* write to array */
+        ret = iod_array_write_list(coh, tid, num_descriptors, array_io, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't write to array object");
+    }
+    else {
+        /* Read from array */
+        ret = iod_array_read_list(coh, tid, num_descriptors, array_io, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't read from array object");
+    }
+
+
+
+#if 0        
 
     file_desc = (iod_array_iodesc_t *)hslabs;
     buf_ptr = (uint8_t *)buf;
@@ -1537,6 +1609,7 @@ H5VL__iod_server_final_io(iod_handle_t iod_oh, hid_t space_id, size_t elmt_size,
         if(ret < 0)
             HGOTO_ERROR_FF(ret, "can't read from array object");
     }
+#endif
 
     /* If this is a read operation, compute checksum for each IOD
        read, and compare it against checksum returned from IOD */
@@ -1571,6 +1644,12 @@ done:
 
     /* free allocated descriptors */
     for(n=0 ; n<num_descriptors ; n++) {
+        if(ret_list[n] != 0)
+            HDONE_ERROR_FF(FAIL, "I/O Failed");
+
+        free(array_io[n].mem_desc);
+        array_io[n].mem_desc = NULL;
+
         free(hslabs[n].start);
         hslabs[n].start = NULL;
         free(hslabs[n].stride);
@@ -1588,11 +1667,17 @@ done:
         free(cs_list);
         cs_list = NULL;
     }
+    if(ret_list) {
+        free(ret_list);
+        ret_list = NULL;
+    }
+
+#if 0
     if(mem_desc) {
         free(mem_desc);
         mem_desc = NULL;
     }
-
+#endif
     return ret_value;
 } /* end H5VL_iod_server_final_io() */
 

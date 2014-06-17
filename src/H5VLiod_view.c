@@ -565,8 +565,7 @@ H5VL__iod_apply_query(hid_t file_id, hid_t rcxt_id, hid_t qid, hid_t vcpl_id,
                 *result = result1 + result2;
 
                 if(sid1!=FAIL && sid2!=FAIL) {
-                    /* MSC - AND the selections when API is available */
-                    if(FAIL == (*region = H5Scopy(sid1)))
+                    if(FAIL == (*region = H5Scombine_select(sid1, H5S_SELECT_AND, sid2)))
                         HGOTO_ERROR_FF(ret, "Unable to AND 2 dataspace selections");
 
                 }
@@ -581,9 +580,8 @@ H5VL__iod_apply_query(hid_t file_id, hid_t rcxt_id, hid_t qid, hid_t vcpl_id,
                 *result = result1 + result2 + 1;
 
                 if(sid1!=FAIL && sid2!=FAIL) {
-                    /* MSC - OR the selections when API is available */
-
-                    *region = H5Scopy(sid2);
+                    if(FAIL == (*region = H5Scombine_select(sid1, H5S_SELECT_OR, sid2)))
+                        HGOTO_ERROR_FF(ret, "Unable to AND 2 dataspace selections");
                 }
                 else if(sid1!=FAIL)
                     *region = H5Scopy(sid1);
@@ -969,7 +967,7 @@ H5VL__iod_get_elmt_region(iod_handle_t coh, iod_obj_id_t dset_id, iod_trans_id_t
         HGOTO_ERROR_FF(FAIL, "can't allocate read buffer");
 
     /* read the data selection from IOD. */
-    if(H5VL__iod_server_final_io(dset_oh, space_id, elmt_size, FALSE, 
+    if(H5VL__iod_server_final_io(coh, dset_oh, space_id, elmt_size, FALSE, 
                                  buf, buf_size, (uint64_t)0, 0, rtid) < 0)
         HGOTO_ERROR_FF(FAIL, "can't read from array object");
 
@@ -1032,7 +1030,10 @@ H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim,
     if (result) {
         hsize_t count[H5S_MAX_RANK], i;
 #if 0
-        fprintf(stderr, "(%d) Element |%d| matches query\n", my_rank_g, *((int *) elem));
+        fprintf(stderr, "(%d) Element [", my_rank_g);
+        for(i=0; i<ndim; i++)
+            fprintf(stderr, "%zu, ",point[i]);
+        fprintf(stderr, "] Matches Query. Value = %d\n", *((int *) elem));
 #endif
 
         udata->num_elmts ++;

@@ -391,7 +391,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
             /* if the selection is a regular hyperslab
                selection, only 1 iod hyperslab object is
                needed */
-            if(H5Sselect_is_regular(space_id)) {
+            if(TRUE == H5Sselect_is_regular(space_id)) {
                 num_descriptors = 1;
 
                 if(NULL != hslabs) {
@@ -414,28 +414,27 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                 if(NULL != hslabs) {
                     hsize_t *blocks = NULL;
                     size_t block_count = 0;
+                    hsize_t *cur_ptr;
 
                     block_count = (unsigned int)ndims * (hsize_t)num_descriptors * sizeof(hsize_t) * 2;
 
                     if(NULL == (blocks = (hsize_t *)malloc(block_count)))
                         HGOTO_ERROR_FF(FAIL, "can't allocate array for points coords");
 
-                    fprintf(stderr, "block count = %zu\n", block_count);
-
                     if(H5Sget_select_hyper_blocklist(space_id, (hsize_t)0, 
                                                      (hsize_t)num_descriptors, blocks) < 0)
                         HGOTO_ERROR_FF(FAIL, "Failed to retrieve point coordinates");
 
+
+                    cur_ptr = blocks; /* temp pointer into blocks array */
                     /* populate the hyperslab */
                     for(n=0 ; n<num_descriptors ; n++) {
-                        hsize_t *cur_ptr = blocks; /* temp pointer into blocks array */
-
                         /* adjust the current pointer to the current block */
                         cur_ptr += n*ndims*2;
                         for(i=0 ; i<ndims ; i++) {
                             hslabs[n].start[i] = *(cur_ptr+i);
                             hslabs[n].count[i] = 1;
-                            hslabs[n].block[i] = *(cur_ptr+ndims+i) - hslabs[n].start[i];
+                            hslabs[n].block[i] = *(cur_ptr+ndims+i) - hslabs[n].start[i] + 1;
                             hslabs[n].stride[i] = hslabs[n].block[i];
                         }
                     }

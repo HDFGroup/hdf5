@@ -78,7 +78,7 @@ static herr_t H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
                                   hid_t *combine_type_id);
 
 static herr_t H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid, 
-                                   hid_t space_id, iod_size_t num_cells, hid_t type_id, 
+                                   hid_t space_id, hid_t type_id, 
                                    const char *split_script, void **split_data, 
                                    size_t *split_num_elmts, hid_t *split_type_id);
 
@@ -828,8 +828,6 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
     for(i=0 ; i<num_ions_g ; i++) {
         hid_t space_id;
 
-        farm_input.num_cells = 0;
-
         /* Get all ranges that are on Node i into a dataspace */
         for(u = 0; u < obj_map->u_map.array_map.n_range ; u++) {
             uint32_t worker = obj_map->u_map.array_map.array_range[u].nearest_rank;
@@ -889,14 +887,14 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
 #if H5_EFF_DEBUG 
         fprintf(stderr, "Farming to %d\n", worker);
 #endif
-        farm_input.num_cells =  obj_map->u_map.array_map.array_range[u].n_cell;
         coords.start_cell = obj_map->u_map.array_map.array_range[u].start_cell;
         coords.end_cell = obj_map->u_map.array_map.array_range[u].end_cell;
 
         if(FAIL == (space_layout = H5VL__iod_get_space_layout(coords, region)))
             HGOTO_ERROR_FF(FAIL, "can't generate local dataspace selection");
 
-        /* MSC - AND region and space_layout */
+        if(H5Smodify_select(space_layout, H5S_SELECT_AND, region) < 0)
+            HGOTO_ERROR_FF(FAIL, "Unable to AND 2 dataspace selections");
 
         farm_input.space_id = space_layout;
         farm_input.coh = cohs[worker];
@@ -905,8 +903,8 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
         if (worker == 0) {
             hg_reqs[u] = HG_REQUEST_NULL;
             /* Do a local split */
-            if(FAIL == H5VL__iod_farm_split(cohs[0], obj_map->oid, rtid, space_layout,
-                                            farm_input.num_cells, farm_input.type_id, split_script,
+            if(FAIL == H5VL__iod_farm_split(cohs[0], obj_map->oid, rtid, farm_input.space_id,
+                                            farm_input.type_id, split_script,
                                             &split_data[u], &split_num_elmts[u], &split_type_id))
                 HGOTO_ERROR_FF(FAIL, "can't split in farmed job");
         } else {
@@ -1021,7 +1019,7 @@ done:
  */
 static herr_t
 H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid, 
-                     hid_t space_id, iod_size_t num_cells, hid_t type_id, 
+                     hid_t space_id, hid_t type_id, 
                      const char *split_script, void **split_data, 
                      size_t *split_num_elmts, hid_t *split_type_id)
 {
@@ -1033,8 +1031,6 @@ H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
     nelmts = (size_t) H5Sget_select_npoints(space_id);
     elmt_size = H5Tget_size(type_id);
     buf_size = nelmts * elmt_size;
-
-    assert(num_cells == nelmts);
 
     /* allocate buffer to hold data */
     if(NULL == (data = malloc(buf_size)))
@@ -1097,13 +1093,12 @@ H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine,
     iod_trans_id_t rtid = input->rtid;
     iod_obj_id_t obj_id = input->obj_id; /* The ID of the object */
     const char *split_script = input->split_script;
-    iod_size_t num_cells = input->num_cells;
     void *split_data = NULL;
     size_t split_num_elmts = 0;
     hid_t split_type_id = FAIL;
     herr_t ret_value = SUCCEED;
 
-    if(H5VL__iod_farm_split(coh, obj_id, rtid, space_id, num_cells, type_id, split_script,
+    if(H5VL__iod_farm_split(coh, obj_id, rtid, space_id, type_id, split_script,
                             &split_data, &split_num_elmts, &split_type_id) < 0)
         HGOTO_ERROR_FF(FAIL, "can't split in farmed job");
 
@@ -1275,7 +1270,7 @@ H5VL__iod_read_selection(iod_handle_t coh, iod_obj_id_t obj_id,
     /* read the data selection from IOD. */
     /* MSC - will need to do it in pieces, not it one shot. */
     elmt_size = H5Tget_size(type_id);
-    ret = H5VL__iod_server_final_io(obj_oh, space_id, elmt_size, FALSE, 
+    ret = H5VL__iod_server_final_io(coh, obj_oh, space_id, elmt_size, FALSE, 
                                     buf, buf_size, (uint64_t)0, 0, rtid);
     if(SUCCEED != ret)
         HGOTO_ERROR_FF(ret, "can't read from array object");
