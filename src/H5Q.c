@@ -552,6 +552,7 @@ H5Q_t *
 H5Q_combine(H5Q_t *query1, H5Q_combine_op_t combine_op, H5Q_t *query2)
 {
     H5Q_t *query = NULL;
+    H5Q_type_t type1, type2;
     H5Q_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -575,6 +576,10 @@ H5Q_combine(H5Q_t *query1, H5Q_combine_op_t combine_op, H5Q_t *query2)
     query1->ref_count++;
     query->query.combine.r_query = query2;
     query2->ref_count++;
+    /* Work out query type of the combined query */
+    type1 = (query1->is_combined) ? query1->query.combine.type : query1->query.select.type;
+    type2 = (query2->is_combined) ? query2->query.combine.type : query2->query.select.type;
+    query->query.combine.type = (type1 == type2) ? type1 : H5Q_TYPE_MISC;
 
     /* set return value */
     ret_value = query;
@@ -587,23 +592,20 @@ done:
 } /* end H5Q_combine() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5Qget_match_info
+ * Function:    H5Qget_type
  *
- * Purpose: The H5Qget_match_info routine queries a singleton query object,
- * given by query_id, for its match information, originally provided to
- * H5Qcreate. Match information is returned through the match_type and
- * match_op parameters, either of which may be NULL to avoid retrieving that
- * information. See H5Qcreate for a table listing the complete set of values
- * that may be returned for match_type and match_op.
- * It is an error to perform this call on a compound query object (one which
- * was created with H5Qcombine).
+ * Purpose: The H5Qget_type routine queries a query object,
+ * given by query_id, for its type information, originally provided to
+ * H5Qcreate or created after a call to H5Qcombine. Information is returned
+ * through the query_type parameter. See H5Qcreate for a table listing the
+ * complete set of values that may be returned for query_type.
  *
  * Return:  Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Qget_match_info(hid_t query_id, H5Q_type_t *query_type, H5Q_match_op_t *match_op)
+H5Qget_type(hid_t query_id, H5Q_type_t *query_type)
 {
     H5Q_t *query = NULL;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -616,24 +618,86 @@ H5Qget_match_info(hid_t query_id, H5Q_type_t *query_type, H5Q_match_op_t *match_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
 
     /* Get match info */
-    if (FAIL == H5Q_get_match_info(query, query_type, match_op))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get match info");
+    if (FAIL == H5Q_get_type(query, query_type))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get query type");
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Qget_match_info() */
+} /* end H5Qget_type() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5Q_get_match_info
+ * Function:    H5Q_get_type
  *
- * Purpose: Private function for H5Qget_match_info.
+ * Purpose: Private function for H5Qget_type.
  *
  * Return:  Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Q_get_match_info(H5Q_t *query, H5Q_type_t *query_type, H5Q_match_op_t *match_op)
+H5Q_get_type(H5Q_t *query, H5Q_type_t *query_type)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(query);
+
+    if (query_type)
+        *query_type = (query->is_combined) ? query->query.combine.type :
+                        query->query.select.type;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q_get_type() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Qget_match_op
+ *
+ * Purpose: The H5Qget_match_op routine queries a singleton query object,
+ * given by query_id, for its op information, originally provided to
+ * H5Qcreate. Match information is returned through the
+ * match_op parameter. See H5Qcreate for a table listing the complete set of
+ * values that may be returned for match_op.
+ * It is an error to perform this call on a compound query object (one which
+ * was created with H5Qcombine).
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Qget_match_op(hid_t query_id, H5Q_match_op_t *match_op)
+{
+    H5Q_t *query = NULL;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*Qt*Qm", query_id, query_type, match_op);
+
+    /* Check args and get the query objects */
+    if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
+
+    /* Get match info */
+    if (FAIL == H5Q_get_match_op(query, match_op))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get match op");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Qget_match_op() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q_get_match_op
+ *
+ * Purpose: Private function for H5Qget_match_op.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Q_get_match_op(H5Q_t *query, H5Q_match_op_t *match_op)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -642,14 +706,13 @@ H5Q_get_match_info(H5Q_t *query, H5Q_type_t *query_type, H5Q_match_op_t *match_o
     HDassert(query);
 
     if (query->is_combined)
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "cannot retrieve info from combined query");
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "cannot retrieve op from combined query");
 
-    if (query_type) *query_type = query->query.select.type;
     if (match_op) *match_op = query->query.select.match_op;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_get_match_info() */
+} /* end H5Q_get_match_op() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Qget_components
