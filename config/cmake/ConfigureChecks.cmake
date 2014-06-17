@@ -289,7 +289,7 @@ MACRO (HDF5_FUNCTION_TEST OTHER_TEST)
     else (${OTHER_TEST})
       message (STATUS "Performing Other Test ${OTHER_TEST} - Failed")
       set (H5_${OTHER_TEST} "" CACHE INTERNAL "Other test ${FUNCTION}")
-      FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+      file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
           "Performing Other Test ${OTHER_TEST} failed with the following output:\n"
           "${OUTPUT}\n"
       )
@@ -467,14 +467,14 @@ if (NOT WINDOWS)
       else (TEST_LFS_WORKS_RUN  MATCHES 0)
         set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
         message (STATUS "${msg}... no")
-        FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+        file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
               "Test TEST_LFS_WORKS Run failed with the following output and exit code:\n ${OUTPUT}\n"
         )
       endif (TEST_LFS_WORKS_RUN  MATCHES 0)
     else (TEST_LFS_WORKS_COMPILE )
       set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
       message (STATUS "${msg}... no")
-      FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+      file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
           "Test TEST_LFS_WORKS Compile failed with the following output:\n ${OUTPUT}\n"
       )
     endif (TEST_LFS_WORKS_COMPILE)
@@ -757,7 +757,7 @@ MACRO (HDF5_CXX_FUNCTION_TEST OTHER_TEST)
     else ("${OTHER_TEST}" EQUAL 0)
       message (STATUS "Performing CXX Test ${OTHER_TEST} - Failed")
       set (${OTHER_TEST} "" CACHE INTERNAL "CXX test ${FUNCTION}")
-      FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+      file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
           "Performing CXX Test ${OTHER_TEST} failed with the following output:\n"
           "${OUTPUT}\n"
       )
@@ -802,14 +802,14 @@ if (NOT WINDOWS)
       else (TEST_DIRECT_VFD_WORKS_RUN  MATCHES 0)
         set (TEST_DIRECT_VFD_WORKS "" CACHE INTERNAL ${msg})
         message (STATUS "${msg}... no")
-        FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+        file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
               "Test TEST_DIRECT_VFD_WORKS Run failed with the following output and exit code:\n ${OUTPUT}\n"
         )
       endif (TEST_DIRECT_VFD_WORKS_RUN  MATCHES 0)
     else (TEST_DIRECT_VFD_WORKS_COMPILE )
       set (TEST_DIRECT_VFD_WORKS "" CACHE INTERNAL ${msg})
       message (STATUS "${msg}... no")
-      FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+      file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
           "Test TEST_DIRECT_VFD_WORKS Compile failed with the following output:\n ${OUTPUT}\n"
       )
     endif (TEST_DIRECT_VFD_WORKS_COMPILE)
@@ -870,7 +870,7 @@ if (WINDOWS)
     if ("${HAVE_IOEO_EXITCODE}" EQUAL 0)
       set (H5_HAVE_IOEO 1 CACHE INTERNAL "Test InitOnceExecuteOnce")
       message (STATUS "Performing Test InitOnceExecuteOnce - Success")
-      FILE (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
         "Performing C SOURCE FILE Test InitOnceExecuteOnce succeded with the following output:\n"
         "${OUTPUT}\n"
         "Return value: ${HAVE_IOEO}\n")
@@ -882,7 +882,7 @@ if (WINDOWS)
       endif (CMAKE_CROSSCOMPILING AND "${HAVE_IOEO_EXITCODE}" MATCHES  "FAILED_TO_RUN")
 
       message (STATUS "Performing Test InitOnceExecuteOnce - Failed")
-      FILE (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
+      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
         "Performing InitOnceExecuteOnce Test  failed with the following output:\n"
         "${OUTPUT}\n"
         "Return value: ${HAVE_IOEO_EXITCODE}\n")
@@ -950,7 +950,7 @@ if (NOT H5_PRINTF_LL_WIDTH OR H5_PRINTF_LL_WIDTH MATCHES "unknown")
         message ("Width with ${HDF5_PRINTF_LL} failed with result: ${HDF5_PRINTF_LL_TEST_RUN}")
       endif (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
     else (HDF5_PRINTF_LL_TEST_COMPILE)
-      FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+      file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
           "Test H5_PRINTF_LL_WIDTH for ${HDF5_PRINTF_LL} failed with the following output:\n ${OUTPUT}\n"
       )
     endif (HDF5_PRINTF_LL_TEST_COMPILE)
@@ -1000,14 +1000,14 @@ MACRO (H5ConversionTests TEST msg)
       else (${TEST}_RUN  MATCHES 0)
         set (${TEST} "" CACHE INTERNAL ${msg})
         message (STATUS "${msg}... no")
-        FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+        file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
               "Test ${TEST} Run failed with the following output and exit code:\n ${OUTPUT}\n"
         )
       endif (${TEST}_RUN  MATCHES 0)
     else (${TEST}_COMPILE )
       set (${TEST} "" CACHE INTERNAL ${msg})
       message (STATUS "${msg}... no")
-      FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+      file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
           "Test ${TEST} Compile failed with the following output:\n ${OUTPUT}\n"
       )
     endif (${TEST}_COMPILE)

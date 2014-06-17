@@ -28,7 +28,9 @@
 #include "hdf5.h"
 #include "H5private.h"
 
+/* not used yet
 #define UBTXT1 "u0.txt"
+*/
 #define UBTXT2 "u10.txt"
 #define UBTXT3 "u511.txt"
 #define UBTXT4 "u512.txt"
@@ -69,24 +71,7 @@ char pattern[11] = "abcdefghij";
 
 #define BUF_SIZE 1024
 
-#define LENSTR  50
-#define LENSTR2  11
-
-#define SPACE2_RANK 2
-#define SPACE2_DIM1 10
-#define SPACE2_DIM2 10
-
-#define SPACE1_RANK 1
-#define SPACE1_DIM1 4
-
-#define DIM1  20
-#define DIM2  10
-#define CDIM1 DIM1/2
-#define CDIM2 DIM2/2
-#define RANK  2
-
 /* Element selection information */
-#define POINT1_NPOINTS 10
 
 typedef enum{
      RED,
@@ -106,21 +91,9 @@ typedef struct s1_t {
 
 /* 1-D array datatype */
 #define ARRAY1_RANK 1
-#define ARRAY1_DIM1 4
-
-/* 3-D array datatype */
-#define ARRAY2_RANK 3
-#define ARRAY2_DIM1 3
-#define ARRAY2_DIM2 4
-#define ARRAY2_DIM3 5
 
 /* 2-D array datatype */
-#define ARRAY3_RANK 2
-#define ARRAY3_DIM1 6
 #define ARRAY3_DIM2 3
-
-/* VL string datatype name */
-#define VLSTR_TYPE      "vl_string_type"
 
 /* A UD link traversal function.  Shouldn't actually be called. */
 static hid_t UD_traverse(const char UNUSED * link_name, hid_t UNUSED cur_group,

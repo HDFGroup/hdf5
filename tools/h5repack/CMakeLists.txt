@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.10)
+cmake_minimum_required (VERSION 2.8.11)
 PROJECT (HDF5_TOOLS_H5REPACK)
 
 #-----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ if (BUILD_TESTING)
     add_definitions (${HDF5_EXTRA_C_FLAGS})
     INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
 
-    add_library (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${LIB_TYPE} ${HDF5_TEST_SRC_DIR}/dynlib1.c)
+    add_library (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${LIB_TYPE} dynlib_rpk.c)
     TARGET_C_PROPERTIES (${HDF5_TOOL_PLUGIN_LIB_TARGET} " " " ")
     target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
     H5_SET_LIB_OPTIONS (
@@ -65,7 +65,7 @@ if (BUILD_TESTING)
     )
 
     # make plugins dir
-    FILE (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
+    file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
     #-----------------------------------------------------------------------------
     # Copy plugin library to a plugins folder
     #-----------------------------------------------------------------------------

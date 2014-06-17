@@ -41,7 +41,7 @@ message (STATUS "COMMAND Result: ${TEST_RESULT}")
 message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
 # now grep the output with the reference
-FILE (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
 
 # TEST_REFERENCE should always be matched
 STRING(REGEX MATCH "${TEST_REFERENCE}" TEST_MATCH ${TEST_STREAM}) 

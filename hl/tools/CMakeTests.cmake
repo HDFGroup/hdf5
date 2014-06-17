@@ -6,7 +6,7 @@
 ##############################################################################
 
 # Make testfiles dir under build dir
-FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
 #
 # copy test files from source to build dir

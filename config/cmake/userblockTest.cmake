@@ -35,7 +35,7 @@ set (TEST_STRING_SIZE 0)
 if (TEST_CHECKUB STREQUAL "YES")
   # find the length of the user block to check
   #s1=`cat $ufile | wc -c | sed -e 's/ //g'`
-  FILE (STRINGS ${TEST_FOLDER}/${TEST_UFILE} TEST_U_STRING)
+  file (STRINGS ${TEST_FOLDER}/${TEST_UFILE} TEST_U_STRING)
   string (LENGTH ${TEST_U_STRING} TEST_U_STRING_LEN)
 
   # Get the size of the original user block, if any.
@@ -54,7 +54,7 @@ if (TEST_CHECKUB STREQUAL "YES")
     if (NOT ${TEST_RESULT} STREQUAL "0")
       message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} ${TEST_OFILE} is: ${TEST_ERROR}")
     endif (NOT ${TEST_RESULT} STREQUAL "0")
-    FILE (READ ${TEST_HFILE}.len.txt TEST_O_STRING_LEN)
+    file (READ ${TEST_HFILE}.len.txt TEST_O_STRING_LEN)
   endif (TEST_OFILE)
    
   MATH( EXPR TEST_STRING_SIZE "${TEST_U_STRING_LEN} + ${TEST_O_STRING_LEN}" )
@@ -71,11 +71,11 @@ if (TEST_CHECKUB STREQUAL "YES")
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     #cat $ufile >> $cmpfile
-    FILE (STRINGS ${TEST_UFILE} TEST_STREAM NEWLINE_CONSUME)
-    FILE (APPEND ${TEST_HFILE}-ub.cmp "${TEST_STREAM}") 
+    file (STRINGS ${TEST_UFILE} TEST_STREAM NEWLINE_CONSUME)
+    file (APPEND ${TEST_HFILE}-ub.cmp "${TEST_STREAM}") 
   else (NOT TEST_O_STRING_LEN STREQUAL "0")
-    FILE (STRINGS ${TEST_UFILE} TEST_STREAM NEWLINE_CONSUME)
-    FILE (WRITE ${TEST_HFILE}-ub.cmp ${TEST_STREAM})
+    file (STRINGS ${TEST_UFILE} TEST_STREAM NEWLINE_CONSUME)
+    file (WRITE ${TEST_HFILE}-ub.cmp ${TEST_STREAM})
   endif (NOT TEST_O_STRING_LEN STREQUAL "0")
 
   #$JAM_BIN/getub -c $size $hfile > $tfile

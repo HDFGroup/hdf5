@@ -23,7 +23,6 @@
 #include "hdf5.h"
 #include "H5private.h"
 
-#define KB              1024
 #define FAMILY_NUMBER   4
 #define FAMILY_SIZE     1024
 #define FILENAME        "family_file%05d.h5"

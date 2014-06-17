@@ -32,18 +32,12 @@
 
 #ifdef VMS
 #  define unlink        delete
-#  define GZ_SUFFIX     "-gz"
 #endif  /* VMS */
 
 #ifdef RISCOS
 #  define unlink        remove
-#  define GZ_SUFFIX     "-gz"
 #  define fileno(file)  file->__file
 #endif  /* RISCOS */
-
-#ifndef GZ_SUFFIX
-#  define GZ_SUFFIX     ".gz"
-#endif  /* GZ_SUFFIX */
 
 #define ONE_KB              1024
 #define ONE_MB              (ONE_KB * ONE_KB)

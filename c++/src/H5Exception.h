@@ -81,7 +81,7 @@ class H5_DLLCPP Exception {
 	Exception( const Exception& orig);
 
 	// virtual Destructor
-	virtual ~Exception();
+	virtual ~Exception() throw();
 
    protected:
         // Default value for detail_message
@@ -96,70 +96,70 @@ class H5_DLLCPP FileIException : public Exception {
    public:
 	FileIException( const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
 	FileIException();
-	virtual ~FileIException();
+	virtual ~FileIException() throw();
 };
 
 class H5_DLLCPP GroupIException : public Exception {
    public:
 	GroupIException( const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
 	GroupIException();
-	virtual ~GroupIException();
+	virtual ~GroupIException() throw();
 };
 
 class H5_DLLCPP DataSpaceIException : public Exception {
    public:
 	DataSpaceIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
 	DataSpaceIException();
-	virtual ~DataSpaceIException();
+	virtual ~DataSpaceIException() throw();
 };
 
 class H5_DLLCPP DataTypeIException : public Exception {
    public:
 	DataTypeIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
 	DataTypeIException();
-	virtual ~DataTypeIException();
+	virtual ~DataTypeIException() throw();
 };
 
 class H5_DLLCPP PropListIException : public Exception {
    public:
 	PropListIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
 	PropListIException();
-	virtual ~PropListIException();
+	virtual ~PropListIException() throw();
 };
 
 class H5_DLLCPP DataSetIException : public Exception {
    public:
 	DataSetIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
 	DataSetIException();
-	virtual ~DataSetIException();
+	virtual ~DataSetIException() throw();
 };
 
 class H5_DLLCPP AttributeIException : public Exception {
    public:
 	AttributeIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
 	AttributeIException();
-	virtual ~AttributeIException();
+	virtual ~AttributeIException() throw();
 };
 
 class H5_DLLCPP ReferenceException : public Exception {
    public:
 	ReferenceException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
 	ReferenceException();
-	virtual ~ReferenceException();
+	virtual ~ReferenceException() throw();
 };
 
 class H5_DLLCPP LibraryIException : public Exception {
    public:
 	LibraryIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
 	LibraryIException();
-	virtual ~LibraryIException();
+	virtual ~LibraryIException() throw();
 };
 
 class H5_DLLCPP IdComponentException : public Exception {
    public:
 	IdComponentException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
 	IdComponentException();
-	virtual ~IdComponentException();
+	virtual ~IdComponentException() throw();
 };
 
 #ifndef H5_NO_NAMESPACE
