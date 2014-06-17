@@ -43,8 +43,8 @@ MODULE TH5_MISC_PROVISIONAL
   USE ISO_C_BINDING
   IMPLICIT NONE
 
-  INTEGER, PARAMETER :: sp = KIND(0.0)
-  INTEGER, PARAMETER :: dp = KIND(0.D0)
+  INTEGER, PARAMETER :: sp = SELECTED_REAL_KIND(5)  ! This should map to REAL*4 on most modern processors
+  INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(10) ! This should map to REAL*8 on most modern processors
 
   ! generic compound datatype
   TYPE, BIND(C) :: comp_datatype
@@ -58,7 +58,7 @@ MODULE TH5_MISC_PROVISIONAL
   INTERFACE H5_SIZEOF
      MODULE PROCEDURE H5_SIZEOF_CMPD
      MODULE PROCEDURE H5_SIZEOF_CHR
-     MODULE PROCEDURE H5_SIZEOF_I, H5_SIZEOF_IV 
+     MODULE PROCEDURE H5_SIZEOF_I
      MODULE PROCEDURE H5_SIZEOF_SP,H5_SIZEOF_DP
   END INTERFACE
 
@@ -100,17 +100,6 @@ CONTAINS
 
   END FUNCTION H5_SIZEOF_I
 
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5_sizeof_iv
-!DEC$endif
-  INTEGER(C_SIZE_T) FUNCTION H5_SIZEOF_IV(a)
-    IMPLICIT NONE
-    INTEGER, DIMENSION(:), INTENT(in):: a
-
-    H5_SIZEOF_IV = SIZE(a)*storage_size(a(1), c_size_t)/storage_size(c_char_'a',c_size_t)
-
-  END FUNCTION H5_SIZEOF_IV
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
