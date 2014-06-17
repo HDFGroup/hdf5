@@ -303,6 +303,7 @@ H5Qcreate(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
                 HGOTO_ERROR(H5E_QUERY, H5E_CANTCREATE, FAIL, "unable to create query");
         }
         break;
+        case H5Q_TYPE_MISC:
         default:
         {
             HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
@@ -392,6 +393,7 @@ H5Q_create(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
                 query->query.select.elem.link_name.name = H5MM_strdup(link_name);
             }
             break;
+        case H5Q_TYPE_MISC:
         default:
             HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, NULL, "unsupported/unrecognized query type");
             break;
@@ -484,6 +486,7 @@ H5Q_close(H5Q_t *query)
                 H5MM_free(query->query.select.elem.link_name.name);
                 query->query.select.elem.link_name.name = NULL;
                 break;
+            case H5Q_TYPE_MISC:
             default:
                 HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
                 break;
@@ -566,6 +569,7 @@ H5Q_combine(H5Q_t *query1, H5Q_combine_op_t combine_op, H5Q_t *query2)
         case H5Q_COMBINE_OR:
             query->query.combine.op = combine_op;
             break;
+        case H5Q_SINGLETON:
         default:
             HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, NULL, "unsupported/unrecognized combine op");
             break;
@@ -611,7 +615,6 @@ H5Qget_type(hid_t query_id, H5Q_type_t *query_type)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*Qt*Qm", query_id, query_type, match_op);
 
     /* Check args and get the query objects */
     if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
@@ -673,7 +676,6 @@ H5Qget_match_op(hid_t query_id, H5Q_match_op_t *match_op)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*Qt*Qm", query_id, query_type, match_op);
 
     /* Check args and get the query objects */
     if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
@@ -960,6 +962,7 @@ H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc)
                 H5Q_encode_memcpy(&buf_ptr, &buf_size, name, name_len);
             }
                 break;
+            case H5Q_TYPE_MISC:
             default:
                 HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
                 break;
@@ -1071,9 +1074,9 @@ H5Q_decode(const unsigned char **buf_ptr)
             {
                 size_t name_len;
                 char *name;
-
+                
                 H5Q_decode_memcpy(&name_len, sizeof(size_t), buf_ptr);
-                if (NULL == (name = H5MM_malloc(name_len)))
+                if (NULL == (name = (char *)H5MM_malloc(name_len)))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL,
                             "can't allocate value buffer");
                 H5Q_decode_memcpy(name, name_len, buf_ptr);
@@ -1086,13 +1089,14 @@ H5Q_decode(const unsigned char **buf_ptr)
                 char *name;
 
                 H5Q_decode_memcpy(&name_len, sizeof(size_t), buf_ptr);
-                if (NULL == (name = H5MM_malloc(name_len)))
+                if (NULL == (name = (char *)H5MM_malloc(name_len)))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL,
                             "can't allocate value buffer");
                 H5Q_decode_memcpy(name, name_len, buf_ptr);
                 query->query.select.elem.link_name.name = name;
             }
             break;
+            case H5Q_TYPE_MISC:
             default:
                 HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, NULL, "unsupported/unrecognized query type");
                 break;
@@ -1188,6 +1192,7 @@ H5Qapply(hid_t query_id, hbool_t *result, ...)
                 HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
         }
         break;
+        case H5Q_TYPE_MISC:
         default:
         {
             HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
@@ -1283,6 +1288,7 @@ H5Q_apply_combine(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem)
              case H5Q_COMBINE_OR:
                  *result = result1 || result2;
                  break;
+             case H5Q_SINGLETON:
              default:
                  HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized combine op")
                  break;
@@ -1346,6 +1352,7 @@ H5Q_apply(H5Q_t *query, hbool_t *result, ...)
                 HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply link name query");
             break;
         }
+        case H5Q_TYPE_MISC:
         default:
             HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
             break;
