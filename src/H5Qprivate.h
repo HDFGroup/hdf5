@@ -55,6 +55,7 @@ typedef struct H5Q_t H5Q_t;
 
 /* Combine query */
 struct H5Q_combine {
+    H5Q_type_t type; /* type */
     H5Q_combine_op_t op; /* op */
     H5Q_t *l_query; /* left op query */
     H5Q_t *r_query; /* right op query */
@@ -92,7 +93,8 @@ H5_DLL herr_t H5Q_init(void);
 H5_DLL H5Q_t *H5Q_create(H5Q_type_t query_type, H5Q_match_op_t match_op, ...);
 H5_DLL herr_t H5Q_close(H5Q_t *query);
 H5_DLL H5Q_t *H5Q_combine(H5Q_t *query1, H5Q_combine_op_t combine_op, H5Q_t *query2);
-H5_DLL herr_t H5Q_get_match_info(H5Q_t *query, H5Q_type_t *query_type, H5Q_match_op_t *match_op);
+H5_DLL herr_t H5Q_get_type(H5Q_t *query, H5Q_type_t *query_type);
+H5_DLL herr_t H5Q_get_match_op(H5Q_t *query, H5Q_match_op_t *match_op);
 H5_DLL herr_t H5Q_get_components(H5Q_t *query, H5Q_t **sub_query1, H5Q_t **sub_query2);
 H5_DLL herr_t H5Q_get_combine_op(H5Q_t *query, H5Q_combine_op_t *op_type);
 

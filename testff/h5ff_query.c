@@ -17,7 +17,7 @@ apply_elem(hid_t query, hbool_t *result, hid_t type_id, const void *value)
     if (op_type == H5Q_SINGLETON) {
         H5Q_type_t query_type;
 
-        H5Qget_match_info(query, &query_type, NULL);
+        H5Qget_type(query, &query_type);
         if (query_type != H5Q_TYPE_DATA_ELEM)
             fprintf(stderr, "Error, wrong query type\n");
         H5Qapply(query, result, type_id, value);

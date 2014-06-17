@@ -37,7 +37,8 @@ typedef enum H5Q_type_t {
     H5Q_TYPE_DATA_ELEM,  /* selects data elements */
     H5Q_TYPE_ATTR_VALUE, /* selects attribute values */
     H5Q_TYPE_ATTR_NAME,  /* selects attributes */
-    H5Q_TYPE_LINK_NAME   /* selects objects */
+    H5Q_TYPE_LINK_NAME,  /* selects objects */
+    H5Q_TYPE_MISC        /* (for combine queries) selects misc objects */
 } H5Q_type_t;
 
 /* Query match conditions */
@@ -70,7 +71,8 @@ extern "C" {
 H5_DLL hid_t H5Qcreate(H5Q_type_t query_type, H5Q_match_op_t match_op, ...);
 H5_DLL herr_t H5Qclose(hid_t query_id);
 H5_DLL hid_t H5Qcombine(hid_t query1_id, H5Q_combine_op_t combine_op, hid_t query2_id);
-H5_DLL herr_t H5Qget_match_info(hid_t query_id, H5Q_type_t *query_type, H5Q_match_op_t *match_op);
+H5_DLL herr_t H5Qget_type(hid_t query_id, H5Q_type_t *query_type);
+H5_DLL herr_t H5Qget_match_op(hid_t query_id, H5Q_match_op_t *match_op);
 H5_DLL herr_t H5Qget_components(hid_t query_id, hid_t *sub_query1_id, hid_t *sub_query2_id);
 H5_DLL herr_t H5Qget_combine_op(hid_t query_id, H5Q_combine_op_t *op_type);
 
