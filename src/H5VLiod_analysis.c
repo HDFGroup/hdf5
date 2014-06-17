@@ -66,6 +66,13 @@ herr_t H5VL__iod_combine(const char *combine_script,
                          size_t num_targets, hid_t data_type_id,
                          void **combine_data, size_t *combine_num_elmts,
                          hid_t *combine_data_type_id);
+
+static herr_t
+H5VL__iod_integrate(const char *integrate_script, void **combine_data,
+        size_t *combine_num_elmts, size_t count, hid_t *data_type_id,
+        void **integrate_data, size_t *integrate_num_elmts,
+        hid_t *integrate_data_type_id);
+
 #endif
 
 static herr_t H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs);
@@ -199,7 +206,26 @@ H5VL_iod_server_analysis_invoke_cb(AXE_engine_t UNUSED axe_engine,
                 HGOTO_ERROR_FF(FAIL, "can't obtain dset identifier");
         }
 
-        /* MSC - apply Integrate script */
+        /* Apply Integrate script */
+#if H5_EFF_DEBUG
+        fprintf(stderr, "(%d) Applying integrate on data\n", my_rank_g);
+#endif
+#ifdef H5_HAVE_PYTHON
+        if (integrate_script) {
+            void *integrate_data;
+            size_t integrate_num_elmts;
+            hid_t integrate_type_id;
+
+            if (H5VL__iod_integrate(integrate_script, combine_data, combine_num_elmts,
+                    reg_count, combine_type_id, &integrate_data,
+                    &integrate_num_elmts, &integrate_type_id) < 0)
+                HGOTO_ERROR_FF(FAIL, "can't integrate combine data");
+
+            /* TODO Do something with integrate data */
+
+            H5MM_free(integrate_data);
+        }
+#endif
 
         for(i=0 ; i<reg_count ; i++) {
             if(H5Dclose(dset_ids[i]) < 0)
@@ -650,6 +676,89 @@ H5VL__iod_combine(const char *combine_script, void **split_data, size_t *split_n
     /* Extract data from numpy array */
     if(FAIL == H5VL__iod_extract_numpy_array(po_numpy_array_combine, combine_data,
             combine_num_elmts, combine_data_type_id))
+        HGOTO_ERROR_FF(FAIL, "can't extract data from numpy array")
+
+done:
+    /* Cleanup */
+    //Py_XDECREF(po_func);
+    //Py_XDECREF(po_args_tup);
+    for(i = 0; i < count; i++) {
+        //Py_XDECREF(po_numpy_arrays + i);
+    }
+    //Py_XDECREF(po_numpy_array_combine);
+
+    return ret_value;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_integrate
+ *
+ * Purpose:
+ *
+ * Return:  Success:    SUCCEED
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL__iod_integrate(const char *integrate_script, void **combine_data,
+        size_t *combine_num_elmts, size_t count, hid_t *data_type_id,
+        void **integrate_data, size_t *integrate_num_elmts,
+        hid_t *integrate_data_type_id)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    PyObject *po_func = NULL, *po_numpy_arrays = NULL, *po_args_tup = NULL;
+    PyObject *po_numpy_array_integrate = NULL;
+    size_t i, k = 0;
+
+    if(!numpy_initialized) H5VL__iod_numpy_init();
+
+//    for(i = 0; i < count; i++) {
+//        if(0 != combine_num_elmts[i])
+//            count ++;
+//    }
+
+    /* Create numpy arrays */
+    if(NULL == (po_numpy_arrays = PyList_New((Py_ssize_t) count)))
+        HGOTO_ERROR_FF(FAIL, "can't create list of arrays")
+
+    for(i = 0; i < count; i++) {
+        PyObject *po_numpy_array = NULL;
+        int py_ret = 0;
+
+        if(0 != combine_num_elmts[i]) {
+            if(NULL == (po_numpy_array =
+                        H5VL__iod_create_numpy_array(combine_num_elmts[i],
+                                                     data_type_id[i],
+                                                     combine_data[i])))
+                HGOTO_ERROR_FF(FAIL, "can't create numpy array from data")
+
+            if(0 != (py_ret = PyList_SetItem(po_numpy_arrays, (Py_ssize_t) k, po_numpy_array)))
+                HGOTO_ERROR_FF(FAIL, "can't set item to array list")
+            k ++;
+        }
+    }
+
+    /* Load script */
+    if(NULL == (po_func = H5VL__iod_load_script(integrate_script, "integrate")))
+        HGOTO_ERROR_FF(FAIL, "can't load integrate script")
+
+    /* Check whether split is defined as function in given script */
+    if(0 == PyCallable_Check(po_func))
+        HGOTO_ERROR_FF(FAIL, "can't find combine function")
+
+    /* Get the input to function */
+    if(NULL == (po_args_tup = PyTuple_Pack(1, po_numpy_arrays)))
+        HGOTO_ERROR_FF(FAIL, "can't set input to combine function")
+
+    /* Invoke the integrate function */
+    if(NULL == (po_numpy_array_integrate = PyObject_CallObject(po_func, po_args_tup)))
+        HGOTO_ERROR_FF(FAIL, "returned NULL python object")
+
+    /* Extract data from numpy array */
+    if(FAIL == H5VL__iod_extract_numpy_array(po_numpy_array_integrate, integrate_data,
+            integrate_num_elmts, integrate_data_type_id))
         HGOTO_ERROR_FF(FAIL, "can't extract data from numpy array")
 
 done:
