@@ -796,8 +796,8 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
     size_t *split_num_elmts;
     hid_t split_type_id = FAIL;
     hg_request_t *hg_reqs = NULL;
-    uint32_t u;
-    unsigned int num_targets = obj_map->u_map.array_map.n_range;
+    uint32_t u, i;
+    unsigned int num_targets = num_ions_g;//obj_map->u_map.array_map.n_range;
     coords_t coords;
     analysis_farm_in_t farm_input;
     analysis_farm_out_t *farm_output = NULL;
@@ -823,10 +823,11 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
 
     coords.rank = H5Sget_simple_extent_ndims(region);
 
-#if 0
+#if 1
     /* Farm work to the IONs and combine the result */
     for(i=0 ; i<num_ions_g ; i++) {
         hid_t space_id;
+        hbool_t first_space = TRUE;
 
         /* Get all ranges that are on Node i into a dataspace */
         for(u = 0; u < obj_map->u_map.array_map.n_range ; u++) {
@@ -841,44 +842,106 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
                 if(FAIL == (space_layout = H5VL__iod_get_space_layout(coords, region)))
                     HGOTO_ERROR_FF(FAIL, "can't generate local dataspace selection");
 
-                if(0 == farm_input.num_cells) {
+                if(TRUE == first_space) {
                     space_id = H5Scopy(space_layout);
+                    if(space_id < 0)
+                        HGOTO_ERROR_FF(FAIL, "can't copy Dataspace");
+                    first_space = FALSE;
                 }
                 else {
-                    /* MSC - OR the space with the current one */
+                    if(H5Smodify_select(space_id, H5S_SELECT_OR, space_layout) < 0)
+                        HGOTO_ERROR_FF(FAIL, "Unable to OR 2 dataspace selections");
                 }
-
-                farm_input.num_cells += obj_map->u_map.array_map.array_range[u].n_cell;
 
                 if(H5Sclose(space_layout) < 0)
                     HGOTO_ERROR_FF(FAIL, "cannot close region");
             }
         }
 
-        if(farm_input.num_cells) {
-            farm_input.space_id = space_id;
-            farm_input.coh = cohs[i];
+        if(H5Smodify_select(space_id, H5S_SELECT_AND, region) < 0)
+            HGOTO_ERROR_FF(FAIL, "Unable to AND 2 dataspace selections");
 
+        farm_input.space_id = space_id;
+        farm_input.coh = cohs[i];
+
+        if(0 == H5Sget_select_npoints(farm_input.space_id)) {
+            hg_reqs[i] = HG_REQUEST_NULL;;
+            split_data[i] = NULL;
+            split_num_elmts[i] = 0;
+        }
+        else if (i == 0) {
+            /* Do a local split */
+            hg_reqs[i] = HG_REQUEST_NULL;
+            if(FAIL == H5VL__iod_farm_split(cohs[0], obj_map->oid, rtid, farm_input.space_id,
+                                            farm_input.type_id, split_script,
+                                            &split_data[i], &split_num_elmts[i], &split_type_id))
+                HGOTO_ERROR_FF(FAIL, "can't split in farmed job");
+        } else {
             /* forward the call to the target server */
-            if (i == 0) {
-                hg_reqs[i] = HG_REQUEST_NULL;
-                /* Do a local split */
-                if(FAIL == H5VL__iod_farm_split(cohs[0], obj_map->oid, rtid, space_layout,
-                                                farm_input.num_cells, farm_input.type_id, split_script,
-                                                &split_data[i], &split_num_elmts[i], &split_type_id))
-                    HGOTO_ERROR_FF(FAIL, "can't split in farmed job");
-            } else {
-                if(HG_Forward(server_addr_g[i], H5VL_EFF_ANALYSIS_FARM, &farm_input, 
-                              &farm_output[i], &hg_reqs[i]) < 0)
-                    HGOTO_ERROR_FF(FAIL, "failed to ship operation");
-            }
+            if(HG_Forward(server_addr_g[i], H5VL_EFF_ANALYSIS_FARM, &farm_input, 
+                          &farm_output[i], &hg_reqs[i]) < 0)
+                HGOTO_ERROR_FF(FAIL, "failed to ship operation");
+        }
 
-            if(H5Sclose(space_id) < 0)
-                HGOTO_ERROR_FF(FAIL, "cannot close region");
+        if(H5Sclose(space_id) < 0)
+            HGOTO_ERROR_FF(FAIL, "cannot close region");
+    }
+
+    for(i=0 ; i<num_ions_g ; i++) {
+        if (hg_reqs[i] == HG_REQUEST_NULL) {
+            /* No request / was local or empty */
+        } 
+        else {
+            analysis_transfer_in_t transfer_input;
+            analysis_transfer_out_t transfer_output;
+            hg_bulk_t bulk_handle;
+            size_t split_data_size;
+
+            /* Wait for the farmed work to complete */
+            if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
+                HGOTO_ERROR_FF(FAIL, "HG_Wait Failed");
+
+            if(0 != farm_output[i].num_elmts) {
+                /* Get split type ID and num_elemts 
+                   (all the arrays should have the same native type id) */
+                split_type_id = farm_output[i].type_id;
+                split_num_elmts[i] = farm_output[i].num_elmts;
+                split_data_size = split_num_elmts[i] * H5Tget_size(split_type_id);
+
+                if(NULL == (split_data[i] = malloc(split_data_size)))
+                    HGOTO_ERROR_FF(FAIL, "can't allocate farm buffer");
+
+                HG_Bulk_handle_create(1, &split_data[i], &split_data_size,
+                                      HG_BULK_READWRITE, &bulk_handle);
+
+                transfer_input.axe_id = farm_output[i].axe_id;
+                transfer_input.bulk_handle = bulk_handle;
+
+                /* forward a free call to the target server */
+                if(HG_Forward(server_addr_g[i], H5VL_EFF_ANALYSIS_FARM_TRANSFER,
+                              &transfer_input, &transfer_output, &hg_reqs[i]) < 0)
+                    HGOTO_ERROR_FF(FAIL, "failed to ship operation");
+
+                /* Wait for the farmed work to complete */
+                if(HG_Wait(hg_reqs[i], HG_MAX_IDLE_TIME, HG_STATUS_IGNORE) < 0)
+                    HGOTO_ERROR_FF(FAIL, "HG_Wait Failed");
+
+                /* Free bulk handle */
+                HG_Bulk_handle_free(bulk_handle);
+            }
+            else {
+                split_num_elmts[i] = 0;
+                split_data[i] = NULL;
+            }
+            /* Free Mercury request */
+            if(HG_Request_free(hg_reqs[i]) != HG_SUCCESS)
+                HGOTO_ERROR_FF(FAIL, "Can't Free Mercury Request");
         }
     }
+
 #endif
 
+#if 0
     /* farm work for a specific range on a specific node */
     for(u = 0; u < obj_map->u_map.array_map.n_range ; u++) {
         hid_t space_layout;
@@ -899,15 +962,21 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
         farm_input.space_id = space_layout;
         farm_input.coh = cohs[worker];
 
-        /* forward the call to the target server */
-        if (worker == 0) {
+        if(0 == H5Sget_select_npoints(farm_input.space_id)) {
+            hg_reqs[u] = HG_REQUEST_NULL;;
+            split_data[u] = NULL;
+            split_num_elmts[u] = 0;
+        }
+        else if (worker == 0) {
             hg_reqs[u] = HG_REQUEST_NULL;
             /* Do a local split */
             if(FAIL == H5VL__iod_farm_split(cohs[0], obj_map->oid, rtid, farm_input.space_id,
                                             farm_input.type_id, split_script,
                                             &split_data[u], &split_num_elmts[u], &split_type_id))
                 HGOTO_ERROR_FF(FAIL, "can't split in farmed job");
-        } else {
+        }
+        else {
+            /* forward the call to the target server */ 
             if(HG_Forward(server_addr_g[worker], H5VL_EFF_ANALYSIS_FARM, &farm_input, 
                           &farm_output[u], &hg_reqs[u]) < 0)
                 HGOTO_ERROR_FF(FAIL, "failed to ship operation");
@@ -921,7 +990,7 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
         int worker = obj_map->u_map.array_map.array_range[u].nearest_rank;
 
         if (hg_reqs[u] == HG_REQUEST_NULL) {
-            /* No request / was local */
+            /* No request / was local or empty */
         } 
         else {
             analysis_transfer_in_t transfer_input;
@@ -970,6 +1039,7 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
                 HGOTO_ERROR_FF(FAIL, "Can't Free Mercury Request");
         }
     }
+#endif
 
 #if H5_EFF_DEBUG 
     fprintf(stderr, "(%d) Applying combine on data\n", my_rank_g);

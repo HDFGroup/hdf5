@@ -12,7 +12,7 @@
 
 /* #define USE_NATIVE */
 
-#define NTUPLES 64
+#define NTUPLES 512
 
 static int my_rank = 0, my_size = 1;
 

@@ -402,7 +402,8 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                                                    hslabs[0].block) < 0)
                         HGOTO_ERROR_FF(FAIL, "Failed to retrieve hyperslab selection");
                     for(i=0 ; i<ndims ; i++) {
-                        hslabs[0].stride[i] = hslabs[0].block[i] * hslabs[0].stride[i];
+                        if(hslabs[0].stride[i] == 1)
+                            hslabs[0].stride[i] = hslabs[0].block[i];
                     }
                 }
             }
@@ -439,6 +440,17 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                         }
                     }
 
+#if 0
+                    fprintf(stderr, "Space contains %zu elements\n", 
+                            (size_t)H5Sget_select_npoints(space_id));
+                    for(n=0 ; n<num_descriptors ; n++) {
+                        for(i=0 ; i<ndims ; i++) {
+                            fprintf(stderr, "DIMS %d: %zu %zu %zu %zu\n", i,
+                                    (size_t)hslabs[n].start[i],(size_t)hslabs[n].count[i],
+                                    (size_t)hslabs[n].block[i],(size_t)hslabs[n].stride[i]);
+                        }
+                    }
+#endif
                     free(blocks);
                 }
             }

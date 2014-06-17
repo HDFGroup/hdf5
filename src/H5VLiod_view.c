@@ -433,9 +433,15 @@ H5VL__iod_apply_query(hid_t file_id, hid_t rcxt_id, hid_t qid, hid_t vcpl_id,
     if(H5Qget_combine_op(qid, &comb_type) < 0)
         HGOTO_ERROR_FF(FAIL, "can't get query op type");
 
-    if(H5Q_SINGLETON == comb_type) {
-        if(H5Qget_match_info(qid, &q_type, &match_op) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't get query info");
+    if(H5Qget_type(qid, &q_type) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't get query op type");
+
+    if(H5Q_SINGLETON == comb_type || 
+       q_type == H5Q_TYPE_DATA_ELEM ||
+       q_type == H5Q_TYPE_ATTR_VALUE) {
+
+        //if(H5Qget_match_info(qid, &q_type, &match_op) < 0)
+        //HGOTO_ERROR_FF(FAIL, "can't get query info");
 
         if(H5Q_TYPE_DATA_ELEM == q_type) {
             if(H5I_DATASET == obj_type) {
@@ -473,7 +479,6 @@ H5VL__iod_apply_query(hid_t file_id, hid_t rcxt_id, hid_t qid, hid_t vcpl_id,
                     *result = QTRUE;
                     *region = sid;
                 }
-
                 else {
                     if(H5Sclose(sid) < 0)
                         HGOTO_ERROR_FF(FAIL, "unable to release dataspace");
@@ -1020,15 +1025,16 @@ H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim,
 {
     H5VL__iod_get_query_data_t *udata = (H5VL__iod_get_query_data_t *)_udata;
     hbool_t result = FALSE;
+    unsigned i;
     herr_t ret_value = SUCCEED;
 
     /* Apply the query */
-    if(H5Qapply(udata->query_id, &result, type_id, elem) < 0)
+    if(H5Qapply_combine(udata->query_id, &result, type_id, elem) < 0)
         HGOTO_ERROR_FF(FAIL, "unable to apply query to data element");
 
     /* If element satisfies query, add it to the selection */
     if (result) {
-        hsize_t count[H5S_MAX_RANK], i;
+        hsize_t count[H5S_MAX_RANK];
 #if 0
         fprintf(stderr, "(%d) Element [", my_rank_g);
         for(i=0; i<ndim; i++)

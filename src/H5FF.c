@@ -49,6 +49,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Qprivate.h"		/* Query        			*/
 #include "H5Tpkg.h"             /* Datatype access			*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod.h"		/* IOD plugin - tmp      		*/
@@ -70,7 +71,8 @@
 /********************/
 /* Local Prototypes */
 /********************/
-
+static herr_t H5D__apply_index_query(void *idx_handle, H5X_class_t *idx_class, 
+                                     hid_t query_id, hid_t xxpl_id, hid_t *space_id);
 
 /*********************/
 /* Package Variables */
@@ -5021,7 +5023,6 @@ hid_t
 H5Dquery_ff(hid_t dset_id, hid_t query_id, hid_t scope_id, hid_t rcxt_id)
 {
     void *dset = NULL;
-    H5P_genplist_t *xxpl_plist = NULL, *plist = NULL; /* Property list pointer */
     hid_t xxpl_id = FAIL;
     unsigned plugin_id;
     void *buf = NULL;
@@ -5040,6 +5041,7 @@ H5Dquery_ff(hid_t dset_id, hid_t query_id, hid_t scope_id, hid_t rcxt_id)
     if (H5X_PLUGIN_NONE != (plugin_id = H5VL_iod_dataset_get_index_plugin_id(dset))) {
         void *idx_handle = NULL; /* index */
         H5X_class_t *idx_class = NULL;
+        H5P_genplist_t *xxpl_plist = NULL, *plist = NULL; /* Property list pointer */
 
         if (NULL == (idx_handle = H5VL_iod_dataset_get_index(dset)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index handle from dataset");
@@ -5059,7 +5061,8 @@ H5Dquery_ff(hid_t dset_id, hid_t query_id, hid_t scope_id, hid_t rcxt_id)
 
         if (NULL == idx_class->query)
             HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin query callback is not defined");
-        if (FAIL == idx_class->query(idx_handle, query_id, xxpl_id, &ret_value))
+
+        if(FAIL == H5D__apply_index_query(idx_handle, idx_class, query_id, xxpl_id, &ret_value))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot query index");
     }
     else 
@@ -5097,7 +5100,7 @@ H5Dquery_ff(hid_t dset_id, hid_t query_id, hid_t scope_id, hid_t rcxt_id)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't read data from dataset");
 
         if(FAIL == (udata.space_query = H5Scopy(space_id)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy dataspace")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy dataspace")
         if(H5Sselect_none(udata.space_query) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
@@ -5129,5 +5132,63 @@ done:
     }
 
     FUNC_LEAVE_API(ret_value)
+}
+
+static herr_t
+H5D__apply_index_query(void *idx_handle, H5X_class_t *idx_class, hid_t query_id, 
+                       hid_t xxpl_id, hid_t *space_id)
+{
+    H5Q_combine_op_t comb_type;
+    H5Q_type_t q_type;
+    herr_t ret;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    if(H5Qget_combine_op(query_id, &comb_type) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't get query op type");
+
+    if(H5Qget_type(query_id, &q_type) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't get query op type");
+
+    if(H5Q_SINGLETON == comb_type) {
+        if (FAIL == idx_class->query(idx_handle, query_id, xxpl_id, space_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot query index");
+    }
+    else {
+        hid_t qid1, qid2;
+        hid_t sid1 = FAIL , sid2 = FAIL;
+
+        if(H5Qget_components(query_id, &qid1, &qid2) < 0)
+            HGOTO_ERROR_FF(FAIL, "can't get query components");
+
+        ret = H5D__apply_index_query(idx_handle, idx_class, qid1, xxpl_id, &sid1);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "Error applying index query");
+
+        ret = H5D__apply_index_query(idx_handle, idx_class, qid2, xxpl_id, &sid2);
+        if(ret != 0)
+            HGOTO_ERROR_FF(ret, "Error applying index query");
+
+        /* combine result1 and result2 */
+        if(H5Q_COMBINE_AND == comb_type) {
+            if(FAIL == (*space_id = H5Scombine_select(sid1, H5S_SELECT_AND, sid2)))
+                HGOTO_ERROR_FF(ret, "Unable to AND 2 dataspace selections");
+        }
+        else if(H5Q_COMBINE_OR == comb_type) {
+            if(FAIL == (*space_id = H5Scombine_select(sid1, H5S_SELECT_OR, sid2)))
+                HGOTO_ERROR_FF(ret, "Unable to AND 2 dataspace selections");
+        }
+        else
+            HGOTO_ERROR_FF(FAIL, "invalid query combine OP");
+
+        if(sid1!=FAIL && H5Sclose(sid1) < 0)
+            HGOTO_ERROR_FF(FAIL, "unable to release dataspace");
+        if(sid2!=FAIL && H5Sclose(sid2) < 0)
+            HGOTO_ERROR_FF(FAIL, "unable to release dataspace");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5_HAVE_EFF */
