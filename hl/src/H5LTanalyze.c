@@ -917,14 +917,6 @@ hbool_t        first_quote = 1;
 #define INITIAL 0
 #define TAG_STRING 1
 
-#ifndef YY_NO_UNISTD_H
-/* Special case for "unistd.h", since it is non-ANSI. We include it way
- * down here because we want the user's section 1 to have been scanned first.
- * The user has a chance to override it with an option.
- */
-#include <unistd.h>
-#endif
-
 #ifndef YY_EXTRA_TYPE
 #define YY_EXTRA_TYPE void *
 #endif
@@ -1098,7 +1090,7 @@ YY_DECL
 #line 72 "H5LTanalyze.l"
 
 
-#line 1102 "H5LTanalyze.c"
+#line 1094 "H5LTanalyze.c"
 
 	if ( !(yy_init) )
 		{
@@ -1548,7 +1540,7 @@ YY_RULE_SETUP
 #line 174 "H5LTanalyze.l"
 ECHO;
 	YY_BREAK
-#line 1552 "H5LTanalyze.c"
+#line 1544 "H5LTanalyze.c"
 			case YY_STATE_EOF(INITIAL):
 			case YY_STATE_EOF(TAG_STRING):
 				yyterminate();

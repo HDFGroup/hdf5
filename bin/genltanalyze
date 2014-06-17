@@ -48,7 +48,7 @@ cd hl/src
 echo "Generate hl/src/H5LTparse.c from hl/src/H5LTparse.y"
 bison -pH5LTyy -o H5LTparse.c -d H5LTparse.y
 echo "Generate hl/src/H5LTanalyze.c from hl/src/H5LTanalyze.l"
-flex -PH5LTyy -oH5LTanalyze.c H5LTanalyze.l
+flex --nounistd -PH5LTyy -oH5LTanalyze.c H5LTanalyze.l
 cd ../..
 
 exit 0
