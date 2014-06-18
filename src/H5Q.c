@@ -615,6 +615,7 @@ H5Qget_type(hid_t query_id, H5Q_type_t *query_type)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Qt", query_id, query_type);
 
     /* Check args and get the query objects */
     if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
@@ -678,6 +679,7 @@ H5Qget_match_op(hid_t query_id, H5Q_match_op_t *match_op)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Qm", query_id, match_op);
 
     /* Check args and get the query objects */
     if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
