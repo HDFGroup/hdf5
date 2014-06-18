@@ -24,6 +24,7 @@
 #include "H5public.h"
 #include "H5Apublic.h"		/* Attributes				*/
 #include "H5ACpublic.h"		/* Metadata cache			*/
+#include "H5ASpublic.h"		/* Analysis shipping			*/
 #include "H5Dpublic.h"		/* Datasets				*/
 #include "H5Epublic.h"		/* Errors				*/
 #include "H5ESpublic.h"		/* Event Stacks				*/
@@ -41,10 +42,10 @@
 #include "H5RCpublic.h"		/* Read Contexts			*/
 #include "H5Spublic.h"		/* Dataspaces				*/
 #include "H5Tpublic.h"		/* Datatypes				*/
-#include "H5TRpublic.h"		/* Transcations 			*/
-#include "H5Vpublic.h"      /* Views */
+#include "H5TRpublic.h"		/* Transactions 			*/
+#include "H5Vpublic.h"		/* Views				*/
 #ifdef H5_HAVE_INDEXING
-#include "H5Xpublic.h"      /* Index plugins */
+#include "H5Xpublic.h"		/* Index plugins			*/
 #endif
 #include "H5Zpublic.h"		/* Data filters				*/
 #include "H5VLpublic.h"		/* VOL plugins			        */
