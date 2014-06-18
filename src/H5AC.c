@@ -2592,6 +2592,137 @@ done:
 
 
 /*************************************************************************/
+/*************************** Debugging Functions: ************************/
+/*************************************************************************/
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_get_entry_ptr_from_addr()
+ *
+ * Purpose:     Debugging function that attempts to look up an entry in the
+ *              cache by its file address, and if found, returns a pointer
+ *              to the entry in *entry_ptr_ptr.  If the entry is not in the
+ *              cache, *entry_ptr_ptr is set to NULL.
+ *
+ *              WARNING: This call should be used only in debugging
+ *                       routines, and it should be avoided when
+ *                       possible.
+ *
+ *                       Further, if we ever multi-thread the cache,
+ *                       this routine will have to be either discarded
+ *                       or heavily re-worked.
+ *
+ *                       Finally, keep in mind that the entry whose
+ *                       pointer is obtained in this fashion may not
+ *                       be in a stable state.
+ *
+ *              Note that this function is only defined if NDEBUG
+ *              is not defined.
+ *
+ *              As heavy use of this function is almost certainly a
+ *              bad idea, the metadata cache tracks the number of
+ *              successful calls to this function, and (if 
+ *              H5C_DO_SANITY_CHECKS is defined) displays any
+ *              non-zero count on cache shutdown.
+ *
+ *		This function is just a wrapper that calls the H5C 
+ *		version of the function.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  John Mainzer, 5/30/14
+ *
+ * Changes:
+ *
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifndef NDEBUG
+herr_t
+H5AC_get_entry_ptr_from_addr(const H5F_t *f,
+                             haddr_t   addr,
+                             void ** entry_ptr_ptr)
+{
+    herr_t              ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if ( H5C_get_entry_ptr_from_addr(f, addr, entry_ptr_ptr) < 0 )
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5C_get_entry_ptr_from_addr() failed.")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_get_entry_ptr_from_addr() */
+
+#endif /* NDEBUG */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_verify_entry_type()
+ *
+ * Purpose:     Debugging function that attempts to look up an entry in the
+ *              cache by its file address, and if found, test to see if its
+ *              type field contains the expected value.
+ *
+ *              If the specified entry is in cache, *in_cache_ptr is set
+ *              to TRUE, and *type_ok_ptr is set to TRUE or FALSE
+ *              depending on whether the entries type field matches the
+ *              expected_type parameter
+ *
+ *              If the target entry is not in cache, *in_cache_ptr is
+ *              set to FALSE, and *type_ok_ptr is undefined.
+ *
+ *              Note that this function is only defined if NDEBUG
+ *              is not defined.
+ *
+ *		This function is just a wrapper that calls the H5C 
+ *		version of the function.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  John Mainzer, 5/30/14
+ *
+ * Changes:
+ *
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifndef NDEBUG
+herr_t
+H5AC_verify_entry_type(const H5F_t *f,
+                       haddr_t   addr,
+                       const H5AC_class_t * expected_type,
+                       hbool_t * in_cache_ptr,
+                       hbool_t * type_ok_ptr)
+{
+    herr_t              ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if ( H5C_verify_entry_type(f, addr, (const H5C_class_t *)expected_type,
+                               in_cache_ptr, type_ok_ptr) < 0 )
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5C_verify_entry_type() failed.")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_verify_entry_type() */
+
+#endif /* NDEBUG */
+
+
+
+/*************************************************************************/
 /**************************** Private Functions: *************************/
 /*************************************************************************/
 

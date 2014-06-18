@@ -384,6 +384,13 @@ struct H5HF_indirect_t {
     size_t      rc;             /* Reference count of objects using this block */
     H5HF_hdr_t	*hdr;	        /* Shared heap header info	              */
     struct H5HF_indirect_t *parent;	/* Shared parent indirect block info  */
+    struct H5HF_indirect_t 
+		*fd_parent;	/* Saved copy of the parent pointer -- this   */
+				/* necessary as the parent field is sometimes */
+				/* nulled out before the eviction notify call */
+				/* is made from the metadata cache.  Since    */
+				/* this call cancels flush dependencies, it   */
+				/* needs this information.		      */
     unsigned    par_entry;      /* Entry in parent's table                    */
     haddr_t     addr;           /* Address of this indirect block on disk     */
     size_t      size;           /* Size of indirect block on disk             */
@@ -407,6 +414,12 @@ typedef struct H5HF_direct_t {
     /* Internal heap information */
     H5HF_hdr_t	*hdr;	        /* Shared heap header info	              */
     H5HF_indirect_t *parent;	/* Shared parent indirect block info          */
+    H5HF_indirect_t *fd_parent;	/* Saved copy of the parent pointer -- this   */
+				/* necessary as the parent field is sometimes */
+				/* nulled out before the eviction notify call */
+				/* is made from the metadata cache.  Since    */
+				/* this call cancels flush dependencies, it   */
+				/* needs this information.		      */
     unsigned    par_entry;      /* Entry in parent's table                    */
     size_t      size;           /* Size of direct block                       */
     hsize_t     file_size;      /* Size of direct block in file (only valid when block's space is being freed) */
