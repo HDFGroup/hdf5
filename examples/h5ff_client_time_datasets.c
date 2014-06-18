@@ -1,9 +1,9 @@
 /* 
- * h5ff_time_datasets.c: Do timings of various write / persist / prefetch / read operations for datasets
+ * h5ff_time_datasets2.c: Do timings of various write / persist / prefetch / read operations for datasets
  * 
  *    /DL is dataset that is read back from transaction logs in BB
- *    /DP is dataset that is read back from prefetched replica in BB  [optional, based on runtime param]
- *    /DS is dataset that is read back from stored data (DAOS)        [optional, based on runtime param]
+ *    /DP is dataset that is read back from prefetched replica in BB  
+ *    /DS is dataset that is read back from stored data (DAOS)       
  */
 
 #include <stdio.h>
@@ -15,12 +15,19 @@
 #include "hdf5.h"
 
 /* define filename for this app, and max size after username prepended */
-#define FILENAME_APP "eff_time_datasets.h5"
+#define FILENAME_APP "eff_time_datasets2.h5"
 #define FILENAME_SIZE 256
 
 /* define default sizing parameters - can be changed via command line arguments */
-#define DEFAULT_ROWS_PER_RANK 10
-#define DEFAULT_COLS_PER_ROW 5
+//#define DEFAULT_COLS_PER_ROW 131072       /*  = 1 MiB/row => ( 1024*1024 /8 bytes per cell) */
+//#define DEFAULT_ROWS_PER_WRITE 2          /*  = 2 MiB writes with 1MiB/row */
+//#define DEFAULT_ROWS_PER_READ 2           /*  = 2 MiB writes with 1MiB/row */
+//#define DEFAULT_ROWS_PER_RANK 5120        /*  = 5 GiB/rank with 1MiB/row */
+/* Sized for testing - with verbose */
+#define DEFAULT_COLS_PER_ROW 6
+#define DEFAULT_ROWS_PER_WRITE 2  
+#define DEFAULT_ROWS_PER_READ 1  
+#define DEFAULT_ROWS_PER_RANK 4 
 
 /* macros related to error reporting */
 #define STATUS (ret >= 0) ? " " : " - FAILED"
@@ -28,12 +35,17 @@
 
 /* option flags */
 int cols_per_row = DEFAULT_COLS_PER_ROW;
+int rows_per_write = DEFAULT_ROWS_PER_WRITE;      
+int rows_per_read = DEFAULT_ROWS_PER_READ;      
 int rows_per_rank = DEFAULT_ROWS_PER_RANK;      
+
 int logged_dset = 0;             /* Create DL - defaults to no (unless neither DP nor DS are created ) */
 int prefetched_dset = 0;         /* Create DP - defaults to no */
 int stored_dset = 0;             /* Create DS - defaults to no */
 int num_iterations = 1;          /* Number of times to perform the commit/persist/evict/prefetch/read/evict cycle */
+int persist_rate = 1;            /* Rate at which transactions are persisted */
 int enable_checksums = 0;        /* Enable checksums on raw data - defaults to no */
+int detailed_timing = 0;         /* Print detailed timing information for each write & read - defaults to no */
 int verbose = 0;                 /* Verbose output - defaults to no */
 
 /* global variables and macros used to make timing easier */
@@ -44,6 +56,7 @@ struct timeval tv_end;
 #define ELAPSED_TIME (ulong)( (tv_end.tv_usec + 1000000*tv_end.tv_sec) - (tv_start.tv_usec + 1000000*tv_start.tv_sec) ) 
 
 /* function prototypes */
+void fill_stats( int*, ulong*, ulong*, ulong*, ulong );
 void print_container_contents( hid_t, hid_t, int );
 int  parse_options( int, char**, int, int );
 void usage( const char* );
@@ -61,10 +74,11 @@ int main( int argc, char **argv ) {
    hid_t  fapl_id;         
    hid_t  file_id;
 
-   /* Dataspaces */
+   /* Dataspaces and hyperslab selection parameters */
    hid_t    space_l_id;
    hid_t    space_p_id;
    hid_t    space_s_id;
+   hsize_t  rank_offset[2], rank_count[2];
 
    /* Datasets */
    hid_t    dset_l_id;
@@ -92,13 +106,12 @@ int main( int argc, char **argv ) {
    hid_t    trspl_id;
    int      num_tr_leaders;
 
-   /* Memory buffer - sized to hold complete DS or Map Values; sometimes partially used */
+   /* Memory buffer to hold data for 1 rank and memory hyperslab selection parameters */
    uint64_t *mbuf;
-
-   /* Sizing, dataspace, hyperslab parameters set per-rank */
-   hsize_t  rank_mbuf_size[1];
-   hsize_t  rank_offset[2], rank_count[2];
-   hid_t    rank_space_id;
+   uint64_t mbuf_offset;
+   hsize_t  mbuf_size[1];
+   hid_t    mem_space_id;
+   hsize_t  mem_offset[1], mem_count[1];
 
    /* Variables used for reading data written by a neighbor rank */
    int      neighbor_rank;
@@ -110,13 +123,17 @@ int main( int argc, char **argv ) {
    /* Misc */
    herr_t   ret;
    uint64_t u, r, c;
-   uint64_t bytesPerCell, bytesPerRank, bytesPerDataset, bytesPerContainer;
-   double   megabytesPerRank, megabytesPerDataset, megabytesPerContainer;
+   uint64_t bytesPerCell, bytesPerWrite, bytesPerRead, bytesPerRank, bytesPerDataset, bytesPerContainer;
+   double   megabytesPerWrite, megabytesPerRead, megabytesPerRank, megabytesPerDataset, megabytesPerContainer;
+   int      rows_transferred;
    ulong    elapsed_time;
    double   rate;
+   ulong    e_min, e_max, e_sum;
+   int      cnt;
    
    int      i;
    int      iteration;
+   int      iter_since_last_persist;
 
    /****
     * Initialize and create container
@@ -139,9 +156,12 @@ int main( int argc, char **argv ) {
    }    
    if ( my_rank == 0 ) {
       fprintf( stderr, "APP-r%d: Number of MPI processes = %d\n", my_rank, comm_size );
-      fprintf( stderr, "APP-r%d: Datasets will have %d rows (%d per rank).\n", my_rank, (rows_per_rank*comm_size), rows_per_rank );
       fprintf( stderr, "APP-r%d: Datasets will have %d columns.\n", my_rank, cols_per_row );
+      fprintf( stderr, "APP-r%d: Datasets will be written %d rows at a time.\n", my_rank, rows_per_write );
+      fprintf( stderr, "APP-r%d: Datasets will be read %d rows at a time.\n", my_rank, rows_per_read );
+      fprintf( stderr, "APP-r%d: Datasets will have %d rows (%d per rank).\n", my_rank, (rows_per_rank*comm_size), rows_per_rank );
       fprintf( stderr, "APP-r%d: There will be %d iterations.\n", my_rank, num_iterations );
+      fprintf( stderr, "APP-r%d: Persists will occur every %d iterations.\n", my_rank, persist_rate );
       if ( ( prefetched_dset==0 ) && ( stored_dset==0 ) ) {       /* Make sure something is created! */
          logged_dset = 1;
       }
@@ -170,7 +190,9 @@ int main( int argc, char **argv ) {
 
    /* Create the memory buffer that will be used in many places - both for writing and reading */
    bytesPerCell = sizeof( uint64_t );
-   bytesPerRank = bytesPerCell * rows_per_rank * cols_per_row;          /* Bytes written by 1 rank to each dset */
+   bytesPerWrite = bytesPerCell * rows_per_write * cols_per_row;        /* Bytes written in a single operation*/
+   bytesPerRead = bytesPerCell * rows_per_read * cols_per_row;          /* Bytes read in a single operations */
+   bytesPerRank = bytesPerCell * rows_per_rank * cols_per_row;          /* Bytes per rank to each dset */
    bytesPerDataset = bytesPerRank * comm_size;                          /* Bytes written by all ranks to each dset */
    bytesPerContainer = bytesPerDataset;                                 /* Bytes written by all ranks to all dsets */
    if ( prefetched_dset ) {
@@ -180,19 +202,29 @@ int main( int argc, char **argv ) {
       bytesPerContainer += bytesPerDataset;
    }
 
+   megabytesPerWrite = (double)bytesPerWrite/(1024*1024);
+   megabytesPerRead = (double)bytesPerRead/(1024*1024);
    megabytesPerRank = (double)bytesPerRank/(1024*1024);
    megabytesPerDataset = (double)bytesPerDataset/(1024*1024);
    megabytesPerContainer = (double)bytesPerContainer/(1024*1024);
 
    if ( my_rank == 0 ) {
-      fprintf( stderr, "APP-r%d: MB per Rank = %f\n", my_rank, megabytesPerRank );
-      fprintf( stderr, "APP-r%d: MB per Dataset = %f\n", my_rank, megabytesPerDataset );
-      fprintf( stderr, "APP-r%d: MB per Container = %f\n", my_rank, megabytesPerContainer );
+      fprintf( stderr, "APP-r%d: Bytes per Cell = %lu\n", my_rank, bytesPerCell );
+      fprintf( stderr, "APP-r%d: Bytes per Write  = %lu\n", my_rank, bytesPerWrite );
+      fprintf( stderr, "APP-r%d: Bytes per Read  = %lu\n", my_rank, bytesPerRead );
+      fprintf( stderr, "APP-r%d: Bytes per Rank  = %lu\n", my_rank, bytesPerRank );
+      fprintf( stderr, "APP-r%d: Bytes per Dataset  = %lu\n", my_rank, bytesPerDataset );
+      fprintf( stderr, "APP-r%d: Bytes per Container  = %lu\n", my_rank, bytesPerContainer );
+      fprintf( stderr, "APP-r%d: MiB per Write = %f\n", my_rank, megabytesPerWrite );
+      fprintf( stderr, "APP-r%d: MiB per Read = %f\n", my_rank, megabytesPerRead );
+      fprintf( stderr, "APP-r%d: MiB per Rank = %f\n", my_rank, megabytesPerRank );
+      fprintf( stderr, "APP-r%d: MiB per Dataset = %f\n", my_rank, megabytesPerDataset );
+      fprintf( stderr, "APP-r%d: MiB per Container = %f\n", my_rank, megabytesPerContainer );
    }
 
-   mbuf = (uint64_t *) calloc( bytesPerContainer, 1 );
+   mbuf = (uint64_t *) calloc( bytesPerRank, 1 );
    if ( mbuf == NULL ) {
-      fprintf( stderr, "APP-r%d: calloc failed when trying to allocate %lu bytes\n", my_rank, bytesPerContainer );
+      fprintf( stderr, "APP-r%d: calloc failed when trying to allocate %lu bytes\n", my_rank, bytesPerRank );
       exit( -1 );
    }
 
@@ -296,7 +328,7 @@ int main( int argc, char **argv ) {
       neighbor_rank = 0;
    }
 
-   /* Get the dataspaces for the three datasets and make a copy of each */
+   /* Get the dataspaces for the three datasets and make a copy of each for neighbor's */
    if ( logged_dset ) {
       space_l_id = H5Dget_space( dset_l_id ); assert ( space_l_id >= 0 );
       neighbor_space_l_id = H5Scopy( space_l_id );
@@ -310,35 +342,10 @@ int main( int argc, char **argv ) {
       neighbor_space_s_id = H5Scopy( space_s_id );
    }
 
-   /* Select the hyperslab that this rank will update and the hyperslab for reading neighbor's data */
-   rank_offset[0] = my_rank * rows_per_rank;
-   rank_offset[1] = 0;
-   rank_count[0] = rows_per_rank;
-   rank_count[1] = cols_per_row;
 
-   neighbor_offset[0] = neighbor_rank * rows_per_rank;
-   neighbor_offset[1] = 0;
-   neighbor_count[0] = rows_per_rank;
-   neighbor_count[1] = cols_per_row;
-
-   if ( logged_dset ) {
-      ret = H5Sselect_hyperslab( space_l_id, H5S_SELECT_SET, rank_offset, NULL, rank_count, NULL );  ASSERT_RET;
-      ret = H5Sselect_hyperslab( neighbor_space_l_id, H5S_SELECT_SET, neighbor_offset, NULL, neighbor_count, NULL );  ASSERT_RET;
-   }
-
-   if ( prefetched_dset ) { 
-      ret = H5Sselect_hyperslab( space_p_id, H5S_SELECT_SET, rank_offset, NULL, rank_count, NULL );  ASSERT_RET;
-      ret = H5Sselect_hyperslab( neighbor_space_p_id, H5S_SELECT_SET, neighbor_offset, NULL, neighbor_count, NULL );  ASSERT_RET;
-   }
-
-   if ( stored_dset ) {
-      ret = H5Sselect_hyperslab( space_s_id, H5S_SELECT_SET, rank_offset, NULL, rank_count, NULL );  ASSERT_RET;
-      ret = H5Sselect_hyperslab( neighbor_space_s_id, H5S_SELECT_SET, neighbor_offset, NULL, neighbor_count, NULL );  ASSERT_RET;
-   }
-
-   /* Create the memory dataspace for a rank - always first part of memory buffer */
-   rank_mbuf_size[0] = rows_per_rank * cols_per_row;
-   rank_space_id = H5Screate_simple( 1, rank_mbuf_size, rank_mbuf_size ); assert( rank_space_id >= 0 );
+   /* Create the memory dataspace for one rank worth of data */
+   mbuf_size[0] = rows_per_rank * cols_per_row;
+   mem_space_id = H5Screate_simple( 1, mbuf_size, mbuf_size ); assert( mem_space_id >= 0 );
 
    /* Create property lists that will be used */
    if ( logged_dset ) {
@@ -368,7 +375,9 @@ int main( int argc, char **argv ) {
       }
    }
 
-   for ( iteration = 0; iteration < num_iterations; iteration++ ) {
+   iter_since_last_persist = 0;
+
+   for ( iteration = 1; iteration <= num_iterations; iteration++ ) {
 
       /**** 
        *  Cycle of:
@@ -394,47 +403,147 @@ int main( int argc, char **argv ) {
       u = 0;
       for ( r = 0; r < rows_per_rank; r++ ) {
          for ( c = 0; c < cols_per_row; c++ ) {
-            mbuf[u] = ((my_rank*rows_per_rank)+r)*1000000 + c*100 + tr_num;
+            mbuf[u] = ( my_rank*10000 + r*1000 + c*100 + tr_num ) ;
             u++;
          }
       }
-
+   
       fprintf( stderr, "APP-r%d: iter %05d tr %lu - Add updates to transaction.\n", my_rank, iteration, tr_num );
 
       /* Add dataset updates to transaction */
       if ( logged_dset ) {
-         START_TIME;
-         ret = H5Dwrite_ff( dset_l_id, H5T_NATIVE_UINT64, rank_space_id, space_l_id, dxpl_l_id, mbuf, tr_id, H5_EVENT_STACK_NULL ); 
-         ASSERT_RET;
-         END_TIME;
-         elapsed_time = ELAPSED_TIME;
-         rate = megabytesPerRank/((double)elapsed_time/1000000);
-         fprintf( stderr, "APP-r%d: iter %05d step 01: Time to add Write updates for /DL (%lu bytes): %lu usec - %f MB/sec\n", 
-                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
+         cnt = e_min = e_max = e_sum = 0;
+         /* Set parameters that will be used to select the initial hyperslabs for this rank */
+         mem_offset[0] = 0;
+         mem_count[0] = rows_per_write * cols_per_row;
+         mbuf_offset = 0;
+         rank_offset[0] = my_rank * rows_per_rank;
+         rank_offset[1] = 0;
+         rank_count[0] = rows_per_write;
+         rank_count[1] = cols_per_row;
+         rows_transferred = 0;
+
+         while ( (rows_transferred+rows_per_write)  <= rows_per_rank ) {        /* final rows left unfilled if not exact multiple */
+            /* Select the hyperslabs for this write */
+            ret = H5Sselect_hyperslab( mem_space_id, H5S_SELECT_SET, mem_offset, NULL, mem_count, NULL ); ASSERT_RET;
+            ret = H5Sselect_hyperslab( space_l_id, H5S_SELECT_SET, rank_offset, NULL, rank_count, NULL );  ASSERT_RET;
+
+            START_TIME;
+            ret = H5Dwrite_ff( dset_l_id, H5T_NATIVE_UINT64, mem_space_id, space_l_id, dxpl_l_id, &mbuf[mbuf_offset], 
+                               tr_id, H5_EVENT_STACK_NULL ); 
+            ASSERT_RET;
+            END_TIME;
+            elapsed_time = ELAPSED_TIME;
+            fill_stats( &cnt, &e_min, &e_max, &e_sum, elapsed_time );
+            if ( detailed_timing ) {
+               rate = megabytesPerWrite/((double)elapsed_time/1000000);
+               fprintf( stderr, 
+                        "APP-r%d: iter %05d step 01: Time to add Write updates for /DL (%lu bytes): %lu usec - %f MiB/sec\n", 
+                        my_rank, iteration, bytesPerWrite, elapsed_time, rate );
+            }
+
+            /* Advance in preparation for next write */
+            rows_transferred += rows_per_write;
+            rank_offset[0] += rows_per_write;
+            mem_offset[0] += ( rows_per_write * cols_per_row );
+            mbuf_offset += ( rows_per_write * cols_per_row );
+         }
+         if ( cnt > 0 ) {
+            rate = megabytesPerWrite/((double)(e_sum/cnt)/1000000);
+            fprintf( stderr, 
+                     "APP-r%d: iter %05d step 01: Average Time to add Write updates for /DL (%lu bytes): Min: %lu usec; Max: %lu usec; Avg: %lu usec - Avg %f MiB/sec\n", 
+                     my_rank, iteration, bytesPerWrite, e_min, e_max, e_sum/cnt, rate );
+         }
       }
-
+   
       if ( prefetched_dset ) {
-         START_TIME;
-         ret = H5Dwrite_ff( dset_p_id, H5T_NATIVE_UINT64, rank_space_id, space_p_id, dxpl_p_id, mbuf, tr_id, 
-                            H5_EVENT_STACK_NULL ); 
-         ASSERT_RET;
-         END_TIME;
-         elapsed_time = ELAPSED_TIME;
-         rate = megabytesPerRank/((double)elapsed_time/1000000);
-         fprintf( stderr, "APP-r%d: iter %05d step 02: Time to add Write updates for /DP (%lu bytes): %lu usec - %f MB/sec\n", 
-                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
-     }
+         cnt = e_min = e_max = e_sum = 0;
+         /* Set parameters that will be used to select the initial hyperslabs for this rank */
+         mem_offset[0] = 0;
+         mem_count[0] = rows_per_write * cols_per_row;
+         mbuf_offset = 0;
+         rank_offset[0] = my_rank * rows_per_rank;
+         rank_offset[1] = 0;
+         rank_count[0] = rows_per_write;
+         rank_count[1] = cols_per_row;
+         rows_transferred = 0;
 
+         while ( (rows_transferred+rows_per_write)  <= rows_per_rank ) {        /* final rows left unfilled if not exact multiple */
+            /* Select the hyperslabs for this write */
+            ret = H5Sselect_hyperslab( mem_space_id, H5S_SELECT_SET, mem_offset, NULL, mem_count, NULL ); ASSERT_RET;
+            ret = H5Sselect_hyperslab( space_p_id, H5S_SELECT_SET, rank_offset, NULL, rank_count, NULL );  ASSERT_RET;
+
+            START_TIME;
+            ret = H5Dwrite_ff( dset_p_id, H5T_NATIVE_UINT64, mem_space_id, space_p_id, dxpl_p_id, &mbuf[mbuf_offset], tr_id, 
+                               H5_EVENT_STACK_NULL ); 
+            ASSERT_RET;
+            END_TIME;
+            elapsed_time = ELAPSED_TIME;
+            fill_stats( &cnt, &e_min, &e_max, &e_sum, elapsed_time );
+            if ( detailed_timing ) {
+               rate = megabytesPerWrite/((double)elapsed_time/1000000);
+               fprintf( stderr, 
+                        "APP-r%d: iter %05d step 02: Time to add Write updates for /DP (%lu bytes): %lu usec - %f MiB/sec\n", 
+                        my_rank, iteration, bytesPerWrite, elapsed_time, rate );
+            }
+
+            /* Advance in preparation for next write */
+            rows_transferred += rows_per_write;
+            rank_offset[0] += rows_per_write;
+            mem_offset[0] += ( rows_per_write * cols_per_row );
+            mbuf_offset += ( rows_per_write * cols_per_row );
+         }
+         if ( cnt > 0 ) {
+            rate = megabytesPerWrite/((double)(e_sum/cnt)/1000000);
+            fprintf( stderr, 
+                     "APP-r%d: iter %05d step 02: Average Time to add Write updates for /DP (%lu bytes): Min: %lu usec; Max: %lu usec; Avg: %lu usec - Avg %f MiB/sec\n", 
+                     my_rank, iteration, bytesPerWrite, e_min, e_max, e_sum/cnt, rate );
+         }
+      }
+   
       if ( stored_dset ) {
-         START_TIME;
-         ret = H5Dwrite_ff( dset_s_id, H5T_NATIVE_UINT64, rank_space_id, space_s_id, dxpl_s_id, mbuf, tr_id, 
-                            H5_EVENT_STACK_NULL ); 
-         ASSERT_RET;
-         END_TIME;
-         elapsed_time = ELAPSED_TIME;
-         rate = megabytesPerRank/((double)elapsed_time/1000000);
-         fprintf( stderr, "APP-r%d: iter %05d step 03: Time to add Write updates for /DS (%lu bytes): %lu usec - %f MB/sec\n", 
-                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
+         cnt = e_min = e_max = e_sum = 0;
+         /* Set parameters that will be used to select the initial hyperslabs for this rank */
+         mem_offset[0] = 0;
+         mem_count[0] = rows_per_write * cols_per_row;
+         mbuf_offset = 0;
+         rank_offset[0] = my_rank * rows_per_rank;
+         rank_offset[1] = 0;
+         rank_count[0] = rows_per_write;
+         rank_count[1] = cols_per_row;
+         rows_transferred = 0;
+   
+         while ( (rows_transferred+rows_per_write)  <= rows_per_rank ) {        /* final rows left unfilled if not exact multiple */
+            /* Select the hyperslabs for this write */
+            ret = H5Sselect_hyperslab( mem_space_id, H5S_SELECT_SET, mem_offset, NULL, mem_count, NULL ); ASSERT_RET;
+            ret = H5Sselect_hyperslab( space_s_id, H5S_SELECT_SET, rank_offset, NULL, rank_count, NULL );  ASSERT_RET;
+
+            START_TIME;
+            ret = H5Dwrite_ff( dset_s_id, H5T_NATIVE_UINT64, mem_space_id, space_s_id, dxpl_s_id, &mbuf[mbuf_offset], tr_id, 
+                               H5_EVENT_STACK_NULL ); 
+            ASSERT_RET;
+            END_TIME;
+            elapsed_time = ELAPSED_TIME;
+            fill_stats( &cnt, &e_min, &e_max, &e_sum, elapsed_time );
+            if ( detailed_timing ) {
+               rate = megabytesPerWrite/((double)elapsed_time/1000000);
+               fprintf( stderr, 
+                        "APP-r%d: iter %05d step 03: Time to add Write updates for /DS (%lu bytes): %lu usec - %f MiB/sec\n", 
+                        my_rank, iteration, bytesPerWrite, elapsed_time, rate );
+            }
+
+            /* Advance in preparation for next write */
+            rows_transferred += rows_per_write;
+            rank_offset[0] += rows_per_write;
+            mem_offset[0] += ( rows_per_write * cols_per_row );
+            mbuf_offset += ( rows_per_write * cols_per_row );
+         }
+         if ( cnt > 0 ) {
+            rate = megabytesPerWrite/((double)(e_sum/cnt)/1000000);
+            fprintf( stderr, 
+                     "APP-r%d: iter %05d step 03: Average Time to add Write updates for /DS (%lu bytes): Min: %lu usec; Max: %lu usec; Avg: %lu usec - Avg %f MiB/sec\n", 
+                     my_rank, iteration, bytesPerWrite, e_min, e_max, e_sum/cnt, rate );
+        } 
       }
 
       /* Finish, (commit), and close transaction */
@@ -469,55 +578,60 @@ int main( int argc, char **argv ) {
       rc_id = rc_idH;
       version = versionH;
 
+      iter_since_last_persist++;             /* We've done the commit of a TR, so advance iter ctr */
+
       /* Rank 0:
-        - persists the container
-        - evicts DP & DS
-        - prefetches DP
+         if this is a persist iteration:
+         - persists the container
+         - evicts DP & DS
+         - prefetches DP
       */
       if ( my_rank == 0 ) {   
          if ( verbose ) print_container_contents( file_id, rc_id, my_rank );
 
-         START_TIME;
-         ret = H5RCpersist( rc_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
-         END_TIME;
-         elapsed_time = ELAPSED_TIME;
-         rate = megabytesPerContainer/((double)elapsed_time/1000000);
-         fprintf( stderr, "APP-r%d: iter %05d step 04: Time to Persist container (%lu bytes + KVs): %lu usec - %f MB/sec\n", 
-                  my_rank, iteration, bytesPerContainer, elapsed_time, rate );
-
-         if ( prefetched_dset ) {
+         if ( iter_since_last_persist == persist_rate )  {   
             START_TIME;
-            ret = H5Devict_ff( dset_p_id, version, H5P_DEFAULT, H5_EVENT_STACK_NULL );  ASSERT_RET;
+            ret = H5RCpersist( rc_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
             END_TIME;
             elapsed_time = ELAPSED_TIME;
-            rate = megabytesPerDataset/((double)elapsed_time/1000000);
-            fprintf( stderr, "APP-r%d: iter %05d step 05: Time to Evict /DP (%lu bytes): %lu usec - %f MB/sec\n", 
-                     my_rank, iteration, bytesPerDataset, elapsed_time, rate );
-         }
+            rate = megabytesPerContainer/((double)elapsed_time/1000000);
+            fprintf( stderr, "APP-r%d: iter %05d step 04: Time to Persist container (%lu bytes + KVs): %lu usec - %f MiB/sec\n", 
+                     my_rank, iteration, bytesPerContainer, elapsed_time, rate );
 
-         if ( stored_dset ) {
-            START_TIME;
-            ret = H5Devict_ff( dset_s_id, version, H5P_DEFAULT, H5_EVENT_STACK_NULL );  ASSERT_RET;
-            END_TIME;
-            elapsed_time = ELAPSED_TIME;
-            rate = megabytesPerDataset/((double)elapsed_time/1000000);
-            fprintf( stderr, "APP-r%d: iter %05d step 06: Time to Evict /DS (%lu bytes): %lu usec - %f MB/sec\n", 
-                     my_rank, iteration, bytesPerDataset, elapsed_time, rate );
-         }
+            if ( prefetched_dset ) {
+               START_TIME;
+               ret = H5Devict_ff( dset_p_id, version, H5P_DEFAULT, H5_EVENT_STACK_NULL );  ASSERT_RET;
+               END_TIME;
+               elapsed_time = ELAPSED_TIME;
+               rate = megabytesPerDataset/((double)elapsed_time/1000000);
+               fprintf( stderr, "APP-r%d: iter %05d step 05: Time to Evict /DP (%lu bytes): %lu usec - %f MiB/sec\n", 
+                        my_rank, iteration, bytesPerDataset, elapsed_time, rate );
+            }
 
-         if ( prefetched_dset ) {
-            START_TIME;
-            ret = H5Dprefetch_ff( dset_p_id, rc_id, &dset_p_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
-            END_TIME;
-            elapsed_time = ELAPSED_TIME;
-            rate = megabytesPerDataset/((double)elapsed_time/1000000);
-            fprintf( stderr, "APP-r%d: iter %05d step 07: Time to Prefetch (%lu bytes) /DP: %lu usec - %f MB/sec\n", 
-                     my_rank, iteration, bytesPerDataset, elapsed_time, rate );
-         }
+            if ( stored_dset ) {
+               START_TIME;
+               ret = H5Devict_ff( dset_s_id, version, H5P_DEFAULT, H5_EVENT_STACK_NULL );  ASSERT_RET;
+               END_TIME;
+               elapsed_time = ELAPSED_TIME;
+               rate = megabytesPerDataset/((double)elapsed_time/1000000);
+               fprintf( stderr, "APP-r%d: iter %05d step 06: Time to Evict /DS (%lu bytes): %lu usec - %f MiB/sec\n", 
+                        my_rank, iteration, bytesPerDataset, elapsed_time, rate );
+            }
 
-      } 
-
-      if ( prefetched_dset ) { 
+            if ( prefetched_dset ) {
+               START_TIME;
+               ret = H5Dprefetch_ff( dset_p_id, rc_id, &dset_p_replica, H5P_DEFAULT, H5_EVENT_STACK_NULL ); ASSERT_RET;
+               END_TIME;
+               elapsed_time = ELAPSED_TIME;
+               rate = megabytesPerDataset/((double)elapsed_time/1000000);
+               fprintf( stderr, "APP-r%d: iter %05d step 07: Time to Prefetch (%lu bytes) /DP: %lu usec - %f MiB/sec\n", 
+                        my_rank, iteration, bytesPerDataset, elapsed_time, rate );
+            }
+         } 
+      }
+  
+      /* We only prefetch if a persist occurred */
+      if ( ( prefetched_dset ) && ( iter_since_last_persist == persist_rate ) ) { 
          MPI_Bcast( &dset_p_replica, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
          ret = H5Pset_dxpl_replica( dxpl_p_id, dset_p_replica ); ASSERT_RET;
       } 
@@ -525,197 +639,444 @@ int main( int argc, char **argv ) {
       MPI_Barrier( MPI_COMM_WORLD );      /* Make sure all are here before continuing, (esp in case of no prefetch Bcast) */
 
       /* 
-       * All ranks read the same values they updated in last transaction
+       * All ranks read 'their' part of the written dataset (s)
+       * For /DL, read every iteration.
+       * For /DP and DS, only read on persisted iterations.
        */
 
-      /* Datasets */
       if ( logged_dset ) {
-         START_TIME;
-         ret = H5Dread_ff( dset_l_id, H5T_NATIVE_UINT64, rank_space_id, space_l_id, dxpl_l_id, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
-         ASSERT_RET;
-         END_TIME;
-         elapsed_time = ELAPSED_TIME;
-         rate = megabytesPerRank/((double)elapsed_time/1000000);
-         fprintf( stderr, "APP-r%d: iter %05d step 08: Time to Read my entries for /DL (%lu bytes): %lu usec - %f MB/sec\n", 
-                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
-         if ( verbose ) { 
-            fprintf( stderr, "APP-r%d: my first updated value in /DL: %09lu\n", my_rank, mbuf[0] ); 
+         /* Zero the memory buf so we can be sure we are reading */
+         if ( verbose ) {
+            bzero( (void*) mbuf, bytesPerRank );
          }
-      }
-      
-      if ( prefetched_dset ) {
-         START_TIME;
-         ret = H5Dread_ff( dset_p_id, H5T_NATIVE_UINT64, rank_space_id, space_p_id, dxpl_p_id, mbuf, rc_id, H5_EVENT_STACK_NULL );
-         ASSERT_RET;
-         END_TIME;
-         elapsed_time = ELAPSED_TIME;
-         rate = megabytesPerRank/((double)elapsed_time/1000000);
-         fprintf( stderr, "APP-r%d: iter %05d step 09: Time to Read my entries for /DP (%lu bytes): %lu usec - %f MB/sec\n", 
-                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
-         if ( verbose ) { 
-            fprintf( stderr, "APP-r%d: my first updated value in /DP: %09lu\n", my_rank, mbuf[0] ); 
-         }
-      }
 
-      if ( stored_dset ) {
-         START_TIME;
-         ret = H5Dread_ff( dset_s_id, H5T_NATIVE_UINT64, rank_space_id, space_s_id, dxpl_s_id, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
-         ASSERT_RET;
-         END_TIME;
-         elapsed_time = ELAPSED_TIME;
-         rate = megabytesPerRank/((double)elapsed_time/1000000);
-         fprintf( stderr, "APP-r%d: iter %05d step 10: Time to Read my entries for /DS (%lu bytes): %lu usec - %f MB/sec\n", 
-                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
-         if ( verbose ) { 
-            fprintf( stderr, "APP-r%d: my first updated value in /DS: %09lu\n", my_rank, mbuf[0] ); 
-         }
-      }
-      
-      /* 
-       * All ranks read the values "next rank" neighbor updated in last transaction
-       */
+         cnt = e_min = e_max = e_sum = 0;
+         /* Set parameters that will be used to select the initial hyperslabs for this rank */
+         mem_offset[0] = 0;
+         mem_count[0] = rows_per_read * cols_per_row;
+         mbuf_offset = 0;
+         rank_offset[0] = my_rank * rows_per_rank;
+         rank_offset[1] = 0;
+         rank_count[0] = rows_per_read;
+         rank_count[1] = cols_per_row;
+         rows_transferred = 0;
 
-      /* Datasets */
-      if ( logged_dset ) {
-         START_TIME;
-         ret = H5Dread_ff( dset_l_id, H5T_NATIVE_UINT64, rank_space_id, neighbor_space_l_id, dxpl_l_id, mbuf, rc_id, 
-                           H5_EVENT_STACK_NULL ); 
-         ASSERT_RET;
-         END_TIME;
-         elapsed_time = ELAPSED_TIME;
-         rate = megabytesPerRank/((double)elapsed_time/1000000);
-         fprintf( stderr, "APP-r%d: iter %05d step 11: Time to Read neighbor's entries for /DL (%lu bytes): %lu usec - %f MB/sec\n",
-                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
-         if ( verbose ) { 
-            fprintf( stderr, "APP-r%d: neighbor's first updated value in /DL: %09lu\n", my_rank, mbuf[0] ); 
-         }
-      }
-      
-      if ( prefetched_dset ) {
-         START_TIME;
-         ret = H5Dread_ff( dset_p_id, H5T_NATIVE_UINT64, rank_space_id, neighbor_space_p_id, dxpl_p_id, mbuf, rc_id, 
-                           H5_EVENT_STACK_NULL );
-         ASSERT_RET;
-         END_TIME;
-         elapsed_time = ELAPSED_TIME;
-         rate = megabytesPerRank/((double)elapsed_time/1000000);
-         fprintf( stderr, "APP-r%d: iter %05d step 12: Time to Read neighbor's entries for /DP (%lu bytes): %lu usec - %f MB/sec\n", 
-                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
-         if ( verbose ) { 
-            fprintf( stderr, "APP-r%d: neighbor's first updated value in /DP: %09lu\n", my_rank, mbuf[0]); 
-         }
-      }
+         while ( (rows_transferred+rows_per_read)  <= rows_per_rank ) {        /* final rows left unread if not exact multiple */
+            /* Select the hyperslabs for this read */
+            ret = H5Sselect_hyperslab( mem_space_id, H5S_SELECT_SET, mem_offset, NULL, mem_count, NULL ); ASSERT_RET;
+            ret = H5Sselect_hyperslab( space_l_id, H5S_SELECT_SET, rank_offset, NULL, rank_count, NULL );  ASSERT_RET;
 
-      if ( stored_dset ) {
-         START_TIME;
-         ret = H5Dread_ff( dset_s_id, H5T_NATIVE_UINT64, rank_space_id, neighbor_space_s_id, dxpl_s_id, mbuf, rc_id, 
-                           H5_EVENT_STACK_NULL ); 
-         ASSERT_RET;
-         END_TIME;
-         elapsed_time = ELAPSED_TIME;
-         rate = megabytesPerRank/((double)elapsed_time/1000000);
-         fprintf( stderr, "APP-r%d: iter %05d step 13: Time to Read neighbor's entries for /DS (%lu bytes): %lu usec - %f MB/sec\n", 
-                  my_rank, iteration, bytesPerRank, elapsed_time, rate );
-         if ( verbose ) { 
-            fprintf( stderr, "APP-r%d: neighbor's first updated value in /DS: %09lu\n", my_rank, mbuf[0] ); 
-         }
-      }
-      
-      /* 
-       * All ranks read all the values 
-       */
+            START_TIME;
+            ret = H5Dread_ff( dset_l_id, H5T_NATIVE_UINT64, mem_space_id, space_l_id, dxpl_l_id, &mbuf[mbuf_offset], rc_id, 
+                              H5_EVENT_STACK_NULL );
+            ASSERT_RET;
+            END_TIME;
+            elapsed_time = ELAPSED_TIME;
+            fill_stats( &cnt, &e_min, &e_max, &e_sum, elapsed_time );
+            if ( detailed_timing ) {
+               rate = megabytesPerRead/((double)elapsed_time/1000000);
+               fprintf( stderr, "APP-r%d: iter %05d step 08: Time to Read my entries for /DL (%lu bytes): %lu usec - %f MiB/sec\n", 
+                        my_rank, iteration, bytesPerRead, elapsed_time, rate );
+            }
 
-      /* Datasets */
-      if ( logged_dset ) {
-         START_TIME;
-         ret = H5Dread_ff( dset_l_id, H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, dxpl_l_id, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
-         ASSERT_RET;
-         END_TIME;
-         elapsed_time = ELAPSED_TIME;
-         rate = megabytesPerDataset/((double)elapsed_time/1000000);
-         fprintf( stderr, "APP-r%d: iter %05d step 14: Time to Read all entries for /DL (%lu bytes): %lu usec - %f MB/sec\n", 
-                  my_rank, iteration, bytesPerDataset, elapsed_time, rate );
-         if ( verbose ) { 
-            fprintf( stderr, "APP-r%d: first value in /DL: %09lu\n", my_rank, mbuf[0] ); 
-         }
-      }
-      
-      if ( prefetched_dset ) {
-         START_TIME;
-         ret = H5Dread_ff( dset_p_id, H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, dxpl_p_id, mbuf, rc_id, H5_EVENT_STACK_NULL );
-         ASSERT_RET;
-         END_TIME;
-         elapsed_time = ELAPSED_TIME;
-         rate = megabytesPerDataset/((double)elapsed_time/1000000);
-         fprintf( stderr, "APP-r%d: iter %05d step 15: Time to Read all entries for /DP (%lu bytes): %lu usec - %f MB/sec\n", 
-                  my_rank, iteration, bytesPerDataset, elapsed_time, rate );
-         if ( verbose ) { 
-            fprintf( stderr, "APP-r%d: first value in /DP: %09lu\n", my_rank, mbuf[0] ); 
-         }
-      }
+            fprintf( stderr, "APP-r%d: first value read in /DL: %09lu\n", my_rank, mbuf[mbuf_offset] ); 
+            if ( ( verbose ) && ( my_rank == 0 ) ) {      /* print all mbuf on rank 0 to confirm correctness while developing */
+               u = 0;
+               for ( r = 0; r < rows_per_rank; r++ ) {
+                  for ( c = 0; c < cols_per_row; c++ ) {
+                     fprintf( stderr, "%lu   ", mbuf[u] );
+                     u++;
+                  }
+                  fprintf( stderr, "\n" );
+               }
+            }
 
-      if ( stored_dset ) {
-         START_TIME;
-         ret = H5Dread_ff( dset_s_id, H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, dxpl_s_id, mbuf, rc_id, H5_EVENT_STACK_NULL ); 
-         ASSERT_RET;
-         END_TIME;
-         elapsed_time = ELAPSED_TIME;
-         rate = megabytesPerDataset/((double)elapsed_time/1000000);
-         fprintf( stderr, "APP-r%d: iter %05d step 16: Time to Read all entries for /DS (%lu bytes): %lu usec - %f MB/sec\n", 
-                  my_rank, iteration, bytesPerDataset, elapsed_time, rate );
-         if ( verbose ) { 
-            fprintf( stderr, "APP-r%d: first value in /DS: %09lu\n", my_rank, mbuf[0] ); 
+            /* Advance in preparation for next read */
+            rows_transferred += rows_per_read;
+            rank_offset[0] += rows_per_read;
+            mem_offset[0] += ( rows_per_read * cols_per_row );
+            mbuf_offset += ( rows_per_read * cols_per_row );
+         }
+
+         if ( cnt > 0 ) {
+            rate = megabytesPerRead/((double)(e_sum/cnt)/1000000);
+            fprintf( stderr, 
+                     "APP-r%d: iter %05d step 08: Average Time to Read my entries for /DL (%lu bytes): Min: %lu usec; Max: %lu usec; Avg: %lu usec - Avg %f MiB/sec\n", 
+                     my_rank, iteration, bytesPerRead, e_min, e_max, e_sum/cnt, rate );
          }
       }
          
-      /* Rank 0 evicts the replica */
-      MPI_Barrier( MPI_COMM_WORLD );      /* Make sure all ranks done reading the replica before evicting */
-      if ( my_rank == 0 ) {
-         if ( prefetched_dset ) {
+      if ( ( prefetched_dset ) && ( iter_since_last_persist == persist_rate ) ) { 
+         /* Zero the memory buf so we can be sure we are reading */
+         if ( verbose ) {
+            bzero( (void*) mbuf, bytesPerRank );
+         }
+
+         cnt = e_min = e_max = e_sum = 0;
+         /* Set parameters that will be used to select the initial hyperslabs for this rank */
+         mem_offset[0] = 0;
+         mem_count[0] = rows_per_read * cols_per_row;
+         mbuf_offset = 0;
+         rank_offset[0] = my_rank * rows_per_rank;
+         rank_offset[1] = 0;
+         rank_count[0] = rows_per_read;
+         rank_count[1] = cols_per_row;
+         rows_transferred = 0;
+
+         while ( (rows_transferred+rows_per_read)  <= rows_per_rank ) {        /* final rows left unread if not exact multiple */
+            /* Select the hyperslabs for this read */
+            ret = H5Sselect_hyperslab( mem_space_id, H5S_SELECT_SET, mem_offset, NULL, mem_count, NULL ); ASSERT_RET;
+            ret = H5Sselect_hyperslab( space_p_id, H5S_SELECT_SET, rank_offset, NULL, rank_count, NULL );  ASSERT_RET;
+
+            START_TIME;
+            ret = H5Dread_ff( dset_p_id, H5T_NATIVE_UINT64, mem_space_id, space_p_id, dxpl_p_id, &mbuf[mbuf_offset], rc_id, 
+                              H5_EVENT_STACK_NULL );
+            ASSERT_RET;
+            END_TIME;
+            elapsed_time = ELAPSED_TIME;
+            fill_stats( &cnt, &e_min, &e_max, &e_sum, elapsed_time );
+            if ( detailed_timing ) {
+               rate = megabytesPerRead/((double)elapsed_time/1000000);
+               fprintf( stderr, "APP-r%d: iter %05d step 09: Time to Read my entries for /DP (%lu bytes): %lu usec - %f MiB/sec\n", 
+                        my_rank, iteration, bytesPerRead, elapsed_time, rate );
+            }
+
+            fprintf( stderr, "APP-r%d: first value read in /DP: %09lu\n", my_rank, mbuf[mbuf_offset] ); 
+            if ( ( verbose ) && ( my_rank == 0 ) ) {         /* print all mbuf on rank 0 to confirm correctness while developing */
+               u = 0;
+               for ( r = 0; r < rows_per_rank; r++ ) {
+                  for ( c = 0; c < cols_per_row; c++ ) {
+                     fprintf( stderr, "%lu   ", mbuf[u] );
+                     u++;
+                  }
+                  fprintf( stderr, "\n" );
+               }
+            }
+
+            /* Advance in preparation for next read */
+            rows_transferred += rows_per_read;
+            rank_offset[0] += rows_per_read;
+            mem_offset[0] += ( rows_per_read * cols_per_row );
+            mbuf_offset += ( rows_per_read * cols_per_row );
+
+         }
+         if ( cnt > 0 ) {
+            rate = megabytesPerRead/((double)(e_sum/cnt)/1000000);
+            fprintf( stderr, 
+                     "APP-r%d: iter %05d step 09: Average Time to Read my entries for /DP (%lu bytes): Min: %lu usec; Max: %lu usec; Avg: %lu usec - Avg %f MiB/sec\n", 
+                     my_rank, iteration, bytesPerRead, e_min, e_max, e_sum/cnt, rate );
+         }
+      }
+         
+      if ( ( stored_dset ) && ( iter_since_last_persist == persist_rate ) ) { 
+         /* Zero the memory buf so we can be sure we are reading */
+         if ( verbose ) {
+            bzero( (void*) mbuf, bytesPerRank );
+         }
+
+         cnt = e_min = e_max = e_sum = 0;
+         /* Set parameters that will be used to select the initial hyperslabs for this rank */
+         mem_offset[0] = 0;
+         mem_count[0] = rows_per_read * cols_per_row;
+         mbuf_offset = 0;
+         rank_offset[0] = my_rank * rows_per_rank;
+         rank_offset[1] = 0;
+         rank_count[0] = rows_per_read;
+         rank_count[1] = cols_per_row;
+         rows_transferred = 0;
+
+         while ( (rows_transferred+rows_per_read)  <= rows_per_rank ) {        /* final rows left unread if not exact multiple */
+            /* Select the hyperslabs for this read */
+            ret = H5Sselect_hyperslab( mem_space_id, H5S_SELECT_SET, mem_offset, NULL, mem_count, NULL ); ASSERT_RET;
+            ret = H5Sselect_hyperslab( space_s_id, H5S_SELECT_SET, rank_offset, NULL, rank_count, NULL );  ASSERT_RET;
+
+            START_TIME;
+            ret = H5Dread_ff( dset_s_id, H5T_NATIVE_UINT64, mem_space_id, space_s_id, dxpl_s_id, &mbuf[mbuf_offset], rc_id, 
+                              H5_EVENT_STACK_NULL );
+            ASSERT_RET;
+            END_TIME;
+            elapsed_time = ELAPSED_TIME;
+            fill_stats( &cnt, &e_min, &e_max, &e_sum, elapsed_time );
+            if ( detailed_timing ) {
+               rate = megabytesPerRead/((double)elapsed_time/1000000);
+               fprintf( stderr, "APP-r%d: iter %05d step 10: Time to Read my entries for /DS (%lu bytes): %lu usec - %f MiB/sec\n", 
+                        my_rank, iteration, bytesPerRead, elapsed_time, rate );
+            }
+
+            fprintf( stderr, "APP-r%d: first value read in /DS: %09lu\n", my_rank, mbuf[mbuf_offset] ); 
+            if ( ( verbose ) && ( my_rank == 0 ) ) {         /* print all mbuf on rank 0 to confirm correctness while developing */
+               u = 0;
+               for ( r = 0; r < rows_per_rank; r++ ) {
+                  for ( c = 0; c < cols_per_row; c++ ) {
+                     fprintf( stderr, "%lu   ", mbuf[u] );
+                     u++;
+                  }
+                  fprintf( stderr, "\n" );
+               }
+            }
+
+            /* Advance in preparation for next read */
+            rows_transferred += rows_per_read;
+            rank_offset[0] += rows_per_read;
+            mem_offset[0] += ( rows_per_read * cols_per_row );
+            mbuf_offset += ( rows_per_read * cols_per_row );
+         }
+
+         if ( cnt > 0 ) {
+            rate = megabytesPerRead/((double)(e_sum/cnt)/1000000);
+            fprintf( stderr, 
+                     "APP-r%d: iter %05d step 10: Average Time to Read my entries for /DS (%lu bytes): Min: %lu usec; Max: %lu usec; Avg: %lu usec - Avg %f MiB/sec\n", 
+                     my_rank, iteration, bytesPerRead, e_min, e_max, e_sum/cnt, rate );
+         }
+      }
+
+      /* 
+       * All ranks read the values "next rank" neighbor updated in last transaction
+       * For /DL, read every iteration.
+       * For /DP and DS, only read on persisted iterations.
+       */
+
+      if ( logged_dset  && ( my_rank != neighbor_rank ) ) {
+         /* Zero the memory buf so we can be sure we are reading */
+         if ( verbose ) {
+            bzero( (void*) mbuf, bytesPerRank );
+         }
+
+         cnt = e_min = e_max = e_sum = 0;
+         /* Set parameters that will be used to select the initial hyperslabs for this rank */
+         mem_offset[0] = 0;
+         mem_count[0] = rows_per_read * cols_per_row;
+         mbuf_offset = 0;
+         neighbor_offset[0] = neighbor_rank * rows_per_rank;
+         neighbor_offset[1] = 0;
+         neighbor_count[0] = rows_per_read;
+         neighbor_count[1] = cols_per_row;
+         rows_transferred = 0;
+
+         while ( (rows_transferred+rows_per_read)  <= rows_per_rank ) {        /* final rows left unread if not exact multiple */
+            /* Select the hyperslabs for this read */
+            ret = H5Sselect_hyperslab( mem_space_id, H5S_SELECT_SET, mem_offset, NULL, mem_count, NULL ); ASSERT_RET;
+            ret = H5Sselect_hyperslab( neighbor_space_l_id, H5S_SELECT_SET, neighbor_offset, NULL, neighbor_count, NULL );
+            ASSERT_RET;
+
+            START_TIME;
+            ret = H5Dread_ff( dset_l_id, H5T_NATIVE_UINT64, mem_space_id, neighbor_space_l_id, dxpl_l_id, &mbuf[mbuf_offset], rc_id,
+                              H5_EVENT_STACK_NULL ); 
+            ASSERT_RET;
+            END_TIME;
+            elapsed_time = ELAPSED_TIME;
+            fill_stats( &cnt, &e_min, &e_max, &e_sum, elapsed_time );
+            if ( detailed_timing ) {
+               rate = megabytesPerRead/((double)elapsed_time/1000000);
+               fprintf( stderr, 
+                        "APP-r%d: iter %05d step 11: Time to Read neighbor's entries for /DL (%lu bytes): %lu usec - %f MiB/sec\n", 
+                        my_rank, iteration, bytesPerRead, elapsed_time, rate );
+            }
+
+            fprintf( stderr, "APP-r%d: neighbor's first value read in /DL: %09lu\n", my_rank, mbuf[mbuf_offset] ); 
+            if ( ( verbose ) && ( my_rank == 0 ) ) {         /* print all mbuf on rank 0 to confirm correctness while developing */
+               u = 0;
+               for ( r = 0; r < rows_per_rank; r++ ) {
+                  for ( c = 0; c < cols_per_row; c++ ) {
+                     fprintf( stderr, "%lu   ", mbuf[u] );
+                     u++;
+                  }
+                  fprintf( stderr, "\n" );
+               }
+            }
+
+            /* Advance in preparation for next read */
+            rows_transferred += rows_per_read;
+            neighbor_offset[0] += rows_per_read;
+            mem_offset[0] += ( rows_per_read * cols_per_row );
+            mbuf_offset += ( rows_per_read * cols_per_row );
+         }
+
+         if ( cnt > 0 ) {
+            rate = megabytesPerRead/((double)(e_sum/cnt)/1000000);
+            fprintf( stderr, 
+                     "APP-r%d: iter %05d step 11: Average Time to Read neighbor's entries for /DL (%lu bytes): Min: %lu usec; Max: %lu usec; Avg: %lu usec - Avg %f MiB/sec\n", 
+                     my_rank, iteration, bytesPerRead, e_min, e_max, e_sum/cnt, rate );
+         }
+      }
+         
+      if ( ( prefetched_dset ) && ( iter_since_last_persist == persist_rate )  && ( my_rank != neighbor_rank ) ) { 
+         /* Zero the memory buf so we can be sure we are reading */
+         if ( verbose ) {
+            bzero( (void*) mbuf, bytesPerRank );
+         }
+
+         cnt = e_min = e_max = e_sum = 0;
+         /* Set parameters that will be used to select the initial hyperslabs for this rank */
+         mem_offset[0] = 0;
+         mem_count[0] = rows_per_read * cols_per_row;
+         mbuf_offset = 0;
+         neighbor_offset[0] = neighbor_rank * rows_per_rank;
+         neighbor_offset[1] = 0;
+         neighbor_count[0] = rows_per_read;
+         neighbor_count[1] = cols_per_row;
+         rows_transferred = 0;
+
+         while ( (rows_transferred+rows_per_read)  <= rows_per_rank ) {        /* final rows left unread if not exact multiple */
+            /* Select the hyperslabs for this read */
+            ret = H5Sselect_hyperslab( mem_space_id, H5S_SELECT_SET, mem_offset, NULL, mem_count, NULL ); ASSERT_RET;
+            ret = H5Sselect_hyperslab( neighbor_space_p_id, H5S_SELECT_SET, neighbor_offset, NULL, neighbor_count, NULL );
+            ASSERT_RET;
+
+            START_TIME;
+            ret = H5Dread_ff( dset_p_id, H5T_NATIVE_UINT64, mem_space_id, neighbor_space_p_id, dxpl_p_id, &mbuf[mbuf_offset], rc_id,
+                              H5_EVENT_STACK_NULL ); 
+            ASSERT_RET;
+            END_TIME;
+            elapsed_time = ELAPSED_TIME;
+            fill_stats( &cnt, &e_min, &e_max, &e_sum, elapsed_time );
+            if ( detailed_timing ) {
+               rate = megabytesPerRead/((double)elapsed_time/1000000);
+               fprintf( stderr, 
+                        "APP-r%d: iter %05d step 12: Time to Read neighbor's entries for /DP (%lu bytes): %lu usec - %f MiB/sec\n", 
+                        my_rank, iteration, bytesPerRead, elapsed_time, rate );
+            }
+
+            fprintf( stderr, "APP-r%d: neighbor's first value read in /DP: %09lu\n", my_rank, mbuf[mbuf_offset] ); 
+            if ( ( verbose ) && ( my_rank == 0 ) ) {         /* print all mbuf on rank 0 to confirm correctness while developing */
+               u = 0;
+               for ( r = 0; r < rows_per_rank; r++ ) {
+                  for ( c = 0; c < cols_per_row; c++ ) {
+                     fprintf( stderr, "%lu   ", mbuf[u] );
+                     u++;
+                  }
+                  fprintf( stderr, "\n" );
+               }
+            }
+
+            /* Advance in preparation for next read */
+            rows_transferred += rows_per_read;
+            neighbor_offset[0] += rows_per_read;
+            mem_offset[0] += ( rows_per_read * cols_per_row );
+            mbuf_offset += ( rows_per_read * cols_per_row );
+         }
+
+         if ( cnt > 0 ) {
+            rate = megabytesPerRead/((double)(e_sum/cnt)/1000000);
+            fprintf( stderr, 
+                     "APP-r%d: iter %05d step 12: Average Time to Read neighbor's entries for /DP (%lu bytes): Min: %lu usec; Max: %lu usec; Avg: %lu usec - Avg %f MiB/sec\n", 
+                     my_rank, iteration, bytesPerRead, e_min, e_max, e_sum/cnt, rate );
+         }
+      }
+         
+      if ( ( stored_dset ) && ( iter_since_last_persist == persist_rate ) && ( my_rank != neighbor_rank ) ) { 
+         /* Zero the memory buf so we can be sure we are reading */
+         if ( verbose ) {
+            bzero( (void*) mbuf, bytesPerRank );
+         }
+
+         cnt = e_min = e_max = e_sum = 0;
+         /* Set parameters that will be used to select the initial hyperslabs for this rank */
+         mem_offset[0] = 0;
+         mem_count[0] = rows_per_read * cols_per_row;
+         mbuf_offset = 0;
+         neighbor_offset[0] = neighbor_rank * rows_per_rank;
+         neighbor_offset[1] = 0;
+         neighbor_count[0] = rows_per_read;
+         neighbor_count[1] = cols_per_row;
+         rows_transferred = 0;
+
+         while ( (rows_transferred+rows_per_read)  <= rows_per_rank ) {        /* final rows left unread if not exact multiple */
+            /* Select the hyperslabs for this read */
+            ret = H5Sselect_hyperslab( mem_space_id, H5S_SELECT_SET, mem_offset, NULL, mem_count, NULL ); ASSERT_RET;
+            ret = H5Sselect_hyperslab( neighbor_space_s_id, H5S_SELECT_SET, neighbor_offset, NULL, neighbor_count, NULL );
+            ASSERT_RET;
+
+            START_TIME;
+            ret = H5Dread_ff( dset_s_id, H5T_NATIVE_UINT64, mem_space_id, neighbor_space_s_id, dxpl_s_id, &mbuf[mbuf_offset], rc_id,
+                              H5_EVENT_STACK_NULL ); 
+            ASSERT_RET;
+            END_TIME;
+            elapsed_time = ELAPSED_TIME;
+            fill_stats( &cnt, &e_min, &e_max, &e_sum, elapsed_time );
+            if ( detailed_timing ) {
+               rate = megabytesPerRead/((double)elapsed_time/1000000);
+               fprintf( stderr, 
+                        "APP-r%d: iter %05d step 13: Time to Read neighbor's entries for /DS (%lu bytes): %lu usec - %f MiB/sec\n", 
+                        my_rank, iteration, bytesPerRead, elapsed_time, rate );
+            }
+
+            fprintf( stderr, "APP-r%d: neighbor's first value read in /DS: %09lu\n", my_rank, mbuf[mbuf_offset] ); 
+            if ( ( verbose ) && ( my_rank == 0 ) ) {         /* print all mbuf on rank 0 to confirm correctness while developing */
+               u = 0;
+               for ( r = 0; r < rows_per_rank; r++ ) {
+                  for ( c = 0; c < cols_per_row; c++ ) {
+                     fprintf( stderr, "%lu   ", mbuf[u] );
+                     u++;
+                  }
+                  fprintf( stderr, "\n" );
+               }
+            }
+
+            /* Advance in preparation for next read */
+            rows_transferred += rows_per_read;
+            neighbor_offset[0] += rows_per_read;
+            mem_offset[0] += ( rows_per_read * cols_per_row );
+            mbuf_offset += ( rows_per_read * cols_per_row );
+         }
+
+         if ( cnt > 0 ) {
+            rate = megabytesPerRead/((double)(e_sum/cnt)/1000000);
+            fprintf( stderr, 
+                     "APP-r%d: iter %05d step 13: Average Time to Read neighbor's entries for /DS (%lu bytes): Min: %lu usec; Max: %lu usec; Avg: %lu usec - Avg %f MiB/sec\n", 
+                     my_rank, iteration, bytesPerRead, e_min, e_max, e_sum/cnt, rate );
+         }
+
+      }
+
+      /* For persisted iterations, reset the counter & if we prefetched a replica, evict it */
+      if ( iter_since_last_persist == persist_rate ) { 
+         iter_since_last_persist = 0;
+
+         MPI_Barrier( MPI_COMM_WORLD );      /* Make sure all ranks done reading the replica before evicting */
+
+         /* Rank 0 evicts the replica */
+         if  ( ( my_rank == 0 ) && ( prefetched_dset ) ) {
             START_TIME;
             ret = H5Devict_ff( dset_p_id, version, dxpl_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;  
             END_TIME;
             elapsed_time = ELAPSED_TIME;
             rate = megabytesPerDataset/((double)elapsed_time/1000000);
-            fprintf( stderr, "APP-r%d: iter %05d step 17: Time to Evict Replica of /DP (%lu bytes): %lu usec - %f MB/sec\n", 
+            fprintf( stderr, "APP-r%d: iter %05d step 17: Time to Evict Replica of /DP (%lu bytes): %lu usec - %f MiB/sec\n", 
                      my_rank, iteration, bytesPerDataset, elapsed_time, rate );
          }
       }
-
    }
 
    /*
     * Wrap-up 
     */
 
-   /* Print (if verbose) the final state */
    if ( my_rank == 0 ) {
       if ( verbose ) print_container_contents( file_id, rc_id, my_rank );
    }
 
-   /* Close the dataset property lists */
-   if ( prefetched_dset ) {
-      ret = H5Pclose( dxpl_p_id ); ASSERT_RET;
-   }
-
-   /* Close the memory dataspace for the rank */
-   ret = H5Sclose( rank_space_id ); ASSERT_RET;         
-
    fprintf( stderr, "APP-r%d: Closing H5Objects\n", my_rank );
+
+   ret = H5Sclose( mem_space_id ); ASSERT_RET;         
 
    if ( logged_dset ) {
       ret = H5Dclose_ff( dset_l_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
       ret = H5Sclose( space_l_id ); ASSERT_RET;
+      ret = H5Sclose( neighbor_space_l_id ); ASSERT_RET;
+      ret = H5Pclose( dxpl_l_id ); ASSERT_RET;
    }
    if ( prefetched_dset ) {
       ret = H5Dclose_ff( dset_p_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
       ret = H5Sclose( space_p_id ); ASSERT_RET;
       ret = H5Sclose( neighbor_space_p_id ); ASSERT_RET;
+      ret = H5Pclose( dxpl_p_id ); ASSERT_RET;
    }
    if ( stored_dset ) {
       ret = H5Dclose_ff( dset_s_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
       ret = H5Sclose( space_s_id ); ASSERT_RET;
       ret = H5Sclose( neighbor_space_s_id ); ASSERT_RET;
+      ret = H5Pclose( dxpl_s_id ); ASSERT_RET;
    }
 
 
@@ -743,6 +1104,26 @@ int main( int argc, char **argv ) {
    return 0;
 }
 
+/*
+ * Helper function to keep track of timing info
+ */
+void
+fill_stats( int* cnt, ulong* min, ulong* max, ulong* sum, ulong elapsed ) 
+{
+   if ( *min == 0 ) {
+      *min = elapsed;
+      *max = elapsed;
+   } else {
+      if ( elapsed < *min ) {
+         *min = elapsed;
+      }
+      if ( elapsed > *max ) {
+         *max = elapsed;
+      }
+   }
+   *sum += elapsed;
+   *cnt += 1;
+}
 
 /*
  * Helper function used to recursively read and print container contents
@@ -827,8 +1208,9 @@ print_container_contents( hid_t file_id, hid_t rc_id, int my_rank )
 
          free( data );
          sleep( 1 );       /* give output a chance to be printed before diag messages from lower layers on close */
-         ret = H5Dclose_ff( dset_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
+         ret = H5Pclose( dxpl_id ); ASSERT_RET;
          ret = H5Sclose( space_id ); ASSERT_RET;
+         ret = H5Dclose_ff( dset_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
       }
    }
 
@@ -863,10 +1245,34 @@ parse_options( int argc, char** argv, int my_rank, int comm_size ) {
                   cols_per_row = atoi( *argv );
                }
                break;
+            case 'w':
+               if ( ( --argc == 0 )  || (  **(argv+1) == '-' ) ) {
+                  if ( my_rank == 0 ) {
+                     printf( "Error: No number specified after -w option.\n" );
+                     usage( app );
+                  }
+                  return( 1 );
+               } else {
+                  ++argv;
+                  rows_per_write = atoi( *argv );
+               }
+               break;
             case 'r':
                if ( ( --argc == 0 )  || (  **(argv+1) == '-' ) ) {
                   if ( my_rank == 0 ) {
                      printf( "Error: No number specified after -r option.\n" );
+                     usage( app );
+                  }
+                  return( 1 );
+               } else {
+                  ++argv;
+                  rows_per_read = atoi( *argv );
+               }
+               break;
+            case 'b':
+               if ( ( --argc == 0 )  || (  **(argv+1) == '-' ) ) {
+                  if ( my_rank == 0 ) {
+                     printf( "Error: No number specified after -b option.\n" );
                      usage( app );
                   }
                   return( 1 );
@@ -887,17 +1293,32 @@ parse_options( int argc, char** argv, int my_rank, int comm_size ) {
                   num_iterations = atoi( *argv );
                }
                break;
+            case 'p':
+               if ( ( --argc == 0 )  || (  **(argv+1) == '-' ) ) {
+                  if ( my_rank == 0 ) {
+                     printf( "APP-r0: Error: No number specified after -p option.\n" );
+                     usage( app );
+                  }
+                  return( 1 );
+               } else {
+                  ++argv;
+                  persist_rate = atoi( *argv );
+               }
+               break;
             case 'e':   
                enable_checksums = 1;
                break;
-            case 'l':   
+            case 'L':   
                logged_dset = 1;
                break;
-            case 'p':   
+            case 'P':   
                prefetched_dset = 1;
                break;
-            case 's':   
+            case 'S':   
                stored_dset = 1;
+               break;
+            case 'd':
+               detailed_timing = 1;
                break;
             case 'v':   
                verbose = 1;
@@ -918,13 +1339,17 @@ parse_options( int argc, char** argv, int my_rank, int comm_size ) {
  */
 void
 usage( const char* app ) {
-   printf( "Usage: %s [-r rows_per_rank] [-c cols_per_row] [-i num_iterations] [-e] [-p] [-s] [-v] \n", app  );
-   printf( "\tr: number of rows each rank writes in created H5Datasets (total rows = this * # of ranks)\n" );
-   printf( "\tc: number of columns in each row of created H5Datasets\n" );
-   printf( "\ti: number of iterations to do update/commit/persist/evict/prefetch/read/evict\n" );
+   printf( "Usage: %s [-c cols_per_row] [-w rows_per_write] [-r rows_per_read] [-b rows_per_rank] [-i num_iterations] [-p persist_rate] [-e] [-L] [-P] [-S] [-d] [-v] \n", app  );
+   printf( "\tc: number of columns per row (each cell is 8 bytes)\n" );
+   printf( "\tw: number of rows per write per rank\n" );
+   printf( "\tr: number of rows per read per rank\n" );
+   printf( "\tb: number of rows in each rank's block (if not multiple of w or r, may not be fully written or read)\n" );
+   printf( "\ti: number of iterations to do writes/commit/[persist/evict/prefetch/reads/evict]\n" );
+   printf( "\tp: persist rate; for /DP and /DS, also impacts evict/prefetch/read/evict\n" );
    printf( "\te: enable checksums on raw data in H5Datasets\n" );
-   printf( "\tl: create /DL dataset - data will not be evicted (created by default if no /DP nor /DS)\n" );
-   printf( "\tp: create /DP dataset - data will be evicted, replica prefetched, reads from replica\n" );
-   printf( "\ts: create /DS dataset - data will be evicted, reads from storage (DAOS)\n" );
-   printf( "\tv: verbose output\n" );
+   printf( "\tL: create /DL dataset - data will not be evicted (created by default if no /DP nor /DS)\n" );
+   printf( "\tP: create /DP dataset - data will be evicted, replica prefetched, reads from replica\n" );
+   printf( "\tS: create /DS dataset - data will be evicted, reads from storage (DAOS)\n" );
+   printf( "\td: print detailed timing information for each read and write operation\n" );
+   printf( "\tv: verbose output of data values - intended for use only with small arrays and few iterations\n" );
 }
