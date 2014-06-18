@@ -288,9 +288,13 @@ main(int argc, char **argv)
     herr_t ret;
     H5ES_status_t status;
     size_t num_events = 0;
+    int c;
+    extern char *optarg;
     struct analysis_data data;
     size_t ntuples = NTUPLES;
+    int only_analysis = 0;
 
+    getchar();
     /* Prepend user name */
     user_name = getenv("USER");
     snprintf(file_name, NAME_SIZE, "%s_%s", user_name, FILENAME_APP);
@@ -304,7 +308,21 @@ main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
     fprintf(stderr, "APP processes = %d, my rank is %d\n", my_size, my_rank);
 
+    while ((c = getopt (argc, argv, "a")) != -1) {
+        switch (c) {
+        case 'a':
+            only_analysis = 1;
+            break;
+        default:
+            abort ();
+        }
+    }
+
     MPI_Barrier(MPI_COMM_WORLD);
+
+    if(only_analysis) {
+        goto analysis;
+    }
 
     /* Choose the IOD VOL plugin to use with this file. */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -342,13 +360,14 @@ main(int argc, char **argv)
     assert(0 == ret);
     MPI_Barrier(MPI_COMM_WORLD);
 
+analysis:
     if(0 == my_rank) {
         ship_analysis(file_name);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
     EFF_finalize();
+    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();
-
     return 0;
 }

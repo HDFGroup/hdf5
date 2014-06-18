@@ -792,6 +792,7 @@ H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs)
     hg_request_t *hg_reqs = NULL;
     iod_handle_t *temp_cohs = NULL;
     iod_ret_t ret;
+    iod_hint_list_t *con_open_hint = NULL;
     int i;
 
     if(pthread_mutex_init(&h5python_mutex, NULL)) 
@@ -814,7 +815,12 @@ H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs)
 #if H5_EFF_DEBUG 
     fprintf(stderr, "(%d) Calling iod_container_open on %s\n", my_rank_g, file_name);
 #endif
-    ret = iod_container_open(file_name, NULL, IOD_CONT_RW, &temp_cohs[0], NULL);
+    /* scratch pad integrity in the container */
+    con_open_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
+    con_open_hint->num_hint = 1;
+    con_open_hint->hint[0].key = "iod_hint_co_scratch_cksum";
+
+    ret = iod_container_open(file_name, con_open_hint, IOD_CONT_RW, &temp_cohs[0], NULL);
     if(ret < 0)
         HGOTO_ERROR_FF(ret, "can't open file");
 
@@ -831,6 +837,11 @@ H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs)
     *cohs = temp_cohs;
 
 done:
+
+    if(con_open_hint) {
+        free(con_open_hint);
+        con_open_hint = NULL;
+    }
     return ret_value;
 } /* end H5VL__iod_request_container_open */
 
@@ -1478,6 +1489,7 @@ H5VL_iod_server_container_open(hg_handle_t handle)
 {
     const char *file_name;
     iod_handle_t coh;
+    iod_hint_list_t *con_open_hint = NULL;
     int ret_value = HG_SUCCESS;
 
     if(pthread_mutex_init(&h5python_mutex, NULL)) 
@@ -1486,9 +1498,13 @@ H5VL_iod_server_container_open(hg_handle_t handle)
     if(HG_FAIL == HG_Handler_get_input(handle, &file_name))
 	HGOTO_ERROR_FF(FAIL, "can't get input parameters");
 
+    con_open_hint = (iod_hint_list_t *)malloc(sizeof(iod_hint_list_t) + sizeof(iod_hint_t));
+    con_open_hint->num_hint = 1;
+    con_open_hint->hint[0].key = "iod_hint_co_scratch_cksum";
+
     /* open the container */
     printf("Calling iod_container_open on %s\n", file_name);
-    if(iod_container_open(file_name, NULL, IOD_CONT_R, &coh, NULL))
+    if(iod_container_open(file_name, con_open_hint, IOD_CONT_R, &coh, NULL))
         HGOTO_ERROR_FF(FAIL, "can't open file");
 
     HG_Handler_start_output(handle, &coh);
@@ -1498,6 +1514,12 @@ done:
         coh.cookie = IOD_OH_UNDEFINED;
         HG_Handler_start_output(handle, &coh);
     }
+
+    if(con_open_hint) {
+        free(con_open_hint);
+        con_open_hint = NULL;
+    }
+
     return ret_value;
 } /* end H5VL_iod_server_container_open() */
 
