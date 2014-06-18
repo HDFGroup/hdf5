@@ -34,7 +34,7 @@ if BUILD_EFF_CONDITIONAL
                 h5ff_client_vl_data h5ff_python_exec h5ff_client_analysis \
                 h5ff_client_evict_deltas h5ff_client_prefetch \
                 h5ff_client_M6.2_demo h5ff_client_M7.2-pep_demo \
-                h5ff_client_timings h5ff_client_time_datasets
+                h5ff_client_timings h5ff_client_time_datasets h5ff_client_analysis2
 endif
 
 if BUILD_INDEXING_CONDITIONAL
