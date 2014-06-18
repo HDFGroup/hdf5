@@ -354,7 +354,7 @@ H5VL__iod_load_script(const char *script, const char *func_name)
     ret_value = po_func;
 
 done:
-    //Py_DECREF(po_rstring);
+    Py_DECREF(po_rstring);
 
     return ret_value;
 } /* end H5VL__iod_load_script() */
@@ -599,10 +599,10 @@ H5VL__iod_split(const char *split_script, void *data, size_t num_elmts,
 
 done:
     /* Cleanup */
-    //Py_XDECREF(po_func);
-    //Py_XDECREF(po_args_tup);
-    //Py_XDECREF(po_numpy_array);
-    //Py_XDECREF(po_numpy_array_split);
+    Py_XDECREF(po_func);
+    Py_XDECREF(po_args_tup);
+    Py_XDECREF(po_numpy_array);
+    Py_XDECREF(po_numpy_array_split);
 
     return ret_value;
 } /* end H5VL__iod_split() */
@@ -680,12 +680,12 @@ H5VL__iod_combine(const char *combine_script, void **split_data, size_t *split_n
 
 done:
     /* Cleanup */
-    //Py_XDECREF(po_func);
-    //Py_XDECREF(po_args_tup);
+    Py_XDECREF(po_func);
+    Py_XDECREF(po_args_tup);
     for(i = 0; i < count; i++) {
-        //Py_XDECREF(po_numpy_arrays + i);
+        Py_XDECREF(po_numpy_arrays + i);
     }
-    //Py_XDECREF(po_numpy_array_combine);
+    Py_XDECREF(po_numpy_array_combine);
 
     return ret_value;
 }
@@ -763,12 +763,12 @@ H5VL__iod_integrate(const char *integrate_script, void **combine_data,
 
 done:
     /* Cleanup */
-    //Py_XDECREF(po_func);
-    //Py_XDECREF(po_args_tup);
+    Py_XDECREF(po_func);
+    Py_XDECREF(po_args_tup);
     for(i = 0; i < count; i++) {
-        //Py_XDECREF(po_numpy_arrays + i);
+        Py_XDECREF(po_numpy_arrays + i);
     }
-    //Py_XDECREF(po_numpy_array_combine);
+    Py_XDECREF(po_numpy_array_integrate);
 
     return ret_value;
 }
