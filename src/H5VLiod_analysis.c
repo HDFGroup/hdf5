@@ -905,24 +905,24 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
     size_t *split_num_elmts;
     hid_t split_type_id = FAIL;
     hg_request_t *hg_reqs = NULL;
-    uint32_t u, i;
+    uint32_t u, i, processed = 0;
     unsigned int num_targets = num_ions_g;//obj_map->u_map.array_map.n_range;
     coords_t coords;
     analysis_farm_in_t farm_input;
     analysis_farm_out_t *farm_output = NULL;
 
     /* function shipper requests */
-    if(NULL == (hg_reqs = (hg_request_t *) malloc(sizeof(hg_request_t) * num_targets)))
+    if(NULL == (hg_reqs = (hg_request_t *)calloc(num_targets, sizeof(hg_request_t))))
         HGOTO_ERROR_FF(FAIL, "can't allocate HG requests");
 
-    if(NULL == (farm_output = (analysis_farm_out_t *) malloc
-                (sizeof(analysis_farm_out_t) * num_targets)))
+    if(NULL == (farm_output = (analysis_farm_out_t *)calloc
+                (num_targets, sizeof(analysis_farm_out_t))))
         HGOTO_ERROR_FF(FAIL, "can't allocate HG requests");
 
-    if(NULL == (split_data = (void **) malloc(sizeof(void *) * num_targets)))
+    if(NULL == (split_data = (void **)calloc(num_targets, sizeof(void *))))
         HGOTO_ERROR_FF(FAIL, "can't allocate array for split data");
 
-    if(NULL == (split_num_elmts = (size_t *) malloc(sizeof(size_t) * num_targets)))
+    if(NULL == (split_num_elmts = (size_t *)calloc(num_targets, sizeof(size_t))))
         HGOTO_ERROR_FF(FAIL, "can't allocate array for num elmts");
 
     farm_input.obj_id = obj_map->oid;
@@ -935,8 +935,12 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
 #if 1
     /* Farm work to the IONs and combine the result */
     for(i=0 ; i<num_ions_g ; i++) {
-        hid_t space_id;
+        hid_t space_id = FAIL;
         hbool_t first_space = TRUE;
+
+        /* no more ranges to process */
+        if(obj_map->u_map.array_map.n_range == processed)
+            break;
 
         /* Get all ranges that are on Node i into a dataspace */
         for(u = 0; u < obj_map->u_map.array_map.n_range ; u++) {
@@ -964,8 +968,14 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
 
                 if(H5Sclose(space_layout) < 0)
                     HGOTO_ERROR_FF(FAIL, "cannot close region");
+
+                processed ++;
             }
         }
+
+        /* no data is local to this ION */
+        if(space_id == FAIL)
+            continue;
 
         if(H5Smodify_select(space_id, H5S_SELECT_AND, region) < 0)
             HGOTO_ERROR_FF(FAIL, "Unable to AND 2 dataspace selections");

@@ -153,8 +153,8 @@ init_data(size_t ntuples, struct analysis_data *data)
     data->temperature = (double *) malloc(sizeof(double) * ncomponents * ntuples);
     for (i = 0; i < ntuples; i++) {
        for (j = 0; j < ncomponents; j++) {
-           data->temperature[ncomponents * i + j] =
-                   (double) (((hsize_t) my_rank) * ntuples + i);
+           data->temperature[ncomponents * i + j] = i;
+           //(double) (((hsize_t) my_rank) * ntuples + i);
        }
     }
 }
@@ -334,20 +334,19 @@ main(int argc, char **argv)
     MPI_Barrier(MPI_COMM_WORLD);
 
     free_data(&data);
-
-    if(0 == my_rank) {
-        ship_analysis(file_name);
-    }
-
-    MPI_Barrier(MPI_COMM_WORLD);
-
     ret = H5ESclose(estack_id);
     assert(ret == 0);
 
     /* Close the file. */
     ret = H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL);
     assert(0 == ret);
+    MPI_Barrier(MPI_COMM_WORLD);
 
+    if(0 == my_rank) {
+        ship_analysis(file_name);
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
     EFF_finalize();
     MPI_Finalize();
 
