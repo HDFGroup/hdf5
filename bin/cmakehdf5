@@ -101,16 +101,16 @@ echo Running Cmake for HDF5-${version} ...
 #      4. Configure the C library, tools and tests with this command:
 STEP "Configure..." "cmake -G 'Unix Makefiles' -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ../hdf5" $configlog
       
-#      3. Build the C library, tools and tests with this command:
+#      5. Build the C library, tools and tests with this command:
 STEP "Build the library, tools and tests, ..." "cmake --build . --config Release" $makelog
       
-#      4. Test the C library and tools with this command:
+#      6. Test the C library and tools with this command:
 STEP "Test the library and tools..." "ctest . -C Release" $testlog
       
-#      5. Create an install image with this command:
+#      7. Create an install image with this command:
 STEP "Create an install image..." "cpack -C Release CPackConfig.cmake" $packlog
       
-#      6. Install with this command:
+#      8. Install with this command:
 STEP "Install..." "./HDF5-${version}-Linux.sh --skip-license" $installlog
 # save the last exit code
 exit_code=$?
@@ -199,7 +199,7 @@ set (SITE_BUILDNAME_SUFFIX "cmakehdf5")
 set (LOCAL_SKIP_UPDATE TRUE)
 set (REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/branches/hdf5_1_8")
 # -- Standard build options  
-set (ADD_BUILD_OPTIONS "-DCMAKE_INSTALL_PREFIX:PATH=/usr/local/hdf5.1.8 -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=\"SVN\" -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
+set (ADD_BUILD_OPTIONS "-DCMAKE_INSTALL_PREFIX:PATH=${CTEST_BINARY_DIRECTORY} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=\"SVN\" -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
 
 # Use multiple CPU cores to build
 include(ProcessorCount)

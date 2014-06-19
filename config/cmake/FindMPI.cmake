@@ -427,18 +427,18 @@ function (interrogate_mpi_compiler lang try_libs)
           HINTS         ${_MPI_BASE_DIR} ${_MPI_PREFIX_PATH}
           PATH_SUFFIXES lib)
         if (MPI_LIBRARIES_WORK AND MPI_LIB)
-          set(MPI_LIBRARIES_WORK ${MPI_LIBRARIES_WORK} ${MPI_LIB})
+          list(APPEND MPI_LIBRARIES_WORK ${MPI_LIB})
         endif()
       endif()
 
       if (${lang} STREQUAL Fortran)
         set(MPI_LIB "MPI_LIB-NOTFOUND" CACHE FILEPATH "Cleared" FORCE)
         find_library(MPI_LIB
-          NAMES         fmpi fmpich fmpich2 fmpich2g
+          NAMES         fmpi fmpich fmpich2 fmpich2g msmpifec msmpifmc
           HINTS         ${_MPI_BASE_DIR} ${_MPI_PREFIX_PATH}
-          PATH_SUFFIXES lib)
+          PATH_SUFFIXES lib lib/${MS_MPI_ARCH_DIR} Lib Lib/${MS_MPI_ARCH_DIR})
         if (MPI_LIBRARIES_WORK AND MPI_LIB)
-          set(MPI_LIBRARIES_WORK ${MPI_LIBRARIES_WORK} ${MPI_LIB})
+          list(APPEND MPI_LIBRARIES_WORK ${MPI_LIB})
         endif()
       endif()
 

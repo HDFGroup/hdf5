@@ -88,7 +88,7 @@ test_genprop_basic_class(void)
     CHECK_PTR(name, "H5Pget_class_name");
     if(HDstrcmp(name,CLASS1_NAME)!=0)
         TestErrPrintf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
-    HDfree(name);
+    H5free_memory(name);
 
     /* Check class parent */
     cid2 = H5Pget_class_parent(cid1);
@@ -119,7 +119,7 @@ test_genprop_basic_class(void)
     CHECK_PTR(name, "H5Pget_class_name");
     if(HDstrcmp(name,CLASS2_NAME)!=0)
         TestErrPrintf("Class names don't match!, name=%s, CLASS2_NAME=%s\n",name,CLASS2_NAME);
-    HDfree(name);
+    H5free_memory(name);
 
     /* Check class parent */
     cid2 = H5Pget_class_parent(cid1);
@@ -1868,7 +1868,7 @@ test_genprop_refcount(void)
     CHECK_PTR(name, "H5Pget_class_name");
     if(HDstrcmp(name,CLASS1_NAME)!=0)
         TestErrPrintf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
-    HDfree(name);
+    H5free_memory(name);
 
     /* Close class */
     ret = H5Pclose_class(cid1);
@@ -1887,7 +1887,7 @@ test_genprop_refcount(void)
     CHECK_PTR(name, "H5Pget_class_name");
     if(HDstrcmp(name,CLASS1_NAME)!=0)
         TestErrPrintf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
-    HDfree(name);
+    H5free_memory(name);
 
     /* Close list */
     ret = H5Pclose(lid1);
@@ -1898,7 +1898,7 @@ test_genprop_refcount(void)
     CHECK_PTR(name, "H5Pget_class_name");
     if(HDstrcmp(name,CLASS1_NAME)!=0)
         TestErrPrintf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
-    HDfree(name);
+    H5free_memory(name);
 
     /* Close class */
     ret = H5Pclose_class(cid1);

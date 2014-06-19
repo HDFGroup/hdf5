@@ -193,8 +193,6 @@ int do_copy_refobjs(hid_t fidin,
                                         goto error;
                                     if(options->verbose)
                                     {
-
-
                                         printf(FORMAT_OBJ,"dset",travt->objs[i].name );
                                         printf("object <%s> object reference created to <%s>\n",
                                             travt->objs[i].name,
@@ -468,7 +466,7 @@ static int copy_refs_attr(hid_t loc_in,
     hbool_t    is_ref=0, is_ref_vlen=0, is_ref_array=0, is_ref_comp=0;
     void  *refbuf = NULL;
     void  *buf = NULL;
-    const char* refname;
+    const char* refname = NULL;
     int   *ref_comp_index = NULL;
     size_t *ref_comp_size = NULL;
     int    ref_comp_field_n = 0;
@@ -477,8 +475,7 @@ static int copy_refs_attr(hid_t loc_in,
     if(H5Oget_info(loc_in, &oinfo) < 0)
         goto error;
 
-    for(u = 0; u < (unsigned)oinfo.num_attrs; u++)
-    {
+    for(u = 0; u < (unsigned)oinfo.num_attrs; u++) {
     	is_ref = is_ref_vlen = is_ref_array = is_ref_comp = 0;
 
         /* open attribute */
@@ -499,56 +496,55 @@ static int copy_refs_attr(hid_t loc_in,
 
         is_ref = (type_class == H5T_REFERENCE);
 
-        if (type_class == H5T_VLEN ) {
-        	hid_t base_type = -1;
-        	base_type = H5Tget_super(ftype_id);
-        	is_ref_vlen = (H5Tget_class(base_type)==H5T_REFERENCE);
-        	msize = H5Tget_size(base_type);
-        	H5Tclose(base_type);
-        }
+        if(type_class == H5T_VLEN ) {
+            hid_t base_type;
 
-        if (type_class == H5T_ARRAY ) {
-        	hid_t base_type = -1;
-        	base_type = H5Tget_super(ftype_id);
-        	is_ref_array = (H5Tget_class(base_type)==H5T_REFERENCE);
-        	msize = H5Tget_size(base_type);
-        	H5Tclose(base_type);
+            base_type = H5Tget_super(ftype_id);
+            is_ref_vlen = (H5Tget_class(base_type)==H5T_REFERENCE);
+            msize = H5Tget_size(base_type);
+            H5Tclose(base_type);
         }
+        else if(type_class == H5T_ARRAY ) {
+            hid_t base_type;
 
-        if (type_class == H5T_COMPOUND) {
-        	int nmembers = H5Tget_nmembers(ftype_id) ;
-        	if (nmembers < 1)
-        		goto error;
+            base_type = H5Tget_super(ftype_id);
+            is_ref_array = (H5Tget_class(base_type)==H5T_REFERENCE);
+            msize = H5Tget_size(base_type);
+            H5Tclose(base_type);
+        }
+        else if(type_class == H5T_COMPOUND) {
+            int nmembers = H5Tget_nmembers(ftype_id) ;
+
+            if (nmembers < 1)
+                goto error;
 
             ref_comp_index = (int *)HDmalloc(nmembers*sizeof (int));
             ref_comp_size = (size_t *)HDmalloc(nmembers*sizeof(ref_comp_size));
             ref_comp_field_n = 0;
 
-        	for (i=0; i<(unsigned)nmembers; i++) {
-        		hid_t mtid = H5Tget_member_type( ftype_id, i );
-        		if ((H5Tget_class(mtid)==H5T_REFERENCE)) {
-        			ref_comp_index[ref_comp_field_n] = i;
-        			ref_comp_size[ref_comp_field_n] = H5Tget_size(mtid);
-        			ref_comp_field_n++;
-        		}
-        		H5Tclose(mtid);
-        	}
+            for (i=0; i<(unsigned)nmembers; i++) {
+                hid_t mtid = H5Tget_member_type( ftype_id, i );
+
+                if ((H5Tget_class(mtid)==H5T_REFERENCE)) {
+                    ref_comp_index[ref_comp_field_n] = i;
+                    ref_comp_size[ref_comp_field_n] = H5Tget_size(mtid);
+                    ref_comp_field_n++;
+                }
+                H5Tclose(mtid);
+            }
             
             /* if compound don't contain reference type member, free the above 
              * mallocs. Otherwise there can be memory leaks by the 'continue' 
              * statement below. */
-            if (!ref_comp_field_n) 
-            {
-                if (ref_comp_index) 
-                {
-                	HDfree(ref_comp_index);
-                	ref_comp_index = NULL;
+            if (!ref_comp_field_n) {
+                if (ref_comp_index) {
+                    HDfree(ref_comp_index);
+                    ref_comp_index = NULL;
                 }
 
-                if (ref_comp_size) 
-                {
+                if (ref_comp_size) {
             	    HDfree(ref_comp_size);
-        	        ref_comp_size = NULL;
+                    ref_comp_size = NULL;
                 }
             }
         }
@@ -556,10 +552,10 @@ static int copy_refs_attr(hid_t loc_in,
         is_ref_comp = (ref_comp_field_n > 0);
 
         if (!(is_ref || is_ref_vlen || is_ref_array || is_ref_comp)) {
-        	H5Tclose(mtype_id);
-           	H5Tclose(ftype_id);
-        	H5Aclose(attr_id);
-        	continue;
+            H5Tclose(mtype_id);
+            H5Tclose(ftype_id);
+            H5Aclose(attr_id);
+            continue;
         }
 
         /* get name */
@@ -584,32 +580,30 @@ static int copy_refs_attr(hid_t loc_in,
             nelmts *= dims[j];
 
         if (is_ref_array) {
-        	unsigned        array_rank = 0;
-        	hsize_t    array_size = 1;
-        	hsize_t array_dims[H5S_MAX_RANK];
-        	hid_t base_type = -1;
-        	base_type = H5Tget_super(ftype_id);
-        	msize = H5Tget_size(base_type);
-           	H5Tclose(base_type);
+            unsigned        array_rank = 0;
+            hsize_t    array_size = 1;
+            hsize_t array_dims[H5S_MAX_RANK];
+            hid_t base_type;
 
-        	array_rank = H5Tget_array_ndims(mtype_id);
-        	H5Tget_array_dims2(mtype_id, array_dims);
+            base_type = H5Tget_super(ftype_id);
+            msize = H5Tget_size(base_type);
+            H5Tclose(base_type);
+
+            array_rank = H5Tget_array_ndims(mtype_id);
+            H5Tget_array_dims2(mtype_id, array_dims);
             for(j = 0; j <array_rank; j++)
             	array_size *= array_dims[j];
             nelmts *= array_size;
-         }
+        }
 
         if((attr_out = H5Acreate2(loc_out, name, ftype_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
 
-        if (nelmts>0)
-        {
+        if (nelmts>0) {
             /* handle object references */
-            if((is_ref || is_ref_array) && (H5R_OBJ_REF_BUF_SIZE==msize))
-            {
+            if((is_ref || is_ref_array) && (H5R_OBJ_REF_BUF_SIZE==msize)) {
                 buf = (hobj_ref_t *)HDmalloc((unsigned)(nelmts * msize));
-                if(buf == NULL)
-                {
+                if(buf == NULL) {
                     printf("cannot read into memory\n");
                     goto error;
                 } /* end if */
@@ -617,26 +611,23 @@ static int copy_refs_attr(hid_t loc_in,
                     goto error;
 
                 refbuf = (hobj_ref_t *)HDcalloc((unsigned)nelmts, msize);
-                if(refbuf == NULL)
-                {
-                    printf( "cannot allocate memory\n" );
+                if(refbuf == NULL) {
+                    printf("cannot allocate memory\n");
                     goto error;
                 } /* end if */
 
-                for(i = 0; i < (unsigned)nelmts; i++)
-                {
+                for(i = 0; i < (unsigned)nelmts; i++) {
                     if (update_ref_value(attr_id, H5R_OBJECT, &((hobj_ref_t *)buf)[i], fidout, &((hobj_ref_t *)refbuf)[i], travt)<0)
-                		continue;
+                        continue;
                     if(options->verbose)
                         printf("object <%s> reference created to <%s>\n", name, refname);
-                } /* k */
-            }/*H5T_STD_REF_OBJ*/
+                } /* i */
+            } /* H5T_STD_REF_OBJ */
             /* handle region references */
-            else if((is_ref || is_ref_array) && (H5R_DSET_REG_REF_BUF_SIZE == msize))
-            {
+            else if((is_ref || is_ref_array) && (H5R_DSET_REG_REF_BUF_SIZE == msize)) {
                 buf = (hdset_reg_ref_t *)HDmalloc((unsigned)(nelmts * msize));
-                if(buf == NULL)
-                {
+
+                if(buf == NULL) {
                     printf( "cannot read into memory\n" );
                     goto error;
                 } /* end if */
@@ -648,16 +639,14 @@ static int copy_refs_attr(hid_t loc_in,
                 *-------------------------------------------------------------------------
                 */
                 refbuf = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), (size_t)nelmts); /*init to zero */
-                if(refbuf == NULL)
-                {
+                if(refbuf == NULL) {
                     printf( "cannot allocate memory\n" );
                     goto error;
                 } /* end if */
 
-                for(i = 0; i < (unsigned)nelmts; i++)
-                {
+                for(i = 0; i < (unsigned)nelmts; i++) {
                     if (update_ref_value(attr_id, H5R_DATASET_REGION, &((hdset_reg_ref_t *)buf)[i], fidout, &((hdset_reg_ref_t *)refbuf)[i], travt)<0)
-                		continue;
+                        continue;
                     if(options->verbose)
                         printf("object <%s> region reference created to <%s>\n", name, refname);
                 }
@@ -668,8 +657,7 @@ static int copy_refs_attr(hid_t loc_in,
                 buf = (hvl_t *)HDmalloc((unsigned)(nelmts * sizeof(hvl_t)));
                 refbuf = buf; /* reuse the read buffer for write */
 
-                if(buf == NULL)
-                {
+                if(buf == NULL) {
                     printf( "cannot read into memory\n" );
                     goto error;
                 } /* end if */
@@ -677,28 +665,31 @@ static int copy_refs_attr(hid_t loc_in,
                 if(H5Aread(attr_id, mtype_id, buf) < 0)
                     goto error;
 
- 				if (H5R_OBJ_REF_BUF_SIZE==msize) {
-					hobj_ref_t ref_out;
-					for (i=0; i<(unsigned)nelmts; i++) {
-						hobj_ref_t *ptr = (hobj_ref_t *)((hvl_t *)buf)[i].p;
-						for (j=0; j<((hvl_t *)buf)[i].len; j++ ) {
-							if (update_ref_value(attr_id, H5R_OBJECT, &(ptr[j]), fidout, &ref_out, travt)<0)
-								continue;
-							HDmemcpy(&(ptr[j]), &ref_out, msize);
-						}
-					}  /* for (i=0; i<nelems; i++) */
-				} else if (H5R_DSET_REG_REF_BUF_SIZE == msize) {
+                if (H5R_OBJ_REF_BUF_SIZE==msize) {
+                    hobj_ref_t ref_out;
 
-					hdset_reg_ref_t ref_out;
-					for (i=0; i<(unsigned)nelmts; i++) {
-						hdset_reg_ref_t *ptr = (hdset_reg_ref_t *)((hvl_t *)buf)[i].p;
-						for (j=0; j<((hvl_t *)buf)[i].len; j++ ) {
-							if (update_ref_value(attr_id, H5R_DATASET_REGION, &(ptr[j]), fidout, &ref_out, travt)<0)
-								continue;
-							HDmemcpy(&(ptr[j]), &ref_out, msize);
-						}
-					}  /* for (i=0; i<nelems; i++) */
-				}
+                    for (i=0; i<(unsigned)nelmts; i++) {
+                        hobj_ref_t *ptr = (hobj_ref_t *)((hvl_t *)buf)[i].p;
+
+                        for (j=0; j<((hvl_t *)buf)[i].len; j++ ) {
+                            if (update_ref_value(attr_id, H5R_OBJECT, &(ptr[j]), fidout, &ref_out, travt)<0)
+                                continue;
+                            HDmemcpy(&(ptr[j]), &ref_out, msize);
+                        }
+                    }  /* for (i=0; i<nelems; i++) */
+                } else if (H5R_DSET_REG_REF_BUF_SIZE == msize) {
+                    hdset_reg_ref_t ref_out;
+
+                    for (i=0; i<(unsigned)nelmts; i++) {
+                        hdset_reg_ref_t *ptr = (hdset_reg_ref_t *)((hvl_t *)buf)[i].p;
+
+                        for (j=0; j<((hvl_t *)buf)[i].len; j++ ) {
+                            if (update_ref_value(attr_id, H5R_DATASET_REGION, &(ptr[j]), fidout, &ref_out, travt)<0)
+                                continue;
+                            HDmemcpy(&(ptr[j]), &ref_out, msize);
+                        }
+                    }  /* for (i=0; i<nelems; i++) */
+                }
             } /* else if (is_ref_vlen) */
             else if (is_ref_comp) {
             	/* handle ref fields in a compound */
@@ -822,9 +813,9 @@ MapIdToName(hid_t refobj_id, trav_table_t *travt)
 
     /* linear search */
     for(u = 0; u < travt->nobjs; u++) {
-        if(travt->objs[u].type == H5O_TYPE_DATASET ||
-                travt->objs[u].type == H5O_TYPE_GROUP ||
-                travt->objs[u].type == H5O_TYPE_NAMED_DATATYPE) {
+        if(travt->objs[u].type == (h5trav_type_t)H5O_TYPE_DATASET ||
+                travt->objs[u].type == (h5trav_type_t)H5O_TYPE_GROUP ||
+                travt->objs[u].type == (h5trav_type_t)H5O_TYPE_NAMED_DATATYPE) {
             H5O_info_t   ref_oinfo;     /* Stat for the refobj id */
 
             /* obtain information to identify the referenced object uniquely */

@@ -16,11 +16,14 @@ target_link_libraries (${HDF5_F90_C_TEST_LIB_TARGET}
     ${HDF5_TEST_LIB_TARGET}
 )
 H5_SET_LIB_OPTIONS (${HDF5_F90_C_TEST_LIB_TARGET} ${HDF5_F90_C_TEST_LIB_NAME} ${LIB_TYPE})
-set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test/fortran)
+set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
+    FOLDER libraries/test/fortran
+    INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+)
 
 add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf.f90)
 set (SHARED_LINK_FLAGS " ")
-if (WIN32 AND NOT CYGWIN)
+if (WIN32)
   if (BUILD_SHARED_LIBS)
     set_property (TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS BUILD_HDF5_DLL)
     if (MSVC)
@@ -28,7 +31,7 @@ if (WIN32 AND NOT CYGWIN)
     endif (MSVC)
   endif (BUILD_SHARED_LIBS)
   set_property (TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS HDF5F90_WINDOWS)
-endif (WIN32 AND NOT CYGWIN)
+endif (WIN32)
 TARGET_FORTRAN_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET} " " ${SHARED_LINK_FLAGS})
 set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES LINKER_LANGUAGE Fortran)
 target_link_libraries (${HDF5_F90_TEST_LIB_TARGET}
@@ -37,7 +40,10 @@ target_link_libraries (${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_LIB_TARGET}
 )
 H5_SET_LIB_OPTIONS (${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_TEST_LIB_NAME} ${LIB_TYPE})
-set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test/fortran)
+set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES
+    FOLDER libraries/test/fortran
+    INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+)
 
 #-----------------------------------------------------------------------------
 # Add Tests

@@ -121,6 +121,7 @@ extern "C" {
 #endif
 void test_attr();
 void test_compound();
+void test_dsproplist();
 void test_file();
 void test_filters();
 void test_links();
@@ -133,6 +134,7 @@ void test_dset();
 /* Prototypes for the cleanup routines */
 void cleanup_attr();
 void cleanup_compound();
+void cleanup_dsproplist();
 void cleanup_dsets();
 void cleanup_file();
 void cleanup_filters();

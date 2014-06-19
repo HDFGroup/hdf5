@@ -1181,5 +1181,111 @@ CONTAINS
 
   END SUBROUTINE h5pcreate_class_f
 
+!
+!****s* H5P (F03)/h5pset_file_image_f_F03
+!
+! NAME
+!  h5pset_file_image_f
+!
+! PURPOSE
+!  Sets an initial file image in a memory buffer.
+!
+! Inputs:
+!  fapl_id - File access property list identifier
+!  buf_ptr - Pointer to the initial file image, 
+!            or C_NULL_PTR if no initial file image is desired
+!  buf_len - Size of the supplied buffer, or 0 (zero) if no initial image is desired
+!
+! Outputs:
+!  hdferr  - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  February 19, 2012
+!
+! Fortran2003 Interface:
+  SUBROUTINE h5pset_file_image_f(fapl_id, buf_ptr, buf_len, hdferr)
+    USE iso_c_binding
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)  :: fapl_id
+    TYPE(C_PTR)    , INTENT(IN)  :: buf_ptr
+    INTEGER(SIZE_T), INTENT(IN)  :: buf_len
+    INTEGER        , INTENT(OUT) :: hdferr
+!*****
+    INTERFACE
+       INTEGER FUNCTION h5pset_file_image_c(fapl_id, buf_ptr, buf_len)
+         USE iso_c_binding
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDCLOSEF90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FILE_IMAGE_C'::h5pset_file_image_c
+         !DEC$ENDIF
+         INTEGER(HID_T), INTENT(IN) :: fapl_id
+         TYPE(C_PTR), VALUE :: buf_ptr
+         INTEGER(SIZE_T), INTENT(IN)  :: buf_len
+       END FUNCTION h5pset_file_image_c
+    END INTERFACE
+
+    hdferr = h5pset_file_image_c(fapl_id, buf_ptr, buf_len)
+
+  END SUBROUTINE h5pset_file_image_f
+!
+!****s* H5P (F03)/h5pget_file_image_f_F03
+!
+! NAME
+!  h5pget_file_image_f
+!
+! PURPOSE
+!  Retrieves a copy of the file image designated as the initial content and structure of a file. 
+!
+! Inputs:
+!  fapl_id     - File access property list identifier.
+!
+! Outputs:
+!  buf_ptr     - Will hold either a C_NULL_PTR or a scalar of type
+!                c_loc. If buf_ptr is not C_NULL_PTR, on successful
+!                return, buf_ptr shall contain a C pointer to a copy
+!                of the initial image provided in the last call to
+!                H5Pset_file_image_f for the supplied fapl_id, or
+!                buf_ptr shall contain a C_NULL_PTR if there is no
+!                initial image set.
+!
+!  buf_len_ptr - Contains the value of the buffer parameter for
+!                the initial image in the supplied fapl_id. The value
+!                will be 0 if no initial image is set.
+!
+!
+!  hdferr      - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  February 19, 2012
+!
+! Fortran2003 Interface:
+  SUBROUTINE h5pget_file_image_f(fapl_id, buf_ptr, buf_len_ptr, hdferr)
+    USE iso_c_binding
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)                :: fapl_id
+    TYPE(C_PTR)    , INTENT(OUT), DIMENSION(*) :: buf_ptr
+    INTEGER(SIZE_T), INTENT(OUT)               :: buf_len_ptr
+    INTEGER        , INTENT(OUT)               :: hdferr
+    
+!*****
+    INTERFACE
+       INTEGER FUNCTION h5pget_file_image_c(fapl_id, buf_ptr, buf_len_ptr)
+         USE iso_c_binding
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDCLOSEF90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_FILE_IMAGE_C'::h5pget_file_image_c
+         !DEC$ENDIF
+         INTEGER(HID_T), INTENT(IN) :: fapl_id
+         TYPE(C_PTR), DIMENSION(*), INTENT(OUT)  :: buf_ptr
+         INTEGER(SIZE_T), INTENT(OUT)  :: buf_len_ptr
+       END FUNCTION h5pget_file_image_c
+    END INTERFACE
+
+    hdferr = h5pget_file_image_c(fapl_id, buf_ptr, buf_len_ptr)
+
+  END SUBROUTINE h5pget_file_image_f
+
 END MODULE H5P_PROVISIONAL
 

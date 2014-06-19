@@ -273,7 +273,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     char           *ptr, last = '\0';
     size_t          i, j;
     hid_t           driver = -1;
-    int        isppdriver = 0;  /* if the driver is MPI parallel */
+    int             isppdriver = 0;  /* if the driver is MPI parallel */
 
     if (!base_name || !fullname || size < 1)
         return NULL;
@@ -294,7 +294,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
      * could be of value -1 if it is not defined.
      */
-    isppdriver = H5P_DEFAULT != fapl && (H5FD_MPIO==driver || H5FD_MPIPOSIX==driver);
+    isppdriver = H5P_DEFAULT != fapl && (H5FD_MPIO==driver);
 
     /* Check HDF5_NOCLEANUP environment setting.
      * (The #ifdef is needed to prevent compile failure in case MPI is not
@@ -863,7 +863,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
         /* Check for simple cases */
         if(driver == H5FD_SEC2 || driver == H5FD_STDIO || driver == H5FD_CORE ||
 #ifdef H5_HAVE_PARALLEL
-                driver == H5FD_MPIO || driver == H5FD_MPIPOSIX ||
+                driver == H5FD_MPIO || 
 #endif /* H5_HAVE_PARALLEL */
 #ifdef H5_HAVE_WINDOWS
                 driver == H5FD_WINDOWS ||

@@ -21,7 +21,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src, test, and c++/src directories
-INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/c++/src
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/c++/src
 
 # Shared C++ libraries aren't universally supported.
 if CXX_SHARED_CONDITIONAL
@@ -38,7 +38,7 @@ check_PROGRAMS=$(TEST_PROG)
 LDADD=$(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
 
 testhdf5_SOURCES=testhdf5.cpp dsets.cpp tattr.cpp tcompound.cpp	\
-	tfile.cpp tfilter.cpp th5s.cpp tlinks.cpp trefer.cpp	\
+	tdspl.cpp tfile.cpp tfilter.cpp th5s.cpp tlinks.cpp trefer.cpp	\
 	ttypes.cpp tvlstr.cpp h5cpputil.cpp
 
 # Tell conclude.am that these are C++ tests.

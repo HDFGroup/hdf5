@@ -63,7 +63,6 @@ Features:
 Clear file buffers before write: @HDF5_Enable_Clear_File_Buffers@
            Using memory checker: @HDF5_ENABLE_USING_MEMCHECKER@
          Function Stack Tracing: @HDF5_ENABLE_CODESTACK@
-                           GPFS: @HDF5_ENABLE_GPFS@
       Strict File Format Checks: @HDF5_STRICT_FORMAT_CHECKS@
    Optimization Instrumentation: @HDF5_Enable_Instrument@
        Large File Support (LFS): @HDF5_ENABLE_LARGE_FILE@

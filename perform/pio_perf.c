@@ -216,14 +216,6 @@ static struct long_options l_opts[] = {
     { "min-xfe", require_arg, 'x' },
     { "min-xf", require_arg, 'x' },
     { "min-x", require_arg, 'x' },
-    { "mpi-posix", no_arg, 'm' },
-    { "mpi-posi", no_arg, 'm' },
-    { "mpi-pos", no_arg, 'm' },
-    { "mpi-po", no_arg, 'm' },
-    { "mpi-p", no_arg, 'm' },
-    { "mpi-", no_arg, 'm' },
-    { "mpi", no_arg, 'm' },
-    { "mp", no_arg, 'm' },
     { "num-bytes", require_arg, 'e' },
     { "num-byte", require_arg, 'e' },
     { "num-byt", require_arg, 'e' },
@@ -294,7 +286,6 @@ struct options {
     off_t h5_threshold;         /* threshold for alignment in HDF5 file */
     int h5_use_chunks;     	/* Make HDF5 dataset chunked            */
     int h5_write_only;        	/* Perform the write tests only         */
-    unsigned h5_use_mpi_posix;  /* Use MPI-posix VFD for HDF5 I/O (instead of MPI-I/O VFD) */
     int verify;        		/* Verify data correctness              */
 };
 
@@ -444,7 +435,6 @@ run_test_loop(struct options *opts)
     parms.h5_thresh = opts->h5_threshold;
     parms.h5_use_chunks = opts->h5_use_chunks;
     parms.h5_write_only = opts->h5_write_only;
-    parms.h5_use_mpi_posix = opts->h5_use_mpi_posix;
     parms.verify = opts->verify;
 
     /* start with max_num_procs and decrement it by half for each loop. */
@@ -562,18 +552,15 @@ run_test(iotype iot, parameters parms, struct options *opts)
     output_report("IO API = ");
 
     switch (iot) {
-    case POSIXIO:
-        output_report("POSIX\n");
-        break;
-    case MPIO:
-        output_report("MPIO\n");
-        break;
-    case PHDF5:
-        if(parms.h5_use_mpi_posix)
-            output_report("PHDF5 (w/MPI-posix driver)\n");
-        else
-            output_report("PHDF5 (w/MPI-I/O driver)\n");
-        break;
+        case POSIXIO:
+            output_report("POSIX\n");
+            break;
+        case MPIO:
+            output_report("MPIO\n");
+            break;
+        case PHDF5:
+            output_report("PHDF5 (w/MPI-IO driver)\n");
+            break;
     }
 
     MPI_Comm_size(pio_comm_g, &comm_size);
@@ -1232,11 +1219,7 @@ report_parameters(struct options *opts)
     else
         HDfprintf(output, "1D\n");
 
-    HDfprintf(output, "rank %d: VFL used for HDF5 I/O=", rank);
-    if(opts->h5_use_mpi_posix)
-        HDfprintf(output, "MPI-posix driver\n");
-    else
-        HDfprintf(output, "MPI-I/O driver\n");
+    HDfprintf(output, "rank %d: VFL used for HDF5 I/O=%s\n", rank, "MPI-IO driver");
 
     HDfprintf(output, "rank %d: Data storage method in HDF5=", rank);
     if(opts->h5_use_chunks)
@@ -1295,7 +1278,6 @@ parse_command_line(int argc, char *argv[])
     cl_opts->h5_threshold = 1;      /* No threshold for aligning HDF5 objects by default */
     cl_opts->h5_use_chunks = FALSE; /* Don't chunk the HDF5 dataset by default */
     cl_opts->h5_write_only = FALSE; /* Do both read and write by default */
-    cl_opts->h5_use_mpi_posix = FALSE; /* Don't use MPI-posix VFD for HDF5 I/O by default */
     cl_opts->verify = FALSE;        /* No Verify data correctness by default */
 
     while ((opt = get_option(argc, (const char **)argv, s_opts, l_opts)) != EOF) {
@@ -1427,10 +1409,6 @@ parse_command_line(int argc, char *argv[])
             break;
         case 'I':
             cl_opts->interleaved = 1;
-            break;
-        case 'm':
-            /* Turn on MPI-posix VFL driver for HDF5 I/O */
-            cl_opts->h5_use_mpi_posix = TRUE;
             break;
         case 'o':
             cl_opts->output_file = opt_arg;
@@ -1604,8 +1582,6 @@ usage(const char *prog)
         printf("     -I, --interleaved           Interleaved access pattern\n");
         printf("                                 (see below for example)\n");
         printf("                                 [default: Contiguous access pattern]\n");
-        printf("     -m, --mpi-posix             Use MPI-posix driver for HDF5 I/O\n");
-        printf("                                 [default: use MPI-I/O driver]\n");
         printf("     -o F, --output=F            Output raw data into file F [default: none]\n");
         printf("     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
         printf("     -P N, --max-num-processes=N Maximum number of processes to use\n");

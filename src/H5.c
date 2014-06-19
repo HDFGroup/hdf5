@@ -806,3 +806,28 @@ H5close(void)
     FUNC_LEAVE_API_NOFS(SUCCEED)
 } /* end H5close() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5free_memory
+ *
+ * Purpose:	Frees memory allocated by the library that it is the user's
+ *              responsibility to free.  Ensures that the same library
+ *              that was used to allocate the memory frees it.  Passing
+ *              NULL pointers is allowed.
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5free_memory(void *mem)
+{
+    FUNC_ENTER_API_NOINIT
+    H5TRACE1("e", "*x", mem);
+
+    /* At this time, it is impossible for this to fail. */
+    HDfree(mem);
+
+    FUNC_LEAVE_API(SUCCEED)
+} /* end H5free_memory() */
+

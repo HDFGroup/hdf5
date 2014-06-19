@@ -216,7 +216,6 @@ set (H5FD_SRCS
     ${HDF5_SRC_DIR}/H5FDlog.c
     ${HDF5_SRC_DIR}/H5FDmpi.c
     ${HDF5_SRC_DIR}/H5FDmpio.c
-    ${HDF5_SRC_DIR}/H5FDmpiposix.c
     ${HDF5_SRC_DIR}/H5FDmulti.c
     ${HDF5_SRC_DIR}/H5FDsec2.c
     ${HDF5_SRC_DIR}/H5FDspace.c
@@ -231,7 +230,6 @@ set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDlog.h
     ${HDF5_SRC_DIR}/H5FDmpi.h
     ${HDF5_SRC_DIR}/H5FDmpio.h
-    ${HDF5_SRC_DIR}/H5FDmpiposix.h
     ${HDF5_SRC_DIR}/H5FDmulti.h
     ${HDF5_SRC_DIR}/H5FDpkg.h
     ${HDF5_SRC_DIR}/H5FDpublic.h
@@ -785,9 +783,9 @@ set (H5_PRIVATE_HEADERS
 #-----------------------------------------------------------------------------
 add_executable (H5detect ${HDF5_SRC_DIR}/H5detect.c)
 TARGET_C_PROPERTIES (H5detect " " " ")
-if (MSVC)
+if (MSVC OR MINGW)
   target_link_libraries (H5detect "ws2_32.lib")
-endif (MSVC)
+endif (MSVC OR MINGW)
 
 set (CMD $<TARGET_FILE:H5detect>)
 add_custom_command (
@@ -799,9 +797,9 @@ add_custom_command (
 
 add_executable (H5make_libsettings ${HDF5_SRC_DIR}/H5make_libsettings.c)
 TARGET_C_PROPERTIES (H5make_libsettings " " " ")
-if (MSVC)
+if (MSVC OR MINGW)
   target_link_libraries (H5make_libsettings "ws2_32.lib")
-endif (MSVC)
+endif (MSVC OR MINGW)
 
 set (CMD $<TARGET_FILE:H5make_libsettings>)
 add_custom_command (
@@ -853,6 +851,9 @@ target_link_libraries (${HDF5_LIB_TARGET} ${LINK_LIBS})
 if (NOT WIN32)
   target_link_libraries (${HDF5_LIB_TARGET} dl)
 endif (NOT WIN32)
+if (H5_HAVE_PARALLEL AND MPI_C_FOUND)
+  target_link_libraries (${HDF5_LIB_TARGET} ${MPI_C_LIBRARIES})
+endif (H5_HAVE_PARALLEL AND MPI_C_FOUND)
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT ${HDF5_LIB_TARGET})
 H5_SET_LIB_OPTIONS (${HDF5_LIB_TARGET} ${HDF5_LIB_NAME} ${LIB_TYPE})
 set_target_properties (${HDF5_LIB_TARGET} PROPERTIES

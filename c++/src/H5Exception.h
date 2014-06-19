@@ -155,6 +155,13 @@ class H5_DLLCPP LibraryIException : public Exception {
 	virtual ~LibraryIException() throw();
 };
 
+class H5_DLLCPP LocationException : public Exception {
+   public:
+	LocationException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
+	LocationException();
+	virtual ~LocationException() throw();
+};
+
 class H5_DLLCPP IdComponentException : public Exception {
    public:
 	IdComponentException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);

@@ -9,9 +9,9 @@
 #  Macro used to add a unit test
 # --------------------------------------------------------------------
 MACRO (HL_ADD_TEST hl_name files)
-  add_test (NAME hl_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
+  add_test (NAME HL_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
   if (NOT "${last_test}" STREQUAL "")
-    set_tests_properties (hl_${hl_name} PROPERTIES DEPENDS ${last_test})
+    set_tests_properties (HL_${hl_name} PROPERTIES DEPENDS ${last_test})
   endif (NOT "${last_test}" STREQUAL "")
 
   # --------------------------------------------------------------------
@@ -32,7 +32,7 @@ ENDMACRO (HL_ADD_TEST)
 
 # Remove any output file left over from previous test run
 add_test (
-    NAME hl_test-clear-objects
+    NAME HL_test-clear-objects
     COMMAND    ${CMAKE_COMMAND}
         -E remove 
         combine_tables1.h5
@@ -61,9 +61,9 @@ add_test (
         test_table.h5
 )
 if (NOT "${last_test}" STREQUAL "")
-  set_tests_properties (hl_test-clear-objects PROPERTIES DEPENDS ${last_test})
+  set_tests_properties (HL_test-clear-objects PROPERTIES DEPENDS ${last_test})
 endif (NOT "${last_test}" STREQUAL "")
-set (last_test "hl_test-clear-objects")
+set (last_test "HL_test-clear-objects")
 
 HL_add_test (test_ds "dsdata.txt;dslat.txt;dslon.txt;test_ds_be.h5;test_ds_le.h5")
 HL_add_test (test_dset_opt "")

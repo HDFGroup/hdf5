@@ -42,12 +42,12 @@ foreach (example ${examples})
   add_executable (f90_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
   TARGET_NAMING (f90_ex_${example} ${LIB_TYPE})
   TARGET_FORTRAN_PROPERTIES (f90_ex_${example} " " " ")
-  if (WIN32 AND NOT CYGWIN)
+  if (WIN32)
     set_property (TARGET f90_ex_${example} 
         APPEND PROPERTY COMPILE_DEFINITIONS 
           HDF5F90_WINDOWS
     )
-  endif (WIN32 AND NOT CYGWIN)
+  endif (WIN32)
   target_link_libraries (f90_ex_${example}
       ${HDF5_F90_LIB_TARGET}
       ${HDF5_LIB_TARGET}
@@ -61,11 +61,11 @@ if (HDF5_ENABLE_F2003)
     add_executable (f03_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
     TARGET_NAMING (f03_ex_${example} ${LIB_TYPE})
     TARGET_FORTRAN_PROPERTIES (f03_ex_${example} " " " ")
-    if (WIN32 AND NOT CYGWIN)
+    if (WIN32)
       set_property (TARGET f03_ex_${example} 
           APPEND PROPERTY COMPILE_DEFINITIONS HDF5F90_WINDOWS
       )
-    endif (WIN32 AND NOT CYGWIN)
+    endif (WIN32)
     target_link_libraries (f03_ex_${example}
         ${HDF5_F90_LIB_TARGET}
         ${HDF5_LIB_TARGET}
@@ -79,12 +79,12 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   add_executable (f90_ex_ph5example ${HDF5_F90_EXAMPLES_SOURCE_DIR}/ph5example.f90)
   TARGET_NAMING (f90_ex_ph5example ${LIB_TYPE})
   TARGET_FORTRAN_PROPERTIES (f90_ex_ph5example " " " ")
-  if (WIN32 AND NOT CYGWIN)
+  if (WIN32)
     set_property (TARGET f90_ex_ph5example 
         APPEND PROPERTY COMPILE_DEFINITIONS 
           HDF5F90_WINDOWS
     )
-  endif (WIN32 AND NOT CYGWIN)
+  endif (WIN32)
   target_link_libraries (f90_ex_ph5example
       ${HDF5_F90_LIB_TARGET}
       ${HDF5_LIB_TARGET}

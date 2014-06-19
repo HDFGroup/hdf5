@@ -3388,7 +3388,7 @@ nh5pget_class_name_c(hid_t_f *cls, _fcd name, int_f *name_len)
 
      HD5packFstring(c_name, _fcdtocp(name), (size_t)*name_len);
      ret_value = (int_f)HDstrlen(c_name);
-     HDfree(c_name);
+     H5free_memory(c_name);
 
 DONE:
      return ret_value;
@@ -5544,5 +5544,75 @@ nh5pget_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nb
   *rdcc_w0=(real_f)c_rdcc_w0;
 
   ret_value = 0;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pset_file_image_c
+ * Purpose:     Calls H5Pset_file_image
+ *
+ * Inputs:
+ *  fapl_id - File access property list identifier
+ *  buf_ptr - Pointer to the initial file image, 
+ *            or NULL if no initial file image is desired
+ *  buf_len - Size of the supplied buffer, or 0 (zero) if no initial image is desired
+ *
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M. Scot Breitenfeld
+ *              February 19, 2012
+ *---------------------------------------------------------------------------*/
+
+int_f
+nh5pset_file_image_c(hid_t_f *fapl_id, void *buf_ptr, size_t_f *buf_len)
+{
+  int ret_value = -1;
+  /*
+   * Call H5Pset_file_image function.
+   */
+  if( (H5Pset_file_image((hid_t)*fapl_id, buf_ptr, (size_t)*buf_len)) <0 )
+    return ret_value; /* error occurred */
+
+  ret_value = 0;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pget_file_image_c
+ * Purpose:     Calls H5Pget_file_image
+ *
+ * Inputs:
+ *  fapl_id - File access property list identifier
+ * Outputs:
+ *  buf_ptr - Pointer to the initial file image, 
+ *            or NULL if no initial file image is desired
+ *  buf_len - Size of the supplied buffer, or 0 (zero) if no initial image is desired
+ *
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M. Scot Breitenfeld
+ *              February 19, 2012
+ *---------------------------------------------------------------------------*/
+
+int_f
+nh5pget_file_image_c(hid_t_f *fapl_id, void **buf_ptr, size_t_f *buf_len_ptr)
+{
+  int ret_value = -1;
+  size_t c_buf_len_ptr;
+  void *c_buf_ptr = NULL;
+
+  c_buf_len_ptr = (size_t)*buf_len_ptr;
+
+  /*
+   * Call H5Pget_file_image function.
+   */
+  if( (H5Pget_file_image((hid_t)*fapl_id, (void **)&c_buf_ptr, &c_buf_len_ptr)) <0 )
+    return ret_value; /* error occurred */
+
+  HDmemcpy((void *)*buf_ptr, (void *)c_buf_ptr, c_buf_len_ptr);
+
+  *buf_len_ptr=(size_t_f)c_buf_len_ptr;
+
+  ret_value = 0;
+  if(c_buf_ptr) HDfree(c_buf_ptr);
+
   return ret_value;
 }

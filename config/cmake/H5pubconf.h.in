@@ -217,12 +217,6 @@
 /* Define to 1 if you have the `get_fpc_csr' function. */
 #cmakedefine H5_HAVE_GET_FPC_CSR @H5_HAVE_GET_FPC_CSR@
 
-/* Define if we have GPFS support */
-#cmakedefine H5_HAVE_GPFS @H5_HAVE_GPFS@
-
-/* Define to 1 if you have the <gpfs.h> header file. */
-#cmakedefine H5_HAVE_GPFS_H @H5_HAVE_GPFS_H@
-
 /* Define if library will contain instrumentation to detect correct
    optimization operation */
 #cmakedefine H5_HAVE_INSTRUMENTED_LIBRARY @H5_HAVE_INSTRUMENTED_LIBRARY@

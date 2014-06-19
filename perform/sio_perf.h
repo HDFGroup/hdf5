@@ -66,7 +66,6 @@ typedef struct parameters_ {
     int   h5_use_chunks;  /* Make HDF5 dataset chunked            */
     int   h5_extendable;  /* Make HDF5 dataset chunked            */
     int      h5_write_only;  /* Perform the write tests only         */
-    unsigned    h5_use_mpi_posix;   /* VFD for HDF5 I/O  */
     int   verify;      /* Verify data correctness              */
 } parameters;
 

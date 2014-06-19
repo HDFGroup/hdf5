@@ -13,10 +13,6 @@ endforeach (testp ${H5P_TESTS})
 
 SET_TESTS_PROPERTIES(TEST_PAR_t_pflush2 PROPERTIES DEPENDS TEST_PAR_t_pflush1)
 
-if (NOT WIN32)
-  add_test (NAME TEST_PAR_t_posix_compliant COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:t_posix_compliant>)
-endif (NOT WIN32)
-  
 if (HDF5_TEST_VFD)
 
   set (VFD_LIST
@@ -41,7 +37,7 @@ if (HDF5_TEST_VFD)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       foreach (test ${H5P_VFD_TESTS})
         add_test (
-          NAME VFD-${vfdname}-${test} 
+          NAME TEST_PAR_VFD-${vfdname}-${test} 
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:${test}>"
               -D "TEST_ARGS:STRING="

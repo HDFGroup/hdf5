@@ -44,7 +44,6 @@
 /* defines for type of VFL driver to use */
 #define FACC_DEFAULT    0
 #define FACC_MPIO       1
-#define FACC_MPIPOSIX   2
 
 /* Defines for computing performance information */
 #define ONE_KB              1024
@@ -78,7 +77,7 @@ char mpi_name[MPI_MAX_PROCESSOR_NAME];
 static void usage(void)
 {
     printf("usage: benchpar [-d <# of dims>] [-s <dim_size>] [-f <file name>] [-h]\n");
-    printf("            [-S <slice dim>] [-p] [-I] [-c] [-i <# of iterations>\n");
+    printf("            [-S <slice dim>] [-I] [-c] [-i <# of iterations>\n");
     printf("    -c              - Use chunked storage for dataset with 1-1 exact\n");
     printf("                      mapping of chunks to hyperslabs\n");
     printf("                      Default: off (i.e. contiguous storage)\n");
@@ -91,8 +90,6 @@ static void usage(void)
     printf("                      Default: 3\n");
     printf("    -I              - Use independent parallel I/O\n");
     printf("                      Default: use collective parallel I/O\n");
-    printf("    -p              - Use MPI-posix VFL driver\n");
-    printf("                      Default: use MPI-I/O VFL driver\n");
     printf("    -s <dim_size>   - Set the size of each of the dataset's dimensions\n");
     printf("                      Default: 1024\n");
     printf("    -S <slice dim>  - Set the dimension to slice the dataset along\n");
@@ -114,7 +111,6 @@ static hid_t create_fcpl(void)
 static hid_t create_fapl(MPI_Comm comm, MPI_Info info, int acc_type )
 {
     hid_t fapl;                 /* File access property list    */
-    hbool_t use_gpfs = FALSE;   /* Use GPFS hints               */
     herr_t ret;                 /* Generic return value         */
 
     fapl = H5Pcreate (H5P_FILE_ACCESS);
@@ -122,13 +118,7 @@ static hid_t create_fapl(MPI_Comm comm, MPI_Info info, int acc_type )
 
     /* set parallel access with communicator, using MPI-I/O driver */
     if (acc_type == FACC_MPIO) {
-    ret = H5Pset_fapl_mpio(fapl, comm, info);
-        assert(ret>=0);
-    } /* end if */
-
-    /* set parallel access with communicator, using MPI-posix driver */
-    if (acc_type == FACC_MPIPOSIX) {
-      ret = H5Pset_fapl_mpiposix(fapl, comm, use_gpfs);
+        ret = H5Pset_fapl_mpio(fapl, comm, info);
         assert(ret>=0);
     } /* end if */
 
@@ -277,10 +267,6 @@ int main(int argc, char *argv[])
 
                 case 'I':       /* Use independent I/O for parallel I/O */
                     par_mode=H5FD_MPIO_INDEPENDENT;
-                    break;
-
-                case 'p':       /* Use MPI-posix VFL driver */
-                    vfl_type=FACC_MPIPOSIX;
                     break;
 
                 case 's':       /* Change dimension size */
@@ -469,7 +455,7 @@ int main(int argc, char *argv[])
     /* Only print information from one node */
     if(mpi_rank==0) {
         /* Print information about test */
-        printf("File driver used: %s\n",vfl_type==FACC_MPIO ? "MPI-I/O" : "MPI-posix");
+        printf("File driver used: %s\n",vfl_type==FACC_MPIO ? "MPI-I/O" : "Unknown");
         printf("Type of parallel access: %s\n",par_mode==H5FD_MPIO_COLLECTIVE ? "Collective" : "Independent");
         printf("Type of dataset storage: %s\n",use_chunks ? "Chunked" : "Contiguous");
         printf("Number of processes: %d\n",mpi_size);

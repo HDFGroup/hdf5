@@ -24,6 +24,7 @@
  *  under hdf5/test/ directory.
  */
 
+#include <stdio.h>
 #include "h5test.h"
 
 #define H5FILE_NAME        "data.h5"
@@ -70,7 +71,9 @@ int create_scale_offset_dsets_int(hid_t fid, hid_t fsid, hid_t msid);
 int create_scale_offset_dsets_long_long(hid_t fid, hid_t fsid, hid_t msid);
 int create_fletcher_dsets_float(hid_t fid, hid_t fsid, hid_t msid);
 int create_deflate_dsets_float(hid_t fid, hid_t fsid, hid_t msid);
+#ifdef H5_HAVE_FILTER_SZIP
 int create_szip_dsets_float(hid_t fid, hid_t fsid, hid_t msid);
+#endif /* H5_HAVE_FILTER_SZIP */
 int create_shuffle_dsets_float(hid_t fid, hid_t fsid, hid_t msid);
 int create_nbit_dsets_float(hid_t fid, hid_t fsid, hid_t msid);
 
@@ -1016,6 +1019,7 @@ error:
 #endif /* H5_HAVE_FILTER_DEFLATE */
 }
 
+#ifdef H5_HAVE_FILTER_SZIP
 
 /*-------------------------------------------------------------------------
  * Function:    create_szip_dsets_float
@@ -1035,7 +1039,6 @@ error:
 int
 create_szip_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
 {
-#ifdef H5_HAVE_FILTER_SZIP
     hid_t       dataset;         /* dataset handles */
     hid_t       dcpl;
     float       data[NX][NY];          /* data to write */
@@ -1097,15 +1100,8 @@ create_szip_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
     if(H5Pclose(dcpl) < 0)
         TEST_ERROR
 
-#else /* H5_HAVE_FILTER_SZIP */
-    const char          *not_supported= "Szip filter is not enabled. Can't create the dataset.";
-
-    puts(not_supported);
-#endif /* H5_HAVE_FILTER_SZIP */
-
     return 0;
 
-#ifdef H5_HAVE_FILTER_SZIP
 error:
     H5E_BEGIN_TRY {
         H5Pclose(dcpl);
@@ -1113,8 +1109,8 @@ error:
     } H5E_END_TRY;
 
     return -1;
-#endif /* H5_HAVE_FILTER_SZIP */
 }
+#endif /* H5_HAVE_FILTER_SZIP */
 
 
 /*-------------------------------------------------------------------------
@@ -1426,9 +1422,13 @@ main (void)
     if(create_deflate_dsets_float(file, filespace, memspace) < 0)
         {H5_FAILED(); AT(); return 1;}
 
+#ifdef H5_HAVE_FILTER_SZIP
     /* Create a dataset of FLOAT with szip filter */
     if(create_szip_dsets_float(file, filespace, memspace) < 0)
         {H5_FAILED(); AT(); return 1;}
+#else /* H5_HAVE_FILTER_SZIP */
+    puts("Szip filter is not enabled. Can't create the dataset.");
+#endif /* H5_HAVE_FILTER_SZIP */
 
     /* Create a dataset of FLOAT with shuffle filter */
     if(create_shuffle_dsets_float(file, filespace, memspace) < 0)

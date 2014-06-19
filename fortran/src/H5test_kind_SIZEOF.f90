@@ -49,6 +49,10 @@ PROGRAM test_kind
   INTEGER :: ji, jr, jd
   last = -1
   ii = 0
+
+  ikind_numbers = 0
+  rkind_numbers = 0
+
   DO i = 1,100
      j = SELECTED_INT_KIND(i)
      IF(j .NE. last) THEN
@@ -114,8 +118,93 @@ WRITE(*,'(40(A,/))') &
 '!',&
 '!*****'
 
-!  Generate a program
-  WRITE(*,*) "PROGRAM int_kind"
+! GENERATE A PROGRAM
+!
+! (a) Generate the module
+
+  WRITE(*,*) "MODULE H5test_kind_SIZEOF_mod"
+  WRITE(*,*) "USE ISO_C_BINDING"
+  WRITE(*,*) "IMPLICIT NONE"
+  WRITE(*,*) "CONTAINS"
+  j = 0
+  ji = KIND(1)
+  WRITE(*, "("" SUBROUTINE i"", i2.2,""()"")") j
+  WRITE(*,*)"   IMPLICIT NONE"
+  WRITE(*,*)"   INTEGER :: a"
+  WRITE(*,*)"   INTEGER(C_SIZE_T) :: a_size"
+  WRITE(*,*)"   CHARACTER(LEN=2) :: ichr2, jchr2"
+  WRITE(*,*)"   a_size = SIZEOF(a)"
+  WRITE(*,*)"   WRITE(ichr2,'(I2)') a_size"
+  WRITE(*,'(A,I0)')"    WRITE(jchr2,'(I2)') ",ji
+  WRITE(*,'(A)')'    WRITE(*,*) "#define H5_FORTRAN_HAS_NATIVE_"'//  &
+       "//TRIM(ADJUSTL(ichr2))//"//'"_KIND "'//"//ADJUSTL(jchr2)"
+  WRITE(*,*)"   RETURN"
+  WRITE(*,*)"END SUBROUTINE"
+  jr = 0
+  j = KIND(1.0)
+  WRITE(*, "("" SUBROUTINE r"", i2.2,""()"")") jr
+  WRITE(*,*)"   IMPLICIT NONE"
+  WRITE(*,*)"   REAL :: a"
+  WRITE(*,*)"   INTEGER(C_SIZE_T) :: a_size"
+  WRITE(*,*)"   CHARACTER(LEN=2) :: ichr2, jchr2"
+  WRITE(*,*)"   a_size = SIZEOF(a)"
+  WRITE(*,*)"   WRITE(ichr2,'(I2)') a_size"
+  WRITE(*,'(A,I0)')"    WRITE(jchr2,'(I2)') ",j
+  WRITE(*,'(A)')'    WRITE(*,*) "#define H5_FORTRAN_HAS_REAL_NATIVE_"'//  &
+       "//TRIM(ADJUSTL(ichr2))//"//'"_KIND "'//"//ADJUSTL(jchr2)"
+  WRITE(*,*)"   RETURN"
+  WRITE(*,*)"END SUBROUTINE"
+  jd = 0
+  j = KIND(1.d0)
+  WRITE(*, "("" SUBROUTINE d"", i2.2,""()"")") jd
+  WRITE(*,*)"   IMPLICIT NONE"
+  WRITE(*,*)"   DOUBLE PRECISION :: a"
+  WRITE(*,*)"   INTEGER(C_SIZE_T) :: a_size"
+  WRITE(*,*)"   CHARACTER(LEN=2) :: ichr2, jchr2"
+  WRITE(*,*)"   a_size = SIZEOF(a)"
+  WRITE(*,*)"   WRITE(ichr2,'(I2)') a_size"
+  WRITE(*,'(A,I0)')"    WRITE(jchr2,'(I2)') ",j
+  WRITE(*,'(A)')'    WRITE(*,*) "#define H5_FORTRAN_HAS_DOUBLE_NATIVE_"'//  &
+       "//TRIM(ADJUSTL(ichr2))//"//'"_KIND "'//"//ADJUSTL(jchr2)"
+  WRITE(*,*)"   RETURN"
+  WRITE(*,*)"END SUBROUTINE"
+  DO i = 1, ii
+     j = ikind_numbers(i)
+     WRITE(*, "("" SUBROUTINE i"", i2.2,""()"")") j
+     WRITE(*,*)"   IMPLICIT NONE"
+     WRITE(*,'(A,I0,A)')"   INTEGER(KIND=",j,") :: a"
+     WRITE(*,*)"   INTEGER(C_SIZE_T) :: a_size"
+     WRITE(*,*)"   CHARACTER(LEN=2) :: ichr2, jchr2"
+     WRITE(*,*)"   a_size = SIZEOF(a)"
+     WRITE(*,*)"   WRITE(ichr2,'(I2)') a_size"
+     WRITE(*,'(A,I0)')"    WRITE(jchr2,'(I2)') ",j
+     WRITE(*,'(A)')'    WRITE(*,*) "#define H5_FORTRAN_HAS_INTEGER_"'//  &
+          "//TRIM(ADJUSTL(ichr2))//"//'"_KIND "'//"//ADJUSTL(jchr2)"
+     WRITE(*,*)"   RETURN"
+     WRITE(*,*)"END SUBROUTINE"
+  ENDDO
+  DO i = 1, ir
+     j = rkind_numbers(i)
+     WRITE(*, "("" SUBROUTINE r"", i2.2,""()"")") j
+     WRITE(*,*)"   IMPLICIT NONE"
+     WRITE(*,'(A,I0,A)')"    REAL(KIND= ",j,") :: a"
+     WRITE(*,*)"   INTEGER(C_SIZE_T) :: a_size"
+     WRITE(*,*)"   CHARACTER(LEN=2) :: ichr2, jchr2"
+     WRITE(*,*)"   a_size = SIZEOF(a)"
+     WRITE(*,*)"   WRITE(ichr2,'(I2)') a_size"
+     WRITE(*,'(A,I0)')"    WRITE(jchr2,'(I2)') ", j
+     WRITE(*,'(A)')'    WRITE(*,*) "#define H5_FORTRAN_HAS_REAL_"'//  &
+          "//TRIM(ADJUSTL(ichr2))//"//'"_KIND "'//"//ADJUSTL(jchr2)"
+     WRITE(*,*)"   RETURN"
+     WRITE(*,*)"END SUBROUTINE"
+  ENDDO
+  WRITE(*,*) "END MODULE H5test_kind_SIZEOF_mod"
+  WRITE(*,*) ""
+
+  ! (b) generate the main program
+
+  WRITE(*,*) "PROGRAM H5test_kind_SIZEOF"
+  WRITE(*,*) "USE H5test_kind_SIZEOF_mod"
   WRITE(*,*) "WRITE(*,*) "" /*generating header file*/ """
   ji = 0
   WRITE(*, "("" CALL i"", i2.2,""()"")") ji
@@ -131,79 +220,8 @@ WRITE(*,'(40(A,/))') &
      j = rkind_numbers(i)
      WRITE(*, "("" CALL r"", i2.2,""()"")") j
   ENDDO
-  WRITE(*,*) "END PROGRAM int_kind"
-  j = 0
-  ji = KIND(1)
-  WRITE(*, "("" SUBROUTINE i"", i2.2,""()"")") j
-  WRITE(*,*)"   IMPLICIT NONE"
-  WRITE(*,*)"   INTEGER :: a"
-  WRITE(*,*)"   INTEGER :: a_size"
-  WRITE(*,*)"   CHARACTER(LEN=2) :: ichr2, jchr2"
-  WRITE(*,*)"   a_size = SIZEOF(a)"
-  WRITE(*,*)"   WRITE(ichr2,'(I2)') a_size"
-  WRITE(*,'(A,I0)')"    WRITE(jchr2,'(I2)') ",ji
-  WRITE(*,'(A)')'    WRITE(*,*) "#define H5_FORTRAN_HAS_NATIVE_"'//  &
-       "//TRIM(ADJUSTL(ichr2))//"//'"_KIND "'//"//ADJUSTL(jchr2)"
-  WRITE(*,*)"   RETURN"
-  WRITE(*,*)"END SUBROUTINE"
-  jr = 0
-  j = KIND(1.0)
-  WRITE(*, "("" SUBROUTINE r"", i2.2,""()"")") jr
-  WRITE(*,*)"   IMPLICIT NONE"
-  WRITE(*,*)"   REAL :: a"
-  WRITE(*,*)"   INTEGER :: a_size"
-  WRITE(*,*)"   CHARACTER(LEN=2) :: ichr2, jchr2"
-  WRITE(*,*)"   a_size = SIZEOF(a)"
-  WRITE(*,*)"   WRITE(ichr2,'(I2)') a_size"
-  WRITE(*,'(A,I0)')"    WRITE(jchr2,'(I2)') ",j
-  WRITE(*,'(A)')'    WRITE(*,*) "#define H5_FORTRAN_HAS_REAL_NATIVE_"'//  &
-       "//TRIM(ADJUSTL(ichr2))//"//'"_KIND "'//"//ADJUSTL(jchr2)"
-  WRITE(*,*)"   RETURN"
-  WRITE(*,*)"END SUBROUTINE"
-  jd = 0
-  j = KIND(1.d0)
-  WRITE(*, "("" SUBROUTINE d"", i2.2,""()"")") jd
-  WRITE(*,*)"   IMPLICIT NONE"
-  WRITE(*,*)"   DOUBLE PRECISION :: a"
-  WRITE(*,*)"   INTEGER :: a_size"
-  WRITE(*,*)"   CHARACTER(LEN=2) :: ichr2, jchr2"
-  WRITE(*,*)"   a_size = SIZEOF(a)"
-  WRITE(*,*)"   WRITE(ichr2,'(I2)') a_size"
-  WRITE(*,'(A,I0)')"    WRITE(jchr2,'(I2)') ",j
-  WRITE(*,'(A)')'    WRITE(*,*) "#define H5_FORTRAN_HAS_DOUBLE_NATIVE_"'//  &
-       "//TRIM(ADJUSTL(ichr2))//"//'"_KIND "'//"//ADJUSTL(jchr2)"
-  WRITE(*,*)"   RETURN"
-  WRITE(*,*)"END SUBROUTINE"
-  DO i = 1, ii
-     j = ikind_numbers(i)
-     WRITE(*, "("" SUBROUTINE i"", i2.2,""()"")") j
-     WRITE(*,*)"   IMPLICIT NONE"
-     WRITE(*,'(A,I0,A)')"   INTEGER(KIND=",j,") :: a"
-     WRITE(*,*)"   INTEGER :: a_size"
-     WRITE(*,*)"   CHARACTER(LEN=2) :: ichr2, jchr2"
-     WRITE(*,*)"   a_size = SIZEOF(a)"
-     WRITE(*,*)"   WRITE(ichr2,'(I2)') a_size"
-     WRITE(*,'(A,I0)')"    WRITE(jchr2,'(I2)') ",j
-     WRITE(*,'(A)')'    WRITE(*,*) "#define H5_FORTRAN_HAS_INTEGER_"'//  &
-          "//TRIM(ADJUSTL(ichr2))//"//'"_KIND "'//"//ADJUSTL(jchr2)"
-     WRITE(*,*)"   RETURN"
-     WRITE(*,*)"END SUBROUTINE"
-  ENDDO
-  DO i = 1, ir
-     j = rkind_numbers(i)
-     WRITE(*, "("" SUBROUTINE r"", i2.2,""()"")") j
-     WRITE(*,*)"   IMPLICIT NONE"
-     WRITE(*,'(A,I0,A)')"   REAL(KIND= ",j,") :: a"
-     WRITE(*,*)"   INTEGER :: a_size"
-     WRITE(*,*)"   CHARACTER(LEN=2) :: ichr2, jchr2"
-     WRITE(*,*)"   a_size = SIZEOF(a)"
-     WRITE(*,*)"   WRITE(ichr2,'(I2)') a_size"
-     WRITE(*,'(A,I0)')"    WRITE(jchr2,'(I2)') ", j
-     WRITE(*,'(A)')'    WRITE(*,*) "#define H5_FORTRAN_HAS_REAL_"'//  &
-          "//TRIM(ADJUSTL(ichr2))//"//'"_KIND "'//"//ADJUSTL(jchr2)"
-     WRITE(*,*)"   RETURN"
-     WRITE(*,*)"END SUBROUTINE"
-  ENDDO
+  WRITE(*,*) "END PROGRAM H5test_kind_SIZEOF"
+
 END PROGRAM test_kind
 
 
