@@ -622,8 +622,6 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     char *coresident_s = NULL;
     herr_t ret_value = SUCCEED;
 
-    H5open();
-
     MPI_Comm_size(comm, &num_procs);
     MPI_Comm_rank(comm, &my_rank);
 

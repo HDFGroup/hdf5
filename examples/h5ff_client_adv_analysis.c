@@ -294,12 +294,13 @@ main(int argc, char **argv)
     size_t ntuples = NTUPLES;
     int only_analysis = 0;
 
-    getchar();
     /* Prepend user name */
     user_name = getenv("USER");
     snprintf(file_name, NAME_SIZE, "%s_%s", user_name, FILENAME_APP);
 
     MPI_Init(&argc, &argv);
+
+    H5open();
 
     /* Call EFF_init to initialize the EFF stack. */
     EFF_init(MPI_COMM_WORLD, MPI_INFO_NULL);
