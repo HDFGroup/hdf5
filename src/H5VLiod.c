@@ -622,6 +622,8 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     char *coresident_s = NULL;
     herr_t ret_value = SUCCEED;
 
+    H5open();
+
     MPI_Comm_size(comm, &num_procs);
     MPI_Comm_rank(comm, &my_rank);
 
@@ -749,6 +751,7 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     if(HG_Request_free(hg_req) != HG_SUCCESS)
         return FAIL;
 
+done:
     return ret_value;
 } /* end EFF_init() */
 
@@ -769,9 +772,8 @@ herr_t
 EFF_finalize(void)
 {
     hg_request_t hg_req;
-    herr_t ret_value = SUCCEED;
-
     H5VL_iod_request_t *cur_req = axe_list.head;
+    herr_t ret_value = SUCCEED;
 
     /* process axe_list */
     while(cur_req) {
