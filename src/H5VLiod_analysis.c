@@ -566,9 +566,10 @@ H5VL__iod_split(const char *split_script, void *data, size_t num_elmts,
         hid_t *split_data_type_id)
 {
     herr_t ret_value = SUCCEED; /* Return value */
-
     PyObject *po_func = NULL, *po_numpy_array = NULL, *po_args_tup = NULL;
     PyObject *po_numpy_array_split = NULL;
+
+    Py_BEGIN_ALLOW_THREADS
 
     pthread_mutex_lock(&h5python_mutex);
     if(!numpy_initialized) {
@@ -608,7 +609,7 @@ done:
     Py_XDECREF(po_args_tup);
     Py_XDECREF(po_numpy_array);
     Py_XDECREF(po_numpy_array_split);
-
+    Py_END_ALLOW_THREADS
     return ret_value;
 } /* end H5VL__iod_split() */
 
@@ -633,6 +634,8 @@ H5VL__iod_combine(const char *combine_script, void **split_data, size_t *split_n
     PyObject *po_numpy_array_combine = NULL;
     size_t count = 0;
     size_t i, k = 0;
+
+    Py_BEGIN_ALLOW_THREADS
 
     pthread_mutex_lock(&h5python_mutex);
     if(!numpy_initialized) {
@@ -696,7 +699,7 @@ done:
         Py_XDECREF(po_numpy_arrays + i);
     }
     Py_XDECREF(po_numpy_array_combine);
-
+    Py_END_ALLOW_THREADS
     return ret_value;
 }
 
@@ -721,6 +724,8 @@ H5VL__iod_integrate(const char *integrate_script, void **combine_data,
     PyObject *po_func = NULL, *po_numpy_arrays = NULL, *po_args_tup = NULL;
     PyObject *po_numpy_array_integrate = NULL;
     size_t i, k = 0;
+
+    Py_BEGIN_ALLOW_THREADS
 
     pthread_mutex_lock(&h5python_mutex);
     if(!numpy_initialized) {
@@ -784,7 +789,7 @@ done:
         Py_XDECREF(po_numpy_arrays + i);
     }
     Py_XDECREF(po_numpy_array_integrate);
-
+    Py_END_ALLOW_THREADS
     return ret_value;
 }
 
