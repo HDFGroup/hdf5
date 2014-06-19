@@ -5197,16 +5197,6 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* get the context ID */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-    if(H5P_get(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
-
-    /* get the RC object */
-    if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID")
-
     switch (get_type) {
         /* H5Aget_space */
         case H5VL_ATTR_GET_SPACE:
@@ -5292,6 +5282,16 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 char *attr_name = va_arg (arguments, char *);
                 htri_t *ret = va_arg (arguments, htri_t *);
                 attr_op_in_t input;
+
+                /* get the context ID */
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+                    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+                if(H5P_get(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
+
+                /* get the RC object */
+                if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID")
 
                 /* allocate parent request array */
                 if(NULL == (parent_reqs = (H5VL_iod_request_t **)

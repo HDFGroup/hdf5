@@ -171,6 +171,14 @@ int main(int argc, char **argv) {
 
         H5Sclose(sid2);
 
+        {
+            hid_t temp_sid;
+
+            temp_sid = H5Aget_space(aid5);
+            assert(temp_sid > 0);
+            H5Sclose(temp_sid);
+        }
+
         ret = H5Aclose_ff(aid1, e_stack);
         assert(ret == 0);
 
