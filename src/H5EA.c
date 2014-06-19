@@ -48,7 +48,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5VMprivate.h"         /* Vector functions			*/
+#include "H5VMprivate.h"        /* Vector functions			*/
 
 
 /****************/

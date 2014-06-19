@@ -165,7 +165,7 @@ static void test_null_filter()
 
 const H5std_string      DSET_SZIP_NAME("szipped dataset");
 
-void test_szip_filter(H5File& file1)
+static void test_szip_filter(H5File& file1)
 {
 #ifdef H5_HAVE_FILTER_SZIP
     int      points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];

@@ -488,7 +488,7 @@ void H5Location::removeComment(const H5std_string& name) const
 ///		will be truncated to accommodate the null terminator.
 // Programmer	Binh-Minh Ribler - Mar 2014
 //--------------------------------------------------------------------------
-ssize_t H5Location::getComment(const char* name, const size_t buf_size, char* comment) const
+ssize_t H5Location::getComment(const char* name, size_t buf_size, char* comment) const
 {
     // H5Oget_comment_by_name will get buf_size chars of the comment including
     // the null terminator
@@ -502,7 +502,7 @@ ssize_t H5Location::getComment(const char* name, const size_t buf_size, char* co
     }
     // If the comment is longer than the provided buffer size, the C library
     // will not null terminate it
-    if (comment_len >= buf_size)
+    if ((size_t)comment_len >= buf_size)
 	comment[buf_size-1] = '\0';
 
     // Return the actual comment length, which might be different from buf_size
@@ -519,7 +519,7 @@ ssize_t H5Location::getComment(const char* name, const size_t buf_size, char* co
 ///\exception	H5::LocationException
 // Programmer	Binh-Minh Ribler - 2000 (moved from CommonFG, Sep 2013)
 //--------------------------------------------------------------------------
-H5std_string H5Location::getComment(const char* name, const size_t buf_size) const
+H5std_string H5Location::getComment(const char* name, size_t buf_size) const
 {
     // Initialize string to "", so that if there is no comment, the returned
     // string will be empty
@@ -549,6 +549,10 @@ H5std_string H5Location::getComment(const char* name, const size_t buf_size) con
 
 	// Used overloaded function
 	ssize_t comment_len = getComment(name, tmp_len+1, comment_C);
+	if (comment_len < 0)
+	{
+	    throw LocationException("H5Location::getComment", "H5Oget_comment_by_name failed");
+	}
 
 	// Convert the C comment to return
 	comment = comment_C;
@@ -568,7 +572,7 @@ H5std_string H5Location::getComment(const char* name, const size_t buf_size) con
 ///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000 (moved from CommonFG, Sep 2013)
 //--------------------------------------------------------------------------
-H5std_string H5Location::getComment(const H5std_string& name, const size_t buf_size) const
+H5std_string H5Location::getComment(const H5std_string& name, size_t buf_size) const
 {
     return(getComment(name.c_str(), buf_size));
 }
@@ -696,6 +700,8 @@ void H5Location::reference(void* ref, const H5std_string& name, H5R_type_t ref_t
 //			 referenced object
 //		ref - IN: Reference pointer
 //		ref_type - IN: Reference type
+//		plist - IN: Property list - default to PropList::DEFAULT
+//		from_func - IN: Name of the calling function
 // Exception	H5::ReferenceException
 // Programmer	Binh-Minh Ribler - Oct, 2006
 // Modification
@@ -726,6 +732,7 @@ hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_ty
 ///\param	loc - IN: Location of the referenced object
 ///\param	ref - IN: Reference pointer
 ///\param	ref_type - IN: Reference type
+///\param	plist - IN: Property list - default to PropList::DEFAULT
 ///\exception	H5::ReferenceException
 // Programmer	Binh-Minh Ribler - Oct, 2006
 // Modification
@@ -743,6 +750,7 @@ void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t 
 ///\param	attr - IN: Attribute specifying the location of the referenced object
 ///\param	ref - IN: Reference pointer
 ///\param	ref_type - IN: Reference type
+///\param	plist - IN: Property list - default to PropList::DEFAULT
 ///\exception	H5::ReferenceException
 // Programmer	Binh-Minh Ribler - Oct, 2006
 // Modification
@@ -860,10 +868,13 @@ H5O_type_t H5Location::p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const
 {
    H5O_type_t obj_type = H5O_TYPE_UNKNOWN;
    herr_t ret_value = H5Rget_obj_type2(getId(), ref_type, ref, &obj_type);
-
-   if (obj_type == H5O_TYPE_UNKNOWN || obj_type >= H5O_TYPE_NTYPES)
+   if (ret_value < 0)
    {
       throw ReferenceException(inMemFunc("getRefObjType"), "H5Rget_obj_type2 failed");
+   }
+   if (obj_type == H5O_TYPE_UNKNOWN || obj_type >= H5O_TYPE_NTYPES)
+   {
+      throw ReferenceException(inMemFunc("getRefObjType"), "H5Rget_obj_type2 returned invalid type");
    }
    return(obj_type);
 }

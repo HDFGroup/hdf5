@@ -50,7 +50,6 @@ static void test_transfplist()
     const char* simple = "(4/2) * ( (2 + 4)/(5 - 2.5))"; /* this equals 4.8 */
     /* inverses the utrans transform in init_test to get back original array */
     const char* utrans_inv = "(x/3)*4 - 100";
-    char *c_to_f_read=NULL, *simple_read=NULL, *utrans_inv_read=NULL;
 
     SUBTEST("DSetMemXferPropList::set/getDataTransform()");
     try {
@@ -75,7 +74,7 @@ static void test_transfplist()
 	// Find out the length of the transform expression, allocate the buffer
 	// for it, then read and verify the expression from the copied plist
 	ssize_t tran_len = dxpl_c_to_f_copy.getDataTransform(NULL);
-	c_to_f_read = (char *)HDmalloc(tran_len+1);
+	char *c_to_f_read = (char *)HDmalloc(tran_len+1);
 	HDmemset(c_to_f_read, 0, tran_len+1);
 	dxpl_c_to_f_copy.getDataTransform(c_to_f_read, tran_len+1);
 	verify_val((const char*)c_to_f_read, (const char*)c_to_f,
@@ -106,7 +105,7 @@ static void test_transfplist()
 	// Get and verify the expression with:
 	// ssize_t getDataTransform(char* exp, const size_t buf_size)
 	tran_len = dxpl_utrans_inv.getDataTransform(NULL, 0);
-	utrans_inv_read = (char *)HDmalloc(tran_len+1);
+	char *utrans_inv_read = (char *)HDmalloc(tran_len+1);
 	HDmemset(utrans_inv_read, 0, tran_len+1);
 	dxpl_utrans_inv.getDataTransform(utrans_inv_read, tran_len+1);
 	verify_val((const char*)utrans_inv_read, (const char*)utrans_inv,

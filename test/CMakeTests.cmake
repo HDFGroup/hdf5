@@ -253,7 +253,7 @@ foreach (test ${H5_TESTS})
   set_tests_properties (H5TEST-${test} PROPERTIES DEPENDS H5TEST-clear-objects)
 endforeach (test ${H5_TESTS})
 
-set_tests_properties (H5TEST-flush2 PROPERTIES DEPENDS flush1)
+set_tests_properties (H5TEST-flush2 PROPERTIES DEPENDS H5TEST-flush1)
 
 ##############################################################################
 ##############################################################################

@@ -36,14 +36,18 @@
 !  
 !
 !*****
+MODULE TH5SSELECT
+
+CONTAINS
 
   SUBROUTINE test_select_hyperslab(cleanup, total_error)
 
     USE HDF5 ! This module contains all necessary modules
+    USE TH5_MISC
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN) :: cleanup
-    INTEGER, INTENT(OUT) :: total_error
+    INTEGER, INTENT(INOUT) :: total_error
 
     CHARACTER(LEN=7), PARAMETER :: filename = "tselect"
     CHARACTER(LEN=80) :: fix_filename
@@ -319,10 +323,11 @@
   SUBROUTINE test_select_element(cleanup, total_error)
 
     USE HDF5 ! This module contains all necessary modules
+    USE TH5_MISC
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
-    INTEGER, INTENT(OUT) :: total_error
+    INTEGER, INTENT(INOUT) :: total_error
 
     !
     !the dataset1 is stored in file "copy1.h5"
@@ -695,10 +700,11 @@
 
   SUBROUTINE test_basic_select(cleanup, total_error)
     USE HDF5 ! This module contains all necessary modules
+    USE TH5_MISC
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
-    INTEGER, INTENT(OUT) :: total_error
+    INTEGER, INTENT(INOUT) :: total_error
 
      !
      !the dataset is stored in file "testselect.h5"
@@ -804,8 +810,6 @@
      !
      INTEGER :: error
      INTEGER(HSIZE_T), DIMENSION(3) :: data_dims
-
-     INTEGER :: i
 
      !
      !initialize the coord array to give the selected points' position
@@ -1033,10 +1037,11 @@
 
 SUBROUTINE test_select_point(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules 
+  USE TH5_MISC
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   INTEGER(HID_T) :: xfer_plist
   
   INTEGER, PARAMETER :: SPACE1_DIM1=3
@@ -1073,10 +1078,10 @@ SUBROUTINE test_select_point(cleanup, total_error)
 !!$               *tbuf;       /* temporary buffer pointer */
   INTEGER :: i,j;        !/* Counters */
 !    struct pnt_iter pi;     /* Custom Pointer iterator struct */
-  INTEGER :: error		!/* Generic return value		*/
+  INTEGER :: error    !/* Generic return value		*/
   CHARACTER(LEN=9) :: filename = 'h5s_hyper'
   CHARACTER(LEN=80) :: fix_filename 
-  CHARACTER(LEN=1), DIMENSION(1:SPACE2_DIM1,1:SPACE2_DIM2) :: wbuf, rbuf
+  CHARACTER(LEN=1), DIMENSION(1:SPACE2_DIM1,1:SPACE2_DIM2) :: wbuf
 
   CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
   IF (error .NE. 0) THEN
@@ -1357,12 +1362,12 @@ END SUBROUTINE test_select_point
 !**
 !****************************************************************/
 
-SUBROUTINE test_select_combine(cleanup, total_error)
+SUBROUTINE test_select_combine(total_error)
   USE HDF5 ! This module contains all necessary modules 
+  USE TH5_MISC
   
   IMPLICIT NONE
-  LOGICAL, INTENT(IN)  :: cleanup
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
 
   INTEGER, PARAMETER :: SPACE7_RANK = 2
   INTEGER, PARAMETER :: SPACE7_DIM1 = 10
@@ -1779,12 +1784,12 @@ END SUBROUTINE test_select_combine
 !**
 !****************************************************************/
 
-SUBROUTINE test_select_bounds(cleanup, total_error)
+SUBROUTINE test_select_bounds(total_error)
   USE HDF5 ! This module contains all necessary modules 
+  USE TH5_MISC
   
   IMPLICIT NONE
-  LOGICAL, INTENT(IN)  :: cleanup
-  INTEGER, INTENT(OUT) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
 
   INTEGER, PARAMETER :: SPACE11_RANK=2
   INTEGER, PARAMETER :: SPACE11_DIM1=100
@@ -1860,8 +1865,8 @@ SUBROUTINE test_select_bounds(cleanup, total_error)
 
   CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 3, total_error)
   CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 3, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), SPACE11_DIM1-4, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), SPACE11_DIM2-4, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), INT(SPACE11_DIM1-4), total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), INT(SPACE11_DIM2-4), total_error)
 
   ! /* Set bad offset for selection */
 
@@ -1884,8 +1889,8 @@ SUBROUTINE test_select_bounds(cleanup, total_error)
 
   CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 5, total_error)
   CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), SPACE11_DIM1-2, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), SPACE11_DIM2-6, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), INT(SPACE11_DIM1-2), total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), INT(SPACE11_DIM2-6), total_error)
 
   ! /* Reset offset for selection */
   offset(1:2) = 0
@@ -1991,3 +1996,5 @@ SUBROUTINE test_select_bounds(cleanup, total_error)
   CALL check("h5sclose_f", error, total_error)
 
 END SUBROUTINE test_select_bounds
+
+END MODULE TH5SSELECT

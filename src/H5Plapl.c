@@ -123,10 +123,13 @@ static herr_t H5P_lacc_elink_fapl_close(const char* name, size_t size, void* val
 const H5P_libclass_t H5P_CLS_LACC[1] = {{
     "link access",		/* Class name for debugging     */
     H5P_TYPE_LINK_ACCESS,       /* Class type                   */
-    &H5P_CLS_ROOT_g,		/* Parent class ID              */
-    &H5P_CLS_LINK_ACCESS_g,	/* Pointer to class ID          */
-    &H5P_LST_LINK_ACCESS_g,	/* Pointer to default property list ID */
+
+    &H5P_CLS_ROOT_g,		/* Parent class                 */
+    &H5P_CLS_LINK_ACCESS_g,	/* Pointer to class             */
+    &H5P_CLS_LINK_ACCESS_ID_g,	/* Pointer to class ID          */
+    &H5P_LST_LINK_ACCESS_ID_g,	/* Pointer to default property list ID */
     H5P_lacc_reg_prop,		/* Default property registration routine */
+
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
     NULL,			/* Class copy callback          */

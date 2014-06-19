@@ -1735,7 +1735,7 @@ typedef struct H5_api_struct {
 
 /* Macro for first thread initialization */
 #ifdef H5_HAVE_WIN_THREADS
-#define H5_FIRST_THREAD_INIT InitOnceExecuteOnce(&H5TS_first_init_g, H5TS_win32_first_thread_init, NULL, NULL);
+#define H5_FIRST_THREAD_INIT InitOnceExecuteOnce(&H5TS_first_init_g, H5TS_win32_process_enter, NULL, NULL);
 #else
 #define H5_FIRST_THREAD_INIT pthread_once(&H5TS_first_init_g, H5TS_pthread_first_thread_init);
 #endif

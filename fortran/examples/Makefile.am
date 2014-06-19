@@ -26,6 +26,8 @@ if BUILD_PARALLEL_CONDITIONAL
    EXAMPLE_PROG_PARA=ph5example
 endif
 
+INSTALL_SCRIPT_FILES = run-fortran-ex.sh
+
 # These are the programs that 'make all' or 'make tests' will build and
 # that 'make check' will run.  List them in the order in which they should
 # be run.
@@ -41,7 +43,6 @@ INSTALL_FILES=h5_crtdat.f90 h5_rdwt.f90 \
      h5_crtatt.f90 h5_crtgrp.f90 h5_crtgrpar.f90 h5_crtgrpd.f90  \
      h5_extend.f90 h5_subset.f90 h5_cmprss.f90 hyperslab.f90 selectele.f90 refobjexample.f90 \
      refregexample.f90 mountexample.f90 compound.f90 ph5example.f90
-INSTALL_SCRIPT_FILES = run-fortran-ex.sh
 
 
 # Add attention tests for Fortran 2003 features
@@ -52,6 +53,7 @@ if FORTRAN_2003_CONDITIONAL_F
       compound_fortran2003.f90 compound_complex_fortran2003.f90
 endif
 TEST_SCRIPT=testh5fc.sh
+TEST_EXAMPLES_SCRIPT=$(INSTALL_SCRIPT_FILES)
 
 # Mark this directory as part of the Fortran API
 FORTRAN_API=yes

@@ -65,6 +65,7 @@ add_executable (testhdf5_fortran
     tH5T.f90
     tH5VL.f90
     tH5Z.f90
+    tHDF5.f90
 )
 TARGET_NAMING (testhdf5_fortran ${LIB_TYPE})
 TARGET_FORTRAN_PROPERTIES (testhdf5_fortran " " " ")
@@ -86,6 +87,8 @@ add_executable (testhdf5_fortran_1_8
     tH5O.f90
     tH5A_1_8.f90
     tH5G_1_8.f90
+    tH5MISC_1_8.f90
+    tHDF5_1_8.f90
 )
 TARGET_NAMING (testhdf5_fortran_1_8 ${LIB_TYPE})
 TARGET_FORTRAN_PROPERTIES (testhdf5_fortran_1_8 " " " ")
@@ -111,6 +114,7 @@ if (HDF5_ENABLE_F2003)
       tH5O_F03.f90
       tH5P_F03.f90
       tH5T_F03.f90
+      tHDF5_F03.f90
   )
   TARGET_NAMING (fortranlib_test_F03 ${LIB_TYPE})
   TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03 " " " ")

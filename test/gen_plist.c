@@ -327,6 +327,8 @@ main(void)
         assert(ret > 0);
     if((ret = H5Pset_mdc_config(fapl1, &my_cache_config)) < 0)
         assert(ret > 0);
+    if((ret = H5Pset_core_write_tracking(fapl1, TRUE, (size_t)(1024 * 1024))) < 0)
+        assert(ret > 0);
 
     if((ret = encode_plist(fapl1, little_endian, "testfiles/plist_files/fapl_le", "testfiles/plist_files/fapl_be")) < 0)
         assert(ret > 0);

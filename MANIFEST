@@ -363,6 +363,7 @@
 ./fortran/test/tH5G_1_8.f90
 ./fortran/test/tH5I.f90
 ./fortran/test/tH5L_F03.f90
+./fortran/test/tH5MISC_1_8.f90
 ./fortran/test/tH5O.f90
 ./fortran/test/tH5O_F03.f90
 ./fortran/test/tH5P_F03.f90
@@ -374,6 +375,9 @@
 ./fortran/test/tH5T.f90
 ./fortran/test/tH5VL.f90
 ./fortran/test/tH5Z.f90
+./fortran/test/tHDF5_1_8.f90
+./fortran/test/tHDF5_F03.f90
+./fortran/test/tHDF5.f90
 
 ./fortran/testpar/Makefile.am
 ./fortran/testpar/Makefile.in
@@ -485,6 +489,8 @@
 ./c++/src/h5c++.in
 ./c++/src/header.html
 ./c++/src/header_files/filelist.xml
+./c++/src/header_files/hdf_logo.jpg
+./c++/src/header_files/help.jpg
 ./c++/src/header_files/image001.jpg
 ./c++/src/header_files/image002.jpg
 
@@ -503,6 +509,7 @@
 ./c++/test/th5s.cpp
 ./c++/test/th5s.h5
 ./c++/test/tlinks.cpp
+./c++/test/tobject.cpp
 ./c++/test/ttypes.cpp
 ./c++/test/trefer.cpp
 ./c++/test/tvlstr.cpp
@@ -2180,6 +2187,12 @@
 ./tools/h5diff/testfiles/compounds_array_vlen2.h5
 ./tools/h5diff/testfiles/non_comparables1.h5
 ./tools/h5diff/testfiles/non_comparables2.h5
+./tools/h5diff/testfiles/tmptest2.he5
+./tools/h5diff/testfiles/tmpSingleSiteBethe.reference.h5
+./tools/h5diff/testfiles/h5diff_tmp1.txt
+./tools/h5diff/testfiles/tmptest.he5
+./tools/h5diff/testfiles/h5diff_tmp2.txt
+./tools/h5diff/testfiles/tmpSingleSiteBethe.output.h5
 
 #test files for h5repack
 ./tools/h5repack/testfiles/h5repack_attr.h5

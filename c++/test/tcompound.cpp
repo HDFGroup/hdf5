@@ -742,13 +742,12 @@ cerr << "test_compound_7 in catch" << endl;
  *
  *-------------------------------------------------------------------------
  */
-#define	COMPFILE	"tcompound_types.h5"
+const H5std_string COMPFILE("tcompound_types.h5");
 static void test_compound_set_size()
 {
     typedef struct {
 	int a, b, c[4], d, e;
     } src_typ_t;
-    src_typ_t	  *s_ptr;
 
     // Output message about test being performed
     SUBTEST("Setting Size on Compound Datatype");
@@ -794,7 +793,7 @@ static void test_compound_set_size()
 
 	// Verify setSize() actually set size
 	size_t new_size = dtype.getSize();
-	verify_val(new_size, 33, "DataType::getSize", __LINE__, __FILE__);
+	verify_val(new_size, (size_t)33, "DataType::getSize", __LINE__, __FILE__);
 
 	// Shrink the type, and verify that it became packed
 	dtype.setSize((size_t)32);
@@ -803,7 +802,7 @@ static void test_compound_set_size()
 
 	// Verify setSize() actually set size again
 	new_size = dtype.getSize();
-	verify_val(new_size, 32, "DataType::getSize", __LINE__, __FILE__);
+	verify_val(new_size, (size_t)32, "DataType::getSize", __LINE__, __FILE__);
 
 	/* Close types and file */
 	dtype_tmp.close();
@@ -867,4 +866,5 @@ extern "C"
 #endif
 void cleanup_compound()
 {
+    HDremove(COMPFILE.c_str());
 }   // cleanup_file
