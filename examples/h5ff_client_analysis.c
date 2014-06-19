@@ -222,7 +222,7 @@ ship_analysis(const char *file_name, const char *dataset_name)
 
     /* Issue an anlysis shipping request */
     ret = H5ASinvoke(file_name, query_id, split_script, combine_script,
-                     combine_script, H5_EVENT_STACK_NULL);
+                     NULL, H5_EVENT_STACK_NULL);
     assert(0 == ret);
 
     H5Qclose(query_id);
