@@ -204,6 +204,16 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         if(SUCCEED != ret)
             HGOTO_ERROR_FF(ret, "can't insert link count KV value");
 
+        /* insert link count metadata */
+        ret = H5VL_iod_insert_link_count(mdkv_oh, first_tid, (uint64_t)1,cs_scope, NULL, NULL);
+        if(ret != SUCCEED)
+            HGOTO_ERROR_FF(ret, "can't insert KV value");
+
+        /* insert object type metadata */
+        ret = H5VL_iod_insert_object_type(mdkv_oh, first_tid, H5I_GROUP, cs_scope, NULL, NULL);
+        if(ret != SUCCEED)
+            HGOTO_ERROR_FF(ret, "can't insert KV value");
+
         kv.value = &value;
         kv.value_len = sizeof(uint64_t);
 
@@ -1028,6 +1038,16 @@ setup_eff_container(iod_handle_t coh, uint32_t cs_scope, unsigned num_peers, hbo
         ret = H5VL_iod_insert_plist(mdkv_oh, first_tid, fcpl_id, cs_scope, NULL, NULL);
         if(SUCCEED != ret)
             HGOTO_ERROR_FF(ret, "can't insert link count KV value");
+
+        /* insert link count metadata */
+        ret = H5VL_iod_insert_link_count(mdkv_oh, first_tid, (uint64_t)1,cs_scope, NULL, NULL);
+        if(ret != SUCCEED)
+            HGOTO_ERROR_FF(ret, "can't insert KV value");
+
+        /* insert object type metadata */
+        ret = H5VL_iod_insert_object_type(mdkv_oh, first_tid, H5I_GROUP, cs_scope, NULL, NULL);
+        if(ret != SUCCEED)
+            HGOTO_ERROR_FF(ret, "can't insert KV value");
 
         kv.value = &value;
         kv.value_len = sizeof(uint64_t);

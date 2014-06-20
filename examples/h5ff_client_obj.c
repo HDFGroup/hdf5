@@ -219,6 +219,20 @@ int main(int argc, char **argv) {
         fprintf(stderr, "size of comment is %d Comment is %s\n", ret_size, comment);
         free(comment);
 
+        ret = H5Oget_info_ff(file_id, &oinfo, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        assert(H5O_TYPE_GROUP == oinfo.type);
+        fprintf(stderr, 
+                "get_info: Group with OID: %"PRIx64", num attrs = %zu, ref count = %u\n", 
+                oinfo.addr, oinfo.num_attrs, oinfo.rc);
+
+        ret = H5Oget_info_by_name_ff(file_id, ".", &oinfo, H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        assert(H5O_TYPE_GROUP == oinfo.type);
+        fprintf(stderr, 
+                "get_info: Group with OID: %"PRIx64", num attrs = %zu, ref count = %u\n", 
+                oinfo.addr, oinfo.num_attrs, oinfo.rc);
+
         ret = H5Oget_info_ff(gid, &oinfo, rid2, H5_EVENT_STACK_NULL);
         assert(ret == 0);
         assert(H5O_TYPE_GROUP == oinfo.type);
