@@ -37,7 +37,7 @@ typedef struct {
 
 #ifdef H5_HAVE_PYTHON
 
-pthread_mutex_t h5python_mutex;
+static pthread_mutex_t h5python_mutex = PTHREAD_MUTEX_INITIALIZER;
 static hbool_t numpy_initialized = FALSE;
 
 static void H5VL__iod_numpy_init(void);
@@ -299,7 +299,7 @@ H5VL__iod_numpy_init(void)
      * If, however, the extension module involves multiple files where the C-API
      * is needed then some additional steps must be taken. */
     import_array();
-    numpy_initialized = TRUE;
+
 } /* end H5VL__iod_numpy_init() */
 
 /*-------------------------------------------------------------------------
@@ -570,7 +570,12 @@ H5VL__iod_split(const char *split_script, void *data, size_t num_elmts,
     PyObject *po_func = NULL, *po_numpy_array = NULL, *po_args_tup = NULL;
     PyObject *po_numpy_array_split = NULL;
 
-    if(!numpy_initialized) H5VL__iod_numpy_init();
+    pthread_mutex_lock(&h5python_mutex);
+    if(!numpy_initialized) {
+        H5VL__iod_numpy_init();
+        numpy_initialized = TRUE;
+    }
+    pthread_mutex_unlock(&h5python_mutex);
 
     /* Create numpy array */
     if(NULL == (po_numpy_array = H5VL__iod_create_numpy_array(num_elmts, data_type_id, data)))
@@ -629,7 +634,12 @@ H5VL__iod_combine(const char *combine_script, void **split_data, size_t *split_n
     size_t count = 0;
     size_t i, k = 0;
 
-    if(!numpy_initialized) H5VL__iod_numpy_init();
+    pthread_mutex_lock(&h5python_mutex);
+    if(!numpy_initialized) {
+        H5VL__iod_numpy_init();
+        numpy_initialized = TRUE;
+    }
+    pthread_mutex_unlock(&h5python_mutex);
 
     for(i = 0; i < num_targets; i++) {
         if(0 != split_num_elmts[i])
@@ -712,7 +722,12 @@ H5VL__iod_integrate(const char *integrate_script, void **combine_data,
     PyObject *po_numpy_array_integrate = NULL;
     size_t i, k = 0;
 
-    if(!numpy_initialized) H5VL__iod_numpy_init();
+    pthread_mutex_lock(&h5python_mutex);
+    if(!numpy_initialized) {
+        H5VL__iod_numpy_init();
+        numpy_initialized = TRUE;
+    }
+    pthread_mutex_unlock(&h5python_mutex);
 
 //    for(i = 0; i < count; i++) {
 //        if(0 != combine_num_elmts[i])
@@ -794,9 +809,6 @@ H5VL__iod_request_container_open(const char *file_name, iod_handle_t **cohs)
     iod_ret_t ret;
     iod_hint_list_t *con_open_hint = NULL;
     int i;
-
-    if(pthread_mutex_init(&h5python_mutex, NULL)) 
-        HGOTO_ERROR_FF(FAIL, "can't init AS mutex");
     
     if(NULL == (hg_reqs = (hg_request_t *)malloc(sizeof(hg_request_t) * (unsigned int) num_ions_g)))
         HGOTO_ERROR_FF(FAIL, "can't allocate HG requests");
@@ -889,8 +901,6 @@ H5VL__iod_request_container_close(iod_handle_t *cohs)
     free(hg_reqs);
     free(cohs);
 
-    if(pthread_mutex_destroy(&h5python_mutex))
-        HGOTO_ERROR_FF(FAIL, "can't destroy AS mutex");
 done:
     return ret_value;
 } /* end H5VL__iod_request_container_close */
@@ -1249,13 +1259,9 @@ H5VL__iod_farm_split(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
     /* Apply split python script on data from query */
 #ifdef H5_HAVE_PYTHON
     if(nelmts) {
-        if (pthread_mutex_lock(&h5python_mutex))
-            HGOTO_ERROR_FF(FAIL, "can't lock AS mutex");
         if(FAIL == H5VL__iod_split(split_script, data, nelmts, type_id,
                                    split_data, split_num_elmts, split_type_id))
             HGOTO_ERROR_FF(FAIL, "can't apply split script to data");
-        if (pthread_mutex_unlock(&h5python_mutex))
-            HGOTO_ERROR_FF(FAIL, "can't unlock AS mutex");
     }
 #endif
 
@@ -1492,9 +1498,6 @@ H5VL_iod_server_container_open(hg_handle_t handle)
     iod_hint_list_t *con_open_hint = NULL;
     int ret_value = HG_SUCCESS;
 
-    if(pthread_mutex_init(&h5python_mutex, NULL)) 
-        HGOTO_ERROR_FF(FAIL, "can't init AS mutex");
-
     if(HG_FAIL == HG_Handler_get_input(handle, &file_name))
 	HGOTO_ERROR_FF(FAIL, "can't get input parameters");
 
@@ -1536,8 +1539,6 @@ H5VL_iod_server_container_close(hg_handle_t handle)
     if(iod_container_close(coh, NULL, NULL))
         HGOTO_ERROR_FF(FAIL, "can't open file");
 
-    if(pthread_mutex_destroy(&h5python_mutex))
-        HGOTO_ERROR_FF(FAIL, "can't destroy AS mutex");
 done:
     HG_Handler_start_output(handle, &ret_value);
     return ret_value;
