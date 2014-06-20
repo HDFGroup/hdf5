@@ -11,7 +11,7 @@
 #include <hdf5.h>
 
 /* define filename for this app, and max size after username prepended */
-#define FILENAME_APP "eff_analysis.h5"
+#define FILENAME_APP "eff_adv_analysis.h5"
 #define NAME_SIZE 64
 
 /* macros related to error reporting */
