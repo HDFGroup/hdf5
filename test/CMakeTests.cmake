@@ -492,6 +492,9 @@ if (HDF5_TEST_VFD)
     endforeach (test ${H5_VFD_TESTS})
     set_tests_properties (VFD-${vfdname}-flush1 PROPERTIES TIMEOUT 10)
     set_tests_properties (VFD-${vfdname}-objcopy PROPERTIES TIMEOUT 1000)
+    set_tests_properties (VFD-${vfdname}-testhdf5 PROPERTIES TIMEOUT 1200)
+    set_tests_properties (VFD-${vfdname}-gheap PROPERTIES TIMEOUT 1200)
+    set_tests_properties (VFD-${vfdname}-istore PROPERTIES TIMEOUT 1200)
     if (HDF5_TEST_FHEAP_VFD)
       add_test (
         NAME VFD-${vfdname}-fheap 
