@@ -33,7 +33,7 @@ AUTOMAKE_VERSION="automake (GNU automake) 1.14.1"
 AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.69"
 ACLOCAL_VERSION="aclocal (GNU automake) 1.14.1"
 LIBTOOL_VERSION="(GNU libtool) 2.4.2"
-M4_VERSION="m4 (GNU M4) 1.4.16"
+M4_VERSION="m4 (GNU M4) 1.4.17"
 
 #
 # When upgrading automake's version, don't forget to also update its
@@ -61,7 +61,7 @@ if test -z ${LIBTOOL}; then
   LIBTOOL=/mnt/hdf/packages/libtool/libtool-2.4.2/bin/libtool
 fi
 if test -z ${M4}; then
-  M4=/mnt/hdf/packages/m4/m4-1.4.16/bin/m4
+  M4=/mnt/hdf/packages/m4/m4-1.4.17/bin/m4
 fi
 
 # Check version numbers of all autotools against the "correct" versions

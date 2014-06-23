@@ -51,7 +51,7 @@ if (BUILD_TESTING)
     set (HDF5_TOOL_PLUGIN_LIB_CORENAME         "dynlibadd")
     set (HDF5_TOOL_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TOOL_PLUGIN_LIB_CORENAME}")
     set (HDF5_TOOL_PLUGIN_LIB_TARGET           ${HDF5_TOOL_PLUGIN_LIB_CORENAME})
-    add_definitions (${HDF5_EXTRA_C_FLAGS})
+    add_definitions (${HDF_EXTRA_C_FLAGS})
     INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
 
     add_library (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${LIB_TYPE} dynlib_rpk.c)

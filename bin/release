@@ -42,12 +42,13 @@ USAGE()
 cat << EOF
 Usage: $0 [--nocheck] [-d <dir>] [-h] <methods> ...
    -d DIR	The name of the directory where the releas(es) should be
-                placed.  By default, the directory is ./releases
+                placed.
 
    --nocheck	Ignore errors in MANIFEST file.
          
    --private	Make a private release with today's date in version information.
          
+This must be run at the top level of the source directory.
 The other command-line options are the names of the programs to use
 for compressing the resulting tar archive (if none are given then
 "tar md5" is assumed):
@@ -61,19 +62,21 @@ for compressing the resulting tar archive (if none are given then
 
 Examples:
 
-    $ release
-    releases/hdf5-1.0.38.tar
-    releases/hdf5-1.0.38.tar.md5
+    $ bin/release -d /tmp
+    /tmp/hdf5-1.8.13-RELEASE.txt
+    /tmp/hdf5-1.8.13.tar
+    /tmp/hdf5-1.8.13.tar.md5
 
-    $ release gzip
-    releases/hdf5-1.0.38.tar.gz
+    $ bin/release -d /tmp gzip
+    /tmp/hdf5-1.8.13-RELEASE.txt
+    /tmp/hdf5-1.8.13.tar.gz
 
-    $ release -d /tmp tar gzip zip md5
-    /tmp/hdf5-1.0.38.tar
-    /tmp/hdf5-1.0.38.tar.Z
-    /tmp/hdf5-1.0.38.tar.gz
-    /tmp/hdf5-1.0.38.tar.bz2
-    /tmp/hdf5-1.0.38.tar.md5
+    $ bin/release -d /tmp tar gzip zip md5
+    /tmp/hdf5-1.8.13-RELEASE.txt
+    /tmp/hdf5-1.8.13.tar
+    /tmp/hdf5-1.8.13.tar.gz
+    /tmp/hdf5-1.8.13.tar.md5
+    /tmp/hdf5-1.8.13.tar.zip
 
 EOF
 
@@ -107,19 +110,19 @@ tar2zip()
 	echo "usage: tar2zip <tarfilename> <zipfilename>"
 	return 1
     fi
-    tmpdir=/tmp/tmpdir$$
-    mkdir -p $tmpdir
+    ztmpdir=/tmp/tmpdir$$
+    mkdir -p $ztmpdir
     version=$1
     tarfile=$2
     zipfile=$3
 
-    # step 1: untar tarball in tmpdir
-    (cd $tmpdir; tar xf -) < $tarfile
+    # step 1: untar tarball in ztmpdir
+    (cd $ztmpdir; tar xf -) < $tarfile
     # sanity check
-    if [ ! -d $tmpdir/$version ]; then
-	echo "untar did not create $tmp/$version source dir"
+    if [ ! -d $ztmpdir/$version ]; then
+	echo "untar did not create $ztmpdir/$version source dir"
 	# cleanup
-	rm -rf $tmpdir
+	rm -rf $ztmpdir
 	return 1
     fi
     # step 2: convert text files
@@ -128,7 +131,7 @@ tar2zip()
     # -k   Keep the date stamp 
     # -q   quiet mode
     # grep redirect output to /dev/null because -q or -s are not portable.
-    find $tmpdir/$version | \
+    find $ztmpdir/$version | \
 	while read inf; do \
 	    if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
 		unix2dos -q -k $inf; \
@@ -139,11 +142,11 @@ tar2zip()
     # -y Store symbolic links as such in the zip archive
     # -r recursive
     # -q quiet
-    (cd $tmpdir; zip -9 -y -r -q $version.zip $version)
-    mv $tmpdir/$version.zip $zipfile
+    (cd $ztmpdir; zip -9 -y -r -q $version.zip $version)
+    mv $ztmpdir/$version.zip $zipfile
 
     # cleanup
-    rm -rf $tmpdir
+    rm -rf $ztmpdir
 }
 
 # This command must be run at the top level of the hdf5 source directory.
