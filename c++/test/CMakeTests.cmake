@@ -60,6 +60,7 @@ if (HDF5_TEST_VFD)
             -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       set_tests_properties (CPP_VFD-${vfdname}-cpp_testhdf5 PROPERTIES DEPENDS CPP_VFD-${vfdname}-cpp_testhdf5-clear-objects)
+      set_tests_properties (CPP_VFD-${vfdname}-cpp_testhdf5 PROPERTIES TIMEOUT 30)
     endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_VFD_TEST)
   
