@@ -4856,7 +4856,6 @@ H5VLiod_get_file_id(const char *filename, iod_handle_t coh, hid_t fapl_id, hid_t
     if(ret < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't free container transaction status object");
 
-    fprintf(stderr, "HDF5 container at version %d\n", (int)rtid);
     ret = iod_trans_start(coh, &rtid, NULL, 0, IOD_TRANS_R, NULL);
     if(ret < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't start transaction");

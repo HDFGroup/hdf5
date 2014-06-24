@@ -149,6 +149,8 @@ int main(int argc, char **argv) {
        Leader can tell its delegates that the transaction is
        started. */
     if(0 == my_rank) {
+        hid_t dcpl_id;
+
         trans_num = 2;
         ret = H5TRstart(tid1, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(0 == ret);
@@ -163,12 +165,21 @@ int main(int argc, char **argv) {
         gid3 = H5Gcreate_ff(gid2, "G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         assert(gid3 > 0);
 
+        dcpl_id = H5Pcreate (H5P_DATASET_CREATE);
+        H5Pset_dcpl_dim_layout(dcpl_id, H5D_COL_MAJOR);
+        H5Pset_dcpl_stripe_count(dcpl_id, 4);
+        H5Pset_dcpl_stripe_size(dcpl_id, 5);
+
         /* create datasets */
-        did1 = H5Dcreate_ff(gid1, "D1", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        did1 = H5Dcreate_ff(gid1, "D1", dtid, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT, tid1, e_stack);
         assert(did1 > 0);
-        did2 = H5Dcreate_ff(gid2, "D2", dtid, scalar, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        H5Pclose(dcpl_id);
+
+        did2 = H5Dcreate_ff(gid2, "D2", dtid, scalar, 
+                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         assert(did2 > 0);
-        did3 = H5Dcreate_ff(gid3, "D3", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        did3 = H5Dcreate_ff(gid3, "D3", dtid, sid, 
+                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
         assert(did3 > 0);
     }
 
@@ -535,7 +546,7 @@ int main(int argc, char **argv) {
     ret = H5Gclose_ff(gid1, e_stack);
     assert(ret == 0);
 
-    H5Fclose_ff(file_id, 0, H5_EVENT_STACK_NULL);
+    H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL);
 
     H5ESget_count(e_stack, &num_events);
 

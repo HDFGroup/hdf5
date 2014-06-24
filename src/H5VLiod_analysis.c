@@ -194,6 +194,7 @@ H5VL_iod_server_analysis_invoke_cb(AXE_engine_t UNUSED axe_engine,
 #if H5_EFF_DEBUG 
             print_iod_obj_map(obj_map);
 #endif
+            print_iod_obj_map(obj_map);
             assert(obj_map->type == IOD_OBJ_ARRAY);
 
             if(H5VL__iod_farm_work(obj_map, cohs, dset_id, region, rtid,
@@ -1506,7 +1507,9 @@ H5VL_iod_server_container_open(hg_handle_t handle)
     con_open_hint->hint[0].key = "iod_hint_co_scratch_cksum";
 
     /* open the container */
+#if H5_EFF_DEBUG 
     printf("Calling iod_container_open on %s\n", file_name);
+#endif
     if(iod_container_open(file_name, con_open_hint, IOD_CONT_R, &coh, NULL))
         HGOTO_ERROR_FF(FAIL, "can't open file");
 

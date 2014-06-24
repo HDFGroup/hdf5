@@ -193,9 +193,6 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_oh.wr_oh.cookie = grp_oh.wr_oh.cookie;
     HG_Handler_start_output(op_data->hg_handle, &output);
 
-    fprintf(stderr, "Created group RD_OH %"PRIu64" WR_OH %"PRIu64"\n", 
-            grp_oh.rd_oh.cookie, grp_oh.wr_oh.cookie);
-
 done:
 
     /* close parent group if it is not the location we started the

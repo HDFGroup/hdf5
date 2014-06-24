@@ -565,8 +565,6 @@ H5VL__iod_apply_query(hid_t file_id, hid_t rcxt_id, hid_t qid, hid_t vcpl_id,
 
             /* combine result1 and result2 */
             if(H5Q_COMBINE_AND == comb_type) {
-                fprintf(stderr, "ANDing %d and %d\n", result1, result2);
-
                 *result = result1 + result2;
 
                 if(sid1!=FAIL && sid2!=FAIL) {
@@ -580,8 +578,6 @@ H5VL__iod_apply_query(hid_t file_id, hid_t rcxt_id, hid_t qid, hid_t vcpl_id,
                     *region = H5Scopy(sid2);
             }
             else if(H5Q_COMBINE_OR == comb_type) {
-                fprintf(stderr, "ORing %d and %d\n", result1, result2);
-
                 *result = result1 + result2 + 1;
 
                 if(sid1!=FAIL && sid2!=FAIL) {

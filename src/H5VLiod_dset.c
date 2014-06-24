@@ -260,6 +260,53 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 
     step ++;
 
+    {
+        H5FF_dset_dim_layout_t dims_layout;
+        size_t stripe_count;
+        size_t stripe_size;
+        iod_dims_seq_t dims_seq = NULL;
+        hbool_t non_def = FALSE;
+        uint32_t i;
+        iod_layout_t iod_layout;
+
+        if(H5Pget_dcpl_dim_layout(dcpl_id, &dims_layout) < 0)
+            HGOTO_ERROR_FF(FAIL, "can't get dcpl layout property");
+
+        if(H5D_COL_MAJOR == dims_layout) {
+            non_def = TRUE;
+            if(NULL == (dims_seq = malloc (sizeof(uint32_t) * array.num_dims)))
+                HGOTO_ERROR_FF(FAIL, "can't allocate memory");
+            for(i=0 ; i<array.num_dims ; i++)
+                dims_seq[i] = array.num_dims - (i+1);
+        }
+
+        if(H5Pget_dcpl_stripe_count(dcpl_id, &stripe_count) < 0)
+            HGOTO_ERROR_FF(FAIL, "can't get dcpl stripe count property");
+
+        if(H5Pget_dcpl_stripe_size(dcpl_id, &stripe_size) < 0)
+            HGOTO_ERROR_FF(FAIL, "can't get dcpl stripe size property");
+
+        if(0!=stripe_count || 0!=stripe_size)
+            non_def = TRUE;
+
+        if(TRUE == non_def) {
+            iod_layout.loc = IOD_LOC_CENTRAL;
+            iod_layout.type = IOD_LAYOUT_STRIPED;
+            iod_layout.target_num = (uint32_t)stripe_count;
+            iod_layout.stripe_size = stripe_size;
+            iod_layout.dims_seq = dims_seq;
+
+            ret = iod_obj_set_layout(dset_oh.wr_oh, wtid, NULL, &iod_layout, NULL);
+            if(ret < 0)
+                HGOTO_ERROR_FF(ret, "can't set IOD array layout");
+        }
+
+        if(dims_seq) {
+            free(dims_seq);
+            dims_seq = NULL;
+        }
+    }
+
     /* create the attribute KV object for the dataset */
     ret = iod_obj_create(coh, wtid, md_obj_create_hint, IOD_OBJ_KV, NULL, NULL, &attrkv_id, NULL);
     if(ret < 0)
