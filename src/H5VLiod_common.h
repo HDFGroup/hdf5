@@ -30,7 +30,7 @@
 #define IOD_OH_UNDEFINED ((uint64_t)0)//(pow(2.0,64.0) - 1)
 #define IOD_ID_UNDEFINED ((uint64_t)(-1))//(pow(2.0,64.0) - 1)
 #define IOD_COUNT_UNDEFINED ((uint64_t)(-1))//(pow(2.0,64.0) - 1)
-#define H5_EFF_DEBUG 1
+#define H5_EFF_DEBUG 0
 
 /* function shipper IDs for different routines */
 extern hg_id_t H5VL_EFF_INIT_ID;
