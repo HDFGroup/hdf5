@@ -62,7 +62,7 @@
 
 /* hints for Dataset storage layout */
 #define H5D_CRT_DIMS_ORDER_SIZE	               sizeof(uint32_t)
-#define H5D_CRT_DIMS_ORDER_DEF	               H5D_ROW_MAJOR
+#define H5D_CRT_DIMS_ORDER_DEF	               0
 #define H5D_CRT_DIMS_ORDER_ENC                 H5P__encode_unsigned
 #define H5D_CRT_DIMS_ORDER_DEC                 H5P__decode_unsigned
 

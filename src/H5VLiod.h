@@ -51,7 +51,7 @@ extern "C" {
 #define H5D_XFER_CHECKSUM_NAME "checksum"
 #define H5D_XFER_CHECKSUM_PTR_NAME "checksum_ptr"
 
-#define H5D_CRT_DIMS_ORDER_NAME "dim_order"
+#define H5D_CRT_DIMS_ORDER_NAME "dims_order"
 #define H5D_CRT_STRIPE_COUNT_NAME "stripe_count"
 #define H5D_CRT_STRIPE_SIZE_NAME "stripe_size"
 #define H5D_CRT_APPEND_ONLY_NAME "append_only"
@@ -109,8 +109,8 @@ H5_DLL herr_t H5Pget_dxpl_inject_corruption(hid_t dxpl_id, hbool_t *flag);
 H5_DLL herr_t H5Pset_dcpl_append_only(hid_t dcpl_id, hbool_t flag);
 H5_DLL herr_t H5Pget_dcpl_append_only(hid_t dcpl_id, hbool_t *flag);
 
-H5_DLL herr_t H5Pset_dcpl_dim_layout(hid_t dcpl_id, H5FF_dset_dim_layout_t layout);
-H5_DLL herr_t H5Pget_dcpl_dim_layout(hid_t dcpl_id, H5FF_dset_dim_layout_t *layout);
+H5_DLL herr_t H5Pset_dcpl_dim_layout(hid_t dcpl_id, H5FF_dset_dim_layout_t dims_layout);
+H5_DLL herr_t H5Pget_dcpl_dim_layout(hid_t dcpl_id, H5FF_dset_dim_layout_t *dims_layout);
 H5_DLL herr_t H5Pset_dcpl_stripe_count(hid_t dcpl_id, size_t stripe_count);
 H5_DLL herr_t H5Pget_dcpl_stripe_count(hid_t dcpl_id, size_t *stripe_count);
 H5_DLL herr_t H5Pset_dcpl_stripe_size(hid_t dcpl_id, size_t stripe_size);
