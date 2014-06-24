@@ -50,8 +50,14 @@ extern "C" {
 #define H5D_XFER_INJECT_CORRUPTION_NAME "inject_corruption"
 #define H5D_XFER_CHECKSUM_NAME "checksum"
 #define H5D_XFER_CHECKSUM_PTR_NAME "checksum_ptr"
+
+#define H5D_CRT_DIM_ORDER_NAME "dim_order"
+#define H5D_CRT_STRIPE_COUNT_NAME "stripe_count"
+#define H5D_CRT_STRIPE_SIZE_NAME "stripe_size"
 #define H5D_CRT_APPEND_ONLY_NAME "append_only"
+
 #define H5O_CRT_ENABLE_CHECKSUM_NAME "enable_obj_checksum"
+
 #define H5O_XFER_REPLICA_ID_NAME "replica_id"
 #define H5O_XFER_LAYOUT_TYPE_NAME "layout_type"
 #define H5O_XFER_SELECTION_NAME "prefetched_selection"
@@ -64,6 +70,11 @@ typedef enum H5FF_layout_t {
     H5_LOCAL_NODE,
     H5_CONTROLLED_LAYOUT
 } H5FF_layout_t;
+
+typedef enum H5FF_dset_dim_layout_t {
+    H5D_ROW_MAJOR = 0,
+    H5D_COL_MAJOR
+} H5FF_dset_dim_layout_t;
 
 H5_DLL H5VL_class_t *H5VL_iod_init(void);
 H5_DLL herr_t H5Pset_fapl_iod(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
@@ -97,6 +108,13 @@ H5_DLL herr_t H5Pget_dxpl_inject_corruption(hid_t dxpl_id, hbool_t *flag);
 
 H5_DLL herr_t H5Pset_dcpl_append_only(hid_t dcpl_id, hbool_t flag);
 H5_DLL herr_t H5Pget_dcpl_append_only(hid_t dcpl_id, hbool_t *flag);
+
+H5_DLL herr_t H5Pset_dcpl_dim_layout(hid_t dcpl_id, H5FF_dset_dim_layout_t layout);
+H5_DLL herr_t H5Pget_dcpl_dim_layout(hid_t dcpl_id, H5FF_dset_dim_layout_t *layout);
+H5_DLL herr_t H5Pset_dcpl_stripe_count(hid_t dcpl_id, size_t stripe_count);
+H5_DLL herr_t H5Pget_dcpl_stripe_count(hid_t dcpl_id, size_t *stripe_count);
+H5_DLL herr_t H5Pset_dcpl_stripe_size(hid_t dcpl_id, size_t stripe_size);
+H5_DLL herr_t H5Pget_dcpl_stripe_size(hid_t dcpl_id, size_t *stripe_size);
 
 H5_DLL hid_t H5VLiod_get_file_id(const char *filename, iod_handle_t coh, 
                                  hid_t fapl_id, hid_t *rcxt_id);

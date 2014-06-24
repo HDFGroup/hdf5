@@ -59,6 +59,22 @@
 #define H5D_CRT_APPEND_ONLY_DEF    	       FALSE
 #define H5D_CRT_APPEND_ONLY_ENC                H5P__encode_hbool_t
 #define H5D_CRT_APPEND_ONLY_DEC                H5P__decode_hbool_t
+
+/* hints for Dataset storage layout */
+#define H5D_CRT_DIMS_ORDER_SIZE	               sizeof(uint32_t)
+#define H5D_CRT_DIMS_ORDER_DEF	               H5D_ROW_MAJOR
+#define H5D_CRT_DIMS_ORDER_ENC                 H5P__encode_unsigned
+#define H5D_CRT_DIMS_ORDER_DEC                 H5P__decode_unsigned
+
+#define H5D_CRT_STRIPE_COUNT_SIZE	       sizeof(size_t)
+#define H5D_CRT_STRIPE_COUNT_DEF	       0
+#define H5D_CRT_STRIPE_COUNT_ENC               H5P__encode_size_t
+#define H5D_CRT_STRIPE_COUNT_DEC               H5P__decode_size_t
+
+#define H5D_CRT_STRIPE_SIZE_SIZE	       sizeof(size_t)
+#define H5D_CRT_STRIPE_SIZE_DEF	               0
+#define H5D_CRT_STRIPE_SIZE_ENC                H5P__encode_size_t
+#define H5D_CRT_STRIPE_SIZE_DEC                H5P__decode_size_t
 #endif
 
 /* Define default layout information */
