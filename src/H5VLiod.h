@@ -51,7 +51,7 @@ extern "C" {
 #define H5D_XFER_CHECKSUM_NAME "checksum"
 #define H5D_XFER_CHECKSUM_PTR_NAME "checksum_ptr"
 
-#define H5D_CRT_DIM_ORDER_NAME "dim_order"
+#define H5D_CRT_DIMS_ORDER_NAME "dim_order"
 #define H5D_CRT_STRIPE_COUNT_NAME "stripe_count"
 #define H5D_CRT_STRIPE_SIZE_NAME "stripe_size"
 #define H5D_CRT_APPEND_ONLY_NAME "append_only"

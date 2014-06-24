@@ -26,7 +26,6 @@
 #include "H5FFprivate.h"        /* Fast Forward            		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Pprivate.h"		/* Property lists			*/
-#include "H5Ppkg.h"		/* Property lists			*/
 #include "H5VLiod.h"            /* Iod VOL plugin			*/
 
 #ifdef H5_HAVE_EFF
@@ -813,7 +812,7 @@ H5Pset_dcpl_dim_layout(hid_t dcpl_id, H5FF_dset_dim_layout_t layout)
     if(NULL == (plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dcpl")
 
-    if(H5P_set(plist, H5D_CRT_DIM_ORDER_NAME, &layout) < 0)
+    if(H5P_set(plist, H5D_CRT_DIMS_ORDER_NAME, &layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -831,7 +830,7 @@ H5Pget_dcpl_dim_layout(hid_t dcpl_id, H5FF_dset_dim_layout_t *layout)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dcpl")
 
     if(layout)
-        if(H5P_get(plist, H5D_CRT_DIM_ORDER_NAME, layout) < 0)
+        if(H5P_get(plist, H5D_CRT_DIMS_ORDER_NAME, layout) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
 done:
     FUNC_LEAVE_API(ret_value)

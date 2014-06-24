@@ -201,6 +201,9 @@ H5FL_BLK_EXTERN(type_conv);
 /* Property value defaults */
 #ifdef H5_HAVE_EFF
 static const hbool_t H5D_def_append_only_g = H5D_CRT_APPEND_ONLY_DEF;
+static const H5FF_dset_dim_layout_t H5D_def_dims_order_g = H5D_CRT_DIMS_ORDER_DEF;
+static const size_t H5D_def_stripe_count_g = H5D_CRT_STRIPE_COUNT_DEF;
+static const size_t H5D_def_stripe_size_g = H5D_CRT_STRIPE_SIZE_DEF;
 #endif
 static const H5O_layout_t H5D_def_layout_g = H5D_CRT_LAYOUT_DEF;        /* Default storage layout */
 static const H5O_fill_t H5D_def_fill_g = H5D_CRT_FILL_VALUE_DEF;        /* Default fill value */
@@ -246,6 +249,24 @@ H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5D_CRT_APPEND_ONLY_NAME, H5D_CRT_APPEND_ONLY_SIZE, 
                          &H5D_def_append_only_g,
                          NULL, NULL, NULL, H5D_CRT_APPEND_ONLY_ENC, H5D_CRT_APPEND_ONLY_DEC, 
+                         NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    if(H5P_register_real(pclass, H5D_CRT_DIMS_ORDER_NAME, H5D_CRT_DIMS_ORDER_SIZE, 
+                         &H5D_def_dims_order_g,
+                         NULL, NULL, NULL, H5D_CRT_DIMS_ORDER_ENC, H5D_CRT_DIMS_ORDER_DEC, 
+                         NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    if(H5P_register_real(pclass, H5D_CRT_STRIPE_COUNT_NAME, H5D_CRT_STRIPE_COUNT_SIZE, 
+                         &H5D_def_stripe_count_g,
+                         NULL, NULL, NULL, H5D_CRT_STRIPE_COUNT_ENC, H5D_CRT_STRIPE_COUNT_DEC, 
+                         NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    if(H5P_register_real(pclass, H5D_CRT_STRIPE_SIZE_NAME, H5D_CRT_STRIPE_SIZE_SIZE, 
+                         &H5D_def_stripe_size_g,
+                         NULL, NULL, NULL, H5D_CRT_STRIPE_SIZE_ENC, H5D_CRT_STRIPE_SIZE_DEC, 
                          NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 #endif
