@@ -697,11 +697,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
                 /* calculate a checksum for the data to be sent */
                 cs = H5_checksum_crc64(buf, size);
             }
-#if H5_EFF_DEBUG
-            else {
-                fprintf(stderr, "NO TRANSFER DATA INTEGRITY CHECKS ON RAW DATA\n");
-            }
-#endif
+
             /* MSC - check if client requested to corrupt data */
             if(H5Pget_dxpl_inject_corruption(dxpl_id, &flag) < 0)
                 HGOTO_ERROR_FF(FAIL, "can't read property list");
@@ -1180,11 +1176,6 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
                 goto done;
             }
         }
-#if H5_EFF_DEBUG
-        else {
-            fprintf(stderr, "NO TRANSFER DATA INTEGRITY CHECKS ON RAW DATA\n");
-        }
-#endif
 
         buf_size = 0;
 
@@ -1488,8 +1479,6 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
             HGOTO_ERROR_FF(FAIL, "unable to generate IOD file descriptor from dataspace selection");
     }
 
-
-
     if(NULL == (array_io = (iod_array_io_t *)calloc
                     (sizeof(iod_array_io_t), (size_t)num_descriptors)))
         HGOTO_ERROR_FF(FAIL, "can't allocate list array");
@@ -1533,6 +1522,14 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
             array_io[n].cs = NULL;
         array_io[n].ret = &ret_list[n];
 
+#if H5_EFF_DEBUG 
+        for(i=0 ; i<ndims ; i++) {
+            fprintf(stderr, "Dim %d:  start %zu   stride %zu   block %zu   count %zu\n", 
+                    i, (size_t)hslabs[n].start[i], (size_t)hslabs[n].stride[i], 
+                    (size_t)hslabs[n].block[i], (size_t)hslabs[n].count[i]);
+        }
+#endif
+
         buf_ptr += num_bytes;
     }
 
@@ -1548,68 +1545,6 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
         if(ret < 0)
             HGOTO_ERROR_FF(ret, "can't read from array object");
     }
-
-
-
-#if 0        
-
-    file_desc = (iod_array_iodesc_t *)hslabs;
-    buf_ptr = (uint8_t *)buf;
-
-    if(cs_scope & H5_CHECKSUM_IOD) {
-        /* allocate cs array */
-        if(NULL == (cs_list = (iod_checksum_t *)calloc
-                    (sizeof(iod_checksum_t), (size_t)num_descriptors)))
-            HGOTO_ERROR_FF(FAIL, "can't allocate checksum array");
-    }
-#if H5_EFF_DEBUG
-    else {
-        fprintf(stderr, "NO IOD DATA INTEGRITY CHECKS ON RAW DATA\n");
-    }
-#endif
-
-    /* set the memory descriptor */
-    mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + 
-                                        (size_t)num_descriptors * sizeof(iod_mem_frag_t));
-    mem_desc->nfrag = (long unsigned)num_descriptors;
-    for(n=0 ; n<num_descriptors ; n++) {
-        hsize_t num_bytes = 0;
-        hsize_t num_elems = 1;
-
-        /* determine how many bytes the current descriptor holds */
-        for(i=0 ; i<ndims ; i++) {
-            num_elems *= (hslabs[n].count[i] * hslabs[n].block[i]);
-        }
-        num_bytes = num_elems * elmt_size;
-
-        mem_desc->frag[n].addr = (void *)buf_ptr;
-        mem_desc->frag[n].len = (iod_size_t)num_bytes;
-
-        if(write_op && (cs_scope & H5_CHECKSUM_IOD))
-            cs_list[n] = H5_checksum_crc64(buf_ptr, (size_t)num_bytes);
-
-#if H5_EFF_DEBUG 
-        for(i=0 ; i<ndims ; i++) {
-            fprintf(stderr, "Dim %d:  start %zu   stride %zu   block %zu   count %zu\n", 
-                    i, (size_t)file_desc->start[i], (size_t)file_desc->stride[i], 
-                    (size_t)file_desc->block[i], (size_t)file_desc->count[i]);
-        }
-#endif
-    }
-
-    if(write_op) {
-        /* write to array */
-        ret = iod_array_write(iod_oh, tid, NULL, mem_desc, file_desc, cs_list, NULL);
-        if(ret < 0)
-            HGOTO_ERROR_FF(ret, "can't write to array object");
-    }
-    else {
-        /* Read from array */
-        ret = iod_array_read(iod_oh, tid, NULL, mem_desc, file_desc, cs_list, NULL);
-        if(ret < 0)
-            HGOTO_ERROR_FF(ret, "can't read from array object");
-    }
-#endif
 
     /* If this is a read operation, compute checksum for each IOD
        read, and compare it against checksum returned from IOD */
