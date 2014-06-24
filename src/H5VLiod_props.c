@@ -802,7 +802,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_dcpl_append_only() */
 
-herr_t 
+herr_t
 H5Pset_dcpl_dim_layout(hid_t dcpl_id, H5FF_dset_dim_layout_t layout)
 {
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
@@ -819,7 +819,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-herr_t 
+herr_t
 H5Pget_dcpl_dim_layout(hid_t dcpl_id, H5FF_dset_dim_layout_t *layout)
 {
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
@@ -837,13 +837,14 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-herr_t 
+herr_t
 H5Pset_dcpl_stripe_count(hid_t dcpl_id, size_t stripe_count)
 {
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iz", dcpl_id, stripe_count);
 
     if(NULL == (plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dcpl")
@@ -854,13 +855,14 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-herr_t 
+herr_t
 H5Pget_dcpl_stripe_count(hid_t dcpl_id, size_t *stripe_count)
 {
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*z", dcpl_id, stripe_count);
 
     if(NULL == (plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dcpl")
@@ -872,13 +874,14 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-herr_t 
+herr_t
 H5Pset_dcpl_stripe_size(hid_t dcpl_id, size_t stripe_size)
 {
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iz", dcpl_id, stripe_size);
 
     if(NULL == (plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dcpl")
@@ -889,13 +892,14 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-herr_t 
+herr_t
 H5Pget_dcpl_stripe_size(hid_t dcpl_id, size_t *stripe_size)
 {
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*z", dcpl_id, stripe_size);
 
     if(NULL == (plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dcpl")
