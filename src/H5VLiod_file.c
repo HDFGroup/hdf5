@@ -424,12 +424,12 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
         IOD_OBJID_SETOWNER_APP(output.oidkv_id)
 
         output.coh.cookie = coh.cookie;
-
+#if H5_EFF_DEBUG
         fprintf(stderr, "Recreating Container HDF5 metadata ");
         fprintf(stderr, "with MDKV %"PRIx64" ", output.mdkv_id);
         fprintf(stderr, "with attrKV %"PRIx64" ", output.attrkv_id);
         fprintf(stderr, "with OIDKV %"PRIx64"\n", output.oidkv_id);
-
+#endif
         if(setup_eff_container(coh, cs_scope, num_peers, acquire, output.fcpl_id,
                                output.root_id, output.mdkv_id, 
                                output.attrkv_id, output.oidkv_id, &root_oh) < 0)
@@ -537,9 +537,11 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
             free(kv[i].value);
         }
 
+#if H5_EFF_DEBUG
         fprintf(stderr, "OID KV index: %d\n", (int)output.kv_oid_index);
         fprintf(stderr, "OID ARRAY index: %d\n", (int)output.array_oid_index);
         fprintf(stderr, "OID BLOB index: %d\n", (int)output.blob_oid_index);
+#endif
 
         free(kv);
         free(oid_cs);
