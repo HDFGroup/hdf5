@@ -254,6 +254,9 @@ foreach (test ${H5_TESTS})
 endforeach (test ${H5_TESTS})
 
 set_tests_properties (H5TEST-flush2 PROPERTIES DEPENDS H5TEST-flush1)
+set_tests_properties (H5TEST-fheap PROPERTIES TIMEOUT 1800)
+set_tests_properties (H5TEST-testmeta PROPERTIES TIMEOUT 1800)
+set_tests_properties (H5TEST-big PROPERTIES TIMEOUT 1800)
 
 ##############################################################################
 ##############################################################################
@@ -491,10 +494,6 @@ if (HDF5_TEST_VFD)
       )
     endforeach (test ${H5_VFD_TESTS})
     set_tests_properties (VFD-${vfdname}-flush1 PROPERTIES TIMEOUT 10)
-    set_tests_properties (VFD-${vfdname}-objcopy PROPERTIES TIMEOUT 1000)
-    set_tests_properties (VFD-${vfdname}-testhdf5 PROPERTIES TIMEOUT 1200)
-    set_tests_properties (VFD-${vfdname}-gheap PROPERTIES TIMEOUT 1200)
-    set_tests_properties (VFD-${vfdname}-istore PROPERTIES TIMEOUT 1200)
     if (HDF5_TEST_FHEAP_VFD)
       add_test (
         NAME VFD-${vfdname}-fheap 
@@ -507,6 +506,7 @@ if (HDF5_TEST_VFD)
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
             -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
+      set_tests_properties (VFD-${vfdname}-fheap PROPERTIES TIMEOUT 1800)
     endif (HDF5_TEST_FHEAP_VFD)
   ENDMACRO (ADD_VFD_TEST)
   
