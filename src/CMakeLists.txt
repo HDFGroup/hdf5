@@ -700,6 +700,7 @@ IF (HDF5_ENABLE_EFF)
         ${HDF5_SRC_DIR}/H5VLiod_link.c
         ${HDF5_SRC_DIR}/H5VLiod_obj.c
         ${HDF5_SRC_DIR}/H5VLiod_map.c
+        ${HDF5_SRC_DIR}/H5VLiod_props.c
         ${HDF5_SRC_DIR}/H5VLiod_trans.c
         ${HDF5_SRC_DIR}/H5VLiod_encdec.c
         ${HDF5_SRC_DIR}/H5VLiod_view.c
