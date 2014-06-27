@@ -118,6 +118,60 @@ const H5X_class_t H5X_DUMMY[1] = {{
 }};
 
 /*-------------------------------------------------------------------------
+ * Function:    H5X__dummy_read_data
+ *
+ * Purpose: Read data from dataset.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5X__dummy_read_data(hid_t dataset_id, hid_t rcxt_id, void **buf,
+        size_t *buf_size)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    hid_t type_id = FAIL, space_id = FAIL;
+    size_t nelmts, elmt_size;
+    void *data = NULL;
+    size_t data_size;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get space info */
+    if (FAIL == (type_id = H5Dget_type(dataset_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get type from dataset");
+    if (FAIL == (space_id = H5Dget_space(dataset_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get dataspace from dataset");
+    if (0 == (nelmts = (size_t) H5Sget_select_npoints(space_id)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid number of elements");
+    if (0 == (elmt_size = H5Tget_size(type_id)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "invalid size of element");
+
+    /* Allocate buffer to hold data */
+    data_size = nelmts * elmt_size;
+    if (NULL == (data = H5MM_malloc(data_size)))
+        HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate read buffer");
+
+    /* Read data from dataset */
+    if (FAIL == H5Dread_ff(dataset_id, type_id, H5S_ALL, space_id,
+            H5P_DEFAULT, data, rcxt_id, H5_EVENT_STACK_NULL))
+        HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
+
+    *buf = data;
+    *buf_size = data_size;
+
+done:
+    if (type_id != FAIL)
+        H5Tclose(type_id);
+    if (space_id != FAIL)
+        H5Sclose(space_id);
+    if (ret_value == FAIL)
+        H5MM_free(data);
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5X_dummy_create
  *
  * Purpose: This function creates a new instance of a dummy plugin index.
@@ -132,7 +186,10 @@ H5X_dummy_create(hid_t file_id, hid_t dataset_id, hid_t UNUSED xcpl_id,
         hid_t xapl_id, size_t *metadata_size, void **metadata)
 {
     H5X_dummy_t *dummy = NULL;
-    hid_t type_id, space_id, trans_id;
+    hid_t type_id, space_id, trans_id = FAIL, rcxt_id = FAIL;
+    void *buf = NULL;
+    size_t buf_size;
+    uint64_t version;
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -149,14 +206,29 @@ H5X_dummy_create(hid_t file_id, hid_t dataset_id, hid_t UNUSED xcpl_id,
     if (FAIL == (space_id = H5Dget_space(dataset_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get dataspace from dataset");
 
-#ifdef H5_HAVE_INDEXING
+    /* Get transaction ID from xapl */
     if (FAIL == H5Pget_xapl_transaction(xapl_id, &trans_id))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get trans_id from xapl");
-#endif
 
+    /* Create read context from version */
+    if (FAIL == H5TRget_version(trans_id, &version))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get version from transaction ID");
+    if (FAIL == (rcxt_id =  H5RCcreate(file_id, version)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, NULL, "can't create read context");
+
+    /* Get data from dataset */
+    if (FAIL == H5X__dummy_read_data(dataset_id, rcxt_id, &buf, &buf_size))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get data from dataset");
+
+    /* Create anonymous datasets */
     if (FAIL == (dummy->idx_anon_id = H5Dcreate_anon_ff(file_id, type_id, space_id,
             H5P_DEFAULT, H5P_DEFAULT, trans_id, H5_EVENT_STACK_NULL)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, NULL, "can't create anonymous dataset");
+
+    /* Update index elements (simply write data for now) */
+    if (FAIL == H5Dwrite_ff(dummy->idx_anon_id, type_id, H5S_ALL,
+            H5S_ALL, H5P_DEFAULT, buf, trans_id, H5_EVENT_STACK_NULL))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, NULL, "can't update index elements");
 
     if (FAIL == H5Oget_token(dummy->idx_anon_id, NULL, &dummy->idx_token_size))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get token size for anonymous dataset");
@@ -174,6 +246,9 @@ H5X_dummy_create(hid_t file_id, hid_t dataset_id, hid_t UNUSED xcpl_id,
     ret_value = dummy;
 
 done:
+    if (FAIL != rcxt_id)
+        H5RCclose(rcxt_id);
+    H5MM_free(buf);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_dummy_create() */
 
@@ -372,6 +447,8 @@ H5X__dummy_get_query_data_cb(void *elem, hid_t type_id, unsigned UNUSED ndim,
     H5X__dummy_query_data_t *udata = (H5X__dummy_query_data_t *)_udata;
     hbool_t result;
     herr_t ret_value = SUCCEED;
+    hsize_t count[H5S_MAX_RANK + 1];
+    int i;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -379,13 +456,20 @@ H5X__dummy_get_query_data_cb(void *elem, hid_t type_id, unsigned UNUSED ndim,
     if (H5Qapply(udata->query_id, &result, type_id, elem) < 0)
         HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query to data element");
 
+    /* Initialize count */
+    for (i = 0; i < H5S_MAX_RANK; i++)
+        count[i] = 1;
+
     /* If element satisfies query, add it to the selection */
     if (result) {
         /* TODO remove that after demo */
-        printf("Element |%d| matches query\n", *((int *) elem));
+        /* printf("Element |%d| matches query\n", *((int *) elem)); */
         udata->num_elmts++;
-        if(H5Sselect_elements(udata->space_query, H5S_SELECT_APPEND, 1, point))
+
+        /* Add converted coordinate to selection */
+        if (H5Sselect_hyperslab(udata->space_query, H5S_SELECT_OR, point, NULL, count, NULL))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "unable to add point to selection");
+
     }
 
 done:
