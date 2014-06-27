@@ -47,7 +47,7 @@
 /* Local Macros */
 /****************/
 //#define H5X_ALACRITY_USE_COMPRESSION
-//#define H5X_ALACRITY_DEBUG
+#define H5X_ALACRITY_DEBUG
 
 #ifdef H5X_ALACRITY_DEBUG
 #define H5X_ALACRITY_LOG_DEBUG(...) do {                        \
@@ -102,6 +102,10 @@ H5X__alacrity_read_data(hid_t dataset_id, hid_t rcxt_id, void **buf,
 static herr_t
 H5X__alacrity_create_index(H5X_alacrity_t *alacrity, hid_t file_id,
         hid_t trans_id, const void *buf, size_t buf_size);
+
+static herr_t
+H5X__alacrity_update_index(H5X_alacrity_t *alacrity, hid_t trans_id,
+        const void *buf, size_t buf_size);
 
 static herr_t
 H5X__alacrity_serialize_metadata(H5X_alacrity_t *alacrity, void *buf,
@@ -492,6 +496,88 @@ done:
     }
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    H5X__alacrity_update_index
+ *
+ * Purpose: Update an existing index from a dataset.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5X__alacrity_update_index(H5X_alacrity_t *alacrity, hid_t trans_id,
+        const void *buf, size_t buf_size)
+{
+    hsize_t metadata_size, index_size;
+    memstream_t memstream;
+    size_t nelmts;
+    void *metadata_buf;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Allocate PartitionData struct */
+    if (alacrity->output) {
+        ALPartitionDataDestroy(alacrity->output);
+        H5MM_free(alacrity->output);
+        alacrity->output = NULL;
+    }
+    if (NULL == (alacrity->output = H5MM_malloc(sizeof(ALPartitionData))))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTALLOC, FAIL, "can't allocate ALACRITY output");
+
+    /* Get number of elements */
+    nelmts = buf_size / ((size_t) alacrity->config.elementSize);
+
+    /* Call ALACRITY encoder */
+    H5X_ALACRITY_LOG_DEBUG("Calling ALACRITY encoder on data (%zu elements)", nelmts);
+
+    if (ALErrorNone != ALEncode(&alacrity->config, buf, nelmts, alacrity->output))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTENCODE, FAIL, "ALACRITY encoder failed");
+
+    /* Compress index */
+#ifdef H5X_ALACRITY_USE_COMPRESSION
+    if (ALErrorNone != ALConvertIndexForm(&alacrity->output->metadata,
+            &alacrity->output->index, ALCompressedInvertedIndex))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCONVERT, FAIL, "can't compress index");
+#endif
+
+    /* Get sizes */
+    if (0 == (metadata_size = ALGetMetadataSize(&alacrity->output->metadata)))
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "ALACRITY metadata size is NULL");
+    if (0 == (index_size = ALGetIndexSize(&alacrity->output->index,
+            &alacrity->output->metadata)))
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "ALACRITY index size is NULL");
+
+    H5X_ALACRITY_LOG_DEBUG("Metadata size: %zu", (size_t) metadata_size);
+    H5X_ALACRITY_LOG_DEBUG("Index size: %zu", (size_t) index_size);
+
+    /* Serialize and write ALACRITY metadata */
+    if (NULL == (metadata_buf = H5MM_malloc(metadata_size)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTALLOC, FAIL, "can't allocate metadata buffer");
+    memstreamInit(&memstream, metadata_buf);
+    if (ALErrorNone != ALSerializeMetadata(&alacrity->output->metadata, &memstream))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTSERIALIZE, FAIL, "can't serialize ALACRITY metadata");
+    if (FAIL == H5Dwrite_ff(alacrity->metadata_id, alacrity->opaque_type_id, H5S_ALL,
+            H5S_ALL, H5P_DEFAULT, memstream.buf, trans_id, H5_EVENT_STACK_NULL))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index metadata");
+    memstreamDestroy(&memstream, 0);
+
+    /* Write ALACRITY index */
+    if (FAIL == H5Dwrite_ff(alacrity->index_id, alacrity->opaque_type_id, H5S_ALL,
+            H5S_ALL, H5P_DEFAULT, alacrity->output->index, trans_id, H5_EVENT_STACK_NULL))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index data");
+
+done:
+    H5MM_free(metadata_buf);
+    if (err_occurred) {
+        H5MM_free(alacrity->output);
+        alacrity->output = NULL;
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5X__alacrity_serialize_metadata
@@ -1286,21 +1372,21 @@ H5X_alacrity_post_update(void *idx_handle, const void UNUSED *data,
 
     /* Get transaction ID from xapl */
     if (FAIL == H5Pget_xapl_transaction(xxpl_id, &trans_id))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get trans_id from xapl");
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get trans_id from xapl");
 
     /* Create read context from version */
     if (FAIL == H5TRget_version(trans_id, &version))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get version from transaction ID");
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get version from transaction ID");
     if (FAIL == (rcxt_id =  H5RCcreate(alacrity->file_id, version)))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, NULL, "can't create read context");
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create read context");
 
     /* Get data from dataset */
     if (FAIL == H5X__alacrity_read_data(alacrity->dataset_id, rcxt_id, &buf, &buf_size))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get data from dataset");
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get data from dataset");
 
-//    /* Update index */
-//    if (FAIL == H5X__alacrity_update_index(alacrity, trans_id, buf, buf_size))
-//        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, NULL, "can't create index data from dataset");
+    /* Update index */
+    if (FAIL == H5X__alacrity_update_index(alacrity, trans_id, buf, buf_size))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create index data from dataset");
 
 done:
     if (FAIL != rcxt_id)
