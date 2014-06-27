@@ -276,7 +276,7 @@ main(int argc, char **argv)
     MPI_Barrier(MPI_COMM_WORLD);
 
     write_dataset(file_name, dataset_name, total, ncomponents, H5T_NATIVE_INT,
-            ntuples, start, data);
+                  ntuples, start, data);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
