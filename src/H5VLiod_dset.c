@@ -1580,6 +1580,11 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
         buf_ptr += num_bytes;
     }
 
+#if 0
+    {
+        double t1, t2;
+        t1 = MPI_Wtime();
+#endif
     if(write_op) {
         /* write to array */
         ret = iod_array_write_list(coh, tid, num_descriptors, array_io, NULL);
@@ -1592,6 +1597,11 @@ H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id,
         if(ret < 0)
             HGOTO_ERROR_FF(ret, "can't read from array object");
     }
+#if 0
+        t2 = MPI_Wtime();
+        fprintf(stderr, "%d: IOD ARRAY IO time: %1.7f\n", my_rank_g, t2-t1);
+    }
+#endif
 
     /* If this is a read operation, compute checksum for each IOD
        read, and compare it against checksum returned from IOD */
