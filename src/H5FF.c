@@ -5124,6 +5124,18 @@ H5Dquery_ff(hid_t dset_id, hid_t query_id, hid_t scope_id, hid_t rcxt_id)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "failed to apply query on Dataset")
 
         ret_value = udata.space_query;
+
+        {
+            hsize_t start_coord[H5S_MAX_RANK + 1], end_coord[H5S_MAX_RANK + 1], nelmts;
+
+            if (FAIL == H5Sget_select_bounds(ret_value, start_coord, end_coord))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "unable to get bounds");
+            if (0 == (nelmts = (hsize_t) H5Sget_select_npoints(ret_value)))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid number of elements");
+            printf("Created dataspace from index with %llu elements [(%llu, %llu):(%llu, %llu)]\n",
+                    nelmts, start_coord[0], start_coord[1], end_coord[0], end_coord[1]);
+        }
+
     }
 
 done:
