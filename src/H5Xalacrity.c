@@ -37,6 +37,8 @@
 #include "H5Sprivate.h"
 /* TODO using private headers but could use public ones */
 
+#include <float.h>
+
 #ifdef H5_HAVE_ALACRITY
 
 #include <alacrity.h>
@@ -45,7 +47,7 @@
 /* Local Macros */
 /****************/
 //#define H5X_ALACRITY_USE_COMPRESSION
-#define H5X_ALACRITY_DEBUG
+//#define H5X_ALACRITY_DEBUG
 
 #ifdef H5X_ALACRITY_DEBUG
 #define H5X_ALACRITY_LOG_DEBUG(...) do {                        \
@@ -64,6 +66,7 @@
 typedef struct H5X_alacrity_t {
     void *private_metadata;     /* Internal metadata */
 
+    hid_t file_id;              /* ID of the indexed dataset file */
     hid_t dataset_id;           /* ID of the indexed dataset */
     unsigned dataset_ndims;     /* dataset number of dimensions */
     hsize_t *dataset_dims;      /* dataset dimensions */
@@ -87,7 +90,7 @@ typedef struct H5X_alacrity_range_t {
 /********************/
 
 static H5X_alacrity_t *
-H5X__alacrity_init(hid_t dataset_id);
+H5X__alacrity_init(hid_t file_id, hid_t dataset_id);
 
 static herr_t
 H5X__alacrity_term(H5X_alacrity_t *alacrity);
@@ -110,6 +113,20 @@ H5X__alacrity_deserialize_metadata(H5X_alacrity_t *alacrity, void *buf,
 
 static herr_t
 H5X__alacrity_get_query_value(H5Q_t *query, value_types_t *value);
+
+static herr_t
+H5X__alacrity_get_min_value(H5Q_t *query, value_types_t *value);
+
+static herr_t
+H5X__alacrity_get_max_value(H5Q_t *query, value_types_t *value);
+
+static herr_t
+H5X__alacrity_combine_range(H5Q_combine_op_t combine_op,
+        H5X_alacrity_range_t range1, H5X_alacrity_range_t range2,
+        H5X_alacrity_range_t *combine_range);
+
+static herr_t
+H5X__alacrity_get_query_range(H5Q_t *query, H5X_alacrity_range_t *query_range);
 
 static herr_t
 H5X__alacrity_get_query_ranges(hid_t query_id,
@@ -205,7 +222,7 @@ const H5X_class_t H5X_ALACRITY[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5X_alacrity_t *
-H5X__alacrity_init(hid_t dataset_id)
+H5X__alacrity_init(hid_t file_id, hid_t dataset_id)
 {
     H5X_alacrity_t *alacrity = NULL;
     hid_t type_id = FAIL, space_id = FAIL;
@@ -218,6 +235,8 @@ H5X__alacrity_init(hid_t dataset_id)
     if (NULL == (alacrity = (H5X_alacrity_t *) H5MM_malloc(sizeof(H5X_alacrity_t))))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, NULL, "can't allocate alacrity struct");
     alacrity->private_metadata = NULL;
+
+    alacrity->file_id = file_id;
     alacrity->dataset_id = dataset_id;
 
     /* Get dimensions of dataset */
@@ -605,6 +624,108 @@ done:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    H5X__alacrity_get_min_value
+ *
+ * Purpose: Get min value from query.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5X__alacrity_get_min_value(H5Q_t *query, value_types_t *value)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (query->query.select.elem.data_elem.type_size) {
+        case sizeof(double):
+            value->asDouble = DBL_MIN;
+            H5X_ALACRITY_LOG_DEBUG("Double %lf\n", value->asDouble);
+            break;
+        case sizeof(float):
+            value->asFloat = -FLT_MAX;
+            H5X_ALACRITY_LOG_DEBUG("Float %f\n", value->asFloat);
+            break;
+        default:
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "unsupported query element type");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5X__alacrity_get_max_value
+ *
+ * Purpose: Get max value from query.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5X__alacrity_get_max_value(H5Q_t *query, value_types_t *value)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (query->query.select.elem.data_elem.type_size) {
+        case sizeof(double):
+            value->asDouble = DBL_MAX;
+            H5X_ALACRITY_LOG_DEBUG("Double %lf\n", value->asDouble);
+            break;
+        case sizeof(float):
+            value->asFloat = FLT_MAX;
+            H5X_ALACRITY_LOG_DEBUG("Float %f\n", value->asFloat);
+            break;
+        default:
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "unsupported query element type");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5X__alacrity_combine_range
+ *
+ * Purpose: Combine ranges from query.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5X__alacrity_combine_range(H5Q_combine_op_t combine_op,
+        H5X_alacrity_range_t range1, H5X_alacrity_range_t range2,
+        H5X_alacrity_range_t *combine_range)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    H5X_alacrity_range_t range;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (combine_op) {
+        case H5Q_COMBINE_AND:
+            range.lb = (range1.lb.asDouble < range2.lb.asDouble) ? range2.lb : range1.lb;
+            range.ub = (range1.ub.asDouble < range2.ub.asDouble) ? range2.ub : range1.ub;
+            break;
+        case H5Q_COMBINE_OR:
+        case H5Q_SINGLETON:
+        default:
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "unsupported combine type");
+    }
+
+    *combine_range = range;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5X__alacrity_get_query_ranges
  *
  * Purpose: Get range value from query.
@@ -617,31 +738,39 @@ static herr_t
 H5X__alacrity_get_query_range(H5Q_t *query, H5X_alacrity_range_t *query_range)
 {
     herr_t ret_value = SUCCEED; /* Return value */
-    /* Would also need min and max values */
+    H5X_alacrity_range_t range;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     if (query->is_combined) {
-        H5X__alacrity_get_query_range(query->query.combine.l_query, query_range);
-        H5X__alacrity_get_query_range(query->query.combine.r_query, query_range);
+        H5X_alacrity_range_t range1, range2;
+
+        H5X__alacrity_get_query_range(query->query.combine.l_query, &range1);
+        H5X__alacrity_get_query_range(query->query.combine.r_query, &range2);
+
+        if (FAIL == H5X__alacrity_combine_range(query->query.combine.op, range1, range2, &range))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCOMPARE, FAIL, "can't combine ranges");
     } else {
         if (H5Q_TYPE_DATA_ELEM != query->query.select.type)
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "unsupported query type");
         if (query->query.select.match_op == H5Q_MATCH_GREATER_THAN) {
             /* This is a lower bound */
-            H5X__alacrity_get_query_value(query, &query_range->lb);
+            H5X__alacrity_get_query_value(query, &range.lb);
+            H5X__alacrity_get_max_value(query, &range.ub);
         }
         if (query->query.select.match_op == H5Q_MATCH_LESS_THAN) {
             /* This is a higher bound */
-            H5X__alacrity_get_query_value(query, &query_range->ub);
+            H5X__alacrity_get_query_value(query, &range.ub);
+            H5X__alacrity_get_min_value(query, &range.lb);
         }
         if (query->query.select.match_op == H5Q_MATCH_EQUAL) {
             /* Lower bound is equal to higher bound */
-            H5X__alacrity_get_query_value(query, &query_range->lb);
-            query_range->ub = query_range->lb;
+            H5X__alacrity_get_query_value(query, &range.lb);
+            range.ub = range.lb;
         }
     }
 
+    *query_range = range;
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -944,7 +1073,7 @@ H5X_alacrity_create(hid_t file_id, hid_t dataset_id, hid_t UNUSED xcpl_id,
     H5X_ALACRITY_LOG_DEBUG("Enter");
 
     /* Initialize ALACRITY plugin */
-    if (NULL == (alacrity = H5X__alacrity_init(dataset_id)))
+    if (NULL == (alacrity = H5X__alacrity_init(file_id, dataset_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, NULL, "can't initialize ALACRITY");
 
     /* Get transaction ID from xapl */
@@ -1049,7 +1178,7 @@ H5X_alacrity_open(hid_t file_id, hid_t dataset_id, hid_t xapl_id,
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get rc_id from xapl");
 
     /* Initialize ALACRITY plugin */
-    if (NULL == (alacrity = H5X__alacrity_init(dataset_id)))
+    if (NULL == (alacrity = H5X__alacrity_init(file_id, dataset_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, NULL, "can't initialize ALACRITY");
 
     /* Create transaction from version (for open_by_token) */
@@ -1138,11 +1267,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_alacrity_post_update(void *idx_handle, const void UNUSED *buf,
+H5X_alacrity_post_update(void *idx_handle, const void UNUSED *data,
         hid_t UNUSED dataspace_id, hid_t UNUSED xxpl_id)
 {
     H5X_alacrity_t *alacrity = (H5X_alacrity_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
+    hid_t trans_id = FAIL, rcxt_id = FAIL;
+    uint64_t version;
+    void *buf;
+    size_t buf_size;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1151,8 +1284,28 @@ H5X_alacrity_post_update(void *idx_handle, const void UNUSED *buf,
     if (NULL == alacrity)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
 
-    /* Not needed here */
+    /* Get transaction ID from xapl */
+    if (FAIL == H5Pget_xapl_transaction(xxpl_id, &trans_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get trans_id from xapl");
+
+    /* Create read context from version */
+    if (FAIL == H5TRget_version(trans_id, &version))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get version from transaction ID");
+    if (FAIL == (rcxt_id =  H5RCcreate(alacrity->file_id, version)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, NULL, "can't create read context");
+
+    /* Get data from dataset */
+    if (FAIL == H5X__alacrity_read_data(alacrity->dataset_id, rcxt_id, &buf, &buf_size))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get data from dataset");
+
+//    /* Update index */
+//    if (FAIL == H5X__alacrity_update_index(alacrity, trans_id, buf, buf_size))
+//        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, NULL, "can't create index data from dataset");
+
 done:
+    if (FAIL != rcxt_id)
+        H5RCclose(rcxt_id);
+    H5MM_free(buf);
     H5X_ALACRITY_LOG_DEBUG("Leave");
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_alacrity_post_update() */
