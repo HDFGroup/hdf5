@@ -96,7 +96,8 @@ write_dataset(hid_t file_id, const char *dataset_name,
 }
 
 static void
-create_index(hid_t file_id, const char *dataset_name, hid_t estack_id)
+create_index(hid_t file_id, const char *dataset_name, unsigned plugin_id,
+        hid_t estack_id)
 {
     hid_t dataset_id, trans_id, rcxt_id;
     hid_t trspl_id;
@@ -127,7 +128,7 @@ create_index(hid_t file_id, const char *dataset_name, hid_t estack_id)
             estack_id);
 
     /* Add indexing information */
-    ret = H5Xcreate_ff(file_id, H5X_PLUGIN_ALACRITY, dataset_id, H5P_DEFAULT,
+    ret = H5Xcreate_ff(file_id, plugin_id, dataset_id, H5P_DEFAULT,
             trans_id, estack_id);
     assert(0 == ret);
 
@@ -162,10 +163,11 @@ query_and_view(hid_t file_id, const char *dataset_name, hid_t estack_id)
     hid_t rcxt_id;
     uint64_t version = 3;
     herr_t ret;
+    double t1, t2;
 
     /* Create a simple query */
     /* query = (39.1 < x < 42.1) || (295 < x < 298) */
-    query_lb = (my_rank == 0) ? 39.1f : 295.f;
+    query_lb = (my_rank == 0) ? 38.8f : 295.f;
     query_ub = (my_rank == 0) ? 42.1f : 298.f;
 
     query_id1 = H5Qcreate(H5Q_TYPE_DATA_ELEM, H5Q_MATCH_GREATER_THAN,
@@ -193,8 +195,12 @@ query_and_view(hid_t file_id, const char *dataset_name, hid_t estack_id)
 //    view_id = H5Vcreate_ff(dataset_id, query_id, H5P_DEFAULT, rid2,
 //            estack_id);
 //    assert(view_id > 0);
-    H5Dquery_ff(dataset_id, query_id, -1, rcxt_id);
 
+    t1 = MPI_Wtime();
+    H5Dquery_ff(dataset_id, query_id, -1, rcxt_id);
+    t2 = MPI_Wtime();
+
+    printf("Query time: %lf ms\n", (t2 - t1) * 1000);
     /* TODO use view_id for analysis shipping etc */
 
 //    H5Vclose(view_id);
@@ -217,6 +223,7 @@ query_and_view(hid_t file_id, const char *dataset_name, hid_t estack_id)
 int
 main(int argc, char **argv)
 {
+    unsigned plugin_id;
     char file_name[50];
     char dataset_name[64];
     hsize_t ntuples = NTUPLES;
@@ -231,12 +238,18 @@ main(int argc, char **argv)
     sprintf(file_name, "%s_%s", getenv("USER"), "eff_file_index.h5");
 
     MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &my_size);
+
+    if (argc < 2) {
+        if (my_rank ==0) printf("Usage: %s <plugin_id>\n", argv[0]);
+        exit(0);
+    }
+    plugin_id = atoi(argv[1]);
 
     /* Call EFF_init to initialize the EFF stack. */
     EFF_init(MPI_COMM_WORLD, MPI_INFO_NULL);
 
-    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &my_size);
     fprintf(stderr, "APP processes = %d, my rank is %d\n", my_size, my_rank);
 
     /* In this example write one dataset per process */
@@ -274,7 +287,7 @@ main(int argc, char **argv)
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    create_index(file_id, dataset_name, estack_id);
+    create_index(file_id, dataset_name, plugin_id, estack_id);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
