@@ -206,10 +206,11 @@ H5X_dummy_create(hid_t file_id, hid_t dataset_id, hid_t UNUSED xcpl_id,
     if (FAIL == (space_id = H5Dget_space(dataset_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get dataspace from dataset");
 
+#ifdef H5_HAVE_INDEXING
     /* Get transaction ID from xapl */
     if (FAIL == H5Pget_xapl_transaction(xapl_id, &trans_id))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get trans_id from xapl");
-
+#endif
     /* Create read context from version */
     if (FAIL == H5TRget_version(trans_id, &version))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get version from transaction ID");
