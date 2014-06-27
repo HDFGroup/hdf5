@@ -175,24 +175,8 @@ write_incr(hid_t file_id, const char *dataset_name,
     hsize_t     count[2] = {ntuples, ncomponents};
     int         rank = (ncomponents == 1) ? 1 : 2;
     herr_t      ret;
-    hid_t       rcxt_id;
     uint64_t    version = req_version;
     int n;
-
-    if(0 == my_rank) {
-        rcxt_id = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
-    }
-    MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
-    if (0 != my_rank) {
-        rcxt_id = H5RCcreate(file_id, version);
-    }
-    assert(req_version == version);
-
-    dataset_id = H5Dopen_ff(file_id, dataset_name, H5P_DEFAULT, rcxt_id, estack_id);
-    assert(dataset_id);
-
-    file_space_id = H5Screate_simple(rank, dims, NULL);
-    assert(file_space_id);
 
     /* do incremental updates */
     for (n = 0; n < my_size; n++) {
@@ -202,6 +186,12 @@ write_incr(hid_t file_id, const char *dataset_name,
             version = (uint64_t) (req_version + (uint64_t) n);
             rid = H5RCacquire(file_id, &version, H5P_DEFAULT, estack_id);
             assert((uint64_t )(req_version + (uint64_t) n) == version);
+
+            dataset_id = H5Dopen_ff(file_id, dataset_name, H5P_DEFAULT, rcxt_id, estack_id);
+            assert(dataset_id);
+
+            file_space_id = H5Dget_space(dataset_id);
+            assert(file_space_id);
 
             /* create transaction object */
             tid = H5TRcreate(file_id, rid, (uint64_t) (req_version + 1 + (uint64_t) n));
@@ -231,23 +221,14 @@ write_incr(hid_t file_id, const char *dataset_name,
             ret = H5RCrelease(rid, H5_EVENT_STACK_NULL);
             assert(0 == ret);
             ret = H5RCclose(rid);
+
+            /* Close the first dataset. */
+            H5Sclose(file_space_id);
+            ret = H5Dclose_ff(dataset_id, estack_id);
+            assert(0 == ret);
         }
         MPI_Barrier(MPI_COMM_WORLD);
     }
-
-    /* Close the first dataset. */
-    H5Sclose(file_space_id);
-    ret = H5Dclose_ff(dataset_id, estack_id);
-    assert(0 == ret);
-
-    /* release container version 0. */
-    if (my_rank == 0) {
-        ret = H5RCrelease(rcxt_id, estack_id);
-        assert(0 == ret);
-    }
-
-    ret = H5RCclose(rcxt_id);
-    assert(0 == ret);
 }
 
 static void
