@@ -1354,7 +1354,7 @@ done:
  */
 static herr_t
 H5X_alacrity_post_update(void *idx_handle, const void UNUSED *data,
-        hid_t UNUSED dataspace_id, hid_t UNUSED xxpl_id)
+        hid_t UNUSED dataspace_id, hid_t xxpl_id)
 {
     H5X_alacrity_t *alacrity = (H5X_alacrity_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1370,9 +1370,9 @@ H5X_alacrity_post_update(void *idx_handle, const void UNUSED *data,
     if (NULL == alacrity)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
 
-    /* Get transaction ID from xapl */
-    if (FAIL == H5Pget_xapl_transaction(xxpl_id, &trans_id))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get trans_id from xapl");
+    /* Get transaction ID from xxpl */
+    if (FAIL == H5Pget_xxpl_transaction(xxpl_id, &trans_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get trans_id from xxpl");
 
     /* Create read context from version */
     if (FAIL == H5TRget_version(trans_id, &version))
