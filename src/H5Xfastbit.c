@@ -51,7 +51,7 @@
 #define H5X_FASTBIT_DEBUG
 
 #ifdef H5X_FASTBIT_DEBUG
-#define H5X_FASTBIT_DEBUG_LVL 6
+#define H5X_FASTBIT_DEBUG_LVL 0
 #define H5X_FASTBIT_LOG_DEBUG(...) do {                         \
       fprintf(stdout, " # %s(): ", __func__);                   \
       fprintf(stdout, __VA_ARGS__);                             \
@@ -69,21 +69,25 @@
 typedef struct H5X_fastbit_t {
     void *private_metadata; /* Internal metadata */
     hid_t dataset_id;       /* ID of the indexed dataset */
+    unsigned dataset_ndims;     /* dataset number of dimensions */
+    hsize_t *dataset_dims;      /* dataset dimensions */
+    hsize_t *dataset_down_dims; /* dataset downed dimensions */
+
     hid_t opaque_type_id;   /* Datatype used for index datasets */
 
     hid_t keys_id;          /* Array for keys */
     uint64_t nkeys;
-    void *keys;
+    double *keys;
 
     hid_t offsets_id;       /* Array for offset */
     uint64_t noffsets;
-    void *offsets;
+    int64_t *offsets;
 
     hid_t bitmaps_id;       /* Array for bitmaps */
     uint64_t nbitmaps;
-    void *bitmaps;
+    uint32_t *bitmaps;
 
-    FastBitIndexHandle idx_handle;
+    hbool_t idx_reconstructed;
 } H5X_fastbit_t;
 
 /********************/
@@ -118,8 +122,16 @@ H5X__fastbit_deserialize_metadata(H5X_fastbit_t *fastbit, void *buf,
 static herr_t
 H5X__fastbit_reconstruct_index(H5X_fastbit_t *fastbit, hid_t rcxt_id);
 
+static double
+H5X__fasbit_query_get_value_as_double(H5Q_t *query);
+
 static herr_t
-H5X__fastbit_get_query_range(H5X_fastbit_t *fastbit, hid_t query_id);
+H5X__fastbit_evaluate_query(H5X_fastbit_t *fastbit, hid_t query_id,
+        uint64_t **coords, uint64_t *ncoords);
+
+static herr_t
+H5X__fastbit_create_selection(H5X_fastbit_t *fastbit, hid_t dataspace_id,
+        uint64_t *coords, uint64_t ncoords);
 
 static void *
 H5X_fastbit_create(hid_t file_id, hid_t dataset_id, hid_t xcpl_id,
@@ -188,8 +200,7 @@ static H5X_fastbit_t *
 H5X__fastbit_init(hid_t dataset_id)
 {
     H5X_fastbit_t *fastbit = NULL;
-//    hid_t type_id = FAIL, space_id = FAIL;
-//    size_t type_size;
+    hid_t space_id = FAIL;
     H5X_fastbit_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -211,32 +222,28 @@ H5X__fastbit_init(hid_t dataset_id)
     fastbit->bitmaps = NULL;
     fastbit->bitmaps_id = FAIL;
 
-    fastbit->idx_handle = NULL;
+    fastbit->idx_reconstructed = FALSE;
 
     /* Initialize FastBit (no config file for now) */
     fastbit_init(NULL);
     fastbit_set_verbose_level(H5X_FASTBIT_DEBUG_LVL);
 
-//    /* Get dimensions of dataset */
-//    if (FAIL == (space_id = H5Dget_space(dataset_id)))
-//        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get dataspace from dataset");
-//    if (0 == (alacrity->dataset_ndims = (unsigned) H5Sget_simple_extent_ndims(space_id)))
-//        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, NULL, "invalid number of dimensions");
-//    if (NULL == (alacrity->dataset_dims = H5MM_malloc(alacrity->dataset_ndims * sizeof(hsize_t))))
-//        HGOTO_ERROR(H5E_INDEX, H5E_CANTALLOC, NULL, "can't allocate dim array");
-//    if (FAIL == H5Sget_simple_extent_dims(space_id, alacrity->dataset_dims, NULL))
-//        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, NULL, "can't get dataspace dims");
-//
-//    /* Useful for coordinate conversion */
-//    if (NULL == (alacrity->dataset_down_dims = H5MM_malloc(alacrity->dataset_ndims * sizeof(hsize_t))))
-//        HGOTO_ERROR(H5E_INDEX, H5E_CANTALLOC, NULL, "can't allocate dim array");
-//    if (FAIL == H5VM_array_down(alacrity->dataset_ndims, alacrity->dataset_dims,
-//            alacrity->dataset_down_dims))
-//        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, NULL, "can't get dataspace down dims");
-//
-//    alacrity->metadata = NULL;
-//    alacrity->output = NULL;
-//
+    /* Get dimensions of dataset */
+    if (FAIL == (space_id = H5Dget_space(dataset_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get dataspace from dataset");
+    if (0 == (fastbit->dataset_ndims = (unsigned) H5Sget_simple_extent_ndims(space_id)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, NULL, "invalid number of dimensions");
+    if (NULL == (fastbit->dataset_dims = H5MM_malloc(fastbit->dataset_ndims * sizeof(hsize_t))))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTALLOC, NULL, "can't allocate dim array");
+    if (FAIL == H5Sget_simple_extent_dims(space_id, fastbit->dataset_dims, NULL))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, NULL, "can't get dataspace dims");
+
+    /* Useful for coordinate conversion */
+    if (NULL == (fastbit->dataset_down_dims = H5MM_malloc(fastbit->dataset_ndims * sizeof(hsize_t))))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTALLOC, NULL, "can't allocate dim array");
+    if (FAIL == H5VM_array_down(fastbit->dataset_ndims, fastbit->dataset_dims,
+            fastbit->dataset_down_dims))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, NULL, "can't get dataspace down dims");
 
     /* Create an opaque type to handle FastBit data */
     if (FAIL == (fastbit->opaque_type_id = H5Tcreate(H5T_OPAQUE, 1)))
@@ -247,6 +254,8 @@ H5X__fastbit_init(hid_t dataset_id)
     ret_value = fastbit;
 
 done:
+    if (space_id != FAIL)
+        H5Sclose(space_id);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5X__fastbit_init() */
 
@@ -271,10 +280,10 @@ H5X__fastbit_term(H5X_fastbit_t *fastbit)
 
     H5MM_free(fastbit->private_metadata);
 
-//    /* Free dim arrays */
-//    H5MM_free(fastbit->dataset_dims);
-//    H5MM_free(fastbit->dataset_down_dims);
-//
+    /* Free dim arrays */
+    H5MM_free(fastbit->dataset_dims);
+    H5MM_free(fastbit->dataset_down_dims);
+
     /* Free metadata if created */
     H5MM_free(fastbit->keys);
     H5MM_free(fastbit->offsets);
@@ -343,6 +352,7 @@ H5X__fastbit_convert_type(hid_t type_id)
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FastBitDataTypeUnknown, "unsupported type");
 
     H5X_FASTBIT_LOG_DEBUG("FastBit converted type: %d\n", ret_value);
+
 done:
     if(FAIL == native_type_id)
         H5Tclose(native_type_id);
@@ -436,34 +446,19 @@ H5X__fastbit_create_index(H5X_fastbit_t *fastbit, hid_t file_id,
     H5X_FASTBIT_LOG_DEBUG("Calling FastBit build index");
 
     /* Build index */
-    if (0 != fastbit_iapi_build_index(column_name, (const char *)0,
-            &fastbit->nkeys, &fastbit->noffsets, &fastbit->nbitmaps))
+    if (0 != fastbit_iapi_build_index(column_name, (const char *)0))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTENCODE, FAIL, "FastBit build index failed");
+
+    /* Get arrays from index */
+    if (0 != fastbit_iapi_deconstruct_index(column_name, &fastbit->keys, &fastbit->nkeys,
+            &fastbit->offsets, &fastbit->noffsets, &fastbit->bitmaps, &fastbit->nbitmaps))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "Can't get FastBit index arrays");
 
     H5X_FASTBIT_LOG_DEBUG("FastBit build index, nkeys=%lu, noffsets=%lu, nbitmaps=%lu\n",
             fastbit->nkeys, fastbit->noffsets, fastbit->nbitmaps);
 
-    /* Allocate arrays to hold keys (doubles) */
-    key_array_size = fastbit->nkeys * sizeof(double);
-    if (NULL == (fastbit->keys = H5MM_malloc(key_array_size)))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTALLOC, FAIL, "can't allocate FastBit keys");
-
-    /* Allocate arrays to hold offsets (int64_t) */
-    offset_array_size = fastbit->noffsets * sizeof(int64_t);
-    if (NULL == (fastbit->offsets = H5MM_malloc(offset_array_size)))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTALLOC, FAIL, "can't allocate FastBit offsets");
-
-    /* Allocate arrays to hold bitmaps (uint32_t) */
-    bitmap_array_size = fastbit->nbitmaps * sizeof(uint32_t);
-    if (NULL == (fastbit->bitmaps = H5MM_malloc(bitmap_array_size)))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTALLOC, FAIL, "can't allocate FastBit bitmaps");
-
-    /* Get arrays from index */
-    if (0 != fastbit_iapi_deconstruct_index("test", fastbit->keys, fastbit->nkeys,
-            fastbit->offsets, fastbit->noffsets, fastbit->bitmaps, fastbit->nbitmaps))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "Can't get FastBit index arrays");
-
     /* Create key array with opaque type */
+    key_array_size = fastbit->nkeys * sizeof(double);
     if (FAIL == (key_space_id = H5Screate_simple(1, &key_array_size, NULL)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
     if (FAIL == (fastbit->keys_id = H5Dcreate_anon_ff(file_id, fastbit->opaque_type_id,
@@ -471,6 +466,7 @@ H5X__fastbit_create_index(H5X_fastbit_t *fastbit, hid_t file_id,
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
 
     /* Create offset array with opaque type */
+    offset_array_size = fastbit->noffsets * sizeof(int64_t);
     if (FAIL == (offset_space_id = H5Screate_simple(1, &offset_array_size, NULL)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
     if (FAIL == (fastbit->offsets_id = H5Dcreate_anon_ff(file_id, fastbit->opaque_type_id,
@@ -478,6 +474,7 @@ H5X__fastbit_create_index(H5X_fastbit_t *fastbit, hid_t file_id,
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
 
     /* Create bitmap array with opaque type */
+    bitmap_array_size = fastbit->nbitmaps * sizeof(uint32_t);
     if (FAIL == (bitmap_space_id = H5Screate_simple(1, &bitmap_array_size, NULL)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
     if (FAIL == (fastbit->bitmaps_id = H5Dcreate_anon_ff(file_id, fastbit->opaque_type_id,
@@ -641,8 +638,10 @@ done:
 static herr_t
 H5X__fastbit_reconstruct_index(H5X_fastbit_t *fastbit, hid_t rcxt_id)
 {
-    hid_t keys_space_id = FAIL, offsets_space_id = FAIL;
-    size_t key_array_size, offset_array_size;
+    void *buf;
+    size_t buf_size;
+    hid_t keys_space_id = FAIL, offsets_space_id = FAIL, bitmaps_space_id = FAIL;
+    size_t key_array_size, offset_array_size, bitmap_array_size;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -663,10 +662,18 @@ H5X__fastbit_reconstruct_index(H5X_fastbit_t *fastbit, hid_t rcxt_id)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid number of elements");
     fastbit->noffsets = offset_array_size / sizeof(int64_t);
 
+    if (FAIL == (bitmaps_space_id = H5Dget_space(fastbit->bitmaps_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get dataspace from index");
+    if (0 == (bitmap_array_size = (size_t) H5Sget_select_npoints(bitmaps_space_id)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid number of elements");
+    fastbit->nbitmaps = bitmap_array_size / sizeof(uint32_t);
+
     /* allocate buffer to hold data */
     if (NULL == (fastbit->keys = H5MM_malloc(key_array_size)))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate keys");
     if (NULL == (fastbit->offsets = H5MM_malloc(offset_array_size)))
+        HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate offsets");
+    if (NULL == (fastbit->bitmaps = H5MM_malloc(bitmap_array_size)))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate offsets");
 
     /* Read FastBit keys */
@@ -681,40 +688,102 @@ H5X__fastbit_reconstruct_index(H5X_fastbit_t *fastbit, hid_t rcxt_id)
             H5_EVENT_STACK_NULL))
         HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
 
+    /* Read FastBit bitmaps */
+    if (FAIL == H5Dread_ff(fastbit->bitmaps_id, fastbit->opaque_type_id,
+            H5S_ALL, bitmaps_space_id, H5P_DEFAULT, fastbit->bitmaps, rcxt_id,
+            H5_EVENT_STACK_NULL))
+        HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
+
     /* Reconstruct index */
-    H5X_FASTBIT_LOG_DEBUG("Reconstructing index with nkeys=%lu, noffsets=%lu",
-            fastbit->nkeys, fastbit->noffsets);
-    if (NULL == (fastbit->idx_handle = fastbit_iapi_reconstruct_index(
-            fastbit->keys, fastbit->nkeys, fastbit->offsets, fastbit->noffsets)))
+    H5X_FASTBIT_LOG_DEBUG("Reconstructing index with nkeys=%lu, noffsets=%lu,"
+            "nbitmaps=%lu", fastbit->nkeys, fastbit->noffsets, fastbit->nbitmaps);
+
+    /* Get data from dataset */
+    if (FAIL == H5X__fastbit_read_data(fastbit->dataset_id, rcxt_id, "test1",
+            &buf, &buf_size))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get data from dataset");
+
+    if (0 != fastbit_iapi_attach_full_index("test1", fastbit->keys, fastbit->nkeys,
+            fastbit->offsets, fastbit->noffsets, fastbit->bitmaps, fastbit->nbitmaps))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTDECODE, FAIL, "can't reconstruct index");
 
     H5X_FASTBIT_LOG_DEBUG("Reconstructed index");
+    fastbit->idx_reconstructed = TRUE;
 
 done:
     if (FAIL != keys_space_id)
         H5Sclose(keys_space_id);
     if (FAIL != offsets_space_id)
         H5Sclose(offsets_space_id);
+    if (FAIL != bitmaps_space_id)
+        H5Sclose(bitmaps_space_id);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5X__fastbit_get_query_range
+ * Function:    H5X__fasbit_query_get_value_as_double
  *
- * Purpose: Get range value from query.
+ * Purpose: Convert query element value to double that can be used by
+ *          FastBit selection.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static double
+H5X__fasbit_query_get_value_as_double(H5Q_t *query)
+{
+    H5T_t *type = query->query.select.elem.data_elem.type;
+    double ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if (0 == H5T_cmp(type, (H5T_t *)H5I_object(H5T_NATIVE_LLONG_g), FALSE)) {
+        ret_value = (double) *((long long *) query->query.select.elem.data_elem.value);
+    }
+    else if (0 == H5T_cmp(type, (H5T_t *)H5I_object(H5T_NATIVE_LONG_g), FALSE)) {
+        ret_value = (double) *((long *) query->query.select.elem.data_elem.value);
+    }
+    else if (0 == H5T_cmp(type, (H5T_t *)H5I_object(H5T_NATIVE_INT_g), FALSE)) {
+        ret_value = (double) *((int *) query->query.select.elem.data_elem.value);
+    }
+    else if (0 == H5T_cmp(type, (H5T_t *)H5I_object(H5T_NATIVE_SHORT_g), FALSE)) {
+        ret_value = (double) *((short *) query->query.select.elem.data_elem.value);
+    }
+    else if (0 == H5T_cmp(type, (H5T_t *)H5I_object(H5T_NATIVE_SCHAR_g), FALSE)) {
+        ret_value = (double) *((char *) query->query.select.elem.data_elem.value);
+    }
+    else if (0 == H5T_cmp(type, (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE_g), FALSE)) {
+        ret_value = *((double *) query->query.select.elem.data_elem.value);
+    }
+    else if (0 == H5T_cmp(type, (H5T_t *)H5I_object(H5T_NATIVE_FLOAT_g), FALSE)) {
+        ret_value = (double) *((float *) query->query.select.elem.data_elem.value);
+    }
+
+    H5X_FASTBIT_LOG_DEBUG("Query element value is: %lf", ret_value);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5X__fastbit_evaluate_query
+ *
+ * Purpose: Evaluate query and get matching coordinates.
  *
  * Return:  Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X__fastbit_get_query_range(H5X_fastbit_t *fastbit, hid_t query_id)
+H5X__fastbit_evaluate_query(H5X_fastbit_t *fastbit, hid_t query_id,
+        uint64_t **coords, uint64_t *ncoords)
 {
     H5Q_t *query;
-    FastBitCompareType fastbit_compare_type;
-    uint32_t cand0 = 0, cand1 = 0, hit0 = 0, hit1 = 0;
     double cv;
-    float cv_float;
+    FastBitSelectionHandle selection_handle;
+    FastBitCompareType compare_type;
+    int64_t nhits;
+    uint64_t *hit_coords = NULL;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -727,37 +796,116 @@ H5X__fastbit_get_query_range(H5X_fastbit_t *fastbit, hid_t query_id)
     /* Translate match op to FastBit op */
     switch(query->query.select.match_op) {
         case H5Q_MATCH_GREATER_THAN:
-            fastbit_compare_type = FastBitCompareGreater;
+            compare_type = FastBitCompareGreater;
             break;
         case H5Q_MATCH_LESS_THAN:
-            fastbit_compare_type = FastBitCompareLess;
+            compare_type = FastBitCompareLess;
             break;
         case H5Q_MATCH_EQUAL:
-            fastbit_compare_type = FastBitCompareEqual;
+            compare_type = FastBitCompareEqual;
             break;
         case H5Q_MATCH_NOT_EQUAL:
-            fastbit_compare_type = FastBitCompareNotEqual;
+            compare_type = FastBitCompareNotEqual;
             break;
         default:
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "unsupported query op");
     }
 
-    cv_float = *((float *) query->query.select.elem.data_elem.value);
-    cv = (double) cv_float;
-    H5X_FASTBIT_LOG_DEBUG("Resolving range with op=%d, cv=%lf",
-            fastbit_compare_type, cv);
+    cv = H5X__fasbit_query_get_value_as_double(query);
+    selection_handle = fastbit_selection_osr("test1", compare_type, cv);
 
-    if (0 != fastbit_iapi_resolve_range(fastbit->idx_handle,
-            fastbit_compare_type, cv, &cand0, &hit0, &hit1, &cand1))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTDECODE, FAIL, "can't resolve range");
+    H5X_FASTBIT_LOG_DEBUG("Selection estimate: %lu",
+            fastbit_selection_estimate(selection_handle));
 
-    H5X_FASTBIT_LOG_DEBUG("Resolved range: cand0=%d, cand1=%d, hit0=%d, hit1=%d",
-            cand0, cand1, hit0, hit1);
+    if (0 > (nhits = fastbit_selection_evaluate(selection_handle)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCOMPUTE, FAIL, "can't evaluate selection");
 
-//    uint32_t a;
+    if (NULL == (hit_coords = H5MM_malloc(((size_t) nhits) * sizeof(uint64_t))))
+        HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate hit coordinates");
+
+    if (0 > fastbit_selection_get_coordinates(selection_handle, hit_coords,
+            (uint64_t) nhits, 0U))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get coordinates");
+
+#ifdef H5X_FASTBIT_DEBUG
+        /* TODO remove debug */
+    //    H5X_FASTBIT_LOG_DEBUG("Resolving range with op=%d, cv=%lf",
+    //            fastbit_compare_type, cv);
+    //
+    //    if (0 != fastbit_iapi_resolve_range(fastbit->idx_handle,
+    //            fastbit_compare_type, cv, &cand0, &hit0, &hit1, &cand1))
+    //        HGOTO_ERROR(H5E_INDEX, H5E_CANTDECODE, FAIL, "can't resolve range");
+
+    //    H5X_FASTBIT_LOG_DEBUG("Resolved range: cand0=%d, cand1=%d, hit0=%d, hit1=%d",
+    //            cand0, cand1, hit0, hit1);
+    //    uint32_t a;
 //    int64_t nhits;
 //    nhits = fastbit_iapi_get_number_of_hits(fastbit->idx_handle, cand0, cand1, &a);
 //    H5X_FASTBIT_LOG_DEBUG("Number of hits: %ld", nhits);
+    {
+        int i;
+        printf(" # %s(): Index read contains following coords: ",  __func__);
+        for (i = 0; i < nhits; i++) {
+            printf("%lu ", hit_coords[i]);
+        }
+        printf("\n");
+    }
+#endif
+
+    *coords = hit_coords;
+    *ncoords = (uint64_t) nhits;
+
+done:
+    if (FAIL == ret_value) {
+        H5MM_free(hit_coords);
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5X__fastbit_create_selection
+ *
+ * Purpose: Create dataspace selection from coordinates.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5X__fastbit_create_selection(H5X_fastbit_t *fastbit, hid_t dataspace_id,
+        uint64_t *coords, uint64_t ncoords)
+{
+    hsize_t count[H5S_MAX_RANK + 1];
+    hsize_t start_coord[H5S_MAX_RANK + 1], end_coord[H5S_MAX_RANK + 1], nelmts;
+    herr_t ret_value = SUCCEED; /* Return value */
+    size_t i;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Initialize count */
+    for (i = 0; i < H5S_MAX_RANK; i++)
+        count[i] = 1;
+
+    for (i = 0; i < ncoords; i++) {
+        hsize_t new_coords[H5S_MAX_RANK + 1];
+        const hsize_t point = coords[i];
+
+        /* Convert coordinates */
+        if (FAIL == H5VM_array_calc_pre(point, fastbit->dataset_ndims,
+                fastbit->dataset_down_dims, new_coords))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTALLOC, FAIL, "can't allocate coord array");
+
+        /* Add converted coordinate to selection */
+        if (H5Sselect_hyperslab(dataspace_id, H5S_SELECT_OR, new_coords, NULL, count, NULL))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "unable to add point to selection");
+    }
+
+    if (FAIL == H5Sget_select_bounds(dataspace_id, start_coord, end_coord))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "unable to get bounds");
+    if (0 == (nelmts = (hsize_t) H5Sget_select_npoints(dataspace_id)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid number of elements");
+    H5X_FASTBIT_LOG_DEBUG("Created dataspace from index with %llu elements [(%llu, %llu):(%llu, %llu)]",
+            nelmts, start_coord[0], start_coord[1], end_coord[0], end_coord[1]);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1017,6 +1165,8 @@ H5X_fastbit_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
     H5X_fastbit_t *fastbit = (H5X_fastbit_t *) idx_handle;
     hid_t rcxt_id;
     hid_t space_id = FAIL, ret_space_id = FAIL;
+    uint64_t *coords = NULL;
+    uint64_t ncoords = 0;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1030,7 +1180,7 @@ H5X_fastbit_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get rcxt_id from xxpl");
 
     /* If metadata has not been read already, read it */
-    if (!fastbit->idx_handle && (FAIL == H5X__fastbit_reconstruct_index(fastbit, rcxt_id)))
+    if (!fastbit->idx_reconstructed && (FAIL == H5X__fastbit_reconstruct_index(fastbit, rcxt_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read FastBit metadata");
 
     /* Create a copy of the original dataspace */
@@ -1041,14 +1191,14 @@ H5X_fastbit_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
     if (FAIL == H5Sselect_none(ret_space_id))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't reset selection");
 
-    /* Get range values from query */
-    if (FAIL == H5X__fastbit_get_query_range(fastbit, query_id))
+    /* Get matching coordinates values from query */
+    if (FAIL == H5X__fastbit_evaluate_query(fastbit, query_id, &coords, &ncoords))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get query range");
 
-//    /* Query range */
-//    if (FAIL == H5X__alacrity_query_range(alacrity, ret_space_id, query_range,
-//            rcxt_id))
-//        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get query range");
+    /* Create selection */
+    if (FAIL == H5X__fastbit_create_selection(fastbit, ret_space_id,
+            coords, ncoords))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get query range");
 
     *dataspace_id = ret_space_id;
 
