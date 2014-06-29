@@ -315,6 +315,7 @@ typedef struct H5VL_iod_write_info_t {
     hg_bulk_t *vl_len_bulk_handle;
     char *vl_lengths;
 #ifdef H5_HAVE_INDEXING
+    H5VL_iod_dset_t *dset;
     void *idx_handle;
     unsigned idx_plugin_id;
     void *buf;

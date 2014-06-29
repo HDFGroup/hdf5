@@ -2911,10 +2911,11 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     info->vl_lengths = vl_lengths;
 #ifdef H5_HAVE_INDEXING
     /* setup extra info required for the index post_update operation */
+    info->dset = dset;
     info->idx_handle = dset->idx_handle;
     info->idx_plugin_id = dset->idx_plugin_id;
     info->buf = buf;
-    info->dataspace_id = mem_space_id;
+    info->dataspace_id = file_space_id;
     info->trans_id = trans_id;
 #endif
 

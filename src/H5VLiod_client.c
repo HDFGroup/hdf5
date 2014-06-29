@@ -686,6 +686,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 H5X_class_t *idx_class = NULL;
                 hid_t xxpl_id = H5P_INDEX_XFER_DEFAULT;
                 H5P_genplist_t *xxpl_plist; /* Property list pointer */
+                void *metadata;
+                size_t metadata_size;
 
                 /* Get the index plugin class */
                 if (NULL == (idx_class = H5X_registered(info->idx_plugin_id)))
@@ -703,6 +705,15 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 if (FAIL == idx_class->post_update(info->idx_handle,
                         info->buf, info->dataspace_id, xxpl_id))
                     HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "unable to issue index post_update operation");
+
+                /* Call refresh if available */
+                if (idx_class->refresh) {
+                    if (FAIL == idx_class->refresh(info->idx_handle, &metadata_size, &metadata))
+                        HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "unable to refresh metadata");
+                    if (FAIL == H5VL_iod_dataset_set_index_info(info->dset, info->idx_plugin_id,
+                            metadata_size, metadata, info->trans_id, NULL))
+                        HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "cannot set index info to dataset");
+                }
             }
 #endif
             if(info->vl_lengths) {
