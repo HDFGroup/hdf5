@@ -114,7 +114,8 @@ const H5X_class_t H5X_DUMMY[1] = {{
     H5X_dummy_close,        /* close */
     H5X_dummy_pre_update,   /* pre_update */
     H5X_dummy_post_update,  /* post_update */
-    H5X_dummy_query         /* query */
+    H5X_dummy_query,        /* query */
+    NULL                    /* refresh */
 }};
 
 /*-------------------------------------------------------------------------

@@ -74,6 +74,7 @@ typedef struct {
             hid_t xxpl_id);
     herr_t (*query)(void *idx_handle, hid_t query_id, hid_t xxpl_id,
         hid_t *dataspace_id);
+    herr_t (*refresh)(void *idx_handle, size_t *metadata_size, void **metadata);
 } H5X_class_t;
 
 /********************/
