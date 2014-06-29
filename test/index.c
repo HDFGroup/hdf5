@@ -137,9 +137,9 @@ create_index(hid_t file_id, const char *dataset_name, unsigned plugin_id,
             estack_id);
 
     /* Add indexing information */
-//    ret = H5Xcreate_ff(file_id, plugin_id, dataset_id, H5P_DEFAULT,
-//            trans_id, estack_id);
-//    assert(0 == ret);
+    ret = H5Xcreate_ff(file_id, plugin_id, dataset_id, H5P_DEFAULT,
+            trans_id, estack_id);
+    assert(0 == ret);
 
     /* Close the first dataset. */
     ret = H5Dclose_ff(dataset_id, estack_id);
@@ -187,7 +187,7 @@ write_incr(hid_t file_id, const char *dataset_name,
             rid = H5RCacquire(file_id, &version, H5P_DEFAULT, estack_id);
             assert((uint64_t )(req_version + (uint64_t) n) == version);
 
-            dataset_id = H5Dopen_ff(file_id, dataset_name, H5P_DEFAULT, rcxt_id, estack_id);
+            dataset_id = H5Dopen_ff(file_id, dataset_name, H5P_DEFAULT, rid, estack_id);
             assert(dataset_id);
 
             file_space_id = H5Dget_space(dataset_id);
@@ -319,7 +319,7 @@ main(int argc, char **argv)
     herr_t ret;
     uint64_t req_version;
     hsize_t i, j;
-    int incr_update = 1;
+    int incr_update;
 
     sprintf(file_name, "%s_%s", getenv("USER"), "eff_file_index.h5");
 
@@ -328,10 +328,11 @@ main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
 
     if (argc < 2) {
-        if (my_rank ==0) printf("Usage: %s <plugin_id>\n", argv[0]);
+        if (my_rank ==0) printf("Usage: %s <plugin_id> <do incremental update>\n", argv[0]);
         exit(0);
     }
-    plugin_id = atoi(argv[1]);
+    plugin_id = (unsigned) atoi(argv[1]);
+    incr_update = atoi(argv[2]);
 
     /* Call EFF_init to initialize the EFF stack. */
     EFF_init(MPI_COMM_WORLD, MPI_INFO_NULL);
