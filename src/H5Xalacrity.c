@@ -638,8 +638,46 @@ H5X__alacrity_update_index(H5X_alacrity_t *alacrity, hid_t trans_id,
             &alacrity->output->metadata)))
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "ALACRITY index size is NULL");
 
+    size_t prev_metadata_size;
+    {
+        hid_t type_id, space_id;
+        size_t nelmts_data, data_elmt_size;
+
+        if (FAIL == (type_id = H5Dget_type(alacrity->metadata_id)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get type from dataset");
+        if (FAIL == (space_id = H5Dget_space(alacrity->metadata_id)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get dataspace from dataset");
+        if (0 == (nelmts_data = (size_t) H5Sget_select_npoints(space_id)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid number of elements");
+        if (0 == (data_elmt_size = H5Tget_size(type_id)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "invalid size of element");
+
+        prev_metadata_size = data_elmt_size * nelmts_data;
+        H5X_ALACRITY_LOG_DEBUG("Old metadata size: %zu", prev_metadata_size);
+
+        H5Tclose(type_id);
+        H5Sclose(space_id);
+    }
+
     H5X_ALACRITY_LOG_DEBUG("Metadata size: %zu", (size_t) metadata_size);
     H5X_ALACRITY_LOG_DEBUG("Index size: %zu", (size_t) index_size);
+    hid_t metadata_space_id, index_space_id;
+
+    /* Create metadata array with opaque type */
+    H5Dclose_ff(alacrity->metadata_id, H5_EVENT_STACK_NULL);
+    if (FAIL == (metadata_space_id = H5Screate_simple(1, &metadata_size, NULL)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
+    if (FAIL == (alacrity->metadata_id = H5Dcreate_anon_ff(alacrity->file_id, alacrity->opaque_type_id,
+            metadata_space_id, H5P_DEFAULT, H5P_DEFAULT, trans_id, H5_EVENT_STACK_NULL)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
+
+    /* Create index array with opaque type */
+    H5Dclose_ff(alacrity->index_id, H5_EVENT_STACK_NULL);
+    if (FAIL == (index_space_id = H5Screate_simple(1, &index_size, NULL)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
+    if (FAIL == (alacrity->index_id = H5Dcreate_anon_ff(alacrity->file_id, alacrity->opaque_type_id,
+            index_space_id, H5P_DEFAULT, H5P_DEFAULT, trans_id, H5_EVENT_STACK_NULL)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
 
     /* Serialize and write ALACRITY metadata */
     if (NULL == (metadata_buf = H5MM_malloc(metadata_size)))
@@ -647,16 +685,16 @@ H5X__alacrity_update_index(H5X_alacrity_t *alacrity, hid_t trans_id,
     memstreamInit(&memstream, metadata_buf);
     if (ALErrorNone != ALSerializeMetadata(&alacrity->output->metadata, &memstream))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTSERIALIZE, FAIL, "can't serialize ALACRITY metadata");
-    if (FAIL == H5Dset_extent_ff(alacrity->metadata_id, &metadata_size, trans_id, H5_EVENT_STACK_NULL))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "can't set extent for index metadata");
+//    if (FAIL == H5Dset_extent_ff(alacrity->metadata_id, &metadata_size, trans_id, H5_EVENT_STACK_NULL))
+//        HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "can't set extent for index metadata");
     if (FAIL == H5Dwrite_ff(alacrity->metadata_id, alacrity->opaque_type_id, H5S_ALL,
             H5S_ALL, H5P_DEFAULT, memstream.buf, trans_id, H5_EVENT_STACK_NULL))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index metadata");
     memstreamDestroy(&memstream, 0);
 
     /* Write ALACRITY index */
-    if (FAIL == H5Dset_extent_ff(alacrity->index_id, &index_size, trans_id, H5_EVENT_STACK_NULL))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "can't set extent for index metadata");
+//    if (FAIL == H5Dset_extent_ff(alacrity->index_id, &index_size, trans_id, H5_EVENT_STACK_NULL))
+//        HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "can't set extent for index metadata");
     if (FAIL == H5Dwrite_ff(alacrity->index_id, alacrity->opaque_type_id, H5S_ALL,
             H5S_ALL, H5P_DEFAULT, alacrity->output->index, trans_id, H5_EVENT_STACK_NULL))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index data");
