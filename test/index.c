@@ -17,7 +17,7 @@
 #define NTUPLES 256
 static int my_rank = 0, my_size = 1;
 
-static void
+static herr_t
 write_dataset(hid_t file_id, const char *dataset_name,
         hsize_t total, hsize_t ncomponents, hid_t datatype_id,
         hsize_t ntuples, hsize_t start, void *buf, uint64_t req_version,
@@ -25,7 +25,7 @@ write_dataset(hid_t file_id, const char *dataset_name,
 {
     hid_t       dataset_id;
     hid_t       file_space_id, mem_space_id;
-    hid_t       trans_id, rcxt_id, trspl_id;
+    hid_t       trans_id, rcxt_id = -1, trspl_id;
     hsize_t     dims[2] = {total, ncomponents};
     /* hsize_t     offset[2] = {start, 0}; */
     hsize_t     count[2] = {ntuples, ncomponents};
@@ -100,13 +100,15 @@ write_dataset(hid_t file_id, const char *dataset_name,
 
     ret = H5TRclose(trans_id);
     assert(0 == ret);
+
+    return ret;
 }
 
-static void
+static herr_t
 create_index(hid_t file_id, const char *dataset_name, unsigned plugin_id,
         uint64_t req_version, hid_t estack_id)
 {
-    hid_t dataset_id, trans_id, rcxt_id;
+    hid_t dataset_id, trans_id, rcxt_id = -1;
     hid_t trspl_id;
     uint64_t version = req_version;
     herr_t ret;
@@ -160,9 +162,11 @@ create_index(hid_t file_id, const char *dataset_name, unsigned plugin_id,
 
     ret = H5TRclose(trans_id);
     assert(0 == ret);
+
+    return ret;
 }
 
-static void
+static herr_t
 write_incr(hid_t file_id, const char *dataset_name,
         hsize_t total, hsize_t ncomponents,
         hsize_t ntuples, hsize_t start, void *buf, uint64_t req_version,
@@ -170,13 +174,15 @@ write_incr(hid_t file_id, const char *dataset_name,
 {
     hid_t       dataset_id;
     hid_t       file_space_id;
-    hsize_t     dims[2] = {total, ncomponents};
+//    hsize_t     dims[2] = {total, ncomponents};
     hsize_t     offset[2] = {start, 0};
     hsize_t     count[2] = {ntuples, ncomponents};
     int         rank = (ncomponents == 1) ? 1 : 2;
     herr_t      ret;
     uint64_t    version = req_version;
     int n;
+
+    (void) total;
 
     /* do incremental updates */
     for (n = 0; n < my_size; n++) {
@@ -229,9 +235,11 @@ write_incr(hid_t file_id, const char *dataset_name,
         }
         MPI_Barrier(MPI_COMM_WORLD);
     }
+
+    return ret;
 }
 
-static void
+static herr_t
 query_and_view(hid_t file_id, const char *dataset_name, uint64_t req_version,
         hid_t estack_id)
 {
@@ -239,7 +247,7 @@ query_and_view(hid_t file_id, const char *dataset_name, uint64_t req_version,
     hid_t  query_id1, query_id2;
     hid_t query_id;
     hid_t dataset_id;
-    hid_t rcxt_id;
+    hid_t rcxt_id = -1;
     uint64_t version = req_version;
     herr_t ret;
     double t1, t2;
@@ -273,18 +281,11 @@ query_and_view(hid_t file_id, const char *dataset_name, uint64_t req_version,
         dataset_id = H5Dopen_ff(file_id, dataset_name, H5P_DEFAULT, rcxt_id,
                 estack_id);
 
-        //    view_id = H5Vcreate_ff(dataset_id, query_id, H5P_DEFAULT, rid2,
-        //            estack_id);
-        //    assert(view_id > 0);
-
         t1 = MPI_Wtime();
         H5Dquery_ff(dataset_id, query_id, -1, rcxt_id);
         t2 = MPI_Wtime();
 
         printf("Query time: %lf ms\n", (t2 - t1) * 1000);
-        /* TODO use view_id for analysis shipping etc */
-
-        //    H5Vclose(view_id);
 
         ret = H5Dclose_ff(dataset_id, estack_id);
         assert(0 == ret);
@@ -302,6 +303,8 @@ query_and_view(hid_t file_id, const char *dataset_name, uint64_t req_version,
     H5Qclose(query_id);
     H5Qclose(query_id2);
     H5Qclose(query_id1);
+
+    return ret;
 }
 
 int
@@ -311,6 +314,7 @@ main(int argc, char **argv)
     char file_name[NAME_SIZE];
     char dataset_name[NAME_SIZE];
     hsize_t ntuples = NTUPLES;
+    hsize_t ntuples_multiplier = 1;
     hsize_t ncomponents = 3;
     hsize_t start, total;
     float *data;
@@ -327,12 +331,14 @@ main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
 
-    if (argc < 2) {
-        if (my_rank ==0) printf("Usage: %s <plugin_id> <do incremental update>\n", argv[0]);
+    if (argc < 3) {
+        if (my_rank ==0) printf("Usage: %s <ntuples_multiplier> <plugin_id> <do incremental update>\n", argv[0]);
         exit(0);
     }
-    plugin_id = (unsigned) atoi(argv[1]);
-    incr_update = atoi(argv[2]);
+    ntuples_multiplier = (hsize_t) atoi(argv[1]);
+    ntuples *= ntuples_multiplier;
+    plugin_id = (unsigned) atoi(argv[2]);
+    incr_update = atoi(argv[3]);
 
     /* Call EFF_init to initialize the EFF stack. */
     EFF_init(MPI_COMM_WORLD, MPI_INFO_NULL);
@@ -396,7 +402,7 @@ main(int argc, char **argv)
 
         MPI_Barrier(MPI_COMM_WORLD);
 
-        req_version += my_size;
+        req_version += (uint64_t) my_size;
         query_and_view(file_id, "D0", req_version, estack_id);
 
         MPI_Barrier(MPI_COMM_WORLD);
@@ -414,5 +420,8 @@ main(int argc, char **argv)
 
     MPI_Finalize();
 
+    if (ret < 0) {
+
+    }
     return 0;
 }
