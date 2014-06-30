@@ -720,7 +720,10 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
             HGOTO_ERROR_FF(FAIL, "can't get replica ID from dxpl");
 
         if(read_tid) {
+            /* Do Nothing */;
+#if H5_EFF_DEBUG 
             fprintf(stderr, "Reading from replica tag %"PRIx64"\n", read_tid);
+#endif
         }
         else {
             read_tid = rtid;
@@ -1319,8 +1322,8 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG 
-        fprintf(stderr, "Start dataset Set Extent first dim to %zu\n", 
-                (iod_size_t)input->dims.size[0]);
+        fprintf(stderr, "Start dataset Set Extent (OID %"PRIx64") first dim to %zu\n", 
+                iod_id, (iod_size_t)input->dims.size[0]);
 #endif
 
     /* open the dataset if we don't have the handle yet */

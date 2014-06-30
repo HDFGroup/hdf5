@@ -267,7 +267,11 @@ int main(int argc, char **argv) {
     assert(ret == 0);
 
     gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, rid3, e_stack);
-
+    {
+        hbool_t exists3;
+        ret = H5Aexists_ff(gid1, "RENAMED_GROUP_ATTR", &exists3, rid3, H5_EVENT_STACK_NULL);
+        assert(exists3 == 1);
+    }
     aid2 = H5Aopen_ff(gid1, "RENAMED_GROUP_ATTR", H5P_DEFAULT, rid3, e_stack);
     assert(aid2);
     ret = H5Aread_ff(aid2, dtid, rdata2, rid3, e_stack);
