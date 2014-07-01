@@ -547,7 +547,7 @@ static herr_t
 H5X__fastbit_scatter_cb(const void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*/,
         void *_info)
 {
-    struct H5X_fastbit_scatter_info *info = (struct scatter_info *) _info;
+    struct H5X_fastbit_scatter_info *info = (struct H5X_fastbit_scatter_info *) _info;
 
     /* Set output variables */
     *src_buf = info->src_buf;

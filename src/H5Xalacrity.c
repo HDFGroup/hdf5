@@ -524,7 +524,7 @@ static herr_t
 H5X__alacrity_scatter_cb(const void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*/,
         void *_info)
 {
-    struct H5X_alacrity_scatter_info *info = (struct scatter_info *) _info;
+    struct H5X_alacrity_scatter_info *info = (struct H5X_alacrity_scatter_info *) _info;
 
     /* Set output variables */
     *src_buf = info->src_buf;
@@ -608,18 +608,18 @@ H5X__alacrity_update_index(H5X_alacrity_t *alacrity, hid_t trans_id,
     /* Call ALACRITY encoder */
     H5X_ALACRITY_LOG_DEBUG("Calling ALACRITY encoder on data (%zu elements)", nelmts);
 
-#ifdef H5X_ALACRITY_DEBUG
-    {
-        printf("----------------------------\n");
-        printf("----------------------------\n");
-        int i;
-        const float *buf_float = (const float *) buf;
-        for (i = 0; i < nelmts; i++)
-            printf("%f\n", buf_float[i]);
-        printf("----------------------------\n");
-        printf("----------------------------\n");
-    }
-#endif
+//#ifdef H5X_ALACRITY_DEBUG
+//    {
+//        printf("----------------------------\n");
+//        printf("----------------------------\n");
+//        int i;
+//        const float *buf_float = (const float *) buf;
+//        for (i = 0; i < nelmts; i++)
+//            printf("%f\n", buf_float[i]);
+//        printf("----------------------------\n");
+//        printf("----------------------------\n");
+//    }
+//#endif
 
     if (ALErrorNone != ALEncode(&alacrity->config, buf, nelmts, alacrity->output))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTENCODE, FAIL, "ALACRITY encoder failed");
