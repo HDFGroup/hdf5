@@ -1223,5 +1223,17 @@ H5_DLL herr_t H5C_ignore_tags(H5C_t * cache_ptr);
 
 H5_DLL void H5C_retag_copied_metadata(H5C_t * cache_ptr, haddr_t metadata_tag);
 
+#ifndef NDEBUG	/* debugging functions */
+
+H5_DLL herr_t H5C_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr,
+                                          void ** entry_ptr_ptr);
+
+H5_DLL herr_t H5C_verify_entry_type(const H5F_t * f, haddr_t addr,
+                                    const H5C_class_t * expected_type,
+                                    hbool_t * in_cache_ptr,
+                                    hbool_t * type_ok_ptr);
+
+#endif /* NDEBUG */
+
 #endif /* !_H5Cprivate_H */
 
