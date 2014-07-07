@@ -2895,54 +2895,6 @@ if test -n "$PARALLEL"; then
   if test "X-$MPE" = "X-yes"; then
     AC_DEFINE([HAVE_MPE], [1], [Define if we have MPE support])
   fi
-
-  ## ----------------------------------------------------------------------
-  ## Set the flag to indicate that the MPI_File_set_size() function
-  ## works with files over 2GB, unless it's already set in the cache.
-  ## (This flag should be set for all machines, except for ASCI Red, where
-  ## the cache value is set in it's config file)
-  ##
-  AC_MSG_CHECKING([if MPI_File_set_size works for files over 2GB])
-  AC_CACHE_VAL([hdf5_cv_mpi_file_set_size_big], [hdf5_cv_mpi_file_set_size_big=yes])
-  
-  if test ${hdf5_cv_mpi_file_set_size_big} = "yes"; then
-    AC_DEFINE([MPI_FILE_SET_SIZE_BIG], [1],
-              [Define if your system's `MPI_File_set_size' function works for files over 2GB.])
-    AC_MSG_RESULT([yes])
-  else
-    AC_MSG_RESULT([no])
-  fi
-
-  ## ----------------------------------------------------------------------
-  ## Set the flag to indicate that the MPI_File_get_size() function
-  ## works.  The default is enabled unless the user knows the function
-  ## doesn't work on the system and disables it.  (This flag should be set
-  ## for all machines except for SGI Altix Propack 4 where the function 
-  ## doesn't return correct file size.)
-  ##
-  AC_ARG_ENABLE([mpi-size],
-                [AS_HELP_STRING([--enable-mpi-size],
-                                [Some systems (only SGI Altix Propack 4 so far) return wrong value
-                                 from MPI_File_get_size.  By disabling this function, the library
-                                 will replace it with stat to get the correct file size.
-                                 [default=yes]])],
-                [MPI_GET_SIZE=$enableval])
-
-  AC_MSG_CHECKING([if MPI_File_get_size is enabled])
-
-  AC_SUBST(MPI_GET_SIZE)
-  case "X-$MPI_GET_SIZE" in
-    X-no)
-      AC_MSG_RESULT([no])
-      MPI_GET_SIZE=no
-      ;;
-    X-yes|*)
-      AC_MSG_RESULT([yes])
-      MPI_GET_SIZE=yes
-      AC_DEFINE([HAVE_MPI_GET_SIZE], [1],
-                [Define if MPI_File_get_size works correctly])
-      ;;
-  esac
 fi
 
 ## ----------------------------------------------------------------------

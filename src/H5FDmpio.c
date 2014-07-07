@@ -1004,9 +1004,6 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     MPI_Comm                    comm_dup=MPI_COMM_NULL;
     MPI_Info                    info_dup=MPI_INFO_NULL;
     H5FD_t			*ret_value;     /* Return value */
-#ifndef H5_HAVE_MPI_GET_SIZE
-    h5_stat_t                 stat_buf;
-#endif
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1081,18 +1078,8 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* Only processor p0 will get the filesize and broadcast it. */
     if (mpi_rank == 0) {
-        /* Get current file size.  If MPI_File_get_size is disabled in configuration
-         * because it doesn't return correct value (SGI Altix Propack 4),
-         * use stat to get the file size. */
-#ifdef H5_HAVE_MPI_GET_SIZE
         if (MPI_SUCCESS != (mpi_code=MPI_File_get_size(fh, &size)))
             HMPI_GOTO_ERROR(NULL, "MPI_File_get_size failed", mpi_code)
-#else
-        if((mpi_code=HDstat(name, &stat_buf))<0)
-            HMPI_GOTO_ERROR(NULL, "stat failed", mpi_code)
-        /* Hopefully this casting is safe */
-        size = (MPI_Offset)(stat_buf.st_size);
-#endif
     } /* end if */
 
     /* Broadcast file size */
@@ -1989,36 +1976,12 @@ H5FD_mpio_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
         int		mpi_code;	/* mpi return code */
         MPI_Offset      mpi_off;
 
-#ifdef H5_MPI_FILE_SET_SIZE_BIG
         if(H5FD_mpi_haddr_to_MPIOff(file->eoa, &mpi_off) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset")
 
         /* Extend the file's size */
         if(MPI_SUCCESS != (mpi_code = MPI_File_set_size(file->f, mpi_off)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_size failed", mpi_code)
-#else /* H5_MPI_FILE_SET_SIZE_BIG */
-	/* Wait until all processes are here before reading/writing the byte at
-         * process 0's end of address space.  The window for corruption is
-         * probably tiny, but does exist...
-         */
-        if(MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
-
-        if(0 == file->mpi_rank) {
-            uint8_t             byte = 0;
-            MPI_Status          mpi_stat;
-
-            /* Portably initialize MPI status variable */
-            HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
-
-            if(H5FD_mpi_haddr_to_MPIOff(file->eoa-1, &mpi_off) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset")
-            if(MPI_SUCCESS != (mpi_code = MPI_File_read_at(file->f, mpi_off, &byte, 1, MPI_BYTE, &mpi_stat)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
-            if(MPI_SUCCESS != (mpi_code = MPI_File_write_at(file->f, mpi_off, &byte, 1, MPI_BYTE, &mpi_stat)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
-        } /* end if */
-#endif /* H5_MPI_FILE_SET_SIZE_BIG */
 
 	/* Don't let any proc return until all have extended the file.
          * (Prevents race condition where some processes go ahead and write

@@ -675,7 +675,6 @@ USE_FILTER_NBIT
 USE_FILTER_FLETCHER32
 USE_FILTER_SHUFFLE
 FILTERS
-MPI_GET_SIZE
 ADD_PARALLEL_FILES
 USINGMEMCHECKER
 CLEARFILEBUF
@@ -922,7 +921,6 @@ enable_clear_file_buffers
 enable_using_memchecker
 enable_parallel
 with_mpe
-enable_mpi_size
 enable_filters
 with_default_vfd
 enable_direct_vfd
@@ -1618,11 +1616,6 @@ Optional Features:
                           picky about it's memory operations and also disables
                           the library's free space manager code. Default=no.
   --enable-parallel       Search for MPI-IO and MPI support files
-  --enable-mpi-size       Some systems (only SGI Altix Propack 4 so far)
-                          return wrong value from MPI_File_get_size. By
-                          disabling this function, the library will replace it
-                          with stat to get the correct file size.
-                          [default=yes]
   --enable-filters=all    Turn on all internal I/O filters. One may also
                           specify a comma-separated list of filters or the
                           word no. The default is all internal I/O filters.
@@ -29233,65 +29226,6 @@ fi
 $as_echo "#define HAVE_MPE 1" >>confdefs.h
 
   fi
-
-  ## ----------------------------------------------------------------------
-  ## Set the flag to indicate that the MPI_File_set_size() function
-  ## works with files over 2GB, unless it's already set in the cache.
-  ## (This flag should be set for all machines, except for ASCI Red, where
-  ## the cache value is set in it's config file)
-  ##
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if MPI_File_set_size works for files over 2GB" >&5
-$as_echo_n "checking if MPI_File_set_size works for files over 2GB... " >&6; }
-  if ${hdf5_cv_mpi_file_set_size_big+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  hdf5_cv_mpi_file_set_size_big=yes
-fi
-
-
-  if test ${hdf5_cv_mpi_file_set_size_big} = "yes"; then
-
-$as_echo "#define MPI_FILE_SET_SIZE_BIG 1" >>confdefs.h
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-  else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-  fi
-
-  ## ----------------------------------------------------------------------
-  ## Set the flag to indicate that the MPI_File_get_size() function
-  ## works.  The default is enabled unless the user knows the function
-  ## doesn't work on the system and disables it.  (This flag should be set
-  ## for all machines except for SGI Altix Propack 4 where the function
-  ## doesn't return correct file size.)
-  ##
-  # Check whether --enable-mpi-size was given.
-if test "${enable_mpi_size+set}" = set; then :
-  enableval=$enable_mpi_size; MPI_GET_SIZE=$enableval
-fi
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if MPI_File_get_size is enabled" >&5
-$as_echo_n "checking if MPI_File_get_size is enabled... " >&6; }
-
-
-  case "X-$MPI_GET_SIZE" in
-    X-no)
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-      MPI_GET_SIZE=no
-      ;;
-    X-yes|*)
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-      MPI_GET_SIZE=yes
-
-$as_echo "#define HAVE_MPI_GET_SIZE 1" >>confdefs.h
-
-      ;;
-  esac
 fi
 
 ## ----------------------------------------------------------------------

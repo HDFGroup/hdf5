@@ -206,7 +206,6 @@ test_mpio_gb_file(char *filename)
     MPI_Offset  mpi_off;
     MPI_Offset  mpi_off_old;
     MPI_Status  mpi_stat;
-    h5_stat_t stat_buf;
     int is_signed, sizeof_mpi_offset;
 
     nerrs = 0;
@@ -380,13 +379,7 @@ test_mpio_gb_file(char *filename)
 	mrc = MPI_Barrier(MPI_COMM_WORLD);
 	VRFY((mrc==MPI_SUCCESS), "Sync before leaving test");
 
-        /*
-         * Check if MPI_File_get_size works correctly.  Some systems (only SGI Altix
-         * Propack 4 so far) return wrong file size.  It can be avoided by reconfiguring
-         * with "--disable-mpi-size".
-         */
-#ifdef H5_HAVE_MPI_GET_SIZE
-	printf("Test if MPI_File_get_size works correctly with %s\n", filename);
+	printf("Test if MPI_File_get_size works with %s\n", filename);
 
 	mrc = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, info, &fh);
         VRFY((mrc==MPI_SUCCESS), "");
@@ -394,14 +387,6 @@ test_mpio_gb_file(char *filename)
         if (MAINPROCESS){			/* only process 0 needs to check it*/
             mrc = MPI_File_get_size(fh, &size);
 	    VRFY((mrc==MPI_SUCCESS), "");
-
-            mrc=HDstat(filename, &stat_buf);
-	    VRFY((mrc==0), "");
-
-            /* Hopefully this casting is safe */
-            if(size != (MPI_Offset)(stat_buf.st_size)) {
-                printf("Warning: MPI_File_get_size doesn't return correct file size.  To avoid using it in the library, reconfigure and rebuild the library with --disable-mpi-size.\n");
-            }
         }
 
 	/* close file and free the communicator */
@@ -414,9 +399,6 @@ test_mpio_gb_file(char *filename)
 	 */
 	mrc = MPI_Barrier(MPI_COMM_WORLD);
 	VRFY((mrc==MPI_SUCCESS), "Sync before leaving test");
-#else
-        printf("Skipped testing MPI_File_get_size because it's disabled\n");
-#endif
     }
 
 finish:
