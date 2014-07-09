@@ -379,7 +379,7 @@ test_mpio_gb_file(char *filename)
 	mrc = MPI_Barrier(MPI_COMM_WORLD);
 	VRFY((mrc==MPI_SUCCESS), "Sync before leaving test");
 
-	printf("Test if MPI_File_get_size works with %s\n", filename);
+        printf("Test if MPI_File_get_size works correctly with %s\n", filename);
 
 	mrc = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, info, &fh);
         VRFY((mrc==MPI_SUCCESS), "");
@@ -387,6 +387,7 @@ test_mpio_gb_file(char *filename)
         if (MAINPROCESS){			/* only process 0 needs to check it*/
             mrc = MPI_File_get_size(fh, &size);
 	    VRFY((mrc==MPI_SUCCESS), "");
+            VRFY((size == mpi_off+MB), "MPI_File_get_size doesn't return correct file size.");
         }
 
 	/* close file and free the communicator */
