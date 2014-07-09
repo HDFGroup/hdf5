@@ -377,6 +377,9 @@ int main(int argc, char **argv)
 	    "compressed dataset collective read", PARATESTFILE);
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
+    AddTest("zerodsetr", zero_dim_dset, NULL,
+	    "zero dim dset", PARATESTFILE);
+
     ndsets_params.name = PARATESTFILE;
     ndsets_params.count = ndatasets;
     AddTest("ndsetw", multiple_dset_write, NULL,
