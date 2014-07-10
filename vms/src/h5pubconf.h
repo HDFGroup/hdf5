@@ -253,9 +253,6 @@
 /* Define to 1 if you have the <mpe.h> header file. */
 /* #undef H5_HAVE_MPE_H */
 
-/* Define if MPI_File_get_size works correctly */
-/* #undef H5_HAVE_MPI_GET_SIZE */
-
 /* Define if `MPI_Comm_c2f' and `MPI_Comm_f2c' exists */
 /* #undef H5_HAVE_MPI_MULTI_LANG_Comm */
 
@@ -484,10 +481,6 @@
 
 /* Define if the metadata trace file code is to be compiled in */
 /* #undef H5_METADATA_TRACE_FILE */
-
-/* Define if your system's `MPI_File_set_size' function works for files over
-   2GB. */
-/* #undef H5_MPI_FILE_SET_SIZE_BIG */
 
 /* Define if we can violate pointer alignment restrictions */
 #define H5_NO_ALIGNMENT_RESTRICTIONS 1
