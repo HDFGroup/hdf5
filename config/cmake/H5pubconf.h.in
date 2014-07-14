@@ -95,6 +95,9 @@
 /* Define to 1 if you have the `alarm' function. */
 #cmakedefine H5_HAVE_ALARM @H5_HAVE_ALARM@
 
+/* Define to 1 if you have the `asprintf' function. */
+#cmakedefine H5_HAVE_ASPRINTF @H5_HAVE_ASPRINTF@
+
 /* Define if the __attribute__(()) extension is present */
 #cmakedefine H5_HAVE_ATTRIBUTE @H5_HAVE_ATTRIBUTE@
 
@@ -314,7 +317,7 @@
 /* Define to 1 if you have the `rand_r' function. */
 #cmakedefine H5_HAVE_RAND_R @H5_HAVE_RAND_R@
 
-/* Define to 1 if you have the `sigsetjmp' function. */
+/* Define to 1 if you have the `setjmp' function. */
 #cmakedefine H5_HAVE_SETJMP @H5_HAVE_SETJMP@
 
 /* Define to 1 if you have the <setjmp.h> header file. */
