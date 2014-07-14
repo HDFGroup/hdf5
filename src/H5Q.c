@@ -619,6 +619,8 @@ H5Qget_type(hid_t query_id, H5Q_type_t *query_type)
     /* Check args and get the query objects */
     if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
+    if (!query_type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer to query type");
 
     /* Get match info */
     if (FAIL == H5Q_get_type(query, query_type))
@@ -645,10 +647,10 @@ H5Q_get_type(H5Q_t *query, H5Q_type_t *query_type)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(query);
+    HDassert(query_type);
 
-    if (query_type)
-        *query_type = (query->is_combined) ? query->query.combine.type :
-                        query->query.select.type;
+    *query_type = (query->is_combined) ? query->query.combine.type :
+            query->query.select.type;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Q_get_type() */
@@ -680,6 +682,8 @@ H5Qget_match_op(hid_t query_id, H5Q_match_op_t *match_op)
     /* Check args and get the query objects */
     if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
+    if (!match_op)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer to match op");
 
     /* Get match info */
     if (FAIL == H5Q_get_match_op(query, match_op))
@@ -706,11 +710,12 @@ H5Q_get_match_op(H5Q_t *query, H5Q_match_op_t *match_op)
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(query);
+    HDassert(match_op);
 
     if (query->is_combined)
         HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "cannot retrieve op from combined query");
 
-    if (match_op) *match_op = query->query.select.match_op;
+    *match_op = query->query.select.match_op;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -914,6 +919,7 @@ H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc)
     if (query->is_combined) {
         size_t l_buf_size = 0, r_buf_size = 0;
 
+        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.combine.type, sizeof(H5Q_type_t));
         H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.combine.op, sizeof(H5Q_combine_op_t));
         H5Q_encode(query->query.combine.l_query, buf_ptr, &l_buf_size);
         buf_size += l_buf_size;
@@ -1041,6 +1047,7 @@ H5Q_decode(const unsigned char **buf_ptr)
 
     H5Q_decode_memcpy(&query->is_combined, sizeof(hbool_t), buf_ptr);
     if (query->is_combined) {
+        H5Q_decode_memcpy(&query->query.combine.type, sizeof(H5Q_type_t), buf_ptr);
         H5Q_decode_memcpy(&query->query.combine.op, sizeof(H5Q_combine_op_t), buf_ptr);
         query->query.combine.l_query = H5Q_decode(buf_ptr);
         query->query.combine.r_query = H5Q_decode(buf_ptr);
