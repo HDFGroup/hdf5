@@ -101,7 +101,7 @@ typedef herr_t (*H5L_copy_func_t)(const char *new_name, hid_t new_loc,
     const void *lnkdata, size_t lnkdata_size);
 
 /* Callback during link traversal */
-typedef herr_t (*H5L_traverse_func_t)(const char *link_name, hid_t cur_group,
+typedef hid_t (*H5L_traverse_func_t)(const char *link_name, hid_t cur_group,
     const void *lnkdata, size_t lnkdata_size, hid_t lapl_id);
 
 /* Callback for when the link is deleted */
