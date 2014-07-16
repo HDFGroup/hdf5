@@ -524,8 +524,8 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
     /* Read data space address through the VOL and return */
-    if((ret_value=H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_SPACE_STATUS, 
-				   H5AC_dxpl_id, H5_EVENT_STACK_NULL, allocation)) < 0)
+    if((ret_value = H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_SPACE_STATUS, 
+                                     H5AC_dxpl_id, H5_EVENT_STACK_NULL, allocation)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get space status")
 
 done:
