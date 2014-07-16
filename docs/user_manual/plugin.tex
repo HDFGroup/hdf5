@@ -1,6 +1,6 @@
 \section{Creating a VOL Plugin}
 Each VOL plugin should be of type {\tt H5VL\_class\_t} that is defined
-as a {\tt struct} of:
+as:
 
 \begin{lstlisting}
 /* Class information for each VOL driver */
@@ -59,9 +59,45 @@ are mapped to from the HDF5 API layer and will be detailed in the
 following sub-sections.
 
 \subsection{Mapping the API to the Callbacks}
+\label{sec:map}
+
+The callback interface defined for the VOL has to be general enough to
+handle all the HDF5 API operations that would access the
+file. Furthermore it has to capture future additions to the HDF5
+library with little to no changes to the callback interface. Changing
+the interface often whenever new features are added would be
+discouraging to plugin developers since that would mean reworking
+their VOL plugin structure. To remedy this issue, every callback will
+contain two parameters:
+\begin{itemize}
+\item A data transfer property list (DXPL) which allows that API to
+  put some properties on for the plugins to retrieve if they have to
+  for particular operations, without having to add arguments to the
+  VOL callback function.
+\item A pointer to a request ({\tt void **req}) to handle asynchronous
+  operations if the HDF5 library adds support for them in future
+  releases (beyond the 1.8 series). That pointer is set by the VOL
+  plugin to a request object it creates to manage progress on that
+  asynchronous operation. If the {\tt req} is {\tt NULL}, that means
+  that the API operation is blocking and so the plugin would not
+  execute the operation asynchronously. If the plugin does not support
+  asynchronous operations, it needs not to worry about this field and
+  leaves it unset.
+\end{itemize}
+
 In order to keep the number of the VOL object classes and callbacks
 concise and readable, it was decided to not have a one-to-one mapping
-between API operation and callbacks.
+between API operation and callbacks. Furthermore, to keep the
+callbacks themselves short and not cluttered with a lot of parameters,
+some of the parameters are passed in as properties in property lists
+included with the callback. The value of those properties can be
+retrieved by calling the public routine (or its private version if
+this is an internal plugin): 
+\begin{lstlisting}
+herr_t H5Pget( hid_t plist_id, const char *property_name, void *value);
+\end{lstlisting}
+The property names and value types will be detailed when describing
+each callback in their respective sections.
 
 The HDF5 library provides several routines to access an object in the
 container. For example to open an attribute on a group object, the
@@ -190,18 +226,140 @@ typedef struct H5VL_attr_class_t {
 } H5VL_attr_class_t;
 \end{lstlisting}
 
-The create callback passes to the plugin the following arguments:
+The {\tt create} callback in the attribute class should create an
+attribute object in the container of the location object and
+returns a pointer to the attribute structure containing information to
+access the attribute in future calls. 
 
+\textbf{Signature:}
+\begin{lstlisting}
+    void *(*create)(void *obj, H5VL_loc_params_t loc_params, 
+        const char *attr_name, hid_t acpl_id, hid_t aapl_id, 
+        hid_t dxpl_id, void **req);
+\end{lstlisting}
+
+\textbf{Arguments:}\\
 \begin{tabular}{l p{10cm}}
-  {\tt void *obj} & Pointer to an object where the attribute needs
+  {\tt obj} & (IN): Pointer to an object where the attribute needs
   to be created or where the look-up of the target object needs to
-  start. \\
-  {\tt H5VL\_loc\_params\_t loc\_params} & The location parameters \\
-  {\tt } & \\
-  {\tt } & \\
-  {\tt } & \\
-  {\tt } & \\
+  start.\\
+  {\tt loc\_params} & (IN): The location parameters as explained in
+  section~\ref{sec:map}.\\
+  {\tt attr\_name} & (IN): The name of the attribute to be created.\\
+  {\tt acpl\_id} & (IN): The attribute creation property list. It contains
+  all the attribute creation properties in addition to the attribute
+  datatype (an {\tt hid\_t}) and dataspace (an {\tt hid\_t}) that can
+  be retrieved with the properties, {\tt H5VL\_ATTR\_TYPE\_ID} and
+  {\tt H5VL\_ATTR\_SPACE\_ID}.\\
+  {\tt aapl\_id} & (IN): The attribute access property list.\\
+  {\tt dxpl\_id} & (IN): The data transfer property list.\\
+  {\tt req} & (IN/OUT): A pointer to the asynchronous request of the
+  operation created by the plugin.\\
 \end{tabular}
+
+The {\tt open} callback in the attribute class should open an
+attribute object in the container of the location object and returns a
+pointer to the attribute structure containing information to access
+the attribute in future calls. 
+
+\textbf{Signature:}
+\begin{lstlisting}
+    void *(*open)(void *obj, H5VL_loc_params_t loc_params, 
+        const char *attr_name, hid_t aapl_id, hid_t dxpl_id, void **req);
+\end{lstlisting}
+
+\textbf{Arguments:}\\
+\begin{tabular}{l p{10cm}}
+  {\tt obj} & (IN): Pointer to an object where the attribute needs to be
+  opened or where the look-up of the target object needs to start.\\
+  {\tt loc\_params} & (IN): The location parameters as explained in
+  section~\ref{sec:map}.\\
+  {\tt attr\_name} & (IN): The name of the attribute to be opened.\\
+  {\tt aapl\_id} & (IN): The attribute access property list.\\
+  {\tt dxpl\_id} & (IN): The data transfer property list.\\
+  {\tt req} & (IN/OUT): A pointer to the asynchronous request of the
+  operation created by the plugin.\\
+\end{tabular}
+
+The {\tt read} callback in the attribute class should read data from
+the attribute object and returns an {\tt herr\_t} indicating success or
+failure.
+
+\textbf{Signature:}
+\begin{lstlisting}
+    herr_t (*read)(void *attr, hid_t mem_type_id, void *buf, 
+        hid_t dxpl_id, void **req);
+\end{lstlisting}
+
+\textbf{Arguments:}\\
+\begin{tabular}{l p{10cm}}
+  {\tt attr} & (IN): Pointer to the attribute object.\\
+  {\tt mem\_type\_id} & (IN): The memory datatype of the attribute.\\
+  {\tt buf} & (OUT): Data buffer to be read into.\\
+  {\tt dxpl\_id} & (IN): The data transfer property list.\\
+  {\tt req} & (IN/OUT): A pointer to the asynchronous request of the
+  operation created by the plugin.\\
+\end{tabular}
+
+The {\tt write} callback in the attribute class should write data to
+the attribute object and returns an {\tt herr\_t} indicating success or
+failure.
+
+\textbf{Signature:}
+\begin{lstlisting}
+    herr_t (*write)(void *attr, hid_t mem_type_id, const void *buf, 
+        hid_t dxpl_id, void **req);
+\end{lstlisting}
+
+\textbf{Arguments:}\\
+\begin{tabular}{l p{10cm}}
+  {\tt attr} & (IN): Pointer to the attribute object.\\
+  {\tt mem\_type\_id} & (IN): The memory datatype of the attribute.\\
+  {\tt buf} & (IN): Data buffer to be written.\\
+  {\tt dxpl\_id} & (IN): The data transfer property list.\\
+  {\tt req} & (IN/OUT): A pointer to the asynchronous request of the
+  operation created by the plugin.\\
+\end{tabular}
+
+The {\tt iterate} callback in the attribute class should iterate over
+the attributes in the container of the location object and call the
+user defined function on each one. It returns an {\tt herr\_t}
+indicating success or failure.
+
+\textbf{Signature:}
+\begin{lstlisting}
+    herr_t (*iterate)(void *obj, H5VL_loc_params_t loc_params,
+        H5_index_t idx_type, H5_iter_order_t order, hsize_t *n, 
+        H5A_operator2_t  op, void *op_data, hid_t dxpl_id, void **req);
+\end{lstlisting}
+
+\textbf{Arguments:}\\
+\begin{tabular}{l p{10cm}}
+  {\tt obj} & (IN): Pointer to an object where the iteration needs
+  to happen or where the look-up of the target object needs to
+  start.\\
+  {\tt loc\_params} & (IN): The location parameters as
+  explained in section~\ref{sec:map}.\\
+  {\tt idx\_type} & (IN): Type of index.\\
+  {\tt order} & (IN): Order in which to iterate over index.\\
+  {\tt n} & (IN/OUT): Initial and return offset withing index.\\
+  {\tt op} & (IN): User-defined function to pass each
+  attribute to. \\
+  {\tt op\_data} & (IN/OUT): User data to pass through to and to be
+  returned by iterator operator function. \\
+  {\tt dxpl\_id} & (IN): The data transfer property list.\\
+  {\tt req} & (IN/OUT): A pointer to the asynchronous request of the
+  operation created by the plugin.\\
+\end{tabular}
+
+
+%    herr_t (*get)(void *attr, H5VL_attr_get_t get_type, hid_t dxpl_id, 
+%        void **req, va_list arguments);
+
+%    herr_t (*remove)(void *obj, H5VL_loc_params_t loc_params, 
+%        const char *attr_name, hid_t dxpl_id, void **req);
+
+%    herr_t (*close)(void *attr, hid_t dxpl_id, void **req);
 
 \subsection{The Named Datatype Function Callbacks}
 
