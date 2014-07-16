@@ -252,6 +252,7 @@ set (H5_TESTS
     enc_dec_plist
     enc_dec_plist_cross_platform
     unregister
+    query
 )
 
 foreach (test ${H5_TESTS})
