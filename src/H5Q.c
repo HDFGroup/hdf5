@@ -88,7 +88,8 @@ typedef enum H5Q_match_type_t { /* The different kinds of native types we can ma
     H5Q_NATIVE_INT_MATCH_LONG,
     H5Q_NATIVE_INT_MATCH_LLONG,
     H5Q_NATIVE_FLOAT_MATCH_FLOAT,
-    H5Q_NATIVE_FLOAT_MATCH_DOUBLE
+    H5Q_NATIVE_FLOAT_MATCH_DOUBLE,
+    H5Q_INVALID_MATCH_TYPE
 } H5Q_match_type_t;
 
 /********************/
@@ -141,8 +142,7 @@ static const H5I_class_t H5I_QUERY_CLS[1] = {{
     H5I_QUERY,             /* Class ID for the type */
     0,                     /* Class behavior flags */
     0,                     /* Number of reserved IDs for this type */
-    (H5I_free_t)H5Q_close, /* Free function for object's of this type */
-    NULL                   /* Free function for auxilary objects of this type */
+    (H5I_free_t)H5Q_close  /* Free function for object's of this type */
 }};
 
 /*-------------------------------------------------------------------------
@@ -1063,7 +1063,7 @@ H5Q_decode(const unsigned char **buf_ptr)
             {
                 size_t type_id_nalloc = 0;
                 H5T_t *type;
-                size_t type_size;
+                size_t type_size = 0;
                 void *value_buf;
 
                 H5Q_decode_memcpy(&type_id_nalloc, sizeof(size_t), buf_ptr);
@@ -1073,6 +1073,8 @@ H5Q_decode(const unsigned char **buf_ptr)
                 *buf_ptr += type_id_nalloc;
 
                 H5Q_decode_memcpy(&type_size, sizeof(size_t), buf_ptr);
+                if (!type_size)
+                    HGOTO_ERROR(H5E_QUERY, H5E_BADVALUE, NULL, "NULL type size");
                 query->query.select.elem.data_elem.type_size = type_size;
                 if (NULL == (value_buf = H5MM_malloc(type_size)))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL, "can't allocate value buffer");
@@ -1082,10 +1084,12 @@ H5Q_decode(const unsigned char **buf_ptr)
             break;
             case H5Q_TYPE_ATTR_NAME:
             {
-                size_t name_len;
+                size_t name_len = 0;
                 char *name;
                 
                 H5Q_decode_memcpy(&name_len, sizeof(size_t), buf_ptr);
+                if (!name_len)
+                    HGOTO_ERROR(H5E_QUERY, H5E_BADVALUE, NULL, "NULL name len");
                 if (NULL == (name = (char *)H5MM_malloc(name_len)))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL,
                             "can't allocate value buffer");
@@ -1095,10 +1099,12 @@ H5Q_decode(const unsigned char **buf_ptr)
             break;
             case H5Q_TYPE_LINK_NAME:
             {
-                size_t name_len;
+                size_t name_len = 0;
                 char *name;
 
                 H5Q_decode_memcpy(&name_len, sizeof(size_t), buf_ptr);
+                if (!name_len)
+                    HGOTO_ERROR(H5E_QUERY, H5E_BADVALUE, NULL, "NULL name len");
                 if (NULL == (name = (char *)H5MM_malloc(name_len)))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL,
                             "can't allocate value buffer");
@@ -1465,7 +1471,7 @@ H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type, const void *valu
     herr_t ret_value = SUCCEED; /* Return value */
     void *value_buf = NULL, *query_value_buf = NULL;
     H5T_t *query_type, *promoted_type;
-    H5Q_match_type_t match_type;
+    H5Q_match_type_t match_type = H5Q_INVALID_MATCH_TYPE;
     size_t type_size, query_type_size, promoted_type_size;
     hid_t type_id = FAIL, query_type_id = FAIL, promoted_type_id = FAIL;
     H5T_path_t *tpath;
@@ -1544,6 +1550,7 @@ H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type, const void *valu
         case H5Q_NATIVE_FLOAT_MATCH_DOUBLE:
             H5Q_CMP_DATA_ELEM(query_result, query_op, double, value_buf, query_value_buf);
             break;
+        case H5Q_INVALID_MATCH_TYPE:
         default:
             HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "unsupported/unrecognized datatype");
             break;
