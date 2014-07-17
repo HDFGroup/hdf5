@@ -1112,6 +1112,9 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
     #define HDrmdir(S)    rmdir(S)
 #endif /* HDrmdir */
 /* scanf() variable arguments */
+#ifndef HDselect
+    #define HDselect(N,RD,WR,ER,T)    select(N,RD,WR,ER,T)
+#endif /* HDsetbuf */
 #ifndef HDsetbuf
     #define HDsetbuf(F,S)    setbuf(F,S)
 #endif /* HDsetbuf */
