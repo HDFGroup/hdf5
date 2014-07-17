@@ -405,9 +405,9 @@ static herr_t
 H5LD_get_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsize_t *cur_dims, const char *fields, void *buf)
 {
     int ndims;		/* Number of dimensions for the dataset */
-    hid_t dtid, tid;	/* Dataset type id */
+    hid_t dtid = -1, tid = -1;	/* Dataset type id */
     size_t tot_tsize;	/* Total data type size */
-    hid_t sid, mid;	/* Dataspace and memory space id */
+    hid_t sid = -1, mid = -1;	/* Dataspace and memory space id */
     hsize_t num_elmts;	/* Number of dataset elements in the selection */
     hsize_t start[H5S_MAX_RANK];/* Starting offset */
     hsize_t count[H5S_MAX_RANK];/* ??offset */
