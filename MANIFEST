@@ -20,6 +20,13 @@
 # in column one with a '#'.
 #------------------------------------------------------------------------------
 
+./docs/user_manual/external.tex
+./docs/user_manual/main.tex
+./docs/user_manual/intro.tex
+./docs/user_manual/internal.tex
+./docs/user_manual/main.pdf
+./docs/user_manual/plugin.tex
+
 ./.autom4te.cfg                 _DO_NOT_DISTRIBUTE_
 ./.h5chkright.ini      _DO_NOT_DISTRIBUTE_
 ./ACKNOWLEDGMENTS
