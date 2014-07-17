@@ -1,9 +1,68 @@
-\section{Creating an External Plugin}
+\section{Creating and Using an External Plugin}
 External plugins are developed outside of the HDF5 library and do not
 use any internal HDF5 private functions. They do not require to be
 shipped with the HDF5 library, but can just link to it from userspace
 just like an HDF5 application.
 
+\subsection{New API Routines for External Plugins}
+Some callbacks in the VOL class require new API routines for the
+implementation to be possible. Two new API routines have been added for
+that matter:
+\begin{lstlisting}
+  hid_t H5VLobject_register(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls);
+\end{lstlisting}
+to register an {\tt hid\_t} with an object {\tt obj} associated with
+the VOL plugin of class {\tt cls}. This is needed in all iterate and
+visit callbacks where the plugins internally need to wrap an {\tt
+  hid\_t} around an object to call the user defined operation {\tt op}
+on.
+
+\begin{lstlisting}
+  herr_t H5VLget_object(hid_t obj_id, void **obj, H5VL_t **vol_plugin);
+\end{lstlisting}
+to retrieve the VOL object and plugin structure from an HDF5
+identifier ({\tt hid\_t}). The plugin structure is defined as:
+\begin{lstlisting}
+struct H5VL_t {
+    const H5VL_class_t *cls;     /* constant class info */
+    const char *container_name;  /* name of the underlying storage 
+                                    container */
+    unsigned long feature_flags; /* VOL Driver feature Flags */
+    int nrefs;                   /* number of references by objects
+                                    using this struct */
+};
+\end{lstlisting}
+
+\subsection{Using an External Plugin}
+Unlike internal plugins, the external plugins cannot create an API
+routine for applications to use to set the VOL plugin in the file access
+property list. After implementing the VOL class as described in
+section~\ref{sec:vol}, the application has to register the plugin with
+HDF5 library. The function to do that is {\tt H5VLregister()}:
+\begin{lstlisting}
+  hid_t H5VLregister(const H5VL_class_t *cls);
+\end{lstlisting}
+where {\tt cls} is a pointer to the external plugin to be used. The
+identifier returned can be used to set this plugin to be used in the
+file access property list with this API routine:
+\begin{lstlisting}
+  herr_t H5Pset_vol(hid_t fapl_id, hid_t plugin_id, const void *new_vol_info);
+\end{lstlisting}
+where {\tt plugin\_id} is the identifier returned from the {\tt
+  H5VLregister()} and {\tt new\_vol\_info} is the plugin information
+needed from the application. 
+
+The user is required to un-register the plugin from the library when
+access to the container(s) is terminated using:
+\begin{lstlisting}
+  herr_t H5VLunregister(hid_t plugin_id);
+\end{lstlisting}
+
+% /* Function prototypes */
+% H5_DLL htri_t H5VLis_registered(hid_t id);
+% H5_DLL ssize_t H5VLget_plugin_name(hid_t id, char *name/*out*/, size_t size);
+
+% H5_DLL void *H5Pget_vol_info(hid_t plist_id);
 %%% Local Variables: 
 %%% mode: latex
 %%% TeX-master: t

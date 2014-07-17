@@ -1,8 +1,74 @@
-\section{Creating an Internal Plugin}
+\section{Creating and Using an Internal Plugin}
 Internal plugins are developed internally with the HDF5 library and
 are required to ship with the entire library to be used. Typically
 those plugins need to use internal features and functions of the HDF5
 library that are not available publicly from the user application.
+
+After implementing the VOL class as described in
+section~\ref{sec:vol}, the next step would be to allow users to select
+this plugin to be used. This is done by creating a new API routine to
+set the plugin on the file access property list. For example, if we
+create an internal plugin called ``dummy'' that needs an MPI
+communicator and info object as information from the user, that
+routine signature should look like:
+
+\begin{lstlisting}
+herr_t H5Pset_fapl_dummy(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
+\end{lstlisting}
+
+The implementation for the above routine should use the internal
+function:
+\begin{lstlisting}
+herr_t H5P_set_vol(H5P_genplist_t *plist, H5VL_class_t *vol_cls, const
+void *vol_info);
+\end{lstlisting}
+that will set the file access using that {\tt fapl\_id} to go through
+the ``dummy'' plugin. It will also call the copy callback of the
+``dummy'' plugin on the info object ({\tt comm and info}).
+
+A sample implementation for the {\tt H5Pset\_fapl\_dummy()} could like
+this:
+
+\begin{lstlisting}
+/* DUMMY-specific file access properties */
+typedef struct H5VL_dummy_fapl_t {
+    MPI_Comm            comm;     /* communicator       */
+    MPI_Info            info;     /* MPI information   */
+} H5VL_dummy_fapl_t;
+
+herr_t
+H5Pset_fapl_dummy(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
+{
+    H5VL_dummy_fapl_t fa;
+    H5P_genplist_t  *plist;      /* Property list pointer */
+    herr_t          ret_value;
+
+    FUNC_ENTER_API(FAIL)
+
+    if(fapl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+
+    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+
+    if(MPI_COMM_NULL == comm)
+	HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a valid communicator")
+
+    /* Initialize driver specific properties */
+    fa.comm = comm;
+    fa.info = info;
+
+    ret_value = H5P_set_vol(plist, &H5VL_dummy_g, &fa);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_fapl_dummy() */
+\end{lstlisting}
+
+At this point, the internal plugin is ready to be used. For more
+information on how to implement an internal plugin, the native plugin
+for the HDF5 library is a comprehensive plugin that implements all
+features of the library and can be used as guide.
 
 %%% Local Variables: 
 %%% mode: latex
