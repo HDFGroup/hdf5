@@ -26,6 +26,9 @@
 ./docs/user_manual/internal.tex
 ./docs/user_manual/main.pdf
 ./docs/user_manual/plugin.tex
+./docs/user_manual/stacking.tex
+./docs/user_manual/mirrored.jpg
+./docs/user_manual/stacked.jpg
 
 ./.autom4te.cfg                 _DO_NOT_DISTRIBUTE_
 ./.h5chkright.ini      _DO_NOT_DISTRIBUTE_
