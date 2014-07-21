@@ -1279,7 +1279,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 break;
 
                             case H5I_VOL:
-                                fprintf(out, "%ld (object driver)", (long)obj);
+                                fprintf(out, "%ld (VOL plugin)", (long)obj);
                                 break;
 
                             case H5I_GENPROP_CLS:
