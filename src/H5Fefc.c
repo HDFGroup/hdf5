@@ -36,7 +36,6 @@
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
 
-
 /* Special values for the "tag" field below */
 #define H5F_EFC_TAG_DEFAULT     -1
 #define H5F_EFC_TAG_LOCK        -2
@@ -164,7 +163,7 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
      * on the state of the efc. */
     if(!efc) {
         if(NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id,
-                dxpl_id)))
+                                         dxpl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
 
         /* Increment the number of open objects to prevent the file from being
@@ -237,7 +236,7 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
             else {
                 /* Cannot cache file, just open file and return */
                 if(NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id,
-                        dxpl_id)))
+                                                 dxpl_id)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
 
                 /* Increment the number of open objects to prevent the file from
@@ -259,7 +258,7 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
 
         /* Open the file */
         if(NULL == (ent->file = H5F_open(name, flags, fcpl_id, fapl_id,
-                dxpl_id)))
+                                         dxpl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
         open_file = TRUE;
 

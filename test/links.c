@@ -6307,7 +6307,6 @@ external_link_strong(hid_t fapl, hbool_t new_format)
     if(H5Gclose(gid2) < 0) TEST_ERROR
     if(H5Fclose(fid2) < 0) TEST_ERROR
 
-
     PASSED();
     return 0;
 
