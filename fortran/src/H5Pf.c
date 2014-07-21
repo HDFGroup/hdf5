@@ -483,19 +483,21 @@ nh5pset_fill_value_double_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
 
 /****if* H5Pf/h5pget_fill_valuec_c
  * NAME
- *        h5pget_fill_valuec_c
+ *  h5pget_fill_valuec_c
  * PURPOSE
- *     Call h5pget_fill_value_c to a character fill value
+ *  Call h5pget_fill_value_c to a character fill value
  * INPUTS
- *      prp_id - property list identifier
- *              type_id - datatype identifier (fill value is of type type_id)
- *              fillvalue  - character value
+ *  prp_id     - property list identifier
+ *  type_id    - datatype identifier (fill value is of type type_id)
+ *  fillvalue - character value
  * RETURNS
- *     0 on success, -1 on failure
- *              Saturday, August 14, 1999
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
+ *  Saturday, August 14, 1999
  * HISTORY
+ *  Fixed wrong call to C wrapper, was nh5pset_fill_value_c, changed
+ *  to nh5pget_fill_value_c. MSB - 7/21/2014
  *
  * SOURCE
 */
@@ -506,27 +508,27 @@ nh5pget_fill_valuec_c (hid_t_f *prp_id, hid_t_f *type_id, _fcd fillvalue)
      int ret_value = -1;
 
      /*
-      * Call h5pget_fill_value_c  function.
+      * Call h5pget_fill_value_c function.
       */
-     ret_value = nh5pset_fill_value_c(prp_id, type_id, _fcdtocp(fillvalue));
+     ret_value = nh5pget_fill_value_c(prp_id, type_id, _fcdtocp(fillvalue));
 
      return ret_value;
 }
 
 /****if* H5Pf/h5pget_fill_value_c
  * NAME
- *        h5pget_fill_value_c
+ *  h5pget_fill_value_c
  * PURPOSE
- *     Call H5Pget_fill_value to set a fillvalue for a dataset
+ *  Call H5Pget_fill_value to set a fillvalue for a dataset
  * INPUTS
- *      prp_id - property list identifier
- *              type_id - datatype identifier (fill value is of type type_id)
- *              fillvalue - fillvalue
+ *  prp_id - property list identifier
+ *  type_id - datatype identifier (fill value is of type type_id)
+ *  fillvalue - fillvalue
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Saturday, August 14, 1999
+ *  Saturday, August 14, 1999
  * SOURCE
 */
 int_f
@@ -542,7 +544,7 @@ nh5pget_fill_value_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
       * Call H5Pget_fill_value function.
       */
      c_prp_id = (hid_t)*prp_id;
-     c_type_id = (int)*type_id;
+     c_type_id = (hid_t)*type_id;
      ret = H5Pget_fill_value(c_prp_id, c_type_id, fillvalue);
 
      if (ret < 0) return ret_value;
