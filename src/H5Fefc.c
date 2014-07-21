@@ -35,8 +35,6 @@
 #include "H5Fpkg.h"             /* File access                          */
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
-#include "H5VLprivate.h"	/* VOL          		  	*/
-#include "H5Iprivate.h"		/* IDs			  		*/
 
 /* Special values for the "tag" field below */
 #define H5F_EFC_TAG_DEFAULT     -1
@@ -262,7 +260,6 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
         if(NULL == (ent->file = H5F_open(name, flags, fcpl_id, fapl_id,
                                          dxpl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
-
         open_file = TRUE;
 
         /* Increment the number of open objects to prevent the file from being
@@ -350,6 +347,7 @@ H5F_efc_close(H5F_t *parent, H5F_t *file)
 
     /* Get external file cache */
     efc = parent->shared->efc;
+
     /* Check if the EFC exists.  If it does not, just call H5F_try_close().  We
      * support this so clients do not have to make 2 different calls depending
      * on the state of the efc. */

@@ -1576,13 +1576,13 @@ test_file_freespace(void)
 
 /****************************************************************
 **
-**  test_file_ishdf5(): low-level file test routine.
-**      This test checks whether the H5Fis_hdf5() routine is working
+**  test_file_isaccessible(): low-level file test routine.
+**      This test checks whether the H5Fis_accessible() routine is working
 **      correctly in variuous situations.
 **
 *****************************************************************/
 static void
-test_file_ishdf5(void)
+test_file_isaccessible(void)
 {
     hid_t    file;      /* File opened with read-write permission */
     hid_t    fcpl;      /* File creation property list */
@@ -1606,7 +1606,7 @@ test_file_ishdf5(void)
 
     /* Verify that the file is an HDF5 file */
     status = H5Fis_accessible(FILE1, H5P_DEFAULT);
-    VERIFY(status, TRUE, "H5Fis_hdf5");
+    VERIFY(status, TRUE, "H5Fis_accessible");
 
 
     /* Create a file creation property list with a non-default user block size */
@@ -1630,7 +1630,7 @@ test_file_ishdf5(void)
 
     /* Verify that the file is an HDF5 file */
     status = H5Fis_accessible(FILE1, H5P_DEFAULT);
-    VERIFY(status, TRUE, "H5Fis_hdf5");
+    VERIFY(status, TRUE, "H5Fis_accessible");
 
 
     /* Create non-HDF5 file and check it */
@@ -1651,9 +1651,9 @@ test_file_ishdf5(void)
 
     /* Verify that the file is not an HDF5 file */
     status = H5Fis_accessible(FILE1, H5P_DEFAULT);
-    VERIFY(status, FALSE, "H5Fis_hdf5");
+    VERIFY(status, FALSE, "H5Fis_accessible");
 
-} /* end test_file_ishdf5() */
+} /* end test_file_isaccessible() */
 
 /****************************************************************
 **
@@ -3657,7 +3657,7 @@ test_file(void)
     test_file_perm();           /* Test file access permissions */
     test_file_perm2();          /* Test file access permission again */
     test_file_freespace();      /* Test file free space information */
-    test_file_ishdf5();         /* Test detecting HDF5 files correctly */
+    test_file_isaccessible();         /* Test detecting HDF5 files correctly */
     test_file_open_dot();       /* Test opening objects with "." for a name */
 #ifndef H5_CANNOT_OPEN_TWICE
     test_file_open_overlap();   /* Test opening files in an overlapping manner */
