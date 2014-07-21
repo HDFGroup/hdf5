@@ -10261,7 +10261,6 @@ test_attr_bug7(hid_t fcpl, hid_t fapl)
      */
     sid = H5Screate_simple(1, &dims_s, NULL);
     CHECK(sid, FAIL, "H5Screate_simple");
-
     aid = H5Acreate2(tid, ATTR1_NAME, H5T_STD_I8LE, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(aid, FAIL, "H5Acreate2");
 

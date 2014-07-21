@@ -225,7 +225,6 @@ herr_t walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void UNUSED
         if (n < EXPECTED_ERROR_DEPTH && maj_num == expected[n].maj_num &&
                 min_num == expected[n].min_num)
             return SUCCEED;
-        printf("n=%d exited\n", n);
     }
 
     error_flag = -1;
