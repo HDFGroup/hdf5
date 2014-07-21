@@ -31,9 +31,25 @@
 #include "H5VMprivate.h"         /* Vector functions			*/
 
 /* Local Macros */
+
+/* Flags for which hyperslab fragments to compute */
 #define H5S_HYPER_COMPUTE_B_NOT_A 0x01
 #define H5S_HYPER_COMPUTE_A_AND_B 0x02
 #define H5S_HYPER_COMPUTE_A_NOT_B 0x04
+
+/* Macro to advance a span, possibly recycling it first */
+#define H5S_HYPER_ADVANCE_SPAN(recover, curr_span, next_span)   \
+    do {                                                        \
+        /* Check if the span should be recovered */             \
+        if(recover) {                                           \
+            H5S_hyper_free_span(curr_span);                     \
+            recover = FALSE;                                    \
+        } /* end if */                                          \
+                                                                \
+        /* Set the current span to next span */                 \
+        curr_span = next_span;                                  \
+    } while(0)
+
 
 /* Local datatypes */
 
@@ -52,8 +68,6 @@ static herr_t H5S_hyper_span_blocklist(const H5S_hyper_span_info_t *spans,
     hsize_t **buf);
 static herr_t H5S_get_select_hyper_blocklist(H5S_t *space, hbool_t internal,
     hsize_t startblock, hsize_t numblocks, hsize_t *buf);
-static herr_t H5S_hyper_recover_span(hbool_t *recover, H5S_hyper_span_t **curr_span,
-    H5S_hyper_span_t *next_span);
 static H5S_hyper_span_t *H5S_hyper_coord_to_span(unsigned rank, const hsize_t *coords);
 static herr_t H5S_hyper_append_span(H5S_hyper_span_t **prev_span,
     H5S_hyper_span_info_t **span_tree, hsize_t low, hsize_t high,
@@ -3206,47 +3220,6 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_hyper_recover_span
- PURPOSE
-    Recover a generated span, if appropriate
- USAGE
-    herr_t H5S_hyper_recover_span(recover, curr_span, next_span)
-        hbool_t *recover;               IN/OUT: Pointer recover flag
-        H5S_hyper_span_t **curr_span;   IN/OUT: Pointer to current span in list
-        H5S_hyper_span_t *next_span;    IN: Pointer to next span
- RETURNS
-    Non-negative on success, negative on failure
- DESCRIPTION
-    Check if the current span needs to be recovered and free it if so.
-    Set the current span to the next span in any case.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static herr_t
-H5S_hyper_recover_span(hbool_t *recover, H5S_hyper_span_t **curr_span, H5S_hyper_span_t *next_span)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(recover);
-    HDassert(curr_span);
-
-    /* Check if the span should be recovered */
-    if(*recover) {
-        H5S_hyper_free_span(*curr_span);
-        *recover = FALSE;
-    } /* end if */
-
-    /* Set the current span to next span */
-    *curr_span = next_span;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5S_hyper_recover_span() */
-
-
-/*--------------------------------------------------------------------------
- NAME
     H5S_hyper_coord_to_span
  PURPOSE
     Create a span tree for a single element
@@ -4860,7 +4833,7 @@ H5S_hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_sp
                     } /* end if */
 
                     /* Advance span 'a', leave span 'b' */
-                    H5S_hyper_recover_span(&recover_a, &span_a, span_a->next);
+                    H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, span_a->next);
                 } /* end if */
                 /* Check if span 'a' overlaps only the lower bound */
                 /*  of span 'b' , up to the upper bound of span 'b' */
@@ -4952,17 +4925,17 @@ H5S_hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_sp
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
 
                         /* Advance span 'a' */
-                        H5S_hyper_recover_span(&recover_a, &span_a, span_a->next);
+                        H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, span_a->next);
 
                         /* Make upper part of span 'b' into new span 'b' */
-                        H5S_hyper_recover_span(&recover_b, &span_b, tmp_span);
+                        H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, tmp_span);
                         recover_b = TRUE;
                     } /* end if */
                     /* No upper part of span 'b' to split */
                     else {
                         /* Advance both 'a' and 'b' */
-                        H5S_hyper_recover_span(&recover_a, &span_a, span_a->next);
-                        H5S_hyper_recover_span(&recover_b, &span_b, span_b->next);
+                        H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, span_a->next);
+                        H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, span_b->next);
                     } /* end else */
                 } /* end if */
                 /* Check if span 'a' overlaps the lower & upper bound */
@@ -5049,11 +5022,11 @@ H5S_hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_sp
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
 
                     /* Make upper part of span 'a' the new span 'a' */
-                    H5S_hyper_recover_span(&recover_a, &span_a, tmp_span);
+                    H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, tmp_span);
                     recover_a = TRUE;
 
                     /* Advance span 'b' */
-                    H5S_hyper_recover_span(&recover_b, &span_b, span_b->next);
+                    H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, span_b->next);
                 } /* end if */
                 /* Check if span 'a' is entirely within span 'b' */
                 /*                AAAAA                  */
@@ -5146,16 +5119,16 @@ H5S_hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_sp
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
 
                         /* And advance span 'a' */
-                        H5S_hyper_recover_span(&recover_a, &span_a, span_a->next);
+                        H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, span_a->next);
 
                         /* Make upper part of span 'b' the new span 'b' */
-                        H5S_hyper_recover_span(&recover_b, &span_b, tmp_span);
+                        H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, tmp_span);
                         recover_b = TRUE;
                     } /* end if */
                     else {
                         /* Advance both span 'a' & span 'b' */
-                        H5S_hyper_recover_span(&recover_a, &span_a, span_a->next);
-                        H5S_hyper_recover_span(&recover_b, &span_b, span_b->next);
+                        H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, span_a->next);
+                        H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, span_b->next);
                     } /* end else */
                 } /* end if */
                 /* Check if span 'a' overlaps only the upper bound */
@@ -5248,11 +5221,11 @@ H5S_hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_sp
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
 
                     /* Make upper part of span 'a' into new span 'a' */
-                    H5S_hyper_recover_span(&recover_a, &span_a, tmp_span);
+                    H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, tmp_span);
                     recover_a = TRUE;
 
                     /* Advance span 'b' */
-                    H5S_hyper_recover_span(&recover_b, &span_b, span_b->next);
+                    H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, span_b->next);
                 } /* end if */
                 /* span 'a' must be entirely above span 'b' */
                 /*                         AAAAA         */
@@ -5271,45 +5244,53 @@ H5S_hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_sp
                     } /* end if */
 
                     /* Advance span 'b', leave span 'a' */
-                    H5S_hyper_recover_span(&recover_b, &span_b, span_b->next);
+                    H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, span_b->next);
                 } /* end else */
             } /* end while */
 
             /* Clean up 'a' spans which haven't been covered yet */
             if(span_a != NULL && span_b == NULL) {
-                while(span_a != NULL) {
-                    /* Copy span 'a' and add to a_not_b list */
-
-                    /* Merge/add span 'a' with/to a_not_b list */
-                    if(need_a_not_b) {
+                /* Check if need to merge/add 'a' spans with/to a_not_b list */
+                if(need_a_not_b) {
+                    while(span_a != NULL) {
+                        /* Copy span 'a' and add to a_not_b list */
                         if(H5S_hyper_append_span(&last_a_not_b, a_not_b, span_a->low, span_a->high, span_a->down, NULL) < 0)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
 
-                        /* Indicate that the a_not_b bounds should be updated */
-                        update_a_not_b_bounds = TRUE;
-                    } /* end if */
+                        /* Advance to the next 'a' span */
+                        H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, span_a->next);
+                    } /* end while */
 
-                    /* Advance to the next 'a' span */
-                    H5S_hyper_recover_span(&recover_a, &span_a, span_a->next);
-                } /* end while */
+                    /* Indicate that the a_not_b bounds should be updated */
+                    update_a_not_b_bounds = TRUE;
+                } /* end if */
+                else {
+                    /* Free the span, if it's generated */
+                    if(recover_a)
+                        H5S_hyper_free_span(span_a);
+                } /* end else */
             } /* end if */
             /* Clean up 'b' spans which haven't been covered yet */
             else if(span_a == NULL && span_b != NULL) {
-                while(span_b != NULL) {
-                    /* Copy span 'b' and add to b_not_a list */
-
-                    /* Merge/add span 'b' with/to b_not_a list */
-                    if(need_b_not_a) {
+                /* Check if need to merge/add 'b' spans with/to b_not_a list */
+                if(need_b_not_a) {
+                    while(span_b != NULL) {
+                        /* Copy span 'b' and add to b_not_a list */
                         if(H5S_hyper_append_span(&last_b_not_a, b_not_a, span_b->low, span_b->high, span_b->down, NULL) < 0)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
 
-                        /* Indicate that the b_not_a bounds should be updated */
-                        update_b_not_a_bounds = TRUE;
-                    } /* end if */
+                        /* Advance to the next 'b' span */
+                        H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, span_b->next);
+                    } /* end while */
 
-                    /* Advance to the next 'b' span */
-                    H5S_hyper_recover_span(&recover_b, &span_b, span_b->next);
-                } /* end while */
+                    /* Indicate that the b_not_a bounds should be updated */
+                    update_b_not_a_bounds = TRUE;
+                } /* end if */
+                else {
+                    /* Free the span, if it's generated */
+                    if(recover_b)
+                        H5S_hyper_free_span(span_b);
+                } /* end else */
             } /* end if */
 
             /* Check for needing to update each set of bounds */
@@ -5426,7 +5407,7 @@ H5S_hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span")
 
                 /* Advance span 'a' */
-                H5S_hyper_recover_span(&recover_a, &span_a, span_a->next);
+                H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, span_a->next);
             } /* end if */
             /* Check if span 'a' overlaps only the lower bound */
             /*  of span 'b', up to the upper bound of span 'b' */
@@ -5465,16 +5446,16 @@ H5S_hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span")
 
                     /* Advance span 'a' */
-                    H5S_hyper_recover_span(&recover_a, &span_a, span_a->next);
+                    H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, span_a->next);
 
                     /* Set new span 'b' to tmp_span */
-                    H5S_hyper_recover_span(&recover_b, &span_b, tmp_span);
+                    H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, tmp_span);
                     recover_b = TRUE;
                 } /* end if */
                 else {
                     /* Advance both span 'a' & 'b' */
-                    H5S_hyper_recover_span(&recover_a, &span_a, span_a->next);
-                    H5S_hyper_recover_span(&recover_b, &span_b, span_b->next);
+                    H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, span_a->next);
+                    H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, span_b->next);
                 } /* end else */
             } /* end if */
             /* Check if span 'a' overlaps the lower & upper bound */
@@ -5512,11 +5493,11 @@ H5S_hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span")
 
                 /* Set new span 'a' to tmp_span */
-                H5S_hyper_recover_span(&recover_a, &span_a, tmp_span);
+                H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, tmp_span);
                 recover_a = TRUE;
 
                 /* Advance span 'b' */
-                H5S_hyper_recover_span(&recover_b, &span_b, span_b->next);
+                H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, span_b->next);
             } /* end if */
             /* Check if span 'a' is entirely within span 'b' */
             /*                AAAAA                  */
@@ -5560,16 +5541,16 @@ H5S_hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span")
 
                     /* Advance span 'a' */
-                    H5S_hyper_recover_span(&recover_a, &span_a, span_a->next);
+                    H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, span_a->next);
 
                     /* Set new span 'b' to tmp_span */
-                    H5S_hyper_recover_span(&recover_b, &span_b, tmp_span);
+                    H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, tmp_span);
                     recover_b = TRUE;
                 } /* end if */
                 else {
                     /* Advance both spans */
-                    H5S_hyper_recover_span(&recover_a, &span_a, span_a->next);
-                    H5S_hyper_recover_span(&recover_b, &span_b, span_b->next);
+                    H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, span_a->next);
+                    H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, span_b->next);
                 } /* end else */
             } /* end if */
             /* Check if span 'a' overlaps only the upper bound */
@@ -5613,11 +5594,11 @@ H5S_hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span")
 
                 /* Set new span 'a' to tmp_span */
-                H5S_hyper_recover_span(&recover_a, &span_a, tmp_span);
+                H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, tmp_span);
                 recover_a = TRUE;
 
                 /* Advance span 'b' */
-                H5S_hyper_recover_span(&recover_b, &span_b, span_b->next);
+                H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, span_b->next);
             } /* end if */
             /* Span 'a' must be entirely above span 'b' */
             /*                         AAAAA         */
@@ -5629,7 +5610,7 @@ H5S_hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span")
 
                 /* Advance span 'b' */
-                H5S_hyper_recover_span(&recover_b, &span_b, span_b->next);
+                H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, span_b->next);
             } /* end else */
         } /* end while */
 
@@ -5641,7 +5622,7 @@ H5S_hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span")
 
                 /* Advance to next 'a' span, until all processed */
-                H5S_hyper_recover_span(&recover_a, &span_a, span_a->next);
+                H5S_HYPER_ADVANCE_SPAN(recover_a, span_a, span_a->next);
             } /* end while */
         } /* end if */
 
@@ -5653,7 +5634,7 @@ H5S_hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span")
 
                 /* Advance to next 'b' span, until all processed */
-                H5S_hyper_recover_span(&recover_b, &span_b, span_b->next);
+                H5S_HYPER_ADVANCE_SPAN(recover_b, span_b, span_b->next);
             } /* end while */
         } /* end if */
     } /* end else */
