@@ -128,6 +128,9 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id,
              plist_id, buf);
 
+    /* check arguments */
+    if(NULL == (dset = (void *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
     if(mem_space_id < 0 || file_space_id < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
@@ -141,9 +144,6 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the dataset object */
-    if(NULL == (dset = (void *)H5I_object(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
     /* Read the data through the VOL */
     if((ret_value = H5VL_dataset_read(dset, vol_plugin, mem_type_id, mem_space_id, 
@@ -202,6 +202,8 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     /* check arguments */
     if(!dset_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if(NULL == (dset = (void *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if(H5P_DEFAULT == dxpl_id)
@@ -213,9 +215,6 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the dataset object */
-    if(NULL == (dset = (void *)H5I_object(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
     /* Write the data through the VOL */
     if((ret_value = H5VL_dataset_write(dset, vol_plugin, mem_type_id, mem_space_id, 

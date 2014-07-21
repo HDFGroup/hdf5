@@ -294,9 +294,8 @@ H5_term_library(void)
             if(pending == 0)
                 pending += DOWN(SL);
             /* Don't shut down the free list code until _everything_ else is down */
-            if(pending == 0) {
+            if(pending == 0)
                 pending += DOWN(FL);
-            }
         }
     } while(pending && ntries++ < 100);
 

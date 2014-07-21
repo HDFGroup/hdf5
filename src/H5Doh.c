@@ -30,8 +30,7 @@
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
-#include "H5VLnative.h" 	/* Native Plugin                        */
-#include "H5VLprivate.h"	/* VOL          		  	*/
+
 
 /****************/
 /* Local Macros */

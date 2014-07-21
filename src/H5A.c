@@ -36,8 +36,8 @@
 #include "H5Opkg.h"		/* Object headers			*/
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
-#include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLnative.h" 	/* VOL native plugin			*/
+#include "H5VLprivate.h"	/* VOL plugins				*/
 
 /****************/
 /* Local Macros */
@@ -635,15 +635,14 @@ H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
     H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
     /* check arguments */
+    if(NULL == (attr = (void *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the attribute object */
-    if(NULL == (attr = (void *)H5I_object(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
 
     /* write the data through the VOL */
     if((ret_value = H5VL_attr_write(attr, vol_plugin, dtype_id, buf, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
@@ -681,15 +680,14 @@ H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
     H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
     /* check arguments */
+    if(NULL == (attr = (void *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the attribute object */
-    if(NULL == (attr = (void *)H5I_object(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
 
     /* Read the data through the VOL */
     if((ret_value = H5VL_attr_read(attr, vol_plugin, dtype_id, buf, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
@@ -726,12 +724,13 @@ H5Aget_space(hid_t attr_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", attr_id);
 
+    /* check arguments */
+    if(NULL == (attr = (void *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the attribute object */
-    if(NULL == (attr = (void *)H5I_object(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
 
     /* get the dataspace through the VOL */
     if(H5VL_attr_get(attr, vol_plugin, H5VL_ATTR_GET_SPACE, H5AC_dxpl_id, H5_EVENT_STACK_NULL, &ret_value) < 0)
@@ -768,12 +767,13 @@ H5Aget_type(hid_t attr_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", attr_id);
 
+    /* check arguments */
+    if(NULL == (attr = (void *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the attribute object */
-    if(NULL == (attr = (void *)H5I_object(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
 
     /* get the datatype through the VOL */
     if(H5VL_attr_get(attr, vol_plugin, H5VL_ATTR_GET_TYPE, H5AC_dxpl_id, H5_EVENT_STACK_NULL, &ret_value) < 0)
@@ -815,12 +815,13 @@ H5Aget_create_plist(hid_t attr_id)
 
     HDassert(H5P_LST_ATTRIBUTE_CREATE_ID_g != -1);
 
+    /* check arguments */
+    if(NULL == (attr = (void *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the attribute object */
-    if(NULL == (attr = (void *)H5I_object(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
 
     /* get the acpl through the VOL */
     if(H5VL_attr_get(attr, vol_plugin, H5VL_ATTR_GET_ACPL, H5AC_dxpl_id, 
@@ -865,6 +866,8 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     H5TRACE3("Zs", "iz*s", attr_id, buf_size, buf);
 
     /* check arguments */
+    if(NULL == (attr = (void *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
     if(!buf && buf_size)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer")
 
@@ -874,9 +877,6 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the attribute object */
-    if(NULL == (attr = (void *)H5I_object(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
 
     /* get the name through the VOL */
     if(H5VL_attr_get(attr, vol_plugin, H5VL_ATTR_GET_NAME, H5AC_dxpl_id, H5_EVENT_STACK_NULL, loc_params, buf_size, buf, &ret_value) < 0)
@@ -995,12 +995,13 @@ H5Aget_storage_size(hid_t attr_id)
     FUNC_ENTER_API(0)
     H5TRACE1("h", "i", attr_id);
 
+    /* check arguments */
+    if(NULL == (attr = (void *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "ID does not contain VOL information")
-    /* get the attribute object */
-    if(NULL == (attr = (void *)H5I_object(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid attribute identifier")
 
     /* get the storage size through the VOL */
     if(H5VL_attr_get(attr, vol_plugin, H5VL_ATTR_GET_STORAGE_SIZE, H5AC_dxpl_id, H5_EVENT_STACK_NULL, &ret_value) < 0)
@@ -1035,12 +1036,13 @@ H5Aget_info(hid_t attr_id, H5A_info_t *ainfo)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", attr_id, ainfo);
 
+    /* check arguments */
+    if(NULL == (attr = (void *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the attribute object */
-    if(NULL == (attr = (void *)H5I_object(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(attr_id);

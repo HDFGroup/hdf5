@@ -523,12 +523,13 @@ H5Gget_create_plist(hid_t grp_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", grp_id);
 
+    /* Check args */
+    if(NULL == (grp = (void *)H5I_object_verify(grp_id, H5I_GROUP)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(grp_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the dataset object */
-    if(NULL == (grp = (void *)H5I_object(grp_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier")
 
     if(H5VL_group_get(grp, vol_plugin, H5VL_GROUP_GET_GCPL, H5AC_dxpl_id, H5_EVENT_STACK_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group creation properties")
