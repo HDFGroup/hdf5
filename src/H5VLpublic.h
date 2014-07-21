@@ -293,8 +293,6 @@ typedef struct H5VL_object_class_t {
                      hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
     herr_t (*visit) (void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type,
                      H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
-    //herr_t (*lookup)(hid_t loc_id, H5VL_loc_type_t lookup_type, void **location, hid_t dxpl_id, void **req, va_list arguments);
-    //herr_t (*free_loc)(void *location, hid_t dxpl_id, void **req);
     herr_t (*get)   (void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*misc)  (void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*optional)(void *obj, H5VL_loc_params_t loc_params, H5VL_object_optional_t op_type, hid_t dxpl_id, void **req, va_list arguments);
