@@ -1496,25 +1496,13 @@ H5VL_native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
     if(NULL == dset->oloc.file)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-    if(mem_space_id < 0 || file_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+    if(H5S_ALL != mem_space_id)
+        if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
-    if(H5S_ALL != mem_space_id) {
-	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(mem_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
-    } /* end if */
-    if(H5S_ALL != file_space_id) {
-	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(file_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
-    } /* end if */
+    if(H5S_ALL != file_space_id)
+        if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* read raw data */
     if(H5D__read(dset, mem_type_id, mem_space, file_space, plist_id, buf/*out*/) < 0)
@@ -1542,10 +1530,12 @@ static herr_t
 H5VL_native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
                           hid_t file_space_id, hid_t dxpl_id, const void *buf, void UNUSED **req)
 {
-    H5D_t         *dset = (H5D_t *)obj;
-    const H5S_t   *mem_space = NULL;
-    const H5S_t   *file_space = NULL;
-    herr_t         ret_value = SUCCEED;                 /* Return value */
+    H5D_t           *dset = (H5D_t *)obj;
+    const H5S_t     *mem_space = NULL;
+    const H5S_t     *file_space = NULL;
+    H5P_genplist_t  *plist;                      /* Property list pointer */
+    hbool_t          direct_write = FALSE;
+    herr_t           ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1553,27 +1543,25 @@ H5VL_native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
     if(NULL == dset->oloc.file)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-    if(mem_space_id < 0 || file_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+    /* Get the dataset transfer property list */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
-    if(H5S_ALL != mem_space_id) {
-        if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+    /* Retrieve the 'direct write' flag */
+    if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, &direct_write) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting flag for direct chunk write")
 
-        /* Check for valid selection */
-	if(H5S_SELECT_VALID(mem_space) != TRUE)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection+offset not within extent")
-    } /* end if */
-    if(H5S_ALL != file_space_id) {
-        if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+    if(!direct_write) {
+        if(H5S_ALL != mem_space_id)
+            if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(file_space) != TRUE)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent")
+        if(H5S_ALL != file_space_id)
+            if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
     } /* end if */
 
-    if(H5D__pre_write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0) 
+    if(H5D__pre_write(dset, direct_write, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0) 
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
 
 done:

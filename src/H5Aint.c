@@ -132,14 +132,10 @@ H5FL_SEQ_DEFINE(H5A_t_ptr);
  *      H5S_t *space;       IN: Dataspace of attribute
  *      hid_t acpl_id       IN: Attribute creation property list
  *
- * Return: attribute structure on success, NULL on Failuer
+ * Return: attribute structure on success, NULL on Failure.
  *
  * Programmer:	Quincey Koziol
  *		April 2, 1998
- *
- * Modified:    Mohamad Chaarawi
- *              June 2012
- *              Retuen H5A_t* instead of hid_t
  *
  *-------------------------------------------------------------------------
  */
@@ -147,11 +143,11 @@ H5A_t *
 H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     const H5S_t *space, hid_t acpl_id, hid_t dxpl_id)
 {
+    H5A_t	*attr = NULL;   /* Attribute created */
     hssize_t	snelmts;	/* elements in attribute */
     size_t	nelmts;		/* elements in attribute */
     htri_t      tri_ret;        /* htri_t return value */
-    H5A_t       *attr = NULL;
-    H5A_t	*ret_value = NULL;   /* Attribute created */
+    H5A_t	*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, loc->oloc->addr, NULL)
 
@@ -924,49 +920,6 @@ H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_get_info() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5A_delete_by_idx
- PURPOSE
-    private version of H5Adelete_by_idx
- RETURNS
-    Non-negative on success/Negative on failure
---------------------------------------------------------------------------*/
-herr_t
-H5A_delete_by_idx(H5G_loc_t loc, const char *obj_name, H5_index_t idx_type,
-                  H5_iter_order_t order, hsize_t n, hid_t lapl_id)
-{
-    H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;            	/* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;            	/* Opened object object location */
-    hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
-    herr_t	ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Set up opened group location to fill in */
-    obj_loc.oloc = &obj_oloc;
-    obj_loc.path = &obj_path;
-    H5G_loc_reset(&obj_loc);
-
-    /* Find the object's location */
-    if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
-    loc_found = TRUE;
-
-    /* Delete the attribute from the location */
-    if(H5O_attr_remove_by_idx(obj_loc.oloc, idx_type, order, n, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
-
-done:
-    /* Release resources */
-    if(loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5A_delete_by_idx() */
 
 
 /*-------------------------------------------------------------------------

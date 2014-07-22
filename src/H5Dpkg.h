@@ -550,6 +550,14 @@ H5_DLL herr_t H5D__flush_sieve_buf(H5D_t *dataset, hid_t dxpl_id);
 H5_DLL herr_t H5D__mark(const H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D__flush_real(H5D_t *dataset, hid_t dxpl_id);
 
+/* Internal I/O routines */
+H5_DLL herr_t H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id, 
+    const H5S_t *mem_space, const H5S_t *file_space, hid_t dxpl_id, const void *buf);
+H5_DLL herr_t H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, 
+    const H5S_t *file_space, hid_t dset_xfer_plist, void *buf/*out*/);
+H5_DLL herr_t H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, 
+    const H5S_t *file_space, hid_t dset_xfer_plist, const void *buf);
+
 /* Functions that perform direct serial I/O operations */
 H5_DLL herr_t H5D__select_read(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info,

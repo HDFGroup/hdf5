@@ -2084,7 +2084,7 @@ H5D__vlen_get_buf_size(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim, c
                          type_id, vlen_bufsize->mspace_id, 
                          vlen_bufsize->fspace_id, vlen_bufsize->xfer_pid, 
                          vlen_bufsize->fl_tbuf, H5_EVENT_STACK_NULL) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

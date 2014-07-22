@@ -29,6 +29,7 @@
 /* Private headers needed by this file */
 #include "H5VMprivate.h"		/* Vectors and arrays */
 
+
 /**************************/
 /* Library Private Macros */
 /**************************/
@@ -294,7 +295,7 @@ typedef struct {
 #define H5F_NOPEN_OBJS(F)       ((F)->nopen_objs)
 #define H5F_INCR_NOPEN_OBJS(F)  ((F)->nopen_objs++)
 #define H5F_DECR_NOPEN_OBJS(F)  ((F)->nopen_objs--)
-#define H5F_FILE_ID(F)          ((F)->id_exists)//file_id)
+#define H5F_FILE_ID(F)          ((F)->id_exists)
 #define H5F_PARENT(F)           ((F)->parent)
 #define H5F_NMOUNTS(F)          ((F)->nmounts)
 #define H5F_DRIVER_ID(F)        ((F)->shared->lf->driver_id)

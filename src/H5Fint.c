@@ -1294,6 +1294,7 @@ herr_t
 H5F_close(H5F_t *f)
 {
     herr_t	        ret_value = SUCCEED;    /* Return value */
+
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
@@ -1460,10 +1461,10 @@ H5F_try_close(H5F_t *f)
     /* Check if this is a child file in a mounting hierarchy & proceed up the
      * hierarchy if so.
      */
-    if(f->parent) {
+    if(f->parent)
         if(H5F_try_close(f->parent) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close parent file")
-    }
+
     /* Unmount and close each child before closing the current file. */
     if(H5F_close_mounts(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't unmount child files")
@@ -1534,6 +1535,45 @@ H5F_reopen(H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_reopen() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_id
+ *
+ * Purpose:	Get the file ID, incrementing it, or "resurrecting" it as
+ *              appropriate.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		Oct 29, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5F_get_id(H5F_t *file, hbool_t app_ref)
+{
+    hid_t       ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+
+    if (FAIL == (ret_value = H5I_get_id(file, H5I_FILE))) {
+        /* resurrect the ID - Register an ID with the native plugin */
+        if((ret_value = H5VL_native_register(H5I_FILE, file, app_ref)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+        file->id_exists = TRUE;
+    }
+    else {
+        /* Increment ref count on existing ID */
+        if(H5I_inc_ref(ret_value, app_ref) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_id() */
 
 
 /*-------------------------------------------------------------------------
@@ -1874,106 +1914,6 @@ H5F_addr_decode(const H5F_t *f, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*o
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_get_file_image
- *
- * Purpose:     Private version of H5Fget_file_image
- *
- * Return:      Success:        Bytes copied / number of bytes needed.
- *              Failure:        negative value
- *
- * Programmer:  John Mainzer
- *              11/15/11
- *
- *-------------------------------------------------------------------------
- */
-ssize_t
-H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
-{
-    H5FD_t     *fd_ptr;                 /* file driver */
-    haddr_t     eoa;                    /* End of file address */
-    ssize_t     ret_value;              /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Check args */
-    if(!file || !file->shared || !file->shared->lf)
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file_id yields invalid file pointer")
-    fd_ptr = file->shared->lf;
-    if(!fd_ptr->cls)
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "fd_ptr yields invalid class pointer")
-
-    /* the address space used by the split and multi file drivers is not
-     * a good fit for this call.  Since the plan is to depreciate these
-     * drivers anyway, don't bother to do a "force fit".
-     *
-     * The following clause tests for the multi file driver, and fails
-     * if the supplied file has the multi file driver as its top level
-     * file driver.  However, this test will not work if there is some
-     * other file driver sitting on top of the multi file driver.
-     *
-     * I'm not sure if this is possible at present, but in all likelyhood,
-     * it will become possible in the future.  On the other hand, we may
-     * remove the split/multi file drivers before then.
-     *
-     * I am leaving this solution in for now, but we should review it,
-     * and improve the solution if necessary.
-     *
-     *                                          JRM -- 11/11/22
-     */
-    if(HDstrcmp(fd_ptr->cls->name, "multi") == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not supported for multi file driver.")
-
-    /* While the family file driver is conceptually fully compatible 
-     * with the get file image operation, it sets a file driver message
-     * in the super block that prevents the image being opened with any
-     * driver other than the family file driver.  Needless to say, this
-     * rather defeats the purpose of the get file image operation.
-     *
-     * While this problem is quire solvable, the required time and 
-     * resources are lacking at present.  Hence, for now, we don't
-     * allow the get file image operation to be perfomed on files 
-     * opened with the family file driver.
-     *
-     * Observe that the following test only looks at the top level 
-     * driver, and fails if there is some other driver sitting on to
-     * of the family file driver.  
-     *
-     * I don't think this can happen at present, but that may change
-     * in the future.
-     *                                   JRM -- 12/21/11
-     */
-    if(HDstrcmp(fd_ptr->cls->name, "family") == 0)
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "Not supported for family file driver.")
-
-    /* Go get the actual file size */
-    if(HADDR_UNDEF == (eoa = H5FD_get_eoa(file->shared->lf, H5FD_MEM_DEFAULT)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
-
-    /* set ret_value = to eoa -- will overwrite this if appropriate */
-    ret_value = (ssize_t)eoa;
-
-    /* test to see if a buffer was provided -- if not, we are done */
-    if(buf_ptr != NULL) {
-        size_t	space_needed;		/* size of file image */
-
-        /* Check for buffer too small */
-        if((haddr_t)buf_len < eoa)
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "supplied buffer too small")
-
-        space_needed = (size_t)eoa;
-
-        /* read in the file image */
-        /* (Note compensation for base address addition in internal routine) */
-        if(H5FD_read(fd_ptr, H5AC_ind_dxpl_g, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "file image read request failed")
-    } /* end if */
-    
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F_get_file_image() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5F_set_grp_btree_shared
  *
  * Purpose:     Set the grp_btree_shared field with a valid ref-count pointer.
@@ -2120,39 +2060,100 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_id
+ * Function:    H5F_get_file_image
  *
- * Purpose:	Get the file ID, incrementing it, or "resurrecting" it as
- *              appropriate.
+ * Purpose:     Private version of H5Fget_file_image
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Success:        Bytes copied / number of bytes needed.
+ *              Failure:        negative value
  *
- * Programmer:	Raymond Lu
- *		Oct 29, 2003
+ * Programmer:  John Mainzer
+ *              11/15/11
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5F_get_id(H5F_t *file, hbool_t app_ref)
+ssize_t
+H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
 {
-    hid_t       ret_value;
+    H5FD_t     *fd_ptr;                 /* file driver */
+    haddr_t     eoa;                    /* End of file address */
+    ssize_t     ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(file);
+    /* Check args */
+    if(!file || !file->shared || !file->shared->lf)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file_id yields invalid file pointer")
+    fd_ptr = file->shared->lf;
+    if(!fd_ptr->cls)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "fd_ptr yields invalid class pointer")
 
-    if (FAIL == (ret_value = H5I_get_id(file, H5I_FILE))) {
-        /* resurrect the ID - Register an ID with the native plugin */
-        if((ret_value = H5VL_native_register(H5I_FILE, file, app_ref)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
-        file->id_exists = TRUE;
-    }
-    else {
-        /* Increment ref count on existing ID */
-        if(H5I_inc_ref(ret_value, app_ref) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
-    }
+    /* the address space used by the split and multi file drivers is not
+     * a good fit for this call.  Since the plan is to depreciate these
+     * drivers anyway, don't bother to do a "force fit".
+     *
+     * The following clause tests for the multi file driver, and fails
+     * if the supplied file has the multi file driver as its top level
+     * file driver.  However, this test will not work if there is some
+     * other file driver sitting on top of the multi file driver.
+     *
+     * I'm not sure if this is possible at present, but in all likelyhood,
+     * it will become possible in the future.  On the other hand, we may
+     * remove the split/multi file drivers before then.
+     *
+     * I am leaving this solution in for now, but we should review it,
+     * and improve the solution if necessary.
+     *
+     *                                          JRM -- 11/11/22
+     */
+    if(HDstrcmp(fd_ptr->cls->name, "multi") == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not supported for multi file driver.")
 
+    /* While the family file driver is conceptually fully compatible 
+     * with the get file image operation, it sets a file driver message
+     * in the super block that prevents the image being opened with any
+     * driver other than the family file driver.  Needless to say, this
+     * rather defeats the purpose of the get file image operation.
+     *
+     * While this problem is quire solvable, the required time and 
+     * resources are lacking at present.  Hence, for now, we don't
+     * allow the get file image operation to be perfomed on files 
+     * opened with the family file driver.
+     *
+     * Observe that the following test only looks at the top level 
+     * driver, and fails if there is some other driver sitting on to
+     * of the family file driver.  
+     *
+     * I don't think this can happen at present, but that may change
+     * in the future.
+     *                                   JRM -- 12/21/11
+     */
+    if(HDstrcmp(fd_ptr->cls->name, "family") == 0)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "Not supported for family file driver.")
+
+    /* Go get the actual file size */
+    if(HADDR_UNDEF == (eoa = H5FD_get_eoa(file->shared->lf, H5FD_MEM_DEFAULT)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
+
+    /* set ret_value = to eoa -- will overwrite this if appropriate */
+    ret_value = (ssize_t)eoa;
+
+    /* test to see if a buffer was provided -- if not, we are done */
+    if(buf_ptr != NULL) {
+        size_t	space_needed;		/* size of file image */
+
+        /* Check for buffer too small */
+        if((haddr_t)buf_len < eoa)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "supplied buffer too small")
+
+        space_needed = (size_t)eoa;
+
+        /* read in the file image */
+        /* (Note compensation for base address addition in internal routine) */
+        if(H5FD_read(fd_ptr, H5AC_ind_dxpl_g, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "file image read request failed")
+    } /* end if */
+    
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_id() */
+} /* H5F_get_file_image() */

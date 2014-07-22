@@ -45,7 +45,7 @@
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5SMpkg.h"            /* Shared object header messages        */
-#include "H5VLprivate.h"	/* Virtual Object Layer                 */
+
 
 /****************/
 /* Local Macros */

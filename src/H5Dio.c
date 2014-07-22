@@ -120,9 +120,11 @@ herr_t
 H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
 {
-    H5VL_t     *vol_plugin = NULL;
-    void       *dset = NULL;
-    herr_t      ret_value = SUCCEED;  /* Return value */
+    H5VL_t          *vol_plugin = NULL;
+    void            *dset = NULL;
+    const H5S_t	    *mem_space = NULL;
+    const H5S_t	    *file_space = NULL;
+    herr_t           ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id,
@@ -133,6 +135,23 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
     if(mem_space_id < 0 || file_space_id < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+    if(H5S_ALL != mem_space_id) {
+	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(mem_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
+    } /* end if */
+    if(H5S_ALL != file_space_id) {
+	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(file_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
+    } /* end if */
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == plist_id)
@@ -191,17 +210,19 @@ herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
 {
-    H5VL_t     *vol_plugin;
-    void       *dset;
-    herr_t      ret_value = SUCCEED;  /* Return value */
+    H5VL_t                 *vol_plugin = NULL;
+    void                   *dset = NULL;
+    H5P_genplist_t 	   *plist;      /* Property list pointer */
+    const H5S_t            *mem_space = NULL;
+    const H5S_t            *file_space = NULL;
+    hbool_t                 direct_write = FALSE;
+    herr_t                  ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf);
 
     /* check arguments */
-    if(!dset_id)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if(NULL == (dset = (void *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
@@ -211,6 +232,37 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* Get the dataset transfer property list */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
+
+    /* Retrieve the 'direct write' flag */
+    if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, &direct_write) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting flag for direct chunk write")
+
+    /* Check dataspace selections if this is not a direct write */
+    if(!direct_write) {
+        if(mem_space_id < 0 || file_space_id < 0)
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+	if(H5S_ALL != mem_space_id) {
+	    if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+	        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+	    /* Check for valid selection */
+	    if(H5S_SELECT_VALID(mem_space) != TRUE)
+		HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection+offset not within extent")
+	} /* end if */
+	if(H5S_ALL != file_space_id) {
+	    if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+		HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+	    /* Check for valid selection */
+	    if(H5S_SELECT_VALID(file_space) != TRUE)
+		HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent")
+	} /* end if */
+    }
 
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
@@ -239,31 +291,17 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__pre_write(H5D_t *dset, hid_t mem_type_id, const H5S_t *mem_space,
-	const H5S_t *file_space, hid_t dxpl_id, const void *buf)
+H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id, 
+         const H5S_t *mem_space, const H5S_t *file_space, 
+         hid_t dxpl_id, const void *buf)
 {
-    H5P_genplist_t 	   *plist;      /* Property list pointer */
-    hbool_t		    direct_write = FALSE;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_PACKAGE
-
-    /* Get the default dataset transfer property list if the user didn't provide one */
-    if(H5P_DEFAULT == dxpl_id)
-        dxpl_id= H5P_DATASET_XFER_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-
-    /* Get the dataset transfer property list */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
-    /* Retrieve the 'direct write' flag */
-    if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, &direct_write) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting flag for direct chunk write")
+    FUNC_ENTER_STATIC
 
     /* Direct chunk write */
     if(direct_write) {
+        H5P_genplist_t *plist;      /* Property list pointer */
         uint32_t direct_filters;
         hsize_t *direct_offset;
         uint32_t direct_datasize;
@@ -271,6 +309,10 @@ H5D__pre_write(H5D_t *dset, hid_t mem_type_id, const H5S_t *mem_space,
 	hsize_t  dims[H5O_LAYOUT_NDIMS];
 	hsize_t  internal_offset[H5O_LAYOUT_NDIMS];
 	int      i;
+
+        /* Get the dataset transfer property list */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
         if(H5D_CHUNKED != dset->shared->layout.type)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
