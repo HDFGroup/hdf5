@@ -165,7 +165,8 @@ Bug Fixes since HDF5-1.8.13
 
     Testing
     -------
-    - 
+    - Fixed incorrect exit code values (was -1) in testframe which is commonly
+      used by several test programs. (AKC - 2014/07/22 HDFFV-8881)
 
 
 Supported Platforms
