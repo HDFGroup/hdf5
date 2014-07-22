@@ -43,7 +43,7 @@ MODULE test_genprop_cls_cb1_mod
   USE ISO_C_BINDING
   IMPLICIT NONE
   
-  TYPE, bind(C) :: cop_cb_struct_ ! /* Struct for iterations */
+  TYPE, BIND(C) :: cop_cb_struct_ ! /* Struct for iterations */
     INTEGER :: count
     INTEGER(HID_T) :: id
   END TYPE cop_cb_struct_
@@ -59,10 +59,10 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN), VALUE :: list_id
     
     TYPE(cop_cb_struct_) :: create_data
-    
+
     create_data%count = create_data%count + 1
     create_data%id = list_id
-    
+
     test_genprop_cls_cb1_f = 0
     
   END FUNCTION test_genprop_cls_cb1_f
@@ -243,12 +243,7 @@ SUBROUTINE test_genprop_class_callback(total_error)
   INTEGER(hid_t) :: lid2 !/* 2nd Generic Property list ID */
   INTEGER(size_t) :: nprops !/* Number of properties in class */
 
-  TYPE cb_struct
-     INTEGER :: count
-     INTEGER(hid_t) :: id
-  END TYPE cb_struct
-
-  TYPE(cb_struct), TARGET :: crt_cb_struct, cls_cb_struct
+  TYPE(cop_cb_struct_), TARGET :: crt_cb_struct, cls_cb_struct
 
   CHARACTER(LEN=7) :: CLASS1_NAME = "Class 1"
   TYPE(C_FUNPTR) :: f1, f5
