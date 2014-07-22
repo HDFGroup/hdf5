@@ -109,6 +109,7 @@ H5FL_DEFINE(H5G_shared_t);
 /* Declare the free list to manage H5_obj_t's */
 H5FL_DEFINE(H5_obj_t);
 
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/

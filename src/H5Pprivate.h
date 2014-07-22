@@ -21,7 +21,6 @@
 
 /* Include package's public header */
 #include "H5Ppublic.h"
-
 #include "H5VLpublic.h"
 
 /* Private headers needed by this file */

@@ -126,6 +126,7 @@ static herr_t H5G_loc_get_comment_cb(H5G_loc_t *grp_loc, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata,
     H5G_own_loc_t *own_loc);
 
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -242,98 +243,6 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
     if(H5G_loc_real(H5I_object(loc_id), H5I_get_type(loc_id), loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-#if 0
-    switch(H5I_get_type(loc_id)) {
-        case H5I_FILE:
-            {
-                H5F_t	*f;
-
-                /* Get the file struct */
-                if(NULL == (f = (H5F_t *)H5I_object(loc_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file ID")
-
-                /* Construct a group location for root group of the file */
-                if(H5G_root_loc(f, loc) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to create location for file")
-            } /* end case */
-            break;
-
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of property list")
-
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of error class, message or stack")
-
-        case H5I_GROUP:
-            {
-                H5G_t	*group;
-
-                if(NULL == (group = (H5G_t *)H5I_object(loc_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group ID")
-                if(NULL == (loc->oloc = H5G_oloc(group)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of group")
-                if(NULL == (loc->path = H5G_nameof(group)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of group")
-            } /* end case */
-            break;
-
-        case H5I_DATATYPE:
-            {
-                H5T_t	*dt;
-
-                if(NULL == (dt = (H5T_t *)H5I_object(loc_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid type ID")
-                if(NULL == (loc->oloc = H5T_oloc(dt)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of datatype")
-                if(NULL == (loc->path = H5T_nameof(dt)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of datatype")
-            } /* end case */
-            break;
-
-        case H5I_DATASPACE:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of dataspace")
-
-        case H5I_DATASET:
-            {
-                H5D_t	*dset;
-
-                if(NULL == (dset = (H5D_t *)H5I_object(loc_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid data ID")
-                if(NULL == (loc->oloc = H5D_oloc(dset)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of dataset")
-                if(NULL == (loc->path = H5D_nameof(dset)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of dataset")
-            } /* end case */
-            break;
-
-        case H5I_ATTR:
-            {
-                H5A_t	*attr;
-
-                if(NULL == (attr = (H5A_t *)H5I_object(loc_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid attribute ID")
-                if(NULL == (loc->oloc = H5A_oloc(attr)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of attribute")
-                if(NULL == (loc->path = H5A_nameof(attr)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of attribute")
-            } /* end case */
-            break;
-
-        case H5I_REFERENCE:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of reference")
-
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_VFL:
-        case H5I_VOL:
-        case H5I_NTYPES:
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object ID")
-    } /* end switch */
-#endif
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_loc() */

@@ -85,9 +85,8 @@ H5F_init_interface(void)
 {
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_init_interface() */
 
@@ -462,8 +461,8 @@ done:
  * 		object is in the file, and either count it or put its ID
  *		on the list.
  *
- * Return:      TRUE if the array of object IDs is filled up.
- *              FALSE otherwise.
+ * Return:      H5_ITER_STOP if the array of object IDs is filled up.
+ *              H5_ITER_CONT otherwise.
  *
  * Programmer:  Raymond Lu
  *              Wednesday, Dec 5, 2001

@@ -169,7 +169,6 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
                                       file_space_id, plist_id, buf, H5_EVENT_STACK_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
-
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dread() */

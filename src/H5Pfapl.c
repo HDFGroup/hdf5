@@ -29,6 +29,7 @@
 /****************/
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 
+
 /***********/
 /* Headers */
 /***********/
@@ -53,6 +54,7 @@
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h"        /* Windows buffered I/O                 */
 #endif
+
 
 /****************/
 /* Local Macros */
@@ -568,6 +570,7 @@ H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void UNUSED *copy_data)
     /* Get driver ID from source property list */
     if(H5P_get(src_plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
+
     if(driver_id > 0) {
         void *driver_info;
 
@@ -3311,3 +3314,4 @@ H5Pget_core_write_tracking(hid_t plist_id, hbool_t *is_enabled, size_t *page_siz
 done:
     FUNC_LEAVE_API(ret_value)
 }
+

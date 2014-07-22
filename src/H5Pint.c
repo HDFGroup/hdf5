@@ -436,7 +436,6 @@ H5P_init_interface(void)
      */
     if(H5I_register_type(H5I_GENPROPCLS_CLS) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
-
     if(H5I_register_type(H5I_GENPROPLST_CLS) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 

@@ -46,7 +46,7 @@
 #include "H5Ppublic.h"		/* Property Lists			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 #include "H5VLnative.h" 	/* Native Plugin                        */
-#include "H5VLprivate.h"	/* VOL          		  	*/
+
 
 /****************/
 /* Local Macros */

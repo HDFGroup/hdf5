@@ -36,7 +36,6 @@
  */
 
 #define H5I_PACKAGE		/*suppress error about including H5Ipkg	  */
-#define H5F_PACKAGE /* MSC - just a temp workaround */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5I_init_interface
@@ -52,8 +51,6 @@
 #include "H5SLprivate.h"	/* Skip Lists                           */
 #include "H5Tprivate.h"		/* Datatypes				*/
 #include "H5VLprivate.h"	/* Virtual Object Layer                 */
-
-#include "H5Fpkg.h"		/* MSC- just a temp workaround FILES*/
 
 /* Define this to compile in support for dumping ID information */
 /* #define H5I_DEBUG_OUTPUT */
@@ -174,7 +171,6 @@ H5I_init_interface(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-done:
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5I_init_interface() */
 
@@ -1046,6 +1042,7 @@ H5I_object(hid_t id)
         /* (Casting away const OK -QAK) */
         ret_value = (void *)id_ptr->obj_ptr;
     } /* end if */
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end if */
@@ -1451,6 +1448,7 @@ H5I_dec_ref(hid_t id)
         --(id_ptr->count);
         ret_value = (int)id_ptr->count;
     } /* end else */
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_dec_ref() */
@@ -2230,7 +2228,6 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
     /* Check arguments */
     if(type <= H5I_BADID || type >= H5I_next_type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
-
     type_ptr = H5I_id_type_list_g[type];
 
     /* Only iterate through ID list if it is initialized and there are IDs in type */
@@ -2328,7 +2325,7 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 
     /* Get object location */
     if(H5G_loc(id, &loc) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
 
     /* Call internal group routine to retrieve object's name */
     if((ret_value = H5G_get_name(&loc, name, size, NULL, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
