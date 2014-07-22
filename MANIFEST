@@ -673,6 +673,7 @@
 ./src/H5Fdeprec.c
 ./src/H5Fefc.c
 ./src/H5Ffake.c
+./src/H5Fint.c
 ./src/H5Fio.c
 ./src/H5Fmount.c
 ./src/H5Fmpi.c
