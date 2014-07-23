@@ -558,7 +558,7 @@ nh5pget_fill_value_integer_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue
      /*
       * Call h5pget_fill_value_c  function.
       */
-     return nh5pset_fill_value_c(prp_id, type_id, fillvalue);
+     return nh5pget_fill_value_c(prp_id, type_id, fillvalue);
 }
 
 int_f
@@ -567,7 +567,7 @@ nh5pget_fill_value_real_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
      /*
       * Call h5pget_fill_value_c  function.
       */
-     return nh5pset_fill_value_c(prp_id, type_id, fillvalue);
+     return nh5pget_fill_value_c(prp_id, type_id, fillvalue);
 }
 
 int_f
@@ -576,7 +576,7 @@ nh5pget_fill_value_double_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
      /*
       * Call h5pget_fill_value_c  function.
       */
-     return nh5pset_fill_value_c(prp_id, type_id, fillvalue);
+     return nh5pget_fill_value_c(prp_id, type_id, fillvalue);
 }
 
 /****if* H5Pf/h5pget_version_c
