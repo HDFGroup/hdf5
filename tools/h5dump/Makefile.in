@@ -103,7 +103,7 @@ DIST_COMMON = $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/bin/test-driver
 check_PROGRAMS = $(am__EXEEXT_1) binread$(EXEEXT)
 bin_PROGRAMS = h5dump$(EXEEXT)
-TESTS = $(am__EXEEXT_1) $(am__EXEEXT_1)
+TESTS = $(am__EXEEXT_1) $(TEST_SCRIPT)
 subdir = tools/h5dump
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -114,7 +114,7 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
-am__EXEEXT_1 =
+am__EXEEXT_1 = h5dumpgentest$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 binread_SOURCES = binread.c
 binread_OBJECTS = binread.$(OBJEXT)
@@ -132,6 +132,10 @@ h5dump_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 h5dump_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h5dump_LDFLAGS) $(LDFLAGS) -o $@
+h5dumpgentest_SOURCES = h5dumpgentest.c
+h5dumpgentest_OBJECTS = h5dumpgentest.$(OBJEXT)
+h5dumpgentest_LDADD = $(LDADD)
+h5dumpgentest_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -166,8 +170,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = binread.c $(h5dump_SOURCES)
-DIST_SOURCES = binread.c $(h5dump_SOURCES)
+SOURCES = binread.c $(h5dump_SOURCES) h5dumpgentest.c
+DIST_SOURCES = binread.c $(h5dump_SOURCES) h5dumpgentest.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -377,11 +381,8 @@ am__set_TESTS_bases = \
 RECHECK_LOGS = $(TEST_LOGS)
 AM_RECURSIVE_TARGETS = check recheck
 TEST_SUITE_LOG = test-suite.log
-am__test_logs1 = $(TESTS:=.log)
-am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
-TEST_LOGS = $(am__test_logs2:.sh.log=.log)
-SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
-SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
+LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
+LOG_COMPILE = $(LOG_COMPILER) $(AM_LOG_FLAGS) $(LOG_FLAGS)
 am__set_b = \
   case '$@' in \
     */*) \
@@ -392,6 +393,11 @@ am__set_b = \
     *) \
       b='$*';; \
   esac
+am__test_logs1 = $(TESTS:=.log)
+am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
+TEST_LOGS = $(am__test_logs2:.sh.log=.log)
+SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
+SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
@@ -677,8 +683,8 @@ TRACE = perl $(top_srcdir)/bin/trace
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 *.bin
 
 # Test programs and scripts
-TEST_PROG = #h5dumpgentest
-TEST_SCRIPT = #testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
+TEST_PROG = h5dumpgentest
+TEST_SCRIPT = testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5dump$(EXEEXT)
 
@@ -819,6 +825,10 @@ h5dump$(EXEEXT): $(h5dump_OBJECTS) $(h5dump_DEPENDENCIES) $(EXTRA_h5dump_DEPENDE
 	@rm -f h5dump$(EXEEXT)
 	$(AM_V_CCLD)$(h5dump_LINK) $(h5dump_OBJECTS) $(h5dump_LDADD) $(LIBS)
 
+h5dumpgentest$(EXEEXT): $(h5dumpgentest_OBJECTS) $(h5dumpgentest_DEPENDENCIES) $(EXTRA_h5dumpgentest_DEPENDENCIES) 
+	@rm -f h5dumpgentest$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(h5dumpgentest_OBJECTS) $(h5dumpgentest_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -829,6 +839,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dump.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dump_ddl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dump_xml.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dumpgentest.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1039,6 +1050,13 @@ recheck: all $(check_PROGRAMS) $(check_SCRIPTS)
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
+h5dumpgentest.log: h5dumpgentest$(EXEEXT)
+	@p='h5dumpgentest$(EXEEXT)'; \
+	b='h5dumpgentest'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 .sh.log:
 	@p='$<'; \
 	$(am__set_b); \

@@ -1050,7 +1050,7 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
     /* Get the link info through the VOL */
     if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_INFO, 
                                   H5AC_dxpl_id, H5_EVENT_STACK_NULL, linfo)) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1116,7 +1116,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     /* Get the link info through the VOL */
     if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_INFO, H5AC_dxpl_id, H5_EVENT_STACK_NULL, 
                                   linfo)) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
     FUNC_LEAVE_API(ret_value)

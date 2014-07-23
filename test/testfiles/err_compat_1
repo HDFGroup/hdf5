@@ -15,14 +15,14 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #000: (file name) line (number) in H5Dcreate2(): not a location ID
     major: Invalid arguments to routine
     minor: Inappropriate type
-  #001: (file name) line (number) in H5G_loc(): invalid object ID
+  #001: (file name) line (number) in H5VL_get_object(): invalid identifier
     major: Invalid arguments to routine
-    minor: Bad value
+    minor: Inappropriate type
 
 ********* Print error stack in customized way *********
-    error #000: (file name) in H5G_loc(): line (number)
+    error #000: (file name) in H5VL_get_object(): line (number)
         major: Invalid arguments to routine
-        minor: Bad value
+        minor: Inappropriate type
     error #001: (file name) in H5Dcreate2(): line (number)
         major: Invalid arguments to routine
         minor: Inappropriate type
@@ -33,9 +33,9 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
         minor: Can't get value
 
 ********* Print error stack in customized way *********
-    error #000: (file name) in H5G_loc(): line (number)
+    error #000: (file name) in H5VL_get_object(): line (number)
         major: Invalid arguments to routine
-        minor: Bad value
+        minor: Inappropriate type
     error #001: (file name) in H5Dcreate2(): line (number)
         major: Invalid arguments to routine
         minor: Inappropriate type
@@ -43,9 +43,9 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #000: (file name) line (number) in H5Dcreate2(): not a location ID
     major: Invalid arguments to routine
     minor: Inappropriate type
-  #001: (file name) line (number) in H5G_loc(): invalid object ID
+  #001: (file name) line (number) in H5VL_get_object(): invalid identifier
     major: Invalid arguments to routine
-    minor: Bad value
+    minor: Inappropriate type
 
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #000: (file name) line (number) in main(): Error test failed

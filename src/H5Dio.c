@@ -132,7 +132,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     /* check arguments */
     if(NULL == (dset = (void *)H5I_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if(mem_space_id < 0 || file_space_id < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
@@ -223,7 +223,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     /* check arguments */
     if(NULL == (dset = (void *)H5I_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if(H5P_DEFAULT == dxpl_id)

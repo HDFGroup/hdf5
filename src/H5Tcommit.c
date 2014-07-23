@@ -622,7 +622,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     /* Create the datatype through the VOL */
     if(NULL == (dt = H5VL_datatype_open(obj, loc_params, vol_plugin, name, tapl_id, 
                                         H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open datatype")
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open datatype")
 
     /* Get an atom for the datatype */
     if ((ret_value = H5VL_create_datatype(dt, vol_plugin, TRUE)) < 0)

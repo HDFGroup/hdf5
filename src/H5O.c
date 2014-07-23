@@ -256,7 +256,7 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
     /* Open the object through the VOL */
     if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, 
                                               H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
     if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
@@ -333,7 +333,7 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 
     /* Open the object through the VOL */
     if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
     if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
@@ -404,7 +404,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 
     /* Open the object through the VOL */
     if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
     if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")

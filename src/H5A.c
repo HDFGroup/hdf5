@@ -434,7 +434,7 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
 
     /* Create the attribute through the VOL */
     if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, attr_name, aapl_id, H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open attribute")
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
 
     /* Get an atom for the attribute */
     if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
@@ -510,7 +510,7 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     /* Create the attribute through the VOL */
     if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, attr_name, aapl_id, H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open attribute")
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
 
     /* Get an atom for the attribute */
     if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
@@ -595,7 +595,7 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 
     /* Create the attribute through the VOL */
     if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, NULL, aapl_id, H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open attribute")
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
 
     /* Get an atom for the attribute */
     if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)

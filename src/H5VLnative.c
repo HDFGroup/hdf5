@@ -660,6 +660,7 @@ static herr_t H5VL_native_attr_iterate(void *obj, H5VL_loc_params_t loc_params, 
     hsize_t	last_attr;      /* Index of last attribute examined */
     void        *temp_obj = NULL;
     H5I_type_t  obj_type;
+    H5VL_t      *vol_plugin = NULL;  /* VOL plugin information */
     herr_t      ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -677,9 +678,15 @@ static herr_t H5VL_native_attr_iterate(void *obj, H5VL_loc_params_t loc_params, 
 
     /* Iterate over the links */
     if(loc_params.type == H5VL_OBJECT_BY_SELF) {
+        /* Build the vol plugin struct */
+        if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+                vol_plugin->cls = &H5VL_native_g;
+        vol_plugin->nrefs = 1;
+
         /* Get an atom for the object */
-        if((obj_loc_id = H5VL_native_register(loc_params.obj_type, obj, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register object");
+        if((obj_loc_id = H5I_register2(loc_params.obj_type, obj, vol_plugin, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register object")
     }
     else if(loc_params.type == H5VL_OBJECT_BY_NAME) { 
         /* Set up opened group location to fill in */
@@ -724,7 +731,11 @@ done:
     /* Release resources */
     if(loc_params.type == H5VL_OBJECT_BY_SELF) {
         if(obj_loc_id >= 0 && NULL == H5I_remove(obj_loc_id))
-            HDONE_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object");
+            HDONE_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to free identifier");
+
+        vol_plugin->nrefs--;
+        if(0 == vol_plugin->nrefs)
+            H5MM_free(vol_plugin);
     }
     else if(loc_params.type == H5VL_OBJECT_BY_NAME) {
         if(obj_loc_id >= 0) {

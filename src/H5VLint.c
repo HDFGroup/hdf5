@@ -523,7 +523,7 @@ H5VL_attr_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, cons
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `attr open' method")
     /* call the corresponding VOL open callback */
     if(NULL == (ret_value = (vol_plugin->cls->attr_cls.open) (obj, loc_params, name, aapl_id, dxpl_id, H5_REQUEST_NULL)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "attribute open failed")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "attribute open failed")
 
     vol_plugin->nrefs ++;
 done:
@@ -829,7 +829,7 @@ H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
 #endif
     /* call the corresponding VOL open callback */
     if(NULL == (ret_value = (vol_plugin->cls->datatype_cls.open)(obj, loc_params, name, tapl_id, dxpl_id, H5_REQUEST_NULL)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
     vol_plugin->nrefs ++;
 
 done:
@@ -1015,7 +1015,7 @@ H5VL_dataset_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, c
     else {
         /* call the corresponding VOL open callback */
         if(NULL == (ret_value = (vol_plugin->cls->dataset_cls.open)(obj, loc_params, name, dapl_id, dxpl_id, H5_REQUEST_NULL)))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
+            HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
         vol_plugin->nrefs ++;
 
     }
@@ -1599,7 +1599,7 @@ H5VL_group_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, con
     else {
         /* call the corresponding VOL open callback */
         if(NULL == (ret_value = (vol_plugin->cls->group_cls.open)(obj, loc_params, name, gapl_id, dxpl_id, H5_REQUEST_NULL)))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
+            HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
         vol_plugin->nrefs ++;
     }
 done:
@@ -1882,7 +1882,7 @@ H5VL_object_open(void *obj, H5VL_loc_params_t params, H5VL_t *vol_plugin, H5I_ty
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `object open' method")
     /* call the corresponding VOL open callback */
     if(NULL == (ret_value = (vol_plugin->cls->object_cls.open)(obj, params, opened_type, dxpl_id, H5_REQUEST_NULL)))
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
+	HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
     vol_plugin->nrefs++;
 
 done:

@@ -605,7 +605,7 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
 
     /* Open the object through the VOL */
     if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to dereference object")
 
     /* Get an atom for the object */
     if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)

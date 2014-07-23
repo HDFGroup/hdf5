@@ -200,7 +200,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 
     /* get the file object */
     if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
@@ -299,7 +299,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
 
     /* get the file object */
     if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
 
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
@@ -366,7 +366,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
 
     /* get the file object */
     if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
 
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
@@ -374,7 +374,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
 
     /* Create the dataset through the VOL */
     if(NULL == (dset = H5VL_dataset_open(obj, loc_params, vol_plugin, name, dapl_id, H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
 
     /* Get an atom for the dataset */
     if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)

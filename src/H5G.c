@@ -483,7 +483,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 
     /* Create the group through the VOL */
     if(NULL == (grp = H5VL_group_open(obj, loc_params, vol_plugin, name, gapl_id, H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Get an atom for the group */
     if((ret_value = H5I_register2(H5I_GROUP, grp, vol_plugin, TRUE)) < 0)
