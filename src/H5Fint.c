@@ -13,13 +13,19 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5F_init_interface
 
 
-/* Packages needed by this file... */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Aprivate.h"		/* Attributes				*/
 #include "H5ACprivate.h"        /* Metadata cache                       */
@@ -37,6 +43,15 @@
 #include "H5VLnative.h" 	/* Native Plugin                        */
 #include "H5VLprivate.h"	/* VOL plugins				*/
 
+
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
+
 /* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */
 typedef struct H5F_olist_t {
     H5I_type_t obj_type;        /* Type of object to look for */
@@ -53,12 +68,37 @@ typedef struct H5F_olist_t {
     size_t     max_nobjs;       /* Maximum # of IDs to put into array */
 } H5F_olist_t;
 
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
 /* private prototypes */
 static H5F_t *H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, H5FD_t *lf);
 static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl,
     const char *name, char ** /*out*/ actual_name);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush);
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 /* Declare a free list to manage the H5F_t struct */
 H5FL_DEFINE(H5F_t);

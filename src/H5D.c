@@ -652,7 +652,6 @@ H5Dget_access_plist(hid_t dset_id)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataset access properties")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dget_access_plist() */
 

@@ -23,7 +23,7 @@
 // ------------------------------------------------------------------------
 
 /*! \mainpage notitle
- *
+ * <br />
  * \section intro_sec Introduction
  *
  * The C++ API provides C++ wrappers for the HDF5 C Library.
@@ -52,13 +52,19 @@
     Dataspace Interface (H5S)         DataSpace
     Datatype Interface (H5T)          DataType and subclasses
   \endverbatim
+ * <br />
  * \section install_sec Installation
  *
- * Please refer to the file release_docs/INSTALL
- * under the top directory for information about installing, building,
+ * The HDF5 C++ API is included with the HDF5 source code and can 
+ * be obtained from 
+ * <a href="http://www.hdfgroup.org/HDF5/release/obtainsrc.html">
+ * http://www.hdfgroup.org/HDF5/release/obtainsrc.html</a>.
+ * 
+ * Please refer to the release_docs/INSTALL file under the top directory 
+ * of the HDF5 source code for information about installing, building, 
  * and testing the C++ API.
  *
- *
+ * <br />
  */
 
 ///	This example shows how to create datasets.

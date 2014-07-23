@@ -768,7 +768,7 @@ H5A_get_type(H5A_t *attr)
     if(H5T_lock(dt, FALSE) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
 
-    /* Create an atom */
+
     if(H5T_committed(dt)) {
         /* If this is a committed datatype, we need to recreate the
            two level IDs, where the VOL object is a copy of the
@@ -858,7 +858,7 @@ H5A_get_name(H5A_t *attr, size_t buf_size, char *buf)
     size_t              copy_len, nbytes;
     ssize_t		ret_value;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* get the real attribute length */
     nbytes = HDstrlen(attr->shared->name);
@@ -898,9 +898,7 @@ H5A_get_name(H5A_t *attr, size_t buf_size, char *buf)
 herr_t
 H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
     HDassert(attr);
@@ -918,7 +916,7 @@ H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo)
         ainfo->corder = attr->shared->crt_idx;
     } /* end else */
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5A_get_info() */
 
 
@@ -1113,14 +1111,13 @@ H5A_oloc(H5A_t *attr)
 {
     H5O_loc_t *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(attr);
 
     /* Set return value */
     ret_value = &(attr->oloc);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_oloc() */
 
@@ -1145,14 +1142,13 @@ H5A_nameof(H5A_t *attr)
 {
     H5G_name_t *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(attr);
 
     /* Set return value */
     ret_value=&(attr->path);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_nameof() */
 
@@ -1175,14 +1171,13 @@ H5A_type(const H5A_t *attr)
 {
     H5T_t *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(attr);
 
     /* Set return value */
     ret_value = attr->shared->dt;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_type() */
 

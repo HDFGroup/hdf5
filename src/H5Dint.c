@@ -2738,6 +2738,7 @@ H5D_get_type(H5D_t *dset)
         if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
     }
+
 done:
     if(ret_value < 0) {
         if(dt && H5T_close(dt) < 0)

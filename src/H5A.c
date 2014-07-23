@@ -281,6 +281,7 @@ done:
     if (ret_value < 0 && attr)
         if(H5VL_attr_close (attr, vol_plugin, H5AC_dxpl_id, H5_EVENT_STACK_NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to release attr")
+
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate2() */
 

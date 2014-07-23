@@ -24,8 +24,7 @@ include $(top_srcdir)/config/commence.am
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-#TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
-TEST_SCRIPT = testlibinfo.sh testcheck_version.sh testlinks_env.sh
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
   TEST_SCRIPT += test_plugin.sh
@@ -160,7 +159,6 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tvlstr.c tvltypes.c
 
 # Temporary files.
-#DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
-DISTCLEANFILES=testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
+DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
 
 include $(top_srcdir)/config/conclude.am
