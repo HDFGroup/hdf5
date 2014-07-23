@@ -88,14 +88,14 @@ typedef enum H5VL_file_get_t {
     H5VL_FILE_GET_NAME,	                    /* file name             		*/
     H5VL_FILE_GET_OBJ_COUNT,	            /* object count in file	       	*/
     H5VL_FILE_GET_OBJ_IDS,	            /* object ids in file     		*/
-    H5VL_OBJECT_GET_FILE
+    H5VL_OBJECT_GET_FILE                    /* retrieve or resurrect file of object */
 } H5VL_file_get_t;
 
 /* types for all file misc operations */
 typedef enum H5VL_file_misc_t {
-    H5VL_FILE_MOUNT,
-    H5VL_FILE_UNMOUNT,
-    H5VL_FILE_IS_ACCESSIBLE
+    H5VL_FILE_MOUNT,                        /* Mount a file                     */
+    H5VL_FILE_UNMOUNT,                      /* Un-Mount a file                  */
+    H5VL_FILE_IS_ACCESSIBLE                 /* Check if a file is accessible    */
 } H5VL_file_misc_t;
 
 /* types for all file optional operations */
@@ -211,9 +211,6 @@ typedef struct H5VL_loc_params_t {
 
 #define H5VL_VOL_DEFAULT 0   /* Default VOL plugin value */
 
-/* Forward declaration */
-typedef struct H5VL_t H5VL_t;
-
 /* H5A routines */
 typedef struct H5VL_attr_class_t {
     void  *(*create)(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
@@ -223,7 +220,7 @@ typedef struct H5VL_attr_class_t {
     herr_t (*iterate) (void *obj, H5VL_loc_params_t loc_params, 
                        H5_index_t idx_type, H5_iter_order_t order, hsize_t *n, 
                        H5A_operator2_t  op, void *op_data, hid_t dxpl_id, void **req);
-    herr_t (*get)   (void *attr, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*get)   (void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*remove)(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t dxpl_id, void **req);
     herr_t (*close) (void *attr, hid_t dxpl_id, void **req);
 } H5VL_attr_class_t;
@@ -336,12 +333,12 @@ typedef struct H5VL_class_t {
  * plugins are declared here and the plugin appends private fields in
  * memory.
  */
-struct H5VL_t {
+typedef struct H5VL_t {
     const H5VL_class_t *cls;            /*constant class info       */
     const char         *container_name; /* name of the underlying storage container */
     unsigned long       feature_flags;  /* VOL Driver feature Flags */
     int                 nrefs;          /* number of references by objects using this struct */
-};
+} H5VL_t;
 
 #ifdef __cplusplus
 extern "C" {
