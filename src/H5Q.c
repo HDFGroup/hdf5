@@ -26,13 +26,13 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions */
+#include "H5private.h"      /* Generic Functions */
 #include "H5Qprivate.h"     /* Query */
-#include "H5Eprivate.h"		/* Error handling */
-#include "H5Iprivate.h"		/* IDs */
-#include "H5MMprivate.h"	/* Memory management */
+#include "H5Eprivate.h"     /* Error handling */
+#include "H5Iprivate.h"     /* IDs */
+#include "H5MMprivate.h"    /* Memory management */
 #include "H5Pprivate.h"
-#include "H5FLprivate.h"        /* Free lists                           */
+#include "H5FLprivate.h"    /* Free lists                           */
 
 /****************/
 /* Local Macros */
