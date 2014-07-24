@@ -253,9 +253,9 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_ATTR_TYPE_ID, &type_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_ATTR_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
-    if(H5P_set(plist, H5VL_ATTR_SPACE_ID, &space_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_ATTR_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
@@ -350,15 +350,15 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_ATTR_TYPE_ID, &type_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_ATTR_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
-    if(H5P_set(plist, H5VL_ATTR_SPACE_ID, &space_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_ATTR_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name = obj_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* get the file object */
     if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
@@ -497,7 +497,7 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
@@ -582,7 +582,7 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
     loc_params.loc_data.loc_by_idx.order = order;
     loc_params.loc_data.loc_by_idx.n = n;
-    loc_params.loc_data.loc_by_idx.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_idx.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
@@ -946,7 +946,7 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
     loc_params.loc_data.loc_by_idx.order = order;
     loc_params.loc_data.loc_by_idx.n = n;
-    loc_params.loc_data.loc_by_idx.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_idx.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the name through the VOL */
@@ -1099,7 +1099,7 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the plugin pointer */
@@ -1182,7 +1182,7 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
     loc_params.loc_data.loc_by_idx.order = order;
     loc_params.loc_data.loc_by_idx.n = n;
-    loc_params.loc_data.loc_by_idx.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_idx.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the plugin pointer */
@@ -1324,7 +1324,7 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
 
         loc_params.type = H5VL_OBJECT_BY_NAME;
         loc_params.loc_data.loc_by_name.name = obj_name;
-        loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+        loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
         loc_params.obj_type = H5I_get_type(loc_id);
 
         /* get the file object */
@@ -1501,7 +1501,7 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name = obj_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* get the file object */
     if(NULL == (obj = (void *)H5I_object(loc_id)))
@@ -1613,7 +1613,7 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the plugin pointer */
@@ -1688,7 +1688,7 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
     loc_params.loc_data.loc_by_idx.order = order;
     loc_params.loc_data.loc_by_idx.n = n;
-    loc_params.loc_data.loc_by_idx.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_idx.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the plugin pointer */
@@ -1705,7 +1705,7 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 #if 0
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* get the attribute info through the VOL */
     if(H5VL_object_misc(loc_id, H5VL_ATTR_DELETE_BY_IDX, H5AC_dxpl_id, H5_EVENT_STACK_NULL, loc_params, 
@@ -1851,7 +1851,7 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the attribute info through the VOL */

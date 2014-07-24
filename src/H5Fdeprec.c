@@ -227,7 +227,7 @@ H5Fis_hdf5(const char *name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
     /* Call private routine */
-    if((ret_value = H5F_is_hdf5(name)) < 0)
+    if((ret_value = H5F_is_hdf5(name, H5P_FILE_ACCESS_DEFAULT)) < 0)
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
 
 done:

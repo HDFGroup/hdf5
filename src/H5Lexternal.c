@@ -610,7 +610,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = link_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(link_loc_id);
 
     /* get the file object */
@@ -625,11 +625,11 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_LINK_TYPE, &link_type) < 0)
+    if(H5P_set(plist, H5VL_PROP_LINK_TYPE, &link_type) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
-    if(H5P_set(plist, H5VL_LINK_UDATA, &ext_link_buf) < 0)
+    if(H5P_set(plist, H5VL_PROP_LINK_UDATA, &ext_link_buf) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
-    if(H5P_set(plist, H5VL_LINK_UDATA_SIZE, &buf_size) < 0)
+    if(H5P_set(plist, H5VL_PROP_LINK_UDATA_SIZE, &buf_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
 
     /* Create the link through the VOL */

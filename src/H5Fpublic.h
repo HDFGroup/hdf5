@@ -174,7 +174,6 @@ extern "C" {
 #endif
 
 /* Functions in H5F.c */
-H5_DLL htri_t H5Fis_hdf5(const char *filename);
 H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
 H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags,
 		  	  hid_t create_plist, hid_t access_plist);
@@ -238,6 +237,7 @@ typedef struct H5F_info1_t {
 
 /* Function prototypes */
 H5_DLL herr_t H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo);
+H5_DLL htri_t H5Fis_hdf5(const char *filename);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

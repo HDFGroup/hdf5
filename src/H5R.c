@@ -600,7 +600,7 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
     loc_params.type = H5VL_OBJECT_BY_REF;
     loc_params.loc_data.loc_by_ref.ref_type = ref_type;
     loc_params.loc_data.loc_by_ref._ref = _ref;
-    loc_params.loc_data.loc_by_ref.plist_id = oapl_id;
+    loc_params.loc_data.loc_by_ref.lapl_id = oapl_id;
     loc_params.obj_type = H5I_get_type(obj_id);
 
     /* Open the object through the VOL */

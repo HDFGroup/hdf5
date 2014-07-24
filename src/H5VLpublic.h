@@ -20,43 +20,36 @@
 #ifndef _H5VLpublic_H
 #define _H5VLpublic_H
 
-#include "stdarg.h"
+#include <stdarg.h>
 
 #include "H5public.h"
 #include "H5Apublic.h"		/* Attributes				*/
-#include "H5Fpublic.h"
-#include "H5Lpublic.h"
-#include "H5Opublic.h"
-#include "H5Rpublic.h"
-
-/* Asynchronous operation status */
-typedef enum H5ES_status_t {
-    H5ES_STATUS_IN_PROGRESS,   /* Operation has not yet completed */
-    H5ES_STATUS_SUCCEED,       /* Operation has completed, successfully */
-    H5ES_STATUS_FAIL,          /* Operation has completed, but failed */
-    H5ES_STATUS_CANCEL         /* Operation has not completed and has been cancelled */
-} H5ES_status_t;
+#include "H5ESpublic.h"         /* Event Stack                          */
+#include "H5Fpublic.h"          /* Files                                */
+#include "H5Lpublic.h"          /* Links                                */
+#include "H5Opublic.h"          /* Objects                              */
+#include "H5Rpublic.h"          /* References                           */
 
 /* Dataset creation property names */
-#define H5VL_DSET_TYPE_ID        "dataset_type_id"
-#define H5VL_DSET_SPACE_ID       "dataset_space_id"
-#define H5VL_DSET_LCPL_ID        "dataset_lcpl_id"
+#define H5VL_PROP_DSET_TYPE_ID        "dataset_type_id"
+#define H5VL_PROP_DSET_SPACE_ID       "dataset_space_id"
+#define H5VL_PROP_DSET_LCPL_ID        "dataset_lcpl_id"
 
 /* Attribute creation property names */
-#define H5VL_ATTR_TYPE_ID        "attr_type_id"
-#define H5VL_ATTR_SPACE_ID       "attr_space_id"
-#define H5VL_ATTR_LOC_PARAMS     "attr_location"
+#define H5VL_PROP_ATTR_TYPE_ID        "attr_type_id"
+#define H5VL_PROP_ATTR_SPACE_ID       "attr_space_id"
+#define H5VL_PROP_ATTR_LOC_PARAMS     "attr_location"
 
 /* Link creation property names */
-#define H5VL_LINK_TARGET             "target_location_object"
-#define H5VL_LINK_TARGET_LOC_PARAMS  "target_params"
-#define H5VL_LINK_TARGET_NAME        "target_name"
-#define H5VL_LINK_TYPE               "link type"
-#define H5VL_LINK_UDATA              "udata"
-#define H5VL_LINK_UDATA_SIZE         "udata size"
+#define H5VL_PROP_LINK_TARGET             "target_location_object"
+#define H5VL_PROP_LINK_TARGET_LOC_PARAMS  "target_params"
+#define H5VL_PROP_LINK_TARGET_NAME        "target_name"
+#define H5VL_PROP_LINK_TYPE               "link type"
+#define H5VL_PROP_LINK_UDATA              "udata"
+#define H5VL_PROP_LINK_UDATA_SIZE         "udata size"
 
 /* Group creation property names */
-#define H5VL_GRP_LCPL_ID "group_lcpl_id"
+#define H5VL_PROP_GRP_LCPL_ID         "group_lcpl_id"
 
 /* types for all attr get API routines */
 typedef enum H5VL_attr_get_t {
@@ -175,7 +168,7 @@ typedef enum H5VL_loc_type_t {
 
 struct H5VL_loc_by_name {
     const char *name;
-    hid_t plist_id;
+    hid_t lapl_id;
 };
 
 struct H5VL_loc_by_idx {
@@ -183,7 +176,7 @@ struct H5VL_loc_by_idx {
     H5_index_t idx_type;
     H5_iter_order_t order;
     hsize_t n;
-    hid_t plist_id;
+    hid_t lapl_id;
 };
 
 struct H5VL_loc_by_addr {
@@ -193,7 +186,7 @@ struct H5VL_loc_by_addr {
 struct H5VL_loc_by_ref {
     H5R_type_t ref_type;
     const void *_ref;
-    hid_t plist_id;
+    hid_t lapl_id;
 };
 
 /* Structure to hold parameters for object locations. 
@@ -358,8 +351,8 @@ H5_DLL herr_t H5VLattr_close(void *attr, H5VL_t *vol_plugin, hid_t dxpl_id, void
 /* DATASE OBJECT ROUTINES */
 H5_DLL void *H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
 H5_DLL void *H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLdataset_read(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, void *buf, void **req);
-H5_DLL herr_t H5VLdataset_write(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, const void *buf, void **req);
+H5_DLL herr_t H5VLdataset_read(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, void *buf, void **req);
+H5_DLL herr_t H5VLdataset_write(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, const void *buf, void **req);
 H5_DLL herr_t H5VLdataset_set_extent(void *dset, H5VL_t *vol_plugin, const hsize_t size[], hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLdataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, void **req);

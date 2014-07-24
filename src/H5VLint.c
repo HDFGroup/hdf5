@@ -821,7 +821,7 @@ H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
 
         loc_params.type = H5VL_OBJECT_BY_NAME;
         loc_params.loc_data.loc_by_name.name = name;
-        loc_params.loc_data.loc_by_name.plist_id = tapl_id;
+        loc_params.loc_data.loc_by_name.lapl_id = tapl_id;
 
         /* Open the object class */
         if((ret_value = H5VL_object_open(id, loc_params, dxpl_id, estack_id)) < 0)

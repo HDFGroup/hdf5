@@ -188,9 +188,9 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_ATTR_TYPE_ID, &type_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_ATTR_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
-    if(H5P_set(plist, H5VL_ATTR_SPACE_ID, &space_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_ATTR_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
@@ -330,7 +330,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     loc_params.loc_data.loc_by_idx.idx_type = H5_INDEX_CRT_ORDER;
     loc_params.loc_data.loc_by_idx.order = H5_ITER_INC;
     loc_params.loc_data.loc_by_idx.n = (hsize_t)idx;
-    loc_params.loc_data.loc_by_idx.plist_id = H5P_LINK_ACCESS_DEFAULT;
+    loc_params.loc_data.loc_by_idx.lapl_id = H5P_LINK_ACCESS_DEFAULT;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */

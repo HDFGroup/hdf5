@@ -297,12 +297,12 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* set location paramter for source object */
     loc_params1.type = H5VL_OBJECT_BY_NAME;
     loc_params1.loc_data.loc_by_name.name = src_name;
-    loc_params1.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params1.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params1.obj_type = H5I_get_type(src_loc_id);
     /* set location paramter for destination object */
     loc_params2.type = H5VL_OBJECT_BY_NAME;
     loc_params2.loc_data.loc_by_name.name = dst_name;
-    loc_params2.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params2.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params2.obj_type = H5I_get_type(dst_loc_id);
 
     if(H5L_SAME_LOC != src_loc_id) {
@@ -388,12 +388,12 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* set location paramter for source object */
     loc_params1.type = H5VL_OBJECT_BY_NAME;
     loc_params1.loc_data.loc_by_name.name = src_name;
-    loc_params1.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params1.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params1.obj_type = H5I_get_type(src_loc_id);
     /* set location paramter for destination object */
     loc_params2.type = H5VL_OBJECT_BY_NAME;
     loc_params2.loc_data.loc_by_name.name = dst_name;
-    loc_params2.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params2.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params2.obj_type = H5I_get_type(dst_loc_id);
 
     if(H5L_SAME_LOC != src_loc_id) {
@@ -478,7 +478,7 @@ H5Lcreate_soft(const char *link_target,
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = link_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(link_loc_id);
 
     /* get the file object */
@@ -493,7 +493,7 @@ H5Lcreate_soft(const char *link_target,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_LINK_TARGET_NAME, &link_target) < 0)
+    if(H5P_set(plist, H5VL_PROP_LINK_TARGET_NAME, &link_target) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
     /* Create the link through the VOL */
@@ -559,12 +559,12 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     loc_params1.type = H5VL_OBJECT_BY_NAME;
     loc_params1.obj_type = H5I_get_type(cur_loc_id);
     loc_params1.loc_data.loc_by_name.name = cur_name;
-    loc_params1.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params1.loc_data.loc_by_name.lapl_id = lapl_id;
 
     loc_params2.type = H5VL_OBJECT_BY_NAME;
     loc_params2.obj_type = H5I_get_type(new_loc_id);
     loc_params2.loc_data.loc_by_name.name = new_name;
-    loc_params2.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params2.loc_data.loc_by_name.lapl_id = lapl_id;
 
     if(H5L_SAME_LOC != cur_loc_id) {
         /* get the file object */
@@ -593,9 +593,9 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_LINK_TARGET, &obj1) < 0)
+    if(H5P_set(plist, H5VL_PROP_LINK_TARGET, &obj1) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
-    if(H5P_set(plist, H5VL_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
+    if(H5P_set(plist, H5VL_PROP_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
 
     /* Create the link through the VOL */
@@ -662,7 +662,7 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = link_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(link_loc_id);
 
     /* get the file object */
@@ -677,11 +677,11 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_LINK_TYPE, &link_type) < 0)
+    if(H5P_set(plist, H5VL_PROP_LINK_TYPE, &link_type) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
-    if(H5P_set(plist, H5VL_LINK_UDATA, &udata) < 0)
+    if(H5P_set(plist, H5VL_PROP_LINK_UDATA, &udata) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
-    if(H5P_set(plist, H5VL_LINK_UDATA_SIZE, &udata_size) < 0)
+    if(H5P_set(plist, H5VL_PROP_LINK_UDATA_SIZE, &udata_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
 
     /* Create the link through the VOL */
@@ -729,7 +729,7 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name = name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* get the file object */
     if(NULL == (obj = (void *)H5I_object(loc_id)))
@@ -796,7 +796,7 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
     loc_params.loc_data.loc_by_idx.order = order;
     loc_params.loc_data.loc_by_idx.n = n;
-    loc_params.loc_data.loc_by_idx.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_idx.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
@@ -858,7 +858,7 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name = name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* get the file object */
     if(NULL == (obj = (void *)H5I_object(loc_id)))
@@ -927,7 +927,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
     loc_params.loc_data.loc_by_idx.order = order;
     loc_params.loc_data.loc_by_idx.n = n;
-    loc_params.loc_data.loc_by_idx.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_idx.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
@@ -983,7 +983,7 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name = name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* get the file object */
     if(NULL == (obj = (void *)H5I_object(loc_id)))
@@ -1038,7 +1038,7 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name = name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* get the file object */
     if(NULL == (obj = (void *)H5I_object(loc_id)))
@@ -1103,7 +1103,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
     loc_params.loc_data.loc_by_idx.order = order;
     loc_params.loc_data.loc_by_idx.n = n;
-    loc_params.loc_data.loc_by_idx.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_idx.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
@@ -1299,7 +1299,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
     loc_params.loc_data.loc_by_idx.order = order;
     loc_params.loc_data.loc_by_idx.n = n;
-    loc_params.loc_data.loc_by_idx.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_idx.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
@@ -1439,7 +1439,7 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name = group_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* get the file object */
     if(NULL == (obj = (void *)H5I_object(loc_id)))
@@ -1590,7 +1590,7 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name = group_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* get the file object */
     if(NULL == (obj = (void *)H5I_object(loc_id)))
