@@ -1322,44 +1322,44 @@ The following platforms are not supported but have been tested for this release.
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
-    Debian7.2.0 3.2.0-4-686 #1 SMP Debian 3.2.51-1 i686 GNU/Linux
+    Debian7.5.0 3.2.0-4-686 #1 SMP Debian 3.2.51-1 i686 GNU/Linux
                                   gcc (Debian 4.7.2-5) 4.7.2
                                   GNU Fortran (Debian 4.7.2-5) 4.7.2
                                   (cmake and autotools)
 
-    Debian7.2.0 3.2.0-4-amd64 #1 SMP Debian 3.2.51-1 x86_64 GNU/Linux
+    Debian7.5.0 3.2.0-4-amd64 #1 SMP Debian 3.2.51-1 x86_64 GNU/Linux
                                   gcc (Debian 4.7.2-5) 4.7.2
                                   GNU Fortran (Debian 4.7.2-5) 4.7.2
                                   (cmake and autotools)
 
-    Fedora20 3.11.10-301.fc20.i6866 #1 SMP i686 i686 i386 GNU/Linux
-                                  gcc (GCC) 4.8.2 20131212 (Red Hat 4.8.2-7)
-                                  GNU Fortran (GCC) 4.8.2 20130603 (Red Hat 4.8.2-7)
+    Fedora20 3.15.3-200.fc20.i6866 #1 SMP i686 i686 i386 GNU/Linux
+                                  gcc (GCC) 4.8.3 20140624 (Red Hat 4.8.3-1)
+                                  GNU Fortran (GCC) 4.8.3 20140624 (Red Hat 4.8.3-1)
                                   (cmake and autotools)
 
-    Fedora20 3.11.10-301.fc20.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
-                                  gcc (GCC) 4.8.2 20131212 (Red Hat 4.8.2-7)
-                                  GNU Fortran (GCC) 4.8.2 20130603 (Red Hat 4.8.2-7)
+    Fedora20 3.15.3-200.fc20.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (GCC) 4.8.3 20140624 (Red Hat 4.8.3-1)
+                                  GNU Fortran (GCC) 4.8.3 20140624 (Red Hat 4.8.3-1)
                                   (cmake and autotools)
 
-    SUSE 13.1 3.11.6-4-desktop #1 SMP PREEMPT i686 athlon i386 GNU/Linux
+    SUSE 13.1 3.11.10-17-desktop #1 SMP PREEMPT i686 athlon i386 GNU/Linux
                                   gcc (SUSE Linux) 4.8.1
                                   GNU Fortran (SUSE Linux) 4.8.1
                                   (cmake and autotools)
 
-    SUSE 13.1 3.11.6-4-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
+    SUSE 13.1 3.11.10-17-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
                                   gcc (SUSE Linux) 4.8.1
                                   GNU Fortran (SUSE Linux) 4.8.1
                                   (cmake and autotools)
 
-    Ubuntu 13.10 3.11.0-13-generic #20-Ubuntu SMP i686 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.8.1-10ubuntu8) 4.8.1
-                                  GNU Fortran (Ubuntu/Linaro 4.8.1-10ubuntu8) 4.8.1
+    Ubuntu 14.04 3.13.0-30-generic #55-Ubuntu SMP i686 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
+                                  GNU Fortran (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
                                   (cmake and autotools)
 
-    Ubuntu 13.10 3.11.0-13-generic #20-Ubuntu SMP x86_64 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.8.1-10ubuntu8) 4.8.1
-                                  GNU Fortran (Ubuntu/Linaro 4.8.1-10ubuntu8) 4.8.1
+    Ubuntu 14.04 3.13.0-30-generic #55-Ubuntu SMP x86_64 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
+                                  GNU Fortran (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
                                   (cmake and autotools)
     
     Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46
