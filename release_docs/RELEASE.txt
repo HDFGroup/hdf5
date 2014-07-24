@@ -1352,12 +1352,12 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (SUSE Linux) 4.8.1
                                   (cmake and autotools)
 
-    Ubuntu 14.04 3.13.0-30-generic #55-Ubuntu SMP i686 GNU/Linux
+    Ubuntu 14.04 3.13.0-32-generic #57-Ubuntu SMP i686 GNU/Linux
                                   gcc (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
                                   GNU Fortran (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
                                   (cmake and autotools)
 
-    Ubuntu 14.04 3.13.0-30-generic #55-Ubuntu SMP x86_64 GNU/Linux
+    Ubuntu 14.04 3.13.0-32-generic #57-Ubuntu SMP x86_64 GNU/Linux
                                   gcc (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
                                   GNU Fortran (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
                                   (cmake and autotools)
