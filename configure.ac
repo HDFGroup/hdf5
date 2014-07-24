@@ -586,6 +586,8 @@ AM_CONDITIONAL([FORTRAN_HAVE_STORAGE_SIZE], [test "X$HAVE_STORAGE_SIZE" = "Xyes"
 AM_CONDITIONAL([FORTRAN_2003_CONDITIONAL_F], [test "X$HAVE_FORTRAN_2003" = "Xyes"])
 AM_CONDITIONAL([FORTRAN_DEFAULT_REALisDBLE_F], [test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"])
 
+
+
 ## ----------------------------------------------------------------------
 ## Check if they would like the C++ interface compiled
 ##
@@ -4153,9 +4155,16 @@ if test "X$HDF5_HL" = "Xyes"; then
  HL="hl"
  AC_DEFINE([INCLUDE_HL], [1],
            [Define if HDF5's high-level library headers should be included in hdf5.h])
+
+## Check if Fortran's default real is double precision. If it is and HL is being built then configure
+## should fail due to bug HDFFV-889.
+  if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
+    AC_MSG_ERROR([Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl.])
+  fi
 else
  echo "no"
 fi
+
 
 ## ----------------------------------------------------------------------
 ## Some programs shouldn't be built by default (e.g., programs to generate

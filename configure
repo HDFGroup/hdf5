@@ -6906,6 +6906,8 @@ else
 fi
 
 
+
+
 ## ----------------------------------------------------------------------
 ## Check if they would like the C++ interface compiled
 ##
@@ -30971,9 +30973,16 @@ if test "X$HDF5_HL" = "Xyes"; then
 
 $as_echo "#define INCLUDE_HL 1" >>confdefs.h
 
+
+## Check if Fortran's default real is double precision. If it is and HL is being built then configure
+## should fail due to bug HDFFV-889.
+  if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
+    as_fn_error $? "Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl." "$LINENO" 5
+  fi
 else
  echo "no"
 fi
+
 
 ## ----------------------------------------------------------------------
 ## Some programs shouldn't be built by default (e.g., programs to generate
