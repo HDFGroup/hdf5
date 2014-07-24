@@ -724,7 +724,9 @@ dump_named_datatype(hid_t tid, const char *name)
 
     /* print attributes */
     dump_indent += COL;
+
     attr_iteration(tid, attr_crt_order_flags);
+
     dump_indent -= COL;
 
 done:

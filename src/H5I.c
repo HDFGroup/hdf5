@@ -2143,6 +2143,7 @@ H5Iiterate(H5I_type_t type, H5I_iterate_func_t op, void *op_data)
     herr_t ret_value;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "Itx*x", type, op, op_data);
 
     /* Set up udata struct */
     int_udata.op = op;

@@ -852,12 +852,12 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5VLdatatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_t size, hid_t dxpl_id, void UNUSED **req)
+H5VLdatatype_get_binary(void *obj, H5VL_t *vol_plugin, void *buf, size_t size, hid_t dxpl_id, void UNUSED **req)
 {
     ssize_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("Zs", "*x*x*szi**x", obj, vol_plugin, buf, size, dxpl_id, req);
+    H5TRACE6("Zs", "*x*x*xzi**x", obj, vol_plugin, buf, size, dxpl_id, req);
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")

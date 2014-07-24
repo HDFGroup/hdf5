@@ -852,7 +852,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t 
-H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_t size, 
+H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, void *buf, size_t size, 
                          hid_t dxpl_id, hid_t UNUSED estack_id)
 {
     ssize_t ret_value = FAIL;

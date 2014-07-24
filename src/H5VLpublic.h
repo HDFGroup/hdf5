@@ -230,7 +230,7 @@ typedef struct H5VL_datatype_class_t {
     void  *(*commit)(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, 
                      hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
     void  *(*open)  (void *obj, H5VL_loc_params_t loc_params, const char * name, hid_t tapl_id, hid_t dxpl_id, void **req);
-    ssize_t (*get_binary) (void *obj, unsigned char *buf, size_t size, hid_t dxpl_id, void **req);
+    ssize_t (*get_binary) (void *obj, void *buf, size_t size, hid_t dxpl_id, void **req);
     herr_t (*get)   (void *obj, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*close) (void *dt, hid_t dxpl_id, void **req);
 } H5VL_datatype_class_t;
@@ -367,7 +367,7 @@ H5_DLL herr_t H5VLdataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, v
 /* DATATYPE OBJECT ROUTINES */
 H5_DLL void *H5VLdatatype_commit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
 H5_DLL void *H5VLdatatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
-H5_DLL ssize_t H5VLdatatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_t size, hid_t dxpl_id, void **req);
+H5_DLL ssize_t H5VLdatatype_get_binary(void *obj, H5VL_t *vol_plugin, void *buf, size_t size, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLdatatype_get(void *obj, H5VL_t *vol_plugin, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLdatatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, void **req);
 

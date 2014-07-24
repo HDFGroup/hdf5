@@ -76,7 +76,7 @@ static herr_t H5VL_native_attr_close(void *attr, hid_t dxpl_id, void **req);
 /* Datatype callbacks */
 static void *H5VL_native_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_native_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
-static ssize_t H5VL_native_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t dxpl_id, void **req);
+static ssize_t H5VL_native_datatype_get_binary(void *obj, void *buf, size_t size, hid_t dxpl_id, void **req);
 static herr_t H5VL_native_datatype_get(void *dt, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_datatype_close(void *dt, hid_t dxpl_id, void **req);
 
@@ -1235,7 +1235,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5VL_native_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t UNUSED dxpl_id, void UNUSED **req)
+H5VL_native_datatype_get_binary(void *obj, void *buf, size_t size, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5T_t       *type = (H5T_t *)obj;
     size_t       nalloc = size;
@@ -1243,7 +1243,7 @@ H5VL_native_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5T_encode(type, buf, &nalloc) < 0)
+        if(H5T_encode(type, (unsigned char *)buf, &nalloc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't determine serialized length of datatype")
 
     ret_value = (ssize_t) nalloc;

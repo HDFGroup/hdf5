@@ -73,7 +73,7 @@ H5_DLL herr_t H5VL_dataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, 
 
 H5_DLL void *H5VL_datatype_commit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, hid_t estack_id);
 H5_DLL void *H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t tapl_id, hid_t dxpl_id, hid_t estack_id);
-H5_DLL ssize_t H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_t size, hid_t dxpl_id, hid_t estack_id);
+H5_DLL ssize_t H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, void *buf, size_t size, hid_t dxpl_id, hid_t estack_id);
 H5_DLL herr_t H5VL_datatype_get(void *dt, H5VL_t *vol_plugin, H5VL_datatype_get_t get_type, hid_t dxpl_id, hid_t estack_id, ...);
 H5_DLL herr_t H5VL_datatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t estack_id);
 

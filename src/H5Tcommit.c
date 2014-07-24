@@ -952,7 +952,7 @@ hid_t
 H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hbool_t app_ref)
 {
     ssize_t        nalloc;
-    unsigned char *buf = NULL;
+    void          *buf = NULL;
     H5T_t         *dt = NULL;       /* datatype token from VOL plugin */
     hid_t          ret_value = FAIL;
 
@@ -964,7 +964,7 @@ H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hbool_t app_ref)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get datatype size")
 
     /* allocate buffer to store binary description of the datatype */
-    if (NULL == (buf = (unsigned char *) H5MM_malloc ((size_t)nalloc)))
+    if (NULL == (buf = (void *) H5MM_malloc ((size_t)nalloc)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate space for datatype")
 
     /* get binary description of the datatype */
