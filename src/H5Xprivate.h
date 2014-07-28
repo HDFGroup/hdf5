@@ -46,15 +46,15 @@ H5_DLL herr_t H5X_unregister(unsigned intex_type);
 
 H5_DLL herr_t H5X_create(hid_t file_id, unsigned plugin_id, hid_t scope_id,
         hid_t xcpl_id);
-H5_DLL herr_t H5X_create_ff(hid_t file_id, unsigned plugin_id,
-        hid_t scope_id, hid_t xcpl_id, hid_t trans_id, hid_t estack_id);
+//H5_DLL herr_t H5X_create_ff(hid_t file_id, unsigned plugin_id,
+//        hid_t scope_id, hid_t xcpl_id, hid_t trans_id, hid_t estack_id);
 
 H5_DLL herr_t H5X_remove(hid_t file_id, unsigned plugin_id, hid_t scope_id);
-H5_DLL herr_t H5X_remove_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id,
-        hid_t trans_id, hid_t estack_id);
+//H5_DLL herr_t H5X_remove_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id,
+//        hid_t trans_id, hid_t estack_id);
 
 H5_DLL herr_t H5X_get_count(hid_t scope_id, hsize_t *idx_count);
-H5_DLL herr_t H5X_get_count_ff(hid_t scope_id, hsize_t *idx_count, hid_t rcxt_id,
-        hid_t estack_id);
+//H5_DLL herr_t H5X_get_count_ff(hid_t scope_id, hsize_t *idx_count, hid_t rcxt_id,
+//        hid_t estack_id);
 
 #endif /* _H5Xprivate_H */
