@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
+#ifdef SWMR_DEBUG
 #include <termios.h>
 #include <fcntl.h>
  
@@ -41,6 +42,7 @@ static int get_key(void)
     }
     return c;
 }
+#endif /* SWMR_DEBUG */
 
 #define TEST_BUF_SIZE 100
 
@@ -93,8 +95,10 @@ monitor_dset(const char *fname, const char *dname)
 	goto done;
     }
 
+#ifdef SWMR_DEBUG
     /* Monitor for keypresses */
     set_mode(1);
+#endif /* SWMR_DEBUG */
 
     /* Monitor the dataset for changes */
     while(1) {
@@ -148,9 +152,11 @@ monitor_dset(const char *fname, const char *dname)
 	/* Sleep before next monitor */
         sleep(1);
 
+#ifdef SWMR_DEBUG
         /* Check for keypress */
         if(get_key())
             break;
+#endif /* SWMR_DEBUG */
     } /* end while */
 
 done:
