@@ -354,7 +354,7 @@ H5F_get_obj_ids_cb(void UNUSED *obj_ptr, hid_t obj_id, void *key)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F_get_obj_count_cb */
+} /* H5F_get_obj_ids_cb */
 
 
 /*-------------------------------------------------------------------------
