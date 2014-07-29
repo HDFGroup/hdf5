@@ -117,6 +117,7 @@ IDE_GENERATED_PROPERTIES ("H5E" "${H5E_HDRS}" "${H5E_SRCS}" )
 
 set (H5F_SRCS
     ${HDF5_SRC_DIR}/H5F.c
+    ${HDF5_SRC_DIR}/H5Fint.c
     ${HDF5_SRC_DIR}/H5Faccum.c
     ${HDF5_SRC_DIR}/H5Fcwfs.c
     ${HDF5_SRC_DIR}/H5Fdbg.c

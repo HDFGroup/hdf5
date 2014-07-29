@@ -50,7 +50,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Dio.c H5Dlayout.c \
         H5Dmpio.c H5Doh.c H5Dscatgath.c H5Dselect.c H5Dtest.c \
         H5E.c H5Edeprec.c H5Eint.c \
-        H5F.c H5Faccum.c H5Fcwfs.c \
+        H5F.c H5Fint.c H5Faccum.c H5Fcwfs.c \
         H5Fdbg.c H5Fefc.c H5Ffake.c H5Fio.c \
         H5Fmount.c H5Fmpi.c H5Fquery.c \
         H5Fsfile.c H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
