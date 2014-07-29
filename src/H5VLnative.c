@@ -2347,6 +2347,8 @@ H5VL_native_file_close(void *file, hid_t UNUSED dxpl_id, void UNUSED **req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    HDassert(f->id_exists);  /* This routine should only be called when a file ID's ref count drops to zero */
+
     /* Flush file if this is the last reference to this id and we have write
      * intent, unless it will be flushed by the "shared" file being closed.
      * This is only necessary to replicate previous behaviour, and could be
@@ -2362,6 +2364,7 @@ H5VL_native_file_close(void *file, hid_t UNUSED dxpl_id, void UNUSED **req)
             if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
+
     /* close the file */
     if(H5F_close(f) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file")

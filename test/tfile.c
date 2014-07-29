@@ -1577,6 +1577,38 @@ test_file_freespace(void)
     VERIFY(mod_filesize, empty_filesize, "H5Fget_freespace");
 } /* end test_file_freespace() */
 
+static void
+test_file_isaccessible_helper(const char *filename, htri_t expected)
+{
+    htri_t   status;    /* Whether a file is an HDF5 file */
+    hid_t    fapl;      /* File access property list */
+    herr_t   ret;
+
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Verify that the file is an HDF5 file with the sec2 default driver*/
+    status = H5Fis_accessible(filename, fapl);
+    VERIFY(status, expected, "H5Fis_accessible");
+
+    /* Verify that the file is an HDF5 file with the core VFD*/
+    ret = H5Pset_fapl_core(fapl, (size_t)1024, 0);
+    CHECK(ret, FAIL, "H5Pset_fapl_core");
+    status = H5Fis_accessible(filename, fapl);
+    VERIFY(status, expected, "H5Fis_accessible");
+
+#ifdef H5_HAVE_DIRECT
+    /* Verify that the file is an HDF5 file with the direct VFD*/
+    ret = H5Pset_fapl_direct(fapl, 1024, 4096, 8*4096);
+    CHECK(ret, FAIL, "H5Pset_fapl_direct");
+    status = H5Fis_accessible(filename, fapl);
+    VERIFY(status, expected, "H5Fis_accessible");
+#endif
+
+    ret = H5Pclose (fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+}
+
 /****************************************************************
 **
 **  test_file_isaccessible(): low-level file test routine.
@@ -1593,7 +1625,6 @@ test_file_isaccessible(void)
     ssize_t  nbytes;    /* Number of bytes written */
     unsigned u;         /* Local index variable */
     unsigned char buf[1024];    /* Buffer of data to write */
-    htri_t   status;    /* Whether a file is an HDF5 file */
     herr_t   ret;
 
     /* Output message about test being performed */
@@ -1608,9 +1639,7 @@ test_file_isaccessible(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is an HDF5 file */
-    status = H5Fis_accessible(FILE1, H5P_DEFAULT);
-    VERIFY(status, TRUE, "H5Fis_accessible");
-
+    test_file_isaccessible_helper(FILE1, TRUE);
 
     /* Create a file creation property list with a non-default user block size */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
@@ -1632,9 +1661,7 @@ test_file_isaccessible(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is an HDF5 file */
-    status = H5Fis_accessible(FILE1, H5P_DEFAULT);
-    VERIFY(status, TRUE, "H5Fis_accessible");
-
+    test_file_isaccessible_helper(FILE1, TRUE);
 
     /* Create non-HDF5 file and check it */
     fd=HDopen(FILE1, O_RDWR|O_CREAT|O_TRUNC, 0666);
@@ -1652,9 +1679,8 @@ test_file_isaccessible(void)
     ret = HDclose(fd);
     CHECK(ret, FAIL, "HDclose");
 
-    /* Verify that the file is not an HDF5 file */
-    status = H5Fis_accessible(FILE1, H5P_DEFAULT);
-    VERIFY(status, FALSE, "H5Fis_accessible");
+    /* Verify that the file is NOT an HDF5 file */
+    test_file_isaccessible_helper(FILE1, FALSE);
 
 } /* end test_file_isaccessible() */
 

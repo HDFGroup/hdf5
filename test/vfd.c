@@ -106,10 +106,6 @@ test_sec2(void)
     if(H5FD_SEC2 != H5Pget_driver(access_fapl))
         TEST_ERROR;
 
-    /* ...and close the property list */
-    if(H5Pclose(access_fapl) < 0)
-        TEST_ERROR;
-
     /* Check file handle API */
     if(H5Fget_vfd_handle(file, H5P_DEFAULT, (void **)&fhandle) < 0)
         TEST_ERROR;
@@ -127,6 +123,14 @@ test_sec2(void)
         TEST_ERROR;
 
     if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Verify that the file is an HDF5 file */
+    if(H5Fis_accessible(filename, access_fapl) != TRUE)
+        TEST_ERROR;
+
+    /* ...and close the property list */
+    if(H5Pclose(access_fapl) < 0)
         TEST_ERROR;
 
     h5_cleanup(FILENAME, fapl);
@@ -214,10 +218,6 @@ test_direct(void)
 
     /* Check that the driver is correct */
     if(H5FD_DIRECT != H5Pget_driver(access_fapl))
-        TEST_ERROR;
-
-    /* ...and close the property list */
-    if (H5Pclose(access_fapl) < 0)
         TEST_ERROR;
 
     /* Check file handle API */
@@ -333,6 +333,14 @@ test_direct(void)
     HDassert(check);
     HDfree(check);
 
+    /* Verify that the file is an HDF5 file */
+    if(H5Fis_accessible(filename, access_fapl) != TRUE)
+        TEST_ERROR;
+
+    /* ...and close the property list */
+    if(H5Pclose(access_fapl) < 0)
+        TEST_ERROR;
+
     h5_cleanup(FILENAME, fapl);
     PASSED();
     return 0;
@@ -438,10 +446,17 @@ test_core(void)
     if(H5Fclose(file) < 0)
         TEST_ERROR;
 
+    /* Verify that the file is an HDF5 file */
+    if(H5Fis_accessible(filename, fapl) != TRUE)
+       TEST_ERROR;
 
     /* Open the file with backing store off for read and write.
      * Changes won't be saved in file. */
     if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, FALSE) < 0)
+        TEST_ERROR;
+
+    /* Verify that the file is an HDF5 file */
+    if(H5Fis_accessible(filename, fapl) != TRUE)
         TEST_ERROR;
 
     if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
@@ -499,6 +514,10 @@ test_core(void)
         TEST_ERROR;
 
     if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Verify that the file is an HDF5 file */
+    if(H5Fis_accessible(filename, fapl) != TRUE)
         TEST_ERROR;
 
     /* Open the file with backing store on for read and write.
@@ -610,6 +629,12 @@ test_family_opens(char *fname, hid_t fa_pl)
     /* Case 1: reopen file with 1st member file name and default property list */
     HDsnprintf(first_name, sizeof(first_name), fname, 0);
 
+    /* Verify that the file is not accessible */
+    H5E_BEGIN_TRY {
+    if(H5Fis_accessible(first_name, H5P_DEFAULT) != FALSE)
+        TEST_ERROR;
+    } H5E_END_TRY;
+
     H5E_BEGIN_TRY {
         file = H5Fopen(first_name, H5F_ACC_RDWR, H5P_DEFAULT);
     } H5E_END_TRY;
@@ -617,6 +642,11 @@ test_family_opens(char *fname, hid_t fa_pl)
         TEST_ERROR
 
     /* Case 2: reopen file with correct name template but default property list */
+
+    /* Verify that the file is not accessible */
+    if(H5Fis_accessible(fname, H5P_DEFAULT) != FALSE)
+        TEST_ERROR;
+
     H5E_BEGIN_TRY {
         file = H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT);
     } H5E_END_TRY;
@@ -625,6 +655,10 @@ test_family_opens(char *fname, hid_t fa_pl)
 
     /* Case 3: reopen file with wrong member size */
     if(H5Pset_fapl_family(fa_pl, (hsize_t)128, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Verify that the file is not accessible */
+    if(H5Fis_accessible(fname, fa_pl) != FALSE)
         TEST_ERROR;
 
     H5E_BEGIN_TRY {
@@ -642,6 +676,10 @@ test_family_opens(char *fname, hid_t fa_pl)
         }
 
     if(H5Pset_fapl_family(fa_pl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Verify that the file is not accessible */
+    if(H5Fis_accessible(wrong_name, fa_pl) != FALSE)
         TEST_ERROR;
 
     H5E_BEGIN_TRY {
@@ -705,6 +743,10 @@ test_family(void)
 
     /* Reopen the file with default member file size */
     if(H5Pset_fapl_family(fapl, (hsize_t)H5F_FAMILY_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Verify that the file is accessible with correct fapl */
+    if(H5Fis_accessible(filename, fapl) != TRUE)
         TEST_ERROR;
 
     if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
@@ -871,6 +913,10 @@ test_family_compat(void)
         HDsnprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
     }
 
+    /* Verify that the file is accessible */
+    if(H5Fis_accessible(newname, fapl) != TRUE)
+        TEST_ERROR;
+
     /* Make sure we can open the file.  Use the read and write mode to flush the
      * superblock. */
     if((file = H5Fopen(newname, H5F_ACC_RDWR, fapl)) < 0)
@@ -938,6 +984,10 @@ test_multi_opens(char *fname)
     /* Case: reopen with the name of super file and default property list */
     HDsnprintf(super_name, sizeof(super_name), "%%s-%c.h5", 's');
     HDsnprintf(sf_name, sizeof(sf_name), super_name, fname);
+
+    /* Verify that the file is accessible */
+    if(H5Fis_accessible(sf_name, H5P_DEFAULT) != FALSE)
+        return -1;
 
     H5E_BEGIN_TRY {
         file = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -1029,6 +1079,10 @@ test_multi(void)
 
     /* Test wrong ways to reopen multi files */
     if(test_multi_opens(filename) < 0)
+        TEST_ERROR;
+
+    /* Verify that the file is an HDF5 file */
+    if(H5Fis_accessible(filename, fapl) != TRUE)
         TEST_ERROR;
 
     /* Reopen the file */
@@ -1232,6 +1286,10 @@ test_multi_compat(void)
     sprintf(newname_r, "%s-%c.h5", FILENAME[9], 'r');
     h5_make_local_copy(filename_r, newname_r);
 
+    /* Verify that the file is accessible */
+    if(H5Fis_accessible(newname, fapl) != TRUE)
+        TEST_ERROR;
+
     /* Reopen the file for read only.  Verify 1.8 library can open file
      * created with 1.6 library. */
     if((file=H5Fopen(newname, H5F_ACC_RDONLY, fapl)) < 0)
@@ -1367,10 +1425,6 @@ test_log(void)
     if(H5FD_LOG != H5Pget_driver(access_fapl))
         TEST_ERROR;
 
-    /* ...and close the property list */
-    if(H5Pclose(access_fapl) < 0)
-        TEST_ERROR;
-
     /* Check file handle API */
     if(H5Fget_vfd_handle(file, H5P_DEFAULT, (void **)&fhandle) < 0)
         TEST_ERROR;
@@ -1388,6 +1442,14 @@ test_log(void)
         TEST_ERROR;
 
     if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Verify that the file is accessible with log vfd */
+    if(H5Fis_accessible(filename, access_fapl) != TRUE)
+        TEST_ERROR;
+
+    /* ...and close the property list */
+    if(H5Pclose(access_fapl) < 0)
         TEST_ERROR;
 
     h5_cleanup(FILENAME, fapl);
@@ -1445,10 +1507,6 @@ test_stdio(void)
     if(H5FD_STDIO != H5Pget_driver(access_fapl))
         TEST_ERROR;
 
-    /* ...and close the property list */
-    if(H5Pclose(access_fapl) < 0)
-        TEST_ERROR;
-
     /* Check file handle API */
     if(H5Fget_vfd_handle(file, H5P_DEFAULT, (void **)&fhandle) < 0)
         TEST_ERROR;
@@ -1466,6 +1524,14 @@ test_stdio(void)
         TEST_ERROR;
 
     if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Verify that the file is accessible with stdio vfd */
+    if(H5Fis_accessible(filename, access_fapl) != TRUE)
+        TEST_ERROR;
+
+    /* ...and close the property list */
+    if(H5Pclose(access_fapl) < 0)
         TEST_ERROR;
 
     h5_cleanup(FILENAME, fapl);
@@ -1535,10 +1601,6 @@ test_windows(void)
     if(H5FD_WINDOWS!= H5Pget_driver(access_fapl))
         TEST_ERROR;
 
-    /* ...and close the property list */
-    if(H5Pclose(access_fapl) < 0)
-        TEST_ERROR;
-
     /* Check file handle API */
     if(H5Fget_vfd_handle(file, H5P_DEFAULT, (void **)&fhandle) < 0)
         TEST_ERROR;
@@ -1556,6 +1618,14 @@ test_windows(void)
         TEST_ERROR;
 
     if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Verify that the file is accessible with windows vfd */
+    if(H5Fis_accessible(filename, access_fapl) != TRUE)
+        TEST_ERROR;
+
+    /* ...and close the property list */
+    if(H5Pclose(access_fapl) < 0)
         TEST_ERROR;
 
     h5_cleanup(FILENAME, fapl);

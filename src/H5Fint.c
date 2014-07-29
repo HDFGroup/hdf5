@@ -634,26 +634,32 @@ done:
 htri_t
 H5F_is_hdf5(const char *name, hid_t fapl_id)
 {
-    H5FD_t	*file = NULL;           /* Low-level file struct */
+    H5F_t	*file = NULL;           /* Low-level file struct */
     haddr_t     sig_addr;               /* Addess of hdf5 file signature */
     htri_t	ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Open the file at the virtual file layer */
-    if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
-	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
+    //if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
+    //HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
+
+    /* Open the file  */
+    if(NULL == (file = H5F_open(name, H5F_ACC_RDONLY, H5P_FILE_CREATE_DEFAULT,
+                                fapl_id, H5AC_ind_dxpl_id)))
+	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FALSE, "unable to open file")
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
-    if(H5FD_locate_signature(file, H5AC_ind_dxpl_g, &sig_addr) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
+    if(H5FD_locate_signature(file->shared->lf, H5AC_ind_dxpl_g, &sig_addr) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FALSE, "unable to locate file signature")
     ret_value = (HADDR_UNDEF != sig_addr);
 
 done:
     /* Close the file */
     if(file)
-        if(H5FD_close(file) < 0 && ret_value >= 0)
-            HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+        //if(H5FD_close(file) < 0 && ret_value >= 0)
+        if(H5F_close(file) < 0 && ret_value >= 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_is_hdf5() */
@@ -1338,7 +1344,6 @@ H5F_close(H5F_t *f)
 
     /* Sanity check */
     HDassert(f);
-    HDassert(f->id_exists);  /* This routine should only be called when a file ID's ref count drops to zero */
 
     /* Perform checks for "semi" file close degree here, since closing the
      * file is not allowed if there are objects still open */
