@@ -598,6 +598,11 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     /* Get the flags for logging */
     file->fa.flags = fa->flags;
+    if(fa->logfile)
+        file->fa.logfile = HDstrdup(fa->logfile);
+    else
+        file->fa.logfile = NULL;
+    file->fa.buf_size = fa->buf_size;
 
     /* Check if we are doing any logging at all */
     if(file->fa.flags != 0) {
@@ -797,6 +802,11 @@ H5FD_log_close(H5FD_t *_file)
         if(file->logfp != stderr)
             HDfclose(file->logfp);
     } /* end if */
+
+    if(file->fa.logfile) {
+        HDfree(file->fa.logfile);
+        file->fa.logfile = NULL;
+    }
 
     /* Release the file info */
     file = H5FL_FREE(H5FD_log_t, file);
