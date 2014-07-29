@@ -156,10 +156,10 @@ set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES
 # Fortran 2003 standard
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_F2003)
-  # default real is 4 bytes, so include double signatures
+  # F2003 features are enabled
   set (F_STATUS "_F03")
 else (HDF5_ENABLE_F2003)
-  # default real is 8 bytes, so exclude double signatures
+  # F2003 features are not enabled
   set (F_STATUS "_F90")
 endif (HDF5_ENABLE_F2003)
 

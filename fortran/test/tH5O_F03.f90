@@ -68,7 +68,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INTEGER(HID_T) :: group_id
+    INTEGER(HID_T), VALUE :: group_id
     CHARACTER(LEN=1), DIMENSION(1:180) :: name
     TYPE(h5o_info_t) :: oinfo
     TYPE(ovisit_ud_t) :: op_data
