@@ -20,16 +20,6 @@
 # in column one with a '#'.
 #------------------------------------------------------------------------------
 
-./docs/user_manual/external.tex
-./docs/user_manual/main.tex
-./docs/user_manual/intro.tex
-./docs/user_manual/internal.tex
-./docs/user_manual/main.pdf
-./docs/user_manual/plugin.tex
-./docs/user_manual/stacking.tex
-./docs/user_manual/mirrored.jpg
-./docs/user_manual/stacked.jpg
-
 ./.autom4te.cfg                 _DO_NOT_DISTRIBUTE_
 ./.h5chkright.ini      _DO_NOT_DISTRIBUTE_
 ./ACKNOWLEDGMENTS
@@ -677,8 +667,8 @@
 ./src/H5EAsblock.c
 ./src/H5EAstat.c
 ./src/H5EAtest.c
+./src/H5ESpublic.h
 ./src/H5F.c
-./src/H5Fint.c
 ./src/H5Faccum.c
 ./src/H5Fcwfs.c
 ./src/H5Fdbg.c
