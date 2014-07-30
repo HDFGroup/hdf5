@@ -65,8 +65,8 @@ const H5Z_class2_t H5Z_FAIL_TEST[1] = {{
  *-------------------------------------------------------------------------
  */
 static size_t
-filter_fail(unsigned int flags, size_t cd_nelmts,
-      const unsigned int *cd_values, size_t nbytes,
+filter_fail(unsigned int flags, size_t UNUSED cd_nelmts,
+      const unsigned int UNUSED *cd_values, size_t nbytes,
       size_t *buf_size, void **buf)
 {
     int   *dst = (int*)(*buf);
@@ -387,6 +387,7 @@ int main(void)
     if(H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
         TEST_ERROR
 
+    /* Run the test again. */
     nerrors += (test_filter_write(filename, fapl, FALSE) < 0	? 1 : 0);
     nerrors += (test_filter_read(filename, fapl) < 0		? 1 : 0);
 

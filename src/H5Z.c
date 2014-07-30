@@ -408,27 +408,27 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_unregister(H5Z_filter_t id)
+H5Z_unregister(H5Z_filter_t filter_id)
 {
-    size_t i;                   /* Local index variable */
+    size_t       filter_index;        /* Local index variable for filter */
     H5Z_object_t object;
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t       ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(id >= 0 && id <= H5Z_FILTER_MAX);
+    HDassert(filter_id>=0 && filter_id<=H5Z_FILTER_MAX);
 
     /* Is the filter already registered? */
-    for (i=0; i<H5Z_table_used_g; i++)
-	if (H5Z_table_g[i].id==id)
+    for (filter_index=0; filter_index<H5Z_table_used_g; filter_index++)
+	if (H5Z_table_g[filter_index].id==filter_id)
             break;
 
     /* Fail if filter not found */
-    if (i>=H5Z_table_used_g)
+    if (filter_index>=H5Z_table_used_g)
         HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "filter is not registered")
 
     /* Initialize the structure object for iteration */
-    object.filter_id = id;
+    object.filter_id = filter_id;
     object.found = FALSE;
 
     /* Iterate through all opened datasets, returns a failure if any of them uses the filter */
@@ -451,9 +451,9 @@ H5Z_unregister(H5Z_filter_t id)
 
     /* Remove filter from table */
     /* Don't worry about shrinking table size (for now) */
-    HDmemmove(&H5Z_table_g[i],&H5Z_table_g[i+1],sizeof(H5Z_class2_t)*((H5Z_table_used_g-1)-i));
+    HDmemmove(&H5Z_table_g[filter_index],&H5Z_table_g[filter_index+1],sizeof(H5Z_class2_t)*((H5Z_table_used_g-1)-filter_index));
 #ifdef H5Z_DEBUG
-    HDmemmove(&H5Z_stat_table_g[i],&H5Z_stat_table_g[i+1],sizeof(H5Z_stats_t)*((H5Z_table_used_g-1)-i));
+    HDmemmove(&H5Z_stat_table_g[filter_index],&H5Z_stat_table_g[filter_index+1],sizeof(H5Z_stats_t)*((H5Z_table_used_g-1)-filter_index));
 #endif /* H5Z_DEBUG */
     H5Z_table_used_g--;
 
@@ -508,7 +508,7 @@ done:
  *              FALSE otherwise.
  *
  * Programmer:  Raymond Lu
- *              13 May 2013
+ *              6 May 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -612,7 +612,7 @@ done:
  *              FAIL if there is an error
  *
  * Programmer:  Raymond Lu
- *              13 May 2013
+ *              6 May 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -635,7 +635,6 @@ H5Z__flush_file_cb(void *obj_ptr, hid_t UNUSED obj_id, void UNUSED *key)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z__flush_file_cb() */
-
 
 
 /*-------------------------------------------------------------------------
@@ -851,7 +850,7 @@ H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type
                 H5S_t *space;           /* Dataspace describing chunk */
                 size_t u;               /* Local index variable */
 
-                /* Create a data space for a chunk & set the extent */
+                /* Create a dataspace for a chunk & set the extent */
                 for(u = 0; u < dcpl_layout.u.chunk.ndims; u++)
                     chunk_dims[u] = dcpl_layout.u.chunk.dim[u];
                 if(NULL == (space = H5S_create_simple(dcpl_layout.u.chunk.ndims, chunk_dims, NULL)))
@@ -972,7 +971,7 @@ H5Z_can_apply_direct(const H5O_pline_t *pline)
     HDassert(pline->nused > 0);
 
     /* Make "can apply" callbacks for filters in pipeline */
-    if(H5Z_prelude_callback(pline, -1, -1, -1, H5Z_PRELUDE_CAN_APPLY) < 0)
+    if(H5Z_prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_CAN_APPLY) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter")
 
 done:
@@ -1009,7 +1008,7 @@ H5Z_set_local_direct(const H5O_pline_t *pline)
     HDassert(pline->nused > 0);
 
     /* Make "set local" callbacks for filters in pipeline */
-    if(H5Z_prelude_callback(pline, -1, -1, -1, H5Z_PRELUDE_SET_LOCAL) < 0)
+    if(H5Z_prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_SET_LOCAL) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "local filter parameters not set")
 
 done:
@@ -1493,7 +1492,7 @@ done:
  *              FAIL   - error
  *
  * Programmer:	Raymond Lu
- *              14 May 2013
+ *              26 April 2013
  *
  * Modifications:
  *
@@ -1522,6 +1521,7 @@ H5Z_filter_in_pline(const H5O_pline_t *pline, H5Z_filter_t filter)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_filter_in_pline() */
+
 
 
 /*-------------------------------------------------------------------------

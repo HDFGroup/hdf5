@@ -68,8 +68,8 @@
 #define MAX_FREE_ID_STRUCTS 1000
 
 /* Combine a Type number and an atom index into an atom */
-#define H5I_MAKE(g,i)	((((hid_t)(g)&TYPE_MASK)<<ID_BITS)|	  \
-			     ((hid_t)(i)&ID_MASK))
+#define H5I_MAKE(g,i)	((((hid_t)(g) & TYPE_MASK) << ID_BITS) |	  \
+			     ((hid_t)(i) & ID_MASK))
 
 /* Local typedefs */
 
@@ -454,7 +454,7 @@ H5Inmembers(H5I_type_t type, hsize_t *num_members)
         if((members = H5I_nmembers(type)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTCOUNT, FAIL, "can't compute number of members")
 
-        *num_members = (hsize_t)members;
+        H5_ASSIGN_OVERFLOW(*num_members, members, int, hsize_t);
     } /* end if */
 
 done:

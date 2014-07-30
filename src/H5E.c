@@ -144,8 +144,7 @@ static const H5I_class_t H5I_ERRSTK_CLS[1] = {{
 }};
 
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5E_init
  *
@@ -172,8 +171,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_init() */
 
-
-
+
 /*--------------------------------------------------------------------------
  * Function:    H5E_set_default_auto
  *
@@ -211,8 +209,7 @@ H5E_set_default_auto(H5E_t *stk)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E_set_default_auto() */
 
-
-
+
 /*--------------------------------------------------------------------------
  * Function:    H5E_init_interface
  *
@@ -267,8 +264,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_init_interface() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5E_term_interface
  *
@@ -299,15 +295,14 @@ H5E_term_interface(void)
         nmsg = H5I_nmembers(H5I_ERROR_MSG);
         nstk = H5I_nmembers(H5I_ERROR_STACK);
 
-        n = ncls + nmsg + nstk;
-        if(n > 0) {
+        if((ncls + nmsg + nstk) > 0) {
             /* Clear any outstanding error stacks */
             if(nstk > 0)
-	        H5I_clear_type(H5I_ERROR_STACK, FALSE, FALSE);
+	        (void)H5I_clear_type(H5I_ERROR_STACK, FALSE, FALSE);
 
             /* Clear all the error classes */
 	    if(ncls > 0) {
-	        H5I_clear_type(H5I_ERROR_CLASS, FALSE, FALSE);
+	        (void)H5I_clear_type(H5I_ERROR_CLASS, FALSE, FALSE);
 
                 /* Reset the HDF5 error class, if its been closed */
                 if(H5I_nmembers(H5I_ERROR_CLASS) == 0)
@@ -316,7 +311,7 @@ H5E_term_interface(void)
 
             /* Clear all the error messages */
 	    if(nmsg > 0) {
-	        H5I_clear_type(H5I_ERROR_MSG, FALSE, FALSE);
+	        (void)H5I_clear_type(H5I_ERROR_MSG, FALSE, FALSE);
 
                 /* Reset the HDF5 error messages, if they've been closed */
                 if(H5I_nmembers(H5I_ERROR_MSG) == 0) {
@@ -324,27 +319,28 @@ H5E_term_interface(void)
                     #include "H5Eterm.h"
                 } /* end if */
             } /* end if */
+
+            n++; /*H5I*/
 	} /* end if */
         else {
             /* Close deprecated interface */
             n += H5E__term_deprec_interface();
 
 	    /* Destroy the error class, message, and stack id groups */
-	    H5I_dec_type_ref(H5I_ERROR_STACK);
-	    H5I_dec_type_ref(H5I_ERROR_CLASS);
-	    H5I_dec_type_ref(H5I_ERROR_MSG);
+	    (void)H5I_dec_type_ref(H5I_ERROR_STACK);
+	    (void)H5I_dec_type_ref(H5I_ERROR_CLASS);
+	    (void)H5I_dec_type_ref(H5I_ERROR_MSG);
+            n++; /*H5I*/
 
 	    /* Mark closed */
 	    H5_interface_initialize_g = 0;
-	    n = 1; /*H5I*/
 	} /* end else */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5E_term_interface() */
 
-
-
+
 #ifdef H5_HAVE_THREADSAFE
 /*-------------------------------------------------------------------------
  * Function:	H5E_get_stack
@@ -395,8 +391,7 @@ H5E_get_stack(void)
 } /* end H5E_get_stack() */
 #endif  /* H5_HAVE_THREADSAFE */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5E_free_class
  *
@@ -426,8 +421,7 @@ H5E_free_class(H5E_cls_t *cls)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E_free_class() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eregister_class
  *
@@ -465,8 +459,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eregister_class() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5E_register_class
  *
@@ -515,8 +508,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_register_class() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eunregister_class
  *
@@ -552,8 +544,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eunregister_class() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5E_unregister_class
  *
@@ -588,8 +579,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_unregister_class() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eget_class_name
  *
@@ -624,8 +614,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eget_class_name() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5E_get_class_name
  *
@@ -663,8 +652,7 @@ H5E_get_class_name(const H5E_cls_t *cls, char *name, size_t size)
     FUNC_LEAVE_NOAPI(len)
 } /* end H5E_get_class_name() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5E_close_msg_cb
  *
@@ -702,8 +690,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_close_msg_cb() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eclose_msg
  *
@@ -736,8 +723,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eclose_msg() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5E_close_msg
  *
@@ -766,8 +752,7 @@ H5E_close_msg(H5E_msg_t *err)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E_close_msg() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Ecreate_msg
  *
@@ -858,8 +843,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_create_msg() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eget_msg
  *
@@ -894,8 +878,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eget_msg() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Ecreate_stack
  *
@@ -932,8 +915,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ecreate_stack() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eget_current_stack
  *
@@ -969,8 +951,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eget_current_stack() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5E_get_current_stack
  *
@@ -1047,8 +1028,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_get_current_stack() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eset_current_stack
  *
@@ -1096,8 +1076,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eset_current_stack() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5E_set_current_stack
  *
@@ -1161,8 +1140,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_set_current_stack() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eclose_stack
  *
@@ -1200,8 +1178,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eclose_stack() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5E_close_stack
  *
@@ -1231,8 +1208,7 @@ H5E_close_stack(H5E_t *estack)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E_close_stack() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eget_num
  *
@@ -1277,8 +1253,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eget_num() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5E_get_num
  *
@@ -1301,8 +1276,7 @@ H5E_get_num(const H5E_t *estack)
     FUNC_LEAVE_NOAPI((ssize_t)estack->nused)
 } /* end H5E_get_num() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Epop
  *
@@ -1351,8 +1325,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Epop() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Epush2
  *
@@ -1466,8 +1439,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Epush2() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eclear2
  *
@@ -1509,8 +1481,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eclear2() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eprint2
  *
@@ -1557,8 +1528,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eprint2() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Ewalk2
  *
@@ -1606,8 +1576,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ewalk2() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eget_auto2
  *
@@ -1663,8 +1632,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eget_auto2() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eset_auto2
  *
@@ -1733,8 +1701,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eset_auto2() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eauto_is_v2
  *

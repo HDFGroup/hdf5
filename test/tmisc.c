@@ -1686,7 +1686,7 @@ test_misc8(void)
     /* Free the read & write buffers */
     HDfree(wdata);
 #ifdef VERIFY_DATA
-    free(rdata);
+    HDfree(rdata);
 #endif /* VERIFY_DATA */
 } /* end test_misc8() */
 
@@ -1910,7 +1910,7 @@ test_misc11(void)
     file = H5Fopen(MISC11_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fcreate");
 
-    /* Get the file's dataset creation property list */
+    /* Get the file's creation property list */
     fcpl =  H5Fget_create_plist(file);
     CHECK(fcpl, FAIL, "H5Fget_create_plist");
 

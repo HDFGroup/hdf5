@@ -352,7 +352,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
     }
 
     /* Add prefix and suffix to the index */
-    return h5tools_str_fmt(str, 0, OPT(info->idx_fmt, "%s: "));
+    return h5tools_str_fmt(str, (size_t)0, OPT(info->idx_fmt, "%s: "));
 }
 
 /*-------------------------------------------------------------------------
@@ -412,7 +412,7 @@ h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
     }
 
     /* Add prefix and suffix to the index */
-    return h5tools_str_fmt(str, 0, OPT(info->idx_fmt, "%s: "));
+    return h5tools_str_fmt(str, (size_t)0, OPT(info->idx_fmt, "%s: "));
 }
 
 /*-------------------------------------------------------------------------

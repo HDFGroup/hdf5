@@ -844,18 +844,18 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
        the prefix is printed one indentation level before */
     if (info->pindex) {
         for (i = 0; i < indentlevel - 1; i++) {
-            PUTSTREAM(h5tools_str_fmt(&str, 0, info->line_indent), stream);
+            PUTSTREAM(h5tools_str_fmt(&str, (size_t)0, info->line_indent), stream);
         }
     }
 
     if (elmtno == 0 && secnum == 0 && info->line_1st) {
-        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
+        PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_1st), stream);
     }
     else if (secnum && info->line_cont) {
-        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_cont), stream);
+        PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_cont), stream);
     }
     else {
-        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
+        PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_pre), stream);
     }
 
     templength = h5tools_str_len(&prefix);
@@ -863,7 +863,7 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
     for (i = 0; i < indentlevel; i++) {
         /*we already made the indent for the array indices case */
         if (!info->pindex) {
-            PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
+            PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_indent), stream);
             templength += h5tools_str_len(&prefix);
         }
         else {
@@ -937,22 +937,22 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
        the prefix is printed one indentation level before */
     if (info->pindex)
         for (i = 0; i < indentlevel - 1; i++) {
-            PUTSTREAM(h5tools_str_fmt(&str, 0, info->line_indent), stream);
+            PUTSTREAM(h5tools_str_fmt(&str, (size_t)0, info->line_indent), stream);
         }
 
     if (elmtno == 0 && secnum == 0 && info->line_1st) {
-        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
+        PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_1st), stream);
     } else if (secnum && info->line_cont) {
-        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_cont), stream);
+        PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_cont), stream);
     } else
-        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
+        PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_pre), stream);
 
     templength = h5tools_str_len(&prefix);
 
     for (i = 0; i < indentlevel; i++) {
         /*we already made the indent for the array indices case */
         if (!info->pindex) {
-            PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
+            PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_indent), stream);
             templength += h5tools_str_len(&prefix);
         }
         else {
@@ -1009,7 +1009,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
     if (stream == NULL)
         return dimension_break;
 
-    s = h5tools_str_fmt(buffer, 0, "%s");
+    s = h5tools_str_fmt(buffer, (size_t)0, "%s");
 
     /*
      * If the element would split on multiple lines if printed at our
@@ -1163,7 +1163,7 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
     int      secnum; /*section sequence number */
     int      multiline; /*datum was multiline  */
 
-    s = h5tools_str_fmt(buffer, 0, "%s");
+    s = h5tools_str_fmt(buffer, (size_t)0, "%s");
 
     /*
      * If the element would split on multiple lines if printed at our

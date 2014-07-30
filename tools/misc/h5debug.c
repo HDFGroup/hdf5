@@ -21,33 +21,31 @@
  *
  * Purpose:             Debugs an existing HDF5 file at a low level.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-#define H5A_PACKAGE	/*suppress error about including H5Apkg  */
-#define H5B2_PACKAGE	/*suppress error about including H5B2pkg  */
-#define H5B2_TESTING	/*suppress warning about H5B2 testing funcs*/
+#define H5A_PACKAGE     /*suppress error about including H5Apkg  */
+#define H5B2_PACKAGE    /*suppress error about including H5B2pkg */
+#define H5B2_TESTING    /*suppress warning about H5B2 testing funcs*/
 #define H5D_PACKAGE     /*suppress error about including H5Dpkg  */
-#define H5F_PACKAGE	/*suppress error about including H5Fpkg	  */
-#define H5G_PACKAGE	/*suppress error about including H5Gpkg	  */
-#define H5HF_PACKAGE	/*suppress error about including H5HFpkg  */
-#define H5O_PACKAGE	/*suppress error about including H5Opkg	  */
-#define H5SM_PACKAGE	/*suppress error about including H5SMpkg  */
+#define H5F_PACKAGE     /*suppress error about including H5Fpkg  */
+#define H5G_PACKAGE     /*suppress error about including H5Gpkg  */
+#define H5HF_PACKAGE    /*suppress error about including H5HFpkg */
+#define H5O_PACKAGE     /*suppress error about including H5Opkg  */
+#define H5SM_PACKAGE    /*suppress error about including H5SMpkg */
 
-#include "H5private.h"	/* Generic Functions			*/
-#include "H5Apkg.h"	/* Attributes				*/
-#include "H5B2pkg.h"	/* v2 B-trees				*/
-#include "H5Dpkg.h"     /* Datasets             		*/
-#include "H5Eprivate.h"	/* Error handling		  	*/
-#include "H5Fpkg.h"     /* File access				*/
-#include "H5FSprivate.h" /* Free space manager			*/
-#include "H5Gpkg.h"	/* Groups				*/
-#include "H5HFpkg.h"	/* Fractal heaps			*/
-#include "H5HGprivate.h" /* Global Heaps			*/
-#include "H5Iprivate.h"	/* IDs			  		*/
-#include "H5Opkg.h"     /* Object headers			*/
-#include "H5SMpkg.h"	/* Implicitly shared messages		*/
+#include "H5private.h"  /* Generic Functions    */
+#include "H5Apkg.h"     /* Attributes           */
+#include "H5B2pkg.h"    /* v2 B-trees           */
+#include "H5Dpkg.h"     /* Datasets             */
+#include "H5Eprivate.h" /* Error handling       */
+#include "H5Fpkg.h"     /* File access          */
+#include "H5FSprivate.h" /* Free space manager  */
+#include "H5Gpkg.h"     /* Groups               */
+#include "H5HFpkg.h"    /* Fractal heaps        */
+#include "H5HGprivate.h" /* Global Heaps        */
+#include "H5Iprivate.h" /* IDs                  */
+#include "H5Opkg.h"     /* Object headers       */
+#include "H5SMpkg.h"    /* Implicitly shared messages    */
 
 /* File drivers */
 #include "H5FDfamily.h"
@@ -192,13 +190,13 @@ main(int argc, char *argv[])
      * Parse command arguments.
      */
     if(argc > 2)
-        addr = HDstrtoll(argv[2], NULL, 0);
+        addr = (haddr_t)HDstrtoll(argv[2], NULL, 0);
     if(argc > 3)
-        extra = HDstrtoll(argv[3], NULL, 0);
+        extra = (haddr_t)HDstrtoll(argv[3], NULL, 0);
     if(argc > 4)
-        extra2 = HDstrtoll(argv[4], NULL, 0);
+        extra2 = (haddr_t)HDstrtoll(argv[4], NULL, 0);
     if(argc > 5)
-        extra3 = HDstrtoll(argv[5], NULL, 0);
+        extra3 = (haddr_t)HDstrtoll(argv[5], NULL, 0);
     if(argc > 6)
         extra4 = (haddr_t)HDstrtoll(argv[6], NULL, 0);
 

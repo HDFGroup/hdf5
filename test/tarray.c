@@ -1041,7 +1041,7 @@ test_array_vlen_atomic(void)
     /* Initialize array data to write */
     for(i=0; i<SPACE1_DIM1; i++)
         for(j=0; j<ARRAY1_DIM1; j++) {
-            wdata[i][j].p=malloc((i+j+1)*sizeof(unsigned int));
+            wdata[i][j].p=HDmalloc((i+j+1)*sizeof(unsigned int));
             wdata[i][j].len=i+j+1;
             for(k=0; k<(i+j+1); k++)
                 ((unsigned int *)wdata[i][j].p)[k]=i*100+j*10+k;
@@ -1252,7 +1252,7 @@ test_array_vlen_array(void)
     /* Initialize array data to write */
     for(i=0; i<SPACE1_DIM1; i++)
         for(j=0; j<ARRAY1_DIM1; j++) {
-            wdata[i][j].p=malloc((i+j+1)*(sizeof(unsigned int)*ARRAY1_DIM1));
+            wdata[i][j].p=HDmalloc((i+j+1)*(sizeof(unsigned int)*ARRAY1_DIM1));
             wdata[i][j].len=i+j+1;
             for(k=0; k<(i+j+1); k++)
                 for(l=0; l<ARRAY1_DIM1; l++)
@@ -1633,7 +1633,7 @@ test_array_bkg(void)
     /* Release memory resources */
     /* ------------------------ */
     for (i = 0; i < dtsinfo.nsubfields; i++)
-        free(dtsinfo.name[i]);
+        HDfree(dtsinfo.name[i]);
 
 
     /* Release IDs */

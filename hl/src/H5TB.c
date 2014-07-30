@@ -15,7 +15,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "H5private.h"
+
 #include "H5LTprivate.h"
 #include "H5TBprivate.h"
 
@@ -1240,9 +1240,9 @@ herr_t H5TBdelete_record(hid_t loc_id,
     if(H5TBget_table_info(loc_id, dset_name, &nfields, &ntotal_records) < 0)
         goto out;
 
-    if(NULL == (src_offset = (size_t *)malloc((size_t)nfields * sizeof(size_t))))
+    if(NULL == (src_offset = (size_t *)HDmalloc((size_t)nfields * sizeof(size_t))))
         goto out;
-    if(NULL == (src_sizes = (size_t *)malloc((size_t)nfields * sizeof(size_t))))
+    if(NULL == (src_sizes = (size_t *)HDmalloc((size_t)nfields * sizeof(size_t))))
         goto out;
 
     /* get field info */
@@ -1327,11 +1327,11 @@ herr_t H5TBdelete_record(hid_t loc_id,
 
 out:
     if(tmp_buf)
-        free(tmp_buf);
+        HDfree(tmp_buf);
     if(src_offset)
-        free(src_offset);
+        HDfree(src_offset);
     if(src_sizes)
-        free(src_sizes);
+        HDfree(src_sizes);
     if(mem_type_id > 0)
         if(H5Tclose(mem_type_id) < 0)
             ret_val = -1;
@@ -1550,9 +1550,9 @@ herr_t H5TBadd_records_from(hid_t loc_id,
     if(H5TBget_table_info(loc_id, dset_name1, &nfields, &ntotal_records) < 0)
         goto out;
 
-    if(NULL == (src_offset = (size_t *)malloc((size_t)nfields * sizeof(size_t))))
+    if(NULL == (src_offset = (size_t *)HDmalloc((size_t)nfields * sizeof(size_t))))
         goto out;
-    if(NULL == (src_sizes  = (size_t *)malloc((size_t)nfields * sizeof(size_t))))
+    if(NULL == (src_sizes  = (size_t *)HDmalloc((size_t)nfields * sizeof(size_t))))
         goto out;
 
     /* get field info */
@@ -1608,11 +1608,11 @@ herr_t H5TBadd_records_from(hid_t loc_id,
 
 out:
     if(tmp_buf)
-        free(tmp_buf);
+        HDfree(tmp_buf);
     if(src_offset)
-        free(src_offset);
+        HDfree(src_offset);
     if(src_sizes)
-        free(src_sizes);
+        HDfree(src_sizes);
     if(tid > 0)
         if(H5Tclose(tid) < 0)
             ret_val = -1;
@@ -1857,7 +1857,7 @@ herr_t H5TBcombine_tables(hid_t loc_id1,
     if(H5Sclose(m_sid) < 0)
         goto out;
     m_sid = H5I_BADID;
-    free(tmp_buf);
+    HDfree(tmp_buf);
     tmp_buf = NULL;
 
     /*-------------------------------------------------------------------------
@@ -1920,13 +1920,13 @@ herr_t H5TBcombine_tables(hid_t loc_id1,
 
 out:
     if(tmp_buf)
-        free(tmp_buf);
+        HDfree(tmp_buf);
     if(tmp_fill_buf)
-        free(tmp_fill_buf);
+        HDfree(tmp_fill_buf);
     if(src_offset)
-        free(src_offset);
+        HDfree(src_offset);
     if(src_sizes)
-        free(src_sizes);
+        HDfree(src_sizes);
     if(member_type_id > 0)
         if(H5Tclose(member_type_id) < 0)
             ret_val = -1;
@@ -3263,7 +3263,7 @@ hid_t H5TB_create_type(hid_t loc_id,
     hsize_t  nfields = 0;
     char   **fnames = NULL;
     unsigned i;
-    herr_t   ret_val = -1;
+    hid_t   ret_val = -1;
 
     /* get the number of fields  */
     if(H5TBget_table_info(loc_id, dset_name, &nfields, NULL) < 0)

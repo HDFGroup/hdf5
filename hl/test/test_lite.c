@@ -1820,7 +1820,6 @@ out:
 static int test_valid_path(void)
 {
   hid_t file_id, group;
-  FILE *fp = NULL;
   htri_t path_valid;
   const char *data_string_in = "test";
   

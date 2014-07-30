@@ -644,7 +644,7 @@ coll_chunktest(const char* filename,
   dims[1] = SPACE_DIM2;
 
   /* allocate memory for data buffer */
-  data_array1 = (int *)malloc(dims[0] * dims[1] * sizeof(int));
+  data_array1 = (int *)HDmalloc(dims[0] * dims[1] * sizeof(int));
   VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
   /* set up dimensions of the slab this process accesses */
@@ -910,11 +910,11 @@ coll_chunktest(const char* filename,
   /* Use collective read to verify the correctness of collective write. */
 
   /* allocate memory for data buffer */
-  data_array1 = (int *)malloc(dims[0]*dims[1]*sizeof(int));
+  data_array1 = (int *)HDmalloc(dims[0]*dims[1]*sizeof(int));
   VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
   /* allocate memory for data buffer */
-  data_origin1 = (int *)malloc(dims[0]*dims[1]*sizeof(int));
+  data_origin1 = (int *)HDmalloc(dims[0]*dims[1]*sizeof(int));
   VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
   acc_plist = create_faccess_plist(comm, info, facc_type);

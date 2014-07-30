@@ -176,7 +176,7 @@ test_direct_chunk_write (hid_t file)
 	    direct_buf[i][j] = n++;
 
     /* Allocate output (compressed) buffer */
-    outbuf = malloc(z_dst_nbytes);
+    outbuf = HDmalloc(z_dst_nbytes);
     z_dst = (Bytef *)outbuf;
 
     /* Perform compression from the source to the destination buffer */
@@ -206,7 +206,7 @@ test_direct_chunk_write (hid_t file)
     }
 
     if(outbuf)
-        free(outbuf);
+        HDfree(outbuf);
 
     if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0) 
         goto error;
@@ -249,7 +249,7 @@ test_direct_chunk_write (hid_t file)
 	    direct_buf[i][j] = i + j;
 
     /* Allocate output (compressed) buffer */
-    outbuf = malloc(z_dst_nbytes);
+    outbuf = HDmalloc(z_dst_nbytes);
     z_dst = (Bytef *)outbuf;
 
     /* Perform compression from the source to the destination buffer */
@@ -280,7 +280,7 @@ test_direct_chunk_write (hid_t file)
     }
 
     if(outbuf)
-        free(outbuf);
+        HDfree(outbuf);
 
     if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0) 
         goto error;
@@ -329,7 +329,7 @@ error:
     } H5E_END_TRY;
 
     if(outbuf)
-        free(outbuf);
+        HDfree(outbuf);
 
     return 1;
 }
@@ -1016,13 +1016,13 @@ test_invalid_parameters(hid_t file)
 
     /* Check invalid dataset ID */ 
     H5E_BEGIN_TRY {
-        if((status = H5DOwrite_chunk(-1, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if((status = H5DOwrite_chunk((hid_t)-1, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
     /* Check invalid DXPL ID */
     H5E_BEGIN_TRY {
-        if((status = H5DOwrite_chunk(dataset, -1, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if((status = H5DOwrite_chunk(dataset, (hid_t)-1, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 

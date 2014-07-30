@@ -1937,7 +1937,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
             datactx.need_prefix = TRUE;
             datactx.indent_level = ctx.indent_level;
             datactx.cur_column = ctx.cur_column;
-            status = h5tools_dump_dset(rawoutstream, outputformat, &datactx, obj_id, -1, NULL);
+            status = h5tools_dump_dset(rawoutstream, outputformat, &datactx, obj_id, NULL);
         }
     } 
     else {

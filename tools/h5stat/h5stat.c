@@ -32,9 +32,9 @@
 #define DEF_SIZE_SMALL_DSETS        	10
 #define DEF_SIZE_SMALL_ATTRS  		10
 
-#define  H5_NFILTERS_IMPL        	8     /* Number of currently implemented filters + one to
-                                          	 accommodate for user-define filters + one
-						 to accomodate datasets whithout any filters */
+#define  H5_NFILTERS_IMPL        8     /* Number of currently implemented filters + one to
+                                          accommodate for user-define filters + one
+                                          to accomodate datasets whithout any filters */
 
 
 
@@ -855,7 +855,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
 			error_msg("Invalid threshold for small datasets\n");
 			goto error;
 		    }
-		} else 
+		} else
 		    error_msg("Missing threshold for small datasets\n");
 
                 break;
@@ -878,7 +878,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
 			goto error;
 		    }
 		} else
-		    error_msg("Missing threshold for small # of attributes\n");
+                    error_msg("Missing threshold for small # of attributes\n");
 
                 break;
 
@@ -1592,9 +1592,9 @@ main(int argc, const char *argv[])
             iter.SM_heap_storage_size = finfo.sohm.msgs_info.heap_size;
         } /* end else */
 
-	iter.num_small_groups = (unsigned long *)calloc((size_t)sgroups_threshold, sizeof(unsigned long));
-	iter.num_small_attrs = (unsigned long *)calloc((size_t)(sattrs_threshold+1), sizeof(unsigned long));
-	iter.small_dset_dims = (unsigned long *)calloc((size_t)sdsets_threshold, sizeof(unsigned long));
+	iter.num_small_groups = (unsigned long *)HDcalloc((size_t)sgroups_threshold, sizeof(unsigned long));
+	iter.num_small_attrs = (unsigned long *)HDcalloc((size_t)(sattrs_threshold+1), sizeof(unsigned long));
+	iter.small_dset_dims = (unsigned long *)HDcalloc((size_t)sdsets_threshold, sizeof(unsigned long));
 
 	if(iter.num_small_groups == NULL || iter.num_small_attrs == NULL || iter.small_dset_dims == NULL) {
 	    error_msg("Unable to allocate memory for tracking small groups/datasets/attributes\n");

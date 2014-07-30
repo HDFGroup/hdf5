@@ -81,8 +81,8 @@ main(void) {
     *  Create references to the group "A" and dataset "B"
     *  and store them in the wbuf.
     */
-   H5Rcreate(&wbuf[0], fid, "A", H5R_OBJECT, -1);
-   H5Rcreate(&wbuf[1], fid, "B", H5R_OBJECT, -1);
+   H5Rcreate(&wbuf[0], fid, "A", H5R_OBJECT, (hid_t)-1);
+   H5Rcreate(&wbuf[1], fid, "B", H5R_OBJECT, (hid_t)-1);
 
    /*
     *  Write dataset R using default transfer properties.
