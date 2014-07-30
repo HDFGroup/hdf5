@@ -2148,7 +2148,7 @@ test_refer_dtype(hid_t file)
         TEST_ERROR;
 
     /* Create reference to named datatype */
-    if(H5Rcreate(wbuf, file, "/Group1/Datatype1", H5R_OBJECT, -1) < 0)
+    if(H5Rcreate(wbuf, file, "/Group1/Datatype1", H5R_OBJECT, (hid_t)-1) < 0)
         TEST_ERROR;
     if(H5Rget_obj_type2(dataset, H5R_OBJECT, wbuf, &obj_type) < 0)
         TEST_ERROR;

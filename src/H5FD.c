@@ -200,16 +200,22 @@ H5FD_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	if((n=H5I_nmembers(H5I_VFL))!=0) {
-	    H5I_clear_type(H5I_VFL, FALSE, FALSE);
-	} else {
-	    H5I_dec_type_ref(H5I_VFL);
+	if(H5I_nmembers(H5I_VFL) > 0) {
+	    (void)H5I_clear_type(H5I_VFL, FALSE, FALSE);
+            n++; /*H5I*/
+	} /* end if */
+        else {
+            /* Destroy the VFL driver id group */
+	    (void)H5I_dec_type_ref(H5I_VFL);
+            n++; /*H5I*/
+
+	    /* Mark closed */
 	    H5_interface_initialize_g = 0;
-	    n = 1; /*H5I*/
-	}
-    }
+	} /* end else */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(n)
-}
+} /* end H5FD_term_interface() */
 
 
 /*-------------------------------------------------------------------------

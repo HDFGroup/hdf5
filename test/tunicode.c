@@ -454,7 +454,7 @@ void test_objnames(hid_t fid, const char* string)
   CHECK(ret, FAIL, "H5Dcreate2");
 
   /* Create reference to named datatype */
-  ret = H5Rcreate(&obj_ref, grp2_id, string, H5R_OBJECT, -1);
+  ret = H5Rcreate(&obj_ref, grp2_id, string, H5R_OBJECT, (hid_t)-1);
   CHECK(ret, FAIL, "H5Rcreate");
   /* Write selection and read it back*/
   ret = H5Dwrite(dset_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, &obj_ref);

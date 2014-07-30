@@ -4145,7 +4145,7 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
     op_data.target_file = filename2;
     /* Core file driver has issues when used as the member file driver for a family file */
     /* Family file driver cannot be used with family or multi drivers for member files */
-    /* Also disable parellel member drivers, because IS_H5FD_MPI whould report FALSE, causing problems */
+    /* Also disable parallel member drivers, because IS_H5FD_MPI whould report FALSE, causing problems */
     base_driver = H5Pget_driver(fapl);
     op_data.base_fapl = (base_driver == H5FD_FAMILY || base_driver ==  H5FD_MULTI
             || base_driver == H5FD_MPIO || base_driver == H5FD_CORE) ? H5P_DEFAULT : fapl;
@@ -6077,7 +6077,7 @@ external_link_closing(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY
 
     /* Test H5Rcreate */
-    if(H5Rcreate(&obj_ref, fid1, "elink/elink/elink/type1_moved", H5R_OBJECT, (-1)) < 0) TEST_ERROR
+    if(H5Rcreate(&obj_ref, fid1, "elink/elink/elink/type1_moved", H5R_OBJECT, (hid_t)(-1)) < 0) TEST_ERROR
 
     /* Test unlink */
     if(H5Ldelete(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT) < 0) TEST_ERROR
@@ -12600,13 +12600,13 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     /* Check for iteration w/bad location ID */
     skip = 0;
     H5E_BEGIN_TRY {
-        ret = H5Literate((-1), H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL);
+        ret = H5Literate((hid_t)(-1), H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL);
     } H5E_END_TRY;
     if(ret >= 0) TEST_ERROR
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     H5E_BEGIN_TRY {
-        ret = H5Giterate((-1), ".", &gskip, group_iterate_old_cb, iter_info);
+        ret = H5Giterate((hid_t)(-1), ".", &gskip, group_iterate_old_cb, iter_info);
     } H5E_END_TRY;
     if(ret >= 0) TEST_ERROR
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

@@ -3038,7 +3038,7 @@ check_fapl_mdc_api_errs(void)
     if  ( pass ) {
 
         H5E_BEGIN_TRY {
-	    result = H5Pget_mdc_config(-1, &scratch);
+	    result = H5Pget_mdc_config((hid_t)-1, &scratch);
 	} H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3109,7 +3109,7 @@ check_fapl_mdc_api_errs(void)
     if ( pass ) {
 
         H5E_BEGIN_TRY {
-            result = H5Pset_mdc_config(-1, &default_config);
+            result = H5Pset_mdc_config((hid_t)-1, &default_config);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3258,7 +3258,7 @@ check_file_mdc_api_errs(void)
 	}
 
         H5E_BEGIN_TRY {
-            result = H5Fget_mdc_config(-1, &scratch);
+            result = H5Fget_mdc_config((hid_t)-1, &scratch);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3317,7 +3317,7 @@ check_file_mdc_api_errs(void)
 	}
 
         H5E_BEGIN_TRY {
-            result = H5Fset_mdc_config(-1, &default_config);
+            result = H5Fset_mdc_config((hid_t)-1, &default_config);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3385,7 +3385,7 @@ check_file_mdc_api_errs(void)
 	}
 
         H5E_BEGIN_TRY {
-            result = H5Fget_mdc_hit_rate(-1, &hit_rate);
+            result = H5Fget_mdc_hit_rate((hid_t)-1, &hit_rate);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3425,7 +3425,7 @@ check_file_mdc_api_errs(void)
 	}
 
         H5E_BEGIN_TRY {
-            result = H5Freset_mdc_hit_rate_stats(-1);
+            result = H5Freset_mdc_hit_rate_stats((hid_t)-1);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3446,7 +3446,7 @@ check_file_mdc_api_errs(void)
 	}
 
         H5E_BEGIN_TRY {
-            result = H5Fget_mdc_size(-1, &max_size, &min_clean_size,
+            result = H5Fget_mdc_size((hid_t)-1, &max_size, &min_clean_size,
                                      &cur_size, &cur_num_entries);
         } H5E_END_TRY;
 

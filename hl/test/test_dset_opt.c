@@ -1016,13 +1016,13 @@ test_invalid_parameters(hid_t file)
 
     /* Check invalid dataset ID */ 
     H5E_BEGIN_TRY {
-        if((status = H5DOwrite_chunk(-1, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if((status = H5DOwrite_chunk((hid_t)-1, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
     /* Check invalid DXPL ID */
     H5E_BEGIN_TRY {
-        if((status = H5DOwrite_chunk(dataset, -1, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if((status = H5DOwrite_chunk(dataset, (hid_t)-1, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 

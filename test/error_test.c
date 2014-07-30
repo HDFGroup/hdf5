@@ -57,7 +57,7 @@ hid_t   ERR_MIN_WRITE;
 hid_t   ERR_MIN_GETNUM;
 
 #define DSET_NAME               "a_dataset"
-#define FAKE_ID                 0
+#define FAKE_ID                 (hid_t)0
 
 #define ERR_CLS_NAME            "Error Test"
 #define ERR_CLS2_NAME           "Second Test"

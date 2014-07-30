@@ -112,12 +112,13 @@ typedef union YYSTYPE
 /* Line 2065 of yacc.c  */
 #line 68 "H5LTparse.y"
 
-    int   ival;         /*for integer token*/
-    char  *sval;        /*for name string*/
+    int     ival;         /*for integer token*/
+    char    *sval;        /*for name string*/
+    hid_t   hid;          /*for hid_t token*/
 
 
 /* Line 2065 of yacc.c  */
-#line 121 "H5LTparse.h"
+#line 122 "H5LTparse.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

@@ -224,12 +224,12 @@ done:
 int
 H5D_term_interface(void)
 {
-    int		n=0;
+    int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	if((n=H5I_nmembers(H5I_DATASET))>0) {
+	if(H5I_nmembers(H5I_DATASET) > 0) {
             /* The dataset API uses the "force" flag set to true because it
              * is using the "file objects" (H5FO) API functions to track open
              * objects in the file.  Using the H5FO code means that dataset
@@ -252,19 +252,25 @@ H5D_term_interface(void)
              *
              * QAK - 5/13/03
              */
-	    H5I_clear_type(H5I_DATASET, TRUE, FALSE);
-	} else {
+	    (void)H5I_clear_type(H5I_DATASET, TRUE, FALSE);
+            n++; /*H5I*/
+	} /* end if */
+        else {
             /* Close public interface */
             n += H5D__term_pub_interface();
 
             /* Close deprecated interface */
             n += H5D__term_deprec_interface();
 
-	    H5I_dec_type_ref(H5I_DATASET);
+	    /* Destroy the dataset object id group */
+	    (void)H5I_dec_type_ref(H5I_DATASET);
+            n++; /*H5I*/
+
+	    /* Mark closed */
 	    H5_interface_initialize_g = 0;
-	    n = 1; /*H5I*/
-	}
-    }
+	} /* end else */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(n)
 } /* end H5D_term_interface() */
 

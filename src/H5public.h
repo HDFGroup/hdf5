@@ -282,9 +282,6 @@ H5_GCC_DIAG_ON(long-long)
 #   error "nothing appropriate for uint64_t"
 #endif
 
-/* Default value for all property list classes */
-#define H5P_DEFAULT     0
-
 /* Common iteration orders */
 typedef enum {
     H5_ITER_UNKNOWN = -1,       /* Unknown order */

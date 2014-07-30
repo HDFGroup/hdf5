@@ -554,7 +554,7 @@ herr_t H5IMlink_palette( hid_t loc_id,
             goto out;
 
         /* Create a reference. The reference is created on the local id.  */
-        if(H5Rcreate(&ref, loc_id, pal_name, H5R_OBJECT, -1) < 0)
+        if(H5Rcreate(&ref, loc_id, pal_name, H5R_OBJECT, (hid_t)-1) < 0)
             goto out;
 
         /* Write the attribute with the reference */
@@ -604,7 +604,7 @@ herr_t H5IMlink_palette( hid_t loc_id,
             goto out;
 
         /* Create a new reference for this palette. */
-        if ( H5Rcreate( &ref, loc_id, pal_name, H5R_OBJECT, -1 ) < 0)
+        if ( H5Rcreate( &ref, loc_id, pal_name, H5R_OBJECT, (hid_t)-1 ) < 0)
             goto out;
 
         refbuf[n_refs] = ref;

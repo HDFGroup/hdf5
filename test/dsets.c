@@ -3843,7 +3843,7 @@ test_nbit_compound_3(hid_t file)
         for(k = 0; k < (i+1); k++) ((unsigned int *)orig_data[i].v.p)[k] = (unsigned int)(i*100 + k);
 
         /* Create reference to the dataset "nbit_obj_ref" */
-        if(H5Rcreate(&orig_data[i].r, file, "nbit_obj_ref", H5R_OBJECT, -1) < 0) goto error;
+        if(H5Rcreate(&orig_data[i].r, file, "nbit_obj_ref", H5R_OBJECT, (hid_t)-1) < 0) goto error;
 
         for(j = 0; j < 5; j++) orig_data[i].o[j] = (unsigned char)(i + j);
     }
