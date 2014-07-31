@@ -11422,6 +11422,12 @@ delete_by_idx(hid_t fapl)
                 } H5E_END_TRY;
                 if(ret >= 0) TEST_ERROR
 
+                /* Check for deletion on non-existing group */
+                H5E_BEGIN_TRY {
+                    ret = H5Ldelete_by_idx(group_id, "None", idx_type, order, (hsize_t)0, H5P_DEFAULT);
+                } H5E_END_TRY;
+                if(ret >= 0) TEST_ERROR
+
                 /* Create several links, up to limit of compact form */
                 for(u = 0; u < max_compact; u++) {
                     hid_t group_id2;	        /* Group ID */
