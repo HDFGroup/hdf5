@@ -623,7 +623,7 @@ h5_fileaccess(void)
 void
 h5_no_hwconv(void)
 {
-    H5Tunregister(H5T_PERS_HARD, NULL, -1, -1, NULL);
+    H5Tunregister(H5T_PERS_HARD, NULL, (hid_t)-1, (hid_t)-1, NULL);
 }
 
 
@@ -1113,7 +1113,7 @@ getenv_all(MPI_Comm comm, int root, const char* name)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+int
 h5_make_local_copy(const char *origfilename, const char *local_copy_name)
 {
     int fd_old = (-1), fd_new = (-1);   /* File descriptors for copying data */

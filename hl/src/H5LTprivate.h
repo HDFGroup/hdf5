@@ -48,6 +48,6 @@ H5_HLDLL herr_t  H5LT_find_attribute( hid_t loc_id, const char *name );
 H5_HLDLL char* H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang,
                                     size_t *slen, hbool_t no_user_buf);
 
-H5_HLDLL int H5LTyyparse(void);
+H5_HLDLL hid_t H5LTyyparse(void);
 
 #endif

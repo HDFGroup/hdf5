@@ -22,6 +22,9 @@
 #include "H5TBprivate.h"
 
 
+/* Local routines */
+static herr_t H5DS_is_reserved(hid_t did);
+static hid_t H5DS_get_REFLIST_type(void);
 
 /*-------------------------------------------------------------------------
 * Function: H5DSset_scale
@@ -221,11 +224,11 @@ herr_t H5DSattach_scale(hid_t did,
     *-------------------------------------------------------------------------
     */
     /* create a reference for the >>DS<< dataset */
-    if (H5Rcreate(&ref_to_ds,dsid,".",H5R_OBJECT,-1) < 0)
+    if (H5Rcreate(&ref_to_ds, dsid, ".", H5R_OBJECT, (hid_t)-1) < 0)
         return FAIL;
 
     /* create a reference for the >>data<< dataset */
-    if (H5Rcreate(&dsl.ref,did,".",H5R_OBJECT,-1) < 0)
+    if (H5Rcreate(&dsl.ref, did, ".", H5R_OBJECT, (hid_t)-1) < 0)
         return FAIL;
 
     /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
@@ -2109,6 +2112,7 @@ out:
 *-------------------------------------------------------------------------
 */
 
+static
 herr_t H5DS_is_reserved(hid_t did)
 {
     int    has_class;
@@ -2179,6 +2183,7 @@ out:
 *-------------------------------------------------------------------------
 */
 
+static
 hid_t H5DS_get_REFLIST_type(void)
 {
     hid_t ntid_t = -1; 

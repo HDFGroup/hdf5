@@ -1744,11 +1744,11 @@ CATCH
  */
 int
 h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, 
-        hid_t dset, hid_t _p_type, struct subset_t *sset)
+        hid_t dset, struct subset_t *sset)
 {
-    hid_t     f_space;
-    hid_t     p_type = _p_type;
-    hid_t     f_type;
+    hid_t     f_space = -1;
+    hid_t     p_type = -1;
+    hid_t     f_type = -1;
     H5S_class_t space_type;
     int       status = FAIL;
     h5tool_format_t info_dflt;
@@ -1761,26 +1761,26 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
         info = &info_dflt;
     }
 
-    if (p_type < 0) {
-        f_type = H5Dget_type(dset);
+    f_type = H5Dget_type(dset);
+    if (f_type < 0)
+        goto done;
 
-        if (info->raw || bin_form == 1)
-            p_type = H5Tcopy(f_type);
-        else if (bin_form == 2)
-            p_type = h5tools_get_little_endian_type(f_type);
-        else if (bin_form == 3)
-            p_type = h5tools_get_big_endian_type(f_type);
-        else
-            p_type = h5tools_get_native_type(f_type);
+    if (info->raw || bin_form == 1)
+        p_type = H5Tcopy(f_type);
+    else if (bin_form == 2)
+        p_type = h5tools_get_little_endian_type(f_type);
+    else if (bin_form == 3)
+        p_type = h5tools_get_big_endian_type(f_type);
+    else
+        p_type = h5tools_get_native_type(f_type);
 
-        H5Tclose(f_type);
-
-        if (p_type < 0)
-            goto done;
-    }
+    if (p_type < 0)
+        goto done;
 
     /* Check the data space */
     f_space = H5Dget_space(dset);
+    if (f_space < 0)
+        goto done;
 
     space_type = H5Sget_simple_extent_type(f_space);
 
@@ -1795,12 +1795,13 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
         /* space is H5S_NULL */
         status = SUCCEED;
 
-    /* Close the dataspace */
-    H5Sclose(f_space);
-
 done:
-    if (p_type != _p_type)
+    if (f_type > 0)
+        H5Tclose(f_type);
+    if (p_type > 0)
         H5Tclose(p_type);
+    if (f_space > 0)
+        H5Sclose(f_space);
 
     return status;
 }
@@ -3855,7 +3856,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info,
         }
         else
             datactx.need_prefix = TRUE;
-        status = h5tools_dump_dset(stream, info, &datactx, obj_id, -1, sset);
+        status = h5tools_dump_dset(stream, info, &datactx, obj_id, sset);
         if((display_char && H5Tget_size(f_type) == 1) && (H5Tget_class(f_type) == H5T_INTEGER)) {
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "\"");

@@ -4086,7 +4086,7 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
 
 
     /* Get number of attributes with bad ID */
-    ret = H5Aget_num_attrs(-1);
+    ret = H5Aget_num_attrs((hid_t)-1);
     VERIFY(ret, FAIL, "H5Aget_num_attrs");
 
     /* Get number of attributes */
