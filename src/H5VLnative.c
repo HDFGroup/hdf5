@@ -3198,7 +3198,7 @@ H5VL_native_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const char
 {
     H5G_loc_t	src_loc;                /* Source object group location */
     H5G_loc_t	dst_loc;                /* Destination group location */
-    hid_t       ret_value = FAIL;
+    herr_t      ret_value = FAIL;
     
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -3599,7 +3599,7 @@ done:
  */
 static herr_t
 H5VL_native_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, 
-                       hid_t UNUSED dxpl_id, void UNUSED **req, va_list arguments)
+                       hid_t dxpl_id, void UNUSED **req, va_list arguments)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
     H5G_loc_t	loc;                    /* Location of group */
@@ -3618,7 +3618,7 @@ H5VL_native_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_
                 if(loc_params.type == H5VL_OBJECT_BY_NAME) {
                     /* Check if the object exists */
                     if((*ret = H5G_loc_exists(&loc, loc_params.loc_data.loc_by_name.name, 
-                                              loc_params.loc_data.loc_by_name.lapl_id, H5AC_dxpl_id)) < 0)
+                                              loc_params.loc_data.loc_by_name.lapl_id, dxpl_id)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", 
                                     loc_params.loc_data.loc_by_name.name)
                 }

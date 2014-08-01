@@ -149,7 +149,7 @@ typedef enum H5VL_object_optional_t {
 
 /* types for all object get API routines */
 typedef enum H5VL_object_get_t {
-    H5VL_OBJECT_EXISTS,                /* H5Oexists_by_name)                */
+    H5VL_OBJECT_EXISTS,                /* H5Oexists_by_name                 */
     H5VL_OBJECT_GET_INFO,	       /* object info	                    */
     H5VL_OBJECT_GET_COMMENT,	       /* object comment            	    */
     H5VL_REF_GET_REGION,               /* dataspace of region               */

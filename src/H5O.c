@@ -612,7 +612,8 @@ H5Odecr_refcount(hid_t object_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* change the ref count through the VOL */
-    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_CHANGE_REF_COUNT, H5AC_dxpl_id, H5_EVENT_STACK_NULL, -1) < 0)
+    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_CHANGE_REF_COUNT, 
+                        H5AC_dxpl_id, H5_EVENT_STACK_NULL, -1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -639,7 +640,7 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
     H5VL_loc_params_t loc_params;
-    hid_t       ret_value = FAIL;       /* Return value */
+    htri_t   ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("t", "i*si", loc_id, name, lapl_id);
@@ -660,13 +661,14 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
 
     /* get the file object */
     if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* change the ref count through the VOL */
-    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_EXISTS, H5AC_dxpl_id, H5_EVENT_STACK_NULL, &ret_value) < 0)
+    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_EXISTS, H5AC_dxpl_id, 
+                       H5_EVENT_STACK_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
 
 done:
@@ -1255,6 +1257,7 @@ H5Oclose(hid_t object_id)
         case H5I_ATTR:
         case H5I_REFERENCE:
         case H5I_VFL:
+        case H5I_VOL:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
