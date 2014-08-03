@@ -626,12 +626,11 @@ static const char *const yytname[] =
   "NUMBER", "'{'", "'}'", "'['", "']'", "'\"'", "':'", "';'", "$accept",
   "start", "ddl_type", "atomic_type", "integer_type", "fp_type",
   "compound_type", "$@1", "memb_list", "memb_def", "$@2", "field_name",
-  "field_offset", "offset", "array_type", "$@3", "dim_list", "dim",
-  "$@4", "$@5", "dimsize", "vlen_type", "opaque_type", "$@6", "@7",
-  "$@8", "$@9", "opaque_size", "opaque_tag", "string_type", "$@10",
-  "$@11", "$@12", "$@13", "@14", "strsize", "strpad", "cset", "ctype",
-  "enum_type", "$@15", "enum_list", "enum_def", "$@16", "enum_symbol",
-  "enum_val", YY_NULL
+  "field_offset", "offset", "array_type", "$@3", "dim_list", "dim", "$@4",
+  "$@5", "dimsize", "vlen_type", "opaque_type", "$@6", "@7", "$@8", "$@9",
+  "opaque_size", "opaque_tag", "string_type", "$@10", "$@11", "$@12",
+  "$@13", "@14", "strsize", "strpad", "cset", "ctype", "enum_type", "$@15",
+  "enum_list", "enum_def", "$@16", "enum_symbol", "enum_val", YY_NULL
 };
 #endif
 
@@ -2188,7 +2187,7 @@ yyreduce:
 
 
 /* Line 1807 of yacc.c  */
-#line 2192 "H5LTparse.c"
+#line 2191 "H5LTparse.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires

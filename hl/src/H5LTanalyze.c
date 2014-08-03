@@ -869,7 +869,7 @@ int my_yyinput(char *, int);
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r=my_yyinput(b, ms))
 #define token(x)        (int)x
-#define hid(x)      (hid_t)x
+#define hid(x)          (hid_t)x
 
 #ifdef  YY_BUF_SIZE
 #undef  YY_BUF_SIZE
