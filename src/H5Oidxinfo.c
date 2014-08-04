@@ -99,8 +99,9 @@ H5O_idxinfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     if (0 == (mesg->plugin_id = *p++))
         HGOTO_ERROR(H5E_RESOURCE, H5E_BADVALUE, NULL, "NULL plugin ID");
-    if (0 == (mesg->metadata_size = (uint64_t) *p++))
+    if (0 == (mesg->metadata_size = *((const hsize_t *) p)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_BADVALUE, NULL, "NULL metadata size");
+    p += sizeof(hsize_t);
     if (NULL == (mesg->metadata = H5MM_malloc(mesg->metadata_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     HDmemcpy(mesg->metadata, (const char *) p, mesg->metadata_size);
@@ -142,9 +143,9 @@ H5O_idxinfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p,
     HDassert(mesg && mesg->s);
 
     /* encode */
-    *p++ = mesg->plugin_id;
-    *p = mesg->metadata_size;
-    p += sizeof(uint64_t);
+    *p++ = (uint8_t) mesg->plugin_id;
+    HDmemcpy(p, &mesg->metadata_size, sizeof(hsize_t));
+    p += sizeof(hsize_t);
     HDmemcpy((char *) p, mesg->metadata, mesg->metadata_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

@@ -681,7 +681,7 @@ typedef uint32_t H5O_refcount_t;        /* Contains # of links to object, if >1 
  */
 typedef struct H5O_idxinfo_t {
     unsigned plugin_id;                 /* ID for the index plugin */
-    size_t metadata_size;               /* Size of the index metadata */
+    hsize_t metadata_size;              /* Size of the index metadata */
     void *metadata;                     /* Index metadata */
 } H5O_idxinfo_t;
 
