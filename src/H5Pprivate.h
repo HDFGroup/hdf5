@@ -101,6 +101,9 @@ H5_DLLVAR H5P_genclass_t *H5P_CLS_OBJECT_COPY_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_LINK_CREATE_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_LINK_ACCESS_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_STRING_CREATE_g;
+H5_DLLVAR H5P_genclass_t *H5P_CLS_INDEX_CREATE_g;
+H5_DLLVAR H5P_genclass_t *H5P_CLS_INDEX_ACCESS_g;
+H5_DLLVAR H5P_genclass_t *H5P_CLS_INDEX_XFER_g;
 
 
 /******************************/
