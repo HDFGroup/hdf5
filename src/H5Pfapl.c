@@ -3025,6 +3025,10 @@ H5Pset_core_write_tracking(hid_t plist_id, hbool_t is_enabled, size_t page_size)
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ibz", plist_id, is_enabled, page_size);
 
+    /* The page size cannot be zero */
+    if(page_size == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page_size cannot be zero")
+
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
