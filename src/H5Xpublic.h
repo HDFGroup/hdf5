@@ -94,29 +94,14 @@ H5_DLL herr_t H5Xunregister(unsigned plugin_id);
 
 H5_DLL herr_t H5Xcreate(hid_t file_id, unsigned plugin_id, hid_t scope_id,
         hid_t xcpl_id);
-//H5_DLL herr_t H5Xcreate_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id,
-//        hid_t xcpl_id, hid_t trans_id, hid_t estack_id);
-
 H5_DLL herr_t H5Xremove(hid_t file_id, unsigned plugin_id, hid_t scope_id);
-//H5_DLL herr_t H5Xremove_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id,
-//        hid_t trans_id, hid_t estack_id);
 
 H5_DLL herr_t H5Xget_count(hid_t scope_id, hsize_t *idx_count);
-//H5_DLL herr_t H5Xget_count_ff(hid_t scope_id, hsize_t *idx_count, hid_t rcxt_id,
-//        hid_t estack_id);
 
 /*
 H5_DLL herr_t H5Xget_type(hid_t object_id, hsize_t index_idx,
         unsigned *plugin_id);
-H5_DLL herr_t H5Xget_type_ff(hid_t object_id, hsize_t index_idx,
-        unsigned *plugin_id, hid_t rcxt_id, hid_t event_stack_id);
 */
-//H5_DLL herr_t H5Pget_xapl_transaction(hid_t xapl_id, hid_t *trans_id);
-//H5_DLL herr_t H5Pget_xapl_read_context(hid_t xapl_id, hid_t *rc_id);
-//
-//H5_DLL herr_t H5Pget_xxpl_transaction(hid_t xxpl_id, hid_t *trans_id);
-//H5_DLL herr_t H5Pget_xxpl_read_context(hid_t xxpl_id, hid_t *rc_id);
-
 
 #ifdef __cplusplus
 }
