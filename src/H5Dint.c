@@ -31,6 +31,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"		/* Links		  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Qprivate.h"		/* Query				*/
 
 
 /****************/
@@ -813,6 +814,8 @@ H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
     H5D_fill_value_t	fill_status;    /* Fill value status */
     hbool_t             fill_changed = FALSE;      /* Flag indicating the fill value was changed */
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
+    void              *idx_handle; /* Index handle */
+    H5O_idxinfo_t     *idx_info; /* Index information */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -826,6 +829,8 @@ H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
     layout = &dset->shared->layout;
     type = dset->shared->type;
     fill_prop = &dset->shared->dcpl_cache.fill;
+    idx_handle = dset->shared->idx_handle;
+    idx_info = &dset->shared->idx_info;
 
     /* Get the file's 'use the latest version of the format' flag */
     use_latest_format = H5F_USE_LATEST_FORMAT(file);
@@ -1381,6 +1386,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
 {
     H5P_genplist_t *plist;              /* Property list */
     H5O_fill_t *fill_prop;              /* Pointer to dataset's fill value info */
+    H5O_idxinfo_t *idx_info;            /* Pointer to dataset's info info */
     unsigned alloc_time_state;          /* Allocation time state */
     htri_t msg_exists;                  /* Whether a particular type of message exists */
     hbool_t layout_init = FALSE;    	/* Flag to indicate that chunk information was initialized */
@@ -1482,6 +1488,20 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
             || (dataset->shared->layout.type == H5D_CHUNKED && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR)
             || (dataset->shared->layout.type == H5D_VIRTUAL && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR))
         alloc_time_state = 1;
+
+    /* Try to get the index info message from the object header */
+    if((msg_exists = H5O_msg_exists(&(dataset->oloc), H5O_IDXINFO_ID, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if message exists");
+    if(msg_exists) {
+        H5X_class_t *idx_class = NULL;
+
+        idx_info = &dataset->shared->idx_info;
+        if(NULL == H5O_msg_read(&(dataset->oloc), H5O_IDXINFO_ID, idx_info, dxpl_id))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message");
+        if (NULL == (idx_class = H5X_registered(idx_info->plugin_id)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
+        dataset->shared->idx_class = idx_class;
+    } /* end if */
 
     /* Set revised fill value properties, if they are different from the defaults */
     if(H5P_fill_value_cmp(&H5D_def_dset.dcpl_cache.fill, fill_prop, sizeof(H5O_fill_t))) {
@@ -3067,3 +3087,103 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_type() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5D_set_index
+ *
+ * Purpose: Set index information.
+ *
+ * Return:  Success:    Non-negative
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_set_index(H5D_t *dset, H5X_class_t *idx_class, void *idx_handle,
+        H5O_idxinfo_t idx_info)
+{
+    H5O_t *oh = NULL; /* Pointer to dataset's object header */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+
+    /* Pin the object header */
+    if (NULL == (oh = H5O_pin(&dset->oloc, H5AC_dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header");
+
+    /* Write the index header message */
+    if (H5O_msg_append_oh(dset->oloc.file, H5AC_dxpl_id, oh, H5O_IDXINFO_ID, H5O_MSG_FLAG_CONSTANT, 0, &idx_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update index header message");
+
+    /* Set user data for index */
+    dset->shared->idx_class = idx_class;
+    dset->shared->idx_handle = idx_handle;
+    dset->shared->idx_info = idx_info;
+done:
+    /* Release pointer to object header itself */
+    if (oh != NULL)
+        if (H5O_unpin(oh) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_set_index() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__query_index
+ *
+ * Purpose: Returns a dataspace selection of dataset elements that match
+ *          the query.
+ *
+ * Return:  Success:    The ID of the dataspace selection
+ *          Failure:    FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__query_index(H5D_t *dset, hid_t query_id, hid_t xxpl_id, hid_t *space_id)
+{
+    H5Q_combine_op_t combine_op;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+    HDassert(space_id);
+
+    if (FAIL == H5Qget_combine_op(query_id, &combine_op))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get combine operator");
+
+    if (combine_op == H5Q_SINGLETON) {
+        H5X_class_t *idx_class = dset->shared->idx_class;
+
+        if (FAIL == idx_class->query(dset->shared->idx_handle, query_id, xxpl_id, space_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTSELECT, FAIL, "cannot query index");
+    } else {
+        hid_t sub_query1_id, sub_query2_id;
+        hid_t sub_selection1_id, sub_selection2_id;
+        H5S_seloper_t seloper;
+        hid_t combine_selection_id;
+
+        if (FAIL == H5Qget_components(query_id, &sub_query1_id, &sub_query2_id))
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get components");
+        if (FAIL == H5D__query_index(dset, sub_query1_id, xxpl_id, &sub_selection1_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTSELECT, FAIL, "cannot query index for sub-query");
+        if (FAIL == H5D__query_index(dset, sub_query2_id, xxpl_id, &sub_selection2_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTSELECT, FAIL, "cannot query index for sub-query");
+
+        /* Combine results */
+        seloper = (combine_op == H5Q_COMBINE_AND) ? H5S_SELECT_AND : H5S_SELECT_OR;
+        if (FAIL == (combine_selection_id = H5Scombine_select(sub_selection1_id, seloper, sub_selection2_id)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTMERGE, FAIL, "cannot combine sub-selections");
+
+        *space_id = combine_selection_id;
+        H5Qclose(sub_query1_id);
+        H5Qclose(sub_query2_id);
+        H5Sclose(sub_selection1_id);
+        H5Sclose(sub_selection2_id);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__query_index */

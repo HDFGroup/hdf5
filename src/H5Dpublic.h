@@ -153,6 +153,7 @@ H5_DLL herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
     hid_t dst_space_id, void *dst_buf);
 H5_DLL herr_t H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
     size_t dst_buf_size, void *dst_buf, H5D_gather_func_t op, void *op_data);
+H5_DLL herr_t H5Dquery(hid_t dset_id, hid_t query_id, hid_t *space_id);
 H5_DLL herr_t H5Ddebug(hid_t dset_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.

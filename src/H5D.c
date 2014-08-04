@@ -306,6 +306,22 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
     if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "can't register dataset atom")
 
+    /* Open the index as well if present */
+    if (dset->shared->idx_class) {
+        H5X_class_t *idx_class = dset->shared->idx_class;
+        void *idx_handle = NULL;
+        hid_t xapl_id = H5P_INDEX_ACCESS_DEFAULT;
+        size_t metadata_size = dset->shared->idx_info.metadata_size;
+        void *metadata = dset->shared->idx_info.metadata;
+
+        if (NULL == idx_class->open)
+            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin open callback not defined");
+        if (NULL == (idx_handle = idx_class->open(loc_id, ret_value, xapl_id,
+                metadata_size, metadata)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "cannot open index");
+        dset->shared->idx_handle = idx_handle;
+    }
+
 done:
     if(ret_value < 0)
         if(dset && H5D_close(dset) < 0)
@@ -332,14 +348,21 @@ done:
 herr_t
 H5Dclose(hid_t dset_id)
 {
-    herr_t       ret_value = SUCCEED;   /* Return value */
+    H5D_t *dset;
+    void *idx_handle;
+    H5X_class_t *idx_class;
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
 
     /* Check args */
-    if(NULL == H5I_object_verify(dset_id, H5I_DATASET))
+    if(NULL == (dset = (H5D_t *) H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* Get reference to idx_handle (before dset gets closed) */
+    idx_class = dset->shared->idx_class;
+    idx_handle = dset->shared->idx_handle;
 
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
@@ -347,6 +370,14 @@ H5Dclose(hid_t dset_id)
      */
     if(H5I_dec_app_ref_always_close(dset_id) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
+
+    /* Close index object if index is closed */
+    if (idx_handle && (FAIL == H5I_get_ref(dset_id, FALSE))) {
+        if (NULL == (idx_class->close))
+            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin close callback not defined");
+        if (FAIL == idx_class->close(idx_handle))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -925,3 +956,42 @@ done:
         FUNC_LEAVE_API(ret_value)
 } /* end H5Dset_extent() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5Dquery
+ *
+ * Purpose: Returns a dataspace selection of dataset elements that match
+ *          the query.
+ *
+ * Return:  Success:    The ID of the dataspace selection
+ *          Failure:    FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dquery(hid_t dset_id, hid_t query_id, hid_t *space_id)
+{
+    H5D_t *dset = NULL;
+    hid_t ret_value = FAIL;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (NULL == (dset = (H5D_t *) H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if (NULL == H5I_object_verify(query_id, H5I_QUERY))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query");
+
+    /* Call query routine of index plugin */
+    if (dset->shared->idx_class) {
+        H5X_class_t *idx_class = dset->shared->idx_class;
+        hid_t xxpl_id = H5P_INDEX_XFER_DEFAULT;
+
+        if (NULL == idx_class->query)
+            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin query callback not defined");
+        if (FAIL == H5D__query_index(dset, query_id, xxpl_id, space_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTSELECT, FAIL, "cannot query index");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dquery() */

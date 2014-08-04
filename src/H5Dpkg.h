@@ -426,6 +426,10 @@ typedef struct H5D_shared_t {
     hsize_t             curr_dims[H5S_MAX_RANK];    /* The curr. size of dataset dimensions */
     hsize_t             max_dims[H5S_MAX_RANK];     /* The max. size of dataset dimensions */ 
 
+    void               *idx_handle;     /* Handle for the index */
+    H5X_class_t        *idx_class;      /* Class for the index */
+    H5O_idxinfo_t       idx_info;       /* Index information */
+
     /* Buffered/cached information for types of raw data storage*/
     struct {
         H5D_rdcdc_t     contig;         /* Information about contiguous data */
@@ -554,6 +558,7 @@ H5_DLL herr_t H5D__get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache);
 H5_DLL herr_t H5D__flush_sieve_buf(H5D_t *dataset, hid_t dxpl_id);
 H5_DLL herr_t H5D__mark(const H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D__flush_real(H5D_t *dataset, hid_t dxpl_id);
+H5_DLL herr_t H5D__query_index(H5D_t *dset, hid_t query_id, hid_t xxpl_id, hid_t *space_id);
 
 /* Internal I/O routines */
 H5_DLL herr_t H5D__read(H5D_t *dataset, hid_t mem_type_id,

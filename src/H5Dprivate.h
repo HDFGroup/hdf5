@@ -27,6 +27,8 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Sprivate.h"		/* Dataspaces 				*/
 #include "H5Zprivate.h"		/* Data filters				*/
+#include "H5Xprivate.h"		/* Index				*/
+
 
 
 /**************************/
@@ -171,6 +173,8 @@ H5_DLL hid_t H5D_get_create_plist(H5D_t *dset);
 H5_DLL hid_t H5D_get_access_plist(H5D_t *dset);
 H5_DLL hid_t H5D_get_space(H5D_t *dset);
 H5_DLL hid_t H5D_get_type(H5D_t *dset);
+H5_DLL herr_t H5D_set_index(H5D_t *dset, H5X_class_t *idx_class, void *idx_handle,
+        H5O_idxinfo_t idx_info);
 
 /* Functions that operate on vlen data */
 H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id,
