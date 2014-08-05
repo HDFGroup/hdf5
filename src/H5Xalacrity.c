@@ -13,7 +13,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	Alacrity index routines.
+ * Purpose:	ALACRITY index routines.
  */
 
 /****************/
