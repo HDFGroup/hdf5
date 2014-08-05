@@ -13,7 +13,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	Alacrity index routines.
+ * Purpose:	FastBit index routines.
  */
 
 /****************/
@@ -182,7 +182,7 @@ H5X_fastbit_refresh(void *idx_handle, size_t *metadata_size, void **metadata);
 /* Local Variables */
 /*******************/
 
-/* Alacrity index class */
+/* FastBit index class */
 const H5X_class_t H5X_FASTBIT[1] = {{
     H5X_CLASS_T_VERS,          /* (From the H5Xpublic.h header file) */
     H5X_PLUGIN_FASTBIT,        /* (Or whatever number is assigned) */
@@ -265,7 +265,7 @@ H5X__fastbit_init(hid_t file_id, hid_t dataset_id)
     /* Create an opaque type to handle FastBit data */
     if (FAIL == (fastbit->opaque_type_id = H5Tcreate(H5T_OPAQUE, 1)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCREATE, NULL, "can't create type");
-    if (FAIL == H5Tset_tag(fastbit->opaque_type_id, "alacrity metadata type"))
+    if (FAIL == H5Tset_tag(fastbit->opaque_type_id, "FastBit metadata type"))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, NULL, "can't set tag to type");
 
     ret_value = fastbit;
@@ -701,7 +701,7 @@ static herr_t
 H5X__fastbit_serialize_metadata(H5X_fastbit_t *fastbit, void *buf,
         size_t *buf_size)
 {
-    size_t alacrity_metadata_size = 3 * sizeof(haddr_t);
+    size_t metadata_size = 3 * sizeof(haddr_t);
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -729,7 +729,7 @@ H5X__fastbit_serialize_metadata(H5X_fastbit_t *fastbit, void *buf,
         buf_ptr += sizeof(haddr_t);
     }
 
-    if (buf_size) *buf_size = alacrity_metadata_size;
+    if (buf_size) *buf_size = metadata_size;
 
  done:
     FUNC_LEAVE_NOAPI(ret_value)
