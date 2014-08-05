@@ -159,6 +159,8 @@ query_and_view(hid_t file_id, const char *dataset_name)
     assert(query_id);
 
     if (0 == my_rank) {
+        hsize_t start_coord[H5S_MAX_RANK + 1], end_coord[H5S_MAX_RANK + 1];
+        hsize_t nelmts;
         hid_t space_id;
 
         dataset_id = H5Dopen(file_id, dataset_name, H5P_DEFAULT);
@@ -167,16 +169,23 @@ query_and_view(hid_t file_id, const char *dataset_name)
         H5Dquery(dataset_id, query_id, &space_id);
         t2 = MPI_Wtime();
 
-        printf("Query time: %lf ms\n", (t2 - t1) * 1000);
+        H5Sget_select_bounds(space_id, start_coord, end_coord);
+        nelmts = (hsize_t) H5Sget_select_npoints(space_id);
+        printf("Create dataspace with %llu elements, bounds = [(%llu, %llu):(%llu, %llu)]\n",
+                nelmts, start_coord[0], start_coord[1], end_coord[0], end_coord[1]);
+        printf("Index query time: %lf ms\n", (t2 - t1) * 1000);
 
         H5Sclose(space_id);
         ret = H5Dclose(dataset_id);
         assert(0 == ret);
     }
 
-    H5Qclose(query_id);
-    H5Qclose(query_id2);
-    H5Qclose(query_id1);
+    ret = H5Qclose(query_id);
+    assert(0 == ret);
+    ret = H5Qclose(query_id2);
+    assert(0 == ret);
+    ret = H5Qclose(query_id1);
+    assert(0 == ret);
 
     return ret;
 }
