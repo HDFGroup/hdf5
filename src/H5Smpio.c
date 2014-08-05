@@ -503,6 +503,7 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
     int			block_length[3];
     MPI_Datatype	inner_type, outer_type, old_types[3];
     MPI_Aint            extent_len, displacement[3];
+    MPI_Aint        lb; /* Needed as an argument for MPI_Type_get_extent */
     unsigned		u;			/* Local index variable */
     int			i;			/* Local index variable */
     int                 mpi_code;               /* MPI return code */
@@ -671,8 +672,8 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
         /* calculate start and extent values of this dimension */
 	displacement[1] = d[i].start * offset[i] * elmt_size;
         displacement[2] = (MPI_Aint)elmt_size * max_xtent[i];
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_extent(outer_type, &extent_len)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_extent failed", mpi_code)
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_get_extent(outer_type, &lb, &extent_len)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_get_extent failed", mpi_code)
 
         /*************************************************
         *  Restructure this datatype ("outer_type")
@@ -697,11 +698,11 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
         FUNC, i, (long)displacement[0], (long)displacement[1], (long)displacement[2]);
 #endif
 
-            mpi_code = MPI_Type_struct(3,               /* count */
-                                       block_length,    /* blocklengths */
-                                       displacement,    /* displacements */
-                                       old_types,       /* old types */
-                                       &inner_type);    /* new type */
+            mpi_code = MPI_Type_create_struct(3,               /* count */
+                                              block_length,    /* blocklengths */
+                                              displacement,    /* displacements */
+                                              old_types,       /* old types */
+                                              &inner_type);    /* new type */
 
             MPI_Type_free(&outer_type);
     	    if(mpi_code != MPI_SUCCESS)
@@ -884,8 +885,8 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span,
             outercount++;
         } /* end while */
 
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_hindexed((int)outercount, blocklen, disp, *elmt_type, span_type)))
-              HMPI_GOTO_ERROR(FAIL, "MPI_Type_hindexed failed", mpi_code)
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)outercount, blocklen, disp, *elmt_type, span_type)))
+              HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
         span_type_valid = TRUE;
     } /* end if */
     else {
@@ -935,9 +936,9 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span,
             /* Build the MPI datatype for this node */
             stride = (*down) * elmt_size;
             H5_CHECK_OVERFLOW(tspan->nelem, hsize_t, int)
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_hvector((int)tspan->nelem, 1, stride, down_type, &inner_type[outercount]))) {
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector((int)tspan->nelem, 1, stride, down_type, &inner_type[outercount]))) {
                 MPI_Type_free(&down_type);
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_hvector failed", mpi_code)
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
             } /* end if */
 
             /* Release MPI datatype for next dimension down */
@@ -950,8 +951,8 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span,
 
         /* building the whole vector datatype */
         H5_CHECK_OVERFLOW(outercount, size_t, int)
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_struct((int)outercount, blocklen, disp, inner_type, span_type)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_struct failed", mpi_code)
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)outercount, blocklen, disp, inner_type, span_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
         span_type_valid = TRUE;
 
         /* Release inner node types */
