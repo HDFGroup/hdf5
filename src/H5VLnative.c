@@ -3086,7 +3086,7 @@ H5VL_native_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *ope
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
-    hid_t       temp_id = FAIL;
+    hid_t       temp_id   = FAIL;
     void       *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3120,8 +3120,8 @@ H5VL_native_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *ope
                 loc_found = TRUE;
 
                 /* Open the object */
-                if((temp_id = H5O_open_by_loc(&obj_loc, loc_params.loc_data.loc_by_name.lapl_id, 
-                                                H5AC_dxpl_id, TRUE)) < 0)
+                if((temp_id = H5O_open_by_loc(&obj_loc, loc_params.loc_data.loc_by_idx.lapl_id, 
+                                              H5AC_dxpl_id, TRUE)) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open object")
                 break;
             }
@@ -3140,7 +3140,7 @@ H5VL_native_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *ope
 
                 /* Open the object */
                 if((temp_id = H5O_open_by_loc(&obj_loc, H5P_LINK_ACCESS_DEFAULT, 
-                                                H5AC_dxpl_id, TRUE)) < 0)
+                                              H5AC_dxpl_id, TRUE)) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open object")
                 break;
             }
