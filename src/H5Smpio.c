@@ -500,10 +500,9 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
     hsize_t		max_xtent[H5S_MAX_RANK];
     H5S_hyper_dim_t	*diminfo;		/* [rank] */
     unsigned		rank;
-    int			block_length[3];
-    MPI_Datatype	inner_type, outer_type, old_types[3];
-    MPI_Aint            extent_len, displacement[3];
-    MPI_Aint        lb; /* Needed as an argument for MPI_Type_get_extent */
+    MPI_Datatype	inner_type, outer_type;
+    MPI_Aint            extent_len, start_disp, new_extent;
+    MPI_Aint            lb; /* Needed as an argument for MPI_Type_get_extent */
     unsigned		u;			/* Local index variable */
     int			i;			/* Local index variable */
     int                 mpi_code;               /* MPI return code */
@@ -670,8 +669,8 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
         *  Then build the dimension type as (start, vector type, xtent).
         ****************************************/
         /* calculate start and extent values of this dimension */
-	displacement[1] = d[i].start * offset[i] * elmt_size;
-        displacement[2] = (MPI_Aint)elmt_size * max_xtent[i];
+	start_disp = d[i].start * offset[i] * elmt_size;
+        new_extent = (MPI_Aint)elmt_size * max_xtent[i];
         if(MPI_SUCCESS != (mpi_code = MPI_Type_get_extent(outer_type, &lb, &extent_len)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_get_extent failed", mpi_code)
 
@@ -680,32 +679,20 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
         *  so that it still starts at 0, but its extent
         *  is the full extent in this dimension.
         *************************************************/
-        if(displacement[1] > 0 || (int)extent_len < displacement[2]) {
+        if(start_disp > 0 || extent_len < new_extent) {
+            MPI_Datatype interm_type;
+            int block_len = 1;
 
-            block_length[0] = 1;
-            block_length[1] = 1;
-            block_length[2] = 1;
+            HDassert(0 == lb);
 
-            displacement[0] = 0;
-
-            old_types[0] = MPI_LB;
-            old_types[1] = outer_type;
-            old_types[2] = MPI_UB;
-#ifdef H5S_DEBUG
-  if(H5DEBUG(S))
-    HDfprintf(H5DEBUG(S), "%s: i=%d Extending struct type\n"
-        "***displacements: %ld, %ld, %ld\n",
-        FUNC, i, (long)displacement[0], (long)displacement[1], (long)displacement[2]);
-#endif
-
-            mpi_code = MPI_Type_create_struct(3,               /* count */
-                                              block_length,    /* blocklengths */
-                                              displacement,    /* displacements */
-                                              old_types,       /* old types */
-                                              &inner_type);    /* new type */
-
+            mpi_code = MPI_Type_create_hindexed(1, &block_len, &start_disp, outer_type, &interm_type);
             MPI_Type_free(&outer_type);
-    	    if(mpi_code != MPI_SUCCESS)
+            if(mpi_code != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
+
+            mpi_code = MPI_Type_create_resized(interm_type, lb, new_extent, &inner_type);
+            MPI_Type_free(&interm_type);
+            if(mpi_code != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(FAIL, "couldn't resize MPI vector type", mpi_code)
         } /* end if */
         else
