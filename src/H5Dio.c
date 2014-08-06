@@ -278,6 +278,23 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     if(H5D__pre_write(dset, direct_write, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0) 
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
 
+    /* Call index post_update if available */
+    if (dset->shared->idx_class) {
+        H5X_class_t *idx_class = dset->shared->idx_class;
+        void *idx_handle = dset->shared->idx_handle;
+        hid_t xxpl_id = H5P_INDEX_XFER_DEFAULT;
+
+        if (idx_class->post_update &&
+                (FAIL == idx_class->post_update(idx_handle, buf, file_space_id, xxpl_id)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "cannot do an index post-update");
+
+/* ADD bool to refresh to signal update
+        if (idx_class->refresh &&
+                (FAIL == idx_class->refresh(idx_handle, &metadata_size, &metadata)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "cannot do an index refresh");
+ */
+    }
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dwrite() */
@@ -354,20 +371,6 @@ H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id,
         if(H5D__write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end else */
-
-    /* Call index post_update if available */
-    if (dset->shared->idx_class) {
-        H5X_class_t *idx_class = dset->shared->idx_class;
-        void *idx_handle = dset->shared->idx_handle;
-        hid_t xxpl_id = H5P_INDEX_XFER_DEFAULT;
-
-        if (idx_class->post_update &&
-                (FAIL == idx_class->post_update(idx_handle, buf, file_space_id, xxpl_id)))
-            HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "cannot do an index post-update");
-//        if (idx_class->refresh &&
-//                (FAIL == idx_class->refresh(idx_handle, &metadata_size, &metadata)))
-//            HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "cannot do an index refresh");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
