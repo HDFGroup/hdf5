@@ -1693,6 +1693,10 @@ H5D_close(H5D_t *dataset)
         if(H5O_close(&(dataset->oloc)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
 
+        /* Release index info */
+        if (FAIL == H5O_msg_reset(H5O_IDXINFO_ID, &dataset->shared->idx_info))
+            free_failed = TRUE;
+
         /*
          * Free memory.  Before freeing the memory set the file pointer to NULL.
          * We always check for a null file pointer in other H5D functions to be
@@ -3119,7 +3123,8 @@ H5D_set_index(H5D_t *dset, H5X_class_t *idx_class, void *idx_handle,
     /* Set user data for index */
     dset->shared->idx_class = idx_class;
     dset->shared->idx_handle = idx_handle;
-    dset->shared->idx_info = idx_info;
+    if (NULL == H5O_msg_copy(H5O_IDXINFO_ID, &idx_info, &dset->shared->idx_info))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to update copy message");
 done:
     /* Release pointer to object header itself */
     if (oh != NULL)
