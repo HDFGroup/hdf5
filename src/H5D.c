@@ -1063,7 +1063,7 @@ H5D_close_dataset(void *dset, H5VL_t *vol_plugin)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Close the dataset through the VOL*/
+    /* Close the dataset through the VOL */
     if((ret_value = H5VL_dataset_close(dset, vol_plugin, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset")
 

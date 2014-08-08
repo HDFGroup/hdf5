@@ -2284,23 +2284,24 @@ H5Iget_file_id(hid_t obj_id)
         /* Get the file through the VOL */
         if(H5VL_file_get(obj, vol_plugin, H5VL_OBJECT_GET_FILE, H5AC_dxpl_id, H5_EVENT_STACK_NULL, type, &file) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to get file")
-
         if (NULL == file)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
 
         /* Check if the ID already exists and procceed accordingly */
         if (FAIL == (ret_value = H5I_get_id(file, H5I_FILE))) {
-            /* resurrect the ID - Register an ID with the native plugin */
+            /* resurrect the ID */
             if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+            /* increment the ref count on the VOL plugin for the new ID */
+            vol_plugin->nrefs ++;
+            if(H5I_inc_ref(vol_plugin->id, FALSE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
         }
         else {
             /* Increment ref count on existing ID */
             if(H5I_inc_ref(ret_value, TRUE) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
         }
-        /* increment the ref count on the VOL plugin for the new ID */
-        vol_plugin->nrefs ++;
     }
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object ID")

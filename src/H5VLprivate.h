@@ -30,7 +30,7 @@
 /* Library Private Typedefs */
 /****************************/
 #define H5_REQUEST_NULL NULL
-#define H5_EVENT_STACK_NULL -1
+#define H5_EVENT_STACK_NULL ((hid_t)-1)
 
 /*****************************/
 /* Library Private Variables */
@@ -44,8 +44,8 @@
 struct H5P_genplist_t;
 struct H5F_t;
 
+H5_DLL herr_t H5VL_init(void);
 H5_DLL int H5VL_term_interface(void);
-H5_DLL H5VL_class_t *H5VL_get_class(hid_t id);
 H5_DLL hid_t  H5VL_register(const void *cls, size_t size, hbool_t app_ref);
 H5_DLL hid_t H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin, hbool_t app_ref);
 H5_DLL ssize_t H5VL_get_plugin_name(hid_t id, char *name/*out*/, size_t size);
@@ -116,14 +116,16 @@ H5_DLL herr_t H5VL_request_cancel(void **req, H5VL_t *vol_plugin, H5ES_status_t 
 H5_DLL herr_t H5VL_request_test(void **req, H5VL_t *vol_plugin, H5ES_status_t *status);
 H5_DLL herr_t H5VL_request_wait(void **req, H5VL_t *vol_plugin, H5ES_status_t *status);
 
-H5_DLL herr_t H5VL_fapl_open(struct H5P_genplist_t *plist, H5VL_class_t *vol_cls, const void *vol_info);
-H5_DLL herr_t H5VL_fapl_copy(H5VL_class_t *vol_cls, const void *vol_info, void **copied_info);
-H5_DLL herr_t H5VL_fapl_close(H5VL_class_t *vol_cls, void *vol_info);
+H5_DLL herr_t H5VL_fapl_open(struct H5P_genplist_t *plist, hid_t vol_id, const void *vol_info);
+H5_DLL herr_t H5VL_fapl_copy(hid_t vol_id, const void *vol_info, void **copied_info);
+H5_DLL herr_t H5VL_fapl_close(hid_t vol_id, void *vol_info);
 
 H5_DLL herr_t H5F_close_file(void *file, H5VL_t *vol_plugin);
 H5_DLL herr_t H5A_close_attr(void *attr, H5VL_t *vol_plugin);
 H5_DLL herr_t H5D_close_dataset(void *dset, H5VL_t *vol_plugin);
 H5_DLL herr_t H5G_close_group(void *grp, H5VL_t *vol_plugin);
 H5_DLL herr_t H5T_close_datatype(void *dt, H5VL_t *vol_plugin);
+
+H5_DLL hid_t H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref);
 
 #endif /* _H5VLprivate_H */

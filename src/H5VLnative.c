@@ -33,7 +33,6 @@
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5VL_native_init_interface
 
-
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"             /* Attribute pkg                        */
 #include "H5Dpkg.h"             /* Dataset pkg                          */
@@ -53,8 +52,16 @@
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLnative.h"         /* Native VOL plugin			*/
 
+/*
+ * The vol identification number.
+ */
+static hid_t H5VL_NATIVE_g = 0;
+
+
 /* Prototypes */
 static H5F_t *H5VL_native_get_file(void *obj, H5I_type_t type);
+
+static herr_t H5VL_native_term(void);
 
 /* Atrribute callbacks */
 static void *H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
@@ -129,7 +136,7 @@ static H5VL_class_t H5VL_native_g = {
     NATIVE,
     "native",					/* name */
     NULL,                                       /* initialize */
-    NULL,                                       /* terminate */
+    H5VL_native_term,                           /* terminate */
     0,                                          /* fapl_size */
     NULL,                                       /* fapl_copy */
     NULL,                                       /* fapl_free */
@@ -215,7 +222,7 @@ static herr_t
 H5VL_native_init_interface(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
-
+    H5VL_native_init();
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5VL_native_init_interface() */
 
@@ -234,18 +241,47 @@ H5VL_native_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-H5VL_class_t *
+hid_t
 H5VL_native_init(void)
 {
-    H5VL_class_t *ret_value = NULL;            /* Return value */
+    hid_t ret_value = FAIL;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Register the Native VOL, if it isn't already */
+    if(H5I_VOL != H5I_get_type(H5VL_NATIVE_g)) {
+        if((H5VL_NATIVE_g = H5VL_register((const H5VL_class_t *)&H5VL_native_g, 
+                                          sizeof(H5VL_class_t), FALSE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't create ID for native plugin")
+    }
 
     /* Set return value */
-    ret_value = &H5VL_native_g;
+    ret_value = H5VL_NATIVE_g;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_init() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VL_native_term
+ *
+ * Purpose:     Shut down the VOL plugin
+ *
+ * Returns:     SUCCEED (Can't fail)
+ *
+ *---------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_native_term(void)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Reset VFL ID */
+    H5VL_NATIVE_g = 0;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL_native_term() */
 
 
 /*---------------------------------------------------------------------------
@@ -347,7 +383,6 @@ hid_t
 H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref)
 {
     H5VL_t  *vol_plugin;        /* VOL plugin information */
-    H5T_t   *dt = NULL;
     hid_t    ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -359,25 +394,21 @@ H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     vol_plugin->cls = &H5VL_native_g;
     vol_plugin->nrefs = 1;
+    vol_plugin->id =  H5VL_NATIVE_g;
+    if(H5I_inc_ref(vol_plugin->id, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 
-    /* if this is a named datatype, we need to create the two-fold datatype 
-       to be comaptible with the VOL */
-    if(H5I_DATATYPE == type) {
-        /* Copy the dataset's datatype */
-        if(NULL == (dt = H5T_copy((H5T_t *)obj, H5T_COPY_TRANSIENT)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy datatype")
-
-        H5T_set_vol_object(dt, obj);
-        obj = (void *) dt;
-    }
-
-    /* Get an atom for the object with the VOL information as the auxilary struct*/
-    if((ret_value = H5I_register2(type, obj, (void *)vol_plugin, app_ref)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+    if ((ret_value = H5VL_object_register(obj, type, vol_plugin, app_ref)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
 
 done:
-    if(ret_value < 0 && dt && H5T_close(dt) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+    if(ret_value < 0) {
+        if(vol_plugin) {
+            if(vol_plugin->id && H5I_dec_ref(vol_plugin->id) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "can't decrement reference count for plugin")
+            H5MM_xfree(vol_plugin);
+        }
+    }
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL_native_register */
 
@@ -407,7 +438,7 @@ H5Pset_fapl_native(hid_t fapl_id)
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    ret_value = H5P_set_vol(plist, &H5VL_native_g, NULL);
+    ret_value = H5P_set_vol(plist, H5VL_NATIVE_g, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -671,13 +702,16 @@ static herr_t H5VL_native_attr_iterate(void *obj, H5VL_loc_params_t loc_params, 
     /* Call attribute iteration routine */
     last_attr = start_idx = (idx ? *idx : 0);
 
-    /* Iterate over the links */
+    /* Iterate over the attributess */
     if(loc_params.type == H5VL_OBJECT_BY_SELF) {
         /* Build the vol plugin struct */
         if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-                vol_plugin->cls = &H5VL_native_g;
+        vol_plugin->cls = &H5VL_native_g;
         vol_plugin->nrefs = 1;
+        vol_plugin->id =  H5VL_NATIVE_g;
+        if(H5I_inc_ref(vol_plugin->id, FALSE) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 
         /* Get an atom for the object */
         if((obj_loc_id = H5I_register2(loc_params.obj_type, obj, vol_plugin, TRUE)) < 0)
@@ -729,6 +763,8 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to free identifier");
 
         vol_plugin->nrefs--;
+        if(H5I_dec_ref(vol_plugin->id) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL plugin")
         if(0 == vol_plugin->nrefs)
             H5MM_free(vol_plugin);
     }
@@ -1898,17 +1934,13 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t UNUSED dxpl_id, 
                 hid_t *plist_id = va_arg (arguments, hid_t *);
 
                 f = (H5F_t *)obj;
+
                 /* Retrieve the file's access property list */
                 if((*plist_id = H5F_get_access_plist(f, TRUE)) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file access property list")
 
                 if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(*plist_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-
-                /* Set the VOL class in the property list - we don't
-                   have a VOL info for the native plugin */
-                if(H5P_set(new_plist, H5F_ACS_VOL_NAME, &H5VL_native_g) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file VOL plugin")
                 break;
             }
         /* H5Fget_create_plist */

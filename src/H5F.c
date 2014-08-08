@@ -32,7 +32,6 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
-#include "H5VLnative.h" 	/* Native Plugin                        */
 #include "H5VLprivate.h"	/* VOL plugins				*/
 
 
@@ -253,9 +252,9 @@ H5Fget_access_plist(hid_t file_id)
 {
     H5VL_t     *vol_plugin;
     void       *file;
-    void       *vol_info = NULL;
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
-    hid_t       fapl_id = FAIL, ret_value;    /* Return value */
+    hid_t       fapl_id = FAIL; 
+    hid_t       ret_value;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", file_id);
@@ -268,17 +267,10 @@ H5Fget_access_plist(hid_t file_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     if(H5VL_file_get(file, vol_plugin, H5VL_FILE_GET_FAPL, H5AC_dxpl_id, 
-                     H5_EVENT_STACK_NULL, &fapl_id, &vol_info) < 0)
+                     H5_EVENT_STACK_NULL, &fapl_id) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file creation properties")
 
-    /* Set the vol properties for the list */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(fapl_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-    if(H5P_set_vol(plist, vol_plugin->cls, vol_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
-
     ret_value = fapl_id;
-
 done:
     if(ret_value < 0 && fapl_id != FAIL) 
         if(H5I_dec_ref(fapl_id) < 0)

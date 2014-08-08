@@ -36,7 +36,6 @@
 #include "H5Opkg.h"		/* Object headers			*/
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
-#include "H5VLnative.h" 	/* VOL native plugin			*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 
 /****************/

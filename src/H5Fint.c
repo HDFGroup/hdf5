@@ -40,7 +40,6 @@
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tprivate.h"		/* Datatypes				*/
-#include "H5VLnative.h" 	/* Native Plugin                        */
 #include "H5VLprivate.h"	/* VOL plugins				*/
 
 
@@ -161,6 +160,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     H5P_genplist_t *old_plist;              /* Old property list */
     void		*driver_info=NULL;
     unsigned            efc_size = 0;
+    hid_t               driver_id;
     hid_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -208,8 +208,22 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
      * Since we're resetting the driver ID and info, close them if they
      * exist in this new property list.
      */
-    if(H5P_facc_close(ret_value, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free the old driver information")
+    /* Get driver ID property */
+    if(H5P_get(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+        HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
+
+    if(driver_id > 0) {
+        /* Get driver info property */
+        if(H5P_get(new_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+            HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
+
+        /* Close the driver for the property list */
+        if(H5FD_fapl_close(driver_id, driver_info) < 0)
+            HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
+    } /* end if */
+
+    //if(H5P_facc_close(ret_value, NULL) < 0)
+    //HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free the old driver information")
 
     /* Increment the reference count on the driver ID and insert it into the property list */
     if(H5I_inc_ref(f->shared->lf->driver_id, FALSE) < 0)

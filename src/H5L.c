@@ -36,7 +36,6 @@
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Oprivate.h"         /* File objects                         */
 #include "H5Pprivate.h"         /* Property lists                       */
-#include "H5VLnative.h" 	/* Native Plugin                        */
 #include "H5VLprivate.h"	/* Virtual Object Layer                 */
 
 /****************/

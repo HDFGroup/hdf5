@@ -28,7 +28,6 @@
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Opublic.h"          /* File objects                         */
 #include "H5Pprivate.h"         /* Property lists                       */
-#include "H5VLnative.h" 	/* Native Plugin                        */
 #include "H5VLprivate.h"	/* Virtual Object Layer                 */
 
 static hid_t H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
@@ -454,6 +453,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     {
         void  *temp_obj = NULL;
         H5I_type_t obj_type;
+
         obj_type = H5I_get_type(ext_obj);
         if(NULL == (temp_obj = H5I_remove(ext_obj)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
