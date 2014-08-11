@@ -83,6 +83,7 @@ test_reference_params(void)
     unsigned   *tu32;       /* Temporary pointer to uint32 data */
     int         i;          /* counting variables */
     const char *write_comment = "Foo!"; /* Comments for group */
+    hid_t	ret_id;		/* Generic hid_t return value	*/
     herr_t      ret;        /* Generic return value     */
     size_t      name_size;  /* Size of reference name */
 
@@ -210,12 +211,12 @@ test_reference_params(void)
     VERIFY(name_size, FAIL, "H5Rget_name type");
 
     /* Test parameters to H5Rget_region */
-    ret = H5Rget_region((hid_t)-1, H5R_OBJECT, &rbuf[0]);
-    VERIFY(ret, FAIL, "H5Rget_region loc_id");
-    ret = H5Rget_region(fid1, H5R_OBJECT, NULL);
-    VERIFY(ret, FAIL, "H5Rget_region ref");
-    ret = H5Rget_region(fid1, H5R_OBJECT, &rbuf[0]);
-    VERIFY(ret, FAIL, "H5Rget_region type");
+    ret_id = H5Rget_region((hid_t)-1, H5R_OBJECT, &rbuf[0]);
+    VERIFY(ret_id, FAIL, "H5Rget_region loc_id");
+    ret_id = H5Rget_region(fid1, H5R_OBJECT, NULL);
+    VERIFY(ret_id, FAIL, "H5Rget_region ref");
+    ret_id = H5Rget_region(fid1, H5R_OBJECT, &rbuf[0]);
+    VERIFY(ret_id, FAIL, "H5Rget_region type");
 
     /* Close disk dataspace */
     ret = H5Sclose(sid1);

@@ -330,7 +330,7 @@ typedef struct H5VL_t {
     const H5VL_class_t *cls;            /* constant class info */
     unsigned long       feature_flags;  /* VOL Driver feature Flags */
     int                 nrefs;          /* number of references by objects using this struct */
-    hid_t               id;         /* identifier for the VOL class */
+    hid_t               id;             /* identifier for the VOL class */
 } H5VL_t;
 
 #ifdef __cplusplus

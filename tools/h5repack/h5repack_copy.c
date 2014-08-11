@@ -68,7 +68,7 @@ static herr_t walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void
 /* get the major number from the error stack. */
 static herr_t walk_error_callback(UNUSED unsigned n, const H5E_error2_t *err_desc, void *udata) {
 	if (err_desc)
-		*((int *) udata) = err_desc->maj_num;
+		*((hid_t *) udata) = err_desc->maj_num;
 
 	return 0;
 }
