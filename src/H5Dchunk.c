@@ -3689,9 +3689,10 @@ H5D__chunk_collective_fill(const H5D_t *dset, hid_t dxpl_id,
         blocks++;
     }
 
-    /* MSC - should use this if MPI_type_create_hindexed block is working */
-    //mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, 
-    //MPI_BYTE, &file_type);
+    /* MSC 
+     * should use this if MPI_type_create_hindexed block is working 
+     * mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE, &file_type);
+     */
     mpi_code = MPI_Type_create_hindexed(blocks, block_lens, chunk_disp_array, 
                                         MPI_BYTE, &file_type);
     if(mpi_code != MPI_SUCCESS)
