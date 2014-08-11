@@ -994,15 +994,15 @@ if(H5DEBUG(D))
             } /* end for */
 
             /* Create final MPI derived datatype for the file */
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_struct((int)num_chunk, chunk_mpi_file_counts, chunk_disp_array, chunk_ftype, &chunk_final_ftype)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_struct failed", mpi_code)
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_file_counts, chunk_disp_array, chunk_ftype, &chunk_final_ftype)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
             if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&chunk_final_ftype)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
             chunk_final_ftype_is_derived = TRUE;
 
             /* Create final MPI derived datatype for memory */
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_struct((int)num_chunk, chunk_mpi_mem_counts, chunk_mem_disp_array, chunk_mtype, &chunk_final_mtype)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_struct failed", mpi_code)
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_mem_counts, chunk_mem_disp_array, chunk_mtype, &chunk_final_mtype)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
             if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&chunk_final_mtype)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
             chunk_final_mtype_is_derived = TRUE;
