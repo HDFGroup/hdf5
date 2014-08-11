@@ -125,6 +125,13 @@ Bug Fixes since HDF5-1.8.13
       thread-safe library is built on Windows.
       (DER - 2014/06/13 HDFFV-8837)
 
+    - Enforce constraing on page_size parameter in
+      H5Pset_core_write_tracking().
+      The reference manual states that the page_size parameter cannot be zero.
+      This change checks the page_size parameter to ensure it is zero and returns
+      an error code if it is.
+      (DER - 2014/08/11 HDFFV-8891)
+
     Parallel Library
     ----------------
     - None
