@@ -65,7 +65,7 @@
         FAIL_STACK_ERROR                                                       \
     if((NMEMBS) != H5I_nmembers(H5I_DATATYPE)) {                               \
         H5_FAILED();                                                           \
-        printf("    #dtype ids expected: %lld; found: %d\n", (long long)NMEMBS,             \
+        printf("    #dtype ids expected: %lld; found: %"PRId64"\n", (long long)NMEMBS,             \
             H5I_nmembers(H5I_DATATYPE));                                       \
         goto error;                                                            \
     }
@@ -3008,7 +3008,7 @@ test_compound_16(void)
     if(H5Fget_obj_ids(file, H5F_OBJ_DATATYPE, (size_t)2, open_dtypes) < 0) TEST_ERROR
     if(open_dtypes[1]) {
         H5_FAILED(); AT();
-        printf("    H5Fget_obj_ids returned as second id: %d; expected: 0\n", open_dtypes[1]);
+        printf("    H5Fget_obj_ids returned as second id: %"PRId64"; expected: 0\n", open_dtypes[1]);
         goto error;
     }
 
