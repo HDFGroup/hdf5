@@ -381,6 +381,12 @@ typedef struct H5O_chk_cache_ud_t {
     H5O_common_cache_ud_t common;       /* Common object header cache callback info */
 } H5O_chk_cache_ud_t;
 
+/* types for object optional VOL operations */
+typedef enum H5VL_object_optional_t {
+    H5VL_OBJECT_GET_COMMENT,	       /* get object comment          	    */
+    H5VL_OBJECT_GET_INFO,	       /* get object info                   */
+    H5VL_OBJECT_SET_COMMENT            /* set object comment                */
+} H5VL_object_optional_t;
 
 /* H5O object header inherits cache-like properties from H5AC */
 H5_DLLVAR const H5AC_class_t H5AC_OHDR[1];

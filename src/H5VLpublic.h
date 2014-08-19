@@ -51,29 +51,52 @@
 /* Group creation property names */
 #define H5VL_PROP_GRP_LCPL_ID         "group_lcpl_id"
 
-/* types for all attr get API routines */
+/* types for attribute GET callback */
 typedef enum H5VL_attr_get_t {
-    H5VL_ATTR_EXISTS,                       /* H5Aexists                           */
-    H5VL_ATTR_GET_SPACE,                    /* dataspace                           */
-    H5VL_ATTR_GET_TYPE,                     /* datatype                            */
     H5VL_ATTR_GET_ACPL,                     /* creation property list              */
+    H5VL_ATTR_GET_INFO,                     /* info                                */
     H5VL_ATTR_GET_NAME,                     /* access property list                */
+    H5VL_ATTR_GET_SPACE,                    /* dataspace                           */
     H5VL_ATTR_GET_STORAGE_SIZE,             /* storage size                        */
-    H5VL_ATTR_GET_INFO                      /* attribute info                      */
+    H5VL_ATTR_GET_TYPE                      /* datatype                            */
 } H5VL_attr_get_t;
 
-/* types for all dataset get API routines */
+/* types for attribute SPECFIC callback */
+typedef enum H5VL_attr_specific_t {
+    H5VL_ATTR_DELETE,                       /* H5Adelete(_by_name/idx)             */
+    H5VL_ATTR_EXISTS,                       /* H5Aexists(_by_name)                 */
+    H5VL_ATTR_ITER,                         /* H5Aiterate(_by_name)                */
+    H5VL_ATTR_RENAME                        /* H5Arename(_by_name)                 */
+} H5VL_attr_specific_t;
+
+/* types for dataset GET callback */
 typedef enum H5VL_dataset_get_t {
+    H5VL_DATASET_GET_DAPL,                  /* access property list                */
+    H5VL_DATASET_GET_DCPL,                  /* creation property list              */
+    H5VL_DATASET_GET_OFFSET,                /* offset                              */
     H5VL_DATASET_GET_SPACE,                 /* dataspace                           */
     H5VL_DATASET_GET_SPACE_STATUS,          /* space  status                       */
-    H5VL_DATASET_GET_TYPE,                  /* datatype                            */
-    H5VL_DATASET_GET_DCPL,                  /* creation property list              */
-    H5VL_DATASET_GET_DAPL,                  /* access property list                */
     H5VL_DATASET_GET_STORAGE_SIZE,          /* storage size                        */
-    H5VL_DATASET_GET_OFFSET                 /* offset                              */
+    H5VL_DATASET_GET_TYPE                   /* datatype                            */
 } H5VL_dataset_get_t;
 
-/* types for all file get API routines */
+/* types for dataset SPECFIC callback */
+typedef enum H5VL_dataset_specific_t {
+    H5VL_DATASET_SET_EXTENT                 /* H5Dset_extent                       */
+} H5VL_dataset_specific_t;
+
+/* types for datatype GET callback */
+typedef enum H5VL_datatype_get_t {
+    H5VL_DATATYPE_GET_BINARY,               /* get serialized form of transient type */ 
+    H5VL_DATATYPE_GET_TCPL	            /* datatype creation property list	   */
+} H5VL_datatype_get_t;
+
+/* types for datatype SPECFIC callback */
+typedef enum H5VL_datatype_specific_t {
+    H5VL_DATATYPE_SPECIFIC_INVALID
+} H5VL_datatype_specific_t;
+
+/* types for file GET callback */
 typedef enum H5VL_file_get_t {
     H5VL_FILE_GET_FAPL,                     /* file access property list	*/
     H5VL_FILE_GET_FCPL,	                    /* file creation property list	*/
@@ -84,40 +107,24 @@ typedef enum H5VL_file_get_t {
     H5VL_OBJECT_GET_FILE                    /* retrieve or resurrect file of object */
 } H5VL_file_get_t;
 
-/* types for all file misc operations */
-typedef enum H5VL_file_misc_t {
+/* types for file SPECIFIC callback */
+typedef enum H5VL_file_specific_t {
+    H5VL_FILE_FLUSH,                        /* Flush file                       */
+    H5VL_FILE_IS_ACCESSIBLE,                /* Check if a file is accessible    */
     H5VL_FILE_MOUNT,                        /* Mount a file                     */
-    H5VL_FILE_UNMOUNT,                      /* Un-Mount a file                  */
-    H5VL_FILE_IS_ACCESSIBLE                 /* Check if a file is accessible    */
-} H5VL_file_misc_t;
+    H5VL_FILE_UNMOUNT                       /* Un-Mount a file                  */
+} H5VL_file_specific_t;
 
-/* types for all file optional operations */
-typedef enum H5VL_file_optional_t {
-    H5VL_FILE_CLEAR_ELINK_CACHE,       /* Clear external link cache             */
-    H5VL_FILE_GET_FILE_IMAGE,          /* file image                            */
-    H5VL_FILE_GET_FREE_SECTIONS,       /* file free selections                  */
-    H5VL_FILE_GET_FREE_SPACE,	       /* file freespace         		*/
-    H5VL_FILE_GET_INFO,	               /* file info             		*/
-    H5VL_FILE_GET_MDC_CONF,	       /* file metadata cache configuration	*/
-    H5VL_FILE_GET_MDC_HR,	       /* file metadata cache hit rate		*/
-    H5VL_FILE_GET_MDC_SIZE,	       /* file metadata cache size		*/
-    H5VL_FILE_GET_SIZE,	               /* file size             		*/
-    H5VL_FILE_GET_VFD_HANDLE,	       /* file VFD handle       		*/
-    H5VL_FILE_REOPEN,                  /* reopen the file                       */
-    H5VL_FILE_RESET_MDC_HIT_RATE,      /* get metadata cache hit rate           */
-    H5VL_FILE_SET_MDC_CONFIG           /* set metadata cache configuration      */
-} H5VL_file_optional_t;
-
-/* types for all group get API routines */
+/* types for group GET callback */
 typedef enum H5VL_group_get_t {
-    H5VL_GROUP_GET_GCPL,	/* group creation property list		*/
-    H5VL_GROUP_GET_INFO 	/* group info             		*/
+    H5VL_GROUP_GET_GCPL,	            /* group creation property list	*/
+    H5VL_GROUP_GET_INFO 	            /* group info             		*/
 } H5VL_group_get_t;
 
-/* types for all datatype get API routines */
-typedef enum H5VL_datatype_get_t {
-    H5VL_DATATYPE_GET_TCPL	/* datatype creation property list	*/
-} H5VL_datatype_get_t;
+/* types for group SPECFIC callback */
+typedef enum H5VL_group_specific_t {
+    H5VL_GROUP_SPECIFIC_INVALID
+} H5VL_group_specific_t;
 
 /* link create types for VOL */
 typedef enum H5VL_link_create_type_t {
@@ -126,36 +133,34 @@ typedef enum H5VL_link_create_type_t {
     H5VL_LINK_CREATE_UD
 } H5VL_link_create_type_t;
 
-/* types for all link get API routines */
+/* types for link GET callback */
 typedef enum H5VL_link_get_t {
-    H5VL_LINK_EXISTS,          /* link existence                    */
     H5VL_LINK_GET_INFO,        /* link info         		    */
     H5VL_LINK_GET_NAME,	       /* link name                         */
     H5VL_LINK_GET_VAL          /* link value                        */
 } H5VL_link_get_t;
 
-/* types for all object general operations */
-typedef enum H5VL_object_misc_t {
-    H5VL_ATTR_RENAME,                  /* H5Arename                          */
-    H5VL_OBJECT_CHANGE_REF_COUNT,      /* H5Oincr/decr_refcount              */
-    H5VL_OBJECT_SET_COMMENT,           /* H5Oset_comment(_by_name)           */
-    H5VL_REF_CREATE                    /* H5Rcreate                          */
-} H5VL_object_misc_t;
+/* types for link SPECIFIC callback */
+typedef enum H5VL_link_specific_t {
+    H5VL_LINK_DELETE,          /* H5Ldelete(_by_idx)                */
+    H5VL_LINK_EXISTS,          /* link existence                    */
+    H5VL_LINK_ITER             /* H5Literate/visit(_by_name)              */
+} H5VL_link_specific_t;
 
-/* types for all object general operations */
-typedef enum H5VL_object_optional_t {
-    H5VL_OPTIONAL
-} H5VL_object_optional_t;
-
-/* types for all object get API routines */
+/* types for object GET callback */
 typedef enum H5VL_object_get_t {
-    H5VL_OBJECT_EXISTS,                /* H5Oexists_by_name                 */
-    H5VL_OBJECT_GET_INFO,	       /* object info	                    */
-    H5VL_OBJECT_GET_COMMENT,	       /* object comment            	    */
+    H5VL_REF_GET_NAME,                 /* object name                       */
     H5VL_REF_GET_REGION,               /* dataspace of region               */
-    H5VL_REF_GET_TYPE,                 /* type of object                    */
-    H5VL_REF_GET_NAME                  /* object name                       */
+    H5VL_REF_GET_TYPE                  /* type of object                    */
 } H5VL_object_get_t;
+
+/* types for object SPECIFIC callback */
+typedef enum H5VL_object_specific_t {
+    H5VL_OBJECT_CHANGE_REF_COUNT,      /* H5Oincr/decr_refcount              */
+    H5VL_OBJECT_EXISTS,                /* H5Oexists_by_name                  */
+    H5VL_OBJECT_VISIT,                 /* H5Ovisit(_by_name)                 */
+    H5VL_REF_CREATE                    /* H5Rcreate                          */
+} H5VL_object_specific_t;
 
 /* types for different ways that objects are located in an HDF5 container */
 typedef enum H5VL_loc_type_t {
@@ -199,65 +204,78 @@ typedef struct H5VL_loc_params_t {
         struct H5VL_loc_by_idx  loc_by_idx;
         struct H5VL_loc_by_addr loc_by_addr;
         struct H5VL_loc_by_ref  loc_by_ref;
-    }loc_data;
+    } loc_data;
 } H5VL_loc_params_t;
 
 #define H5VL_VOL_DEFAULT 0   /* Default VOL plugin value */
 
 /* H5A routines */
 typedef struct H5VL_attr_class_t {
-    void  *(*create)(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
-    void  *(*open)  (void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t dxpl_id, void **req);
-    herr_t (*read)  (void *attr, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req);
-    herr_t (*write) (void *attr, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req);
-    herr_t (*iterate) (void *obj, H5VL_loc_params_t loc_params, 
-                       H5_index_t idx_type, H5_iter_order_t order, hsize_t *n, 
-                       H5A_operator2_t  op, void *op_data, hid_t dxpl_id, void **req);
-    herr_t (*get)   (void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*remove)(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t dxpl_id, void **req);
+    void *(*create)(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, 
+                    hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
+    void *(*open)(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, 
+                  hid_t aapl_id, hid_t dxpl_id, void **req);
+    herr_t (*read)(void *attr, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req);
+    herr_t (*write)(void *attr, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req);
+    herr_t (*get)(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*specific)(void *obj, H5VL_loc_params_t loc_params, H5VL_attr_specific_t specific_type, 
+                       hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*close) (void *attr, hid_t dxpl_id, void **req);
 } H5VL_attr_class_t;
 
-/* H5T routines*/
-typedef struct H5VL_datatype_class_t {
-    void  *(*commit)(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, 
-                     hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
-    void  *(*open)  (void *obj, H5VL_loc_params_t loc_params, const char * name, hid_t tapl_id, hid_t dxpl_id, void **req);
-    ssize_t (*get_binary) (void *obj, void *buf, size_t size, hid_t dxpl_id, void **req);
-    herr_t (*get)   (void *obj, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*close) (void *dt, hid_t dxpl_id, void **req);
-} H5VL_datatype_class_t;
-
 /* H5D routines */
 typedef struct H5VL_dataset_class_t {
-    void  *(*create)(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
-    void  *(*open)  (void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
-    herr_t (*read)  (void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
-                     hid_t xfer_plist_id, void * buf, void **req);
-    herr_t (*write) (void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
-                     hid_t xfer_plist_id, const void * buf, void **req);
-    herr_t (*set_extent) (void *dset, const hsize_t size[], hid_t dxpl_id, void **req);
-    herr_t (*get)   (void *dset, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+    void *(*create)(void *obj, H5VL_loc_params_t loc_params, const char *name, 
+                    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
+    void *(*open)(void *obj, H5VL_loc_params_t loc_params, const char *name, 
+                  hid_t dapl_id, hid_t dxpl_id, void **req);
+    herr_t (*read)(void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
+                   hid_t xfer_plist_id, void * buf, void **req);
+    herr_t (*write)(void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
+                    hid_t xfer_plist_id, const void * buf, void **req);
+    herr_t (*get)(void *obj, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*specific)(void *obj, H5VL_dataset_specific_t specific_type, 
+                       hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*close) (void *dset, hid_t dxpl_id, void **req);
 } H5VL_dataset_class_t;
 
+/* H5T routines*/
+typedef struct H5VL_datatype_class_t {
+    void *(*commit)(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, 
+                    hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
+    void *(*open)(void *obj, H5VL_loc_params_t loc_params, const char * name, 
+                  hid_t tapl_id, hid_t dxpl_id, void **req);
+    herr_t (*get)   (void *obj, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*specific)(void *obj, H5VL_datatype_specific_t specific_type, 
+                       hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*close) (void *dt, hid_t dxpl_id, void **req);
+} H5VL_datatype_class_t;
+
 /* H5F routines */
 typedef struct H5VL_file_class_t {
-    void  *(*create)(const char *name, unsigned flags, hid_t fcpl_id, 
-                     hid_t fapl_id, hid_t dxpl_id, void **req);
-    void  *(*open)  (const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
-    herr_t (*flush) (void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t dxpl_id, void **req);
-    herr_t (*get)   (void *obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*misc)  (void *obj, H5VL_file_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*optional)(void *obj, H5VL_file_optional_t op_type, hid_t dxpl_id, void **req, va_list arguments);
+    void *(*create)(const char *name, unsigned flags, hid_t fcpl_id, 
+                    hid_t fapl_id, hid_t dxpl_id, void **req);
+    void *(*open)(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
+    herr_t (*get)(void *obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*specific)(void *obj, H5VL_file_specific_t specific_type, 
+                       hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*close) (void *file, hid_t dxpl_id, void **req);
 } H5VL_file_class_t;
 
 /* H5G routines */
 typedef struct H5VL_group_class_t {
-    void  *(*create)(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
-    void  *(*open)  (void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
-    herr_t (*get)   (void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+    void *(*create)(void *obj, H5VL_loc_params_t loc_params, const char *name, 
+                    hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
+    void *(*open)(void *obj, H5VL_loc_params_t loc_params, const char *name, 
+                  hid_t gapl_id, hid_t dxpl_id, void **req);
+    herr_t (*get)(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*specific)(void *obj, H5VL_group_specific_t specific_type, 
+                       hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*close) (void *grp, hid_t dxpl_id, void **req);
 } H5VL_group_class_t;
 
@@ -265,28 +283,31 @@ typedef struct H5VL_group_class_t {
 typedef struct H5VL_link_class_t {
     herr_t (*create)(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params, 
                      hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
-    herr_t (*move)  (void *src_obj, H5VL_loc_params_t loc_params1, 
-                     void *dst_obj, H5VL_loc_params_t loc_params2,
-                     hbool_t copy_flag, hid_t lcpl, hid_t lapl, hid_t dxpl_id, void **req);
-    herr_t (*iterate) (void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
-                       H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
-                       H5L_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
-    herr_t (*get)   (void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*remove)(void *obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, void **req);
+    herr_t (*copy)(void *src_obj, H5VL_loc_params_t loc_params1, 
+                   void *dst_obj, H5VL_loc_params_t loc_params2,
+                   hid_t lcpl, hid_t lapl, hid_t dxpl_id, void **req);
+    herr_t (*move)(void *src_obj, H5VL_loc_params_t loc_params1, 
+                   void *dst_obj, H5VL_loc_params_t loc_params2,
+                   hid_t lcpl, hid_t lapl, hid_t dxpl_id, void **req);
+    herr_t (*get)(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, 
+                  hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*specific)(void *obj, H5VL_loc_params_t loc_params, H5VL_link_specific_t specific_type, 
+                       hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
 } H5VL_link_class_t;
 
 /* H5O routines */
 typedef struct H5VL_object_class_t {
-    void  *(*open)  (void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
-    herr_t (*copy)  (void *src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
-                     void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name,
-                     hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
-    herr_t (*visit) (void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type,
-                     H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
-    herr_t (*get)   (void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*misc)  (void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*optional)(void *obj, H5VL_loc_params_t loc_params, H5VL_object_optional_t op_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*close) (void *obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, void **req);
+    void *(*open)(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, 
+                  hid_t dxpl_id, void **req);
+    herr_t (*copy)(void *src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
+                   void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name,
+                   hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
+    herr_t (*get)(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, 
+                  hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*specific)(void *obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type, 
+                       hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
 } H5VL_object_class_t;
 
 /* H5AO routines */
@@ -311,14 +332,19 @@ typedef struct H5VL_class_t {
     size_t  fapl_size;
     void *  (*fapl_copy)(const void *info);
     herr_t  (*fapl_free)(void *info);
+
+    /* Data Model */
     H5VL_attr_class_t          attr_cls;
-    H5VL_datatype_class_t      datatype_cls;
     H5VL_dataset_class_t       dataset_cls;
+    H5VL_datatype_class_t      datatype_cls;
     H5VL_file_class_t          file_cls;
     H5VL_group_class_t         group_cls;
     H5VL_link_class_t          link_cls;
     H5VL_object_class_t        object_cls;
+
+    /* Services */
     H5VL_async_class_t         async_cls;
+    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
 } H5VL_class_t;
 
 /*
@@ -337,69 +363,63 @@ typedef struct H5VL_t {
 extern "C" {
 #endif
 
-/* ATTRIBUTE OBJECT ROUTINES */
 H5_DLL void *H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
 H5_DLL void *H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t aapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLattr_read(void *attr, H5VL_t *vol_plugin, hid_t dtype_id, void *buf, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLattr_write(void *attr, H5VL_t *vol_plugin, hid_t dtype_id, const void *buf, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLattr_iterate(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                               H5_index_t idx_type, H5_iter_order_t order, hsize_t *n, H5A_operator2_t  op, void *op_data, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLattr_get(void *attr, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-H5_DLL herr_t H5VLattr_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin,  const char *attr_name, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLattr_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLattr_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLattr_close(void *attr, H5VL_t *vol_plugin, hid_t dxpl_id, void **req);
 
-/* DATASE OBJECT ROUTINES */
 H5_DLL void *H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
 H5_DLL void *H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLdataset_read(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, void *buf, void **req);
-H5_DLL herr_t H5VLdataset_write(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, const void *buf, void **req);
-H5_DLL herr_t H5VLdataset_set_extent(void *dset, H5VL_t *vol_plugin, const hsize_t size[], hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VLdataset_read(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, void *buf, void **req);
+H5_DLL herr_t H5VLdataset_write(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, const void *buf, void **req);
 H5_DLL herr_t H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLdataset_specific(void *obj, H5VL_t *vol_plugin, H5VL_dataset_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLdataset_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLdataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, void **req);
 
-/* DATATYPE OBJECT ROUTINES */
 H5_DLL void *H5VLdatatype_commit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
 H5_DLL void *H5VLdatatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
-H5_DLL ssize_t H5VLdatatype_get_binary(void *obj, H5VL_t *vol_plugin, void *buf, size_t size, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLdatatype_get(void *obj, H5VL_t *vol_plugin, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLdatatype_get(void *dt, H5VL_t *vol_plugin, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLdatatype_specific(void *obj, H5VL_t *vol_plugin, H5VL_datatype_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLdatatype_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLdatatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, void **req);
 
-/* FILE OBJECT ROUTINES */
 H5_DLL void *H5VLfile_create(H5VL_t **vol_plugin, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
 H5_DLL void *H5VLfile_open(H5VL_t **vol_plugin, const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLfile_flush(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5F_scope_t scope, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLfile_misc(void *file, H5VL_t *vol_plugin, H5VL_file_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments);
-H5_DLL herr_t H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_type, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLfile_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLfile_specific(void *obj, H5VL_t *vol_plugin, H5VL_file_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLfile_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLfile_close(void *file, H5VL_t *vol_plugin, hid_t dxpl_id, void **req);
 
-/* GROUP OBJECT ROUTINES */
 H5_DLL void *H5VLgroup_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
 H5_DLL void *H5VLgroup_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLgroup_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLgroup_get(void *obj, H5VL_t *vol_plugin, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLgroup_specific(void *obj, H5VL_t *vol_plugin, H5VL_group_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLgroup_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLgroup_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, void **req);
 
-/* LINK OBJECT ROUTINES */
 H5_DLL herr_t H5VLlink_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VLlink_copy(void *src_obj, H5VL_loc_params_t loc_params1,
+                             void *dst_obj, H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin,
+                             hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLlink_move(void *src_obj, H5VL_loc_params_t loc_params1,
                              void *dst_obj, H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin,
-                             hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLlink_iterate(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                                hbool_t recursive, H5_index_t idx_type, H5_iter_order_t order, 
-                                hsize_t *idx, H5L_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
+                             hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_link_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-H5_DLL herr_t H5VLlink_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VLlink_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLlink_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, va_list arguments);
 
-/* OBJECT ROUTINES */
 H5_DLL void *H5VLobject_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, H5VL_t *vol_plugin1, const char *src_name, 
                                void *dst_obj, H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin2, const char *dst_name, 
                                hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLobject_visit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-H5_DLL herr_t H5VLobject_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments);
-H5_DLL herr_t H5VLobject_optional(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_misc_t optional_type, hid_t dxpl_id, void **req, va_list arguments);
-H5_DLL herr_t H5VLobject_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VLobject_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLobject_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, va_list arguments);
 
 H5_DLL herr_t H5VLrequest_cancel(void **req, H5VL_t *vol_plugin, H5ES_status_t *status);
 H5_DLL herr_t H5VLrequest_test(void **req, H5VL_t *vol_plugin, H5ES_status_t *status);

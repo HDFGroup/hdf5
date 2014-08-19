@@ -144,6 +144,9 @@ H5_DLL herr_t H5L_get_val(H5G_loc_t *loc, const char *name, void *buf/*out*/,
 H5_DLL herr_t H5L_get_val_by_idx(H5G_loc_t *loc, const char *name, void *udata, 
                                   hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5L_register_external(void);
+H5_DLL herr_t H5L_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
+                          H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, 
+                          H5L_iterate_t op, void *op_data, hid_t dxpl_id);
 
 /* User-defined link functions */
 H5_DLL herr_t H5L_register(const H5L_class_t *cls);

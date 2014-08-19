@@ -2420,3 +2420,208 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_rename_by_name() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_iterate
+ *
+ * Purpose:	Iterates through attrs in an object
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5A_iterate(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
+                   H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data)
+{
+    H5G_loc_t	loc;	        /* Object location */
+    H5G_loc_t   obj_loc;        /* Location used to open group */
+    H5G_name_t  obj_path;       /* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;       /* Opened object object location */
+    hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
+    hid_t       obj_loc_id = (-1);      /* ID for object located */
+    H5A_attr_iter_op_t attr_op; /* Attribute operator */
+    hsize_t	start_idx;      /* Index of attribute to start iterating at */
+    hsize_t	last_attr;      /* Index of last attribute examined */
+    void        *temp_obj = NULL;
+    H5I_type_t  obj_type;
+    herr_t      ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check arguments */
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+
+    /* Build attribute operator info */
+    attr_op.op_type = H5A_ATTR_OP_APP2;
+    attr_op.u.app_op2 = op;
+
+    /* Call attribute iteration routine */
+    last_attr = start_idx = (idx ? *idx : 0);
+
+    /* Iterate over the attributess */
+    if(loc_params.type == H5VL_OBJECT_BY_SELF) {
+        if((obj_loc_id = H5VL_native_register(loc_params.obj_type, obj, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+#if 0
+        /* Build the vol plugin struct */
+        if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        vol_plugin->cls = &H5VL_native_g;
+        vol_plugin->nrefs = 1;
+        vol_plugin->id =  H5VL_NATIVE_g;
+        if(H5I_inc_ref(vol_plugin->id, FALSE) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
+
+        /* Get an atom for the object */
+        if((obj_loc_id = H5I_register2(loc_params.obj_type, obj, vol_plugin, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register object")
+#endif
+    }
+    else if(loc_params.type == H5VL_OBJECT_BY_NAME) { 
+        /* Set up opened group location to fill in */
+        obj_loc.oloc = &obj_oloc;
+        obj_loc.path = &obj_path;
+        H5G_loc_reset(&obj_loc);
+
+        /* Find the object's location */
+        if(H5G_loc_find(&loc, loc_params.loc_data.loc_by_name.name, &obj_loc/*out*/, 
+                        loc_params.loc_data.loc_by_name.lapl_id, H5AC_ind_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found");
+        loc_found = TRUE;
+
+        /* Open the object */
+        if((obj_loc_id = H5O_open_by_loc(&obj_loc, loc_params.loc_data.loc_by_name.lapl_id, 
+                                         H5AC_ind_dxpl_id, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open object");
+
+        /* get the native object from the ID created by the object header and create 
+           a "VOL object" ID */
+        obj_type = H5I_get_type(obj_loc_id);
+        if(NULL == (temp_obj = H5I_remove(obj_loc_id)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object");
+        /* Get an atom for the object */
+        if((obj_loc_id = H5VL_native_register(obj_type, temp_obj, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
+    }
+    else {
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown link iterate params");
+    }
+
+    /* Do the real iteration */
+    if((ret_value = H5O_attr_iterate(obj_loc_id, H5AC_ind_dxpl_id, idx_type, order, 
+                                     start_idx, &last_attr, &attr_op, op_data)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error iterating over attributes");
+
+    /* Set the last attribute information */
+    if(idx)
+        *idx = last_attr;
+
+done:
+    /* Release resources */
+    if(loc_params.type == H5VL_OBJECT_BY_SELF) {
+        if(H5VL_native_unregister(obj_loc_id) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to decrement vol plugin ref count")
+        if(obj_loc_id >= 0 && NULL == H5I_remove(obj_loc_id))
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free identifier");
+    }
+    else if(loc_params.type == H5VL_OBJECT_BY_NAME) {
+        if(obj_loc_id >= 0) {
+            if(H5I_dec_app_ref(obj_loc_id) < 0)
+                HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object");
+        } /* end if */
+        else if(loc_found && H5G_loc_free(&obj_loc) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location");
+    }
+    else {
+        HDONE_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown link iterate params");
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_iterate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_delete
+ *
+ * Purpose:	Deletes an attribute from a location
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, attr not deleted.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5A_delete(void *obj, H5VL_loc_params_t loc_params, const char *attr_name)
+{
+    H5G_loc_t   loc;                    /* Object location */
+    H5G_loc_t   obj_loc;                /* Location used to open group */
+    H5G_name_t  obj_path;            	/* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check arguments */
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+
+    if(H5VL_OBJECT_BY_SELF == loc_params.type) { /* H5Adelete */
+        /* Delete the attribute from the location */
+        if(H5O_attr_remove(loc.oloc, attr_name, H5AC_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+    }
+    else if(H5VL_OBJECT_BY_NAME == loc_params.type) { /* H5Adelete_by_name */
+        /* Set up opened group location to fill in */
+        obj_loc.oloc = &obj_oloc;
+        obj_loc.path = &obj_path;
+        H5G_loc_reset(&obj_loc);
+
+        /* Find the object's location */
+        if(H5G_loc_find(&loc, loc_params.loc_data.loc_by_name.name, &obj_loc/*out*/, 
+                        loc_params.loc_data.loc_by_name.lapl_id, H5AC_ind_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
+        loc_found = TRUE;
+
+        /* Delete the attribute from the location */
+        if(H5O_attr_remove(obj_loc.oloc, attr_name, H5AC_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+    }
+    else if(H5VL_OBJECT_BY_IDX == loc_params.type) { /* H5Adelete_by_idx */
+        /* Set up opened group location to fill in */
+        obj_loc.oloc = &obj_oloc;
+        obj_loc.path = &obj_path;
+        H5G_loc_reset(&obj_loc);
+
+        /* Find the object's location */
+        if(H5G_loc_find(&loc, loc_params.loc_data.loc_by_idx.name, &obj_loc/*out*/, 
+                        loc_params.loc_data.loc_by_idx.lapl_id, H5AC_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
+        loc_found = TRUE;
+
+        /* Delete the attribute from the location */
+        if(H5O_attr_remove_by_idx(obj_loc.oloc, loc_params.loc_data.loc_by_idx.idx_type, 
+                                  loc_params.loc_data.loc_by_idx.order, 
+                                  loc_params.loc_data.loc_by_idx.n, H5AC_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+    }
+    else {
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown attribute remove parameters")
+    }
+
+done:
+    /* Release resources */
+    if(loc_found && H5G_loc_free(&obj_loc) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_delete() */

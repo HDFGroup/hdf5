@@ -6,14 +6,10 @@
 
 #define LOG 502
 
-/* Atrribute callbacks */
-static void *H5VL_log_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL_log_attr_close(void *attr, hid_t dxpl_id, void **req);
-
 /* Datatype callbacks */
 static void *H5VL_log_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_log_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
-static ssize_t H5VL_log_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t dxpl_id, void **req);
+static herr_t H5VL_log_datatype_get(void *dt, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_log_datatype_close(void *dt, hid_t dxpl_id, void **req);
 
 /* Dataset callbacks */
@@ -33,16 +29,13 @@ static herr_t H5VL_log_file_close(void *file, hid_t dxpl_id, void **req);
 
 /* Group callbacks */
 static void *H5VL_log_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
-static void *H5VL_log_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL_log_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_log_group_close(void *grp, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
 
 /* Object callbacks */
 static void *H5VL_log_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
-static herr_t H5VL_log_object_visit(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
-                                    H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
+static herr_t H5VL_log_object_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
 
 static const H5VL_class_t H5VL_log_g = {
     LOG,
@@ -57,63 +50,66 @@ static const H5VL_class_t H5VL_log_g = {
         NULL, //H5VL_log_attr_open,                  /* open */
         NULL, //H5VL_log_attr_read,                  /* read */
         NULL, //H5VL_log_attr_write,                 /* write */
-        NULL, //H5VL_log_attr_iterate,
         NULL, //H5VL_log_attr_get,                   /* get */
-        NULL, //H5VL_log_attr_remove,                /* remove */
+        NULL, //H5VL_log_attr_specific,              /* specific */
+        NULL, //H5VL_log_attr_optional,              /* optional */
         NULL  //H5VL_log_attr_close                  /* close */
     },
-    {                                           /* datatype_cls */
-        H5VL_log_datatype_commit,            /* commit */
-        H5VL_log_datatype_open,              /* open */
-        H5VL_log_datatype_get_binary,          /* get_size */
-        NULL,//H5VL_log_datatype_get
-        H5VL_log_datatype_close              /* close */
-    },
     {                                           /* dataset_cls */
-        H5VL_log_dataset_create,             /* create */
-        H5VL_log_dataset_open,               /* open */
-        H5VL_log_dataset_read,               /* read */
-        H5VL_log_dataset_write,              /* write */
-        NULL, //H5VL_log_dataset_set_extent,         /* set extent */
-        NULL, //H5VL_log_dataset_get,                /* get */
-        H5VL_log_dataset_close               /* close */
+        H5VL_log_dataset_create,                    /* create */
+        H5VL_log_dataset_open,                      /* open */
+        H5VL_log_dataset_read,                      /* read */
+        H5VL_log_dataset_write,                     /* write */
+        NULL, //H5VL_log_dataset_get,               /* get */
+        NULL, //H5VL_log_dataset_specific,          /* specific */
+        NULL, //H5VL_log_dataset_optional,          /* optional */
+        H5VL_log_dataset_close                      /* close */
+    },
+    {                                               /* datatype_cls */
+        H5VL_log_datatype_commit,                   /* commit */
+        H5VL_log_datatype_open,                     /* open */
+        H5VL_log_datatype_get,                      /* get_size */
+        NULL, //H5VL_log_datatype_specific,         /* specific */
+        NULL, //H5VL_log_datatype_optional,         /* optional */
+        H5VL_log_datatype_close                     /* close */
     },
     {                                           /* file_cls */
-        H5VL_log_file_create,                /* create */
-        H5VL_log_file_open,                  /* open */
-        NULL, //H5VL_log_file_flush,                 /* flush */
-        H5VL_log_file_get,                   /* get */
-        NULL, //H5VL_log_file_misc,                  /* misc */
-        NULL, //H5VL_log_file_optional,              /* optional */
-        H5VL_log_file_close                  /* close */
+        H5VL_log_file_create,                      /* create */
+        H5VL_log_file_open,                        /* open */
+        H5VL_log_file_get,                         /* get */
+        NULL, //H5VL_log_file_specific,            /* specific */
+        NULL, //H5VL_log_file_optional,            /* optional */
+        H5VL_log_file_close                        /* close */
     },
     {                                           /* group_cls */
-        H5VL_log_group_create,               /* create */
-        NULL, //H5VL_log_group_open,                 /* open */
-        NULL, //H5VL_log_group_get,                  /* get */
-        H5VL_log_group_close                 /* close */
+        H5VL_log_group_create,                     /* create */
+        NULL, //H5VL_log_group_open,               /* open */
+        NULL, //H5VL_log_group_get,                /* get */
+        NULL, //H5VL_log_group_specific,           /* specific */
+        NULL, //H5VL_log_group_optional,           /* optional */
+        H5VL_log_group_close                       /* close */
     },
     {                                           /* link_cls */
         NULL, //H5VL_log_link_create,                /* create */
+        NULL, //H5VL_log_link_copy,                  /* copy */
         NULL, //H5VL_log_link_move,                  /* move */
-        NULL, //H5VL_log_link_iterate,               /* iterate */
         NULL, //H5VL_log_link_get,                   /* get */
-        NULL  //H5VL_log_link_remove                 /* remove */
+        NULL, //H5VL_log_link_specific,              /* specific */
+        NULL, //H5VL_log_link_optional,              /* optional */
     },
     {                                           /* object_cls */
-        H5VL_log_object_open,                /* open */
+        H5VL_log_object_open,                        /* open */
         NULL, //H5VL_log_object_copy,                /* copy */
-        H5VL_log_object_visit,               /* visit */
         NULL, //H5VL_log_object_get,                 /* get */
-        NULL, //H5VL_log_object_misc,                /* misc */
+        H5VL_log_object_specific,                    /* specific */
         NULL, //H5VL_log_object_optional,            /* optional */
-        NULL  //H5VL_log_object_close                /* close */
     },
     {
         NULL,
         NULL,
         NULL
-    }
+    },
+    NULL
 };
 
 typedef struct H5VL_log_t {
@@ -359,15 +355,15 @@ H5VL_log_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name
     return (void *)dt;
 }
 
-static ssize_t 
-H5VL_log_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t dxpl_id, void **req)
+static herr_t 
+H5VL_log_datatype_get(void *dt, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments)
 {
-    H5VL_log_t *o = (H5VL_log_t *)obj;
-    ssize_t ret_value;
+    H5VL_log_t *o = (H5VL_log_t *)dt;
+    herr_t ret_value;
 
-    ret_value = H5VLdatatype_get_binary(o->under_object, o->under_plugin, buf, size, dxpl_id, req);
+    ret_value = H5VLdatatype_get(o->under_object, o->under_plugin, get_type, dxpl_id, req, arguments);
 
-    printf("------- LOG get_binary\n");
+    printf("------- LOG datatype get\n");
     return ret_value;
 }
 
@@ -402,14 +398,14 @@ H5VL_log_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened
 }
 
 static herr_t 
-H5VL_log_object_visit(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
-                      H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t dxpl_id, void **req)
+H5VL_log_object_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type, 
+                         hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_log_t *o = (H5VL_log_t *)obj;
 
-    H5VLobject_visit(o->under_object, loc_params, o->under_plugin, idx_type, order, op, op_data, dxpl_id, req);
+    H5VLobject_specific(o->under_object, loc_params, o->under_plugin, specific_type, dxpl_id, req, arguments);
 
-    printf("------- LOG H5Ovisit\n");
+    printf("------- LOG Object specific\n");
     return 1;
 }
 

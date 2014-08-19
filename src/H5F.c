@@ -218,7 +218,7 @@ H5Fget_create_plist(hid_t file_id)
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_FCPL, H5AC_dxpl_id, H5_EVENT_STACK_NULL, &ret_value) < 0)
+    if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_FCPL, H5AC_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file creation properties")
 
 done:
@@ -252,7 +252,6 @@ H5Fget_access_plist(hid_t file_id)
 {
     H5VL_t     *vol_plugin;
     void       *file;
-    H5P_genplist_t *plist = NULL;      /* Property list pointer */
     hid_t       fapl_id = FAIL; 
     hid_t       ret_value;    /* Return value */
 
@@ -267,7 +266,7 @@ H5Fget_access_plist(hid_t file_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     if(H5VL_file_get(file, vol_plugin, H5VL_FILE_GET_FAPL, H5AC_dxpl_id, 
-                     H5_EVENT_STACK_NULL, &fapl_id) < 0)
+                     H5_REQUEST_NULL, &fapl_id) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file creation properties")
 
     ret_value = fapl_id;
@@ -339,7 +338,7 @@ H5Fget_obj_count(hid_t file_id, unsigned types)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
         if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_OBJ_COUNT, H5AC_dxpl_id, 
-                         H5_EVENT_STACK_NULL, types, &ret_value) < 0)
+                         H5_REQUEST_NULL, types, &ret_value) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object count in file(s)")
     }
     /* iterate over all open files and get the obj count for each */
@@ -450,7 +449,7 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
         if(NULL == (obj = (void *)H5I_object_verify(file_id, H5I_FILE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-        if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_OBJ_IDS, H5AC_dxpl_id, H5_EVENT_STACK_NULL, 
+        if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_OBJ_IDS, H5AC_dxpl_id, H5_REQUEST_NULL, 
                          types, max_objs, oid_list, &ret_value) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object count in file(s)")
     }
@@ -526,8 +525,8 @@ H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle)
     if(NULL == (obj = (void *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if((ret_value = H5VL_file_optional(obj, vol_plugin, H5VL_FILE_GET_VFD_HANDLE, 
-                                       H5AC_dxpl_id, H5_EVENT_STACK_NULL, file_handle, fapl)) < 0)
+    if(H5VL_file_optional(obj, vol_plugin, H5AC_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_GET_VFD_HANDLE, file_handle, fapl) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file handle")
 
 done:
@@ -569,8 +568,8 @@ H5Fis_accessible(const char *name, hid_t fapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
     /* Call into the VOL to check if file is accessible */
-    if(H5VL_file_misc(NULL, NULL, H5VL_FILE_IS_ACCESSIBLE, H5AC_dxpl_id, 
-                      H5_EVENT_STACK_NULL, fapl_id, name, &ret_value) < 0)
+    if(H5VL_file_specific(NULL, NULL, H5VL_FILE_IS_ACCESSIBLE, H5AC_dxpl_id, 
+                          H5_REQUEST_NULL, fapl_id, name, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file handle")
 
 done:
@@ -643,7 +642,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     /* create a new file or truncate an existing file through the VOL */
     if(NULL == (file = H5VL_file_create(&vol_plugin, filename, flags, fcpl_id, fapl_id, 
-                                        H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
+                                        H5AC_dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
     /* Get an atom for the file with the VOL information as the auxilary struct*/
@@ -719,7 +718,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
     /* Open the file through the VOL layer */
-    if(NULL == (file = H5VL_file_open(&vol_plugin, filename, flags, fapl_id, H5AC_dxpl_id, H5_EVENT_STACK_NULL)))
+    if(NULL == (file = H5VL_file_open(&vol_plugin, filename, flags, fapl_id, H5AC_dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
     /* Get an atom for the file with the VOL information as the auxilary struct*/
@@ -750,8 +749,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 {
     H5VL_t     *vol_plugin;
     void       *obj;
-    H5I_type_t obj_type;
-    H5VL_loc_params_t loc_params;
+    H5I_type_t  obj_type;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -771,10 +769,8 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
     if(NULL == (obj = (void *)H5VL_get_object(object_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    loc_params.type = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = obj_type;
-
-    if((ret_value = H5VL_file_flush(obj, loc_params, vol_plugin, scope, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
+    if(H5VL_file_specific(obj, vol_plugin, H5VL_FILE_FLUSH, H5AC_dxpl_id, 
+                          H5_REQUEST_NULL, obj_type, scope) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
 
 done:
@@ -846,7 +842,7 @@ H5F_close_file(void *file, H5VL_t *vol_plugin)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Close the file through the VOL*/
-    if((ret_value = H5VL_file_close(file, vol_plugin, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
+    if((ret_value = H5VL_file_close(file, vol_plugin, H5AC_dxpl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -894,11 +890,16 @@ H5Freopen(hid_t file_id)
     if(NULL == (obj = (void *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if(H5VL_file_optional(obj, vol_plugin, H5VL_FILE_REOPEN, H5AC_dxpl_id, H5_EVENT_STACK_NULL, &file) < 0)
+    if(H5VL_file_optional(obj, vol_plugin, H5AC_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_REOPEN, &file) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
 
     if (NULL == file)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
+
+    vol_plugin->nrefs ++;
+    if(H5I_inc_ref(vol_plugin->id, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 
     /* Get an atom for the file with the VOL information as the auxilary struct*/
     if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
@@ -943,7 +944,8 @@ H5Fget_intent(hid_t file_id, unsigned *intent_flags)
         if(NULL == (obj = (void *)H5I_object(file_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-        if((ret_value = H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_INTENT, H5AC_dxpl_id, H5_EVENT_STACK_NULL, intent_flags)) < 0)
+        if((ret_value = H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_INTENT, 
+                                      H5AC_dxpl_id, H5_REQUEST_NULL, intent_flags)) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file intent")
     }
 
@@ -984,7 +986,8 @@ H5Fget_freespace(hid_t file_id)
     if(NULL == (obj = (void *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if(H5VL_file_optional(obj, vol_plugin, H5VL_FILE_GET_FREE_SPACE, H5AC_dxpl_id, H5_EVENT_STACK_NULL, &ret_value) < 0)
+    if(H5VL_file_optional(obj, vol_plugin, H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_GET_FREE_SPACE, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file free space")
 
 done:
@@ -1026,8 +1029,8 @@ H5Fget_filesize(hid_t file_id, hsize_t *size)
     if(NULL == (file = (void *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
-    if((ret_value = H5VL_file_optional(file, vol_plugin, H5VL_FILE_GET_SIZE, 
-				       H5AC_dxpl_id, H5_EVENT_STACK_NULL, size)) < 0)
+    if(H5VL_file_optional(file, vol_plugin, H5AC_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_GET_SIZE, size) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file size")
 
 done:
@@ -1095,8 +1098,8 @@ H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* get image through the VOL */
-    if(H5VL_file_optional(file, vol_plugin, H5VL_FILE_GET_FILE_IMAGE, H5AC_dxpl_id, H5_EVENT_STACK_NULL, 
-                          buf_ptr, &ret_value, buf_len) < 0)
+    if(H5VL_file_optional(file, vol_plugin, H5AC_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_GET_FILE_IMAGE, buf_ptr, &ret_value, buf_len) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file image")
 
 done:
@@ -1144,8 +1147,8 @@ H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
     if(NULL == (obj = (void *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if((ret_value = H5VL_file_optional(obj, vol_plugin, H5VL_FILE_GET_MDC_CONF, H5AC_dxpl_id, 
-                                       H5_EVENT_STACK_NULL, config_ptr)) < 0)
+    if(H5VL_file_optional(obj, vol_plugin, H5AC_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_GET_MDC_CONF, config_ptr) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get mdc configuration")
 
 done:
@@ -1185,7 +1188,8 @@ H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
     if(NULL == (obj = (void *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if(H5VL_file_optional(obj, vol_plugin, H5VL_FILE_SET_MDC_CONFIG, H5AC_dxpl_id, H5_EVENT_STACK_NULL, config_ptr) < 0)
+    if(H5VL_file_optional(obj, vol_plugin, H5AC_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_SET_MDC_CONFIG, config_ptr) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "uanvle to set MDC configuration")
 
 done:
@@ -1230,8 +1234,8 @@ H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate_ptr)
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    if((ret_value = H5VL_file_optional(file, vol_plugin, H5VL_FILE_GET_MDC_HR, 
-                                       H5AC_dxpl_id, H5_EVENT_STACK_NULL, hit_rate_ptr)) < 0)
+    if(H5VL_file_optional(file, vol_plugin, H5AC_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_GET_MDC_HR, hit_rate_ptr) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get MDC hit rate")
 
 done:
@@ -1276,8 +1280,8 @@ H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    if((ret_value = H5VL_file_optional(file, vol_plugin, H5VL_FILE_GET_MDC_SIZE, H5AC_dxpl_id, H5_EVENT_STACK_NULL, max_size_ptr, 
-                                       min_clean_size_ptr, cur_size_ptr, cur_num_entries_ptr)) < 0)
+    if(H5VL_file_optional(file, vol_plugin, H5AC_dxpl_id, H5_REQUEST_NULL, H5VL_FILE_GET_MDC_SIZE, 
+                          max_size_ptr, min_clean_size_ptr, cur_size_ptr, cur_num_entries_ptr) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get MDC size")
 
 done:
@@ -1323,7 +1327,8 @@ H5Freset_mdc_hit_rate_stats(hid_t file_id)
     if(NULL == (obj = (void *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if(H5VL_file_optional(obj, vol_plugin, H5VL_FILE_RESET_MDC_HIT_RATE, H5AC_dxpl_id, H5_EVENT_STACK_NULL) < 0)
+    if(H5VL_file_optional(obj, vol_plugin, H5AC_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_RESET_MDC_HIT_RATE) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't reset cache hit rate")
 
 done:
@@ -1358,8 +1363,8 @@ H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
 {
     H5VL_t     *vol_plugin = NULL;
     void       *obj = NULL;
-    ssize_t     ret_value;
     H5I_type_t  type;
+    ssize_t     ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("Zs", "ixz", obj_id, name, size);
@@ -1378,7 +1383,7 @@ H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
     if(NULL == (obj = (void *)H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_NAME, H5AC_dxpl_id, H5_EVENT_STACK_NULL,
+    if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_NAME, H5AC_dxpl_id, H5_REQUEST_NULL,
                      type, size, name, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file name")
 
@@ -1433,8 +1438,8 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
     if(NULL == (obj = (void *)H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if((ret_value = H5VL_file_optional(obj, vol_plugin, H5VL_FILE_GET_INFO, H5AC_dxpl_id, H5_EVENT_STACK_NULL, 
-                                       type, finfo)) < 0)
+    if(H5VL_file_optional(obj, vol_plugin, H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_GET_INFO, type, finfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file info")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1477,8 +1482,8 @@ H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    if(H5VL_file_optional(file, vol_plugin, H5VL_FILE_GET_FREE_SECTIONS, H5AC_dxpl_id, H5_EVENT_STACK_NULL, sect_info, 
-                          &ret_value, type, nsects) < 0)
+    if(H5VL_file_optional(file, vol_plugin, H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_GET_FREE_SECTIONS, sect_info, &ret_value, type, nsects) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file free sections")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1517,8 +1522,8 @@ H5Fclear_elink_file_cache(hid_t file_id)
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-
-    if(H5VL_file_optional(file, vol_plugin, H5VL_FILE_CLEAR_ELINK_CACHE, H5AC_dxpl_id, H5_EVENT_STACK_NULL) < 0)
+    if(H5VL_file_optional(file, vol_plugin, H5AC_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_CLEAR_ELINK_CACHE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
 
 done:

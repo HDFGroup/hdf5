@@ -34,19 +34,6 @@
 /* Library Private Macros */
 /**************************/
 
-/* User data for traversal routine to get ID counts */
-typedef struct {
-    ssize_t *obj_count;   /* number of objects counted so far */
-    unsigned types;      /* types of objects to be counted */
-} H5F_trav_obj_cnt_t;
-
-/* User data for traversal routine to get ID lists */
-typedef struct {
-    size_t max_objs;
-    hid_t *oid_list;
-    ssize_t *obj_count;   /* number of objects counted so far */
-    unsigned types;      /* types of objects to be counted */
-} H5F_trav_obj_ids_t;
 
 /*
  * Encode and decode macros for file meta-data.
@@ -587,7 +574,6 @@ typedef struct H5F_io_info_t {
     const H5F_t *f;                     /* File object */
     const struct H5P_genplist_t *dxpl;         /* DXPL object */
 } H5F_io_info_t;
-
 
 /*****************************/
 /* Library-private Variables */

@@ -209,6 +209,9 @@ H5_DLL herr_t H5A_rename_by_name(H5G_loc_t loc, const char *obj_name, const char
     const char *new_attr_name, hid_t lapl_id);
 H5_DLL htri_t H5A_exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name,
     hid_t lapl_id);
+H5_DLL herr_t H5A_iterate(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
+    H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data);
+H5_DLL herr_t H5A_delete(void *obj, H5VL_loc_params_t loc_params, const char *attr_name);
 
 /* Attribute "dense" storage routines */
 H5_DLL herr_t H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo);

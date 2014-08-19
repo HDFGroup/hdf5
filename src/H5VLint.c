@@ -448,7 +448,7 @@ done:
  */
 void *
 H5VL_attr_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                 hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, hid_t UNUSED estack_id)
+                 hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value;  /* Return value */
 
@@ -460,7 +460,7 @@ H5VL_attr_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, co
 
     /* call the corresponding VOL create callback */
     if(NULL == (ret_value = (vol_plugin->cls->attr_cls.create) 
-                (obj, loc_params, name, acpl_id, aapl_id, dxpl_id, H5_REQUEST_NULL)))
+                (obj, loc_params, name, acpl_id, aapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
 
     vol_plugin->nrefs ++;
@@ -488,7 +488,7 @@ done:
  */
 void *
 H5VL_attr_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-               hid_t aapl_id, hid_t dxpl_id, hid_t UNUSED estack_id)
+               hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value;  /* Return value */
 
@@ -499,7 +499,7 @@ H5VL_attr_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, cons
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `attr open' method")
     /* call the corresponding VOL open callback */
     if(NULL == (ret_value = (vol_plugin->cls->attr_cls.open) 
-                (obj, loc_params, name, aapl_id, dxpl_id, H5_REQUEST_NULL)))
+                (obj, loc_params, name, aapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "attribute open failed")
 
     vol_plugin->nrefs ++;
@@ -526,7 +526,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t H5VL_attr_read(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, void *buf, 
-                      hid_t dxpl_id, hid_t UNUSED estack_id)
+                      hid_t dxpl_id, void **req)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -534,8 +534,7 @@ herr_t H5VL_attr_read(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, void *b
 
     if(NULL == vol_plugin->cls->attr_cls.read)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr read' method")
-
-    if((ret_value = (vol_plugin->cls->attr_cls.read)(attr, mem_type_id, buf, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->attr_cls.read)(attr, mem_type_id, buf, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "read failed")
 
 done:
@@ -558,7 +557,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t H5VL_attr_write(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, const void *buf, 
-                       hid_t dxpl_id, hid_t UNUSED estack_id)
+                       hid_t dxpl_id, void **req)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -566,45 +565,12 @@ herr_t H5VL_attr_write(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, const 
 
     if(NULL == vol_plugin->cls->attr_cls.write)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr write' method")
-    if((ret_value = (vol_plugin->cls->attr_cls.write)(attr, mem_type_id, buf, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->attr_cls.write)(attr, mem_type_id, buf, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "write failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_write() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_attr_iterate
- *
- * Purpose:	Iterate over attrs in an object
- *
- * Return:	Success:        non negative
- *		Failure:	negative
- *
- * Programmer:	Mohamad Chaarawi
- *              June, 2013
- *
- *-------------------------------------------------------------------------
- */
-herr_t 
-H5VL_attr_iterate(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                  H5_index_t idx_type, H5_iter_order_t order, hsize_t *n, 
-                  H5A_operator2_t op, void *op_data, hid_t dxpl_id, hid_t UNUSED estack_id)
-{
-    herr_t            ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(NULL == vol_plugin->cls->attr_cls.iterate)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr iterate' method")
-    if((ret_value = (vol_plugin->cls->attr_cls.iterate)
-        (obj, loc_params, idx_type, order, n, op, op_data, dxpl_id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "iteration failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_attr_iterate() */
 
 
 /*-------------------------------------------------------------------------
@@ -623,7 +589,7 @@ done:
  */
 herr_t
 H5VL_attr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, 
-              hid_t dxpl_id, hid_t estack_id, ...)
+              hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -633,9 +599,9 @@ H5VL_attr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type,
     if(NULL == vol_plugin->cls->attr_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr get' method")
 
-    va_start (arguments, estack_id);
+    va_start (arguments, req);
     if((ret_value = (vol_plugin->cls->attr_cls.get)
-        (obj, get_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+        (obj, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 
@@ -645,35 +611,75 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_attr_remove
+ * Function:	H5VL_attr_specific
  *
- * Purpose:	Removes an attribute through the VOL
+ * Purpose:	specific operation on attributes through the VOL
  *
- * Return:	Success:	Non Negative
+ * Return:	Success:        non negative
  *
- *		Failure:	Negative
+ *		Failure:	negative
  *
  * Programmer:	Mohamad Chaarawi
  *              March, 2012
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
-H5VL_attr_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                 const char *attr_name, hid_t dxpl_id, hid_t UNUSED estack_id)
+herr_t
+H5VL_attr_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
+                   H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
-    herr_t              ret_value = SUCCEED;
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->attr_cls.remove)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr remove' method")
-    if((ret_value = (vol_plugin->cls->attr_cls.remove)(obj, loc_params, attr_name, dxpl_id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDELETE, FAIL, "remove failed")
+    if(NULL == vol_plugin->cls->attr_cls.specific)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr specific' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->cls->attr_cls.specific)
+        (obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute specific callback")
+    va_end (arguments);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_attr_remove() */
+} /* end H5VL_attr_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_attr_optional
+ *
+ * Purpose:	optional operation specific to plugins.
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_attr_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_plugin->cls->attr_cls.optional)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr optional' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->cls->attr_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute optional callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_attr_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -691,7 +697,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_attr_close(void *attr, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED estack_id)
+H5VL_attr_close(void *attr, H5VL_t *vol_plugin, hid_t dxpl_id, void **req)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -699,7 +705,7 @@ H5VL_attr_close(void *attr, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED esta
             
     if(NULL == vol_plugin->cls->attr_cls.close)
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr close' method")
-    if((ret_value = (vol_plugin->cls->attr_cls.close)(attr, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->attr_cls.close)(attr, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
 
     vol_plugin->nrefs --;
@@ -730,7 +736,7 @@ done:
 void *
 H5VL_datatype_commit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
                      hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, 
-                     hid_t dxpl_id, hid_t UNUSED estack_id)
+                     hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;              /* Return value */
 
@@ -742,7 +748,7 @@ H5VL_datatype_commit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin
 
     /* call the corresponding VOL commit callback */
     if(NULL == (ret_value = (vol_plugin->cls->datatype_cls.commit) 
-        (obj, loc_params, name, type_id, lcpl_id, tcpl_id, tapl_id, dxpl_id, H5_REQUEST_NULL)))
+        (obj, loc_params, name, type_id, lcpl_id, tcpl_id, tapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "commit failed")
 
     vol_plugin->nrefs ++;
@@ -770,7 +776,7 @@ done:
  */
 void *
 H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                   hid_t tapl_id, hid_t dxpl_id, hid_t UNUSED estack_id)
+                   hid_t tapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;              /* Return value */
 
@@ -782,7 +788,7 @@ H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
 
     /* call the corresponding VOL open callback */
     if(NULL == (ret_value = (vol_plugin->cls->datatype_cls.open)
-                (obj, loc_params, name, tapl_id, dxpl_id, H5_REQUEST_NULL)))
+                (obj, loc_params, name, tapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
 
     vol_plugin->nrefs ++;
@@ -792,40 +798,6 @@ H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_open() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_datatype_get_binary
- *
- * Purpose:	gets required size to serialize datatype description
- *
- * Return:      Success: size needed
- *
- *		Failure: negative
- *
- * Programmer:	Mohamad Chaarawi
- *              March, 2012
- *
- *-------------------------------------------------------------------------
- */
-ssize_t 
-H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, void *buf, size_t size, 
-                         hid_t dxpl_id, hid_t UNUSED estack_id)
-{
-    ssize_t ret_value = FAIL;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* check if the type specific corresponding VOL open callback exists */
-    if(NULL == vol_plugin->cls->datatype_cls.get_binary)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "no datatype get_binary callback");
-    /* call the corresponding VOL open callback */
-    if((ret_value = (vol_plugin->cls->datatype_cls.get_binary)(obj, buf, size, dxpl_id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "get binary failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_datatype_get_binary() */
 
 
 /*-------------------------------------------------------------------------
@@ -844,7 +816,7 @@ done:
  */
 herr_t
 H5VL_datatype_get(void *obj, H5VL_t *vol_plugin, H5VL_datatype_get_t get_type, 
-                  hid_t dxpl_id, hid_t estack_id, ...)
+                  hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -853,15 +825,87 @@ H5VL_datatype_get(void *obj, H5VL_t *vol_plugin, H5VL_datatype_get_t get_type,
 
     if(NULL == vol_plugin->cls->datatype_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype get' method")
-    va_start (arguments, estack_id);
+    va_start (arguments, req);
     if((ret_value = (vol_plugin->cls->datatype_cls.get)(obj, get_type, dxpl_id, 
-                                                        H5_REQUEST_NULL, arguments)) < 0)
+                                                        req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_datatype_specific
+ *
+ * Purpose:	specific operation on datatypes through the VOL
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_datatype_specific(void *obj, H5VL_t *vol_plugin, H5VL_datatype_specific_t specific_type, 
+                       hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_plugin->cls->datatype_cls.specific)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype specific' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->cls->datatype_cls.specific)
+        (obj, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute datatype specific callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_datatype_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_datatype_optional
+ *
+ * Purpose:	optional operation specific to plugins.
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_datatype_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_plugin->cls->datatype_cls.optional)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype optional' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->cls->datatype_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute datatype optional callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_datatype_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -878,7 +922,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_datatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED estack_id)
+H5VL_datatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, void **req)
 {
     herr_t		ret_value = SUCCEED;    /* Return value */
 
@@ -889,7 +933,7 @@ H5VL_datatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED es
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype close' method")
 
     /* call the corresponding VOL close callback */
-    if((ret_value = (vol_plugin->cls->datatype_cls.close)(dt, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->datatype_cls.close)(dt, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
 
     if(H5I_dec_ref(vol_plugin->id) < 0)
@@ -919,7 +963,7 @@ done:
  */
 void *
 H5VL_dataset_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, hid_t UNUSED estack_id)
+                    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value; /* Return value */
 
@@ -931,7 +975,7 @@ H5VL_dataset_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin,
 
     /* call the corresponding VOL create callback */
     if(NULL == (ret_value = (vol_plugin->cls->dataset_cls.create)
-                (obj, loc_params, name, dcpl_id, dapl_id, dxpl_id, H5_REQUEST_NULL)))
+                (obj, loc_params, name, dcpl_id, dapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
 
     vol_plugin->nrefs ++;
@@ -959,7 +1003,7 @@ done:
  */
 void *
 H5VL_dataset_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                  hid_t dapl_id, hid_t dxpl_id, hid_t UNUSED estack_id)
+                  hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value; /* Return value */
 
@@ -971,7 +1015,7 @@ H5VL_dataset_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, c
 
     /* call the corresponding VOL open callback */
     if(NULL == (ret_value = (vol_plugin->cls->dataset_cls.open)
-                (obj, loc_params, name, dapl_id, dxpl_id, H5_REQUEST_NULL)))
+                (obj, loc_params, name, dapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
 
     vol_plugin->nrefs ++;
@@ -999,7 +1043,7 @@ done:
  */
 herr_t 
 H5VL_dataset_read(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, 
-                  hid_t file_space_id, hid_t plist_id, void *buf, hid_t UNUSED estack_id)
+                  hid_t file_space_id, hid_t plist_id, void *buf, void **req)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -1008,7 +1052,7 @@ H5VL_dataset_read(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_s
     if(NULL == vol_plugin->cls->dataset_cls.read)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset read' method")
     if((ret_value = (vol_plugin->cls->dataset_cls.read)
-        (dset, mem_type_id, mem_space_id, file_space_id, plist_id, buf, H5_REQUEST_NULL)) < 0)
+        (dset, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "read failed")
 
 done:
@@ -1032,7 +1076,7 @@ done:
  */
 herr_t 
 H5VL_dataset_write(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, 
-                   hid_t file_space_id, hid_t plist_id, const void *buf, hid_t UNUSED estack_id)
+                   hid_t file_space_id, hid_t plist_id, const void *buf, void **req)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -1041,44 +1085,12 @@ H5VL_dataset_write(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_
     if(NULL == vol_plugin->cls->dataset_cls.write)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset write' method")
     if((ret_value = (vol_plugin->cls->dataset_cls.write)
-        (dset, mem_type_id, mem_space_id, file_space_id, plist_id, buf, H5_REQUEST_NULL)) < 0)
+        (dset, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "write failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_write() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_dataset_set_extent
- *
- * Purpose:	Modifies the dimensions of a dataset
- *
- * Return:	Success:	Non Negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Mohamad Chaarawi
- *              March, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t 
-H5VL_dataset_set_extent(void *dset, H5VL_t *vol_plugin, const hsize_t size[], 
-                        hid_t dxpl_id, hid_t UNUSED estack_id)
-{
-    herr_t              ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(NULL == vol_plugin->cls->dataset_cls.set_extent)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset set_extent' method")
-    if((ret_value = (vol_plugin->cls->dataset_cls.set_extent)(dset, size, dxpl_id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "set_extent failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_dataset_set_extent() */
 
 
 /*-------------------------------------------------------------------------
@@ -1097,7 +1109,7 @@ done:
  */
 herr_t
 H5VL_dataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, 
-                 hid_t dxpl_id, hid_t estack_id, ...)
+                 hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -1107,14 +1119,86 @@ H5VL_dataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type,
     if(NULL == vol_plugin->cls->dataset_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset get' method")
 
-    va_start (arguments, estack_id);
-    if((ret_value = (vol_plugin->cls->dataset_cls.get)(dset, get_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->cls->dataset_cls.get)(dset, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_dataset_specific
+ *
+ * Purpose:	specific operation on datasets through the VOL
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_dataset_specific(void *obj, H5VL_t *vol_plugin, H5VL_dataset_specific_t specific_type, 
+                       hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_plugin->cls->dataset_cls.specific)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset specific' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->cls->dataset_cls.specific)
+        (obj, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute dataset specific callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_dataset_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_dataset_optional
+ *
+ * Purpose:	optional operation specific to plugins.
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_dataset_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_plugin->cls->dataset_cls.optional)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset optional' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->cls->dataset_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute dataset optional callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_dataset_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -1132,7 +1216,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED estack_id)
+H5VL_dataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, void **req)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -1140,7 +1224,7 @@ H5VL_dataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED e
 
     if(NULL == vol_plugin->cls->dataset_cls.close)
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dset close' method")
-    if((ret_value = (vol_plugin->cls->dataset_cls.close)(dset, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->dataset_cls.close)(dset, dxpl_id, req)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
 
 done:
@@ -1173,7 +1257,7 @@ done:
  */
 void *
 H5VL_file_create(H5VL_t **plugin, const char *name, unsigned flags, hid_t fcpl_id, 
-                 hid_t fapl_id, hid_t dxpl_id, hid_t UNUSED estack_id)
+                 hid_t fapl_id, hid_t dxpl_id, void **req)
 {
     H5P_genplist_t     *plist;                 /* Property list pointer */
     hid_t               vol_id;                /* VOL plugin identigier attached to fapl_id */
@@ -1196,7 +1280,7 @@ H5VL_file_create(H5VL_t **plugin, const char *name, unsigned flags, hid_t fcpl_i
     if(NULL == vol_cls->file_cls.create)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `file create' method")
     /* call the corresponding VOL create callback */
-    if(NULL == (ret_value = (vol_cls->file_cls.create)(name, flags, fcpl_id, fapl_id, dxpl_id, H5_REQUEST_NULL)))
+    if(NULL == (ret_value = (vol_cls->file_cls.create)(name, flags, fcpl_id, fapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
 
     /* Build the vol plugin struct */
@@ -1231,7 +1315,7 @@ done:
  */
 void *
 H5VL_file_open(H5VL_t **plugin, const char *name, unsigned flags, hid_t fapl_id, 
-               hid_t dxpl_id, hid_t UNUSED estack_id)
+               hid_t dxpl_id, void **req)
 {
     H5P_genplist_t     *plist;                 /* Property list pointer */
     hid_t               vol_id;                /* VOL plugin identigier attached to fapl_id */
@@ -1254,7 +1338,7 @@ H5VL_file_open(H5VL_t **plugin, const char *name, unsigned flags, hid_t fapl_id,
     if(NULL == vol_cls->file_cls.open)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `file open' method")
     /* call the corresponding VOL create callback */
-    if(NULL == (ret_value = (vol_cls->file_cls.open)(name, flags, fapl_id, dxpl_id, H5_REQUEST_NULL)))
+    if(NULL == (ret_value = (vol_cls->file_cls.open)(name, flags, fapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
 
     /* Build the vol plugin struct */
@@ -1274,38 +1358,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_file_flush
- *
- * Purpose:	Flushes a file through the VOL
- *
- * Return:	Success:	Non Negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Mohamad Chaarawi
- *              February, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_file_flush(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5F_scope_t scope, 
-                hid_t dxpl_id, hid_t UNUSED estack_id)
-{
-    herr_t              ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(NULL == vol_plugin->cls->file_cls.flush)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file flush' method")
-    if((ret_value = (vol_plugin->cls->file_cls.flush)(obj, loc_params, scope, dxpl_id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTFLUSH, FAIL, "flush failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_file_flush() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5VL_file_get
  *
  * Purpose:	Get specific information about the file through the VOL
@@ -1321,7 +1373,7 @@ done:
  */
 herr_t
 H5VL_file_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, 
-              hid_t dxpl_id, hid_t estack_id, ...)
+              hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -1331,8 +1383,8 @@ H5VL_file_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type,
     if(NULL == vol_plugin->cls->file_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file get' method")
 
-    va_start(arguments, estack_id);
-    if((ret_value = (vol_plugin->cls->file_cls.get)(file, get_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+    va_start(arguments, req);
+    if((ret_value = (vol_plugin->cls->file_cls.get)(file, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end(arguments);
 
@@ -1342,9 +1394,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_file_misc
+ * Function:	H5VL_file_specific
  *
- * Purpose:	perform a specified operation through the VOL
+ * Purpose:	perform File specific operations through the VOL
  *
  * Return:	Success:        non negative
  *		Failure:	negative
@@ -1355,22 +1407,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_misc(void *file, H5VL_t *vol_plugin, H5VL_file_misc_t misc_type, 
-               hid_t dxpl_id, hid_t estack_id, ...)
+H5VL_file_specific(void *file, H5VL_t *vol_plugin, H5VL_file_specific_t specific_type, 
+                   hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (misc_type == H5VL_FILE_IS_ACCESSIBLE) {
+    if(specific_type == H5VL_FILE_IS_ACCESSIBLE) {
         H5P_genplist_t     *plist;          /* Property list pointer */
         hid_t               vol_id;         /* VOL plugin identigier attached to fapl_id */
         H5VL_class_t       *vol_cls;        /* VOL class of vol_id */
         va_list             tmp_args;       /* argument list passed from the API call */
         hid_t               fapl_id;
 
-        va_start (tmp_args, estack_id);
+        va_start (tmp_args, req);
         fapl_id = va_arg (tmp_args, hid_t);
         va_end (tmp_args);
 
@@ -1383,26 +1435,26 @@ H5VL_file_misc(void *file, H5VL_t *vol_plugin, H5VL_file_misc_t misc_type,
         if(NULL == (vol_cls = (H5VL_class_t *)H5I_object(vol_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL ID")
 
-        va_start (arguments, estack_id);
-        if((ret_value = (vol_cls->file_cls.misc)
-            (file, misc_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "misc failed")
+        va_start (arguments, req);
+        if((ret_value = (vol_cls->file_cls.specific)
+            (file, specific_type, dxpl_id, req, arguments)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "specific failed")
         va_end (arguments);
     }
     else {
-        if(NULL == vol_plugin->cls->file_cls.misc)
-            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file misc' method")
+        if(NULL == vol_plugin->cls->file_cls.specific)
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file specific' method")
 
-        va_start (arguments, estack_id);
-        if((ret_value = (vol_plugin->cls->file_cls.misc)
-            (file, misc_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "misc failed")
+        va_start (arguments, req);
+        if((ret_value = (vol_plugin->cls->file_cls.specific)
+            (file, specific_type, dxpl_id, req, arguments)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "specific failed")
         va_end (arguments);
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_file_misc() */
+} /* end H5VL_file_specific() */
 
 
 /*-------------------------------------------------------------------------
@@ -1419,8 +1471,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_type, 
-                   hid_t dxpl_id, hid_t estack_id, ...)
+H5VL_file_optional(void *file, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -1430,17 +1481,10 @@ H5VL_file_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional
     if(NULL == vol_plugin->cls->file_cls.optional)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file optional' method")
 
-    va_start (arguments, estack_id);
-    if((ret_value = (vol_plugin->cls->file_cls.optional)(file, optional_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->cls->file_cls.optional)(file, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "optional failed")
     va_end (arguments);
-
-    /* if the get_type is a named datatype, attach the vol info to it */
-    if(H5VL_FILE_REOPEN == optional_type) {
-        vol_plugin->nrefs ++;
-        if(H5I_inc_ref(vol_plugin->id, FALSE) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1462,7 +1506,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_close(void *file, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED estack_id)
+H5VL_file_close(void *file, H5VL_t *vol_plugin, hid_t dxpl_id, void **req)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -1470,7 +1514,7 @@ H5VL_file_close(void *file, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED esta
 
     if(NULL == vol_plugin->cls->file_cls.close)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file close' method")
-    if((ret_value = (vol_plugin->cls->file_cls.close)(file, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->file_cls.close)(file, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "close failed")
 
     vol_plugin->nrefs --;
@@ -1500,7 +1544,7 @@ done:
  */
 void *
 H5VL_group_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                  hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, hid_t UNUSED estack_id)
+                  hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL; /* Return value */
 
@@ -1512,7 +1556,7 @@ H5VL_group_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, c
 
     /* call the corresponding VOL create callback */
     if(NULL == (ret_value = (vol_plugin->cls->group_cls.create)
-                (obj, loc_params, name, gcpl_id, gapl_id, dxpl_id, H5_REQUEST_NULL)))
+                (obj, loc_params, name, gcpl_id, gapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
 
     vol_plugin->nrefs ++;
@@ -1540,7 +1584,7 @@ done:
  */
 void *
 H5VL_group_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                hid_t gapl_id, hid_t dxpl_id, hid_t UNUSED estack_id)
+                hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value; /* Return value */
 
@@ -1550,7 +1594,7 @@ H5VL_group_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, con
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `group open' method")
 
     if(NULL == (ret_value = (vol_plugin->cls->group_cls.open)
-                (obj, loc_params, name, gapl_id, dxpl_id, H5_REQUEST_NULL)))
+                (obj, loc_params, name, gapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
 
     vol_plugin->nrefs ++;
@@ -1578,7 +1622,7 @@ done:
  */
 herr_t
 H5VL_group_get(void *obj, H5VL_t *vol_plugin, H5VL_group_get_t get_type, 
-               hid_t dxpl_id, hid_t estack_id, ...)
+               hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -1588,15 +1632,87 @@ H5VL_group_get(void *obj, H5VL_t *vol_plugin, H5VL_group_get_t get_type,
     if(NULL == vol_plugin->cls->group_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group get' method")
 
-    va_start (arguments, estack_id);
+    va_start (arguments, req);
     if((ret_value = (vol_plugin->cls->group_cls.get)
-        (obj, get_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+        (obj, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_group_specific
+ *
+ * Purpose:	specific operation on groups through the VOL
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_group_specific(void *obj, H5VL_t *vol_plugin, H5VL_group_specific_t specific_type, 
+                       hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_plugin->cls->group_cls.specific)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group specific' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->cls->group_cls.specific)
+        (obj, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute group specific callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_group_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_group_optional
+ *
+ * Purpose:	optional operation specific to plugins.
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_group_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_plugin->cls->group_cls.optional)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group optional' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->cls->group_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute group optional callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_group_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -1614,7 +1730,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_group_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED estack_id)
+H5VL_group_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, void **req)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -1622,7 +1738,7 @@ H5VL_group_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED esta
 
     if(NULL == vol_plugin->cls->group_cls.close)
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group close' method")
-    if((ret_value = (vol_plugin->cls->group_cls.close)(grp, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->group_cls.close)(grp, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
 
     vol_plugin->nrefs --;
@@ -1650,7 +1766,7 @@ done:
  */
 herr_t
 H5VL_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params, 
-                 H5VL_t *vol_plugin, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, hid_t UNUSED estack_id)
+                 H5VL_t *vol_plugin, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     herr_t               ret_value = SUCCEED;  /* Return value */
 
@@ -1661,7 +1777,7 @@ H5VL_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link create' method")
     /* call the corresponding VOL create callback */
     if((ret_value = (vol_plugin->cls->link_cls.create)
-        (create_type, obj, loc_params, lcpl_id, lapl_id, dxpl_id, H5_REQUEST_NULL)) < 0)
+        (create_type, obj, loc_params, lcpl_id, lapl_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link create failed")
 
 done:
@@ -1670,9 +1786,45 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_link_copy
+ *
+ * Purpose:	Copys a link from src to dst.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_link_copy(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
+               H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin,  
+               hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+{
+    herr_t               ret_value = SUCCEED;  /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* check if the corresponding VOL copy callback exists */
+    if(NULL == vol_plugin->cls->link_cls.copy)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link copy' method")
+
+    /* call the corresponding VOL copy callback */
+    if((ret_value = (vol_plugin->cls->link_cls.copy)
+        (src_obj, loc_params1, dst_obj, loc_params2, lcpl_id, 
+         lapl_id, dxpl_id, req)) < 0)
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link copy failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_link_copy() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_link_move
  *
- * Purpose:	Copy or move a link from src to dst.
+ * Purpose:	Moves a link from src to dst.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1683,8 +1835,8 @@ done:
  */
 herr_t 
 H5VL_link_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
-               H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin, hbool_t copy_flag, 
-               hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, hid_t UNUSED estack_id)
+               H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin,  
+               hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     herr_t               ret_value = SUCCEED;  /* Return value */
 
@@ -1696,47 +1848,13 @@ H5VL_link_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
 
     /* call the corresponding VOL move callback */
     if((ret_value = (vol_plugin->cls->link_cls.move)
-        (src_obj, loc_params1, dst_obj, loc_params2, copy_flag, lcpl_id, 
-         lapl_id, dxpl_id, H5_REQUEST_NULL)) < 0)
+        (src_obj, loc_params1, dst_obj, loc_params2, lcpl_id, 
+         lapl_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link move failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_move() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_link_iterate
- *
- * Purpose:	Iterate over links in a group
- *
- * Return:	Success:        non negative
- *		Failure:	negative
- *
- * Programmer:	Mohamad Chaarawi
- *              May, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t 
-H5VL_link_iterate(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                  hbool_t recursive, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
-                  H5L_iterate_t op, void *op_data, hid_t dxpl_id, hid_t UNUSED estack_id)
-{
-    herr_t            ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(NULL == vol_plugin->cls->link_cls.iterate)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link iterate' method")
-
-    if((ret_value = (vol_plugin->cls->link_cls.iterate)
-        (obj, loc_params, recursive, idx_type, order, idx, op, op_data, dxpl_id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "iteration failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)    
-} /* end H5VL_link_iterate() */
 
 
 /*-------------------------------------------------------------------------
@@ -1755,7 +1873,7 @@ done:
  */
 herr_t
 H5VL_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_link_get_t get_type, 
-              hid_t dxpl_id, hid_t estack_id, ...)
+              hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -1765,9 +1883,9 @@ H5VL_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_
     if(NULL == vol_plugin->cls->link_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link get' method")
 
-    va_start (arguments, estack_id);
+    va_start (arguments, req);
     if((ret_value = (vol_plugin->cls->link_cls.get)
-        (obj, loc_params, get_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+        (obj, loc_params, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 
@@ -1777,36 +1895,75 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_link_remove
+ * Function:	H5VL_link_specific
  *
- * Purpose:	Removes a link through the VOL.
+ * Purpose:	specific operation on links through the VOL
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
  *
  * Programmer:	Mohamad Chaarawi
- *              April, 2012
+ *              March, 2012
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
-H5VL_link_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                 hid_t dxpl_id, hid_t UNUSED estack_id)
+herr_t
+H5VL_link_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
+                   H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
-    herr_t             ret_value = SUCCEED;    /* Return value */
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* check if the corresponding VOL remove callback exists */
-    if(NULL == vol_plugin->cls->link_cls.remove)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link remove' method")
+    if(NULL == vol_plugin->cls->link_cls.specific)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link specific' method")
 
-    /* call the corresponding VOL remove callback */
-    if((ret_value = (vol_plugin->cls->link_cls.remove)(obj, loc_params, dxpl_id, H5_REQUEST_NULL)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link remove failed")
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->cls->link_cls.specific)
+        (obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute link specific callback")
+    va_end (arguments);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_link_remove() */
+} /* end H5VL_link_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_link_optional
+ *
+ * Purpose:	optional operation specific to plugins.
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_link_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_plugin->cls->link_cls.optional)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link optional' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->cls->link_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute link optional callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_link_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -1825,7 +1982,7 @@ done:
  */
 void *
 H5VL_object_open(void *obj, H5VL_loc_params_t params, H5VL_t *vol_plugin, H5I_type_t *opened_type,
-                 hid_t dxpl_id, hid_t UNUSED estack_id)
+                 hid_t dxpl_id, void **req)
 {
     void *ret_value;              /* Return value */
 
@@ -1837,7 +1994,7 @@ H5VL_object_open(void *obj, H5VL_loc_params_t params, H5VL_t *vol_plugin, H5I_ty
 
     /* call the corresponding VOL open callback */
     if(NULL == (ret_value = (vol_plugin->cls->object_cls.open)
-                (obj, params, opened_type, dxpl_id, H5_REQUEST_NULL)))
+                (obj, params, opened_type, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
 
     vol_plugin->nrefs++;
@@ -1865,7 +2022,7 @@ done:
 herr_t 
 H5VL_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, H5VL_t *vol_plugin1, const char *src_name, 
                  void *dst_obj, H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin2, const char *dst_name, 
-                 hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, hid_t UNUSED estack_id)
+                 hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -1880,45 +2037,12 @@ H5VL_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, H5VL_t *vol_plugi
 
     if((ret_value = (vol_plugin1->cls->object_cls.copy)
         (src_obj, loc_params1, src_name, dst_obj, loc_params2, dst_name, ocpypl_id, 
-         lcpl_id, dxpl_id, H5_REQUEST_NULL)) < 0)
+         lcpl_id, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "copy failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_copy() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_object_visit
- *
- * Purpose:	Iterate over links in a group
- *
- * Return:	Success:        non negative
- *		Failure:	negative
- *
- * Programmer:	Mohamad Chaarawi
- *              May, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t H5VL_object_visit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                         H5_index_t idx_type, H5_iter_order_t order, H5O_iterate_t op, 
-                         void *op_data, hid_t dxpl_id, hid_t UNUSED estack_id)
-{
-    herr_t            ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(NULL == vol_plugin->cls->object_cls.visit)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object visit' method")
-
-    if((ret_value = (vol_plugin->cls->object_cls.visit)
-        (obj, loc_params, idx_type, order, op, op_data, dxpl_id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "object visitation failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)    
-} /* end H5VL_object_visit() */
 
 
 /*-------------------------------------------------------------------------
@@ -1937,7 +2061,7 @@ done:
  */
 herr_t
 H5VL_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_get_t get_type, 
-                hid_t dxpl_id, hid_t estack_id, ...)
+                hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -1947,9 +2071,9 @@ H5VL_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5V
     if(NULL == vol_plugin->cls->object_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object get' method")
 
-    va_start (arguments, estack_id);
+    va_start (arguments, req);
     if((ret_value = (vol_plugin->cls->object_cls.get)
-        (obj, loc_params, get_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+        (obj, loc_params, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 
@@ -1959,9 +2083,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_object_misc
+ * Function:	H5VL_object_specific
  *
- * Purpose:	perform a plugin specific operation
+ * Purpose:	specific operation on objects through the VOL
  *
  * Return:	Success:        non negative
  *		Failure:	negative
@@ -1972,36 +2096,36 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_misc_t misc_type, 
-                 hid_t dxpl_id, hid_t estack_id, ...)
+H5VL_object_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
+                     H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->object_cls.misc)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object misc' method")
+    if(NULL == vol_plugin->cls->object_cls.specific)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object specific' method")
 
-    va_start (arguments, estack_id);
-    if((ret_value = (vol_plugin->cls->object_cls.misc)
-        (obj, loc_params, misc_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "misc failed")
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->cls->object_cls.specific)
+        (obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "specific failed")
     va_end (arguments);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_object_misc() */
+} /* end H5VL_object_specific() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_object_close
+ * Function:	H5VL_object_optional
  *
- * Purpose:	Closes a object through the VOL
+ * Purpose:	optional operation specific to plugins.
  *
- * Return:	Success:	Non Negative
+ * Return:	Success:        non negative
  *
- *		Failure:	Negative
+ *		Failure:	negative
  *
  * Programmer:	Mohamad Chaarawi
  *              March, 2012
@@ -2009,21 +2133,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                  hid_t dxpl_id, hid_t UNUSED estack_id)
+H5VL_object_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, ...)
 {
-    herr_t              ret_value = SUCCEED;
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->object_cls.close)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object close' method")
-    if((ret_value = (vol_plugin->cls->object_cls.close)(obj, loc_params, dxpl_id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
+    if(NULL == vol_plugin->cls->object_cls.optional)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object optional' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->cls->object_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute object optional callback")
+    va_end (arguments);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_object_close() */
+} /* end H5VL_object_optional() */
 
 
 /*-------------------------------------------------------------------------

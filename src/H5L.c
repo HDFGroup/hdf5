@@ -327,9 +327,9 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     }
 
     /* Move the link through the VOL */
-    if((ret_value = H5VL_link_move(obj1, loc_params1, obj2, loc_params2, 
-                                   (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2), 
-                                   FALSE, lcpl_id, lapl_id, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
+    if(H5VL_link_move(obj1, loc_params1, obj2, loc_params2, 
+                      (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2), 
+                      lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -418,9 +418,9 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     }
 
     /* Move the link through the VOL */
-    if((ret_value = H5VL_link_move(obj1, loc_params1, obj2, loc_params2, 
-                                   (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2), 
-                                   TRUE, lcpl_id, lapl_id, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
+    if(H5VL_link_copy(obj1, loc_params1, obj2, loc_params2, 
+                      (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2), 
+                      lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -496,8 +496,8 @@ H5Lcreate_soft(const char *link_target,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
     /* Create the link through the VOL */
-    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, obj, loc_params, vol_plugin,
-                                     lcpl_id, lapl_id, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
+    if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, obj, loc_params, vol_plugin,
+                        lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -598,9 +598,9 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
 
     /* Create the link through the VOL */
-    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, obj2, loc_params2, 
-                                     (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2),
-                                     lcpl_id, lapl_id, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
+    if(H5VL_link_create(H5VL_LINK_CREATE_HARD, obj2, loc_params2, 
+                        (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2),
+                        lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -684,8 +684,8 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
 
     /* Create the link through the VOL */
-    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_UD, obj, loc_params, vol_plugin,
-                                     lcpl_id, lapl_id, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
+    if(H5VL_link_create(H5VL_LINK_CREATE_UD, obj, loc_params, vol_plugin,
+                        lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -738,8 +738,9 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Delete the link through the VOL */
-    if((ret_value = H5VL_link_remove(obj, loc_params, vol_plugin, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
+    if(H5VL_link_specific(obj, loc_params, vol_plugin, H5VL_LINK_DELETE, 
+                          H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -806,8 +807,9 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Delete the link through the VOL */
-    if((ret_value = H5VL_link_remove(obj, loc_params, vol_plugin, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
+    if(H5VL_link_specific(obj, loc_params, vol_plugin, H5VL_LINK_DELETE, 
+                          H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -867,8 +869,8 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_VAL, 
-                                  H5AC_dxpl_id, H5_EVENT_STACK_NULL, buf, size)) < 0)
+    if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_VAL, 
+                     H5AC_ind_dxpl_id, H5_REQUEST_NULL, buf, size) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
 
 done:
@@ -937,8 +939,8 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_VAL, 
-                                  H5AC_dxpl_id, H5_EVENT_STACK_NULL, buf, size)) < 0)
+    if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_VAL, 
+                     H5AC_ind_dxpl_id, H5_REQUEST_NULL, buf, size) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
 
 done:
@@ -992,7 +994,8 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* check link existence through the VOL */
-    if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_EXISTS, H5AC_dxpl_id, H5_EVENT_STACK_NULL, &ret_value) < 0)
+    if(H5VL_link_specific(obj, loc_params, vol_plugin, H5VL_LINK_EXISTS,
+                          H5AC_ind_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -1047,8 +1050,8 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_INFO, 
-                                  H5AC_dxpl_id, H5_EVENT_STACK_NULL, linfo)) < 0)
+    if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_INFO, 
+                     H5AC_ind_dxpl_id, H5_REQUEST_NULL, linfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -1113,8 +1116,8 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_INFO, H5AC_dxpl_id, H5_EVENT_STACK_NULL, 
-                                  linfo)) < 0)
+    if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_INFO,
+                     H5AC_ind_dxpl_id, H5_REQUEST_NULL, linfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -1309,8 +1312,8 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the link info through the VOL */
-    if((H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_NAME, H5AC_dxpl_id, H5_EVENT_STACK_NULL, 
-                      name, size, &ret_value)) < 0)
+    if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_NAME, 
+                     H5AC_ind_dxpl_id, H5_REQUEST_NULL, name, size, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link name")
 
 done:
@@ -1375,8 +1378,9 @@ H5Literate(hid_t id, H5_index_t idx_type, H5_iter_order_t order,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* iterate over the links through the VOL */
-    if((ret_value = H5VL_link_iterate(obj, loc_params, vol_plugin, FALSE, idx_type, order, idx_p,
-                                      op, op_data, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
+    if((ret_value = H5VL_link_specific(obj, loc_params, vol_plugin, H5VL_LINK_ITER,
+                                       H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
+                                       FALSE, idx_type, order, idx_p, op, op_data)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -1448,8 +1452,9 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* iterate over the links through the VOL */
-    if((ret_value = H5VL_link_iterate(obj, loc_params, vol_plugin, FALSE, idx_type, order, idx_p,
-                                      op, op_data, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
+    if((ret_value = H5VL_link_specific(obj, loc_params, vol_plugin, H5VL_LINK_ITER,
+                                       H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
+                                       FALSE, idx_type, order, idx_p, op, op_data)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -1521,9 +1526,10 @@ H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* iterate over the links through the VOL */
-    if((ret_value = H5VL_link_iterate(obj, loc_params, vol_plugin, TRUE, idx_type, order, NULL,
-                                      op, op_data, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+    if((ret_value = H5VL_link_specific(obj, loc_params, vol_plugin, H5VL_LINK_ITER,
+                                       H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
+                                       TRUE, idx_type, order, NULL, op, op_data)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visit failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1599,9 +1605,10 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* visit the links through the VOL */
-    if((ret_value = H5VL_link_iterate(obj, loc_params, vol_plugin, TRUE, idx_type, order, NULL,
-                                      op, op_data, H5AC_dxpl_id, H5_EVENT_STACK_NULL)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+    if((ret_value = H5VL_link_specific(obj, loc_params, vol_plugin, H5VL_LINK_ITER,
+                                       H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
+                                       TRUE, idx_type, order, NULL, op, op_data)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visit failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3443,3 +3450,83 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_link_copy_file() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_iterate
+ *
+ * Purpose:	Iterates through links in a group
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              August, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5L_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
+                   H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, 
+                   H5L_iterate_t op, void *op_data, hid_t dxpl_id)
+{
+    H5G_loc_t	loc;
+    herr_t ret_value;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+
+    if(!recursive) {
+        H5G_link_iterate_t lnk_op;  /* Link operator */
+        hsize_t     last_lnk;       /* Index of last object looked at */
+        hsize_t	idx;            /* Internal location to hold index */
+
+        /* Set up iteration beginning/end info */
+        idx = (idx_p == NULL ? 0 : *idx_p);
+        last_lnk = 0;
+
+        /* Build link operator info */
+        lnk_op.op_type = H5G_LINK_OP_NEW;
+        lnk_op.op_func.op_new = op;
+
+        /* Iterate over the links */
+        if(loc_params.type == H5VL_OBJECT_BY_SELF) {
+            if((ret_value = H5G_iterate(&loc, ".", idx_type, order, idx, &last_lnk, &lnk_op, op_data, 
+                                        H5P_LINK_ACCESS_DEFAULT, dxpl_id)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+        }
+        else if(loc_params.type == H5VL_OBJECT_BY_NAME) { 
+            if((ret_value = H5G_iterate(&loc, loc_params.loc_data.loc_by_name.name, 
+                                        idx_type, order, idx, &last_lnk, &lnk_op, op_data, 
+                                        loc_params.loc_data.loc_by_name.lapl_id, dxpl_id)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+        }
+        else {
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown link iterate params")
+        }
+
+        /* Set the index we stopped at */
+        if(idx_p)
+            *idx_p = last_lnk;
+    }
+    else {
+        /* Call internal group visitation routine */
+        if(loc_params.type == H5VL_OBJECT_BY_SELF) {
+            if((ret_value = H5G_visit(&loc, ".", idx_type, order, op, op_data, 
+                                      H5P_LINK_ACCESS_DEFAULT, dxpl_id)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visitation failed")
+        }
+        else if(loc_params.type == H5VL_OBJECT_BY_NAME) { 
+            if((ret_value = H5G_visit(&loc, loc_params.loc_data.loc_by_name.name, 
+                                      idx_type, order, op, op_data, 
+                                      loc_params.loc_data.loc_by_name.lapl_id, dxpl_id)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visitation failed")
+        }
+        else {
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown link visit params")
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_iterate() */
