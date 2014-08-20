@@ -1,0 +1,81 @@
+************************************************************************
+* Build and Test HDF5 Examples with CMake                              *
+************************************************************************
+
+Notes: This short instruction is written for users who want to quickly 
+       test the installation of HDF5 by using the CMake tools to build
+       and test the HDF5 Examples. The following instructions will show
+       the default usage and then present common changes for non-default
+       installations.
+       For more information, see the USING_HDF5_CMake.txt file.
+       
+       More information about using CMake can be found at the KitWare 
+       site, www.cmake.org.
+         
+       CMake uses the command line and these instructions use the script
+       method of the ctest command.
+
+
+========================================================================
+I. Preconditions                                                           
+========================================================================
+
+   1. We suggest you obtain the latest CMake for windows from the Kitware
+      web site. The HDF5 1.8.x product requires a minimum CMake version 
+      of 2.8.12.                     
+                                                                         
+   2. You have installed the HDF5 library built with CMake, by executing 
+      the HDF Install Utility (the *.exe file in the binary package for 
+      Windows or the *.sh on Linux). If you are using a Windows platform, 
+      you can obtain a pre-built Windows binary from The HDF Group's website 
+      at www.hdfgroup.org. See Section "III. Common changes to the 
+      HDF518_Examples.cmake file", for the line to change the location.
+                                                                         
+   3. On Windows, you have installed the 7Zip package. See Section "III. 
+      Common changes to the HDF518_Examples.cmake file", for the line to 
+      change the command.
+
+
+
+========================================================================
+II. Building HDF5 Examples with CMake
+========================================================================
+
+Files in the HDF5 install directory:
+       HDF5Examples-0.1.1-Source.zip (or HDF5Examples-0.1.1-Source.tar.gz)
+       HDF518_Examples.cmake
+       
+Default installation process:
+       Create a directory to run the examples, i.e. \test_hdf5.
+       Copy HDF5Examples-0.1.1-Source.zip(.tar.gz) to this directory, do NOT unzip.
+       Copy HDF518_Examples.cmake to this directory.
+       Edit line 8 of the HDF518_Examples.cmake file and change the INSTALLDIR 
+           to the HDF5 install location.
+       
+       Execute from this directory:
+          ctest -S HDF518_Examples.cmake,HDF5Examples-0.1.1-Source -C Release -O test.log
+
+The script will uncompress the examples file HDF5Examples-0.1.1-Source.zip(.tar.gz),
+   and create a build directory inside the HDF5Examples-0.1.1-Source directory.
+   It will then configure, build, and execute the examples. All the log files
+   will be found under the build\Testing\Temporary directory, check these for
+   errors.
+   
+The amount of script information can be increased by adding -V to the ctest
+   command. Even more information can be shown by adding -VV instead of -V.
+
+
+========================================================================
+III. Common changes to the HDF518_Examples.cmake file
+========================================================================
+
+Line 8: change the INSTALLDIR to a different HDF5 install location.
+
+Line 14: uncomment to allow Mac machines to build shared examples.
+
+Line 15: uncomment to not build and test Fortran examples.
+
+Line 16: uncomment to build and test Fortran examples with F2003 option.
+
+Line 68: change the CTEST_7Z_COMMAND to a different unzip program.
+

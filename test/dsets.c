@@ -50,6 +50,7 @@ const char *FILENAME[] = {
     "chunk_expand",
     "copy_dcpl_newfile",
     "layout_extend",
+    "zero_chunk",
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -477,7 +478,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
 
         HDclose(f);
 
-        free (tconv_buf);
+        HDfree (tconv_buf);
         PASSED();
     } /* end if */
     else {
@@ -1023,10 +1024,10 @@ test_conv_buffer(hid_t fid)
 		cf->a[j][k][l] = 10*(j+1) + l + k;
 
     for(j = 0; j < DIM2; j++)
-	cf->b[j] = (float)(100.*(j+1) + 0.01*j);
+	cf->b[j] = (float)(100.0f*(j+1) + 0.01f*j);
 
     for(j = 0; j < DIM3; j++)
-	cf->c[j] = 100.*(j+1) + 0.02*j;
+	cf->c[j] = 100.0f*(j+1) + 0.02f*j;
 
 
   /* Create data space */
@@ -1848,13 +1849,13 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if(H5Dclose (dataset) < 0) goto error;
     if(H5Sclose (sid) < 0) goto error;
     if(H5Pclose (dxpl) < 0) goto error;
-    free (tconv_buf);
+    HDfree (tconv_buf);
 
     return(0);
 
 error:
     if(tconv_buf)
-        free (tconv_buf);
+        HDfree (tconv_buf);
     return -1;
 }
 
@@ -2770,7 +2771,7 @@ test_nbit_int(hid_t file)
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++) {
         orig_data[i][j] = (int)(((long long)HDrandom() %
-                           (long long)HDpow(2.0, (double)(precision - 1))) << offset);
+                           (long long)HDpow(2.0f, (double)(precision - 1))) << offset);
 
         /* even-numbered values are negtive */
         if((i*size[1]+j+1)%2 == 0)
@@ -2872,8 +2873,8 @@ test_nbit_float(hid_t file)
     /* orig_data[] are initialized to be within the range that can be represented by
      * dataset datatype (no precision loss during datatype conversion)
      */
-    float               orig_data[2][5] = {{(float)188384.00, (float)19.103516, (float)-1.0831790e9, (float)-84.242188,
-    (float)5.2045898}, {(float)-49140.000, (float)2350.2500, (float)-3.2110596e-1, (float)6.4998865e-5, (float)-0.0000000}};
+    float               orig_data[2][5] = {{(float)188384.00f, (float)19.103516f, (float)-1.0831790e9f, (float)-84.242188f,
+    (float)5.2045898f}, {(float)-49140.000f, (float)2350.2500f, (float)-3.2110596e-1f, (float)6.4998865e-5f, (float)-0.0000000f}};
     float               new_data[2][5];
     size_t              precision, offset;
     size_t             i, j;
@@ -3842,7 +3843,7 @@ test_nbit_compound_3(hid_t file)
         for(k = 0; k < (i+1); k++) ((unsigned int *)orig_data[i].v.p)[k] = (unsigned int)(i*100 + k);
 
         /* Create reference to the dataset "nbit_obj_ref" */
-        if(H5Rcreate(&orig_data[i].r, file, "nbit_obj_ref", H5R_OBJECT, -1) < 0) goto error;
+        if(H5Rcreate(&orig_data[i].r, file, "nbit_obj_ref", H5R_OBJECT, (hid_t)-1) < 0) goto error;
 
         for(j = 0; j < 5; j++) orig_data[i].o[j] = (unsigned char)(i + j);
     }
@@ -4021,7 +4022,7 @@ test_nbit_int_size(hid_t file)
    */
    for (i=0; i < DSET_DIM1; i++)
        for (j=0; j < DSET_DIM2; j++)
-           orig_data[i][j] = rand() % (int)pow(2, precision-1) <<offset;
+           orig_data[i][j] = rand() % (int)pow((double)2, (double)(precision-1)) << offset;
 
 
    /* Describe the dataspace. */
@@ -6533,7 +6534,7 @@ auxread_fdata(hid_t fid, const char *name)
     if(H5Dclose(dset_id) < 0)
         goto error;
     if(buf)
-        free(buf);
+        HDfree(buf);
 
     return 0;
 
@@ -6545,7 +6546,7 @@ error:
         H5Tclose(ftype_id);
         H5Tclose(mtype_id);
         if(buf)
-            free(buf);
+            HDfree(buf);
     } H5E_END_TRY;
     return -1;
 }
@@ -6571,7 +6572,7 @@ test_filters_endianess(void)
     hid_t     dsid=-1;                  /* dataset ID */
     hid_t     sid=-1;                   /* dataspace ID */
     hid_t     dcpl=-1;                  /* dataset creation property list ID */
-    const char *data_file = H5_get_srcdir_filename("test_filters_le.hdf5"); /* Corrected test file name */
+    const char *data_file = H5_get_srcdir_filename("test_filters_le.h5"); /* Corrected test file name */
 
     TESTING("filters with big-endian/little-endian data");
 
@@ -6596,7 +6597,7 @@ test_filters_endianess(void)
     */
 
     /* compose the name of the file to open, using the srcdir, if appropriate */
-    data_file = H5_get_srcdir_filename("test_filters_be.hdf5"); /* Corrected test file name */
+    data_file = H5_get_srcdir_filename("test_filters_be.h5"); /* Corrected test file name */
 
     /* open */
     if((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -6677,8 +6678,17 @@ test_zero_dims(hid_t file)
     if(H5Pset_chunk(dcpl, 1, &csize) < 0) FAIL_STACK_ERROR
     if((d = H5Dcreate2(file, ZERODIM_DATASET, H5T_NATIVE_INT, s, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-    /* Just a no-op */
+    /* Various no-op writes */
     if(H5Dwrite(d, H5T_NATIVE_INT, s, s, H5P_DEFAULT, (void*)911) < 0) FAIL_STACK_ERROR
+    if(H5Dwrite(d, H5T_NATIVE_INT, s, s, H5P_DEFAULT, NULL) < 0) FAIL_STACK_ERROR
+    if(H5Dwrite(d, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void*)911) < 0) FAIL_STACK_ERROR
+    if(H5Dwrite(d, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, NULL) < 0) FAIL_STACK_ERROR
+
+    /* Various no-op reads */
+    if(H5Dread(d, H5T_NATIVE_INT, s, s, H5P_DEFAULT, (void*)911) < 0) FAIL_STACK_ERROR
+    if(H5Dread(d, H5T_NATIVE_INT, s, s, H5P_DEFAULT, NULL) < 0) FAIL_STACK_ERROR
+    if(H5Dread(d, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void*)911) < 0) FAIL_STACK_ERROR
+    if(H5Dread(d, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, NULL) < 0) FAIL_STACK_ERROR
 
     if(H5Dclose(d) < 0) FAIL_STACK_ERROR
     if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
@@ -7811,13 +7821,15 @@ test_chunk_expand(hid_t fapl)
     H5D_alloc_time_t alloc_time;        /* Storage allocation time */
     unsigned    write_elem, read_elem;  /* Element written/read */
     unsigned    u;              /* Local index variable */
+    size_t      size;           /* Size of type */
     herr_t      status;         /* Generic return value */
 
     TESTING("filter expanding chunks too much");
 
     h5_fixname(FILENAME[10], fapl, filename, sizeof filename);
 
-    if(sizeof(size_t) <= 4) {
+    size = sizeof(size_t);
+    if(size <= 4) {
 	SKIPPED();
 	puts("    Current machine can't test for error");
     } /* end if */
@@ -8181,6 +8193,1102 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function: test_zero_dim_dset
+ *
+ * Purpose:     Tests support for reading a 1D chunled dataset with 
+ *              dimension size = 0.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              Wednesdat, July 9, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_zero_dim_dset(hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       fid = -1;       /* File ID */
+    hid_t       dcpl = -1;      /* Dataset creation property list ID */
+    hid_t       sid = -1;       /* Dataspace ID */
+    hid_t       dsid = -1;      /* Dataset ID */
+    hsize_t     dim, chunk_dim; /* Dataset and chunk dimensions */
+    int         data[1];
+
+    TESTING("shrinking large chunk");
+
+    h5_fixname(FILENAME[13], fapl, filename, sizeof filename);
+
+    /* Create file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+
+    /* Set 1 chunk size */
+    chunk_dim = 1;
+    if(H5Pset_chunk(dcpl, 1, &chunk_dim) < 0) FAIL_STACK_ERROR
+
+    /* Create 1D dataspace with 0 dim size */
+    dim = 0;
+    if((sid = H5Screate_simple(1, &dim, NULL)) < 0) FAIL_STACK_ERROR
+
+    /* Create chunked dataset */
+    if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* write 0 elements from dataset */
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0) FAIL_STACK_ERROR
+
+    /* Read 0 elements from dataset */
+    if(H5Dread(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0) FAIL_STACK_ERROR
+
+    /* Close everything */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_zero_dim_dset() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_scatter
+ *
+ * Purpose:     Tests H5Dscatter with a variety of different selections
+ *              and source buffer sizes.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Neil Fortner
+ *              Wednesday, January 16, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+typedef struct scatter_info_t {
+    int *src_buf;   /* Source data buffer */
+    size_t block;   /* Maximum number of elements to return to H5Dscatter() */
+    size_t size;    /* Remaining number of elements to return */
+} scatter_info_t;
+
+#define TEST_SCATTER_CHECK_ARR(ARR, EXP) \
+    for(i=0; i<(int)(sizeof(ARR)/sizeof(ARR[0])); i++) \
+        for(j=0; j<(int)(sizeof(ARR[0])/sizeof(ARR[0][0])); j++) \
+            for(k=0; k<(int)(sizeof(ARR[0][0])/sizeof(ARR[0][0][0])); k++) \
+                if(ARR[i][j][k] != EXP[i][j][k]) { \
+                    H5_FAILED(); AT(); \
+                    printf("  " #ARR "[%d][%d][%d] == %d, " #EXP "[%d][%d][%d] == %d\n", i, j, k, ARR[i][j][k], i, j, k, EXP[i][j][k]); \
+                    goto error; \
+                }
+
+static herr_t
+scatter_cb(void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*/,
+    void *_scatter_info)
+{
+    scatter_info_t *scatter_info = (scatter_info_t *)_scatter_info;
+    size_t nelmts;      /* Number of elements to return in src_buf */
+
+    /* Calculate number of elements */
+    nelmts = MIN(scatter_info->block, scatter_info->size);
+    HDassert(nelmts > 0);
+
+    /* Set output variables */
+    *src_buf = (void *)scatter_info->src_buf;
+    *src_buf_bytes_used = nelmts * sizeof(scatter_info->src_buf[0]);
+
+    /* Update scatter_info */
+    scatter_info->src_buf += nelmts;
+    scatter_info->size -= nelmts;
+
+    return SUCCEED;
+}
+
+static herr_t
+test_scatter(void)
+{
+    hid_t       sid = -1;       /* Dataspace ID */
+    hsize_t     dim[3] = {8, 5, 8}; /* Dataspace dimensions */
+    hsize_t     start[3] = {0, 0, 0};
+    hsize_t     stride[3] = {0, 0, 0};
+    hsize_t     count[3] = {0, 0, 0};
+    hsize_t     block[3] = {0, 0, 0};
+    hsize_t     start2[3] = {0, 0, 0};
+    hsize_t     count2[3] = {0, 0, 0};
+    hsize_t     point[4][3] = {{2, 3, 2}, {3, 0, 2}, {7, 2, 0}, {0, 1, 5}};
+    size_t      src_buf_size;
+    int         src_buf[36];    /* Source data buffer */
+    int         dst_buf[8][5][8]; /* Destination data buffer */
+    int         expect_dst_buf[8][5][8]; /* Expected destination data buffer */
+    scatter_info_t scatter_info; /* Operator data for callback */
+    int         i, j, k, src_i; /* Local index variables */
+
+    TESTING("H5Dscatter()");
+
+    /* Create dataspace */
+    if((sid = H5Screate_simple(3, dim, NULL)) < 0) TEST_ERROR
+
+    /* Initialize src_buf */
+    for(i=0; i<(int)(sizeof(src_buf)/sizeof(src_buf[0])); i++)
+        src_buf[i] = i + 1;
+
+
+    /*
+     * Test 1: Simple case
+     */
+    /* Select hyperslab */
+    count[0] = 1;
+    count[1] = 1;
+    count[2] = 8;
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL ,count, NULL) < 0)
+        TEST_ERROR
+
+    /* Initialize dst_buf and expect_dst_buf */
+    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    for(i=0; i<8; i++)
+        expect_dst_buf[0][0][i] = src_buf[i];
+
+    /* Loop over buffer sizes */
+    for(src_buf_size=1; src_buf_size<=9; src_buf_size++) {
+        /* Reset dst_buf */
+        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+
+        /* Set up scatter info */
+        scatter_info.src_buf = src_buf;
+        scatter_info.block = src_buf_size;
+        scatter_info.size = 8;
+
+        /* Scatter data */
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+            TEST_ERROR
+
+        /* Verify data */
+        TEST_SCATTER_CHECK_ARR(dst_buf, expect_dst_buf)
+    } /* end for */
+
+
+    /*
+     * Test 2: Single block in dataset
+     */
+    /* Select hyperslab */
+    start[0] = 3;
+    start[1] = 2;
+    start[2] = 4;
+    count[0] = 2;
+    count[1] = 3;
+    count[2] = 2;
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL ,count, NULL) < 0)
+        TEST_ERROR
+
+    /* Initialize expect_dst_buf */
+    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    src_i = 0;
+    for(i=3; i<5; i++)
+        for(j=2; j<5; j++)
+            for(k=4; k<6; k++)
+                expect_dst_buf[i][j][k] = src_buf[src_i++];
+
+    /* Loop over buffer sizes */
+    for(src_buf_size=1; src_buf_size<=13; src_buf_size++) {
+        /* Reset dst_buf */
+        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+
+        /* Set up scatter info */
+        scatter_info.src_buf = src_buf;
+        scatter_info.block = src_buf_size;
+        scatter_info.size = 12;
+
+        /* Scatter data */
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+            TEST_ERROR
+
+        /* Verify data */
+        TEST_SCATTER_CHECK_ARR(dst_buf, expect_dst_buf)
+    } /* end for */
+
+
+    /*
+     * Test 3: Multiple blocks
+     */
+    /* Select hyperslab */
+    start[0] = 1;
+    start[1] = 1;
+    start[2] = 1;
+    stride[0] = 3;
+    stride[1] = 4;
+    stride[2] = 5;
+    count[0] = 3;
+    count[1] = 1;
+    count[2] = 2;
+    block[0] = 1;
+    block[1] = 3;
+    block[2] = 2;
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride ,count, block) < 0)
+        TEST_ERROR
+
+    /* Initialize expect_dst_buf */
+    /* Iterate over block containing selection, checking if each element is in
+     * selection.  Note that the algorithm used here (if statement) would not
+     * work for overlapping hyperslabs. */
+    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    src_i = 0;
+    for(i=1; i<8; i++)
+        for(j=1; j<4; j++)
+            for(k=1; k<8; k++)
+                if((hsize_t)i >= start[0]
+                        && ((hsize_t)i - start[0]) % stride[0] < block[0]
+                        && ((hsize_t)i - start[0]) / stride[0] < count[0]
+                        && (hsize_t)j >= start[1]
+                        && ((hsize_t)j - start[1]) % stride[1] < block[1]
+                        && ((hsize_t)j - start[1]) / stride[1] < count[1]
+                        && (hsize_t)k >= start[2]
+                        && ((hsize_t)k - start[2]) % stride[2] < block[2]
+                        && ((hsize_t)k - start[2]) / stride[2] < count[2])
+                    expect_dst_buf[i][j][k] = src_buf[src_i++];
+
+    /* Loop over buffer sizes */
+    for(src_buf_size=1; src_buf_size<=37; src_buf_size++) {
+        /* Reset dst_buf */
+        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+
+        /* Set up scatter info */
+        scatter_info.src_buf = src_buf;
+        scatter_info.block = src_buf_size;
+        scatter_info.size = 36;
+
+        /* Scatter data */
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+            TEST_ERROR
+
+        /* Verify data */
+        TEST_SCATTER_CHECK_ARR(dst_buf, expect_dst_buf)
+    } /* end for */
+
+
+    /*
+     * Test 4: Compound selection
+     */
+    /* Select hyperslabs */
+    start[0] = 2;
+    start[1] = 1;
+    start[2] = 1;
+    count[0] = 2;
+    count[1] = 3;
+    count[2] = 2;
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL ,count, NULL) < 0)
+        TEST_ERROR
+    start2[0] = 1;
+    start2[1] = 2;
+    start2[2] = 2;
+    count2[0] = 3;
+    count2[1] = 2;
+    count2[2] = 2;
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_XOR, start2, NULL ,count2, NULL) < 0)
+        TEST_ERROR
+
+    /* Initialize expect_dst_buf */
+    /* Iterate over block containing selection, checking if each element is in
+     * selection. */
+    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    src_i = 0;
+    for(i=1; i<4; i++)
+        for(j=1; j<4; j++)
+            for(k=1; k<4; k++)
+                if(!(((hsize_t)i >= start[0] && (hsize_t)i < start[0] + count[0])
+                        && ((hsize_t)j >= start[1] && (hsize_t)j < start[1] + count[1])
+                        && ((hsize_t)k >= start[2] && (hsize_t)k < start[2] + count[2]))
+                        != !(((hsize_t)i >= start2[0] && (hsize_t)i < start2[0] + count2[0])
+                        && ((hsize_t)j >= start2[1] && (hsize_t)j < start2[1] + count2[1])
+                        && ((hsize_t)k >= start2[2] && (hsize_t)k < start2[2] + count2[2])))
+                    expect_dst_buf[i][j][k] = src_buf[src_i++];
+
+    /* Loop over buffer sizes */
+    for(src_buf_size=1; src_buf_size<=17; src_buf_size++) {
+        /* Reset dst_buf */
+        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+
+        /* Set up scatter info */
+        scatter_info.src_buf = src_buf;
+        scatter_info.block = src_buf_size;
+        scatter_info.size = 16;
+
+        /* Scatter data */
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+            TEST_ERROR
+
+        /* Verify data */
+        TEST_SCATTER_CHECK_ARR(dst_buf, expect_dst_buf)
+    } /* end for */
+
+
+    /*
+     * Test 5: Point selection
+     */
+    /* Select hyperslabs */
+    if(H5Sselect_elements(sid, H5S_SELECT_SET, sizeof(point) / sizeof(point[0]), (hsize_t *)point) < 0)
+        TEST_ERROR
+
+    /* Initialize expect_dst_buf */
+    /* Iterate over block containing selection, checking if each element is in
+     * selection. */
+    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    for(i=0; i<(int)(sizeof(point) / sizeof(point[0])); i++)
+        expect_dst_buf[point[i][0]][point[i][1]][point[i][2]]
+                = src_buf[i];
+
+    /* Loop over buffer sizes */
+    for(src_buf_size=1; src_buf_size<=5; src_buf_size++) {
+        /* Reset dst_buf */
+        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+
+        /* Set up scatter info */
+        scatter_info.src_buf = src_buf;
+        scatter_info.block = src_buf_size;
+        scatter_info.size = 4;
+
+        /* Scatter data */
+        if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+            TEST_ERROR
+
+        /* Verify data */
+        TEST_SCATTER_CHECK_ARR(dst_buf, expect_dst_buf)
+    } /* end for */
+
+
+    /* Close everything */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Sclose(sid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_scatter() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_gather
+ *
+ * Purpose:     Tests H5Dgather with a variety of different selections and
+ *              destination buffer sizes.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Neil Fortner
+ *              Wednesday, January 16, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+typedef struct gather_info_t {
+    int *expect_dst_buf; /* Expected destination data buffer */
+    size_t max_nelmts;  /* Maximum number of elements passed to callback */
+    hbool_t last_call;  /* Whether this should be the last time the callback is called */
+} gather_info_t;
+
+static herr_t
+gather_cb(const void *dst_buf, size_t dst_buf_bytes_used,
+    void *_gather_info)
+{
+    gather_info_t *gather_info = (gather_info_t *)_gather_info;
+    size_t nelmts;      /* Number of elements in src_buf */
+    int i;              /* Local index variable */
+
+    HDassert(dst_buf_bytes_used > 0);
+
+    /* Calculate number of elements */
+    nelmts = dst_buf_bytes_used / sizeof(gather_info->expect_dst_buf[0]);
+
+    /* Make sure the number of bytes is a multiple of the number of elements */
+    if(nelmts * sizeof(gather_info->expect_dst_buf[0]) != dst_buf_bytes_used)
+        TEST_ERROR
+
+    /* Make sure we weren't passed more data than we requested to be passed at
+     * once */
+    if(nelmts > gather_info->max_nelmts)
+        TEST_ERROR
+
+    /* If we were passed less data than requested, make sure this is the last
+     * time the callback was called */
+    if(gather_info->last_call)
+        TEST_ERROR
+    if(nelmts < gather_info->max_nelmts)
+        gather_info->last_call = TRUE;
+
+    /* Compare data and expected data */
+    for(i=0; i<(int)nelmts; i++)
+        if(((const int *)dst_buf)[i] != *((gather_info->expect_dst_buf)++))
+            TEST_ERROR
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+}
+
+static herr_t
+test_gather(void)
+{
+    hid_t       sid = -1;       /* Dataspace ID */
+    hsize_t     dim[3] = {8, 5, 8}; /* Dataspace dimensions */
+    hsize_t     start[3] = {0, 0, 0};
+    hsize_t     stride[3] = {0, 0, 0};
+    hsize_t     count[3] = {0, 0, 0};
+    hsize_t     block[3] = {0, 0, 0};
+    hsize_t     start2[3] = {0, 0, 0};
+    hsize_t     count2[3] = {0, 0, 0};
+    hsize_t     point[4][3] = {{2, 3, 2}, {3, 0, 2}, {7, 2, 0}, {0, 1, 5}};
+    size_t      dst_buf_size;
+    int         src_buf[8][5][8]; /* Source data buffer */
+    int         dst_buf[36];    /* Destination data buffer */
+    int         expect_dst_buf[36]; /* Expected destination data buffer */
+    gather_info_t gather_info;  /* Operator data for callback */
+    int         i, j, k, dst_i; /* Local index variables */
+
+    TESTING("H5Dgather()");
+
+    /* Create dataspace */
+    if((sid = H5Screate_simple(3, dim, NULL)) < 0) TEST_ERROR
+
+    /* Initialize src_buf */
+    for(i=0; i<(int)(sizeof(src_buf)/sizeof(src_buf[0])); i++)
+        for(j=0; j<(int)(sizeof(src_buf[0])/sizeof(src_buf[0][0])); j++)
+            for(k=0; k<(int)(sizeof(src_buf[0][0])/sizeof(src_buf[0][0][0])); k++)
+                src_buf[i][j][k] = 1 + k
+                        + (int)(sizeof(src_buf[0][0]) / sizeof(src_buf[0][0][0])) * j
+                        + (int)(sizeof(src_buf[0]) / sizeof(src_buf[0][0][0])) * i;
+
+
+    /*
+     * Test 1: Simple case
+     */
+    /* Select hyperslab */
+    count[0] = 1;
+    count[1] = 1;
+    count[2] = 8;
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL ,count, NULL) < 0)
+        TEST_ERROR
+
+    /* Initialize expect_dst_buf */
+    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    for(i=0; i<8; i++)
+        expect_dst_buf[i] = src_buf[0][0][i];
+
+    /* Loop over buffer sizes */
+    for(dst_buf_size=1; dst_buf_size<=9; dst_buf_size++) {
+        /* Reset dst_buf */
+        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+
+        /* Initialize gather_info */
+        gather_info.expect_dst_buf = expect_dst_buf;
+        gather_info.max_nelmts = dst_buf_size;
+        gather_info.last_call = FALSE;
+
+        /* Gather data */
+        if(H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]), dst_buf, gather_cb, &gather_info) < 0)
+            TEST_ERROR
+
+        /* Verify that all data has been gathered (and verified) */
+        if(gather_info.expect_dst_buf - expect_dst_buf != 8) TEST_ERROR
+    } /* end for */
+
+    /* Test without a callback */
+    /* Loop over buffer sizes */
+    for(dst_buf_size=8; dst_buf_size<=9; dst_buf_size++) {
+        /* Reset dst_buf */
+        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+
+        /* Gather data */
+        if(H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]), dst_buf, NULL, NULL) < 0)
+            TEST_ERROR
+
+        /* Verify data */
+        for(i=0; i<(int)(sizeof(dst_buf)/sizeof(dst_buf[0])); i++)
+            if(dst_buf[i] != expect_dst_buf[i])
+                TEST_ERROR
+    } /* end for */
+
+    /* Test with a dst_buf_size that is not a multiple of the datatype size */
+    /* Reset dst_buf */
+    dst_buf_size = 7;
+    (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+
+    /* Initialize gather_info */
+    gather_info.expect_dst_buf = expect_dst_buf;
+    gather_info.max_nelmts = dst_buf_size - 1;
+    gather_info.last_call = FALSE;
+
+    /* Gather data */
+    if(H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]) - 1, dst_buf, gather_cb, &gather_info) < 0)
+        TEST_ERROR
+
+    /* Verify that all data has been gathered (and verified) */
+    if(gather_info.expect_dst_buf - expect_dst_buf != 8) TEST_ERROR
+
+
+    /*
+     * Test 2: Single block in dataset
+     */
+    /* Select hyperslab */
+    start[0] = 3;
+    start[1] = 2;
+    start[2] = 4;
+    count[0] = 2;
+    count[1] = 3;
+    count[2] = 2;
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL ,count, NULL) < 0)
+        TEST_ERROR
+
+    /* Initialize expect_dst_buf */
+    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    dst_i = 0;
+    for(i=3; i<5; i++)
+        for(j=2; j<5; j++)
+            for(k=4; k<6; k++)
+                expect_dst_buf[dst_i++] = src_buf[i][j][k];
+
+    /* Loop over buffer sizes */
+    for(dst_buf_size=1; dst_buf_size<=13; dst_buf_size++) {
+        /* Reset dst_buf */
+        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+
+        /* Initialize gather_info */
+        gather_info.expect_dst_buf = expect_dst_buf;
+        gather_info.max_nelmts = dst_buf_size;
+        gather_info.last_call = FALSE;
+
+        /* Gather data */
+        if(H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]), dst_buf, gather_cb, &gather_info) < 0)
+            TEST_ERROR
+
+        /* Verify that all data has been gathered (and verified) */
+        if(gather_info.expect_dst_buf - expect_dst_buf != 12) TEST_ERROR
+    } /* end for */
+
+
+    /*
+     * Test 3: Multiple blocks
+     */
+    /* Select hyperslab */
+    start[0] = 1;
+    start[1] = 1;
+    start[2] = 1;
+    stride[0] = 3;
+    stride[1] = 4;
+    stride[2] = 5;
+    count[0] = 3;
+    count[1] = 1;
+    count[2] = 2;
+    block[0] = 1;
+    block[1] = 3;
+    block[2] = 2;
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride ,count, block) < 0)
+        TEST_ERROR
+
+    /* Initialize expect_dst_buf */
+    /* Iterate over block containing selection, checking if each element is in
+     * selection.  Note that the algorithm used here (if statement) would not
+     * work for overlapping hyperslabs. */
+    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    dst_i = 0;
+    for(i=1; i<8; i++)
+        for(j=1; j<4; j++)
+            for(k=1; k<8; k++)
+                if((hsize_t)i >= start[0]
+                        && ((hsize_t)i - start[0]) % stride[0] < block[0]
+                        && ((hsize_t)i - start[0]) / stride[0] < count[0]
+                        && (hsize_t)j >= start[1]
+                        && ((hsize_t)j - start[1]) % stride[1] < block[1]
+                        && ((hsize_t)j - start[1]) / stride[1] < count[1]
+                        && (hsize_t)k >= start[2]
+                        && ((hsize_t)k - start[2]) % stride[2] < block[2]
+                        && ((hsize_t)k - start[2]) / stride[2] < count[2])
+                    expect_dst_buf[dst_i++] = src_buf[i][j][k];
+
+    /* Loop over buffer sizes */
+    for(dst_buf_size=1; dst_buf_size<=37; dst_buf_size++) {
+        /* Reset dst_buf */
+        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+
+        /* Initialize gather_info */
+        gather_info.expect_dst_buf = expect_dst_buf;
+        gather_info.max_nelmts = dst_buf_size;
+        gather_info.last_call = FALSE;
+
+        /* Gather data */
+        if(H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]), dst_buf, gather_cb, &gather_info) < 0)
+            TEST_ERROR
+
+        /* Verify that all data has been gathered (and verified) */
+        if(gather_info.expect_dst_buf - expect_dst_buf != 36) TEST_ERROR
+    } /* end for */
+
+
+    /*
+     * Test 4: Compound selection
+     */
+    /* Select hyperslabs */
+    start[0] = 2;
+    start[1] = 1;
+    start[2] = 1;
+    count[0] = 2;
+    count[1] = 3;
+    count[2] = 2;
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL ,count, NULL) < 0)
+        TEST_ERROR
+    start2[0] = 1;
+    start2[1] = 2;
+    start2[2] = 2;
+    count2[0] = 3;
+    count2[1] = 2;
+    count2[2] = 2;
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_XOR, start2, NULL ,count2, NULL) < 0)
+        TEST_ERROR
+
+    /* Initialize expect_dst_buf */
+    /* Iterate over block containing selection, checking if each element is in
+     * selection. */
+    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    dst_i = 0;
+    for(i=1; i<4; i++)
+        for(j=1; j<4; j++)
+            for(k=1; k<4; k++)
+                if(!(((hsize_t)i >= start[0] && (hsize_t)i < start[0] + count[0])
+                        && ((hsize_t)j >= start[1] && (hsize_t)j < start[1] + count[1])
+                        && ((hsize_t)k >= start[2] && (hsize_t)k < start[2] + count[2]))
+                        != !(((hsize_t)i >= start2[0] && (hsize_t)i < start2[0] + count2[0])
+                        && ((hsize_t)j >= start2[1] && (hsize_t)j < start2[1] + count2[1])
+                        && ((hsize_t)k >= start2[2] && (hsize_t)k < start2[2] + count2[2])))
+                    expect_dst_buf[dst_i++] = src_buf[i][j][k];
+
+    /* Loop over buffer sizes */
+    for(dst_buf_size=1; dst_buf_size<=17; dst_buf_size++) {
+        /* Reset dst_buf */
+        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+
+        /* Initialize gather_info */
+        gather_info.expect_dst_buf = expect_dst_buf;
+        gather_info.max_nelmts = dst_buf_size;
+        gather_info.last_call = FALSE;
+
+        /* Gather data */
+        if(H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]), dst_buf, gather_cb, &gather_info) < 0)
+            TEST_ERROR
+
+        /* Verify that all data has been gathered (and verified) */
+        if(gather_info.expect_dst_buf - expect_dst_buf != 16) TEST_ERROR
+    } /* end for */
+
+
+    /*
+     * Test 5: Point selection
+     */
+    /* Select hyperslabs */
+    if(H5Sselect_elements(sid, H5S_SELECT_SET, sizeof(point) / sizeof(point[0]), (hsize_t *)point) < 0)
+        TEST_ERROR
+
+    /* Initialize expect_dst_buf */
+    /* Iterate over block containing selection, checking if each element is in
+     * selection. */
+    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    for(i=0; i<(int)(sizeof(point) / sizeof(point[0])); i++)
+        expect_dst_buf[i] = src_buf[point[i][0]][point[i][1]][point[i][2]];
+
+    /* Loop over buffer sizes */
+    for(dst_buf_size=1; dst_buf_size<=5; dst_buf_size++) {
+        /* Reset dst_buf */
+        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+
+        /* Initialize gather_info */
+        gather_info.expect_dst_buf = expect_dst_buf;
+        gather_info.max_nelmts = dst_buf_size;
+        gather_info.last_call = FALSE;
+
+        /* Gather data */
+        if(H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]), dst_buf, gather_cb, &gather_info) < 0)
+            TEST_ERROR
+
+        /* Verify that all data has been gathered (and verified) */
+        if(gather_info.expect_dst_buf - expect_dst_buf != 4) TEST_ERROR
+    } /* end for */
+
+
+    /* Close everything */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Sclose(sid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_gather() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_scatter_error
+ *
+ * Purpose:     Tests H5Dscatter with a variety of different conditions
+ *              that should cause errors.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, February 4, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+scatter_error_cb_fail(void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*/,
+    void *_scatter_info)
+{
+    scatter_info_t *scatter_info = (scatter_info_t *)_scatter_info;
+    size_t nelmts;      /* Number of elements to return in src_buf */
+
+    /* Calculate number of elements */
+    nelmts = MIN(scatter_info->block, scatter_info->size);
+    HDassert(nelmts > 0);
+
+    /* Set output variables */
+    *src_buf = (void *)scatter_info->src_buf;
+    *src_buf_bytes_used = nelmts * sizeof(scatter_info->src_buf[0]);
+
+    return FAIL;
+}
+
+static herr_t
+scatter_error_cb_null(void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*/,
+    void *_scatter_info)
+{
+    scatter_info_t *scatter_info = (scatter_info_t *)_scatter_info;
+    size_t nelmts;      /* Number of elements to return in src_buf */
+
+    /* Calculate number of elements */
+    nelmts = MIN(scatter_info->block, scatter_info->size);
+    HDassert(nelmts > 0);
+
+    /* Set output variables */
+    *src_buf = NULL;
+    *src_buf_bytes_used = nelmts * sizeof(scatter_info->src_buf[0]);
+
+    return SUCCEED;
+}
+
+static herr_t
+scatter_error_cb_unalign(void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*/,
+    void *_src_buf_bytes_used)
+{
+    /* Set output variables */
+    *src_buf = _src_buf_bytes_used;
+    *src_buf_bytes_used = *(size_t *)_src_buf_bytes_used;
+
+    return SUCCEED;
+}
+
+static herr_t
+test_scatter_error(void)
+{
+    hid_t       sid = -1;       /* Dataspace ID */
+    hsize_t     dim[1] = {10};  /* Dataspace dimensions */
+    hsize_t     start[3] = {2};
+    hsize_t     count[3] = {6};
+    int         src_buf[7];     /* Source data buffer */
+    int         dst_buf[10];    /* Destination data buffer */
+    scatter_info_t scatter_info; /* Operator data for callback */
+    size_t      cb_unalign_nbytes; /* Number of bytes to return for unaligned test */
+    herr_t      ret;            /* Return value */
+    int         i;              /* Local index variable */
+
+    TESTING("H5Dscatter() error conditions");
+
+    /* Create dataspace */
+    if((sid = H5Screate_simple(1, dim, NULL)) < 0) TEST_ERROR
+
+    /* Initialize src_buf */
+    for(i=0; i<(int)(sizeof(src_buf)/sizeof(src_buf[0])); i++)
+        src_buf[i] = i + 1;
+
+    /* Select hyperslab */
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL ,count, NULL) < 0)
+        TEST_ERROR
+
+    /* Verify that base configuration passes */
+    scatter_info.src_buf = src_buf;
+    scatter_info.block = sizeof(src_buf)/sizeof(src_buf[0]);
+    scatter_info.size = 6;
+    if(H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf) < 0)
+        TEST_ERROR
+
+
+    /*
+     * Test invalid parameters
+     */
+    scatter_info.src_buf = src_buf;
+    scatter_info.size = 6;
+    H5E_BEGIN_TRY {
+        ret = H5Dscatter(NULL, NULL, H5T_NATIVE_INT, sid, dst_buf);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+    scatter_info.src_buf = src_buf;
+    scatter_info.size = 6;
+    H5E_BEGIN_TRY {
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, sid, sid, dst_buf);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+    scatter_info.src_buf = src_buf;
+    scatter_info.size = 6;
+    H5E_BEGIN_TRY {
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, H5T_NATIVE_INT, dst_buf);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+    scatter_info.src_buf = src_buf;
+    scatter_info.size = 6;
+    H5E_BEGIN_TRY {
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, NULL);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+
+    /*
+     * Test returning too many elements in callback
+     */
+    scatter_info.src_buf = src_buf;
+    scatter_info.size = 7;
+    H5E_BEGIN_TRY {
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+
+    /*
+     * Test callback returns failure
+     */
+    scatter_info.src_buf = src_buf;
+    scatter_info.size = 6;
+    H5E_BEGIN_TRY {
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_fail, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+
+    /*
+     * Test callback returns NULL buffer
+     */
+    scatter_info.src_buf = src_buf;
+    scatter_info.size = 6;
+    H5E_BEGIN_TRY {
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_null, &scatter_info, H5T_NATIVE_INT, sid, dst_buf);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+
+    /*
+     * Test callback returns 0 for src_buf_bytes_used
+     */
+    cb_unalign_nbytes = 0;
+    H5E_BEGIN_TRY {
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+
+    /*
+     * Test callback returns src_buf_bytes_used that is not a multiple of
+     * datatype size
+     */
+    cb_unalign_nbytes = sizeof(src_buf[0]) - 1;
+    H5E_BEGIN_TRY {
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+    cb_unalign_nbytes = sizeof(src_buf[0]) + 1;
+    H5E_BEGIN_TRY {
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_error_cb_unalign, &cb_unalign_nbytes, H5T_NATIVE_INT, sid, dst_buf);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+
+    /* Close everything */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Sclose(sid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_scatter_error() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_gather_error
+ *
+ * Purpose:     Tests H5Dgather with a variety of different conditions
+ *              that should cause errors.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, February 4, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+gather_error_cb_fail(const void UNUSED *dst_buf,
+    size_t UNUSED dst_buf_bytes_used, void UNUSED *op_data)
+{
+    return FAIL;
+}
+
+static herr_t
+test_gather_error(void)
+{
+    hid_t       sid = -1;       /* Dataspace ID */
+    hsize_t     dim[1] = {10};  /* Dataspace dimensions */
+    hsize_t     start[1] = {2};
+    hsize_t     count[1] = {6};
+    int         src_buf[10];    /* Source data buffer */
+    int         dst_buf[6];     /* Destination data buffer */
+    int         expect_dst_buf[6]; /* Expected destination data buffer */
+    gather_info_t gather_info;  /* Operator data for callback */
+    herr_t      ret;            /* Return value */
+    int         i;              /* Local index variable */
+
+    TESTING("H5Dgather() error conditions");
+
+    /* Create dataspace */
+    if((sid = H5Screate_simple(1, dim, NULL)) < 0) TEST_ERROR
+
+    /* Initialize src_buf */
+    for(i=0; i<(int)(sizeof(src_buf)/sizeof(src_buf[0])); i++)
+        src_buf[i] = 1 + i;
+
+    /* Select hyperslab */
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL ,count, NULL) < 0)
+        TEST_ERROR
+
+    /* Initialize expect_dst_buf */
+    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    for(i=0; i<6; i++)
+        expect_dst_buf[i] = src_buf[i + 2];
+
+    /* Verify that base configuration passes */
+    gather_info.expect_dst_buf = expect_dst_buf;
+    gather_info.max_nelmts = 6;
+    gather_info.last_call = FALSE;
+    if(H5Dgather(sid, src_buf, H5T_NATIVE_INT, 6 * sizeof(dst_buf[0]), dst_buf, gather_cb, &gather_info) < 0)
+        TEST_ERROR
+
+    /*
+     * Test invalid parameters
+     */
+    gather_info.expect_dst_buf = expect_dst_buf;
+    gather_info.last_call = FALSE;
+    H5E_BEGIN_TRY {
+        ret = H5Dgather(H5T_NATIVE_INT, src_buf, H5T_NATIVE_INT, 6 * sizeof(dst_buf[0]), dst_buf, gather_cb, &gather_info);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+    gather_info.expect_dst_buf = expect_dst_buf;
+    gather_info.last_call = FALSE;
+    H5E_BEGIN_TRY {
+        ret = H5Dgather(sid, NULL, H5T_NATIVE_INT, 6 * sizeof(dst_buf[0]), dst_buf, gather_cb, &gather_info);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+    gather_info.expect_dst_buf = expect_dst_buf;
+    gather_info.last_call = FALSE;
+    H5E_BEGIN_TRY {
+        ret = H5Dgather(sid, src_buf, sid, 6 * sizeof(dst_buf[0]), dst_buf, gather_cb, &gather_info);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+    gather_info.expect_dst_buf = expect_dst_buf;
+    gather_info.last_call = FALSE;
+    H5E_BEGIN_TRY {
+        ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 0, dst_buf, gather_cb, &gather_info);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+    gather_info.expect_dst_buf = expect_dst_buf;
+    gather_info.last_call = FALSE;
+    H5E_BEGIN_TRY {
+        ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 1, dst_buf, gather_cb, &gather_info);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+    gather_info.expect_dst_buf = expect_dst_buf;
+    gather_info.last_call = FALSE;
+    H5E_BEGIN_TRY {
+        ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 6 * sizeof(dst_buf[0]), NULL, gather_cb, &gather_info);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+    gather_info.expect_dst_buf = expect_dst_buf;
+    gather_info.last_call = FALSE;
+    H5E_BEGIN_TRY {
+        ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 5 * sizeof(dst_buf[0]), dst_buf, NULL, &gather_info);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+
+    /*
+     * Test callback returns failure
+     */
+    gather_info.expect_dst_buf = expect_dst_buf;
+    gather_info.last_call = FALSE;
+    H5E_BEGIN_TRY {
+        ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 6 * sizeof(dst_buf[0]), dst_buf, gather_error_cb_fail, NULL);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+
+    /* Close everything */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Sclose(sid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_gather_error() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Tests the dataset interface (H5D)
@@ -8307,6 +9415,7 @@ main(void)
         nerrors += (test_chunk_expand(my_fapl) < 0		? 1 : 0);
 	nerrors += (test_layout_extend(my_fapl) < 0		? 1 : 0);
 	nerrors += (test_large_chunk_shrink(my_fapl) < 0        ? 1 : 0);
+	nerrors += (test_zero_dim_dset(my_fapl) < 0             ? 1 : 0);
 
         if(H5Fclose(file) < 0)
             goto error;
@@ -8314,6 +9423,12 @@ main(void)
 
     /* Close 2nd FAPL */
     if(H5Pclose(fapl2) < 0) TEST_ERROR
+
+    /* Tests that do not use files */
+    nerrors += (test_scatter() < 0                          ? 1 : 0);
+    nerrors += (test_gather() < 0                           ? 1 : 0);
+    nerrors += (test_scatter_error() < 0                    ? 1 : 0);
+    nerrors += (test_gather_error() < 0                     ? 1 : 0);
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);

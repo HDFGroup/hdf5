@@ -134,7 +134,6 @@
 static const H5I_class_t H5I_GROUP_CLS[1] = {{
     H5I_GROUP,			/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     0,				/* # of reserved IDs for class */
     (H5I_free_t)H5G_close	/* Callback routine for closing objects of this class */
 }};
@@ -225,16 +224,21 @@ H5G_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	if((n = H5I_nmembers(H5I_GROUP)))
-	    H5I_clear_type(H5I_GROUP, FALSE, FALSE);
-	else {
-	    /* Destroy the group object id group */
-	    H5I_dec_type_ref(H5I_GROUP);
+        if(H5I_nmembers(H5I_GROUP) > 0) {
+            (void)H5I_clear_type(H5I_GROUP, FALSE, FALSE);
+            n++; /*H5I*/
+        } /* end if */
+        else {
+            /* Close deprecated interface */
+            n += H5G__term_deprec_interface();
 
-	    /* Mark closed */
-	    H5_interface_initialize_g = 0;
-	    n = 1; /*H5I*/
-	} /* end else */
+            /* Destroy the group object id group */
+            (void)H5I_dec_type_ref(H5I_GROUP);
+            n++; /*H5I*/
+
+            /* Mark closed */
+            H5_interface_initialize_g = 0;
+        } /* end else */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
@@ -495,25 +499,56 @@ done:
 hid_t
 H5Gget_create_plist(hid_t group_id)
 {
-    H5O_linfo_t         linfo;		        /* Link info message            */
-    htri_t	        ginfo_exists;
-    htri_t	        linfo_exists;
-    htri_t              pline_exists;
-    H5G_t		*grp = NULL;
-    H5P_genplist_t      *gcpl_plist;
-    H5P_genplist_t      *new_plist;
-    hid_t		new_gcpl_id = FAIL;
+    H5G_t		*group = NULL;
     hid_t		ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", group_id);
 
     /* Check args */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(group_id, H5I_GROUP)))
+    if(NULL == (group = (H5G_t *)H5I_object_verify(group_id, H5I_GROUP)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
+    if((ret_value = H5G_get_create_plist(group)) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gget_create_plist() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_get_create_plist
+ *
+ * Purpose:	Private function for H5Gget_create_plist
+ *
+ * Return:	Success:	ID for a copy of the group creation
+ *				property list.  The property list ID should be
+ *				released by calling H5Pclose().
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, October 25, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5G_get_create_plist(H5G_t *grp)
+{
+    H5O_linfo_t         linfo;		        /* Link info message            */
+    htri_t	        ginfo_exists;
+    htri_t	        linfo_exists;
+    htri_t              pline_exists;
+    H5P_genplist_t      *gcpl_plist;
+    H5P_genplist_t      *new_plist;
+    hid_t		new_gcpl_id = FAIL;
+    hid_t		ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
     /* Copy the default group creation property list */
-    if(NULL == (gcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_GROUP_CREATE_g)))
+    if(NULL == (gcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_GROUP_CREATE_ID_g)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get default group creation property list")
     if((new_gcpl_id = H5P_copy_plist(gcpl_plist, TRUE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to copy the creation property list")
@@ -573,8 +608,8 @@ done:
                 HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't free")
     } /* end if */
 
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Gget_create_plist() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_get_create_plist() */
 
 
 /*-------------------------------------------------------------------------

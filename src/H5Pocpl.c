@@ -40,6 +40,8 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
+#include "H5PLprivate.h"	/* Dynamic plugin			*/
+#include "H5Zprivate.h"	        /* Filter pipeline			*/
 
 
 /****************/
@@ -90,6 +92,9 @@ static herr_t H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size
 static herr_t H5P__ocrt_pipeline_dec(const void **_pp, void *value);
 static int H5P__ocrt_pipeline_cmp(const void *value1, const void *value2, size_t size);
 
+/* Local routines */
+static herr_t H5P__set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, 
+    unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/]);
 
 /*********************/
 /* Package Variables */
@@ -99,10 +104,13 @@ static int H5P__ocrt_pipeline_cmp(const void *value1, const void *value2, size_t
 const H5P_libclass_t H5P_CLS_OCRT[1] = {{
     "object create",		/* Class name for debugging     */
     H5P_TYPE_OBJECT_CREATE,     /* Class type                   */
-    &H5P_CLS_ROOT_g,		/* Parent class ID              */
-    &H5P_CLS_OBJECT_CREATE_g,	/* Pointer to class ID          */
+
+    &H5P_CLS_ROOT_g,		/* Parent class                 */
+    &H5P_CLS_OBJECT_CREATE_g,	/* Pointer to class             */
+    &H5P_CLS_OBJECT_CREATE_ID_g,	/* Pointer to class ID          */
     NULL,			/* Pointer to default property list ID */
     H5P__ocrt_reg_prop,		/* Default property registration routine */
+
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
     H5P__ocrt_copy,		/* Class copy callback          */
@@ -747,7 +755,6 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
 	       size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
 {
     H5P_genplist_t  *plist;             /* Property list */
-    H5O_pline_t     pline;              /* Filter pipeline */
     herr_t          ret_value=SUCCEED;  /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -765,6 +772,74 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
+    /* Call the private function */
+    if(H5P__set_filter(plist, filter, flags, cd_nelmts, cd_values) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "failed to call private function")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_filter() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P__set_filter
+ *
+ * Purpose:	Adds the specified FILTER and corresponding properties to the
+ *		end of the data or link output filter pipeline
+ *		depending on whether PLIST is a dataset creation or group
+ *		creation property list.  The FLAGS argument specifies certain
+ *		general properties of the filter and is documented below.
+ *		The CD_VALUES is an array of CD_NELMTS integers which are
+ *		auxiliary data for the filter.  The integer vlues will be
+ *		stored in the dataset object header as part of the filter
+ *		information.
+ *
+ * 		The FLAGS argument is a bit vector of the following fields:
+ *
+ * 		H5Z_FLAG_OPTIONAL(0x0001)
+ *		If this bit is set then the filter is optional.  If the
+ *		filter fails during an H5Dwrite() operation then the filter
+ *		is just excluded from the pipeline for the chunk for which it
+ *		failed; the filter will not participate in the pipeline
+ *		during an H5Dread() of the chunk.  If this bit is clear and
+ *		the filter fails then the entire I/O operation fails.
+ *		If this bit is set but encoding is disabled for a filter,
+ *		attempting to write will generate an error.
+ *
+ *              If the filter is not registered, this function tries to load 
+ *              it dynamically during run time.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 15, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned int flags,
+	       size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
+{
+    H5O_pline_t     pline;                  /* Filter pipeline */
+    htri_t          filter_avail;           /* Filter availability */
+    herr_t          ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if filter is already available */
+    if((filter_avail = H5Z_filter_avail(filter)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't check filter availability")
+
+    /* If filter is not available, try to dynamically load it */
+    if(!filter_avail) {
+        const H5Z_class2_t *filter_info;
+
+        if(NULL == (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)filter)))
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, FAIL, "failed to load dynamically loaded plugin")
+        if(H5Z_register(filter_info) < 0)
+	    HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")
+    } /* end if */
+
     /* Get the pipeline property to append to */
     if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
@@ -778,8 +853,8 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
 
 done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_filter() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__set_filter() */
 
 
 /*-------------------------------------------------------------------------
@@ -1105,6 +1180,42 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5P_filter_in_pline
+ *
+ * Purpose:	Check whether the filter is in the pipeline of the object
+ *              creation property list.  
+ *
+ * Return:	TRUE:		found
+ *		FALSE:		not found
+ *              FAIL: 		error
+ *
+ * Programmer:	Raymond Lu
+ *              26 April 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id)
+{
+    H5O_pline_t         pline;  /* Filter pipeline */
+    htri_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Get pipeline info */
+    if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
+
+    /* Check if the file is in the pipeline */
+    if((ret_value = H5Z_filter_in_pline(&pline, id)) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTCOMPARE, FAIL, "can't find filter")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_get_filter_by_id() */
+
+
+/*-------------------------------------------------------------------------
  * Function: H5Premove_filter
  *
  * Purpose: Deletes a filter from the dataset creation property list;
@@ -1344,7 +1455,7 @@ H5P_get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
 
     /* Filter configuration (assume filter ID has already been checked) */
     if(filter_config)
-        H5Zget_filter_info(filter->id, filter_config);
+        H5Z_get_filter_info(filter->id, filter_config);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_get_filter() */
@@ -1387,7 +1498,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
         /* encode nused value */
         enc_value = (uint64_t)pline->nused;
-        enc_size = H5V_limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -1417,7 +1528,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
             /* encode cd_nelmts */
             enc_value = (uint64_t)pline->filter[u].cd_nelmts;
-            enc_size = H5V_limit_enc_size(enc_value);
+            enc_size = H5VM_limit_enc_size(enc_value);
             HDassert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -1430,12 +1541,12 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
     /* calculate size required for encoding */
     *size += 1;
-    *size += (1 + H5V_limit_enc_size((uint64_t)pline->nused));
+    *size += (1 + H5VM_limit_enc_size((uint64_t)pline->nused));
     for(u = 0; u < pline->nused; u++) {
         *size += (sizeof(int32_t) + sizeof(unsigned) + 1);
         if(NULL != pline->filter[u].name)
             *size += H5Z_COMMON_NAME_LEN;
-        *size += (1 + H5V_limit_enc_size((uint64_t)pline->filter[u].cd_nelmts));
+        *size += (1 + H5VM_limit_enc_size((uint64_t)pline->filter[u].cd_nelmts));
         *size += pline->filter[u].cd_nelmts * sizeof(unsigned);
     } /* end for */
 
@@ -1514,9 +1625,12 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         UINT64DECODE_VAR(*pp, enc_value, enc_size);
         filter.cd_nelmts = (size_t)enc_value;
 
-        if(filter.cd_nelmts)
+        if(filter.cd_nelmts) {
             if(NULL == (filter.cd_values = (unsigned *)H5MM_malloc(sizeof(unsigned) * filter.cd_nelmts)))
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for cd_values")
+        } /* end if */
+        else
+            filter.cd_values = NULL;
 
         /* decode values */
         for(v = 0; v < filter.cd_nelmts; v++)

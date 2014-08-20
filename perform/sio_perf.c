@@ -210,14 +210,6 @@ static struct long_options l_opts[] = {
     { "min-xfe", require_arg, 'x' },
     { "min-xf", require_arg, 'x' },
     { "min-x", require_arg, 'x' },
-    { "mpi-posix", no_arg, 'm' },
-    { "mpi-posi", no_arg, 'm' },
-    { "mpi-pos", no_arg, 'm' },
-    { "mpi-po", no_arg, 'm' },
-    { "mpi-p", no_arg, 'm' },
-    { "mpi-", no_arg, 'm' },
-    { "mpi", no_arg, 'm' },
-    { "mp", no_arg, 'm' },
     { "num-bytes", require_arg, 'e' },
     { "num-byte", require_arg, 'e' },
     { "num-byt", require_arg, 'e' },
@@ -302,7 +294,6 @@ struct options {
     int h5_use_chunks;     	/* Make HDF5 dataset chunked            */
     int h5_write_only;        	/* Perform the write tests only         */
     int h5_extendable;        	/* Perform the write tests only         */
-    unsigned h5_use_mpi_posix;  /* Use MPI-posix VFD for HDF5 I/O (instead of MPI-I/O VFD) */
     int verify;        		/* Verify data correctness              */
     vfdtype     vfd;            /* File driver */
 
@@ -411,7 +402,6 @@ run_test_loop(struct options *opts)
     parms.h5_use_chunks = opts->h5_use_chunks;
     parms.h5_extendable = opts->h5_extendable;
     parms.h5_write_only = opts->h5_write_only;
-    parms.h5_use_mpi_posix = opts->h5_use_mpi_posix;
     parms.verify = opts->verify;
     parms.vfd = opts->vfd;
 
@@ -481,6 +471,11 @@ run_test(iotype iot, parameters parms, struct options *opts)
             break;
         case HDF5:
             output_report("HDF5\n");
+            break;
+        default:
+            /* unknown request */
+            HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+            HDassert(0 && "Unknown IO tpe");
             break;
     }
 
@@ -827,14 +822,14 @@ recover_size_and_print(long long val, const char *end)
     if (val >= ONE_KB && (val % ONE_KB) == 0) {
         if (val >= ONE_MB && (val % ONE_MB) == 0) {
             if (val >= ONE_GB && (val % ONE_GB) == 0)
-                HDfprintf(output, "%HdGB%s", val / ONE_GB, end);
+                HDfprintf(output, "%" H5_PRINTF_LL_WIDTH "d""GB%s", val / ONE_GB, end);
             else
-                HDfprintf(output, "%HdMB%s", val / ONE_MB, end);
+                HDfprintf(output, "%" H5_PRINTF_LL_WIDTH "d""MB%s", val / ONE_MB, end);
         } else {
-            HDfprintf(output, "%HdKB%s", val / ONE_KB, end);
+            HDfprintf(output, "%" H5_PRINTF_LL_WIDTH "d""KB%s", val / ONE_KB, end);
         }
     } else {
-        HDfprintf(output, "%Hd%s", val, end);
+        HDfprintf(output, "%" H5_PRINTF_LL_WIDTH "d""%s", val, end);
     }
 }
 
@@ -860,8 +855,8 @@ report_parameters(struct options *opts)
     HDfprintf(output, "IO API=");
     print_io_api(opts->io_types);
 
-    HDfprintf(output, "Number of iterations=%Hd\n",
-              (long long)opts->num_iters);
+    HDfprintf(output, "Number of iterations=%d\n",
+              opts->num_iters);
 
     HDfprintf(output, "Dataset size=");
 
@@ -977,7 +972,6 @@ parse_command_line(int argc, char *argv[])
     cl_opts->h5_use_chunks = FALSE; /* Don't chunk the HDF5 dataset by default */
     cl_opts->h5_write_only = FALSE; /* Do both read and write by default */
     cl_opts->h5_extendable = FALSE; /* Use extendable dataset */
-    cl_opts->h5_use_mpi_posix = FALSE; /* Don't use MPI-posix VFD for HDF5 I/O by default */
     cl_opts->verify = FALSE;        /* No Verify data correctness by default */
 
     while ((opt = get_option(argc, (const char **)argv, s_opts, l_opts)) != EOF) {
@@ -1138,10 +1132,6 @@ parse_command_line(int argc, char *argv[])
 
         case 'i':
             cl_opts->num_iters = atoi(opt_arg);
-            break;
-        case 'm':
-            /* Turn on MPI-posix VFL driver for HDF5 I/O */
-            cl_opts->h5_use_mpi_posix = TRUE;
             break;
         case 'o':
             cl_opts->output_file = opt_arg;

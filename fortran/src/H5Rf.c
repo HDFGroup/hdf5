@@ -59,7 +59,7 @@ nh5rcreate_object_c(haddr_t_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
      /*
       * Call H5Rcreate function.
       */
-     if(H5Rcreate(&ref_c, *loc_id, c_name, H5R_OBJECT, -1) < 0)
+     if(H5Rcreate(&ref_c, *loc_id, c_name, H5R_OBJECT, (hid_t)-1) < 0)
          HGOTO_DONE(FAIL)
 
      /* Copy the reference created */
@@ -355,7 +355,6 @@ nh5rget_region_ptr_c(hid_t_f *dset_id, void *ref, hid_t_f *space_id)
 /******/
 {
      hid_t c_space_id;
-     hdset_reg_ref_t ref_c;
      int_f ret_value = 0;
 
      /*

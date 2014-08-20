@@ -36,8 +36,8 @@
 typedef enum H5I_type_t {
     H5I_UNINIT		= (-2), /*uninitialized type			    */
     H5I_BADID		= (-1),	/*invalid Type				    */
-    H5I_FILE		= 1,	/*type ID for File objects		    */
-    H5I_GROUP,		        /*type ID for Group objects		    */
+    H5I_FILE            = 1,  	/*type ID for File objects      	    */
+    H5I_GROUP,	                /*type ID for Group objects     	    */
     H5I_DATATYPE,	        /*type ID for Datatype objects		    */
     H5I_DATASPACE,	        /*type ID for Dataspace objects		    */
     H5I_DATASET,	        /*type ID for Dataset objects		    */
@@ -53,8 +53,8 @@ typedef enum H5I_type_t {
 } H5I_type_t;
 
 /* Type of atoms to return to users */
-typedef int hid_t;
-#define H5_SIZEOF_HID_T         H5_SIZEOF_INT
+typedef int64_t hid_t;
+#define H5_SIZEOF_HID_T         H5_SIZEOF_INT64_T
 
 /* An invalid object ID. This is also negative for error return. */
 #define H5I_INVALID_HID         (-1)

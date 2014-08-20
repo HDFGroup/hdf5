@@ -77,7 +77,6 @@ static ssize_t H5R_get_name(H5F_t *file, hid_t lapl_id, hid_t dxpl_id, hid_t id,
 static const H5I_class_t H5I_REFERENCE_CLS[1] = {{
     H5I_REFERENCE,		/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     0,				/* # of reserved IDs for class */
     NULL			/* Callback routine for closing objects of this class */
 }};
@@ -158,22 +157,30 @@ done:
 int
 H5R_term_interface(void)
 {
-    int	n=0;
+    int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5_interface_initialize_g) {
-	if ((n=H5I_nmembers(H5I_REFERENCE))) {
-	    H5I_clear_type(H5I_REFERENCE, FALSE, FALSE);
-	} else {
-	    H5I_dec_type_ref(H5I_REFERENCE);
+	if(H5I_nmembers(H5I_REFERENCE) > 0) {
+	    (void)H5I_clear_type(H5I_REFERENCE, FALSE, FALSE);
+            n++; /*H5I*/
+	} /* end if */
+        else {
+            /* Close deprecated interface */
+            n += H5R__term_deprec_interface();
+
+            /* Destroy the reference id group */
+	    (void)H5I_dec_type_ref(H5I_REFERENCE);
+            n++; /*H5I*/
+
+            /* Mark closed */
 	    H5_interface_initialize_g = 0;
-	    n = 1; /*H5I*/
-	}
-    }
+	} /* end else */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-}
+} /* end H5R_term_interface() */
 
 
 /*--------------------------------------------------------------------------
@@ -295,7 +302,7 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5
             /* Serialize the heap ID and index for storage in the file */
             p = (uint8_t *)ref;
             H5F_addr_encode(loc->oloc->file, &p, hobjid.addr);
-            INT32ENCODE(p, hobjid.idx);
+            UINT32ENCODE(p, hobjid.idx);
 
             /* Free the buffer we serialized data in */
             H5MM_xfree(buf);
@@ -439,7 +446,7 @@ H5R_dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, H5R_type_t ref_type, 
             /* Get the heap ID for the dataset region */
             p = (const uint8_t *)_ref;
             H5F_addr_decode(oloc.file, &p, &(hobjid.addr));
-            INT32DECODE(p, hobjid.idx);
+            UINT32DECODE(p, hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
             if(NULL == (buf = (uint8_t *)H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)))
@@ -637,7 +644,7 @@ H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref)
     /* Get the heap ID for the dataset region */
     p = (const uint8_t *)_ref;
     H5F_addr_decode(oloc.file, &p, &(hobjid.addr));
-    INT32DECODE(p, hobjid.idx);
+    UINT32DECODE(p, hobjid.idx);
 
     /* Get the dataset region from the heap (allocate inside routine) */
     if((buf = (uint8_t *)H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)) == NULL)
@@ -772,7 +779,7 @@ H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type,
             /* Get the heap ID for the dataset region */
             p = (const uint8_t *)_ref;
             H5F_addr_decode(oloc.file, &p, &(hobjid.addr));
-            INT32DECODE(p, hobjid.idx);
+            UINT32DECODE(p, hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
             if((buf = (uint8_t *)H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)) == NULL)
@@ -895,7 +902,6 @@ H5R_get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_ty
     /* Check args */
     HDassert(f);
     HDassert(_ref);
-    HDassert(name);
 
     /* Initialize the object location */
     H5O_loc_reset(&oloc);
@@ -916,7 +922,7 @@ H5R_get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_ty
             /* Get the heap ID for the dataset region */
             p = (const uint8_t *)_ref;
             H5F_addr_decode(oloc.file, &p, &(hobjid.addr));
-            INT32DECODE(p, hobjid.idx);
+            UINT32DECODE(p, hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
             if((buf = (uint8_t *)H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)) == NULL)
@@ -966,8 +972,10 @@ done:
                             object that the dataset is located within.
         H5R_type_t ref_type;    IN: Type of reference
         void *ref;      IN: Reference to query.
-        char *name;     OUT: Buffer to place name of object referenced
-        size_t size;    IN: Size of name buffer
+        char *name;     OUT: Buffer to place name of object referenced. If NULL
+	                     then this call will return the size in bytes of name.
+        size_t size;    IN: Size of name buffer (user needs to include NULL terminator
+                            when passing in the size)
 
  RETURNS
     Non-negative length of the path on success, Negative on failure
@@ -979,6 +987,12 @@ done:
     This may not be the only path to that object.
  EXAMPLES
  REVISION LOG
+    M. Scot Breitenfeld
+    22 January 2014
+    Changed the behavior for the returned value of the function when name is NULL.
+    If name is NULL then size is ignored and the function returns the size 
+    of the name buffer (not including the NULL terminator), it still returns
+    negative on failure.
 --------------------------------------------------------------------------*/
 ssize_t
 H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,

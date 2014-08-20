@@ -28,7 +28,7 @@
 
 /* Other private headers that this test requires */
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 
 /* Local macros */

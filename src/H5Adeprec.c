@@ -105,6 +105,30 @@ H5A__init_deprec_interface(void)
     FUNC_LEAVE_NOAPI(H5A_init())
 } /* H5A__init_deprec_interface() */
 
+
+/*--------------------------------------------------------------------------
+NAME
+   H5A__term_deprec_interface -- Terminate interface
+USAGE
+    herr_t H5A__term_deprec_interface()
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Terminates interface.  (Just resets H5_interface_initialize_g
+    currently).
+
+--------------------------------------------------------------------------*/
+herr_t
+H5A__term_deprec_interface(void)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Mark closed */
+    H5_interface_initialize_g = 0;
+
+    FUNC_LEAVE_NOAPI(0)
+} /* H5A__term_deprec_interface() */
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*--------------------------------------------------------------------------
@@ -138,6 +162,7 @@ hid_t
 H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t plist_id)
 {
+    H5A_t	        *attr = NULL;           /* Attribute created */
     H5G_loc_t           loc;                    /* Object location */
     H5T_t		*type;                  /* Datatype to use for attribute */
     H5S_t		*space;                 /* Dataspace to use for attribute */
@@ -158,11 +183,15 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type")
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     /* Go do the real work for attaching the attribute to the dataset */
-    if((ret_value = H5A_create(&loc, name, type, space, plist_id, H5AC_dxpl_id)) < 0)
+    if((attr = H5A_create(&loc, name, type, space, plist_id, H5AC_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
+
+    /* Register the new attribute and get an ID for it */
+    if((ret_value = H5I_register(H5I_ATTR, attr, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
 
 done:
     FUNC_LEAVE_API(ret_value)

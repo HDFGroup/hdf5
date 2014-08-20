@@ -298,7 +298,7 @@ nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock,
   if (rank < 0 ) return ret_value;
   c_startblock = (hsize_t)*startblock;
 
-  c_buf = (hsize_t*)malloc(sizeof(hsize_t)*(size_t)(c_num_blocks*2*rank));
+  c_buf = (hsize_t*)HDmalloc(sizeof(hsize_t)*(size_t)(c_num_blocks*2*rank));
   if (!c_buf) return ret_value;
 
   ret_value = H5Sget_select_hyper_blocklist(c_space_id, c_startblock,
@@ -425,7 +425,7 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
   if (rank < 0 ) return ret_value;
 
   c_startpoint = (hsize_t)*startpoint;
-  c_buf = (hsize_t*)malloc(sizeof(hsize_t)*(size_t)(c_num_points*rank));
+  c_buf = (hsize_t*)HDmalloc(sizeof(hsize_t)*(size_t)(c_num_points*rank));
   if (!c_buf) return ret_value;
   ret_value = H5Sget_select_elem_pointlist(c_space_id, c_startpoint,
                                             c_num_points, c_buf);
@@ -575,7 +575,7 @@ nh5sget_simple_extent_npoints_c ( hid_t_f *space_id , hsize_t_f *npoints )
 {
   int ret_value = 0;
   hid_t c_space_id;
-  hsize_t c_npoints;
+  hssize_t c_npoints;
 
   c_space_id = *space_id;
   c_npoints = H5Sget_simple_extent_npoints(c_space_id);
@@ -1002,8 +1002,6 @@ done:
     return ret_value;
 }
 
-
-#ifdef NEW_HYPERSLAB_API
 /****if* H5Sf/h5scombine_hyperslab_c
  * NAME
  *        h5scombine_hyperslab_c
@@ -1127,11 +1125,11 @@ nh5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t
   ret_value = 0;
   return ret_value;
 }
-/****if* H5Sf/h5sselect_select_c
+/****if* H5Sf/h5smodify_select_c
  * NAME
- *        h5sselect_select_c
+ *        h5smodify_select_c
  * PURPOSE
- *     Call H5Sselect_ select
+ *     Call H5Smodify_select
  * INPUTS
  *      space1_id - identifier of the first dataspace  to modify
  *              operator - defines how the new selection is combined
@@ -1147,7 +1145,7 @@ nh5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t
 */
 
 int_f
-nh5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
+nh5smodify_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
 /******/
 {
   int ret_value = -1;
@@ -1159,11 +1157,11 @@ nh5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
 
   c_space1_id = (hid_t)*space1_id;
   c_space2_id = (hid_t)*space2_id;
-  if( H5Sselect_select(c_space1_id, c_op, c_space2_id)< 0) return ret_value;
+  if( H5Smodify_select(c_space1_id, c_op, c_space2_id)< 0) return ret_value;
   ret_value = 0;
   return ret_value;
 }
-#endif /*NEW_HYPERSLAB_API*/
+
 /****if* H5Sf/h5sget_select_type_c
  * NAME
  *        h5sget_select_type_c

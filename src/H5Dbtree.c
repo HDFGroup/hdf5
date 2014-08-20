@@ -43,7 +43,7 @@
 #include "H5MFprivate.h"	/* File space management		*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Sprivate.h"         /* Dataspaces                           */
-#include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5VMprivate.h"		/* Vector and array functions		*/
 
 /****************/
 /* Local Macros */
@@ -105,7 +105,7 @@ static int H5D__btree_idx_iterate_cb(H5F_t *f, hid_t dxpl_id, const void *left_k
     haddr_t addr, const void *right_key, void *_udata);
 
 /* B-tree callbacks */
-static H5RC_t *H5D__btree_get_shared(const H5F_t *f, const void *_udata);
+static H5UC_t *H5D__btree_get_shared(const H5F_t *f, const void *_udata);
 static herr_t H5D__btree_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t, void *_lt_key,
     void *_udata, void *_rt_key, haddr_t *addr_p /*out*/);
 static int H5D__btree_cmp2(void *_lt_key, void *_udata, void *_rt_key);
@@ -219,7 +219,7 @@ H5B_class_t H5B_BTREE[1] = {{
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-static H5RC_t *
+static H5UC_t *
 H5D__btree_get_shared(const H5F_t UNUSED *f, const void *_udata)
 {
     const H5D_chunk_common_ud_t *udata = (const H5D_chunk_common_ud_t *) _udata;
@@ -345,7 +345,7 @@ H5D__btree_cmp2(void *_lt_key, void *_udata, void *_rt_key)
     HDassert(udata->layout->ndims > 0 && udata->layout->ndims <= H5O_LAYOUT_NDIMS);
 
     /* Compare the offsets but ignore the other fields */
-    ret_value = H5V_vector_cmp_u(udata->layout->ndims, lt_key->offset, rt_key->offset);
+    ret_value = H5VM_vector_cmp_u(udata->layout->ndims, lt_key->offset, rt_key->offset);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree_cmp2() */
@@ -409,9 +409,9 @@ H5D__btree_cmp3(void *_lt_key, void *_udata, void *_rt_key)
             ret_value = (-1);
     } /* end if */
     else {
-        if(H5V_vector_ge_u(udata->layout->ndims, udata->offset, rt_key->offset))
+        if(H5VM_vector_ge_u(udata->layout->ndims, udata->offset, rt_key->offset))
             ret_value = 1;
-        else if(H5V_vector_lt_u(udata->layout->ndims, udata->offset, lt_key->offset))
+        else if(H5VM_vector_lt_u(udata->layout->ndims, udata->offset, lt_key->offset))
             ret_value = (-1);
     } /* end else */
 
@@ -540,7 +540,7 @@ H5D__btree_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
         /* Negative indices not supported yet */
         HGOTO_ERROR(H5E_STORAGE, H5E_UNSUPPORTED, H5B_INS_ERROR, "internal error")
 
-    } else if(H5V_vector_eq_u(udata->common.layout->ndims,
+    } else if(H5VM_vector_eq_u(udata->common.layout->ndims,
 				udata->common.offset, lt_key->offset) &&
 	       lt_key->nbytes > 0) {
         /*
@@ -579,10 +579,10 @@ H5D__btree_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
             ret_value = H5B_INS_NOOP;
         }
 
-    } else if (H5V_hyper_disjointp(udata->common.layout->ndims,
+    } else if (H5VM_hyper_disjointp(udata->common.layout->ndims,
 				   lt_key->offset, udata->common.layout->dim,
 				   udata->common.offset, udata->common.layout->dim)) {
-        HDassert(H5V_hyper_disjointp(udata->common.layout->ndims,
+        HDassert(H5VM_hyper_disjointp(udata->common.layout->ndims,
 				   rt_key->offset, udata->common.layout->dim,
 				   udata->common.offset, udata->common.layout->dim));
         /*
@@ -800,7 +800,7 @@ H5D__btree_shared_create(const H5F_t *f, H5O_storage_chunk_t *store, unsigned nd
         /* <none> */
 
     /* Make shared B-tree info reference counted */
-    if(NULL == (store->u.btree.shared = H5RC_create(shared, H5B_shared_free)))
+    if(NULL == (store->u.btree.shared = H5UC_create(shared, H5B_shared_free)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
 
 done:
@@ -1186,7 +1186,7 @@ H5D__btree_idx_delete(const H5D_chk_idx_info_t *idx_info)
         /* Release the shared B-tree page */
         if(NULL == tmp_storage.u.btree.shared)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "ref-counted page nil")
-        if(H5RC_DEC(tmp_storage.u.btree.shared) < 0)
+        if(H5UC_DEC(tmp_storage.u.btree.shared) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
     } /* end if */
 
@@ -1268,9 +1268,9 @@ H5D__btree_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
     HDassert(storage_dst);
 
     /* Decrement refcount on shared B-tree info */
-    if(H5RC_DEC(storage_src->u.btree.shared) < 0)
+    if(H5UC_DEC(storage_src->u.btree.shared) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to decrement ref-counted page")
-    if(H5RC_DEC(storage_dst->u.btree.shared) < 0)
+    if(H5UC_DEC(storage_dst->u.btree.shared) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to decrement ref-counted page")
 
 done:
@@ -1330,7 +1330,7 @@ done:
     if(shared_init) {
         if(NULL == idx_info->storage->u.btree.shared)
             HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
-        if(H5RC_DEC(idx_info->storage->u.btree.shared) < 0)
+        if(H5UC_DEC(idx_info->storage->u.btree.shared) < 0)
             HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
     } /* end if */
 
@@ -1420,7 +1420,7 @@ H5D__btree_idx_dest(const H5D_chk_idx_info_t *idx_info)
     /* Free the raw B-tree node buffer */
     if(NULL == idx_info->storage->u.btree.shared)
         HGOTO_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
-    if(H5RC_DEC(idx_info->storage->u.btree.shared) < 0)
+    if(H5UC_DEC(idx_info->storage->u.btree.shared) < 0)
 	HGOTO_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
 
 done:
@@ -1475,7 +1475,7 @@ done:
         if(NULL == storage.u.btree.shared)
             HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
         else
-            if(H5RC_DEC(storage.u.btree.shared) < 0)
+            if(H5UC_DEC(storage.u.btree.shared) < 0)
                 HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
     } /* end if */
 

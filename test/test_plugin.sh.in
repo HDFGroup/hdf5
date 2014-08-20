@@ -1,0 +1,94 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.                                              
+# All rights reserved.                                                     
+#                                                                          
+# This file is part of HDF5. The full HDF5 copyright notice, including     
+# terms governing use, modification, and redistribution, is contained in   
+# the files COPYING and Copyright.html.  COPYING can be found at the root  
+# of the source code distribution tree; Copyright.html can be found at the 
+# root level of an installed copy of the electronic document set and is    
+# linked from the top-level documents page.  It can also be found at       
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have access  
+# to either file, you may request a copy from help@hdfgroup.org.           
+#
+srcdir=@srcdir@
+TOP_BUILDDIR=@top_builddir@
+
+# Determine backward compatibility options enabled
+DEPRECATED_SYMBOLS="@DEPRECATED_SYMBOLS@"
+
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+nerrors=0
+verbose=yes
+exit_code=$EXIT_SUCCESS
+
+TEST_NAME=plugin
+TEST_BIN=`pwd`/$TEST_NAME
+FROM_DIR=`pwd`/.libs
+PLUGIN_LIB1="$FROM_DIR/libdynlib1.* $FROM_DIR/libdynlib3.*"
+PLUGIN_LIB2="$FROM_DIR/libdynlib2.*"
+PLUGIN_LIBDIR1=testdir1
+PLUGIN_LIBDIR2=testdir2
+CP="cp -p"	# Use -p to preserve mode,ownership,timestamps
+RM="rm -rf"
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+    SPACES="                                                               "
+    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Main Body
+# Create test directories if not exists yet.
+test -d $PLUGIN_LIBDIR1 || mkdir -p $PLUGIN_LIBDIR1
+if [ $? != 0 ]; then
+    echo "Failed to create test directory($PLUGIN_LIBDIR1)"
+    exit $EXIT_FAILURE
+fi
+
+test -d $PLUGIN_LIBDIR2 || mkdir -p $PLUGIN_LIBDIR2
+if [ $? != 0 ]; then
+    echo "Failed to create test directory($PLUGIN_LIBDIR2)"
+    exit $EXIT_FAILURE
+fi
+
+# copy plugin library for test
+$CP $PLUGIN_LIB1 $PLUGIN_LIBDIR1
+if [ $? != 0 ]; then
+    echo "Failed to copy plugin library ($PLUGIN_LIB1) for test."
+    exit $EXIT_FAILURE
+fi
+
+$CP $PLUGIN_LIB2 $PLUGIN_LIBDIR2
+if [ $? != 0 ]; then
+    echo "Failed to copy plugin library ($PLUGIN_LIB2) for test."
+    exit $EXIT_FAILURE
+fi
+
+# setup plugin path
+ENVCMD="env HDF5_PLUGIN_PATH=${PLUGIN_LIBDIR1}:${PLUGIN_LIBDIR2}"
+
+# Run the test
+$ENVCMD $TEST_BIN
+if [ $? != 0 ]; then
+    nerrors=`expr $nerrors + 1`
+fi
+
+# print results
+if test $nerrors -ne 0 ; then
+    echo "$nerrors errors encountered"
+    exit_code=$EXIT_FAILURE
+else
+    echo "All Plugin API tests passed."
+    exit_code=$EXIT_SUCCESS
+fi
+
+# Clean up temporary files/directories and leave
+$RM $PLUGIN_LIBDIR1 $PLUGIN_LIBDIR2
+
+exit $exit_code

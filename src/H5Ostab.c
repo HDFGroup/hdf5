@@ -149,9 +149,9 @@ H5O_stab_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    assert(f);
-    assert(p);
-    assert(stab);
+    HDassert(f);
+    HDassert(p);
+    HDassert(stab);
 
     /* encode */
     H5F_addr_encode(f, &p, stab->btree_addr);
@@ -433,11 +433,11 @@ H5O_stab_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    assert(f);
-    assert(stab);
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+    HDassert(f);
+    HDassert(stab);
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
 
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "B-tree address:", stab->btree_addr);

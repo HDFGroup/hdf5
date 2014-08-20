@@ -441,13 +441,13 @@ hsize_t diff_datasetid( hid_t did1,
                 HDassert(sm_nbytes > 0);
             } /* end for */
 
-      /* malloc return code should be verified.
+            /* malloc return code should be verified.
              * If fail, need to handle the error.
              * This else branch should be recoded as a separate function.
              * Note that there are many "goto error" within this branch
              * that fails to address freeing other objects created here.
-       * E.g., sm_space.
-       */
+             * E.g., sm_space.
+             */
             sm_buf1 = HDmalloc((size_t)sm_nbytes);
             HDassert(sm_buf1);
             sm_buf2 = HDmalloc((size_t)sm_nbytes);

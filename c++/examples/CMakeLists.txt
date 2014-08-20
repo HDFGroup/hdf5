@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.6)
+cmake_minimum_required (VERSION 2.8.11)
 # --------------------------------------------------------------------
 # Notes: When creating examples they should be prefixed
 # with "cpp_ex_". This allows for easier filtering of the examples.
@@ -10,7 +10,7 @@ PROJECT (HDF5_CPP_EXAMPLES)
 # Define examples
 #-----------------------------------------------------------------------------
 
-SET (examples
+set (examples
     create
     readdata
     writedata
@@ -20,35 +20,34 @@ SET (examples
     h5group
 )
 
-FOREACH (example ${examples})
-  ADD_EXECUTABLE (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
+set (tutr_examples
+    h5tutr_cmprss
+    h5tutr_crtdat
+    h5tutr_crtatt
+    h5tutr_crtgrpar
+    h5tutr_crtgrp
+    h5tutr_crtgrpd
+    h5tutr_extend
+    h5tutr_rdwt
+    h5tutr_subset
+)
+
+foreach (example ${examples})
+  add_executable (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
   TARGET_NAMING (cpp_ex_${example} ${LIB_TYPE})
-  TARGET_LINK_LIBRARIES (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
-  SET_TARGET_PROPERTIES (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
-ENDFOREACH (example ${examples})
+  TARGET_C_PROPERTIES (cpp_ex_${example} " " " ")
+  target_link_libraries (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
+  set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
+endforeach (example ${examples})
 
-IF (BUILD_TESTING)
-  # Remove any output file left over from previous test run
-  ADD_TEST (
-      NAME cpp_ex-clear-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove 
-          Group.h5
-          SDS.h5
-          SDScompound.h5
-          SDSextendible.h5
-          Select.h5
-  )
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (cpp_ex-clear-objects PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "cpp_ex-clear-objects")
+foreach (example ${tutr_examples})
+  add_executable (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
+  TARGET_NAMING (cpp_ex_${example} ${LIB_TYPE})
+  TARGET_C_PROPERTIES (cpp_ex_${example} " " " ")
+  target_link_libraries (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
+  set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
+endforeach (example ${tutr_examples})
 
-  FOREACH (example ${examples})
-    ADD_TEST (NAME cpp_ex_${example} COMMAND $<TARGET_FILE:cpp_ex_${example}>)
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (cpp_ex_${example} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "cpp_ex_${example}")
-  ENDFOREACH (example ${examples})
-ENDIF (BUILD_TESTING)
+if (BUILD_TESTING)
+  include (CMakeTests.cmake)
+endif (BUILD_TESTING)

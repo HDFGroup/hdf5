@@ -42,41 +42,111 @@ USAGE()
 cat << EOF
 Usage: $0 [--nocheck] [-d <dir>] [-h] <methods> ...
    -d DIR	The name of the directory where the releas(es) should be
-                placed.  By default, the directory is ./releases
+                placed.
 
    --nocheck	Ignore errors in MANIFEST file.
          
    --private	Make a private release with today's date in version information.
          
+This must be run at the top level of the source directory.
 The other command-line options are the names of the programs to use
 for compressing the resulting tar archive (if none are given then
 "tar md5" is assumed):
 
     tar		-- use tar and don't do any compressing.
-    compress	-- use compress and append ".Z" to the output name.
     gzip	-- use gzip with "-9" and append ".gz" to the output name.
     bzip2       -- use bzip2 with "-9" and append ".bz2" to the output name.
+    zip		-- convert all text files to DOS style and form a zip file for Windows use.
     md5         -- produce a md5 checksum in addition to the archive.
     doc         -- produce the latest doc tree in addition to the archive.
 
 Examples:
 
-    $ release
-    releases/hdf5-1.0.38.tar
-    releases/hdf5-1.0.38.tar.md5
+    $ bin/release -d /tmp
+    /tmp/hdf5-1.8.13-RELEASE.txt
+    /tmp/hdf5-1.8.13.tar
+    /tmp/hdf5-1.8.13.tar.md5
 
-    $ release gzip
-    releases/hdf5-1.0.38.tar.gz
+    $ bin/release -d /tmp gzip
+    /tmp/hdf5-1.8.13-RELEASE.txt
+    /tmp/hdf5-1.8.13.tar.gz
 
-    $ release -d /tmp tar compress gzip bzip2 md5
-    /tmp/hdf5-1.0.38.tar
-    /tmp/hdf5-1.0.38.tar.Z
-    /tmp/hdf5-1.0.38.tar.gz
-    /tmp/hdf5-1.0.38.tar.bz2
-    /tmp/hdf5-1.0.38.tar.md5
+    $ bin/release -d /tmp tar gzip zip md5
+    /tmp/hdf5-1.8.13-RELEASE.txt
+    /tmp/hdf5-1.8.13.tar
+    /tmp/hdf5-1.8.13.tar.gz
+    /tmp/hdf5-1.8.13.tar.md5
+    /tmp/hdf5-1.8.13.tar.zip
 
 EOF
 
+}
+
+# Function name: tar2zip
+# Convert the release tarball to a Windows zipball.
+#
+# Programmer: Albert Cheng
+# Creation date: 2014-04-23
+#
+# Modifications
+#
+# Steps:
+# 1. untar the tarball in a temporay directory;
+#    Note: do this in a temporary directory to avoid changing
+#    the original source directory which maybe around.
+# 2. convert all its text files to DOS (LF-CR) style;
+# 3. form a zip file which is usable by Windows users.
+#
+# Parameters:
+# $1 version
+# $2 release tarball
+# $3 output zipball file name
+#
+# Returns 0 if successful; 1 otherwise
+#
+tar2zip()
+{
+    if [ $# -ne 3 ]; then
+	echo "usage: tar2zip <tarfilename> <zipfilename>"
+	return 1
+    fi
+    ztmpdir=/tmp/tmpdir$$
+    mkdir -p $ztmpdir
+    version=$1
+    tarfile=$2
+    zipfile=$3
+
+    # step 1: untar tarball in ztmpdir
+    (cd $ztmpdir; tar xf -) < $tarfile
+    # sanity check
+    if [ ! -d $ztmpdir/$version ]; then
+	echo "untar did not create $ztmpdir/$version source dir"
+	# cleanup
+	rm -rf $ztmpdir
+	return 1
+    fi
+    # step 2: convert text files
+    # There maybe a simpler way to do this.
+    # options used in unix2dos:
+    # -k   Keep the date stamp 
+    # -q   quiet mode
+    # grep redirect output to /dev/null because -q or -s are not portable.
+    find $ztmpdir/$version | \
+	while read inf; do \
+	    if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
+		unix2dos -q -k $inf; \
+	    fi\
+	done
+    # step 3: make zipball
+    # -9 maximum compression
+    # -y Store symbolic links as such in the zip archive
+    # -r recursive
+    # -q quiet
+    (cd $ztmpdir; zip -9 -y -r -q $version.zip $version)
+    mv $ztmpdir/$version.zip $zipfile
+
+    # cleanup
+    rm -rf $ztmpdir
 }
 
 # This command must be run at the top level of the hdf5 source directory.
@@ -225,10 +295,6 @@ for comp in $methods; do
 	tar)
 	    cp -p $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.tar
 	    ;;
-	compress)
-	    test "$verbose" && echo "   Running compress..." 1>&2
-	    compress -c <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.Z
-	    ;;
 	gzip)
 	    test "$verbose" && echo "   Running gzip..." 1>&2
 	    gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
@@ -236,6 +302,10 @@ for comp in $methods; do
 	bzip2)
 	    test "$verbose" && echo "   Running bzip2..." 1>&2
 	    bzip2 -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2
+	    ;;
+	zip)
+	    test "$verbose" && echo "   Creating zip ball..." 1>&2
+	    tar2zip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
 	    ;;
 	md5)
 	    test "$verbose" && echo "   Creating checksum..." 1>&2
@@ -254,6 +324,10 @@ for comp in $methods; do
 	    mv $tmpdir/trunk $tmpdir/${HDF5_VERS}_docs
 	    (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs)
 	    mv $tmpdir/${HDF5_VERS}_docs.tar $DEST
+	    ;;
+	*)
+	    echo "***Error*** Unknown method $comp"
+	    exit 1
 	    ;;
     esac
 done

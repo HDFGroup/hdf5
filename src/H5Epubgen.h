@@ -28,6 +28,7 @@
 #define H5E_FILE             (H5OPEN H5E_FILE_g)
 #define H5E_SOHM             (H5OPEN H5E_SOHM_g)
 #define H5E_SYM              (H5OPEN H5E_SYM_g)
+#define H5E_PLUGIN           (H5OPEN H5E_PLUGIN_g)
 #define H5E_VFL              (H5OPEN H5E_VFL_g)
 #define H5E_INTERNAL         (H5OPEN H5E_INTERNAL_g)
 #define H5E_BTREE            (H5OPEN H5E_BTREE_g)
@@ -60,6 +61,7 @@ H5_DLLVAR hid_t H5E_FUNC_g;          /* Function entry/exit */
 H5_DLLVAR hid_t H5E_FILE_g;          /* File accessibilty */
 H5_DLLVAR hid_t H5E_SOHM_g;          /* Shared Object Header Messages */
 H5_DLLVAR hid_t H5E_SYM_g;           /* Symbol table */
+H5_DLLVAR hid_t H5E_PLUGIN_g;        /* Plugin for dynamically loaded library */
 H5_DLLVAR hid_t H5E_VFL_g;           /* Virtual File Layer */
 H5_DLLVAR hid_t H5E_INTERNAL_g;      /* Internal error (too specific to document in detail) */
 H5_DLLVAR hid_t H5E_BTREE_g;         /* B-Tree node */
@@ -221,6 +223,10 @@ H5_DLLVAR hid_t H5E_PATH_g;          /* Problem with path to object */
 #define H5E_NONE_MINOR       (H5OPEN H5E_NONE_MINOR_g)
 H5_DLLVAR hid_t H5E_NONE_MINOR_g;    /* No error */
 
+/* Plugin errors */
+#define H5E_OPENERROR        (H5OPEN H5E_OPENERROR_g)
+H5_DLLVAR hid_t H5E_OPENERROR_g;     /* Can't open directory or file */
+
 /* File accessibilty errors */
 #define H5E_FILEEXISTS       (H5OPEN H5E_FILEEXISTS_g)
 #define H5E_FILEOPEN         (H5OPEN H5E_FILEOPEN_g)
@@ -322,12 +328,14 @@ H5_DLLVAR hid_t H5E_CANTRECV_g;      /* Can't receive data */
 #define H5E_CANTNEXT         (H5OPEN H5E_CANTNEXT_g)
 #define H5E_BADSELECT        (H5OPEN H5E_BADSELECT_g)
 #define H5E_CANTCOMPARE      (H5OPEN H5E_CANTCOMPARE_g)
+#define H5E_INCONSISTENTSTATE (H5OPEN H5E_INCONSISTENTSTATE_g)
 H5_DLLVAR hid_t H5E_CANTCLIP_g;      /* Can't clip hyperslab region */
 H5_DLLVAR hid_t H5E_CANTCOUNT_g;     /* Can't count elements */
 H5_DLLVAR hid_t H5E_CANTSELECT_g;    /* Can't select hyperslab */
 H5_DLLVAR hid_t H5E_CANTNEXT_g;      /* Can't move to next iterator location */
 H5_DLLVAR hid_t H5E_BADSELECT_g;     /* Invalid selection */
 H5_DLLVAR hid_t H5E_CANTCOMPARE_g;   /* Can't compare objects */
+H5_DLLVAR hid_t H5E_INCONSISTENTSTATE_g; /* Internal states are inconsistent */
 
 /* Argument errors */
 #define H5E_UNINITIALIZED    (H5OPEN H5E_UNINITIALIZED_g)

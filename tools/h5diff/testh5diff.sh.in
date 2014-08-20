@@ -38,6 +38,7 @@ EXIT_FAILURE=1
 H5DIFF=h5diff               # The tool name
 H5DIFF_BIN=`pwd`/$H5DIFF    # The path of the tool binary
 
+RM='rm -rf'
 CMP='cmp -s'
 DIFF='diff -c'
 CP='cp'
@@ -301,6 +302,12 @@ $SRC_H5DIFF_TESTFILES/h5diff_709.txt
 $SRC_H5DIFF_TESTFILES/h5diff_710.txt
 $SRC_H5DIFF_TESTFILES/h5diff_80.txt
 $SRC_H5DIFF_TESTFILES/h5diff_90.txt
+$SRC_H5DIFF_TESTFILES/h5diff_tmp1.txt
+$SRC_H5DIFF_TESTFILES/h5diff_tmp2.txt
+$SRC_H5DIFF_TESTFILES/tmptest.he5
+$SRC_H5DIFF_TESTFILES/tmptest2.he5
+$SRC_H5DIFF_TESTFILES/tmpSingleSiteBethe.reference.h5
+$SRC_H5DIFF_TESTFILES/tmpSingleSiteBethe.output.h5
 "
 
 #
@@ -334,6 +341,19 @@ COPY_TESTFILES_TO_TESTDIR()
             fi
         fi
     done
+}
+
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=`$DIRNAME $tstfile`
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $TESTDIR
+    fi
 }
 
 # Parse option
@@ -743,6 +763,10 @@ TOOLTEST h5diff_631.txt -v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1.h
 # 7.  attributes
 # ##############################################################################
 TOOLTEST h5diff_70.txt -v h5diff_attr1.h5 h5diff_attr2.h5 
+# temporary test to verify HDF5-8625
+TOOLTEST h5diff_tmp1.txt tmptest2.he5 tmptest.he5
+# temporary test to verify HDF5-8639
+TOOLTEST h5diff_tmp2.txt tmpSingleSiteBethe.output.h5 tmpSingleSiteBethe.reference.h5
 
 # ##################################################
 #  attrs with verbose option level
@@ -1095,6 +1119,9 @@ TOOLTEST h5diff_646.txt -v --use-system-epsilon -p 0.05 h5diff_basic1.h5 h5diff_
 # ##############################################################################
 # # END
 # ##############################################################################
+
+# Clean up temporary files/directories
+CLEAN_TESTFILES_AND_TESTDIR
 
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."

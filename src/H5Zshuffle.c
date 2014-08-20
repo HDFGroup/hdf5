@@ -81,7 +81,7 @@ H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get datatype */
-    if(NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
+    if(NULL == (type = (const H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Get the filter's current parameters */
@@ -183,6 +183,9 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 
                 duffs_index = (numofelements + 7) / 8;
                 switch (numofelements % 8) {
+                    default:
+                        HDassert(0 && "This Should never be executed!");
+                        break;
                     case 0:
                         do
                           {
@@ -238,6 +241,9 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 
                 duffs_index = (numofelements + 7) / 8;
                 switch (numofelements % 8) {
+                    default:
+                        HDassert(0 && "This Should never be executed!");
+                        break;
                     case 0:
                         do
                           {

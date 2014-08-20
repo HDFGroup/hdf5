@@ -83,12 +83,16 @@ H5CS_get_stack(void)
 
     fstack = H5TS_get_thread_local_value(H5TS_funcstk_key_g);
     if (!fstack) {
-        /* no associated value with current thread - create one */
-        fstack = (H5CS_t *)HDmalloc(sizeof(H5CS_t));  /* Don't use H5MM_malloc() here, it causes infinite recursion */
+        /* No associated value with current thread - create one */
+#ifdef H5_HAVE_WIN_THREADS
+        fstack = (H5CS_t *)LocalAlloc(LPTR, sizeof(H5CS_t)); /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
+#else
+        fstack = (H5CS_t *)HDmalloc(sizeof(H5CS_t)); /* Don't use H5MM_malloc() here, it causes infinite recursion */
+#endif /* H5_HAVE_WIN_THREADS */
         HDassert(fstack);
 
         /* Set the thread-specific info */
-	fstack->nused=0;
+        fstack->nused=0;
 
         /* (It's not necessary to release this in this API, it is
          *      released by the "key destructor" set up in the H5TS
@@ -173,7 +177,7 @@ H5CS_print(FILE *stream)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    assert(fstack);
+    HDassert(fstack);
 
     H5CS_print_stack(fstack, stream);
 
@@ -205,8 +209,8 @@ H5CS_push(const char *func_name)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    assert (fstack);
-    assert (func_name);
+    HDassert(fstack);
+    HDassert(func_name);
 
     /*
      * Push the function if there's room.  Otherwise just increment count
@@ -242,8 +246,8 @@ H5CS_pop(void)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    assert (fstack);
-    assert (fstack->nused>0);
+    HDassert(fstack);
+    HDassert(fstack->nused>0);
 
     /* Pop the function. */
     fstack->nused--;
@@ -276,7 +280,7 @@ H5CS_copy_stack(H5CS_t *new_stack)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    HDassert (old_stack);
+    HDassert(old_stack);
 
     /* Copy old stack to new one, duplicating the strings */
     for(u = 0; u < old_stack->nused; u++)
@@ -310,7 +314,7 @@ H5CS_close_stack(H5CS_t *stack)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    HDassert (stack);
+    HDassert(stack);
 
     /* Free strings on stack */
     for(u = 0; u < stack->nused; u++)

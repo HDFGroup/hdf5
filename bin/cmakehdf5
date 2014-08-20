@@ -1,0 +1,379 @@
+#! /bin/sh
+# Build and Test HDF5 using cmake.
+# Author: Allen Byrne
+#         Albert Cheng
+# Creation Date: Nov 2012
+# Modified:
+#	Changed to use the quick steps described in INSTALL_CMake.txt. (AKC 2014/1/1)
+
+# Copyright: The HDF Group, 2012-14
+
+# Debug Print: remove the comment hash if you want DPRINT to do echo
+DPRINT=:
+#DPRINT=echo
+
+# use the ctest scripting method if --script is given
+if [ "$1" != "--script" ]; then
+# variable names
+# The "extra" number is the step number and easier to see all logfiles in
+# the sorted order of steps
+progname=`basename $0`	# program name
+configlog="#${progname}_1config.log"
+makelog="#${progname}_2build.log"
+testlog="#${progname}_3test.log"
+packlog="#${progname}_4pack.log"
+installlog="#${progname}_5install.log"
+srcdir="../hdf5"	# expected source directory
+exit_code=0
+
+#=============
+# Function definitions
+#=============
+
+# Show user help page
+HELP()
+{
+    echo "Usage: $progname [--script]"
+    echo "  --script: Use the ctest scripting method of $progname"
+    echo ""
+}
+
+# Display a time stamp
+TIMESTAMP()
+{
+    echo "=====" "`date`" "====="
+}
+
+
+# Do one step bracketed with time stamps
+# The '< /dev/null' is needed to prevent some applications like MPI
+# jobs blocked for reading when they read stdin unnecessary.
+# $1 is banner message to be displayed.
+# $2 is command to run
+# $3 is logfile name for saving output from the command
+STEP()
+{
+    banner="$1"
+    command="$2"
+    logfile="$3"
+
+    echo "$banner" with output saved in $logfile
+    (TIMESTAMP; nerror=0 ;
+	echo "eval $command"
+	eval $command || nerror=1 ;
+	TIMESTAMP; exit $nerror) < /dev/null >> "$logfile" 2>&1
+    if [ $? -ne 0 ]; then
+	echo "error in '$banner'.  $progname aborted."
+	exit 1
+    fi
+}
+
+
+#==========
+# main
+#==========
+
+# Show a start time stamp
+TIMESTAMP
+
+# Always display the help page
+HELP
+
+# Verify there is a valid hdf5 source directory present
+if [ ! -d $srcdir ]; then
+    echo $srcdir not found. Aborted.
+    exit 1
+fi
+
+# figure out version information
+vers=bin/h5vers
+if [ ! -x $srcdir/$vers ]; then
+    echo $srcdir/$vers not found or not executable. Aborted.
+    exit 1
+fi
+version=`cd $srcdir; $vers`
+if [ $? != 0 ]; then
+    echo $vers failed. Aborted.
+    exit 1
+fi
+echo Running Cmake for HDF5-${version} ...
+
+#      4. Configure the C library, tools and tests with this command:
+STEP "Configure..." "cmake -G 'Unix Makefiles' -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ../hdf5" $configlog
+      
+#      5. Build the C library, tools and tests with this command:
+STEP "Build the library, tools and tests, ..." "cmake --build . --config Release" $makelog
+      
+#      6. Test the C library and tools with this command:
+STEP "Test the library and tools..." "ctest . -C Release" $testlog
+      
+#      7. Create an install image with this command:
+STEP "Create an install image..." "cpack -C Release CPackConfig.cmake" $packlog
+      
+#      8. Install with this command:
+STEP "Install..." "./HDF5-${version}-Linux.sh --skip-license" $installlog
+# save the last exit code
+exit_code=$?
+
+# Show a closing time stamp
+TIMESTAMP
+exit $exit_code
+
+else
+# ---------------
+# older version
+# ---------------
+
+# variable names
+progname=`basename $0`	# program name
+cminfile="cmakemin.$$" # Cmake minimum file
+cfgfile=$progname.$$	# configure file
+ctest_log=ctest.log    # output of ctest script
+install_log=install.log  # output of installation
+$DPRINT $cfgfile
+
+# Remove temporary generated files if exit 0
+trap "rm -f $cminfile $cfgfile" 0
+
+#=============
+# Function definitions
+#=============
+TIMESTAMP()
+{
+    echo "=====" "`date`" "====="
+}
+
+
+#==========
+# main
+#==========
+# Show a start time stamp
+TIMESTAMP
+
+# Explain what and where log files are.
+cat <<EOF
+$ctest_log: output of ctest script.
+$install_log: output of installation
+Log files will be stored in Testing/Temporary:
+    LastConfigure_<timestamp>.log: output of configure
+    LastBuild_<timestamp>.log: output of build
+    LastTest_<timestamp>.log: output of testing
+    LastTestsFailed_<timestamp>.log: list of failed tests
+
+EOF
+
+# First generate the two needed input files, the $cimnfile and $cfgfile.
+# Then use ctest to use the two input files.
+
+#==========
+# create the configure file
+#==========
+# Create the cmake minimum required file to be used by the following
+# configure file. Though not absolute needed, it is better to generate
+# this file before the configure file.  Quote the EOF to preven substitution
+# in the text.
+#==========
+#==========
+cat > $cfgfile <<'EOF'
+cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
+########################################################
+# This dashboard is maintained by The HDF Group
+# For any comments please contact cdashhelp@hdfgroup.org
+#
+########################################################
+
+set (CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
+set (CTEST_SOURCE_DIRECTORY "../hdf5")
+set (CTEST_BINARY_DIRECTORY ".")
+set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
+set (CTEST_BUILD_CONFIGURATION "Release")
+set (CTEST_MAX_N 8)
+
+# -- CDash variables
+set (LOCAL_NO_SUBMIT TRUE)	# No CDash submit.
+set (MODEL "Experimental")
+set (CDASH_LOCAL TRUE)
+set (SITE_BUILDNAME_SUFFIX "cmakehdf5")
+
+# -- URL set for internal check, default is to not update
+set (LOCAL_SKIP_UPDATE TRUE)
+set (REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/branches/hdf5_1_8")
+# -- Standard build options  
+set (ADD_BUILD_OPTIONS "-DCMAKE_INSTALL_PREFIX:PATH=${CTEST_BINARY_DIRECTORY} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=\"SVN\" -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
+
+# Use multiple CPU cores to build
+include(ProcessorCount)
+ProcessorCount(N)
+if(NOT N EQUAL 0)
+  if(N GREATER ${CTEST_MAX_N})
+    set(N ${CTEST_MAX_N})
+  endif(N GREATER ${CTEST_MAX_N})
+  set(CTEST_BUILD_FLAGS -j${N})
+  set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${N})
+endif()
+
+# -----------------------------------------------------------  
+# -- Get environment
+# -----------------------------------------------------------  
+  ## -- set hostname
+  ## --------------------------
+  find_program (HOSTNAME_CMD NAMES hostname)
+  exec_program (${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)
+  set (CTEST_SITE "${HOSTNAME}${CTEST_SITE_EXT}")
+  find_program (UNAME NAMES uname)
+  macro (getuname name flag)
+    exec_program ("${UNAME}" ARGS "${flag}" OUTPUT_VARIABLE "${name}")
+  endmacro (getuname)
+
+  getuname (osname -s)
+  getuname (osrel  -r)
+  getuname (cpu    -m)
+
+  if (SITE_BUILDNAME_SUFFIX)
+    set (CTEST_BUILD_NAME  "${osname}-${osrel}-${cpu}-${SITE_BUILDNAME_SUFFIX}")
+  else (SITE_BUILDNAME_SUFFIX)
+    set (CTEST_BUILD_NAME  "${osname}-${osrel}-${cpu}")
+  endif (SITE_BUILDNAME_SUFFIX)
+# -----------------------------------------------------------  
+  
+set (BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
+ 
+#-----------------------------------------------------------------------------
+# MAC machines need special option
+#-----------------------------------------------------------------------------
+if (APPLE)
+  # Compiler choice
+  execute_process(COMMAND xcrun --find cc OUTPUT_VARIABLE XCODE_CC OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND xcrun --find c++ OUTPUT_VARIABLE XCODE_CXX OUTPUT_STRIP_TRAILING_WHITESPACE)
+  SET(ENV{CC} "${XCODE_CC}")
+  SET(ENV{CXX} "${XCODE_CXX}")
+  # Shared fortran is not supported, build static 
+  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
+  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF")
+endif (APPLE)
+
+
+# -----------------------------------------------------------  
+find_package (Subversion)
+set (CTEST_UPDATE_COMMAND "${Subversion_SVN_EXECUTABLE}")
+# -- Only clean build folder if LOCAL_CLEAR_BUILD is set  
+if (LOCAL_CLEAR_BUILD)
+  set (CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
+  ctest_empty_binary_directory (${CTEST_BINARY_DIRECTORY})
+endif (LOCAL_CLEAR_BUILD)
+
+#-----------------------------------------------------------------------------
+# Send the main script as a note.
+list (APPEND CTEST_NOTES_FILES
+  "${CMAKE_CURRENT_LIST_FILE}"
+  "${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake"
+  )
+
+# Check for required variables.
+foreach (req
+    CTEST_CMAKE_GENERATOR
+    CTEST_SITE
+    CTEST_BUILD_NAME
+    )
+  if (NOT DEFINED ${req})
+    message(FATAL_ERROR "The containing script must set ${req}")
+  endif (NOT DEFINED ${req})
+endforeach (req)
+
+## -- set output to english
+set($ENV{LC_MESSAGES}  "en_EN")
+ 
+#-----------------------------------------------------------------------------
+# Initialize the CTEST commands
+#------------------------------
+set (CTEST_CMAKE_COMMAND "\"${CMAKE_COMMAND}\"")
+set (CTEST_CONFIGURE_COMMAND
+    "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\"")
+
+# Print summary information.
+foreach (v
+    CTEST_SITE
+    CTEST_BUILD_NAME
+    CTEST_SOURCE_DIRECTORY
+    CTEST_BINARY_DIRECTORY
+    CTEST_CMAKE_GENERATOR
+    CTEST_BUILD_CONFIGURATION
+    CTEST_CONFIGURE_COMMAND
+    CTEST_SCRIPT_DIRECTORY
+    )
+  set (vars "${vars}  ${v}=[${${v}}]\n")
+endforeach (v)
+message ("Dashboard script configuration:\n${vars}\n")
+
+CTEST_START (${MODEL} TRACK ${MODEL})
+if (NOT LOCAL_SKIP_UPDATE)
+  CTEST_UPDATE (SOURCE "${CTEST_SOURCE_DIRECTORY}")
+endif (NOT LOCAL_SKIP_UPDATE)
+CTEST_CONFIGURE (BUILD "${CTEST_BINARY_DIRECTORY}" RETURN_VALUE res)
+if(NOT res STREQUAL "0")
+  message (FATAL_ERROR "Configure FAILED")
+endif()
+message ("Configure DONE")
+CTEST_READ_CUSTOM_FILES ("${CTEST_BINARY_DIRECTORY}")
+if (NOT LOCAL_NO_SUBMIT)
+  CTEST_SUBMIT (PARTS Update Configure Notes)
+endif (NOT LOCAL_NO_SUBMIT)
+CTEST_BUILD (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND RETURN_VALUE res)
+if (NOT LOCAL_NO_SUBMIT)
+  CTEST_SUBMIT (PARTS Build)
+endif (NOT LOCAL_NO_SUBMIT)
+if(NOT res STREQUAL "0")
+  message (FATAL_ERROR "Build FAILED")
+endif()
+message ("build DONE")
+if (NOT LOCAL_SKIP_TEST)
+  CTEST_TEST (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args} RETURN_VALUE res)
+  if (NOT LOCAL_NO_SUBMIT)
+    CTEST_SUBMIT (PARTS Test)
+  endif (NOT LOCAL_NO_SUBMIT)
+  if(NOT res STREQUAL "0")
+    message (FATAL_ERROR "Test FAILED")
+  endif()
+  message ("test DONE")
+endif (NOT LOCAL_SKIP_TEST)
+if(NOT LOCAL_MEMCHECK_TEST)
+  ##-----------------------------------------------
+  ## Package the product
+  ##-----------------------------------------------
+  execute_process(COMMAND cpack -C ${CTEST_BUILD_CONFIGURATION} -V
+    WORKING_DIRECTORY ${CTEST_BINARY_DIRECTORY}
+    RESULT_VARIABLE cpackResult
+    OUTPUT_VARIABLE cpackLog
+    ERROR_VARIABLE cpackLog.err
+  )
+  file(WRITE ${CTEST_BINARY_DIRECTORY}/cpack.log "${cpackLog.err}" "${cpackLog}")
+endif(NOT LOCAL_MEMCHECK_TEST)
+#-----------------------------------------------------------------------------
+
+message ("DONE")
+EOF
+
+
+# Run ctest
+ctest -S $cfgfile -C Release -V -O $ctest_log
+exit_code=$?
+if [ $exit_code = 0 ]; then
+    echo CTest script completed without error
+else
+    echo Error encountered CTest script
+fi
+# Using HDF5-*.sh because actual name is unavailable
+install_sh=HDF5-*.sh
+echo installing with $install_sh ...
+./$install_sh --skip-license > $install_log
+exit_code=$?
+if [ $exit_code = 0 ]; then
+    echo Complete without error
+else
+    echo Error encountered
+fi
+TIMESTAMP
+exit $exit_code
+
+fi
+

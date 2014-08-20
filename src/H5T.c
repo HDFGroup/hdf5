@@ -494,10 +494,10 @@ size_t H5T_NATIVE_UINT_FAST64_ALIGN_g	= 0;
 
 /* Useful floating-point values for conversion routines */
 /* (+/- Inf for all floating-point types) */
-float H5T_NATIVE_FLOAT_POS_INF_g        = 0.0;
-float H5T_NATIVE_FLOAT_NEG_INF_g        = 0.0;
-double H5T_NATIVE_DOUBLE_POS_INF_g      = 0.0;
-double H5T_NATIVE_DOUBLE_NEG_INF_g      = 0.0;
+float H5T_NATIVE_FLOAT_POS_INF_g        = 0.0f;
+float H5T_NATIVE_FLOAT_NEG_INF_g        = 0.0f;
+double H5T_NATIVE_DOUBLE_POS_INF_g      = (double)0.0f;
+double H5T_NATIVE_DOUBLE_NEG_INF_g      = (double)0.0f;
 
 /* Declare the free list for H5T_t's and H5T_shared_t's */
 H5FL_DEFINE(H5T_t);
@@ -528,7 +528,6 @@ H5FL_DEFINE_STATIC(H5T_path_t);
 static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
     H5I_DATATYPE,		/* ID class value */
     0,				/* Class flags */
-    64,				/* Minimum hash size for class */
     8,				/* # of reserved IDs for class */
     (H5I_free_t)H5T_close	/* Callback routine for closing objects of this class */
 }};
@@ -771,7 +770,6 @@ H5T_init_interface(void)
     hsize_t     dim[1]={1};             /* Dimension info for array datatype */
     herr_t	status;
     unsigned    copied_dtype=1;         /* Flag to indicate whether datatype was copied or allocated (for error cleanup) */
-    H5P_genclass_t  *crt_pclass;        /* Property list class for datatype creation properties */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1348,21 +1346,17 @@ H5T_init_interface(void)
     if (status<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to register conversion function(s)")
 
-    /* ========== Datatype Creation Property Class Initialization ============*/
-    assert(H5P_CLS_DATATYPE_CREATE_g!=-1);
-
-    /* Get the pointer to group creation class */
-    if(NULL == (crt_pclass = (H5P_genclass_t *)H5I_object(H5P_CLS_DATATYPE_CREATE_g)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
-
     /* Register datatype creation property class properties here.  See similar
      * code in H5D_init_interface(), etc. for example.
      */
 
     /* Only register the default property list if it hasn't been created yet */
-    if(H5P_LST_DATATYPE_CREATE_g == (-1)) {
+    if(H5P_LST_DATATYPE_CREATE_ID_g == (-1)) {
+        /* ========== Datatype Creation Property Class Initialization ============*/
+        HDassert(H5P_CLS_DATATYPE_CREATE_g != NULL);
+
         /* Register the default datatype creation property list */
-        if((H5P_LST_DATATYPE_CREATE_g = H5P_create_id(crt_pclass, FALSE)) < 0)
+        if((H5P_LST_DATATYPE_CREATE_ID_g = H5P_create_id(H5P_CLS_DATATYPE_CREATE_g, FALSE)) < 0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
     } /* end if */
 
@@ -1442,20 +1436,23 @@ H5T_unlock_cb(void *_dt, hid_t UNUSED id, void UNUSED *key)
 int
 H5T_term_interface(void)
 {
-    int	i, nprint=0, n=0;
-    H5T_path_t	*path = NULL;
+    int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
+        int i, nprint = 0;
+
 	/* Unregister all conversion functions */
 	for(i = 0; i < H5T_g.npaths; i++) {
+            H5T_path_t *path;
+
 	    path = H5T_g.path[i];
 	    HDassert(path);
 	    if(path->func) {
 		H5T__print_stats(path, &nprint/*in,out*/);
 		path->cdata.command = H5T_CONV_FREE;
-		if((path->func)(FAIL, FAIL, &(path->cdata), (size_t)0,
+		if((path->func)((hid_t)FAIL, (hid_t)FAIL, &(path->cdata), (size_t)0,
                         (size_t)0, (size_t)0, NULL, NULL,H5AC_dxpl_id) < 0) {
 #ifdef H5T_DEBUG
 		    if (H5DEBUG(T)) {
@@ -1488,7 +1485,13 @@ H5T_term_interface(void)
 	/* Unlock all datatypes, then free them */
 	/* note that we are ignoring the return value from H5I_iterate() */
 	H5I_iterate(H5I_DATATYPE, H5T_unlock_cb, NULL, FALSE);
-	H5I_dec_type_ref(H5I_DATATYPE);
+
+        /* Close deprecated interface */
+        n += H5T__term_deprec_interface();
+
+        /* Destroy the datatype object id group */
+	(void)H5I_dec_type_ref(H5I_DATATYPE);
+	n++; /*H5I*/
 
         /* Reset all the datatype IDs */
         H5T_IEEE_F32BE_g			= FAIL;
@@ -1588,7 +1591,6 @@ H5T_term_interface(void)
 
 	/* Mark interface as closed */
 	H5_interface_initialize_g = 0;
-	n = 1; /*H5I*/
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
@@ -1914,7 +1916,7 @@ H5T_get_class(const H5T_t *dt, htri_t internal)
 
     FUNC_ENTER_NOAPI(H5T_NO_CLASS)
 
-    assert(dt);
+    HDassert(dt);
 
     /* Externally, a VL string is a string; internally, a VL string is a VL. */
     if(internal) {
@@ -2271,7 +2273,7 @@ H5T_get_super(const H5T_t *dt)
 
     FUNC_ENTER_NOAPI(NULL)
 
-    assert(dt);
+    HDassert(dt);
 
     if (!dt->shared->parent)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a derived data type");
@@ -2319,11 +2321,11 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    assert(src);
-    assert(dst);
-    assert(func);
-    assert(H5T_PERS_HARD==pers || H5T_PERS_SOFT==pers);
-    assert(name && *name);
+    HDassert(src);
+    HDassert(dst);
+    HDassert(func);
+    HDassert(H5T_PERS_HARD==pers || H5T_PERS_SOFT==pers);
+    HDassert(name && *name);
 
     if(H5T_PERS_HARD == pers) {
         /* Only bother to register the path if it's not a no-op path (for this machine) */
@@ -2369,7 +2371,7 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
          */
         for (i=1; i<H5T_g.npaths; i++) {
             old_path = H5T_g.path[i];
-            assert(old_path);
+            HDassert(old_path);
 
             /* Does the new soft conversion function apply to this path? */
             if (old_path->is_hard ||
@@ -2395,7 +2397,7 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
             if(NULL == (new_path = H5FL_CALLOC(H5T_path_t)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
             HDstrncpy(new_path->name, name, (size_t)H5T_NAMELEN);
-            new_path->name[H5T_NAMELEN-1] = '\0';
+            new_path->name[H5T_NAMELEN - 1] = '\0';
             if(NULL == (new_path->src = H5T_copy(old_path->src, H5T_COPY_ALL)) ||
                     NULL == (new_path->dst=H5T_copy(old_path->dst, H5T_COPY_ALL)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy data types")
@@ -2582,7 +2584,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
             /* Shut down path */
             H5T__print_stats(path, &nprint);
             path->cdata.command = H5T_CONV_FREE;
-            if((path->func)(FAIL, FAIL, &(path->cdata),
+            if((path->func)((hid_t)FAIL, (hid_t)FAIL, &(path->cdata),
                     (size_t)0, (size_t)0, (size_t)0, NULL, NULL, dxpl_id) < 0) {
 #ifdef H5T_DEBUG
                 if(H5DEBUG(T)) {
@@ -3247,6 +3249,8 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                 new_dt->shared->state = H5T_STATE_RDONLY;
             }
             break;
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, NULL, "invalid copy method type")
     } /* end switch */
 
     /* Update fields in the new struct, if we aren't sharing an already opened
@@ -3435,7 +3439,7 @@ H5T_lock (H5T_t *dt, hbool_t immutable)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert (dt);
+    HDassert (dt);
 
     switch (dt->shared->state) {
         case H5T_STATE_TRANSIENT:
@@ -3449,6 +3453,8 @@ H5T_lock (H5T_t *dt, hbool_t immutable)
         case H5T_STATE_OPEN:
             /*void*/
             break;
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "invalid datatype state")
     }
 
 done:
@@ -3709,10 +3715,10 @@ H5T_set_size(H5T_t *dt, size_t size)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    assert(dt);
-    assert(size!=0);
-    assert(H5T_REFERENCE!=dt->shared->type);
-    assert(!(H5T_ENUM==dt->shared->type && 0==dt->shared->u.enumer.nmembs));
+    HDassert(dt);
+    HDassert(size!=0);
+    HDassert(H5T_REFERENCE!=dt->shared->type);
+    HDassert(!(H5T_ENUM==dt->shared->type && 0==dt->shared->u.enumer.nmembs));
 
     if (dt->shared->parent) {
         if (H5T_set_size(dt->shared->parent, size)<0)
@@ -3841,12 +3847,12 @@ H5T_set_size(H5T_t *dt, size_t size)
             case H5T_VLEN:
             case H5T_ARRAY:
             case H5T_REFERENCE:
-                assert("can't happen" && 0);
+                HDassert("can't happen" && 0);
             case H5T_NO_CLASS:
             case H5T_NCLASSES:
-                assert("invalid type" && 0);
+                HDassert("invalid type" && 0);
             default:
-                assert("not implemented yet" && 0);
+                HDassert("not implemented yet" && 0);
         }
 
         /* Commit (if we didn't convert this type to a VL string) */
@@ -3893,7 +3899,7 @@ H5T_get_size(const H5T_t *dt)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    assert(dt);
+    HDassert(dt);
 
     FUNC_LEAVE_NOAPI(dt->shared->size)
 }
@@ -3999,9 +4005,9 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
 #ifdef H5T_DEBUG
             /* I don't quite trust the code above yet :-)  --RPM */
             for (u=0; u<dt1->shared->u.compnd.nmembs-1; u++) {
-                assert(HDstrcmp(dt1->shared->u.compnd.memb[idx1[u]].name,
+                HDassert(HDstrcmp(dt1->shared->u.compnd.memb[idx1[u]].name,
                         dt1->shared->u.compnd.memb[idx1[u + 1]].name));
-                assert(HDstrcmp(dt2->shared->u.compnd.memb[idx2[u]].name,
+                HDassert(HDstrcmp(dt2->shared->u.compnd.memb[idx2[u]].name,
                         dt2->shared->u.compnd.memb[idx2[u + 1]].name));
             }
 #endif
@@ -4079,9 +4085,9 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
 #ifdef H5T_DEBUG
             /* I don't quite trust the code above yet :-)  --RPM */
             for (u=0; u<dt1->shared->u.enumer.nmembs-1; u++) {
-                assert(HDstrcmp(dt1->shared->u.enumer.name[idx1[u]],
+                HDassert(HDstrcmp(dt1->shared->u.enumer.name[idx1[u]],
                         dt1->shared->u.enumer.name[idx1[u+1]]));
-                assert(HDstrcmp(dt2->shared->u.enumer.name[idx2[u]],
+                HDassert(HDstrcmp(dt2->shared->u.enumer.name[idx2[u]],
                         dt2->shared->u.enumer.name[idx2[u+1]]));
             }
 #endif
@@ -4137,10 +4143,10 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
             break;
 
         case H5T_VLEN:
-            assert(dt1->shared->u.vlen.type>H5T_VLEN_BADTYPE && dt1->shared->u.vlen.type<H5T_VLEN_MAXTYPE);
-            assert(dt2->shared->u.vlen.type>H5T_VLEN_BADTYPE && dt2->shared->u.vlen.type<H5T_VLEN_MAXTYPE);
-            assert(dt1->shared->u.vlen.loc>=H5T_LOC_BADLOC && dt1->shared->u.vlen.loc<H5T_LOC_MAXLOC);
-            assert(dt2->shared->u.vlen.loc>=H5T_LOC_BADLOC && dt2->shared->u.vlen.loc<H5T_LOC_MAXLOC);
+            HDassert(dt1->shared->u.vlen.type>H5T_VLEN_BADTYPE && dt1->shared->u.vlen.type<H5T_VLEN_MAXTYPE);
+            HDassert(dt2->shared->u.vlen.type>H5T_VLEN_BADTYPE && dt2->shared->u.vlen.type<H5T_VLEN_MAXTYPE);
+            HDassert(dt1->shared->u.vlen.loc>=H5T_LOC_BADLOC && dt1->shared->u.vlen.loc<H5T_LOC_MAXLOC);
+            HDassert(dt2->shared->u.vlen.loc>=H5T_LOC_BADLOC && dt2->shared->u.vlen.loc<H5T_LOC_MAXLOC);
 
             /* Arbitrarily sort sequence VL datatypes before string VL datatypes */
             if (dt1->shared->u.vlen.type==H5T_VLEN_SEQUENCE &&
@@ -4300,14 +4306,14 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
 
                         case H5R_BADTYPE:
                         case H5R_MAXTYPE:
-                            assert("invalid type" && 0);
+                            HDassert("invalid type" && 0);
                         default:
-                            assert("not implemented yet" && 0);
+                            HDassert("not implemented yet" && 0);
                     }
                     break;
 
                 default:
-                    assert("not implemented yet" && 0);
+                    HDassert("not implemented yet" && 0);
             }
         break;
     } /* end switch */
@@ -4389,10 +4395,10 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	H5T_g.apaths = 128;
 	if(NULL == (H5T_g.path[0] = H5FL_CALLOC(H5T_path_t)))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for no-op conversion path")
-	HDstrcpy(H5T_g.path[0]->name, "no-op");
+        HDsnprintf(H5T_g.path[0]->name, sizeof(H5T_g.path[0]->name), "no-op");
 	H5T_g.path[0]->func = H5T__conv_noop;
 	H5T_g.path[0]->cdata.command = H5T_CONV_INIT;
-	if(H5T__conv_noop(FAIL, FAIL, &(H5T_g.path[0]->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL, dxpl_id) < 0) {
+	if(H5T__conv_noop((hid_t)FAIL, (hid_t)FAIL, &(H5T_g.path[0]->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL, dxpl_id) < 0) {
 #ifdef H5T_DEBUG
 	    if(H5DEBUG(T))
 		fprintf(H5DEBUG(T), "H5T: unable to initialize no-op conversion function (ignored)\n");
@@ -4457,7 +4463,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	    path->name[H5T_NAMELEN - 1] = '\0';
         } /* end if */
 	else
-	    HDstrcpy(path->name, "NONAME");
+	    HDsnprintf(path->name, sizeof(path->name), "NONAME");
 	if(NULL == (path->src = H5T_copy(src, H5T_COPY_ALL)))
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy datatype for conversion path")
         if(NULL == (path->dst = H5T_copy(dst, H5T_COPY_ALL)))
@@ -4511,7 +4517,8 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	    H5E_clear_stack(H5E_DEFAULT); /*ignore the error*/
 	} /* end if */
         else {
-	    HDstrcpy(path->name, H5T_g.soft[i].name);
+	    HDstrncpy(path->name, H5T_g.soft[i].name, (size_t)H5T_NAMELEN);
+	    path->name[H5T_NAMELEN - 1] = '\0';
 	    path->func = H5T_g.soft[i].func;
 	    path->is_hard = FALSE;
 	} /* end else */
@@ -4550,7 +4557,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	HDassert(table == H5T_g.path[md]);
 	H5T__print_stats(table, &nprint/*in,out*/);
 	table->cdata.command = H5T_CONV_FREE;
-	if((table->func)(FAIL, FAIL, &(table->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL, dxpl_id) < 0) {
+	if((table->func)((hid_t)FAIL, (hid_t)FAIL, &(table->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL, dxpl_id) < 0) {
 #ifdef H5T_DEBUG
 	    if(H5DEBUG(T)) {
 		fprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx free "
@@ -4633,7 +4640,7 @@ H5T_path_noop(const H5T_path_t *p)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(p);
+    HDassert(p);
 
     FUNC_LEAVE_NOAPI(p->is_noop || (p->is_hard && 0==H5T_cmp(p->src, p->dst, FALSE)))
 } /* end H5T_path_noop() */
@@ -4702,7 +4709,7 @@ H5T_path_bkg(const H5T_path_t *p)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(p);
+    HDassert(p);
 
     FUNC_LEAVE_NOAPI(p->cdata.need_bkg)
 } /* end H5T_path_bkg() */
@@ -4850,6 +4857,8 @@ H5T_oloc(H5T_t *dt)
             HDassert(dt->sh_loc.type == H5O_SHARE_TYPE_COMMITTED);
             ret_value = &dt->oloc;
             break;
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, NULL, "invalid datatype state")
     } /* end switch */
 
 done:
@@ -4888,6 +4897,8 @@ H5T_nameof(H5T_t *dt)
         case H5T_STATE_OPEN:
             ret_value = &(dt->path);
             break;
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, NULL, "invalid datatype state")
     } /* end switch */
 
 done:
@@ -4918,7 +4929,7 @@ H5T_is_immutable(const H5T_t *dt)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(dt);
+    HDassert(dt);
 
     if(dt->shared->state == H5T_STATE_IMMUTABLE)
         ret_value = TRUE;
@@ -4951,7 +4962,7 @@ H5T_is_named(const H5T_t *dt)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(dt);
+    HDassert(dt);
 
     if(dt->shared->state == H5T_STATE_OPEN || dt->shared->state == H5T_STATE_NAMED)
         ret_value = TRUE;
@@ -4988,7 +4999,7 @@ H5T_get_ref_type(const H5T_t *dt)
 
     FUNC_ENTER_NOAPI(H5R_BADTYPE)
 
-    assert(dt);
+    HDassert(dt);
 
     if(dt->shared->type==H5T_REFERENCE)
         ret_value=dt->shared->u.atomic.u.r.rtype;
@@ -5022,7 +5033,7 @@ H5T_is_sensible(const H5T_t *dt)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(dt);
+    HDassert(dt);
 
     switch(dt->shared->type) {
         case H5T_COMPOUND:
@@ -5087,8 +5098,8 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(dt);
-    assert(loc>=H5T_LOC_BADLOC && loc<H5T_LOC_MAXLOC);
+    HDassert(dt);
+    HDassert(loc>=H5T_LOC_BADLOC && loc<H5T_LOC_MAXLOC);
 
     /* Datatypes can't change in size if the force_conv flag is not set */
     if(dt->shared->force_conv) {

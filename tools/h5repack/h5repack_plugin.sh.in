@@ -1,0 +1,264 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.                                              
+# All rights reserved.                                                     
+#                                                                          
+# This file is part of HDF5. The full HDF5 copyright notice, including     
+# terms governing use, modification, and redistribution, is contained in   
+# the files COPYING and Copyright.html.  COPYING can be found at the root  
+# of the source code distribution tree; Copyright.html can be found at the 
+# root level of an installed copy of the electronic document set and is    
+# linked from the top-level documents page.  It can also be found at       
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have access  
+# to either file, you may request a copy from help@hdfgroup.org.           
+#
+srcdir=@srcdir@
+TOP_BUILDDIR=@top_builddir@
+
+# Determine backward compatibility options enabled
+DEPRECATED_SYMBOLS="@DEPRECATED_SYMBOLS@"
+
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+H5REPACK=h5repack               # The tool name
+H5REPACK_BIN=`pwd`/$H5REPACK    # The path of the tool binary
+
+H5DUMP=../h5dump/h5dump         # The h5dump tool name
+H5DUMP_BIN=`pwd`/$H5DUMP        # The path of the h5dump tool binary
+
+nerrors=0
+verbose=yes
+exit_code=$EXIT_SUCCESS
+
+TEST_NAME=ud_plugin
+FROM_DIR=`pwd`/.libs
+PLUGIN_LIB="$FROM_DIR/libdynlibadd.*"
+PLUGIN_LIBDIR=testdir3
+RM='rm -rf'
+
+GREP='grep'
+CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
+
+# source dirs
+SRC_TOOLS="$srcdir/.."
+
+# testfiles source dirs for tools
+SRC_H5REPACK_TESTFILES="$SRC_TOOLS/h5repack/testfiles"
+
+TESTDIR=testplug
+test -d $TESTDIR || mkdir $TESTDIR
+
+######################################################################
+# test files
+# --------------------------------------------------------------------
+# All the test files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       Any test files from other tools can be used in this framework.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+LIST_HDF5_TEST_FILES="
+$SRC_H5REPACK_TESTFILES/h5repack_layout.h5
+$SRC_H5REPACK_TESTFILES/h5repack_layout.h5-plugin_test.ddl
+$SRC_H5REPACK_TESTFILES/plugin_test.h5repack_layout.h5.tst
+"
+#$SRC_H5REPACK_TESTFILES/h5repack_layout.UD.h5
+#$SRC_H5REPACK_TESTFILES/h5repack_layout.UD.h5-plugin_none.ddl
+#$SRC_H5REPACK_TESTFILES/plugin_none.h5repack_layout.UD.h5.tst
+#"
+
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES"
+
+# Main Body
+# Create test directories if not exists yet.
+test -d $PLUGIN_LIBDIR || mkdir -p $PLUGIN_LIBDIR
+if [ $? != 0 ]; then
+    echo "Failed to create test directory($PLUGIN_LIBDIR)"
+    exit $EXIT_FAILURE
+fi
+
+# copy plugin library for test
+$CP $PLUGIN_LIB $PLUGIN_LIBDIR
+if [ $? != 0 ]; then
+    echo "Failed to copy plugin library ($PLUGIN_LIB) for test."
+    exit $EXIT_FAILURE
+fi
+
+# setup plugin path
+ENVCMD="env HDF5_PLUGIN_PATH=../${PLUGIN_LIBDIR}"
+
+COPY_TESTFILES_TO_TESTDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_TESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+                
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
+
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=`$DIRNAME $tstfile`
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $TESTDIR
+    fi
+}
+
+# Print a $* message left justified in a field of 70 characters
+#
+MESSAGE() {
+   SPACES="                                                               "
+   echo "$* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+    SPACES="                                                               "
+    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Verifying".
+#
+VERIFY() {
+    MESSAGE "Verifying $*"
+}
+
+# This is different from $srcdir/../../bin/output_filter.sh
+STDOUT_FILTER() {
+    result_file=$1
+    tmp_file=/tmp/h5test_tmp_$$
+    # Filter name of files.
+    cp $result_file $tmp_file
+    sed -e '/^Opening file/d' -e '/^Making file/d' \
+    < $tmp_file > $result_file
+    # cleanup
+    rm -f $tmp_file
+}
+          
+# This runs h5repack comparing output with h5dump output
+# from -pH option
+#
+TOOLTEST_DUMP() 
+{
+    echo $@
+    infile=$2
+    outfile=out-$1.$2
+    expect1="$TESTDIR/$1.$2.tst"
+    actual1="$TESTDIR/$1.$2.out"
+    actual1_err="$TESTDIR/$1.$2.err"
+    expect2="$TESTDIR/$2-$1.ddl"
+    actual2="$TESTDIR/$2-$1.out"
+    actual2_err="$TESTDIR/$2-$1.err"
+
+    shift
+    shift
+    
+    # Run test.
+    TESTING $H5REPACK $@
+    (
+      cd $TESTDIR
+      $ENVCMD $H5REPACK_BIN "$@" $infile $outfile
+    ) >$actual1 2>$actual1_err
+    RET=$?
+    STDOUT_FILTER $actual1
+    cat $actual1_err >> $actual1
+    if [ $RET != 0 ] ; then
+      echo "*FAILED*"
+      nerrors="`expr $nerrors + 1`"
+    else
+      echo " PASSED"
+      if cmp -s $expect1 $actual1; then
+        echo " PASSED"
+      else
+        echo "*FAILED*"
+        echo "    Expected result (*.tst) differs from actual result (*.out)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && diff -c $expect1 $actual1 |sed 's/^/    /'
+      fi
+      VERIFY h5dump output -pH $outfile 
+      (
+        cd $TESTDIR
+        $ENVCMD $H5DUMP_BIN -pH $outfile 
+      ) >$actual2 2>$actual2_err
+      RET=$?
+      cat $actual2_err >> $actual2
+
+      if cmp -s $expect2 $actual2; then
+        echo " PASSED"
+      else
+        echo "*FAILED*"
+      echo "    Expected result (*.ddl) differs from actual result (*.out)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && diff -c $expect2 $actual2 |sed 's/^/    /'
+     fi
+          
+    fi
+
+    
+   rm -f $actual1 $actual1_err $actual2 $actual2_err
+   rm -f $outfile
+}
+
+##############################################################################
+###           T H E   T E S T S                               
+##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
+
+# Run the test
+arg="h5repack_layout.h5 -v -f UD=257,1,9"
+TOOLTEST_DUMP plugin_test $arg 
+
+#arg="h5repack_layout.UD.h5 -v -f NONE"
+#TOOLTEST_DUMP plugin_none $arg 
+
+# print results
+if test $nerrors -ne 0 ; then
+    echo "$nerrors errors encountered"
+    exit_code=$EXIT_FAILURE
+else
+    echo "All Plugin API tests passed."
+    exit_code=$EXIT_SUCCESS
+fi
+
+# Clean up temporary files/directories
+CLEAN_TESTFILES_AND_TESTDIR
+
+# Clean up temporary files/directories and leave
+$RM $PLUGIN_LIBDIR
+
+exit $exit_code

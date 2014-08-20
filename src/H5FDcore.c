@@ -17,57 +17,48 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Tuesday, August 10, 1999
  *
- * Purpose:	A driver which stores the HDF5 data in main memory  using
- *		only the HDF5 public API. This driver is useful for fast
- *		access to small, temporary hdf5 files.
+ * Purpose:     A driver which stores the HDF5 data in main memory  using
+ *              only the HDF5 public API. This driver is useful for fast
+ *              access to small, temporary hdf5 files.
  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5FD_core_init_interface
 
-
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5FDprivate.h"	/* File drivers				*/
-#include "H5FDcore.h"           /* Core file driver			*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5private.h"      /* Generic Functions            */
+#include "H5Eprivate.h"     /* Error handling               */
+#include "H5Fprivate.h"     /* File access                  */
+#include "H5FDprivate.h"    /* File drivers                 */
+#include "H5FDcore.h"       /* Core file driver             */
+#include "H5FLprivate.h"    /* Free lists                   */
+#include "H5Iprivate.h"     /* IDs                          */
+#include "H5MMprivate.h"    /* Memory management            */
+#include "H5Pprivate.h"     /* Property lists               */
+#include "H5SLprivate.h"    /* Skip lists                   */
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_CORE_g = 0;
 
-/* Since Windows doesn't follow the rest of the world when it comes
- * to POSIX I/O types, some typedefs and constants are needed to avoid
- * making the code messy with #ifdefs.
- * NOTE: These are only used when writing data to the backing store on
- * file close.
- */
-#ifdef H5_HAVE_WIN32_API
-typedef unsigned int    h5_core_io_t;
-typedef int             h5_core_io_ret_t;
-static int H5_CORE_MAX_IO_BYTES_g = INT_MAX;
-#else
-/* Unix, everyone else */
-typedef size_t          h5_core_io_t;
-typedef ssize_t         h5_core_io_ret_t;
-static size_t H5_CORE_MAX_IO_BYTES_g = SSIZET_MAX;
-#endif /* H5_HAVE_WIN32_API */
+/* The skip list node type.  Represents a region in the file. */
+typedef struct H5FD_core_region_t {
+    haddr_t start;              /* Start address of the region          */
+    haddr_t end;                /* End address of the region            */
+} H5FD_core_region_t;
 
-/* The description of a file belonging to this driver. The `eoa' and `eof'
+/* The description of a file belonging to this driver. The 'eoa' and 'eof'
  * determine the amount of hdf5 address space in use and the high-water mark
  * of the file (the current size of the underlying memory).
  */
 typedef struct H5FD_core_t {
-    H5FD_t	pub;			/*public stuff, must be first	*/
-    char	*name;			/*for equivalence testing	*/
-    unsigned char *mem;			/*the underlying memory		*/
-    haddr_t	eoa;			/*end of allocated region	*/
-    haddr_t	eof;			/*current allocated size	*/
-    size_t	increment;		/*multiples for mem allocation	*/
-    hbool_t	backing_store;		/*write to file name on flush	*/
-    int		fd;			/*backing store file descriptor	*/
+    H5FD_t  pub;                /* public stuff, must be first          */
+    char    *name;              /* for equivalence testing              */
+    unsigned char *mem;         /* the underlying memory                */
+    haddr_t eoa;                /* end of allocated region              */
+    haddr_t eof;                /* current allocated size               */
+    size_t  increment;          /* multiples for mem allocation         */
+    hbool_t backing_store;      /* write to file name on flush          */
+    size_t  bstore_page_size;   /* backing store page size              */
+    int     fd;                 /* backing store file descriptor        */
     /* Information for determining uniqueness of a file with a backing store */
 #ifndef H5_HAVE_WIN32_API
     /* On most systems the combination of device and i-node number uniquely
@@ -100,44 +91,48 @@ typedef struct H5FD_core_t {
     
     HANDLE          hFile;      /* Native windows file handle */
 #endif /* H5_HAVE_WIN32_API */
-    hbool_t	dirty;			/*changes not saved?		*/
-    H5FD_file_image_callbacks_t fi_callbacks; /* file image callbacks */
+    hbool_t dirty;                              /* changes not saved?       */
+    H5FD_file_image_callbacks_t fi_callbacks;   /* file image callbacks     */
+    H5SL_t *dirty_list;                         /* dirty parts of the file  */
 } H5FD_core_t;
 
 /* Driver-specific file access properties */
 typedef struct H5FD_core_fapl_t {
-    size_t	increment;		/*how much to grow memory	*/
-    hbool_t	backing_store;		/*write to file name on flush	*/
+    size_t  increment;          /* how much to grow memory */
+    hbool_t backing_store;      /* write to file name on flush */
 } H5FD_core_fapl_t;
 
 /* Allocate memory in multiples of this size by default */
-#define H5FD_CORE_INCREMENT		8192
+#define H5FD_CORE_INCREMENT 8192
 
 /* These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
  *
- * ADDR_OVERFLOW:	Checks whether a file address of type `haddr_t'
- *			is too large to be represented by the second argument
- *			of the file seek function.
+ * ADDR_OVERFLOW:   Checks whether a file address of type `haddr_t'
+ *                  is too large to be represented by the second argument
+ *                  of the file seek function.
  *
- * SIZE_OVERFLOW:	Checks whether a buffer size of type `hsize_t' is too
- *			large to be represented by the `size_t' type.
+ * SIZE_OVERFLOW:   Checks whether a buffer size of type `hsize_t' is too
+ *                  large to be represented by the `size_t' type.
  *
- * REGION_OVERFLOW:	Checks whether an address and size pair describe data
- *			which can be addressed entirely in memory.
+ * REGION_OVERFLOW: Checks whether an address and size pair describe data
+ *                  which can be addressed entirely in memory.
  */
-#define MAXADDR 		((haddr_t)((~(size_t)0)-1))
-#define ADDR_OVERFLOW(A)	(HADDR_UNDEF==(A) || (A) > (haddr_t)MAXADDR)
-#define SIZE_OVERFLOW(Z)	((Z) > (hsize_t)MAXADDR)
-#define REGION_OVERFLOW(A,Z)	(ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) ||      \
-                                 HADDR_UNDEF==(A)+(Z) ||		      \
-				 (size_t)((A)+(Z))<(size_t)(A))
+#define MAXADDR             ((haddr_t)((~(size_t)0)-1))
+#define ADDR_OVERFLOW(A)    (HADDR_UNDEF==(A) || (A) > (haddr_t)MAXADDR)
+#define SIZE_OVERFLOW(Z)    ((Z) > (hsize_t)MAXADDR)
+#define REGION_OVERFLOW(A,Z)    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) ||    \
+                                 HADDR_UNDEF==(A)+(Z) ||                    \
+                                (size_t)((A)+(Z))<(size_t)(A))
 
 /* Prototypes */
+static herr_t H5FD_core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end);
+static herr_t H5FD_core_destroy_dirty_list(H5FD_core_t *file);
+static herr_t H5FD_core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size);
 static herr_t H5FD_core_term(void);
 static void *H5FD_core_fapl_get(H5FD_t *_file);
 static H5FD_t *H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
-			      haddr_t maxaddr);
+            haddr_t maxaddr);
 static herr_t H5FD_core_close(H5FD_t *_file);
 static int H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_core_query(const H5FD_t *_f1, unsigned long *flags);
@@ -146,82 +141,328 @@ static herr_t H5FD_core_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
 static haddr_t H5FD_core_get_eof(const H5FD_t *_file);
 static herr_t  H5FD_core_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_core_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-			     size_t size, void *buf);
+            size_t size, void *buf);
 static herr_t H5FD_core_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-			      size_t size, const void *buf);
+            size_t size, const void *buf);
 static herr_t H5FD_core_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_core_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 
 static const H5FD_class_t H5FD_core_g = {
-    "core",					/*name			*/
-    MAXADDR,					/*maxaddr		*/
-    H5F_CLOSE_WEAK,				/*fc_degree		*/
-    H5FD_core_term,                             /*terminate             */
-    NULL,					/*sb_size		*/
-    NULL,					/*sb_encode		*/
-    NULL,					/*sb_decode		*/
-    sizeof(H5FD_core_fapl_t),			/*fapl_size		*/
-    H5FD_core_fapl_get,				/*fapl_get		*/
-    NULL,					/*fapl_copy		*/
-    NULL, 					/*fapl_free		*/
-    0,						/*dxpl_size		*/
-    NULL,					/*dxpl_copy		*/
-    NULL,					/*dxpl_free		*/
-    H5FD_core_open,				/*open			*/
-    H5FD_core_close,				/*close			*/
-    H5FD_core_cmp,				/*cmp			*/
-    H5FD_core_query,			        /*query			*/
-    NULL,					/*get_type_map		*/
-    NULL,					/*alloc			*/
-    NULL,					/*free			*/
-    H5FD_core_get_eoa,				/*get_eoa		*/
-    H5FD_core_set_eoa, 				/*set_eoa		*/
-    H5FD_core_get_eof,				/*get_eof		*/
-    H5FD_core_get_handle,                       /*get_handle            */
-    H5FD_core_read,				/*read			*/
-    H5FD_core_write,				/*write			*/
-    H5FD_core_flush,				/*flush			*/
-    H5FD_core_truncate,				/*truncate		*/
-    NULL,                                       /*lock                  */
-    NULL,                                       /*unlock                */
-    NULL,                                       /* coordinate            */
-    H5FD_FLMAP_DICHOTOMY			/*fl_map		*/
+    "core",                     /* name                 */
+    MAXADDR,                    /* maxaddr              */
+    H5F_CLOSE_WEAK,             /* fc_degree            */
+    H5FD_core_term,             /* terminate            */
+    NULL,                       /* sb_size              */
+    NULL,                       /* sb_encode            */
+    NULL,                       /* sb_decode            */
+    sizeof(H5FD_core_fapl_t),   /* fapl_size            */
+    H5FD_core_fapl_get,         /* fapl_get             */
+    NULL,                       /* fapl_copy            */
+    NULL,                       /* fapl_free            */
+    0,                          /* dxpl_size            */
+    NULL,                       /* dxpl_copy            */
+    NULL,                       /* dxpl_free            */
+    H5FD_core_open,             /* open                 */
+    H5FD_core_close,            /* close                */
+    H5FD_core_cmp,              /* cmp                  */
+    H5FD_core_query,            /* query                */
+    NULL,                       /* get_type_map         */
+    NULL,                       /* alloc                */
+    NULL,                       /* free                 */
+    H5FD_core_get_eoa,          /* get_eoa              */
+    H5FD_core_set_eoa,          /* set_eoa              */
+    H5FD_core_get_eof,          /* get_eof              */
+    H5FD_core_get_handle,       /* get_handle           */
+    H5FD_core_read,             /* read                 */
+    H5FD_core_write,            /* write                */
+    H5FD_core_flush,            /* flush                */
+    H5FD_core_truncate,         /* truncate             */
+    NULL,                       /* lock                 */
+    NULL,                       /* unlock               */
+    NULL,                       /* coordinate           */
+    H5FD_FLMAP_DICHOTOMY        /* fl_map               */
 };
 
+/* Define a free list to manage the region type */
+H5FL_DEFINE(H5FD_core_region_t);
+
 
-/*--------------------------------------------------------------------------
-NAME
-   H5FD_core_init_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5FD_core_init_interface()
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_core_add_dirty_region
+ *
+ * Purpose:     Add a new dirty region to the list for later flushing
+ *              to the backing store.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
+{
+    H5FD_core_region_t *b_item  = NULL;
+    H5FD_core_region_t *a_item  = NULL;
+    H5FD_core_region_t *item    = NULL;
+    haddr_t     b_addr          = 0;
+    haddr_t     a_addr          = 0;
+    hbool_t     create_new_node = TRUE;
+    herr_t      ret_value       = SUCCEED;
+#ifdef DER
+    hbool_t     was_adjusted    = FALSE;
+#endif
 
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5FD_core_init currently).
+    FUNC_ENTER_NOAPI_NOINIT
 
---------------------------------------------------------------------------*/
+    HDassert(file);
+    HDassert(file->dirty_list);
+    HDassert(start <= end);
+
+#ifdef DER
+fprintf(stderr, "Add region: (%llu, %llu)\n", start, end);
+#endif
+
+    /* Adjust the dirty region to the nearest block boundaries */
+    if(start % file->bstore_page_size != 0) {
+        start = (start / file->bstore_page_size) * file->bstore_page_size;
+#ifdef DER
+        was_adjusted = TRUE;
+#endif
+    }
+    if(end % file->bstore_page_size != (file->bstore_page_size - 1)) {
+        end = (((end / file->bstore_page_size) + 1) * file->bstore_page_size) - 1;
+        if(end > file->eof){
+#ifdef DER
+fprintf(stderr, "Adjusted to EOF\n");
+#endif
+            end = file->eof - 1;
+        }
+#ifdef DER
+        was_adjusted = TRUE;
+#endif
+    }
+
+#ifdef DER
+if(was_adjusted)
+    fprintf(stderr, "Adjusted region: (%llu, %llu)\n", start, end);
+#endif
+
+    /* Get the regions before and after the intended insertion point */
+    b_addr = start +1;
+    a_addr = end + 2;
+    b_item = (H5FD_core_region_t *)H5SL_less(file->dirty_list, &b_addr);
+    a_item = (H5FD_core_region_t *)H5SL_less(file->dirty_list, &a_addr);
+
+    /* Check to see if we need to extend the upper end of the NEW region */
+    if(a_item) {
+        if(start < a_item->start && end < a_item->end) {
+
+            /* Extend the end of the NEW region to match the existing AFTER region */
+            end = a_item->end;
+        }
+    }
+    /* Attempt to extend the PREV region */
+    if(b_item) {
+        if(start <= b_item->end + 1) {
+
+            /* Need to set this for the delete algorithm */
+            start = b_item->start;
+
+            /* We won't need to insert a new node since we can
+             * just update an existing one instead.
+             */
+            create_new_node = FALSE;
+        }
+    }
+
+    /* Remove any old nodes that are no longer needed */
+    while(a_item && a_item->start > start) {
+
+        H5FD_core_region_t *less;
+        haddr_t key = a_item->start - 1;
+
+        /* Save the previous node before we trash this one */
+        less = (H5FD_core_region_t *)H5SL_less(file->dirty_list, &key);
+
+        /* Delete this node */
+        a_item = (H5FD_core_region_t *)H5SL_remove(file->dirty_list, &a_item->start);
+        a_item = H5FL_FREE(H5FD_core_region_t, a_item);
+
+        /* Set up to check the next node */
+        if(less)
+            a_item = less;
+    }
+
+    /* Insert the new node */
+    if(create_new_node) {
+        if(NULL == (item = (H5FD_core_region_t *)H5SL_search(file->dirty_list, &start))) {
+            /* Ok to insert.  No pre-existing node with that key. */
+            item = (H5FD_core_region_t *)H5FL_CALLOC(H5FD_core_region_t);
+            item->start = start;
+            item->end = end;
+            if(H5SL_insert(file->dirty_list, item, &item->start) < 0)
+                HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, FAIL, "can't insert new dirty region: (%llu, %llu)\n", start, end)
+        }
+        else {
+            /* Store the new item endpoint if it's bigger */
+            item->end = (item->end < end) ? end : item->end;
+        }
+    }
+    else {
+        /* Update the size of the before region */
+        if(b_item->end < end)
+            b_item->end = end;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_core_add_dirty_region() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_core_destroy_dirty_list
+ *
+ * Purpose:     Completely destroy the dirty list.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_core_destroy_dirty_list(H5FD_core_t *file)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+
+    /* Destroy the list, including any remaining list elements */
+    if(file->dirty_list) {
+        H5FD_core_region_t *region = NULL;
+
+#ifdef DER
+{
+size_t count = H5SL_count(file->dirty_list);
+if(count != 0)
+    fprintf(stderr, "LIST NOT EMPTY AT DESTROY\n");
+}
+#endif
+        while(NULL != (region = (H5FD_core_region_t *)H5SL_remove_first(file->dirty_list)))
+            region = H5FL_FREE(H5FD_core_region_t, region);
+
+        if(H5SL_close(file->dirty_list) < 0)
+            HGOTO_ERROR(H5E_SLIST, H5E_CLOSEERROR, FAIL, "can't close core vfd dirty list")
+        file->dirty_list = NULL;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_core_destroy_dirty_list() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_core_write_to_bstore
+ *
+ * Purpose:     Write data to the backing store.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t H5FD_core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
+{
+    unsigned char  *ptr         = file->mem + addr;     /* mutable pointer into the
+                                                         * buffer (can't change mem)
+                                                         */
+    herr_t          ret_value   = SUCCEED;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+
+    /* Write to backing store */
+    if((off_t)addr != HDlseek(file->fd, (off_t)addr, SEEK_SET))
+        HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store")
+
+    while (size > 0) {
+
+        h5_posix_io_t       bytes_in        = 0;    /* # of bytes to write  */
+        h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */
+
+        /* Trying to write more bytes than the return type can handle is
+         * undefined behavior in POSIX.
+         */
+        if(size > H5_POSIX_MAX_IO_BYTES)
+            bytes_in = H5_POSIX_MAX_IO_BYTES;
+        else
+            bytes_in = (h5_posix_io_t)size;
+
+#ifdef DER
+fprintf(stderr, "\nNEW\n");
+#endif
+        do {
+            bytes_wrote = HDwrite(file->fd, ptr, bytes_in);
+#ifdef DER
+fprintf(stderr, "bytes wrote: %lu\n", bytes_wrote);
+#endif
+        } while(-1 == bytes_wrote && EINTR == errno);
+
+        if(-1 == bytes_wrote) { /* error */
+            int myerrno = errno;
+            time_t mytime = HDtime(NULL);
+            HDoff_t myoffset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write to backing store failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', ptr = %p, total write size = %llu, bytes this sub-write = %llu, bytes actually written = %llu, offset = %llu", HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), ptr, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_wrote, (unsigned long long)myoffset);
+        } /* end if */
+
+        HDassert(bytes_wrote > 0);
+        HDassert((size_t)bytes_wrote <= size);
+
+        size -= (size_t)bytes_wrote;
+        ptr = (unsigned char *)ptr + bytes_wrote;
+
+    } /* end while */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_core_write_to_bstore() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_core_init_interface
+ *
+ * Purpose:     Initializes any interface-specific data or routines.
+ *
+ * Return:      Non-negative on success/Negative on failure 
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5FD_core_init_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;
 
-    FUNC_LEAVE_NOAPI(H5FD_core_init())
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5FD_core_init() < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize core VFD")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_core_init_interface() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_core_init
+ * Function:    H5FD_core_init
  *
- * Purpose:	Initialize this driver by registering the driver with the
- *		library.
+ * Purpose:     Initialize this driver by registering the driver with the
+ *              library.
  *
- * Return:	Success:	The driver ID for the core driver.
+ * Return:      Success:    The driver ID for the core driver.
+ *              Failure:    Negative.
  *
- *		Failure:	Negative.
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
@@ -229,15 +470,15 @@ H5FD_core_init_interface(void)
 hid_t
 H5FD_core_init(void)
 {
-    hid_t ret_value=H5FD_CORE_g;   /* Return value */
+    hid_t ret_value = H5FD_CORE_g;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (H5I_VFL!=H5Iget_type(H5FD_CORE_g))
+    if(H5I_VFL != H5I_get_type(H5FD_CORE_g))
         H5FD_CORE_g = H5FD_register(&H5FD_core_g,sizeof(H5FD_class_t),FALSE);
 
     /* Set return value */
-    ret_value=H5FD_CORE_g;
+    ret_value = H5FD_CORE_g;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -245,11 +486,11 @@ done:
 
 
 /*---------------------------------------------------------------------------
- * Function:	H5FD_core_term
+ * Function:    H5FD_core_term
  *
- * Purpose:	Shut down the VFD
+ * Purpose:     Shut down the VFD
  *
- * Returns:     Non-negative on success or negative on failure
+ * Returns:     SUCCEED (Can't fail)
  *
  * Programmer:  Quincey Koziol
  *              Friday, Jan 30, 2004
@@ -262,32 +503,32 @@ H5FD_core_term(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Reset VFL ID */
-    H5FD_CORE_g=0;
+    H5FD_CORE_g = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_core_term() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_fapl_core
+ * Function:    H5Pset_fapl_core
  *
- * Purpose:	Modify the file access property list to use the H5FD_CORE
- *		driver defined in this source file.  The INCREMENT specifies
- *		how much to grow the memory each time we need more.
+ * Purpose:     Modify the file access property list to use the H5FD_CORE
+ *              driver defined in this source file.  The INCREMENT specifies
+ *              how much to grow the memory each time we need more.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *		Thursday, February 19, 1998
+ * Programmer:  Robb Matzke
+ *              Thursday, February 19, 1998
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
 {
-    H5FD_core_fapl_t	fa;
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value;
+    H5FD_core_fapl_t    fa;
+    H5P_genplist_t      *plist;         /* Property list pointer */
+    herr_t              ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "izb", fapl_id, increment, backing_store);
@@ -307,26 +548,23 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_fapl_core
+ * Function:    H5Pget_fapl_core
  *
- * Purpose:	Queries properties set by the H5Pset_fapl_core() function.
+ * Purpose:     Queries properties set by the H5Pset_fapl_core() function.
  *
- * Return:	Success:	Non-negative
+ * Return:      SUCCEED/FAIL
  *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Tuesday, August 10, 1999
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
-		 hbool_t *backing_store/*out*/)
+H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, hbool_t *backing_store /*out*/)
 {
-    H5FD_core_fapl_t	*fa;
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5FD_core_fapl_t    *fa;
+    H5P_genplist_t      *plist;                 /* Property list pointer */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", fapl_id, increment, backing_store);
@@ -349,15 +587,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_core_fapl_get
+ * Function:    H5FD_core_fapl_get
  *
- * Purpose:	Returns a copy of the file access properties.
+ * Purpose:     Returns a copy of the file access properties.
  *
- * Return:	Success:	Ptr to new file access properties.
+ * Return:      Success:    Ptr to new file access properties.
  *
- *		Failure:	NULL
+ *              Failure:    NULL
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, August 13, 1999
  *
  *-------------------------------------------------------------------------
@@ -365,9 +603,9 @@ done:
 static void *
 H5FD_core_fapl_get(H5FD_t *_file)
 {
-    H5FD_core_t		*file = (H5FD_core_t*)_file;
-    H5FD_core_fapl_t	*fa;
-    void      *ret_value;       /* Return value */
+    H5FD_core_t         *file = (H5FD_core_t*)_file;
+    H5FD_core_fapl_t    *fa;
+    void                *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -378,7 +616,7 @@ H5FD_core_fapl_get(H5FD_t *_file)
     fa->backing_store = (hbool_t)(file->fd >= 0);
 
     /* Set return value */
-    ret_value=fa;
+    ret_value = fa;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -386,36 +624,35 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_core_open
+ * Function:    H5FD_core_open
  *
- * Purpose:	Create memory as an HDF5 file.
+ * Purpose:     Create memory as an HDF5 file.
  *
- * Return:	Success:	A pointer to a new file data structure. The
- *				public fields will be initialized by the
- *				caller, which is always H5FD_open().
+ * Return:      Success:    A pointer to a new file data structure. The
+ *                          public fields will be initialized by the
+ *                          caller, which is always H5FD_open().
  *
- *		Failure:	NULL
+ *              Failure:    NULL
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
-H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
-	       haddr_t maxaddr)
+H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    int			o_flags;
-    H5FD_core_t		*file=NULL;
-    H5FD_core_fapl_t	*fa=NULL;
-    H5P_genplist_t *plist;      /* Property list pointer */
+    int                 o_flags;
+    H5FD_core_t         *file = NULL;
+    H5FD_core_fapl_t    *fa = NULL;
+    H5P_genplist_t      *plist;         /* Property list pointer */
 #ifdef H5_HAVE_WIN32_API
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
-    h5_stat_t		sb;
-    int			fd=-1;
-    H5FD_file_image_info_t   file_image_info;
-    H5FD_t		*ret_value;
+    h5_stat_t           sb;
+    int                 fd = -1;
+    H5FD_file_image_info_t  file_image_info;
+    H5FD_t              *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -555,20 +792,23 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
                 /* Read in existing data, being careful of interrupted system calls,
                  * partial results, and the end of the file.
                  */
+                
+                uint8_t *mem = file->mem; /* memory pointer for writes */
+                
                 while(size > 0) {
-                    h5_core_io_t        bytes_in        = 0;    /* # of bytes to read       */
-                    h5_core_io_ret_t    bytes_read      = -1;   /* # of bytes actually read */
+                    h5_posix_io_t       bytes_in        = 0;    /* # of bytes to read       */
+                    h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */
                     
                     /* Trying to read more bytes than the return type can handle is
                      * undefined behavior in POSIX.
                      */
-                    if(size > H5_CORE_MAX_IO_BYTES_g)
-                        bytes_in = H5_CORE_MAX_IO_BYTES_g;
+                    if(size > H5_POSIX_MAX_IO_BYTES)
+                        bytes_in = H5_POSIX_MAX_IO_BYTES;
                     else
-                        bytes_in = (h5_core_io_t)size;
+                        bytes_in = (h5_posix_io_t)size;
                     
                     do {
-                        bytes_read = HDread(file->fd, file->mem, bytes_in);
+                        bytes_read = HDread(file->fd, mem, bytes_in);
                     } while(-1 == bytes_read && EINTR == errno);
                     
                     if(-1 == bytes_read) { /* error */
@@ -576,15 +816,50 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
                         time_t mytime = HDtime(NULL);
                         HDoff_t myoffset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
 
-                        HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', file->mem = %p, size = %lu, offset = %llu", HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), file->mem, (unsigned long)size, (unsigned long long)myoffset);
+                        HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', file->mem = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), file->mem, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)myoffset);
                     } /* end if */
                     
                     HDassert(bytes_read >= 0);
                     HDassert((size_t)bytes_read <= size);
                     
+                    mem += bytes_read;
                     size -= (size_t)bytes_read;
                 } /* end while */
             } /* end else */
+        } /* end if */
+    } /* end if */
+
+    /* Set up write tracking if the backing store is on */
+    file->dirty_list = NULL;
+    if(fa->backing_store) {
+        hbool_t write_tracking_flag = FALSE;    /* what the user asked for */
+        hbool_t use_write_tracking = FALSE;     /* what we're actually doing */
+
+        /* Get the write tracking flag */
+        if(H5P_get(plist, H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME, &write_tracking_flag) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get core VFD write tracking flag");
+
+        /* Get the page size */
+        if(H5P_get(plist, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, &(file->bstore_page_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get core VFD write tracking page size");
+
+        /* default is to have write tracking OFF for create (hence the check to see
+         * if the user explicitly set a page size) and ON with the default page size
+         * on open (when not read-only).
+         */
+        /* Only use write tracking if the file is open for writing */
+        use_write_tracking = 
+            TRUE == write_tracking_flag         /* user asked for write tracking */
+            && !(o_flags & O_RDONLY)            /* file is open for writing (i.e. not read-only) */
+            && file->bstore_page_size != 0;     /* page size is not zero */
+
+        /* initialize the dirty list */
+        if(use_write_tracking) {
+            if(NULL == (file->dirty_list = H5SL_create(H5SL_TYPE_HADDR, NULL)))
+                HGOTO_ERROR(H5E_SLIST, H5E_CANTCREATE, NULL, "can't create core vfd dirty region list");
+#ifdef DER
+fprintf(stderr, "\n");
+#endif
         } /* end if */
     } /* end if */
 
@@ -592,20 +867,26 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
     ret_value = (H5FD_t *)file;
 
 done:
+    if(!ret_value && file) {
+        if(file->fd >= 0)
+            HDclose(file->fd);
+        H5MM_xfree(file->name);
+        H5MM_xfree(file->mem);
+        H5MM_xfree(file);
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_open() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_core_close
+ * Function:    H5FD_core_close
  *
- * Purpose:	Closes the file.
+ * Purpose:     Closes the file.
  *
- * Return:	Success:	0
+ * Return:      SUCCEED/FAIL
  *
- *		Failure:	-1
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
@@ -613,14 +894,19 @@ done:
 static herr_t
 H5FD_core_close(H5FD_t *_file)
 {
-    H5FD_core_t	*file = (H5FD_core_t*)_file;
-    herr_t ret_value = SUCCEED;       /* Return value */
+    H5FD_core_t     *file = (H5FD_core_t*)_file;
+    herr_t          ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Flush any changed buffers */
     if(H5FD_core_flush(_file, (hid_t)-1, TRUE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush core vfd backing store")
+
+    /* Destroy the dirty region list */
+    if(file->dirty_list)
+        if(H5FD_core_destroy_dirty_list(file) != SUCCEED)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free core vfd dirty region list")
 
     /* Release resources */
     if(file->fd >= 0)
@@ -645,19 +931,19 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_core_cmp
+ * Function:    H5FD_core_cmp
  *
- * Purpose:	Compares two files belonging to this driver by name. If one
- *		file doesn't have a name then it is less than the other file.
- *		If neither file has a name then the comparison is by file
- *		address.
+ * Purpose:     Compares two files belonging to this driver by name. If one
+ *              file doesn't have a name then it is less than the other file.
+ *              If neither file has a name then the comparison is by file
+ *              address.
  *
- * Return:	Success:	A value like strcmp()
+ * Return:      Success:    A value like strcmp()
  *
- *		Failure:	never fails (arguments were checked by the
- *				caller).
+ *              Failure:    never fails (arguments were checked by the
+ *                          caller).
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
@@ -665,9 +951,9 @@ done:
 static int
 H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
-    const H5FD_core_t	*f1 = (const H5FD_core_t*)_f1;
-    const H5FD_core_t	*f2 = (const H5FD_core_t*)_f2;
-    int			ret_value = 0;
+    const H5FD_core_t   *f1 = (const H5FD_core_t*)_f1;
+    const H5FD_core_t   *f2 = (const H5FD_core_t*)_f2;
+    int                 ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -729,15 +1015,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_core_query
+ * Function:    H5FD_core_query
  *
- * Purpose:	Set the flags that this VFL driver is capable of supporting.
+ * Purpose:     Set the flags that this VFL driver is capable of supporting.
  *              (listed in H5FDpublic.h)
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      SUCCEED (Can't fail)
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, October  7, 2008
  *
  *-------------------------------------------------------------------------
@@ -745,7 +1030,7 @@ done:
 static herr_t
 H5FD_core_query(const H5FD_t * _file, unsigned long *flags /* out */)
 {
-    const H5FD_core_t	*file = (const H5FD_core_t*)_file;
+    const H5FD_core_t   *file = (const H5FD_core_t*)_file;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -769,17 +1054,15 @@ H5FD_core_query(const H5FD_t * _file, unsigned long *flags /* out */)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_core_get_eoa
+ * Function:    H5FD_core_get_eoa
  *
- * Purpose:	Gets the end-of-address marker for the file. The EOA marker
- *		is the first address past the last byte allocated in the
- *		format address space.
+ * Purpose:     Gets the end-of-address marker for the file. The EOA marker
+ *              is the first address past the last byte allocated in the
+ *              format address space.
  *
- * Return:	Success:	The end-of-address marker.
+ * Return:      The end-of-address marker. (Can't fail)
  *
- *		Failure:	HADDR_UNDEF
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, August  2, 1999
  *
  *-------------------------------------------------------------------------
@@ -787,7 +1070,7 @@ H5FD_core_query(const H5FD_t * _file, unsigned long *flags /* out */)
 static haddr_t
 H5FD_core_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 {
-    const H5FD_core_t	*file = (const H5FD_core_t*)_file;
+    const H5FD_core_t   *file = (const H5FD_core_t*)_file;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -796,17 +1079,15 @@ H5FD_core_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_core_set_eoa
+ * Function:    H5FD_core_set_eoa
  *
- * Purpose:	Set the end-of-address marker for the file. This function is
- *		called shortly after an existing HDF5 file is opened in order
- *		to tell the driver where the end of the HDF5 data is located.
+ * Purpose:     Set the end-of-address marker for the file. This function is
+ *              called shortly after an existing HDF5 file is opened in order
+ *              to tell the driver where the end of the HDF5 data is located.
  *
- * Return:	Success:	0
+ * Return:      SUCCEED/FAIL
  *
- *		Failure:	-1
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
@@ -814,8 +1095,8 @@ H5FD_core_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 static herr_t
 H5FD_core_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
 {
-    H5FD_core_t	*file = (H5FD_core_t*)_file;
-    herr_t ret_value = SUCCEED;       /* Return value */
+    H5FD_core_t *file = (H5FD_core_t*)_file;
+    herr_t      ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -830,19 +1111,17 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_core_get_eof
+ * Function:    H5FD_core_get_eof
  *
- * Purpose:	Returns the end-of-file marker, which is the greater of
- *		either the size of the underlying memory or the HDF5
- *		end-of-address markers.
+ * Purpose:     Returns the end-of-file marker, which is the greater of
+ *              either the size of the underlying memory or the HDF5
+ *              end-of-address markers.
  *
- * Return:	Success:	End of file address, the first address past
- *				the end of the "file", either the memory
- *				or the HDF5 file.
+ * Return:      End of file address, the first address past
+ *              the end of the "file", either the memory
+ *              or the HDF5 file. (Can't fail)
  *
- *		Failure:	HADDR_UNDEF
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
@@ -850,7 +1129,7 @@ done:
 static haddr_t
 H5FD_core_get_eof(const H5FD_t *_file)
 {
-    const H5FD_core_t	*file = (const H5FD_core_t*)_file;
+    const H5FD_core_t   *file = (const H5FD_core_t*)_file;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -861,9 +1140,9 @@ H5FD_core_get_eof(const H5FD_t *_file)
 /*-------------------------------------------------------------------------
  * Function:       H5FD_core_get_handle
  *
- * Purpose:        Returns the file handle of CORE file driver.
+ * Purpose:        Gets the file handle of CORE file driver.
  *
- * Returns:        Non-negative if succeed or negative if fails.
+ * Returns:        SUCCEED/FAIL
  *
  * Programmer:     Raymond Lu
  *                 Sept. 16, 2002
@@ -874,7 +1153,7 @@ static herr_t
 H5FD_core_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
 {
     H5FD_core_t *file = (H5FD_core_t *)_file;   /* core VFD info */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -919,26 +1198,25 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_core_read
+ * Function:    H5FD_core_read
  *
- * Purpose:	Reads SIZE bytes of data from FILE beginning at address ADDR
- *		into buffer BUF according to data transfer properties in
- *		DXPL_ID.
+ * Purpose:     Reads SIZE bytes of data from FILE beginning at address ADDR
+ *              into buffer BUF according to data transfer properties in
+ *              DXPL_ID.
  *
- * Return:	Success:	Zero. Result is stored in caller-supplied
- *				buffer BUF.
+ * Return:      Success:    SUCCEED. Result is stored in caller-supplied
+ *                          buffer BUF.
  *
- *		Failure:	-1, Contents of buffer BUF are undefined.
+ *              Failure:    FAIL, Contents of buffer BUF are undefined.
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
-	       size_t size, void *buf/*out*/)
+        size_t size, void *buf/*out*/)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -985,28 +1263,25 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_core_write
+ * Function:    H5FD_core_write
  *
- * Purpose:	Writes SIZE bytes of data to FILE beginning at address ADDR
- *		from buffer BUF according to data transfer properties in
- *		DXPL_ID.
+ * Purpose:     Writes SIZE bytes of data to FILE beginning at address ADDR
+ *              from buffer BUF according to data transfer properties in
+ *              DXPL_ID.
  *
- * Return:	Success:	Zero
+ * Return:      SUCCEED/FAIL
  *
- *		Failure:	-1
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
-		size_t size, const void *buf)
+        size_t size, const void *buf)
 {
     H5FD_core_t *file = (H5FD_core_t*)_file;
-    herr_t ret_value = SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1045,12 +1320,20 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
         } /* end else */
 
 #ifdef H5_CLEAR_MEMORY
-HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
+        HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
 #endif /* H5_CLEAR_MEMORY */
         file->mem = x;
 
         file->eof = new_eof;
     } /* end if */
+
+    /* Add the buffer region to the dirty list if using that optimization */
+    if(file->dirty_list) {
+        haddr_t start = addr;
+        haddr_t end = addr + (haddr_t)size - 1;
+        if(H5FD_core_add_dirty_region(file, start, end) != SUCCEED)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINSERT, FAIL, "unable to add core VFD dirty region during write call - addresses: start=%llu end=%llu", start, end)
+    }
 
     /* Write from BUF to memory */
     HDmemcpy(file->mem + addr, buf, size);
@@ -1064,70 +1347,73 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_core_flush
+ * Function:    H5FD_core_flush
  *
- * Purpose:	Flushes the file to backing store if there is any and if the
- *		dirty flag is set.
+ * Purpose:     Flushes the file to backing store if there is any and if the
+ *              dirty flag is set.
  *
- * Return:	Success:	0
+ * Return:      SUCCEED/FAIL
  *
- *		Failure:	-1
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, October 15, 1999
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5FD_core_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 {
-    H5FD_core_t	*file = (H5FD_core_t*)_file;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5FD_core_t *file = (H5FD_core_t*)_file;
+    herr_t      ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Write to backing store */
-    if (file->dirty && file->fd>=0 && file->backing_store) {
-        haddr_t size = file->eof;
-        unsigned char *ptr = file->mem;
+    if (file->dirty && file->fd >= 0 && file->backing_store) {
 
-        if (0!=HDlseek(file->fd, (off_t)0, SEEK_SET))
-            HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store")
-        
-        while (size > 0) {
+        /* Use the dirty list, if available */
+        if(file->dirty_list) {
+            H5FD_core_region_t *item = NULL;
+            size_t size;
 
-            h5_core_io_t        bytes_in        = 0;    /* # of bytes to write  */
-            h5_core_io_ret_t    bytes_wrote     = -1;   /* # of bytes written   */ 
+#ifdef DER
+    fprintf(stderr, "FLUSHING. DIRTY LIST:\n");
+#endif
+            while(NULL != (item = (H5FD_core_region_t *)H5SL_remove_first(file->dirty_list))) {
 
-            /* Trying to write more bytes than the return type can handle is
-             * undefined behavior in POSIX.
-             */
-            if(size > H5_CORE_MAX_IO_BYTES_g)
-                bytes_in = H5_CORE_MAX_IO_BYTES_g;
-            else
-                bytes_in = (h5_core_io_t)size;
+                /* The file may have been truncated, so check for that
+                 * and skip or adjust as necessary.
+                 */
+                if(item->start < file->eof) {
+                    if(item->end >= file->eof)
+                        item->end = file->eof - 1;
 
-            do {
-                bytes_wrote = HDwrite(file->fd, ptr, bytes_in);
-            } while(-1 == bytes_wrote && EINTR == errno);
-            
-            if(-1 == bytes_wrote) { /* error */
-                int myerrno = errno;
-                time_t mytime = HDtime(NULL);
-                HDoff_t myoffset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
 
-                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write to backing store failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', ptr = %p, size = %lu, offset = %llu", HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), ptr, (unsigned long)size, (unsigned long long)myoffset);
-            } /* end if */
-            
-            HDassert(bytes_wrote > 0);
-            HDassert((size_t)bytes_wrote <= size);
+                    size = (size_t)((item->end - item->start) + 1);
+#ifdef DER
+fprintf(stderr, "(%llu, %llu : %lu)\n", item->start, item->end, size);
+#endif
+                    if(H5FD_core_write_to_bstore(file, item->start, size) != SUCCEED)
+                        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store")
+                } /* end if */
 
-            size -= (size_t)bytes_wrote;
-            ptr = (unsigned char *)ptr + bytes_wrote;
-            
+                item = H5FL_FREE(H5FD_core_region_t, item);
+           } /* end while */
+
+#ifdef DER
+fprintf(stderr, "EOF: %llu\n", file->eof);
+fprintf(stderr, "EOA: %llu\n", file->eoa);
+if(file->eoa > file->eof)
+    fprintf(stderr, "*** EOA BADNESS ***\n");
+fprintf(stderr, "\n");
+#endif
+        }
+        /* Otherwise, write the entire file out at once */
+        else {
+            if(H5FD_core_write_to_bstore(file, (haddr_t)0, (size_t)file->eof) != SUCCEED)
+                HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store")
+
         } /* end while */
-        
+
         file->dirty = FALSE;
     }
 
@@ -1137,42 +1423,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_core_truncate
+ * Function:    H5FD_core_truncate
  *
- * Purpose:	Makes sure that the true file size is the same (or larger)
- *		than the end-of-address.
+ * Purpose:     Makes sure that the true file size is the same (or larger)
+ *              than the end-of-address.
  *
- *		Addendum -- 12/2/11
- *		For file images opened with the core file driver, it is 
- *		necessary that we avoid reallocating the core file driver's
- *		buffer uneccessarily.
+ *              Addendum -- 12/2/11
+ *              For file images opened with the core file driver, it is 
+ *              necessary that we avoid reallocating the core file driver's
+ *              buffer uneccessarily.
  *
- *		To this end, I have made the following functional changes
- *		to this function.  
+ *              To this end, I have made the following functional changes
+ *              to this function.  
  *
- *		If we are closing, and there is no backing store, this 
- *		function becomes a no-op.
+ *              If we are closing, and there is no backing store, this 
+ *              function becomes a no-op.
  *
- *		If we are closing, and there is backing store, we set the
- *		eof to equal the eoa, and truncate the backing store to 
- *		the new eof
+ *              If we are closing, and there is backing store, we set the
+ *              eof to equal the eoa, and truncate the backing store to 
+ *              the new eof
  *
- *		If we are not closing, we realloc the buffer to size equal 
- *		to the smallest multiple of the allocation increment that 
- *		equals or exceeds the eoa and set the eof accordingly.  
- *		Note that we no longer truncate	the backing store to the 
- *		new eof if applicable.
- *							-- JRM
+ *              If we are not closing, we realloc the buffer to size equal 
+ *              to the smallest multiple of the allocation increment that 
+ *              equals or exceeds the eoa and set the eof accordingly.  
+ *              Note that we no longer truncate	the backing store to the 
+ *              new eof if applicable.
+ *                                                                  -- JRM
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, October  7, 2008
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5FD_core_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t closing)
 {
@@ -1253,6 +1537,10 @@ H5FD_core_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t closing)
                 if(-1 == HDftruncate(file->fd, (HDoff_t)new_eof))
                     HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #endif /* H5_HAVE_WIN32_API */
+
+#ifdef DER
+fprintf(stderr, "OLD: Truncated to: %llu\n", file->eoa);
+#endif
             } /* end if */
 
             /* Update the eof value */

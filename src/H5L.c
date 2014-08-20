@@ -2372,7 +2372,7 @@ H5L_delete_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     H5L_trav_gvbi_t *udata = (H5L_trav_gvbi_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(udata->dxpl_id, obj_loc->oloc->addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(udata->dxpl_id, (obj_loc) ? (obj_loc->oloc->addr) : HADDR_UNDEF, FAIL)
 
     /* Check if the name of the group resolved to a valid object */
     if(obj_loc == NULL)

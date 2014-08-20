@@ -557,7 +557,7 @@ test_core(void)
 
     /* Append ".copy" to the filename from the source directory */
     VERIFY(HDstrlen(filename) < (1023 - 5), "file name too long.");
-    HDstrncpy(copied_filename, filename, 1023);
+    HDstrncpy(copied_filename, filename, (size_t)1023);
     copied_filename[1023] = '\0';
     HDstrcat(copied_filename, ".copy");
 
@@ -1207,6 +1207,9 @@ test_get_file_image_error_rejection(void)
     err = H5Fclose(file_id);
     VERIFY(err == SUCCEED, "H5Fclose(2) failed.");
 
+    /* tidy up */
+    result = h5_cleanup(FILENAME2, fapl_id);
+    VERIFY(result != 0, "h5_cleanup(2 failed.");
 
     /************************** Test #4 **********************************/
     /* set up a family file driver test file, and try to get its image 

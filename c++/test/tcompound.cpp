@@ -122,9 +122,9 @@ static void test_compound_2()
     SUBTEST("Compound Element Reordering");
     try {
 	// Sizes should be the same, but be careful just in case
-	buf = (unsigned char*)malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-	bkg = (unsigned char*)malloc(nelmts * sizeof(dst_typ_t));
-	orig = (unsigned char*)malloc(nelmts * sizeof(src_typ_t));
+	buf = (unsigned char*)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
+	bkg = (unsigned char*)HDmalloc(nelmts * sizeof(dst_typ_t));
+	orig = (unsigned char*)HDmalloc(nelmts * sizeof(src_typ_t));
 	for (i=0; i<nelmts; i++) {
 	    s_ptr = ((src_typ_t*)orig) + i;
 	    s_ptr->a    = i*8+0;
@@ -190,9 +190,9 @@ static void test_compound_2()
 	    }
     	}
 	// Release resources
-	free(buf);
-	free(bkg);
-	free(orig);
+	HDfree(buf);
+	HDfree(bkg);
+	HDfree(orig);
 	s_ptr = NULL;
 	d_ptr = NULL;
 	st.close();
@@ -247,9 +247,9 @@ static void test_compound_3()
     SUBTEST("Compound Datatype Subset Conversions");
     try {
 	/* Initialize */
-	buf = (unsigned char*)malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-	bkg = (unsigned char*)malloc(nelmts * sizeof(dst_typ_t));
-	orig = (unsigned char*)malloc(nelmts * sizeof(src_typ_t));
+	buf = (unsigned char*)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
+	bkg = (unsigned char*)HDmalloc(nelmts * sizeof(dst_typ_t));
+	orig = (unsigned char*)HDmalloc(nelmts * sizeof(src_typ_t));
 	for (i=0; i<nelmts; i++) {
 	    s_ptr = ((src_typ_t*)orig) + i;
 	    s_ptr->a    = i*8+0;
@@ -312,9 +312,9 @@ static void test_compound_3()
 	} // for
 
 	/* Release resources */
-	free(buf);
-	free(bkg);
-	free(orig);
+	HDfree(buf);
+	HDfree(bkg);
+	HDfree(orig);
 	s_ptr = NULL;
 	d_ptr = NULL;
 	st.close();
@@ -374,9 +374,9 @@ static void test_compound_4()
     SUBTEST("Compound Element Shrinking & Reordering");
     try {
 	/* Sizes should be the same, but be careful just in case */
-	buf = (unsigned char*)malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-	bkg = (unsigned char*)malloc(nelmts * sizeof(dst_typ_t));
-	orig = (unsigned char*)malloc(nelmts * sizeof(src_typ_t));
+	buf = (unsigned char*)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
+	bkg = (unsigned char*)HDmalloc(nelmts * sizeof(dst_typ_t));
+	orig = (unsigned char*)HDmalloc(nelmts * sizeof(src_typ_t));
 	for (i=0; i<nelmts; i++) {
 	    s_ptr = ((src_typ_t*)orig) + i;
 	    s_ptr->a    = i*8+0;
@@ -444,9 +444,9 @@ static void test_compound_4()
 	} // for
 
 	/* Release resources */
-	free(buf);
-	free(bkg);
-	free(orig);
+	HDfree(buf);
+	HDfree(bkg);
+	HDfree(orig);
 	s_ptr = NULL;
 	d_ptr = NULL;
 	st.close();
@@ -499,8 +499,8 @@ static void test_compound_5()
     src_typ_t  src[2] = {{"one", 102, {104, 105, 106, 107}},
                           {"two", 202, {204, 205, 206, 207}}};
     dst_typ_t  *dst;
-    void        *buf = calloc(2, sizeof(dst_typ_t));
-    void        *bkg = calloc(2, sizeof(dst_typ_t));
+    void        *buf = HDcalloc(2, sizeof(dst_typ_t));
+    void        *bkg = HDcalloc(2, sizeof(dst_typ_t));
     ArrayType* array_dt = NULL;
 
     // Output message about test being performed
@@ -552,8 +552,8 @@ static void test_compound_5()
 	{ H5_FAILED(); }
 
 	/* Free memory buffers */
-	free(buf);
-	free(bkg);
+	HDfree(buf);
+	HDfree(bkg);
 	dst = NULL;
 	PASSED();
     }   // end of try block
@@ -606,9 +606,9 @@ static void test_compound_6()
     SUBTEST("Compound Element Growing");
     try {
 	/* Sizes should be the same, but be careful just in case */
-	buf = (unsigned char*)malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-	bkg = (unsigned char*)malloc(nelmts * sizeof(dst_typ_t));
-	orig = (unsigned char*)malloc(nelmts * sizeof(src_typ_t));
+	buf = (unsigned char*)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
+	bkg = (unsigned char*)HDmalloc(nelmts * sizeof(dst_typ_t));
+	orig = (unsigned char*)HDmalloc(nelmts * sizeof(src_typ_t));
 	for (i=0; i<nelmts; i++) {
 	    s_ptr = ((src_typ_t*)orig) + i;
 	    s_ptr->b    = (i*8+1) & 0x7fff;
@@ -645,9 +645,9 @@ static void test_compound_6()
 	} // for
 
 	/* Release resources */
-	free(buf);
-	free(bkg);
-	free(orig);
+	HDfree(buf);
+	HDfree(bkg);
+	HDfree(orig);
 	s_ptr = NULL;
 	d_ptr = NULL;
 	st.close();
@@ -727,7 +727,95 @@ cerr << "test_compound_7 in catch" << endl;
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_compound_7()
+
+/*-------------------------------------------------------------------------
+ * Function:	test_compound_set_size
+ *
+ * Purpose:	Tests member function setSize() on compound datatype
+ *
+ * Return:	None
+ *
+ * Programmer:	Binh-Minh Ribler (use partial C version test_ooo_order)
+ *              March, 2014
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+const H5std_string COMPFILE("tcompound_types.h5");
+static void test_compound_set_size()
+{
+    typedef struct {
+	int a, b, c[4], d, e;
+    } src_typ_t;
 
+    // Output message about test being performed
+    SUBTEST("Setting Size on Compound Datatype");
+    try {
+        // Create File
+        H5File file(COMPFILE, H5F_ACC_TRUNC);
+
+        // Create a compound datatype
+        CompType dtype(sizeof(src_typ_t));
+
+        dtype.insertMember("a", HOFFSET(src_typ_t, a), PredType::NATIVE_INT);
+        dtype.insertMember("b", HOFFSET(src_typ_t, b), PredType::NATIVE_FLOAT);
+        dtype.insertMember("c", HOFFSET(src_typ_t, c), PredType::NATIVE_LONG);
+        dtype.insertMember("d", HOFFSET(src_typ_t, d), PredType::NATIVE_DOUBLE);
+
+	// Verify that the compound is not packed
+	// bool packed = dtype.packed(); // not until C library provides API
+	// verify_val(packed, FALSE, "DataType::packed", __LINE__, __FILE__);
+
+	dtype.commit(file, "dtype");
+
+	// Close the type and file
+	dtype.close();
+	file.close();
+
+	// Open the file for read/write
+	file.openFile(COMPFILE, H5F_ACC_RDWR);
+
+	// Open the data type "dtype"
+	CompType dtype_tmp = file.openCompType("dtype");
+
+	// Make a copy of the data type
+	dtype = dtype_tmp;
+
+	// Verify that the compound is not packed
+	// packed = dtype_tmp.packed(); // not until C library provides API
+	// verify_val(packed, FALSE, "DataType::packed", __LINE__, __FILE__);
+
+	// Expand the type, and verify that it became unpacked
+	dtype.setSize((size_t)33);
+	// packed = dtype.packed(); // not until C library provides API
+	// verify_val(packed, FALSE, "DataType::packed", __LINE__, __FILE__);
+
+	// Verify setSize() actually set size
+	size_t new_size = dtype.getSize();
+	verify_val(new_size, (size_t)33, "DataType::getSize", __LINE__, __FILE__);
+
+	// Shrink the type, and verify that it became packed
+	dtype.setSize((size_t)32);
+	// packed = dtype.packed(); // not until C library provides API
+	// verify_val(packed, TRUE, "DataType::packed", __LINE__, __FILE__);
+
+	// Verify setSize() actually set size again
+	new_size = dtype.getSize();
+	verify_val(new_size, (size_t)32, "DataType::getSize", __LINE__, __FILE__);
+
+	/* Close types and file */
+	dtype_tmp.close();
+	dtype.close();
+	file.close();
+
+	PASSED();
+    }   // end of try block
+
+    catch (Exception E) {
+        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}   // test_compound_set_size()
 
 /*-------------------------------------------------------------------------
  * Function:	test_compound
@@ -749,7 +837,6 @@ extern "C"
 void test_compound()
 {
     // Output message about test being performed
-    //MESSAGE("Testing Compound Data Type operations\n");
     MESSAGE(5, ("Testing Compound Data Type operations\n"));
 
     test_compound_1();	// various things about compound data types
@@ -759,6 +846,7 @@ void test_compound()
     test_compound_5();	// optimized struct converter
     test_compound_6();	// compound element growing
     test_compound_7();	// compound element insertion
+    test_compound_set_size();	// set size on compound data types
 }   // test_compound()
 
 
@@ -778,4 +866,5 @@ extern "C"
 #endif
 void cleanup_compound()
 {
+    HDremove(COMPFILE.c_str());
 }   // cleanup_file

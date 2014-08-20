@@ -34,6 +34,7 @@ UNJAM=h5unjam                     # Tool to test
 JAM_BIN="$RUNSERIAL "`pwd`    # The path of the jam binary
 UNJAM_BIN=`pwd`    # The path of the jam binary
 
+RM='rm -rf'
 CMP='cmp -s'
 DIFF='diff -c'
 AWK='awk'
@@ -120,6 +121,19 @@ COPY_TESTFILES_TO_TESTDIR()
             fi
         fi
     done
+}
+
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=`$DIRNAME $tstfile`
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $TESTDIR
+    fi
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -377,7 +391,7 @@ JAMTEST() {
 			compare_orig="xxofile.h5"
 			cleanup="$cleanup $compare_orig"
 		else
-			# output goes to $4,  compare ofile to ubfile
+			# output goes to $3,  compare ofile to ubfile
 			ofile="$3"
 			compare_test="$ofile"
 			compare_orig="$ifile"
@@ -497,10 +511,10 @@ TOOLTEST_OUTPUT() {
 	    # Create the expect file if it doesn't yet exist.
         echo " CREATED"
         cp $actual $expect
-	    rm -f $actual $actual_err
+	    rm -f $actual $actual_sav $actual_err $actual_err_sav
     elif $CMP $expect $actual; then
         echo " PASSED"
-	    rm -f $actual $actual_err
+	    rm -f $actual $actual_sav $actual_err $actual_err_sav
     else
         echo "*FAILED*"
 	    echo "    Expected result differs from actual result"
@@ -539,19 +553,22 @@ JAMTEST $TESTDIR/u513.txt $TESTDIR/tall.h5 ta5.h5
 CHECKFILE $TESTDIR/tall.h5 ta5.h5
 CLEANUP ta5.h5
 
-SETUP $TESTDIR/tall.h5 ta.h5
-JAMTEST $TESTDIR/u10.txt ta.h5 
-CHECKFILE $TESTDIR/tall.h5 ta.h5
-SETUP $TESTDIR/tall.h5 ta.h5
-JAMTEST $TESTDIR/u511.txt ta.h5 
-CHECKFILE $TESTDIR/tall.h5 ta.h5
-SETUP $TESTDIR/tall.h5 ta.h5
-JAMTEST $TESTDIR/u512.txt ta.h5 
-CHECKFILE $TESTDIR/tall.h5 ta.h5
-SETUP $TESTDIR/tall.h5 ta.h5
-JAMTEST $TESTDIR/u513.txt ta.h5 
-CHECKFILE $TESTDIR/tall.h5 ta.h5
-CLEANUP ta.h5
+SETUP $TESTDIR/tall.h5 ta6.h5
+JAMTEST $TESTDIR/u10.txt ta6.h5 
+CHECKFILE $TESTDIR/tall.h5 ta6.h5
+CLEANUP ta6.h5
+SETUP $TESTDIR/tall.h5 ta7.h5
+JAMTEST $TESTDIR/u511.txt ta7.h5 
+CHECKFILE $TESTDIR/tall.h5 ta7.h5
+CLEANUP ta7.h5
+SETUP $TESTDIR/tall.h5 ta8.h5
+JAMTEST $TESTDIR/u512.txt ta8.h5 
+CHECKFILE $TESTDIR/tall.h5 ta8.h5
+CLEANUP ta8.h5
+SETUP $TESTDIR/tall.h5 ta9.h5
+JAMTEST $TESTDIR/u513.txt ta9.h5 
+CHECKFILE $TESTDIR/tall.h5 ta9.h5
+CLEANUP ta9.h5
 
 JAMTEST $TESTDIR/u10.txt $TESTDIR/twithub.h5 tax2.h5
 CHECKFILE $TESTDIR/tall.h5 tax2.h5
@@ -672,7 +689,8 @@ UNJAMTEST taj3.h5 --delete tac3.h5
 CHECKFILE $TESTDIR/tall.h5 tac3.h5
 CLEANUP tac3.h5 taj3.h5
 
-
+# Clean up temporary files/directories
+CLEAN_TESTFILES_AND_TESTDIR
 
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."

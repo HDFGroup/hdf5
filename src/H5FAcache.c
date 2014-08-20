@@ -41,7 +41,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FApkg.h"		/* Fixed Arrays				*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 

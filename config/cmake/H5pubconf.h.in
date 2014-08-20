@@ -15,6 +15,24 @@
 /* Define if using a Windows compiler (i.e. Visual Studio) */
 #cmakedefine H5_HAVE_VISUAL_STUDIO @H5_HAVE_VISUAL_STUDIO@
 
+/* Defined if HDF5 was built with CMake AND build as a shared library */
+#cmakedefine H5_BUILT_AS_DYNAMIC_LIB @H5_BUILT_AS_DYNAMIC_LIB@
+
+/* Defined if HDF5 was built with CMake AND build as a static library */
+#cmakedefine H5_BUILT_AS_STATIC_LIB @H5_BUILT_AS_STATIC_LIB@
+
+/* Defined if HDF5 CPP  was built with CMake AND build as a shared library  */
+#cmakedefine H5_CPP_BUILT_AS_DYNAMIC_LIB @H5_CPP_BUILT_AS_DYNAMIC_LIB@
+
+/* Defined if HDF5 CPP  was built with CMake AND build as a static library  */
+#cmakedefine H5_CPP_BUILT_AS_STATIC_LIB @H5_CPP_BUILT_AS_STATIC_LIB@
+
+/* Defined if HDF5 HL was built with CMake AND build as a shared library */
+#cmakedefine H5_HL_BUILT_AS_DYNAMIC_LIB @H5_HL_BUILT_AS_DYNAMIC_LIB@
+
+/* Defined if HDF5 HL was built with CMake AND build as a static library */
+#cmakedefine H5_HL_BUILT_AS_STATIC_LIB @H5_HL_BUILT_AS_STATIC_LIB@
+
 /* Define if building universal (internal helper macro) */
 #cmakedefine H5_AC_APPLE_UNIVERSAL_BUILD @H5_AC_APPLE_UNIVERSAL_BUILD@
 
@@ -35,6 +53,9 @@
 /* Define a macro for Cygwin (on XP only) where the compiler has rounding
    problem converting from unsigned long long to long double */
 #cmakedefine H5_CYGWIN_ULLONG_TO_LDOUBLE_ROUND_PROBLEM @H5_CYGWIN_ULLONG_TO_LDOUBLE_ROUND_PROBLEM@
+
+/* Define the default plugins path to compile */
+#cmakedefine H5_DEFAULT_PLUGINDIR "@H5_DEFAULT_PLUGINDIR@"
 
 /* Define the default virtual file driver to compile */
 #cmakedefine H5_DEFAULT_VFD @H5_DEFAULT_VFD@
@@ -74,6 +95,9 @@
 /* Define to 1 if you have the `alarm' function. */
 #cmakedefine H5_HAVE_ALARM @H5_HAVE_ALARM@
 
+/* Define to 1 if you have the `asprintf' function. */
+#cmakedefine H5_HAVE_ASPRINTF @H5_HAVE_ASPRINTF@
+
 /* Define if the __attribute__(()) extension is present */
 #cmakedefine H5_HAVE_ATTRIBUTE @H5_HAVE_ATTRIBUTE@
 
@@ -93,6 +117,9 @@
 /* Define if the function stack tracing code is to be compiled in */
 #cmakedefine H5_HAVE_CODESTACK @H5_HAVE_CODESTACK@
 
+/* Define if Darwin or Mac OS X */
+#cmakedefine H5_HAVE_DARWIN @H5_HAVE_DARWIN@
+
 /* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
    */
 #cmakedefine H5_HAVE_DECL_TZNAME @H5_HAVE_DECL_TZNAME@
@@ -102,6 +129,9 @@
 
 /* Define if the direct I/O virtual file driver should be compiled */
 #cmakedefine H5_HAVE_DIRECT @H5_HAVE_DIRECT@
+
+/* Define to 1 if you have the <dirent.h> header file. */
+#cmakedefine H5_HAVE_DIRENT_H @H5_HAVE_DIRENT_H@
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #cmakedefine H5_HAVE_DLFCN_H @H5_HAVE_DLFCN_H@
@@ -190,12 +220,6 @@
 /* Define to 1 if you have the `get_fpc_csr' function. */
 #cmakedefine H5_HAVE_GET_FPC_CSR @H5_HAVE_GET_FPC_CSR@
 
-/* Define if we have GPFS support */
-#cmakedefine H5_HAVE_GPFS @H5_HAVE_GPFS@
-
-/* Define to 1 if you have the <gpfs.h> header file. */
-#cmakedefine H5_HAVE_GPFS_H @H5_HAVE_GPFS_H@
-
 /* Define if library will contain instrumentation to detect correct
    optimization operation */
 #cmakedefine H5_HAVE_INSTRUMENTED_LIBRARY @H5_HAVE_INSTRUMENTED_LIBRARY@
@@ -208,6 +232,9 @@
 
 /* Define to 1 if you have the <io.h> header file. */
 #cmakedefine H5_HAVE_IO_H @H5_HAVE_IO_H@
+
+/* Define to 1 if you have the `dl' library (-ldl). */
+#cmakedefine H5_HAVE_LIBDL @H5_HAVE_LIBDL@
 
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #cmakedefine H5_HAVE_LIBDMALLOC @H5_HAVE_LIBDMALLOC@
@@ -269,9 +296,6 @@
 /* Define to 1 if you have the <mpe.h> header file. */
 #cmakedefine H5_HAVE_MPE_H @H5_HAVE_MPE_H@
 
-/* Define if MPI_File_get_size works correctly */
-#cmakedefine H5_HAVE_MPI_GET_SIZE @H5_HAVE_MPI_GET_SIZE@
-
 /* Define if `MPI_Comm_c2f' and `MPI_Comm_f2c' exists */
 #cmakedefine H5_HAVE_MPI_MULTI_LANG_Comm @H5_HAVE_MPI_MULTI_LANG_Comm@
 
@@ -293,7 +317,7 @@
 /* Define to 1 if you have the `rand_r' function. */
 #cmakedefine H5_HAVE_RAND_R @H5_HAVE_RAND_R@
 
-/* Define to 1 if you have the `sigsetjmp' function. */
+/* Define to 1 if you have the `setjmp' function. */
 #cmakedefine H5_HAVE_SETJMP @H5_HAVE_SETJMP@
 
 /* Define to 1 if you have the <setjmp.h> header file. */
@@ -433,6 +457,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #cmakedefine H5_HAVE_UNISTD_H @H5_HAVE_UNISTD_H@
 
+/* Define to 1 if you have the `asprintf' function. */
+#cmakedefine H5_HAVE_ASPRINTF @H5_HAVE_ASPRINTF@
+
 /* Define to 1 if you have the `vasprintf' function. */
 #cmakedefine H5_HAVE_VASPRINTF @H5_HAVE_VASPRINTF@
 
@@ -507,10 +534,6 @@
 /* Define if the metadata trace file code is to be compiled in */
 #cmakedefine H5_METADATA_TRACE_FILE @H5_METADATA_TRACE_FILE@
 
-/* Define if your system's `MPI_File_set_size' function works for files over
-   2GB. */
-#cmakedefine H5_MPI_FILE_SET_SIZE_BIG @H5_MPI_FILE_SET_SIZE_BIG@
-
 /* Define if we can violate pointer alignment restrictions */
 #cmakedefine H5_NO_ALIGNMENT_RESTRICTIONS @H5_NO_ALIGNMENT_RESTRICTIONS@
 
@@ -539,68 +562,68 @@
 #define H5_PACKAGE_URL "@HDF5_PACKAGE_URL@"
 
 /* Define to the version of this package. */
-#define H5_PACKAGE_VERSION "@HDF5_PACKAGE_VERSION@"
+#define H5_PACKAGE_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #cmakedefine H5_PRINTF_LL_WIDTH @H5_PRINTF_LL_WIDTH@
 
 /* The size of `char', as computed by sizeof. */
-#define H5_SIZEOF_CHAR @H5_SIZEOF_CHAR@
+#cmakedefine H5_SIZEOF_CHAR @H5_SIZEOF_CHAR@
 
 /* The size of `double', as computed by sizeof. */
-#define H5_SIZEOF_DOUBLE @H5_SIZEOF_DOUBLE@
+#cmakedefine H5_SIZEOF_DOUBLE @H5_SIZEOF_DOUBLE@
 
 /* The size of `float', as computed by sizeof. */
-#define H5_SIZEOF_FLOAT @H5_SIZEOF_FLOAT@
+#cmakedefine H5_SIZEOF_FLOAT @H5_SIZEOF_FLOAT@
 
 /* The size of `int', as computed by sizeof. */
-#define H5_SIZEOF_INT @H5_SIZEOF_INT@
+#cmakedefine H5_SIZEOF_INT @H5_SIZEOF_INT@
 
 /* The size of `int16_t', as computed by sizeof. */
-#define H5_SIZEOF_INT16_T @H5_SIZEOF_INT16_T@
+#cmakedefine H5_SIZEOF_INT16_T @H5_SIZEOF_INT16_T@
 
 /* The size of `int32_t', as computed by sizeof. */
-#define H5_SIZEOF_INT32_T @H5_SIZEOF_INT32_T@
+#cmakedefine H5_SIZEOF_INT32_T @H5_SIZEOF_INT32_T@
 
 /* The size of `int64_t', as computed by sizeof. */
-#define H5_SIZEOF_INT64_T @H5_SIZEOF_INT64_T@
+#cmakedefine H5_SIZEOF_INT64_T @H5_SIZEOF_INT64_T@
 
 /* The size of `int8_t', as computed by sizeof. */
-#define H5_SIZEOF_INT8_T @H5_SIZEOF_INT8_T@
+#cmakedefine H5_SIZEOF_INT8_T @H5_SIZEOF_INT8_T@
 
 /* The size of `int_fast16_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_FAST16_T @H5_SIZEOF_INT_FAST16_T@
+#cmakedefine H5_SIZEOF_INT_FAST16_T @H5_SIZEOF_INT_FAST16_T@
 
 /* The size of `int_fast32_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_FAST32_T @H5_SIZEOF_INT_FAST32_T@
+#cmakedefine H5_SIZEOF_INT_FAST32_T @H5_SIZEOF_INT_FAST32_T@
 
 /* The size of `int_fast64_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_FAST64_T @H5_SIZEOF_INT_FAST64_T@
+#cmakedefine H5_SIZEOF_INT_FAST64_T @H5_SIZEOF_INT_FAST64_T@
 
 /* The size of `int_fast8_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_FAST8_T @H5_SIZEOF_INT_FAST8_T@
+#cmakedefine H5_SIZEOF_INT_FAST8_T @H5_SIZEOF_INT_FAST8_T@
 
 /* The size of `int_least16_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_LEAST16_T @H5_SIZEOF_INT_LEAST16_T@
+#cmakedefine H5_SIZEOF_INT_LEAST16_T @H5_SIZEOF_INT_LEAST16_T@
 
 /* The size of `int_least32_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_LEAST32_T @H5_SIZEOF_INT_LEAST32_T@
+#cmakedefine H5_SIZEOF_INT_LEAST32_T @H5_SIZEOF_INT_LEAST32_T@
 
 /* The size of `int_least64_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_LEAST64_T @H5_SIZEOF_INT_LEAST64_T@
+#cmakedefine H5_SIZEOF_INT_LEAST64_T @H5_SIZEOF_INT_LEAST64_T@
 
 /* The size of `int_least8_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_LEAST8_T @H5_SIZEOF_INT_LEAST8_T@
+#cmakedefine H5_SIZEOF_INT_LEAST8_T @H5_SIZEOF_INT_LEAST8_T@
 
 #if !defined(__APPLE__)
 /* The size of `size_t', as computed by sizeof. */
-#define H5_SIZEOF_SIZE_T @H5_SIZEOF_SIZE_T@
+#cmakedefine H5_SIZEOF_SIZE_T @H5_SIZEOF_SIZE_T@
 
 /* The size of `ssize_t', as computed by sizeof. */
-#define H5_SIZEOF_SSIZE_T @H5_SIZEOF_SSIZE_T@
+#cmakedefine H5_SIZEOF_SSIZE_T @H5_SIZEOF_SSIZE_T@
 
 /* The size of `long', as computed by sizeof. */
-#define H5_SIZEOF_LONG @H5_SIZEOF_LONG@
+#cmakedefine H5_SIZEOF_LONG @H5_SIZEOF_LONG@
 
 #else
    # if defined(__LP64__) && __LP64__
@@ -616,66 +639,66 @@
 #endif
 
 /* The size of `long double', as computed by sizeof. */
-#define H5_SIZEOF_LONG_DOUBLE @H5_SIZEOF_LONG_DOUBLE@
+#cmakedefine H5_SIZEOF_LONG_DOUBLE @H5_SIZEOF_LONG_DOUBLE@
 
 /* Define size of long long and/or __int64 bit integer type only if the type
    exists.  */
 #if !defined(__APPLE__)
- #define H5_SIZEOF_LONG_LONG @H5_SIZEOF_LONG_LONG@
+ #cmakedefine H5_SIZEOF_LONG_LONG @H5_SIZEOF_LONG_LONG@
 #else
  #define H5_SIZEOF_LONG_LONG 8
 #endif
 
 /* The size of `off64_t', as computed by sizeof. */
-#define H5_SIZEOF_OFF64_T @H5_SIZEOF_OFF64_T@
+#cmakedefine H5_SIZEOF_OFF64_T @H5_SIZEOF_OFF64_T@
 
 /* The size of `off_t', as computed by sizeof. */
-#define H5_SIZEOF_OFF_T @H5_SIZEOF_OFF_T@
+#cmakedefine H5_SIZEOF_OFF_T @H5_SIZEOF_OFF_T@
 
 /* The size of `ptrdiff_t', as computed by sizeof. */
-/* #define H5_SIZEOF_PTRDIFF_T @H5_SIZEOF_PTRDIFF_T@ */
+#cmakedefine H5_SIZEOF_PTRDIFF_T @H5_SIZEOF_PTRDIFF_T@
 
 /* The size of `short', as computed by sizeof. */
-#define H5_SIZEOF_SHORT @H5_SIZEOF_SHORT@
+#cmakedefine H5_SIZEOF_SHORT @H5_SIZEOF_SHORT@
 
 /* The size of `uint16_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT16_T @H5_SIZEOF_UINT16_T@
+#cmakedefine H5_SIZEOF_UINT16_T @H5_SIZEOF_UINT16_T@
 
 /* The size of `uint32_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT32_T @H5_SIZEOF_UINT32_T@
+#cmakedefine H5_SIZEOF_UINT32_T @H5_SIZEOF_UINT32_T@
 
 /* The size of `uint64_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT64_T @H5_SIZEOF_UINT64_T@
+#cmakedefine H5_SIZEOF_UINT64_T @H5_SIZEOF_UINT64_T@
 
 /* The size of `uint8_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT8_T @H5_SIZEOF_UINT8_T@
+#cmakedefine H5_SIZEOF_UINT8_T @H5_SIZEOF_UINT8_T@
 
 /* The size of `uint_fast16_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_FAST16_T @H5_SIZEOF_UINT_FAST16_T@
+#cmakedefine H5_SIZEOF_UINT_FAST16_T @H5_SIZEOF_UINT_FAST16_T@
 
 /* The size of `uint_fast32_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_FAST32_T @H5_SIZEOF_UINT_FAST32_T@
+#cmakedefine H5_SIZEOF_UINT_FAST32_T @H5_SIZEOF_UINT_FAST32_T@
 
 /* The size of `uint_fast64_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_FAST64_T @H5_SIZEOF_UINT_FAST64_T@
+#cmakedefine H5_SIZEOF_UINT_FAST64_T @H5_SIZEOF_UINT_FAST64_T@
 
 /* The size of `uint_fast8_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_FAST8_T @H5_SIZEOF_UINT_FAST8_T@
+#cmakedefine H5_SIZEOF_UINT_FAST8_T @H5_SIZEOF_UINT_FAST8_T@
 
 /* The size of `uint_least16_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_LEAST16_T @H5_SIZEOF_UINT_LEAST16_T@
+#cmakedefine H5_SIZEOF_UINT_LEAST16_T @H5_SIZEOF_UINT_LEAST16_T@
 
 /* The size of `uint_least32_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_LEAST32_T @H5_SIZEOF_UINT_LEAST32_T@
+#cmakedefine H5_SIZEOF_UINT_LEAST32_T @H5_SIZEOF_UINT_LEAST32_T@
 
 /* The size of `uint_least64_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_LEAST64_T @H5_SIZEOF_UINT_LEAST64_T@
+#cmakedefine H5_SIZEOF_UINT_LEAST64_T @H5_SIZEOF_UINT_LEAST64_T@
 
 /* The size of `uint_least8_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_LEAST8_T @H5_SIZEOF_UINT_LEAST8_T@
+#cmakedefine H5_SIZEOF_UINT_LEAST8_T @H5_SIZEOF_UINT_LEAST8_T@
 
 /* The size of `unsigned', as computed by sizeof. */
-#define H5_SIZEOF_UNSIGNED @H5_SIZEOF_UNSIGNED@
+#cmakedefine H5_SIZEOF_UNSIGNED @H5_SIZEOF_UNSIGNED@
 
 /* The size of `__int64', as computed by sizeof. */
 #define H5_SIZEOF___INT64 @H5_SIZEOF___INT64@
@@ -724,7 +747,7 @@
 #cmakedefine H5_USING_MEMCHECKER @H5_USING_MEMCHECKER@
 
 /* Version number of package */
-#define VERSION "@HDF5_PACKAGE_VERSION@"
+#define H5_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
 
 /* Define if vsnprintf() returns the correct value for formatted strings that
    don't fit into size allowed */
@@ -751,10 +774,10 @@
 #cmakedefine WORDS_BIGENDIAN @H5_WORDS_BIGENDIANR@
 
 /* Number of bits in a file offset, on hosts where this is settable. */
-#cmakedefine _FILE_OFFSET_BITS
+#cmakedefine H5__FILE_OFFSET_BITS
 
 /* Define for large files, on AIX-style hosts. */
-#cmakedefine _LARGE_FILES
+#cmakedefine H5__LARGE_FILES
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #cmakedefine H5_const

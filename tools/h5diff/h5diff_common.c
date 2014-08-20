@@ -15,6 +15,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "H5private.h"
 #include "h5diff.h"
 #include "h5diff_common.h"
 #include "h5tools.h"
@@ -102,6 +103,13 @@ void parse_command_line(int argc,
     /* NaNs are handled by default */
     options->do_nans = 1;
 
+    /* not Listing objects that are not comparable */
+    options->m_list_not_cmp = 0;
+
+    /* initially no not-comparable. */
+    /**this is bad in mixing option with results**/
+    options->not_cmp=0;
+
     /* init for exclude-path option */
     exclude_head = NULL;
 
@@ -135,7 +143,7 @@ void parse_command_line(int argc,
                     options->m_verbose_level = 0;
                     break;
             }
-                else if (!strncmp (argv[i], "-v", 2))
+                else if (!strncmp (argv[i], "-v", (size_t)2))
             {
                     options->m_verbose_level = atoi(&argv[i][2]);
                     break;
@@ -149,7 +157,7 @@ void parse_command_line(int argc,
                     options->m_verbose_level = 0;
                     break;
             }
-            else if ( !strncmp (argv[i], "--verbose", 9) && argv[i][9]=='=')
+            else if ( !strncmp (argv[i], "--verbose", (size_t)9) && argv[i][9]=='=')
             {
                     options->m_verbose_level = atoi(&argv[i][10]);
                     break;
@@ -164,7 +172,7 @@ void parse_command_line(int argc,
             options->m_report = 1;
             break;
         case 'l':
-            options->follow_links = 1;
+            options->follow_links = TRUE;
             break;
         case 'x':
             options->no_dangle_links = 1;
@@ -173,7 +181,7 @@ void parse_command_line(int argc,
             options->exclude_path = 1;
             
             /* create linked list of excluding objects */
-            if( (exclude_node = (struct exclude_path_list*) malloc(sizeof(struct exclude_path_list))) == NULL)
+            if( (exclude_node = (struct exclude_path_list*) HDmalloc(sizeof(struct exclude_path_list))) == NULL)
             {
                 printf("Error: lack of memory!\n");
                 h5diff_exit(EXIT_FAILURE);

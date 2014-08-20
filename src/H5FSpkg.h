@@ -96,7 +96,7 @@
 /* Callback info for loading a free space header into the cache */
 typedef struct H5FS_hdr_cache_ud_t {
     H5F_t *f;                  /* File that free space header is within */
-    size_t nclasses;                            /* Number of section classes */
+    uint16_t nclasses;                            /* Number of section classes */
     const H5FS_section_class_t **classes;       /* Array of section class info */
     void *cls_init_udata;                       /* Pointer to class init user data */
     haddr_t addr;              /* Address of header */
@@ -163,7 +163,7 @@ struct H5FS_t {
 
     /* Creation parameters */
     H5FS_client_t client;       /* Type of user of this free space manager    */
-    unsigned nclasses;          /* Number of section classes handled          */
+    uint16_t nclasses;         /* Number of section classes handled          */
     unsigned shrink_percent;    /* Percent of "normal" serialized size to shrink serialized space at */
     unsigned expand_percent;    /* Percent of "normal" serialized size to expand serialized space at */
     unsigned max_sect_addr;     /* Size of address space free sections are within (log2 of actual value) */
@@ -221,7 +221,7 @@ H5FL_EXTERN(H5FS_t);
 /******************************/
 
 /* Free space manager header routines */
-H5_DLL H5FS_t *H5FS_new(const H5F_t *f, size_t nclasses,
+H5_DLL H5FS_t *H5FS_new(const H5F_t *f, uint16_t nclasses,
     const H5FS_section_class_t *classes[], void *cls_init_udata);
 H5_DLL herr_t H5FS_incr(H5FS_t *fspace);
 H5_DLL herr_t H5FS_decr(H5FS_t *fspace);

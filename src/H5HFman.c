@@ -38,7 +38,7 @@
 #include "H5HFpkg.h"		/* Fractal heaps			*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 /****************/
 /* Local Macros */
@@ -157,7 +157,7 @@ H5HF_man_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t obj_size, const void *obj
     HDassert(sec_node->sect_info.state == H5FS_SECT_LIVE);
 
     /* Retrieve direct block address from section */
-    if(H5HF_sect_single_dblock_info(hdr, dxpl_id, sec_node, &dblock_addr, &dblock_size) < 0)
+    if(H5HF_sect_single_dblock_info(hdr, sec_node, &dblock_addr, &dblock_size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve direct block information")
 
     /* Lock direct block */
@@ -312,12 +312,14 @@ H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
     /* Decode the object offset within the heap & its length */
     UINT64DECODE_VAR(id, obj_off, hdr->heap_off_size);
     UINT64DECODE_VAR(id, obj_len, hdr->heap_len_size);
-    HDassert(obj_off > 0);
-    HDassert(obj_len > 0);
 
     /* Check for bad offset or length */
+    if(obj_off == 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "invalid fractal heap offset")
     if(obj_off > hdr->man_size)
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object offset too large")
+    if(obj_len == 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "invalid fractal heap object size")
     if(obj_len > hdr->man_dtable.cparam.max_direct_size)
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object size too large for direct block")
     if(obj_len > hdr->max_man_size)
@@ -554,12 +556,14 @@ H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
     /* Decode the object offset within the heap & it's length */
     UINT64DECODE_VAR(id, obj_off, hdr->heap_off_size);
     UINT64DECODE_VAR(id, obj_len, hdr->heap_len_size);
-    HDassert(obj_off > 0);
-    HDassert(obj_len > 0);
 
     /* Check for bad offset or length */
+    if(obj_off == 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "invalid fractal heap offset")
     if(obj_off > hdr->man_size)
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object offset too large")
+    if(obj_len == 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "invalid fractal heap object size")
     if(obj_len > hdr->man_dtable.cparam.max_direct_size)
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object size too large for direct block")
     if(obj_len > hdr->max_man_size)

@@ -24,8 +24,10 @@
 
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 
+#ifdef NOT_YET
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5P_init_encdec_interface
+#endif /* NOT_YET */
 
 
 /***********/
@@ -33,9 +35,11 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* Files		  	        */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
+#include "H5VMprivate.h"        /* Vector functions			*/
 
 
 /****************/
@@ -78,6 +82,7 @@ typedef struct {
 /*******************/
 
 
+#ifdef NOT_YET
 
 /*--------------------------------------------------------------------------
 NAME
@@ -98,6 +103,7 @@ H5P_init_encdec_interface(void)
 
     FUNC_LEAVE_NOAPI(H5P_init())
 } /* H5P_init_encdec_interface() */
+#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------
@@ -118,7 +124,7 @@ H5P__encode_size_t(const void *value, void **_pp, size_t *size)
 {
     uint64_t enc_value = (uint64_t)*(const size_t *)value;    /* Property value to encode */
     uint8_t **pp = (uint8_t **)_pp;
-    unsigned enc_size = H5V_limit_enc_size(enc_value);  /* Size of encoded property */
+    unsigned enc_size = H5VM_limit_enc_size(enc_value);  /* Size of encoded property */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -159,7 +165,7 @@ herr_t
 H5P__encode_hsize_t(const void *value, void **_pp, size_t *size)
 {
     uint64_t enc_value = (uint64_t)*(const hsize_t *)value;    /* Property value to encode */
-    unsigned enc_size = H5V_limit_enc_size(enc_value);  /* Size of encoded property */
+    unsigned enc_size = H5VM_limit_enc_size(enc_value);  /* Size of encoded property */
     uint8_t **pp = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR

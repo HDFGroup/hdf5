@@ -21,7 +21,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src and tools/lib directories
-INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
 TEST_PROG=h5importtest
@@ -39,5 +39,8 @@ h5import_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 # All programs depend on the main hdf5 library and the tools library
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+
+# Temporary files from h5importtest
+CHECK_CLEANFILES+=*.bin
 
 include $(top_srcdir)/config/conclude.am

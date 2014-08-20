@@ -37,7 +37,7 @@
 #include "H5B2pkg.h"		/* v2 B-trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 /****************/
 /* Local Macros */
@@ -181,7 +181,7 @@ HDmemset(hdr->page, 0, hdr->node_size);
 
     /* Compute size to store # of records in each node */
     /* (uses leaf # of records because its the largest) */
-    u_max_nrec_size = H5V_limit_enc_size((uint64_t)hdr->node_info[0].max_nrec);
+    u_max_nrec_size = H5VM_limit_enc_size((uint64_t)hdr->node_info[0].max_nrec);
     H5_ASSIGN_OVERFLOW(/* To: */ hdr->max_nrec_size, /* From: */ u_max_nrec_size, /* From: */ unsigned, /* To: */ uint8_t)
     HDassert(hdr->max_nrec_size <= H5B2_SIZEOF_RECORDS_PER_NODE);
 
@@ -197,7 +197,7 @@ HDmemset(hdr->page, 0, hdr->node_size);
 
             hdr->node_info[u].cum_max_nrec = ((hdr->node_info[u].max_nrec + 1) *
                 hdr->node_info[u - 1].cum_max_nrec) + hdr->node_info[u].max_nrec;
-            u_max_nrec_size = H5V_limit_enc_size((uint64_t)hdr->node_info[u].cum_max_nrec);
+            u_max_nrec_size = H5VM_limit_enc_size((uint64_t)hdr->node_info[u].cum_max_nrec);
             H5_ASSIGN_OVERFLOW(/* To: */ hdr->node_info[u].cum_max_nrec_size, /* From: */ u_max_nrec_size, /* From: */ unsigned, /* To: */ uint8_t)
 
             if(NULL == (hdr->node_info[u].nat_rec_fac = H5FL_fac_init(hdr->cls->nrec_size * hdr->node_info[u].max_nrec)))
@@ -413,7 +413,7 @@ done:
 herr_t
 H5B2_hdr_fuse_incr(H5B2_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(hdr);
@@ -441,7 +441,7 @@ H5B2_hdr_fuse_incr(H5B2_hdr_t *hdr)
 size_t
 H5B2_hdr_fuse_decr(H5B2_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(hdr);
@@ -601,6 +601,6 @@ done:
     if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_HDR, hdr->addr, hdr, cache_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_hdr_delete() */
 

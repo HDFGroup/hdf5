@@ -31,15 +31,20 @@
 !
 !*****
 !
+MODULE TH5E
+
+CONTAINS
+
     SUBROUTINE error_report_test(cleanup, total_error)
 
 !   This subroutine tests following functionalities: h5eprint_f
 
    USE HDF5 ! This module contains all necessary modules
+   USE TH5_MISC
 
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
-     INTEGER, INTENT(OUT) :: total_error
+     INTEGER, INTENT(INOUT) :: total_error
 
      CHARACTER(LEN=6), PARAMETER :: filename = "etestf" ! File name
      CHARACTER(LEN=80) :: fix_filename
@@ -92,3 +97,6 @@
               CALL check("h5_cleanup_f", error, total_error)
      RETURN
      END SUBROUTINE error_report_test
+
+END MODULE TH5E
+

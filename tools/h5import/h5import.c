@@ -273,7 +273,6 @@ static int gtoken(char *s)
      * identify the token type
      */
     if (s[0] == '-') { /* option name (or negative number) */
-        token = ERR;
         len = HDstrlen(&s[1]);
         switch (s[1]) {
         case 'o':
@@ -309,6 +308,9 @@ static int gtoken(char *s)
         case 's':
             if (!HDstrncmp("size", &s[1], len))
                 token = OPT_s;
+            break;
+        default:
+            token = ERR; /* not a supported option tag */
             break;
         }
 
@@ -861,24 +863,20 @@ static int processStrData(FILE *strm, struct Input *in, hid_t file_id)
     hid_t   handle;
     hsize_t dims[1];
     char    str[1024];
-    char    c;
+    int     c;
     int     i = 0;
     int     j;
-    int     nlines = 0;
-    int     line;
+    hsize_t nlines = 0;
+    hsize_t line;
 
     /*-------------------------------------------------------------------------
      * get number of lines in the input file
      *-------------------------------------------------------------------------
      */
 
-    while (!HDfeof(strm)) {
-        c = HDfgetc(strm);
-
-        if (c == 10) { /* eol */
+    while(EOF != (c = HDfgetc(strm)))
+        if (c == 10)    /* eol */
             nlines++;
-        }
-    }
 
     if (!nlines)
         return 0;
@@ -939,10 +937,8 @@ static int processStrData(FILE *strm, struct Input *in, hid_t file_id)
 
     line = 0;
 
-    while (!HDfeof(strm)) {
-        c = HDfgetc(strm);
-
-        str[i] = c;
+    while(EOF != (c = HDfgetc(strm))) {
+        str[i] = (char)c;
 
         i++;
 
@@ -1009,11 +1005,8 @@ static int processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
     char   *str2 = NULL;
     char   *str3 = NULL;
     char    str[1024] = "";
-    char    c;
-    int     results;
     int     j;
-    int     nlines = 0;
-    int     line;
+    hsize_t     line;
 
     /*-------------------------------------------------------------------------
      * read file and generate an HDF5 dataset
@@ -1080,7 +1073,7 @@ static int processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
         str2 = NULL;
         str3 = NULL;
 #ifdef H5DEBUGIMPORT
-            printf("processStrHDFData DATATYPE STRING[%d]={%s}\n", line, str1);
+            printf("processStrHDFData DATATYPE STRING[%llu]={%s}\n", (unsigned long long)line, str1);
 #endif
             /* process string to remove the first and last quote char */
             str2 = strchr(str1, '"');
@@ -1109,7 +1102,7 @@ static int processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
                         hsize_t count[1] = { 1 };
 
 #ifdef H5DEBUGIMPORT
-                        printf("processStrHDFData DATATYPE STRING[%d] store %s\n", line, str2);
+                        printf("processStrHDFData DATATYPE STRING[%llu] store %s\n", (unsigned long long)line, str2);
 #endif
                         if ((fspace_id = H5Dget_space(dset_id)) < 0)
                             goto out;
@@ -3389,6 +3382,11 @@ hid_t createOutputDataType(struct Input *in)
 {
     hid_t       new_type = (-1);
     const char *err1 = "Invalid value for output class.\n";
+    const char *err2 = "Invalid value for output size.\n";
+    const char *err3 = "Invalid value for output byte order.\n";
+	const char *err4 = "Invalid value for output architecture.\n";
+    const char *err5 = "STD not supported for float.\n";
+    const char *err6 = "IEEE not supported for INT.\n";
 
     switch (in->outputClass) {
     case 0:
@@ -3410,6 +3408,10 @@ hid_t createOutputDataType(struct Input *in)
             case 64:
                 new_type = H5Tcopy(H5T_NATIVE_LLONG);
                 break;
+
+            default:
+                (void) HDfprintf(stderr, "%s", err2);
+                return (-1);
             }
             switch (in->outputByteOrder) {
             case -1: /* default */
@@ -3421,6 +3423,10 @@ hid_t createOutputDataType(struct Input *in)
             case 1:
                 H5Tset_order(new_type, H5T_ORDER_LE);
                 break;
+
+            default:
+                (void) HDfprintf(stderr, "%s", err3);
+                return (-1);
             }
             break;
 
@@ -3436,6 +3442,10 @@ hid_t createOutputDataType(struct Input *in)
                 case 1:
                     new_type = H5Tcopy(H5T_STD_I8LE);
                     break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err3);
+                    return (-1);
                 }
                 break;
 
@@ -3449,6 +3459,10 @@ hid_t createOutputDataType(struct Input *in)
                 case 1:
                     new_type = H5Tcopy(H5T_STD_I16LE);
                     break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err3);
+                    return (-1);
                 }
                 break;
 
@@ -3462,6 +3476,10 @@ hid_t createOutputDataType(struct Input *in)
                 case 1:
                     new_type = H5Tcopy(H5T_STD_I32LE);
                     break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err3);
+                    return (-1);
                 }
                 break;
 
@@ -3475,11 +3493,22 @@ hid_t createOutputDataType(struct Input *in)
                 case 1:
                     new_type = H5Tcopy(H5T_STD_I64LE);
                     break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err3);
+                    return (-1);
                 }
                 break;
+
+            default:
+                (void) HDfprintf(stderr, "%s", err2);
+                return (-1);
             }
             break;
 
+		default:
+			(void) HDfprintf(stderr, "%s", err4);
+			return (-1);
         }
         break;
 
@@ -3494,6 +3523,10 @@ hid_t createOutputDataType(struct Input *in)
             case 64:
                 new_type = H5Tcopy(H5T_NATIVE_DOUBLE);
                 break;
+
+            default:
+                (void) HDfprintf(stderr, "%s", err2);
+                return (-1);
             }
             switch (in->outputByteOrder) {
             case -1: /* DEFAULT */
@@ -3505,12 +3538,16 @@ hid_t createOutputDataType(struct Input *in)
             case 1:
                 H5Tset_order(new_type, H5T_ORDER_LE);
                 break;
+
+            default:
+                (void) HDfprintf(stderr, "%s", err3);
+                return (-1);
             }
             break;
 
         case 1:
-            /* STD not supported for float */
-            break;
+            (void) HDfprintf(stderr, "%s", err5);
+            return (-1);
 
         case 2:
             switch (in->outputSize) {
@@ -3524,6 +3561,10 @@ hid_t createOutputDataType(struct Input *in)
                 case 1:
                     new_type = H5Tcopy(H5T_IEEE_F32LE);
                     break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err3);
+                    return (-1);
                 }
                 break;
 
@@ -3537,11 +3578,22 @@ hid_t createOutputDataType(struct Input *in)
                 case 1:
                     new_type = H5Tcopy(H5T_IEEE_F64LE);
                     break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err3);
+                    return (-1);
                 }
                 break;
+
+            default:
+                (void) HDfprintf(stderr, "%s", err2);
+                return (-1);
             }
             break;
 
+		default:
+			(void) HDfprintf(stderr, "%s", err4);
+			return (-1);
         }
         break;
 
@@ -3564,6 +3616,10 @@ hid_t createOutputDataType(struct Input *in)
             case 64:
                 new_type = H5Tcopy(H5T_NATIVE_ULLONG);
                 break;
+
+            default:
+                (void) HDfprintf(stderr, "%s", err2);
+                return (-1);
             }
             switch (in->outputByteOrder) {
             case -1: /* Default */
@@ -3575,6 +3631,10 @@ hid_t createOutputDataType(struct Input *in)
             case 1:
                 H5Tset_order(new_type, H5T_ORDER_LE);
                 break;
+
+            default:
+                (void) HDfprintf(stderr, "%s", err3);
+                return (-1);
             }
             break;
 
@@ -3590,6 +3650,10 @@ hid_t createOutputDataType(struct Input *in)
                 case 1:
                     new_type = H5Tcopy(H5T_STD_U8LE);
                     break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err3);
+                    return (-1);
                 }
                 break;
 
@@ -3603,6 +3667,10 @@ hid_t createOutputDataType(struct Input *in)
                 case 1:
                     new_type = H5Tcopy(H5T_STD_U16LE);
                     break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err3);
+                    return (-1);
                 }
                 break;
 
@@ -3616,6 +3684,10 @@ hid_t createOutputDataType(struct Input *in)
                 case 1:
                     new_type = H5Tcopy(H5T_STD_U32LE);
                     break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err3);
+                    return (-1);
                 }
                 break;
 
@@ -3629,17 +3701,27 @@ hid_t createOutputDataType(struct Input *in)
                 case 1:
                     new_type = H5Tcopy(H5T_STD_U64LE);
                     break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err3);
+                    return (-1);
                 }
                 break;
+
+            default:
+                (void) HDfprintf(stderr, "%s", err2);
+                return (-1);
             }
             break;
 
         case 2:
-            /* IEEE not supported for INT */
-            break;
+            (void) HDfprintf(stderr, "%s", err6);
+            return (-1);
 
+        default:
+            (void) HDfprintf(stderr, "%s", err4);
+            return (-1);
         }
-
         break;
 
     default:
@@ -3653,6 +3735,7 @@ hid_t createInputDataType(struct Input *in)
 {
     hid_t       new_type = (-1);
     const char *err1 = "Invalid value for input class.\n";
+    const char *err2 = "Invalid value for output size.\n";
 
     switch (in->inputClass) {
     case 0:
@@ -3675,7 +3758,7 @@ hid_t createInputDataType(struct Input *in)
             break;
 
         default:
-            (void) HDfprintf(stderr, "%s", err1);
+            (void) HDfprintf(stderr, "%s", err2);
             return (-1);
         }
         break;
@@ -3693,12 +3776,14 @@ hid_t createInputDataType(struct Input *in)
             break;
 
         default:
-            (void) HDfprintf(stderr, "%s", err1);
+            (void) HDfprintf(stderr, "%s", err2);
             return (-1);
         }
         break;
 
     case 5:
+        (void) HDfprintf(stderr, "%s", err1);
+        return (-1);
         break;
 
     case 6:
@@ -3721,7 +3806,7 @@ hid_t createInputDataType(struct Input *in)
             break;
 
         default:
-            (void) HDfprintf(stderr, "%s", err1);
+            (void) HDfprintf(stderr, "%s", err2);
             return (-1);
         }
         break;

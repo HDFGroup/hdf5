@@ -26,22 +26,23 @@ if BUILD_PARALLEL_CONDITIONAL
    EXAMPLE_PROG_PARA=ph5example
 endif
 
+INSTALL_SCRIPT_FILES = run-fortran-ex.sh
+
 # These are the programs that 'make all' or 'make tests' will build and
 # that 'make check' will run.  List them in the order in which they should
 # be run.
 # We don't tell automake about these programs so that it doesn't try to
 # compile them with the regular fortran compiler.
 
-EXAMPLE_PROG=dsetexample fileexample rwdsetexample attrexample groupexample \
-     grpsexample grpdsetexample hyperslab selectele grpit refobjexample  \
-     refregexample mountexample compound
+EXAMPLE_PROG=h5_crtdat h5_rdwt h5_crtatt h5_crtgrp \
+     h5_crtgrpar h5_crtgrpd h5_extend h5_subset h5_cmprss hyperslab selectele \
+     refobjexample refregexample mountexample compound
 
 # List files to be installed here
-INSTALL_FILES=dsetexample.f90 fileexample.f90 rwdsetexample.f90           \
-     attrexample.f90 groupexample.f90 grpsexample.f90 grpdsetexample.f90  \
-     hyperslab.f90 selectele.f90 grpit.f90 refobjexample.f90              \
-     refregexample.f90 mountexample.f90  compound.f90 ph5example.f90
-INSTALL_SCRIPT_FILES = run-fortran-ex.sh
+INSTALL_FILES=h5_crtdat.f90 h5_rdwt.f90 \
+     h5_crtatt.f90 h5_crtgrp.f90 h5_crtgrpar.f90 h5_crtgrpd.f90  \
+     h5_extend.f90 h5_subset.f90 h5_cmprss.f90 hyperslab.f90 selectele.f90 refobjexample.f90 \
+     refregexample.f90 mountexample.f90 compound.f90 ph5example.f90
 
 
 # Add attention tests for Fortran 2003 features
@@ -52,17 +53,18 @@ if FORTRAN_2003_CONDITIONAL_F
       compound_fortran2003.f90 compound_complex_fortran2003.f90
 endif
 TEST_SCRIPT=testh5fc.sh
+TEST_EXAMPLES_SCRIPT=$(INSTALL_SCRIPT_FILES)
 
 # Mark this directory as part of the Fortran API
 FORTRAN_API=yes
 
 # Some examples depend on files created by other examples.
-grpdsetexample.chkexe_: grpsexample.chkexe_
+h5_crtgrpd.chkexe_: h5_crtgrpar.chkexe_
 refregexample.chkexe_: refobjexample.chkexe_
-# rwdsetexample and attrexample both modify the same file created by
-# dsetexample. Serialize them.
-rwdsetexample.chkexe_: dsetexample.chkexe_
-attrexample.chkexe_: rwdsetexample.chkexe_
+# h5_rdwt and h5_crtatt both modify the same file created by
+# h5_crtdat. Serialize them.
+h5_rdwt.chkexe_: h5_crtdat.chkexe_
+h5_crtatt.chkexe_: h5_rdwt.chkexe_
 
 # Tell automake how to build examples using h5fc
 # Additional dependencies for the examples are listed below
@@ -84,16 +86,17 @@ EXAMPLEDIR=${DESTDIR}$(exec_prefix)/share/hdf5_examples/fortran
 # an inelegant way of solving the problem.
 # All programs share the same build rule and a dependency on the main hdf5
 # and fortran libraries above.
-dsetexample: dsetexample.f90
-fileexample: fileexample.f90
-rwdsetexample: rwdsetexample.f90
-attrexample: attrexample.f90
-groupexample: groupexample.f90
-grpsexample: grpsexample.f90
-grpdsetexample: grpdsetexample.f90
+h5_crtdat: h5_crtdat.f90
+h5_extend: h5_extend.f90
+h5_subset: h5_subset.f90
+h5_rdwt: h5_rdwt.f90
+h5_crtatt: h5_crtatt.f90
+h5_crtgrp: h5_crtgrp.f90
+h5_crtgrpar: h5_crtgrpar.f90
+h5_crtgrpd: h5_crtgrpd.f90
+h5_cmprss: h5_cmprss.f90
 hyperslab: hyperslab.f90
 selectele: selectele.f90
-grpit: grpit.f90
 refobjexample: refobjexample.f90
 refregexample: refregexample.f90
 mountexample: mountexample.f90

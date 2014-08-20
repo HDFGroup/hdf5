@@ -46,7 +46,6 @@ test_split_comm_access(void)
     int newrank, newprocs;
     hid_t fid;			/* file IDs */
     hid_t acc_tpl;		/* File access properties */
-    hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     herr_t ret;			/* generic return value */
     const char *filename;
 
@@ -74,7 +73,7 @@ test_split_comm_access(void)
 	MPI_Comm_rank(comm,&sub_mpi_rank);
 
 	/* setup file access template */
-	acc_tpl = create_faccess_plist(comm, info, facc_type, use_gpfs);
+	acc_tpl = create_faccess_plist(comm, info, facc_type);
 	VRFY((acc_tpl >= 0), "");
 
 	/* create the file collectively */
@@ -126,16 +125,15 @@ void
 test_avoid_truncation(void)
 {
     int mpi_size, mpi_rank;
+    int sub_mpi_rank;	/* rank in the sub-comm */
     H5F_t * f = NULL;               /* Internal File Pointer */
     int mrc;
     hid_t sid,did,fid;			/* file IDs */
     haddr_t eoa,eof = HADDR_UNDEF; /* End of File/Allocation values */
     hid_t fcpl,acc_tpl;		/* File access properties */
-    hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     herr_t ret;			/* generic return value */
     hid_t status;
     H5F_avoid_truncate_t avoid_truncate;
-    int filesize;
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
     const char *filename;
@@ -150,11 +148,10 @@ test_avoid_truncation(void)
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
-    int sub_mpi_rank;	/* rank in the sub-comm */
     MPI_Comm_rank(comm,&sub_mpi_rank);
 
     /* setup file access template */
-    acc_tpl = create_faccess_plist(comm, info, facc_type, use_gpfs);
+    acc_tpl = create_faccess_plist(comm, info, facc_type);
     VRFY((acc_tpl >= 0), "");
 
     /* Create a file creation property list */
@@ -171,7 +168,7 @@ test_avoid_truncation(void)
 
     /* Get the internal file pointer */
     f = (H5F_t *)H5I_object(fid);
-    VRFY((fid != NULL), "");
+    VRFY((f != NULL), "");
     
     /* Create dataspace for dataset */
     sid = H5Screate(H5S_SCALAR);

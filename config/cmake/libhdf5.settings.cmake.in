@@ -3,7 +3,7 @@
 
 General Information:
 -------------------
-                   HDF5 Version: @HDF5_PACKAGE_VERSION@
+                   HDF5 Version: @HDF5_PACKAGE_VERSION_STRING@
                   Configured on: @CONFIG_DATE@
                   Configured by: @CMAKE_GENERATOR@
                  Configure mode: CMAKE @CMAKE_VERSION@
@@ -20,7 +20,7 @@ Compiling Options:
                          CFLAGS: @CMAKE_C_FLAGS@
                       H5_CFLAGS: @H5_CFLAGS@
                       AM_CFLAGS: @AM_CFLAGS@
-                       CPPFLAGS: @CMAKE_CXX_FLAGS@
+                       CPPFLAGS: @CPPFLAGS@
                     H5_CPPFLAGS: @H5_CPPFLAGS@
                     AM_CPPFLAGS: @AM_CPPFLAGS@
                Shared Libraries: @H5_ENABLE_SHARED_LIB@
@@ -63,7 +63,6 @@ Features:
 Clear file buffers before write: @HDF5_Enable_Clear_File_Buffers@
            Using memory checker: @HDF5_ENABLE_USING_MEMCHECKER@
          Function Stack Tracing: @HDF5_ENABLE_CODESTACK@
-                           GPFS: @HDF5_ENABLE_GPFS@
       Strict File Format Checks: @HDF5_STRICT_FORMAT_CHECKS@
    Optimization Instrumentation: @HDF5_Enable_Instrument@
        Large File Support (LFS): @HDF5_ENABLE_LARGE_FILE@

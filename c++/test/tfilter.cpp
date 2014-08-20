@@ -47,12 +47,14 @@
 #define FILTER_CHUNK_DIM2 25
 
 // will do this function later or use it as guideline - BMR - 2007/01/26
+#if 0
 static herr_t test_filter_internal(hid_t fid, const char *name, hid_t dcpl,
 		int if_fletcher32, int corrupted, hsize_t *dset_size)
 {
     cerr << "do nothing right now" << endl;
     return(0);
 }
+#endif
 
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS        305
@@ -163,7 +165,7 @@ static void test_null_filter()
 
 const H5std_string      DSET_SZIP_NAME("szipped dataset");
 
-void test_szip_filter(H5File& file1)
+static void test_szip_filter(H5File& file1)
 {
 #ifdef H5_HAVE_FILTER_SZIP
     int      points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
@@ -228,7 +230,7 @@ void test_szip_filter(H5File& file1)
             issue_fail_msg("test_szip_filter()", __LINE__, __FILE__, E.getCDetailMsg());
         }
 
-        delete tconv_buf;
+        delete[] tconv_buf;
     } // if szip presents
     else {
 	SKIPPED();
@@ -254,13 +256,11 @@ extern "C"
 void test_filters()
 {
     // Output message about test being performed
-    //MESSAGE("Testing Various Filters\n");
     MESSAGE(5, ("Testing Various Filters\n"));
 
     hid_t       fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
 
-    int         nerrors=0;      // keep track of number of failures occurr
     try
     {
         // Use the file access template id to create a file access prop. list

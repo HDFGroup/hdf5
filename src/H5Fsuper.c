@@ -320,6 +320,7 @@ done:
 herr_t
 H5F_super_read(H5F_t *f, hid_t dxpl_id)
 {
+    H5P_genplist_t     *dxpl;               /* DXPL object */
     H5F_super_t *       sblock = NULL;      /* superblock structure                         */
     unsigned            sblock_flags = H5AC__NO_FLAGS_SET;       /* flags used in superblock unprotect call      */
     haddr_t             super_addr;         /* Absolute address of superblock */
@@ -329,9 +330,15 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id)
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
 
+    /* Get the DXPL plist object for DXPL ID */
+    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
     /* Find the superblock */
-    if(HADDR_UNDEF == (super_addr = H5F_locate_signature(f->shared->lf, dxpl_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to find file signature")
+    if(H5FD_locate_signature(f->shared->lf, dxpl, &super_addr) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
+    if(HADDR_UNDEF == super_addr)
+        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "file signature not found")
 
     /* Check for userblock present */
     if(H5F_addr_gt(super_addr, 0)) {

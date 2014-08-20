@@ -51,7 +51,6 @@
 static herr_t make_attributes( hid_t loc_id, const char* obj_name );
 
 
-
 /*-------------------------------------------------------------------------
 * test dataset functions
 *-------------------------------------------------------------------------
@@ -1552,10 +1551,10 @@ static int test_compounds(void)
     if((memb_name = H5Tget_member_name(dtype, 1)) == NULL)
         goto out;
     if(HDstrcmp(memb_name, "i16_field")) {
-        HDfree(memb_name);
+        H5free_memory(memb_name);
         goto out;
     }
-    HDfree(memb_name);
+    H5free_memory(memb_name);
 
     if((memb_class = H5Tget_member_class(dtype, 2))<0)
         goto out;
@@ -1620,10 +1619,10 @@ static int test_compound_bug(void)
     if((memb_name = H5Tget_member_name(dtype, 2)) == NULL)
         goto out;
     if(HDstrcmp(memb_name, "sub")) {
-        HDfree(memb_name);
+        H5free_memory(memb_name);
         goto out;
     }
-    HDfree(memb_name);
+    H5free_memory(memb_name);
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
@@ -1657,10 +1656,10 @@ static int test_compound_bug(void)
     if((memb_name = H5Tget_member_name(dtype, 1)) == NULL)
         goto out;
     if(HDstrcmp(memb_name, "desc_________________________________________________________________________________________")) {
-        HDfree(memb_name);
+        H5free_memory(memb_name);
         goto out;
     }
-    HDfree(memb_name);
+    H5free_memory(memb_name);
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
@@ -1813,11 +1812,9 @@ out:
 static int test_valid_path(void)
 {
   hid_t file_id, group;
-  herr_t status;
-  FILE *fp = NULL;
   htri_t path_valid;
   const char *data_string_in = "test";
-  
+   
   TESTING("H5LTpath_valid");
     
   /* Create a new file using default properties. */
@@ -1945,7 +1942,8 @@ static int test_valid_path(void)
   /*
    * Close the file.
    */
-  status = H5Fclose (file_id);
+  if(H5Fclose (file_id) < 0)
+      goto out;
 
   /* Create another file for checking external links */
 
@@ -2137,7 +2135,6 @@ static int test_valid_path(void)
   return -1;
 }
 
-
 /*-------------------------------------------------------------------------
 * the main program
 *-------------------------------------------------------------------------
@@ -2166,6 +2163,4 @@ int main( void )
 
 error:
     return 1;
-
-
 }

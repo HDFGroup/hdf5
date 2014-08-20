@@ -76,6 +76,7 @@ MAJOR, H5E_FSPACE, Free Space Manager
 MAJOR, H5E_SOHM, Shared Object Header Messages
 MAJOR, H5E_EARRAY, Extensible Array
 MAJOR, H5E_FARRAY, Fixed Array
+MAJOR, H5E_PLUGIN, Plugin for dynamically loaded library
 MAJOR, H5E_NONE_MAJOR, No error
 
 # Sections (for grouping minor errors)
@@ -98,6 +99,7 @@ SECTION, HEAP, Heap errors
 SECTION, FSPACE, Free space errors
 SECTION, PIPELINE, I/O pipeline errors
 SECTION, SYSTEM, System level errors
+SECTION, PLUGIN, Plugin errors
 SECTION, NONE, No error
 
 # Minor errors
@@ -215,6 +217,7 @@ MINOR, DSPACE, H5E_CANTSELECT, Can't select hyperslab
 MINOR, DSPACE, H5E_CANTNEXT, Can't move to next iterator location
 MINOR, DSPACE, H5E_BADSELECT, Invalid selection
 MINOR, DSPACE, H5E_CANTCOMPARE, Can't compare objects
+MINOR, DSPACE, H5E_INCONSISTENTSTATE, Internal states are inconsistent
 
 # Property list errors
 MINOR, PLIST, H5E_CANTGET, Can't get value
@@ -257,6 +260,9 @@ MINOR, PIPELINE, H5E_CANTFILTER, Filter operation failed
 
 # System level errors
 MINOR, SYSTEM, H5E_SYSERRSTR, System error message
+
+# Plugin errors
+MINOR, PLUGIN, H5E_OPENERROR, Can't open directory or file
 
 # No error, for backward compatibility */
 MINOR, NONE, H5E_NONE_MINOR, No error

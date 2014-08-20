@@ -14,8 +14,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5Object_H
-#define _H5Object_H
+#ifndef __H5Object_H
+#define __H5Object_H
 
 #include "H5Location.h"
 #include "H5Classes.h"		// constains forward class declarations
@@ -33,21 +33,33 @@
 //		H5Object is H5File is not an HDF5 object, and renaming H5Object
 //		to H5Location will risk breaking user applications.
 //		-BMR
-
+//	Apr 2, 2014: Added wrapper getObjName for H5Iget_name 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
 
+/*! \class H5Object
+    \brief Class H5Object is a bridge between H5Location and DataSet, DataType,
+     and Group.
+
+    All the wrappers in H5Object were moved to H5Location.
+*/
 class H5_DLLCPP H5Object : public H5Location {
    public:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Copy constructor: makes copy of an H5Object object.
 	H5Object(const H5Object& original);
+
+	// Gets the name of this HDF5 object, i.e., Group, DataSet, or
+	// DataType.
+	ssize_t getObjName(char *obj_name, size_t buf_size = 0) const;
+	ssize_t getObjName(H5std_string& obj_name, size_t len = 0) const;
+	H5std_string getObjName() const;
 
 	// Noop destructor.
 	virtual ~H5Object();
 
    protected:
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Default constructor
 	H5Object();
 
@@ -61,4 +73,4 @@ class H5_DLLCPP H5Object : public H5Location {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5Object_H

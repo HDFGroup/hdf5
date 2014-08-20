@@ -26,15 +26,18 @@
 !  filters_test, szip_test
 !
 !*****
+MODULE TH5Z
 
-    SUBROUTINE filters_test(cleanup, total_error)
+CONTAINS
+
+    SUBROUTINE filters_test(total_error)
 
 !   This subroutine tests following functionalities: h5zfilter_avail_f, h5zunregister_f
 
    USE HDF5 ! This module contains all necessary modules
+   USE TH5_MISC
 
      IMPLICIT NONE
-     LOGICAL, INTENT(IN)  :: cleanup
      INTEGER, INTENT(OUT) :: total_error
      LOGICAL :: status
      INTEGER(HID_T)    :: crtpr_id, xfer_id
@@ -165,6 +168,7 @@
 
         SUBROUTINE szip_test(szip_flag, cleanup, total_error)
         USE HDF5 ! This module contains all necessary modules
+        USE TH5_MISC
 
           IMPLICIT NONE
           LOGICAL, INTENT(OUT) :: szip_flag
@@ -412,3 +416,4 @@
 
           RETURN
         END SUBROUTINE szip_test
+END MODULE TH5Z

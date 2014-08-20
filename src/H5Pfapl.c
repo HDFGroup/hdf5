@@ -37,17 +37,17 @@
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* Files		  	*/
+#include "H5Fprivate.h"		/* Files		  	        */
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"        /* Memory Management    */
+#include "H5MMprivate.h"        /* Memory Management                    */
 #include "H5Ppkg.h"		/* Property lists		  	*/
 
 /* Includes needed to set as default file driver */
 #include "H5FDsec2.h"		/* Posix unbuffered I/O	file driver	*/
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
 #ifdef H5_HAVE_WINDOWS
-#include "H5FDwindows.h"        /* Windows buffered I/O     */
+#include "H5FDwindows.h"        /* Windows buffered I/O                 */
 #endif
 
 
@@ -160,7 +160,16 @@
 #define H5F_ACS_FILE_IMAGE_INFO_DEL             H5P_file_image_info_del
 #define H5F_ACS_FILE_IMAGE_INFO_COPY            H5P_file_image_info_copy
 #define H5F_ACS_FILE_IMAGE_INFO_CLOSE           H5P_file_image_info_close
-
+/* Definition of core VFD write tracking flag */
+#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_SIZE   sizeof(hbool_t)
+#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEF    FALSE
+#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_ENC    H5P__encode_hbool_t
+#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEC    H5P__decode_hbool_t
+/* Definition of core VFD write tracking page size */
+#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_SIZE      sizeof(size_t)
+#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEF       524288
+#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_ENC       H5P__encode_size_t
+#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEC       H5P__decode_size_t
 
 /******************/
 /* Local Typedefs */
@@ -204,10 +213,13 @@ static herr_t H5P__facc_multi_type_dec(const void **_pp, void *value);
 const H5P_libclass_t H5P_CLS_FACC[1] = {{
     "file access",		/* Class name for debugging     */
     H5P_TYPE_FILE_ACCESS,       /* Class type                   */
-    &H5P_CLS_ROOT_g,		/* Parent class ID              */
-    &H5P_CLS_FILE_ACCESS_g,	/* Pointer to class ID          */
-    &H5P_LST_FILE_ACCESS_g,	/* Pointer to default property list ID */
+
+    &H5P_CLS_ROOT_g,		/* Parent class                 */
+    &H5P_CLS_FILE_ACCESS_g,	/* Pointer to class             */
+    &H5P_CLS_FILE_ACCESS_ID_g,	/* Pointer to class ID          */
+    &H5P_LST_FILE_ACCESS_ID_g,	/* Pointer to default property list ID */
     H5P_facc_reg_prop,		/* Default property registration routine */
+
     H5P_facc_create,		/* Class creation callback      */
     NULL,		        /* Class creation callback info */
     H5P_facc_copy,		/* Class copy callback          */
@@ -246,8 +258,9 @@ static const H5FD_mem_t H5F_def_mem_type_g = H5F_ACS_MULTI_TYPE_DEF;            
 static const hbool_t H5F_def_latest_format_g = H5F_ACS_LATEST_FORMAT_DEF;          /* Default setting for "use the latest version of the format" flag */
 static const hbool_t H5F_def_want_posix_fd_g = H5F_ACS_WANT_POSIX_FD_DEF;          /* Default setting for retrieving 'handle' from core VFD */
 static const unsigned H5F_def_efc_size_g = H5F_ACS_EFC_SIZE_DEF;                   /* Default external file cache size */
-static const H5FD_file_image_info_t H5F_def_file_image_info_g = H5F_ACS_FILE_IMAGE_INFO_DEF;  /* Default file image info and callbacks */
-
+static const H5FD_file_image_info_t H5F_def_file_image_info_g = H5F_ACS_FILE_IMAGE_INFO_DEF;                 /* Default file image info and callbacks */
+static const hbool_t H5F_def_core_write_tracking_flag_g = H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEF;              /* Default setting for core VFD write tracking */
+static const size_t H5F_def_core_write_tracking_page_size_g = H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEF;     /* Default core VFD write tracking page size */
 
 
 /*-------------------------------------------------------------------------
@@ -395,6 +408,18 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5F_ACS_FILE_IMAGE_INFO_NAME, H5F_ACS_FILE_IMAGE_INFO_SIZE, &H5F_def_file_image_info_g, 
             NULL, NULL, NULL, NULL, NULL, 
             H5F_ACS_FILE_IMAGE_INFO_DEL, H5F_ACS_FILE_IMAGE_INFO_COPY, NULL, H5F_ACS_FILE_IMAGE_INFO_CLOSE) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the core VFD backing store write tracking flag */
+    if(H5P_register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME, H5F_ACS_CORE_WRITE_TRACKING_FLAG_SIZE, &H5F_def_core_write_tracking_flag_g , 
+            NULL, NULL, NULL, H5F_ACS_CORE_WRITE_TRACKING_FLAG_ENC, H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the size of the core VFD backing store page size */
+    if(H5P_register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_SIZE, &H5F_def_core_write_tracking_page_size_g , 
+            NULL, NULL, NULL, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_ENC, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -1102,7 +1127,7 @@ H5Pset_cache(hid_t plist_id, int UNUSED mdc_nelmts,
              rdcc_w0);
 
     /* Check arguments */
-    if(rdcc_w0 < 0.0 || rdcc_w0 > 1.0)
+    if(rdcc_w0 < (double)0.0f || rdcc_w0 > (double)1.0f)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "raw data cache w0 value must be between 0.0 and 1.0 inclusive")
 
     /* Get the plist structure */
@@ -2267,7 +2292,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5P_file_image_info_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
 {
     H5FD_file_image_info_t info;        /* Image info struct */
@@ -2289,7 +2314,7 @@ H5P_file_image_info_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UN
 		    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "image_free callback failed")
             } /* end if */
             else
-                free(info.buffer);
+                HDfree(info.buffer);
         } /* end if */
 
         /* Free udata if it exists */
@@ -2321,7 +2346,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5P_file_image_info_copy(const char UNUSED *name, size_t UNUSED size, void *value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2396,7 +2421,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5P_file_image_info_close(const char UNUSED *name, size_t UNUSED size, void *value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2472,7 +2497,7 @@ H5P__facc_cache_config_cmp(const void *_config1, const void *_config2, size_t UN
     if(config1->close_trace_file > config2->close_trace_file) HGOTO_DONE(1);
 
     if((ret_value = HDstrncmp(config1->trace_file_name, config2->trace_file_name, 
-                              H5AC__MAX_TRACE_FILE_NAME_LEN + 1)) != 0)
+                              (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + 1))) != 0)
         HGOTO_DONE(ret_value);
 
     if(config1->evictions_enabled < config2->evictions_enabled) HGOTO_DONE(-1);
@@ -2606,7 +2631,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
         H5_ENCODE_UNSIGNED(*pp, config->set_initial_size);
 
         enc_value = (uint64_t)config->initial_size;
-        enc_size = H5V_limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -2614,13 +2639,13 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
         H5_ENCODE_DOUBLE(*pp, config->min_clean_fraction);
 
         enc_value = (uint64_t)config->max_size;
-        enc_size = H5V_limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
         enc_value = (uint64_t)config->min_size;
-        enc_size = H5V_limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -2638,7 +2663,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
         H5_ENCODE_UNSIGNED(*pp, config->apply_max_increment);
 
         enc_value = (uint64_t)config->max_increment;
-        enc_size = H5V_limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -2660,7 +2685,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
         H5_ENCODE_UNSIGNED(*pp, config->apply_max_decrement);
 
         enc_value = (uint64_t)config->max_decrement;
-        enc_size = H5V_limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -2681,15 +2706,15 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 
     /* Compute encoded size of variably-encoded values */
     enc_value = (uint64_t)config->initial_size;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    *size += 1 + H5VM_limit_enc_size(enc_value);
     enc_value = (uint64_t)config->max_size;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    *size += 1 + H5VM_limit_enc_size(enc_value);
     enc_value = (uint64_t)config->min_size;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    *size += 1 + H5VM_limit_enc_size(enc_value);
     enc_value = (uint64_t)config->max_increment;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    *size += 1 + H5VM_limit_enc_size(enc_value);
     enc_value = (uint64_t)config->max_decrement;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    *size += 1 + H5VM_limit_enc_size(enc_value);
 
     /* Compute encoded size of fixed-size values */
     *size += (5 + (sizeof(unsigned) * 8) + (sizeof(double) * 8) +
@@ -2979,4 +3004,81 @@ H5P__facc_multi_type_dec(const void **_pp, void *_value)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_multi_type_dec() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_core_write_tracking
+ *
+ * Purpose:	Enables/disables core VFD write tracking and page
+ *              aggregation size.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_core_write_tracking(hid_t plist_id, hbool_t is_enabled, size_t page_size)
+{
+    H5P_genplist_t *plist;        /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ibz", plist_id, is_enabled, page_size);
+
+    /* The page size cannot be zero */
+    if(page_size == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page_size cannot be zero")
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set values */
+    if(H5P_set(plist, H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME, &is_enabled) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set core VFD write tracking flag")
+    if(H5P_set(plist, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, &page_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set core VFD write tracking page size")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_core_write_tracking
+ *
+ * Purpose:	Gets information about core VFD write tracking and page
+ *              aggregation size.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_core_write_tracking(hid_t plist_id, hbool_t *is_enabled, size_t *page_size)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*b*z", plist_id, is_enabled, page_size);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get values */
+    if(is_enabled) {
+        if(H5P_get(plist, H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME, is_enabled) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get core VFD write tracking flag")
+    } /* end if */
+
+    if(page_size) {
+        if(H5P_get(plist, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, page_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get core VFD write tracking page size")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
 

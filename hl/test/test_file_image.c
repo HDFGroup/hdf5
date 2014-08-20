@@ -77,23 +77,23 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
         FAIL_PUTS_ERROR("malloc() failed");
 
     /* allocate array of pointers for each of the open images */
-    if (NULL == (buf_ptr = (void **)malloc(sizeof(void *) * open_images)))
+    if (NULL == (buf_ptr = (void **)HDmalloc(sizeof(void *) * open_images)))
         FAIL_PUTS_ERROR("malloc() failed");
 
     /* allocate array to store the name of each of the open images */
-    if (NULL == (filename = (char **)malloc(sizeof(char *) * open_images)))
+    if (NULL == (filename = (char **)HDmalloc(sizeof(char *) * open_images)))
         FAIL_PUTS_ERROR("malloc() failed");
 
     /* allocate array to store the size of each of the open images */
-    if (NULL == (buf_size = (ssize_t *)malloc(sizeof(ssize_t) * open_images)))
+    if (NULL == (buf_size = (ssize_t *)HDmalloc(sizeof(ssize_t) * open_images)))
         FAIL_PUTS_ERROR("malloc() failed");
 
     /* allocate array for each of the file identifiers */
-    if (NULL == (file_id = (hid_t *)malloc(sizeof(hid_t) * open_images)))
+    if (NULL == (file_id = (hid_t *)HDmalloc(sizeof(hid_t) * open_images)))
         FAIL_PUTS_ERROR("malloc() failed");
 
     /* allocate array for each of the dataset identifiers */
-    if (NULL == (dset_id = (hid_t *)malloc(sizeof(hid_t) * open_images)))
+    if (NULL == (dset_id = (hid_t *)HDmalloc(sizeof(hid_t) * open_images)))
         FAIL_PUTS_ERROR("malloc() failed");
 
     TESTING("get file images");

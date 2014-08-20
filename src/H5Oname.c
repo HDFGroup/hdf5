@@ -97,10 +97,10 @@ H5O_name_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     HDassert(p);
 
     /* decode */
-    if(NULL == (mesg = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))) ||
-            NULL == (mesg->s = (char *)H5MM_malloc(HDstrlen((const char *)p) + 1)))
+    if(NULL == (mesg = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDstrcpy(mesg->s, (const char *)p);
+    if(NULL == (mesg->s = (char *)H5MM_strdup((const char *)p)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set return value */
     ret_value = mesg;
@@ -138,9 +138,9 @@ H5O_name_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, cons
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    assert(f);
-    assert(p);
-    assert(mesg && mesg->s);
+    HDassert(f);
+    HDassert(p);
+    HDassert(mesg && mesg->s);
 
     /* encode */
     HDstrcpy((char*)p, mesg->s);
@@ -228,8 +228,8 @@ H5O_name_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const void *
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    assert(f);
-    assert(mesg);
+    HDassert(f);
+    HDassert(mesg);
 
     ret_value = mesg->s ? HDstrlen(mesg->s) + 1 : 0;
 
@@ -294,11 +294,11 @@ H5O_name_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *s
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    assert(f);
-    assert(mesg);
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+    HDassert(f);
+    HDassert(mesg);
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
 
     fprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth,
             "Name:",

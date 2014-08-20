@@ -32,6 +32,7 @@ endif
 # We don't tell automake about these programs so that it doesn't try to
 # compile them with the regular fortran compiler.
 EXAMPLE_PROG=exlite ex_ds1
+TEST_EXAMPLES_SCRIPT=$(INSTALL_SCRIPT_FILES)
 
 # List files to be installed here
 INSTALL_FILES= exlite.f90 ex_ds1.f90

@@ -26,7 +26,7 @@
 #define PAL_ENTRIES  256
 
 static int    read_data(const char* file_name, hsize_t *width, hsize_t *height );
-unsigned char *gbuf = 0;  /* global buffer for image data */
+unsigned char *gbuf = NULL;  /* global buffer for image data */
 
 int main( void )
 {
@@ -46,6 +46,10 @@ int main( void )
 
  /* make the image */
  status=H5IMmake_image_8bit( file_id, IMAGE1_NAME, width, height, gbuf );
+ if (gbuf) {
+    free(gbuf);
+    gbuf = NULL;
+ }
 
 /*-------------------------------------------------------------------------
  * define a palette, blue to red tones
@@ -79,10 +83,21 @@ int main( void )
  /* close the file. */
  H5Fclose( file_id );
 
+ if(gbuf) {
+    free(gbuf);
+    gbuf = NULL;
+ }
+
  return 0;
 
 out:
  printf("Error on return function...Exiting\n");
+
+ if(gbuf) {
+    free(gbuf);
+    gbuf = NULL;
+ }
+
  return 1;
 }
 

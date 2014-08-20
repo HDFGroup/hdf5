@@ -26,9 +26,6 @@
 
 void parse_command_line (int argc, const char *argv[]);
 
-#define TRUE 1
-#define FALSE 0
-
 /* Name of tool */
 #define PROGRAMNAME "getub"
 char *nbytes = NULL;
@@ -79,21 +76,21 @@ usage (const char *prog)
 void
 parse_command_line (int argc, const char *argv[])
 {
-  int opt = FALSE;
+  int opt;
 
   /* parse command line options */
   while ((opt = get_option (argc, argv, s_opts, l_opts)) != EOF)
     {
       switch ((char) opt)
-  {
-  case 'c':
-    nbytes = HDstrdup (opt_arg);
-    break;
-  case '?':
-  default:
-    usage (h5tools_getprogname());
-    exit (EXIT_FAILURE);
-  }
+      {
+      case 'c':
+        nbytes = HDstrdup (opt_arg);
+        break;
+      case '?':
+      default:
+        usage (h5tools_getprogname());
+        exit (EXIT_FAILURE);
+      }
     }
 
   if (argc <= opt_ind)
@@ -153,7 +150,7 @@ main (int argc, const char *argv[])
       exit (EXIT_FAILURE);
     }
 
-  buf = malloc ((unsigned)(size + 1));
+  buf = (char *)HDmalloc ((unsigned)(size + 1));
   if (buf == NULL)
     {
       HDclose (fd);
@@ -165,7 +162,7 @@ main (int argc, const char *argv[])
   if (res < (long)size)
     {
       if (buf)
-  free (buf);
+  HDfree (buf);
       HDclose (fd);
       exit (EXIT_FAILURE);
     }
@@ -173,7 +170,7 @@ main (int argc, const char *argv[])
   HDwrite (1, buf, (unsigned)size);
 
   if (buf)
-    free (buf);
+    HDfree (buf);
   HDclose (fd);
   return (EXIT_SUCCESS);
 }

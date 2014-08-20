@@ -44,7 +44,7 @@
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 
 /****************/
@@ -219,7 +219,7 @@ HDfprintf(stderr, "%s: iblock->size = %Zu\n", FUNC, iblock->size);
         haddr_t tmp_addr = HADDR_UNDEF;         /* Address value to fill data block addresses with */
 
         /* Set all the data block addresses to "undefined" address value */
-        H5V_array_fill(iblock->dblk_addrs, &tmp_addr, sizeof(haddr_t), iblock->ndblk_addrs);
+        H5VM_array_fill(iblock->dblk_addrs, &tmp_addr, sizeof(haddr_t), iblock->ndblk_addrs);
     } /* end if */
 
     /* Reset any super block addresses in the index block */
@@ -227,7 +227,7 @@ HDfprintf(stderr, "%s: iblock->size = %Zu\n", FUNC, iblock->size);
         haddr_t tmp_addr = HADDR_UNDEF;         /* Address value to fill super block addresses with */
 
         /* Set all the super block addresses to "undefined" address value */
-        H5V_array_fill(iblock->sblk_addrs, &tmp_addr, sizeof(haddr_t), iblock->nsblk_addrs);
+        H5VM_array_fill(iblock->sblk_addrs, &tmp_addr, sizeof(haddr_t), iblock->nsblk_addrs);
     } /* end if */
 
     /* Cache the new extensible array index block */

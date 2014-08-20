@@ -26,7 +26,7 @@
 /*
  * Definitions for the testing structure.
  */
-#define MAXNUMOFTESTS   50
+#define MAXNUMOFTESTS   60
 #define MAXTESTNAME     16
 #define MAXTESTDESC     64
 
@@ -67,25 +67,27 @@ static int (*TestPrivateParser)(int ac, char *av[]) = NULL;
  * TheDescr--Long description of the test.
  * Parameters--pointer to extra parameters. Use NULL if none used.
  *    Since only the pointer is copied, the contents should not change.
+ * Return: Void
+ *    exit EXIT_FAILURE if error is encountered.
  */
 void
 AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), const char *TheDescr, const void *Parameters)
 {
     /* Sanity checking */
     if (Index >= MAXNUMOFTESTS) {
-        printf("Too many tests added, increase MAXNUMOFTEST(%d).\n",
+        printf("Too many tests added, increase MAXNUMOFTESTS(%d).\n",
 		MAXNUMOFTESTS);
-        exit(-1);
+        exit(EXIT_FAILURE);
     }                           /* end if */
     if (HDstrlen(TheDescr) >= MAXTESTDESC) {
         printf("Test description too long, increase MAXTESTDESC(%d).\n",
 		MAXTESTDESC);
-        exit(-1);
+        exit(EXIT_FAILURE);
     } /* end if */
     if (HDstrlen(TheName) >= MAXTESTNAME) {
         printf("Test name too long, increase MAXTESTNAME(%d).\n",
 		MAXTESTNAME);
-        exit(-1);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Set up test function */
@@ -155,8 +157,8 @@ void TestUsage(void)
 
 	print_func("Usage: %s [-v[erbose] (l[ow]|m[edium]|h[igh]|0-9)] %s\n",
 	    TestProgName, (TestPrivateUsage ? "<extra options>" : ""));
-	print_func("              [-[e]x[clude] name+] \n");
-	print_func("              [-o[nly] name+] \n");
+	print_func("              [-[e]x[clude] name]+ \n");
+	print_func("              [-o[nly] name]+ \n");
 	print_func("              [-b[egin] name] \n");
 	print_func("              [-s[ummary]]  \n");
 	print_func("              [-c[leanoff]]  \n");
@@ -203,6 +205,9 @@ void TestInfo(const char *ProgName)
  * Parse command line information.
  *      argc, argv: the usual command line argument count and strings
  *
+ * Return: Void
+ *    exit EXIT_FAILURE if error is encountered.
+ *
  * Modification:
  * 	2004/08/18 Albert Cheng.  Add extra_parse feature.
  */
@@ -218,7 +223,7 @@ void TestParseCmdLine(int argc, char *argv[])
 		ParseTestVerbosity(*argv);
 	    }else{
 		TestUsage();
-		exit(1);
+		exit(EXIT_FAILURE);
 	    }
 	}
 	else if (((HDstrcmp(*argv, "-exclude") == 0) ||
@@ -228,7 +233,7 @@ void TestParseCmdLine(int argc, char *argv[])
 		SetTest(*argv, SKIPTEST);
 	    }else{
 		TestUsage();
-		exit(1);
+		exit(EXIT_FAILURE);
 	    }
 	}
 	else if (((HDstrcmp(*argv, "-begin") == 0) ||
@@ -238,7 +243,7 @@ void TestParseCmdLine(int argc, char *argv[])
 		SetTest(*argv, BEGINTEST);
 	    }else{
 		TestUsage();
-		exit(1);
+		exit(EXIT_FAILURE);
 	    }
 	}
 	else if (((HDstrcmp(*argv, "-only") == 0) ||
@@ -252,14 +257,14 @@ void TestParseCmdLine(int argc, char *argv[])
 		SetTest(*argv, ONLYTEST);
 	    }else{
 		TestUsage();
-		exit(1);
+		exit(EXIT_FAILURE);
 	    }
 	}
 	else if ((HDstrcmp(*argv, "-summary") == 0) || (HDstrcmp(*argv, "-s") == 0))
             Summary = 1;
 	else if ((HDstrcmp(*argv, "-help") == 0) || (HDstrcmp(*argv, "-h") == 0)) {
             TestUsage();
-            exit(0);
+            exit(EXIT_SUCCESS);
         }
 	else if ((HDstrcmp(*argv, "-cleanoff") == 0) || (HDstrcmp(*argv, "-c") == 0))
 	    SetTestNoCleanup();
@@ -274,7 +279,7 @@ void TestParseCmdLine(int argc, char *argv[])
     if (NULL != TestPrivateParser){
 	ret_code=TestPrivateParser(argc+1, argv-1);
 	if (ret_code != 0)
-	    exit(-1);
+	    exit(EXIT_FAILURE);
     }
 }
 

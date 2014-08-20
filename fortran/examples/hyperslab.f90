@@ -33,8 +33,6 @@
 
      INTEGER(HSIZE_T), DIMENSION(3) :: dimsm = (/7,7,3/) ! Dataset dimensions
                                                          ! in memory
-     INTEGER(HSIZE_T), DIMENSION(2) :: dims_out ! Buffer to read in dataset
-                                                ! dimesions
      INTEGER(HSIZE_T), DIMENSION(2) :: dimsf = (/5,6/) ! Dataset dimensions.
 
      INTEGER(HSIZE_T), DIMENSION(2) :: count = (/3,4/)
@@ -49,16 +47,15 @@
      INTEGER, DIMENSION(7,7,3) :: data_out ! Output buffer
      INTEGER :: dsetrank = 2 ! Dataset rank ( in file )
      INTEGER :: memrank = 3  ! Dataset rank ( in memory )
-     INTEGER :: rank
      INTEGER :: i, j, k
 
-     INTEGER :: error, error_n  ! Error flags
+     INTEGER :: error  ! Error flag
      INTEGER(HSIZE_T), DIMENSION(3) :: data_dims
 
 
-   !
-   ! Write data to the HDF5 file.
-   !
+     !
+     ! Write data to the HDF5 file.
+     !
 
      !
      ! Data initialization.

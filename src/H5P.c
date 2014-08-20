@@ -25,7 +25,7 @@
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5P_init_pub_interface
+#define H5_INTERFACE_INIT_FUNC	H5P__init_pub_interface
 
 
 /***********/
@@ -75,9 +75,9 @@ typedef struct {
 
 /*--------------------------------------------------------------------------
 NAME
-   H5P_init_pub_interface -- Initialize interface-specific information
+   H5P__init_pub_interface -- Initialize interface-specific information
 USAGE
-    herr_t H5P_init_pub_interface()
+    herr_t H5P__init_pub_interface()
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -86,12 +86,36 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_init_pub_interface(void)
+H5P__init_pub_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     FUNC_LEAVE_NOAPI(H5P_init())
-} /* H5P_init_pub_interface() */
+} /* H5P__init_pub_interface() */
+
+
+/*--------------------------------------------------------------------------
+NAME
+   H5P__term_pub_interface -- Terminate interface
+USAGE
+    herr_t H5P__term_pub_interface()
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Terminates interface.  (Just resets H5_interface_initialize_g
+    currently).
+
+--------------------------------------------------------------------------*/
+herr_t
+H5P__term_pub_interface(void)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Mark closed */
+    H5_interface_initialize_g = 0;
+
+    FUNC_LEAVE_NOAPI(0)
+} /* H5P__term_pub_interface() */
 
 
 /*--------------------------------------------------------------------------
@@ -862,7 +886,7 @@ herr_t
 H5Pencode(hid_t plist_id, void *buf, size_t *nalloc)
 {
     H5P_genplist_t	*plist;         /* Property list to query */
-    hid_t ret_value = SUCCEED;          /* return value */
+    herr_t ret_value = SUCCEED;          /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*x*z", plist_id, buf, nalloc);
@@ -1660,7 +1684,7 @@ done:
 herr_t
 H5Pclose_class(hid_t cls_id)
 {
-    hid_t	ret_value = SUCCEED;    /* Return value			*/
+    herr_t	ret_value = SUCCEED;    /* Return value			*/
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", cls_id);

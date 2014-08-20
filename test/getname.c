@@ -2487,30 +2487,30 @@ test_obj_ref(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create reference to dataset */
-    if(H5Rcreate(&wbuf[0], fid1, "/Dataset3", H5R_OBJECT, -1) < 0)
+    if(H5Rcreate(&wbuf[0], fid1, "/Dataset3", H5R_OBJECT, (hid_t)-1) < 0)
         FAIL_STACK_ERROR
 
     /* Create reference to dataset */
-    if(H5Rcreate(&wbuf[1], fid1, "/Group1/Dataset2", H5R_OBJECT, -1) < 0)
+    if(H5Rcreate(&wbuf[1], fid1, "/Group1/Dataset2", H5R_OBJECT, (hid_t)-1) < 0)
         FAIL_STACK_ERROR
 
     /* Create reference to group */
-    if(H5Rcreate(&wbuf[2], fid1, "/Group1", H5R_OBJECT, -1) < 0)
+    if(H5Rcreate(&wbuf[2], fid1, "/Group1", H5R_OBJECT, (hid_t)-1) < 0)
         FAIL_STACK_ERROR
 
     /* Create reference to named datatype */
-    if(H5Rcreate(&wbuf[3], fid1, "/Group1/Datatype1", H5R_OBJECT, -1) < 0)
+    if(H5Rcreate(&wbuf[3], fid1, "/Group1/Datatype1", H5R_OBJECT, (hid_t)-1) < 0)
         FAIL_STACK_ERROR
 
-    if(H5Rcreate(&wbuf[4], fid1, "/Group1/Group2/Dataset4", H5R_OBJECT, -1) < 0)
+    if(H5Rcreate(&wbuf[4], fid1, "/Group1/Group2/Dataset4", H5R_OBJECT, (hid_t)-1) < 0)
         FAIL_STACK_ERROR
-    if(H5Rcreate(&wbuf[5], fid1, "/Group1/Group2", H5R_OBJECT, -1) < 0)
+    if(H5Rcreate(&wbuf[5], fid1, "/Group1/Group2", H5R_OBJECT, (hid_t)-1) < 0)
         FAIL_STACK_ERROR
-    if(H5Rcreate(&wbuf[6], fid1, "/Group1/Group2/Link/Dataset5", H5R_OBJECT, -1) < 0)
+    if(H5Rcreate(&wbuf[6], fid1, "/Group1/Group2/Link/Dataset5", H5R_OBJECT, (hid_t)-1) < 0)
         FAIL_STACK_ERROR
 
     /* Create reference to root group */
-    if(H5Rcreate(&wbuf[7], fid1, "/", H5R_OBJECT, -1) < 0)
+    if(H5Rcreate(&wbuf[7], fid1, "/", H5R_OBJECT, (hid_t)-1) < 0)
         FAIL_STACK_ERROR
 
     /* Write selection to disk */
@@ -2524,6 +2524,14 @@ test_obj_ref(hid_t fapl)
     if(H5Dclose(dataset2) < 0) FAIL_STACK_ERROR
     if(!((HDstrcmp(buf, "/Dataset3") == 0) &&(i == 9))) TEST_ERROR
     *buf = '\0';
+
+    /* Check H5Rget_name returns the correct length of the name when name is NULL */
+    i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[0], NULL, 0);
+    if(i != 9) TEST_ERROR
+    /* Make sure size parameter is ignored */
+    i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[0], NULL, 200);
+    if(i != 9) TEST_ERROR
+    
     i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[0], (char*)buf, sizeof(buf));
     if(!((HDstrcmp(buf, "/Dataset3") == 0) &&(i == 9))) TEST_ERROR
     PASSED()
@@ -2761,7 +2769,12 @@ test_reg_ref(hid_t fapl)
     /* Get name of the dataset the first region reference points to using H5Rget_name */
     TESTING("H5Rget_name to get name from region reference(hyperslab)");
     *buf1 = '\0';
-    name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[0], (char*)buf1, NAME_BUF_SIZE);
+
+    /* Check H5Rget_name returns the correct length of the name when name is NULL */
+    name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[0], NULL, 0);
+    if(name_size1 != 7) TEST_ERROR
+
+    name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[0], (char*)buf1, NAME_BUF_SIZE );
     if(!((HDstrcmp(buf1, "/MATRIX") == 0) &&(name_size1 == 7))) TEST_ERROR
     PASSED()
 

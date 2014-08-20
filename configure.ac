@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.132], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.193], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -160,7 +160,6 @@ AC_MSG_RESULT([done])
 ## HDF_CXX: whether C++ is enabled. Default no.
 ## CXX: C++ compiler.
 ## HDF5_HL: whether high-level library is enabled. Default is yes.
-## GPFS: whether gpfs is enabled. Default no.
 ## LARGEFILE: whether largefile support is enabled. Default yes.
 ## INSTRUMENT: whether INSTRUMENT is enabled. No default set here.
 ## CODESTACK: whether CODESTACK is enabled. Default no.
@@ -182,7 +181,6 @@ AC_SUBST([FC2003]) HDF_FORTRAN2003=no
 AC_SUBST([HDF_CXX]) HDF_CXX=no
 AC_SUBST([CXX]) HDF_CXX=no
 AC_SUBST([HDF5_HL]) HDF5_HL=yes
-AC_SUBST([GPFS]) GPFS=no
 AC_SUBST([LARGEFILE]) LARGEFILE=yes
 AC_SUBST([INSTRUMENT])
 AC_SUBST([CODESTACK]) CODESTACK=no
@@ -405,6 +403,8 @@ else
 fi
 
 HAVE_SIZEOF="no"
+HAVE_C_SIZEOF="no"
+HAVE_STORAGE_SIZE="no"
 FORTRAN_DEFAULT_REALisDBLE="no"
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
@@ -431,12 +431,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([HID_T])
   AC_SUBST([SIZE_T])
   AC_SUBST([OBJECT_NAMELEN_DEFAULT_F])
-
-  ## --------------------------------------------------------------------
-  ## General Fortran flags
-  ##
-  AM_FCFLAGS="${AM_FCFLAGS} ${FFLAGS}"
-  FCFLAGS="${FCFLAGS} ${FFLAGS}"
 
   ## --------------------------------------------------------------------
   ## Fortran source extention
@@ -489,6 +483,33 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
    END PROGRAM
   ], [AC_MSG_RESULT([yes])
      	HAVE_SIZEOF="yes"],
+     [AC_MSG_RESULT([no])])
+
+  ## See if the fortran compiler supports the intrinsic function "C_SIZEOF"
+
+  AC_MSG_CHECKING([if Fortran compiler supports intrinsic C_SIZEOF])
+  AC_TRY_RUN([ 
+   PROGRAM main
+     USE ISO_C_BINDING
+     INTEGER(C_INT) :: a
+     INTEGER(C_SIZE_T) :: result
+     result = C_SIZEOF(a)
+   END PROGRAM
+  ], [AC_MSG_RESULT([yes])
+     	HAVE_C_SIZEOF="yes"],
+     [AC_MSG_RESULT([no])])
+
+  ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
+
+  AC_MSG_CHECKING([if Fortran compiler supports intrinsic STORAGE_SIZE])
+  AC_TRY_RUN([ 
+   PROGRAM main
+     INTEGER :: a
+     INTEGER :: result
+     result = STORAGE_SIZE(a)
+   END PROGRAM
+  ], [AC_MSG_RESULT([yes])
+     	HAVE_STORAGE_SIZE="yes"],
      [AC_MSG_RESULT([no])])
 
   ## Check to see if -r8 was specified to determine if we need to
@@ -560,8 +581,12 @@ fi
 AC_LANG_POP(Fortran)
 
 AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF" = "Xyes"])
+AM_CONDITIONAL([FORTRAN_HAVE_C_SIZEOF], [test "X$HAVE_C_SIZEOF" = "Xyes"])
+AM_CONDITIONAL([FORTRAN_HAVE_STORAGE_SIZE], [test "X$HAVE_STORAGE_SIZE" = "Xyes"])
 AM_CONDITIONAL([FORTRAN_2003_CONDITIONAL_F], [test "X$HAVE_FORTRAN_2003" = "Xyes"])
 AM_CONDITIONAL([FORTRAN_DEFAULT_REALisDBLE_F], [test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"])
+
+
 
 ## ----------------------------------------------------------------------
 ## Check if they would like the C++ interface compiled
@@ -1052,12 +1077,15 @@ if test "X$STATIC_EXEC" = "Xyes"; then
   ## Issue a warning if -static flag is not supported.
   if test "X$lt_cv_prog_compiler_static_works" = "Xno"; then
       echo "    warning: -static flag not supported on this system; executable won't statically link shared system libraries."
+      LT_STATIC_EXEC=""
+  else
+    LT_STATIC_EXEC="-all-static"
   fi
-  LT_STATIC_EXEC="-all-static"
 else
   echo "no"
   LT_STATIC_EXEC=""
 fi
+AM_CONDITIONAL([USE_PLUGINS_CONDITIONAL], [test "X$LT_STATIC_EXEC" = X])
 
 AC_SUBST([LT_STATIC_EXEC])
 
@@ -1086,6 +1114,7 @@ case "X-$RPATH" in
     runpath_var=
     hardcode_libdir_flag_spec=
     hardcode_libdir_flag_spec_ld=
+    hardcode_into_libs=no
     ;;
   X-|X-yes)
     AC_MSG_RESULT([yes])
@@ -1095,8 +1124,6 @@ case "X-$RPATH" in
     AC_MSG_ERROR([\'$enableval\' is not a valid rpath type])
     ;;
 esac
-
-AC_MSG_CHECKING([make])
 
 ## ----------------------------------------------------------------------
 ## Sometimes makes think the `.PATH:' appearing before the first rule
@@ -1242,9 +1269,10 @@ case "X-$enable_production" in
 esac
 
 ## ----------------------------------------------------------------------
-## Check for system libraries.
+## Check for system libraries. "dl" stands for dynamically loaded library
 ##
 AC_CHECK_LIB([m], [ceil])
+AC_CHECK_LIB([dl], [dlopen])
 
 if test "`uname`" = "SunOS" -o "`uname -sr`" = "HP-UX B.11.00"; then
   ## ...for Solaris
@@ -1274,10 +1302,17 @@ AC_CHECK_FUNCS([clock_gettime],[have_clock_gettime="yes"],[have_clock_gettime="n
 AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
 AC_CHECK_HEADERS([sys/socket.h sys/types.h])
 AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
+AC_CHECK_HEADERS([dirent.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
 
 ## Darwin
 AC_CHECK_HEADERS([mach/mach_time.h])
+## Also need to detect Darwin for pubconf
+case $host_os in
+  darwin*)
+    AC_DEFINE([HAVE_DARWIN], [1], [Define if Darwin or Mac OS X])
+  ;;
+esac
 
 ## Windows
 case "`uname`" in
@@ -1465,7 +1500,7 @@ case "$host_cpu-$host_vendor-$host_os" in
     ;;
 esac
 
-## Need to add the AM_ and H5_ into CPFLAGS/CPPFLAGS to make them visible 
+## Need to add the AM_ and H5_ into CFLAGS/CPPFLAGS to make them visible 
 ## for configure checks.
 ## Note: Both will be restored by the end of configure.
 CPPFLAGS="$H5_CPPFLAGS $AM_CPPFLAGS $CPPFLAGS"
@@ -1609,9 +1644,10 @@ AC_ARG_WITH([dmalloc],
 case $withval in
   yes)
     HAVE_DMALLOC="yes"
-    AC_CHECK_HEADERS([dmalloc.h])
-    AC_CHECK_LIB([dmalloc], [dmalloc_shutdown],, [unset HAVE_DMALLOC])
-
+    AC_CHECK_HEADERS([dmalloc.h],, [unset HAVE_DMALLOC])
+    if test "x$HAVE_DMALLOC" = "xyes"; then
+      AC_CHECK_LIB([dmalloc], [dmalloc_shutdown],, [unset HAVE_DMALLOC])
+    fi
     if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find dmalloc library])
     fi
@@ -1655,14 +1691,16 @@ case $withval in
       AM_CPPFLAGS="$AM_CPPFLAGS -I$dmalloc_inc"
     fi
 
-    AC_CHECK_HEADERS([dmalloc.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+    AC_CHECK_HEADERS([dmalloc.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_DMALLOC])
 
-    if test -n "$dmalloc_lib"; then
-      LDFLAGS="$LDFLAGS -L$dmalloc_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$dmalloc_lib"
+    if test "x$HAVE_DMALLOC" = "xyes"; then
+      if test -n "$dmalloc_lib"; then
+        LDFLAGS="$LDFLAGS -L$dmalloc_lib"
+        AM_LDFLAGS="$AM_LDFLAGS -L$dmalloc_lib"
+      fi
+
+      AC_CHECK_LIB([dmalloc], [dmalloc_shutdown],, [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_DMALLOC])
     fi
-
-    AC_CHECK_LIB([dmalloc], [dmalloc_shutdown],, [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_DMALLOC])
 
     if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find dmalloc library])
@@ -1686,12 +1724,16 @@ AC_ARG_WITH([zlib],
 case $withval in
   yes)
     HAVE_ZLIB="yes"
-    AC_CHECK_HEADERS([zlib.h], [HAVE_ZLIB_H="yes"])
-    AC_CHECK_LIB([z], [compress2],, [unset HAVE_ZLIB])
-    AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
-
-    if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find zlib library])
+    AC_CHECK_HEADERS([zlib.h], [HAVE_ZLIB_H="yes"], [unset HAVE_ZLIB])
+    if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes"; then
+      AC_CHECK_LIB([z], [compress2],, [unset HAVE_ZLIB])
+    fi
+    if test -z "$HAVE_ZLIB"; then
+      if test -n "$HDF5_CONFIG_ABORT"; then
+        AC_MSG_ERROR([couldn't find zlib library])
+      fi
+    else
+      AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
     fi
     ;;
   no)
@@ -1703,8 +1745,8 @@ case $withval in
     HAVE_ZLIB="yes"
     case "$withval" in
       *,*)
-        zlib_inc="`echo $withval |cut -f1 -d,`"
-        zlib_lib="`echo $withval |cut -f2 -d, -s`"
+        zlib_inc="`echo $withval | cut -f1 -d,`"
+        zlib_lib="`echo $withval | cut -f2 -d, -s`"
         ;;
       *)
         if test -n "$withval"; then
@@ -1735,32 +1777,37 @@ case $withval in
 
     AC_CHECK_HEADERS([zlib.h],
                      [HAVE_ZLIB_H="yes"],
-                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_ZLIB])
 
     if test -n "$zlib_lib"; then
       LDFLAGS="$LDFLAGS -L$zlib_lib"
       AM_LDFLAGS="$AM_LDFLAGS -L$zlib_lib"
     fi
 
-    AC_CHECK_LIB([z], [compress2],,
-                 [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_ZLIB])
-    AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
+    if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes"; then
+      AC_CHECK_LIB([z], [compress2],,
+                   [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_ZLIB])
+    fi
 
-    if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find zlib library])
+    if test -z "$HAVE_ZLIB"; then
+      if test -n "$HDF5_CONFIG_ABORT"; then
+        AC_MSG_ERROR([couldn't find zlib library])
+      fi
+    else
+      AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
     fi
     ;;
 esac
 
 if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes" -a "x$HAVE_COMPRESS2" = "xyes"; then
-    AC_DEFINE([HAVE_FILTER_DEFLATE], [1], [Define if support for deflate (zlib) filter is enabled])
-    USE_FILTER_DEFLATE="yes"
+  AC_DEFINE([HAVE_FILTER_DEFLATE], [1], [Define if support for deflate (zlib) filter is enabled])
+  USE_FILTER_DEFLATE="yes"
 
-    ## Add "deflate" to external filter list
-    if test "X$EXTERNAL_FILTERS" != "X"; then
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
-    fi
-    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate(zlib)"
+  ## Add "deflate" to external filter list
+  if test "X$EXTERNAL_FILTERS" != "X"; then
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
+  fi
+  EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate(zlib)"
 fi
 
 
@@ -1780,9 +1827,10 @@ AC_ARG_WITH([szlib],
 case $withval in
   yes)
     HAVE_SZLIB="yes"
-    AC_CHECK_HEADERS([szlib.h], [HAVE_SZLIB_H="yes"])
-    AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],, [unset HAVE_SZLIB])
-
+    AC_CHECK_HEADERS([szlib.h], [HAVE_SZLIB_H="yes"], [unset HAVE_SZLIB])
+    if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
+      AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],, [unset HAVE_SZLIB])
+    fi
     if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find szlib library])
     fi
@@ -1828,15 +1876,17 @@ case $withval in
     
     AC_CHECK_HEADERS([szlib.h],
                      [HAVE_SZLIB_H="yes"],
-                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_SZLIB])
 
     if test -n "$szlib_lib"; then
       LDFLAGS="$LDFLAGS -L$szlib_lib"
       AM_LDFLAGS="$AM_LDFLAGS -L$szlib_lib"
     fi
     
-    AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],,
-                 [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB])
+    if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
+      AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],,
+                   [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB])
+    fi
 
     if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find szlib library])
@@ -1845,21 +1895,21 @@ case $withval in
 esac
 
 if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
-    ## SZLIB library is available.  Check if it can encode
-    AC_MSG_CHECKING([for szlib encoder])
+  ## SZLIB library is available.  Check if it can encode
+  AC_MSG_CHECKING([for szlib encoder])
 
-    ## Set LD_LIBRARY_PATH so encoder test can find the library and run.
-    ## Also add LL_PATH substitution to Makefiles so they can use the 
-    ## path as well, for testing examples.
-    if test -z "$LD_LIBRARY_PATH"; then
+  ## Set LD_LIBRARY_PATH so encoder test can find the library and run.
+  ## Also add LL_PATH substitution to Makefiles so they can use the 
+  ## path as well, for testing examples.
+  if test -z "$LD_LIBRARY_PATH"; then
     export LD_LIBRARY_PATH="$szlib_lib"
-    else
+  else
     export LD_LIBRARY_PATH="$szlib_lib:$LD_LIBRARY_PATH"
-    fi
+  fi
 
-    AC_SUBST([LL_PATH]) LL_PATH="$LD_LIBRARY_PATH"
+  AC_SUBST([LL_PATH]) LL_PATH="$LD_LIBRARY_PATH"
 
-    AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
+  AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
         [AC_TRY_RUN([
         #include <szlib.h>
         
@@ -1873,31 +1923,30 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
         }
         ], [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)])
     
-    AC_DEFINE([HAVE_FILTER_SZIP], [1], 
+  AC_DEFINE([HAVE_FILTER_SZIP], [1], 
             [Define if support for szip filter is enabled])
-    USE_FILTER_SZIP="yes"
+  USE_FILTER_SZIP="yes"
 
-    if test ${hdf5_cv_szlib_can_encode} = "yes"; then
-        AC_MSG_RESULT([yes])
-    fi 
-    if test ${hdf5_cv_szlib_can_encode} = "no"; then
-        AC_MSG_RESULT([no])
-    fi 
+  if test ${hdf5_cv_szlib_can_encode} = "yes"; then
+    AC_MSG_RESULT([yes])
+  fi 
+  if test ${hdf5_cv_szlib_can_encode} = "no"; then
+    AC_MSG_RESULT([no])
+  fi 
     
-    ## Add "szip" to external filter list
-    if test ${hdf5_cv_szlib_can_encode} = "yes"; then
-        if test "X$EXTERNAL_FILTERS" != "X"; then
-            EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
-        fi
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(encoder)"
-    fi 
-    if test ${hdf5_cv_szlib_can_encode} = "no"; then
-        if test "X$EXTERNAL_FILTERS" != "X"; then
-            EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
-        fi
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(no encoder)"
+  ## Add "szip" to external filter list
+  if test ${hdf5_cv_szlib_can_encode} = "yes"; then
+    if test "X$EXTERNAL_FILTERS" != "X"; then
+      EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
     fi
-
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(encoder)"
+  fi 
+  if test ${hdf5_cv_szlib_can_encode} = "no"; then
+    if test "X$EXTERNAL_FILTERS" != "X"; then
+      EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
+    fi
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(no encoder)"
+  fi
 fi
 
 AM_CONDITIONAL([BUILD_SHARED_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xyes" && test "X$LL_PATH" != "X"])
@@ -1906,82 +1955,13 @@ AM_CONDITIONAL([BUILD_SHARED_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xye
 AC_CACHE_SAVE
 
 ## ----------------------------------------------------------------------
-## Is the Pthreads library present?  It has a header file `pthread.h' and
-## a library `-lpthread' and their locations might be specified with the
-## `--with-pthread' command-line switch.  The value is an include path
-## and/or a library path.  If the library path is specified then it must
-## be preceded by a comma.
-##
-AC_SUBST([PTHREAD]) PTHREAD=yes
-AC_ARG_WITH([pthread],
-            [AS_HELP_STRING([--with-pthread=DIR],
-                            [Use the Pthreads library [default=no]])],,
-            [withval=no])
-
-case "$withval" in
-  yes)
-    AC_CHECK_HEADERS([pthread.h])
-    AC_CHECK_LIB([pthread], [pthread_self],, [unset PTHREAD])
-    ;;
-  no)
-    AC_MSG_CHECKING([for pthread])
-    AC_MSG_RESULT([suppressed])
-    unset PTHREAD
-    ;;
-  *)
-    case "$withval" in
-      *,*)
-        pthread_inc="`echo $withval | cut -f1 -d,`"
-        pthread_lib="`echo $withval | cut -f2 -d, -s`"
-        ;;
-      *)
-        if test -n "$withval"; then
-          pthread_inc="$withval/include"
-          pthread_lib="$withval/lib"
-        fi
-        ;;
-    esac
-
-    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-    ## can mess some compilers up.
-    if test "X$pthread_inc" = "X/usr/include"; then
-      pthread_inc=""
-    fi
-    if test "X$pthread_lib" = "X/usr/lib"; then
-      pthread_lib=""
-    fi
-
-    if test -n "$pthread_inc"; then
-      saved_CPPFLAGS="$CPPFLAGS"
-      saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-      CPPFLAGS="$CPPFLAGS -I$pthread_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
-      AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset PTHREAD])
-    else
-      AC_CHECK_HEADERS([pthread.h],, [unset PTHREAD])
-    fi
-
-    if test -n "$pthread_lib"; then
-      saved_LDFLAGS="$LDFLAGS"
-      saved_AM_LDFLAGS="$AM_LDFLAGS"
-      LDFLAGS="$LDFLAGS -L$pthread_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
-      AC_CHECK_LIB([pthread], [pthread_self],,
-                   [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset PTHREAD])
-
-    else
-      AC_CHECK_LIB([pthread], [pthread_self],, [unset PTHREAD])
-    fi
-    ;;
-esac
-
-## ----------------------------------------------------------------------
-## Enable thread-safe version of library.  It requires Pthreads support.
+## Enable thread-safe version of library.  It requires Pthreads support
+## on POSIX systems.
 ##
 AC_MSG_CHECKING([for thread safe support])
 AC_ARG_ENABLE([threadsafe],
               [AS_HELP_STRING([--enable-threadsafe],
-                              [Enable thread safe capability])],
+                              [Enable thread-safe capability])],
               [THREADSAFE=$enableval])
 
 ## The --enable-threadsafe flag is not compatible with --enable-cxx.
@@ -2006,10 +1986,8 @@ case "X-$THREADSAFE" in
     AC_MSG_RESULT([no])
     ;;
   X-yes)
-    ## Check that we can link a simple Pthread program.
-    AC_TRY_LINK(, [pthread_self()],
-                [AC_MSG_RESULT([yes]); THREADSAFE=yes],
-                [AC_MSG_ERROR([needed pthread library not available])])
+    THREADSAFE=yes 
+    AC_MSG_RESULT([yes])
     ;;
   *)
     AC_MSG_RESULT([error])
@@ -2018,7 +1996,83 @@ case "X-$THREADSAFE" in
 esac
 
 if test "X$THREADSAFE" = "Xyes"; then
-  AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
+    AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
+
+    ## ----------------------------------------------------------------------
+    ## Is the pthreads library present?  It has a header file `pthread.h' and
+    ## a library `-lpthread' and their locations might be specified with the
+    ## `--with-pthread' command-line switch.  The value is an include path
+    ## and/or a library path.  If the library path is specified then it must
+    ## be preceded by a comma.
+    ##
+    ## Thread-safety in HDF5 only uses Pthreads via configure, so the
+    ## default is "yes", though this only has an effect when
+    ## --enable-threadsafe is specified.
+    AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
+    AC_ARG_WITH([pthread],
+                [AS_HELP_STRING([--with-pthread=DIR],
+                                [Specify alternative path to Pthreads library when thread-safe capability is built])],,
+                [withval=yes])
+
+    case "$withval" in
+      yes)
+        AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
+        if test "x$HAVE_PTHREAD" = "xyes"; then
+          AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+        fi
+        ;;
+      no)
+        AC_MSG_CHECKING([for pthread])
+        AC_MSG_RESULT([suppressed])
+        unset HAVE_PTHREAD
+        ;;
+      *)
+        case "$withval" in
+          *,*)
+            pthread_inc="`echo $withval | cut -f1 -d,`"
+            pthread_lib="`echo $withval | cut -f2 -d, -s`"
+            ;;
+          *)
+            if test -n "$withval"; then
+              pthread_inc="$withval/include"
+              pthread_lib="$withval/lib"
+            fi
+            ;;
+        esac
+
+        ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+        ## can mess some compilers up.
+        if test "X$pthread_inc" = "X/usr/include"; then
+          pthread_inc=""
+        fi
+        if test "X$pthread_lib" = "X/usr/lib"; then
+          pthread_lib=""
+        fi
+
+        if test -n "$pthread_inc"; then
+          saved_CPPFLAGS="$CPPFLAGS"
+          saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+          CPPFLAGS="$CPPFLAGS -I$pthread_inc"
+          AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
+          AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset HAVE_PTHREAD])
+        else
+          AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
+        fi
+
+        if test "x$HAVE_PTHREAD" = "xyes"; then
+          if test -n "$pthread_lib"; then
+            saved_LDFLAGS="$LDFLAGS"
+            saved_AM_LDFLAGS="$AM_LDFLAGS"
+            LDFLAGS="$LDFLAGS -L$pthread_lib"
+            AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
+            AC_CHECK_LIB([pthread], [pthread_self],,
+                         [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD])
+          else
+            AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+          fi
+        fi
+        ;;
+    esac
 fi
 
 ## ----------------------------------------------------------------------
@@ -2129,7 +2183,14 @@ AC_TRY_COMPILE([
 ## ----------------------------------------------------------------------
 ## How do we figure out the width of a tty in characters?
 ##
-AC_CHECK_FUNCS([_getvideoconfig gettextinfo GetConsoleScreenBufferInfo])
+AC_CHECK_FUNCS([_getvideoconfig gettextinfo])
+case "`uname`" in
+  CYGWIN*)
+    ;;
+  *)
+    AC_CHECK_FUNCS([GetConsoleScreenBufferInfo])
+    ;;
+esac
 AC_CHECK_FUNCS([_scrsize ioctl])
 
 AC_MSG_CHECKING([for struct videoconfig])
@@ -2169,7 +2230,7 @@ AC_CHECK_FUNCS([gethostname getpwuid getrusage lstat])
 AC_CHECK_FUNCS([rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
-AC_CHECK_FUNCS([tmpfile vasprintf waitpid])
+AC_CHECK_FUNCS([tmpfile asprintf vasprintf waitpid])
 
 ## Check for vsnprintf() separately, so we can detect situations where it
 ## doesn't return the correct size for formatted strings that are too large
@@ -2232,12 +2293,12 @@ AC_CACHE_CHECK([if lone colon can be used as an argument],
                [hdf5_cv_lone_colon],
                [
   echo "int main(int argc, char * argv[]) {return 0;}" > conftest.c
-  $CC $CFLAGS conftest.c > /dev/null 2> /dev/null
+  $CC $CFLAGS conftest.c -o a.out> /dev/null 2> /dev/null
   echo "./a.out :" > conftest.sh
   chmod 700 conftest.sh
 
   ./conftest.sh 2> conftest.out
-  rm a.out
+  rm -f a.out
   TEST_OUTPUT=`cat conftest.out`
 
   if test "X$TEST_OUTPUT" = "X"; then
@@ -2293,14 +2354,9 @@ AC_TRY_COMPILE(,[
 ## Try to figure out how to print `long long'.  Some machines use `%lld'
 ## and others use `%qd'.  There may be more!  The final `l' is a
 ## default in case none of the others work.
-## Need to patch up LD_LIBRARY_PATH so that the execution can find all
-## the dynamic library.  The correct way to do it should be updating
-## LD_LIBRARY_PATH along with LDFLAGS or do it with the AC_TRY_RUN macro.
 ##
 AC_MSG_CHECKING([how to print long long])
 AC_CACHE_VAL([hdf5_cv_printf_ll], [
-LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo $AM_LDFLAGS $LDFLAGS | sed -e 's/-L/:/g' -e 's/ //g'`"
-export LD_LIBRARY_PATH
 
 for hdf5_cv_printf_ll in l ll L q unknown; do
    AC_TRY_RUN([
@@ -2353,35 +2409,6 @@ else
   AC_MSG_RESULT([no])
 fi
 
-## ----------------------------------------------------------------------
-## Checking to see if GPFS is available on this filesystem
-##
-AC_ARG_ENABLE([gpfs],
-              [AS_HELP_STRING([--enable-gpfs],
-                              [Enable GPFS hints for the MPI/POSIX file
-                               driver. [default=no]])],,
-              [enableval=no])
-
-case "X-$enableval" in
-  X-yes)
-    AC_CHECK_HEADERS([gpfs.h],
-                     [AC_MSG_CHECKING([for GPFS support])
-                     AC_TRY_COMPILE([#include <gpfs.h>],
-                                    [int fd = 0; gpfs_fcntl(fd, (void *)0);],
-                                    [AC_DEFINE([HAVE_GPFS], [1],
-                                               [Define if we have GPFS support])
-                                       AC_MSG_RESULT([yes])
-                                       LIBS="$LIBS -lgpfs"
-                                       GPFS="yes"],
-                                    [AC_MSG_RESULT([no])
-                                       GPFS="no"])])
-    ;;
-  X-no|*)
-    AC_MSG_CHECKING([for gpfs])
-    AC_MSG_RESULT([suppressed])
-    ;;
-esac
-   
 ## ----------------------------------------------------------------------
 ## Turn on debugging by setting compiler flags
 ## This must come after the enable-production since it depends on production.
@@ -2689,10 +2716,7 @@ case "X-$enable_parallel" in
           integer:: ierr
           call mpi_file_open( ierr )
           end],,
-          [AC_CHECK_LIB([mpi], [
-            include 'mpif.h'
-            integer:: ierr
-            call mpi_file_open( ierr )],, [PARALLEL=no])])
+          [AC_CHECK_LIB([mpi], [mpi_file_open],, [PARALLEL=no])])
 
       ## Then try link a simple MPI-IO program.  If fail, try again with
       ## -lmpio.
@@ -2703,10 +2727,7 @@ case "X-$enable_parallel" in
             integer:: ierr
             call mpi_file_open( ierr )
             end],,
-            [AC_CHECK_LIB([mpio], [
-              include 'mpif.h'
-              integer:: ierr
-              call mpi_file_open( ierr )],, [PARALLEL=no])])
+            [AC_CHECK_LIB([mpio], [mpi_file_open],, [PARALLEL=no])])
       fi
 
       ## Change to the C language
@@ -2876,54 +2897,6 @@ if test -n "$PARALLEL"; then
   if test "X-$MPE" = "X-yes"; then
     AC_DEFINE([HAVE_MPE], [1], [Define if we have MPE support])
   fi
-
-  ## ----------------------------------------------------------------------
-  ## Set the flag to indicate that the MPI_File_set_size() function
-  ## works with files over 2GB, unless it's already set in the cache.
-  ## (This flag should be set for all machines, except for ASCI Red, where
-  ## the cache value is set in it's config file)
-  ##
-  AC_MSG_CHECKING([if MPI_File_set_size works for files over 2GB])
-  AC_CACHE_VAL([hdf5_cv_mpi_file_set_size_big], [hdf5_cv_mpi_file_set_size_big=yes])
-  
-  if test ${hdf5_cv_mpi_file_set_size_big} = "yes"; then
-    AC_DEFINE([MPI_FILE_SET_SIZE_BIG], [1],
-              [Define if your system's `MPI_File_set_size' function works for files over 2GB.])
-    AC_MSG_RESULT([yes])
-  else
-    AC_MSG_RESULT([no])
-  fi
-
-  ## ----------------------------------------------------------------------
-  ## Set the flag to indicate that the MPI_File_get_size() function
-  ## works.  The default is enabled unless the user knows the function
-  ## doesn't work on the system and disables it.  (This flag should be set
-  ## for all machines except for SGI Altix Propack 4 where the function 
-  ## doesn't return correct file size.)
-  ##
-  AC_ARG_ENABLE([mpi-size],
-                [AS_HELP_STRING([--enable-mpi-size],
-                                [Some systems (only SGI Altix Propack 4 so far) return wrong value
-                                 from MPI_File_get_size.  By disabling this function, the library
-                                 will replace it with stat to get the correct file size.
-                                 [default=yes]])],
-                [MPI_GET_SIZE=$enableval])
-
-  AC_MSG_CHECKING([if MPI_File_get_size is enabled])
-
-  AC_SUBST(MPI_GET_SIZE)
-  case "X-$MPI_GET_SIZE" in
-    X-no)
-      AC_MSG_RESULT([no])
-      MPI_GET_SIZE=no
-      ;;
-    X-yes|*)
-      AC_MSG_RESULT([yes])
-      MPI_GET_SIZE=yes
-      AC_DEFINE([HAVE_MPI_GET_SIZE], [1],
-                [Define if MPI_File_get_size works correctly])
-      ;;
-  esac
 fi
 
 ## ----------------------------------------------------------------------
@@ -3072,6 +3045,27 @@ else
 fi
 
 AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])
+
+## ----------------------------------------------------------------------
+## Enable custom plugin default path for library.  It requires SHARED support.
+##
+AC_MSG_CHECKING([for custom plugin default path definition])
+AC_ARG_WITH([default-plugindir],
+            [AS_HELP_STRING([--with-default-plugindir=location],
+                            [Specify default location for plugins
+                            [default="/usr/local/hdf5/lib/plugin"]])],,
+            withval="/usr/local/hdf5/lib/plugin")
+
+if test "X$withval" = "X"; then
+    AC_MSG_RESULT([default])
+    default_plugindir="/usr/local/hdf5/lib/plugin"
+else
+    AC_MSG_RESULT([$withval])
+    default_plugindir=$withval
+fi
+
+AC_DEFINE_UNQUOTED([DEFAULT_PLUGINDIR], ["$default_plugindir"],
+            [Define the default plugins path to compile])
 
 ## ----------------------------------------------------------------------
 ## Decide whether the presence of user's exception handling functions is
@@ -3969,7 +3963,7 @@ fi
 
 ## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine generates bad code
-## for the H5V_log2_gen() routine in src/H5Vprivate.h
+## for the H5VM_log2_gen() routine in src/H5VMprivate.h
 ## (This flag should be set to no for all machines, except for SGI IRIX64,
 ## where the cache value is set to yes in it's config file)
 ##
@@ -4046,7 +4040,7 @@ if test -n "$cc_version_info"; then
 fi
 
 AC_SUBST([FC_VERSION])
-## Strip anything that looks like a flag off of $CC
+## Strip anything that looks like a flag off of $FC
 FC_NOFLAGS=`echo $FC | sed 's/ -.*//'`
 
 if `echo $FC_NOFLAGS | grep ^/ >/dev/null 2>&1`; then
@@ -4065,7 +4059,7 @@ if test -n "$fc_version_info"; then
 fi
 
 AC_SUBST([CXX_VERSION])
-## Strip anything that looks like a flag off of $CC
+## Strip anything that looks like a flag off of $CXX
 CXX_NOFLAGS=`echo $CXX | sed 's/ -.*//'`
 
 if `echo $CXX_NOFLAGS | grep ^/ >/dev/null 2>&1`; then
@@ -4161,9 +4155,16 @@ if test "X$HDF5_HL" = "Xyes"; then
  HL="hl"
  AC_DEFINE([INCLUDE_HL], [1],
            [Define if HDF5's high-level library headers should be included in hdf5.h])
+
+## Check if Fortran's default real is double precision. If it is and HL is being built then configure
+## should fail due to bug HDFFV-889.
+  if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
+    AC_MSG_ERROR([Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl.])
+  fi
 else
  echo "no"
 fi
+
 
 ## ----------------------------------------------------------------------
 ## Some programs shouldn't be built by default (e.g., programs to generate
@@ -4249,7 +4250,7 @@ fi
 ## Enable strict file format checks
 ##
 AC_SUBST([STRICT_FORMAT_CHECKS])
-AC_MSG_CHECKING([Whether to perform strict file format checks]);
+AC_MSG_CHECKING([whether to perform strict file format checks]);
 AC_ARG_ENABLE([strict-format-checks],
               [AS_HELP_STRING([--enable-strict-format-checks],
                      [Enable strict file format checks, default=yes if
@@ -4282,7 +4283,7 @@ esac
 ## ----------------------------------------------------------------------
 ## Enable embedded library information
 ##
-AC_MSG_CHECKING([Whether to have library information embedded in the executables])
+AC_MSG_CHECKING([whether to have library information embedded in the executables])
 AC_ARG_ENABLE([embedded-libinfo],
     [AS_HELP_STRING([--enable-embedded-libinfo],
 	[Enable embedded library information [default=yes]])],
@@ -4403,91 +4404,12 @@ PARALLEL_MAKE=""
 FORTRAN_PARALLEL_MAKE=""
 
 if test -n "$TESTPARALLEL"; then
-  PARALLEL_MAKE="$TESTPARALLEL/Makefile $TESTPARALLEL/testph5.sh"
+  PARALLEL_MAKE="$TESTPARALLEL/Makefile"
 
   if test "X$HDF_FORTRAN" = "Xyes"; then
     FORTRAN_PARALLEL_MAKE=fortran/$TESTPARALLEL/Makefile
   fi
 fi
-
-AC_CONFIG_FILES([src/libhdf5.settings
-                 Makefile
-                 src/Makefile
-                 test/Makefile
-                 test/testcheck_version.sh
-                 test/testerror.sh
-                 test/H5srcdir_str.h
-                 test/testlibinfo.sh
-                 test/testlinks_env.sh
-                 testpar/Makefile
-                 testpar/testph5.sh
-                 perform/Makefile
-                 tools/Makefile
-                 tools/h5dump/Makefile
-                 tools/h5dump/testh5dump.sh
-                 tools/h5dump/testh5dumppbits.sh
-                 tools/h5dump/testh5dumpxml.sh
-                 tools/h5ls/testh5ls.sh
-                 tools/h5import/Makefile
-                 tools/h5import/h5importtestutil.sh
-                 tools/h5diff/Makefile
-                 tools/h5diff/testh5diff.sh
-                 tools/h5diff/testph5diff.sh
-                 tools/h5jam/Makefile
-                 tools/h5jam/testh5jam.sh
-                 tools/h5repack/Makefile
-                 tools/h5repack/h5repack.sh
-                 tools/h5ls/Makefile
-                 tools/h5copy/Makefile
-                 tools/h5copy/testh5copy.sh
-                 tools/lib/Makefile
-                 tools/misc/Makefile
-                 tools/misc/h5cc
-                 tools/misc/testh5mkgrp.sh
-                 tools/misc/testh5extend.sh
-                 tools/misc/testh5repart.sh
-                 tools/h5stat/testh5stat.sh
-                 tools/h5stat/Makefile
-                 examples/Makefile
-                 examples/run-c-ex.sh
-                 examples/testh5cc.sh
-                 c++/Makefile
-                 c++/src/Makefile
-                 c++/src/h5c++
-                 c++/test/Makefile
-                 c++/test/H5srcdir_str.h
-                 c++/examples/Makefile
-                 c++/examples/run-c++-ex.sh
-                 c++/examples/testh5c++.sh
-                 fortran/Makefile
-                 fortran/src/h5fc
-                 fortran/src/Makefile
-                 fortran/test/Makefile
-                 fortran/testpar/Makefile
-                 fortran/examples/Makefile
-                 fortran/examples/run-fortran-ex.sh
-                 fortran/examples/testh5fc.sh
-                 hl/Makefile
-                 hl/src/Makefile
-                 hl/test/Makefile
-                 hl/test/H5srcdir_str.h
-                 hl/tools/Makefile
-                 hl/tools/gif2h5/Makefile
-                 hl/tools/gif2h5/h52giftest.sh
-                 hl/examples/Makefile
-                 hl/examples/run-hlc-ex.sh
-                 hl/c++/Makefile
-                 hl/c++/src/Makefile
-                 hl/c++/test/Makefile
-                 hl/c++/examples/Makefile
-                 hl/c++/examples/run-hlc++-ex.sh
-                 hl/fortran/Makefile
-                 hl/fortran/src/Makefile
-                 hl/fortran/test/Makefile
-                 hl/fortran/examples/Makefile
-                 hl/fortran/examples/run-hlfortran-ex.sh])
-
-AC_OUTPUT
 LT_OUTPUT
 no_create=$saved_no_create
 
@@ -4541,6 +4463,91 @@ elif test "X$enable_shared" = "Xyes"; then
 else
   STATIC_SHARED="none"
 fi
+
+## ----------------------------------------------------------------------
+## Set a macro if shared library is enabled.
+##
+AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
+
+AC_CONFIG_FILES([src/libhdf5.settings
+                 Makefile
+                 src/Makefile
+                 test/Makefile
+                 test/testcheck_version.sh
+                 test/testerror.sh
+                 test/H5srcdir_str.h
+                 test/testlibinfo.sh
+                 test/testlinks_env.sh
+                 test/test_plugin.sh
+                 testpar/Makefile
+                 perform/Makefile
+                 tools/Makefile
+                 tools/h5dump/Makefile
+                 tools/h5dump/testh5dump.sh
+                 tools/h5dump/testh5dumppbits.sh
+                 tools/h5dump/testh5dumpxml.sh
+                 tools/h5ls/testh5ls.sh
+                 tools/h5import/Makefile
+                 tools/h5import/h5importtestutil.sh
+                 tools/h5diff/Makefile
+                 tools/h5diff/testh5diff.sh
+                 tools/h5diff/testph5diff.sh
+                 tools/h5jam/Makefile
+                 tools/h5jam/testh5jam.sh
+                 tools/h5repack/Makefile
+                 tools/h5repack/h5repack.sh
+                 tools/h5repack/h5repack_plugin.sh
+                 tools/h5ls/Makefile
+                 tools/h5copy/Makefile
+                 tools/h5copy/testh5copy.sh
+                 tools/lib/Makefile
+                 tools/misc/Makefile
+                 tools/misc/h5cc
+                 tools/misc/testh5mkgrp.sh
+                 tools/misc/testh5extend.sh
+                 tools/misc/testh5repart.sh
+                 tools/h5stat/testh5stat.sh
+                 tools/h5stat/Makefile
+                 examples/Makefile
+                 examples/run-c-ex.sh
+                 examples/testh5cc.sh
+                 c++/Makefile
+                 c++/src/Makefile
+                 c++/src/h5c++
+                 c++/test/Makefile
+                 c++/test/H5srcdir_str.h
+                 c++/examples/Makefile
+                 c++/examples/run-c++-ex.sh
+                 c++/examples/testh5c++.sh
+                 fortran/Makefile
+                 fortran/src/h5fc
+                 fortran/src/Makefile
+                 fortran/test/Makefile
+                 fortran/testpar/Makefile
+                 fortran/examples/Makefile
+                 fortran/examples/run-fortran-ex.sh
+                 fortran/examples/testh5fc.sh
+                 hl/Makefile
+                 hl/src/Makefile
+                 hl/test/Makefile
+                 hl/test/H5srcdir_str.h
+                 hl/tools/Makefile
+                 hl/tools/gif2h5/Makefile
+                 hl/tools/gif2h5/h52giftest.sh
+                 hl/examples/Makefile
+                 hl/examples/run-hlc-ex.sh
+                 hl/c++/Makefile
+                 hl/c++/src/Makefile
+                 hl/c++/test/Makefile
+                 hl/c++/examples/Makefile
+                 hl/c++/examples/run-hlc++-ex.sh
+                 hl/fortran/Makefile
+                 hl/fortran/src/Makefile
+                 hl/fortran/test/Makefile
+                 hl/fortran/examples/Makefile
+                 hl/fortran/examples/run-hlfortran-ex.sh])
+
+AC_OUTPUT
 
 chmod 755 tools/misc/h5cc
 

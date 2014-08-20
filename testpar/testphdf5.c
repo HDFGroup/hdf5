@@ -118,7 +118,6 @@ usage(void)
         "\tset number of groups for the multiple group test\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-2\t\tuse Split-file together with MPIO\n");
-    printf("\t-p\t\tuse combo MPI-POSIX driver\n");
     printf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n",
 	ROW_FACTOR, COL_FACTOR);
     printf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
@@ -168,9 +167,6 @@ parse_options(int argc, char **argv)
 				return(1);
 			    }
 			    paraprefix = *argv;
-			    break;
-		case 'p':   /* Use the MPI-POSIX driver access */
-			    facc_type = FACC_MPIPOSIX;
 			    break;
 		case 'i':   /* Collective MPI-IO access with independent IO  */
 			    dxfer_coll_type = DXFER_INDEPENDENT_IO;
@@ -257,8 +253,7 @@ parse_options(int argc, char **argv)
  * Create the appropriate File access property list
  */
 hid_t
-create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type,
-                     hbool_t use_gpfs)
+create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
 {
     hid_t ret_pl = -1;
     herr_t ret;                 /* generic return value */
@@ -299,13 +294,6 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type,
 	return(ret_pl);
     }
 
-    if (l_facc_type == FACC_MPIPOSIX) {
-	/* set Parallel access with communicator */
-	ret = H5Pset_fapl_mpiposix(ret_pl, comm, use_gpfs);
-	VRFY((ret >= 0), "H5Pset_fapl_mpiposix succeeded");
-	return(ret_pl);
-    }
-
     /* unknown file access types */
     return (ret_pl);
 }
@@ -342,7 +330,7 @@ int main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0){
-	printf("Failed to turn off atexit processing. Continue.\n", mpi_rank);
+	printf("Failed to turn off atexit processing. Continue.\n");
     };
     H5open();
     h5_show_hostname();
@@ -353,8 +341,6 @@ int main(int argc, char **argv)
     /* Tests are generally arranged from least to most complexity... */
     AddTest("mpiodup", test_fapl_mpio_dup, NULL,
 	    "fapl_mpio duplicate", NULL);
-    AddTest("posixdup", test_fapl_mpiposix_dup, NULL,
-	    "fapl_mpiposix duplicate", NULL);
 
     AddTest("trunc", test_avoid_truncation, NULL,
 	    "file avoiding truncation", PARATESTFILE);
@@ -385,7 +371,7 @@ int main(int argc, char **argv)
     AddTest("selnone", none_selection_chunk, NULL,
             "chunked dataset with none-selection", PARATESTFILE);
     AddTest("calloc", test_chunk_alloc, NULL,
-	    "parallel extend Chunked allocation on serial file", PARATESTFILE);
+            "parallel extend Chunked allocation on serial file", PARATESTFILE);
     AddTest("fltread", test_filter_read, NULL,
 	    "parallel read of dataset written serially with filters", PARATESTFILE);
 
@@ -393,6 +379,9 @@ int main(int argc, char **argv)
     AddTest("cmpdsetr", compress_readAll, NULL,
 	    "compressed dataset collective read", PARATESTFILE);
 #endif /* H5_HAVE_FILTER_DEFLATE */
+
+    AddTest("zerodsetr", zero_dim_dset, NULL,
+	    "zero dim dset", PARATESTFILE);
 
     ndsets_params.name = PARATESTFILE;
     ndsets_params.count = ndatasets;
@@ -489,11 +478,17 @@ int main(int argc, char **argv)
 	    "I/O mode confusion test -- hangs quickly on failure",
             &io_mode_confusion_params);
 
-    rr_obj_flush_confusion_params.name = PARATESTFILE;
-    rr_obj_flush_confusion_params.count = 0; /* value not used */
-    AddTest("rrobjflushconf", rr_obj_hdr_flush_confusion, NULL,
-	    "round robin object header flush confusion test",
-            &rr_obj_flush_confusion_params);
+    if((mpi_size < 3) && MAINPROCESS) {
+        printf("rr_obj_hdr_flush_confusion test needs at least 3 processes.\n");
+        printf("rr_obj_hdr_flush_confusion test will be skipped \n");
+    }
+    if(mpi_size > 2) {
+        rr_obj_flush_confusion_params.name = PARATESTFILE;
+        rr_obj_flush_confusion_params.count = 0; /* value not used */
+        AddTest("rrobjflushconf", rr_obj_hdr_flush_confusion, NULL,
+                "round robin object header flush confusion test",
+                &rr_obj_flush_confusion_params);
+    }
 
     AddTest("tldsc",
             lower_dim_size_comp_test, NULL,
@@ -535,6 +530,10 @@ int main(int argc, char **argv)
                 "dataset atomic updates", PARATESTFILE);
     }
 
+    AddTest("denseattr", test_dense_attr, NULL,
+	    "Store Dense Attributes", NULL);
+
+
     /* Display testing information */
     TestInfo(argv[0]);
 
@@ -544,12 +543,6 @@ int main(int argc, char **argv)
 
     /* Parse command line arguments */
     TestParseCmdLine(argc, argv);
-
-    if (facc_type == FACC_MPIPOSIX && MAINPROCESS){
-	printf("===================================\n"
-	       "   Using MPIPOSIX driver\n"
-	       "===================================\n");
-    }
 
     if (dxfer_coll_type == DXFER_INDEPENDENT_IO && MAINPROCESS){
 	printf("===================================\n"

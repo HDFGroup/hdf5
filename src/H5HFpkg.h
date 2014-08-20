@@ -136,7 +136,7 @@
 
 /* Compute the # of bytes required to store an offset into a given buffer size */
 #define H5HF_SIZEOF_OFFSET_BITS(b)   (((b) + 7) / 8)
-#define H5HF_SIZEOF_OFFSET_LEN(l)   H5HF_SIZEOF_OFFSET_BITS(H5V_log2_of2((unsigned)(l)))
+#define H5HF_SIZEOF_OFFSET_LEN(l)   H5HF_SIZEOF_OFFSET_BITS(H5VM_log2_of2((unsigned)(l)))
 
 /* Heap ID bit flags */
 /* Heap ID version (2 bits: 6-7) */
@@ -384,6 +384,13 @@ struct H5HF_indirect_t {
     size_t      rc;             /* Reference count of objects using this block */
     H5HF_hdr_t	*hdr;	        /* Shared heap header info	              */
     struct H5HF_indirect_t *parent;	/* Shared parent indirect block info  */
+    struct H5HF_indirect_t 
+		*fd_parent;	/* Saved copy of the parent pointer -- this   */
+				/* necessary as the parent field is sometimes */
+				/* nulled out before the eviction notify call */
+				/* is made from the metadata cache.  Since    */
+				/* this call cancels flush dependencies, it   */
+				/* needs this information.		      */
     unsigned    par_entry;      /* Entry in parent's table                    */
     haddr_t     addr;           /* Address of this indirect block on disk     */
     size_t      size;           /* Size of indirect block on disk             */
@@ -407,6 +414,12 @@ typedef struct H5HF_direct_t {
     /* Internal heap information */
     H5HF_hdr_t	*hdr;	        /* Shared heap header info	              */
     H5HF_indirect_t *parent;	/* Shared parent indirect block info          */
+    H5HF_indirect_t *fd_parent;	/* Saved copy of the parent pointer -- this   */
+				/* necessary as the parent field is sometimes */
+				/* nulled out before the eviction notify call */
+				/* is made from the metadata cache.  Since    */
+				/* this call cancels flush dependencies, it   */
+				/* needs this information.		      */
     unsigned    par_entry;      /* Entry in parent's table                    */
     size_t      size;           /* Size of direct block                       */
     hsize_t     file_size;      /* Size of direct block in file (only valid when block's space is being freed) */
@@ -754,14 +767,14 @@ H5_DLL herr_t H5HF_space_remove(H5HF_hdr_t *hdr, hid_t dxpl_id,
 H5_DLL herr_t H5HF_space_close(H5HF_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5HF_space_delete(H5HF_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5HF_space_sect_change_class(H5HF_hdr_t *hdr, hid_t dxpl_id,
-    H5HF_free_section_t *sect, unsigned new_class);
+    H5HF_free_section_t *sect, uint16_t new_class);
 
 /* Free space section routines */
 H5_DLL H5HF_free_section_t *H5HF_sect_single_new(hsize_t sect_off,
     size_t sect_size, H5HF_indirect_t *parent, unsigned par_entry);
 H5_DLL herr_t H5HF_sect_single_revive(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect);
-H5_DLL herr_t H5HF_sect_single_dblock_info(H5HF_hdr_t *hdr, hid_t dxpl_id,
+H5_DLL herr_t H5HF_sect_single_dblock_info(H5HF_hdr_t *hdr,
     H5HF_free_section_t *sect, haddr_t *dblock_addr, size_t *dblock_size);
 H5_DLL herr_t H5HF_sect_single_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect, size_t amt);

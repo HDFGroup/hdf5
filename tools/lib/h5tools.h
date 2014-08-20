@@ -33,9 +33,15 @@
 #define END_OF_DATA     0x0002
 
 /* format for hsize_t */
-#define HSIZE_T_FORMAT   "%"H5_PRINTF_LL_WIDTH"u"
+#define HSIZE_T_FORMAT   "%" H5_PRINTF_LL_WIDTH "u"
 
 #define H5TOOLS_DUMP_MAX_RANK     H5S_MAX_RANK
+
+/* Stream macros */
+#define FLUSHSTREAM(S)           if(S != NULL) HDfflush(S)
+#define PRINTSTREAM(S, F, ...)   if(S != NULL) HDfprintf(S, F, __VA_ARGS__)
+#define PRINTVALSTREAM(S, V)   if(S != NULL) HDfprintf(S, V)
+#define PUTSTREAM(X,S)          if(S != NULL) HDfputs(X, S);
 
 /*
  * Strings for output - these were duplicated from the h5dump.h
@@ -525,7 +531,9 @@ H5TOOLS_DLLVAR int     packed_bits_num;     /* number of packed bits to display 
 H5TOOLS_DLLVAR int     packed_data_offset;  /* offset of packed bits to display */
 H5TOOLS_DLLVAR int     packed_data_length; /* lengtht of packed bits to display */
 H5TOOLS_DLLVAR unsigned long long packed_data_mask;  /* mask in which packed bits to display */
+H5TOOLS_DLLVAR FILE   *rawattrstream;       /* output stream for raw attribute data */
 H5TOOLS_DLLVAR FILE   *rawdatastream;       /* output stream for raw data */
+H5TOOLS_DLLVAR FILE   *rawinstream;         /* input stream for raw input */
 H5TOOLS_DLLVAR FILE   *rawoutstream;        /* output stream for raw output */
 H5TOOLS_DLLVAR FILE   *rawerrorstream;      /* output stream for raw error */
 H5TOOLS_DLLVAR int     bin_output;          /* binary output */
@@ -543,6 +551,11 @@ H5TOOLS_DLLVAR int     attr_data_output;    /* attribute data output */
 /* Definitions of useful routines */
 H5TOOLS_DLL void    h5tools_init(void);
 H5TOOLS_DLL void    h5tools_close(void);
+H5TOOLS_DLL int 	h5tools_set_data_output_file(const char *fname, int is_bin);
+H5TOOLS_DLL int 	h5tools_set_attr_output_file(const char *fname, int is_bin);
+H5TOOLS_DLL int 	h5tools_set_input_file(const char *fname, int is_bin);
+H5TOOLS_DLL int 	h5tools_set_output_file(const char *fname, int is_bin);
+H5TOOLS_DLL int 	h5tools_set_error_file(const char *fname, int is_bin);
 H5TOOLS_DLL hid_t   h5tools_fopen(const char *fname, unsigned flags, hid_t fapl,
                             const char *driver, char *drivername, size_t drivername_len);
 H5TOOLS_DLL hid_t   h5tools_get_native_type(hid_t type);
@@ -562,8 +575,6 @@ H5TOOLS_DLL void    h5tools_region_simple_prefix(FILE *stream, const h5tool_form
                             h5tools_context_t *ctx, hsize_t elmtno, hsize_t *ptdata, int secnum);
 
 H5TOOLS_DLL int     render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t nelmts);
-H5TOOLS_DLL int     render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
-                            hid_t container, int ndims, hid_t type_id, hssize_t nblocks, hsize_t *ptdata);
 H5TOOLS_DLL hbool_t render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
                              FILE *stream, hid_t container);
 H5TOOLS_DLL hbool_t render_bin_output_region_points(hid_t region_space, hid_t region_id,

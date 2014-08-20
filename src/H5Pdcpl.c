@@ -144,10 +144,13 @@ static int H5P__dcrt_ext_file_list_cmp(const void *value1, const void *value2, s
 const H5P_libclass_t H5P_CLS_DCRT[1] = {{
     "dataset create",		/* Class name for debugging     */
     H5P_TYPE_DATASET_CREATE,    /* Class type                   */
-    &H5P_CLS_OBJECT_CREATE_g,	/* Parent class ID              */
-    &H5P_CLS_DATASET_CREATE_g,	/* Pointer to class ID          */
-    &H5P_LST_DATASET_CREATE_g,	/* Pointer to default property list ID */
+
+    &H5P_CLS_OBJECT_CREATE_g,	/* Parent class                 */
+    &H5P_CLS_DATASET_CREATE_g,	/* Pointer to class             */
+    &H5P_CLS_DATASET_CREATE_ID_g,	/* Pointer to class ID          */
+    &H5P_LST_DATASET_CREATE_ID_g,	/* Pointer to default property list ID */
     H5P__dcrt_reg_prop,		/* Default property registration routine */
+
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
     H5P__dcrt_copy,		/* Class copy callback          */
@@ -668,7 +671,7 @@ H5P__fill_value_enc(const void *value, void **_pp, size_t *size)
 
             /* Encode the size of a size_t */
             enc_value = (uint64_t)dt_size;
-            enc_size = H5V_limit_enc_size(enc_value);
+            enc_size = H5VM_limit_enc_size(enc_value);
             HDassert(enc_size < 256);
 
             /* Encode the size */
@@ -697,7 +700,7 @@ H5P__fill_value_enc(const void *value, void **_pp, size_t *size)
             if(H5T_encode(fill->type, NULL, &dt_size) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
             enc_value = (uint64_t)dt_size;
-            enc_size = H5V_limit_enc_size(enc_value);
+            enc_size = H5VM_limit_enc_size(enc_value);
         }
         *size += (1 + enc_size);
         *size += dt_size;
@@ -873,7 +876,7 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
     if(NULL != *pp) {
         /* Encode number of slots used */
         enc_value = (uint64_t)efl->nused;
-        enc_size = H5V_limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -883,7 +886,7 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
             /* Calculate length of slot name and encode it */
             len = HDstrlen(efl->slot[u].name) + 1;
             enc_value = (uint64_t)len;
-            enc_size = H5V_limit_enc_size(enc_value);
+            enc_size = H5VM_limit_enc_size(enc_value);
             HDassert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -894,14 +897,14 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
 
             /* Encode offset */
             enc_value = (uint64_t)efl->slot[u].offset;
-            enc_size = H5V_limit_enc_size(enc_value);
+            enc_size = H5VM_limit_enc_size(enc_value);
             HDassert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
             /* encode size */
             enc_value = (uint64_t)efl->slot[u].size;
-            enc_size = H5V_limit_enc_size(enc_value);
+            enc_size = H5VM_limit_enc_size(enc_value);
             HDassert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -909,13 +912,13 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
     } /* end if */
 
     /* Calculate size needed for encoding */
-    *size += (1 + H5V_limit_enc_size((uint64_t)efl->nused));
+    *size += (1 + H5VM_limit_enc_size((uint64_t)efl->nused));
     for(u = 0; u < efl->nused; u++) {
         len = HDstrlen(efl->slot[u].name) + 1;
-        *size += (1 + H5V_limit_enc_size((uint64_t)len));
+        *size += (1 + H5VM_limit_enc_size((uint64_t)len));
         *size += len;
-        *size += (1 + H5V_limit_enc_size((uint64_t)efl->slot[u].offset));
-        *size += (1 + H5V_limit_enc_size((uint64_t)efl->slot[u].size));
+        *size += (1 + H5VM_limit_enc_size((uint64_t)efl->slot[u].offset));
+        *size += (1 + H5VM_limit_enc_size((uint64_t)efl->slot[u].size));
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1669,13 +1672,6 @@ done:
  * Programmer:	Kent Yang
  *              Tuesday, April 1, 2003
  *
- * Modifications:
- *
- *          Nat Furrer and James Laird
- *          June 30, 2004
- *          Now ensures that SZIP encoding is enabled
- *          SZIP defaults to k13 compression
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1685,22 +1681,22 @@ H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block)
     H5P_genplist_t *plist;      /* Property list pointer */
     unsigned cd_values[2];      /* Filter parameters */
     unsigned int config_flags;
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iIuIu", plist_id, options_mask, pixels_per_block);
 
-    if(H5Zget_filter_info(H5Z_FILTER_SZIP, &config_flags) < 0)
+    if(H5Z_get_filter_info(H5Z_FILTER_SZIP, &config_flags) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't get filter info")
 
-    if(! (config_flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED))
+    if(!(config_flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED))
         HGOTO_ERROR(H5E_PLINE, H5E_NOENCODER, FAIL, "Filter present but encoding is disabled.")
 
     /* Check arguments */
-    if ((pixels_per_block%2)==1)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is not even")
-    if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is too large")
+    if((pixels_per_block % 2) == 1)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is not even")
+    if(pixels_per_block > H5_SZIP_MAX_PIXELS_PER_BLOCK)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is too large")
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -2013,7 +2009,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_get_fill_value(H5P_genplist_t *plist, H5T_t *type, void *value/*out*/,
+H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value/*out*/,
     hid_t dxpl_id)
 {
     H5O_fill_t          fill;                   /* Fill value to retrieve */

@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5stat -dT h5stat_filters.h5'
-#############################
 Filename: h5stat_filters.h5
 Dataset dimension information:
 	Max. rank of datasets: 2
@@ -9,10 +6,10 @@ Dataset dimension information:
 		# of dataset with rank 2: 14
 1-D Dataset information:
 	Max. dimension size of 1-D datasets: 100
-	Small 1-D datasets:
-		Total small datasets: 0
+	Small 1-D datasets (with dimension sizes 0 to 9):
+		Total # of small datasets: 0
 	1-D Dataset dimension bins:
-		# of datasets of size 100 - 999: 1
+		# of datasets with dimension size 100 - 999: 1
 		Total # of datasets: 1
 Dataset storage information:
 	Total raw data size: 8659

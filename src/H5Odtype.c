@@ -25,7 +25,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Tpkg.h"		/* Datatypes				*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 
 /* PRIVATE PROTOTYPES */
@@ -266,7 +266,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                 unsigned j;
 
                 /* Compute the # of bytes required to store a member offset */
-                offset_nbytes = H5V_limit_enc_size((uint64_t)dt->shared->size);
+                offset_nbytes = H5VM_limit_enc_size((uint64_t)dt->shared->size);
 
                 /*
                  * Compound datatypes...
@@ -891,7 +891,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
                 unsigned offset_nbytes;         /* Size needed to encode member offsets */
 
                 /* Compute the # of bytes required to store a member offset */
-                offset_nbytes = H5V_limit_enc_size((uint64_t)dt->shared->size);
+                offset_nbytes = H5VM_limit_enc_size((uint64_t)dt->shared->size);
 
                 /*
                  * Compound datatypes...
@@ -1262,7 +1262,7 @@ H5O_dtype_size(const H5F_t *f, const void *_mesg)
                 unsigned offset_nbytes;         /* Size needed to encode member offsets */
 
                 /* Compute the # of bytes required to store a member offset */
-                offset_nbytes = H5V_limit_enc_size((uint64_t)dt->shared->size);
+                offset_nbytes = H5VM_limit_enc_size((uint64_t)dt->shared->size);
 
                 /* Compute the total size needed to encode compound datatype */
                 for(u = 0; u < dt->shared->u.compnd.nmembs; u++) {

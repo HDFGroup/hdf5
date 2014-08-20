@@ -27,7 +27,6 @@ include $(top_srcdir)/config/lt_vers.am
 # a long time to compile it with any optimization on.  H5detect is used
 # to generate H5Tinit.c once. So, optimization is not critical.
 noinst_PROGRAMS = H5detect H5make_libsettings
-H5detect_CFLAGS = -g $(AM_CFLAGS)
 
 # Our main target, the HDF5 library
 lib_LTLIBRARIES=libhdf5.la
@@ -53,7 +52,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5E.c H5Edeprec.c H5Eint.c \
         H5EA.c H5EAcache.c H5EAdbg.c H5EAdblkpage.c H5EAdblock.c H5EAhdr.c \
         H5EAiblock.c H5EAint.c H5EAsblock.c H5EAstat.c H5EAtest.c \
-        H5F.c H5Faccum.c H5Fcwfs.c \
+        H5F.c H5Fint.c H5Faccum.c H5Fcwfs.c \
         H5Fdbg.c H5Fdeprec.c H5Fefc.c H5Ffake.c H5Fio.c \
         H5Fmount.c H5Fmpi.c H5Fquery.c \
         H5Fsfile.c H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
@@ -61,7 +60,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5FAstat.c H5FAtest.c \
         H5FD.c H5FDcore.c  \
         H5FDdirect.c H5FDfamily.c H5FDint.c H5FDlog.c H5FDmpi.c H5FDmpio.c \
-        H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c \
+        H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c \
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSsection.c H5FSstat.c H5FStest.c \
         H5G.c H5Gbtree2.c H5Gcache.c \
         H5Gcompact.c H5Gdense.c H5Gdeprec.c H5Gent.c \
@@ -90,8 +89,9 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
         H5Pgcpl.c H5Pint.c \
         H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c \
+        H5PL.c \
         H5R.c H5Rdeprec.c \
-        H5RC.c \
+        H5UC.c \
         H5RS.c \
         H5S.c H5Sall.c H5Sdbg.c H5Shyper.c H5Smpio.c H5Snone.c H5Spoint.c \
         H5Sselect.c H5Stest.c \
@@ -104,7 +104,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Toh.c \
         H5Topaque.c \
         H5Torder.c \
-        H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c H5Tvlen.c H5TS.c H5V.c H5WB.c H5Z.c  \
+        H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c H5Tvlen.c H5TS.c H5VM.c H5WB.c H5Z.c  \
         H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zszip.c  \
         H5Zscaleoffset.c H5Ztrans.c
 
@@ -113,11 +113,14 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
 include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5version.h \
         H5Apublic.h H5ACpublic.h \
         H5Cpublic.h H5Dpublic.h \
-        H5Epubgen.h H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDdirect.h \
-	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
+        H5Epubgen.h H5Epublic.h H5Fpublic.h \
+        H5FDpublic.h H5FDcore.h H5FDdirect.h \
+	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
-        H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h \
+        H5MMpublic.h H5Opublic.h H5Ppublic.h \
+        H5PLextern.h \
+        H5Rpublic.h H5Spublic.h \
         H5Tpublic.h H5Zpublic.h
 
 # install libhdf5.settings in lib directory

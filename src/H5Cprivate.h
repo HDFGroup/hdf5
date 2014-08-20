@@ -905,20 +905,20 @@ typedef struct H5C_cache_entry_t
 
 #define H5C__MAX_EPOCH_MARKERS  		10
 
-#define H5C__DEF_AR_UPPER_THRESHHOLD		0.9999
-#define H5C__DEF_AR_LOWER_THRESHHOLD		0.9
+#define H5C__DEF_AR_UPPER_THRESHHOLD		0.9999f
+#define H5C__DEF_AR_LOWER_THRESHHOLD		0.9f
 #define H5C__DEF_AR_MAX_SIZE			((size_t)(16 * 1024 * 1024))
 #define H5C__DEF_AR_INIT_SIZE			((size_t)( 1 * 1024 * 1024))
 #define H5C__DEF_AR_MIN_SIZE			((size_t)( 1 * 1024 * 1024))
-#define H5C__DEF_AR_MIN_CLEAN_FRAC		0.5
-#define H5C__DEF_AR_INCREMENT			2.0
+#define H5C__DEF_AR_MIN_CLEAN_FRAC		0.5f
+#define H5C__DEF_AR_INCREMENT			2.0f
 #define H5C__DEF_AR_MAX_INCREMENT		((size_t)( 2 * 1024 * 1024))
-#define H5C__DEF_AR_FLASH_MULTIPLE              1.0
-#define H5C__DEV_AR_FLASH_THRESHOLD             0.25
-#define H5C__DEF_AR_DECREMENT			0.9
+#define H5C__DEF_AR_FLASH_MULTIPLE              1.0f
+#define H5C__DEV_AR_FLASH_THRESHOLD             0.25f
+#define H5C__DEF_AR_DECREMENT			0.9f
 #define H5C__DEF_AR_MAX_DECREMENT		((size_t)( 1 * 1024 * 1024))
 #define H5C__DEF_AR_EPCHS_B4_EVICT		3
-#define H5C__DEF_AR_EMPTY_RESERVE		0.05
+#define H5C__DEF_AR_EMPTY_RESERVE		0.05f
 #define H5C__MIN_AR_EPOCH_LENGTH		100
 #define H5C__DEF_AR_EPOCH_LENGTH		50000
 #define H5C__MAX_AR_EPOCH_LENGTH		1000000
@@ -1222,6 +1222,18 @@ H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t * config_ptr,
 H5_DLL herr_t H5C_ignore_tags(H5C_t * cache_ptr);
 
 H5_DLL void H5C_retag_copied_metadata(H5C_t * cache_ptr, haddr_t metadata_tag);
+
+#ifndef NDEBUG	/* debugging functions */
+
+H5_DLL herr_t H5C_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr,
+                                          void ** entry_ptr_ptr);
+
+H5_DLL herr_t H5C_verify_entry_type(const H5F_t * f, haddr_t addr,
+                                    const H5C_class_t * expected_type,
+                                    hbool_t * in_cache_ptr,
+                                    hbool_t * type_ok_ptr);
+
+#endif /* NDEBUG */
 
 #endif /* !_H5Cprivate_H */
 

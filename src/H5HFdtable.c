@@ -37,7 +37,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5HFpkg.h"		/* Fractal heaps			*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 /****************/
 /* Local Macros */
@@ -104,10 +104,10 @@ H5HF_dtable_init(H5HF_dtable_t *dtable)
     HDassert(dtable);
 
     /* Compute/cache some values */
-    dtable->start_bits = H5V_log2_of2((uint32_t)dtable->cparam.start_block_size);
-    dtable->first_row_bits = dtable->start_bits + H5V_log2_of2(dtable->cparam.width);
+    dtable->start_bits = H5VM_log2_of2((uint32_t)dtable->cparam.start_block_size);
+    dtable->first_row_bits = dtable->start_bits + H5VM_log2_of2(dtable->cparam.width);
     dtable->max_root_rows = (dtable->cparam.max_index - dtable->first_row_bits) + 1;
-    dtable->max_direct_bits = H5V_log2_of2((uint32_t)dtable->cparam.max_direct_size);
+    dtable->max_direct_bits = H5VM_log2_of2((uint32_t)dtable->cparam.max_direct_size);
     dtable->max_direct_rows = (dtable->max_direct_bits - dtable->start_bits) + 2;
     dtable->num_id_first_row = dtable->cparam.start_block_size * dtable->cparam.width;
     dtable->max_dir_blk_off_size = H5HF_SIZEOF_OFFSET_LEN(dtable->cparam.max_direct_size);
@@ -171,7 +171,7 @@ HDfprintf(stderr, "%s: off = %Hu\n", "H5HF_dtable_lookup", off);
         H5_ASSIGN_OVERFLOW(/* To: */ *col, /* From: */ (off / dtable->cparam.start_block_size), /* From: */ hsize_t, /* To: */ unsigned);
     } /* end if */
     else {
-        unsigned high_bit = H5V_log2_gen(off);  /* Determine the high bit in the offset */
+        unsigned high_bit = H5VM_log2_gen(off);  /* Determine the high bit in the offset */
         hsize_t off_mask = ((hsize_t)1) << high_bit;       /* Compute mask for determining column */
 
 #ifdef QAK
@@ -252,7 +252,7 @@ H5HF_dtable_size_to_row(const H5HF_dtable_t *dtable, size_t block_size)
     if(block_size == dtable->cparam.start_block_size)
         row = 0;
     else
-        row = (H5V_log2_of2((uint32_t)block_size) - H5V_log2_of2((uint32_t)dtable->cparam.start_block_size)) + 1;
+        row = (H5VM_log2_of2((uint32_t)block_size) - H5VM_log2_of2((uint32_t)dtable->cparam.start_block_size)) + 1;
 
     FUNC_LEAVE_NOAPI(row)
 } /* end H5HF_dtable_size_to_row() */
@@ -283,7 +283,7 @@ H5HF_dtable_size_to_rows(const H5HF_dtable_t *dtable, hsize_t size)
      */
     HDassert(dtable);
 
-    rows = (H5V_log2_gen(size) - dtable->first_row_bits) + 1;
+    rows = (H5VM_log2_gen(size) - dtable->first_row_bits) + 1;
 
     FUNC_LEAVE_NOAPI(rows)
 } /* end H5HF_dtable_size_to_rows() */

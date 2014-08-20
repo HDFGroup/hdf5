@@ -794,7 +794,7 @@ H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Get dataspace */
     if(NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     /* Get total number of elements in the chunk */
     if((npoints = H5S_GET_EXTENT_NPOINTS(ds)) < 0)
@@ -1093,6 +1093,8 @@ H5Z_nbit_decompress_one_array(unsigned char *data, size_t data_offset,
            parms_index++; /* skip size of no-op type */
            H5Z_nbit_decompress_one_nooptype(data, data_offset, buffer, j, buf_len, total_size);
            break;
+      default:
+          HDassert(0 && "This Should never be executed!");
    } /* end switch */
 }
 
@@ -1131,6 +1133,8 @@ H5Z_nbit_decompress_one_compound(unsigned char *data, size_t data_offset,
               H5Z_nbit_decompress_one_nooptype(data, data_offset+member_offset,
                                                buffer, j, buf_len, size);
               break;
+          default:
+              HDassert(0 && "This Should never be executed!");
       } /* end switch */
    }
 }
@@ -1179,6 +1183,8 @@ H5Z_nbit_decompress(unsigned char *data, unsigned d_nelmts, unsigned char *buffe
               parms_index = 4;
            }
            break;
+      default:
+          HDassert(0 && "This Should never be executed!");
    } /* end switch */
 }
 
@@ -1320,6 +1326,8 @@ static void H5Z_nbit_compress_one_array(unsigned char *data, size_t data_offset,
            parms_index++; /* skip size of no-op type */
            H5Z_nbit_compress_one_nooptype(data, data_offset, buffer, j, buf_len, total_size);
            break;
+      default:
+          HDassert(0 && "This Should never be executed!");
    } /* end switch */
 }
 
@@ -1358,6 +1366,8 @@ static void H5Z_nbit_compress_one_compound(unsigned char *data, size_t data_offs
               H5Z_nbit_compress_one_nooptype(data, data_offset+member_offset,
                                              buffer, j, buf_len, size);
               break;
+         default:
+             HDassert(0 && "This Should never be executed!");
       } /* end switch */
    }
 }
@@ -1406,6 +1416,8 @@ static void H5Z_nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned c
               parms_index = 4;
            }
            break;
+       default:
+           HDassert(0 && "This Should never be executed!");
    } /* end switch */
 
    /* Update the size to the new value after compression.  If there are any bits hanging over in

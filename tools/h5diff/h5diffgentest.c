@@ -560,10 +560,10 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
         int          data4[3][2] = {{0,0},{0,0},{0,0}};
         int          data5[2][2] = {{0,0},{0,0}};
         unsigned int data6[3][2] = {{0,0},{0,0},{0,0}};
-        cmp1_t       data7[1] = {1,2};
-        cmp2_t       data8[1] = {1,2};
-        hsize_t      dims3[2] = { 2,2 };
-        hsize_t      dims4[1] = { 1 };
+        cmp1_t       data7[1] = {{1.0f, 2}};
+        cmp2_t       data8[1] = {{1, 2.0f}};
+        hsize_t      dims3[2] = {2, 2};
+        hsize_t      dims4[1] = {1};
         size_t       type_size;
         hid_t        tid;
 
@@ -978,8 +978,8 @@ int test_attributes(const char *file,
     */
 
     write_attr_in(did,"dset",fid,make_diffs);
-    write_attr_in(gid,NULL,0,make_diffs);
-    write_attr_in(root_id,NULL,0,make_diffs);
+    write_attr_in(gid,NULL,(hid_t)0,make_diffs);
+    write_attr_in(root_id,NULL,(hid_t)0,make_diffs);
 
 
     /* Close */
@@ -3664,9 +3664,6 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         };
     hsize_t dims_fixlen_str_array[]  = {FIXLEN_STR_ARRY_DIM};
 
-    /* objref */
-    hsize_t    objref_dims[1]={1};
-
     /*------------------------------------------
      * compound dataset
      *------------------------------------------*/
@@ -4130,9 +4127,9 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
     did_comp = H5Dcreate2(gid, "Compound_dset9", tid9_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* obj references */
-    status=H5Rcreate(&(comp9_buf.objref1),gid,"Compound_dset2",H5R_OBJECT,-1);
-    status=H5Rcreate(&(comp9_buf.objref2),gid,"Compound_dset3",H5R_OBJECT,-1);
-    status=H5Rcreate(&(comp9_buf.objref3),gid,"Compound_dset4",H5R_OBJECT,-1);
+    status=H5Rcreate(&(comp9_buf.objref1),gid,"Compound_dset2",H5R_OBJECT,(hid_t)-1);
+    status=H5Rcreate(&(comp9_buf.objref2),gid,"Compound_dset3",H5R_OBJECT,(hid_t)-1);
+    status=H5Rcreate(&(comp9_buf.objref3),gid,"Compound_dset4",H5R_OBJECT,(hid_t)-1);
 
     status = H5Dwrite(did_comp, tid9_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp9_buf);
     if (status < 0)
@@ -4261,15 +4258,39 @@ test_enums(const char *fname)
     tid = H5Tenum_create(H5T_NATIVE_INT);
     enum_val = 0;
     status = H5Tenum_insert(tid, "YIN", &enum_val);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tenum_insert failed.\n", fname);
+        status = FAIL;
+        goto out;
+    }
     enum_val = 1;
     status = H5Tenum_insert(tid, "YANG", &enum_val);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tenum_insert failed.\n", fname);
+        status = FAIL;
+        goto out;
+    }
 
     /*-----------------------------------------------------------------------
      * Create datasets containing enum data.
      *---------------------------------------------------------------------*/
 
     status = write_dset(fid, 1, &dims, "dset1", tid, data1);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed.\n", fname);
+        status = FAIL;
+        goto out;
+    }
     status = write_dset(fid, 1, &dims, "dset2", tid, data2);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed.\n", fname);
+        status = FAIL;
+        goto out;
+    }
 
 out:
     /*-----------------------------------------------------------------------
@@ -4398,6 +4419,7 @@ static void test_comps_array (const char *fname, const char *dset, const char *a
      * Create an attribute in root group
      */
     tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
+    assert(tid_attr > 0);
     ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
     assert(ret >= 0);
 
@@ -4440,6 +4462,7 @@ static void test_comps_vlen (const char * fname, const char *dset, const char *a
     hid_t  fid;  /* HDF5 File ID */
     hid_t  did_dset; /* dataset ID   */
     hid_t  sid_dset;  /* dataset space ID */
+    hid_t  tid_attr;
     hid_t  tid_cmpd2; /* compound2 type ID */
     hid_t  tid_cmpd1; /* compound1 type ID */
     hid_t  tid_cmpd1_vlen;
@@ -4452,7 +4475,7 @@ static void test_comps_vlen (const char * fname, const char *dset, const char *a
     for(i=0; i<SDIM_DSET; i++)
     {
         wdata[i].i1 = i;
-        wdata[i].vl.p = malloc((i+1)*sizeof(cmpd2_t));
+        wdata[i].vl.p = HDmalloc((i+1)*sizeof(cmpd2_t));
         wdata[i].vl.len = i+1;
         for(j=0; j<(i+1); j++)
         {
@@ -4504,22 +4527,22 @@ static void test_comps_vlen (const char * fname, const char *dset, const char *a
     ret = H5Dwrite(did_dset, tid_cmpd1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
+    /*-----------------------------------
+     * Create an attribute in root group
+     */
+    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
+    assert(tid_attr > 0);
+    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
+    assert(ret >= 0);
+
     /* Reclaim the write VL data */
     ret = H5Dvlen_reclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
-    /*-----------------------------------
-     * Create an attribute in root group
-     */
-    /* TODO: creating vlen with compound type doesn't work for attribute now. 
-     * so add this later when it's fixed 
-    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
-    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
-    assert(ret >= 0);
-    */
-
     /* ----------------
      * Close IDs */
+    ret = H5Aclose(tid_attr);
+    assert(ret >= 0);
     ret = H5Dclose(did_dset);
     assert(ret >= 0);
     ret = H5Tclose(tid_cmpd2);
@@ -4556,6 +4579,7 @@ static void test_comps_array_vlen (const char * fname, const char *dset,const ch
     hid_t  fid;  /* HDF5 File IDs  */
     hid_t  did_dset; /* Dataset ID   */
     hid_t  sid_dset;       /* Dataspace ID   */
+    hid_t  tid_attr;
     hid_t  tid_cmpd1;       /* Compound1 Datatype ID   */
     hid_t  tid_arry1;       /* Array Datatype ID   */
     hid_t  tid_cmpd2;       /* Compound2 Datatype ID   */
@@ -4576,7 +4600,7 @@ static void test_comps_array_vlen (const char * fname, const char *dset,const ch
         for(j=0; j < SDIM_CMPD_ARRAY; j++) 
         {
             wdata[i].cmpd2[j].i2 = j*10;
-            wdata[i].cmpd2[j].vl.p = malloc((j+1)*sizeof(cmpd3_t));
+            wdata[i].cmpd2[j].vl.p = HDmalloc((j+1)*sizeof(cmpd3_t));
             wdata[i].cmpd2[j].vl.len = j+1;
             for(k=0; k<(j+1); k++) 
             {
@@ -4643,22 +4667,22 @@ static void test_comps_array_vlen (const char * fname, const char *dset,const ch
     ret = H5Dwrite(did_dset, tid_cmpd1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
+    /*-----------------------------------
+     * Create an attribute in root group
+     */
+    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
+    assert(tid_attr > 0);
+    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
+    assert(ret >= 0);
+
     /* Reclaim the write VL data */
     ret = H5Dvlen_reclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
-    /*-----------------------------------
-     * Create an attribute in root group
-     */
-    /* TODO: creating vlen with compound type doesn't work for attribute now. 
-     * so add this later when it's fixed
-    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
-    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
-    assert(ret >= 0);
-    */
-
     /*-------------------
      * Close IDs */
+    ret = H5Aclose(tid_attr);
+    assert(ret >= 0);
     ret = H5Tclose(tid_arry1);
     assert(ret >= 0);
     ret = H5Dclose(did_dset);
@@ -4703,6 +4727,7 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
     hid_t  fid;  /* HDF5 File ID */
     hid_t  did_dset; /* dataset ID   */
     hid_t  sid_dset;  /* dataset space ID */
+    hid_t  tid_attr;
     hid_t  tid_cmpd3; /* compound3 type ID */
     hid_t  tid_cmpd2; /* compound2 type ID */
     hid_t  tid_cmpd2_arry;
@@ -4719,7 +4744,7 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
     {
         /* compound 1 data */
         wdata[i].i1 = i;
-        wdata[i].vl.p = malloc((i+1)*sizeof(cmpd2_t));
+        wdata[i].vl.p = HDmalloc((i+1)*sizeof(cmpd2_t));
         wdata[i].vl.len = i+1;
         for(j=0; j<(i+1); j++)
         {
@@ -4788,22 +4813,22 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
     ret = H5Dwrite(did_dset, tid_cmpd1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
+    /*-----------------------------------
+     * Create an attribute in root group
+     */
+    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
+    assert(tid_attr > 0);
+    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
+    assert(ret >= 0);
+
     /* Reclaim the write VL data */
     ret = H5Dvlen_reclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
-    /*-----------------------------------
-     * Create an attribute in root group
-     */
-    /* TODO: creating vlen with compound type doesn't work for attribute now.
-     * so add this later when it's fixed
-    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
-    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
-    assert(ret >= 0);
-    */
-
     /* ----------------
      * Close IDs */
+    ret = H5Aclose(tid_attr);
+    assert(ret >= 0);
     ret = H5Dclose(did_dset);
     assert(ret >= 0);
     ret = H5Sclose(sid_dset);
@@ -4849,7 +4874,7 @@ static void test_data_nocomparables (const char * fname, int make_diffs)
     int data1[DIM_ARRY] = {0,0,0};
     int data2[DIM_ARRY] = {1,1,1};
     int data3[DIM_ARRY+1] = {1,1,1,1};
-    int data1_dim2[DIM_ARRY][1] = {0,0,0};
+    int data1_dim2[DIM_ARRY][1] = {{0},{0},{0}};
     int rank_attr;
     char data1_str[DIM_ARRY][STR_SIZE]= {"ab","cd","ef"};
     herr_t  status = SUCCEED;
@@ -5391,8 +5416,8 @@ void write_attr_in(hid_t loc_id,
     /* Create references to dataset */
     if (dset_name)
     {
-        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,-1);
-        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,-1);
+        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,(hid_t)-1);
         write_attr(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
     }
 
@@ -5431,10 +5456,10 @@ void write_attr_in(hid_t loc_id,
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len = 1;
-    buf5[0].p = malloc( 1 * sizeof(int));
+    buf5[0].p = HDmalloc( 1 * sizeof(int));
     ((int *)buf5[0].p)[0]=1;
     buf5[1].len = 2;
-    buf5[1].p = malloc( 2 * sizeof(int));
+    buf5[1].p = HDmalloc( 2 * sizeof(int));
     ((int *)buf5[1].p)[0]=2;
     ((int *)buf5[1].p)[1]=3;
 
@@ -5673,7 +5698,7 @@ void write_attr_in(hid_t loc_id,
     {
         for (i = 0; i < 3; i++) {
             for (j = 0; j < 2; j++) {
-                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,-1);
+                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,(hid_t)-1);
             }
         }
         write_attr(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
@@ -5718,7 +5743,7 @@ void write_attr_in(hid_t loc_id,
     n=0;
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 2; j++) {
-            buf52[i][j].p = malloc((i + 1) * sizeof(int));
+            buf52[i][j].p = HDmalloc((i + 1) * sizeof(int));
             buf52[i][j].len = i + 1;
             for (l = 0; l < i + 1; l++)
                 if (make_diffs)((int *)buf52[i][j].p)[l] = 0;
@@ -6069,7 +6094,7 @@ void write_attr_in(hid_t loc_id,
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 3; j++) {
                 for (k = 0; k < 2; k++)
-                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,-1);
+                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,(hid_t)-1);
             }
         }
         write_attr(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
@@ -6134,7 +6159,7 @@ void write_attr_in(hid_t loc_id,
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             for (k = 0; k < 2; k++) {
-                buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
+                buf53[i][j][k].p = HDmalloc((i + 1) * sizeof(int));
                 buf53[i][j][k].len = i + 1;
                 for (l = 0; l < i + 1; l++)
                     if (make_diffs)((int *)buf53[i][j][k].p)[l] = 0;
@@ -6435,8 +6460,8 @@ void write_dset_in(hid_t loc_id,
     /* Create references to dataset */
     if (dset_name)
     {
-        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,-1);
-        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,-1);
+        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,(hid_t)-1);
         write_dset(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
     }
 
@@ -6465,10 +6490,10 @@ void write_dset_in(hid_t loc_id,
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len = 1;
-    buf5[0].p = malloc( 1 * sizeof(int));
+    buf5[0].p = HDmalloc( 1 * sizeof(int));
     ((int *)buf5[0].p)[0]=1;
     buf5[1].len = 2;
-    buf5[1].p = malloc( 2 * sizeof(int));
+    buf5[1].p = HDmalloc( 2 * sizeof(int));
     ((int *)buf5[1].p)[0]=2;
     ((int *)buf5[1].p)[1]=3;
 
@@ -6650,7 +6675,7 @@ void write_dset_in(hid_t loc_id,
     {
         for (i = 0; i < 3; i++) {
             for (j = 0; j < 2; j++) {
-                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,-1);
+                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,(hid_t)-1);
             }
         }
         write_dset(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
@@ -6678,7 +6703,7 @@ void write_dset_in(hid_t loc_id,
     {
         for(j = 0; j < 2; j++)
         {
-            buf52[i][j].p = malloc((i + 1) * sizeof(int));
+            buf52[i][j].p = HDmalloc((i + 1) * sizeof(int));
             buf52[i][j].len = i + 1;
             for(l = 0; l < i + 1; l++)
             {
@@ -6861,7 +6886,7 @@ void write_dset_in(hid_t loc_id,
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 3; j++) {
                 for (k = 0; k < 2; k++)
-                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,-1);
+                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,(hid_t)-1);
             }
         }
         write_dset(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
@@ -6891,7 +6916,7 @@ void write_dset_in(hid_t loc_id,
         {
             for(k = 0; k < 2; k++)
             {
-                buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
+                buf53[i][j][k].p = HDmalloc((i + 1) * sizeof(int));
                 buf53[i][j][k].len = i + 1;
                 for(l = 0; l < i + 1; l++)
                 {

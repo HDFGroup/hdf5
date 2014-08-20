@@ -14,14 +14,14 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5FileCreatPropList_H
-#define _H5FileCreatPropList_H
+#ifndef __H5FileCreatPropList_H
+#define __H5FileCreatPropList_H
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
 
-// class for file access properties
+//! Class FileCreatPropList represents the HDF5 file create property list.
 class H5_DLLCPP FileCreatPropList : public PropList {
    public:
 	// Default file creation property list.
@@ -78,4 +78,4 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 #ifndef H5_NO_NAMESPACE
 }
 #endif
-#endif
+#endif // __H5FileCreatPropList_H

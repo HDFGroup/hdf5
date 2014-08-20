@@ -276,7 +276,7 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
      */
     if(H5I_dec_ref(cb_return) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
-    cb_return = (-1);
+    cb_return = (hid_t)(-1);
 
 done:
     /* Close location given to callback. */

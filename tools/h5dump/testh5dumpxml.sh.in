@@ -26,6 +26,7 @@ H5_LONE_COLON="@H5_LONE_COLON@"
 DUMPER=h5dump               # The tool name
 DUMPER_BIN=`pwd`/$DUMPER    # The path of the tool binary
 
+RM='rm -rf'
 CMP='cmp -s'
 DIFF='diff -c'
 CP='cp'
@@ -50,8 +51,10 @@ SRC_H5JAM_TESTFILES="$SRC_TOOLS/h5jam/testfiles"
 SRC_H5STAT_TESTFILES="$SRC_TOOLS/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/h5import/testfiles"
 
-TESTDIR=./testfiles
-test -d $TESTDIR || mkdir $TESTDIR
+TEST_P_DIR=./testfiles
+TESTDIR=./testfiles/xml
+test -d $TEST_P_DIR || mkdir -p $TEST_P_DIR
+test -d $TESTDIR || mkdir -p $TESTDIR
 
 ######################################################################
 # test files
@@ -215,6 +218,19 @@ COPY_TESTFILES_TO_TESTDIR()
     done
 }
 
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=`$DIRNAME $tstfile`
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $TESTDIR
+    fi
+}
+
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
 #
@@ -222,6 +238,9 @@ TESTING() {
    SPACES="                                                               "
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
+
+# Source in the output filter function definitions.
+. $srcdir/../../bin/output_filter.sh
 
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
 # the `nerrors' global variable and (if $verbose is set) display the
@@ -232,18 +251,17 @@ TESTING() {
 # non-zero value.
 #
 TOOLTEST() {
-   expect="$srcdir/../testfiles/$1"
-   actual="../testfiles/`basename $1 .ddl`.out"
-   actual_err="../testfiles/`basename $1 .ddl`.err"
+   expect="$TESTDIR/$1"
+   actual="$TESTDIR/`basename $1 .xml`.out"
+   actual_err="$TESTDIR/`basename $1 .xml`.err"
    shift
 
-   # Run test.
-   TESTING $DUMPER $@
-   (
-      cd $srcdir/../testfiles
-      $RUNSERIAL $DUMPER_BIN $@
-   ) >$actual 2>$actual_err
-   cat $actual_err >> $actual
+    # Run test.
+    TESTING $DUMPER $@
+    (
+    cd $TESTDIR
+      $RUNSERIAL $DUMPER_BIN "$@"
+    ) >$actual 2>$actual_err
 
 
    if [ ! -f $expect ]; then
@@ -254,7 +272,7 @@ TOOLTEST() {
       echo " PASSED"
    else
       echo "*FAILED*"
-      echo "    Expected result (*.ddl) differs from actual result (*.out)"
+      echo "    Expected result (*.xml) differs from actual result (*.out)"
       nerrors="`expr $nerrors + 1`"
       test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
    fi
@@ -277,6 +295,8 @@ SKIP() {
 ###        T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
 
 # test XML
 TOOLTEST tall.h5.xml --xml tall.h5
@@ -366,6 +386,8 @@ TOOLTEST torderattr4.h5.xml --xml -H --sort_by=creation_order --sort_order=desce
 # tests for floating point user defined printf format
 TOOLTEST tfpformat.h5.xml -u -m %.7f tfpformat.h5
 
+# Clean up temporary files/directories
+CLEAN_TESTFILES_AND_TESTDIR
 
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."

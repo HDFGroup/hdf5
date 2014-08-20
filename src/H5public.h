@@ -72,13 +72,32 @@
 extern "C" {
 #endif
 
+/* Macros for enabling/disabling particular GCC warnings */
+/* (see the following web-sites for more info:
+ *      http://www.dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
+ *      http://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
+ */
+/* These pragmas are only implemented usefully in gcc 4.6+ */
+#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406
+    #define H5_GCC_DIAG_STR(s) #s
+    #define H5_GCC_DIAG_JOINSTR(x,y) H5_GCC_DIAG_STR(x ## y)
+    #define H5_GCC_DIAG_DO_PRAGMA(x) _Pragma (#x)
+    #define H5_GCC_DIAG_PRAGMA(x) H5_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
+
+    #define H5_GCC_DIAG_OFF(x) H5_GCC_DIAG_PRAGMA(push) H5_GCC_DIAG_PRAGMA(ignored H5_GCC_DIAG_JOINSTR(-W,x))
+    #define H5_GCC_DIAG_ON(x) H5_GCC_DIAG_PRAGMA(pop)
+#else
+    #define H5_GCC_DIAG_OFF(x)
+    #define H5_GCC_DIAG_ON(x)
+#endif
+
 /* Version numbers */
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
 #define H5_VERS_MINOR	9	/* For minor interface/format changes  	     */
-#define H5_VERS_RELEASE	132	/* For tweaks, bug-fixes, or development     */
+#define H5_VERS_RELEASE	193	/* For tweaks, bug-fixes, or development     */
 #define H5_VERS_SUBRELEASE ""	/* For pre-releases like snap0       */
 				/* Empty string for real releases.           */
-#define H5_VERS_INFO    "HDF5 library version: 1.9.132"      /* Full version string */
+#define H5_VERS_INFO    "HDF5 library version: 1.9.193"      /* Full version string */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				        H5_VERS_RELEASE)
@@ -148,8 +167,10 @@ typedef long long ssize_t;
  * type.
  */
 #if H5_SIZEOF_LONG_LONG >= 8
+H5_GCC_DIAG_OFF(long-long)
 typedef unsigned long long 	hsize_t;
 typedef signed long long	hssize_t;
+H5_GCC_DIAG_ON(long-long)
 #       define H5_SIZEOF_HSIZE_T H5_SIZEOF_LONG_LONG
 #       define H5_SIZEOF_HSSIZE_T H5_SIZEOF_LONG_LONG
 #else
@@ -195,7 +216,7 @@ typedef signed long long	hssize_t;
 #elif H5_SIZEOF_HADDR_T ==H5_SIZEOF_LONG
 #   define H5_PRINTF_HADDR_FMT  "%lu"
 #elif H5_SIZEOF_HADDR_T ==H5_SIZEOF_LONG_LONG
-#   define H5_PRINTF_HADDR_FMT  "%"H5_PRINTF_LL_WIDTH"u"
+#   define H5_PRINTF_HADDR_FMT  "%" H5_PRINTF_LL_WIDTH "u"
 #else
 #   error "nothing appropriate for H5_PRINTF_HADDR_FMT"
 #endif
@@ -261,9 +282,6 @@ typedef signed long long	hssize_t;
 #   error "nothing appropriate for uint64_t"
 #endif
 
-/* Default value for all property list classes */
-#define H5P_DEFAULT     0
-
 /* Common iteration orders */
 typedef enum {
     H5_ITER_UNKNOWN = -1,       /* Unknown order */
@@ -313,6 +331,7 @@ H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum,
 				unsigned *relnum);
 H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
 			       unsigned relnum);
+H5_DLL herr_t H5free_memory(void *mem);
 
 #ifdef __cplusplus
 }

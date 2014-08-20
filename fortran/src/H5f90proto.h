@@ -93,6 +93,7 @@ typedef struct H5O_info_t_f {
 #define nh5fget_obj_count_c       H5_FC_FUNC_(h5fget_obj_count_c, H5FGET_OBJ_COUNT_C)
 #define nh5fget_obj_ids_c         H5_FC_FUNC_(h5fget_obj_ids_c, H5FGET_OBJ_IDS_C)
 #define nh5fget_freespace_c       H5_FC_FUNC_(h5fget_freespace_c, H5FGET_FREESPACE_C)
+#define nh5fget_file_image_c      H5_FC_FUNC_(h5fget_file_image_c, H5FGET_FILE_IMAGE_C)
 #define nh5fget_name_c            H5_FC_FUNC_(h5fget_name_c, H5FGET_NAME_C)
 #define nh5fget_filesize_c        H5_FC_FUNC_(h5fget_filesize_c, H5FGET_FILESIZE_C)
 
@@ -108,6 +109,7 @@ H5_FCDLL int_f nh5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id);
 H5_FCDLL int_f nh5fget_obj_count_c (hid_t_f *file_id, int_f *obj_type, size_t_f *obj_count);
 H5_FCDLL int_f nh5fget_obj_ids_c (hid_t_f *file_id, int_f *obj_type, size_t_f *max_objs, hid_t_f *obj_ids, size_t_f *num_objs);
 H5_FCDLL int_f nh5fget_freespace_c (hid_t_f *file_id, hssize_t_f *free_space);
+H5_FCDLL int_f nh5fget_file_image_c(hid_t_f *file_id, void *buf_ptr, size_t_f *buf_len, size_t_f *buf_req);
 H5_FCDLL int_f nh5fflush_c (hid_t_f *obj_id, int_f *scope);
 H5_FCDLL int_f nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen);
 H5_FCDLL int_f nh5fget_filesize_c(hid_t_f *file_id, hsize_t_f *size);
@@ -141,7 +143,7 @@ H5_FCDLL int_f nh5fget_filesize_c(hid_t_f *file_id, hsize_t_f *size);
 #define nh5sselect_hyperslab_c   H5_FC_FUNC_(h5sselect_hyperslab_c, H5SSELECT_HYPERSLAB_C)
 #define nh5scombine_hyperslab_c   H5_FC_FUNC_(h5scombine_hyperslab_c, H5SCOMBINE_HYPERSLAB_C)
 #define nh5scombine_select_c   H5_FC_FUNC_(h5scombine_select_c, H5SCOMBINE_SELECT_C)
-#define nh5sselect_select_c   H5_FC_FUNC_(h5sselect_select_c, H5SSELECT_SELECT_C)
+#define nh5smodify_select_c   H5_FC_FUNC_(h5smodify_select_c, H5SMODIFY_SELECT_C)
 #define nh5sget_select_type_c   H5_FC_FUNC_(h5sget_select_type_c, H5SGET_SELECT_TYPE_C)
 #define nh5sselect_elements_c    H5_FC_FUNC_(h5sselect_elements_c, H5SSELECT_ELEMENTS_C)
 #define nh5sdecode_c    H5_FC_FUNC_(h5sdecode_c, H5SDECODE_C)
@@ -176,7 +178,7 @@ H5_FCDLL int_f nh5sget_select_type_c ( hid_t_f *space_id , int_f *op);
 H5_FCDLL int_f nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements, hsize_t_f *coord);
 H5_FCDLL int_f nh5scombine_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block, hid_t_f *hyper_id);
 H5_FCDLL int_f nh5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t_f *ds_id);
-H5_FCDLL int_f nh5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id);
+H5_FCDLL int_f nh5smodify_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id);
 H5_FCDLL int_f nh5sdecode_c ( _fcd buf, hid_t_f *obj_id );
 H5_FCDLL int_f nh5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc );
 H5_FCDLL int_f nh5sextent_equal_c ( hid_t_f * space1_id, hid_t_f *space2_id, hid_t_f *c_equal);
@@ -861,11 +863,13 @@ H5_FCDLL int_f nh5oget_comment_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *
 #define nh5pget_preserve_c  H5_FC_FUNC_(h5pget_preserve_c, H5PGET_PRESERVE_C)
 #define nh5pset_chunk_c    H5_FC_FUNC_(h5pset_chunk_c, H5PSET_CHUNK_C)
 #define nh5pget_chunk_c    H5_FC_FUNC_(h5pget_chunk_c, H5PGET_CHUNK_C)
+#define nh5pset_file_image_c H5_FC_FUNC_(h5pset_file_image_c,H5PSET_FILE_IMAGE_C)
 #define nh5pset_fill_valuec_c        H5_FC_FUNC_(h5pset_fill_valuec_c, H5PSET_FILL_VALUEC_C)
 #define nh5pset_fill_value_c         H5_FC_FUNC_(h5pset_fill_value_c, H5PSET_FILL_VALUE_C)
 #define nh5pset_fill_value_integer_c H5_FC_FUNC_(h5pset_fill_value_integer_c, H5PSET_FILL_VALUE_INTEGER_C)
 #define nh5pset_fill_value_real_c    H5_FC_FUNC_(h5pset_fill_value_real_c, H5PSET_FILL_VALUE_REAL_C)
 #define nh5pset_fill_value_double_c  H5_FC_FUNC_(h5pset_fill_value_double_c, H5PSET_FILL_VALUE_DOUBLE_C)
+#define nh5pget_file_image_c H5_FC_FUNC_(h5pget_file_image_c,H5PGET_FILE_IMAGE_C)
 #define nh5pget_fill_valuec_c        H5_FC_FUNC_(h5pget_fill_valuec_c, H5PGET_FILL_VALUEC_C)
 #define nh5pget_fill_value_c         H5_FC_FUNC_(h5pget_fill_value_c, H5PGET_FILL_VALUE_C)
 #define nh5pget_fill_value_integer_c H5_FC_FUNC_(h5pget_fill_value_integer_c, H5PGET_FILL_VALUE_INTEGER_C)
@@ -912,8 +916,6 @@ H5_FCDLL int_f nh5oget_comment_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *
 #define nh5pset_btree_ratios_c         H5_FC_FUNC_(h5pset_btree_ratios_c, H5PSET_BTREE_RATIOS_C)
 #define nh5pset_fapl_mpio_c         H5_FC_FUNC_(h5pset_fapl_mpio_c, H5PSET_FAPL_MPIO_C)
 #define nh5pget_fapl_mpio_c         H5_FC_FUNC_(h5pget_fapl_mpio_c, H5PGET_FAPL_MPIO_C)
-#define nh5pset_fapl_mpiposix_c     H5_FC_FUNC_(h5pset_fapl_mpiposix_c, H5PSET_FAPL_MPIPOSIX_C)
-#define nh5pget_fapl_mpiposix_c     H5_FC_FUNC_(h5pget_fapl_mpiposix_c, H5PGET_FAPL_MPIPOSIX_C)
 #define nh5pset_dxpl_mpio_c        H5_FC_FUNC_(h5pset_dxpl_mpio_c, H5PSET_DXPL_MPIO_C)
 #define nh5pget_dxpl_mpio_c        H5_FC_FUNC_(h5pget_dxpl_mpio_c, H5PGET_DXPL_MPIO_C)
 #define nh5pget_fclose_degree_c    H5_FC_FUNC_(h5pget_fclose_degree_c, H5PGET_FCLOSE_DEGREE_C)
@@ -1017,11 +1019,13 @@ H5_FCDLL int_f nh5pget_class_c ( hid_t_f *prp_id , int_f *classtype);
 H5_FCDLL int_f nh5pset_deflate_c ( hid_t_f *prp_id , int_f *level);
 H5_FCDLL int_f nh5pset_chunk_c ( hid_t_f *prp_id, int_f *rank, hsize_t_f *dims );
 H5_FCDLL int_f nh5pget_chunk_c ( hid_t_f *prp_id, int_f *max_rank, hsize_t_f *dims );
+H5_FCDLL int_f nh5pset_file_image_c (hid_t_f *fapl_id, void *buf_ptr, size_t_f *buf_len);
 H5_FCDLL int_f nh5pset_fill_valuec_c (hid_t_f *prp_id, hid_t_f *type_id, _fcd fillvalue);
 H5_FCDLL int_f nh5pset_fill_value_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue);
 H5_FCDLL int_f nh5pset_fill_value_integer_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue);
 H5_FCDLL int_f nh5pset_fill_value_real_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue);
 H5_FCDLL int_f nh5pset_fill_value_double_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue);
+H5_FCDLL int_f nh5pget_file_image_c (hid_t_f *fapl_id, void **buf_ptr, size_t_f *buf_len);
 H5_FCDLL int_f nh5pget_fill_valuec_c (hid_t_f *prp_id, hid_t_f *type_id, _fcd fillvalue);
 H5_FCDLL int_f nh5pget_fill_value_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue);
 H5_FCDLL int_f nh5pget_fill_value_integer_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue);
@@ -1063,15 +1067,13 @@ H5_FCDLL int_f nh5pmodify_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags
 H5_FCDLL int_f nh5pget_nfilters_c (hid_t_f *prp_id, int_f* nfilters);
 H5_FCDLL int_f nh5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values, size_t_f *namelen, _fcd name, int_f* filter_id);
 H5_FCDLL int_f nh5pget_filter_by_id_c(hid_t_f *prp_id, int_f* filter_id, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values, size_t_f *namelen, _fcd name);
-H5_FCDLL int_f nh5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, int_f* offset, hsize_t_f*bytes);
+H5_FCDLL int_f nh5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, off_t_f* offset, hsize_t_f*bytes);
 H5_FCDLL int_f nh5pget_external_count_c (hid_t_f *prp_id, int_f* count);
-H5_FCDLL int_f nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, int_f* offset, hsize_t_f*bytes);
+H5_FCDLL int_f nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, off_t_f* offset, hsize_t_f*bytes);
 H5_FCDLL int_f nh5pget_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* right);
 H5_FCDLL int_f nh5pset_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* right);
 H5_FCDLL int_f nh5pget_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info);
 H5_FCDLL int_f nh5pset_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info);
-H5_FCDLL int_f nh5pget_fapl_mpiposix_c(hid_t_f *prp_id, int_f* comm, int_f* flag);
-H5_FCDLL int_f nh5pset_fapl_mpiposix_c(hid_t_f *prp_id, int_f* comm, int_f* flag);
 H5_FCDLL int_f nh5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode);
 H5_FCDLL int_f nh5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode);
 H5_FCDLL int_f nh5pset_fclose_degree_c(hid_t_f *fapl, int_f *degree);
@@ -1258,9 +1260,9 @@ H5_FCDLL int_f nprocess_buffer(hid_t_f *estack_id,void **buffer);
 
 H5_FCDLL int_f nh5open_c(void);
 H5_FCDLL int_f nh5close_c(void);
-H5_FCDLL int_f nh5init_types_c(hid_t_f *types, hid_t_f * floatingtypes, hid_t_f * integertypes);
-H5_FCDLL int_f nh5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f * floatingtypes, int_f * floatinglen, hid_t_f * integertypes,  int_f * integerlen);
-H5_FCDLL int_f nh5init_flags_c(int_f *h5d_flags, int_f *h5e_flags, hid_t_f *h5e_hid_flags, int_f *h5f_flags,
+H5_FCDLL int_f nh5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes);
+H5_FCDLL int_f nh5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f *floatingtypes, int_f *floatinglen, hid_t_f *integertypes, int_f *integerlen);
+H5_FCDLL int_f nh5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid_t_f *h5e_hid_flags, int_f *h5f_flags,
 			       int_f *h5fd_flags, hid_t_f *h5fd_hid_flags,
 			       int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags,
 			       hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags, int_f *h5s_flags,

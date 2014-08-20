@@ -791,7 +791,7 @@ test_3 (hid_t fapl)
 	} /* end if */
     } /* end for */
 
-      /* Extend the dataset by another 100 elements */
+    /* Extend the dataset by another 100 elements */
     if(H5Dset_extent(dset, &max_size) < 0) goto error;
     if(H5Sclose(file_space) < 0) goto error;
     if((file_space = H5Dget_space(dset)) < 0) goto error;

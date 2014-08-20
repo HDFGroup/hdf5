@@ -29,16 +29,13 @@
 #define LONG_BUF_SIZE (2 * MAX_STRING_LENGTH + 4)
 
 #define DSET1_NAME "fl_string_dataset"
-#define DSET2_NAME "dataset2"
 #define DSET3_NAME "dataset3"
 #define DSET4_NAME "dataset4"
 #define VL_DSET1_NAME "vl_dset_1"
-#define VL_DSET2_NAME "vl_dset_2"
 #define GROUP1_NAME "group1"
 #define GROUP2_NAME "group2"
 #define GROUP3_NAME "group3"
 #define GROUP4_NAME "group4"
-#define SLINK_NAME "soft_link"
 
 #define RANK 1
 #define COMP_INT_VAL 7
@@ -457,7 +454,7 @@ void test_objnames(hid_t fid, const char* string)
   CHECK(ret, FAIL, "H5Dcreate2");
 
   /* Create reference to named datatype */
-  ret = H5Rcreate(&obj_ref, grp2_id, string, H5R_OBJECT, -1);
+  ret = H5Rcreate(&obj_ref, grp2_id, string, H5R_OBJECT, (hid_t)-1);
   CHECK(ret, FAIL, "H5Rcreate");
   /* Write selection and read it back*/
   ret = H5Dwrite(dset_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, &obj_ref);
@@ -605,7 +602,7 @@ void test_compound(hid_t fid, const char * string)
   readbuf = H5Tget_member_name(s1_tid, 0);
   ret = HDstrcmp(readbuf, string);
   VERIFY(ret, 0, "strcmp");
-  free(readbuf);
+  H5free_memory(readbuf);
 
   /* Add the other fields to the datatype */
   ret = H5Tinsert(s1_tid, "c_name", HOFFSET(s1_t, c), H5T_NATIVE_DOUBLE);
@@ -718,7 +715,7 @@ void test_opaque(hid_t UNUSED fid, const char * string)
   read_buf = H5Tget_tag(type_id);
   ret = strcmp(read_buf, string);
   VERIFY(ret, 0, "H5Tget_tag");
-  free(read_buf);
+  H5free_memory(read_buf);
 
   ret = H5Tclose(type_id);
   CHECK(ret, FAIL, "H5Tclose");

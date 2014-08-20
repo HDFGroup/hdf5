@@ -37,7 +37,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
-#include "H5FDmpi.h"            /* MPI-based file drivers		*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 
@@ -102,7 +101,7 @@ H5F_mpi_get_rank(const H5F_t *f)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(f && f->shared);
+    HDassert(f && f->shared);
 
     /* Dispatch to driver */
     if ((ret_value=H5FD_mpi_get_rank(f->shared->lf)) < 0)
@@ -136,7 +135,7 @@ H5F_mpi_get_comm(const H5F_t *f)
 
     FUNC_ENTER_NOAPI(MPI_COMM_NULL)
 
-    assert(f && f->shared);
+    HDassert(f && f->shared);
 
     /* Dispatch to driver */
     if ((ret_value=H5FD_mpi_get_comm(f->shared->lf))==MPI_COMM_NULL)
@@ -170,7 +169,7 @@ H5F_mpi_get_size(const H5F_t *f)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(f && f->shared);
+    HDassert(f && f->shared);
 
     /* Dispatch to driver */
     if ((ret_value=H5FD_mpi_get_size(f->shared->lf)) < 0)

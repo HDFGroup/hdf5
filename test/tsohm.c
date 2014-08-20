@@ -1280,6 +1280,9 @@ static void size2_verify_plist1(hid_t plist)
 
     ret = memcmp(&fill1, &fill1_correct, sizeof(fill1_correct));
     VERIFY(ret, 0, memcmp);
+
+    ret = H5Tclose(dtype1_id);
+    CHECK_I(ret, "H5Tclose");
 }
 
 /*-------------------------------------------------------------------------
@@ -1348,6 +1351,9 @@ static void size2_verify_plist2(hid_t plist)
 
     ret = HDmemcmp(&fill2, &fill2_correct, (size_t)DTYPE2_SIZE);
     VERIFY(ret, 0, memcmp);
+
+    ret = H5Tclose(dtype2_id);
+    CHECK_I(ret, "H5Tclose");
 }
 
 #ifdef NOT_NOW
@@ -3138,6 +3144,8 @@ static void test_sohm_extlink_helper(hid_t src_fcpl_id, hid_t dst_fcpl_id)
     /* Close the dataset and both files to make sure everything gets flushed
      * out of memory
      */
+    ret = H5Sclose(space_id);
+    CHECK_I(ret, "H5Sclose");
     ret = H5Dclose(dset_id);
     CHECK_I(ret, "H5Dclose");
     ret = H5Fclose(src_file_id);
@@ -3195,6 +3203,9 @@ test_sohm_extlink(void)
     test_sohm_extlink_helper(fcpl_id, H5P_DEFAULT);
     test_sohm_extlink_helper(H5P_DEFAULT, fcpl_id);
     test_sohm_extlink_helper(fcpl_id, fcpl_id);
+
+    ret = H5Pclose(fcpl_id);
+    CHECK_I(ret, "H5Pclose");
 }
 
 
@@ -3782,6 +3793,9 @@ test_sohm_extend_dset(void)
     CHECK_I(ret, "test_sohm_extend_dset_helper");
     ret = test_sohm_extend_dset_helper(fcpl_id, TRUE);
     CHECK_I(ret, "test_sohm_extend_dset_helper");
+
+    ret = H5Pclose(fcpl_id);
+    CHECK_I(ret, "H5Pclose");
 }
 
 
@@ -3870,7 +3884,7 @@ test_sohm_external_dtype(void)
     CHECK_I(dset1_tid, "H5Dget_type");
 
     /* Allocate space and initialize data */
-    orig = (s1_t*)malloc(NX * NY * sizeof(s1_t));
+    orig = (s1_t*)HDmalloc(NX * NY * sizeof(s1_t));
     for(i=0; i<NX*NY; i++) {
         s_ptr = (s1_t*)orig + i;
         s_ptr->a = i*3 + 1;
@@ -3949,7 +3963,7 @@ test_sohm_external_dtype(void)
     ret = H5Fclose(file2);
     CHECK_I(ret, "H5Fclose");
 
-    free(orig);
+    HDfree(orig);
 }
 
 

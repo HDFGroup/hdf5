@@ -27,20 +27,12 @@
 #include "H5FDpublic.h"		/* File drivers				*/
 
 /* Private headers needed by this file */
-#include "H5Vprivate.h"		/* Vectors and arrays */
+#include "H5VMprivate.h"		/* Vectors and arrays */
 
 
-/****************************/
-/* Library Private Typedefs */
-/****************************/
-
-/* Main file structure */
-typedef struct H5F_t H5F_t;
-typedef struct H5F_file_t H5F_file_t;
-
-/* Block aggregation structure */
-typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
-
+/**************************/
+/* Library Private Macros */
+/**************************/
 
 /*
  * Encode and decode macros for file meta-data.
@@ -119,7 +111,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 /* (Assumes that the high bits of the integer are zero) */
 #  define UINT64ENCODE_VARLEN(p, n) {					      \
    uint64_t __n = (uint64_t)(n);							      \
-   unsigned _s = H5V_limit_enc_size(__n);				      \
+   unsigned _s = H5VM_limit_enc_size(__n);				      \
 									      \
    *(p)++ = (uint8_t)_s;						      \
    UINT64ENCODE_VAR(p, __n, _s);						      \
@@ -280,7 +272,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5F_PACKAGE
-#define H5F_INTENT(F)           ((F)->intent)
+#define H5F_INTENT(F)           ((F)->shared->flags)
 #define H5F_OPEN_NAME(F)        ((F)->open_name)
 #define H5F_ACTUAL_NAME(F)      ((F)->actual_name)
 #define H5F_EXTPATH(F)          ((F)->extpath)
@@ -465,6 +457,8 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_ACS_WANT_POSIX_FD_NAME              "want_posix_fd" /* Internal: query the file descriptor from the core VFD, instead of the memory address */
 #define H5F_ACS_EFC_SIZE_NAME                   "efc_size"      /* Size of external file cache */
 #define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
+#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME       "core_write_tracking_flag" /* Whether or not core VFD backing store write tracking is enabled */
+#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME  "core_write_tracking_page_size" /* The page size in kiB when core VFD write tracking is enabled */
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME 		"local"                 /* Whether absolute symlinks local to file. */
@@ -474,6 +468,10 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 /* Which process writes metadata */
 #define H5_PAR_META_WRITE 0
 #endif /* H5_HAVE_PARALLEL */
+
+/* Define the HDF5 file signature */
+#define H5F_SIGNATURE	  "\211HDF\r\n\032\n"
+#define H5F_SIGNATURE_LEN 8
 
 /* Version #'s of the major components of the file format */
 #define HDF5_SUPERBLOCK_VERSION_DEF	0	/* The default super block format	  */
@@ -550,11 +548,42 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5SM_LIST_MAGIC                 "SMLI"          /* Shared Message List */
 
 
-/* Forward declarations for prototype arguments */
+/****************************/
+/* Library Private Typedefs */
+/****************************/
+
+/* Forward declarations (for prototypes & type definitions) */
 struct H5B_class_t;
-struct H5RC_t;
+struct H5UC_t;
 struct H5O_loc_t;
 struct H5HG_heap_t;
+struct H5P_genplist_t;
+
+/* Forward declarations for anonymous H5F objects */
+
+/* Main file structures */
+typedef struct H5F_t H5F_t;
+typedef struct H5F_file_t H5F_file_t;
+
+/* Block aggregation structure */
+typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
+
+/* I/O Info for an operation */
+typedef struct H5F_io_info_t {
+    const H5F_t *f;                     /* File object */
+    const struct H5P_genplist_t *dxpl;         /* DXPL object */
+} H5F_io_info_t;
+
+
+/*****************************/
+/* Library-private Variables */
+/*****************************/
+
+
+/***************************************/
+/* Library-private Function Prototypes */
+/***************************************/
+
 
 /* Private functions */
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
@@ -572,6 +601,7 @@ H5_DLL unsigned H5F_get_nopen_objs(const H5F_t *f);
 H5_DLL unsigned H5F_incr_nopen_objs(H5F_t *f);
 H5_DLL unsigned H5F_decr_nopen_objs(H5F_t *f);
 H5_DLL hid_t H5F_get_file_id(const H5F_t *f);
+H5_DLL ssize_t H5F_get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len);
 H5_DLL H5F_t *H5F_get_parent(const H5F_t *f);
 H5_DLL unsigned H5F_get_nmounts(const H5F_t *f);
 H5_DLL hid_t H5F_get_access_plist(H5F_t *f, hbool_t app_ref);
@@ -602,8 +632,8 @@ H5_DLL unsigned H5F_gc_ref(const H5F_t *f);
 H5_DLL hbool_t H5F_use_latest_format(const H5F_t *f);
 H5_DLL hbool_t H5F_store_msg_crt_idx(const H5F_t *f);
 H5_DLL herr_t H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag);
-H5_DLL struct H5RC_t *H5F_grp_btree_shared(const H5F_t *f);
-H5_DLL herr_t H5F_set_grp_btree_shared(H5F_t *f, struct H5RC_t *rc);
+H5_DLL struct H5UC_t *H5F_grp_btree_shared(const H5F_t *f);
+H5_DLL herr_t H5F_set_grp_btree_shared(H5F_t *f, struct H5UC_t *rc);
 H5_DLL hbool_t H5F_use_tmp_space(const H5F_t *f);
 H5_DLL hbool_t H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
 H5_DLL H5F_avoid_truncate_t H5F_avoid_truncate(const H5F_t *f);
@@ -620,6 +650,7 @@ H5_DLL herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl,
 H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
 H5_DLL hbool_t H5F_has_mount(const H5F_t *file);
 H5_DLL herr_t H5F_traverse_mount(struct H5O_loc_t *oloc/*in,out*/);
+H5_DLL herr_t H5F_flush_mounts(H5F_t *f, hid_t dxpl_id);
 
 /* Functions that operate on blocks of bytes wrt super block */
 H5_DLL herr_t H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr,

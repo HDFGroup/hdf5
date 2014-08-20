@@ -51,14 +51,16 @@ typedef enum {
 /* Struct to keep track of symbolic link targets visited.
  * Functions: symlink_visit_add() and symlink_is_visited()
  */
+typedef struct symlink_trav_path_t {
+    H5L_type_t  type;
+    char *file;
+    char *path;
+} symlink_trav_path_t;
+
 typedef struct symlink_trav_t {
     size_t      nalloc;
     size_t      nused;
-    struct {
-        H5L_type_t  type;
-        char *file;
-        char *path;
-    } *objs;
+    symlink_trav_path_t *objs;
     hbool_t dangle_link;
 } symlink_trav_t;
 

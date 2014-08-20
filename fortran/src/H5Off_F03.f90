@@ -28,7 +28,7 @@
 ! NOTES
 !                         *** IMPORTANT ***
 !  If you add a new H5P function you must add the function name to the
-!  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+!  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
 !*****
@@ -205,7 +205,6 @@ CONTAINS
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
 !*****
-    INTEGER         :: corder_valid
     INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T)  :: lapl_id_default
     TYPE(C_PTR)     :: ptr
@@ -329,7 +328,6 @@ CONTAINS
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
 !*****
-    INTEGER         :: corder_valid
     INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T)  :: lapl_id_default
     TYPE(C_PTR)     :: ptr
@@ -418,7 +416,6 @@ CONTAINS
 
     INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T)  :: lapl_id_default
-    TYPE(C_PTR)     :: ptr
 
     INTERFACE
        INTEGER FUNCTION h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &

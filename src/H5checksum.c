@@ -422,6 +422,8 @@ H5_checksum_lookup3(const void *key, size_t length, uint32_t initval)
         case 1 : a+=k[0];
                  break;
         case 0 : goto done;
+        default:
+            HDassert(0 && "This Should never be executed!");
     }
 
     H5_lookup3_final(a, b, c);
