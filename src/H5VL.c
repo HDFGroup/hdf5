@@ -51,6 +51,10 @@ static herr_t H5VL_free_cls(H5VL_class_t *cls);
 /*******************/
 /* Local Variables */
 /*******************/
+typedef struct {
+    const H5VL_class_t *vol_cls;
+    hid_t ret_id;
+} H5VL_is_registered_ud_t;
 
 /* VOL ID class */
 static const H5I_class_t H5I_VOL_CLS[1] = {{
@@ -289,6 +293,39 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__is_registered_cb
+ *
+ * Purpose:	Callback routine to search through registered VLs
+ *
+ * Return:	Success:	The first object in the type for which FUNC
+ *				returns non-zero. NULL if FUNC returned zero
+ *				for every object in the type.
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		Friday, March 30, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5VL__is_registered_cb(void *obj, hid_t id, void *_op_data)
+{
+    H5VL_is_registered_ud_t *op_data = (H5VL_is_registered_ud_t *)_op_data; /* User data for callback */
+    H5VL_class_t *cls = (H5VL_class_t *)obj;
+    int ret_value;     /* Callback return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    if(cls->value == op_data->vol_cls->value) {
+        op_data->ret_id = id;
+        ret_value = H5_ITER_STOP;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__is_registered_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VLis_registered
  *
  * Purpose:	Tests whether a VOL class has been registered or not
@@ -303,15 +340,22 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5VLis_registered(hid_t id)
+H5VLis_registered(const H5VL_class_t *cls)
 {
+    H5VL_is_registered_ud_t op_data;
     htri_t ret_value = FALSE;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "i", id);
+    H5TRACE1("t", "*x", cls);
+
+    op_data.ret_id = FAIL;
+    op_data.vol_cls = cls;
 
     /* Check arguments */
-    if(NULL != H5I_object_verify(id, H5I_VOL))
+    if(H5I_iterate(H5I_VOL, H5VL__is_registered_cb, &op_data, TRUE) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "can't iterate over VOL ids")
+
+    if(op_data.ret_id != FAIL)
         ret_value = TRUE;
 
 done:

@@ -2489,7 +2489,7 @@ H5I__get_id_cb(void *_item, void UNUSED *_key, void *_udata)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5I_get_id(void *object, H5I_type_t type)
+H5I_get_id(const void *object, H5I_type_t type)
 {
     hid_t  ret_value = FAIL;      /* Return value */
     H5I_id_type_t   *type_ptr;      /*ptr to the type       */

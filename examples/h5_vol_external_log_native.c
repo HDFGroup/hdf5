@@ -162,6 +162,8 @@ int main(int argc, char **argv) {
         under_fapl = H5Pcreate (H5P_FILE_ACCESS);
         H5Pset_fapl_native(under_fapl);
         vol_id = H5VLregister (&H5VL_log_g);
+        assert(H5VLis_registered(&H5VL_log_g) == 1);
+
         acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
         H5Pset_vol(acc_tpl, vol_id, &under_fapl);
 
@@ -240,7 +242,7 @@ int main(int argc, char **argv) {
         H5Pclose(under_fapl);
         
         H5VLunregister (vol_id);
-
+        assert(H5VLis_registered(&H5VL_log_g) == 0);
 	return 0;
 }
 
