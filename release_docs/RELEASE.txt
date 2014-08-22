@@ -67,7 +67,12 @@ New Features
  
     Parallel Library
     ----------------
-    - 
+    - Optimize the chunk fill algorithm of datasets by writing out all
+      the chunk fill values collectively in a single MPI-IO
+      call. Previously it was done independently by rank 0
+      one block at a time. This should show a great performance
+      improvement when creating chunked datasets in parallel when the
+      chunk dimensions are fairly small.
  
     Tools
     -----
