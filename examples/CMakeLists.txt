@@ -34,7 +34,7 @@ set (examples
     h5_extlink
     h5_elink_unix2win
     h5_shared_mesg
-    h5_external_log_native_vol
+    h5_vol_external_log_native
 )
 
 foreach (example ${examples})

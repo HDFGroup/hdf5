@@ -150,7 +150,7 @@
 ./examples/h5_ref2reg.c
 ./examples/h5_shared_mesg.c
 ./examples/ph5example.c
-./examples/h5_external_log_native_vol.c
+./examples/h5_vol_external_log_native.c
 ./examples/testh5cc.sh.in
 ./examples/README
 
