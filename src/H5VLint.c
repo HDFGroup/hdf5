@@ -256,36 +256,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_close
- *
- * Purpose: decrements the ref count on the number of references
- *          outstanding for a VOL plugin
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *		May, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_close(H5VL_class_t *cls)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(cls->terminate && cls->terminate() < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL plugin did not terminate cleanly")
-
-    H5MM_xfree(cls);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_close() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5VL_get_plugin_name
  *
  * Purpose:	Private version of H5VLget_plugin_name

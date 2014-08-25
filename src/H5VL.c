@@ -194,19 +194,14 @@ H5VL_term_interface(void)
 static herr_t
 H5VL_free_cls(H5VL_class_t *cls)
 {
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(cls);
 
-    if(cls->terminate && cls->terminate() < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "vol plugin '%s' did not terminate cleanly", cls->name)
-
     H5MM_free(cls);
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_free_cls() */
 
 
@@ -293,6 +288,70 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VLinitialize
+ *
+ * Purpose:	Calls the plugin specific callback to init the plugin.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		August 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLinitialize(hid_t plugin_id, hid_t vipl_id)
+{
+    H5VL_class_t *cls = NULL;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if(cls->initialize && cls->initialize(vipl_id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL plugin did not initialize")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLinitialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VLterminate
+ *
+ * Purpose:	
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		August 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLterminate(hid_t plugin_id, hid_t vtpl_id)
+{
+    H5VL_class_t *cls = NULL;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if(cls->terminate && cls->terminate(vtpl_id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL plugin did not terminate cleanly")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLterminate() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL__is_registered_cb
  *
  * Purpose:	Callback routine to search through registered VLs
@@ -364,6 +423,46 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VLget_plugin_id
+ *
+ * Purpose:	Retrieves the registered plugin ID for a VOL.
+ *
+ * Return:	Positive if the VOL class has been registered
+ *              Negative on error (if the class is not a valid class or not registered)
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              August 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5VLget_plugin_id(const H5VL_class_t *cls)
+{
+    H5VL_is_registered_ud_t op_data;
+    hid_t ret_value = FAIL;     /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    op_data.ret_id = FAIL;
+    op_data.vol_cls = cls;
+
+    /* Check arguments */
+    if(H5I_iterate(H5I_VOL, H5VL__is_registered_cb, &op_data, TRUE) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_BADITER,FAIL, "can't iterate over VOL ids")
+
+    if(op_data.ret_id != FAIL) {
+        if(H5I_inc_ref(op_data.ret_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
+
+        ret_value = op_data.ret_id;
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLget_plugin_id() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VLget_plugin_name
  *
  * Purpose:	Returns the plugin name for the VOL associated with the 
@@ -391,6 +490,38 @@ H5VLget_plugin_name(hid_t id, char *name/*out*/, size_t size)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLget_plugin_name() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VLclose
+ *
+ * Purpose:	Closes the specified VOL plugin.  The VOL ID will no longer be
+ *		valid for accessing the VOL.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		August 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLclose(hid_t vol_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(NULL == H5I_object_verify(vol_id,H5I_VOL))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if(H5I_dec_app_ref(vol_id) < 0)
+    	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close VOL plugin ID")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLclose() */
 
 
 /*---------------------------------------------------------------------------

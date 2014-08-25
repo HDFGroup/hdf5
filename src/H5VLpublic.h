@@ -327,8 +327,8 @@ typedef enum H5VL_class_value_t {
 typedef struct H5VL_class_t {
     H5VL_class_value_t value;
     const char *name;
-    herr_t  (*initialize)(void);
-    herr_t  (*terminate)(void);
+    herr_t  (*initialize)(hid_t vipl_id);
+    herr_t  (*terminate)(hid_t vtpl_id);
     size_t  fapl_size;
     void *  (*fapl_copy)(const void *info);
     herr_t  (*fapl_free)(void *info);
@@ -426,6 +426,10 @@ H5_DLL herr_t H5VLrequest_test(void **req, H5VL_t *vol_plugin, H5ES_status_t *st
 H5_DLL herr_t H5VLrequest_wait(void **req, H5VL_t *vol_plugin, H5ES_status_t *status);
 
 /* Function prototypes */
+H5_DLL herr_t H5VLinitialize(hid_t plugin_id, hid_t vipl_id);
+H5_DLL herr_t H5VLterminate(hid_t plugin_id, hid_t vtpl_id);
+H5_DLL hid_t H5VLget_plugin_id(const H5VL_class_t *cls);
+H5_DLL herr_t H5VLclose(hid_t plugin_id);
 H5_DLL hid_t H5VLregister(const H5VL_class_t *cls);
 H5_DLL herr_t H5VLunregister(hid_t plugin_id);
 H5_DLL htri_t H5VLis_registered(const H5VL_class_t *cls);
@@ -434,10 +438,6 @@ H5_DLL hid_t H5VLobject_register(void *obj, H5I_type_t obj_type, const H5VL_clas
 H5_DLL herr_t H5VLget_object(hid_t obj_id, void **obj, H5VL_t **vol_plugin);
 #if 0
     H5_DLL hid_t H5VLregister_by_name(const char *plugin_name);
-    H5_DLL herr_t H5VLinitialize(hid_t plugin_id, hid_t vipl_id);
-    H5_DLL herr_t H5VLterminate(hid_t plugin_id, hid_t vtpl_id);
-    H5_DLL hid_t H5VLget_plugin_id(H5VL_class_value_t or char *);
-    H5_DLL herr_t H5VLclose(hid_t plugin_id);
     H5_DLL herr_t H5VLioctl(hid_t loc_id or vol_id, <class enum>, ...);
 #endif
 

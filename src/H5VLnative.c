@@ -61,8 +61,6 @@ static hid_t H5VL_NATIVE_g = 0;
 /* Prototypes */
 static H5F_t *H5VL_native_get_file(void *obj, H5I_type_t type);
 
-static herr_t H5VL_native_term(void);
-
 /* Atrribute callbacks */
 static void *H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_native_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t dxpl_id, void **req);
@@ -128,7 +126,7 @@ static H5VL_class_t H5VL_native_g = {
     NATIVE,
     "native",					/* name */
     NULL,                                       /* initialize */
-    H5VL_native_term,                           /* terminate */
+    NULL,                                       /* terminate */
     0,                                          /* fapl_size */
     NULL,                                       /* fapl_copy */
     NULL,                                       /* fapl_free */
@@ -244,7 +242,7 @@ H5VL_native_init(void)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Register the Native VOL, if it isn't already */
-    if(H5I_VOL != H5I_get_type(H5VL_NATIVE_g)) {
+    if(NULL == H5I_object_verify(H5VL_NATIVE_g, H5I_VOL)) {
         if((H5VL_NATIVE_g = H5VL_register((const H5VL_class_t *)&H5VL_native_g, 
                                           sizeof(H5VL_class_t), FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't create ID for native plugin")
@@ -257,6 +255,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_init() */
 
+#if 0
 
 /*---------------------------------------------------------------------------
  * Function:    H5VL_native_term
@@ -277,6 +276,7 @@ H5VL_native_term(void)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_native_term() */
+#endif
 
 
 /*---------------------------------------------------------------------------

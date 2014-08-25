@@ -6,6 +6,9 @@
 
 #define LOG 502
 
+static herr_t H5VL_log_init(hid_t vipl_id);
+static herr_t H5VL_log_term(hid_t vtpl_id);
+
 /* Datatype callbacks */
 static void *H5VL_log_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_log_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
@@ -40,8 +43,8 @@ static herr_t H5VL_log_object_specific(void *obj, H5VL_loc_params_t loc_params, 
 static const H5VL_class_t H5VL_log_g = {
     LOG,
     "log",					/* name */
-    NULL,                                       /* initialize */
-    NULL,                                       /* terminate */
+    H5VL_log_init,                              /* initialize */
+    H5VL_log_term,                              /* terminate */
     sizeof(hid_t),
     NULL,
     NULL,
@@ -147,7 +150,7 @@ int main(int argc, char **argv) {
         hid_t datasetId;
         hid_t acc_tpl;
         hid_t under_fapl;
-        hid_t vol_id;
+        hid_t vol_id, vol_id2;
         hid_t int_id;
         hid_t attr;
         hid_t space;
@@ -163,6 +166,10 @@ int main(int argc, char **argv) {
         H5Pset_fapl_native(under_fapl);
         vol_id = H5VLregister (&H5VL_log_g);
         assert(H5VLis_registered(&H5VL_log_g) == 1);
+
+        vol_id2 = H5VLget_plugin_id(&H5VL_log_g);
+        H5VLinitialize(vol_id2, H5P_DEFAULT);
+        H5VLclose(vol_id2);
 
         acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
         H5Pset_vol(acc_tpl, vol_id, &under_fapl);
@@ -240,10 +247,23 @@ int main(int argc, char **argv) {
 	H5Fclose(file_id);
         H5Pclose(acc_tpl);
         H5Pclose(under_fapl);
-        
+
+        H5VLterminate(vol_id, H5P_DEFAULT);
         H5VLunregister (vol_id);
         assert(H5VLis_registered(&H5VL_log_g) == 0);
 	return 0;
+}
+
+static herr_t H5VL_log_init(hid_t vipl_id)
+{
+    printf("------- LOG INIT\n");
+    return 0;
+}
+
+static herr_t H5VL_log_term(hid_t vtpl_id)
+{
+    printf("------- LOG TERM\n");
+    return 0;
 }
 
 static void *
