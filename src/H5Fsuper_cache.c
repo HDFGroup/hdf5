@@ -121,7 +121,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     H5F_file_t         *shared;             /* shared part of `file'        */
     H5FD_t             *lf;                 /* file driver part of `shared' */
     haddr_t             stored_eof;         /* stored end-of-file address in file  */
-    haddr_t             eof;                /*end of file address           */
+    /*haddr_t             eof;              end of file address           */
     uint8_t             sizeof_addr;        /* Size of offsets in the file (in bytes) */
     uint8_t             sizeof_size;        /* Size of lengths in the file (in bytes) */
     const size_t        fixed_size = H5F_SUPERBLOCK_FIXED_SIZE; /*fixed sizeof superblock   */
@@ -475,12 +475,19 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
      * possible is if the first file of a family of files was opened
      * individually.
      */
+    /* if(HADDR_UNDEF == (eof = MAX(H5FD_get_eof(lf), H5FD_get_eoa(lf, H5FD_MEM_SUPER))))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to determine file size") */
     /* if(HADDR_UNDEF == (eof = H5FD_get_eof(lf)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to determine file size") */
+
+#if 0
     eof = H5FD_get_eof(lf);
     /* (Account for the stored EOF being absolute offset -QAK) */
     if((eof + sblock->base_addr) < stored_eof)
-        HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, NULL, "truncated file: eof = %llu, sblock->base_addr = %llu, stored_eof = %llu", (unsigned long long)eof, (unsigned long long)sblock->base_addr, (unsigned long long)stored_eof)
+        HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, NULL, 
+                    "truncated file: eof = %llu, sblock->base_addr = %llu, stored_eof = %llu", 
+                    (unsigned long long)eof, (unsigned long long)sblock->base_addr, (unsigned long long)stored_eof)
+#endif
 
     /*
      * Tell the file driver how much address space has already been
