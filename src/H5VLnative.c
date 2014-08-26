@@ -244,7 +244,7 @@ H5VL_native_init(void)
     /* Register the Native VOL, if it isn't already */
     if(NULL == H5I_object_verify(H5VL_NATIVE_g, H5I_VOL)) {
         if((H5VL_NATIVE_g = H5VL_register((const H5VL_class_t *)&H5VL_native_g, 
-                                          sizeof(H5VL_class_t), FALSE)) < 0)
+                                          sizeof(H5VL_class_t), TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't create ID for native plugin")
     }
 
@@ -254,29 +254,6 @@ H5VL_native_init(void)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_init() */
-
-#if 0
-
-/*---------------------------------------------------------------------------
- * Function:    H5VL_native_term
- *
- * Purpose:     Shut down the VOL plugin
- *
- * Returns:     SUCCEED (Can't fail)
- *
- *---------------------------------------------------------------------------
- */
-static herr_t
-H5VL_native_term(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Reset VFL ID */
-    H5VL_NATIVE_g = 0;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5VL_native_term() */
-#endif
 
 
 /*---------------------------------------------------------------------------
@@ -388,10 +365,7 @@ H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref)
     if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     vol_plugin->cls = &H5VL_native_g;
-    vol_plugin->nrefs = 1;
     vol_plugin->id =  H5VL_NATIVE_g;
-    if(H5I_inc_ref(vol_plugin->id, FALSE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 
     /* Get an atom for the object */
     if(type == H5I_DATATYPE && ((H5T_t *)obj)->vol_obj == NULL) {
@@ -399,7 +373,7 @@ H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
     }
     else {
-        if((ret_value = H5I_register2(type, obj, vol_plugin, app_ref)) < 0)
+        if((ret_value = H5VL_register_id(type, obj, vol_plugin, app_ref)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register object")
     }
 
@@ -439,11 +413,9 @@ H5VL_native_unregister(hid_t obj_id)
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    vol_plugin->nrefs--;
-    if(H5I_dec_ref(vol_plugin->id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL plugin")
-    if(0 == vol_plugin->nrefs)
-        H5MM_free(vol_plugin);
+    /* decrement ref count on VOL ID */
+    if(H5VL_free_id(vol_plugin) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL plugin")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

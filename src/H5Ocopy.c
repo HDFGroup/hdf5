@@ -252,8 +252,8 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     loc_params2.obj_type = H5I_get_type(dst_loc_id);
 
     /* Open the object through the VOL */
-    if((ret_value = H5VL_object_copy(obj1, loc_params1, vol_plugin1, src_name, 
-                                     obj2, loc_params2, vol_plugin2, dst_name, 
+    if((ret_value = H5VL_object_copy(obj1, loc_params1, vol_plugin1->cls, src_name, 
+                                     obj2, loc_params2, vol_plugin2->cls, dst_name, 
                                      ocpypl_id, lcpl_id, H5AC_dxpl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to copy object")
 

@@ -87,6 +87,7 @@ test_family_h5repart_opens(void)
 error:
     H5E_BEGIN_TRY {
         H5Fclose(file);
+        H5Pclose(fapl);
     } H5E_END_TRY;
     return -1;
 }

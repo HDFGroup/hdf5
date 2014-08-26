@@ -52,9 +52,9 @@ static herr_t H5VL_free_cls(H5VL_class_t *cls);
 /* Local Variables */
 /*******************/
 typedef struct {
-    const H5VL_class_t *vol_cls;
+    const char *name;
     hid_t ret_id;
-} H5VL_is_registered_ud_t;
+} H5VL_get_plugin_ud_t;
 
 /* VOL ID class */
 static const H5I_class_t H5I_VOL_CLS[1] = {{
@@ -306,6 +306,7 @@ H5VLinitialize(hid_t plugin_id, hid_t vipl_id)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", plugin_id, vipl_id);
 
     /* Check args */
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
@@ -338,6 +339,7 @@ H5VLterminate(hid_t plugin_id, hid_t vtpl_id)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", plugin_id, vtpl_id);
 
     /* Check args */
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
@@ -367,21 +369,21 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5VL__is_registered_cb(void *obj, hid_t id, void *_op_data)
+H5VL__get_plugin_cb(void *obj, hid_t id, void *_op_data)
 {
-    H5VL_is_registered_ud_t *op_data = (H5VL_is_registered_ud_t *)_op_data; /* User data for callback */
+    H5VL_get_plugin_ud_t *op_data = (H5VL_get_plugin_ud_t *)_op_data; /* User data for callback */
     H5VL_class_t *cls = (H5VL_class_t *)obj;
-    int ret_value;     /* Callback return value */
+    int ret_value = H5_ITER_CONT;     /* Callback return value */
 
     FUNC_ENTER_STATIC_NOERR
 
-    if(cls->value == op_data->vol_cls->value) {
+    if(0 == strcmp(cls->name, op_data->name)) {
         op_data->ret_id = id;
         ret_value = H5_ITER_STOP;
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__is_registered_cb() */
+} /* end H5VL__get_plugin_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -399,19 +401,19 @@ H5VL__is_registered_cb(void *obj, hid_t id, void *_op_data)
  *-------------------------------------------------------------------------
  */
 htri_t
-H5VLis_registered(const H5VL_class_t *cls)
+H5VLis_registered(const char *name)
 {
-    H5VL_is_registered_ud_t op_data;
+    H5VL_get_plugin_ud_t op_data;
     htri_t ret_value = FALSE;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "*x", cls);
+    H5TRACE1("t", "*s", name);
 
     op_data.ret_id = FAIL;
-    op_data.vol_cls = cls;
+    op_data.name = name;
 
     /* Check arguments */
-    if(H5I_iterate(H5I_VOL, H5VL__is_registered_cb, &op_data, TRUE) < 0)
+    if(H5I_iterate(H5I_VOL, H5VL__get_plugin_cb, &op_data, TRUE) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "can't iterate over VOL ids")
 
     if(op_data.ret_id != FAIL)
@@ -436,18 +438,19 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VLget_plugin_id(const H5VL_class_t *cls)
+H5VLget_plugin_id(const char *name)
 {
-    H5VL_is_registered_ud_t op_data;
+    H5VL_get_plugin_ud_t op_data;
     hid_t ret_value = FAIL;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE1("i", "*s", name);
 
     op_data.ret_id = FAIL;
-    op_data.vol_cls = cls;
+    op_data.name = name;
 
     /* Check arguments */
-    if(H5I_iterate(H5I_VOL, H5VL__is_registered_cb, &op_data, TRUE) < 0)
+    if(H5I_iterate(H5I_VOL, H5VL__get_plugin_cb, &op_data, TRUE) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_BADITER,FAIL, "can't iterate over VOL ids")
 
     if(op_data.ret_id != FAIL) {
@@ -477,14 +480,14 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5VLget_plugin_name(hid_t id, char *name/*out*/, size_t size)
+H5VLget_plugin_name(hid_t obj_id, char *name/*out*/, size_t size)
 {
     ssize_t    ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("Zs", "ixz", id, name, size);
+    H5TRACE3("Zs", "ixz", obj_id, name, size);
 
-    if((ret_value = H5VL_get_plugin_name(id, name, size)) < 0)
+    if((ret_value = H5VL_get_plugin_name(obj_id, name, size)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Can't get plugin name")
 
 done:
@@ -511,9 +514,10 @@ H5VLclose(hid_t vol_id)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", vol_id);
 
     /* Check args */
-    if(NULL == H5I_object_verify(vol_id,H5I_VOL))
+    if(NULL == H5I_object_verify(vol_id, H5I_VOL))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     if(H5I_dec_app_ref(vol_id) < 0)
@@ -538,19 +542,25 @@ done:
  *---------------------------------------------------------------------------
  */
 hid_t
-H5VLobject_register(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls)
+H5VLobject_register(void *obj, H5I_type_t obj_type, hid_t plugin_id)
 {
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_class_t *vol_cls = NULL;
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("i", "*xIt*x", obj, obj_type, cls);
+    H5TRACE3("i", "*xIti", obj, obj_type, plugin_id);
+
+    if(NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object to register")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Build the vol plugin struct */
     if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    vol_plugin->cls = cls;
-    vol_plugin->nrefs = 1;
+    vol_plugin->cls = vol_cls;
+    vol_plugin->id = plugin_id;
 
     if ((ret_value = H5VL_object_register(obj, obj_type, vol_plugin, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
@@ -575,28 +585,24 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VLget_object(hid_t obj_id, void **obj, H5VL_t **vol_plugin)
+H5VLget_object(hid_t obj_id, void **obj)
 {
-    H5VL_t *temp_vol;
+    H5VL_t *vol_plugin;
     hid_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i**x**x", obj_id, obj, vol_plugin);
+    H5TRACE2("e", "i**x", obj_id, obj);
 
     /* Check args */
     if(!obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object pointer")
 
     /* get the plugin pointer */
-    if (NULL == (temp_vol = (H5VL_t *)H5I_get_aux(obj_id)))
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    if(NATIVE == temp_vol->cls->value)
+    if(NATIVE == vol_plugin->cls->value)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot call public function on library type")
-
-    /* if the user requested the plugin pointer, return it */
-    if(vol_plugin)
-        *vol_plugin = temp_vol;
 
     if(NULL == (*obj = H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain a valid object")
@@ -620,16 +626,21 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
+H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
                 hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
-    void *ret_value = NULL;  /* Return value */
+    H5VL_class_t *vol_cls = NULL;
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
-    if(NULL == (ret_value = H5VL_attr_create(obj, loc_params, vol_plugin, name, acpl_id, aapl_id, dxpl_id, req)))
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
+
+    if(NULL == (ret_value = H5VL_attr_create(obj, loc_params, vol_cls, name, 
+                                             acpl_id, aapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to create attribute")
 
 done:
@@ -651,16 +662,21 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
+H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
               hid_t aapl_id, hid_t dxpl_id, void **req)
 {
-    void *ret_value;  /* Return value */
+    H5VL_class_t *vol_cls = NULL;
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
-    if(NULL == (ret_value = H5VL_attr_open(obj, loc_params, vol_plugin, name, aapl_id, dxpl_id, req)))
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
+
+    if(NULL == (ret_value = H5VL_attr_open(obj, loc_params, vol_cls, name, aapl_id, 
+                                           dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to open attribute")
 
 done:
@@ -682,15 +698,19 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5VLattr_read(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req)
+herr_t H5VLattr_read(void *attr, hid_t plugin_id, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
-    if (NULL == attr || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_attr_read(attr, vol_plugin, mem_type_id, buf, dxpl_id, req)) < 0)
+    if (NULL == attr)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_attr_read(attr, vol_cls, mem_type_id, buf, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to read attribute")
 
 done:
@@ -711,15 +731,19 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5VLattr_write(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req)
+herr_t H5VLattr_write(void *attr, hid_t plugin_id, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
-    if (NULL == attr || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_attr_write(attr, vol_plugin, mem_type_id, buf, dxpl_id, req)) < 0)
+    if (NULL == attr)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_attr_write(attr, vol_cls, mem_type_id, buf, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to write attribute")
 
 done:
@@ -741,21 +765,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, 
+H5VLattr_get(void *obj, hid_t plugin_id, H5VL_attr_get_t get_type, 
              hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*x*xVai**xx", obj, vol_plugin, get_type, dxpl_id, req, arguments);
+    H5TRACE6("e", "*xiVai**xx", obj, plugin_id, get_type, dxpl_id, req, arguments);
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Bypass the H5VLint layer */
-    if(NULL == vol_plugin->cls->attr_cls.get)
+    if(NULL == vol_cls->attr_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr get' method")
-    if((ret_value = (vol_plugin->cls->attr_cls.get)(obj, get_type, dxpl_id, req, arguments)) < 0)
+    if((ret_value = (vol_cls->attr_cls.get)(obj, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to get attribute information")
 
 done:
@@ -777,22 +804,25 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
+H5VLattr_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, 
                   H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*xx*xVbi**xx", obj, loc_params, vol_plugin, specific_type,
+    H5TRACE7("e", "*xxiVbi**xx", obj, loc_params, plugin_id, specific_type,
              dxpl_id, req, arguments);
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Bypass the H5VLint layer */
-    if(NULL == vol_plugin->cls->attr_cls.specific)
+    if(NULL == vol_cls->attr_cls.specific)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr specific' method")
-    if((ret_value = (vol_plugin->cls->attr_cls.specific)
+    if((ret_value = (vol_cls->attr_cls.specific)
         (obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute specific callback")
 
@@ -815,20 +845,23 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, va_list arguments)
+H5VLattr_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*x*xi**xx", obj, vol_plugin, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", obj, plugin_id, dxpl_id, req, arguments);
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Have to bypass the H5VLint layer due to unknown val_list arguments */
-    if(NULL == vol_plugin->cls->attr_cls.optional)
+    if(NULL == vol_cls->attr_cls.optional)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr optional' method")
-    if((ret_value = (vol_plugin->cls->attr_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+    if((ret_value = (vol_cls->attr_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute optional callback")
 
 done:
@@ -850,16 +883,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_close(void *attr, H5VL_t *vol_plugin, hid_t dxpl_id, void **req)
+H5VLattr_close(void *attr, hid_t plugin_id, hid_t dxpl_id, void **req)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*x*xi**x", attr, vol_plugin, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", attr, plugin_id, dxpl_id, req);
 
-    if (NULL == attr || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_attr_close(attr, vol_plugin, dxpl_id, req)) < 0)
+    if (NULL == attr)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_attr_close(attr, vol_cls, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close attribute")
 
 done:
@@ -881,16 +918,20 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdatatype_commit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
+H5VLdatatype_commit(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
                      hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req)
 {
-    void *ret_value = NULL;              /* Return value */
+    H5VL_class_t *vol_cls = NULL;
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
-    if(NULL == (ret_value = H5VL_datatype_commit(obj, loc_params, vol_plugin, name, type_id, 
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
+
+    if(NULL == (ret_value = H5VL_datatype_commit(obj, loc_params, vol_cls, name, type_id, 
                                                  lcpl_id, tcpl_id, tapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to commit datatype")
 
@@ -913,16 +954,21 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdatatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
+H5VLdatatype_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
                    hid_t tapl_id, hid_t dxpl_id, void **req)
 {
-    void *ret_value = NULL;              /* Return value */
+    H5VL_class_t *vol_cls = NULL;
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
-    if(NULL == (ret_value = H5VL_datatype_open(obj, loc_params, vol_plugin, name, tapl_id, dxpl_id, req)))
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
+
+    if(NULL == (ret_value = H5VL_datatype_open(obj, loc_params, vol_cls, name, 
+                                               tapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to open datatype")
 
 done:
@@ -944,21 +990,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdatatype_specific(void *obj, H5VL_t *vol_plugin, H5VL_datatype_specific_t specific_type, 
+H5VLdatatype_specific(void *obj, hid_t plugin_id, H5VL_datatype_specific_t specific_type, 
                       hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*x*xVfi**xx", obj, vol_plugin, specific_type, dxpl_id, req,
+    H5TRACE6("e", "*xiVfi**xx", obj, plugin_id, specific_type, dxpl_id, req,
              arguments);
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    if(NULL == vol_plugin->cls->datatype_cls.specific)
+    if(NULL == vol_cls->datatype_cls.specific)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype specific' method")
-    if((ret_value = (vol_plugin->cls->datatype_cls.specific)
+    if((ret_value = (vol_cls->datatype_cls.specific)
         (obj, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute datatype specific callback")
 
@@ -981,19 +1030,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdatatype_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, va_list arguments)
+H5VLdatatype_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*x*xi**xx", obj, vol_plugin, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", obj, plugin_id, dxpl_id, req, arguments);
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    if(NULL == vol_plugin->cls->datatype_cls.optional)
+    if(NULL == vol_cls->datatype_cls.optional)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype optional' method")
-    if((ret_value = (vol_plugin->cls->datatype_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+    if((ret_value = (vol_cls->datatype_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute datatype optional callback")
 
 done:
@@ -1015,21 +1067,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdatatype_get(void *obj, H5VL_t *vol_plugin, H5VL_datatype_get_t get_type, 
+H5VLdatatype_get(void *obj, hid_t plugin_id, H5VL_datatype_get_t get_type, 
                  hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*x*xVei**xx", obj, vol_plugin, get_type, dxpl_id, req, arguments);
+    H5TRACE6("e", "*xiVei**xx", obj, plugin_id, get_type, dxpl_id, req, arguments);
 
-    if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if(NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Bypass the H5VLint layer */
-    if(NULL == vol_plugin->cls->datatype_cls.get)
+    if(NULL == vol_cls->datatype_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype get' method")
-    if((ret_value = (vol_plugin->cls->datatype_cls.get)(obj, get_type, dxpl_id, req, arguments)) < 0)
+    if((ret_value = (vol_cls->datatype_cls.get)(obj, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to execute datatype get callback")
 
 done:
@@ -1051,16 +1106,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdatatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, void **req)
+H5VLdatatype_close(void *dt, hid_t plugin_id, hid_t dxpl_id, void **req)
 {
-    herr_t		ret_value = SUCCEED;    /* Return value */
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*x*xi**x", dt, vol_plugin, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", dt, plugin_id, dxpl_id, req);
 
-    if (NULL == dt || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_datatype_close(dt, vol_plugin, dxpl_id, req)) < 0)
+    if (NULL == dt)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_datatype_close(dt, vol_cls, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close datatype")
 
 done:
@@ -1082,16 +1141,20 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
+H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
                     hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
-    void *ret_value; /* Return value */
+    H5VL_class_t *vol_cls = NULL;
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
-    if(NULL == (ret_value = H5VL_dataset_create(obj, loc_params, vol_plugin, name, 
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
+
+    if(NULL == (ret_value = H5VL_dataset_create(obj, loc_params, vol_cls, name, 
                                                 dcpl_id, dapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to create dataset")
 
@@ -1114,16 +1177,20 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
+H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
                   hid_t dapl_id, hid_t dxpl_id, void **req)
 {
-    void *ret_value; /* Return value */
+    H5VL_class_t *vol_cls = NULL;
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
-    if(NULL == (ret_value = H5VL_dataset_open(obj, loc_params, vol_plugin, name, dapl_id, dxpl_id, req)))
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
+
+    if(NULL == (ret_value = H5VL_dataset_open(obj, loc_params, vol_cls, name, dapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to open dataset")
 
 done:
@@ -1145,18 +1212,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_read(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, 
+H5VLdataset_read(void *dset, hid_t plugin_id, hid_t mem_type_id, hid_t mem_space_id, 
                   hid_t file_space_id, hid_t plist_id, void *buf, void **req)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "*x*xiiii*x**x", dset, vol_plugin, mem_type_id, mem_space_id,
+    H5TRACE8("e", "*xiiiii*x**x", dset, plugin_id, mem_type_id, mem_space_id,
              file_space_id, plist_id, buf, req);
 
-    if (NULL == dset || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_dataset_read(dset, vol_plugin, mem_type_id, mem_space_id, file_space_id, 
+    if (NULL == dset)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_dataset_read(dset, vol_cls, mem_type_id, mem_space_id, file_space_id, 
                                       plist_id, buf, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to read dataset")
 
@@ -1179,18 +1250,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_write(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, 
+H5VLdataset_write(void *dset, hid_t plugin_id, hid_t mem_type_id, hid_t mem_space_id, 
                    hid_t file_space_id, hid_t plist_id, const void *buf, void **req)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "*x*xiiii*x**x", dset, vol_plugin, mem_type_id, mem_space_id,
+    H5TRACE8("e", "*xiiiii*x**x", dset, plugin_id, mem_type_id, mem_space_id,
              file_space_id, plist_id, buf, req);
 
-    if (NULL == dset || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_dataset_write(dset, vol_plugin, mem_type_id, mem_space_id, file_space_id, 
+    if (NULL == dset)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_dataset_write(dset, vol_cls, mem_type_id, mem_space_id, file_space_id, 
                                        plist_id, buf, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to write dataset")
 
@@ -1213,22 +1288,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, 
+H5VLdataset_get(void *dset, hid_t plugin_id, H5VL_dataset_get_t get_type, 
                 hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*x*xVci**xx", dset, vol_plugin, get_type, dxpl_id, req,
-             arguments);
+    H5TRACE6("e", "*xiVci**xx", dset, plugin_id, get_type, dxpl_id, req, arguments);
 
-    if (NULL == dset || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if (NULL == dset)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Bypass the H5VLint layer */
-    if(NULL == vol_plugin->cls->dataset_cls.get)
+    if(NULL == vol_cls->dataset_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset get' method")
-    if((ret_value = (vol_plugin->cls->dataset_cls.get)(dset, get_type, dxpl_id, req, arguments)) < 0)
+    if((ret_value = (vol_cls->dataset_cls.get)(dset, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to execute dataset get callback")
 
 done:
@@ -1250,21 +1327,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_specific(void *obj, H5VL_t *vol_plugin, H5VL_dataset_specific_t specific_type, 
+H5VLdataset_specific(void *obj, hid_t plugin_id, H5VL_dataset_specific_t specific_type, 
                       hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*x*xVdi**xx", obj, vol_plugin, specific_type, dxpl_id, req,
+    H5TRACE6("e", "*xiVdi**xx", obj, plugin_id, specific_type, dxpl_id, req,
              arguments);
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    if(NULL == vol_plugin->cls->dataset_cls.specific)
+    if(NULL == vol_cls->dataset_cls.specific)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset specific' method")
-    if((ret_value = (vol_plugin->cls->dataset_cls.specific)
+    if((ret_value = (vol_cls->dataset_cls.specific)
         (obj, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute dataset specific callback")
 
@@ -1287,19 +1367,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, va_list arguments)
+H5VLdataset_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*x*xi**xx", obj, vol_plugin, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", obj, plugin_id, dxpl_id, req, arguments);
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    if(NULL == vol_plugin->cls->dataset_cls.optional)
+    if(NULL == vol_cls->dataset_cls.optional)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset optional' method")
-    if((ret_value = (vol_plugin->cls->dataset_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+    if((ret_value = (vol_cls->dataset_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute dataset optional callback")
 
 done:
@@ -1321,16 +1404,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, void **req)
+H5VLdataset_close(void *dset, hid_t plugin_id, hid_t dxpl_id, void **req)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*x*xi**x", dset, vol_plugin, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", dset, plugin_id, dxpl_id, req);
 
-    if (NULL == dset || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_dataset_close(dset, vol_plugin, dxpl_id, req)) < 0)
+    if (NULL == dset)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_dataset_close(dset, vol_cls, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close dataset")
 
 done:
@@ -1352,14 +1439,27 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLfile_create(H5VL_t **vol_plugin, const char *name, unsigned flags, hid_t fcpl_id, 
-                hid_t fapl_id, hid_t dxpl_id, void **req)
+H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, 
+                hid_t dxpl_id, void **req)
 {
-    void	       *ret_value;             /* Return value */
+    H5P_genplist_t     *plist;                 /* Property list pointer */
+    hid_t               plugin_id;             /* VOL plugin identigier attached to fapl_id */
+    H5VL_class_t       *vol_cls = NULL;
+    void	       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_API(NULL)
 
-    if(NULL == (ret_value = H5VL_file_create(vol_plugin, name, flags, fcpl_id, fapl_id, dxpl_id, req)))
+    /* get the VOL info from the fapl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
+
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
+
+    if(NULL == (ret_value = H5VL_file_create(vol_cls, name, flags, fcpl_id, fapl_id, 
+                                             dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to create file")
 
 done:
@@ -1381,13 +1481,25 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLfile_open(H5VL_t **vol_plugin, const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req)
+H5VLfile_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req)
 {
-    void	       *ret_value;             /* Return value */
+    H5P_genplist_t     *plist;                 /* Property list pointer */
+    hid_t               plugin_id;             /* VOL plugin id attached to fapl_id */
+    H5VL_class_t       *vol_cls = NULL;
+    void	       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_API(NULL)
 
-    if(NULL == (ret_value = H5VL_file_open(vol_plugin, name, flags, fapl_id, dxpl_id, req)))
+    /* get the VOL info from the fapl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
+
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
+
+    if(NULL == (ret_value = H5VL_file_open(vol_cls, name, flags, fapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to create file")
 
 done:
@@ -1409,22 +1521,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, 
+H5VLfile_get(void *file, hid_t plugin_id, H5VL_file_get_t get_type, 
              hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*x*xVgi**xx", file, vol_plugin, get_type, dxpl_id, req,
-             arguments);
+    H5TRACE6("e", "*xiVgi**xx", file, plugin_id, get_type, dxpl_id, req, arguments);
 
-    if(NULL == file || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if(NULL == file)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Bypass the H5VLint layer */
-    if(NULL == vol_plugin->cls->file_cls.get)
+    if(NULL == vol_cls->file_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file get' method")
-    if((ret_value = (vol_plugin->cls->file_cls.get)(file, get_type, dxpl_id, req, arguments)) < 0)
+    if((ret_value = (vol_cls->file_cls.get)(file, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to execute file get callback")
 
 done:
@@ -1446,19 +1560,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_specific(void *file, H5VL_t *vol_plugin, H5VL_file_specific_t specific_type, 
+H5VLfile_specific(void *file, hid_t plugin_id, H5VL_file_specific_t specific_type, 
                   hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*x*xVhi**xx", file, vol_plugin, specific_type, dxpl_id, req,
+    H5TRACE6("e", "*xiVhi**xx", file, plugin_id, specific_type, dxpl_id, req,
              arguments);
 
     if(specific_type == H5VL_FILE_IS_ACCESSIBLE) {
         H5P_genplist_t     *plist;          /* Property list pointer */
         hid_t               vol_id;         /* VOL plugin identigier attached to fapl_id */
-        H5VL_class_t       *vol_cls;        /* VOL class of vol_id */
         hid_t               fapl_id;
 
         fapl_id = va_arg (arguments, hid_t);
@@ -1477,12 +1591,14 @@ H5VLfile_specific(void *file, H5VL_t *vol_plugin, H5VL_file_specific_t specific_
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "specific failed")
     }
     else {
-        if(NULL == file || NULL == vol_plugin || NULL == vol_plugin->cls)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+        if(NULL == file)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+        if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-        if(NULL == vol_plugin->cls->file_cls.specific)
+        if(NULL == vol_cls->file_cls.specific)
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file specific' method")
-        if((ret_value = (vol_plugin->cls->file_cls.specific)
+        if((ret_value = (vol_cls->file_cls.specific)
             (file, specific_type, dxpl_id, req, arguments)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute file specific callback")
     }
@@ -1505,19 +1621,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_optional(void *file, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, va_list arguments)
+H5VLfile_optional(void *file, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*x*xi**xx", file, vol_plugin, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", file, plugin_id, dxpl_id, req, arguments);
 
-    if(NULL == file || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if(NULL == file)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    if(NULL == vol_plugin->cls->file_cls.optional)
+    if(NULL == vol_cls->file_cls.optional)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file optional' method")
-    if((ret_value = (vol_plugin->cls->file_cls.optional)(file, dxpl_id, req, arguments)) < 0)
+    if((ret_value = (vol_cls->file_cls.optional)(file, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute file optional callback")
 
 done:
@@ -1539,16 +1658,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_close(void *file, H5VL_t *vol_plugin, hid_t dxpl_id, void **req)
+H5VLfile_close(void *file, hid_t plugin_id, hid_t dxpl_id, void **req)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*x*xi**x", file, vol_plugin, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", file, plugin_id, dxpl_id, req);
 
-    if(NULL == file || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_file_close(file, vol_plugin, dxpl_id, req)) < 0)
+    if(NULL == file)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_file_close(file, vol_cls, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close file")
 
 done:
@@ -1570,16 +1693,20 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLgroup_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
+H5VLgroup_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
                  hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
+    H5VL_class_t *vol_cls = NULL;
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
-    if(NULL == (ret_value = H5VL_group_create(obj, loc_params, vol_plugin, name, 
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
+
+    if(NULL == (ret_value = H5VL_group_create(obj, loc_params, vol_cls, name, 
                                               gcpl_id, gapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to create group")
 
@@ -1602,16 +1729,20 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLgroup_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
+H5VLgroup_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
                 hid_t gapl_id, hid_t dxpl_id, void **req)
 {
-    void *ret_value; /* Return value */
+    H5VL_class_t *vol_cls = NULL;
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
-    if(NULL == (ret_value = H5VL_group_open(obj, loc_params, vol_plugin, name, 
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
+
+    if(NULL == (ret_value = H5VL_group_open(obj, loc_params, vol_cls, name, 
                                               gapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to open group")
 
@@ -1634,21 +1765,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_get(void *obj, H5VL_t *vol_plugin, H5VL_group_get_t get_type, 
+H5VLgroup_get(void *obj, hid_t plugin_id, H5VL_group_get_t get_type, 
               hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*x*xVii**xx", obj, vol_plugin, get_type, dxpl_id, req, arguments);
+    H5TRACE6("e", "*xiVii**xx", obj, plugin_id, get_type, dxpl_id, req, arguments);
 
-    if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if(NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Bypass the H5VLint layer */
-    if(NULL == vol_plugin->cls->group_cls.get)
+    if(NULL == vol_cls->group_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group get' method")
-    if((ret_value = (vol_plugin->cls->group_cls.get)(obj, get_type, dxpl_id, req, arguments)) < 0)
+    if((ret_value = (vol_cls->group_cls.get)(obj, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to execute group get callback")
 
 done:
@@ -1670,21 +1804,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_specific(void *obj, H5VL_t *vol_plugin, H5VL_group_specific_t specific_type, 
+H5VLgroup_specific(void *obj, hid_t plugin_id, H5VL_group_specific_t specific_type, 
                       hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*x*xVji**xx", obj, vol_plugin, specific_type, dxpl_id, req,
+    H5TRACE6("e", "*xiVji**xx", obj, plugin_id, specific_type, dxpl_id, req,
              arguments);
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    if(NULL == vol_plugin->cls->group_cls.specific)
+    if(NULL == vol_cls->group_cls.specific)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group specific' method")
-    if((ret_value = (vol_plugin->cls->group_cls.specific)
+    if((ret_value = (vol_cls->group_cls.specific)
         (obj, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute group specific callback")
 
@@ -1707,19 +1844,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, va_list arguments)
+H5VLgroup_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*x*xi**xx", obj, vol_plugin, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", obj, plugin_id, dxpl_id, req, arguments);
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    if(NULL == vol_plugin->cls->group_cls.optional)
+    if(NULL == vol_cls->group_cls.optional)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group optional' method")
-    if((ret_value = (vol_plugin->cls->group_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+    if((ret_value = (vol_cls->group_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute group optional callback")
 
 done:
@@ -1741,16 +1881,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, void **req)
+H5VLgroup_close(void *grp, hid_t plugin_id, hid_t dxpl_id, void **req)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*x*xi**x", grp, vol_plugin, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", grp, plugin_id, dxpl_id, req);
 
-    if(NULL == grp || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_group_close(grp, vol_plugin, dxpl_id, req)) < 0)
+    if(NULL == grp)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_group_close(grp, vol_cls, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close group")
 
 done:
@@ -1772,17 +1916,21 @@ done:
  */
 herr_t
 H5VLlink_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params, 
-                 H5VL_t *vol_plugin, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+                 hid_t plugin_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
-    herr_t               ret_value = SUCCEED;  /* Return value */
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "Vk*xx*xiii**x", create_type, obj, loc_params, vol_plugin,
-             lcpl_id, lapl_id, dxpl_id, req);
+    H5TRACE8("e", "Vk*xxiiii**x", create_type, obj, loc_params, plugin_id, lcpl_id,
+             lapl_id, dxpl_id, req);
 
-    if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_link_create(create_type, obj, loc_params, vol_plugin, lcpl_id, lapl_id, dxpl_id, req)) < 0)
+    if(NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_link_create(create_type, obj, loc_params, vol_cls, lcpl_id, lapl_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -1802,18 +1950,25 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5VLlink_copy(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj, 
-                            H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin, 
-                            hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+herr_t
+H5VLlink_copy(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj, 
+              H5VL_loc_params_t loc_params2, hid_t plugin_id, 
+              hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
-    herr_t               ret_value = SUCCEED;  /* Return value */
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*xx*xxiiii**x", src_obj, loc_params1, dst_obj, loc_params2,
+             plugin_id, lcpl_id, lapl_id, dxpl_id, req);
 
-    if(NULL == src_obj || NULL == dst_obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-            if((ret_value = H5VL_link_copy(src_obj, loc_params1, dst_obj, loc_params2, vol_plugin, 
-                                           lcpl_id, lapl_id, dxpl_id, req)) < 0)
+    if(NULL == src_obj || NULL == dst_obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_link_copy(src_obj, loc_params1, dst_obj, loc_params2, vol_cls, 
+                                   lcpl_id, lapl_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to copy object")
 
 done:
@@ -1833,17 +1988,24 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5VLlink_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj, 
-                            H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin, 
-                            hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+herr_t
+H5VLlink_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj, 
+              H5VL_loc_params_t loc_params2, hid_t plugin_id, 
+              hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
-    herr_t               ret_value = SUCCEED;  /* Return value */
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*xx*xxiiii**x", src_obj, loc_params1, dst_obj, loc_params2,
+             plugin_id, lcpl_id, lapl_id, dxpl_id, req);
 
-    if(NULL == src_obj || NULL == dst_obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_link_move(src_obj, loc_params1, dst_obj, loc_params2, vol_plugin, 
+    if(NULL == src_obj || NULL == dst_obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_link_move(src_obj, loc_params1, dst_obj, loc_params2, vol_cls, 
                                    lcpl_id, lapl_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to move object")
 
@@ -1867,21 +2029,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_link_get_t get_type, 
+H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_link_get_t get_type, 
               hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*xx*xVli**xx", obj, loc_params, vol_plugin, get_type, dxpl_id,
-             req, arguments);
+    H5TRACE7("e", "*xxiVli**xx", obj, loc_params, plugin_id, get_type, dxpl_id, req,
+             arguments);
 
-    if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if(NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    if(NULL == vol_plugin->cls->link_cls.get)
+    if(NULL == vol_cls->link_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link get' method")
-    if((ret_value = (vol_plugin->cls->link_cls.get)
+    if((ret_value = (vol_cls->link_cls.get)
         (obj, loc_params, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute link get callback")
 
@@ -1904,22 +2069,25 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
+H5VLlink_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, 
                   H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*xx*xVmi**xx", obj, loc_params, vol_plugin, specific_type,
+    H5TRACE7("e", "*xxiVmi**xx", obj, loc_params, plugin_id, specific_type,
              dxpl_id, req, arguments);
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Bypass the H5VLint layer */
-    if(NULL == vol_plugin->cls->link_cls.specific)
+    if(NULL == vol_cls->link_cls.specific)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link specific' method")
-    if((ret_value = (vol_plugin->cls->link_cls.specific)
+    if((ret_value = (vol_cls->link_cls.specific)
         (obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute link specific callback")
 
@@ -1942,20 +2110,23 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, va_list arguments)
+H5VLlink_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*x*xi**xx", obj, vol_plugin, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", obj, plugin_id, dxpl_id, req, arguments);
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Have to bypass the H5VLint layer due to unknown val_list arguments */
-    if(NULL == vol_plugin->cls->link_cls.optional)
+    if(NULL == vol_cls->link_cls.optional)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link optional' method")
-    if((ret_value = (vol_plugin->cls->link_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+    if((ret_value = (vol_cls->link_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute link optional callback")
 
 done:
@@ -1977,16 +2148,20 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLobject_open(void *obj, H5VL_loc_params_t params, H5VL_t *vol_plugin, H5I_type_t *opened_type,
+H5VLobject_open(void *obj, H5VL_loc_params_t params, hid_t plugin_id, H5I_type_t *opened_type,
                 hid_t dxpl_id, void **req)
 {
-    void *ret_value;              /* Return value */
+    H5VL_class_t *vol_cls = NULL;
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
-    if(NULL == (ret_value = H5VL_object_open(obj, params, vol_plugin, opened_type, dxpl_id, req)))
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
+
+    if(NULL == (ret_value = H5VL_object_open(obj, params, vol_cls, opened_type, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to create group")
 
 done:
@@ -2008,22 +2183,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, H5VL_t *vol_plugin1, const char *src_name, 
-                void *dst_obj, H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin2, const char *dst_name, 
+H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, hid_t plugin_id1, const char *src_name, 
+                void *dst_obj, H5VL_loc_params_t loc_params2, hid_t plugin_id2, const char *dst_name, 
                 hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
 {
+    H5VL_class_t *vol_cls1 = NULL;
+    H5VL_class_t *vol_cls2 = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE12("e", "*xx*x*s*xx*x*siii**x", src_obj, loc_params1, vol_plugin1,
-             src_name, dst_obj, loc_params2, vol_plugin2, dst_name, ocpypl_id,
+    H5TRACE12("e", "*xxi*s*xxi*siii**x", src_obj, loc_params1, plugin_id1,
+             src_name, dst_obj, loc_params2, plugin_id2, dst_name, ocpypl_id,
              lcpl_id, dxpl_id, req);
 
-    if(NULL == src_obj || NULL == dst_obj || NULL == vol_plugin1 || 
-       NULL == vol_plugin2 || NULL == vol_plugin1->cls || NULL == vol_plugin2->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_object_copy(src_obj, loc_params1, vol_plugin1, src_name, 
-                                     dst_obj, loc_params2, vol_plugin2, dst_name,
+    if(NULL == src_obj || NULL == dst_obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls1 = (H5VL_class_t *)H5I_object_verify(plugin_id1, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+    if(NULL == (vol_cls2 = (H5VL_class_t *)H5I_object_verify(plugin_id2, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_object_copy(src_obj, loc_params1, vol_cls1, src_name, 
+                                     dst_obj, loc_params2, vol_cls2, dst_name,
                                      ocpypl_id, lcpl_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to move object")
 
@@ -2047,21 +2228,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_get_t get_type, 
+H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_object_get_t get_type, 
                hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*xx*xVni**xx", obj, loc_params, vol_plugin, get_type, dxpl_id,
-             req, arguments);
+    H5TRACE7("e", "*xxiVni**xx", obj, loc_params, plugin_id, get_type, dxpl_id, req,
+             arguments);
 
-    if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if(NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    if(NULL == vol_plugin->cls->object_cls.get)
+    if(NULL == vol_cls->object_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object get' method")
-    if((ret_value = (vol_plugin->cls->object_cls.get)
+    if((ret_value = (vol_cls->object_cls.get)
         (obj, loc_params, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute object get callback")
 
@@ -2084,22 +2268,25 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
+H5VLobject_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, 
                     H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*xx*xVoi**xx", obj, loc_params, vol_plugin, specific_type,
+    H5TRACE7("e", "*xxiVoi**xx", obj, loc_params, plugin_id, specific_type,
              dxpl_id, req, arguments);
 
-    if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if(NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Bypass the H5VLint layer */
-    if(NULL == vol_plugin->cls->object_cls.specific)
+    if(NULL == vol_cls->object_cls.specific)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object specific' method")
-    if((ret_value = (vol_plugin->cls->object_cls.specific)
+    if((ret_value = (vol_cls->object_cls.specific)
         (obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute object specific callback")
 
@@ -2122,20 +2309,23 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_optional(void *obj, H5VL_t *vol_plugin, hid_t dxpl_id, void **req, va_list arguments)
+H5VLobject_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
 {
-    herr_t            ret_value = SUCCEED;
+    H5VL_class_t *vol_cls = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*x*xi**xx", obj, vol_plugin, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", obj, plugin_id, dxpl_id, req, arguments);
 
-    if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if (NULL == obj)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Have to bypass the H5VLint layer due to unknown val_list arguments */
-    if(NULL == vol_plugin->cls->object_cls.optional)
+    if(NULL == vol_cls->object_cls.optional)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object optional' method")
-    if((ret_value = (vol_plugin->cls->object_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+    if((ret_value = (vol_cls->object_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute object optional callback")
 
 done:
@@ -2157,16 +2347,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLrequest_cancel(void **req, H5VL_t *vol_plugin, H5ES_status_t *status)
+H5VLrequest_cancel(void **req, hid_t plugin_id, H5ES_status_t *status)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "**x*x*Es", req, vol_plugin, status);
+    H5TRACE3("e", "**xi*Es", req, plugin_id, status);
 
-    if(NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request/VOL class pointer")
-    if((ret_value = H5VL_request_cancel(req, vol_plugin, status)) < 0)
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_request_cancel(req, vol_cls, status)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to cancel request")
 
 done:
@@ -2188,16 +2380,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLrequest_test(void **req, H5VL_t *vol_plugin, H5ES_status_t *status)
+H5VLrequest_test(void **req, hid_t plugin_id, H5ES_status_t *status)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "**x*x*Es", req, vol_plugin, status);
+    H5TRACE3("e", "**xi*Es", req, plugin_id, status);
 
-    if(NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request/VOL class pointer")
-    if((ret_value = H5VL_request_test(req, vol_plugin, status)) < 0)
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_request_test(req, vol_cls, status)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to test request")
 
 done:
@@ -2219,16 +2413,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLrequest_wait(void **req, H5VL_t *vol_plugin, H5ES_status_t *status)
+H5VLrequest_wait(void **req, hid_t plugin_id, H5ES_status_t *status)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "**x*x*Es", req, vol_plugin, status);
+    H5TRACE3("e", "**xi*Es", req, plugin_id, status);
 
-    if(NULL == vol_plugin || NULL == vol_plugin->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request/VOL class pointer")
-    if((ret_value = H5VL_request_wait(req, vol_plugin, status)) < 0)
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if((ret_value = H5VL_request_wait(req, vol_cls, status)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to wait on request")
 
 done:

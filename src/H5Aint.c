@@ -2468,20 +2468,6 @@ herr_t H5A_iterate(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type,
     if(loc_params.type == H5VL_OBJECT_BY_SELF) {
         if((obj_loc_id = H5VL_native_register(loc_params.obj_type, obj, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
-#if 0
-        /* Build the vol plugin struct */
-        if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-        vol_plugin->cls = &H5VL_native_g;
-        vol_plugin->nrefs = 1;
-        vol_plugin->id =  H5VL_NATIVE_g;
-        if(H5I_inc_ref(vol_plugin->id, FALSE) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
-
-        /* Get an atom for the object */
-        if((obj_loc_id = H5I_register2(loc_params.obj_type, obj, vol_plugin, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register object")
-#endif
     }
     else if(loc_params.type == H5VL_OBJECT_BY_NAME) { 
         /* Set up opened group location to fill in */

@@ -40,6 +40,8 @@ static herr_t H5VL_log_group_close(void *grp, hid_t dxpl_id, void **req);
 static void *H5VL_log_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
 static herr_t H5VL_log_object_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
 
+hid_t native_plugin_id = -1;
+
 static const H5VL_class_t H5VL_log_g = {
     LOG,
     "log",					/* name */
@@ -117,7 +119,6 @@ static const H5VL_class_t H5VL_log_g = {
 
 typedef struct H5VL_log_t {
     void   *under_object;
-    H5VL_t *under_plugin;
 } H5VL_log_t;
 
 static herr_t
@@ -164,12 +165,18 @@ int main(int argc, char **argv) {
 
         under_fapl = H5Pcreate (H5P_FILE_ACCESS);
         H5Pset_fapl_native(under_fapl);
-        vol_id = H5VLregister (&H5VL_log_g);
-        assert(H5VLis_registered(&H5VL_log_g) == 1);
+        assert(H5VLis_registered("native") == 1);
 
-        vol_id2 = H5VLget_plugin_id(&H5VL_log_g);
+        vol_id = H5VLregister (&H5VL_log_g);
+        assert(vol_id > 0);
+        assert(H5VLis_registered("log") == 1);
+
+        vol_id2 = H5VLget_plugin_id("log");
         H5VLinitialize(vol_id2, H5P_DEFAULT);
         H5VLclose(vol_id2);
+
+        native_plugin_id = H5VLget_plugin_id("native");
+        assert(native_plugin_id > 0);
 
         acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
         H5Pset_vol(acc_tpl, vol_id, &under_fapl);
@@ -248,9 +255,10 @@ int main(int argc, char **argv) {
         H5Pclose(acc_tpl);
         H5Pclose(under_fapl);
 
+        H5VLclose(native_plugin_id);
         H5VLterminate(vol_id, H5P_DEFAULT);
         H5VLunregister (vol_id);
-        assert(H5VLis_registered(&H5VL_log_g) == 0);
+        assert(H5VLis_registered("log") == 0);
 	return 0;
 }
 
@@ -275,7 +283,7 @@ H5VL_log_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     file = (H5VL_log_t *)calloc(1, sizeof(H5VL_log_t));
 
     under_fapl = *((hid_t *)H5Pget_vol_info(fapl_id));
-    file->under_object = H5VLfile_create(&(file->under_plugin), name, flags, fcpl_id, under_fapl, dxpl_id, req);
+    file->under_object = H5VLfile_create(name, flags, fcpl_id, under_fapl, dxpl_id, req);
 
     printf("------- LOG H5Fcreate\n");
     return (void *)file;
@@ -290,7 +298,7 @@ H5VL_log_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_i
     file = (H5VL_log_t *)calloc(1, sizeof(H5VL_log_t));
 
     under_fapl = *((hid_t *)H5Pget_vol_info(fapl_id));
-    file->under_object = H5VLfile_open(&(file->under_plugin), name, flags, under_fapl, dxpl_id, req);
+    file->under_object = H5VLfile_open(name, flags, under_fapl, dxpl_id, req);
 
     printf("------- LOG H5Fopen\n");
     return (void *)file;
@@ -301,7 +309,7 @@ H5VL_log_file_get(void *file, H5VL_file_get_t get_type, hid_t dxpl_id, void **re
 {
     H5VL_log_t *f = (H5VL_log_t *)file;
 
-    H5VLfile_get(f->under_object, f->under_plugin, get_type, dxpl_id, req, arguments);
+    H5VLfile_get(f->under_object, native_plugin_id, get_type, dxpl_id, req, arguments);
 
     printf("------- LOG H5Fget %d\n", get_type);
     return 1;
@@ -311,7 +319,7 @@ H5VL_log_file_close(void *file, hid_t dxpl_id, void **req)
 {
     H5VL_log_t *f = (H5VL_log_t *)file;
 
-    H5VLfile_close(f->under_object, f->under_plugin, dxpl_id, req);
+    H5VLfile_close(f->under_object, native_plugin_id, dxpl_id, req);
     free(f);
 
     printf("------- LOG H5Fclose\n");
@@ -327,8 +335,7 @@ H5VL_log_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name,
 
     group = (H5VL_log_t *)calloc(1, sizeof(H5VL_log_t));
 
-    group->under_object = H5VLgroup_create(o->under_object, loc_params, o->under_plugin, name, gcpl_id,  gapl_id, dxpl_id, req);
-    group->under_plugin = o->under_plugin;
+    group->under_object = H5VLgroup_create(o->under_object, loc_params, native_plugin_id, name, gcpl_id,  gapl_id, dxpl_id, req);
 
     printf("------- LOG H5Gcreate\n");
     return (void *)group;
@@ -339,7 +346,7 @@ H5VL_log_group_close(void *grp, hid_t dxpl_id, void **req)
 {
     H5VL_log_t *g = (H5VL_log_t *)grp;
 
-    H5VLgroup_close(g->under_object, g->under_plugin, dxpl_id, req);
+    H5VLgroup_close(g->under_object, native_plugin_id, dxpl_id, req);
     free(g);
 
     printf("------- LOG H5Gclose\n");
@@ -355,9 +362,8 @@ H5VL_log_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *na
 
     dt = (H5VL_log_t *)calloc(1, sizeof(H5VL_log_t));
 
-    dt->under_object = H5VLdatatype_commit(o->under_object, loc_params, o->under_plugin, name, 
+    dt->under_object = H5VLdatatype_commit(o->under_object, loc_params, native_plugin_id, name, 
                                            type_id, lcpl_id, tcpl_id, tapl_id, dxpl_id, req);
-    dt->under_plugin = o->under_plugin;
 
     printf("------- LOG H5Tcommit\n");
     return dt;
@@ -370,8 +376,7 @@ H5VL_log_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name
 
     dt = (H5VL_log_t *)calloc(1, sizeof(H5VL_log_t));
 
-    dt->under_object = H5VLdatatype_open(o->under_object, loc_params, o->under_plugin, name, tapl_id, dxpl_id, req);
-    dt->under_plugin = o->under_plugin;
+    dt->under_object = H5VLdatatype_open(o->under_object, loc_params, native_plugin_id, name, tapl_id, dxpl_id, req);
 
     printf("------- LOG H5Topen\n");
     return (void *)dt;
@@ -383,7 +388,7 @@ H5VL_log_datatype_get(void *dt, H5VL_datatype_get_t get_type, hid_t dxpl_id, voi
     H5VL_log_t *o = (H5VL_log_t *)dt;
     herr_t ret_value;
 
-    ret_value = H5VLdatatype_get(o->under_object, o->under_plugin, get_type, dxpl_id, req, arguments);
+    ret_value = H5VLdatatype_get(o->under_object, native_plugin_id, get_type, dxpl_id, req, arguments);
 
     printf("------- LOG datatype get\n");
     return ret_value;
@@ -395,9 +400,8 @@ H5VL_log_datatype_close(void *dt, hid_t dxpl_id, void **req)
     H5VL_log_t *type = (H5VL_log_t *)dt;
 
     assert(type->under_object);
-    assert(type->under_plugin);
 
-    H5VLdatatype_close(type->under_object, type->under_plugin, dxpl_id, req);
+    H5VLdatatype_close(type->under_object, native_plugin_id, dxpl_id, req);
     free(type);
 
     printf("------- LOG H5Tclose\n");
@@ -412,8 +416,7 @@ H5VL_log_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened
 
     new_obj = (H5VL_log_t *)calloc(1, sizeof(H5VL_log_t));
     
-    new_obj->under_object = H5VLobject_open(o->under_object, loc_params, o->under_plugin, opened_type, dxpl_id, req);
-    new_obj->under_plugin = o->under_plugin;
+    new_obj->under_object = H5VLobject_open(o->under_object, loc_params, native_plugin_id, opened_type, dxpl_id, req);
 
     printf("------- LOG H5Oopen\n");
     return (void *)new_obj;
@@ -425,7 +428,7 @@ H5VL_log_object_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_object_sp
 {
     H5VL_log_t *o = (H5VL_log_t *)obj;
 
-    H5VLobject_specific(o->under_object, loc_params, o->under_plugin, specific_type, dxpl_id, req, arguments);
+    H5VLobject_specific(o->under_object, loc_params, native_plugin_id, specific_type, dxpl_id, req, arguments);
 
     printf("------- LOG Object specific\n");
     return 1;
@@ -439,8 +442,7 @@ H5VL_log_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *nam
 
     dset = (H5VL_log_t *)calloc(1, sizeof(H5VL_log_t));
 
-    dset->under_object = H5VLdataset_create(o->under_object, loc_params, o->under_plugin, name, dcpl_id,  dapl_id, dxpl_id, req);
-    dset->under_plugin = o->under_plugin;
+    dset->under_object = H5VLdataset_create(o->under_object, loc_params, native_plugin_id, name, dcpl_id,  dapl_id, dxpl_id, req);
 
     printf("------- LOG H5Dcreate\n");
     return (void *)dset;
@@ -454,8 +456,7 @@ H5VL_log_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name,
 
     dset = (H5VL_log_t *)calloc(1, sizeof(H5VL_log_t));
 
-    dset->under_object = H5VLdataset_open(o->under_object, loc_params, o->under_plugin, name, dapl_id, dxpl_id, req);
-    dset->under_plugin = o->under_plugin;
+    dset->under_object = H5VLdataset_open(o->under_object, loc_params, native_plugin_id, name, dapl_id, dxpl_id, req);
 
     printf("------- LOG H5Dopen\n");
     return (void *)dset;
@@ -467,7 +468,7 @@ H5VL_log_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
 {
     H5VL_log_t *d = (H5VL_log_t *)dset;
 
-    H5VLdataset_read(d->under_object, d->under_plugin, mem_type_id, mem_space_id, file_space_id, 
+    H5VLdataset_read(d->under_object, native_plugin_id, mem_type_id, mem_space_id, file_space_id, 
                      plist_id, buf, req);
 
     printf("------- LOG H5Dread\n");
@@ -479,7 +480,7 @@ H5VL_log_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
 {
     H5VL_log_t *d = (H5VL_log_t *)dset;
 
-    H5VLdataset_write(d->under_object, d->under_plugin, mem_type_id, mem_space_id, file_space_id, 
+    H5VLdataset_write(d->under_object, native_plugin_id, mem_type_id, mem_space_id, file_space_id, 
                      plist_id, buf, req);
 
     printf("------- LOG H5Dwrite\n");
@@ -490,7 +491,7 @@ H5VL_log_dataset_close(void *dset, hid_t dxpl_id, void **req)
 {
     H5VL_log_t *d = (H5VL_log_t *)dset;
 
-    H5VLdataset_close(d->under_object, d->under_plugin, dxpl_id, req);
+    H5VLdataset_close(d->under_object, native_plugin_id, dxpl_id, req);
     free(d);
 
     printf("------- LOG H5Dclose\n");

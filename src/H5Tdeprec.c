@@ -178,7 +178,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* commit the datatype through the VOL */
-    if (NULL == (dt = H5VL_datatype_commit(obj, loc_params, vol_plugin, name, type_id, 
+    if (NULL == (dt = H5VL_datatype_commit(obj, loc_params, vol_plugin->cls, name, type_id, 
                                            H5P_LINK_CREATE_DEFAULT, H5P_DATATYPE_CREATE_DEFAULT, 
                                            H5P_DATATYPE_ACCESS_DEFAULT, H5AC_dxpl_id, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to commit datatype")
@@ -191,6 +191,10 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
     /* attach VOL information to the ID */
     if (H5I_register_aux(type_id, vol_plugin) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+
+    vol_plugin->nrefs ++;
+    if(H5I_inc_ref(vol_plugin->id, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -240,7 +244,7 @@ H5Topen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Create the datatype through the VOL */
-    if(NULL == (dt = H5VL_datatype_open(obj, loc_params, vol_plugin, name, 
+    if(NULL == (dt = H5VL_datatype_open(obj, loc_params, vol_plugin->cls, name, 
                                         H5P_DATATYPE_ACCESS_DEFAULT, H5AC_dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open datatype")
 
@@ -250,7 +254,7 @@ H5Topen1(hid_t loc_id, const char *name)
 
 done:
     if (ret_value < 0 && dt)
-        if(H5VL_datatype_close (dt, vol_plugin, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_datatype_close (dt, vol_plugin->cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Topen1() */

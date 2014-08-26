@@ -328,7 +328,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 
     /* Move the link through the VOL */
     if(H5VL_link_move(obj1, loc_params1, obj2, loc_params2, 
-                      (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2), 
+                      (vol_plugin1!=NULL ? vol_plugin1->cls : vol_plugin2->cls), 
                       lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
@@ -419,7 +419,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 
     /* Move the link through the VOL */
     if(H5VL_link_copy(obj1, loc_params1, obj2, loc_params2, 
-                      (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2), 
+                      (vol_plugin1!=NULL ? vol_plugin1->cls : vol_plugin2->cls), 
                       lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 done:
@@ -496,7 +496,7 @@ H5Lcreate_soft(const char *link_target,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
     /* Create the link through the VOL */
-    if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, obj, loc_params, vol_plugin,
+    if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, obj, loc_params, vol_plugin->cls,
                         lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
@@ -599,7 +599,7 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
 
     /* Create the link through the VOL */
     if(H5VL_link_create(H5VL_LINK_CREATE_HARD, obj2, loc_params2, 
-                        (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2),
+                        (vol_plugin1!=NULL ? vol_plugin1->cls : vol_plugin2->cls),
                         lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
@@ -684,7 +684,7 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
 
     /* Create the link through the VOL */
-    if(H5VL_link_create(H5VL_LINK_CREATE_UD, obj, loc_params, vol_plugin,
+    if(H5VL_link_create(H5VL_LINK_CREATE_UD, obj, loc_params, vol_plugin->cls,
                         lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
@@ -738,7 +738,7 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Delete the link through the VOL */
-    if(H5VL_link_specific(obj, loc_params, vol_plugin, H5VL_LINK_DELETE, 
+    if(H5VL_link_specific(obj, loc_params, vol_plugin->cls, H5VL_LINK_DELETE, 
                           H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
@@ -807,7 +807,7 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Delete the link through the VOL */
-    if(H5VL_link_specific(obj, loc_params, vol_plugin, H5VL_LINK_DELETE, 
+    if(H5VL_link_specific(obj, loc_params, vol_plugin->cls, H5VL_LINK_DELETE, 
                           H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
@@ -869,7 +869,7 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the link info through the VOL */
-    if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_VAL, 
+    if(H5VL_link_get(obj, loc_params, vol_plugin->cls, H5VL_LINK_GET_VAL, 
                      H5AC_ind_dxpl_id, H5_REQUEST_NULL, buf, size) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
 
@@ -939,7 +939,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the link info through the VOL */
-    if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_VAL, 
+    if(H5VL_link_get(obj, loc_params, vol_plugin->cls, H5VL_LINK_GET_VAL, 
                      H5AC_ind_dxpl_id, H5_REQUEST_NULL, buf, size) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
 
@@ -994,7 +994,7 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* check link existence through the VOL */
-    if(H5VL_link_specific(obj, loc_params, vol_plugin, H5VL_LINK_EXISTS,
+    if(H5VL_link_specific(obj, loc_params, vol_plugin->cls, H5VL_LINK_EXISTS,
                           H5AC_ind_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
@@ -1050,7 +1050,7 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the link info through the VOL */
-    if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_INFO, 
+    if(H5VL_link_get(obj, loc_params, vol_plugin->cls, H5VL_LINK_GET_INFO, 
                      H5AC_ind_dxpl_id, H5_REQUEST_NULL, linfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
@@ -1116,7 +1116,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the link info through the VOL */
-    if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_INFO,
+    if(H5VL_link_get(obj, loc_params, vol_plugin->cls, H5VL_LINK_GET_INFO,
                      H5AC_ind_dxpl_id, H5_REQUEST_NULL, linfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
@@ -1312,7 +1312,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the link info through the VOL */
-    if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_NAME, 
+    if(H5VL_link_get(obj, loc_params, vol_plugin->cls, H5VL_LINK_GET_NAME, 
                      H5AC_ind_dxpl_id, H5_REQUEST_NULL, name, size, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link name")
 
@@ -1378,7 +1378,7 @@ H5Literate(hid_t id, H5_index_t idx_type, H5_iter_order_t order,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* iterate over the links through the VOL */
-    if((ret_value = H5VL_link_specific(obj, loc_params, vol_plugin, H5VL_LINK_ITER,
+    if((ret_value = H5VL_link_specific(obj, loc_params, vol_plugin->cls, H5VL_LINK_ITER,
                                        H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
                                        FALSE, idx_type, order, idx_p, op, op_data)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
@@ -1452,7 +1452,7 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* iterate over the links through the VOL */
-    if((ret_value = H5VL_link_specific(obj, loc_params, vol_plugin, H5VL_LINK_ITER,
+    if((ret_value = H5VL_link_specific(obj, loc_params, vol_plugin->cls, H5VL_LINK_ITER,
                                        H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
                                        FALSE, idx_type, order, idx_p, op, op_data)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
@@ -1526,7 +1526,7 @@ H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* iterate over the links through the VOL */
-    if((ret_value = H5VL_link_specific(obj, loc_params, vol_plugin, H5VL_LINK_ITER,
+    if((ret_value = H5VL_link_specific(obj, loc_params, vol_plugin->cls, H5VL_LINK_ITER,
                                        H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
                                        TRUE, idx_type, order, NULL, op, op_data)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visit failed")
@@ -1605,7 +1605,7 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* visit the links through the VOL */
-    if((ret_value = H5VL_link_specific(obj, loc_params, vol_plugin, H5VL_LINK_ITER,
+    if((ret_value = H5VL_link_specific(obj, loc_params, vol_plugin->cls, H5VL_LINK_ITER,
                                        H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
                                        TRUE, idx_type, order, NULL, op, op_data)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visit failed")

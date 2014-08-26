@@ -2085,7 +2085,7 @@ H5D__vlen_get_buf_size(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim, c
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't select point")
 
     /* Read in the point (with the custom VL memory allocator) */
-    if(H5VL_dataset_read(vlen_bufsize->dset, vlen_bufsize->vol_plugin, 
+    if(H5VL_dataset_read(vlen_bufsize->dset, vlen_bufsize->vol_cls, 
                          type_id, vlen_bufsize->mspace_id, 
                          vlen_bufsize->fspace_id, vlen_bufsize->xfer_pid, 
                          vlen_bufsize->fl_tbuf, H5_REQUEST_NULL) < 0)

@@ -2282,20 +2282,17 @@ H5Iget_file_id(hid_t obj_id)
         }
 
         /* Get the file through the VOL */
-        if(H5VL_file_get(obj, vol_plugin, H5VL_OBJECT_GET_FILE, H5AC_dxpl_id, H5_REQUEST_NULL, type, &file) < 0)
+        if(H5VL_file_get(obj, vol_plugin->cls, H5VL_OBJECT_GET_FILE, H5AC_dxpl_id, 
+                         H5_REQUEST_NULL, type, &file) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to get file")
         if (NULL == file)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
 
         /* Check if the ID already exists and procceed accordingly */
         if (FAIL == (ret_value = H5I_get_id(file, H5I_FILE))) {
-            /* resurrect the ID */
-            if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
-            /* increment the ref count on the VOL plugin for the new ID */
-            vol_plugin->nrefs ++;
-            if(H5I_inc_ref(vol_plugin->id, FALSE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
+            /* Get an atom for the file with the VOL information as the auxilary struct*/
+            if((ret_value = H5VL_register_id(H5I_FILE, file, vol_plugin, TRUE)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
         }
         else {
             /* Increment ref count on existing ID */
@@ -2478,7 +2475,7 @@ H5I__get_id_cb(void *_item, void UNUSED *_key, void *_udata)
 /*-------------------------------------------------------------------------
  * Function:	H5I_get_id
  *
- * Purpose:     return ID of vol object
+ * Purpose:     return ID of object
  *
  * Return:	Success:	id of object
  *		Failure:	FAIL
