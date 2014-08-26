@@ -437,8 +437,8 @@ H5_DLL ssize_t H5VLget_plugin_name(hid_t id, char *name/*out*/, size_t size);
 H5_DLL hid_t H5VLobject_register(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls);
 H5_DLL herr_t H5VLget_object(hid_t obj_id, void **obj, H5VL_t **vol_plugin);
 #if 0
-    H5_DLL hid_t H5VLregister_by_name(const char *plugin_name);
-    H5_DLL herr_t H5VLioctl(hid_t loc_id or vol_id, <class enum>, ...);
+H5_DLL hid_t H5VLregister_by_name(const char *plugin_name);
+H5_DLL herr_t H5VLioctl(hid_t loc_id or vol_id, <class enum>, ...);
 #endif
 
 #ifdef __cplusplus
