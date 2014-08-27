@@ -79,6 +79,9 @@ test_family_h5repart_opens(void)
     if((file=H5Fopen(FILENAME[1], H5F_ACC_RDWR, fapl))<0)
         goto error;
 
+    if(H5Pclose(fapl)<0)
+        goto error;
+
     if(H5Fclose(file)<0)
         goto error;
 
@@ -87,7 +90,6 @@ test_family_h5repart_opens(void)
 error:
     H5E_BEGIN_TRY {
         H5Fclose(file);
-        H5Pclose(fapl);
     } H5E_END_TRY;
     return -1;
 }
