@@ -1933,7 +1933,6 @@ H5FD_mpio_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
     H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
     int			mpi_code;	/* mpi return code */
     herr_t              ret_value = SUCCEED;
-    haddr_t max_eof;    /* End-of-file value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
