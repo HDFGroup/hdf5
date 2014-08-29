@@ -126,7 +126,8 @@ H5F_locate_signature(H5FD_t *file, hid_t dxpl_id)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Find the least N such that 2^N is larger than the file size */
-    if(HADDR_UNDEF == (addr = MAX(H5FD_get_eof(file),H5FD_get_eoa(file,H5FD_MEM_SUPER))) || HADDR_UNDEF == (eoa = H5FD_get_eoa(file, H5FD_MEM_SUPER)))
+    if(HADDR_UNDEF == (addr = MAX(H5FD_get_eof(file),H5FD_get_eoa(file,H5FD_MEM_SUPER))) || 
+       HADDR_UNDEF == (eoa = H5FD_get_eoa(file, H5FD_MEM_SUPER)))
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to obtain EOF/EOA value")
     for(maxpow = 0; addr; maxpow++)
         addr >>= 1;

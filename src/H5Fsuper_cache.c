@@ -475,12 +475,8 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
      * possible is if the first file of a family of files was opened
      * individually.
      */
-    /* if(HADDR_UNDEF == (eof = MAX(H5FD_get_eof(lf), H5FD_get_eoa(lf, H5FD_MEM_SUPER))))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to determine file size") */
     if(HADDR_UNDEF == (eof = H5FD_get_eof(lf)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to determine file size") 
-
-    //eof = H5FD_get_eof(lf);
     /* (Account for the stored EOF being absolute offset -QAK) */
     if((eof + sblock->base_addr) < stored_eof)
         HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, NULL, 
@@ -828,8 +824,9 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                at file close */
             if(((H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_ALL)) ||
                ((H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_EXTEND) &&
-                (H5FD_get_eof(f->shared->lf) < H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)))) {
+                (H5FD_get_eof(f->shared->lf) <= H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)))) {
                 H5F_io_info_t fio_info;             /* I/O info for operation */
+                haddr_t rel_eoa;
 
                 /* If we're avoiding truncating the file, then we need to
                  * store the file's size in the superblock. We will only be
@@ -856,7 +853,18 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to determine file size")
                 if(rel_eof == 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "flushing a superblock to an empty file?!?!")
-                H5F_addr_encode(f, &p, (rel_eof + sblock->base_addr));
+
+                if(HADDR_UNDEF == (rel_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)))
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to determine eoa")
+
+                /* Check again if truncation will happen after updating the EOF when flushing. */
+                if((H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_ALL) ||
+                   (H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_EXTEND && rel_eof <= rel_eoa)) {
+                    H5F_addr_encode(f, &p, (rel_eof + sblock->base_addr));
+                }
+                else {
+                    H5F_addr_encode(f, &p, (rel_eoa + sblock->base_addr));
+                }
             } /* end if */
             else {
                 /* Otherwise, at this point in time, the EOF value itself may

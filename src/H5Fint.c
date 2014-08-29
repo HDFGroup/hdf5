@@ -865,7 +865,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         if (((!H5F_AVOID_TRUNCATE(f))||
              (((H5F_AVOID_TRUNCATE(f)==H5F_AVOID_TRUNCATE_EXTEND)&&
                (H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT) < H5FD_get_eof(f->shared->lf)))))
-#if 1
+#if 0
             ||
             /* Note: Due to some currently unknown (bug? feature?) in the multi
                driver, we *must* truncate if the EOA = EOF. I do not understand
@@ -875,7 +875,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                the file since it doesn't need to ... */
             (H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT) == H5FD_get_eof(f->shared->lf))
 #endif
-
             ) {
             /* Only truncate the file on an orderly close, with write-access */
             if(f->closing && (H5F_ACC_RDWR & H5F_INTENT(f))) {

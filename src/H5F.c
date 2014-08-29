@@ -975,7 +975,7 @@ H5Fget_filesize(hid_t file_id, hsize_t *size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Go get the actual file size */
-    if(HADDR_UNDEF == (eof = MAX(H5FD_get_eof(file->shared->lf), H5FD_get_eoa(file->shared->lf, H5FD_MEM_SUPER))))
+    if(HADDR_UNDEF == (eof = MAX(H5FD_get_eof(file->shared->lf), H5FD_get_eoa(file->shared->lf, H5FD_MEM_DEFAULT))))
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "file get eof request failed")
     base_addr = H5FD_get_base_addr(file->shared->lf);
 
