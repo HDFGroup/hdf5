@@ -148,8 +148,6 @@ void tts_error(void)
     ret=H5Dclose(dataset);
     assert(ret>=0);
     ret=H5Fclose(error_file);
-/* intentional failure */
-ret=-1;
     assert(ret>=0);
 
     H5TS_attr_destroy(&attribute);
