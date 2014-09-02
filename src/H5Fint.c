@@ -864,7 +864,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
            the file */
         if (((!H5F_AVOID_TRUNCATE(f))||
              (((H5F_AVOID_TRUNCATE(f)==H5F_AVOID_TRUNCATE_EXTEND)&&
-               (H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT) < H5FD_get_eof(f->shared->lf)))))
+               (H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER) < H5FD_get_eof(f->shared->lf)))))
 #if 0
             ||
             /* Note: Due to some currently unknown (bug? feature?) in the multi
