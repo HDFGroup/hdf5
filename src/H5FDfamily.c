@@ -425,15 +425,9 @@ H5FD_family_fapl_copy(const void *_old_fa)
     HDmemcpy(new_fa, old_fa, sizeof(H5FD_family_fapl_t));
 
     /* Deep copy the property list objects in the structure */
-    if(old_fa->memb_fapl_id==H5P_FILE_ACCESS_DEFAULT) {
-        if(H5I_inc_ref(new_fa->memb_fapl_id, FALSE)<0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver")
-    } /* end if */
-    else {
-        if(NULL == (plist = (H5P_genplist_t *)H5I_object(old_fa->memb_fapl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-        new_fa->memb_fapl_id = H5P_copy_plist(plist, FALSE);
-    } /* end else */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(old_fa->memb_fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+    new_fa->memb_fapl_id = H5P_copy_plist(plist, FALSE);
 
     /* Set return value */
     ret_value=new_fa;
