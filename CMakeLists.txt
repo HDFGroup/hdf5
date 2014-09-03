@@ -283,8 +283,8 @@ if (BUILD_SHARED_LIBS)
 else (BUILD_SHARED_LIBS)
   set (H5_BUILT_AS_STATIC_LIB 1)
   set (H5_ENABLE_STATIC_LIB YES)
+  set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif (BUILD_SHARED_LIBS)
-set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 #-----------------------------------------------------------------------------
 # Option to Build Static executables

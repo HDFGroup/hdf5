@@ -21,15 +21,10 @@ set (REPACK_COMMON_SRCS
 )
 
 add_executable (h5repack ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_main.c)
+TARGET_NAMING (h5repack ${LIB_TYPE})
 TARGET_C_PROPERTIES (h5repack " " " ")
+target_link_libraries (h5repack  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5repack PROPERTIES FOLDER tools)
-if (ONLY_STATIC_TOOLS)
-  TARGET_NAMING (h5repack STATIC)
-  target_link_libraries (h5repack ${HDF5_TOOLS_LIB_TARGET}_static ${HDF5_LIB_TARGET}_static)
-else (ONLY_STATIC_TOOLS)
-  TARGET_NAMING (h5repack ${LIB_TYPE})
-  target_link_libraries (h5repack  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
-endif (ONLY_STATIC_TOOLS)
 
 set (H5_DEP_EXECUTABLES h5repack)
 

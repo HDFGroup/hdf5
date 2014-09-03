@@ -10,16 +10,11 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 # Add the h5import executables
 # --------------------------------------------------------------------
 add_executable (h5import ${HDF5_TOOLS_H5IMPORT_SOURCE_DIR}/h5import.c)
+TARGET_NAMING (h5import ${LIB_TYPE})
 TARGET_C_PROPERTIES (h5import " " " ")
+target_link_libraries (h5import  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 #set_target_properties (h5import PROPERTIES COMPILE_DEFINITIONS H5DEBUGIMPORT)
 set_target_properties (h5import PROPERTIES FOLDER tools)
-if (ONLY_STATIC_TOOLS)
-  TARGET_NAMING (h5import STATIC)
-  target_link_libraries (h5import ${HDF5_TOOLS_LIB_TARGET}_static ${HDF5_LIB_TARGET}_static)
-else (ONLY_STATIC_TOOLS)
-  TARGET_NAMING (h5import ${LIB_TYPE})
-  target_link_libraries (h5import  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
-endif (ONLY_STATIC_TOOLS)
 
 set (H5_DEP_EXECUTABLES h5import)
 
