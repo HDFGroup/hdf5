@@ -13,10 +13,15 @@ add_executable (h5diff
     ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_common.c
     ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_main.c
 )
-TARGET_NAMING (h5diff ${LIB_TYPE})
 TARGET_C_PROPERTIES (h5diff " " " ")
-target_link_libraries (h5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5diff PROPERTIES FOLDER tools)
+if (ONLY_STATIC_TOOLS)
+  TARGET_NAMING (h5diff STATIC)
+  target_link_libraries (h5diff ${HDF5_TOOLS_LIB_TARGET}_static ${HDF5_LIB_TARGET}_static)
+else (ONLY_STATIC_TOOLS)
+  TARGET_NAMING (h5diff ${LIB_TYPE})
+  target_link_libraries (h5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+endif (ONLY_STATIC_TOOLS)
 
 set (H5_DEP_EXECUTABLES h5diff)
 
@@ -25,10 +30,15 @@ if (H5_HAVE_PARALLEL)
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_common.c
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/ph5diff_main.c
   )
-  TARGET_NAMING (ph5diff ${LIB_TYPE})
   TARGET_C_PROPERTIES (ph5diff " " " ")
-  target_link_libraries (ph5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (ph5diff PROPERTIES FOLDER tools)
+  if (ONLY_STATIC_TOOLS)
+    TARGET_NAMING (ph5diff STATIC)
+    target_link_libraries (ph5diff ${HDF5_TOOLS_LIB_TARGET}_static ${HDF5_LIB_TARGET}_static)
+  else (ONLY_STATIC_TOOLS)
+    TARGET_NAMING (ph5diff ${LIB_TYPE})
+    target_link_libraries (ph5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+  endif (ONLY_STATIC_TOOLS)
 endif (H5_HAVE_PARALLEL)
 
 if (BUILD_TESTING)

@@ -14,10 +14,15 @@ add_executable (h5dump
     ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dump_ddl.c
     ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dump_xml.c
 )
-TARGET_NAMING (h5dump ${LIB_TYPE})
 TARGET_C_PROPERTIES (h5dump " " " ")
-target_link_libraries (h5dump  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5dump PROPERTIES FOLDER tools)
+if (ONLY_STATIC_TOOLS)
+  TARGET_NAMING (h5dump STATIC)
+  target_link_libraries (h5dump ${HDF5_TOOLS_LIB_TARGET}_static ${HDF5_LIB_TARGET}_static)
+else (ONLY_STATIC_TOOLS)
+  TARGET_NAMING (h5dump ${LIB_TYPE})
+  target_link_libraries (h5dump  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+endif (ONLY_STATIC_TOOLS)
 
 set (H5_DEP_EXECUTABLES h5dump)
 

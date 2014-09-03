@@ -858,7 +858,8 @@ set_source_files_properties (${HDF5_BINARY_DIR}/H5version.h GENERATED)
 set (common_SRCS ${common_SRCS} ${HDF5_BINARY_DIR}/H5overflow.h)
 set_source_files_properties (${HDF5_BINARY_DIR}/H5overflow.h GENERATED)
 
-add_library (${HDF5_LIB_TARGET} ${LIB_TYPE} ${common_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS})
+add_library (${HDF5_LIB_TARGET}_obj OBJECT ${common_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS})
+add_library (${HDF5_LIB_TARGET} ${LIB_TYPE} $<TARGET_OBJECTS:${HDF5_LIB_TARGET}_obj>)
 TARGET_C_PROPERTIES (${HDF5_LIB_TARGET} " " " ")
 target_link_libraries (${HDF5_LIB_TARGET} ${LINK_LIBS})
 if (NOT WIN32)
@@ -873,6 +874,21 @@ set_target_properties (${HDF5_LIB_TARGET} PROPERTIES
     FOLDER libraries
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
+if (ONLY_STATIC_TOOLS)
+  add_library (${HDF5_LIB_TARGET}_static STATIC $<TARGET_OBJECTS:${HDF5_LIB_TARGET}_obj>)
+  TARGET_C_PROPERTIES (${HDF5_LIB_TARGET}_static " " " ")
+  target_link_libraries (${HDF5_LIB_TARGET}_static ${LINK_LIBS})
+  if (NOT WIN32)
+    target_link_libraries (${HDF5_LIB_TARGET}_static dl)
+  endif (NOT WIN32)
+  if (H5_HAVE_PARALLEL AND MPI_C_FOUND)
+    target_link_libraries (${HDF5_LIB_TARGET}_static ${MPI_C_LIBRARIES})
+  endif (H5_HAVE_PARALLEL AND MPI_C_FOUND)
+  H5_SET_LIB_OPTIONS (${HDF5_LIB_TARGET}_static ${HDF5_LIB_NAME} STATIC)
+  set_target_properties (${HDF5_LIB_TARGET}_static PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+  )
+endif (ONLY_STATIC_TOOLS)
 
 option (HDF5_ENABLE_DEBUG_APIS "Turn on debugging in all packages" OFF)
 if (HDF5_ENABLE_DEBUG_APIS)

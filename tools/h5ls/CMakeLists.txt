@@ -10,10 +10,15 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 # Add the h5ls executable
 #-----------------------------------------------------------------------------
 add_executable (h5ls ${HDF5_TOOLS_H5LS_SOURCE_DIR}/h5ls.c)
-TARGET_NAMING (h5ls ${LIB_TYPE})
 TARGET_C_PROPERTIES (h5ls " " " ")
-target_link_libraries (h5ls  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5ls PROPERTIES FOLDER tools)
+if (ONLY_STATIC_TOOLS)
+  TARGET_NAMING (h5ls STATIC)
+  target_link_libraries (h5ls ${HDF5_TOOLS_LIB_TARGET}_static ${HDF5_LIB_TARGET}_static)
+else (ONLY_STATIC_TOOLS)
+  TARGET_NAMING (h5ls ${LIB_TYPE})
+  target_link_libraries (h5ls  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+endif (ONLY_STATIC_TOOLS)
 
 set (H5_DEP_EXECUTABLES
     h5ls

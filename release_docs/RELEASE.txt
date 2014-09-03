@@ -41,6 +41,10 @@ New Features
 
     Configuration:
     -------------
+    - CMake: Added option to build only tools static. This can be used when building
+      the libraries as shared. For release binaries on Windows, this option prevents
+      the tools being named with 'dll' being appended, see HDFFV-8292 
+      (ADB 2014/09/03)
     - Autotools: Automake updated to 1.14.1 (ADB - 2014/04/08)
     - CMake: Moved minimum CMake version to 2.8.11 which enables better library
       include processing. (ADB - 2014/03/26)

@@ -10,10 +10,15 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 # Add the h5stat executables
 # --------------------------------------------------------------------
 add_executable (h5stat ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat.c)
-TARGET_NAMING (h5stat ${LIB_TYPE})
 TARGET_C_PROPERTIES (h5stat " " " ")
-target_link_libraries (h5stat  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5stat PROPERTIES FOLDER tools)
+if (ONLY_STATIC_TOOLS)
+  TARGET_NAMING (h5stat STATIC)
+  target_link_libraries (h5stat ${HDF5_TOOLS_LIB_TARGET}_static ${HDF5_LIB_TARGET}_static)
+else (ONLY_STATIC_TOOLS)
+  TARGET_NAMING (h5stat ${LIB_TYPE})
+  target_link_libraries (h5stat  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+endif (ONLY_STATIC_TOOLS)
 
 set (H5_DEP_EXECUTABLES h5stat)
 

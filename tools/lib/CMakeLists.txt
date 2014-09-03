@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 2.8.11)
 PROJECT (HDF5_TOOLS_LIB)
 
+option (ONLY_STATIC_TOOLS "Build Only Static Tools" OFF)
 #-----------------------------------------------------------------------------
 # Apply Definitions to compiler in this directory and below
 #-----------------------------------------------------------------------------
@@ -36,7 +37,8 @@ set (H5_TOOLS_LIB_HDRS
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff.h
 )
 
-add_library (${HDF5_TOOLS_LIB_TARGET} ${LIB_TYPE} ${H5_TOOLS_LIB_SRCS} ${H5_TOOLS_LIB_HDRS})
+add_library (${HDF5_TOOLS_LIB_TARGET}_obj OBJECT ${H5_TOOLS_LIB_SRCS} ${H5_TOOLS_LIB_HDRS})
+add_library (${HDF5_TOOLS_LIB_TARGET} ${LIB_TYPE} $<TARGET_OBJECTS:${HDF5_TOOLS_LIB_TARGET}_obj>)
 TARGET_C_PROPERTIES (${HDF5_TOOLS_LIB_TARGET} " " " ")
 target_link_libraries (${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_TOOLS_LIB_TARGET}")
@@ -51,6 +53,15 @@ set_target_properties (${HDF5_TOOLS_LIB_TARGET} PROPERTIES
     FOLDER libraries/tools
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
+if (ONLY_STATIC_TOOLS)
+  add_library (${HDF5_TOOLS_LIB_TARGET}_static STATIC $<TARGET_OBJECTS:${HDF5_TOOLS_LIB_TARGET}_obj>)
+  TARGET_C_PROPERTIES (${HDF5_TOOLS_LIB_TARGET}_static " " " ")
+  target_link_libraries (${HDF5_TOOLS_LIB_TARGET}_static ${HDF5_LIB_TARGET}_static)
+  H5_SET_LIB_OPTIONS (${HDF5_TOOLS_LIB_TARGET}_static ${HDF5_TOOLS_LIB_NAME} STATIC)
+  set_target_properties (${HDF5_TOOLS_LIB_TARGET}_static PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+  )
+endif (ONLY_STATIC_TOOLS)
 
 ##############################################################################
 ##############################################################################

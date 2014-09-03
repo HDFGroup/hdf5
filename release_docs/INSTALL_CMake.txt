@@ -554,6 +554,7 @@ HDF5_BUILD_EXAMPLES "Build HDF5 Library Examples"    OFF
 HDF5_BUILD_FORTRAN  "Build FORTRAN support"          OFF
 HDF5_BUILD_HL_LIB   "Build HIGH Level HDF5 Library"  OFF
 HDF5_BUILD_TOOLS    "Build HDF5 Tools"               OFF
+ONLY_STATIC_TOOLS   "Build Only Static Tools"        OFF
 if (HDF5_BUILD_FORTRAN) 
     HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" OFF
 
