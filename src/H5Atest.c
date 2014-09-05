@@ -100,7 +100,7 @@ H5A_is_shared_test(hid_t attr_id)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5VL_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Check if attribute is shared */
@@ -133,7 +133,7 @@ H5A_get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5VL_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Sanity check */

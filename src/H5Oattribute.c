@@ -726,7 +726,7 @@ H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char* name_t
             unsigned long attr_fnum;        /* Attributes file serial number */
 
             /* Get pointer to attribute */
-            if(NULL == (*attr = (H5A_t *)H5I_object_verify(attr_id_list[u], H5I_ATTR)))
+            if(NULL == (*attr = (H5A_t *)H5VL_object_verify(attr_id_list[u], H5I_ATTR)))
                 HGOTO_ERROR(H5E_ATTR, H5E_BADTYPE, FAIL, "not an attribute")
 
             /* Get file serial number for attribute */

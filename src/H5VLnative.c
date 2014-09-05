@@ -354,37 +354,47 @@ done:
 hid_t
 H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref)
 {
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
     hid_t    ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(obj);
 
-    /* Build the vol plugin struct */
-    if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    vol_plugin->cls = &H5VL_native_g;
-    vol_plugin->id =  H5VL_NATIVE_g;
+    /* make sure this is from the internal Native plugin not from the API */
+    if(type == H5I_DATATYPE) {
+        HDassert(((H5T_t *)obj)->vol_obj == NULL);
+    }
 
     /* Get an atom for the object */
-    if(type == H5I_DATATYPE && ((H5T_t *)obj)->vol_obj == NULL) {
-        if ((ret_value = H5VL_object_register(obj, type, vol_plugin, app_ref)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
-    }
+    if ((ret_value = H5VL_object_register(obj, type, H5VL_NATIVE_g, app_ref)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
+
+#if 0
     else {
-        if((ret_value = H5VL_register_id(type, obj, vol_plugin, app_ref)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register object")
+        H5VL_t *vol_info = NULL;        /* VOL info struct */
+        H5VL_object_t *new_obj = NULL;
+
+        /* setup VOL object */
+        if(NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
+            HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, NULL, "can't allocate top object structure")
+        new_obj->vol_obj = obj;
+
+        /* setup VOL info struct */
+        if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate VL info struct")
+        vol_info->vol_cls = &H5VL_native_g;
+        vol_info->nrefs = 1;
+        vol_info->vol_id = H5VL_NATIVE_g;
+        if(H5I_inc_ref(vol_info->id, FALSE) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, NULL, "unable to increment ref count on VOL plugin")
+        new_obj->vol_info = vol_info;
+
+        if((ret_value = H5I_register(obj_type, new_obj, app_ref)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register object ID")
     }
+#endif
 
 done:
-    if(ret_value < 0) {
-        if(vol_plugin) {
-            if(vol_plugin->id && H5I_dec_ref(vol_plugin->id) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "can't decrement reference count for plugin")
-            H5MM_xfree(vol_plugin);
-        }
-    }
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL_native_register */
 
@@ -404,18 +414,18 @@ done:
 herr_t
 H5VL_native_unregister(hid_t obj_id)
 {
-    H5VL_t *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    if (NULL == (obj = (H5VL_object_t *)H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid ID")
 
-    /* decrement ref count on VOL ID */
-    if(H5VL_free_id(vol_plugin) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL plugin")
+    /* free object */
+    if(H5VL_free_object(obj) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -498,11 +508,10 @@ H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *att
     if(0 == (H5F_INTENT(loc.oloc->file) & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_ARGS, H5E_WRITEERROR, NULL, "no write intent on file")
 
-    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a type")
-    /* Get the actual datatype object if this is a named datatype */
-    if(NULL == (type = (H5T_t *)H5T_get_named_type(dt)))
-        type = dt;
+    if(NULL == (dt = (H5T_t *)H5I_object(type_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
+    /* If this is a named datatype, get the plugin pointer to the datatype */
+    type = (H5T_t *)H5T_get_actual_type(dt);
 
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data space")

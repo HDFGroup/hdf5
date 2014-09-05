@@ -12,7 +12,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
         minor: Bad value
 
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #000: (file name) line (number) in H5Dcreate2(): not a location ID
+  #000: (file name) line (number) in H5Dcreate2(): invalid location identifier
     major: Invalid arguments to routine
     minor: Inappropriate type
 
@@ -31,7 +31,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
         major: Invalid arguments to routine
         minor: Inappropriate type
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #000: (file name) line (number) in H5Dcreate2(): not a location ID
+  #000: (file name) line (number) in H5Dcreate2(): invalid location identifier
     major: Invalid arguments to routine
     minor: Inappropriate type
 

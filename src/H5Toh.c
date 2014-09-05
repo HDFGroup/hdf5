@@ -224,9 +224,8 @@ H5O_dtype_get_oloc(hid_t obj_id)
     /* Get the datatype */
     if(NULL == (dt = (H5T_t *)H5I_object(obj_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
-
-    if(NULL == (type = (H5T_t *)H5T_get_named_type(dt)))
-        type = dt;
+    /* If this is a named datatype, get the plugin pointer to the datatype */
+    type = (const H5T_t *)H5T_get_actual_type(dt);
 
     /* Get the datatype's object header location */
     if(NULL == (ret_value = H5T_oloc(type)))

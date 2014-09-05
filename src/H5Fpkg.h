@@ -329,8 +329,6 @@ H5_DLL htri_t H5F_is_hdf5(const char *name, hid_t fapl_id);
 H5_DLL herr_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, 
     hbool_t app_ref, size_t *obj_id_count_ptr);
 H5_DLL int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
-H5_DLL int H5F_get_obj_count_cb(void *obj_ptr, hid_t obj_id, void *key);
-H5_DLL int H5F_get_obj_ids_cb(void *obj_ptr, hid_t obj_id, void *key);
 H5_DLL herr_t H5F_close(H5F_t *f);
 
 /* File mount related routines */

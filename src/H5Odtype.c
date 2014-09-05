@@ -1481,7 +1481,7 @@ H5O_dtype_can_share(const void *_mesg)
         HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is immutable")
 
     /* Don't share committed datatypes */
-    if((tri_ret = H5T_committed(mesg)) > 0)
+    if((tri_ret = H5T_is_named(mesg)) > 0)
         HGOTO_DONE(FALSE)
     else if(tri_ret < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is shared")
@@ -1606,12 +1606,12 @@ H5O_dtype_shared_post_copy_upd(const H5O_loc_t UNUSED *src_oloc,
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(dt_dst->sh_loc.type == H5O_SHARE_TYPE_COMMITTED) {
-        HDassert(H5T_committed(dt_dst));
+        HDassert(H5T_is_named(dt_dst));
         dt_dst->oloc.file = dt_dst->sh_loc.file;
         dt_dst->oloc.addr = dt_dst->sh_loc.u.loc.oh_addr;
     } /* end if */
     else
-        HDassert(!H5T_committed(dt_dst));
+        HDassert(!H5T_is_named(dt_dst));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_dtype_shared_post_copy_upd */

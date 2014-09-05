@@ -249,49 +249,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_obj_count_cb
- *
- * Purpose: H5F_get_obj_count_cb callback function.  It calls in the
- *          VOL and gets the object count for the file ID passed
- *
- * Return:	Non-negative on success; negative on failure.
- *
- * Programmer:  Mohamad Chaarawi
- *              May 2012
- *
- *-------------------------------------------------------------------------
- */
-int
-H5F_get_obj_count_cb(void UNUSED *obj_ptr, hid_t obj_id, void *key)
-{
-    H5F_trav_obj_cnt_t *udata = (H5F_trav_obj_cnt_t *)key;
-    ssize_t            obj_count = 0;
-    H5VL_t             *vol_plugin;
-    void               *obj;
-    int                ret_value = H5_ITER_CONT;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
-    /* get the file object */
-    if(NULL == (obj = (void *)H5I_object_verify(obj_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file id")
-
-    if(H5VL_file_get(obj, vol_plugin->cls, H5VL_FILE_GET_OBJ_COUNT, H5AC_dxpl_id, H5_REQUEST_NULL, 
-                     udata->types, &obj_count) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5_ITER_ERROR, "unable to get object count in file(s)")
-
-    *(udata->obj_count) += obj_count; 
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F_get_obj_count_cb */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5F_get_obj_count
  *
  * Purpose:	Private function return the number of opened object IDs
@@ -321,54 +278,6 @@ H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref, size_t *obj_i
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_obj_count() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_get_obj_ids_cb
- *
- * Purpose: H5F_get_obj_ids_cb callback function.  It calls in the
- *          VOL and gets the object ids for the file ID passed
- *
- * Return:	Non-negative on success; negative on failure.
- *
- * Programmer:  Mohamad Chaarawi
- *              May 2012
- *
- *-------------------------------------------------------------------------
- */
-int
-H5F_get_obj_ids_cb(void UNUSED *obj_ptr, hid_t obj_id, void *key)
-{
-    H5F_trav_obj_ids_t *udata = (H5F_trav_obj_ids_t *)key;
-    H5VL_t             *vol_plugin;
-    void               *obj;
-    ssize_t            obj_count = 0;
-    int                ret_value = H5_ITER_CONT;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
-    /* get the file object */
-    if(NULL == (obj = (void *)H5I_object_verify(obj_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-
-    if(H5VL_file_get(obj, vol_plugin->cls, H5VL_FILE_GET_OBJ_IDS, H5AC_dxpl_id, H5_REQUEST_NULL, 
-                     udata->types, udata->max_objs, udata->oid_list, &obj_count) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5_ITER_ERROR, "unable to get object count in file(s)")
-
-    *(udata->obj_count) += obj_count; 
-    udata->max_objs -= obj_count;
-    udata->oid_list += obj_count;
-
-    if(udata->max_objs <= 0)
-        ret_value = H5_ITER_STOP;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F_get_obj_ids_cb */
 
 
 /*-------------------------------------------------------------------------
@@ -561,16 +470,11 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 		break;
 
 	    case H5I_DATATYPE:
-                {
-                    H5T_t *type = NULL;
-
-                    /* Get the actual datatype object that should be the vol_obj */
-                    if(NULL == (type = (H5T_t *)H5T_get_named_type((H5T_t*)obj_ptr)))
-                        oloc = NULL;
-                    else
-                        oloc = H5T_oloc(type);
-                    break;
-                }
+                if(H5T_is_named((H5T_t*)obj_ptr)==TRUE)
+                    oloc = H5T_oloc((H5T_t*)obj_ptr);
+                else
+                    oloc = NULL;
+		break;
 
 	    case H5I_UNINIT:
 	    case H5I_BADID:

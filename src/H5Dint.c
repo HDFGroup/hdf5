@@ -114,8 +114,7 @@ static const H5I_class_t H5I_DATASET_CLS[1] = {{
     H5I_DATASET,		/* ID class value */
     0,				/* Class flags */
     0,				/* # of reserved IDs for class */
-    NULL,                       /* Callback routine for closing objects of this class */
-    (H5I_free2_t)H5D_close_dataset /* Callback routine for closing auxilary objects of this class */
+    (H5I_free_t)H5D_close_dataset /* Callback routine for closing objects of this class */
 }};
 
 
@@ -930,7 +929,7 @@ H5D_t *
 H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     hid_t dapl_id, hid_t dxpl_id)
 {
-    const H5T_t         *type, *dt;             /* Datatype for dataset */
+    const H5T_t         *type, *dt;              /* Datatype for dataset */
     H5D_t		*new_dset = NULL;
     H5P_genplist_t 	*dc_plist = NULL;       /* New Property list */
     hbool_t             has_vl_type = FALSE;    /* Flag to indicate a VL-type for dataset */
@@ -948,12 +947,10 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     HDassert(H5I_GENPROP_LST == H5I_get_type(dxpl_id));
 
     /* Get the dataset's datatype */
-    if(NULL == (dt = (const H5T_t *)H5I_object(type_id)))
+    if(NULL == (dt = (H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
-
-    /* Get the actual datatype object if this is a named datatype */
-    if(NULL == (type = (const H5T_t *)H5T_get_named_type(dt)))
-        type = dt;
+    /* If this is a named datatype, get the plugin pointer to the datatype */
+    type = (const H5T_t *)H5T_get_actual_type(dt);
 
     /* Check if the datatype is "sensible" for use in a dataset */
     if(H5T_is_sensible(type) != TRUE)
@@ -2061,6 +2058,7 @@ herr_t
 H5D__vlen_get_buf_size(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim, const hsize_t *point, void *op_data)
 {
     H5D_vlen_bufsize_t *vlen_bufsize = (H5D_vlen_bufsize_t *)op_data;
+    H5VL_object_t *dset = (H5VL_object_t *)vlen_bufsize->dset;
     H5T_t *dt;                          /* Datatype for operation */
     H5S_t *fspace;                      /* File dataspace for operation */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2085,7 +2083,7 @@ H5D__vlen_get_buf_size(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim, c
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't select point")
 
     /* Read in the point (with the custom VL memory allocator) */
-    if(H5VL_dataset_read(vlen_bufsize->dset, vlen_bufsize->vol_cls, 
+    if(H5VL_dataset_read(dset->vol_obj, dset->vol_info->vol_cls, 
                          type_id, vlen_bufsize->mspace_id, 
                          vlen_bufsize->fspace_id, vlen_bufsize->xfer_pid, 
                          vlen_bufsize->fl_tbuf, H5_REQUEST_NULL) < 0)
@@ -2732,7 +2730,7 @@ H5D_get_type(H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
 
     /* Create an atom */
-    if(H5T_committed(dt)) {
+    if(H5T_is_named(dt)) {
         /* If this is a committed datatype, we need to recreate the
            two level IDs, where the VOL object is a copy of the
            returned datatype */

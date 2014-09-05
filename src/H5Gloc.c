@@ -179,8 +179,7 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
                 H5T_t *dt = NULL;
 
                 /* Get the actual datatype object if the VOL object is set */
-                if(NULL == (dt = (H5T_t *)H5T_get_named_type((const H5T_t *)obj)))
-                    dt = (H5T_t *) obj;
+                dt = (H5T_t *)H5T_get_actual_type((H5T_t *)obj);
     
                 if(NULL == (loc->oloc = H5T_oloc(dt)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of datatype")
@@ -236,11 +235,16 @@ done:
 herr_t
 H5G_loc(hid_t loc_id, H5G_loc_t *loc)
 {
+    void        *obj = NULL;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(H5G_loc_real(H5I_object(loc_id), H5I_get_type(loc_id), loc) < 0)
+    /* get the object */
+    if(NULL == (obj = H5VL_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid identifier")
+
+    if(H5G_loc_real(obj, H5I_get_type(loc_id), loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
 done:

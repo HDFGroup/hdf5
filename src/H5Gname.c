@@ -824,21 +824,12 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             break;
 
         case H5I_DATATYPE:
-                {
-                    H5T_t *type = NULL;
+            /* Avoid non-named datatypes */
+            if(!H5T_is_named((H5T_t*)obj_ptr))
+                HGOTO_DONE(SUCCEED)     /* Do not exit search over IDs */
 
-                    /* Get the actual datatype object that should be the vol_obj */
-                    if(NULL == (type = (H5T_t *)H5T_get_named_type((H5T_t*)obj_ptr)))
-                        HGOTO_DONE(SUCCEED)     /* Do not exit search over IDs */
-
-                    /* Avoid non-named datatypes */
-                    if(!H5T_is_named(type))
-                        HGOTO_DONE(SUCCEED)     /* Do not exit search over IDs */
-
-                    oloc = H5T_oloc(type);
-                    obj_path = H5T_nameof(type);
-                    break;
-                }
+            oloc = H5T_oloc((H5T_t*)obj_ptr);
+            obj_path = H5T_nameof((H5T_t*)obj_ptr);
             break;
 
         case H5I_UNINIT:
@@ -848,6 +839,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         case H5I_ATTR:
         case H5I_REFERENCE:
         case H5I_VFL:
+        case H5I_VOL:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:

@@ -61,8 +61,7 @@ static const H5I_class_t H5I_VOL_CLS[1] = {{
     H5I_VOL,			/* ID class value */
     0,				/* Class flags */
     0,				/* # of reserved IDs for class */
-    (H5I_free_t)H5VL_free_cls,  /* Callback routine for closing objects of this class */
-    NULL,                 	/* Callback routine for closing auxilary objects of this class */
+    (H5I_free_t)H5VL_free_cls   /* Callback routine for closing objects of this class */
 }};
 
 
@@ -544,8 +543,6 @@ done:
 hid_t
 H5VLobject_register(void *obj, H5I_type_t obj_type, hid_t plugin_id)
 {
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
-    H5VL_class_t *vol_cls = NULL;
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
@@ -553,16 +550,8 @@ H5VLobject_register(void *obj, H5I_type_t obj_type, hid_t plugin_id)
 
     if(NULL == obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object to register")
-    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Build the vol plugin struct */
-    if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    vol_plugin->cls = vol_cls;
-    vol_plugin->id = plugin_id;
-
-    if ((ret_value = H5VL_object_register(obj, obj_type, vol_plugin, TRUE)) < 0)
+    if ((ret_value = H5VL_object_register(obj, obj_type, plugin_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
 
 done:
@@ -587,7 +576,6 @@ done:
 herr_t
 H5VLget_object(hid_t obj_id, void **obj)
 {
-    H5VL_t *vol_plugin;
     hid_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -596,13 +584,6 @@ H5VLget_object(hid_t obj_id, void **obj)
     /* Check args */
     if(!obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object pointer")
-
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
-    if(NATIVE == vol_plugin->cls->value)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot call public function on library type")
 
     if(NULL == (*obj = H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain a valid object")

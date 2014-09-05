@@ -48,6 +48,45 @@
 #include "H5VLpkg.h"		/* VOL package header		  	*/
 #include "H5VLprivate.h"	/* VOL          		  	*/
 
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
+/* Declare a free list to manage the H5VL_t struct */
+H5FL_DEFINE(H5VL_t);
+
+/* Declare a free list to manage the H5VL_object_t struct */
+H5FL_DEFINE(H5VL_object_t);
+
 
 /*--------------------------------------------------------------------------
 NAME
@@ -117,23 +156,23 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_register() */
 
-
 /*-------------------------------------------------------------------------
- * Function:	H5VL_register_id
+ * Function:   H5VL_register_id
  *
- * Purpose:	Wrapper to register an object ID with a VOL aux struct 
- *              and increment ref count on VOL plugin ID
+ * Purpose:    Wrapper to register an object ID with a VOL aux struct 
+ *             and increment ref count on VOL plugin ID
  *
- * Return:	Success:	Positive Identifier
- *		Failure:	A negative value.
+ * Return:     Success:Positive Identifier
+ * Failure:    A negative value.
  *
- * Programmer:	Mohamad Chaarawi
- *              August, 2014
+ * Programmer: Mohamad Chaarawi
+ *             August, 2014
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_register_id(H5I_type_t type, const void *object, H5VL_t *vol_plugin, hbool_t app_ref)
+H5VL_register_id(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_ref)
 {
+    H5VL_object_t *new_obj = NULL;
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -142,46 +181,62 @@ H5VL_register_id(H5I_type_t type, const void *object, H5VL_t *vol_plugin, hbool_
     HDassert(object);
     HDassert(vol_plugin);
 
-    if((ret_value = H5I_register2(type, object, vol_plugin, app_ref)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize handle")
-
+    /* setup VOL object */
+    if(NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
+	HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "can't allocate top object structure")
+    new_obj->vol_info = vol_plugin;
     vol_plugin->nrefs ++;
-    if(H5I_inc_ref(vol_plugin->id, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
+    new_obj->vol_obj = object;
+
+    if(H5I_DATATYPE == type) {
+        H5T_t *dt = NULL;
+
+        if(NULL == (dt = H5T_construct_datatype(new_obj)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't construct datatype object");
+
+        if((ret_value = H5I_register(type, dt, app_ref)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize handle")
+    }
+    else {
+        if((ret_value = H5I_register(type, new_obj, app_ref)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize handle")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_register_id() */
 
-
 /*-------------------------------------------------------------------------
- * Function:	H5VL_free_id
+ * Function:    H5VL_free_id
  *
- * Purpose:	Wrapper to register an object ID with a VOL aux struct 
+ * Purpose:     Wrapper to register an object ID with a VOL aux struct 
  *              and increment ref count on VOL plugin ID
  *
- * Return:	Success:	Positive Identifier
- *		Failure:	A negative value.
+ * Return:      Success:Positive Identifier
+ * Failure:     A negative value.
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *              August, 2014
  *-------------------------------------------------------------------------
  */
-hid_t
-H5VL_free_id(H5VL_t *vol_plugin)
+herr_t
+H5VL_free_object(H5VL_object_t *obj)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(SUCCEED)
 
     /* Check arguments */
-    HDassert(vol_plugin);
+    HDassert(obj);
 
-    vol_plugin->nrefs --;
-    if(H5I_dec_ref(vol_plugin->id) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL plugin")
-    if (0 == vol_plugin->nrefs)
-        vol_plugin = (H5VL_t *)H5MM_xfree(vol_plugin);
+    obj->vol_info->nrefs --;
+    if (0 == obj->vol_info->nrefs) {
+        if(H5I_dec_ref(obj->vol_info->vol_id) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL plugin")
+        obj->vol_info = H5FL_FREE(H5VL_t, obj->vol_info);
+    }
+
+    obj = H5FL_FREE(H5VL_object_t, obj);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -341,19 +396,22 @@ done:
 ssize_t
 H5VL_get_plugin_name(hid_t id, char *name/*out*/, size_t size)
 {
-    H5VL_t       *vol_plugin;            /* VOL structure attached to id */
+    H5VL_object_t *obj = NULL;
+    const H5VL_class_t *vol_cls = NULL;
     size_t        len;
     ssize_t       ret_value;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux (id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Object/File does not contain VOL information")
+    /* get the object pointer */
+    if(NULL == (obj = H5VL_get_object(id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    len = HDstrlen(vol_plugin->cls->name);
+    vol_cls = obj->vol_info->vol_cls;
 
+    len = HDstrlen(vol_cls->name);
     if(name) {
-        HDstrncpy(name, vol_plugin->cls->name, MIN(len + 1,size));
+        HDstrncpy(name, vol_cls->name, MIN(len + 1,size));
         if(len >= size)
             name[size-1]='\0';
     } /* end if */
@@ -381,54 +439,28 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin, hbool_t app_ref)
+H5VL_object_register(void *obj, H5I_type_t obj_type, hid_t plugin_id, hbool_t app_ref)
 {
+    H5VL_class_t *vol_cls = NULL;
+    H5VL_t *vol_info = NULL;        /* VOL info struct */
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Get an atom for the object and attach VOL information and free function to the ID */
-    switch(obj_type) {
-        case H5I_FILE:
-            if((ret_value = H5VL_register_id(obj_type, obj, vol_plugin, app_ref)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
-            break;
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-        case H5I_ATTR:
-            if((ret_value = H5VL_register_id(obj_type, obj, vol_plugin, app_ref)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize attribute handle")
-            break;
+    /* setup VOL info struct */
+    if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
+    vol_info->vol_cls = vol_cls;
+    vol_info->vol_id = plugin_id;
+    if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 
-        case H5I_GROUP:
-            if((ret_value = H5VL_register_id(obj_type, obj, vol_plugin, app_ref)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
-            break;
-
-        case H5I_DATASET:
-            if((ret_value = H5VL_register_id(obj_type, obj, vol_plugin, app_ref)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-            break;
-
-        case H5I_DATATYPE:
-            if ((ret_value = H5VL_create_datatype(obj, vol_plugin, app_ref)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
-            break;
-
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_DATASPACE:
-        case H5I_REFERENCE:
-        case H5I_VFL:
-        case H5I_VOL:
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-        case H5I_NTYPES:
-        default:
-            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "invalid object type")
-    } /* end switch */
+    /* Get an atom for the object */
+    if((ret_value = H5VL_register_id(obj_type, obj, vol_info, app_ref)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -451,25 +483,181 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
+H5VL_object_t *
 H5VL_get_object(hid_t id)
 {
+    void *obj = NULL;
+    H5I_type_t obj_type = H5I_get_type(id);
+    H5VL_object_t *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    if(H5I_FILE == obj_type || H5I_GROUP == obj_type || H5I_ATTR == obj_type || 
+       H5I_DATASET == obj_type || H5I_DATATYPE == obj_type) {
+        /* get the object */
+        if(NULL == (obj = H5I_object(id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+
+        /* if this is a datatype, get the VOL object attached to the H5T_t struct */
+        if (H5I_DATATYPE == obj_type) {
+            if (NULL == (obj = H5T_get_named_type((H5T_t *)obj)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype")
+        }
+    }
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier type to function")
+
+
+    ret_value = (H5VL_object_t *)obj;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_get_object() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_object
+ *
+ * Purpose:     utility function to return the VOL object pointer associated with
+ *              an hid_t.
+ *
+ * Return:      Success:        object pointer
+ *              Failure:        NULL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              September, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5VL_object(hid_t id)
+{
+    H5VL_object_t *obj = NULL;    
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
-    /* get the object */
-    if(NULL == (ret_value = (void *)H5I_object(id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+    /* Get the symbol table entry */
+    switch(H5I_get_type(id)) {
+        case H5I_GROUP:
+        case H5I_DATASET:
+        case H5I_FILE:            
+        case H5I_ATTR:
+            /* get the object */
+            if(NULL == (obj = (H5VL_object_t *)H5I_object(id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
 
-    /* if this is a datatype, get the VOL object attached to the H5T_t struct */
-    if (H5I_DATATYPE == H5I_get_type(id)) {
-        if (NULL == (ret_value = H5T_get_named_type((H5T_t *)ret_value)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype")
+            ret_value = obj->vol_obj;
+            break;
+        case H5I_DATATYPE:
+            {
+                H5T_t *dt;
+
+                /* get the object */
+                if(NULL == (dt = (H5T_t *)H5I_object(id)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+
+                /* Get the actual datatype object that should be the vol_obj */
+                if(NULL == (obj = H5T_get_named_type(dt)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype")
+
+                ret_value = obj->vol_obj;
+                break;
+            }
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_DATASPACE:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unknown data object type")
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_get_object() */
+} /* end H5VL_object() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_object_verify
+ *
+ * Purpose:     utility function to return the VOL object pointer associated with
+ *              an hid_t.
+ *
+ * Return:      Success:        object pointer
+ *              Failure:        NULL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              September, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5VL_object_verify(hid_t id, H5I_type_t obj_type)
+{
+    H5VL_object_t *obj = NULL;    
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Get the symbol table entry */
+    switch(obj_type) {
+        case H5I_GROUP:
+        case H5I_DATASET:
+        case H5I_FILE:            
+        case H5I_ATTR:
+            /* get the object */
+            if(NULL == (obj = (H5VL_object_t *)H5I_object_verify(id, obj_type)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+
+            ret_value = obj->vol_obj;
+            break;
+        case H5I_DATATYPE:
+            {
+                H5T_t *dt;
+
+                /* get the object */
+                if(NULL == (dt = (H5T_t *)H5I_object_verify(id, obj_type)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+
+                /* Get the actual datatype object that should be the vol_obj */
+                if(NULL == (obj = H5T_get_named_type(dt)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype")
+
+                ret_value = obj->vol_obj;
+                break;
+            }
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_DATASPACE:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unknown data object type")
+    }
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_object_verify() */
+
+void *
+H5VL_plugin_object(H5VL_object_t *obj)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    FUNC_LEAVE_NOAPI(obj->vol_obj)
+} /* end H5VL_plugin_object() */
 
 
 /*-------------------------------------------------------------------------
@@ -1952,9 +2140,9 @@ H5VL_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const H5VL_class_
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* check if both objects are associated with the same VOL plugin */
-    if(vol_cls1->value != vol_cls2->value)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be copied")
+    /* Make sure that the VOL plugins are the same */
+    if (vol_cls1->value != vol_cls2->value)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
 
     if(NULL == vol_cls1->object_cls.copy)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object copy' method")

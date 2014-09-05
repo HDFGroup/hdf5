@@ -204,7 +204,7 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
     H5TRACE2("e", "ib", file_id, flag);
 
     /* Check args */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (file = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Check VFD */
@@ -244,7 +244,7 @@ H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag)
     H5TRACE2("e", "i*b", file_id, flag);
 
     /* Check args */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (file = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Check VFD */

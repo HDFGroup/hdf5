@@ -120,8 +120,7 @@ herr_t
 H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
 {
-    H5VL_t          *vol_plugin = NULL;
-    void            *dset = NULL;
+    H5VL_object_t   *dset = NULL;
     const H5S_t	    *mem_space = NULL;
     const H5S_t	    *file_space = NULL;
     herr_t           ret_value = SUCCEED;  /* Return value */
@@ -131,7 +130,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
              plist_id, buf);
 
     /* check arguments */
-    if(NULL == (dset = (void *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if(mem_space_id < 0 || file_space_id < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
@@ -160,12 +159,8 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
     /* Read the data through the VOL */
-    if((ret_value = H5VL_dataset_read(dset, vol_plugin->cls, mem_type_id, mem_space_id, 
+    if((ret_value = H5VL_dataset_read(dset->vol_obj, dset->vol_info->vol_cls, mem_type_id, mem_space_id, 
                                       file_space_id, plist_id, buf, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
@@ -209,8 +204,7 @@ herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
 {
-    H5VL_t                 *vol_plugin = NULL;
-    void                   *dset = NULL;
+    H5VL_object_t          *dset = NULL;
     H5P_genplist_t 	   *plist;      /* Property list pointer */
     const H5S_t            *mem_space = NULL;
     const H5S_t            *file_space = NULL;
@@ -222,7 +216,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
              dxpl_id, buf);
 
     /* check arguments */
-    if(NULL == (dset = (void *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
@@ -263,12 +257,8 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	} /* end if */
     }
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
     /* Write the data through the VOL */
-    if((ret_value = H5VL_dataset_write(dset, vol_plugin->cls, mem_type_id, mem_space_id, 
+    if((ret_value = H5VL_dataset_write(dset->vol_obj, dset->vol_info->vol_cls, mem_type_id, mem_space_id, 
                                        file_space_id, dxpl_id, buf, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 

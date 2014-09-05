@@ -299,8 +299,7 @@ static const H5I_class_t H5I_GENPROPCLS_CLS[1] = {{
     H5I_GENPROP_CLS,		/* ID class value */
     0,				/* Class flags */
     0,				/* # of reserved IDs for class */
-    (H5I_free_t)H5P_close_class,/* Callback routine for closing objects of this class */
-    NULL                        /* Callback routine for closing auxilary objects of this class */
+    (H5I_free_t)H5P_close_class /* Callback routine for closing objects of this class */
 }};
 
 /* Generic Property List ID class */
@@ -308,8 +307,7 @@ static const H5I_class_t H5I_GENPROPLST_CLS[1] = {{
     H5I_GENPROP_LST,		/* ID class value */
     0,				/* Class flags */
     0,				/* # of reserved IDs for class */
-    (H5I_free_t)H5P_close,	/* Callback routine for closing objects of this class */
-    NULL                        /* Callback routine for closing auxilary objects of this class */
+    (H5I_free_t)H5P_close 	/* Callback routine for closing objects of this class */
 }};
 
 

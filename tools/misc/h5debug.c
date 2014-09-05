@@ -256,7 +256,7 @@ main(int argc, char *argv[])
         HDfprintf(stderr, "cannot open file\n");
         HDexit(1);
     } /* end if */
-    if(NULL == (f = (H5F_t *)H5I_object(fid))) {
+    if(NULL == (f = (H5F_t *)H5VL_object(fid))) {
         HDfprintf(stderr, "cannot obtain H5F_t pointer\n");
         HDexit(2);
     } /* end if */

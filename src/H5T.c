@@ -530,8 +530,7 @@ static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
     H5I_DATATYPE,		/* ID class value */
     0,				/* Class flags */
     8,				/* # of reserved IDs for class */
-    (H5I_free_t)H5T_close,	/* Callback routine for closing objects of this class */
-    (H5I_free2_t)H5T_close_datatype /* Callback routine for closing auxilary objects of this class */
+    (H5I_free_t)H5T_close_datatype	/* Callback routine for closing objects of this class */
 }};
 
 
@@ -1693,7 +1692,7 @@ H5Tcopy(hid_t type_id)
                 H5D_t	*dset;          /* Dataset for datatype */
 
                 /* The argument is a dataset handle */
-                if(NULL == (dset = (H5D_t *)H5I_object(type_id)))
+                if(NULL == (dset = (H5D_t *)H5VL_object(type_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
                 if(NULL == (dt = H5D_typeof(dset)))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get the dataset datatype")
@@ -4969,8 +4968,10 @@ H5T_is_named(const H5T_t *dt)
 
     HDassert(dt);
 
-    if(dt->shared->state == H5T_STATE_OPEN || dt->shared->state == H5T_STATE_NAMED)
+    if(dt->vol_obj)
         ret_value = TRUE;
+    else
+        ret_value = (H5T_STATE_OPEN == dt->shared->state || H5T_STATE_NAMED == dt->shared->state);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

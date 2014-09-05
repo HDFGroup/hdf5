@@ -164,7 +164,7 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo)
      * the top file in a mount hierarchy)
      */
     if(H5I_get_type(obj_id) == H5I_FILE ) {
-        if(NULL == (f = (H5F_t *)H5I_object(obj_id)))
+        if(NULL == (f = (H5F_t *)H5VL_object(obj_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
     } /* end if */
     else {

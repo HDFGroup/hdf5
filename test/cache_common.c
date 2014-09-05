@@ -2555,7 +2555,7 @@ setup_cache(size_t max_cache_size,
 
         } else {
 
-            file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE);
+            file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE);
 
 	    if ( file_ptr == NULL ) {
 
@@ -2757,7 +2757,7 @@ takedown_cache(H5F_t * file_ptr,
         if ( H5F_addr_defined(saved_actual_base_addr) ) {
 
             if ( NULL == file_ptr )  {
-                file_ptr = (H5F_t *)H5I_object_verify(saved_fid, H5I_FILE);
+                file_ptr = (H5F_t *)H5VL_object_verify(saved_fid, H5I_FILE);
                 HDassert ( file_ptr );
             }
 
@@ -5125,7 +5125,7 @@ check_and_validate_cache_hit_rate(hid_t file_id,
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
@@ -5263,7 +5263,7 @@ check_and_validate_cache_size(hid_t file_id,
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
@@ -5446,7 +5446,7 @@ validate_mdc_config(hid_t file_id,
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 

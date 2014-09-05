@@ -567,8 +567,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     size_t      file_name_len;          /* Length of file name string */
     size_t      norm_obj_name_len;      /* Length of normalized object name string */
     uint8_t    *p;                      /* Pointer into external link buffer */
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t    *obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
     H5P_genplist_t *plist;              /* Property list pointer */
     H5L_type_t link_type = H5L_TYPE_EXTERNAL;
@@ -613,12 +612,9 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(link_loc_id);
 
-    /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(link_loc_id)))
+    /* get the location object */
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(link_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(link_loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
@@ -633,7 +629,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
 
     /* Create the link through the VOL */
-    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_UD, obj, loc_params, vol_plugin->cls,
+    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_UD, obj->vol_obj, loc_params, obj->vol_info->vol_cls,
                                      lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
