@@ -1266,7 +1266,7 @@ ccdataset_vrfy(hsize_t start[],
                         if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED){
                             printf("Dataset Verify failed at [%lu][%lu]: expect %d, got %d\n",
                                    (unsigned long)i, (unsigned long)j,
-                                   *(original), *(dataset));
+                                   *(oriptr), *(dataptr));
                         }
                     }
                 }
