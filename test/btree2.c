@@ -26,6 +26,14 @@
 #define H5B2_TESTING
 #include "H5B2pkg.h"
 
+/*
+ * This file needs to access private information from the H5F package.
+ * This file also needs to access the file testing code.
+ */
+#define H5F_PACKAGE
+#define H5F_TESTING
+#include "H5Fpkg.h"		/* File access	 			*/
+
 /* Other private headers that this test requires */
 #include "H5Iprivate.h"
 

@@ -26,6 +26,14 @@
 #define H5FA_TESTING
 #include "H5FApkg.h"		/* Fixed Arrays			*/
 
+/*
+ * This file needs to access private information from the H5F package.
+ * This file also needs to access the file testing code.
+ */
+#define H5F_PACKAGE
+#define H5F_TESTING
+#include "H5Fpkg.h"		/* File access	 			*/
+
 /* Other private headers that this test requires */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5VMprivate.h"		/* Vectors and arrays 			*/

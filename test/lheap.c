@@ -25,6 +25,14 @@
 #include "H5HLprivate.h"
 #include "H5Iprivate.h"
 
+/*
+ * This file needs to access private information from the H5F package.
+ * This file also needs to access the file testing code.
+ */
+#define H5F_PACKAGE
+#define H5F_TESTING
+#include "H5Fpkg.h"		/* File access	 			*/
+
 const char *FILENAME[] = {
     "lheap",
     NULL
