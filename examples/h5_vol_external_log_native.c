@@ -43,6 +43,7 @@ static herr_t H5VL_log_object_specific(void *obj, H5VL_loc_params_t loc_params, 
 hid_t native_plugin_id = -1;
 
 static const H5VL_class_t H5VL_log_g = {
+    0,
     LOG,
     "log",					/* name */
     H5VL_log_init,                              /* initialize */

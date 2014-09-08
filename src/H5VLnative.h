@@ -23,6 +23,7 @@
 #define H5VLnative_H
 
 #define H5VL_NATIVE	(H5VL_native_init())
+#define HDF5_VOL_NATIVE_VERSION_1	1	/* Version number of Native VOL plugin */
 
 #ifdef __cplusplus
 extern "C" {

@@ -123,8 +123,9 @@ static herr_t H5VL_native_object_specific(void *obj, H5VL_loc_params_t loc_param
 static herr_t H5VL_native_object_optional(void *obj, hid_t dxpl_id, void **req, va_list arguments);
 
 static H5VL_class_t H5VL_native_g = {
-    NATIVE,
-    "native",					/* name */
+    HDF5_VOL_NATIVE_VERSION_1,                  /* Version number */
+    NATIVE,                                     /* Plugin value */
+    "native",					/* Plugin name */
     NULL,                                       /* initialize */
     NULL,                                       /* terminate */
     0,                                          /* fapl_size */
