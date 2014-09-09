@@ -4479,6 +4479,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testlibinfo.sh
                  test/testlinks_env.sh
                  test/test_plugin.sh
+                 test/test_vol_plugin.sh
                  testpar/Makefile
                  perform/Makefile
                  tools/Makefile

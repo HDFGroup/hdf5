@@ -30,7 +30,8 @@
 typedef enum H5PL_type_t {
     H5PL_TYPE_ERROR        = -1,  /*error                    */
     H5PL_TYPE_FILTER       = 0,   /*filter                   */
-    H5PL_TYPE_NONE         = 1    /*this must be last!       */
+    H5PL_TYPE_VOL          = 1,   /*vol plugin               */
+    H5PL_TYPE_NONE         = 2    /*this must be last!       */
 } H5PL_type_t;
 
 

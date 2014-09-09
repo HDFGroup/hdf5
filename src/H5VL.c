@@ -40,6 +40,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5PLprivate.h"        /* Plugins                              */
 #include "H5VLpkg.h"		/* VOL package header		  	*/
 #include "H5VLprivate.h"	/* VOL          		  	*/
 
@@ -205,6 +206,39 @@ H5VL_free_cls(H5VL_class_t *cls)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__get_plugin_cb
+ *
+ * Purpose:	Callback routine to search through registered VLs
+ *
+ * Return:	Success:	The first object in the type for which FUNC
+ *				returns non-zero. NULL if FUNC returned zero
+ *				for every object in the type.
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		Friday, March 30, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5VL__get_plugin_cb(void *obj, hid_t id, void *_op_data)
+{
+    H5VL_get_plugin_ud_t *op_data = (H5VL_get_plugin_ud_t *)_op_data; /* User data for callback */
+    H5VL_class_t *cls = (H5VL_class_t *)obj;
+    int ret_value = H5_ITER_CONT;     /* Callback return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    if(0 == strcmp(cls->name, op_data->name)) {
+        op_data->ret_id = id;
+        ret_value = H5_ITER_STOP;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__get_plugin_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VLregister
  *
  * Purpose:	Registers a new vol plugin as a member of the virtual object
@@ -240,8 +274,68 @@ H5VLregister(const H5VL_class_t *cls)
     /* MSC - check if required callback are defined?? */
 
     /* Create the new class ID */
-    if((ret_value=H5VL_register(cls, sizeof(H5VL_class_t), TRUE)) < 0)
+    if((ret_value = H5VL_register(cls, sizeof(H5VL_class_t), TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register vol plugin ID")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLregister() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VLregister_by_name
+ *
+ * Purpose:	Registers a new vol plugin as a member of the virtual object
+ *		layer class.
+ *
+ * Return:	Success:	A vol plugin ID which is good until the
+ *				library is closed or the plugin is
+ *				unregistered.
+ *
+ *		Failure:	A negative value.
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              September, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5VLregister_by_name(const char *name)
+{
+    H5VL_get_plugin_ud_t op_data;
+    hid_t ret_value;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("i", "*s", name);
+
+    /* Check arguments */
+    if(!name)
+	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "null plugin name is disallowed")
+
+    op_data.ret_id = FAIL;
+    op_data.name = name;
+
+    /* check if plugin is already registered */
+    if(H5I_iterate(H5I_VOL, H5VL__get_plugin_cb, &op_data, TRUE) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_BADITER,FAIL, "can't iterate over VOL ids")
+
+    if(op_data.ret_id != FAIL) {
+        /* If plugin alread registered, increment ref count on ID and return ID */
+        if(H5I_inc_ref(op_data.ret_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
+        ret_value = op_data.ret_id;
+    }
+    else {
+        const H5VL_class_t *cls;
+
+        /* Try loading the plugin */
+        if(NULL == (cls = (const H5VL_class_t *)H5PL_load(H5PL_TYPE_VOL, -1, name)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to load VOL plugin")
+
+        /* Register the plugin we loaded */
+        if((ret_value = H5VL_register(cls, sizeof(H5VL_class_t), TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register vol plugin ID")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -350,39 +444,6 @@ H5VLterminate(hid_t plugin_id, hid_t vtpl_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLterminate() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL__is_registered_cb
- *
- * Purpose:	Callback routine to search through registered VLs
- *
- * Return:	Success:	The first object in the type for which FUNC
- *				returns non-zero. NULL if FUNC returned zero
- *				for every object in the type.
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		Friday, March 30, 2012
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5VL__get_plugin_cb(void *obj, hid_t id, void *_op_data)
-{
-    H5VL_get_plugin_ud_t *op_data = (H5VL_get_plugin_ud_t *)_op_data; /* User data for callback */
-    H5VL_class_t *cls = (H5VL_class_t *)obj;
-    int ret_value = H5_ITER_CONT;     /* Callback return value */
-
-    FUNC_ENTER_STATIC_NOERR
-
-    if(0 == strcmp(cls->name, op_data->name)) {
-        op_data->ret_id = id;
-        ret_value = H5_ITER_STOP;
-    }
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__get_plugin_cb() */
 
 
 /*-------------------------------------------------------------------------

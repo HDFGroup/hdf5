@@ -995,6 +995,8 @@
 ./test/dynlib1.c
 ./test/dynlib2.c
 ./test/dynlib3.c
+./test/dynlibvol1.c
+./test/dynlibvol2.c
 ./test/earray.c
 ./test/efc.c
 ./test/enc_dec_plist.c
@@ -1070,6 +1072,7 @@
 ./test/ohdr.c
 ./test/objcopy.c
 ./test/plugin.c
+./test/vol_test.c
 ./test/reserved.c
 ./test/pool.c
 ./test/set_extent.c
@@ -1095,6 +1098,7 @@
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
 ./test/test_plugin.sh.in
+./test/test_vol_plugin.sh.in
 ./test/testmeta.c
 ./test/tfile.c
 ./test/tgenprop.c

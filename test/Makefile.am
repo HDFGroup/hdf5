@@ -28,7 +28,9 @@ TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
   TEST_SCRIPT += test_plugin.sh
+  TEST_SCRIPT += test_vol_plugin.sh
   SCRIPT_DEPEND += plugin$(EXEEXT)
+  SCRIPT_DEPEND += vol_test$(EXEEXT)
 endif
 
 check_SCRIPTS = $(TEST_SCRIPT)
@@ -57,6 +59,7 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
 check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_env
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= plugin
+  check_PROGRAMS+= vol_test
 endif
 
 # These programs generate test files for the tests.  They don't need to be
@@ -81,10 +84,13 @@ if HAVE_SHARED_CONDITIONAL
 
   # The libdynlib1 and libdynlib2 library for testing plugin module plugin.c.
   # Build it as shared library if configure is enabled for shared library.
-  lib_LTLIBRARIES=libdynlib1.la libdynlib2.la libdynlib3.la
+  lib_LTLIBRARIES=libdynlib1.la libdynlib2.la libdynlib3.la libdynlibvol1.la libdynlibvol2.la
   libdynlib1_la_SOURCES=dynlib1.c
   libdynlib2_la_SOURCES=dynlib2.c
   libdynlib3_la_SOURCES=dynlib3.c
+  libdynlibvol1_la_SOURCES=dynlibvol1.c
+  libdynlibvol2_la_SOURCES=dynlibvol2.c
+
 
 install-exec-hook:
 	$(RM) $(DESTDIR)$(libdir)/*dynlib*
@@ -142,6 +148,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     tmisc[0-9]*.h5 set_extent[1-5].h5 ext[12].bin           \
     getname.h5 getname[1-3].h5 sec2_file.h5 direct_file.h5           \
     family_file000[0-3][0-9].h5 new_family_v16_000[0-3][0-9].h5      \
+    log_file1.h5 log_file2.h5      \
     multi_file-[rs].h5 core_file plugin.h5 \
     new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
@@ -159,6 +166,6 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tvlstr.c tvltypes.c
 
 # Temporary files.
-DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
+DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh test_vol_plugin.sh
 
 include $(top_srcdir)/config/conclude.am

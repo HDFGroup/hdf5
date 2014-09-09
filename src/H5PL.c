@@ -27,6 +27,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5PLprivate.h"	/* Plugin       			*/
+#include "H5VLprivate.h"	/* VOL          			*/
 #include "H5Zprivate.h"		/* Filter pipeline			*/
 
 
@@ -96,9 +97,10 @@ typedef const void *(*H5PL_get_plugin_info_t)(void);
 
 /* Type for the list of info for opened plugin libraries */
 typedef struct H5PL_table_t {
-    H5PL_type_t pl_type;			/* plugin type	     */
-    int         pl_id;                          /* ID for the plugin */
-    H5PL_HANDLE handle;			/* plugin handle     */
+    H5PL_type_t pl_type;		/* plugin type	      */
+    int         pl_id;                  /* ID for the plugin  */
+    const char *pl_name;                /* name of the plugin */
+    H5PL_HANDLE handle;			/* plugin handle      */
 } H5PL_table_t;
 
 
@@ -107,9 +109,9 @@ typedef struct H5PL_table_t {
 /********************/
 
 static herr_t H5PL__init_path_table(void);
-static htri_t H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info);
-static htri_t H5PL__open(H5PL_type_t pl_type, char *libname, int plugin_id, const void **pl_info);
-static htri_t H5PL__search_table(H5PL_type_t plugin_type, int type_id, const void **info);
+static htri_t H5PL__find(H5PL_type_t plugin_type, int type_id, const char *plugin_name, char *dir, const void **info);
+static htri_t H5PL__open(H5PL_type_t pl_type, char *libname, int plugin_id, const char *plugin_name, const void **pl_info);
+static htri_t H5PL__search_table(H5PL_type_t plugin_type, int type_id, const char *plugin_name, const void **info);
 static herr_t H5PL__close(H5PL_HANDLE handle);
 
 
@@ -131,6 +133,11 @@ static herr_t H5PL__close(H5PL_HANDLE handle);
 static size_t		H5PL_table_alloc_g = 0;
 static size_t		H5PL_table_used_g = 0;
 static H5PL_table_t     *H5PL_table_g = NULL;
+
+/* Table for opened vol plugin libraries */
+static size_t		H5PL_vol_table_alloc_g = 0;
+static size_t		H5PL_vol_table_used_g = 0;
+static H5PL_table_t     *H5PL_vol_table_g = NULL;
 
 /* Table of location paths for plugin libraries */
 static char             *H5PL_path_table_g[H5PL_MAX_PATH_NUM];
@@ -231,9 +238,19 @@ H5PL_term_interface(void)
         for(u = 0; u < H5PL_table_used_g; u++)
             H5PL__close((H5PL_table_g[u]).handle);
 
+	/* Close opened dynamic vol libraries */
+        for(u = 0; u < H5PL_vol_table_used_g; u++) {
+            H5PL__close((H5PL_vol_table_g[u]).handle);
+            HDfree(H5PL_vol_table_g[u].pl_name);
+        }
+
 	/* Free the table of dynamic libraries */
 	H5PL_table_g = (H5PL_table_t *)H5MM_xfree(H5PL_table_g);
 	H5PL_table_used_g = H5PL_table_alloc_g = 0;
+
+	/* Free the table of dynamic vol libraries */
+	H5PL_vol_table_g = (H5PL_table_t *)H5MM_xfree(H5PL_vol_table_g);
+	H5PL_vol_table_used_g = H5PL_vol_table_alloc_g = 0;
 
         /* Free the table of search paths */
         for(u = 0; u < H5PL_num_paths_g; u++)
@@ -253,9 +270,9 @@ H5PL_term_interface(void)
 /*-------------------------------------------------------------------------
  * Function:	H5PL_load
  *
- * Purpose:	Given the plugin type and identifier, this function searches
- *              and/or loads a dynamic plugin library first among the already
- *              opened libraries then in the designated location paths.
+ * Purpose:	Given the plugin type and identifier and/or name, this function
+ *              searches and/or loads a dynamic plugin library first among the 
+ *              already opened libraries then in the designated location paths.
  *
  * Return:	Non-NULL on success/NULL on failure
  *
@@ -265,7 +282,7 @@ H5PL_term_interface(void)
  *-------------------------------------------------------------------------
  */
 const void *
-H5PL_load(H5PL_type_t type, int id)
+H5PL_load(H5PL_type_t type, int id, const char *name)
 {
     htri_t      found;               /* Whether the plugin was found */
     const void  *plugin_info = NULL;
@@ -285,7 +302,7 @@ H5PL_load(H5PL_type_t type, int id)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, NULL, "can't initialize search path table")
 
     /* Search in the table of already loaded plugin libraries */
-    if((found = H5PL__search_table(type, id, &plugin_info)) < 0)
+    if((found = H5PL__search_table(type, id, name, &plugin_info)) < 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "search in table failed")
 
     /* If not found, iterate through the path table to find the right dynamic library */
@@ -293,7 +310,7 @@ H5PL_load(H5PL_type_t type, int id)
         size_t	   i;                   /* Local index variable */
 
         for(i = 0; i < H5PL_num_paths_g; i++) {
-            if((found = H5PL__find(type, id, H5PL_path_table_g[i], &plugin_info)) < 0)
+            if((found = H5PL__find(type, id, name, H5PL_path_table_g[i], &plugin_info)) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "search in paths failed")
      
             /* Break out if found */
@@ -387,7 +404,7 @@ done:
  */
 #ifndef H5_HAVE_WIN32_API
 static htri_t
-H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
+H5PL__find(H5PL_type_t plugin_type, int type_id, const char *plugin_name, char *dir, const void **info)
 {
     char           *pathname = NULL;
     DIR            *dirp = NULL;
@@ -425,8 +442,8 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
             if(S_ISDIR(my_stat.st_mode))
                 continue;
 
-            /* Attempt to open the dynamic library as a filter library */
-            if((found_in_dir = H5PL__open(plugin_type, pathname, type_id, info)) < 0)
+            /* Attempt to open the dynamic library */
+            if((found_in_dir = H5PL__open(plugin_type, pathname, type_id, plugin_name, info)) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
             if(found_in_dir) {
                 /* Indicate success */
@@ -449,7 +466,7 @@ done:
 } /* end H5PL__find() */
 #else /* H5_HAVE_WIN32_API */
 static htri_t
-H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
+H5PL__find(H5PL_type_t plugin_type, int type_id, const char *plugin_name, char *dir, const void **info)
 {
     WIN32_FIND_DATA fdFile;
     HANDLE          hFind;
@@ -482,7 +499,7 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
             if(fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 continue;
 
-            if((found_in_dir = H5PL__open(plugin_type, pathname, type_id, info)) < 0)
+            if((found_in_dir = H5PL__open(plugin_type, pathname, type_id, plugin_name, info)) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
             if(found_in_dir) {
                 /* Indicate success */
@@ -522,7 +539,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, const void **pl_info)
+H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, const char *pl_name, const void **pl_info)
 {
     H5PL_HANDLE    handle = NULL;
     htri_t         ret_value = FALSE;
@@ -546,45 +563,108 @@ H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, const void **pl_info)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
         } /* end if */
         else {
-            const H5Z_class2_t *plugin_info;
+            switch(pl_type) {
+            case H5PL_TYPE_FILTER:
+                {
+                    const H5Z_class2_t *plugin_info;
 
-            /* Invoke H5PLget_plugin_info to verify this is the right library we are looking for.
-             * Move on if it isn't.
-             */
-            if(NULL == (plugin_info = (const H5Z_class2_t *)(*get_plugin_info)())) {
-                if(H5PL__close(handle) < 0)
-                    HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get plugin info")
-            } /* end if */
+                    /* Invoke H5PLget_plugin_info to verify this is the right library we are looking for.
+                     * Move on if it isn't.
+                     */
+                    if(NULL == (plugin_info = (const H5Z_class2_t *)(*get_plugin_info)())) {
+                        if(H5PL__close(handle) < 0)
+                            HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
+                        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get plugin info")
+                    } /* end if */
 
-            /* Successfully found plugin library, check if it's the right one */
-            if(plugin_info->id == pl_id) {
-                /* Expand the table if it is too small */
-                if(H5PL_table_used_g >= H5PL_table_alloc_g) {
-                    size_t n = MAX(H5Z_MAX_NFILTERS, 2 * H5PL_table_alloc_g);
-                    H5PL_table_t *table = (H5PL_table_t *)H5MM_realloc(H5PL_table_g, n * sizeof(H5PL_table_t));
+                    /* Successfully found plugin library, check if it's the right one */
+                    if(plugin_info->id == pl_id) {
+                        /* Expand the table if it is too small */
+                        if(H5PL_table_used_g >= H5PL_table_alloc_g) {
+                            size_t n = MAX(H5Z_MAX_NFILTERS, 2 * H5PL_table_alloc_g);
+                            H5PL_table_t *table = (H5PL_table_t *)H5MM_realloc(H5PL_table_g, n * sizeof(H5PL_table_t));
 
-                    if(!table)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to extend dynamic library table")
+                            if(!table)
+                                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to extend dynamic library table")
 
-                    H5PL_table_g = table;
-                    H5PL_table_alloc_g = n;
-                } /* end if */
+                            H5PL_table_g = table;
+                            H5PL_table_alloc_g = n;
+                        } /* end if */
 
-                (H5PL_table_g[H5PL_table_used_g]).handle = handle;
-                (H5PL_table_g[H5PL_table_used_g]).pl_type = pl_type;
-                (H5PL_table_g[H5PL_table_used_g]).pl_id = plugin_info->id;
-                H5PL_table_used_g++;
+                        (H5PL_table_g[H5PL_table_used_g]).handle = handle;
+                        (H5PL_table_g[H5PL_table_used_g]).pl_type = pl_type;
+                        (H5PL_table_g[H5PL_table_used_g]).pl_id = plugin_info->id;
+                        H5PL_table_used_g++;
 
-                /* Set the plugin info to return */
-                *pl_info = (const void *)plugin_info;
-     
-                /* Indicate success */
-                ret_value = TRUE;
-            } /* end if */
-            else
-                if(H5PL__close(handle) < 0)
-                    HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
+                        /* Set the plugin info to return */
+                        *pl_info = (const void *)plugin_info;
+
+                        /* Indicate success */
+                        ret_value = TRUE;
+                    } /* end if */
+                    else
+                        if(H5PL__close(handle) < 0)
+                            HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
+
+                    break;
+                }
+            case H5PL_TYPE_VOL:
+                {
+                    const H5VL_class_t *plugin_info;
+
+                    /* Invoke H5PLget_plugin_info to verify this is the right library we are looking for.
+                     * Move on if it isn't.
+                     */
+                    if(NULL == (plugin_info = (const H5VL_class_t *)(*get_plugin_info)())) {
+                        if(H5PL__close(handle) < 0)
+                            HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
+                        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get plugin info")
+                    } /* end if */
+
+                    /* Successfully found plugin library, check if it's the right one */
+                    if((pl_id > MAX_VOL_LIB_VALUE && plugin_info->value == pl_id) ||
+                       (pl_name && !strcmp(pl_name, plugin_info->name))) {
+                        /* Expand the table if it is too small */
+                        if(H5PL_vol_table_used_g >= H5PL_vol_table_alloc_g) {
+                            size_t n;
+                            H5PL_table_t *table = NULL;
+
+                            if(0 == H5PL_vol_table_alloc_g)
+                                n = 16;
+                            else
+                                n = 2 * H5PL_vol_table_alloc_g;
+
+                            table = (H5PL_table_t *)H5MM_realloc(H5PL_vol_table_g, n * sizeof(H5PL_table_t));
+                            if(!table)
+                                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to extend dynamic library table for vol plugins")
+
+                            H5PL_vol_table_g = table;
+                            H5PL_vol_table_alloc_g = n;
+                        } /* end if */
+
+                        (H5PL_vol_table_g[H5PL_vol_table_used_g]).handle = handle;
+                        (H5PL_vol_table_g[H5PL_vol_table_used_g]).pl_type = pl_type;
+                        (H5PL_vol_table_g[H5PL_vol_table_used_g]).pl_id = plugin_info->value;
+                        (H5PL_vol_table_g[H5PL_vol_table_used_g]).pl_name = HDstrdup(pl_name);
+                        H5PL_vol_table_used_g++;
+
+                        /* Set the plugin info to return */
+                        *pl_info = (const void *)plugin_info;
+
+                        /* Indicate success */
+                        ret_value = TRUE;
+                    } /* end if */
+                    else
+                        if(H5PL__close(handle) < 0)
+                            HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
+
+                    break;
+                }
+            case H5PL_TYPE_ERROR:
+            case H5PL_TYPE_NONE:
+            default:
+                HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "invalid plugin type")
+            } /* end switch */
         } /* end if */
     } /* end else */
 
@@ -609,14 +689,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5PL__search_table(H5PL_type_t plugin_type, int type_id, const void **info)
+H5PL__search_table(H5PL_type_t plugin_type, int type_id, const char *plugin_name, const void **info)
 {
     htri_t         ret_value = FALSE;
 
     FUNC_ENTER_STATIC
 
     /* Search in the table of already opened dynamic libraries */
-    if(H5PL_table_used_g > 0) {
+    if(H5PL_TYPE_FILTER == plugin_type && H5PL_table_used_g > 0) {
         size_t         i;
 
         for(i = 0; i < H5PL_table_used_g; i++) {
@@ -628,6 +708,26 @@ H5PL__search_table(H5PL_type_t plugin_type, int type_id, const void **info)
 		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get function for H5PLget_plugin_info")
 
 	        if(NULL == (plugin_info = (const H5Z_class2_t *)(*get_plugin_info)()))
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get plugin info")
+
+	        *info = plugin_info;
+                HGOTO_DONE(TRUE)
+            } /* end if */
+        } /* end for */
+    } /* end if */
+    else if(H5PL_TYPE_VOL == plugin_type && H5PL_vol_table_used_g > 0) {
+        size_t         i;
+
+        for(i = 0; i < H5PL_vol_table_used_g; i++) {
+            if((plugin_type == (H5PL_vol_table_g[i]).pl_type) && 
+               (type_id == (H5PL_vol_table_g[i]).pl_id || !strcmp(plugin_name, (H5PL_vol_table_g[i]).pl_name))) {
+                H5PL_get_plugin_info_t get_plugin_info;
+                const H5VL_class_t   *plugin_info;
+
+                if(NULL == (get_plugin_info = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC((H5PL_vol_table_g[i]).handle, "H5PLget_plugin_info")))
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get function for H5PLget_plugin_info")
+
+	        if(NULL == (plugin_info = (const H5VL_class_t *)(*get_plugin_info)()))
 		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get plugin info")
 
 	        *info = plugin_info;
