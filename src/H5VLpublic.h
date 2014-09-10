@@ -325,7 +325,7 @@ typedef enum H5VL_class_value_t {
 
 /* Class information for each VOL driver */
 typedef struct H5VL_class_t {
-    unsigned version;                             /* Class version # */
+    unsigned int version;                         /* Class version # */
     H5VL_class_value_t value;                     /* value to identify plugin */
     const char *name;                             /* Plugin name */
     herr_t  (*initialize)(hid_t vipl_id);         /* Plugin initialization callback */

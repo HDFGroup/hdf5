@@ -15,7 +15,7 @@ visit_cb(hid_t oid, const char *name,
 
     if(H5Iget_type(oid) == H5I_GROUP) {
         len = H5VLget_plugin_name(oid, n, 50);
-        printf ("Visiting GROUP VOL name = %s  %d\n", n, len);
+        printf ("Visiting GROUP VOL name = %s  %zd\n", n, len);
     }
     if(H5Iget_type(oid) == H5I_DATASET) 
         printf("visiting dataset\n");
@@ -46,10 +46,10 @@ int main(int argc, char **argv) {
     ssize_t len;
     char name[25];
     static hsize_t      ds_size[2] = {10, 20};
-
+    getchar();
     for(n=1 ; n<3 ; n++) {
-        char pl_name[4];
-        const char file_name[50];
+        char pl_name[10];
+        char file_name[50];
 
         sprintf(pl_name, "log%d", n);
         sprintf(file_name, "log_file%d.h5", n);
@@ -74,29 +74,29 @@ int main(int argc, char **argv) {
 
         file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
         len = H5VLget_plugin_name(file_id, name, 25);
-        printf ("FILE VOL name = %s  %d\n", name, len);
+        printf ("FILE VOL name = %s  %zd\n", name, len);
 
         group_id = H5Gcreate2(file_id, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         len = H5VLget_plugin_name(group_id, name, 50);
-        printf ("GROUP VOL name = %s  %d\n", name, len);
+        printf ("GROUP VOL name = %s  %zd\n", name, len);
 
         int_id = H5Tcopy(H5T_NATIVE_INT);
         H5Tcommit2(file_id, "int", int_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         len = H5VLget_plugin_name(int_id, name, 50);
-        printf ("DT COMMIT name = %s  %d\n", name, len);
+        printf ("DT COMMIT name = %s  %zd\n", name, len);
         H5Tclose(int_id);
 
         int_id = H5Topen2(file_id, "int", H5P_DEFAULT);
         len = H5VLget_plugin_name(int_id, name, 50);
-        printf ("DT OPEN name = %s  %d\n", name, len);
+        printf ("DT OPEN name = %s  %zd\n", name, len);
         H5Tclose(int_id);
 
         int_id = H5Oopen(file_id,"int",H5P_DEFAULT);
         len = H5VLget_plugin_name(int_id, name, 50);
-        printf ("DT OOPEN name = %s  %d\n", name, len);
+        printf ("DT OOPEN name = %s  %zd\n", name, len);
 
         len = H5Fget_name(file_id, name, 50);
-        printf("name = %d  %s\n", len, name);
+        printf("name = %zd  %s\n", len, name);
 
         data = (int *)malloc (sizeof(int)*nelem);
         for(i=0;i<nelem;++i)
@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
         H5Sclose(dataspaceId);
 
         len = H5VLget_plugin_name(datasetId, name, 50);
-        printf ("DSET name = %s  %d\n", name, len);
+        printf ("DSET name = %s  %zd\n", name, len);
 
         H5Dwrite(datasetId, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
         H5Dclose(datasetId);
