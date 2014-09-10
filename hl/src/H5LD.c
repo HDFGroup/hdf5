@@ -88,8 +88,8 @@ H5LD_clean_vector(H5LD_memb_t *listv[])
 static herr_t
 H5LD_construct_info(H5LD_memb_t *memb, hid_t par_tid)
 {
-    hid_t tmp_tid;	/* Dataset type id */
-    hid_t memb_tid;	/* Type id for a member in a field */
+    hid_t tmp_tid=-1;	/* Dataset type id */
+    hid_t memb_tid=-1;	/* Type id for a member in a field */
     unsigned i;		/* Local index variable */
     int idx;		/* Index # of a member in a compound data type */
     herr_t ret_value = SUCCEED;	/* Return value */
@@ -285,7 +285,7 @@ H5LD_construct_vector(char *fields, H5LD_memb_t *listv[]/*OUT*/, hid_t par_tid)
 static herr_t
 H5LD_get_dset_dims(hid_t did, hsize_t *cur_dims)
 {
-    hid_t sid;                  /* dataspace id */
+    hid_t sid=-1;              	/* dataspace id */
     int ret_value = SUCCEED;    /* return_value */
 
     /* Verify parameter */
@@ -329,9 +329,9 @@ out:
 static size_t
 H5LD_get_dset_type_size(hid_t did, const char *fields)
 {
-    hid_t dset_tid;	/* Dataset's type identifier */
-    hid_t tid;		/* Native Type identifier */
-    size_t tot = 0;	/* Data type size of all the fields in "fields" */
+    hid_t dset_tid=-1;		/* Dataset's type identifier */
+    hid_t tid=-1;		/* Native Type identifier */
+    size_t tot = 0;		/* Data type size of all the fields in "fields" */
     H5LD_memb_t **listv = NULL;	/* Vector for storing information in "fields" */
     char *dup_fields = NULL;	/* A copy of "fields" */
     int n = 0, num = 0;		/* Local index variable */

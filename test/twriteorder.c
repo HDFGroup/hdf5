@@ -139,8 +139,8 @@ parse_option(int argc, char * const argv[])
 	    };
 	    break;
 	  case 'n':	/* number of planes to write/read */
-	    if ((nlinkedblock_g = atoi(optarg)) <= 0){
-		fprintf(stderr, "bad number of linked blocks %s, must be a positive integer\n", optarg);
+	    if ((nlinkedblock_g = atoi(optarg)) < 2){
+		fprintf(stderr, "bad number of linked blocks %s, must be greater than 1.\n", optarg);
 		usage(progname_g);
 		Hgoto_error(-1);
 	    };
