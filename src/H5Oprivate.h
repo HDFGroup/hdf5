@@ -423,6 +423,7 @@ typedef struct H5O_storage_chunk_btree_t {
 struct H5FA_t;                          /* Defined in H5FAprivate.h          */
 
 typedef struct H5O_storage_chunk_farray_t {
+    haddr_t     dset_ohdr_addr;         /* File address dataset's object header */
     struct H5FA_t *fa;                  /* Pointer to fixed index array struct */
 } H5O_storage_chunk_farray_t;
 

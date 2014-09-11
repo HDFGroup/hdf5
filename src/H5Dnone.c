@@ -59,8 +59,6 @@
 /* Non Index chunking I/O ops */
 static herr_t H5D_none_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D_none_is_space_alloc(const H5O_storage_chunk_t *storage);
-static herr_t H5D_none_insert(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata);
 static herr_t H5D_none_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static int H5D_none_iterate(const H5D_chk_idx_info_t *idx_info,
@@ -81,11 +79,11 @@ static herr_t H5D_none_dump(const H5O_storage_chunk_t *storage, FILE *stream);
 
 /* Non Index chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_NONE[1] = {{
-    FALSE,                      /* Non-indexed chunking don't current support SWMR access */
+    TRUE,                      	/* Non-indexed chunking don't current support SWMR access */
     NULL,			/* init */
     H5D_none_create,		/* create */
     H5D_none_is_space_alloc, 	/* is_space_alloc */
-    H5D_none_insert,		/* insert */
+    NULL,			/* insert */
     H5D_none_get_addr,		/* get_addr */
     NULL,			/* resize */
     H5D_none_iterate,		/* iterate */
@@ -95,8 +93,6 @@ const H5D_chunk_ops_t H5D_COPS_NONE[1] = {{
     NULL,			/* copy_shutdown */
     H5D_none_size,		/* size */
     H5D_none_reset,		/* reset */
-    NULL,			/* support */
-    NULL,			/* unsupport */
     H5D_none_dump,		/* dump */
     NULL			/* dest */
 }};
@@ -182,52 +178,6 @@ H5D_none_is_space_alloc(const H5O_storage_chunk_t *storage)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_none_insert
- *
- * Purpose:	Calculate the address of the chunk
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi; Sept 2010
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_none_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
-{
-    hsize_t     idx;			/* Array index of chunk */
-    herr_t	ret_value = SUCCEED;	/* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->pline->nused == 0);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
-    HDassert(udata);
-
-    /* Calculate the index of this chunk */
-    if(H5VM_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
-
-    HDassert(!H5F_addr_defined(udata->addr));
-    HDassert(udata->nbytes == idx_info->layout->size);
-
-    /* Storage is already allocated, just calculate the file address of the chunk */
-    H5_CHECK_OVERFLOW(udata->nbytes, /*From: */uint32_t, /*To: */hsize_t);
-    udata->addr = idx_info->storage->idx_addr + idx * udata->nbytes;
-
-    HDassert(H5F_addr_defined(udata->addr));
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D_none_insert() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5D_none_get_addr
  *
  * Purpose:	Get the file address of a chunk.
@@ -259,6 +209,8 @@ H5D_none_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     /* Calculate the index of this chunk */
     if(H5VM_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+
+    udata->chunk_idx = idx;
 
     /* Calculate the address of the chunk */
     udata->addr = idx_info->storage->idx_addr + idx * idx_info->layout->size;

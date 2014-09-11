@@ -349,17 +349,6 @@ H5B2_split1(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
     /* Update flush dependencies */
     if(hdr->swmr_write) {
-        /* Update dependencies on records */
-        if(hdr->cls->upd_flush_dep) {
-            /* Update right child's records */
-            for(u = 0; u < *right_nrec; u++)
-                if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(right_native, hdr, u), udata, left_child, right_child) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-            /* Update the middle record */
-            if(hdr->cls->upd_flush_dep(H5B2_INT_NREC(internal, hdr, idx), udata, left_child, internal) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-        } /* end if */
 
         /* Update node pointers */
         if(depth > 1) {
@@ -688,21 +677,6 @@ H5B2_redistribute2(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
         /* Update flush dependencies */
         if(hdr->swmr_write) {
-            /* Update dependencies on records */
-            if(hdr->cls->upd_flush_dep) {
-                /* Update the old middle record */
-                if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(left_native, hdr, *left_nrec), udata, internal, left_child) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                /* Update left child's records moved from right child */
-                for(u = (*left_nrec + (unsigned)1); u < *left_nrec + move_nrec; u++)
-                    if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(left_native, hdr, u), udata, right_child, left_child) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                /* Update the new middle record */
-                if(hdr->cls->upd_flush_dep(H5B2_INT_NREC(internal, hdr, idx), udata, right_child, internal) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-            } /* end if */
 
             /* Update node pointers */
             if(depth > 1) {
@@ -810,21 +784,6 @@ H5B2_redistribute2(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
         /* Update flush dependencies */
         if(hdr->swmr_write) {
-            /* Update dependencies on records */
-            if(hdr->cls->upd_flush_dep) {
-                /* Update the old middle record */
-                if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(right_native, hdr, (move_nrec - 1)), udata, internal, right_child) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                /* Update right child's records moved from left child */
-                for(u = 0; u < (unsigned)(move_nrec - 1); u++)
-                    if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(right_native, hdr, u), udata, left_child, right_child) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                /* Update the new middle record */
-                if(hdr->cls->upd_flush_dep(H5B2_INT_NREC(internal, hdr, idx), udata, left_child, internal) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-            } /* end if */
 
             /* Update node pointers */
             if(depth > 1) {
@@ -1131,21 +1090,6 @@ H5B2_redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
             /* Update flush dependencies */
             if(hdr->swmr_write) {
-                /* Update dependencies on records */
-                if(hdr->cls->upd_flush_dep) {
-                    /* Update the old parent record */
-                    if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(left_native, hdr, *left_nrec), udata, internal, left_child) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                    /* Update left child's records moved from middle child */
-                    for(u = (*left_nrec + (unsigned)1); u < *left_nrec + (unsigned)moved_middle_nrec; u++)
-                        if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(left_native, hdr, u), udata, middle_child, left_child) < 0)
-                            HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                    /* Update the new parent record */
-                    if(hdr->cls->upd_flush_dep(H5B2_INT_NREC(internal, hdr, idx - 1), udata, middle_child, internal) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-                } /* end if */
 
                 /* Update node pointers */
                 if(depth > 1) {
@@ -1247,21 +1191,6 @@ H5B2_redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
             /* Update flush dependencies */
             if(hdr->swmr_write) {
-                /* Update dependencies on records */
-                if(hdr->cls->upd_flush_dep) {
-                    /* Update the old parent record */
-                    if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(right_native, hdr, (right_nrec_move - 1)), udata, internal, right_child) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                    /* Update right child's records moved from middle child */
-                    for(u = 0; u < (right_nrec_move - 1); u++)
-                        if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(right_native, hdr, u), udata, middle_child, right_child) < 0)
-                            HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                    /* Update the new parent record */
-                    if(hdr->cls->upd_flush_dep(H5B2_INT_NREC(internal, hdr, idx), udata, middle_child, internal) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-                } /* end if */
 
                 /* Update node pointers */
                 if(depth > 1) {
@@ -1363,21 +1292,6 @@ H5B2_redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
             /* Update flush dependencies */
             if(hdr->swmr_write) {
-                /* Update dependencies on records */
-                if(hdr->cls->upd_flush_dep) {
-                    /* Update the old parent record */
-                    if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(middle_native, hdr, (left_nrec_move - 1)), udata, internal, middle_child) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                    /* Update middle child's records moved from left child */
-                    for(u = 0; u < (left_nrec_move - 1); u++)
-                        if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(middle_native, hdr, u), udata, left_child, middle_child) < 0)
-                            HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                    /* Update the new parent record */
-                    if(hdr->cls->upd_flush_dep(H5B2_INT_NREC(internal, hdr, idx - 1), udata, left_child, internal) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-                } /* end if */
 
                 /* Update node pointers */
                 if(depth > 1) {
@@ -1478,21 +1392,6 @@ H5B2_redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
             /* Update flush dependencies */
             if(hdr->swmr_write) {
-                /* Update dependencies on records */
-                if(hdr->cls->upd_flush_dep) {
-                    /* Update the old parent record */
-                    if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(middle_native, hdr, curr_middle_nrec), udata, internal, middle_child) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                    /* Update middle child's records moved from right child */
-                    for(u = (curr_middle_nrec + (unsigned)1); u < curr_middle_nrec + right_nrec_move; u++)
-                        if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(middle_native, hdr, u), udata, right_child, middle_child) < 0)
-                            HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                    /* Update the new parent record */
-                    if(hdr->cls->upd_flush_dep(H5B2_INT_NREC(internal, hdr, idx), udata, right_child, internal) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-                } /* end if */
 
                 /* Update node pointers */
                 if(depth > 1) {
@@ -1776,17 +1675,6 @@ H5B2_merge2(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
         /* Update flush dependencies */
         if(hdr->swmr_write) {
-            /* Update dependencies on records */
-            if(hdr->cls->upd_flush_dep) {
-                /* Update the old parent record */
-                if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(left_native, hdr, *left_nrec), udata, internal, left_child) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                /* Update records moved from right child */
-                for(u = (*left_nrec + (unsigned)1); u < (*left_nrec + (unsigned)*right_nrec + (unsigned)1); u++)
-                    if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(left_native, hdr, u), udata, right_child, left_child) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-            } /* end if */
 
             /* Update node pointers */
             if(depth > 1) {
@@ -2077,21 +1965,6 @@ H5B2_merge3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
         /* Update flush dependencies */
         if(hdr->swmr_write) {
-            /* Update dependencies on records */
-            if(hdr->cls->upd_flush_dep) {
-                /* Update the old parent record */
-                if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(left_native, hdr, *left_nrec), udata, internal, left_child) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                /* Update records moved from middle child */
-                for(u = (*left_nrec + (unsigned)1); u < (*left_nrec + (unsigned)middle_nrec_move); u++)
-                    if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(left_native, hdr, u), udata, middle_child, left_child) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                /* Update the new parent record */
-                if(hdr->cls->upd_flush_dep(H5B2_INT_NREC(internal, hdr, idx), udata, middle_child, internal) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-            } /* end if */
 
             /* Update node pointers */
             if(depth > 1) {
@@ -2173,17 +2046,6 @@ H5B2_merge3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
         /* Update flush dependencies */
         if(hdr->swmr_write) {
-            /* Update dependencies on records */
-            if(hdr->cls->upd_flush_dep) {
-                /* Update the old parent record */
-                if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(middle_native, hdr, *middle_nrec), udata, internal, middle_child) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-                /* Update records moved from right child */
-                for(u = (*middle_nrec + (unsigned)1); u < (*middle_nrec + (unsigned)*right_nrec + (unsigned)1); u++)
-                    if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(left_native, hdr, u), udata, right_child, middle_child) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-            } /* end if */
 
             /* Update node pointers */
             if(depth > 1) {
@@ -2383,14 +2245,6 @@ H5B2_swap_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
     HDmemcpy(H5B2_NAT_NREC(child_native, hdr, 0), swap_loc, hdr->cls->nrec_size);
     HDmemcpy(swap_loc, hdr->page, hdr->cls->nrec_size);
 
-    /* Update flush dependencies */
-    if(hdr->swmr_write && hdr->cls->upd_flush_dep) {
-        if(hdr->cls->upd_flush_dep(H5B2_NAT_NREC(child_native, hdr, 0), udata, swap_parent, child) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-        if(hdr->cls->upd_flush_dep(swap_loc, udata, child, swap_parent) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-    } /* end if */
-
     /* Mark parent as dirty */
     *internal_flags_ptr |= H5AC__DIRTIED_FLAG;
 
@@ -2474,11 +2328,6 @@ H5B2_insert_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_ptr,
     /* Make callback to store record in native form */
     if((hdr->cls->store)(H5B2_LEAF_NREC(leaf, hdr, idx), udata) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into leaf node")
-
-    /* Set up flush dependency on child client object, if appropriate */
-    if(hdr->swmr_write && hdr->cls->crt_flush_dep)
-        if((hdr->cls->crt_flush_dep)(H5B2_LEAF_NREC(leaf, hdr, idx), udata, leaf) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
 
     /* Update record count for node pointer to current node */
     curr_node_ptr->all_nrec++;

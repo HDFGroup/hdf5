@@ -291,6 +291,9 @@ typedef struct H5D_chunk_ud_t {
     unsigned	filter_mask;		/*excluded filters	*/
     haddr_t	addr;			/*file address of chunk */
     hbool_t     new_unfilt_chunk;       /*whether the chunk just became unfiltered */
+    hsize_t    chunk_idx;              /*chunk index for EA, FA indexing */
+    hbool_t    need_insert;
+    hbool_t    need_modify;
 } H5D_chunk_ud_t;
 
 /* Typedef for "generic" chunk callbacks */
@@ -319,10 +322,6 @@ typedef herr_t (*H5D_chunk_copy_shutdown_func_t)(H5O_storage_chunk_t *storage_sr
 typedef herr_t (*H5D_chunk_size_func_t)(const H5D_chk_idx_info_t *idx_info,
     hsize_t *idx_size);
 typedef herr_t (*H5D_chunk_reset_func_t)(H5O_storage_chunk_t *storage, hbool_t reset_addr);
-typedef htri_t (*H5D_chunk_support_func_t)(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry);
-typedef herr_t (*H5D_chunk_unsupport_func_t)(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry);
 typedef herr_t (*H5D_chunk_dump_func_t)(const H5O_storage_chunk_t *storage,
     FILE *stream);
 typedef herr_t (*H5D_chunk_dest_func_t)(const H5D_chk_idx_info_t *idx_info);
@@ -333,7 +332,7 @@ typedef struct H5D_chunk_ops_t {
     H5D_chunk_init_func_t init;             /* Routine to initialize indexing information in memory */
     H5D_chunk_create_func_t create;         /* Routine to create chunk index */
     H5D_chunk_is_space_alloc_func_t is_space_alloc;    /* Query routine to determine if storage/index is allocated */
-    H5D_chunk_insert_func_t insert;         /* Routine to insert a chunk into an index */
+    H5D_chunk_insert_func_t insert_addr;         /* Routine to insert a chunk into an index */
     H5D_chunk_get_addr_func_t get_addr;     /* Routine to retrieve address of chunk in file */
     H5D_chunk_resize_func_t resize;         /* Routine to update chunk index info after resizing dataset */
     H5D_chunk_iterate_func_t iterate;       /* Routine to iterate over chunks */
@@ -343,8 +342,6 @@ typedef struct H5D_chunk_ops_t {
     H5D_chunk_copy_shutdown_func_t copy_shutdown; /* Routine to perform any necessary shutdown for copying chunks */
     H5D_chunk_size_func_t size;             /* Routine to get size of indexing information */
     H5D_chunk_reset_func_t reset;           /* Routine to reset indexing information */
-    H5D_chunk_support_func_t support;       /* Routine to create dependency between chunk [proxy] and index metadata */
-    H5D_chunk_unsupport_func_t unsupport;   /* Routine to remove dependency between chunk [proxy] and index metadata */
     H5D_chunk_dump_func_t dump;             /* Routine to dump indexing information */
     H5D_chunk_dest_func_t dest;             /* Routine to destroy indexing information in memory */
 } H5D_chunk_ops_t;
@@ -396,6 +393,7 @@ typedef struct H5D_chunk_cached_t{
     hbool_t     valid;                          /*whether cache info is valid*/
     hsize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
     uint32_t	nbytes;				/*size of stored data	*/
+    hsize_t    chunk_idx;			/*index of chunk in dataset */
     unsigned	filter_mask;			/*excluded filters	*/
     haddr_t	addr;				/*file address of chunk */
 } H5D_chunk_cached_t;
@@ -536,9 +534,8 @@ typedef struct H5D_rdcc_ent_t {
     uint32_t	rd_count;	/*bytes remaining to be read		*/
     uint32_t	wr_count;	/*bytes remaining to be written		*/
     haddr_t     chunk_addr;     /*address of chunk in file		*/
+    hsize_t     chunk_idx;  	/*index of chunk in dataset */
     uint8_t	*chunk;		/*the unfiltered chunk data		*/
-    haddr_t     proxy_addr;     /*address of chunk proxy in file	*/
-    struct H5D_chunk_proxy_t *proxy;   /*pointer to chunk proxy in memory	*/
     unsigned	idx;		/*index in hash table			*/
     struct H5D_rdcc_ent_t *next;/*next item in doubly-linked list	*/
     struct H5D_rdcc_ent_t *prev;/*previous item in doubly-linked list	*/
@@ -546,16 +543,6 @@ typedef struct H5D_rdcc_ent_t {
     struct H5D_rdcc_ent_t *tmp_prev;/*previous item in temporary doubly-linked list */
 } H5D_rdcc_ent_t;
 typedef H5D_rdcc_ent_t *H5D_rdcc_ent_ptr_t; /* For free lists */
-
-/* Metadata cache chunk proxy type */
-typedef struct H5D_chunk_proxy_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
-                            /* first field in structure */
-    H5D_t *dset;            /* Pointer to dataset that chunk proxies are related to */
-    H5D_rdcc_ent_t *ent;    /* Pointer to chunk cache entry this proxy is standing in for */
-    hbool_t supported;      /* Whether the proxy is a flush dependency of the index */
-} H5D_chunk_proxy_t;
-
 
 /*****************************/
 /* Package Private Variables */

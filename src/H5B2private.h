@@ -95,8 +95,6 @@ struct H5B2_class_t {
     herr_t (*compare)(const void *rec1, const void *rec2); 		/* Compare two native records */
     herr_t (*encode)(uint8_t *raw, const void *record, void *ctx);  	/* Encode record from native form to disk storage form */
     herr_t (*decode)(const uint8_t *raw, void *record, void *ctx);  	/* Decode record from disk storage form to native form */
-    herr_t (*crt_flush_dep)(void *record, void *udata, void *parent);   /* Create a flush dependency with record as child */
-    herr_t (*upd_flush_dep)(void *record, void *udata, void *old_parent, void *new_parent); /* Update a flush dependency with record as child */
     herr_t (*debug)(FILE *stream, const H5F_t *f, hid_t dxpl_id,    	/* Print a record for debugging */
         int indent, int fwidth, const void *record, const void *ctx);
     void *(*crt_dbg_ctx)(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr); 	/* Create debugging context */

@@ -86,8 +86,6 @@ const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
     H5B2_test_compare,          /* Record comparison callback */
     H5B2_test_encode,           /* Record encoding callback */
     H5B2_test_decode,           /* Record decoding callback */
-    NULL,                       /* Create flush dependency */
-    NULL,                       /* Update flush dependency */
     H5B2_test_debug,            /* Record debugging callback */
     H5B2_test_crt_dbg_context,  /* Create debugging context */
     H5B2_test_dst_context       /* Destroy debugging context */

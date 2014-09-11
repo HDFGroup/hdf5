@@ -124,9 +124,11 @@ static herr_t H5D_farray_filt_debug(FILE *stream, int indent, int fwidth,
     hsize_t idx, const void *elmt);
 
 /* Chunked layout indexing callbacks */
+static herr_t H5D_farray_idx_init(const H5D_chk_idx_info_t *idx_info,
+    const H5S_t UNUSED *space, haddr_t dset_ohdr_addr);
 static herr_t H5D_farray_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D_farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
-static herr_t H5D_farray_idx_insert(const H5D_chk_idx_info_t *idx_info,
+static herr_t H5D_farray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static herr_t H5D_farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
@@ -152,11 +154,11 @@ static herr_t H5D_farray_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
 /* Fixed array indexed chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_FARRAY[1] = {{
-    FALSE,                              /* Fixed array indices don't current support SWMR access */
-    NULL,
+    TRUE,                              /* Fixed array indices support SWMR access */
+    H5D_farray_idx_init,
     H5D_farray_idx_create,
     H5D_farray_idx_is_space_alloc,
-    H5D_farray_idx_insert,
+    H5D_farray_idx_insert_addr,
     H5D_farray_idx_get_addr,
     NULL,
     H5D_farray_idx_iterate,
@@ -166,8 +168,6 @@ const H5D_chunk_ops_t H5D_COPS_FARRAY[1] = {{
     H5D_farray_idx_copy_shutdown,
     H5D_farray_idx_size,
     H5D_farray_idx_reset,
-    NULL,
-    NULL,
     H5D_farray_idx_dump,
     H5D_farray_idx_dest
 }};
@@ -715,6 +715,145 @@ H5D_farray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_farray_idx_depend
+ *
+ * Purpose:	Create flush dependency between fixed array and dataset's
+ *              object header.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Copied and modified from H5Dearrary.c
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_farray_idx_depend(const H5D_chk_idx_info_t *idx_info)
+{
+    H5O_loc_t oloc;         /* Temporary object header location for dataset */
+    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check args */
+    HDassert(idx_info);
+    HDassert(idx_info->f);
+    HDassert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
+    HDassert(idx_info->pline);
+    HDassert(idx_info->layout);
+    HDassert(H5D_CHUNK_IDX_FARRAY == idx_info->layout->idx_type);
+    HDassert(idx_info->storage);
+    HDassert(H5D_CHUNK_IDX_FARRAY == idx_info->storage->idx_type);
+    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(idx_info->storage->u.farray.fa);
+
+    /* Set up object header location for dataset */
+    H5O_loc_reset(&oloc);
+    oloc.file = idx_info->f;
+    oloc.addr = idx_info->storage->u.farray.dset_ohdr_addr;
+
+    /* Pin the dataset's object header proxy */
+    if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
+
+    /* Make the extensible array a child flush dependency of the dataset's object header */
+    if(H5FA_depend((H5AC_info_t *)oh_proxy, idx_info->storage->u.farray.fa) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header")
+
+done:
+    /* Unpin the dataset's object header proxy */
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_farray_idx_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_farray_idx_undepend
+ *
+ * Purpose:	Remove flush dependency between fixed array and dataset's
+ *              object header.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Copied and modified from H5Dearray.c
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_farray_idx_undepend(const H5D_chk_idx_info_t *idx_info)
+{
+    H5O_loc_t oloc;         /* Temporary object header location for dataset */
+    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check args */
+    HDassert(idx_info);
+    HDassert(idx_info->f);
+    HDassert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
+    HDassert(idx_info->pline);
+    HDassert(idx_info->layout);
+    HDassert(H5D_CHUNK_IDX_FARRAY == idx_info->layout->idx_type);
+    HDassert(idx_info->storage);
+    HDassert(H5D_CHUNK_IDX_FARRAY == idx_info->storage->idx_type);
+    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(idx_info->storage->u.farray.fa);
+
+    /* Set up object header location for dataset */
+    H5O_loc_reset(&oloc);
+    oloc.file = idx_info->f;
+    oloc.addr = idx_info->storage->u.farray.dset_ohdr_addr;
+
+    /* Pin the dataset's object header proxy */
+    if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
+
+    /* Remove the extensible array as a child flush dependency of the dataset's object header */
+    if(H5FA_undepend((H5AC_info_t *)oh_proxy, idx_info->storage->u.farray.fa) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on object header")
+
+done:
+    /* Unpin the dataset's object header proxy */
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_farray_idx_undepend() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_farray_idx_init
+ *
+ * Purpose:     Initialize the indexing information for a dataset.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Wednensday, May 23, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_farray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t UNUSED *space, haddr_t dset_ohdr_addr)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+     /* Check args */
+    HDassert(idx_info);
+    HDassert(idx_info->storage);
+    HDassert(H5F_addr_defined(dset_ohdr_addr));
+
+    idx_info->storage->u.farray.dset_ohdr_addr = dset_ohdr_addr;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D_farray_idx_init() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_farray_idx_open
  *
  * Purpose:	Opens an existing fixed array and initializes
@@ -754,6 +893,12 @@ H5D_farray_idx_open(const H5D_chk_idx_info_t *idx_info)
     /* Open the fixed array for the chunk index */
     if(NULL == (idx_info->storage->u.farray.fa = H5FA_open(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, &udata)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open fixed array")
+
+     /* Check for SWMR writes to the file */
+    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
+        if(H5D_farray_idx_depend(idx_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -836,6 +981,12 @@ H5D_farray_idx_create(const H5D_chk_idx_info_t *idx_info)
     if(H5FA_get_addr(idx_info->storage->u.farray.fa, &(idx_info->storage->idx_addr)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query fixed array address")
 
+    /* Check for SWMR writes to the file */
+    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
+        if(H5D_farray_idx_depend(idx_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header")
+    } /* end if */
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_farray_idx_create() */
@@ -871,28 +1022,20 @@ H5D_farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_farray_idx_insert
+ * Function:	H5D_farray_idx_insert_addr
  *
- * Purpose:	Create the chunk if it doesn't exist, or reallocate the
- *              chunk if its size changed.
+ * Purpose:	Insert chunk address into the indexing structure.
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi
- *              Thursday, April 30, 2009
- *
- * Modifications:
- *	Vailin Choi; June 2010
- *	Modified to handle extendible datdaset.
- *	(fixed max. dim. setting but not H5S_UNLIMITED)
- *
+ * Programmer:	Vailin Choi; 5 May 2014
+ *              
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
+H5D_farray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 {
     H5FA_t      *fa;  	/* Pointer to fixed array structure */
-    hsize_t     idx;	/* Array index of chunk */
     herr_t	ret_value = SUCCEED;		/* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -904,6 +1047,7 @@ H5D_farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     HDassert(idx_info->storage);
     HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
+    HDassert(udata->need_insert);
 
     /* Check if the fixed array is open yet */
     if(NULL == idx_info->storage->u.farray.fa) {
@@ -915,109 +1059,32 @@ H5D_farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     /* Set convenience pointer to fixed array structure */
     fa = idx_info->storage->u.farray.fa;
 
-    /* Calculate the index of this chunk */
-    if(H5VM_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    if(!H5F_addr_defined(udata->addr))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "The chunk should have allocated already")
+    if(udata->chunk_idx != (udata->chunk_idx & 0xffffffff)) /* negative value */
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk index must be less than 2^32")
 
     /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) {
         H5D_farray_filt_elmt_t elmt;            /* Fixed array element */
-        unsigned allow_chunk_size_len;          /* Allowed size of encoded chunk size */
-        unsigned new_chunk_size_len;            /* Size of encoded chunk size */
-        hbool_t alloc_chunk = FALSE;            /* Whether to allocate chunk */
 
-        /* Compute the size required for encoding the size of a chunk, allowing
-         *      for an extra byte, in case the filter makes the chunk larger.
-         */
-        allow_chunk_size_len = 1 + ((H5VM_log2_gen(idx_info->layout->size) + 8) / 8);
-        if(allow_chunk_size_len > 8)
-            allow_chunk_size_len = 8;
+	elmt.addr = udata->addr;
+        elmt.nbytes = udata->nbytes;
+        elmt.filter_mask = udata->filter_mask;
 
-        /* Compute encoded size of chunk */
-        new_chunk_size_len = (H5VM_log2_gen(udata->nbytes) + 8) / 8;
-        if(new_chunk_size_len > 8)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "encoded chunk size is more than 8 bytes?!?")
-
-        /* Check if the chunk became too large to be encoded */
-        if(new_chunk_size_len > allow_chunk_size_len)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk size can't be encoded")
-
-        /* Get the information for the chunk */
-        if(H5FA_get(fa, idx_info->dxpl_id, idx, &elmt) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info")
-
-        /* Check for previous chunk */
-        if(H5F_addr_defined(elmt.addr)) {
-            /* Sanity check */
-            HDassert(!H5F_addr_defined(udata->addr) || H5F_addr_eq(udata->addr, elmt.addr));
-
-            /* Check for chunk being same size */
-            if(udata->nbytes != elmt.nbytes) {
-                /* Release previous chunk */
-                H5_CHECK_OVERFLOW(elmt.nbytes, uint32_t, hsize_t);
-                if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, elmt.addr, (hsize_t)elmt.nbytes) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
-                elmt.addr = HADDR_UNDEF;
-                alloc_chunk = TRUE;
-            } /* end if */
-            else {
-                /* Don't need to reallocate chunk, but send its address back up */
-                if(!H5F_addr_defined(udata->addr))
-                    udata->addr = elmt.addr;
-            } /* end else */
-        } /* end if */
-        else
-            alloc_chunk = TRUE;
-
-        /* Check if we need to allocate the chunk */
-        if(alloc_chunk) {
-            H5_CHECK_OVERFLOW(udata->nbytes, uint32_t, hsize_t);
-            udata->addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, (hsize_t)udata->nbytes);
-            if(!H5F_addr_defined(udata->addr))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate chunk")
-
-            /* Update the element information */
-            elmt.addr = udata->addr;
-            elmt.nbytes = udata->nbytes;
-            elmt.filter_mask = udata->filter_mask;
-
-            /* Set the info for the chunk */
-            if(H5FA_set(fa, idx_info->dxpl_id, idx, &elmt) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk info")
-        } /* end if */
+        /* Set the info for the chunk */
+        if(H5FA_set(fa, idx_info->dxpl_id, udata->chunk_idx, &elmt) < 0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk info")
     } /* end if */
     else {
-        HDassert(!H5F_addr_defined(udata->addr));
-        HDassert(udata->nbytes == idx_info->layout->size);
-
-#ifndef NDEBUG
-{
-    haddr_t     addr = HADDR_UNDEF;     /* Address of chunk in file */
-
-    /* Get the address for the chunk */
-    if(H5FA_get(fa, idx_info->dxpl_id, idx, &addr) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
-    HDassert(!H5F_addr_defined(addr));
-}
-#endif /* NDEBUG */
-
-        /*
-         * Allocate storage for the new chunk
-         */
-        H5_CHECK_OVERFLOW(udata->nbytes, /*From: */uint32_t, /*To: */hsize_t);
-        udata->addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, (hsize_t)udata->nbytes);
-        if(!H5F_addr_defined(udata->addr))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "file allocation failed")
-
         /* Set the address for the chunk */
-        if(H5FA_set(fa, idx_info->dxpl_id, idx, &udata->addr) < 0)
+        if(H5FA_set(fa, idx_info->dxpl_id, udata->chunk_idx, &udata->addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk address")
     } /* end else */
-    HDassert(H5F_addr_defined(udata->addr));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D_farray_idx_insert() */
+} /* H5D_farray_idx_insert_addr() */
 
 
 /*-------------------------------------------------------------------------
@@ -1069,6 +1136,8 @@ H5D_farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
     /* Calculate the index of this chunk */
     if(H5VM_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+
+    udata->chunk_idx = idx;
 
     /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) {
@@ -1702,6 +1771,16 @@ H5D_farray_idx_dest(const H5D_chk_idx_info_t *idx_info)
 
     /* Check if the fixed array is open */
     if(idx_info->storage->u.farray.fa) {
+	 /* Check for SWMR writes to the file */
+        if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
+            /* Sanity check */
+            HDassert(H5F_addr_defined(idx_info->storage->u.farray.dset_ohdr_addr));
+
+            /* Remove flush dependency between extensible array and dataset' object header */
+            if(H5D_farray_idx_undepend(idx_info) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on object header")
+        } /* end if */
+
         if(H5FA_close(idx_info->storage->u.farray.fa, idx_info->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close fixed array")
         idx_info->storage->u.farray.fa = NULL;

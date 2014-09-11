@@ -122,8 +122,6 @@ const H5B2_class_t H5HF_HUGE_BT2_INDIR[1]={{ /* B-tree class information */
     H5HF_huge_bt2_indir_compare,            /* Record comparison callback */
     H5HF_huge_bt2_indir_encode,             /* Record encoding callback */
     H5HF_huge_bt2_indir_decode,             /* Record decoding callback */
-    NULL,                                   /* Create flush dependency */
-    NULL,                                   /* Update flush dependency */
     H5HF_huge_bt2_indir_debug,              /* Record debugging callback */
     H5HF_huge_bt2_crt_dbg_context,          /* Create debugging context */
     H5HF_huge_bt2_dst_context               /* Destroy debugging context */
@@ -140,8 +138,6 @@ const H5B2_class_t H5HF_HUGE_BT2_FILT_INDIR[1]={{ /* B-tree class information */
     H5HF_huge_bt2_filt_indir_compare,       /* Record comparison callback */
     H5HF_huge_bt2_filt_indir_encode,        /* Record encoding callback */
     H5HF_huge_bt2_filt_indir_decode,        /* Record decoding callback */
-    NULL,                                   /* Create flush dependency */
-    NULL,                                   /* Update flush dependency */
     H5HF_huge_bt2_filt_indir_debug,         /* Record debugging callback */
     H5HF_huge_bt2_crt_dbg_context,          /* Create debugging context */
     H5HF_huge_bt2_dst_context               /* Destroy debugging context */
@@ -158,8 +154,6 @@ const H5B2_class_t H5HF_HUGE_BT2_DIR[1]={{  /* B-tree class information */
     H5HF_huge_bt2_dir_compare,              /* Record comparison callback */
     H5HF_huge_bt2_dir_encode,               /* Record encoding callback */
     H5HF_huge_bt2_dir_decode,               /* Record decoding callback */
-    NULL,                                   /* Create flush dependency */
-    NULL,                                   /* Update flush dependency */
     H5HF_huge_bt2_dir_debug,                /* Record debugging callback */
     H5HF_huge_bt2_crt_dbg_context,          /* Create debugging context */
     H5HF_huge_bt2_dst_context               /* Destroy debugging context */
@@ -176,8 +170,6 @@ const H5B2_class_t H5HF_HUGE_BT2_FILT_DIR[1]={{ /* B-tree class information */
     H5HF_huge_bt2_filt_dir_compare,         /* Record comparison callback */
     H5HF_huge_bt2_filt_dir_encode,          /* Record encoding callback */
     H5HF_huge_bt2_filt_dir_decode,          /* Record decoding callback */
-    NULL,                                   /* Create flush dependency */
-    NULL,                                   /* Update flush dependency */
     H5HF_huge_bt2_filt_dir_debug,           /* Record debugging callback */
     H5HF_huge_bt2_crt_dbg_context,          /* Create debugging context */
     H5HF_huge_bt2_dst_context               /* Destroy debugging context */

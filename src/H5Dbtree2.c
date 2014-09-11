@@ -116,9 +116,6 @@ static herr_t H5D_bt2_store(void *native, const void *udata);
 static herr_t H5D_bt2_compare(const void *rec1, const void *rec2);
 static herr_t H5D_bt2_encode(uint8_t *raw, const void *native, void *ctx);
 static herr_t H5D_bt2_decode(const uint8_t *raw, void *native, void *ctx);
-static herr_t H5D_bt2_crt_flush_dep(void *_record, void *_udata, void *parent);
-static herr_t H5D_bt2_upd_flush_dep(void *_record, void *_udata,
-    void *old_parent, void *new_parent);
 static herr_t H5D_bt2_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
     int indent, int fwidth, const void *record, const void *u_ctx);
 
@@ -127,10 +124,6 @@ static herr_t H5D_bt2_filt_store(void *native, const void *udata);
 static herr_t H5D_bt2_filt_compare(const void *rec1, const void *rec2);
 static herr_t H5D_bt2_filt_encode(uint8_t *raw, const void *native, void *ctx);
 static herr_t H5D_bt2_filt_decode(const uint8_t *raw, void *native, void *ctx);
-static herr_t H5D_bt2_filt_crt_flush_dep(void *_record, void *_udata,
-    void *parent);
-static herr_t H5D_bt2_filt_upd_flush_dep(void *_record, void *_udata,
-    void *old_parent, void *new_parent);
 static herr_t H5D_bt2_filt_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
     int indent, int fwidth, const void *record, const void *u_ctx);
 
@@ -159,7 +152,7 @@ static herr_t H5D_bt2_idx_init(const H5D_chk_idx_info_t *idx_info,
     const H5S_t *space, haddr_t dset_ohdr_addr);
 static herr_t H5D_bt2_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D_bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
-static herr_t H5D_bt2_idx_insert(const H5D_chk_idx_info_t *idx_info,
+static herr_t H5D_bt2_idx_insert_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static herr_t H5D_bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
@@ -174,10 +167,6 @@ static herr_t H5D_bt2_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
     H5O_storage_chunk_t *storage_dst, hid_t dxpl_id);
 static herr_t H5D_bt2_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *size);
 static herr_t H5D_bt2_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
-static htri_t H5D_bt2_idx_support(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry);
-static herr_t H5D_bt2_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry);
 static herr_t H5D_bt2_idx_dump(const H5O_storage_chunk_t *storage,
     FILE *stream);
 static herr_t H5D_bt2_idx_dest(const H5D_chk_idx_info_t *idx_info);
@@ -193,7 +182,7 @@ const H5D_chunk_ops_t H5D_COPS_BT2[1] = {{
     H5D_bt2_idx_init, 
     H5D_bt2_idx_create,
     H5D_bt2_idx_is_space_alloc,
-    H5D_bt2_idx_insert,
+    H5D_bt2_idx_insert_addr,
     H5D_bt2_idx_get_addr,
     NULL,
     H5D_bt2_idx_iterate,
@@ -203,8 +192,6 @@ const H5D_chunk_ops_t H5D_COPS_BT2[1] = {{
     H5D_bt2_idx_copy_shutdown,
     H5D_bt2_idx_size,
     H5D_bt2_idx_reset,
-    H5D_bt2_idx_support,
-    H5D_bt2_idx_unsupport,
     H5D_bt2_idx_dump, 
     H5D_bt2_idx_dest 
 }};
@@ -225,8 +212,6 @@ const H5B2_class_t H5D_BT2[1] = {{  	/* B-tree class information */
     H5D_bt2_compare,   		/* Record comparison callback */
     H5D_bt2_encode,    		/* Record encoding callback */
     H5D_bt2_decode,    		/* Record decoding callback */
-    H5D_bt2_crt_flush_dep,      /* Create flush dependency */
-    H5D_bt2_upd_flush_dep,      /* Update flush dependency */
     H5D_bt2_debug,  		/* Record debugging callback */
     H5D_bt2_crt_dbg_context,  	/* Create debugging context */
     H5D_bt2_dst_dbg_context      /* Destroy debugging context */
@@ -243,8 +228,6 @@ const H5B2_class_t H5D_BT2_FILT[1] = {{	/* B-tree class information */
     H5D_bt2_filt_compare,      	/* Record comparison callback */
     H5D_bt2_filt_encode,       	/* Record encoding callback */
     H5D_bt2_filt_decode,       	/* Record decoding callback */
-    H5D_bt2_filt_crt_flush_dep, /* Create flush dependency */
-    H5D_bt2_filt_upd_flush_dep, /* Update flush dependency */
     H5D_bt2_filt_debug,        	/* Record debugging callback */
     H5D_bt2_crt_dbg_context,   	/* Create debugging context */
     H5D_bt2_dst_dbg_context   	/* Destroy debugging context */
@@ -471,89 +454,6 @@ H5D_bt2_decode(const uint8_t *raw, void *_record, void *_ctx)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D_bt2_crt_flush_dep
- *
- * Purpose:     Creates a flush dependency between the specified chunk
- *              (child) and parent.
- *
- * Return:      Success:        0
- *              Failure:        FAIL
- *
- * Programmer:  Neil Fortner
- *              Tuesday, May 1, 2012
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_bt2_crt_flush_dep(void *_record, void *_udata, void *parent)
-{
-    H5D_bt2_rec_t *record = (H5D_bt2_rec_t *)_record;   /* The native record */
-    const H5D_bt2_find_ud_t *udata = (const H5D_bt2_find_ud_t *)_udata; /* User data */
-    int         ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(record);
-    HDassert(udata);
-    HDassert(udata->layout->ndims > 0 && udata->layout->ndims <= H5O_LAYOUT_NDIMS);
-    HDassert(parent);
-
-    /* If there is no rdcc, then there are no cached chunks to create
-     * dependencies on.  This should only happen when copying */
-    if(udata->rdcc)
-        /* Delegate to chunk routine */
-        if(H5D__chunk_create_flush_dep(udata->rdcc, udata->layout, record->offset, parent) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_bt2_crt_flush_dep() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D_bt2_upd_flush_dep
- *
- * Purpose:     Updates the flush dependency of the specified chunk from
- *              old_parent to new_parent, but only if the current parent
- *              is cached.  If the chunk is not cached, does nothing.
- *
- * Return:      Success:        0
- *              Failure:        FAIL
- *
- * Programmer:  Neil Fortner
- *              Tuesday, May 1, 2012
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_bt2_upd_flush_dep(void *_record, void *_udata, void *old_parent,
-    void *new_parent)
-{
-    H5D_bt2_rec_t *record = (H5D_bt2_rec_t *)_record;   /* The native record */
-    const H5D_bt2_find_ud_t *udata = (const H5D_bt2_find_ud_t *)_udata; /* User data */
-    int         ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(record);
-    HDassert(udata);
-    HDassert(udata->layout->ndims > 0 && udata->layout->ndims <= H5O_LAYOUT_NDIMS);
-    HDassert(old_parent);
-    HDassert(new_parent);
-
-    /* If there is no rdcc, then there are no cached chunks to update
-     * dependencies.  This should only happen when copying */
-    if(udata->rdcc)
-        /* Delegate to chunk routine */
-        if(H5D__chunk_update_flush_dep(udata->rdcc, udata->layout, record->offset, old_parent, new_parent) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_bt2_upd_flush_dep() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5D_bt2_debug
  *
  * Purpose:	Debug native form of record (non-filtered)
@@ -718,89 +618,6 @@ H5D_bt2_filt_decode(const uint8_t *raw, void *_record, void *_ctx)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5D_bt2_filt_decode() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D_bt2_filt_crt_flush_dep
- *
- * Purpose:     Creates a flush dependency between the specified chunk
- *              (child) and parent.
- *
- * Return:      Success:        0
- *              Failure:        FAIL
- *
- * Programmer:  Neil Fortner
- *              Tuesday, May 1, 2012
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_bt2_filt_crt_flush_dep(void *_record, void *_udata, void *parent)
-{
-    H5D_bt2_filt_rec_t *record = (H5D_bt2_filt_rec_t *)_record; /* The native record */
-    const H5D_bt2_find_ud_t *udata = (const H5D_bt2_find_ud_t *)_udata; /* User data */
-    int         ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(record);
-    HDassert(udata);
-    HDassert(udata->layout->ndims > 0 && udata->layout->ndims <= H5O_LAYOUT_NDIMS);
-    HDassert(parent);
-
-    /* If there is no rdcc, then there are no cached chunks to create
-     * dependencies on.  This should only happen when copying */
-    if(udata->rdcc)
-        /* Delegate to chunk routine */
-        if(H5D__chunk_create_flush_dep(udata->rdcc, udata->layout, record->offset, parent) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_bt2_filt_crt_flush_dep() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D_bt2_filt_upd_flush_dep
- *
- * Purpose:     Updates the flush dependency of the specified chunk from
- *              old_parent to new_parent, but only if the current parent
- *              is cached.  If the chunk is not cached, does nothing.
- *
- * Return:      Success:        0
- *              Failure:        FAIL
- *
- * Programmer:  Neil Fortner
- *              Tuesday, May 1, 2012
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_bt2_filt_upd_flush_dep(void *_record, void *_udata, void *old_parent,
-    void *new_parent)
-{
-    H5D_bt2_filt_rec_t *record = (H5D_bt2_filt_rec_t *)_record; /* The native record */
-    const H5D_bt2_find_ud_t *udata = (const H5D_bt2_find_ud_t *)_udata; /* User data */
-    int         ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(record);
-    HDassert(udata);
-    HDassert(udata->layout->ndims > 0 && udata->layout->ndims <= H5O_LAYOUT_NDIMS);
-    HDassert(old_parent);
-    HDassert(new_parent);
-
-    /* If there is no rdcc, then there are no cached chunks to update
-     * dependencies.  This should only happen when copying */
-    if(udata->rdcc)
-        /* Delegate to chunk routine */
-        if(H5D__chunk_update_flush_dep(udata->rdcc, udata->layout, record->offset, old_parent, new_parent) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_btree_filt_upd_flush_dep() */
 
 
 /*-------------------------------------------------------------------------
@@ -1182,9 +999,10 @@ H5D_bt2_mod_filt_cb(void *_record, void *_op_data, hbool_t *changed)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_bt2_idx_insert
+ * Function:	H5D_bt2_idx_insert_addr
  *
- * Purpose:	A non-filtered chunk: 
+ * Purpose:	Insert chunk address into the indexing structure.
+ *		A non-filtered chunk: 
  *		  Should not exist
  *		  Allocate the chunk and pass chunk address back up
  *		A filtered chunk:
@@ -1199,11 +1017,13 @@ H5D_bt2_mod_filt_cb(void *_record, void *_op_data, hbool_t *changed)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
+H5D_bt2_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 {
     H5B2_t *bt2;                        /* v2 B-tree handle for indexing chunks */
     H5D_bt2_find_ud_t bt2_udata;        /* User data for v2 B-tree calls */
     unsigned u;				/* Local index variable */
+    H5D_bt2_rec_t rec;  	
+    H5D_bt2_filt_rec_t filt_rec;  
     herr_t ret_value = SUCCEED;		/* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1215,6 +1035,8 @@ H5D_bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     HDassert(idx_info->storage);
     HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
+    HDassert(udata->need_insert || udata->need_modify);
+    HDassert(H5F_addr_defined(udata->addr));
 
     /* Check if the v2 B-tree is open yet */
     if(NULL == idx_info->storage->u.btree2.bt2) {
@@ -1226,125 +1048,43 @@ H5D_bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
 
-    /* Check for filters on chunks */
+    bt2_udata.ndims = idx_info->layout->ndims - 1;
+    bt2_udata.layout = idx_info->layout;
+    bt2_udata.rdcc = udata->common.rdcc;
+
     if(idx_info->pline->nused > 0) { /* filtered chunk */
-	H5D_bt2_filt_rec_t rec;  	/* Record for searching object */
-	H5D_bt2_filt_rec_t found_rec;  	/* Record found from searching for object */
-	unsigned allow_chunk_size_len;	/* Allowed size of encoded chunk size */
-        unsigned new_chunk_size_len;  	/* Size of encoded chunk size */
+	bt2_udata.rec = &filt_rec;
 
-	/* 
-	 * Compute the size required for encoding the size of a chunk,
-         * allowing for an extra byte, in case the filter makes the chunk larger.
-         */
-        allow_chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)idx_info->layout->size) + 8) / 8);
-        if(allow_chunk_size_len > 8)
-            allow_chunk_size_len = 8;
+	filt_rec.addr = udata->addr;
+        filt_rec.nbytes = udata->nbytes;
+        filt_rec.filter_mask = udata->filter_mask;
+	for(u = 0; u < (idx_info->layout->ndims - 1); u++)
+	    filt_rec.offset[u] = udata->common.offset[u];
+    } else { /* non-filtered chunk */
+	bt2_udata.rec = &rec;
 
-        /* Compute encoded size of chunk */
-        new_chunk_size_len = (H5VM_log2_gen((uint64_t)udata->nbytes) + 8) / 8;
-        if(new_chunk_size_len > 8)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "encoded chunk size is more than 8 bytes?!?")
-
-        /* Check if the chunk became too large to be encoded */
-        if(new_chunk_size_len > allow_chunk_size_len)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk size can't be encoded")
-
-	/* Initialize record information */
-        rec.nbytes = udata->nbytes;
-        rec.filter_mask = udata->filter_mask;
+	rec.addr = udata->addr;
 	for(u = 0; u < (idx_info->layout->ndims - 1); u++)
 	    rec.offset[u] = udata->common.offset[u];
+    }
 
-	found_rec.addr = HADDR_UNDEF;
-	found_rec.nbytes = 0;
-	found_rec.filter_mask = 0;
+    if(udata->need_modify) {
+	HDassert(idx_info->pline->nused > 0);
 
-	/* Prepare user data for compare callback */
-	bt2_udata.rec = &rec;
-	bt2_udata.ndims = idx_info->layout->ndims - 1;
-	bt2_udata.layout = idx_info->layout;
-	bt2_udata.rdcc = udata->common.rdcc;
-
-	/* Try to find the chunked record */
-	if(H5B2_find(bt2, idx_info->dxpl_id, &bt2_udata, H5D_bt2_filt_found_cb, &found_rec) < 0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "can't find object in v2 B-tree")
-
-        /* Check for previous chunk */
-        if(H5F_addr_defined(found_rec.addr)) { /* Found it */
-            /* Sanity check */
-            HDassert(!H5F_addr_defined(udata->addr) || H5F_addr_eq(udata->addr, found_rec.addr));
-
-            /* Check for chunk being same size */
-            if(udata->nbytes != found_rec.nbytes) {
-		/* Free the original chunk if not doing SWMR writes */
-		if(!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)) {
-                    H5_CHECK_OVERFLOW(found_rec.nbytes, uint32_t, hsize_t);
-                    if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, found_rec.addr, (hsize_t)found_rec.nbytes) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
-                } /* end if */
-
-		/* Allocate a new chunk */
-		H5_CHECK_OVERFLOW(udata->nbytes, uint32_t, hsize_t);
-                udata->addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, (hsize_t)udata->nbytes);
-                if(!H5F_addr_defined(udata->addr))
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate chunk")
-                rec.addr = udata->addr;
-
-		/* Modify record for object in v2 B-tree */
-                if(H5B2_modify(bt2, idx_info->dxpl_id, &bt2_udata, H5D_bt2_mod_filt_cb, &rec) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to modify record in v2 B-tree")
-            } /* end if */
-            else
-                /* Don't need to reallocate chunk, but send its address back up */
-		udata->addr = found_rec.addr;
-        } /* end if */
-        else { /* Not found */
-            H5_CHECK_OVERFLOW(udata->nbytes, uint32_t, hsize_t);
-
-	    /* Allocate a new chunk */
-            udata->addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, (hsize_t)udata->nbytes);
-            if(!H5F_addr_defined(udata->addr))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate chunk")
-            rec.addr = udata->addr;
-
-	    /* Insert record for object in v2 B-tree */
-            if(H5B2_insert(bt2, idx_info->dxpl_id, &bt2_udata) < 0)                
-		HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "couldn't insert record in v2 B-tree")
-	} /* end else */
-    } /* end if */
-    else { /* non-filtered chunk */
-	H5D_bt2_rec_t rec;  	
-
-	/* The record should not be there */
-	HDassert(!H5F_addr_defined(udata->addr));
-        HDassert(udata->nbytes == idx_info->layout->size);
-
-	/* Prepare user data for compare callback */
-	bt2_udata.rec = &rec;
-	bt2_udata.ndims = idx_info->layout->ndims - 1;
-        bt2_udata.layout = idx_info->layout;
-        bt2_udata.rdcc = udata->common.rdcc;
-
-	for(u = 0; u < (idx_info->layout->ndims - 1); u++)
-	    rec.offset[u] = udata->common.offset[u];
-
-	/* Allocate storage for the new chunk */
-	H5_CHECK_OVERFLOW(udata->nbytes, uint32_t, hsize_t);
-        udata->addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, (hsize_t)udata->nbytes);
-	if(!H5F_addr_defined(udata->addr))
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate chunk")
-        rec.addr = udata->addr;
+	/* Modify record for filtered object in v2 B-tree */
+	if(H5B2_modify(bt2, idx_info->dxpl_id, &bt2_udata, H5D_bt2_mod_filt_cb, &filt_rec) < 0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to modify record in v2 B-tree")
+    } else {
+	HDassert(udata->need_insert);
 
 	/* Insert record for object in v2 B-tree */
 	if(H5B2_insert(bt2, idx_info->dxpl_id, &bt2_udata) < 0)                
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "couldn't insert record in v2 B-tree")
-    } /* end else */
-    HDassert(H5F_addr_defined(udata->addr));
+		HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "couldn't insert record in v2 B-tree")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D_bt2_idx_insert() */
+} /* H5D_bt2_idx_insert_addr() */
 
 
 /*-------------------------------------------------------------------------
@@ -2028,146 +1768,6 @@ H5D_bt2_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_bt2_idx_reset() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D_bt2_idx_support
- *
- * Purpose:     Create a dependency between a chunk [proxy] and the index
- *              metadata that contains the record for the chunk.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Monday, May 14, 2012
- *
- *-------------------------------------------------------------------------
- */
-static htri_t
-H5D_bt2_idx_support(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
-    H5AC_info_t *child_entry)
-{
-    H5D_bt2_find_ud_t bt2_udata;        /* User data for v2 B-tree calls */
-    unsigned u;                         /* Local index variable */
-    htri_t ret_value;                   /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Check args */
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
-    HDassert(udata);
-    HDassert(child_entry);
-    HDassert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
-
-    if(idx_info->pline->nused > 0) { /* filtered chunk */
-        H5D_bt2_filt_rec_t   search_rec;        /* Record for searching for object */
-
-        /* Set the chunk offset to be searched for */
-        for(u = 0; u < (idx_info->layout->ndims - 1); u++)
-            search_rec.offset[u] = udata->common.offset[u];
-
-        /* Prepare user data for support callback */
-        bt2_udata.rec = &search_rec;
-        bt2_udata.ndims = idx_info->layout->ndims - 1;
-        bt2_udata.layout = idx_info->layout;
-        bt2_udata.rdcc = udata->common.rdcc;
-    } /* end if */
-    else { /* non-filtered chunk */
-        H5D_bt2_rec_t   search_rec;     /* Record for searching for object */
-
-        /* Set the chunk offset to be searched for */
-        for(u = 0; u < (idx_info->layout->ndims - 1); u++)
-            search_rec.offset[u] = udata->common.offset[u];
-
-        /* Prepare user data for support callback */
-        bt2_udata.rec = &search_rec;
-        bt2_udata.ndims = idx_info->layout->ndims - 1;
-        bt2_udata.layout = idx_info->layout;
-        bt2_udata.rdcc = udata->common.rdcc;
-    } /* end else */
-
-    /* Add the flush dependency on the chunk */
-    if((ret_value = H5B2_support(idx_info->storage->u.btree2.bt2, idx_info->dxpl_id, &bt2_udata, child_entry)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on b-tree array metadata")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_bt2_idx_support() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D_bt2_idx_unsupport
- *
- * Purpose:     Destroy a dependency between a chunk [proxy] and the index
- *              metadata that contains the record for the chunk.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Monday, May 14, 2012
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_bt2_idx_unsupport(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
-    H5AC_info_t *child_entry)
-{
-    H5D_bt2_find_ud_t bt2_udata;        /* User data for v2 B-tree calls */
-    unsigned u;                         /* Local index variable */
-    herr_t ret_value;                   /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Check args */
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
-    HDassert(udata);
-    HDassert(child_entry);
-    HDassert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
-
-    if(idx_info->pline->nused > 0) { /* filtered chunk */
-        H5D_bt2_filt_rec_t   search_rec;        /* Record for searching for object */
-
-        /* Set the chunk offset to be searched for */
-        for(u = 0; u < (idx_info->layout->ndims - 1); u++)
-            search_rec.offset[u] = udata->common.offset[u];
-
-        /* Prepare user data for support callback */
-        bt2_udata.rec = &search_rec;
-        bt2_udata.ndims = idx_info->layout->ndims - 1;
-        bt2_udata.layout = idx_info->layout;
-        bt2_udata.rdcc = udata->common.rdcc;
-    } /* end if */
-    else { /* non-filtered chunk */
-        H5D_bt2_rec_t   search_rec;     /* Record for searching for object */
-
-        /* Set the chunk offset to be searched for */
-        for(u = 0; u < (idx_info->layout->ndims - 1); u++)
-            search_rec.offset[u] = udata->common.offset[u];
-
-        /* Prepare user data for support callback */
-        bt2_udata.rec = &search_rec;
-        bt2_udata.ndims = idx_info->layout->ndims - 1;
-        bt2_udata.layout = idx_info->layout;
-        bt2_udata.rdcc = udata->common.rdcc;
-    } /* end else */
-
-    /* Add the flush dependency on the chunk */
-    if((ret_value = H5B2_unsupport(idx_info->storage->u.btree2.bt2, idx_info->dxpl_id, &bt2_udata, child_entry)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency on b-tree array metadata")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_bt2_idx_unsupport() */
 
 
 /*-------------------------------------------------------------------------

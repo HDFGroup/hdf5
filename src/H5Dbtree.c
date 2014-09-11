@@ -124,17 +124,13 @@ static herr_t H5D__btree_encode_key(const H5B_shared_t *shared, uint8_t *raw,
     const void *_key);
 static herr_t H5D__btree_debug_key(FILE *stream, int indent, int fwidth,
     const void *key, const void *udata);
-static herr_t H5D__btree_create_flush_dep(void *_key, void *_udata,
-    void *parent);
-static herr_t H5D__btree_update_flush_dep(void *_key, void *_udata,
-    void *old_parent, void *new_parent);
 
 /* Chunked layout indexing callbacks */
 static herr_t H5D__btree_idx_init(const H5D_chk_idx_info_t *idx_info,
     const H5S_t *space, haddr_t dset_ohdr_addr);
 static herr_t H5D__btree_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
-static herr_t H5D__btree_idx_insert(const H5D_chk_idx_info_t *idx_info,
+static herr_t H5D__btree_idx_insert_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static herr_t H5D__btree_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
@@ -150,10 +146,6 @@ static herr_t H5D__btree_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
 static herr_t H5D__btree_idx_size(const H5D_chk_idx_info_t *idx_info,
     hsize_t *size);
 static herr_t H5D__btree_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
-static herr_t H5D__btree_idx_support(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry);
-static herr_t H5D__btree_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry);
 static herr_t H5D__btree_idx_dump(const H5O_storage_chunk_t *storage,
     FILE *stream);
 static herr_t H5D__btree_idx_dest(const H5D_chk_idx_info_t *idx_info);
@@ -165,11 +157,11 @@ static herr_t H5D__btree_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
 /* v1 B-tree indexed chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_BTREE[1] = {{
-    TRUE,                               /* v1 B-tree indices do support SWMR access */
+    FALSE,                               /* v1 B-tree indices does not support SWMR access */
     H5D__btree_idx_init,
     H5D__btree_idx_create,
     H5D__btree_idx_is_space_alloc,
-    H5D__btree_idx_insert,
+    H5D__btree_idx_insert_addr,
     H5D__btree_idx_get_addr,
     NULL,
     H5D__btree_idx_iterate,
@@ -179,8 +171,6 @@ const H5D_chunk_ops_t H5D_COPS_BTREE[1] = {{
     H5D__btree_idx_copy_shutdown,
     H5D__btree_idx_size,
     H5D__btree_idx_reset,
-    H5D__btree_idx_support,
-    H5D__btree_idx_unsupport,
     H5D__btree_idx_dump,
     H5D__btree_idx_dest
 }};
@@ -206,9 +196,7 @@ H5B_class_t H5B_BTREE[1] = {{
     H5D__btree_remove,		/*remove		*/
     H5D__btree_decode_key,	/*decode		*/
     H5D__btree_encode_key,	/*encode		*/
-    H5D__btree_debug_key,	/*debug			*/
-    H5D__btree_create_flush_dep, /*create_flush_dep      */
-    H5D__btree_update_flush_dep, /*update_flush_dep      */
+    H5D__btree_debug_key	/*debug			*/
 }};
 
 
@@ -268,7 +256,7 @@ H5D__btree_get_shared(const H5F_t UNUSED *f, const void *_udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__btree_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t op,
+H5D__btree_new_node(H5F_t *f, hid_t UNUSED dxpl_id, H5B_ins_t op,
 		    void *_lt_key, void *_udata, void *_rt_key,
 		    haddr_t *addr_p/*out*/)
 {
@@ -278,7 +266,7 @@ H5D__btree_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t op,
     unsigned		u;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -288,12 +276,10 @@ H5D__btree_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t op,
     HDassert(udata->common.layout->ndims > 0 && udata->common.layout->ndims < H5O_LAYOUT_NDIMS);
     HDassert(addr_p);
 
-    /* Allocate new storage */
+    /* Set address */
     HDassert(udata->nbytes > 0);
-    H5_CHECK_OVERFLOW(udata->nbytes, uint32_t, hsize_t);
-    if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, (hsize_t)udata->nbytes)))
-        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "couldn't allocate new file storage")
-    udata->addr = *addr_p;
+    HDassert(H5F_addr_defined(udata->addr));
+    *addr_p = udata->addr;
 
     /*
      * The left key describes the storage of the UDATA chunk being
@@ -318,7 +304,6 @@ H5D__btree_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t op,
         } /* end if */
     } /* end if */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree_new_node() */
 
@@ -520,7 +505,7 @@ done:
  */
 /* ARGSUSED */
 static H5B_ins_t
-H5D__btree_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
+H5D__btree_insert(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t addr, void *_lt_key,
 		  hbool_t *lt_key_changed,
 		  void *_md_key, void *_udata, void *_rt_key,
 		  hbool_t UNUSED *rt_key_changed,
@@ -561,41 +546,16 @@ H5D__btree_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
          * then we should reallocate storage.
          */
         if(lt_key->nbytes != udata->nbytes) {
-/* Currently, the old chunk data is "thrown away" after the space is reallocated,
- * so avoid data copy in H5MF_realloc() call by just free'ing the space and
- * allocating new space.
- *
- * This should keep the file smaller also, by freeing the space and then
- * allocating new space, instead of vice versa (in H5MF_realloc).
- *
- * QAK - 11/19/2002
- */
-#ifdef OLD_WAY
-	    /* Note that this does not take SWMR writes into account!  Fix this
-	     * if we ever want to go back to this code.  -NAF 8/2/11 */
-            if(HADDR_UNDEF == (*new_node_p = H5MF_realloc(f, H5FD_MEM_DRAW, addr,
-                      (hsize_t)lt_key->nbytes, (hsize_t)udata->nbytes)))
-                HGOTO_ERROR(H5E_STORAGE, H5E_NOSPACE, H5B_INS_ERROR, "unable to reallocate chunk storage")
-#else /* OLD_WAY */
-	    /* Only free the old location if not doing SWMR writes - otherwise
-	     * we must keep the old chunk around in case a reader has an
-	     * outdated version of the b-tree node */
-	    if(!(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)) {
-		H5_CHECK_OVERFLOW(lt_key->nbytes, uint32_t, hsize_t);
-		if(H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, addr, (hsize_t)lt_key->nbytes) < 0)
-		    HGOTO_ERROR(H5E_STORAGE, H5E_CANTFREE, H5B_INS_ERROR, "unable to free chunk")
-	    } /* end if */
-            H5_CHECK_OVERFLOW(udata->nbytes, uint32_t, hsize_t);
-            if(HADDR_UNDEF == (*new_node_p = H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, (hsize_t)udata->nbytes)))
-                HGOTO_ERROR(H5E_STORAGE, H5E_NOSPACE, H5B_INS_ERROR, "unable to reallocate chunk")
-#endif /* OLD_WAY */
+	    /* Set node's address (already re-allocated by main chunk routines) */
+	    HDassert(H5F_addr_defined(udata->addr));
+            *new_node_p = udata->addr;
             lt_key->nbytes = udata->nbytes;
             lt_key->filter_mask = udata->filter_mask;
             *lt_key_changed = TRUE;
-            udata->addr = *new_node_p;
             ret_value = H5B_INS_CHANGE;
         } else {
-            udata->addr = addr;
+	    /* Already have address in udata, from main chunk routines */
+	    HDassert(H5F_addr_defined(udata->addr));
             ret_value = H5B_INS_NOOP;
         }
 
@@ -616,13 +576,8 @@ H5D__btree_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
             md_key->offset[u] = udata->common.offset[u];
         } /* end for */
 
-        /*
-         * Allocate storage for the new chunk
-         */
-        H5_CHECK_OVERFLOW(udata->nbytes, uint32_t, hsize_t);
-        if(HADDR_UNDEF == (*new_node_p = H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, (hsize_t)udata->nbytes)))
-            HGOTO_ERROR(H5E_STORAGE, H5E_NOSPACE, H5B_INS_ERROR, "file allocation failed")
-        udata->addr = *new_node_p;
+	HDassert(H5F_addr_defined(udata->addr));
+        *new_node_p = udata->addr;
         ret_value = H5B_INS_RIGHT;
 
     } else {
@@ -661,11 +616,9 @@ H5D__btree_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key /*in,out 
     FUNC_ENTER_STATIC
 
     /* Remove raw data chunk from file */
-    if(!(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)) {
-        H5_CHECK_OVERFLOW(lt_key->nbytes, uint32_t, hsize_t);
-        if(H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, addr, (hsize_t)lt_key->nbytes) < 0)
-            HGOTO_ERROR(H5E_STORAGE, H5E_CANTFREE, H5B_INS_ERROR, "unable to free chunk")
-    } /* end if */
+    H5_CHECK_OVERFLOW(lt_key->nbytes, uint32_t, hsize_t);
+    if(H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, addr, (hsize_t)lt_key->nbytes) < 0)
+	HGOTO_ERROR(H5E_STORAGE, H5E_CANTFREE, H5B_INS_ERROR, "unable to free chunk")
 
     /* Mark keys as unchanged */
     *lt_key_changed = FALSE;
@@ -831,90 +784,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__btree_create_flush_dep
- *
- * Purpose:     Creates a flush dependency between the specified chunk
- *              (child) and parent.
- *
- * Return:      Success:        0
- *              Failure:        FAIL
- *
- * Programmer:  Neil Fortner
- *              Tuesday, September 21, 2010
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__btree_create_flush_dep(void *_key, void *_udata, void *parent)
-{
-    H5D_btree_key_t             *key = (H5D_btree_key_t *)_key;
-    H5D_chunk_common_ud_t       *udata = (H5D_chunk_common_ud_t *) _udata;
-    int                         ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    HDassert(key);
-    HDassert(udata);
-    HDassert(udata->layout->ndims > 0 && udata->layout->ndims <= H5O_LAYOUT_NDIMS);
-    HDassert(parent);
-
-    /* If there is no rdcc, then there are no cached chunks to create
-     * dependencies on.  This should only happen when copying */
-    if(udata->rdcc)
-        /* Delegate to chunk routine */
-        if(H5D__chunk_create_flush_dep(udata->rdcc, udata->layout, key->offset, parent) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__btree_create_flush_dep() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__btree_update_flush_dep
- *
- * Purpose:     Updates the flush dependency of the specified chunk from
- *              old_parent to new_parent, but only if the current parent
- *              is cached.  If the chunk is not cached, does nothing.
- *
- * Return:      Success:        0
- *              Failure:        FAIL
- *
- * Programmer:  Neil Fortner
- *              Tuesday, August 31, 2010
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__btree_update_flush_dep(void *_key, void *_udata, void *old_parent,
-        void *new_parent)
-{
-    H5D_btree_key_t             *key = (H5D_btree_key_t *)_key;
-    H5D_chunk_common_ud_t       *udata = (H5D_chunk_common_ud_t *) _udata;
-    int                         ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    HDassert(key);
-    HDassert(udata);
-    HDassert(udata->layout->ndims > 0 && udata->layout->ndims <= H5O_LAYOUT_NDIMS);
-    HDassert(old_parent);
-    HDassert(new_parent);
-
-    /* If there is no rdcc, then there are no cached chunks to update
-     * dependencies.  This should only happen when copying */
-    if(udata->rdcc)
-        /* Delegate to chunk routine */
-        if(H5D__chunk_update_flush_dep(udata->rdcc, udata->layout, key->offset,
-                old_parent, new_parent) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__btree_update_flush_dep() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5D__btree_idx_init
  *
  * Purpose:	Initialize the indexing information for a dataset.
@@ -976,7 +845,6 @@ H5D__btree_idx_create(const H5D_chk_idx_info_t *idx_info)
 {
     H5D_chunk_common_ud_t udata;        /* User data for B-tree callback */
     H5O_loc_t oloc;                     /* Temporary object header location for dataset */
-    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -994,26 +862,11 @@ H5D__btree_idx_create(const H5D_chk_idx_info_t *idx_info)
     udata.storage = idx_info->storage;
     udata.rdcc = NULL;
 
-    /* Check for SWMR writes to the file */
-    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
-        /* Set up object header location for dataset */
-        H5O_loc_reset(&oloc);
-        oloc.file = idx_info->f;
-        oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
-
-        /* Pin the dataset's object header proxy */
-        if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
-    } /* end if */
-
     /* Create the v1 B-tree for the chunk index */
-    if(H5B_create(idx_info->f, idx_info->dxpl_id, H5B_BTREE, &udata, oh_proxy, &(idx_info->storage->idx_addr)/*out*/) < 0)
+    if(H5B_create(idx_info->f, idx_info->dxpl_id, H5B_BTREE, &udata, &(idx_info->storage->idx_addr)/*out*/) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create B-tree")
 
 done:
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree_idx_create() */
 
@@ -1048,10 +901,9 @@ H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__btree_idx_insert
+ * Function:	H5D__btree_idx_insert_addr
  *
- * Purpose:	Create the chunk it if it doesn't exist, or reallocate the
- *              chunk if its size changed.
+ * Purpose:	Insert chunk address into the indexing structure.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1061,10 +913,9 @@ H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__btree_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
+H5D__btree_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 {
     H5O_loc_t   oloc;                   /* Temporary object header location for dataset */
-    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1077,32 +928,16 @@ H5D__btree_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
 
-    /* Check for SWMR writes to the file.  If so we must pin the dataset object
-     * header so it can be set as a flush dependency parent. */
-    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
-        /* Set up object header location for dataset */
-        H5O_loc_reset(&oloc);
-        oloc.file = idx_info->f;
-        oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
-
-        /* Pin the dataset's object header proxy */
-        if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
-    } /* end if */
-
     /*
      * Create the chunk it if it doesn't exist, or reallocate the chunk if
      * its size changed.
      */
-    if(H5B_insert(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr, udata, oh_proxy) < 0)
+    if(H5B_insert(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr, udata) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to allocate chunk")
 
 done:
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
-
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D__btree_idx_insert() */
+} /* H5D__btree_idx_insert_addr() */
 
 
 /*-------------------------------------------------------------------------
@@ -1123,7 +958,6 @@ static herr_t
 H5D__btree_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 {
     H5O_loc_t   oloc;                   /* Temporary object header location for dataset */
-    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t	ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_STATIC
@@ -1137,27 +971,11 @@ H5D__btree_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
     HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
 
-    /* Check for SWMR writes to the file.  If so we must pin the dataset object
-     * header so it can be set as a flush dependency parent. */
-    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
-        /* Set up object header location for dataset */
-        H5O_loc_reset(&oloc);
-        oloc.file = idx_info->f;
-        oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
-
-        /* Pin the dataset's object header proxy */
-        if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
-    } /* end if */
-
     /* Go get the chunk information from the B-tree */
-    if(H5B_find(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr, udata, oh_proxy) < 0)
+    if(H5B_find(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr, udata) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info")
 
 done:
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__btree_idx_get_addr() */
 
@@ -1229,7 +1047,6 @@ H5D__btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 {
     H5D_btree_it_ud_t	udata;  /* User data for B-tree iterator callback */
     H5O_loc_t   oloc;           /* Temporary object header location for dataset */
-    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     int ret_value;              /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1243,19 +1060,6 @@ H5D__btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     HDassert(chunk_cb);
     HDassert(chunk_udata);
 
-    /* Check for SWMR writes to the file.  If so we must pin the dataset object
-     * header so it can be set as a flush dependency parent. */
-    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
-        /* Set up object header location for dataset */
-        H5O_loc_reset(&oloc);
-        oloc.file = idx_info->f;
-        oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
-
-        /* Pin the dataset's object header proxy */
-        if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
-    } /* end if */
-
     /* Initialize userdata */
     HDmemset(&udata, 0, sizeof udata);
     udata.common.layout = idx_info->layout;
@@ -1264,13 +1068,10 @@ H5D__btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     udata.udata = chunk_udata;
 
     /* Iterate over existing chunks */
-    if((ret_value = H5B_iterate(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr, H5D__btree_idx_iterate_cb, &udata, oh_proxy)) < 0)
+    if((ret_value = H5B_iterate(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr, H5D__btree_idx_iterate_cb, &udata)) < 0)
         HERROR(H5E_DATASET, H5E_BADITER, "unable to iterate over chunk B-tree");
 
 done:
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree_idx_iterate() */
 
@@ -1291,7 +1092,6 @@ static herr_t
 H5D__btree_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata)
 {
     H5O_loc_t   oloc;                   /* Temporary object header location for dataset */
-    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t	ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_STATIC
@@ -1304,29 +1104,14 @@ H5D__btree_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t 
     HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
 
-    /* Check for SWMR writes to the file.  If so we must pin the dataset object
-     * header so it can be set as a flush dependency parent. */
-    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
-        /* Set up object header location for dataset */
-        H5O_loc_reset(&oloc);
-        oloc.file = idx_info->f;
-        oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
-
-        /* Pin the dataset's object header proxy */
-        if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
-    } /* end if */
 
     /* Remove the chunk from the v1 B-tree index and release the space for the
      * chunk (in the B-tree callback).
      */
-    if(H5B_remove(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr, udata, oh_proxy) < 0)
+    if(H5B_remove(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr, udata) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to remove chunk entry")
 
 done:
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__btree_idx_remove() */
 
@@ -1349,7 +1134,6 @@ static herr_t
 H5D__btree_idx_delete(const H5D_chk_idx_info_t *idx_info)
 {
     H5O_loc_t   oloc;                   /* Temporary object header location for dataset */
-    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1366,18 +1150,6 @@ H5D__btree_idx_delete(const H5D_chk_idx_info_t *idx_info)
         H5O_storage_chunk_t tmp_storage;  /* Local copy of storage info */
         H5D_chunk_common_ud_t udata;            /* User data for B-tree operations */
 
-        /* Check for SWMR writes to the file.  If so we must pin the dataset object
-        * header so it can be set as a flush dependency parent. */
-        if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
-            /* Set up object header location for dataset */
-            H5O_loc_reset(&oloc);
-            oloc.file = idx_info->f;
-            oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
-
-            /* Pin the dataset's object header proxy */
-            if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
-        } /* end if */
 
         /* Set up temporary chunked storage info */
         tmp_storage = *idx_info->storage;
@@ -1392,7 +1164,7 @@ H5D__btree_idx_delete(const H5D_chk_idx_info_t *idx_info)
         udata.storage = &tmp_storage;
 
         /* Delete entire B-tree */
-        if(H5B_delete(idx_info->f, idx_info->dxpl_id, H5B_BTREE, tmp_storage.idx_addr, &udata, oh_proxy) < 0)
+        if(H5B_delete(idx_info->f, idx_info->dxpl_id, H5B_BTREE, tmp_storage.idx_addr, &udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete chunk B-tree")
 
         /* Release the shared B-tree page */
@@ -1403,9 +1175,6 @@ H5D__btree_idx_delete(const H5D_chk_idx_info_t *idx_info)
     } /* end if */
 
 done:
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree_idx_delete() */
 
@@ -1513,7 +1282,6 @@ H5D__btree_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     H5B_info_t bt_info;                 /* B-tree info */
     hbool_t shared_init = FALSE;        /* Whether shared B-tree info is initialized */
     H5O_loc_t oloc;                     /* Temporary object header location for dataset */
-    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1526,19 +1294,6 @@ H5D__btree_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     HDassert(idx_info->storage);
     HDassert(index_size);
 
-    /* Check for SWMR writes to the file.  If so we must pin the dataset object
-     * header so it can be set as a flush dependency parent. */
-    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
-        /* Set up object header location for dataset */
-        H5O_loc_reset(&oloc);
-        oloc.file = idx_info->f;
-        oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
-
-        /* Pin the dataset's object header proxy */
-        if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
-    } /* end if */
-
     /* Initialize the shared info for the B-tree traversal */
     if(H5D__btree_shared_create(idx_info->f, idx_info->storage, idx_info->layout->ndims) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
@@ -1550,16 +1305,13 @@ H5D__btree_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     udata.storage = idx_info->storage;
 
     /* Get metadata information for B-tree */
-    if(H5B_get_info(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr, &bt_info, NULL, &udata, oh_proxy) < 0)
+    if(H5B_get_info(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr, &bt_info, NULL, &udata) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to iterate over chunk B-tree")
 
     /* Set the size of the B-tree */
     *index_size = bt_info.size;
 
 done:
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
-
     if(shared_init) {
         if(NULL == idx_info->storage->u.btree.shared)
             HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
@@ -1597,118 +1349,6 @@ H5D__btree_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__btree_idx_reset() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__btree_idx_support
- *
- * Purpose:     Create a dependency between a chunk [proxy] and the index
- *              metadata that contains the record for the chunk.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Friday, Jun 24, 2011
- *
- *-------------------------------------------------------------------------
- */
-static htri_t
-H5D__btree_idx_support(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
-    H5AC_info_t *child_entry)
-{
-    H5O_loc_t oloc;                     /* Temporary object header location for dataset */
-    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
-    htri_t ret_value;                   /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Check args */
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
-    HDassert(udata);
-    HDassert(child_entry);
-    HDassert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
-
-    /* Set up object header location for dataset */
-    H5O_loc_reset(&oloc);
-    oloc.file = idx_info->f;
-    oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
-
-    /* Pin the dataset's object header proxy */
-    if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
-
-    /* Add the flush dependency on the chunk */
-    if((ret_value = H5B_support(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr,
-    udata, oh_proxy, child_entry)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on b-tree array metadata")
-
-done:
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__btree_idx_support() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__btree_idx_unsupport
- *
- * Purpose:     Destroy a dependency between a chunk [proxy] and the index
- *              metadata that contains the record for the chunk.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Wednesday, Jul 6, 2011
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__btree_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry)
-{
-    H5O_loc_t oloc;                     /* Temporary object header location for dataset */
-    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Check args */
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
-    HDassert(udata);
-    HDassert(child_entry);
-    HDassert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
-
-    /* Set up object header location for dataset */
-    H5O_loc_reset(&oloc);
-    oloc.file = idx_info->f;
-    oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
-
-    /* Pin the dataset's object header proxy */
-    if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
-
-    /* Remove the flush dependency on the chunk */
-    if((ret_value = H5B_unsupport(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr,
-    udata, oh_proxy, child_entry)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency on b-tree array metadata")
-
-done:
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__btree_idx_unsupport() */
 
 
 /*-------------------------------------------------------------------------
