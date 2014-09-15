@@ -622,7 +622,7 @@ H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, const char *pl_name, c
                     } /* end if */
 
                     /* Successfully found plugin library, check if it's the right one */
-                    if((pl_id > MAX_VOL_LIB_VALUE && plugin_info->value == pl_id) ||
+                    if((pl_id > H5_VOL_MAX_LIB_VALUE && plugin_info->value == pl_id) ||
                        (pl_name && !strcmp(pl_name, plugin_info->name))) {
                         /* Expand the table if it is too small */
                         if(H5PL_vol_table_used_g >= H5PL_vol_table_alloc_g) {

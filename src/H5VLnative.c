@@ -124,7 +124,7 @@ static herr_t H5VL_native_object_optional(void *obj, hid_t dxpl_id, void **req, 
 
 static H5VL_class_t H5VL_native_g = {
     HDF5_VOL_NATIVE_VERSION_1,                  /* Version number */
-    NATIVE,                                     /* Plugin value */
+    H5_VOL_NATIVE,                              /* Plugin value */
     "native",					/* Plugin name */
     NULL,                                       /* initialize */
     NULL,                                       /* terminate */

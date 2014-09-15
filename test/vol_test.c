@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
     ssize_t len;
     char name[25];
     static hsize_t      ds_size[2] = {10, 20};
-    getchar();
+
     for(n=1 ; n<3 ; n++) {
         char pl_name[10];
         char file_name[50];

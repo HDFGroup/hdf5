@@ -258,6 +258,7 @@ H5VL__get_plugin_cb(void *obj, hid_t id, void *_op_data)
 hid_t
 H5VLregister(const H5VL_class_t *cls)
 {
+    H5VL_get_plugin_ud_t op_data;
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -267,11 +268,22 @@ H5VLregister(const H5VL_class_t *cls)
     if(!cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "null class pointer is disallowed")
 
-    if(cls->value < MAX_VOL_LIB_VALUE)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, 
-                    "registered class value must not be smaller than %d", MAX_VOL_LIB_VALUE)
+    if(cls->value < H5_VOL_MAX_LIB_VALUE)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, 
+                    "registered class value must not be smaller than %d", H5_VOL_MAX_LIB_VALUE)
 
-    /* MSC - check if required callback are defined?? */
+    if(!cls->name)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "invalid VOL class name");
+
+    op_data.ret_id = FAIL;
+    op_data.name = cls->name;
+
+    /* check if plugin is already registered */
+    if(H5I_iterate(H5I_VOL, H5VL__get_plugin_cb, &op_data, TRUE) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_BADITER,FAIL, "can't iterate over VOL ids")
+
+    if(op_data.ret_id != FAIL)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "VOL plugin with the same name is already registered.")
 
     /* Create the new class ID */
     if((ret_value = H5VL_register(cls, sizeof(H5VL_class_t), TRUE)) < 0)
@@ -362,14 +374,18 @@ done:
 herr_t
 H5VLunregister(hid_t vol_id)
 {
+    H5VL_class_t *cls = NULL;
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", vol_id);
 
     /* Check arguments */
-    if(NULL == H5I_object_verify(vol_id, H5I_VOL))
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(vol_id, H5I_VOL)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a vol plugin")
+
+    if(cls->value <= H5_VOL_MAX_LIB_VALUE)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't unregister an internal plugin")
 
     /* The H5VL_class_t struct will be freed by this function */
     if(H5I_dec_app_ref(vol_id) < 0)
