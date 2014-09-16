@@ -100,71 +100,6 @@ H5F_init_super_interface(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_locate_signature
- *
- * Purpose:	Finds the HDF5 superblock signature in a file.	The signature
- *		can appear at address 0, or any power of two beginning with
- *		512.
- *
- * Return:	Success:	The absolute format address of the signature.
- *
- *		Failure:	HADDR_UNDEF
- *
- * Programmer:	Robb Matzke
- *		Friday, November  7, 1997
- *
- *-------------------------------------------------------------------------
- */
-haddr_t
-H5F_locate_signature(H5FD_t *file, hid_t dxpl_id)
-{
-    haddr_t	    addr, eoa;
-    uint8_t	    buf[H5F_SIGNATURE_LEN];
-    unsigned	    n, maxpow;
-    haddr_t         ret_value;       /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Find the least N such that 2^N is larger than the file size */
-    if(HADDR_UNDEF == (addr = MAX(H5FD_get_eof(file),H5FD_get_eoa(file,H5FD_MEM_SUPER))) || 
-       HADDR_UNDEF == (eoa = H5FD_get_eoa(file, H5FD_MEM_SUPER)))
-	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to obtain EOF/EOA value")
-    for(maxpow = 0; addr; maxpow++)
-        addr >>= 1;
-    maxpow = MAX(maxpow, 9);
-
-    /*
-     * Search for the file signature at format address zero followed by
-     * powers of two larger than 9.
-     */
-    for(n = 8; n < maxpow; n++) {
-	addr = (8 == n) ? 0 : (haddr_t)1 << n;
-	if(H5FD_set_eoa(file, H5FD_MEM_SUPER, addr + H5F_SIGNATURE_LEN) < 0)
-	    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to set EOA value for file signature")
-	if(H5FD_read(file, dxpl_id, H5FD_MEM_SUPER, addr, (size_t)H5F_SIGNATURE_LEN, buf) < 0)
-	    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to read file signature")
-	if(!HDmemcmp(buf, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN))
-            break;
-    } /* end for */
-
-    /*
-     * If the signature was not found then reset the EOA value and return
-     * failure.
-     */
-    if(n >= maxpow) {
-	(void)H5FD_set_eoa(file, H5FD_MEM_SUPER, eoa); /* Ignore return value */
-	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to find a valid file signature")
-    } /* end if */
-
-    /* Set return value */
-    ret_value = addr;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_locate_signature() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5F_super_ext_create
  *
  * Purpose:     Create the superblock extension

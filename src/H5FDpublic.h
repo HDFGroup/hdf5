@@ -241,7 +241,12 @@ typedef enum H5FD_coord_t {
      * image to store in memory.
      */
 #define H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS 0x00000800
-
+    /*
+     * Defining the H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS for a VFL driver 
+     * means that the library will needs to query eof/eoa values for every
+     * MEM type.
+     */
+#define H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS    0x00001000
 
 /* Forward declaration */
 typedef struct H5FD_t H5FD_t;
@@ -274,7 +279,7 @@ typedef struct H5FD_class_t {
                     haddr_t addr, hsize_t size);
     haddr_t (*get_eoa)(const H5FD_t *file, H5FD_mem_t type);
     herr_t  (*set_eoa)(H5FD_t *file, H5FD_mem_t type, haddr_t addr);
-    haddr_t (*get_eof)(const H5FD_t *file);
+    haddr_t (*get_eof)(const H5FD_t *file, H5FD_mem_t type);
     herr_t  (*get_handle)(H5FD_t *file, hid_t fapl, void**file_handle);
     herr_t  (*read)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl,
                     haddr_t addr, size_t size, void *buffer);
@@ -356,7 +361,7 @@ H5_DLL herr_t H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                        haddr_t addr, hsize_t size);
 H5_DLL haddr_t H5FDget_eoa(H5FD_t *file, H5FD_mem_t type);
 H5_DLL herr_t H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t eoa);
-H5_DLL haddr_t H5FDget_eof(H5FD_t *file);
+H5_DLL haddr_t H5FDget_eof(H5FD_t *file, H5FD_mem_t type);
 H5_DLL herr_t H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void**file_handle);
 H5_DLL herr_t H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                        haddr_t addr, size_t size, void *buf/*out*/);

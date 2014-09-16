@@ -470,7 +470,8 @@ hid_t create_test_file_eof_gt_eoa(char * filename, hid_t fcpl, hid_t fapl, haddr
     /* Determine EOA and EOF values */
     if ((*eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
         TEST_ERROR;
-    if ((*eof = H5FD_get_eof(f->shared->lf)) == HADDR_UNDEF) TEST_ERROR;
+    if ((*eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF) 
+        TEST_ERROR;
 
     /* We want to be creating the case when EOA < EOF at file close */
     if (*eoa >= *eof) TEST_ERROR;
@@ -525,7 +526,8 @@ hid_t create_test_file_eof_lt_eoa(char * filename, hid_t fcpl, hid_t fapl, haddr
     /* Determine EOA and EOF values */
     if ((*eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
         TEST_ERROR;
-    if ((*eof = H5FD_get_eof(f->shared->lf)) == HADDR_UNDEF) TEST_ERROR;
+    if ((*eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF) 
+        TEST_ERROR;
 
     /* We want to be creating the case when EOA > EOF at file close */
     if (*eoa <= *eof) TEST_ERROR;

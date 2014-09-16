@@ -110,7 +110,7 @@
         + 1 /* consistency flags */                                     \
         + H5F_SIZEOF_ADDR(f) /* base address */                         \
         + H5F_SIZEOF_ADDR(f) /* superblock extension address */         \
-        + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
+        + H5F_SIZEOF_ADDR(f)*7 /* EOF address */                          \
         + H5F_SIZEOF_ADDR(f) /* root group object header address */     \
         + H5F_SIZEOF_CHKSUM) /* superblock checksum (keep this last) */
 #define H5F_SUPERBLOCK_VARLEN_SIZE(v, f) (				\
@@ -299,6 +299,7 @@ herr_t H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush);
 H5_DLL herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing);
 H5_DLL htri_t H5F_is_hdf5(const char *name);
 H5_DLL herr_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
+H5_DLL htri_t H5F__should_truncate(H5F_t *f);
 H5_DLL herr_t H5F_close(H5F_t *f);
 
 /* File mount related routines */

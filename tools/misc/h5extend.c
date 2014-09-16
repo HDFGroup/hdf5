@@ -217,7 +217,7 @@ main (int argc, char *argv[])
     } /* end if */
 
     /* Get 'EOF' value */
-    if ((eof = H5FDget_eof(f->shared->lf)) == HADDR_UNDEF) {
+    if ((eof = H5FDget_eof(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF) {
         error_msg("Unable to retrieve 'EOF' value from file driver.\n");
         leave(EXIT_FAILURE);
     } /* end if */

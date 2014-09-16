@@ -858,14 +858,13 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         if(H5I_dec_ref(f->shared->fcpl_id) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close property list")
-
+#if 0
         /* If not avoiding truncation, OR if only avoiding truncation during file
            extension and a truncation will result in a smaller file, then truncate
            the file */
         if (((!H5F_AVOID_TRUNCATE(f))||
              (((H5F_AVOID_TRUNCATE(f)==H5F_AVOID_TRUNCATE_EXTEND)&&
-               (H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER) < H5FD_get_eof(f->shared->lf)))))
-#if 0
+               (H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT) < H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)))))
             ||
             /* Note: Due to some currently unknown (bug? feature?) in the multi
                driver, we *must* truncate if the EOA = EOF. I do not understand
@@ -873,9 +872,10 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                This should be resolved before merging to 1.10. In any case, when
                EOA=EOF, the truncate file driver call shouldn't actually truncate
                the file since it doesn't need to ... */
-            (H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT) == H5FD_get_eof(f->shared->lf))
-#endif
+            (H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT) == H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT))
             ) {
+#endif
+        if(TRUE == H5F__should_truncate(f)) {
             /* Only truncate the file on an orderly close, with write-access */
             if(f->closing && (H5F_ACC_RDWR & H5F_INTENT(f))) {
                 /* Truncate the file to the current allocated size */
@@ -1086,7 +1086,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
      */
-    if(0 == (MAX(H5FD_get_eof(lf),H5FD_get_eoa(lf,H5FD_MEM_SUPER))) && (flags & H5F_ACC_RDWR)) {
+    if(0 == (MAX(H5FD_get_eof(lf,H5FD_MEM_SUPER),H5FD_get_eoa(lf,H5FD_MEM_SUPER))) && (flags & H5F_ACC_RDWR)) {
         /*
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.
@@ -2079,3 +2079,31 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_get_file_image() */
+
+htri_t
+H5F__should_truncate(H5F_t *f)
+{
+    htri_t ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_OFF)
+        HGOTO_DONE(TRUE)
+    else if(H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_EXTEND) {
+        if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) {
+            H5FD_mem_t mt;
+
+            for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
+                if(H5FD_get_eof(f->shared->lf, mt) > H5FD_get_eoa(f->shared->lf, mt))
+                   HGOTO_DONE(TRUE)
+            }
+        }
+        else {
+            if(H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT) > H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT))
+                HGOTO_DONE(TRUE)
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}

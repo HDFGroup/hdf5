@@ -183,7 +183,7 @@ test_avoid_truncation(void)
     eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER);
     VRFY((eoa != HADDR_UNDEF), "");
 
-    eof = H5FD_get_eof(f->shared->lf);
+    eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_SUPER);
     VRFY((eof != HADDR_UNDEF), "");
 
     /* Make sure EOA/EOF are not the same */
@@ -219,7 +219,7 @@ test_avoid_truncation(void)
     eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER);
     VRFY((eoa != HADDR_UNDEF), "");
 
-    eof = H5FD_get_eof(f->shared->lf);
+    eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_SUPER);
     VRFY((eof != HADDR_UNDEF), "");
 
     /* Make sure values are not equal */
