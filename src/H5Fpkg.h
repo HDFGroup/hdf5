@@ -110,7 +110,7 @@
         + 1 /* consistency flags */                                     \
         + H5F_SIZEOF_ADDR(f) /* base address */                         \
         + H5F_SIZEOF_ADDR(f) /* superblock extension address */         \
-        + H5F_SIZEOF_ADDR(f)*7 /* EOF address */                          \
+        + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
         + H5F_SIZEOF_ADDR(f) /* root group object header address */     \
         + H5F_SIZEOF_CHKSUM) /* superblock checksum (keep this last) */
 #define H5F_SUPERBLOCK_VARLEN_SIZE(v, f) (				\

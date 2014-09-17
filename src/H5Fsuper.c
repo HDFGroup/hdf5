@@ -584,7 +584,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
             haddr_t eoa; /* 'EOA' value */
 
             if(HADDR_UNDEF == (eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)))
-                HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to obtain EOA value")
+                HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to obtain EOA value")
 
             if(H5O_msg_create(&ext_loc, H5O_EOA_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &eoa, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update 'EOA' value header message")

@@ -858,23 +858,10 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         if(H5I_dec_ref(f->shared->fcpl_id) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close property list")
-#if 0
+
         /* If not avoiding truncation, OR if only avoiding truncation during file
            extension and a truncation will result in a smaller file, then truncate
            the file */
-        if (((!H5F_AVOID_TRUNCATE(f))||
-             (((H5F_AVOID_TRUNCATE(f)==H5F_AVOID_TRUNCATE_EXTEND)&&
-               (H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT) < H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)))))
-            ||
-            /* Note: Due to some currently unknown (bug? feature?) in the multi
-               driver, we *must* truncate if the EOA = EOF. I do not understand
-               *why* at the current point in time ... needs investigation ...
-               This should be resolved before merging to 1.10. In any case, when
-               EOA=EOF, the truncate file driver call shouldn't actually truncate
-               the file since it doesn't need to ... */
-            (H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT) == H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT))
-            ) {
-#endif
         if(TRUE == H5F__should_truncate(f)) {
             /* Only truncate the file on an orderly close, with write-access */
             if(f->closing && (H5F_ACC_RDWR & H5F_INTENT(f))) {

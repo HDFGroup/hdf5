@@ -41,7 +41,7 @@
 /****************/
 
 /* Maximum size of super-block buffers */
-#define H5F_MAX_SUPERBLOCK_SIZE  190//134
+#define H5F_MAX_SUPERBLOCK_SIZE  134
 
 
 /******************/
@@ -289,37 +289,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
         /* Remainder of "variable-sized" portion of superblock */
         H5F_addr_decode(f, (const uint8_t **)&p, &sblock->base_addr/*out*/);
         H5F_addr_decode(f, (const uint8_t **)&p, &sblock->ext_addr/*out*/);
-
-#if 0
-        {
-            char name[50];
-            FILE *fd;
-            H5FD_mem_t mt;
-            haddr_t temp;
-
-            sprintf(name, "%s.eofs", f->open_name);
-            fprintf(stderr, "%s\n", name);
-            fd = fopen(name, "r");
-
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                fread(&types_eof[mt], 1, sizeof(haddr_t), fd);
-                fprintf(stderr, "Decode %llu\n",  types_eof[mt]);
-            }
-            fclose(fd);
-        }
-#endif
-
-        if(0) {
-            H5FD_mem_t mt;
-
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1))
-                H5F_addr_decode(f, (const uint8_t **)&p, &types_eof[mt]/*out*/);
-            stored_eof = types_eof[H5FD_MEM_SUPER];
-        }
-        else {
-            H5F_addr_decode(f, (const uint8_t **)&p, &stored_eof/*out*/);
-        }
-
+        H5F_addr_decode(f, (const uint8_t **)&p, &stored_eof/*out*/);
         H5F_addr_decode(f, (const uint8_t **)&p, &sblock->driver_addr/*out*/);
 
         /* Allocate space for the root group symbol table entry */
@@ -424,6 +394,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     else {
         uint32_t computed_chksum;       /* Computed checksum  */
         uint32_t read_chksum;           /* Checksum read from file  */
+        H5FD_mem_t mt;
 
         /* Size of file addresses */
         sizeof_addr = *p++;
@@ -451,18 +422,12 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
         /* Base, superblock extension, end of file & root group object header addresses */
         H5F_addr_decode(f, (const uint8_t **)&p, &sblock->base_addr/*out*/);
         H5F_addr_decode(f, (const uint8_t **)&p, &sblock->ext_addr/*out*/);
-
-        if(1) {
-            H5FD_mem_t mt;
-
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1))
-                H5F_addr_decode(f, (const uint8_t **)&p, &types_eof[mt]/*out*/);
-            stored_eof = types_eof[H5FD_MEM_SUPER];
-        }
-        else {
-            H5F_addr_decode(f, (const uint8_t **)&p, &stored_eof/*out*/);
-        }
-
+        H5F_addr_decode(f, (const uint8_t **)&p, &stored_eof/*out*/);
+#if 0
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1))
+            H5F_addr_decode(f, (const uint8_t **)&p, &types_eof[mt]/*out*/);
+        stored_eof = types_eof[H5FD_MEM_SUPER];
+#endif
         H5F_addr_decode(f, (const uint8_t **)&p, &sblock->root_addr/*out*/);
 
         /* Compute checksum for superblock */
@@ -795,53 +760,14 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
             /* Encode the address of global free-space index */
             H5F_addr_encode(f, &p, sblock->ext_addr);
 
-#if 0
-            {
-                char name[50];
-                FILE *fd;
-                H5FD_mem_t mt;
-                haddr_t temp;
-
-                sprintf(name, "%s.eofs", f->open_name);
-                fprintf(stderr, "%s\n", name);
-                fd = fopen(name, "w");
-
-                for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                    if ((rel_eof = H5FD_get_eoa(f->shared->lf, mt)) == HADDR_UNDEF)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-
-
-                    fprintf(stderr, "Encoding %llu\n", temp);
-                    fwrite(&temp, 1, sizeof(haddr_t), fd);
-                }
-                fclose(fd);
-            }
-#endif
-
             /* Encode the end-of-file address. Note that at this point in time,
              * the EOF value itself may not be reflective of the file's size, as
              * we will eventually truncate the file to match the EOA value. As
              * such, use the EOA value in its place, knowing that the current EOF
              * value will ultimately match it. */
-            if(0) {
-                H5FD_mem_t mt;
-                haddr_t temp;
-
-                for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                    if ((temp = H5FD_get_eoa(f->shared->lf, mt)) == HADDR_UNDEF)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-
-                    if(H5FD_MEM_SUPER == mt) 
-                        rel_eof = temp + sblock->base_addr;
-
-                    H5F_addr_encode(f, &p, temp + sblock->base_addr);
-                }
-            }
-            else {
-                if ((rel_eof = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-                H5F_addr_encode(f, &p, (rel_eof + sblock->base_addr));
-            }
+            if ((rel_eof = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
+            H5F_addr_encode(f, &p, (rel_eof + sblock->base_addr));
 
             /* Encode the driver informaton block address */
             H5F_addr_encode(f, &p, sblock->driver_addr);
@@ -888,6 +814,7 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
         else {
             uint32_t        chksum;                 /* Checksum temporary variable      */
             H5O_loc_t       *root_oloc;             /* Pointer to root group's object location */
+            hbool_t should_truncate;
 
             /* Size of file addresses & offsets, and status flags */
             *p++ = (uint8_t)H5F_SIZEOF_ADDR(f);
@@ -902,14 +829,8 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 
             /* Encode the end-of-file address if the file will not be truncated
                at file close */
-            if(FALSE == H5F__should_truncate(f)) {
-                /*
-            if(((H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_ALL)) ||
-               ((H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_EXTEND) &&
-                (H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT) <= H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))) {
-                */
+            if(FALSE == (should_truncate = H5F__should_truncate(f))) {
                 H5F_io_info_t fio_info;             /* I/O info for operation */
-                haddr_t rel_eoa;
 
                 /* If we're avoiding truncating the file, then we need to
                  * store the file's size in the superblock. We will only be
@@ -934,69 +855,13 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 #endif
 
                 /* Check again if truncation will happen after updating the EOF when flushing. */
-                        /*
-                if((H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_ALL) ||
-                   (H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_EXTEND && rel_eof <= rel_eoa)) {
-                        */
-                if(FALSE == H5F__should_truncate(f)) {
-                    if(1) {
-                        H5FD_mem_t mt;
-                        haddr_t temp;
-
-                        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                            if ((temp = H5FD_get_eof(f->shared->lf, mt)) == HADDR_UNDEF)
-                                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-
-                            if(H5FD_MEM_SUPER == mt) 
-                                rel_eof = temp + sblock->base_addr;
-
-                            H5F_addr_encode(f, &p, temp + sblock->base_addr);
-                        }
-                    }
-                    else {
-                        if(HADDR_UNDEF == (rel_eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)))
-                            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to determine file size")
-                        if(rel_eof == 0)
-                            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "flushing a superblock to an empty file?!?!")
-                        H5F_addr_encode(f, &p, (rel_eof + sblock->base_addr));
-                    }
-                }
-                else {
-                    if(1) {
-                        H5FD_mem_t mt;
-                        haddr_t temp;
-
-                        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                            if ((temp = H5FD_get_eoa(f->shared->lf, mt)) == HADDR_UNDEF)
-                                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-
-                            if(H5FD_MEM_SUPER == mt) 
-                                rel_eof = temp + sblock->base_addr;
-
-                            H5F_addr_encode(f, &p, temp + sblock->base_addr);
-                        }
-                    }
-                    else {
-                        if(HADDR_UNDEF == (rel_eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_SUPER)))
-                            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to determine file size")
-                        if(rel_eof == 0)
-                            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "flushing a superblock to an empty file?!?!")
-                        H5F_addr_encode(f, &p, (rel_eof + sblock->base_addr));
-                    }
-                }
-            } /* end if */
-            else {
-                /* Otherwise, at this point in time, the EOF value itself may
-                 * not be reflective of the file's size, since we'll eventually
-                 * truncate it to match the EOA value. As such, use the EOA value
-                 * in its place, knowing that the current EOF value will
-                 * ultimately match it. */
-                if(1) {
-                    H5FD_mem_t mt;
-                    haddr_t temp;
-
+                if(FALSE == (should_truncate = H5F__should_truncate(f))) {
+                    if ((rel_eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eof request failed")
+                    H5F_addr_encode(f, &p, rel_eof + sblock->base_addr);
+#if 0
                     for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                        if ((temp = H5FD_get_eoa(f->shared->lf, mt)) == HADDR_UNDEF)
+                        if ((temp = H5FD_get_eof(f->shared->lf, mt)) == HADDR_UNDEF)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
 
                         if(H5FD_MEM_SUPER == mt) 
@@ -1004,13 +869,31 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 
                         H5F_addr_encode(f, &p, temp + sblock->base_addr);
                     }
+#endif
                 }
-                else {
-                    if((rel_eof = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
+            } /* end if */
+
+            if(TRUE == should_truncate) {
+                /* Otherwise, at this point in time, the EOF value itself may
+                 * not be reflective of the file's size, since we'll eventually
+                 * truncate it to match the EOA value. As such, use the EOA value
+                 * in its place, knowing that the current EOF value will
+                 * ultimately match it. */
+                if ((rel_eof = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
+                H5F_addr_encode(f, &p, rel_eof + sblock->base_addr);
+#if 0
+                for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
+                    if ((temp = H5FD_get_eoa(f->shared->lf, mt)) == HADDR_UNDEF)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-                    H5F_addr_encode(f, &p, (rel_eof + sblock->base_addr));
+
+                    if(H5FD_MEM_SUPER == mt) 
+                        rel_eof = temp + sblock->base_addr;
+
+                    H5F_addr_encode(f, &p, temp + sblock->base_addr);
                 }
-            } /* end else */
+#endif
+            } /* end if */
 
             /* Retrieve information for root group */
             if(NULL == (root_oloc = H5G_oloc(f->shared->root_grp)))
@@ -1026,10 +909,7 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
             UINT32ENCODE(p, chksum);
 
             /* Sanity check */
-            if(1)
-                HDassert((size_t)(p - buf) == (size_t)H5F_SUPERBLOCK_SIZE(sblock->super_vers, f));
-            else
-                HDassert((size_t)(p - buf)+48 == (size_t)H5F_SUPERBLOCK_SIZE(sblock->super_vers, f));
+            HDassert((size_t)(p - buf) == (size_t)H5F_SUPERBLOCK_SIZE(sblock->super_vers, f));
         } /* end else */
 
         /* Retrieve the total size of the superblock info */
