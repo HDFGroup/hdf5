@@ -1210,16 +1210,20 @@ Supported Platforms
     Windows 7                     Visual Studio 2008 w/ Intel Fortran 14 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 14 (cmake)
                                   Visual Studio 2012 w/ Intel Fortran 14 (cmake)
-                                  Cygwin(CYGWIN_NT-6.1 1.7.28(0.271/5/3) gcc(4.8.2) compiler and gfortran)
+                                  Visual Studio 2013 w/ Intel Fortran 14 (cmake)
+                                  Cygwin(CYGWIN_NT-6.1 1.7.32(0.274/5/3) gcc(4.8.3) compiler and gfortran)
                                   (cmake and autotools)
 
     Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 14 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 14 (cmake)
                                   Visual Studio 2012 w/ Intel Fortran 14 (cmake)
+                                  Visual Studio 2013 w/ Intel Fortran 14 (cmake)
                                   
     Windows 8.1                   Visual Studio 2012 w/ Intel Fortran 14 (cmake)
+                                  Visual Studio 2013 w/ Intel Fortran 14 (cmake)
 
     Windows 8.1 x64               Visual Studio 2012 w/ Intel Fortran 14 (cmake)
+                                  Visual Studio 2013 w/ Intel Fortran 14 (cmake)
 
     Mac OS X Lion 10.7.3          gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.2.1
     32- and 64-bit                g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.2.1
@@ -1352,14 +1356,14 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (SUSE Linux) 4.8.1
                                   (cmake and autotools)
 
-    Ubuntu 14.04 3.13.0-32-generic #57-Ubuntu SMP i686 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
-                                  GNU Fortran (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
+    Ubuntu 14.04 3.13.0-35-generic #62-Ubuntu SMP i686 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.9.1-0ubuntu1) 4.9.1
+                                  GNU Fortran (Ubuntu/Linaro 4.9.1-0ubuntu1) 4.9.1
                                   (cmake and autotools)
 
-    Ubuntu 14.04 3.13.0-32-generic #57-Ubuntu SMP x86_64 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
-                                  GNU Fortran (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
+    Ubuntu 14.04 3.13.0-35-generic #62-Ubuntu SMP x86_64 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.9.1-0ubuntu1) 4.9.1
+                                  GNU Fortran (Ubuntu/Linaro 4.9.1-0ubuntu1) 4.9.1
                                   (cmake and autotools)
     
     Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46
