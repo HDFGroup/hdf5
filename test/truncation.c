@@ -66,16 +66,9 @@ int main(void)
 
     /* Get current driver */
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
-
     /* Skip tests with multi, split, log, and family drivers (for now ...) */
-    if ((env_h5_drvr != NULL) &&
-        ((!HDstrcmp(env_h5_drvr,"multi")) ||
-         (!HDstrcmp(env_h5_drvr,"split")) ||
-         (!HDstrcmp(env_h5_drvr,"log")) ||
-         (!HDstrcmp(env_h5_drvr,"family")))) {
-
+    if ((env_h5_drvr != NULL) && (!HDstrcmp(env_h5_drvr,"log"))) {
         HDfprintf(stdout, "Truncation Detection Test skipped with %s file driver\n", env_h5_drvr);
-
     } /* end if */
     else {
 
@@ -87,7 +80,11 @@ int main(void)
 
         /* Run tests on truncation detection methods */
         if (!nerrors) nerrors += test_avoid_truncate_property(fapl);
-        if (!nerrors) nerrors += test_truncation_occurrence(fapl);
+
+        /* Multi driver requires special processing for this test */
+        if(H5Pget_driver(fapl) != H5FD_MULTI)
+            if (!nerrors) nerrors += test_truncation_occurrence(fapl);
+
         if (!nerrors) nerrors += test_truncation_detection(fapl);
 
     } /* end else */
@@ -468,9 +465,9 @@ hid_t create_test_file_eof_gt_eoa(char * filename, hid_t fcpl, hid_t fapl, haddr
     if (H5Ldelete(fid, "Dataset", H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* Determine EOA and EOF values */
-    if ((*eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
+    if ((*eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)) == HADDR_UNDEF)
         TEST_ERROR;
-    if ((*eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF) 
+    if ((*eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)) == HADDR_UNDEF) 
         TEST_ERROR;
 
     /* We want to be creating the case when EOA < EOF at file close */
@@ -582,9 +579,7 @@ return FAIL;
 } /* test_truncation_detection */
 
 int test_truncation_detection_helper(hid_t fcpl, hid_t fapl) {
-
     hid_t fid;
-    int filesize;
     char filename[1024]; /* File Name */
 
     /* Fix the file's name */
@@ -594,13 +589,10 @@ int test_truncation_detection_helper(hid_t fcpl, hid_t fapl) {
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0) FAIL_STACK_ERROR;
     if (H5Fclose(fid)<0) FAIL_STACK_ERROR;
 
-    /* Get file size. */
-    if ((filesize = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR;
-
     /* Extending the file should be fine. Add a byte to the end of the
      * file, and make sure HDF5 doesn't care. (it will, however, write
      * over the byte). */
-    if (truncate(filename, (off_t)filesize+1) != 0) TEST_ERROR;
+    if (h5_file_truncate(filename, fapl, (off_t)1) != 0) TEST_ERROR;
 
     /* Make sure we can open the file without problem */
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR;
@@ -609,7 +601,7 @@ int test_truncation_detection_helper(hid_t fcpl, hid_t fapl) {
     if (H5Fclose(fid) < 0) TEST_ERROR;
 
     /* Manually truncate the file by a byte, rendering it unreadable by HDF5 */
-    if (truncate(filename, (off_t)filesize-1) != 0) TEST_ERROR;
+    if (h5_file_truncate(filename, fapl, (off_t)(-2)) != 0) TEST_ERROR;
 
     /* Try to re-open file: this should fail, as the file has been truncated */
     H5E_BEGIN_TRY {

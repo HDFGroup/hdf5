@@ -938,6 +938,111 @@ h5_get_file_size(const char *filename, hid_t fapl)
     return(-1);
 } /* end get_file_size() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:  h5_file_truncate
+ *
+ * Purpose:   truncate the file by size bytes.
+ *
+ * Return:  Success:  0
+ *    Failure:  -1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              Septmeber, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5_file_truncate(const char *filename, hid_t fapl, off_t size)
+{
+    h5_stat_size_t filesize;
+    h5_stat_t  sb;     /* Structure for querying file info */
+    char temp[2048];    /* Temporary buffer for file names */
+    int j = 0;
+
+    if(fapl == H5P_DEFAULT) {
+        if (truncate(filename, size) != 0) 
+            return -1;
+    } /* end if */
+    else {
+        hid_t  driver;         /* VFD used for file */
+
+        /* Get the driver used when creating the file */
+        if((driver = H5Pget_driver(fapl)) < 0)
+            return -1;
+
+        /* Check for simple cases */
+        if(driver == H5FD_SEC2 || driver == H5FD_STDIO || driver == H5FD_CORE ||
+#ifdef H5_HAVE_PARALLEL
+                driver == H5FD_MPIO || 
+#endif /* H5_HAVE_PARALLEL */
+#ifdef H5_HAVE_WINDOWS
+                driver == H5FD_WINDOWS ||
+#endif /* H5_HAVE_WINDOWS */
+#ifdef H5_HAVE_DIRECT
+                driver == H5FD_DIRECT ||
+#endif /* H5_HAVE_DIRECT */
+                driver == H5FD_LOG) {
+
+            /* Get file size. */
+            if ((filesize = h5_get_file_size(filename, fapl)) < 0)
+                return -1;
+
+            /* truncate the file */
+            if (truncate(filename, (off_t)filesize + size) != 0) 
+                return -1;
+        } /* end if */
+        else if(driver == H5FD_MULTI) {
+            H5FD_mem_t mt;
+
+            HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+                /* Create the filename to query */
+                HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
+
+                /* Check for existence of file */
+                if(0 == HDaccess(temp, F_OK)) {
+
+                    /* Get the file's statistics */
+                    if(0 != HDstat(temp, &sb))
+                        return -1;
+
+                    if((off_t)sb.st_size != 0) {
+                        /* truncate the file */
+                        if (truncate(temp, (off_t)sb.st_size + size) != 0) 
+                            return -1;
+                    }
+                } /* end if */
+            } /* end for */
+        } /* end if */
+        else if(driver == H5FD_FAMILY) {
+
+            /* Try all filenames possible, until we find one that's missing */
+            for(j = 0; /*void*/; j++) {
+                /* Create the filename to query */
+                HDsnprintf(temp, sizeof temp, filename, j);
+
+                /* Check for existence of file */
+                if(HDaccess(temp, F_OK) < 0)
+                    break;
+
+                /* Get the file's statistics */
+                if(0 != HDstat(temp, &sb))
+                    return -1;
+
+                /* truncate the file */
+                if (truncate(temp, (off_t)sb.st_size + size) != 0) 
+                    return -1;
+            } /* end for */
+        } /* end if */
+        else {
+            HDassert(0 && "Unknown VFD!");
+        } /* end else */
+    } /* end else */
+
+    return 0;
+} /* end h5_file_truncate() */
+
 /*
  * This routine is designed to provide equivalent functionality to 'printf'
  * and allow easy replacement for environments which don't have stdin/stdout
