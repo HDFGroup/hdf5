@@ -91,7 +91,7 @@ set (H5_DEFAULT_VFD H5FD_SEC2)
 
 if (NOT DEFINED "H5_DEFAULT_PLUGINDIR")
   if (WINDOWS)
-    set (H5_DEFAULT_PLUGINDIR "%ALLUSERSPROFILE%\\hdf5\\lib\\plugin")
+    set (H5_DEFAULT_PLUGINDIR "%ALLUSERSPROFILE%\\\\hdf5\\\\lib\\\\plugin")
   else (WINDOWS)
     set (H5_DEFAULT_PLUGINDIR "/usr/local/hdf5/lib/plugin")
   endif (WINDOWS)
