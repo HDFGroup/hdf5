@@ -1526,7 +1526,7 @@ H5FDget_eof(H5FD_t *file, H5FD_mem_t type)
     haddr_t	ret_value;
 
     FUNC_ENTER_API(HADDR_UNDEF)
-    H5TRACE1("a", "*x", file);
+    H5TRACE2("a", "*xMt", file, type);
 
     /* Check arguments */
     if(!file || !file->cls)

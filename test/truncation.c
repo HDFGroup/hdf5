@@ -607,7 +607,7 @@ int test_truncation_detection_helper(hid_t fcpl, hid_t fapl) {
     H5E_BEGIN_TRY {
         fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
     } H5E_END_TRY;
-    if (fid >= 0) TEST_ERROR;
+    if (fid >= 0) {H5Fclose(fid); TEST_ERROR;}
 
     /* Delete test file */
     HDremove(filename);

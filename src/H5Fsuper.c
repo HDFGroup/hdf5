@@ -383,6 +383,9 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     /* Bump superblock version if the 'avoid truncate' feature is enabled */
     else if(H5F_AVOID_TRUNCATE(f))
         super_vers = HDF5_SUPERBLOCK_VERSION_2;
+    /* Bump superblock version if the VFD use is multi like with a file for every memory type. */
+    else if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS)
+        super_vers = HDF5_SUPERBLOCK_VERSION_2;
     /* Check for non-default indexed storage B-tree internal 'K' value
      * and set the version # of the superblock to 1 if it is a non-default
      * value.
@@ -589,6 +592,21 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
             if(H5O_msg_create(&ext_loc, H5O_EOA_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &eoa, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update 'EOA' value header message")
         } /* end if */
+
+        /* Check if we need to store the 'EOFs' value in the superblock extension */
+        if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) {
+            haddr_t eofs[H5FD_MEM_NTYPES]; /* 'EOFs' value */
+            H5FD_mem_t mt;
+
+            for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
+                if((eofs[mt] = H5FD_get_eof(f->shared->lf, mt)) == HADDR_UNDEF)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eof request failed")
+            }
+
+            if(H5O_msg_create(&ext_loc, H5O_EOFS_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, 
+                              &eofs, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update 'EOFS' value header message")
+        }
     } /* end if */
 
 done:

@@ -127,7 +127,8 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_REFCOUNT,		/*0x0016 Object's ref. count		*/
     H5O_MSG_FSINFO,		/*0x0017 Free-space manager info message */
     H5O_MSG_EOA,		/*0x0018 'EOA' message                  */
-    H5O_MSG_UNKNOWN,		/*0x0019 Placeholder for unknown message */
+    H5O_MSG_EOFS,		/*0x0019 'EOFS' message                  */
+    H5O_MSG_UNKNOWN,		/*0x001A Placeholder for unknown message */
 };
 
 /* Declare a free list to manage the H5O_t struct */
