@@ -84,6 +84,11 @@ hid_t H5PTcreate_fl ( hid_t loc_id,
   hsize_t maxdims[1];
   hid_t ret_value;
 
+  /* check the arguments */
+  if (dset_name == NULL) {
+    goto out;
+  }
+
   /* Register the packet table ID type if this is the first table created */
   if(H5PT_ptable_id_type < 0)
     if((H5PT_ptable_id_type = H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)H5PT_free_id)) < 0)
@@ -178,6 +183,11 @@ hid_t H5PTcreate_vl ( hid_t loc_id,
   hid_t ret_value=H5I_BADID;
   hid_t vltype;
 
+  /* check the arguments */
+  if (dset_name == NULL) {
+    goto out;
+  }
+
   /* Create a variable length type that uses single bytes as its base type */
   vltype = H5Tvlen_create(H5T_NATIVE_UCHAR);
   if(vltype < 0)
@@ -231,6 +241,11 @@ hid_t H5PTopen( hid_t loc_id,
   htbl_t * table = NULL;
   hid_t ret_value;
   hsize_t dims[1];
+
+  /* check the arguments */
+  if (dset_name == NULL) {
+    goto out;
+  }
 
   /* Register the packet table ID type if this is the first table created */
   if( H5PT_ptable_id_type < 0)
