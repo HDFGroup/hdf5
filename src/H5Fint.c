@@ -222,9 +222,6 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
             HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
     } /* end if */
 
-    //if(H5P_facc_close(ret_value, NULL) < 0)
-    //HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free the old driver information")
-
     /* Increment the reference count on the driver ID and insert it into the property list */
     if(H5I_inc_ref(f->shared->lf->driver_id, FALSE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver")

@@ -494,6 +494,7 @@ if (HDF5_TEST_VFD)
       )
     endforeach (test ${H5_VFD_TESTS})
     set_tests_properties (VFD-${vfdname}-flush1 PROPERTIES TIMEOUT 10)
+    set_tests_properties (VFD-${vfdname}-flush2 PROPERTIES TIMEOUT 10)
     if (HDF5_TEST_FHEAP_VFD)
       add_test (
         NAME VFD-${vfdname}-fheap 
