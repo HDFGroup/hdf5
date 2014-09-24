@@ -45,7 +45,7 @@
 /****************/
 /* Local Macros */
 /****************/
-#define H5X_FASTBIT_DEBUG
+//#define H5X_FASTBIT_DEBUG
 
 #ifdef H5X_FASTBIT_DEBUG
 #define H5X_FASTBIT_DEBUG_LVL 6
@@ -210,7 +210,6 @@ const H5X_class_t H5X_FASTBIT[1] = {{
 static H5X_fastbit_t *
 H5X__fastbit_init(hid_t file_id, hid_t dataset_id)
 {
-    static int column_number = 0; /* TODO remove that once John fixes attach */
     H5X_fastbit_t *fastbit = NULL;
     hid_t space_id = FAIL;
     H5X_fastbit_t *ret_value = NULL; /* Return value */
@@ -236,8 +235,7 @@ H5X__fastbit_init(hid_t file_id, hid_t dataset_id)
     fastbit->bitmaps = NULL;
     fastbit->bitmaps_id = FAIL;
 
-    sprintf(fastbit->column_name, "test%d", column_number);
-    column_number++;
+    sprintf(fastbit->column_name, "H5X__fastbit_column");
 
     fastbit->idx_reconstructed = FALSE;
 
@@ -306,9 +304,6 @@ H5X__fastbit_term(H5X_fastbit_t *fastbit)
     H5MM_free(fastbit->offsets);
     H5MM_free(fastbit->bitmaps);
 
-    /* Free FastBit resources */
-    fastbit_cleanup();
-
     /* Close opaque type */
     if ((FAIL != fastbit->opaque_type_id) &&
             (FAIL == H5Tclose(fastbit->opaque_type_id)))
@@ -324,6 +319,12 @@ H5X__fastbit_term(H5X_fastbit_t *fastbit)
     if ((FAIL != fastbit->bitmaps_id) &&
             (FAIL == H5Dclose(fastbit->bitmaps_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "can't close anonymous dataset for index");
+
+    /* Free array */
+    fastbit_iapi_free_array(fastbit->column_name);
+
+    /* Free FastBit resources */
+    fastbit_cleanup();
 
     H5MM_free(fastbit);
 
@@ -780,13 +781,27 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+static int
+H5X__fastbit_read_bitmaps(void *context, uint64_t start, uint64_t count,
+        uint32_t *data)
+{
+    unsigned j;
+    const uint32_t *bitmaps = (uint32_t *) context + start;
+
+    for (j = 0; j < count; ++ j)
+        data[j] = bitmaps[j];
+
+    return 0;
+}
+
 static herr_t
 H5X__fastbit_reconstruct_index(H5X_fastbit_t *fastbit)
 {
-    void *buf;
-    size_t buf_size;
     hid_t keys_space_id = FAIL, offsets_space_id = FAIL, bitmaps_space_id = FAIL;
     size_t key_array_size, offset_array_size, bitmap_array_size;
+    FastBitDataType fastbit_type;
+    hid_t type_id = FAIL, space_id = FAIL;
+    size_t nelmts;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -837,22 +852,36 @@ H5X__fastbit_reconstruct_index(H5X_fastbit_t *fastbit)
         HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
 
     /* Reconstruct index */
-    H5X_FASTBIT_LOG_DEBUG("Reconstructing index with nkeys=%lu, noffsets=%lu,"
+    H5X_FASTBIT_LOG_DEBUG("Reconstructing index with nkeys=%lu, noffsets=%lu, "
             "nbitmaps=%lu", fastbit->nkeys, fastbit->noffsets, fastbit->nbitmaps);
 
-    /* Get data from dataset */
-    if (FAIL == H5X__fastbit_read_data(fastbit->dataset_id, fastbit->column_name,
-            &buf, &buf_size))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get data from dataset");
+    /* Get space info */
+    if (FAIL == (type_id = H5Dget_type(fastbit->dataset_id)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get type from dataset");
+    if (FAIL == (space_id = H5Dget_space(fastbit->dataset_id)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get dataspace from dataset");
+    if (0 == (nelmts = (size_t) H5Sget_select_npoints(space_id)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid number of elements");
 
-    if (0 != fastbit_iapi_attach_full_index(fastbit->column_name, fastbit->keys, fastbit->nkeys,
-            fastbit->offsets, fastbit->noffsets, fastbit->bitmaps, fastbit->nbitmaps))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTDECODE, FAIL, "can't reconstruct index");
+    /* Convert type to FastBit type */
+    if (FastBitDataTypeUnknown == (fastbit_type = H5X__fastbit_convert_type(type_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCONVERT, FAIL, "can't convert type");
+
+    /* Register array */
+    if (0 != fastbit_iapi_register_array_index_only(fastbit->column_name,
+            fastbit_type, &nelmts, 1, fastbit->keys, fastbit->nkeys,
+            fastbit->offsets, fastbit->noffsets, fastbit->bitmaps,
+            H5X__fastbit_read_bitmaps))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTREGISTER, FAIL, "can't register array");
 
     H5X_FASTBIT_LOG_DEBUG("Reconstructed index");
     fastbit->idx_reconstructed = TRUE;
 
 done:
+    if (FAIL != type_id)
+        H5Tclose(type_id);
+    if (FAIL != space_id)
+        H5Sclose(space_id);
     if (FAIL != keys_space_id)
         H5Sclose(keys_space_id);
     if (FAIL != offsets_space_id)
@@ -922,8 +951,8 @@ H5X__fastbit_evaluate_query(H5X_fastbit_t *fastbit, hid_t query_id,
 {
     H5Q_t *query;
     double cv;
-    FastBitSelectionHandle selection_handle;
-    FastBitCompareType compare_type;
+    FastBitSelectionHandle selection_handle = NULL;
+    FastBitCompareType compare_type = 0;
     int64_t nhits;
     uint64_t *hit_coords = NULL;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -956,7 +985,7 @@ H5X__fastbit_evaluate_query(H5X_fastbit_t *fastbit, hid_t query_id,
     cv = H5X__fasbit_query_get_value_as_double(query);
     selection_handle = fastbit_selection_osr(fastbit->column_name, compare_type, cv);
 
-    H5X_FASTBIT_LOG_DEBUG("Selection estimate: %lu",
+    H5X_FASTBIT_LOG_DEBUG("Selection estimate: %ld",
             fastbit_selection_estimate(selection_handle));
 
     if (0 > (nhits = fastbit_selection_evaluate(selection_handle)))
@@ -1316,6 +1345,7 @@ H5X_fastbit_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
     *dataspace_id = ret_space_id;
 
 done:
+    H5MM_free(coords);
     if (FAIL != space_id)
         H5Sclose(space_id);
     if ((FAIL == ret_value) && (FAIL != ret_space_id))
