@@ -329,9 +329,7 @@ H5_term_library(void)
             pending += DOWN(R);
             pending += DOWN(S);
             pending += DOWN(T);
- #ifdef H5_HAVE_INDEXING
             pending += DOWN(X);
-#endif
        } /* end if */
 
         /* Don't shut down "low-level" components until "high-level" components

@@ -227,9 +227,6 @@
 /* Define if we have parallel support */
 #cmakedefine H5_HAVE_PARALLEL @H5_HAVE_PARALLEL@
 
-/* Define if we have Indexing support */
-#cmakedefine H5_HAVE_INDEXING @H5_HAVE_INDEXING@
-
 /* Define if we have support for ALACRITY */
 #cmakedefine H5_HAVE_ALACRITY @H5_HAVE_ALACRITY@
 
