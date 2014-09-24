@@ -44,7 +44,7 @@
 /* Local Macros */
 /****************/
 //#define H5X_ALACRITY_USE_COMPRESSION
-#define H5X_ALACRITY_DEBUG
+//#define H5X_ALACRITY_DEBUG
 
 #ifdef H5X_ALACRITY_DEBUG
 #define H5X_ALACRITY_LOG_DEBUG(...) do {                        \
