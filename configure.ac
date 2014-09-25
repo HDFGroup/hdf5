@@ -2116,7 +2116,7 @@ AC_ARG_WITH([fastbit],
 
 case $withval in
   yes)
-    HAVE_ALACRITY="yes"
+    HAVE_FASTBIT="yes"
     AC_CHECK_HEADERS([iapi.h])
     AC_CHECK_LIB([fastbit], [fastbit_selection_create],[MYFASTBIT_LIBS="-lfastbit"], [unset HAVE_FASTBIT])
     AC_SUBST([MYFASTBIT_LIBS])
