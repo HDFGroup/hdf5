@@ -140,7 +140,7 @@ H5O_idxinfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p,
     /* check args */
     HDassert(f);
     HDassert(p);
-    HDassert(mesg && mesg->s);
+    HDassert(mesg && mesg->metadata);
 
     /* encode */
     *p++ = (uint8_t) mesg->plugin_id;
