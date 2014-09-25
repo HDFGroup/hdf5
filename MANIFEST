@@ -2435,14 +2435,14 @@
 
 # CMake-specific Files
 ./config/cmake/cacheinit.cmake
+./config/cmake/CMakePackageConfigHelpers.cmake
 ./config/cmake/ConversionTests.c
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CTestCustom.cmake
 ./config/cmake/FindHDF5.cmake.in
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
-./config/cmake/hdf5-config.cmake.build.in
-./config/cmake/hdf5-config.cmake.install.in
+./config/cmake/hdf5-config.cmake.in
 ./config/cmake/hdf5-config-version.cmake.in
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/libhdf5.settings.cmake.in

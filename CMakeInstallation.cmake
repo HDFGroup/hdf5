@@ -1,3 +1,4 @@
+include (${HDF_RESOURCES_DIR}/CMakePackageConfigHelpers.cmake)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
@@ -33,19 +34,32 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
 endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 
 #-----------------------------------------------------------------------------
-# Configure the hdf5-config.cmake file for the build directory
+# Set includess needed for build
 #-----------------------------------------------------------------------------
 set (HDF5_INCLUDES_BUILD_TIME
     ${HDF5_SRC_DIR} ${HDF5_CPP_SRC_DIR} ${HDF5_HL_SRC_DIR}
     ${HDF5_TOOLS_SRC_DIR} ${HDF5_BINARY_DIR}
 )
+
+#-----------------------------------------------------------------------------
+# Set variables needed for installation
+#-----------------------------------------------------------------------------
 set (HDF5_VERSION_STRING ${HDF5_PACKAGE_VERSION})
 set (HDF5_VERSION_MAJOR  ${HDF5_PACKAGE_VERSION_MAJOR})
 set (HDF5_VERSION_MINOR  ${HDF5_PACKAGE_VERSION_MINOR})
 
-configure_file (
-    ${HDF_RESOURCES_DIR}/hdf5-config.cmake.build.in 
-    ${HDF5_BINARY_DIR}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake @ONLY
+#-----------------------------------------------------------------------------
+# Configure the hdf5-config.cmake file for the build directory
+#-----------------------------------------------------------------------------
+set(INCLUDE_INSTALL_DIR HDF5_INSTALL_INCLUDE_DIR )
+set(SHARE_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/share" )
+set(CURRENT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" )
+configure_package_config_file (
+    ${HDF_RESOURCES_DIR}/hdf5-config.cmake.in
+    "${HDF5_BINARY_DIR}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake"
+    INSTALL_DESTINATION "${CMAKE_CURRENT_BINARY_DIR}"
+    PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
+    INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
 #-----------------------------------------------------------------------------
@@ -66,11 +80,17 @@ endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 #-----------------------------------------------------------------------------
 # Configure the hdf5-config.cmake file for the install directory
 #-----------------------------------------------------------------------------
+set(INCLUDE_INSTALL_DIR HDF5_INSTALL_INCLUDE_DIR )
+set(SHARE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/" )
+set(CURRENT_BUILD_DIR "${CMAKE_INSTALL_PREFIX}" )
+configure_package_config_file (
+    ${HDF_RESOURCES_DIR}/hdf5-config.cmake.in
+    "${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}"
+    PATH_VARS HDF5_INSTALL_INCLUDE_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
+)
+
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
-  configure_file (
-      ${HDF_RESOURCES_DIR}/hdf5-config.cmake.install.in
-      ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake @ONLY
-  )
   install (
       FILES ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake
       DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/${HDF5_PACKAGE}
