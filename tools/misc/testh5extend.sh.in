@@ -122,6 +122,12 @@ TOOLTEST h5extend_exp3.ddl h5extend_tfile.h5
 TOOLTEST h5extend_exp4.ddl -r h5extend_tfile.h5
 TOOLTEST h5extend_exp5.ddl h5extend_tfile.h5
 
+TOOLTEST h5extend_multiexp1.ddl h5extend_multifile.h5
+TOOLTEST h5extend_multiexp2.ddl -e h5extend_multifile.h5
+TOOLTEST h5extend_multiexp3.ddl h5extend_multifile.h5
+TOOLTEST h5extend_multiexp4.ddl -r h5extend_multifile.h5
+TOOLTEST h5extend_multiexp5.ddl h5extend_multifile.h5
+
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."
     exit $EXIT_SUCCESS

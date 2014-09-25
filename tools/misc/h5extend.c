@@ -99,7 +99,7 @@ leave(int ret)
 int
 main (int argc, char *argv[])
 {
-    hbool_t eoa_msg_found = 0; /* Bool indicating if EOA message found */
+    hbool_t should_truncate = 0; /* Bool indicating if EOA and EOF are not equal */
     const char *filename; /* Source file name */
     int argno=1; /* Program argument number */
     hid_t fid = -1;
@@ -164,10 +164,9 @@ main (int argc, char *argv[])
         leave(EXIT_FAILURE);
     } /* end if */
 
-    /* Check to see if the EOA value is stored via an 'EOA' message */
+    /* If a SB extension exists check for EOA or EOFs messages */
     if (f->shared->sblock->ext_addr != HADDR_UNDEF) {
         H5O_loc_t ext_loc;      /* "Object location" for superblock extension */
-        H5O_eoa_t eoa_msg;      /* 'EOA' Message' */
 
         /* Open the superblock extension */
         if (H5F_super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0) {
@@ -175,30 +174,110 @@ main (int argc, char *argv[])
             leave(EXIT_FAILURE);
         } /* end if */
 
-        /* Check to see if there is an 'EOA' message */
-        if (H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id)) {
-            eoa_msg_found = 1;
+        /* If this is a multi-like vfd, read the EOFs message and retrieve
+           the EOAs for individual files and truncate accordingly */
+        if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) {
+            H5O_eofs_t eofs_msg;      /* 'EOFS' Message' */
+            H5FD_mem_t mt;
 
-            /* Retrieve 'EOA' message */ 
-            if (H5O_msg_read(&ext_loc, H5O_EOA_ID, &eoa_msg, H5AC_dxpl_id) == NULL) {
-                error_msg("Unable to read 'EOA' message in superblock extension.\n");
-                leave(EXIT_FAILURE);
-            } /* end if */
-
-            /* Pull 'EOA' value from the 'EOA' message */
-            eoa = eoa_msg.eoa;
-
-            if (!quiet_g) HDfprintf(outputfile, "  Superblock extension contains 'EOA' message with value = %a\n", eoa);
-
-            /* If requested, remove the 'EOA' message from the superblock extension */
-            if (remove_g) {
-                if (H5O_msg_remove(&ext_loc, H5O_EOA_ID, H5O_ALL, TRUE, H5AC_dxpl_id) < 0) {
-                    error_msg("Unable to remove 'EOA' message.\n");
+            /* Check to see if there is an 'EOFS' message */
+            if (H5O_msg_exists(&ext_loc, H5O_EOFS_ID, H5AC_dxpl_id)) {
+                /* Retrieve 'EOFS' message */ 
+                if (H5O_msg_read(&ext_loc, H5O_EOFS_ID, &eofs_msg, H5AC_dxpl_id) == NULL) {
+                    error_msg("Unable to read 'EOFS' message in superblock extension.\n");
                     leave(EXIT_FAILURE);
                 } /* end if */
-                if (!quiet_g) HDfprintf(outputfile, "  Removed 'EOA' message from superblock extension.\n");
+
+                if (!quiet_g) {
+                    HDfprintf(outputfile, 
+                              "  File Driver EOA and Superblock extension EOF values:\n");
+                }
+
+                for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
+                    if ((eoa = H5FDget_eoa(f->shared->lf, mt)) == HADDR_UNDEF) {
+                        error_msg("Unable to determine 'EOA' message from file driver.\n");
+                        leave(EXIT_FAILURE);
+                    } /* end if */
+
+                    if (!quiet_g)
+                        HDfprintf(outputfile, "  %d: EOA = %llu  EOF = %llu\n", mt, eoa, eofs_msg.memb_eof[mt]);
+
+                    if(eoa != eofs_msg.memb_eof[mt]) {
+                        should_truncate = 1;
+                    }
+                }
+
+                /* If requested, remove the 'EOFS' message from the superblock extension */
+                if (remove_g) {
+                    if (H5O_msg_remove(&ext_loc, H5O_EOFS_ID, H5O_ALL, TRUE, H5AC_dxpl_id) < 0) {
+                        error_msg("Unable to remove 'EOFS' message.\n");
+                        leave(EXIT_FAILURE);
+                    } /* end if */
+                    if (!quiet_g) HDfprintf(outputfile, "  Removed 'EOFS' message from superblock extension.\n");
+                } /* end if */
             } /* end if */
+            else if (!quiet_g) 
+                HDfprintf(outputfile, "  No 'EOFS' message contained in this file.\n");
         } /* end if */
+        /* for non multi-like VFDs, check to see if the EOA value is stored via an 'EOA' message */
+        else {
+            hbool_t eoa_msg_found = 0; /* Bool indicating if EOA message found */
+            H5O_eoa_t eoa_msg;      /* 'EOA' Message' */
+
+            /* Check to see if there is an 'EOA' message */
+            if (H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id)) {
+                eoa_msg_found = 1;
+
+                /* Retrieve 'EOA' message */ 
+                if (H5O_msg_read(&ext_loc, H5O_EOA_ID, &eoa_msg, H5AC_dxpl_id) == NULL) {
+                    error_msg("Unable to read 'EOA' message in superblock extension.\n");
+                    leave(EXIT_FAILURE);
+                } /* end if */
+
+                /* Pull 'EOA' value from the 'EOA' message */
+                eoa = eoa_msg.eoa;
+
+                if (!quiet_g) 
+                    HDfprintf(outputfile, 
+                              "  Superblock extension contains 'EOA' message with value = %a\n", eoa);
+
+                /* If requested, remove the 'EOA' message from the superblock extension */
+                if (remove_g) {
+                    if (H5O_msg_remove(&ext_loc, H5O_EOA_ID, H5O_ALL, TRUE, H5AC_dxpl_id) < 0) {
+                        error_msg("Unable to remove 'EOA' message.\n");
+                        leave(EXIT_FAILURE);
+                    } /* end if */
+                    if (!quiet_g) 
+                        HDfprintf(outputfile, "  Removed 'EOA' message from superblock extension.\n");
+                } /* end if */
+            } /* end if */
+
+            /* Retrieve 'EOA' value from file driver layer if not found in sblock extension */
+            if (!eoa_msg_found) {
+                if ((eoa = H5FDget_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF) {
+                    error_msg("Unable to determine 'EOA' message from file driver.\n");
+                    leave(EXIT_FAILURE);
+                } /* end if */
+                if (!quiet_g) HDfprintf(outputfile, "  No 'EOA' message contained in this file. File driver's reported EOA value = %a\n", eoa);
+            } /* end if */
+
+            /* Get 'EOF' value */
+            if ((eof = H5FDget_eof(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF) {
+                error_msg("Unable to retrieve 'EOF' value from file driver.\n");
+                leave(EXIT_FAILURE);
+            } /* end if */
+            if (!quiet_g) HDfprintf(outputfile, "  File EOF value = %a\n", eof);
+
+            /* Get file size */
+            if (H5Fget_filesize(fid, &filesize) < 0) {
+                error_msg("Unable to retrieve file size.\n");
+                leave(EXIT_FAILURE);
+            } /* end if */
+            if (!quiet_g) HDfprintf(outputfile, "  File size = %a\n", filesize);
+
+            if (eoa != eof)
+                should_truncate = 1;
+        } /* end else */
 
         /* Close superblock extension */
         if (H5F_super_ext_close(f, &ext_loc, H5AC_dxpl_id, FALSE) < 0) {
@@ -207,38 +286,23 @@ main (int argc, char *argv[])
         } /* end if */
     } /* end if */
 
-    /* Retrieve 'EOA' value from file driver layer if not found in sblock extension */
-    if (!eoa_msg_found) {
-        if ((eoa = H5FDget_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF) {
-            error_msg("Unable to determine 'EOA' message from file driver.\n");
-            leave(EXIT_FAILURE);
-        } /* end if */
-        if (!quiet_g) HDfprintf(outputfile, "  No 'EOA' message contained in this file. File driver's reported EOA value = %a\n", eoa);
-    } /* end if */
-
-    /* Get 'EOF' value */
-    if ((eof = H5FDget_eof(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF) {
-        error_msg("Unable to retrieve 'EOF' value from file driver.\n");
-        leave(EXIT_FAILURE);
-    } /* end if */
-    if (!quiet_g) HDfprintf(outputfile, "  File EOF value = %a\n", eof);
-
-    /* Get file size */
-    if (H5Fget_filesize(fid, &filesize) < 0) {
-        error_msg("Unable to retrieve file size.\n");
-        leave(EXIT_FAILURE);
-    } /* end if */
-    if (!quiet_g) HDfprintf(outputfile, "  File size = %a\n", filesize);
 
     /* Suggest extending the file if EOA/EOF do not match (and request to remove/extend not already made) */
-    if ((!extend_g && !remove_g)&&(eoa != eof))
+    if ((!extend_g && !remove_g)&&(should_truncate))
         if (!quiet_g) HDfprintf(outputfile, "  EOA and EOF do not match! Suggest extending the file for backward compatibility.\n");
 
     /* Extend the file, if requested */
     if (extend_g) {
-        if (eoa != eof) {
+        if (should_truncate) {
             /* truncate file to match 'EOA' value */
-            if (!quiet_g) HDfprintf(outputfile, "  Truncating file to match EOA of %a\n", eoa);
+
+            if (!quiet_g) {
+                if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS)
+                    HDfprintf(outputfile, "  Truncating file to match EOA\n");
+                else
+                    HDfprintf(outputfile, "  Truncating file to match EOA of %a\n", eoa);
+            }
+
             if (H5FDtruncate(f->shared->lf, H5AC_dxpl_id, 0) < 0) {
                 error_msg("Unable to truncate file.\n");
                 leave(EXIT_FAILURE);
