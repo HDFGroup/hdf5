@@ -641,7 +641,7 @@ cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
 set(CTEST_SOURCE_NAME hdf5-1.8.13)
 # this is the location of the source with ctest parameter hdf5src
 # "ctest -S HDF518LinuxCmake.cmake,hdf5src -C Release -O hdf518static.log"
-set(CTEST_SOURCE_NAME ${CTEST_SCRIPT_ARG})
+#set(CTEST_SOURCE_NAME ${CTEST_SCRIPT_ARG})
 
 # this is the location of the build directory
 set(CTEST_BINARY_NAME ${CTEST_SOURCE_NAME}/build)
