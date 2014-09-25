@@ -58,16 +58,15 @@ typedef struct H5X__dummy_query_data_t {
 /********************/
 
 static void *
-H5X_dummy_create(hid_t file_id, hid_t dataset_id, hid_t xcpl_id,
-        hid_t xapl_id, size_t *metadata_size, void **metadata);
+H5X_dummy_create(hid_t dataset_id, hid_t xcpl_id, hid_t xapl_id,
+        size_t *metadata_size, void **metadata);
 
 static herr_t
-H5X_dummy_remove(hid_t file_id, hid_t dataset_id, size_t metadata_size,
-        void *metadata);
+H5X_dummy_remove(hid_t dataset_id, size_t metadata_size, void *metadata);
 
 static void *
-H5X_dummy_open(hid_t file_id, hid_t dataset_id, hid_t xapl_id,
-        size_t metadata_size, void *metadata);
+H5X_dummy_open(hid_t dataset_id, hid_t xapl_id, size_t metadata_size,
+        void *metadata);
 
 static herr_t
 H5X_dummy_close(void *idx_handle);
@@ -178,11 +177,11 @@ done:
  *------------------------------------------------------------------------
  */
 static void *
-H5X_dummy_create(hid_t file_id, hid_t dataset_id, hid_t UNUSED xcpl_id,
-        hid_t xapl_id, size_t *metadata_size, void **metadata)
+H5X_dummy_create(hid_t dataset_id, hid_t UNUSED xcpl_id, hid_t xapl_id,
+        size_t *metadata_size, void **metadata)
 {
     H5X_dummy_t *dummy = NULL;
-    hid_t type_id, space_id;
+    hid_t file_id, type_id, space_id;
     void *buf = NULL;
     size_t buf_size;
     H5O_info_t dset_info;
@@ -205,6 +204,10 @@ H5X_dummy_create(hid_t file_id, hid_t dataset_id, hid_t UNUSED xcpl_id,
     /* Get data from dataset */
     if (FAIL == H5X__dummy_read_data(dataset_id, &buf, &buf_size))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get data from dataset");
+
+    /* Get file ID */
+    if (FAIL == (file_id = H5Iget_file_id(dataset_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get file ID from dataset");
 
     /* Create anonymous datasets */
     if (FAIL == (dummy->idx_anon_id = H5Dcreate_anon(file_id, type_id, space_id,
@@ -251,7 +254,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_dummy_remove(hid_t UNUSED file_id, hid_t UNUSED dataset_id, size_t UNUSED metadata_size,
+H5X_dummy_remove(hid_t UNUSED dataset_id, size_t UNUSED metadata_size,
         void UNUSED *metadata)
 {
     herr_t ret_value = SUCCEED; /* Return value */
@@ -276,9 +279,10 @@ H5X_dummy_remove(hid_t UNUSED file_id, hid_t UNUSED dataset_id, size_t UNUSED me
  *-------------------------------------------------------------------------
  */
 static void *
-H5X_dummy_open(hid_t file_id, hid_t dataset_id, hid_t xapl_id,
-        size_t metadata_size, void *metadata)
+H5X_dummy_open(hid_t dataset_id, hid_t xapl_id, size_t metadata_size,
+        void *metadata)
 {
+    hid_t file_id;
     H5X_dummy_t *dummy = NULL;
     void *ret_value = NULL; /* Return value */
 
@@ -299,6 +303,9 @@ H5X_dummy_open(hid_t file_id, hid_t dataset_id, hid_t xapl_id,
     if (NULL == (dummy->idx_token = H5MM_malloc(dummy->idx_token_size)))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, NULL, "can't allocate token");
     HDmemcpy(dummy->idx_token, metadata, dummy->idx_token_size);
+
+    if (FAIL == (file_id = H5Iget_file_id(dataset_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get file ID from dataset");
 
     if (FAIL == (dummy->idx_anon_id = H5Oopen_by_addr(file_id, *((haddr_t *) dummy->idx_token))))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, NULL, "can't open anonymous dataset");

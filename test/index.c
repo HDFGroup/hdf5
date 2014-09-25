@@ -65,13 +65,12 @@ static herr_t
 create_index(hid_t file, const char *dataset_name, unsigned plugin)
 {
     hid_t dataset = H5I_BADID;
-    herr_t ret;
 
     dataset = H5Dopen(file, dataset_name, H5P_DEFAULT);
     if (dataset < 0) FAIL_STACK_ERROR;
 
     /* Add indexing information */
-    if (H5Xcreate(file, plugin, dataset, H5P_DEFAULT) < 0) FAIL_STACK_ERROR;
+    if (H5Xcreate(dataset, plugin, H5P_DEFAULT) < 0) FAIL_STACK_ERROR;
 
     if (H5Dclose(dataset) < 0) FAIL_STACK_ERROR;
 
@@ -138,7 +137,7 @@ static herr_t
 query(hid_t file_id, const char *dataset_name)
 {
     hsize_t start_coord[H5S_MAX_RANK + 1], end_coord[H5S_MAX_RANK + 1];
-    hsize_t nelmts;
+//    hsize_t nelmts;
     hid_t dataset = H5I_BADID;
     hid_t space = H5I_BADID;
     float query_lb = 39.1f, query_ub = 42.1f;
@@ -169,18 +168,18 @@ query(hid_t file_id, const char *dataset_name)
 
     /* Bounds should be 40 and 42 */
     H5Sget_select_bounds(space, start_coord, end_coord);
+
+    /*
     nelmts = (hsize_t) H5Sget_select_npoints(space);
+    printf("\n Created dataspace with %llu elements,"
+            " bounds = [(%llu, %llu):(%llu, %llu)]\n",
+            nelmts, start_coord[0], start_coord[1], end_coord[0], end_coord[1]);
+     */
 
     if (start_coord[0] != 40) FAIL_STACK_ERROR;
     if (start_coord[1] != 0) FAIL_STACK_ERROR;
     if (end_coord[0] != 42) FAIL_STACK_ERROR;
     if (end_coord[1] != 2) FAIL_STACK_ERROR;
-
-    /*
-    printf("\n Created dataspace with %llu elements,"
-            " bounds = [(%llu, %llu):(%llu, %llu)]\n",
-            nelmts, start_coord[0], start_coord[1], end_coord[0], end_coord[1]);
-     */
 
     /*
     printf("\n Index query time: %lf ms\n",
@@ -215,7 +214,6 @@ main(int argc, char **argv)
     hsize_t ntuples = NTUPLES;
     hsize_t ntuples_multiplier = 1;
     hsize_t ncomponents = 3;
-    hsize_t start, total;
     float *data;
     hid_t file = H5I_BADID, fapl = H5I_BADID;
     hsize_t i, j;
@@ -247,7 +245,7 @@ main(int argc, char **argv)
      * Test creating index...
      */
     TESTING("index create from existing dataset");
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         goto error;
 
@@ -299,6 +297,7 @@ error:
     puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY {
         H5Fclose(file);
+        HDfree(data);
     } H5E_END_TRY;
 
     return 1;

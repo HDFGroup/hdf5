@@ -384,9 +384,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Xcreate(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t xcpl_id)
+H5Xcreate(hid_t scope_id, unsigned plugin_id, hid_t xcpl_id)
 {
-    H5F_t *file = NULL;
     H5D_t *dset = NULL;
     H5X_class_t *idx_class = NULL;
     void *idx_handle = NULL; /* pointer to index object created */
@@ -403,8 +402,6 @@ H5Xcreate(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t xcpl_id)
     /* Check args */
     if (plugin_id > H5X_PLUGIN_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid plugin identification number");
-    if (NULL == (file = (H5F_t *) H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID");
     if (NULL == (dset = (H5D_t *) H5I_object_verify(scope_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
@@ -422,8 +419,8 @@ H5Xcreate(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t xcpl_id)
     /* Call create of the plugin */
     if (NULL == idx_class->create)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin create callback is not defined");
-    if (NULL == (idx_handle = idx_class->create(file_id, dataset_id, xcpl_id,
-            xapl_id, &metadata_size, &metadata)))
+    if (NULL == (idx_handle = idx_class->create(dataset_id, xcpl_id, xapl_id,
+            &metadata_size, &metadata)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot create new plugin index");
 
     /* Add idx_handle to dataset */
@@ -447,9 +444,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Xremove(hid_t file_id, unsigned plugin_id, hid_t scope_id)
+H5Xremove(hid_t scope_id, unsigned plugin_id)
 {
-    void *file = NULL, *dset = NULL;
+    void *dset = NULL;
     size_t plugin_index;
     hid_t dataset_id = scope_id; /* TODO for now */
     hid_t xapl_id = H5P_INDEX_ACCESS_DEFAULT; /* TODO for now */
@@ -463,8 +460,6 @@ H5Xremove(hid_t file_id, unsigned plugin_id, hid_t scope_id)
     /* Check args */
     if (plugin_id > H5X_PLUGIN_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid plugin identification number");
-    if (NULL == (file = (void *) H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID");
     if (NULL == H5I_object_verify(scope_id, H5I_DATASET))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "scope_id is restricted to dataset ID");
 
@@ -477,8 +472,8 @@ H5Xremove(hid_t file_id, unsigned plugin_id, hid_t scope_id)
     /* Call remove of the plugin */
     if (NULL == H5X_table_g[plugin_index].remove)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin remove callback is not defined");
-    if (FAIL == H5X_table_g[plugin_index].remove(file_id, dataset_id,
-            metadata_size, metadata))
+    if (FAIL == H5X_table_g[plugin_index].remove(dataset_id, metadata_size,
+            metadata))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot remove index");
 
     /* Remove idx_handle from dataset */
@@ -509,6 +504,8 @@ H5Xget_count(hid_t scope_id, hsize_t *idx_count)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "scope_id is restricted to dataset ID");
     if (!idx_count)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "idx_count is NULL");
+
+    *idx_count = 1;
 
 done:
     FUNC_LEAVE_API(ret_value)

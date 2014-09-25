@@ -62,12 +62,11 @@ typedef struct {
     H5X_type_t type;      /* Type of data indexed by this plugin */
 
     /* Callbacks, described above */
-    void *(*create)(hid_t file_id, hid_t dataset_id, hid_t xcpl_id,
-        hid_t xapl_id, size_t *metadata_size, void **metadata);
-    herr_t (*remove)(hid_t file_id, hid_t dataset_id, size_t metadata_size,
-        void *metadata);
-    void *(*open)(hid_t file_id, hid_t dataset_id, hid_t xapl_id,
-        size_t metadata_size, void *metadata);
+    void * (*create)(hid_t dataset_id, hid_t xcpl_id, hid_t xapl_id,
+            size_t *metadata_size, void **metadata);
+    herr_t (*remove)(hid_t dataset_id, size_t metadata_size, void *metadata);
+    void *(*open)(hid_t dataset_id, hid_t xapl_id, size_t metadata_size,
+            void *metadata);
     herr_t (*close)(void *idx_handle);
     herr_t (*pre_update)(void *idx_handle, hid_t dataspace_id, hid_t xxpl_id);
     herr_t (*post_update)(void *idx_handle, const void *buf, hid_t dataspace_id,
@@ -92,9 +91,8 @@ extern "C" {
 H5_DLL herr_t H5Xregister(const H5X_class_t *idx_class);
 H5_DLL herr_t H5Xunregister(unsigned plugin_id);
 
-H5_DLL herr_t H5Xcreate(hid_t file_id, unsigned plugin_id, hid_t scope_id,
-        hid_t xcpl_id);
-H5_DLL herr_t H5Xremove(hid_t file_id, unsigned plugin_id, hid_t scope_id);
+H5_DLL herr_t H5Xcreate(hid_t scope_id, unsigned plugin_id, hid_t xcpl_id);
+H5_DLL herr_t H5Xremove(hid_t scope_id, unsigned plugin_id);
 
 H5_DLL herr_t H5Xget_count(hid_t scope_id, hsize_t *idx_count);
 

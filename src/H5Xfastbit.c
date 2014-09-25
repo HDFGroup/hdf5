@@ -101,7 +101,7 @@ struct H5X_fastbit_scatter_info {
 /********************/
 
 static H5X_fastbit_t *
-H5X__fastbit_init(hid_t file_id, hid_t dataset_id);
+H5X__fastbit_init(hid_t dataset_id);
 
 static herr_t
 H5X__fastbit_term(H5X_fastbit_t *fastbit);
@@ -114,7 +114,7 @@ H5X__fastbit_read_data(hid_t dataset_id, const char *column_name, void **buf,
         size_t *buf_size);
 
 static herr_t
-H5X__fastbit_create_index(H5X_fastbit_t *fastbit, hid_t file_id);
+H5X__fastbit_create_index(H5X_fastbit_t *fastbit);
 
 static herr_t
 H5X__fastbit_update_index(H5X_fastbit_t *fastbit);
@@ -141,16 +141,15 @@ H5X__fastbit_create_selection(H5X_fastbit_t *fastbit, hid_t dataspace_id,
         uint64_t *coords, uint64_t ncoords);
 
 static void *
-H5X_fastbit_create(hid_t file_id, hid_t dataset_id, hid_t xcpl_id,
-        hid_t xapl_id, size_t *metadata_size, void **metadata);
+H5X_fastbit_create(hid_t dataset_id, hid_t xcpl_id, hid_t xapl_id,
+        size_t *metadata_size, void **metadata);
 
 static herr_t
-H5X_fastbit_remove(hid_t file_id, hid_t dataset_id, size_t metadata_size,
-        void *metadata);
+H5X_fastbit_remove(hid_t dataset_id, size_t metadata_size, void *metadata);
 
 static void *
-H5X_fastbit_open(hid_t file_id, hid_t dataset_id, hid_t xapl_id,
-        size_t metadata_size, void *metadata);
+H5X_fastbit_open(hid_t dataset_id, hid_t xapl_id, size_t metadata_size,
+        void *metadata);
 
 static herr_t
 H5X_fastbit_close(void *idx_handle);
@@ -208,10 +207,11 @@ const H5X_class_t H5X_FASTBIT[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5X_fastbit_t *
-H5X__fastbit_init(hid_t file_id, hid_t dataset_id)
+H5X__fastbit_init(hid_t dataset_id)
 {
     H5X_fastbit_t *fastbit = NULL;
     hid_t space_id = FAIL;
+    hid_t file_id = FAIL;
     H5X_fastbit_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -220,8 +220,11 @@ H5X__fastbit_init(hid_t file_id, hid_t dataset_id)
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, NULL, "can't allocate FastBit struct");
     fastbit->private_metadata = NULL;
 
-    fastbit->file_id = file_id;
+    if ((file_id = H5Iget_file_id(dataset_id)) < 0)
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get file ID from dataset");
+
     fastbit->dataset_id = dataset_id;
+    fastbit->file_id = file_id;
 
     fastbit->keys_id = FAIL;
     fastbit->nkeys = 0;
@@ -450,7 +453,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X__fastbit_create_index(H5X_fastbit_t *fastbit, hid_t file_id)
+H5X__fastbit_create_index(H5X_fastbit_t *fastbit)
 {
     hid_t key_space_id = FAIL, offset_space_id = FAIL, bitmap_space_id = FAIL;
     hsize_t key_array_size, offset_array_size, bitmap_array_size;
@@ -476,7 +479,7 @@ H5X__fastbit_create_index(H5X_fastbit_t *fastbit, hid_t file_id)
     key_array_size = fastbit->nkeys * sizeof(double);
     if (FAIL == (key_space_id = H5Screate_simple(1, &key_array_size, NULL)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
-    if (FAIL == (fastbit->keys_id = H5Dcreate_anon(file_id, fastbit->opaque_type_id,
+    if (FAIL == (fastbit->keys_id = H5Dcreate_anon(fastbit->file_id, fastbit->opaque_type_id,
             key_space_id, H5P_DEFAULT, H5P_DEFAULT)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
 
@@ -488,7 +491,7 @@ H5X__fastbit_create_index(H5X_fastbit_t *fastbit, hid_t file_id)
     offset_array_size = fastbit->noffsets * sizeof(int64_t);
     if (FAIL == (offset_space_id = H5Screate_simple(1, &offset_array_size, NULL)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
-    if (FAIL == (fastbit->offsets_id = H5Dcreate_anon(file_id, fastbit->opaque_type_id,
+    if (FAIL == (fastbit->offsets_id = H5Dcreate_anon(fastbit->file_id, fastbit->opaque_type_id,
             offset_space_id, H5P_DEFAULT, H5P_DEFAULT)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
 
@@ -500,7 +503,7 @@ H5X__fastbit_create_index(H5X_fastbit_t *fastbit, hid_t file_id)
     bitmap_array_size = fastbit->nbitmaps * sizeof(uint32_t);
     if (FAIL == (bitmap_space_id = H5Screate_simple(1, &bitmap_array_size, NULL)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
-    if (FAIL == (fastbit->bitmaps_id = H5Dcreate_anon(file_id, fastbit->opaque_type_id,
+    if (FAIL == (fastbit->bitmaps_id = H5Dcreate_anon(fastbit->file_id, fastbit->opaque_type_id,
             bitmap_space_id, H5P_DEFAULT, H5P_DEFAULT)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
 
@@ -1082,8 +1085,8 @@ done:
  *------------------------------------------------------------------------
  */
 static void *
-H5X_fastbit_create(hid_t file_id, hid_t dataset_id, hid_t UNUSED xcpl_id,
-        hid_t xapl_id, size_t *metadata_size, void **metadata)
+H5X_fastbit_create(hid_t dataset_id, hid_t UNUSED xcpl_id, hid_t xapl_id,
+        size_t *metadata_size, void **metadata)
 {
     H5X_fastbit_t *fastbit = NULL;
     void *ret_value = NULL; /* Return value */
@@ -1096,7 +1099,7 @@ H5X_fastbit_create(hid_t file_id, hid_t dataset_id, hid_t UNUSED xcpl_id,
     H5X_FASTBIT_LOG_DEBUG("Enter");
 
     /* Initialize FastBit plugin */
-    if (NULL == (fastbit = H5X__fastbit_init(file_id, dataset_id)))
+    if (NULL == (fastbit = H5X__fastbit_init(dataset_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, NULL, "can't initialize FastBit");
 
     /* Get data from dataset */
@@ -1104,7 +1107,7 @@ H5X_fastbit_create(hid_t file_id, hid_t dataset_id, hid_t UNUSED xcpl_id,
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get data from dataset");
 
     /* Index data */
-    if (FAIL == H5X__fastbit_create_index(fastbit, file_id))
+    if (FAIL == H5X__fastbit_create_index(fastbit))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, NULL, "can't create index data from dataset");
 
     /* Serialize metadata for H5X interface */
@@ -1144,8 +1147,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_fastbit_remove(hid_t UNUSED file_id, hid_t UNUSED dataset_id,
-        size_t UNUSED metadata_size, void UNUSED *metadata)
+H5X_fastbit_remove(hid_t UNUSED dataset_id, size_t UNUSED metadata_size,
+        void UNUSED *metadata)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1167,8 +1170,8 @@ H5X_fastbit_remove(hid_t UNUSED file_id, hid_t UNUSED dataset_id,
  *-------------------------------------------------------------------------
  */
 static void *
-H5X_fastbit_open(hid_t file_id, hid_t dataset_id, hid_t xapl_id,
-        size_t metadata_size, void *metadata)
+H5X_fastbit_open(hid_t dataset_id, hid_t xapl_id, size_t metadata_size,
+        void *metadata)
 {
     H5X_fastbit_t *fastbit = NULL;
     void *ret_value = NULL; /* Return value */
@@ -1182,7 +1185,7 @@ H5X_fastbit_open(hid_t file_id, hid_t dataset_id, hid_t xapl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL metadata");
 
     /* Initialize FastBit plugin */
-    if (NULL == (fastbit = H5X__fastbit_init(file_id, dataset_id)))
+    if (NULL == (fastbit = H5X__fastbit_init(dataset_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, NULL, "can't initialize FastBit");
 
     /* Deserialize plugin metadata */
@@ -1263,8 +1266,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_fastbit_post_update(void *idx_handle, const void *data,
-        hid_t dataspace_id, hid_t xxpl_id)
+H5X_fastbit_post_update(void *idx_handle, const void *data, hid_t dataspace_id,
+        hid_t xxpl_id)
 {
     H5X_fastbit_t *fastbit = (H5X_fastbit_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */

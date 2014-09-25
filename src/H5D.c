@@ -316,7 +316,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
 
         if (NULL == idx_class->open)
             HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin open callback not defined");
-        if (NULL == (idx_handle = idx_class->open(loc_id, ret_value, xapl_id,
+        if (NULL == (idx_handle = idx_class->open(ret_value, xapl_id,
                 metadata_size, metadata)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "cannot open index");
         dset->shared->idx_handle = idx_handle;
