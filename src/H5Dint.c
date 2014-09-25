@@ -1693,6 +1693,16 @@ H5D_close(H5D_t *dataset)
         if(H5O_close(&(dataset->oloc)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
 
+        /* Close index object if index is closed */
+        if (dataset->shared->idx_handle) {
+            H5X_class_t *idx_class = dataset->shared->idx_class;
+
+            if (NULL == (idx_class->close))
+                HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin close callback not defined");
+            if (FAIL == idx_class->close(dataset->shared->idx_handle))
+                HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
+        }
+
         /* Release index info */
         if (FAIL == H5O_msg_reset(H5O_IDXINFO_ID, &dataset->shared->idx_info))
             free_failed = TRUE;

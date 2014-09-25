@@ -348,21 +348,10 @@ done:
 herr_t
 H5Dclose(hid_t dset_id)
 {
-    H5D_t *dset;
-    void *idx_handle;
-    H5X_class_t *idx_class;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
-
-    /* Check args */
-    if(NULL == (dset = (H5D_t *) H5I_object_verify(dset_id, H5I_DATASET)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-
-    /* Get reference to idx_handle (before dset gets closed) */
-    idx_class = dset->shared->idx_class;
-    idx_handle = dset->shared->idx_handle;
 
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
@@ -370,14 +359,6 @@ H5Dclose(hid_t dset_id)
      */
     if(H5I_dec_app_ref_always_close(dset_id) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
-
-    /* Close index object if index is closed */
-    if (idx_handle && (FAIL == H5I_get_ref(dset_id, FALSE))) {
-        if (NULL == (idx_class->close))
-            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin close callback not defined");
-        if (FAIL == idx_class->close(idx_handle))
-            HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
-    }
 
 done:
     FUNC_LEAVE_API(ret_value)
