@@ -971,7 +971,7 @@ herr_t
 H5Dquery(hid_t dset_id, hid_t query_id, hid_t *space_id)
 {
     H5D_t *dset = NULL;
-    hid_t ret_value = FAIL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
