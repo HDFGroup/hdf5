@@ -39,6 +39,8 @@ typedef enum H5PL_type_t {
   #define H5PLUGIN_DLL __declspec(dllexport)
 #elif (__GNUC__ >= 4)  /* GCC 4.x has support for visibility options */
   #define H5PLUGIN_DLL __attribute__ ((visibility("default")))
+#else
+  #define H5PLUGIN_DLL
 #endif
 
 #ifdef __cplusplus
