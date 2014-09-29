@@ -982,7 +982,7 @@ herr_t H5TBread_fields_name(hid_t loc_id,
     if((mem_type_id = H5Tcreate(H5T_COMPOUND, type_size)) < 0)
         goto out;
 
-    /* iterate tru the members */
+    /* iterate through the members */
     for(i = 0, j = 0; i < nfields; i++) {
         /* get the member name */
         if(NULL == (member_name = H5Tget_member_name(ftype_id, (unsigned)i)))
@@ -1028,6 +1028,10 @@ herr_t H5TBread_fields_name(hid_t loc_id,
         member_name = NULL;
     } /* end for */
 
+    /* check to make sure field was found, no reason to continue if it does not exist */
+    if(j == 0)
+      goto out;
+    
     /* get the dataspace handle */
     if((sid = H5Dget_space(did)) < 0)
         goto out;
