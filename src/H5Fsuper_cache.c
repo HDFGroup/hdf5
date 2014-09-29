@@ -421,11 +421,6 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
         H5F_addr_decode(f, (const uint8_t **)&p, &sblock->base_addr/*out*/);
         H5F_addr_decode(f, (const uint8_t **)&p, &sblock->ext_addr/*out*/);
         H5F_addr_decode(f, (const uint8_t **)&p, &stored_eof/*out*/);
-#if 0
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1))
-            H5F_addr_decode(f, (const uint8_t **)&p, &types_eof[mt]/*out*/);
-        stored_eof = types_eof[H5FD_MEM_SUPER];
-#endif
         H5F_addr_decode(f, (const uint8_t **)&p, &sblock->root_addr/*out*/);
 
         /* Compute checksum for superblock */
@@ -883,23 +878,11 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                 if(H5FD_coordinate(f->shared->lf, dxpl_id, H5FD_COORD_EOF) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level coordinate failed")
 #endif
-
                 /* Check again if truncation will happen after updating the EOF when flushing. */
                 if(FALSE == (should_truncate = H5F__should_truncate(f))) {
                     if ((rel_eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eof request failed")
                     H5F_addr_encode(f, &p, rel_eof + sblock->base_addr);
-#if 0
-                    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                        if ((temp = H5FD_get_eof(f->shared->lf, mt)) == HADDR_UNDEF)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-
-                        if(H5FD_MEM_SUPER == mt) 
-                            rel_eof = temp + sblock->base_addr;
-
-                        H5F_addr_encode(f, &p, temp + sblock->base_addr);
-                    }
-#endif
                 }
             } /* end if */
 
@@ -912,17 +895,6 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                 if ((rel_eof = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
                 H5F_addr_encode(f, &p, rel_eof + sblock->base_addr);
-#if 0
-                for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                    if ((temp = H5FD_get_eoa(f->shared->lf, mt)) == HADDR_UNDEF)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-
-                    if(H5FD_MEM_SUPER == mt) 
-                        rel_eof = temp + sblock->base_addr;
-
-                    H5F_addr_encode(f, &p, temp + sblock->base_addr);
-                }
-#endif
             } /* end if */
 
             /* Retrieve information for root group */
@@ -975,7 +947,10 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                 /* Get the current EOA */
                 if((eoa_msg.eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-        
+
+                /* add the base address to the EOA */
+                eoa_msg.eoa += sblock->base_addr;
+
                 /* Set the message flag */
                 eoa_msg.avoid_truncate = f->shared->avoid_truncate;
 
@@ -988,11 +963,13 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                  * unknown' flag'.
                  */
                 if(eoa_msg.eoa == rel_eof) {
-                    if(H5O_msg_write(&ext_loc, H5O_EOA_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &eoa_msg, dxpl_id) < 0)
+                    if(H5O_msg_write(&ext_loc, H5O_EOA_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, 
+                                     H5O_UPDATE_TIME, &eoa_msg, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "unable to update driver info header message")
                 } /* end if */
                 else {
-                    if(H5O_msg_write(&ext_loc, H5O_EOA_ID, H5O_MSG_FLAG_FAIL_IF_UNKNOWN, H5O_UPDATE_TIME, &eoa_msg, dxpl_id) < 0)
+                    if(H5O_msg_write(&ext_loc, H5O_EOA_ID, H5O_MSG_FLAG_FAIL_IF_UNKNOWN, 
+                                     H5O_UPDATE_TIME, &eoa_msg, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "unable to update driver info header message")
                 } /* end else */
             } /* end if */ 

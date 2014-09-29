@@ -776,7 +776,11 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
             } /* end else */
 
             /* Set up data structures */
-            file->eof = size;
+
+            /* Determine new size of memory buffer */
+            H5_ASSIGN_OVERFLOW(file->eof, file->increment * (size / file->increment), haddr_t, size_t);
+            if(size % file->increment)
+                file->eof += file->increment;
 
             /* If there is an initial file image, copy it, using the callback if possible */
             if(file_image_info.buffer && file_image_info.size > 0) {

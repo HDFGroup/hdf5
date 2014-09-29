@@ -464,6 +464,7 @@ void big_dataset(void)
     int mpi_size, mpi_rank;     /* MPI info */
     hid_t iof,                  /* File ID */
         fapl,                   /* File access property list ID */
+        fcpl,                   /* File create property list ID */
         dataset,                /* Dataset ID */
         filespace;              /* Dataset's dataspace ID */
     hsize_t file_dims [4];      /* Dimensions of dataspace */
@@ -483,10 +484,17 @@ void big_dataset(void)
     fapl = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     VRFY((fapl >= 0), "create_faccess_plist succeeded");
 
+    fcpl = H5Pcreate(H5P_FILE_CREATE);
+    VRFY((fcpl >= 0), "H5Pcreate succeeded");
+
+    /* This test requires avoid truncate to be OFF */
+    ret = H5Pset_avoid_truncate(fcpl, H5F_AVOID_TRUNCATE_OFF);
+    VRFY((ret >= 0), "H5Pset_avoid_truncate succeeded");
+
     /*
      * Create >2GB HDF5 file
      */
-    iof = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    iof = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
     VRFY((iof >= 0), "H5Fcreate succeeded");
 
     /* Define dataspace for 2GB dataspace */
@@ -515,7 +523,7 @@ void big_dataset(void)
     /*
      * Create >4GB HDF5 file
      */
-    iof = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    iof = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
     VRFY((iof >= 0), "H5Fcreate succeeded");
 
     /* Define dataspace for 4GB dataspace */
@@ -544,7 +552,7 @@ void big_dataset(void)
     /*
      * Create >8GB HDF5 file
      */
-    iof = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    iof = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
     VRFY((iof >= 0), "H5Fcreate succeeded");
 
     /* Define dataspace for 8GB dataspace */
@@ -572,6 +580,10 @@ void big_dataset(void)
 
     /* Close fapl */
     ret = H5Pclose(fapl);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+
+    /* Close fcpl */
+    ret = H5Pclose(fcpl);
     VRFY((ret >= 0), "H5Pclose succeeded");
 }
 

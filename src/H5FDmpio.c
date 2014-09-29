@@ -1890,7 +1890,8 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      * we know is wrong sitting around rather than one that could only
      * potentially be wrong.) */
     file->eof = HADDR_UNDEF;
-    if ((bytes_written+addr)>file->local_eof) {
+
+    if (bytes_written && (bytes_written+addr > file->local_eof)) {
         file->local_eof = addr+bytes_written;
     } /* end if */
 

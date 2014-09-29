@@ -5717,7 +5717,6 @@ smoke_check_3(int metadata_write_strategy)
 {
     const char * fcn_name = "smoke_check_3()";
     hbool_t success = TRUE;
-    hbool_t verbose = FALSE;
     int cp = 0;
     int i;
     int max_nerrors;
@@ -6402,7 +6401,6 @@ smoke_check_5(int metadata_write_strategy)
 {
     const char * fcn_name = "smoke_check_5()";
     hbool_t success = TRUE;
-    hbool_t verbose = FALSE;
     int cp = 0;
     int i;
     int max_nerrors;
@@ -7110,6 +7108,7 @@ main(int argc, char **argv)
     int mpi_size;
     int mpi_rank;
     int max_nerrors;
+    int take_down_types = 0;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -7126,7 +7125,7 @@ main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0){
-	printf("Failed to turn off atexit processing. Continue.\n", mpi_rank);
+	printf("Failed to turn off atexit processing. Continue.\n");
     };
     H5open();
 
@@ -7169,6 +7168,7 @@ main(int argc, char **argv)
     set_up_file_communicator();
 
     setup_derived_types();
+    take_down_types = 1;
 
     /* h5_fixname() will hang some processes don't participate.
      *
@@ -7302,7 +7302,8 @@ finish:
 	printf("===================================\n");
     }
 
-    takedown_derived_types();
+    if(take_down_types)
+        takedown_derived_types();
 
     /* close HDF5 library */
     H5close();
