@@ -2267,6 +2267,8 @@ out:
 static char* 
 realloc_and_append(hbool_t _no_user_buf, size_t *len, char *buf, char *str_to_add)
 {
+    size_t size_str_to_add, size_str;
+
     if(_no_user_buf) {
         /* If the buffer isn't big enough, reallocate it.  Otherwise, go to do strcat. */
         if(str_to_add && ((ssize_t)(*len - (HDstrlen(buf) + HDstrlen(str_to_add) + 1)) < LIMIT)) {
@@ -2281,8 +2283,25 @@ realloc_and_append(hbool_t _no_user_buf, size_t *len, char *buf, char *str_to_ad
     if(!buf)
         goto out;
 
-    if(str_to_add)
-        HDstrcat(buf, str_to_add);
+    if(str_to_add) {
+      /* find the size of the buffer to add */
+      size_str_to_add = HDstrlen(str_to_add);
+      /* find the size of the current buffer */
+      size_str = HDstrlen(buf);
+
+      /* Check to make sure the appended string does not 
+       * extend past the allocated buffer; if it does then truncate the string
+       */
+      if(size_str < *len - 1) {
+	if( size_str + size_str_to_add < *len - 1) {
+	  HDstrncat(buf, str_to_add, size_str_to_add);
+	} else {
+	  HDstrncat(buf, str_to_add, (*len - 1) - size_str);
+	}
+      } else {
+	buf[*len-1] = '\0'; /* buffer is full, null terminate */
+      }
+    }
 
     return buf;
 
