@@ -317,7 +317,7 @@ static void test_h5s_scalar_read()
     SUBTEST("Scalar Dataspace Reading");
 
     try {
-	// Create file
+	// Open file
 	H5File fid1(DATAFILE, H5F_ACC_RDWR);
 
 	// Create a dataset
@@ -506,7 +506,7 @@ static void test_h5s_compound_scalar_read()
     // Output message about test being performed
     SUBTEST("Compound Dataspace Reading");
     try {
-	// Create file
+	// Open file
 	H5File fid1(DATAFILE, H5F_ACC_RDWR);
 
 	// Create a dataset

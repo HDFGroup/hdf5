@@ -69,6 +69,10 @@ H5File::H5File() : H5Location(), id(0) {}
 ///				       the file.
 ///		\li \c H5F_ACC_EXCL - Fail if file already exists.
 ///			\c H5F_ACC_TRUNC and \c H5F_ACC_EXCL are mutually exclusive
+///		\li \c H5F_ACC_RDONLY - Open file as read-only, if it already
+///					exists, and fail, otherwise
+///		\li \c H5F_ACC_RDWR - Open file for read/write, if it already
+///					exists, and fail, otherwise
 ///		\li \c H5F_ACC_DEBUG - print debug information. This flag is
 ///			used only by HDF5 library developers; it is neither
 ///			tested nor supported for use in applications.
@@ -121,12 +125,15 @@ H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPro
 // This function is private and contains common code between the
 // constructors taking a string or a char*
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//		- removed H5F_ACC_CREAT because H5Fcreate will fail with
+//		H5F_ACC_CREAT. - BMR, Sep 17, 2014
 //--------------------------------------------------------------------------
 void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist)
 {
     // These bits only set for creation, so if any of them are set,
     // create the file.
-    if( flags & (H5F_ACC_CREAT|H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
+    if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
     {
 	hid_t create_plist_id = create_plist.getId();
 	hid_t access_plist_id = access_plist.getId();
@@ -147,6 +154,7 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 	}
     }
 }
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
