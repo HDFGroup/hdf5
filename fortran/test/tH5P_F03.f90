@@ -43,7 +43,7 @@ MODULE test_genprop_cls_cb1_mod
   USE ISO_C_BINDING
   IMPLICIT NONE
   
-  TYPE, bind(C) :: cop_cb_struct_ ! /* Struct for iterations */
+  TYPE, BIND(C) :: cop_cb_struct_ ! /* Struct for iterations */
     INTEGER :: count
     INTEGER(HID_T) :: id
   END TYPE cop_cb_struct_
@@ -59,10 +59,10 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN), VALUE :: list_id
     
     TYPE(cop_cb_struct_) :: create_data
-    
+
     create_data%count = create_data%count + 1
     create_data%id = list_id
-    
+
     test_genprop_cls_cb1_f = 0
     
   END FUNCTION test_genprop_cls_cb1_f
@@ -111,6 +111,10 @@ SUBROUTINE test_create(total_error)
   INTEGER(SIZE_T) :: h5off
   TYPE(C_PTR) :: f_ptr
   LOGICAL :: differ1, differ2
+  CHARACTER(LEN=1) :: cfill
+  INTEGER :: ifill
+  REAL :: rfill
+  REAL(KIND=dp) :: dpfill
 
   !/*
   ! * Create a file.
@@ -162,6 +166,41 @@ SUBROUTINE test_create(total_error)
 
   f_ptr = C_LOC(fill_ctype)
 
+  ! Test various fill values
+  CALL H5Pset_fill_value_f(dcpl, H5T_NATIVE_CHARACTER, 'X', error)
+  CALL check("H5Pset_fill_value_f",error, total_error)
+  CALL h5pget_fill_value_f(dcpl, H5T_NATIVE_CHARACTER, cfill, error)
+  CALL check("H5Pget_fill_value_f",error, total_error)
+  IF(cfill.NE.'X')THEN
+     PRINT*,"***ERROR: Returned wrong fill value (character)"
+     total_error = total_error + 1
+  ENDIF
+  CALL H5Pset_fill_value_f(dcpl, H5T_NATIVE_INTEGER, 9, error)
+  CALL check("H5Pset_fill_value_f",error, total_error)
+  CALL h5pget_fill_value_f(dcpl, H5T_NATIVE_INTEGER, ifill, error)
+  CALL check("H5Pget_fill_value_f",error, total_error)
+  IF(ifill.NE.9)THEN
+     PRINT*,"***ERROR: Returned wrong fill value (integer)"
+     total_error = total_error + 1
+  ENDIF
+  CALL H5Pset_fill_value_f(dcpl, H5T_NATIVE_DOUBLE, 1.0_dp, error)
+  CALL check("H5Pset_fill_value_f",error, total_error)
+  CALL h5pget_fill_value_f(dcpl, H5T_NATIVE_DOUBLE, dpfill, error)
+  CALL check("H5Pget_fill_value_f",error, total_error)
+  IF(.NOT.dreal_eq( REAL(dpfill,dp), 1.0_dp))THEN
+     PRINT*,"***ERROR: Returned wrong fill value (double)"
+     total_error = total_error + 1
+  ENDIF
+  CALL H5Pset_fill_value_f(dcpl, H5T_NATIVE_REAL, 2.0, error)
+  CALL check("H5Pset_fill_value_f",error, total_error)
+  CALL h5pget_fill_value_f(dcpl, H5T_NATIVE_REAL, rfill, error)
+  CALL check("H5Pget_fill_value_f",error, total_error)
+  IF(.NOT.dreal_eq( REAL(rfill,dp), REAL(2.0,dp)))THEN
+     PRINT*,"***ERROR: Returned wrong fill value (real)"
+     total_error = total_error + 1
+  ENDIF
+
+  ! For the actual compound type
   CALL H5Pset_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f",error, total_error)
 
@@ -243,12 +282,7 @@ SUBROUTINE test_genprop_class_callback(total_error)
   INTEGER(hid_t) :: lid2 !/* 2nd Generic Property list ID */
   INTEGER(size_t) :: nprops !/* Number of properties in class */
 
-  TYPE cb_struct
-     INTEGER :: count
-     INTEGER(hid_t) :: id
-  END TYPE cb_struct
-
-  TYPE(cb_struct), TARGET :: crt_cb_struct, cls_cb_struct
+  TYPE(cop_cb_struct_), TARGET :: crt_cb_struct, cls_cb_struct
 
   CHARACTER(LEN=7) :: CLASS1_NAME = "Class 1"
   TYPE(C_FUNPTR) :: f1, f5
