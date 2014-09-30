@@ -121,6 +121,48 @@ if (BUILD_SHARED_LIBS)
           "${CMAKE_BINARY_DIR}/testdir2/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
     )
   endforeach (test_lib ${TEST2_PLUGIN_LIBS})
+
+  # make vol_plugins dir
+  file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/voltestdir")
+
+  #-----------------------------------------------------------------------------
+  # Define Test Library Sources
+  #-----------------------------------------------------------------------------
+  set (TEST_VOL_PLUGIN_LIBS
+      dynlibvol1
+      dynlibvol2
+  )
+
+  foreach (test_lib ${TEST_VOL_PLUGIN_LIBS})
+    set (HDF5_TEST_VOL_PLUGIN_LIB_CORENAME         "${test_vol_lib}")
+    set (HDF5_TEST_VOL_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TEST_VOL_PLUGIN_LIB_CORENAME}")
+    set (HDF5_TEST_VOL_PLUGIN_LIB_TARGET           ${HDF5_TEST_VOL_PLUGIN_LIB_CORENAME})
+    add_definitions (${HDF_EXTRA_C_FLAGS})
+    INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
+
+    add_library (${HDF5_TEST_VOL_PLUGIN_LIB_TARGET} ${LIB_TYPE} ${HDF5_TEST_SOURCE_DIR}/${test_vol_lib}.c)
+    TARGET_C_PROPERTIES (${HDF5_TEST_VOL_PLUGIN_LIB_TARGET} " " " ")
+    target_link_libraries (${HDF5_TEST_VOL_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+    H5_SET_LIB_OPTIONS (
+        ${HDF5_TEST_VOL_PLUGIN_LIB_TARGET} ${HDF5_TEST_VOL_PLUGIN_LIB_NAME}
+        ${LIB_TYPE}
+        HDF5_TEST_VOL_PLUGIN_LIB_NAME_RELEASE
+        HDF5_TEST_VOL_PLUGIN_LIB_NAME_DEBUG
+    )
+    set_target_properties (${HDF5_TEST_VOL_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_VOL_PLUGIN)
+
+    #-----------------------------------------------------------------------------
+    # Copy plugin library to a plugins folder
+    #-----------------------------------------------------------------------------
+    add_custom_command (
+        TARGET     ${HDF5_TEST_VOL_PLUGIN_LIB_TARGET}
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different 
+          "$<TARGET_FILE:${HDF5_TEST_VOL_PLUGIN_LIB_TARGET}>"
+          "${CMAKE_BINARY_DIR}/voltestdir/$<TARGET_FILE_NAME:${HDF5_TEST_VOL_PLUGIN_LIB_TARGET}>"
+    )
+  endforeach (test_lib ${TEST_VOL_PLUGIN_LIBS})
 endif (BUILD_SHARED_LIBS)
 
 set (testhdf5_SRCS
