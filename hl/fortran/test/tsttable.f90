@@ -175,13 +175,30 @@ SUBROUTINE test_table1()
   CALL h5tbwrite_field_name_f(file_id,dsetname1,field_names(4),start,nrecords,type_sizer,&
        bufr,errcode)
 
-
   !-------------------------------------------------------------------------
   ! read field
   !-------------------------------------------------------------------------
 
+  ! Read an invalid field, should fail
+  CALL h5tbread_field_name_f(file_id,dsetname1,'DoesNotExist',start,nrecords,type_sizec,&
+       bufsr,errcode)
+
+  IF(errcode.GE.0)THEN
+     PRINT *, 'error in h5tbread_field_name_f'
+     CALL h5fclose_f(file_id, errcode)
+     CALL h5close_f(errcode)
+     STOP
+  ENDIF
+
+  ! Read a valid field, should pass
   CALL h5tbread_field_name_f(file_id,dsetname1,field_names(1),start,nrecords,type_sizec,&
        bufsr,errcode)
+  IF(errcode.LT.0)THEN
+     PRINT *, 'error in h5tbread_field_name_f'
+     CALL h5fclose_f(file_id, errcode)
+     CALL h5close_f(errcode)
+     STOP
+  ENDIF
 
   !
   ! compare read and write buffers.
@@ -328,8 +345,6 @@ SUBROUTINE test_table1()
   ! Insert field
   ! we insert a field callsed "field5" with the same type and buffer as field 4 (Real)
   !-------------------------------------------------------------------------
-
-
 
   CALL test_begin(' Insert field                   ')
 

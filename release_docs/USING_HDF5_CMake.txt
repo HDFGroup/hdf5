@@ -27,7 +27,7 @@ Notes: This short instruction is written for users who want to quickly
             
          3. See the appendix at the bottom of this file for an example 
             of using a ctest script for building and testing. See 
-            CMake.txt for more information.
+            INSTALL_CMake.txt for more information.
 
 
 
@@ -69,7 +69,7 @@ Go through these steps to build HDF5 applications with CMake.
    1. Run CMake
    2. Configure the cache settings
    3. Build HDF5 Applications
-   4. Test HDF5 Applications.
+   4. Test HDF5 Applications
 
 These steps are described in more detail below.
 
