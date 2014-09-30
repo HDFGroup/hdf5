@@ -18,12 +18,12 @@ Using Visual Studio 2010 with HDF5 Libraries built with Visual Studio 2010
 
    1. Set up path for external libraries and headers
 
-      The path settings will need to be in project property sheets per project. 
+      The path settings will need to be in the project property sheets per project. 
       Go to "Project" and select "Properties", find "Configuration Properties", 
       and then "VC++ Directories".
           
       1.1 If you are building on 64-bit Windows, find the "Platform" dropdown
-              and select "x64".
+          and select "x64".
               
       1.2 Add the header path to the "Include Directories" setting.
           
@@ -42,7 +42,7 @@ Using Visual Studio 2010 with HDF5 Libraries built with Visual Studio 2010
 Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
 ==========================================================================
 
-   2. Set up path for external libraries and headers
+   2. Set up the path for external libraries and headers
 
       Invoke Microsoft Visual Studio and go to "Tools" and select "Options", 
       find "Projects", and then "VC++ Directories".

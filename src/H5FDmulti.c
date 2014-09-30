@@ -491,7 +491,7 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
     }
     if (!memb_addr) {
 	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1))
-	    _memb_addr[mt] = (hsize_t)(mt ? (mt - 1) : 0) * HADDR_MAX / H5FD_MEM_NTYPES;
+	    _memb_addr[mt] = (hsize_t)(mt ? (mt - 1) : 0) * (HADDR_MAX / H5FD_MEM_NTYPES);
 	memb_addr = _memb_addr;
     }
 

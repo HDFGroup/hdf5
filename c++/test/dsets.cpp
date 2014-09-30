@@ -1083,6 +1083,7 @@ void test_dset()
 
 	// Close the file before testing data size.
 	file.close();
+
 	nerrors += test_datasize(fapl) <0 ? 1:0;
     }
     catch (Exception E)

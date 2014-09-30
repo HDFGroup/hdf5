@@ -111,6 +111,10 @@ SUBROUTINE test_create(total_error)
   INTEGER(SIZE_T) :: h5off
   TYPE(C_PTR) :: f_ptr
   LOGICAL :: differ1, differ2
+  CHARACTER(LEN=1) :: cfill
+  INTEGER :: ifill
+  REAL :: rfill
+  REAL(KIND=dp) :: dpfill
 
   !/*
   ! * Create a file.
@@ -162,6 +166,41 @@ SUBROUTINE test_create(total_error)
 
   f_ptr = C_LOC(fill_ctype)
 
+  ! Test various fill values
+  CALL H5Pset_fill_value_f(dcpl, H5T_NATIVE_CHARACTER, 'X', error)
+  CALL check("H5Pset_fill_value_f",error, total_error)
+  CALL h5pget_fill_value_f(dcpl, H5T_NATIVE_CHARACTER, cfill, error)
+  CALL check("H5Pget_fill_value_f",error, total_error)
+  IF(cfill.NE.'X')THEN
+     PRINT*,"***ERROR: Returned wrong fill value (character)"
+     total_error = total_error + 1
+  ENDIF
+  CALL H5Pset_fill_value_f(dcpl, H5T_NATIVE_INTEGER, 9, error)
+  CALL check("H5Pset_fill_value_f",error, total_error)
+  CALL h5pget_fill_value_f(dcpl, H5T_NATIVE_INTEGER, ifill, error)
+  CALL check("H5Pget_fill_value_f",error, total_error)
+  IF(ifill.NE.9)THEN
+     PRINT*,"***ERROR: Returned wrong fill value (integer)"
+     total_error = total_error + 1
+  ENDIF
+  CALL H5Pset_fill_value_f(dcpl, H5T_NATIVE_DOUBLE, 1.0_dp, error)
+  CALL check("H5Pset_fill_value_f",error, total_error)
+  CALL h5pget_fill_value_f(dcpl, H5T_NATIVE_DOUBLE, dpfill, error)
+  CALL check("H5Pget_fill_value_f",error, total_error)
+  IF(.NOT.dreal_eq( REAL(dpfill,dp), 1.0_dp))THEN
+     PRINT*,"***ERROR: Returned wrong fill value (double)"
+     total_error = total_error + 1
+  ENDIF
+  CALL H5Pset_fill_value_f(dcpl, H5T_NATIVE_REAL, 2.0, error)
+  CALL check("H5Pset_fill_value_f",error, total_error)
+  CALL h5pget_fill_value_f(dcpl, H5T_NATIVE_REAL, rfill, error)
+  CALL check("H5Pget_fill_value_f",error, total_error)
+  IF(.NOT.dreal_eq( REAL(rfill,dp), REAL(2.0,dp)))THEN
+     PRINT*,"***ERROR: Returned wrong fill value (real)"
+     total_error = total_error + 1
+  ENDIF
+
+  ! For the actual compound type
   CALL H5Pset_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f",error, total_error)
 
