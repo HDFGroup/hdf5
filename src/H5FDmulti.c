@@ -1377,6 +1377,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
             H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "bad eoa", HADDR_UNDEF)
 	 }
     }
+
     return eoa;
 } /* end H5FD_multi_get_eoa() */
 
@@ -1493,10 +1494,10 @@ H5FD_multi_get_eof(const H5FD_t *_file, H5FD_mem_t type)
                     H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eof", HADDR_UNDEF)
                 if (tmp_eof>0) tmp_eof += file->fa.memb_addr[mt];
             } else if (file->fa.relax) {
-	    /*
-	     * The member is not open yet (maybe it doesn't exist). Make the
-	     * best guess about the end-of-file.
-	     */
+                /*
+                 * The member is not open yet (maybe it doesn't exist). Make the
+                 * best guess about the end-of-file.
+                 */
                 tmp_eof = file->memb_next[mt];
                 assert(HADDR_UNDEF!=tmp_eof);
             } else {
@@ -1509,6 +1510,7 @@ H5FD_multi_get_eof(const H5FD_t *_file, H5FD_mem_t type)
         if (H5FD_MEM_DEFAULT==mmt) mmt = type;
 
 	if (file->memb[mmt]) {
+            /* Retrieve EOF */
             H5E_BEGIN_TRY {
 	        eof = H5FDget_eof(file->memb[mmt], mmt);
             } H5E_END_TRY;

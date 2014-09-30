@@ -476,7 +476,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
      * individually.
      */
     if(HADDR_UNDEF == (eof = H5FD_get_eof(lf, H5FD_MEM_DEFAULT)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to determine file size") 
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to determine file size")
 
     /* (Account for the stored EOF being absolute offset -QAK) */
     if((eof + sblock->base_addr) < stored_eof)

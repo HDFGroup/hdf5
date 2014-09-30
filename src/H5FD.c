@@ -1538,6 +1538,7 @@ H5FDget_eof(H5FD_t *file, H5FD_mem_t type)
 
     /* (Note compensating for base address subtraction in internal routine) */
     ret_value += file->base_addr;
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDget_eof() */
