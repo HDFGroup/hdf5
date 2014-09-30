@@ -1444,6 +1444,9 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label)
     if (H5I_DATASET != it)
         return FAIL;
 
+    if (label == NULL) 
+        return FAIL;
+
      /* get dataset space */
     if ((sid = H5Dget_space(did)) < 0)
         return FAIL;
@@ -1912,11 +1915,12 @@ out:
 htri_t H5DSis_scale(hid_t did)
 {
     hid_t      tid = -1;   /* attribute type ID */
-    hid_t      aid;        /* attribute ID */
+    hid_t      aid = -1;   /* attribute ID */
     herr_t     has_class;  /* has the "CLASS" attribute */
     htri_t     is_ds;      /* boolean return value */
     H5I_type_t it;           /* ID type */
-    char       buf[20];
+    char       *buf;         /* Name of attribute */
+    hsize_t    storage_size; /* Size of storage for attribute */
 
     /*-------------------------------------------------------------------------
     * parameter checking
@@ -1944,19 +1948,41 @@ htri_t H5DSis_scale(hid_t did)
         if((tid = H5Aget_type(aid)) < 0)
             goto out;
 
-        if(H5Aread(aid, tid, buf) < 0)
-            goto out;
+	/* check to make sure attribute is a string */
+	if(H5T_STRING != H5Tget_class(tid))
+	    goto out;
 
-        if(strcmp(buf, DIMENSION_SCALE_CLASS)==0)
+	/* check to make sure string is null-terminated */
+	if(H5T_STR_NULLTERM != H5Tget_strpad(tid))
+	    goto out;
+
+	/* allocate buffer large enough to hold string */
+	if((storage_size = H5Aget_storage_size(aid)) == 0)
+	    goto out;
+
+	buf = (char*)HDmalloc( (size_t)storage_size * sizeof(char) + 1);
+	if(buf == NULL)
+	    goto out;
+
+	/* Read the attribute */
+        if(H5Aread(aid, tid, buf) < 0)
+	    goto out;
+
+	/* compare strings */
+        if(HDstrncmp(buf, DIMENSION_SCALE_CLASS, MIN(HDstrlen(DIMENSION_SCALE_CLASS),HDstrlen(buf)))==0)
             is_ds = 1;
         else
             is_ds = 0;
+
+	HDfree(buf);
 
         if(H5Tclose(tid) < 0)
             goto out;
 
         if (H5Aclose(aid) < 0)
             goto out;
+
+
     }
 
     return is_ds;
@@ -2118,7 +2144,8 @@ herr_t H5DS_is_reserved(hid_t did)
     int    has_class;
     hid_t  tid = -1;
     hid_t  aid = -1;
-    char   buf[40];
+    char *buf;            /* Name of attribute */
+    hsize_t storage_size; /* Size of storage for attribute */
     herr_t ret;
 
     /* try to find the attribute "CLASS" on the dataset */
@@ -2135,15 +2162,35 @@ herr_t H5DS_is_reserved(hid_t did)
     if((tid = H5Aget_type(aid)) < 0)
         goto out;
 
-    if(H5Aread(aid, tid, buf) < 0)
-        goto out;
+    /* check to make sure attribute is a string */
+    if(H5T_STRING != H5Tget_class(tid))
+      goto out;
 
-    if(strcmp(buf, IMAGE_CLASS) == 0 ||
-        strcmp(buf, PALETTE_CLASS) == 0 ||
-        strcmp(buf, TABLE_CLASS) == 0 )
+    /* check to make sure string is null-terminated */
+    if(H5T_STR_NULLTERM != H5Tget_strpad(tid))
+      goto out;
+
+    /* allocate buffer large enough to hold string */
+    if((storage_size = H5Aget_storage_size(aid)) == 0)
+      goto out;
+
+    buf = (char*)HDmalloc( (size_t)storage_size * sizeof(char) + 1);
+    if(buf == NULL)
+      goto out;
+
+    /* Read the attribute */
+    if(H5Aread(aid, tid, buf) < 0)
+      goto out;
+
+
+    if(HDstrncmp(buf, IMAGE_CLASS, MIN(HDstrlen(IMAGE_CLASS),HDstrlen(buf))) == 0 ||
+       HDstrncmp(buf, PALETTE_CLASS, MIN(HDstrlen(PALETTE_CLASS),HDstrlen(buf))) == 0 ||
+       HDstrncmp(buf, TABLE_CLASS, MIN(HDstrlen(TABLE_CLASS),HDstrlen(buf))) == 0 )
         ret = 1;
     else
         ret = 0;
+
+    HDfree(buf);
 
     if (H5Tclose(tid) < 0)
         goto out;

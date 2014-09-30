@@ -1238,6 +1238,41 @@ static int test_strings(void)
     }
     HDfree(dt_str);
 
+    /* Length of the character buffer is larger then needed */
+    str_len = str_len + 10;
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
+      goto out;
+    
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+      HDfree(dt_str);
+      goto out;
+    }
+    if(HDstrncmp(dt_str, "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }", str_len-1)) {
+      printf("dt=\n%s\n", dt_str);
+      HDfree(dt_str);
+      goto out;
+    }
+
+    /* Length of the character buffer is smaller then needed */
+    str_len = 21;
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
+      goto out;
+
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+      HDfree(dt_str);
+      goto out;
+    }
+    /* check the truncated string */
+    if(strlen(dt_str) != str_len-1) goto out;
+    str_len = strlen(dt_str);
+    if(HDstrncmp(dt_str, "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }", str_len)) {
+      printf("dt=\n%s\n", dt_str);
+      HDfree(dt_str);
+      goto out;
+    }
+
+    HDfree(dt_str);
+
     if(H5Tclose(dtype)<0)
         goto out;
 
@@ -1245,6 +1280,9 @@ static int test_strings(void)
     return 0;
 
 out:
+    if(dt_str)
+      HDfree(dt_str);
+
     H5_FAILED();
     return -1;
 }
