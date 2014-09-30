@@ -54,15 +54,18 @@ ArrayType::ArrayType( const hid_t existing_id ) : DataType( existing_id )
    rank = H5Tget_array_ndims(existing_id);
    if (rank < 0)
    {
-      throw DataTypeIException("ArrayType overloaded constructor", "H5Tget_array_ndims failed");
+      throw DataTypeIException("ArrayType constructor (existing id)", "H5Tget_array_ndims failed");
    }
 
-   // Get the dimensions of the existing array and store it in this array
-   dimensions = new hsize_t[rank];
-   //hsize_t rdims2[H5S_MAX_RANK];
-   int ret_value = H5Tget_array_dims2(id, dimensions);
-   if (ret_value < 0)
-      throw DataTypeIException("ArrayType::getArrayDims", "H5Tget_array_dims2 failed");
+    // Get the dimensions of the existing array and store it in this array
+    try {
+	dimensions = new hsize_t[rank];
+    } catch (const std::bad_alloc&) {
+	throw DataTypeIException("ArrayType constructor (existing id)", "Memory allocation failed");
+    }
+    int ret_value = H5Tget_array_dims2(id, dimensions);
+    if (ret_value < 0)
+	throw DataTypeIException("ArrayType constructor (existing id)", "H5Tget_array_dims2 failed");
 }
 
 //--------------------------------------------------------------------------
@@ -72,10 +75,14 @@ ArrayType::ArrayType( const hid_t existing_id ) : DataType( existing_id )
 //--------------------------------------------------------------------------
 ArrayType::ArrayType( const ArrayType& original ) : DataType( original )
 {
-   rank = original.rank;
-   dimensions = new hsize_t[rank];
-   for (int i = 0; i < rank; i++)
-      dimensions[i] = original.dimensions[i];
+    rank = original.rank;
+    try {
+	dimensions = new hsize_t[rank];
+    } catch (const std::bad_alloc&) {
+	throw DataTypeIException("ArrayType constructor (existing id)", "Memory allocation failed");
+    }
+    for (int i = 0; i < rank; i++)
+	dimensions[i] = original.dimensions[i];
 }
 
 //--------------------------------------------------------------------------
@@ -90,14 +97,18 @@ ArrayType::ArrayType( const ArrayType& original ) : DataType( original )
 //--------------------------------------------------------------------------
 ArrayType::ArrayType(const DataType& base_type, int ndims, const hsize_t* dims) : DataType()
 {
-   hid_t new_type_id = H5Tarray_create2(base_type.getId(), ndims, dims);
-   if (new_type_id < 0)
-      throw DataTypeIException("ArrayType constructor", "H5Tarray_create2 failed");
-   id = new_type_id;
-   rank = ndims;
-   dimensions = new hsize_t[rank];
-   for (int i = 0; i < rank; i++)
-      dimensions[i] = dims[i];
+    hid_t new_type_id = H5Tarray_create2(base_type.getId(), ndims, dims);
+    if (new_type_id < 0)
+	throw DataTypeIException("ArrayType constructor", "H5Tarray_create2 failed");
+    id = new_type_id;
+    rank = ndims;
+    try {
+	dimensions = new hsize_t[rank];
+    } catch (const std::bad_alloc&) {
+	throw DataTypeIException("ArrayType constructor (existing id)", "Memory allocation failed");
+    }
+    for (int i = 0; i < rank; i++)
+	dimensions[i] = dims[i];
 }
 
 //--------------------------------------------------------------------------
@@ -140,7 +151,11 @@ int ArrayType::getArrayDims(hsize_t* dims)
          throw DataTypeIException("ArrayType::getArrayDims", "H5Tget_array_dims2 failed");
       // store the array's info in memory
       rank = ndims;
-      dimensions = new hsize_t[rank];
+      try {
+	   dimensions = new hsize_t[rank];
+      } catch (const std::bad_alloc&) {
+	    throw DataTypeIException("ArrayType constructor (existing id)", "Memory allocation failed");
+      }
       for (int i = 0; i < rank; i++)
          dimensions[i] = dims[i];
    }

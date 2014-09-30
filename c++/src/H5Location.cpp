@@ -33,6 +33,9 @@
 #include "H5DataSet.h"
 #include "H5Attribute.h"
 #include "H5private.h"		// for HDmemset
+#include <iostream>
+using namespace std;
+
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
