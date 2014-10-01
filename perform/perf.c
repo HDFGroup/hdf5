@@ -46,6 +46,9 @@
 #   include <mpio.h>
 #endif
 
+#ifndef HDF5_PARAPREFIX
+#    define HDF5_PARAPREFIX     ""
+#endif  /* !HDF5_PARAPREFIX */
 
 /* Macro definitions */
 /* Verify:
@@ -114,6 +117,8 @@ int main(int argc, char **argv)
     MPI_File fh;
     MPI_Status status;
     int nchars;
+    const char *prefix;
+    char *fullname=NULL;
     herr_t ret;           /* Generic return value */
 
     /* startup MPI and determine the rank of this process */
@@ -126,6 +131,20 @@ int main(int argc, char **argv)
 
     if (mynod == 0) printf("# Using hdf5-io calls.\n");
 
+    /* create filename with correct prefix using HDF5_PARAPREFIX */
+    prefix = HDgetenv("HDF5_PARAPREFIX");
+
+#ifdef HDF5_PARAPREFIX
+    if (!prefix)
+        prefix = HDF5_PARAPREFIX;
+#endif  /* HDF5_PARAPREFIX */
+    fullname = (char*) malloc(strlen(prefix) + strlen(opt_file) + 2);
+    if (strlen(prefix) > 0)
+    {
+    	strcpy(fullname, prefix);
+      	strcat(fullname, "/");
+    }
+    strcat(fullname, opt_file);
 
     /* kindof a weird hack- if the location of the pvfstab file was
      * specified on the command line, then spit out this location into
@@ -199,7 +218,7 @@ int main(int argc, char **argv)
     }
 
     /* create the parallel file */
-    fid = H5Fcreate(opt_file, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
+    fid = H5Fcreate(fullname, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
     VRFY((fid >= 0), "H5Fcreate succeeded", H5FATAL);
 
     /* define a contiquous dataset of opt_iter*nprocs*opt_block chars */
@@ -261,7 +280,7 @@ int main(int argc, char **argv)
     MPI_Barrier(MPI_COMM_WORLD);
 
     /* reopen the file for reading */
-    fid=H5Fopen(opt_file,H5F_ACC_RDONLY,acc_tpl);
+    fid=H5Fopen(fullname,H5F_ACC_RDONLY,acc_tpl);
     VRFY((fid >= 0), "", H5FATAL);
 
     /* open the dataset */
@@ -382,6 +401,8 @@ die_jar_jar_die:
 
     free(tmp);
     if (opt_correct) free(tmp2);
+    if(fullname) free(fullname);
+    
     MPI_Finalize();
 
     return(0);
