@@ -9,3 +9,4 @@ Expected output for 'h5extend -r h5extend_multifile.h5'
   5: EOA = 10540996613548315328  EOF = 10540996613548315328
   6: EOA = 13176245766935394354  EOF = 13176245766935394354
   Removed 'EOFS' message from superblock extension.
+  Removed 'EOA' message from superblock extension.

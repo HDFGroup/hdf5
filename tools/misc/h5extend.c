@@ -214,6 +214,13 @@ main (int argc, char *argv[])
                         leave(EXIT_FAILURE);
                     } /* end if */
                     if (!quiet_g) HDfprintf(outputfile, "  Removed 'EOFS' message from superblock extension.\n");
+
+                    if (H5O_msg_remove(&ext_loc, H5O_EOA_ID, H5O_ALL, TRUE, H5AC_dxpl_id) < 0) {
+                        error_msg("Unable to remove 'EOA' message.\n");
+                        leave(EXIT_FAILURE);
+                    } /* end if */
+                    if (!quiet_g) 
+                        HDfprintf(outputfile, "  Removed 'EOA' message from superblock extension.\n");
                 } /* end if */
             } /* end if */
             else if (!quiet_g) 
