@@ -57,12 +57,10 @@ ArrayType::ArrayType( const hid_t existing_id ) : DataType( existing_id )
       throw DataTypeIException("ArrayType constructor (existing id)", "H5Tget_array_ndims failed");
    }
 
+    // Allocate space for the dimensions
+    dimensions = new hsize_t[rank];
+
     // Get the dimensions of the existing array and store it in this array
-    try {
-	dimensions = new hsize_t[rank];
-    } catch (const std::bad_alloc&) {
-	throw DataTypeIException("ArrayType constructor (existing id)", "Memory allocation failed");
-    }
     int ret_value = H5Tget_array_dims2(id, dimensions);
     if (ret_value < 0)
 	throw DataTypeIException("ArrayType constructor (existing id)", "H5Tget_array_dims2 failed");
@@ -75,12 +73,11 @@ ArrayType::ArrayType( const hid_t existing_id ) : DataType( existing_id )
 //--------------------------------------------------------------------------
 ArrayType::ArrayType( const ArrayType& original ) : DataType( original )
 {
+    // Copy the rank of the original array
     rank = original.rank;
-    try {
-	dimensions = new hsize_t[rank];
-    } catch (const std::bad_alloc&) {
-	throw DataTypeIException("ArrayType constructor (existing id)", "Memory allocation failed");
-    }
+
+    // Allocate space then copy the dimensions from the original array
+    dimensions = new hsize_t[rank];
     for (int i = 0; i < rank; i++)
 	dimensions[i] = original.dimensions[i];
 }
@@ -97,16 +94,17 @@ ArrayType::ArrayType( const ArrayType& original ) : DataType( original )
 //--------------------------------------------------------------------------
 ArrayType::ArrayType(const DataType& base_type, int ndims, const hsize_t* dims) : DataType()
 {
+    // Call C API to create an array data type
     hid_t new_type_id = H5Tarray_create2(base_type.getId(), ndims, dims);
     if (new_type_id < 0)
 	throw DataTypeIException("ArrayType constructor", "H5Tarray_create2 failed");
+
+    // Set the id and rank for this object
     id = new_type_id;
     rank = ndims;
-    try {
-	dimensions = new hsize_t[rank];
-    } catch (const std::bad_alloc&) {
-	throw DataTypeIException("ArrayType constructor (existing id)", "Memory allocation failed");
-    }
+
+    // Allocate space then set the dimensions as provided by caller
+    dimensions = new hsize_t[rank];
     for (int i = 0; i < rank; i++)
 	dimensions[i] = dims[i];
 }
@@ -143,23 +141,19 @@ int ArrayType::getArrayNDims()
 //--------------------------------------------------------------------------
 int ArrayType::getArrayDims(hsize_t* dims)
 {
-   // if the array's dimensions have not been stored, retrieve them via C API
+   // If the array's dimensions have not been stored, retrieve them via C API
    if (dimensions == NULL)
    {
       int ndims = H5Tget_array_dims2(id, dims);
       if (ndims < 0)
          throw DataTypeIException("ArrayType::getArrayDims", "H5Tget_array_dims2 failed");
-      // store the array's info in memory
+      // Store the array's info in memory
       rank = ndims;
-      try {
-	   dimensions = new hsize_t[rank];
-      } catch (const std::bad_alloc&) {
-	    throw DataTypeIException("ArrayType constructor (existing id)", "Memory allocation failed");
-      }
+      dimensions = new hsize_t[rank];
       for (int i = 0; i < rank; i++)
          dimensions[i] = dims[i];
    }
-   // otherwise, simply copy what's in 'dimensions' to 'dims'
+   // Otherwise, simply copy what's in 'dimensions' to 'dims'
    for (int i = 0; i < rank; i++)
       dims[i] = dimensions[i];
    return(rank);
