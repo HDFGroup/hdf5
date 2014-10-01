@@ -367,6 +367,11 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* On windows platforms in debug configurations, the VFD flush1 tests will fail
+  with the split and multi VFD drivers. These tests will display a modal debug 
+  dialog which must be answered or wait for the test timeout to expire.
+  (ADB - 2014/06/23 - HDFFV-8851)
+
 * CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
   catches some undefined behavior in the alignment algorithm of the macro DETECT_I
   in H5detect.c (Issue 8147).  Since the algorithm is trying to detect the alignment
