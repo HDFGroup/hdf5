@@ -317,6 +317,7 @@ H5std_string IdComponent::p_get_file_name() const
    // Check for failure again
    if( name_size < 0 )
    {
+      delete []name_C;
       throw IdComponentException("", "H5Fget_name failed");
    }
 

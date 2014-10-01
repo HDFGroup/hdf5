@@ -443,7 +443,10 @@ H5std_string CommonFG::getLinkval( const char* name, size_t size ) const
 
 	ret_value = H5Lget_val(getLocId(), name, value_C, val_size, H5P_DEFAULT);
 	if( ret_value < 0 )
+	{
+	    delete []value_C;
 	    throwException("getLinkval", "H5Lget_val failed");
+	}
 
 	value = H5std_string(value_C);
 	delete []value_C;
@@ -916,6 +919,12 @@ H5std_string CommonFG::getObjnameByIdx(hsize_t idx) const
 
     name_len = H5Lget_name_by_idx(getLocId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C, name_len+1, H5P_DEFAULT);
 
+    if (name_len < 0)
+    {
+	delete []name_C;
+	throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
+    }
+
     // clean up and return the string
     H5std_string name = H5std_string(name_C);
     delete []name_C;
@@ -960,10 +969,15 @@ ssize_t CommonFG::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) 
    char* name_C = new char[size+1]; // temporary C-string for object name
    HDmemset(name_C, 0, size+1); // clear buffer
 
+   // call overloaded function to get the name
    ssize_t name_len = getObjnameByIdx(idx, name_C, size+1);
    if(name_len < 0)
+   {
+      delete []name_C;
       throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
+   }
 
+   // clean up and return the string
    name = H5std_string(name_C);
    delete []name_C;
    return (name_len);
