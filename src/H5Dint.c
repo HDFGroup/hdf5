@@ -814,8 +814,6 @@ H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
     H5D_fill_value_t	fill_status;    /* Fill value status */
     hbool_t             fill_changed = FALSE;      /* Flag indicating the fill value was changed */
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
-    void              *idx_handle; /* Index handle */
-    H5O_idxinfo_t     *idx_info; /* Index information */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -829,8 +827,6 @@ H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
     layout = &dset->shared->layout;
     type = dset->shared->type;
     fill_prop = &dset->shared->dcpl_cache.fill;
-    idx_handle = dset->shared->idx_handle;
-    idx_info = &dset->shared->idx_info;
 
     /* Get the file's 'use the latest version of the format' flag */
     use_latest_format = H5F_USE_LATEST_FORMAT(file);
@@ -3115,19 +3111,14 @@ herr_t
 H5D_set_index(H5D_t *dset, H5X_class_t *idx_class, void *idx_handle,
         H5O_idxinfo_t idx_info)
 {
-    H5O_t *oh = NULL; /* Pointer to dataset's object header */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(dset);
 
-    /* Pin the object header */
-    if (NULL == (oh = H5O_pin(&dset->oloc, H5AC_dxpl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header");
-
     /* Write the index header message */
-    if (H5O_msg_append_oh(dset->oloc.file, H5AC_dxpl_id, oh, H5O_IDXINFO_ID, H5O_MSG_FLAG_CONSTANT, 0, &idx_info) < 0)
+    if (H5O_msg_create(&dset->oloc, H5O_IDXINFO_ID, H5O_MSG_FLAG_CONSTANT, 0,  &idx_info, H5AC_dxpl_id))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update index header message");
 
     /* Set user data for index */
@@ -3135,12 +3126,8 @@ H5D_set_index(H5D_t *dset, H5X_class_t *idx_class, void *idx_handle,
     dset->shared->idx_handle = idx_handle;
     if (NULL == H5O_msg_copy(H5O_IDXINFO_ID, &idx_info, &dset->shared->idx_info))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to update copy message");
-done:
-    /* Release pointer to object header itself */
-    if (oh != NULL)
-        if (H5O_unpin(oh) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header");
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_set_index() */
 
