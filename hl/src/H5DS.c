@@ -1880,7 +1880,7 @@ ssize_t H5DSget_scale_name(hid_t did,
     if (buf)
         HDfree(buf);
 
-    return (ssize_t)(nbytes - 1);
+    return (ssize_t) MAX(0,nbytes-1);
 
     /* error zone */
 out:
