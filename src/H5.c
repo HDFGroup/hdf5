@@ -31,6 +31,7 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5SLprivate.h"        /* Skip lists                           */
 #include "H5Tprivate.h"         /* Datatypes                            */
+#include "H5Xprivate.h"         /* Index                                */
 
 /****************/
 /* Local Macros */
@@ -218,6 +219,8 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize metadata caching interface")
     if(H5L_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize link interface")
+    if(H5X_init() < 0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize index interface")
 
     /* Debugging? */
     H5_debug_mask("-all");
