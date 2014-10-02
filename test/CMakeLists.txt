@@ -133,7 +133,7 @@ if (BUILD_SHARED_LIBS)
       dynlibvol2
   )
 
-  foreach (test_lib ${TEST_VOL_PLUGIN_LIBS})
+  foreach (test_vol_lib ${TEST_VOL_PLUGIN_LIBS})
     set (HDF5_TEST_VOL_PLUGIN_LIB_CORENAME         "${test_vol_lib}")
     set (HDF5_TEST_VOL_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TEST_VOL_PLUGIN_LIB_CORENAME}")
     set (HDF5_TEST_VOL_PLUGIN_LIB_TARGET           ${HDF5_TEST_VOL_PLUGIN_LIB_CORENAME})
@@ -162,7 +162,7 @@ if (BUILD_SHARED_LIBS)
           "$<TARGET_FILE:${HDF5_TEST_VOL_PLUGIN_LIB_TARGET}>"
           "${CMAKE_BINARY_DIR}/voltestdir/$<TARGET_FILE_NAME:${HDF5_TEST_VOL_PLUGIN_LIB_TARGET}>"
     )
-  endforeach (test_lib ${TEST_VOL_PLUGIN_LIBS})
+  endforeach (test_vol_lib ${TEST_VOL_PLUGIN_LIBS})
 endif (BUILD_SHARED_LIBS)
 
 set (testhdf5_SRCS
