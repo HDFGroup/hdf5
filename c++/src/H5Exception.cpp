@@ -80,8 +80,11 @@ H5std_string Exception::getMajorString( hid_t err_major ) const
 
    // Check for failure again
    if( mesg_size < 0 )
+   {
+      delete []mesg_C;
       throw IdComponentException("Exception::getMajorString",
 				"H5Eget_msg failed");
+   }
 
    // Convert the C error description and return
    H5std_string major_str(mesg_C);
@@ -116,8 +119,11 @@ H5std_string Exception::getMinorString( hid_t err_minor ) const
 
    // Check for failure again
    if( mesg_size < 0 )
+   {
+      delete []mesg_C;
       throw IdComponentException("Exception::getMinorString",
 				"H5Eget_msg failed");
+   }
 
    // Convert the C error description and return
    H5std_string minor_str(mesg_C);

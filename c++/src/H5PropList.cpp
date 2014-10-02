@@ -402,6 +402,7 @@ H5std_string PropList::getProperty(const char* name) const
    // Throw exception if H5Pget returns failure
    if (ret_value < 0)
    {
+      delete []prop_strg_C;
       throw PropListIException(inMemFunc("getProperty"), "H5Pget failed");
    }
 
