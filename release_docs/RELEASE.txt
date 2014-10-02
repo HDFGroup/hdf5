@@ -88,7 +88,9 @@ New Features
 
     C++ API
     -------
-    - None
+    - H5I_INVALID_HID replaces 0 to initialize data member "id" in classes
+      that represent HDF5 objects.  For PropList, H5P_DEFAULT is used
+      instead of H5I_INVALID_HID. (HDFFV-4259, 2014/09/30 -BMR)
 
 
 
@@ -150,7 +152,13 @@ Bug Fixes since HDF5-1.8.13
 
     C++ API
     ------
-    - None
+    - User's patches were applied to remove several potential memory leaks.
+      (HDFFV-8928, 2014/09/30 -BMR)
+    - H5F_ACC_CREAT was included in the C++ API but the C library doesn't
+      allow it at this time, so it is now removed from the C++ API.
+      In addition, H5F_ACC_RDONLY and H5F_ACC_RDWR were missing from the
+      documentation, and they are now included.
+      (HDFFV-8852, 2014/09/29 -BMR)
 
     High-Level APIs:
     ------
