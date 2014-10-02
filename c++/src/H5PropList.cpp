@@ -46,7 +46,7 @@ const PropList PropList::DEFAULT;
 ///\brief	Default constructor: creates a stub property list object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PropList::PropList() : IdComponent(), id(0) {}
+PropList::PropList() : IdComponent(), id(H5P_DEFAULT) {}
 
 //--------------------------------------------------------------------------
 // Function:	PropList copy constructor
@@ -74,7 +74,7 @@ PropList::PropList(const PropList& original) : IdComponent(original)
 //--------------------------------------------------------------------------
 PropList::PropList( const hid_t plist_id ) : IdComponent()
 {
-    if (plist_id == 0)
+    if (plist_id <= 0)
 	id = H5P_DEFAULT;
 
     H5I_type_t id_type = H5Iget_type(plist_id);
@@ -277,7 +277,7 @@ void PropList::close()
 	    throw PropListIException(inMemFunc("close"), "H5Pclose failed");
 	}
 	// reset the id
-	id = 0;
+	id = H5I_INVALID_HID;
     }
 }
 

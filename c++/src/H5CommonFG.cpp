@@ -33,6 +33,9 @@
 #include "H5Alltypes.h"
 #include "H5private.h"		// for HDstrcpy
 
+#include <iostream>
+using namespace std;
+
 // There are a few comments that are common to most of the functions
 // defined in this file so they are listed here.
 // - getLocId is called by all functions, that call a C API, to get

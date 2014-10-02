@@ -622,7 +622,7 @@ extern "C"
 void test_file()
 {
     // Output message about test being performed
-    MESSAGE(5, ("Testing File I/O operations\n"));
+    MESSAGE(5, ("Testing File I/O Operations\n"));
 
     test_file_create();	// Test file creation (also creation templates)
     test_file_open();	// Test file opening
