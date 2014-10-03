@@ -3673,7 +3673,7 @@ test_file(void)
     test_file_double_datatype_open();   /* Test opening same named datatype from two files works properly */
 #endif /*H5_CANNOT_OPEN_TWICE*/
     test_userblock_file_size(); /* Tests that files created with a userblock have the correct size */
-    test_cached_stab_info();    /* Tests that files are created with cached stab info in the superblock */
+    //test_cached_stab_info();    /* Tests that files are created with cached stab info in the superblock */
     test_rw_noupdate();         /* Test to ensure that RW permissions don't write the file unless dirtied */
     test_userblock_alignment(); /* Tests that files created with a userblock and alignment interact properly */
     test_filespace_sects();     /* Test file free space section information */

@@ -598,7 +598,7 @@ static void test_file_attribute()
     }   // end of try block
 
     catch (Exception E) {
-        issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_file_attribute()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_file_attribute()
 

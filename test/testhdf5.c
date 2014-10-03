@@ -42,7 +42,7 @@ main(int argc, char *argv[])
 {
     /* Initialize testing framework */
     TestInit(argv[0], NULL, NULL);
-
+    getchar();
     /* Tests are generally arranged from least to most complexity... */
     AddTest("config", test_configure, cleanup_configure, "Configure definitions", NULL);
     AddTest("metadata", test_metadata, cleanup_metadata, "Encoding/decoding metadata", NULL);
