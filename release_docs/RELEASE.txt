@@ -4,22 +4,22 @@ HDF5 version 1.8.15-snap0 currently under development
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.13 and 
-HDF5-1.8.14-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.14-*. 
+This document describes the differences between HDF5-1.8.14 and 
+HDF5-1.8.15-*, and contains information on the platforms tested and 
+known problems in HDF5-1.8.15-*. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
-Links to the HDF5 1.8.13 source code, documentation, and additional materials
+Links to the HDF5 1.8.14 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
 
-The HDF5 1.8.13 release can be obtained from:
+The HDF5 1.8.14 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
-User documentation for 1.8.13 can be accessed directly at this location: 
+User documentation for 1.8.14 can be accessed directly at this location: 
 
      http://www.hdfgroup.org/HDF5/doc/
 
@@ -30,8 +30,8 @@ in 1.8.0?" document:
      http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes 
-from Release to Release" document, in the section "Release 1.8.14 (current 
-release) versus Release 1.8.13":
+from Release to Release" document, in the section "Release 1.8.15 (current 
+release) versus Release 1.8.14
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
@@ -45,7 +45,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms, Languages, and Compilers
-- Bug Fixes since HDF5-1.8.13
+- Bug Fixes since HDF5-1.8.14
 - Supported Platforms
 - Supported Configuration Features Summary
 - More Tested Platforms
@@ -57,22 +57,15 @@ New Features
 
     Configuration
     -------------
-    - [Example] New feature 
-      (EIP - 2014/04/14)
-    - 
+    - None
     
     Library
     -------
-    - 
+    - None
  
     Parallel Library
     ----------------
-    - Optimize the chunk fill algorithm of datasets by writing out all
-      the chunk fill values collectively in a single MPI-IO
-      call. Previously it was done independently by rank 0
-      one block at a time. This should show a great performance
-      improvement when creating chunked datasets in parallel when the
-      chunk dimensions are fairly small.
+    - None
  
     Tools
     -----
@@ -88,9 +81,7 @@ New Features
 
     C++ API
     -------
-    - H5I_INVALID_HID replaces 0 to initialize data member "id" in classes
-      that represent HDF5 objects.  For PropList, H5P_DEFAULT is used
-      instead of H5I_INVALID_HID. (HDFFV-4259, 2014/09/30 -BMR)
+    - None
 
 
 
@@ -98,41 +89,16 @@ Support for New Platforms, Languages, and Compilers
 ===================================================
                                   
 
-Bug Fixes since HDF5-1.8.13
+Bug Fixes since HDF5-1.8.14
 ===========================
 
     Configuration
     -------------
-    - 
-    - Autotools: An export of LD_LIBRARY_PATH=<szip library location> was
-      removed from configure and make installcheck was revised to run
-      scripts installed in share/hdf5_examples to use the installed h5cc, etc. 
-      to compile and run example source files also installed there. Make
-      installcheck will now fail when a shared szip or other external lib file
-      cannot be found in the same manner that executables compiled and linked
-      with h5cc will fail to run when those lib files cannot be found after
-      install.  Make installcheck should pass after setting LD_LIBRARY_PATH to the
-      szip location.
-      (LRK - 2014/04/16)
+    - None
 
     Library
     -------
-    - Removal of DllMain() from static Windows builds. 
-      A DllMain() function was added in HDF5 1.8.13 in order to handle win32 thread
-      cleanup. The preprocessor #ifdefs around the DllMain function allowed it
-      to be compiled when the static library is built, which is incorrect behavior
-      and can cause linkage problems in clients.
-      The fix was to change the preprocessor #ifdefs to exclude compiling DllMain()
-      in static builds. Our DllMain function is now only compiled when the shared, 
-      thread-safe library is built on Windows.
-      (DER - 2014/06/13 HDFFV-8837)
-
-    - Enforce constraing on page_size parameter in
-      H5Pset_core_write_tracking().
-      The reference manual states that the page_size parameter cannot be zero.
-      This change checks the page_size parameter to ensure it is zero and returns
-      an error code if it is.
-      (DER - 2014/08/11 HDFFV-8891)
+    - None
 
     Parallel Library
     ----------------
@@ -152,13 +118,7 @@ Bug Fixes since HDF5-1.8.13
 
     C++ API
     ------
-    - User's patches were applied to remove several potential memory leaks.
-      (HDFFV-8928, 2014/09/30 -BMR)
-    - H5F_ACC_CREAT was included in the C++ API but the C library doesn't
-      allow it at this time, so it is now removed from the C++ API.
-      In addition, H5F_ACC_RDONLY and H5F_ACC_RDWR were missing from the
-      documentation, and they are now included.
-      (HDFFV-8852, 2014/09/29 -BMR)
+    - None
 
     High-Level APIs:
     ------
@@ -170,8 +130,7 @@ Bug Fixes since HDF5-1.8.13
 
     Testing
     -------
-    - Fixed incorrect exit code values (was -1) in testframe which is commonly
-      used by several test programs. (AKC - 2014/07/22 HDFFV-8881)
+    - None
 
 
 Supported Platforms
