@@ -1190,11 +1190,12 @@ Supported Platforms
                                   compilers:
                                      Version 14.0.2 (Build 20140120)
 
-    Linux 2.6.32-431.11.2.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
-    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
-    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
-                                  IBM XL C/C++ V11.1
-                                  IBM XL Fortran V13.1
+    Linux 2.6.32-431.29.2.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-4)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-4)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-4)
+                                  IBM XL C/C++ V13.1
+                                  IBM XL Fortran V15.1
+    
     Linux 2.6.32-220.23.1.1chaos  Intel C, C++, Fortran Compilers
     ch5.x86_64 GNU/Linux              Version 12.1.5.339
     (LLNL Aztec)
