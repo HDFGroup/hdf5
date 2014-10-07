@@ -103,7 +103,10 @@ Bug Fixes since HDF5-1.8.13
 
     Configuration
     -------------
-    - 
+    - Library version number is changed due to interface changes since
+      previous version 1.8.13. (AKC - 2014/10/03 HDFFV-8937).
+    - Mac platforms now builds library with "-O3" optimization when the
+      default clang compiler is used. (AKC - 2014/10/01 HDFFV-8933). 
     - Autotools: An export of LD_LIBRARY_PATH=<szip library location> was
       removed from configure and make installcheck was revised to run
       scripts installed in share/hdf5_examples to use the installed h5cc, etc. 
