@@ -26,6 +26,16 @@ installlog="#${progname}_5install.log"
 srcdir="../hdf5"	# expected source directory
 exit_code=0
 
+# Cmake build options
+hdf5_src=../hdf5
+cacheinit=$hdf5_src/config/cmake/cacheinit.cmake
+build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=ON	# C++ interface default on
+build_fortran= #-DHDF5_BUILD_FORTRAN:BOOL=ON	# Fortran interface default off
+build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON	# High Level interface default on
+build_testing=-DBUILD_TESTING:BOOL=ON		# Build tests default on
+build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON		# Build tools default on
+
+
 #=============
 # Function definitions
 #=============
@@ -99,7 +109,13 @@ fi
 echo Running Cmake for HDF5-${version} ...
 
 #      4. Configure the C library, tools and tests with this command:
-STEP "Configure..." "cmake -G 'Unix Makefiles' -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ../hdf5" $configlog
+STEP "Configure..." "cmake \
+    $build_cpp_lib \
+    $build_fortran \
+    $build_hl_lib \
+    $build_testing \
+    $build_tools \
+    $hdf5_src" $configlog
       
 #      5. Build the C library, tools and tests with this command:
 STEP "Build the library, tools and tests, ..." "cmake --build . --config Release" $makelog
