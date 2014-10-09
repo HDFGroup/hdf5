@@ -4365,6 +4365,11 @@ test_dense_attr(void)
     hid_t atFileSpace, atid;
     hsize_t atDims[1] = {10000};
     herr_t status;
+    const char *filename;
+
+    /* get filename */
+    filename = (const char *)GetTestParameters();
+    HDassert( filename != NULL );
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
@@ -4376,7 +4381,7 @@ test_dense_attr(void)
     VRFY((status >= 0), "H5Pset_libver_bounds succeeded");
     status = H5Pset_fapl_mpio(fpid, MPI_COMM_WORLD, MPI_INFO_NULL);
     VRFY((status >= 0), "H5Pset_fapl_mpio succeeded");
-    fid = H5Fcreate("ph5Dense.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fpid);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fpid);
     VRFY((fid > 0), "H5Fcreate succeeded");
     status = H5Pclose(fpid);
     VRFY((status >= 0), "H5Pclose succeeded");

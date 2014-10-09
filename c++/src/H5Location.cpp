@@ -33,6 +33,9 @@
 #include "H5DataSet.h"
 #include "H5Attribute.h"
 #include "H5private.h"		// for HDmemset
+#include <iostream>
+using namespace std;
+
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -551,6 +554,7 @@ H5std_string H5Location::getComment(const char* name, size_t buf_size) const
 	ssize_t comment_len = getComment(name, tmp_len+1, comment_C);
 	if (comment_len < 0)
 	{
+	    delete []comment_C;
 	    throw LocationException("H5Location::getComment", "H5Oget_comment_by_name failed");
 	}
 

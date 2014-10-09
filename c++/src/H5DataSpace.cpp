@@ -630,7 +630,7 @@ void DataSpace::close()
 	    throw DataSpaceIException("DataSpace::close", "H5Sclose failed");
 	}
 	// reset the id
-	id = 0;
+	id = H5I_INVALID_HID;
     }
 }
 
