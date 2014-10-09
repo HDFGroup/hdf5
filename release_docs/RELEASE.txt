@@ -1172,9 +1172,6 @@ Supported Platforms
     #1 SMP x86_64 GNU/Linux       compilers for 64-bit applications;
     (koala)                           Version 4.1.2 20080704 (Red Hat 4.1.2-54)
                                       Version 4.8.2
-                                  PGI C, Fortran, C++ for 64-bit target on 
-                                  x86-64;
-                                      Version 13.7-0 
                                   Intel(R) C, C++, Fortran Compilers for 
                                   applications running on Intel(R) 64; 
                                       Version 14.0.2 (Build 20140120)
@@ -1309,12 +1306,12 @@ More Tested Platforms
 =====================
 The following platforms are not supported but have been tested for this release.
 
-    Linux 2.6.18-308.13.1.el5PAE  MPICH mpich 3.1 compiled with
-    #1 SMP i686 i686 i386             gcc 4.8.2 and gfortran 4.8.2
+    Linux 2.6.18-308.13.1.el5PAE  MPICH mpich 3.1.2 compiled with
+    #1 SMP i686 i686 i386             gcc 4.9.1 and gfortran 4.9.1
     (jam)                         g95 (GCC 4.0.3 (g95 0.94!)
 
-    Linux 2.6.18-431.11.2.el6     MPICH mpich 3.1 compiled with
-    #1 SMP x86_64 GNU/Linux           gcc 4.8.2 and gfortran 4.8.2
+    Linux 2.6.18-431.11.2.el6     MPICH mpich 3.1.2 compiled with
+    #1 SMP x86_64 GNU/Linux           gcc 4.9.1 and gfortran 4.9.1
     (platypus)                    g95 (GCC 4.0.3 (g95 0.94!)   
 
     FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
