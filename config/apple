@@ -34,17 +34,17 @@ if test "X-" = "X-$CC"; then
 
 	    # Production
 	    PROD_CFLAGS="-O3" 
-	    PROD_CPPFLAGS="-O3" 
+	    PROD_CPPFLAGS=
 
 	    # Debug
 	    DEBUG_CFLAGS="-g -O0"
-	    DEBUG_CPPFLAGS="-g -O0"
+	    DEBUG_CPPFLAGS=
 
 	    # Profile
 	    # Use this for profiling with gprof
 	    # Just "-g" for now. More later.
 	    PROFILE_CFLAGS="-g"
-	    PROFILE_CPPFLAGS="-g"
+	    PROFILE_CPPFLAGS=
 	    ;;
     esac
 fi
@@ -102,6 +102,16 @@ if test "X-" = "X-$CXX"; then
             ;;
     esac
 fi
+
+case $CXX_BASENAME in
+    clang++)
+	PROD_CXXFLAGS="-O3"
+	DEBUG_CXXFLAGS="-g -O0"
+	# Use this for profiling with gprof
+	# Just "-g" for now. More later.
+	PROFILE_CXXFLAGS="-g"
+	;;
+esac
 
 # compiler version strings
 case $CC in
