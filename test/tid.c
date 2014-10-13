@@ -545,21 +545,19 @@ static herr_t fake_free(void *obj)
 	/* Test boundary cases with lots of IDs */
 
 /* Type IDs range from 0 to ID_MASK before wrapping around.  The code will assign */
-/* IDs in sequential order until ID_MASK IDs have been given out, at which */
-/* point it will search for type IDs that were allocated but have since been */
-/* closed. */
+/* IDs in sequential order until ID_MASK IDs have been given out. */
 /* This test will allocate IDs up to ID_MASK, ensure that IDs wrap around */
-/* to low values successfully, ensure that an error is thrown when all possible */
-/* type IDs are taken, then ensure that deleting types frees up their IDs. */
+/* to low values successfully, then ensure that deleting types frees up their IDs. */
 /* NOTE: this test depends on the implementation of IDs, so may break */
 /*		if the implementation changes. */
 static int test_id_wrap(void)
 {
-    H5I_type_t testType;        /* ID class for testing */
+    H5I_type_t testType;    /* ID class for testing */
     hid_t *id_array;    /* Array of IDs allocated */
     hid_t test_id;      /* Test ID */
     void *obj;          /* Object pointer returned for ID */
     unsigned u;         /* Local index variable */
+    hsize_t nids;       /* Number of IDs registered for type */
     herr_t status;      /* Status from routine */
 
     /* Allocate array for storing IDs */
@@ -578,14 +576,50 @@ static int test_id_wrap(void)
         CHECK(id_array[u], FAIL, "H5Iregister");
         if(id_array[u] < 0)
             goto out;
+        if(u > 0) {
+            /* IDs should be returned in increasing order */
+            /* (Since application-registered IDs don't reuse ID values) */
+            if(id_array[u] < id_array[u - 1])
+                goto out;
+
+            /* Release the previous ID in the array */
+            obj = H5Iremove_verify(id_array[u - 1], testType);
+            CHECK(obj, NULL, "H5Iremove_verify");
+            if(NULL == obj)
+                goto out;
+            VERIFY(obj, &id_array[u - 1], "H5Iremove_verify");
+            if(&id_array[u - 1] != obj)
+                goto out;
+        } /* end if */
+
+        /* Verify number of registered IDs */
+        /* (Should stay at 1) */
+        status = H5Inmembers(testType, &nids);
+        CHECK(status, FAIL, "H5Inmembers");
+        if(status < 0)
+            goto out;
+        VERIFY(nids, 1, "H5Inmembers");
+        if(nids != 1)
+            goto out;
     } /* end for */
 
-    /* There should be no room at the inn for a new ID */
-    H5E_BEGIN_TRY
-        test_id = H5Iregister(testType, id_array);
-    H5E_END_TRY
-    VERIFY(test_id, H5I_BADID, "H5Iregister_type");
-    if(test_id != H5I_BADID)
+    /* Register another object, will wraparound */
+    test_id = H5Iregister(testType, &id_array[0]);
+    CHECK(test_id, FAIL, "H5Iregister");
+    if(test_id < 0)
+        goto out;
+    VERIFY(test_id, id_array[0], "H5Iregister");
+    if(id_array[0] != test_id)
+        goto out;
+
+    /* Verify number of registered IDs */
+    /* (Should be 2 now) */
+    status = H5Inmembers(testType, &nids);
+    CHECK(status, FAIL, "H5Inmembers");
+    if(status < 0)
+        goto out;
+    VERIFY(nids, 2, "H5Inmembers");
+    if(nids != 2)
         goto out;
 
     /* Release the first ID in the array */
@@ -597,25 +631,24 @@ static int test_id_wrap(void)
     if(&id_array[0] != obj)
         goto out;
 
-    /* Register another object, should be room now, but will wraparound */
-    test_id = H5Iregister(testType, &id_array[0]);
-    CHECK(test_id, FAIL, "H5Iregister");
-    if(test_id < 0)
+    /* Release the last ID in the array */
+    obj = H5Iremove_verify(id_array[ID_MASK], testType);
+    CHECK(obj, NULL, "H5Iremove_verify");
+    if(NULL == obj)
         goto out;
-    VERIFY(test_id, id_array[0], "H5Iregister");
-    if(id_array[0] != test_id)
+    VERIFY(obj, &id_array[ID_MASK], "H5Iremove_verify");
+    if(&id_array[ID_MASK] != obj)
         goto out;
 
-    /* Release all IDs, unregister the ID class and free the array */
-    for(u = 0; u <= ID_MASK; u++) {
-        obj = H5Iremove_verify(id_array[u], testType);
-        CHECK(obj, NULL, "H5Iremove_verify");
-        if(NULL == obj)
-            goto out;
-        VERIFY(obj, &id_array[u], "H5Iremove_verify");
-        if(&id_array[u] != obj)
-            goto out;
-    } /* end for */
+    /* Verify number of registered IDs */
+    /* (Should be 0 now) */
+    status = H5Inmembers(testType, &nids);
+    CHECK(status, FAIL, "H5Inmembers");
+    if(status < 0)
+        goto out;
+    VERIFY(nids, 0, "H5Inmembers");
+    if(nids != 0)
+        goto out;
 
     status = H5Idestroy_type(testType);
     CHECK(status, FAIL, "H5Idestroy_type");
