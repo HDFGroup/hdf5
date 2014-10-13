@@ -16,6 +16,7 @@
 /* Programmer:  Jerome Soumagne <jsoumagne@hdfgroup.org>
  *              Wednesday, Sep 24, 2014
  */
+
 #include "h5test.h"
 
 const char *FILENAME[] = {
@@ -62,9 +63,11 @@ error:
 }
 
 static herr_t
-create_index(hid_t file, const char *dataset_name, unsigned plugin)
+test_create_index(hid_t file, const char *dataset_name, unsigned plugin)
 {
     hid_t dataset = H5I_BADID;
+
+    TESTING("index create from existing dataset");
 
     dataset = H5Dopen(file, dataset_name, H5P_DEFAULT);
     if (dataset < 0) FAIL_STACK_ERROR;
@@ -73,6 +76,39 @@ create_index(hid_t file, const char *dataset_name, unsigned plugin)
     if (H5Xcreate(dataset, plugin, H5P_DEFAULT) < 0) FAIL_STACK_ERROR;
 
     if (H5Dclose(dataset) < 0) FAIL_STACK_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(dataset);
+    } H5E_END_TRY;
+    return -1;
+}
+
+static herr_t
+test_remove_index(hid_t file, const char *dataset_name, unsigned plugin)
+{
+    hid_t dataset = H5I_BADID;
+    hsize_t idx_count = 0;
+
+    TESTING("index remove");
+
+    dataset = H5Dopen(file, dataset_name, H5P_DEFAULT);
+    if (dataset < 0) FAIL_STACK_ERROR;
+
+    /* Add indexing information */
+    if (H5Xremove(dataset, plugin) < 0) FAIL_STACK_ERROR;
+
+    /* Check that there is no more index */
+    if (H5Xget_count(dataset, &idx_count) < 0) FAIL_STACK_ERROR;
+    if (idx_count) FAIL_STACK_ERROR;
+
+    if (H5Dclose(dataset) < 0) FAIL_STACK_ERROR;
+
+    PASSED();
 
     return 0;
 
@@ -134,15 +170,16 @@ error:
 //}
 
 static herr_t
-query(hid_t file_id, const char *dataset_name)
+test_query(hid_t file_id, const char *dataset_name)
 {
     hsize_t start_coord[H5S_MAX_RANK + 1], end_coord[H5S_MAX_RANK + 1];
-//    hsize_t nelmts;
     hid_t dataset = H5I_BADID;
     hid_t space = H5I_BADID;
-    float query_lb = 39.1f, query_ub = 42.1f;
+    float query_lb = 39.1f, query_ub = 42.6f;
     hid_t query = H5I_BADID, query1 = H5I_BADID, query2 = H5I_BADID;
     struct timeval t1, t2;
+
+    TESTING("index query");
 
     /* Create a simple query */
     /* query = 39.1 < x < 42.1 */
@@ -170,11 +207,14 @@ query(hid_t file_id, const char *dataset_name)
     H5Sget_select_bounds(space, start_coord, end_coord);
 
     /*
-    nelmts = (hsize_t) H5Sget_select_npoints(space);
-    printf("\n Created dataspace with %llu elements,"
-            " bounds = [(%llu, %llu):(%llu, %llu)]\n",
-            nelmts, start_coord[0], start_coord[1], end_coord[0], end_coord[1]);
-     */
+    {
+        hsize_t nelmts;
+        nelmts = (hsize_t) H5Sget_select_npoints(space);
+        printf("\n Created dataspace with %llu elements,"
+                " bounds = [(%llu, %llu):(%llu, %llu)]\n",
+                nelmts, start_coord[0], start_coord[1], end_coord[0], end_coord[1]);
+    }
+    */
 
     if (start_coord[0] != 40) FAIL_STACK_ERROR;
     if (start_coord[1] != 0) FAIL_STACK_ERROR;
@@ -192,6 +232,8 @@ query(hid_t file_id, const char *dataset_name)
     if (H5Qclose(query) < 0) FAIL_STACK_ERROR;
     if (H5Qclose(query2) < 0) FAIL_STACK_ERROR;
     if (H5Qclose(query1) < 0) FAIL_STACK_ERROR;
+
+    PASSED();
 
     return 0;
 
@@ -241,31 +283,37 @@ main(int argc, char **argv)
     h5_reset();
     fapl = h5_fileaccess();
 
-    /*
-     * Test creating index...
-     */
-    TESTING("index create from existing dataset");
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+    /* Check that no object is left open */
+    H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI);
+
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         goto error;
+    if (H5Pclose(fapl) < 0) goto error;
 
     if (write_dataset(file, DATASETNAME, ntuples, ncomponents, H5T_NATIVE_FLOAT,
             data) < 0)
         FAIL_STACK_ERROR;
 
-    if (create_index(file, DATASETNAME, plugin) < 0)
+    /*
+     * Test creating index...
+     */
+    if (test_create_index(file, DATASETNAME, plugin) < 0)
         FAIL_STACK_ERROR;
 
-    PASSED();
+    /*
+     * TODO Test creating index from dataset create...
+     */
 
-//    TESTING("index create from dataset create");
+    /* Close and reopen the file */
+    if (H5Fclose(file) < 0) goto error;
 
-    TESTING("index query");
+    fapl = h5_fileaccess();
+    if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        goto error;
 
-    if (query(file, DATASETNAME) < 0)
+    if (test_query(file, DATASETNAME) < 0)
         FAIL_STACK_ERROR;
-
-    PASSED();
 
 //    if (incr_update) {
 //        start = ntuples * (hsize_t) my_rank;
@@ -279,6 +327,9 @@ main(int argc, char **argv)
 //
 //        MPI_Barrier(MPI_COMM_WORLD);
 //    }
+
+    if (test_remove_index(file, DATASETNAME, plugin) < 0)
+        FAIL_STACK_ERROR;
 
     /* Close the file. */
     if (H5Fclose(file) < 0) goto error;
