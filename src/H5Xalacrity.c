@@ -54,7 +54,8 @@
       fflush(stdout);                                           \
   } while (0)
 #else
-#define H5X_ALACRITY_LOG_DEBUG
+#define H5X_ALACRITY_LOG_DEBUG(...) do { \
+  } while (0)
 #endif
 
 /******************/
@@ -83,8 +84,8 @@ typedef struct H5X_alacrity_range_t {
 } H5X_alacrity_range_t;
 
 struct H5X_alacrity_scatter_info {
-    void *src_buf;       /* Source data buffer */
-    size_t src_buf_size; /* Remaining number of elements to return */
+    const void *src_buf;    /* Source data buffer */
+    size_t src_buf_size;    /* Remaining number of elements to return */
 };
 
 /********************/
@@ -160,7 +161,7 @@ H5X_alacrity_create(hid_t dataset_id, hid_t xcpl_id, hid_t xapl_id,
         size_t *metadata_size, void **metadata);
 
 static herr_t
-H5X_alacrity_remove(hid_t dataset_id, size_t metadata_size, void *metadata);
+H5X_alacrity_remove(hid_t file_id, size_t metadata_size, void *metadata);
 
 static void *
 H5X_alacrity_open(hid_t dataset_id, hid_t xapl_id, size_t metadata_size,
@@ -208,18 +209,20 @@ extern _Bool findBinRange1C(const ALMetadata *meta, ALUnivariateQuery *query,
 
 /* Alacrity index class */
 const H5X_class_t H5X_ALACRITY[1] = {{
-    H5X_CLASS_T_VERS,          /* (From the H5Xpublic.h header file) */
-    H5X_PLUGIN_ALACRITY,       /* (Or whatever number is assigned) */
-    "ALACRITY index plugin",   /* Whatever name desired */
-    H5X_TYPE_DATA_ELEM,        /* This plugin operates on dataset elements */
-    H5X_alacrity_create,       /* create */
-    H5X_alacrity_remove,       /* remove */
-    H5X_alacrity_open,         /* open */
-    H5X_alacrity_close,        /* close */
-    H5X_alacrity_pre_update,   /* pre_update */
-    H5X_alacrity_post_update,  /* post_update */
-    H5X_alacrity_query,        /* query */
-    H5X_alacrity_refresh       /* refresh */
+    H5X_CLASS_T_VERS,           /* (From the H5Xpublic.h header file) */
+    H5X_PLUGIN_ALACRITY,        /* (Or whatever number is assigned) */
+    "ALACRITY index plugin",    /* Whatever name desired */
+    H5X_TYPE_DATA_ELEM,         /* This plugin operates on dataset elements */
+    H5X_alacrity_create,        /* create */
+    H5X_alacrity_remove,        /* remove */
+    H5X_alacrity_open,          /* open */
+    H5X_alacrity_close,         /* close */
+    H5X_alacrity_pre_update,    /* pre_update */
+    H5X_alacrity_post_update,   /* post_update */
+    H5X_alacrity_query,         /* query */
+    H5X_alacrity_refresh,       /* refresh */
+    NULL,                       /* copy */
+    NULL                        /* get_size */
 }};
 
 /*-------------------------------------------------------------------------
@@ -320,6 +323,9 @@ H5X__alacrity_term(H5X_alacrity_t *alacrity)
         HGOTO_DONE(SUCCEED);
 
     H5MM_free(alacrity->private_metadata);
+
+    if (FAIL == H5Fclose(alacrity->file_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "can't close file ID");
 
     /* Free dim arrays */
     H5MM_free(alacrity->dataset_dims);
@@ -586,6 +592,7 @@ static herr_t
 H5X__alacrity_update_index(H5X_alacrity_t *alacrity, const void *buf,
         size_t buf_size)
 {
+    hid_t metadata_space_id, index_space_id;
     hsize_t metadata_size, index_size;
     memstream_t memstream;
     size_t nelmts;
@@ -609,19 +616,6 @@ H5X__alacrity_update_index(H5X_alacrity_t *alacrity, const void *buf,
     /* Call ALACRITY encoder */
     H5X_ALACRITY_LOG_DEBUG("Calling ALACRITY encoder on data (%zu elements)", nelmts);
 
-//#ifdef H5X_ALACRITY_DEBUG
-//    {
-//        printf("----------------------------\n");
-//        printf("----------------------------\n");
-//        int i;
-//        const float *buf_float = (const float *) buf;
-//        for (i = 0; i < nelmts; i++)
-//            printf("%f\n", buf_float[i]);
-//        printf("----------------------------\n");
-//        printf("----------------------------\n");
-//    }
-//#endif
-
     if (ALErrorNone != ALEncode(&alacrity->config, buf, nelmts, alacrity->output))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTENCODE, FAIL, "ALACRITY encoder failed");
 
@@ -639,30 +633,8 @@ H5X__alacrity_update_index(H5X_alacrity_t *alacrity, const void *buf,
             &alacrity->output->metadata)))
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "ALACRITY index size is NULL");
 
-    size_t prev_metadata_size;
-    {
-        hid_t type_id, space_id;
-        size_t nelmts_data, data_elmt_size;
-
-        if (FAIL == (type_id = H5Dget_type(alacrity->metadata_id)))
-            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get type from dataset");
-        if (FAIL == (space_id = H5Dget_space(alacrity->metadata_id)))
-            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get dataspace from dataset");
-        if (0 == (nelmts_data = (size_t) H5Sget_select_npoints(space_id)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid number of elements");
-        if (0 == (data_elmt_size = H5Tget_size(type_id)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "invalid size of element");
-
-        prev_metadata_size = data_elmt_size * nelmts_data;
-        H5X_ALACRITY_LOG_DEBUG("Old metadata size: %zu", prev_metadata_size);
-
-        H5Tclose(type_id);
-        H5Sclose(space_id);
-    }
-
     H5X_ALACRITY_LOG_DEBUG("Metadata size: %zu", (size_t) metadata_size);
     H5X_ALACRITY_LOG_DEBUG("Index size: %zu", (size_t) index_size);
-    hid_t metadata_space_id, index_space_id;
 
     /* Create metadata array with opaque type */
     H5Dclose(alacrity->metadata_id);
@@ -686,16 +658,12 @@ H5X__alacrity_update_index(H5X_alacrity_t *alacrity, const void *buf,
     memstreamInit(&memstream, metadata_buf);
     if (ALErrorNone != ALSerializeMetadata(&alacrity->output->metadata, &memstream))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTSERIALIZE, FAIL, "can't serialize ALACRITY metadata");
-//    if (FAIL == H5Dset_extent_ff(alacrity->metadata_id, &metadata_size, trans_id, H5_EVENT_STACK_NULL))
-//        HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "can't set extent for index metadata");
     if (FAIL == H5Dwrite(alacrity->metadata_id, alacrity->opaque_type_id, H5S_ALL,
             H5S_ALL, H5P_DEFAULT, memstream.buf))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index metadata");
     memstreamDestroy(&memstream, 0);
 
     /* Write ALACRITY index */
-//    if (FAIL == H5Dset_extent_ff(alacrity->index_id, &index_size, trans_id, H5_EVENT_STACK_NULL))
-//        HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "can't set extent for index metadata");
     if (FAIL == H5Dwrite(alacrity->index_id, alacrity->opaque_type_id, H5S_ALL,
             H5S_ALL, H5P_DEFAULT, alacrity->output->index))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index data");
@@ -982,7 +950,7 @@ done:
  */
 static herr_t
 H5X__alacrity_get_query_ranges(hid_t query_id,
-        H5X_alacrity_range_t *query_ranges, size_t *nranges)
+        H5X_alacrity_range_t *query_ranges, size_t UNUSED *nranges)
 {
     H5Q_t *query;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1014,7 +982,6 @@ H5X__alacrity_find_bin_range(ALMetadata *metadata, value_types_t query_lb,
     hbool_t ret_value = FALSE; /* Return value */
     ALUnivariateQuery univariate_query;
     ALBinLayout *bl = &metadata->binLayout;
-    uint64_t resultCount;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1029,12 +996,16 @@ H5X__alacrity_find_bin_range(ALMetadata *metadata, value_types_t query_lb,
     /* Call internal ALACRITY findBinRange1C routine */
     ret_value = findBinRange1C(metadata, &univariate_query, start_bin,
             end_bin) ? TRUE : FALSE;
+#ifdef H5X_ALACRITY_DEBUG
     if (ret_value) {
+        uint64_t resultCount;
+
         H5X_ALACRITY_LOG_DEBUG("Start bin: %d", *start_bin);
         H5X_ALACRITY_LOG_DEBUG("End bin: %d", *end_bin);
         resultCount = bl->binStartOffsets[*end_bin] - bl->binStartOffsets[*start_bin];
         H5X_ALACRITY_LOG_DEBUG("Result count: %lu", resultCount);
     }
+#endif
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -1252,7 +1223,7 @@ done:
  *------------------------------------------------------------------------
  */
 static void *
-H5X_alacrity_create(hid_t dataset_id, hid_t UNUSED xcpl_id, hid_t xapl_id,
+H5X_alacrity_create(hid_t dataset_id, hid_t UNUSED xcpl_id, hid_t UNUSED xapl_id,
         size_t *metadata_size, void **metadata)
 {
     H5X_alacrity_t *alacrity = NULL;
@@ -1260,7 +1231,6 @@ H5X_alacrity_create(hid_t dataset_id, hid_t UNUSED xcpl_id, hid_t xapl_id,
     size_t private_metadata_size;
     void *buf = NULL;
     size_t buf_size;
-    uint64_t version;
 
     FUNC_ENTER_NOAPI_NOINIT
     H5X_ALACRITY_LOG_DEBUG("Enter");
@@ -1314,13 +1284,38 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_alacrity_remove(hid_t UNUSED dataset_id, size_t UNUSED metadata_size,
-        void UNUSED *metadata)
+H5X_alacrity_remove(hid_t file_id, size_t metadata_size, void *metadata)
 {
+    hid_t metadata_id, index_id;
+    char *buf_ptr = metadata;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
     H5X_ALACRITY_LOG_DEBUG("Enter");
+
+    if (metadata_size < (2 * sizeof(haddr_t)))
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "metadata size is not valid");
+
+    /* Decode metadata info */
+    if (FAIL == (metadata_id = H5Oopen_by_addr(file_id, *((haddr_t *) buf_ptr))))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "can't open anonymous dataset");
+    buf_ptr += sizeof(haddr_t);
+
+    /* Decode index info */
+    if (FAIL == (index_id = H5Oopen_by_addr(file_id, *((haddr_t *) buf_ptr))))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "can't open anonymous dataset");
+
+    /* Decrement refcount so that anonymous dataset gets deleted */
+    if (FAIL == H5Odecr_refcount(metadata_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTDEC, FAIL, "can't decrement dataset refcount");
+    if (FAIL == H5Odecr_refcount(index_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTDEC, FAIL, "can't decrement dataset refcount");
+
+done:
+    if (FAIL != metadata_id)
+        H5Dclose(metadata_id);
+    if (FAIL != index_id)
+        H5Dclose(index_id);
 
     H5X_ALACRITY_LOG_DEBUG("Leave");
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1337,7 +1332,7 @@ H5X_alacrity_remove(hid_t UNUSED dataset_id, size_t UNUSED metadata_size,
  *-------------------------------------------------------------------------
  */
 static void *
-H5X_alacrity_open(hid_t dataset_id, hid_t xapl_id, size_t metadata_size,
+H5X_alacrity_open(hid_t dataset_id, hid_t UNUSED xapl_id, size_t metadata_size,
         void *metadata)
 {
     H5X_alacrity_t *alacrity = NULL;
@@ -1434,7 +1429,7 @@ done:
  */
 static herr_t
 H5X_alacrity_post_update(void *idx_handle, const void *data,
-        hid_t dataspace_id, hid_t xxpl_id)
+        hid_t dataspace_id, hid_t UNUSED xxpl_id)
 {
     H5X_alacrity_t *alacrity = (H5X_alacrity_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1477,7 +1472,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_alacrity_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
+H5X_alacrity_query(void *idx_handle, hid_t query_id, hid_t UNUSED xxpl_id,
         hid_t *dataspace_id)
 {
     H5X_alacrity_t *alacrity = (H5X_alacrity_t *) idx_handle;

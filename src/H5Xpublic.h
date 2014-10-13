@@ -64,7 +64,7 @@ typedef struct {
     /* Callbacks, described above */
     void * (*create)(hid_t dataset_id, hid_t xcpl_id, hid_t xapl_id,
             size_t *metadata_size, void **metadata);
-    herr_t (*remove)(hid_t dataset_id, size_t metadata_size, void *metadata);
+    herr_t (*remove)(hid_t file_id, size_t metadata_size, void *metadata);
     void *(*open)(hid_t dataset_id, hid_t xapl_id, size_t metadata_size,
             void *metadata);
     herr_t (*close)(void *idx_handle);
@@ -72,8 +72,12 @@ typedef struct {
     herr_t (*post_update)(void *idx_handle, const void *buf, hid_t dataspace_id,
             hid_t xxpl_id);
     herr_t (*query)(void *idx_handle, hid_t query_id, hid_t xxpl_id,
-        hid_t *dataspace_id);
+            hid_t *dataspace_id);
     herr_t (*refresh)(void *idx_handle, size_t *metadata_size, void **metadata);
+    herr_t (*copy)(hid_t src_dataset_id, hid_t dest_dataset_id, hid_t xcpl_id,
+            hid_t xapl_id, size_t src_metadata_size, void *src_metadata,
+            size_t *dest_metadata_size, void **dest_metadata);
+    herr_t (*get_size)(void *idx_handle, hsize_t *idx_size);
 } H5X_class_t;
 
 /********************/

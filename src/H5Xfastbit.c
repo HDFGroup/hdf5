@@ -57,7 +57,8 @@
   } while (0)
 #else
 #define H5X_FASTBIT_DEBUG_LVL 0
-#define H5X_FASTBIT_LOG_DEBUG
+#define H5X_FASTBIT_LOG_DEBUG(...) do { \
+  } while (0)
 #endif
 
 /******************/
@@ -92,8 +93,8 @@ typedef struct H5X_fastbit_t {
 } H5X_fastbit_t;
 
 struct H5X_fastbit_scatter_info {
-    void *src_buf;       /* Source data buffer */
-    size_t src_buf_size; /* Remaining number of elements to return */
+    const void *src_buf;    /* Source data buffer */
+    size_t src_buf_size;    /* Remaining number of elements to return */
 };
 
 /********************/
@@ -145,7 +146,7 @@ H5X_fastbit_create(hid_t dataset_id, hid_t xcpl_id, hid_t xapl_id,
         size_t *metadata_size, void **metadata);
 
 static herr_t
-H5X_fastbit_remove(hid_t dataset_id, size_t metadata_size, void *metadata);
+H5X_fastbit_remove(hid_t file_id, size_t metadata_size, void *metadata);
 
 static void *
 H5X_fastbit_open(hid_t dataset_id, hid_t xapl_id, size_t metadata_size,
@@ -183,18 +184,20 @@ H5X_fastbit_refresh(void *idx_handle, size_t *metadata_size, void **metadata);
 
 /* FastBit index class */
 const H5X_class_t H5X_FASTBIT[1] = {{
-    H5X_CLASS_T_VERS,          /* (From the H5Xpublic.h header file) */
-    H5X_PLUGIN_FASTBIT,        /* (Or whatever number is assigned) */
-    "FASTBIT index plugin",    /* Whatever name desired */
-    H5X_TYPE_DATA_ELEM,        /* This plugin operates on dataset elements */
-    H5X_fastbit_create,        /* create */
-    H5X_fastbit_remove,        /* remove */
-    H5X_fastbit_open,          /* open */
-    H5X_fastbit_close,         /* close */
-    H5X_fastbit_pre_update,    /* pre_update */
-    H5X_fastbit_post_update,   /* post_update */
-    H5X_fastbit_query,         /* query */
-    H5X_fastbit_refresh        /* refresh */
+    H5X_CLASS_T_VERS,           /* (From the H5Xpublic.h header file) */
+    H5X_PLUGIN_FASTBIT,         /* (Or whatever number is assigned) */
+    "FASTBIT index plugin",     /* Whatever name desired */
+    H5X_TYPE_DATA_ELEM,         /* This plugin operates on dataset elements */
+    H5X_fastbit_create,         /* create */
+    H5X_fastbit_remove,         /* remove */
+    H5X_fastbit_open,           /* open */
+    H5X_fastbit_close,          /* close */
+    H5X_fastbit_pre_update,     /* pre_update */
+    H5X_fastbit_post_update,    /* post_update */
+    H5X_fastbit_query,          /* query */
+    H5X_fastbit_refresh,        /* refresh */
+    NULL,                       /* copy */
+    NULL                        /* get_size */
 }};
 
 /*-------------------------------------------------------------------------
@@ -297,6 +300,9 @@ H5X__fastbit_term(H5X_fastbit_t *fastbit)
         HGOTO_DONE(SUCCEED);
 
     H5MM_free(fastbit->private_metadata);
+
+    if (FAIL == H5Fclose(fastbit->file_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "can't close file ID");
 
     /* Free dim arrays */
     H5MM_free(fastbit->dataset_dims);
@@ -1085,7 +1091,7 @@ done:
  *------------------------------------------------------------------------
  */
 static void *
-H5X_fastbit_create(hid_t dataset_id, hid_t UNUSED xcpl_id, hid_t xapl_id,
+H5X_fastbit_create(hid_t dataset_id, hid_t UNUSED xcpl_id, hid_t UNUSED xapl_id,
         size_t *metadata_size, void **metadata)
 {
     H5X_fastbit_t *fastbit = NULL;
@@ -1093,7 +1099,6 @@ H5X_fastbit_create(hid_t dataset_id, hid_t UNUSED xcpl_id, hid_t xapl_id,
     size_t private_metadata_size;
     void *buf = NULL;
     size_t buf_size;
-    uint64_t version;
 
     FUNC_ENTER_NOAPI_NOINIT
     H5X_FASTBIT_LOG_DEBUG("Enter");
@@ -1147,13 +1152,47 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_fastbit_remove(hid_t UNUSED dataset_id, size_t UNUSED metadata_size,
-        void UNUSED *metadata)
+H5X_fastbit_remove(hid_t file_id, size_t metadata_size, void *metadata)
 {
+    hid_t keys_id, offsets_id, bitmaps_id;
+    char *buf_ptr = metadata;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
     H5X_FASTBIT_LOG_DEBUG("Enter");
+
+    if (metadata_size < (3 * sizeof(haddr_t)))
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "metadata size is not valid");
+
+    /* Decode keys info */
+    if (FAIL == (keys_id = H5Oopen_by_addr(file_id, *((haddr_t *) buf_ptr))))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "can't open anonymous dataset");
+    buf_ptr += sizeof(haddr_t);
+
+    /* Decode offsets info */
+    if (FAIL == (offsets_id = H5Oopen_by_addr(file_id, *((haddr_t *) buf_ptr))))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "can't open anonymous dataset");
+    buf_ptr += sizeof(haddr_t);
+
+    /* Decode bitmaps info */
+    if (FAIL == (bitmaps_id = H5Oopen_by_addr(file_id, *((haddr_t *) buf_ptr))))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "can't open anonymous dataset");
+
+    /* Decrement refcount so that anonymous dataset gets deleted */
+    if (FAIL == H5Odecr_refcount(keys_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTDEC, FAIL, "can't decrement dataset refcount");
+    if (FAIL == H5Odecr_refcount(offsets_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTDEC, FAIL, "can't decrement dataset refcount");
+    if (FAIL == H5Odecr_refcount(bitmaps_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTDEC, FAIL, "can't decrement dataset refcount");
+
+done:
+    if (FAIL != keys_id)
+        H5Dclose(keys_id);
+    if (FAIL != offsets_id)
+        H5Dclose(offsets_id);
+    if (FAIL != bitmaps_id)
+        H5Dclose(bitmaps_id);
 
     H5X_FASTBIT_LOG_DEBUG("Leave");
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1170,7 +1209,7 @@ H5X_fastbit_remove(hid_t UNUSED dataset_id, size_t UNUSED metadata_size,
  *-------------------------------------------------------------------------
  */
 static void *
-H5X_fastbit_open(hid_t dataset_id, hid_t xapl_id, size_t metadata_size,
+H5X_fastbit_open(hid_t dataset_id, hid_t UNUSED xapl_id, size_t metadata_size,
         void *metadata)
 {
     H5X_fastbit_t *fastbit = NULL;
@@ -1267,7 +1306,7 @@ done:
  */
 static herr_t
 H5X_fastbit_post_update(void *idx_handle, const void *data, hid_t dataspace_id,
-        hid_t xxpl_id)
+        hid_t UNUSED xxpl_id)
 {
     H5X_fastbit_t *fastbit = (H5X_fastbit_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1310,7 +1349,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_fastbit_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
+H5X_fastbit_query(void *idx_handle, hid_t query_id, hid_t UNUSED xxpl_id,
         hid_t *dataspace_id)
 {
     H5X_fastbit_t *fastbit = (H5X_fastbit_t *) idx_handle;

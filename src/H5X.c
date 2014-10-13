@@ -35,6 +35,10 @@
 #include "H5Pprivate.h"     /* Property lists */
 #include "H5Xpkg.h"         /* Index plugins */
 #include "H5Dprivate.h"     /* Datasets */
+#include "H5Oprivate.h"
+
+#define H5D_PACKAGE
+#include "H5Dpkg.h"
 
 /****************/
 /* Local Macros */
@@ -47,7 +51,6 @@
 /********************/
 /* Local Prototypes */
 /********************/
-H5_DLL int H5X_term_interface(void);
 
 /*********************/
 /* Package Variables */
@@ -253,7 +256,7 @@ H5X_register(const H5X_class_t *index_class)
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(index_class);
-    HDassert(index_class->id >= 0 && index_class->id <= H5X_PLUGIN_MAX);
+    HDassert(index_class->id <= H5X_PLUGIN_MAX);
 
     /* Is the index class already registered? */
     for (i = 0; i < H5X_table_used_g; i++)
@@ -335,7 +338,7 @@ H5X_unregister(unsigned plugin_id)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert((plugin_id >= 0) && (plugin_id <= H5X_PLUGIN_MAX));
+    HDassert(plugin_id <= H5X_PLUGIN_MAX);
 
     /* Is the plugin already registered? */
     if (FALSE == H5X__registered(plugin_id, &plugin_index))
@@ -427,7 +430,7 @@ H5Xcreate(hid_t scope_id, unsigned plugin_id, hid_t xcpl_id)
     idx_info.plugin_id = plugin_id;
     idx_info.metadata_size = metadata_size;
     idx_info.metadata = metadata;
-    if (FAIL == H5D_set_index(dset, idx_class, idx_handle, idx_info))
+    if (FAIL == H5D_set_index(dset, 1, &idx_class, &idx_handle, &idx_info))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "cannot set index");
 
 done:
@@ -446,12 +449,8 @@ done:
 herr_t
 H5Xremove(hid_t scope_id, unsigned plugin_id)
 {
-    void *dset = NULL;
+    H5D_t *dset = NULL;
     size_t plugin_index;
-    hid_t dataset_id = scope_id; /* TODO for now */
-    hid_t xapl_id = H5P_INDEX_ACCESS_DEFAULT; /* TODO for now */
-    size_t metadata_size; /* size of metadata created by plugin */
-    void *metadata; /* metadata created by plugin that needs to be stored */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -460,23 +459,12 @@ H5Xremove(hid_t scope_id, unsigned plugin_id)
     /* Check args */
     if (plugin_id > H5X_PLUGIN_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid plugin identification number");
-    if (NULL == H5I_object_verify(scope_id, H5I_DATASET))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "scope_id is restricted to dataset ID");
-
-    /* Is the plugin already registered */
-    if (FALSE == H5X__registered(plugin_id, &plugin_index))
-        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin is not registered");
-
-    /* Get index info */
-
-    /* Call remove of the plugin */
-    if (NULL == H5X_table_g[plugin_index].remove)
-        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin remove callback is not defined");
-    if (FAIL == H5X_table_g[plugin_index].remove(dataset_id, metadata_size,
-            metadata))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot remove index");
+    if (NULL == (dset = (H5D_t *) H5I_object_verify(scope_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Remove idx_handle from dataset */
+    if (FAIL == H5D_remove_index(dset, plugin_id))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete index messages")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -494,18 +482,21 @@ done:
 herr_t
 H5Xget_count(hid_t scope_id, hsize_t *idx_count)
 {
-    void *dset;
+    H5D_t *dset = NULL;
+    unsigned actual_count;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", scope_id, idx_count);
 
-    if (NULL == H5I_object_verify(scope_id, H5I_DATASET))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "scope_id is restricted to dataset ID");
+    if (NULL == (dset = (H5D_t *) H5I_object_verify(scope_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if (!idx_count)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "idx_count is NULL");
+    if (FAIL == H5D_get_index(dset, 1, NULL, NULL, NULL, &actual_count))
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin is not registered");
 
-    *idx_count = 1;
+    *idx_count = actual_count;
 
 done:
     FUNC_LEAVE_API(ret_value)

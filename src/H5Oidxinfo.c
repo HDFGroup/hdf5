@@ -31,6 +31,7 @@
 #include "H5MMprivate.h"    /* Memory management    */
 #include "H5Opkg.h"         /* Object headers       */
 #include "H5Fprivate.h"
+#include "H5Xprivate.h"
 
 
 /* PRIVATE PROTOTYPES */
@@ -42,6 +43,9 @@ static void *H5O_idxinfo_copy(const void *_mesg, void *_dest);
 static size_t H5O_idxinfo_size(const H5F_t *f, hbool_t disable_shared,
         const void *_mesg);
 static herr_t H5O_idxinfo_reset(void *_mesg);
+static herr_t H5O_idxinfo_free(void *_mesg);
+static herr_t H5O_idxinfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
+    void *_mesg);
 static herr_t H5O_idxinfo_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
         FILE * stream, int indent, int fwidth);
 
@@ -56,8 +60,8 @@ const H5O_msg_class_t H5O_MSG_IDXINFO[1] = {{
     H5O_idxinfo_copy,           /* copy the native value            */
     H5O_idxinfo_size,           /* raw message size                 */
     H5O_idxinfo_reset,          /* free internal memory             */
-    NULL,                       /* free method                      */
-    NULL,                       /* file delete method               */
+    H5O_idxinfo_free,           /* free method                      */
+    H5O_idxinfo_delete,         /* file delete method               */
     NULL,                       /* link method                      */
     NULL,                       /* set share method                 */
     NULL,                       /* can share method                 */
@@ -234,12 +238,6 @@ H5O_idxinfo_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const voi
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              matzke@llnl.gov
- *              Aug 12 1997
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -259,6 +257,74 @@ H5O_idxinfo_reset(void *_mesg)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_idxinfo_reset() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_idxinfo_free
+ *
+ * Purpose:     Frees the message
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_idxinfo_free(void *_mesg)
+{
+    H5O_idxinfo_t *mesg = (H5O_idxinfo_t *) _mesg;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check args */
+    HDassert(mesg);
+
+    /* Free resources within the message */
+    if(H5O_idxinfo_reset(mesg) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free message resources");
+
+    mesg = (H5O_idxinfo_t *)H5MM_xfree(mesg);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_idxinfo_free() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_idxinfo_delete
+ *
+ * Purpose:     Free file space referenced by message
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_idxinfo_delete(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t *open_oh, void *_mesg)
+{
+    hid_t file_id;
+    H5O_idxinfo_t *mesg = (H5O_idxinfo_t *) _mesg;
+    H5X_class_t *idx_class = NULL;
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check args */
+    HDassert(f);
+    HDassert(open_oh);
+    HDassert(mesg);
+
+    file_id = H5F_get_file_id(f);
+
+    /* call plugin index remove callback */
+    if (NULL == (idx_class = H5X_registered(mesg->plugin_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
+    if (NULL == idx_class->remove)
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin remove callback is not defined");
+    if (FAIL == idx_class->remove(file_id, mesg->metadata_size, mesg->metadata))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot remove index");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_idxinfo_delete() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_idxinfo_debug
@@ -286,7 +352,7 @@ H5O_idxinfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE
 
     fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth, "Plugin ID:",
             mesg->plugin_id);
-    fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth, "Metadata Size:",
+    fprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, "Metadata Size:",
             mesg->metadata_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

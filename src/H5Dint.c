@@ -3108,8 +3108,77 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_set_index(H5D_t *dset, H5X_class_t *idx_class, void *idx_handle,
-        H5O_idxinfo_t idx_info)
+H5D_set_index(H5D_t *dset, unsigned count, H5X_class_t **idx_class,
+        void **idx_handle, H5O_idxinfo_t *idx_info)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+    /* Do not support more than one index for now */
+    HDassert(count <= 1);
+    HDassert(idx_class);
+    HDassert(idx_handle);
+    HDassert(idx_info);
+
+    /* Write the index header message */
+    if (H5O_msg_create(&dset->oloc, H5O_IDXINFO_ID, H5O_MSG_FLAG_CONSTANT, 0, idx_info, H5AC_dxpl_id))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update index header message");
+
+    /* Set user data for index */
+    dset->shared->idx_class = *idx_class;
+    dset->shared->idx_handle = *idx_handle;
+    if (NULL == H5O_msg_copy(H5O_IDXINFO_ID, idx_info, &dset->shared->idx_info))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to update copy message");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_set_index() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_get_index
+ *
+ * Purpose: Get index information.
+ *
+ * Return:  Success:    Non-negative
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_get_index(H5D_t *dset, unsigned max_count, H5X_class_t **idx_class,
+        void **idx_handle, H5O_idxinfo_t **idx_info, unsigned *actual_count)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(dset);
+    HDassert(max_count);
+
+    /* Get user data for index */
+    if (idx_class) *idx_class = dset->shared->idx_class;
+    if (idx_handle) *idx_handle = dset->shared->idx_handle;
+    if (idx_info) *idx_info = &dset->shared->idx_info;
+    /* Just one index for now */
+    if (actual_count) *actual_count = (dset->shared->idx_class) ? 1 : 0;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_get_index() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_remove_index
+ *
+ * Purpose: Remove index.
+ *
+ * Return:  Success:    Non-negative
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_remove_index(H5D_t *dset, unsigned UNUSED plugin_id)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -3117,19 +3186,29 @@ H5D_set_index(H5D_t *dset, H5X_class_t *idx_class, void *idx_handle,
 
     HDassert(dset);
 
-    /* Write the index header message */
-    if (H5O_msg_create(&dset->oloc, H5O_IDXINFO_ID, H5O_MSG_FLAG_CONSTANT, 0,  &idx_info, H5AC_dxpl_id))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update index header message");
+    /* First close index if opened */
+    if (dset->shared->idx_handle) {
+        H5X_class_t *idx_class = dset->shared->idx_class;
 
-    /* Set user data for index */
-    dset->shared->idx_class = idx_class;
-    dset->shared->idx_handle = idx_handle;
-    if (NULL == H5O_msg_copy(H5O_IDXINFO_ID, &idx_info, &dset->shared->idx_info))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to update copy message");
+        if (NULL == (idx_class->close))
+            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin close callback not defined");
+        if (FAIL == idx_class->close(dset->shared->idx_handle))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
+
+        dset->shared->idx_class = NULL;
+        dset->shared->idx_handle = NULL;
+    }
+
+    /* Remove idx_handle from dataset */
+    if (H5O_msg_remove(&dset->oloc, H5O_IDXINFO_ID, H5O_ALL, TRUE, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete index messages");
+
+    if (FAIL == H5O_msg_reset(H5O_IDXINFO_ID, &dset->shared->idx_info))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to free index index");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_set_index() */
+} /* end H5D_remove_index() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__query_index
