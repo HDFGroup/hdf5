@@ -115,7 +115,12 @@ AM_CFLAGS="${AM_CFLAGS}"
 AM_CXXFLAGS="${AM_CXXFLAGS}"
 AM_FCFLAGS="${AM_FCFLAGS}"
 AM_CPPFLAGS="${AM_CPPFLAGS}"
-AM_LDFLAGS="${AM_LDFLAGS}"
+# Added to address HDFFV-8944
+if test "x$prefix" = xNONE; then
+  AM_LDFLAGS="$AM_LDFLAGS -L$ac_default_prefix/lib"
+else
+  AM_LDFLAGS="$AM_LDFLAGS -L$prefix/lib"
+fi
 CFLAGS="${CFLAGS}"
 CXXFLAGS="${CXXFLAGS}"
 FCFLAGS="${FCFLAGS}"
