@@ -115,7 +115,11 @@ AM_CFLAGS="${AM_CFLAGS}"
 AM_CXXFLAGS="${AM_CXXFLAGS}"
 AM_FCFLAGS="${AM_FCFLAGS}"
 AM_CPPFLAGS="${AM_CPPFLAGS}"
-AM_LDFLAGS="${AM_LDFLAGS}"
+if test "x$prefix" = xNONE; then
+  AM_LDFLAGS="${AM_LDFLAGS} -L$ac_default_prefix/lib"
+else
+  AM_LDFLAGS="$AM_LDFLAGS -L$prefix/lib"
+fi
 CFLAGS="${CFLAGS}"
 CXXFLAGS="${CXXFLAGS}"
 FCFLAGS="${FCFLAGS}"
@@ -1904,7 +1908,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
   if test -z "$LD_LIBRARY_PATH"; then
     export LD_LIBRARY_PATH="$szlib_lib"
   else
-    export LD_LIBRARY_PATH="$szlib_lib:$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$szlib_lib"
   fi
 
   AC_SUBST([LL_PATH]) LL_PATH="$LD_LIBRARY_PATH"
