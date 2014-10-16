@@ -38,7 +38,6 @@ else (FORTRAN_HAVE_STORAGE_SIZE)
       add_executable (H5test_FortranHavekind
           ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind.f90
       )
-      set (H5_TEST_KIND_NAME "h5test_kind_mod")
     endif (FORTRAN_HAVE_SIZEOF)
 endif (FORTRAN_HAVE_STORAGE_SIZE)
 if (WIN32 AND MSVC)
@@ -279,7 +278,6 @@ if (WIN32)
   install (
       FILES
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5fortran_types.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/${H5_TEST_KIND_NAME}.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/hdf5.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5global.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5a.mod
@@ -312,11 +310,20 @@ if (WIN32)
       COMPONENT
           fortheaders
   )
+  if (H5_TEST_KIND_NAME)
+    install (
+        FILES
+            ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/${H5_TEST_KIND_NAME}.mod
+        DESTINATION
+            ${HDF5_INSTALL_INCLUDE_DIR}
+        COMPONENT
+            fortheaders
+    )
+  endif (H5_TEST_KIND_NAME)
 else (WIN32)
   install (
       FILES
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5fortran_types.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/${H5_TEST_KIND_NAME}.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/hdf5.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5global.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5f.mod
@@ -350,6 +357,16 @@ else (WIN32)
       COMPONENT
           fortheaders
   )
+  if (H5_TEST_KIND_NAME)
+    install (
+        FILES
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/${H5_TEST_KIND_NAME}.mod
+        DESTINATION
+            ${HDF5_INSTALL_INCLUDE_DIR}
+        COMPONENT
+            fortheaders
+    )
+  endif (H5_TEST_KIND_NAME)
 endif (WIN32)
 
 #-----------------------------------------------------------------------------

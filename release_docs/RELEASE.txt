@@ -103,6 +103,9 @@ Bug Fixes since HDF5-1.8.13
 
     Configuration
     -------------
+    - CMake: Removed module name from package list of fortran modules because
+      that module was never generated. This was only an issue for Fortran
+      compliers that are not F2003 compatible. (ADB - 2014/10/16 HDFFV-8932).
     - Library version number is changed due to interface changes since
       previous version 1.8.13. (AKC - 2014/10/03 HDFFV-8937).
     - Mac platforms now builds library with "-O3" optimization when the
