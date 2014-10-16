@@ -731,8 +731,10 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 
 # Add libtool shared library version numbers to the HDF5 library
 # See libtool versioning documentation online.
+# After making changes, run bin/reconfigure to update other configure related
+# files like Makefile.in.
 LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 189
+LT_VERS_REVISION = 190
 LT_VERS_AGE = 0
 AM_FCLIBS = $(LIBHDF5)
 

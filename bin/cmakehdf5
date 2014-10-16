@@ -30,7 +30,7 @@ exit_code=0
 hdf5_src=../hdf5
 cacheinit=$hdf5_src/config/cmake/cacheinit.cmake
 build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=ON	# C++ interface default on
-build_fortran= #-DHDF5_BUILD_FORTRAN:BOOL=ON	# Fortran interface default off
+build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=ON	# Fortran interface default on
 build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON	# High Level interface default on
 build_testing=-DBUILD_TESTING:BOOL=ON		# Build tests default on
 build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON		# Build tools default on
