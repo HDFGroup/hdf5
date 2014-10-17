@@ -814,7 +814,7 @@ H5I__wrapped_cb(void *_item, void UNUSED *_key, void *_udata)
     HDassert(udata);
 
     /* Break out if we see a free ID */
-    if(udata->nextid != item->id) {
+    if(udata->nextid != (ID_MASK & item->id)) {
         /* Sanity check */
         HDassert(item->id > udata->nextid);
 
@@ -874,6 +874,40 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
     /* If no available ID structure, then create a new id for use, and
      * allocate a new struct to house it. */
     else {
+        /*
+         * This next section of code checks for the 'nextid' getting too large and
+         * wrapping around, thus necessitating checking for duplicate IDs being
+         * handed out.
+         */
+        if(type_ptr->nextid > (hid_t)ID_MASK)
+            type_ptr->wrapped = TRUE;
+
+        /*
+         * If we've wrapped around then we need to check for duplicate id's being
+         * handed out.
+         */
+        if(type_ptr->wrapped) {
+            H5I_wrap_ud_t udata;    /* User data for iteration */
+            herr_t iter_status;     /* Iteration status */
+
+            /* Set up user data for iteration */
+            udata.nextid = (hid_t)type_ptr->cls->reserved;
+
+            /* Iterate over all the ID nodes, looking for a gap in the ID sequence */
+            if((iter_status = H5SL_iterate(type_ptr->ids, H5I__wrapped_cb, &udata)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_BADITER, FAIL, "ID iteration failed")
+
+            /* If we didn't break out of the iteration and we're at the max. ID, we've used all the IDs */
+            if(0 == iter_status && udata.nextid >= ID_MASK)
+                HGOTO_ERROR(H5E_ATOM, H5E_NOIDS, FAIL, "no IDs available in type")
+
+            /* Sanity check */
+            HDassert(udata.nextid < ID_MASK);
+
+            /* Retain the next ID for the class */
+            type_ptr->nextid = udata.nextid;
+        } /* end if */
+
         /* Allocate new ID struct */
         if(NULL == (id_ptr = H5FL_MALLOC(H5I_id_info_t)))
             HGOTO_ERROR(H5E_ATOM, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -894,40 +928,6 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
     if(H5SL_insert(type_ptr->ids, id_ptr, &id_ptr->id) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't insert ID node into skip list")
     type_ptr->id_count++;
-
-    /*
-     * This next section of code checks for the 'nextid' getting too large and
-     * wrapping around, thus necessitating checking for duplicate IDs being
-     * handed out.
-     */
-    if(type_ptr->nextid > (hid_t)ID_MASK)
-	type_ptr->wrapped = TRUE;
-
-    /*
-     * If we've wrapped around then we need to check for duplicate id's being
-     * handed out.
-     */
-    if(type_ptr->wrapped) {
-        H5I_wrap_ud_t udata;    /* User data for iteration */
-        herr_t iter_status;     /* Iteration status */
-
-        /* Set up user data for iteration */
-        udata.nextid = (hid_t)type_ptr->cls->reserved;
-
-        /* Iterate over all the ID nodes, looking for a gap in the ID sequence */
-        if((iter_status = H5SL_iterate(type_ptr->ids, H5I__wrapped_cb, &udata)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_BADITER, FAIL, "ID iteration failed")
-
-        /* If we didn't break out of the iteration and we're at the max. ID, we've used all the IDs */
-        if(0 == iter_status && udata.nextid >= ID_MASK)
-            HGOTO_ERROR(H5E_ATOM, H5E_NOIDS, FAIL, "no IDs available in type")
-
-        /* Sanity check */
-        HDassert(udata.nextid < ID_MASK);
-
-        /* Retain the next ID for the class */
-        type_ptr->nextid = udata.nextid;
-    } /* end if */
 
     /* Set return value */
     ret_value = id_ptr->id;
@@ -1249,13 +1249,24 @@ H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id)
     /* (Casting away const OK -QAK) */
     ret_value = (void *)curr_id->obj_ptr;
 
-    /* If there's room, and we can save IDs of this type, then 
-       save the struct (and its ID) for future re-use */
-    if((type_ptr->cls->flags & H5I_CLASS_REUSE_IDS)
-            && (type_ptr->avail_count < MAX_FREE_ID_STRUCTS)) {
-        if(H5SL_insert(type_ptr->avail_ids, curr_id, &curr_id->id) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, NULL, "can't insert available ID node into skip list")
-        type_ptr->avail_count++;
+    /* See if we can reuse IDs of this type */
+    if(type_ptr->cls->flags & H5I_CLASS_REUSE_IDS) {
+        /* See if we can decrement the next ID for the ID class */
+        if(type_ptr->nextid == (ID_MASK & (curr_id->id + 1))) {
+            type_ptr->nextid--;
+            curr_id = H5FL_FREE(H5I_id_info_t, curr_id);
+        } /* end if */
+        else {
+            /* Store the ID on the available ID list, for later */
+            if((type_ptr->avail_count < MAX_FREE_ID_STRUCTS)
+                    && (type_ptr->id_count > 1)) {
+                if(H5SL_insert(type_ptr->avail_ids, curr_id, &curr_id->id) < 0)
+                    HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, NULL, "can't insert available ID node into skip list")
+                type_ptr->avail_count++;
+            }
+            else
+                curr_id = H5FL_FREE(H5I_id_info_t, curr_id);
+        } /* end else */
     } /* end if */
     /* Otherwise, just toss it. */
     else

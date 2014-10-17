@@ -305,7 +305,7 @@ static const H5I_class_t H5I_GENPROPCLS_CLS[1] = {{
 /* Generic Property List ID class */
 static const H5I_class_t H5I_GENPROPLST_CLS[1] = {{
     H5I_GENPROP_LST,		/* ID class value */
-    0,				/* Class flags */
+    H5I_CLASS_REUSE_IDS,	/* Class flags */
     0,				/* # of reserved IDs for class */
     (H5I_free_t)H5P_close	/* Callback routine for closing objects of this class */
 }};
