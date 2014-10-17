@@ -151,6 +151,18 @@ Bug Fixes since HDF5-1.8.13
       an error code if it is.
       (DER - 2014/08/11 HDFFV-8891)
 
+    - H5Ldelete_by_idx() fails on non-existent group name.
+      (MSC - 2014/07/31 HDFFV-8888)
+
+    - Bug in test when building Parallel HDF5 on PVFS2.
+      Use MPI_File_get_size() instead of stat().
+      (MSC - 2014/07/14 HDFFV-8856)
+
+    - MPI-IO driver tries to allocate space for zero-length dataset
+      and asserts. Fixed and added a regression test to make sure this
+      doesn't happen again.
+      (MSC - 2014/07/03 HDFFV-8761)
+
     Parallel Library
     ----------------
     - None
