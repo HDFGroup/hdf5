@@ -89,7 +89,8 @@ main(int argc, char *argv[])
     /* Exit failure if errors encountered; else exit success. */
     /* No need to print anything since PerformTests() already does. */
     if (GetTestNumErrs() > 0)
-	exit(EXIT_FAILURE);
+	/* Since exiting failed, don't do at_exit stuff by calling _exit */
+	_exit(EXIT_FAILURE);
     else
 	exit(EXIT_SUCCESS);
 }   /* end main() */
