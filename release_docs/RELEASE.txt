@@ -121,6 +121,17 @@ Bug Fixes since HDF5-1.8.13
       szip location.
       (LRK - 2014/04/16)
 
+    - Changed autotools build behavior
+
+      The Fortran HL library does not compile if the default size of a REAL is
+      DOUBLE PRECISION; build fails during compilation.
+
+      Configure now checks for: if REAL is DOUBLE PRECISION, Fortran is enabled and
+      HL library is enabled. If this is true then configure will stop with an error
+      message.
+
+      (MSB - 2014/8/11, HDFFV-8883/HDFFV-889)
+
     Library
     -------
     - Removal of DllMain() from static Windows builds. 
@@ -152,9 +163,50 @@ Bug Fixes since HDF5-1.8.13
     -----
     - 
 
-    F90 API
+    Fortran API
     -------
-    - None
+    - Non-standard Fortran
+  
+      Intrinsic function SIZEOF is non-standard and should be replaced with a 
+      standard intrinsic function.
+
+      If the F2008 intrinsic C_SIZEOF and STORAGE_SIZE are available then they will 
+      be used instead of the non-standard SIZEOF intrinsic, even when the SIZEOF 
+      function is available.
+
+      (MSB - 2014/6/16, HDFFV-8653)
+
+    - Non-functional API
+ 
+      The Fortran wrapper for H5Pget_fill_value_f calls the wrong C API.
+
+      The correct C API, H5Pget_fill_value, was used instead in the C wrapper.
+
+      (MSB - 2014/9/25, HDFFV-8879)
+
+    - Interoperability with C HDF5
+
+      H5literate_f assumes the return value for the callback function to be of type 
+      int (or int_f in C). However, in the C wrapper the return value of H5Literate 
+      is type herr_t and this could cause interoperability issues.
+
+      The callback function should be declared INTEGER(C_INT) for portability. The
+      tests were updated accordingly.
+
+      (MSB - 2014/9/26, HDFFV-8909)
+
+    - Interoperability with C HDF5
+
+      Wrong type cast of constant Fortran INTEGER parameters.
+
+      The following parameter constants types were change from INTEGER to INTEGER(HID_T) 
+      to match the C types:
+
+      H5FD_CORE, H5FD_FAMILY, H5FD_LOG, H5FD_MPIO, H5FD_MULTI, H5FD_SEC2, H5FD_STDIO.
+
+      Other internal 'int' types where changed to 'hid_t', which are transparent to the user.
+
+      (MSB - 2014/7/18, HDFFV-8748)
 
     C++ API
     ------
@@ -168,11 +220,41 @@ Bug Fixes since HDF5-1.8.13
 
     High-Level APIs:
     ------
-    - None
+    - Seg faults in H5TBread_field_name and H5TBread_field_name_f
+
+      H5TBread_field_name (H5TBread_field_name_f) seg faults if the name of the field is wrong.
+
+      Both C and Fortran APIs no longer seg fault if the name of the field is wrong, and both APIs
+      return a negative value if the field is wrong.
+
+      (MSB - 2014/09/29, HDFFV-8912)
+
+    - Possible data corruption
+
+      Multiple HL APIs have issues,
+        (1) the type from the file is re-used as the memory type, and
+        (2) no effort is made to ensure the string is actually null-terminated.
+     
+      All the HL routines now check: for NULL pointers, if they received a string which
+      is null terminated, and if string buffers are short enough not to overflow the buffer. 
+      The minimum length of the buffers is now used in strncmp to avoid overflow.
+
+      (MSB - 2014/9/29, HDFFV-8670)
+
+    - Behavior change of HL API
+
+      For H5LTdtype_to_text; if a user buffer is passed in along with the 
+      length then the function does not truncate at the end of the buffer, but 
+      may exceed the end of the user buffer.
+
+      H5LTdtype_to_text was changed to truncate the string if the buffer is 
+      to small.
+
+      (MSB - 2014/9/29, HDFFV-8855)
 
     Fortran High-Level APIs:
     ------
-    - None
+     - See entry for HDFFV-8912 above.
 
     Testing
     -------
