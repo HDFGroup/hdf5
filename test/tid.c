@@ -556,7 +556,7 @@ static herr_t fake_free(void *obj)
 static int test_id_wrap(void)
 {
     H5I_type_t testType;        /* ID class for testing */
-    hid_t *id_array;    /* Array of IDs allocated */
+    hid_t *id_array=NULL;    /* Array of IDs allocated */
     hid_t test_id;      /* Test ID */
     void *obj;          /* Object pointer returned for ID */
     unsigned u;         /* Local index variable */
@@ -627,6 +627,10 @@ static int test_id_wrap(void)
     return(0);
 
 out:
+    /* cleanup */
+    if (id_array)
+	HDfree(id_array);
+
     return(-1);
 }
 
@@ -637,5 +641,8 @@ void test_ids(void)
 	if (test_is_valid() < 0) TestErrPrintf("H5Iis_valid test failed\n");
 	if (test_get_type() < 0) TestErrPrintf("H5Iget_type test failed\n");
 	if (test_id_type_list() < 0) TestErrPrintf("ID type list test failed\n");
+#ifndef H5_HAVE_WIN32_API
+	/* Temporary skip this test for Windows platforms */
 	if (test_id_wrap() < 0) TestErrPrintf("ID wraparound test failed\n");
+#endif
 }
