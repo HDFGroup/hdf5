@@ -66,8 +66,9 @@ main(int argc, char *argv[])
     AddTest("array", test_array, cleanup_array,  "Array Datatypes", NULL);
     AddTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties", NULL);
     AddTest("unicode", test_unicode, cleanup_unicode,  "UTF-8 Encoding", NULL);
-    AddTest("id", test_ids, NULL,  "User-Created Identifiers", NULL);
     AddTest("misc", test_misc, cleanup_misc,  "Miscellaneous", NULL);
+    /* id test needs to be the last test. */
+    AddTest("id", test_ids, NULL,  "User-Created Identifiers", NULL);
 
     /* Display testing information */
     TestInfo(argv[0]);
