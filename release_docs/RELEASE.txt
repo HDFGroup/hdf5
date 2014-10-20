@@ -138,6 +138,10 @@ Bug Fixes since HDF5-1.8.13
 
     Library
     -------
+    - Corrected ID management code that was failing with 'duplicate key
+      inserted' error, and was not handling other situations where many/all
+      IDs of a type are opened/closed.  (QAK - 2014/10/16 - HDFFV-8930)
+
     - Removal of DllMain() from static Windows builds. 
       A DllMain() function was added in HDF5 1.8.13 in order to handle win32 thread
       cleanup. The preprocessor #ifdefs around the DllMain function allowed it
