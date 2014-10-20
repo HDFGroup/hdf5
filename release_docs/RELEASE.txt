@@ -119,16 +119,11 @@ Bug Fixes since HDF5-1.8.13
       bin/reconfigure script now will execute bison and flex and update the 
       hl/src files. (ADB - 2014/06/16 HDFFV-8709)
     - Autotools: m4 upgraded to 1.4.17. (ADB - 2014/06/12 HDFFV-8743)
-    - Autotools: An export of LD_LIBRARY_PATH=<szip library location> was
-      removed from configure and make installcheck was revised to run
-      scripts installed in share/hdf5_examples to use the installed h5cc, etc. 
-      to compile and run example source files also installed there. Make
-      installcheck will now fail when a shared szip or other external lib file
-      cannot be found in the same manner that executables compiled and linked
-      with h5cc will fail to run when those lib files cannot be found after
-      install.  Make installcheck should pass after setting LD_LIBRARY_PATH to the
-      szip location.
-      (LRK - 2014/04/16)
+    - Autotools: Modified configure to add an entry at the beginning of AM_LDFLAGS 
+      for the hdf5 install directory.  Without this entry the relink commands 
+      invoked by "make install" to create libraries dependent on libhdf5.so added 
+      a dependency on the first libhdf5.so found in any directory in AM_LDFLAGS 
+      regardless of its version.  (LRK - 2014/10/17 HDFFV-8944)
 
     - Changed autotools build behavior
 
