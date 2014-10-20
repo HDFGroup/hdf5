@@ -109,7 +109,16 @@ Bug Fixes since HDF5-1.8.13
     - Library version number is changed due to interface changes since
       previous version 1.8.13. (AKC - 2014/10/03 HDFFV-8937).
     - Mac platforms now builds library with "-O3" optimization when the
-      default clang compiler is used. (AKC - 2014/10/01 HDFFV-8933). 
+      default clang compiler is used. (AKC - 2014/10/01 HDFFV-8933).
+    - CMake: Propagated configure test changes to H5_LDOUBLE_TO_INTEGER_WORKS_TEST
+      and H5_ULLONG_TO_LDOUBLE_PRECISION_TEST to ConfigureChecks.cmake (added
+      stdlib.h and string.h in HDFTests.c file). (ADB - 2014/09/02 HDFFV-8845)
+    - CMake: removed parallel test, t_posix_compliant, because source file
+      was removed from library. (ADB - 2014/8/14 HDFFV-8880)
+    - Autotools: Bison was upgraded to 2.7 and flex upgraded to 2.5.37. The 
+      bin/reconfigure script now will execute bison and flex and update the 
+      hl/src files. (ADB - 2014/06/16 HDFFV-8709)
+    - Autotools: m4 upgraded to 1.4.17. (ADB - 2014/06/12 HDFFV-8743)
     - Autotools: An export of LD_LIBRARY_PATH=<szip library location> was
       removed from configure and make installcheck was revised to run
       scripts installed in share/hdf5_examples to use the installed h5cc, etc. 
@@ -475,6 +484,7 @@ Known Problems
 * On windows platforms in debug configurations, the VFD flush1 tests will fail
   with the split and multi VFD drivers. These tests will display a modal debug 
   dialog which must be answered or wait for the test timeout to expire.
+  The flush1 and flush2 tests will be skipped under debug for this release.
   (ADB - 2014/06/23 - HDFFV-8851)
 
 * CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
