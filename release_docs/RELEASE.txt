@@ -88,12 +88,12 @@ New Features
 
     C++ API
     -------
-    - Initialization of object IDs
+    - Initialization of Object IDs
 
       The data member "id" in classes that represent HDF5 objects were
       initialized to 0, which caused problem for some users.
 
-      Replaced 0 with H5I_INVALID_HID to initialize these "id"s.  For
+      Replaced 0 with H5I_INVALID_HID to initialize these "id"s.  For the 
       PropList class, H5P_DEFAULT is used instead of H5I_INVALID_HID.
 
       (BMR - 2014/09/30, HDFFV-4259)
@@ -114,49 +114,51 @@ Bug Fixes since HDF5-1.8.13
       A Fortran module was not generated if the compiler was not F2003
       compliant.
     
-      Removed module name from package list of fortran modules because
+      Removed the module name from the package list of Fortran modules because
       that module was never generated. This was only an issue for Fortran
       compliers that are not F2003 compatible.
       
-      (ADB - 2014/10/16 HDFFV-8932).
-      
+      (ADB - 2014/10/16 HDFFV-8932)
+
     - Library version number is changed due to interface changes since
       previous version 1.8.13. (AKC - 2014/10/03 HDFFV-8937).
     - Mac platforms now builds library with "-O3" optimization when the
       default clang compiler is used. (AKC - 2014/10/01 HDFFV-8933).
+
     - CMake ConfigureChecks
     
       Two include files were missing from two C tests.
     
-      Propagated configure test changes to H5_LDOUBLE_TO_INTEGER_WORKS_TEST
+      Propagated the configure test changes to H5_LDOUBLE_TO_INTEGER_WORKS_TEST
       and H5_ULLONG_TO_LDOUBLE_PRECISION_TEST to ConfigureChecks.cmake (added
-      stdlib.h and string.h in HDFTests.c file).
+      stdlib.h and string.h in the HDFTests.c file).
       
       (ADB - 2014/09/02 HDFFV-8845)
       
-    - CMake Parallel
+    - CMake Parallel Test Missing
     
-      t_posix_compliant test was removed in the previous release.
+      The source file was removed in the previous release but the parallel 
+      test t_posix_compliant was not.
     
-      Removed parallel test, t_posix_compliant, because source file
-      was removed from library. 
+      Removed the t_posix_compliant parallel test from the library. 
       
       (ADB - 2014/8/14 HDFFV-8880)
-      
-    - Autotools Reconfigure
+
+    - Autotools Reconfigure. Bison. Flex.
     
-      Windows and Linux would generate different files because of the versions
-      for bison and flex.
+      The Bison and Flex files were out of date. 
     
-      Bison was upgraded to 2.7 and flex upgraded to 2.5.37.  The bin/reconfigure 
-      script now will execute bison and flex and update the hl/src files. 
+      Bison was upgraded to 2.7, and Flex was upgraded to 2.5.37. The 
+      bin/reconfigure script now will execute Bison and Flex and update 
+      the hl/src files. 
       
       (ADB - 2014/06/16 HDFFV-8709)
+
+    - Autotools Reconfigure. m4.
+
+      The m4 macro processor was out of date.
       
-    - Autotools Reconfigure
-      Latest m4 is 1.4.17.
-      
-      Reconfigured with m4 upgraded to 1.4.17. 
+      Reconfigured Autotools with m4 upgraded to 1.4.17. 
     
       (ADB - 2014/06/12 HDFFV-8743)
     
@@ -166,16 +168,19 @@ Bug Fixes since HDF5-1.8.13
       a dependency on the first libhdf5.so found in any directory in AM_LDFLAGS 
       regardless of its version.  (LRK - 2014/10/17 HDFFV-8944)
 
-    - Changed autotools build behavior
+    - Changed Autotools Build Behavior. Fortran High-level Library.
 
-      The Fortran HL library does not compile if the default size of a REAL is
-      DOUBLE PRECISION; build fails during compilation.
+      The Fortran high-level (HL) library did not compile if the default 
+      size of a REAL is DOUBLE PRECISION; the build would fail during 
+      compilation.
 
-      Configure now checks for: if REAL is DOUBLE PRECISION, Fortran is enabled and
-      HL library is enabled. If this is true then configure will stop with an error
-      message.
+      Configure now checks to see if REAL is DOUBLE PRECISION, Fortran is 
+      enabled, and HL library is enabled. If this is true, then configure 
+      will stop with an error message.
 
       (MSB - 2014/8/11, HDFFV-8883/HDFFV-889)
+
+
 
     Library
     -------
@@ -183,21 +188,28 @@ Bug Fixes since HDF5-1.8.13
       inserted' error, and was not handling other situations where many/all
       IDs of a type are opened/closed.  (QAK - 2014/10/16 - HDFFV-8930)
 
-    - Removal of DllMain() from static Windows builds. 
-      A DllMain() function was added in HDF5 1.8.13 in order to handle win32 thread
-      cleanup. The preprocessor #ifdefs around the DllMain function allowed it
-      to be compiled when the static library is built, which is incorrect behavior
-      and can cause linkage problems in clients.
-      The fix was to change the preprocessor #ifdefs to exclude compiling DllMain()
-      in static builds. Our DllMain function is now only compiled when the shared, 
-      thread-safe library is built on Windows.
+    - Removal of DllMain() from Static Windows Builds 
+
+      A DllMain() function was added in HDF5 1.8.13 in order to handle 
+      win32 thread cleanup. The preprocessor #ifdefs around the DllMain 
+      function allowed it to be compiled when the static library is built, 
+      which is incorrect behavior that can cause linkage problems in 
+      clients.
+
+      The fix was to change the preprocessor #ifdefs to exclude compiling 
+      DllMain() in static builds. Our DllMain function is now only 
+      compiled when the shared, thread-safe library is built on Windows.
+
       (DER - 2014/06/13 HDFFV-8837)
 
-    - Enforce constraing on page_size parameter in
-      H5Pset_core_write_tracking().
-      The reference manual states that the page_size parameter cannot be zero.
-      This change checks the page_size parameter to ensure it is zero and returns
-      an error code if it is.
+    - Enforce Constraint on page_size Parameter in H5Pset_core_write_tracking()
+
+      The reference manual states that the page_size parameter cannot be 
+      zero.
+
+      This change checks the page_size parameter to see it is zero and 
+      returns an error code if it is.
+
       (DER - 2014/08/11 HDFFV-8891)
 
     - H5Ldelete_by_idx() fails on non-existent group name.
@@ -226,52 +238,55 @@ Bug Fixes since HDF5-1.8.13
 
     Fortran API
     -------
-    - Non-standard Fortran
+    - SIZEOF Replaced by C_SIZEOF and STORAGE_SIZE. 
   
-      Intrinsic function SIZEOF is non-standard and should be replaced with a 
+      The intrinsic function SIZEOF is non-standard and should be replaced with a 
       standard intrinsic function.
 
-      If the F2008 intrinsic C_SIZEOF and STORAGE_SIZE are available then they will 
+      If the F2008 intrinsic C_SIZEOF and STORAGE_SIZE are available, then they will 
       be used instead of the non-standard SIZEOF intrinsic, even when the SIZEOF 
       function is available.
 
       (MSB - 2014/6/16, HDFFV-8653)
 
-    - Non-functional API
+    - Non-functional API: h5pget_fill_value_f
  
-      The Fortran wrapper for H5Pget_fill_value_f calls the wrong C API.
+      The Fortran wrapper h5pget_fill_value_f was calling the wrong C API.
 
-      The correct C API, H5Pget_fill_value, was used instead in the C wrapper.
+      The correct C API, H5Pget_fill_value, is now called by the Fortran 
+      wrapper.
 
       (MSB - 2014/9/25, HDFFV-8879)
 
-    - Interoperability with C HDF5
+    - Interoperability with C HDF5: H5Literate and h5literate_f
 
-      H5literate_f assumes the return value for the callback function to be of type 
-      int (or int_f in C). However, in the C wrapper the return value of H5Literate 
-      is type herr_t and this could cause interoperability issues.
+      h5literate_f assumes the return value for the callback function to 
+      be of type int (or int_f in C). However, in the C wrapper the return 
+      value of H5Literate is type herr_t, and this could cause 
+      interoperability issues.
 
-      The callback function should be declared INTEGER(C_INT) for portability. The
-      tests were updated accordingly.
+      The callback function should be declared INTEGER(C_INT) for 
+      portability. The tests were updated accordingly.
 
       (MSB - 2014/9/26, HDFFV-8909)
 
-    - Interoperability with C HDF5
+    - Interoperability with C HDF5: Constant INTEGER Parameters with the 
+      H5FD Interface
 
-      Wrong type cast of constant Fortran INTEGER parameters.
+      Wrong type cast of constant Fortran INTEGER parameters was used.
 
-      The following parameter constants types were change from INTEGER to INTEGER(HID_T) 
-      to match the C types:
+      The following parameter constant types were changed from INTEGER to 
+      INTEGER(HID_T) to match the C types: H5FD_CORE, H5FD_FAMILY, H5FD_LOG, 
+      H5FD_MPIO, H5FD_MULTI, H5FD_SEC2, and H5FD_STDIO.
 
-      H5FD_CORE, H5FD_FAMILY, H5FD_LOG, H5FD_MPIO, H5FD_MULTI, H5FD_SEC2, H5FD_STDIO.
-
-      Other internal 'int' types where changed to 'hid_t', which are transparent to the user.
+      Other internal 'int' types where changed to 'hid_t'; these are 
+      transparent to the user.
 
       (MSB - 2014/7/18, HDFFV-8748)
 
     C++ API
     ------
-    - Memory leaks
+    - Memory Leaks
 
       There were several potential memory leaks in the library due to
       dynamically allocated strings not being freed when failure occurs.
@@ -282,29 +297,34 @@ Bug Fixes since HDF5-1.8.13
 
     - Disallow H5F_ACC_CREAT
       
-      H5F_ACC_CREAT was included in the C++ API but the C library doesn't
+      H5F_ACC_CREAT was included in the C++ API but the C library does not
       allow it at this time.
 
       Removed this flag from the functions in H5File class.
-      (BMR - 2014/09/29, HDFFV-8852)
-
-    - Missing flags in documentation
-      H5F_ACC_RDONLY and H5F_ACC_RDWR were missing from the documentation
-      of the H5File constructors, causing confusion to users.
-
-      These two flags are now included in the documentation for opening files.
 
       (BMR - 2014/09/29, HDFFV-8852)
 
+    - Missing Flags in Documentation: H5F_ACC_RDONLY and H5F_ACC_RDWR
+
+      The H5F_ACC_RDONLY and H5F_ACC_RDWR flags were missing from the 
+      documentation of the H5File constructors.
+
+      These two flags are now included in the documentation for opening 
+      files.
+
+      (BMR - 2014/09/29, HDFFV-8852)
 
     High-Level APIs:
     ------
-    - Seg faults in H5TBread_field_name and H5TBread_field_name_f
+    - Seg Faults in H5TBread_field_name and H5TBread_field_name_f
 
-      H5TBread_field_name (H5TBread_field_name_f) seg faults if the name of the field is wrong.
+      When H5TBread_field_name or H5TBread_field_name_f were used to read a 
+      field and if the name of the field was wrong, a segmentation fault 
+      would result.
 
-      Both C and Fortran APIs no longer seg fault if the name of the field is wrong, and both APIs
-      return a negative value if the field is wrong.
+      Both C and Fortran APIs were fixed so they no longer seg fault if 
+      the name of the field is wrong, and both APIs return a negative 
+      value if the name of the field is wrong.
 
       (MSB - 2014/09/29, HDFFV-8912)
 
@@ -320,14 +340,14 @@ Bug Fixes since HDF5-1.8.13
 
       (MSB - 2014/9/29, HDFFV-8670)
 
-    - Behavior change of HL API
+    - Behavior Change of H5LTdtype_to_text
 
-      For H5LTdtype_to_text; if a user buffer is passed in along with the 
-      length then the function does not truncate at the end of the buffer, but 
-      may exceed the end of the user buffer.
+      If a user buffer was passed in to H5LTdtype_to_text along with the 
+      length, then the function would not truncate at the end of the 
+      buffer, but would exceed the end of the user buffer.
 
-      H5LTdtype_to_text was changed to truncate the string if the buffer is 
-      to small.
+      H5LTdtype_to_text was changed to truncate the string if the user 
+      buffer is too small.
 
       (MSB - 2014/9/29, HDFFV-8855)
 
