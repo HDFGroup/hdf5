@@ -74,7 +74,7 @@ typedef struct {
     herr_t (*query)(void *idx_handle, hid_t query_id, hid_t xxpl_id,
             hid_t *dataspace_id);
     herr_t (*refresh)(void *idx_handle, size_t *metadata_size, void **metadata);
-    herr_t (*copy)(hid_t src_dataset_id, hid_t dest_dataset_id, hid_t xcpl_id,
+    herr_t (*copy)(hid_t src_file_id, hid_t dest_file_id, hid_t xcpl_id,
             hid_t xapl_id, size_t src_metadata_size, void *src_metadata,
             size_t *dest_metadata_size, void **dest_metadata);
     herr_t (*get_size)(void *idx_handle, hsize_t *idx_size);
