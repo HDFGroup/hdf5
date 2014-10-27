@@ -49,28 +49,33 @@ New Features
 
     Configuration
     -------------
-    - [Example] New feature 
-      (EIP - 2014/04/14)
-    - 
+    - None
     
     Library
     -------
-    - 
- 
+    - None
+
     Parallel Library
     ----------------
-    - Optimize the chunk fill algorithm of datasets by writing out all
-      the chunk fill values collectively in a single MPI-IO
-      call. Previously it was done independently by rank 0
-      one block at a time. This should show a great performance
-      improvement when creating chunked datasets in parallel when the
-      chunk dimensions are fairly small.
- 
+     - Chunk Fill Writes Changed to Collective
+    
+      Slow performance in chunk fill writes. Chunk fills 
+      in the past were written independently by rank 0 one block 
+      at a time. 
+      
+      Optimized the chunk fill write algorithm so that all 
+      chunk fill values will be written collectively in a single MPI-IO 
+      call. This should show a great performance improvement when 
+      creating chunked datasets in parallel when the chunk dimensions 
+      are fairly small.
+      
+      (MSC - 2014/08/22, HDFFV-8878)
+
     Tools
     -----
     - None
 
-    High-Level APIs
+    High-level APIs
     ---------------
     - None
 
@@ -200,7 +205,7 @@ Bug Fixes since HDF5-1.8.13
       DllMain() in static builds. Our DllMain function is now only 
       compiled when the shared, thread-safe library is built on Windows.
 
-      (DER - 2014/06/13 HDFFV-8837)
+      (DER - 2014/06/13, HDFFV-8837)
 
     - Enforce Constraint on page_size Parameter in H5Pset_core_write_tracking()
 
@@ -210,19 +215,37 @@ Bug Fixes since HDF5-1.8.13
       This change checks the page_size parameter to see it is zero and 
       returns an error code if it is.
 
-      (DER - 2014/08/11 HDFFV-8891)
+      (DER - 2014/08/11, HDFFV-8891)
 
     - H5Ldelete_by_idx() fails on non-existent group name.
-      (MSC - 2014/07/31 HDFFV-8888)
+      (MSC - 2014/07/31, HDFFV-8888)
 
-    - Bug in test when building Parallel HDF5 on PVFS2.
-      Use MPI_File_get_size() instead of stat().
-      (MSC - 2014/07/14 HDFFV-8856)
+    - H5Ldelete_by_idx() Seg Fault on Non-existent Group Name
+      
+      If a non-existent group name was used by H5Ldelete_by_idx(), a 
+      segmentation fault would result. 
+      
+      Bug was fixed.
+      
+      (MSC - 2014/07/31, HDFFV-8888)
 
-    - MPI-IO driver tries to allocate space for zero-length dataset
-      and asserts. Fixed and added a regression test to make sure this
-      doesn't happen again.
-      (MSC - 2014/07/03 HDFFV-8761)
+    - Bug in Test When Building Parallel HDF5 on PVFS2
+      
+      There was a bug in a test when building Parallel HDF5 on PVFS2.
+      
+      The build now uses MPI_File_get_size() instead of stat().
+      
+      (MSC - 2014/07/14, HDFFV-8856)
+
+    - MPI-IO Driver Tried to Allocate Space for Zero-length Dataset
+      
+      MPI-IO driver tried to allocate space for zero-length dataset
+      and asserts. 
+      
+      Fixed driver and added a regression test.
+      
+      (MSC - 2014/07/03, HDFFV-8761)
+      
 
     Parallel Library
     ----------------
@@ -314,7 +337,7 @@ Bug Fixes since HDF5-1.8.13
 
       (BMR - 2014/09/29, HDFFV-8852)
 
-    High-Level APIs:
+    High-level APIs:
     ------
     - Seg Faults in H5TBread_field_name and H5TBread_field_name_f
 
@@ -328,17 +351,36 @@ Bug Fixes since HDF5-1.8.13
 
       (MSB - 2014/09/29, HDFFV-8912)
 
-    - Possible data corruption
+    - Possible Buffer Overflow in High-level (HL) APIs
 
-      Multiple HL APIs have issues,
-        (1) the type from the file is re-used as the memory type, and
-        (2) no effort is made to ensure the string is actually null-terminated.
+      Multiple HL APIs (H5DSis_scale is one example) had issues:
+        (1) The datatype from the file was re-used as the memory datatype, 
+            and
+        (2) No effort was made to ensure that strings were actually 
+            null-terminated.
      
-      All the HL routines now check: for NULL pointers, if they received a string which
-      is null terminated, and if string buffers are short enough not to overflow the buffer. 
-      The minimum length of the buffers is now used in strncmp to avoid overflow.
+      All of the HL routines now check for NULL pointers, for null-terminated 
+      strings, and to see if string buffers are short enough not to overflow 
+      the buffer. The minimum length of the buffers is now used in strncmp 
+      to avoid overflow.
 
       (MSB - 2014/9/29, HDFFV-8670)
+
+old:
+      All the HL routines now check: for NULL pointers, if they received a 
+      string which 
+      is null terminated, and if string buffers are short enough not to 
+      overflow the buffer. 
+      The minimum length of the buffers is now used in strncmp to avoid overflow.
+
+
+
+
+
+
+
+
+
 
     - Behavior Change of H5LTdtype_to_text
 
@@ -351,7 +393,7 @@ Bug Fixes since HDF5-1.8.13
 
       (MSB - 2014/9/29, HDFFV-8855)
 
-    Fortran High-Level APIs:
+    Fortran High-level APIs:
     ------
      - See entry for HDFFV-8912 above.
 
@@ -359,6 +401,19 @@ Bug Fixes since HDF5-1.8.13
     -------
     - Fixed incorrect exit code values (was -1) in testframe which is commonly
       used by several test programs. (AKC - 2014/07/22 HDFFV-8881)
+
+    - Fixed Incorrect Exit Code Values in Test Frame
+
+      The test frame which is commonly used by several test programs 
+      had some incorrect exit code values. 
+
+      Fixed the incorrect exit code values. 
+      
+      (AKC - 2014/07/22, HDFFV-8881)
+
+
+
+
 
 
 Supported Platforms
