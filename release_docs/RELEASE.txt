@@ -109,6 +109,14 @@ Bug Fixes since HDF5-1.8.13
 
     Configuration
     -------------
+    - CMake and svn urls
+    
+      The svn urls will be different when the HDF Group domain name changes.
+    
+      Removed the svn url references in the cacheinit.cmake and release_docs files.
+      
+      (ADB - 2014/10/27 HDFFV-8953)
+
     - CMake Packaging
     
       A Fortran module was not generated if the compiler was not F2003
