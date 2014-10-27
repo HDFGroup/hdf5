@@ -8,6 +8,12 @@ This document describes the differences between HDF5-1.8.13 and
 HDF5-1.8.14-*, and contains information on the platforms tested and 
 known problems in HDF5-1.8.14-*. 
 
+All new and modified APIs are listed in the "HDF5 Software Changes 
+from Release to Release" document along with details about previous
+releases at:
+
+     http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
+
 Links to the HDF5 1.8.13 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
@@ -20,12 +26,6 @@ The HDF5 1.8.13 release can be obtained from:
 User documentation for 1.8.13 can be accessed directly at this location: 
 
      http://www.hdfgroup.org/HDF5/doc/
-
-All new and modified APIs are listed in the "HDF5 Software Changes 
-from Release to Release" document along with details about previous
-releases at:
-
-     http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
 If you have any questions or comments, please send them to the HDF Help Desk:
 
