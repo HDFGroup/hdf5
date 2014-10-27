@@ -127,8 +127,17 @@ Bug Fixes since HDF5-1.8.13
 
     - Library version number is changed due to interface changes since
       previous version 1.8.13. (AKC - 2014/10/03 HDFFV-8937).
-    - Mac platforms now builds library with "-O3" optimization when the
-      default clang compiler is used. (AKC - 2014/10/01 HDFFV-8933).
+
+    - Configure Settings for Mac OSX Need Defaults for PROD_XXX, DEBUG_XXX, 
+      and PROFILE_XXX
+      
+      The configure setting files for Mac OSX (config/apple) did not 
+      have the default settings of PROD_XXX, DEBUG_XXX, PROFILE_XXX. 
+      
+      Added the default settings. Mac platforms now builds library with 
+      "-O3" optimization when the default clang compiler is used. 
+      
+      (AKC - 2014/10/01, HDFFV-8933)
 
     - CMake ConfigureChecks
     
