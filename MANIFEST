@@ -1468,6 +1468,8 @@
 ./tools/testfiles/tbinregR.exp
 ./tools/testfiles/tbinregR.ddl
 ./tools/testfiles/tbitfields.h5
+./tools/testfiles/tbitnopaque.ddl
+./tools/testfiles/tbitnopaque.h5
 ./tools/testfiles/tboot1.ddl
 ./tools/testfiles/tboot2.ddl
 ./tools/testfiles/tboot2A.ddl
