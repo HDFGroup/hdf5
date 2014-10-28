@@ -106,13 +106,13 @@ Bug Fixes since HDF5-1.8.13
 
     Configuration
     -------------
-    - CMake and svn urls
+    - CMake and SVN URLs
     
-      The svn urls will be different when the HDF Group domain name changes.
+      The SVN URLs will be different when the HDF Group domain name changes.
     
-      Removed the svn url references in the cacheinit.cmake and release_docs files.
+      Removed the SVN URL references in the cacheinit.cmake and release_docs files.
       
-      (ADB - 2014/10/27 HDFFV-8953)
+      (ADB - 2014/10/27, HDFFV-8953)
 
     - CMake Packaging
     
@@ -123,10 +123,16 @@ Bug Fixes since HDF5-1.8.13
       that module was never generated. This was only an issue for Fortran
       compliers that are not F2003 compatible.
       
-      (ADB - 2014/10/16 HDFFV-8932)
+      (ADB - 2014/10/16, HDFFV-8932)
 
-    - Library version number is changed due to interface changes since
-      previous version 1.8.13. (AKC - 2014/10/03 HDFFV-8937).
+    - Shared Library Version Numbers Changed (soname)
+      
+      The C library had an interface incompatibility due to renamed 
+      symbols in H5Ppublic.h.
+      
+      The shared library version numbers (soname) were changed.
+      
+      (AKC - 2014/10/03, HDFFV-8937)
 
     - Configure Settings for Mac OSX Need Defaults for PROD_XXX, DEBUG_XXX, 
       and PROFILE_XXX
@@ -198,9 +204,16 @@ Bug Fixes since HDF5-1.8.13
 
     Library
     -------
-    - Corrected ID management code that was failing with 'duplicate key
-      inserted' error, and was not handling other situations where many/all
-      IDs of a type are opened/closed.  (QAK - 2014/10/16 - HDFFV-8930)
+    - Fixed Identifier Management Code
+      
+      Opening an object returns an identifier; closing the object should 
+      free up the identifier. A problem was found where the identifiers 
+      were not being freed up correctly.
+      
+      Fixed the problem so that identifiers that have been used can be 
+      used again after their object has been closed.
+      
+      (QAK - 2014/10/16, HDFFV-8930)
 
     - Removal of DllMain() from Static Windows Builds 
 
