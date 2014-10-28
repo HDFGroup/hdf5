@@ -388,22 +388,6 @@ Bug Fixes since HDF5-1.8.13
 
       (MSB - 2014/9/29, HDFFV-8670)
 
-old:
-      All the HL routines now check: for NULL pointers, if they received a 
-      string which 
-      is null terminated, and if string buffers are short enough not to 
-      overflow the buffer. 
-      The minimum length of the buffers is now used in strncmp to avoid overflow.
-
-
-
-
-
-
-
-
-
-
     - Behavior Change of H5LTdtype_to_text
 
       If a user buffer was passed in to H5LTdtype_to_text along with the 
@@ -432,11 +416,6 @@ old:
       Fixed the incorrect exit code values. 
       
       (AKC - 2014/07/22, HDFFV-8881)
-
-
-
-
-
 
 Supported Platforms
 ===================
