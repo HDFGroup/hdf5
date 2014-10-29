@@ -56,9 +56,11 @@
 
 /***** Macros for One linked collective IO case. *****/
 /* The default value to do one linked collective IO for all chunks.
-   If the average number of chunks per process is greater than this value,
-      the library will create an MPI derived datatype to link all chunks to do collective IO.
-      The user can set this value through an API. */
+ * If the average number of chunks per process is greater than this
+ * value, the library will create an MPI derived datatype to link all
+ * chunks to do collective IO.  The user can set this value through an
+ * API. 
+ */
 
 /* Macros to represent options on how to obtain chunk address for one linked-chunk IO case */
 #define H5D_OBTAIN_ONE_CHUNK_ADDR_IND 0
@@ -69,10 +71,10 @@
 #define H5D_ALL_CHUNK_ADDR_THRES_COL_NUM 10000
 
 /***** Macros for multi-chunk collective IO case. *****/
-/* The default value of the threshold to do collective IO for this chunk.
-   If the average number of processes per chunk is greater than the default value,
-   collective IO is done for this chunk.
-*/
+/* The default value of the threshold to do collective IO for this
+ *  chunk.  If the average number of processes per chunk is greater
+ *  than the default value, collective IO is done for this chunk.
+ */
 
 
 /* Macros to represent the regularity of the selection for multiple chunk IO case. */
@@ -170,7 +172,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
 
     /* Check whether these are both simple or scalar dataspaces */
     if(!((H5S_SIMPLE == H5S_GET_EXTENT_TYPE(mem_space) || H5S_SCALAR == H5S_GET_EXTENT_TYPE(mem_space))
-            && (H5S_SIMPLE == H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR == H5S_GET_EXTENT_TYPE(file_space))))
+         && (H5S_SIMPLE == H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR == H5S_GET_EXTENT_TYPE(file_space))))
         local_cause |= H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
 
     /* Dataset storage must be contiguous or chunked */
@@ -203,7 +205,8 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
         /* Form consensus opinion among all processes about whether to perform
          * collective I/O
          */
-        if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 1, MPI_INT, MPI_BOR, io_info->comm)))
+        if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 1, 
+                                                    MPI_INT, MPI_BOR, io_info->comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
     } /* end else */
 
@@ -290,7 +293,7 @@ H5D__mpio_opt_possible_mdset(const size_t count, H5D_io_info_md_t *io_info_md, H
 
         /* Check whether these are both simple or scalar dataspaces */
         if(!((H5S_SIMPLE == H5S_GET_EXTENT_TYPE(mem_space) || H5S_SCALAR == H5S_GET_EXTENT_TYPE(mem_space))
-                && (H5S_SIMPLE == H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR == H5S_GET_EXTENT_TYPE(file_space))))
+             && (H5S_SIMPLE == H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR == H5S_GET_EXTENT_TYPE(file_space))))
             local_cause |= H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
 
         /* Dataset storage must be contiguous or chunked */
@@ -324,7 +327,8 @@ H5D__mpio_opt_possible_mdset(const size_t count, H5D_io_info_md_t *io_info_md, H
         /* Form consensus opinion among all processes about whether to perform
          * collective I/O
          */
-        if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 1, MPI_INT, MPI_BOR, io_info_md->comm)))
+        if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 1, MPI_INT, 
+                                                    MPI_BOR, io_info_md->comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
     } /* end else */
 
@@ -377,7 +381,8 @@ H5D__mpio_select_read_mdset(const H5D_io_info_md_t *io_info_md, hsize_t mpi_buf_
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
-    if(H5F_block_read(file, H5FD_MEM_DRAW, io_info_md->store_faddr, (size_t)mpi_buf_count, io_info_md->dxpl_id, rbuf) < 0)
+    if(H5F_block_read(file, H5FD_MEM_DRAW, io_info_md->store_faddr, (size_t)mpi_buf_count, 
+                      io_info_md->dxpl_id, rbuf) < 0)
        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't finish collective parallel write")
 
 done:
@@ -416,7 +421,8 @@ H5D__mpio_select_write_mdset(const H5D_io_info_md_t *io_info_md, hsize_t mpi_buf
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
-    if(H5F_block_write(file, H5FD_MEM_DRAW, io_info_md->store_faddr, (size_t)mpi_buf_count, io_info_md->dxpl_id, wbuf) < 0)
+    if(H5F_block_write(file, H5FD_MEM_DRAW, io_info_md->store_faddr, (size_t)mpi_buf_count, 
+                       io_info_md->dxpl_id, wbuf) < 0)
        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't finish collective parallel write")
 
 done:
@@ -427,10 +433,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__piece_mdset_io
  *
- * Purpose:     Routine for
- *               choose an IO option:
- *                 a) Single collective IO defined by one MPI derived datatype to link through all pieces (chunks/contigs). Default.
- *               Note: previously there were other options, but cutoff as part of multi-dset work.
+ * Purpose:     Routine for choosing an IO option:
+ *              a) Single collective IO defined by one MPI derived datatype 
+ *                 to link through all pieces (chunks/contigs). Default.
+ *              Note: previously there were other options, but cutoff as part of multi-dset work.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -565,7 +571,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__all_piece_collective_io
  *
- * Purpose:     Routine for single collective IO with one MPI derived datatype to link with all pieces (chunks + contig)
+ * Purpose:     Routine for single collective IO with one MPI derived datatype 
+ *              to link with all pieces (chunks + contig)
  *
  *              1. Use the piece addresses and piece info sorted in skiplist
  *              2. Build up MPI derived datatype for each chunk
@@ -648,21 +655,21 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
     /* Set up MPI datatype for chunks selected */
     if(num_chunk) {
         /* Allocate chunking information */
-        if(NULL == (chunk_mtype           = (MPI_Datatype *)H5MM_malloc(num_chunk * sizeof(MPI_Datatype))))
+        if(NULL == (chunk_mtype = (MPI_Datatype *)H5MM_malloc(num_chunk * sizeof(MPI_Datatype))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk memory datatype buffer")
-        if(NULL == (chunk_ftype           = (MPI_Datatype *)H5MM_malloc(num_chunk * sizeof(MPI_Datatype))))
+        if(NULL == (chunk_ftype = (MPI_Datatype *)H5MM_malloc(num_chunk * sizeof(MPI_Datatype))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file datatype buffer")
-        if(NULL == (chunk_file_disp_array      = (MPI_Aint *)H5MM_malloc(num_chunk * sizeof(MPI_Aint))))
+        if(NULL == (chunk_file_disp_array = (MPI_Aint *)H5MM_malloc(num_chunk * sizeof(MPI_Aint))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file displacement buffer")
-        if(NULL == (chunk_mem_disp_array  = (MPI_Aint *)H5MM_calloc(num_chunk * sizeof(MPI_Aint))))
+        if(NULL == (chunk_mem_disp_array = (MPI_Aint *)H5MM_calloc(num_chunk * sizeof(MPI_Aint))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk memory displacement buffer")
-        if(NULL == (chunk_mpi_mem_counts        = (int *)H5MM_calloc(num_chunk * sizeof(int))))
+        if(NULL == (chunk_mpi_mem_counts = (int *)H5MM_calloc(num_chunk * sizeof(int))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk memory counts buffer")
-        if(NULL == (chunk_mpi_file_counts       = (int *)H5MM_calloc(num_chunk * sizeof(int))))
+        if(NULL == (chunk_mpi_file_counts = (int *)H5MM_calloc(num_chunk * sizeof(int))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file counts buffer")
-        if(NULL == (chunk_mbt_is_derived_array  = (hbool_t *)H5MM_calloc(num_chunk * sizeof(hbool_t))))
+        if(NULL == (chunk_mbt_is_derived_array = (hbool_t *)H5MM_calloc(num_chunk * sizeof(hbool_t))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk memory is derived datatype flags buffer")
-        if(NULL == (chunk_mft_is_derived_array  = (hbool_t *)H5MM_calloc(num_chunk * sizeof(hbool_t))))
+        if(NULL == (chunk_mft_is_derived_array = (hbool_t *)H5MM_calloc(num_chunk * sizeof(hbool_t))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file is derived datatype flags buffer")
 
         /* get first piece, which is sorted in skiplist */
@@ -760,30 +767,21 @@ if(H5DEBUG(D))
             piece_node = H5SL_next(piece_node);
         } /* end while */
 
-        /* Create final MPI derived datatype for the file */
-        /* Note: consider to use 'MPI_Type_create_struct' instead of
-         * 'MPI_Type_struct' which is deprecated as of MPI-2 - JKM */
-        #if defined(MPI_VERSION) && MPI_VERSION >= 2
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_file_counts, chunk_file_disp_array, chunk_ftype, &chunk_final_ftype)))
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_file_counts, 
+                                                             chunk_file_disp_array, chunk_ftype, 
+                                                             &chunk_final_ftype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
-        #else
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_struct((int)num_chunk, chunk_mpi_file_counts, chunk_file_disp_array, chunk_ftype, &chunk_final_ftype)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_struct failed", mpi_code)
-        #endif
+
         if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&chunk_final_ftype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
         chunk_final_ftype_is_derived = TRUE;
 
         /* Create final MPI derived datatype for memory */
-        /* Note: consider to use 'MPI_Type_create_struct' instead of
-         * 'MPI_Type_struct' which is deprecated as of MPI-2 - JKM */
-        #if defined(MPI_VERSION) && MPI_VERSION >= 2
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_mem_counts, chunk_mem_disp_array, chunk_mtype, &chunk_final_mtype)))
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_mem_counts, 
+                                                             chunk_mem_disp_array, chunk_mtype, 
+                                                             &chunk_final_mtype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
-        #else
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_struct((int)num_chunk, chunk_mpi_mem_counts, chunk_mem_disp_array, chunk_mtype, &chunk_final_mtype)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_struct failed", mpi_code)
-        #endif
+
         if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&chunk_final_mtype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
         chunk_final_mtype_is_derived = TRUE;
