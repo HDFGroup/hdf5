@@ -620,7 +620,7 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
 
             /* if only single-dset */
             if (1 == count)
-                actual_chunk_opt_mode = H5D_MPIO_NO_CHUNK_OPTIMIZATION; 
+                actual_chunk_opt_mode = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
         }
         else
             HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
@@ -637,199 +637,199 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
 
     /* Code block for actual actions (Build a MPI Type, IO) */
     {
-    hsize_t mpi_buf_count;  /* Number of MPI types */
-    size_t num_chunk;       /* Number of chunks for this process */
-    size_t u=0;               /* Local index variable */
+        hsize_t mpi_buf_count;  /* Number of MPI types */
+        size_t num_chunk;       /* Number of chunks for this process */
+        size_t u=0;               /* Local index variable */
 
-    H5SL_node_t    *piece_node;         /* Current node in chunk skip list */
-    H5D_piece_info_t *piece_info;
+        H5SL_node_t    *piece_node;         /* Current node in chunk skip list */
+        H5D_piece_info_t *piece_info;
 
-    /* local variable for base address for write buffer */
-    const void * base_wbuf_addr = NULL;
-    void * base_rbuf_addr = NULL;
+        /* local variable for base address for write buffer */
+        const void * base_wbuf_addr = NULL;
+        void * base_rbuf_addr = NULL;
 
-    /* Get the number of chunks with a selection */
-    num_chunk = H5SL_count(io_info_md->sel_pieces);
-    H5_CHECK_OVERFLOW(num_chunk, size_t, int);
+        /* Get the number of chunks with a selection */
+        num_chunk = H5SL_count(io_info_md->sel_pieces);
+        H5_CHECK_OVERFLOW(num_chunk, size_t, int);
 
-    /* Set up MPI datatype for chunks selected */
-    if(num_chunk) {
-        /* Allocate chunking information */
-        if(NULL == (chunk_mtype = (MPI_Datatype *)H5MM_malloc(num_chunk * sizeof(MPI_Datatype))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk memory datatype buffer")
-        if(NULL == (chunk_ftype = (MPI_Datatype *)H5MM_malloc(num_chunk * sizeof(MPI_Datatype))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file datatype buffer")
-        if(NULL == (chunk_file_disp_array = (MPI_Aint *)H5MM_malloc(num_chunk * sizeof(MPI_Aint))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file displacement buffer")
-        if(NULL == (chunk_mem_disp_array = (MPI_Aint *)H5MM_calloc(num_chunk * sizeof(MPI_Aint))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk memory displacement buffer")
-        if(NULL == (chunk_mpi_mem_counts = (int *)H5MM_calloc(num_chunk * sizeof(int))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk memory counts buffer")
-        if(NULL == (chunk_mpi_file_counts = (int *)H5MM_calloc(num_chunk * sizeof(int))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file counts buffer")
-        if(NULL == (chunk_mbt_is_derived_array = (hbool_t *)H5MM_calloc(num_chunk * sizeof(hbool_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk memory is derived datatype flags buffer")
-        if(NULL == (chunk_mft_is_derived_array = (hbool_t *)H5MM_calloc(num_chunk * sizeof(hbool_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file is derived datatype flags buffer")
+        /* Set up MPI datatype for chunks selected */
+        if(num_chunk) {
+            /* Allocate chunking information */
+            if(NULL == (chunk_mtype = (MPI_Datatype *)H5MM_malloc(num_chunk * sizeof(MPI_Datatype))))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk memory datatype buffer")
+            if(NULL == (chunk_ftype = (MPI_Datatype *)H5MM_malloc(num_chunk * sizeof(MPI_Datatype))))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file datatype buffer")
+            if(NULL == (chunk_file_disp_array = (MPI_Aint *)H5MM_malloc(num_chunk * sizeof(MPI_Aint))))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file displacement buffer")
+            if(NULL == (chunk_mem_disp_array = (MPI_Aint *)H5MM_calloc(num_chunk * sizeof(MPI_Aint))))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk memory displacement buffer")
+            if(NULL == (chunk_mpi_mem_counts = (int *)H5MM_calloc(num_chunk * sizeof(int))))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk memory counts buffer")
+            if(NULL == (chunk_mpi_file_counts = (int *)H5MM_calloc(num_chunk * sizeof(int))))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file counts buffer")
+            if(NULL == (chunk_mbt_is_derived_array = (hbool_t *)H5MM_calloc(num_chunk * sizeof(hbool_t))))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk memory is derived datatype flags buffer")
+            if(NULL == (chunk_mft_is_derived_array = (hbool_t *)H5MM_calloc(num_chunk * sizeof(hbool_t))))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file is derived datatype flags buffer")
 
-        /* get first piece, which is sorted in skiplist */
-        if(NULL == (piece_node = H5SL_first(io_info_md->sel_pieces)))
-            HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get piece node from skipped list")
-        if(NULL == (piece_info = (H5D_piece_info_t *)H5SL_item(piece_node)))
-            HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get piece info from skipped list")
-        /* save lowest file address */
-        ctg_store.contig.dset_addr = piece_info->faddr;
-
-        /* save base mem addr of piece for read/write */
-        base_wbuf_addr = piece_info->dset_info->u.wbuf;
-        base_rbuf_addr = piece_info->dset_info->u.rbuf;
-
-#ifdef H5D_DEBUG
-if(H5DEBUG(D))
-    HDfprintf(H5DEBUG(D),"before iterate over selected pieces\n");
-#endif
-
-        /* Obtain MPI derived datatype from all individual pieces */
-        /* Iterate over selected pieces for this process */
-        while(piece_node) {
-            hsize_t *permute_map = NULL; /* array that holds the mapping from the old, 
-                                            out-of-order displacements to the in-order 
-                                            displacements of the MPI datatypes of the 
-                                            point selection of the file space */
-            hbool_t is_permuted = FALSE;
-
+            /* get first piece, which is sorted in skiplist */
+            if(NULL == (piece_node = H5SL_first(io_info_md->sel_pieces)))
+                HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get piece node from skipped list")
             if(NULL == (piece_info = (H5D_piece_info_t *)H5SL_item(piece_node)))
                 HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get piece info from skipped list")
+            /* save lowest file address */
+            ctg_store.contig.dset_addr = piece_info->faddr;
 
-            /* Obtain disk and memory MPI derived datatype */
-            /* NOTE: The permute_map array can be allocated within H5S_mpio_space_type
-             *              and will be fed into the next call to H5S_mpio_space_type
-             *              where it will be freed.
-             */
-            if(H5S_mpio_space_type(piece_info->fspace,
-                                   piece_info->dset_info->type_info.src_type_size, 
-                                   &chunk_ftype[u], /* OUT: datatype created */ 
-                                   &chunk_mpi_file_counts[u], /* OUT */
-                                   &(chunk_mft_is_derived_array[u]), /* OUT */
-                                   TRUE, /* this is a file space,
-                                            so permute the
-                                            datatype if the point
-                                            selections are out of
-                                            order */
-                                   &permute_map,/* OUT: a map to indicate the
-                                                   permutation of points
-                                                   selected in case they
-                                                   are out of order */
-                                   &is_permuted /* OUT */) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI file type")
+            /* save base mem addr of piece for read/write */
+            base_wbuf_addr = piece_info->dset_info->u.wbuf;
+            base_rbuf_addr = piece_info->dset_info->u.rbuf;
 
-            /* Sanity check */
-            if(is_permuted)
-                HDassert(permute_map);
-            if(H5S_mpio_space_type(piece_info->mspace,
-                                   piece_info->dset_info->type_info.dst_type_size,
-                                   &chunk_mtype[u], 
-                                   &chunk_mpi_mem_counts[u], 
-                                   &(chunk_mbt_is_derived_array[u]), 
-                                   FALSE, /* this is a memory
-                                             space, so if the file
-                                             space is not
-                                             permuted, there is no
-                                             need to permute the
-                                             datatype if the point
-                                             selections are out of
-                                             order*/
-                                   &permute_map, /* IN: the permutation map
-                                                    generated by the
-                                                    file_space selection
-                                                    and applied to the
-                                                    memory selection */
-                                   &is_permuted /* IN */) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI buf type")
-            /* Sanity check */
-            if(is_permuted)
-                HDassert(!permute_map);
-
-            /* Piece address relative to the first piece addr 
-             * Assign piece address to MPI displacement 
-             * (assume MPI_Aint big enough to hold it) */
-            chunk_file_disp_array[u] = (MPI_Aint)piece_info->faddr - (MPI_Aint)ctg_store.contig.dset_addr;
-
-            if(io_info_md->op_type == H5D_IO_OP_WRITE) {
-                chunk_mem_disp_array[u] = (MPI_Aint)piece_info->dset_info->u.wbuf - (MPI_Aint)base_wbuf_addr;
-            } 
-            else if (io_info_md->op_type == H5D_IO_OP_READ) {
-                chunk_mem_disp_array[u] = (MPI_Aint)piece_info->dset_info->u.rbuf - (MPI_Aint)base_rbuf_addr;
-            }
-
-            /* Advance to next piece in list */
-            u++;
-            piece_node = H5SL_next(piece_node);
-        } /* end while */
-
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_file_counts, 
-                                                             chunk_file_disp_array, chunk_ftype, 
-                                                             &chunk_final_ftype)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
-
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&chunk_final_ftype)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
-        chunk_final_ftype_is_derived = TRUE;
-
-        /* Create final MPI derived datatype for memory */
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_mem_counts, 
-                                                             chunk_mem_disp_array, chunk_mtype, 
-                                                             &chunk_final_mtype)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
-
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&chunk_final_mtype)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
-        chunk_final_mtype_is_derived = TRUE;
-
-        /* Free the file & memory MPI datatypes for each chunk */
-        for(u = 0; u < num_chunk; u++) {
-            if(chunk_mbt_is_derived_array[u])
-                if(MPI_SUCCESS != (mpi_code = MPI_Type_free(chunk_mtype + u)))
-                    HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-
-            if(chunk_mft_is_derived_array[u])
-                if(MPI_SUCCESS != (mpi_code = MPI_Type_free(chunk_ftype + u)))
-                    HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-        } /* end for */
-
-        /* We have a single, complicated MPI datatype for both memory & file */
-        mpi_buf_count  = (hsize_t)1;
-    } /* end if */
-    else {      /* no selection at all for this process */
-
-        /* since this process doesn't do any io, just pass a valid addr.
-         * at this point dset object hear address is availbe to any 
-         * process, so just pass it. 0x0 also work fine */
-        ctg_store.contig.dset_addr = 0x0;
-        /* or ctg_store.contig.dset_addr = io_info_md->dsets_info[0].dset->oloc.addr; */
-        
-        /* just provide a valid mem address. no actual IO occur */
-        base_wbuf_addr = io_info_md->dsets_info[0].u.wbuf;
-        base_rbuf_addr = io_info_md->dsets_info[0].u.rbuf;
-
-        /* Set the MPI datatype to just participate */
-        chunk_final_ftype = MPI_BYTE;
-        chunk_final_mtype = MPI_BYTE;
-
-        mpi_buf_count  = (hsize_t)0;
-    } /* end else */
 #ifdef H5D_DEBUG
-if(H5DEBUG(D))
-    HDfprintf(H5DEBUG(D),"before coming to final collective IO\n");
+            if(H5DEBUG(D))
+                HDfprintf(H5DEBUG(D),"before iterate over selected pieces\n");
 #endif
-    /* Set up the base storage address for this piece */
-    io_info_md->store_faddr = ctg_store.contig.dset_addr;
-    io_info_md->base_maddr_w = base_wbuf_addr;
-    io_info_md->base_maddr_r = base_rbuf_addr;
 
-    /* Perform final collective I/O operation */
-    if(H5D__final_collective_io_mdset(io_info_md, mpi_buf_count, &chunk_final_ftype, &chunk_final_mtype) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish MPI-IO")
+            /* Obtain MPI derived datatype from all individual pieces */
+            /* Iterate over selected pieces for this process */
+            while(piece_node) {
+                hsize_t *permute_map = NULL; /* array that holds the mapping from the old, 
+                                                out-of-order displacements to the in-order 
+                                                displacements of the MPI datatypes of the 
+                                                point selection of the file space */
+                hbool_t is_permuted = FALSE;
+
+                if(NULL == (piece_info = (H5D_piece_info_t *)H5SL_item(piece_node)))
+                    HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get piece info from skipped list")
+
+                /* Obtain disk and memory MPI derived datatype */
+                /* NOTE: The permute_map array can be allocated within H5S_mpio_space_type
+                 *              and will be fed into the next call to H5S_mpio_space_type
+                 *              where it will be freed.
+                 */
+                if(H5S_mpio_space_type(piece_info->fspace,
+                                       piece_info->dset_info->type_info.src_type_size, 
+                                       &chunk_ftype[u], /* OUT: datatype created */ 
+                                       &chunk_mpi_file_counts[u], /* OUT */
+                                       &(chunk_mft_is_derived_array[u]), /* OUT */
+                                       TRUE, /* this is a file space,
+                                                so permute the
+                                                datatype if the point
+                                                selections are out of
+                                                order */
+                                       &permute_map,/* OUT: a map to indicate the
+                                                       permutation of points
+                                                       selected in case they
+                                                       are out of order */
+                                       &is_permuted /* OUT */) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI file type")
+
+                /* Sanity check */
+                if(is_permuted)
+                    HDassert(permute_map);
+                if(H5S_mpio_space_type(piece_info->mspace,
+                                       piece_info->dset_info->type_info.dst_type_size,
+                                       &chunk_mtype[u], 
+                                       &chunk_mpi_mem_counts[u], 
+                                       &(chunk_mbt_is_derived_array[u]), 
+                                       FALSE, /* this is a memory
+                                                 space, so if the file
+                                                 space is not
+                                                 permuted, there is no
+                                                 need to permute the
+                                                 datatype if the point
+                                                 selections are out of
+                                                 order*/
+                                       &permute_map, /* IN: the permutation map
+                                                        generated by the
+                                                        file_space selection
+                                                        and applied to the
+                                                        memory selection */
+                                       &is_permuted /* IN */) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI buf type")
+                /* Sanity check */
+                if(is_permuted)
+                    HDassert(!permute_map);
+
+                /* Piece address relative to the first piece addr 
+                 * Assign piece address to MPI displacement 
+                 * (assume MPI_Aint big enough to hold it) */
+                chunk_file_disp_array[u] = (MPI_Aint)piece_info->faddr - (MPI_Aint)ctg_store.contig.dset_addr;
+
+                if(io_info_md->op_type == H5D_IO_OP_WRITE) {
+                    chunk_mem_disp_array[u] = (MPI_Aint)piece_info->dset_info->u.wbuf - (MPI_Aint)base_wbuf_addr;
+                } 
+                else if (io_info_md->op_type == H5D_IO_OP_READ) {
+                    chunk_mem_disp_array[u] = (MPI_Aint)piece_info->dset_info->u.rbuf - (MPI_Aint)base_rbuf_addr;
+                }
+
+                /* Advance to next piece in list */
+                u++;
+                piece_node = H5SL_next(piece_node);
+            } /* end while */
+
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_file_counts, 
+                                                                 chunk_file_disp_array, chunk_ftype, 
+                                                                 &chunk_final_ftype)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
+
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&chunk_final_ftype)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+            chunk_final_ftype_is_derived = TRUE;
+
+            /* Create final MPI derived datatype for memory */
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_mem_counts, 
+                                                                 chunk_mem_disp_array, chunk_mtype, 
+                                                                 &chunk_final_mtype)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
+
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&chunk_final_mtype)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+            chunk_final_mtype_is_derived = TRUE;
+
+            /* Free the file & memory MPI datatypes for each chunk */
+            for(u = 0; u < num_chunk; u++) {
+                if(chunk_mbt_is_derived_array[u])
+                    if(MPI_SUCCESS != (mpi_code = MPI_Type_free(chunk_mtype + u)))
+                        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+
+                if(chunk_mft_is_derived_array[u])
+                    if(MPI_SUCCESS != (mpi_code = MPI_Type_free(chunk_ftype + u)))
+                        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+            } /* end for */
+
+            /* We have a single, complicated MPI datatype for both memory & file */
+            mpi_buf_count  = (hsize_t)1;
+        } /* end if */
+        else {      /* no selection at all for this process */
+
+            /* since this process doesn't do any io, just pass a valid addr.
+             * at this point dset object hear address is availbe to any 
+             * process, so just pass it. 0x0 also work fine */
+            ctg_store.contig.dset_addr = 0x0;
+            /* or ctg_store.contig.dset_addr = io_info_md->dsets_info[0].dset->oloc.addr; */
+        
+            /* just provide a valid mem address. no actual IO occur */
+            base_wbuf_addr = io_info_md->dsets_info[0].u.wbuf;
+            base_rbuf_addr = io_info_md->dsets_info[0].u.rbuf;
+
+            /* Set the MPI datatype to just participate */
+            chunk_final_ftype = MPI_BYTE;
+            chunk_final_mtype = MPI_BYTE;
+
+            mpi_buf_count  = (hsize_t)0;
+        } /* end else */
+#ifdef H5D_DEBUG
+        if(H5DEBUG(D))
+            HDfprintf(H5DEBUG(D),"before coming to final collective IO\n");
+#endif
+        /* Set up the base storage address for this piece */
+        io_info_md->store_faddr = ctg_store.contig.dset_addr;
+        io_info_md->base_maddr_w = base_wbuf_addr;
+        io_info_md->base_maddr_r = base_rbuf_addr;
+
+        /* Perform final collective I/O operation */
+        if(H5D__final_collective_io_mdset(io_info_md, mpi_buf_count, &chunk_final_ftype, &chunk_final_mtype) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish MPI-IO")
     }
 
 done:

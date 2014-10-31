@@ -599,7 +599,7 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md,
     /* this is need when multiple write/read occurs on the same dsets,
      * just pass the previously created pointer */
     if (NULL == io_info_md->sel_pieces)
-            io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
+        io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
 
     HDassert(io_info_md->sel_pieces);
 
@@ -632,8 +632,6 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md,
      */
     {
         unsigned    u;
-
-        
 
         /* if selected elements exist */
         if (dinfo->nelmts) {
