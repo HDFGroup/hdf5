@@ -475,7 +475,7 @@ main (int argc, const char *argv[])
 
     /* free link info path */
     if (linkinfo.trg_path)
-        HDfree((char*)linkinfo.trg_path);
+        HDfree(linkinfo.trg_path);
 
     /* close propertis */
     if(H5Pclose(ocpl_id)<0)
@@ -496,7 +496,7 @@ error:
 
     /* free link info path */
     if (linkinfo.trg_path)
-        HDfree((char*)linkinfo.trg_path);
+        HDfree(linkinfo.trg_path);
 
  H5E_BEGIN_TRY {
     H5Pclose(ocpl_id);

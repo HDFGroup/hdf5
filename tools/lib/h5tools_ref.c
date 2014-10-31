@@ -65,7 +65,7 @@ free_ref_path_info(void *item, void UNUSED *key, void UNUSED *operator_data/*in,
 {
     ref_path_node_t *node = (ref_path_node_t *)item;
 
-    HDfree((void *)node->path);
+    HDfree(node->path);
     HDfree(node);
 
     return(0);
