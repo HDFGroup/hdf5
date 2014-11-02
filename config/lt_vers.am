@@ -19,7 +19,7 @@
 # After making changes, run bin/reconfigure to update other configure related
 # files like Makefile.in.
 LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 192
+LT_VERS_REVISION = 193
 LT_VERS_AGE = 0
 
 ## If the API changes *at all*, increment LT_VERS_INTERFACE and
