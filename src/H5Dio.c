@@ -103,14 +103,14 @@ H5FL_BLK_DEFINE(type_conv);
  *		passed to this function with the PLIST_ID argument.
  *
  *		The FILE_SPACE_ID can be the constant H5S_ALL which indicates
- *		that the entire file dataspace is to be referenced.
+ *		that the entire file data space is to be referenced.
  *
  *		The MEM_SPACE_ID can be the constant H5S_ALL in which case
- *		the memory dataspace is the same as the file dataspace
+ *		the memory data space is the same as the file data space
  *		defined when the dataset was created.
  *
- *		The number of elements in the memory dataspace must match
- *		the number of elements in the file dataspace.
+ *		The number of elements in the memory data space must match
+ *		the number of elements in the file data space.
  *
  *		The PLIST_ID can be the constant H5P_DEFAULT in which
  *		case the default data transfer properties are used.
@@ -142,11 +142,11 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     if(mem_space_id < 0 || file_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     if(H5S_ALL != mem_space_id) {
 	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
 	/* Check for valid selection */
 	if(H5S_SELECT_VALID(mem_space) != TRUE)
@@ -154,7 +154,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     } /* end if */
     if(H5S_ALL != file_space_id) {
 	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
 	/* Check for valid selection */
 	if(H5S_SELECT_VALID(file_space) != TRUE)
@@ -189,14 +189,14 @@ done:
  *		PLIST_ID argument.
  *
  *		The FILE_SPACE_ID can be the constant H5S_ALL which indicates
- *		that the entire file dataspace is to be referenced.
+ *		that the entire file data space is to be referenced.
  *
  *		The MEM_SPACE_ID can be the constant H5S_ALL in which case
- *		the memory dataspace is the same as the file dataspace
+ *		the memory data space is the same as the file data space
  *		defined when the dataset was created.
  *
- *		The number of elements in the memory dataspace must match
- *		the number of elements in the file dataspace.
+ *		The number of elements in the memory data space must match
+ *		the number of elements in the file data space.
  *
  *		The PLIST_ID can be the constant H5P_DEFAULT in which
  *		case the default data transfer properties are used.
@@ -380,7 +380,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
     H5S_t * projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
                                         /* projection of the supplied mem_space to a new  */
-                                        /* dataspace with rank equal to that of          */
+                                        /* data space with rank equal to that of          */
                                         /* file_space.                                    */
                                         /*                                                */
                                         /* This field is only used if                     */
@@ -434,7 +434,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     /* Make certain that the number of elements in each selection is the same */
     if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest dataspaces have different sizes")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
 
     /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
     if(NULL == buf) {
@@ -596,7 +596,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
     H5S_t * projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
                                         /* projection of the supplied mem_space to a new  */
-                                        /* dataspace with rank equal to that of          */
+                                        /* data space with rank equal to that of          */
                                         /* file_space.                                    */
                                         /*                                                */
                                         /* This field is only used if                     */
@@ -688,7 +688,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     /* Make certain that the number of elements in each selection is the same */
     if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest dataspaces have different sizes")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
 
     /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
     if(NULL == buf) {
@@ -742,7 +742,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* Retrieve dataset properties */
     /* <none needed currently> */
 
-    /* Allocate dataspace and initialize it if it hasn't been. */
+    /* Allocate data space and initialize it if it hasn't been. */
     if(nelmts > 0 && dataset->shared->dcpl_cache.efl.nused == 0 &&
             !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)) {
         hssize_t file_nelmts;   /* Number of elements in file dataset's dataspace */
@@ -947,7 +947,7 @@ H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     } /* end else */
 
     /*
-     * Locate the type conversion function and dataspace conversion
+     * Locate the type conversion function and data space conversion
      * functions, and set up the element numbering information. If a data
      * type conversion is necessary then register datatype atoms. Data type
      * conversion is necessary if the user has set the `need_bkg' to a high

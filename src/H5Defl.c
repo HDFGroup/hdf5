@@ -144,7 +144,7 @@ H5D__efl_construct(H5F_t *f, H5D_t *dset)
 
     /*
      * The maximum size of the dataset cannot exceed the storage size.
-     * Also, only the slowest varying dimension of a simple dataspace
+     * Also, only the slowest varying dimension of a simple data space
      * can be extendible (currently only for external data storage).
      */
 

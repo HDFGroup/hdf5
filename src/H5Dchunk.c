@@ -17,7 +17,7 @@
  *	       	Thursday, April 24, 2008
  *
  * Purpose:	Abstract indexed (chunked) I/O functions.  The logical
- *		multi-dimensional dataspace is regularly partitioned into
+ *		multi-dimensional data space is regularly partitioned into
  *		same-sized "chunks", the first of which is aligned with the
  *		logical origin.  The chunks are indexed by different methods,
  *		that map a chunk index to disk address.  Each chunk can be
@@ -329,7 +329,7 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsiz
 
     FUNC_ENTER_STATIC_TAG(dxpl_id, dset->oloc.addr, FAIL)
 
-    /* Allocate dataspace and initialize it if it hasn't been. */
+    /* Allocate data space and initialize it if it hasn't been. */
     if(!(*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
  	/* Allocate storage */
         if(H5D__alloc_storage(dset, dxpl_id, H5D_ALLOC_WRITE, FALSE, NULL) < 0)
