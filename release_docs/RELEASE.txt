@@ -125,12 +125,18 @@ Bug Fixes since HDF5-1.8.13
       
       (ADB - 2014/10/16, HDFFV-8932)
 
-    - Shared Library Version Numbers Changed (soname)
+    - Shared Library Interface Version Number (soname)
       
-      The C library had an interface incompatibility due to renamed 
-      symbols in H5Ppublic.h.
-      
-      The shared library version numbers (soname) were changed.
+      In order to increase the maintainability of HDF5, an architectural
+      change was made which required the renaming of several public symbols in
+      H5Ppublic.h.
+
+      The shared libary interface version number ("soname") has been increased
+      on account of these changes. For a full list of the changed symbols, see
+      the interface compatibility report, which is available as a link off of
+      the 'HDF5 Software Changes from Release to Release' document:
+
+          http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
       
       (AKC - 2014/10/03, HDFFV-8937)
 
