@@ -3540,9 +3540,16 @@ test_no_collective_cause_mode(int selection_mode)
         is_chunked = 0;
     }
     else {
-        /* Create the basic Space */    
-        dims[0] = dim0;
-        dims[1] = dim1;
+        /* Create the basic Space */
+        /* if this is a compact dataset, create a small dataspace that does not exceed 64K */
+        if (selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT) {
+            dims[0] = ROW_FACTOR * 6;
+            dims[1] = COL_FACTOR * 6;
+        }
+        else {
+            dims[0] = dim0;
+            dims[1] = dim1;
+        }
         sid = H5Screate_simple (RANK, dims, NULL);
         VRFY((sid >= 0), "H5Screate_simple succeeded");
     }
@@ -3645,7 +3652,7 @@ test_no_collective_cause_mode(int selection_mode)
     }
 
     /* Get the number of elements in the selection */
-    length = dim0 * dim1;
+    length = dims[0] * dims[1];
 
     /* Allocate and initialize the buffer */
     buffer = (int *)HDmalloc(sizeof(int) * length);
