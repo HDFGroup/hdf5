@@ -41,6 +41,7 @@
 
 ./bin/COPYING
 ./bin/buildhdf5
+./bin/build_and_package_hdf5_binaries.sh  _DO_NOT_DISTRIBUTE_
 ./bin/checkapi        _DO_NOT_DISTRIBUTE_
 ./bin/checkposix      _DO_NOT_DISTRIBUTE_
 ./bin/chkconfigure      _DO_NOT_DISTRIBUTE_
@@ -67,6 +68,9 @@
 ./bin/make_overflow
 ./bin/make_vers
 ./bin/makehelp
+./bin/make1814TarFiles.pl       _DO_NOT_DISTRIBUTE_
+./bin/makeInternal1814README.pl _DO_NOT_DISTRIBUTE_
+./bin/makeOuter1814README.pl    _DO_NOT_DISTRIBUTE_
 ./bin/missing
 ./bin/mkdirs
 ./bin/mkinstalldirs
@@ -78,6 +82,7 @@
 ./bin/snapshot
 ./bin/snapshot_version      _DO_NOT_DISTRIBUTE_
 ./bin/test-driver
+./bin/testh51814binary.sh       _DO_NOT_DISTRIBUTE_
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
