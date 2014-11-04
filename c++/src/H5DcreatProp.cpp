@@ -356,8 +356,11 @@ int DSetCreatPropList::getNfilters() const
 ///\exception	H5::PropListIException
 ///\par Description
 ///		Failure occurs when \a filter_number is out of range.
+//		Note: the first argument was mistakenly typed as int instead
+//		of unsigned int, but for backward compatibility, it cannot be
+//		changed. -BMR (2014/04/15)
 //--------------------------------------------------------------------------
-H5Z_filter_t DSetCreatPropList::getFilter(unsigned int filter_number,
+H5Z_filter_t DSetCreatPropList::getFilter(int filter_number,
 	unsigned int &flags, size_t &cd_nelmts, unsigned int* cd_values,
 	size_t namelen, char name[], unsigned int& filter_config) const
 {

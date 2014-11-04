@@ -200,9 +200,15 @@ DESCRIPTION
 static herr_t
 H5FD_direct_init_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;
 
-    FUNC_LEAVE_NOAPI(H5FD_direct_init())
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5FD_direct_init() < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize direct VFD")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_direct_init_interface() */
 
 

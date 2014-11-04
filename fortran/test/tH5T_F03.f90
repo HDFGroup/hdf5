@@ -661,9 +661,6 @@ END SUBROUTINE test_array_compound_atomic
     USE ISO_C_BINDING
     IMPLICIT NONE
 
-    INTEGER, PARAMETER :: r_k4 = SELECTED_REAL_KIND(5)
-    INTEGER, PARAMETER :: r_k8 = SELECTED_REAL_KIND(10)
-
     INTEGER, INTENT(INOUT) :: total_error
 
     INTEGER, PARAMETER :: LENGTH = 5
@@ -685,8 +682,8 @@ END SUBROUTINE test_array_compound_atomic
 
     TYPE CmpField_struct
        INTEGER, DIMENSION(1:ALEN) :: a
-       REAL(KIND=r_k4), DIMENSION(1:ALEN) :: b
-       REAL(KIND=r_k8), DIMENSION(1:ALEN) :: c
+       REAL(KIND=sp), DIMENSION(1:ALEN) :: b
+       REAL(KIND=dp), DIMENSION(1:ALEN) :: c
     ENDTYPE CmpField_struct
 
     TYPE(CmpField_struct), DIMENSION(1:LENGTH), TARGET :: cf
@@ -702,7 +699,7 @@ END SUBROUTINE test_array_compound_atomic
     TYPE(CmpDTSinfo_struct) :: dtsinfo
 
     TYPE fld_t_struct
-       REAL(KIND=r_k4), DIMENSION(1:ALEN) :: b
+       REAL(KIND=sp), DIMENSION(1:ALEN) :: b
     END TYPE fld_t_struct
  
     INTEGER(SIZE_T) :: type_sizei  ! Size of the integer datatype 
@@ -741,10 +738,10 @@ END SUBROUTINE test_array_compound_atomic
     ! ----------------------- 
     CALL h5tget_size_f(H5T_NATIVE_INTEGER, type_sizei, error)
     CALL check("h5tget_size_f", error, total_error)
-    IF(sizeof(cf(1)%b(1)).EQ.4)THEN
+    IF(h5_sizeof(cf(1)%b(1)).EQ.4_size_t)THEN
        CALL h5tget_size_f(H5T_NATIVE_REAL_4, type_sizer, error)
        CALL check("h5tget_size_f", error, total_error)
-    ELSE IF(sizeof(cf(1)%b(1)).EQ.8)THEN
+    ELSE IF(h5_sizeof(cf(1)%b(1)).EQ.8_size_t)THEN
        CALL h5tget_size_f(H5T_NATIVE_REAL_8, type_sizer, error)
        CALL check("h5tget_size_f", error, total_error)
     ENDIF

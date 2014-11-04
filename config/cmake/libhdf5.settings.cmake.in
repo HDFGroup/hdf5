@@ -20,7 +20,7 @@ Compiling Options:
                          CFLAGS: @CMAKE_C_FLAGS@
                       H5_CFLAGS: @H5_CFLAGS@
                       AM_CFLAGS: @AM_CFLAGS@
-                       CPPFLAGS: @CMAKE_CXX_FLAGS@
+                       CPPFLAGS: @CPPFLAGS@
                     H5_CPPFLAGS: @H5_CPPFLAGS@
                     AM_CPPFLAGS: @AM_CPPFLAGS@
                Shared Libraries: @H5_ENABLE_SHARED_LIB@

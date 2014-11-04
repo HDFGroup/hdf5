@@ -4,7 +4,7 @@ PROJECT (HDF5_CPP)
 #-----------------------------------------------------------------------------
 # Apply Definitions to compiler in this directory and below
 #-----------------------------------------------------------------------------
-add_definitions (${HDF5_EXTRA_C_FLAGS})
+add_definitions (${HDF_EXTRA_C_FLAGS})
 
 #-----------------------------------------------------------------------------
 # Shared/Static Libs
@@ -18,7 +18,7 @@ endif (BUILD_SHARED_LIBS)
 #-----------------------------------------------------------------------------
 # Generate configure file
 #-----------------------------------------------------------------------------
-configure_file (${HDF5_RESOURCES_DIR}/H5cxx_config.h.in
+configure_file (${HDF_RESOURCES_DIR}/H5cxx_config.h.in
                 ${HDF5_BINARY_DIR}/H5cxx_pubconf.h
 )
 

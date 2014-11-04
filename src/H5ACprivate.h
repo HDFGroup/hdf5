@@ -34,6 +34,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Cprivate.h"		/* Cache				*/
 #include "H5Fprivate.h"		/* File access				*/
+#include "H5Pprivate.h"		/* Property lists			*/
 
 #ifdef H5_METADATA_TRACE_FILE
 #define H5AC__TRACE_FILE_ENABLED	1
@@ -222,6 +223,7 @@ extern hid_t H5AC_dxpl_id;
 /* Dataset transfer property list for independent metadata I/O calls */
 /* (just "library internal" set - i.e. independent transfer mode) */
 /* (Global variable declaration, definition is in H5AC.c) */
+H5_DLLVAR H5P_genplist_t *H5AC_ind_dxpl_g;
 H5_DLLVAR hid_t H5AC_ind_dxpl_id;
 
 
@@ -413,6 +415,18 @@ H5_DLL herr_t H5AC_ignore_tags(H5F_t * f);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);
 #endif /* H5_HAVE_PARALLEL */
+
+#ifndef NDEBUG  /* debugging functions */
+
+H5_DLL herr_t H5AC_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr,
+                                           void ** entry_ptr_ptr);
+
+H5_DLL herr_t H5AC_verify_entry_type(const H5F_t * f, haddr_t addr,
+                                     const H5AC_class_t * expected_type,
+                                     hbool_t * in_cache_ptr,
+                                     hbool_t * type_ok_ptr);
+
+#endif /* NDEBUG */ /* end debugging functions */
 
 #endif /* !_H5ACprivate_H */
 

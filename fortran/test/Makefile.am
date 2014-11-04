@@ -53,7 +53,23 @@ endif
 
 check_PROGRAMS=$(TEST_PROG)
 
-libh5test_fortran_la_SOURCES= tf.f90 t.c
+if FORTRAN_HAVE_STORAGE_SIZE
+if FORTRAN_HAVE_C_SIZEOF
+    libh5test_fortran_la_SOURCES = tf_F08.f90
+else
+    libh5test_fortran_la_SOURCES = tf_F03.f90
+endif
+else
+if FORTRAN_2003_CONDITIONAL_F
+  libh5test_fortran_la_SOURCES = tf_F03.f90
+else
+  libh5test_fortran_la_SOURCES = tf_F90.f90
+endif
+endif
+
+# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
+# compiled first
+libh5test_fortran_la_SOURCES += tf.f90 t.c
 
 # Source files are used for both the library and fortranlib_test.
 # Automake will complain about this without the following workaround.
@@ -63,11 +79,11 @@ fortranlib_test_CFLAGS=$(AM_CFLAGS)
 fortranlib_test_SOURCES = tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 \
         tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90 tHDF5.f90 fortranlib_test.f90
 
-fortranlib_test_1_8_SOURCES = tH5F.f90 tH5O.f90 tH5A_1_8.f90 tH5G_1_8.f90 tH5MISC_1_8.f90 tHDF5_1_8.f90\
+fortranlib_test_1_8_SOURCES = tH5O.f90 tH5A_1_8.f90 tH5G_1_8.f90 tH5MISC_1_8.f90 tHDF5_1_8.f90\
         fortranlib_test_1_8.f90
 
 if FORTRAN_2003_CONDITIONAL_F
-   fortranlib_test_F03_SOURCES = tH5F.f90 tH5E_F03.f90 tH5F_F03.f90 tH5L_F03.f90 \
+   fortranlib_test_F03_SOURCES = tH5E_F03.f90 tH5F_F03.f90 tH5L_F03.f90 \
         tH5O_F03.f90 tH5P_F03.f90 tH5T_F03.f90 tHDF5_F03.f90 fortranlib_test_F03.f90
 endif
 

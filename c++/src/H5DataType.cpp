@@ -53,7 +53,7 @@ namespace H5 {
 ///\brief	Default constructor: Creates a stub datatype
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType::DataType() : H5Object(), id(0) {}
+DataType::DataType() : H5Object(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:	DataType overloaded constructor
@@ -105,7 +105,7 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object()
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(0)
+DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(H5I_INVALID_HID)
 {
     id = H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
@@ -124,7 +124,7 @@ DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, 
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataType::DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(0)
+DataType::DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(H5I_INVALID_HID)
 {
     id = H5Location::p_dereference(attr.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
@@ -273,12 +273,42 @@ void DataType::commit(const H5Location& loc, const char* name)
 
 //--------------------------------------------------------------------------
 // Function:	DataType::commit
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const's.  This wrapper will be removed in future release.
+///\param	loc - IN: A location (file, dataset, datatype, or group)
+///\param	name - IN: Name of the datatype
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Jan, 2007
+//--------------------------------------------------------------------------
+void DataType::commit(H5Location& loc, const char* name)
+{
+   p_commit(loc.getId(), name);
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::commit
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function only in the type of the
 ///		argument \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataType::commit(const H5Location& loc, const H5std_string& name)
+{
+   p_commit(loc.getId(), name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::commit
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const's.  This wrapper will be removed in future release.
+///\param	loc - IN: A location (file, dataset, datatype, or group)
+///\param	name - IN: Name of the datatype
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Jan, 2007
+//--------------------------------------------------------------------------
+void DataType::commit(H5Location& loc, const H5std_string& name)
 {
    p_commit(loc.getId(), name.c_str());
 }
@@ -680,7 +710,7 @@ void DataType::close()
 	    throw DataTypeIException(inMemFunc("close"), "H5Tclose failed");
 	}
 	// reset the id
-	id = 0;
+	id = H5I_INVALID_HID;
     }
 }
 

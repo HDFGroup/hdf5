@@ -34,8 +34,9 @@ To test the installation with the examples;
     Copy HDF5Examples-0.1.1-Source.@BINARY_EXAMPLE_ENDING@ to this directory, do NOT unzip.
     Copy HDF518_Examples.cmake to this directory.
     Edit HDF518_Examples.cmake line 8 to set INSTALLDIR to where HDF5 is installed.
+       (The default should be correct unless you installed into a different folder.)
     Execute from this directory: 
-        ctest -S HDF518_Examples.cmake,HDF5Examples-0.1.1-Source -C Release -O test.log
+        ctest -S HDF518_Examples.cmake,HDF5Examples-0.1.1-Source -C Release -V -O test.log
 
 When executed, the ctest script will save the results to the log file, test.log, as
 indicated by the ctest command. If you wish the to see more build and test information, 

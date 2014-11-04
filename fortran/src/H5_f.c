@@ -460,13 +460,13 @@ nh5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 /*
  *  H5FD flags of type hid_t
  */
-    h5fd_hid_flags[0] = (int_f)H5FD_CORE;
-    h5fd_hid_flags[1] = (int_f)H5FD_FAMILY;
-    h5fd_hid_flags[2] = (int_f)H5FD_LOG;
-    h5fd_hid_flags[3] = (int_f)H5FD_MPIO;
-    h5fd_hid_flags[4] = (int_f)H5FD_MULTI;
-    h5fd_hid_flags[5] = (int_f)H5FD_SEC2;
-    h5fd_hid_flags[6] = (int_f)H5FD_STDIO;
+    h5fd_hid_flags[0] = (hid_t_f)H5FD_CORE;
+    h5fd_hid_flags[1] = (hid_t_f)H5FD_FAMILY;
+    h5fd_hid_flags[2] = (hid_t_f)H5FD_LOG;
+    h5fd_hid_flags[3] = (hid_t_f)H5FD_MPIO;
+    h5fd_hid_flags[4] = (hid_t_f)H5FD_MULTI;
+    h5fd_hid_flags[5] = (hid_t_f)H5FD_SEC2;
+    h5fd_hid_flags[6] = (hid_t_f)H5FD_STDIO;
 
 /*
  *  H5G flags

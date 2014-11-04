@@ -368,7 +368,7 @@ int main(int argc, char **argv)
     AddTest("selnone", none_selection_chunk, NULL,
             "chunked dataset with none-selection", PARATESTFILE);
     AddTest("calloc", test_chunk_alloc, NULL,
-	    "parallel extend Chunked allocation on serial file", PARATESTFILE);
+            "parallel extend Chunked allocation on serial file", PARATESTFILE);
     AddTest("fltread", test_filter_read, NULL,
 	    "parallel read of dataset written serially with filters", PARATESTFILE);
 
@@ -376,6 +376,9 @@ int main(int argc, char **argv)
     AddTest("cmpdsetr", compress_readAll, NULL,
 	    "compressed dataset collective read", PARATESTFILE);
 #endif /* H5_HAVE_FILTER_DEFLATE */
+
+    AddTest("zerodsetr", zero_dim_dset, NULL,
+	    "zero dim dset", PARATESTFILE);
 
     ndsets_params.name = PARATESTFILE;
     ndsets_params.count = ndatasets;
@@ -508,7 +511,7 @@ int main(int argc, char **argv)
     }
 
     AddTest("denseattr", test_dense_attr, NULL,
-	    "Store Dense Attributes", NULL);
+	    "Store Dense Attributes", PARATESTFILE);
 
 
     /* Display testing information */

@@ -52,7 +52,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub DataSet.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet() : AbstractDs(), H5Object(), id(0) {}
+DataSet::DataSet() : AbstractDs(), H5Object(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:	DataSet overloaded constructor
@@ -95,7 +95,7 @@ DataSet::DataSet(const DataSet& original) : AbstractDs(original), H5Object(origi
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : AbstractDs(), H5Object(), id(0)
+DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : AbstractDs(), H5Object(), id(H5I_INVALID_HID)
 {
     id = H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereferenced");
 }
@@ -114,7 +114,7 @@ DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, co
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataSet::DataSet(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : AbstractDs(), H5Object(), id(0)
+DataSet::DataSet(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : AbstractDs(), H5Object(), id(H5I_INVALID_HID)
 {
     id = H5Location::p_dereference(attr.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
@@ -310,6 +310,20 @@ hsize_t DataSet::getVlenBufSize(const DataType& type, const DataSpace& space ) c
       throw DataSetIException("DataSet::getVlenBufSize", "H5Dvlen_get_buf_size failed");
    }
    return( size );
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataSet::getVlenBufSize
+///\brief       This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///             misses const's.  This wrapper will be removed in future release.
+///\return	Amount of storage
+///\exception	H5::DataSetIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+hsize_t DataSet::getVlenBufSize( DataType& type, DataSpace& space ) const
+{
+    return(getVlenBufSize((const DataType)type, (const DataSpace)space));
 }
 
 //--------------------------------------------------------------------------
@@ -577,9 +591,11 @@ void DataSet::extend( const hsize_t* size ) const
 ///\param	buf_type - IN: Datatype of the elements in buffer
 ///\param	space - IN: Dataspace describing memory buffer & containing selection to use
 ///\exception	H5::DataSetIException
-// Programmer	Binh-Minh Ribler - 2000
+// Programmer	Binh-Minh Ribler - 2014
+// Modification
+//		Used the non-const version.
 //--------------------------------------------------------------------------
-void DataSet::fillMemBuf(const void *fill, const DataType& fill_type, void *buf, const DataType& buf_type, const DataSpace& space)
+void DataSet::fillMemBuf(const void *fill, const DataType& fill_type, void *buf, const DataType& buf_type, const DataSpace& space) const
 {
     hid_t fill_type_id = fill_type.getId();
     hid_t buf_type_id = buf_type.getId();
@@ -593,16 +609,32 @@ void DataSet::fillMemBuf(const void *fill, const DataType& fill_type, void *buf,
 
 //--------------------------------------------------------------------------
 // Function:	DataSet::fillMemBuf
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it only takes the
-///		the last three arguments.
+///\brief       This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///             misses const's.  This wrapper will be removed in future release.
+///\param	fill - IN: Pointer to fill value to use - default NULL
+///\param	fill_type - IN: Datatype of the fill value
 ///\param	buf - IN/OUT: Memory buffer to fill selection within
 ///\param	buf_type - IN: Datatype of the elements in buffer
 ///\param	space - IN: Dataspace describing memory buffer & containing selection to use
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSet::fillMemBuf(void *buf, const DataType& buf_type, const DataSpace& space)
+void DataSet::fillMemBuf(const void *fill, DataType& fill_type, void *buf, DataType& buf_type, DataSpace& space)
+{
+    fillMemBuf(fill, (const DataType)fill_type, buf, (const DataType)buf_type, (const DataSpace)space);
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataSet::fillMemBuf
+///\brief	Fills a selection in memory with 0.
+///\param	buf - IN/OUT: Memory buffer to fill selection within
+///\param	buf_type - IN: Datatype of the elements in buffer
+///\param	space - IN: Dataspace describing memory buffer & containing selection to use
+///\exception	H5::DataSetIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void DataSet::fillMemBuf(void *buf, const DataType& buf_type, const DataSpace& space) const
 {
     hid_t buf_type_id = buf_type.getId();
     hid_t space_id = space.getId();
@@ -611,6 +643,22 @@ void DataSet::fillMemBuf(void *buf, const DataType& buf_type, const DataSpace& s
     {
 	throw DataSetIException("DataSet::fillMemBuf", "H5Dfill failed");
     }
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataSet::fillMemBuf
+///\brief       This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///             misses const's.  This wrapper will be removed in future release.
+///\param       buf - IN/OUT: Memory buffer to fill selection within
+///\param       buf_type - IN: Datatype of the elements in buffer
+///\param       space - IN: Dataspace describing memory buffer & containing selection to use
+///\exception   H5::DataSetIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void DataSet::fillMemBuf(void *buf, DataType& buf_type, DataSpace& space)
+{
+    fillMemBuf(buf, (const DataType)buf_type, (const DataSpace)space);
 }
 
 //--------------------------------------------------------------------------
@@ -740,7 +788,7 @@ void DataSet::close()
 	    throw DataSetIException("DataSet::close", "H5Dclose failed");
 	}
 	// reset the id
-	id = 0;
+	id = H5I_INVALID_HID;
     }
 }
 

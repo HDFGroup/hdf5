@@ -1204,8 +1204,8 @@ test_derived_flt(void)
     src_size = H5Tget_size(tid2);
     dst_size = H5Tget_size(tid1);
     endian = H5Tget_order(tid2);
-    buf = (unsigned char *)HDmalloc(nelmts*(MAX(src_size, dst_size)));
-    saved_buf = (unsigned char *)HDmalloc(nelmts*src_size);
+    buf = (unsigned char *)HDmalloc(nelmts * (MAX(src_size, dst_size)));
+    saved_buf = (unsigned char *)HDmalloc(nelmts * src_size);
     HDmemset(buf, 0, nelmts * MAX(src_size, dst_size));
     HDmemset(saved_buf, 0, nelmts*src_size);
 

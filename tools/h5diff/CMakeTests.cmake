@@ -317,7 +317,7 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.txt"
               -D "TEST_APPEND=EXIT CODE:"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS "H5DIFF-${resultfile}-clear-objects")
     endif (HDF5_ENABLE_USING_MEMCHECKER)
@@ -355,7 +355,7 @@
 #              -D "TEST_APPEND=EXIT CODE: [0-9]"
 #              -D "TEST_REF_FILTER=EXIT CODE: 0"
               -D "TEST_SKIP_COMPARE=TRUE"
-              -P "${HDF5_RESOURCES_DIR}/prunTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/prunTest.cmake"
       )
       set_tests_properties (PH5DIFF-${resultfile} PROPERTIES DEPENDS "PH5DIFF-${resultfile}-clear-objects")
     endif (HDF5_ENABLE_USING_MEMCHECKER)
@@ -1072,12 +1072,7 @@ ADD_H5_TEST (h5diff_80 1 -v ${FILE7} ${FILE8})
 ADD_H5_TEST (h5diff_90 0 -v ${FILE2} ${FILE2})
 
 # 10. read by hyperslab, print indexes
-#if test -n "$pmode" -a "$mydomainname" = hdfgroup.uiuc.edu; then
-#    # skip this test which sometimes hangs in some THG machines
-#    message (STATUS "SKIP -v ${FILE9} ${FILE10})
-#else
-#    ADD_H5_TEST (h5diff_100 1 -v ${FILE9} ${FILE10}) 
-#fi
+ADD_H5_TEST (h5diff_100 1 -v ${FILE9} ${FILE10}) 
 
 # 11. floating point comparison
 ADD_H5_TEST (h5diff_101 1 -v ${FILE1} ${FILE1} g1/d1  g1/d2) 

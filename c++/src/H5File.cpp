@@ -50,7 +50,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub H5File object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File() : H5Location(), id(0) {}
+H5File::H5File() : H5Location(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:	H5File overloaded constructor
@@ -69,6 +69,10 @@ H5File::H5File() : H5Location(), id(0) {}
 ///				       the file.
 ///		\li \c H5F_ACC_EXCL - Fail if file already exists.
 ///			\c H5F_ACC_TRUNC and \c H5F_ACC_EXCL are mutually exclusive
+///		\li \c H5F_ACC_RDONLY - Open file as read-only, if it already
+///					exists, and fail, otherwise
+///		\li \c H5F_ACC_RDWR - Open file for read/write, if it already
+///					exists, and fail, otherwise
 ///		\li \c H5F_ACC_DEBUG - print debug information. This flag is
 ///			used only by HDF5 library developers; it is neither
 ///			tested nor supported for use in applications.
@@ -82,7 +86,7 @@ H5File::H5File() : H5Location(), id(0) {}
 //		to catch then re-throw it. -BMR 2013/03/21
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : H5Location(), id(0)
+H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : H5Location(), id(H5I_INVALID_HID)
 {
     try {
 	p_get_file(name, flags, create_plist, access_plist);
@@ -107,7 +111,7 @@ H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& c
 //		to catch then re-throw it. -BMR 2013/03/21
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : H5Location(), id(0)
+H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : H5Location(), id(H5I_INVALID_HID)
 {
     try {
 	p_get_file(name.c_str(), flags, create_plist, access_plist);
@@ -121,12 +125,15 @@ H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPro
 // This function is private and contains common code between the
 // constructors taking a string or a char*
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//		- removed H5F_ACC_CREAT because H5Fcreate will fail with
+//		H5F_ACC_CREAT. - BMR, Sep 17, 2014
 //--------------------------------------------------------------------------
 void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist)
 {
     // These bits only set for creation, so if any of them are set,
     // create the file.
-    if( flags & (H5F_ACC_CREAT|H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
+    if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
     {
 	hid_t create_plist_id = create_plist.getId();
 	hid_t access_plist_id = access_plist.getId();
@@ -147,6 +154,7 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 	}
     }
 }
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
@@ -454,6 +462,23 @@ void H5File::getVFDHandle(const FileAccPropList& fapl, void **file_handle) const
 
 //--------------------------------------------------------------------------
 // Function:	H5File::getVFDHandle
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const.  This wrapper will be removed in future release.
+///\param	fapl        - File access property list
+///\param	file_handle - Pointer to the file handle being used by
+///			      the low-level virtual file driver
+///\exception	H5::FileIException
+// Programmer   Binh-Minh Ribler - May 2004
+// Note:	Retiring April, 2014
+//--------------------------------------------------------------------------
+void H5File::getVFDHandle(FileAccPropList& fapl, void **file_handle) const
+{
+    getVFDHandle((const FileAccPropList)fapl, file_handle);
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::getVFDHandle
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function only in what arguments it
 ///		accepts.
@@ -493,19 +518,6 @@ hsize_t H5File::getFileSize() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5File::getLocId
-// Purpose:	Get the id of this file
-// Description
-//		This function is a redefinition of CommonFG::getLocId.  It
-//		is used by CommonFG member functions to get the file id.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-hid_t H5File::getLocId() const
-{
-   return( getId() );
-}
-
-//--------------------------------------------------------------------------
 // Function:    H5File::getId
 ///\brief	Get the id of this file
 ///\return	File identifier
@@ -523,6 +535,19 @@ hid_t H5File::getId() const
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:	H5File::getLocId
+// Purpose:	Get the id of this file
+// Description
+//		This function is a redefinition of CommonFG::getLocId.  It
+//		is used by CommonFG member functions to get the file id.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+hid_t H5File::getLocId() const
+{
+   return( getId() );
+}
+
 //--------------------------------------------------------------------------
 // Function:	H5File::reopen
 // Purpose:	Reopens this file.
@@ -579,7 +604,7 @@ void H5File::close()
 	    throw FileIException("H5File::close", "H5Fclose failed");
 	}
 	// reset the id
-	id = 0;
+	id = H5I_INVALID_HID;
     }
 }
 

@@ -18,6 +18,7 @@
  */
 
 #include "h5test.h"
+#include "H5ACprivate.h"
 #include "H5Pprivate.h"
 
 static int

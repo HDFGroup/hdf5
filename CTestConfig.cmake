@@ -23,9 +23,9 @@ set (VALGRIND_COMMAND_OPTIONS "-v --tool=memcheck --leak-check=full --track-fds=
 set (CTEST_MEMORYCHECK_COMMAND "/usr/bin/valgrind")
 set (CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v --tool=memcheck --leak-check=full --track-fds=yes --num-callers=50 --show-reachable=yes --track-origins=yes --malloc-fill=0xff --free-fill=0xfe")
 
-set (CTEST_TEST_TIMEOUT 3600 CACHE STRING 
+set (CTEST_TEST_TIMEOUT 1200 CACHE STRING 
     "Maximum time allowed before CTest will kill the test.") 
-set (DART_TESTING_TIMEOUT 3600 CACHE STRING 
+set (DART_TESTING_TIMEOUT 1200 CACHE STRING 
     "Maximum time allowed before CTest will kill the test." FORCE)
 
 SET(CTEST_SUBMIT_RETRY_DELAY 20 CACHE STRING

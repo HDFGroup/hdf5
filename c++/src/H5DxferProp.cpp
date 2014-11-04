@@ -229,7 +229,7 @@ void DSetMemXferPropList::setDataTransform(const H5std_string& expression) const
 //--------------------------------------------------------------------------
 // Function:	DSetMemXferPropList::getDataTransform
 ///\brief	Sets data transform expression.
-///\param	expression - OUT: buffer for data transform expression (char*)
+///\param	exp - OUT: buffer for data transform expression (char*)
 ///\param	buf_size   - IN: size of buffer for expression, including the
 ///				 null terminator
 ///\exception	H5::PropListIException

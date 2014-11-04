@@ -224,18 +224,20 @@ H5G_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-        if((n = H5I_nmembers(H5I_GROUP)))
-            H5I_clear_type(H5I_GROUP, FALSE, FALSE);
+        if(H5I_nmembers(H5I_GROUP) > 0) {
+            (void)H5I_clear_type(H5I_GROUP, FALSE, FALSE);
+            n++; /*H5I*/
+        } /* end if */
         else {
             /* Close deprecated interface */
             n += H5G__term_deprec_interface();
 
             /* Destroy the group object id group */
-            H5I_dec_type_ref(H5I_GROUP);
+            (void)H5I_dec_type_ref(H5I_GROUP);
+            n++; /*H5I*/
 
             /* Mark closed */
             H5_interface_initialize_g = 0;
-            n = 1; /*H5I*/
         } /* end else */
     } /* end if */
 
@@ -546,7 +548,7 @@ H5G_get_create_plist(H5G_t *grp)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Copy the default group creation property list */
-    if(NULL == (gcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_GROUP_CREATE_g)))
+    if(NULL == (gcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_GROUP_CREATE_ID_g)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get default group creation property list")
     if((new_gcpl_id = H5P_copy_plist(gcpl_plist, TRUE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to copy the creation property list")

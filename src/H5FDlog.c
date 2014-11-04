@@ -229,17 +229,22 @@ H5FL_DEFINE_STATIC(H5FD_log_t);
  *
  * Purpose:     Initializes any interface-specific data or routines.
  *
- * Return:      Success:    The driver ID for the log driver.
- *              Failure:    Negative.
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5FD_log_init_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;
 
-    FUNC_LEAVE_NOAPI(H5FD_log_init())
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5FD_log_init() < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize log VFD")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_log_init_interface() */
 
 
@@ -598,6 +603,11 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     /* Get the flags for logging */
     file->fa.flags = fa->flags;
+    if(fa->logfile)
+        file->fa.logfile = HDstrdup(fa->logfile);
+    else
+        file->fa.logfile = NULL;
+    file->fa.buf_size = fa->buf_size;
 
     /* Check if we are doing any logging at all */
     if(file->fa.flags != 0) {
@@ -797,6 +807,11 @@ H5FD_log_close(H5FD_t *_file)
         if(file->logfp != stderr)
             HDfclose(file->logfp);
     } /* end if */
+
+    if(file->fa.logfile) {
+        HDfree(file->fa.logfile);
+        file->fa.logfile = NULL;
+    }
 
     /* Release the file info */
     file = H5FL_FREE(H5FD_log_t, file);

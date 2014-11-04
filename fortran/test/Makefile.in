@@ -101,7 +101,20 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_fortran_la_LIBADD =
-am_libh5test_fortran_la_OBJECTS = tf.lo t.lo
+am__libh5test_fortran_la_SOURCES_DIST = tf_F90.f90 tf.f90 t.c \
+	tf_F03.f90 tf_F08.f90
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_libh5test_fortran_la_OBJECTS = tf_F90.lo \
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.lo \
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.lo
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_libh5test_fortran_la_OBJECTS = tf_F03.lo \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.lo \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.lo
+@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@am_libh5test_fortran_la_OBJECTS = tf_F03.lo \
+@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	tf.lo \
+@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	t.lo
+@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@am_libh5test_fortran_la_OBJECTS = tf_F08.lo \
+@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	tf.lo \
+@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	t.lo
 libh5test_fortran_la_OBJECTS = $(am_libh5test_fortran_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -138,18 +151,17 @@ fortranlib_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=FC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(FCLD) \
 	$(fortranlib_test_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-am_fortranlib_test_1_8_OBJECTS = tH5F.$(OBJEXT) tH5O.$(OBJEXT) \
-	tH5A_1_8.$(OBJEXT) tH5G_1_8.$(OBJEXT) tH5MISC_1_8.$(OBJEXT) \
-	tHDF5_1_8.$(OBJEXT) fortranlib_test_1_8.$(OBJEXT)
+am_fortranlib_test_1_8_OBJECTS = tH5O.$(OBJEXT) tH5A_1_8.$(OBJEXT) \
+	tH5G_1_8.$(OBJEXT) tH5MISC_1_8.$(OBJEXT) tHDF5_1_8.$(OBJEXT) \
+	fortranlib_test_1_8.$(OBJEXT)
 fortranlib_test_1_8_OBJECTS = $(am_fortranlib_test_1_8_OBJECTS)
 fortranlib_test_1_8_LDADD = $(LDADD)
 fortranlib_test_1_8_DEPENDENCIES = libh5test_fortran.la $(LIBH5TEST) \
 	$(LIBH5F) $(LIBHDF5)
-am__fortranlib_test_F03_SOURCES_DIST = tH5F.f90 tH5E_F03.f90 \
-	tH5F_F03.f90 tH5L_F03.f90 tH5O_F03.f90 tH5P_F03.f90 \
-	tH5T_F03.f90 tHDF5_F03.f90 fortranlib_test_F03.f90
+am__fortranlib_test_F03_SOURCES_DIST = tH5E_F03.f90 tH5F_F03.f90 \
+	tH5L_F03.f90 tH5O_F03.f90 tH5P_F03.f90 tH5T_F03.f90 \
+	tHDF5_F03.f90 fortranlib_test_F03.f90
 @FORTRAN_2003_CONDITIONAL_F_TRUE@am_fortranlib_test_F03_OBJECTS =  \
-@FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5F.$(OBJEXT) \
 @FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5E_F03.$(OBJEXT) \
 @FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5F_F03.$(OBJEXT) \
 @FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5L_F03.$(OBJEXT) \
@@ -214,9 +226,9 @@ am__v_FCLD_1 =
 SOURCES = $(libh5test_fortran_la_SOURCES) $(fflush1_SOURCES) \
 	$(fflush2_SOURCES) $(fortranlib_test_SOURCES) \
 	$(fortranlib_test_1_8_SOURCES) $(fortranlib_test_F03_SOURCES)
-DIST_SOURCES = $(libh5test_fortran_la_SOURCES) $(fflush1_SOURCES) \
-	$(fflush2_SOURCES) $(fortranlib_test_SOURCES) \
-	$(fortranlib_test_1_8_SOURCES) \
+DIST_SOURCES = $(am__libh5test_fortran_la_SOURCES_DIST) \
+	$(fflush1_SOURCES) $(fflush2_SOURCES) \
+	$(fortranlib_test_SOURCES) $(fortranlib_test_1_8_SOURCES) \
 	$(am__fortranlib_test_F03_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -560,14 +572,12 @@ LIPO = @LIPO@
 LL_PATH = @LL_PATH@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
-LT_ADD_LIBHDF5_DEPENDENCY = @LT_ADD_LIBHDF5_DEPENDENCY@
 LT_STATIC_EXEC = @LT_STATIC_EXEC@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
-MPI_GET_SIZE = @MPI_GET_SIZE@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -741,7 +751,30 @@ noinst_LTLIBRARIES = libh5test_fortran.la
 # Our main targets, the tests themselves
 TEST_PROG = fortranlib_test fflush1 fflush2 fortranlib_test_1_8 \
 	$(am__append_2)
-libh5test_fortran_la_SOURCES = tf.f90 t.c
+
+# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
+# compiled first
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@libh5test_fortran_la_SOURCES = tf_F90.f90 \
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.f90 \
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.c
+
+# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
+# compiled first
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@libh5test_fortran_la_SOURCES = tf_F03.f90 \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.f90 \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.c
+
+# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
+# compiled first
+@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@libh5test_fortran_la_SOURCES = tf_F03.f90 \
+@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	tf.f90 \
+@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	t.c
+
+# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
+# compiled first
+@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@libh5test_fortran_la_SOURCES = tf_F08.f90 \
+@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	tf.f90 \
+@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	t.c
 
 # Source files are used for both the library and fortranlib_test.
 # Automake will complain about this without the following workaround.
@@ -750,10 +783,10 @@ fortranlib_test_CFLAGS = $(AM_CFLAGS)
 fortranlib_test_SOURCES = tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 \
         tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90 tHDF5.f90 fortranlib_test.f90
 
-fortranlib_test_1_8_SOURCES = tH5F.f90 tH5O.f90 tH5A_1_8.f90 tH5G_1_8.f90 tH5MISC_1_8.f90 tHDF5_1_8.f90\
+fortranlib_test_1_8_SOURCES = tH5O.f90 tH5A_1_8.f90 tH5G_1_8.f90 tH5MISC_1_8.f90 tHDF5_1_8.f90\
         fortranlib_test_1_8.f90
 
-@FORTRAN_2003_CONDITIONAL_F_TRUE@fortranlib_test_F03_SOURCES = tH5F.f90 tH5E_F03.f90 tH5F_F03.f90 tH5L_F03.f90 \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@fortranlib_test_F03_SOURCES = tH5E_F03.f90 tH5F_F03.f90 tH5L_F03.f90 \
 @FORTRAN_2003_CONDITIONAL_F_TRUE@        tH5O_F03.f90 tH5P_F03.f90 tH5T_F03.f90 tHDF5_F03.f90 fortranlib_test_F03.f90
 
 fflush1_SOURCES = fflush1.f90

@@ -145,7 +145,7 @@ int IdComponent::getCounter() const
 //--------------------------------------------------------------------------
 H5I_type_t IdComponent::getHDFObjType(const hid_t obj_id)
 {
-    if (obj_id == 0)
+    if (obj_id <= 0)
 	return H5I_BADID; // invalid
     H5I_type_t id_type = H5Iget_type(obj_id);
     if (id_type <= H5I_BADID || id_type >= H5I_NTYPES)
@@ -317,6 +317,7 @@ H5std_string IdComponent::p_get_file_name() const
    // Check for failure again
    if( name_size < 0 )
    {
+      delete []name_C;
       throw IdComponentException("", "H5Fget_name failed");
    }
 
@@ -339,7 +340,7 @@ H5std_string IdComponent::p_get_file_name() const
 //--------------------------------------------------------------------------
 bool IdComponent::p_valid_id(const hid_t obj_id)
 {
-    if (obj_id == 0)
+    if (obj_id <= 0)
 	return false;
 
     H5I_type_t id_type = H5Iget_type(obj_id);

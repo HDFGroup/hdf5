@@ -27,7 +27,7 @@ Notes: This short instruction is written for users who want to quickly
             
          3. See the appendix at the bottom of this file for an example 
             of using a ctest script for building and testing. See 
-            CMake.txt for more information.
+            INSTALL_CMake.txt for more information.
 
 
 
@@ -69,7 +69,7 @@ Go through these steps to build HDF5 applications with CMake.
    1. Run CMake
    2. Configure the cache settings
    3. Build HDF5 Applications
-   4. Test HDF5 Applications.
+   4. Test HDF5 Applications
 
 These steps are described in more detail below.
 
@@ -175,8 +175,8 @@ These steps are described in more detail below.
 III. Minimum C Project Files for CMake
 ========================================================================
 
-   6. Create a CMakeLists.txt file at the source root. Include the 
-      following text in the file:
+Create a CMakeLists.txt file at the source root. Include the 
+following text in the file:
 
 ##########################################################
 cmake_minimum_required (VERSION 2.8.12)
@@ -254,7 +254,7 @@ set(SITE_COMPILER_NAME "compiler name")
 set(SITE_COMPILER_VERSION "compiler version")
 
 # needed for source updates, change as required
-set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5-examples/trunk/1_8")
+set(REPOSITORY_URL "http://svn.${hdfgroup_url}/hdf5-examples/trunk/1_8")
 
 set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_INSTALL_PREFIX:PATH=/usr/local/hdf5Examples-1.8")
 

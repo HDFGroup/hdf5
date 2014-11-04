@@ -80,11 +80,8 @@ libhdf5_fortran_la_SOURCES=H5f90global.f90 \
 	  H5Aff$(F_STATUS).f90 H5Dff$(F_STATUS).f90 H5Eff$(F_STATUS).f90 H5Fff$(F_STATUS).f90 H5Lff$(F_STATUS).f90 \
 	  H5Off$(F_STATUS).f90 H5Pff$(F_STATUS).f90 H5Rff$(F_STATUS).f90 H5Tff$(F_STATUS).f90 $(PARALLEL_COND_SRC)
 
-# HDF5 Fortran library depends on HDF5 Library.  However, only add the dependency
-# if --enable-sharedlib-rpath is yes.
-if LT_ADD_LIBHDF5_DEPENDENCY
+# HDF5 Fortran library depends on HDF5 Library. 
 libhdf5_fortran_la_LIBADD=$(LIBHDF5)
-endif
 
 # h5fc is generated during configure.
 # Remove it only when distclean.
@@ -180,10 +177,14 @@ H5fortran_detect.f90: H5test_kind$(EXEEXT)
 # H5test_kind.f90 is included in the distribution, and Automake knows
 # how to compile a fortran program given its sources.
 
+if FORTRAN_HAVE_STORAGE_SIZE
+  H5test_kind_SOURCES = H5test_kind_STORAGE_SIZE.f90
+else 
 if FORTRAN_HAVE_SIZEOF
   H5test_kind_SOURCES = H5test_kind_SIZEOF.f90
 else
   H5test_kind_SOURCES = H5test_kind.f90
+endif
 endif
 
 # Mark this directory as part of the Fortran API

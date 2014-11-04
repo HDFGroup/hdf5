@@ -148,8 +148,7 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@libhdf5_fortran_la_DEPENDENCIES =  \
-@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@	$(LIBHDF5)
+libhdf5_fortran_la_DEPENDENCIES = $(LIBHDF5)
 am__libhdf5_fortran_la_SOURCES_DIST = H5f90global.f90 \
 	H5fortran_types.f90 H5_ff$(F_STATUS).f90 H5_ff.f90 H5Aff.f90 \
 	H5Dff.f90 H5Eff.f90 H5Fff.f90 H5Gff.f90 H5Iff.f90 H5Lff.f90 \
@@ -190,11 +189,11 @@ H5fortran_detect_LDADD = $(LDADD)
 H5match_types_SOURCES = H5match_types.c
 H5match_types_OBJECTS = H5match_types.$(OBJEXT)
 H5match_types_LDADD = $(LDADD)
-am__H5test_kind_SOURCES_DIST = H5test_kind.f90 H5test_kind_SIZEOF.f90
-@FORTRAN_HAVE_SIZEOF_FALSE@am_H5test_kind_OBJECTS =  \
-@FORTRAN_HAVE_SIZEOF_FALSE@	H5test_kind.$(OBJEXT)
-@FORTRAN_HAVE_SIZEOF_TRUE@am_H5test_kind_OBJECTS =  \
-@FORTRAN_HAVE_SIZEOF_TRUE@	H5test_kind_SIZEOF.$(OBJEXT)
+am__H5test_kind_SOURCES_DIST = H5test_kind.f90 H5test_kind_SIZEOF.f90 \
+	H5test_kind_STORAGE_SIZE.f90
+@FORTRAN_HAVE_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_H5test_kind_OBJECTS = H5test_kind.$(OBJEXT)
+@FORTRAN_HAVE_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_H5test_kind_OBJECTS = H5test_kind_SIZEOF.$(OBJEXT)
+@FORTRAN_HAVE_STORAGE_SIZE_TRUE@am_H5test_kind_OBJECTS = H5test_kind_STORAGE_SIZE.$(OBJEXT)
 H5test_kind_OBJECTS = $(am_H5test_kind_OBJECTS)
 H5test_kind_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -564,14 +563,12 @@ LIPO = @LIPO@
 LL_PATH = @LL_PATH@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
-LT_ADD_LIBHDF5_DEPENDENCY = @LT_ADD_LIBHDF5_DEPENDENCY@
 LT_STATIC_EXEC = @LT_STATIC_EXEC@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
-MPI_GET_SIZE = @MPI_GET_SIZE@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -734,8 +731,10 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 
 # Add libtool shared library version numbers to the HDF5 library
 # See libtool versioning documentation online.
+# After making changes, run bin/reconfigure to update other configure related
+# files like Makefile.in.
 LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 167
+LT_VERS_REVISION = 193
 LT_VERS_AGE = 0
 AM_FCLIBS = $(LIBHDF5)
 
@@ -774,9 +773,8 @@ libhdf5_fortran_la_SOURCES = H5f90global.f90 \
 	  H5Off$(F_STATUS).f90 H5Pff$(F_STATUS).f90 H5Rff$(F_STATUS).f90 H5Tff$(F_STATUS).f90 $(PARALLEL_COND_SRC)
 
 
-# HDF5 Fortran library depends on HDF5 Library.  However, only add the dependency
-# if --enable-sharedlib-rpath is yes.
-@LT_ADD_LIBHDF5_DEPENDENCY_TRUE@libhdf5_fortran_la_LIBADD = $(LIBHDF5)
+# HDF5 Fortran library depends on HDF5 Library. 
+libhdf5_fortran_la_LIBADD = $(LIBHDF5)
 
 # h5fc is generated during configure.
 # Remove it only when distclean.
@@ -802,11 +800,12 @@ BUILT_SOURCES = H5f90i_gen.h
 # Automake knows how to build fortran programs if we tell it the source
 # files.
 H5fortran_detect_SOURCES = H5fortran_detect.f90
-@FORTRAN_HAVE_SIZEOF_FALSE@H5test_kind_SOURCES = H5test_kind.f90
+@FORTRAN_HAVE_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@H5test_kind_SOURCES = H5test_kind.f90
+@FORTRAN_HAVE_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@H5test_kind_SOURCES = H5test_kind_SIZEOF.f90
 
 # H5test_kind.f90 is included in the distribution, and Automake knows
 # how to compile a fortran program given its sources.
-@FORTRAN_HAVE_SIZEOF_TRUE@H5test_kind_SOURCES = H5test_kind_SIZEOF.f90
+@FORTRAN_HAVE_STORAGE_SIZE_TRUE@H5test_kind_SOURCES = H5test_kind_STORAGE_SIZE.f90
 
 # Mark this directory as part of the Fortran API
 FORTRAN_API = yes

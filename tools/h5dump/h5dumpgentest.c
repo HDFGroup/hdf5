@@ -109,6 +109,7 @@
 #define FILE77  "tcmpdints.h5"
 #define FILE78  "tscalarintattrsize.h5"
 #define FILE79  "tintsattrs.h5"
+#define FILE80  "tbitnopaque.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -348,6 +349,8 @@ typedef struct s1_t {
 #define F77_DATASETNAME1   "CompoundInts"
 #define F77_DATASETNAME2   "CompoundRInts"
 #define F77_LENGTH      64
+
+#define F80_DIM32      32
 
 static void
 gent_group(void)
@@ -2080,16 +2083,16 @@ static void gent_objref(void)
     dataset = H5Dcreate2(fid1, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create reference to dataset */
-    H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_OBJECT, -1);
+    H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_OBJECT, (hid_t)-1);
 
     /* Create reference to dataset */
-    H5Rcreate(&wbuf[1], fid1, "/Group1/Dataset2", H5R_OBJECT, -1);
+    H5Rcreate(&wbuf[1], fid1, "/Group1/Dataset2", H5R_OBJECT, (hid_t)-1);
 
     /* Create reference to group */
-    H5Rcreate(&wbuf[2], fid1, "/Group1", H5R_OBJECT, -1);
+    H5Rcreate(&wbuf[2], fid1, "/Group1", H5R_OBJECT, (hid_t)-1);
 
     /* Create reference to named datatype */
-    H5Rcreate(&wbuf[3], fid1, "/Group1/Datatype1", H5R_OBJECT, -1);
+    H5Rcreate(&wbuf[3], fid1, "/Group1/Datatype1", H5R_OBJECT, (hid_t)-1);
 
     /* Write selection to disk */
     H5Dwrite(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
@@ -3950,8 +3953,8 @@ static void write_attr_in(hid_t loc_id,
     /* Create references to dataset */
     if(dset_name)
     {
-        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,-1);
-        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,-1);
+        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,(hid_t)-1);
         write_attr(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
     }
 
@@ -4057,7 +4060,7 @@ static void write_attr_in(hid_t loc_id,
     {
         for(i = 0; i < 3; i++) {
             for(j = 0; j < 2; j++) {
-                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,-1);
+                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,(hid_t)-1);
             }
         }
         write_attr(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
@@ -4188,7 +4191,7 @@ static void write_attr_in(hid_t loc_id,
         for(i = 0; i < 4; i++) {
             for(j = 0; j < 3; j++) {
                 for(k = 0; k < 2; k++)
-                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,-1);
+                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,(hid_t)-1);
             }
         }
         write_attr(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
@@ -4392,8 +4395,8 @@ static void write_dset_in(hid_t loc_id,
     /* Create references to dataset */
     if(dset_name)
     {
-        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,-1);
-        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,-1);
+        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,(hid_t)-1);
         write_dset(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
     }
 
@@ -4499,7 +4502,7 @@ static void write_dset_in(hid_t loc_id,
     {
         for(i = 0; i < 3; i++) {
             for(j = 0; j < 2; j++) {
-                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,-1);
+                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,(hid_t)-1);
             }
         }
         write_dset(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
@@ -4642,7 +4645,7 @@ static void write_dset_in(hid_t loc_id,
         for(i = 0; i < 4; i++) {
             for(j = 0; j < 3; j++) {
                 for(k = 0; k < 2; k++)
-                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,-1);
+                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,(hid_t)-1);
             }
         }
         write_dset(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
@@ -4767,8 +4770,8 @@ static void gent_attr_all(void)
      */
 
     write_attr_in(did,"dset",fid);
-    write_attr_in(group_id,NULL,0);
-    write_attr_in(root_id,NULL,0);
+    write_attr_in(group_id,NULL,(hid_t)0);
+    write_attr_in(root_id,NULL,(hid_t)0);
 
     /*-------------------------------------------------------------------------
      * write a series of datasets on group 2
@@ -9575,6 +9578,156 @@ gent_intsattrs(void)
     H5Fclose(fid);
 }
 
+static void gent_bitnopaquefields(void)
+{
+    /* Compound datatype */
+    typedef struct s_t
+    {
+        unsigned char   a;
+        unsigned int    b;
+        unsigned long    c;
+        unsigned long long    d;
+    } s_t;
+    hid_t  file, grp=-1, type=-1, space=-1, dset=-1;
+    size_t  i;
+    hsize_t  nelmts = F80_DIM32;
+    unsigned char buf[F80_DIM32];    /* bitfield, opaque */
+    unsigned int buf2[F80_DIM32];    /* bitfield, opaque */
+    unsigned long buf3[F80_DIM32];    /* bitfield, opaque */
+    unsigned long long buf4[F80_DIM32];    /* bitfield, opaque */
+    s_t      buf5[F80_DIM32];        /* compound */
+
+    file = H5Fcreate(FILE80, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    if ((grp = H5Gcreate2(file, "bittypetests", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+        /* bitfield_1 */
+        if ((type = H5Tcopy(H5T_STD_B8LE)) >= 0) {
+            if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
+                if ((dset = H5Dcreate2(grp, "bitfield_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    for (i = 0; i < nelmts; i++) {
+                        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+                    }
+                    H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+                    H5Dclose(dset);
+                }
+                H5Sclose(space);
+            }
+            H5Tclose(type);
+        }
+
+        /* bitfield_2 */
+        if ((type = H5Tcopy(H5T_STD_B16LE)) >= 0) {
+            if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
+                if ((dset = H5Dcreate2(grp, "bitfield_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    for (i = 0; i < nelmts; i++) {
+                        buf2[i] = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                    }
+                    H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
+                    H5Dclose(dset);
+                }
+                H5Sclose(space);
+            }
+            H5Tclose(type);
+        }
+
+        /* bitfield_3 */
+        if ((type = H5Tcopy(H5T_STD_B32LE)) >= 0) {
+            if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
+                if ((dset = H5Dcreate2(grp, "bitfield_3", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    for (i = 0; i < nelmts; i++) {
+                        buf3[i] = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+                    }
+                    H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf3);
+                    H5Dclose(dset);
+                }
+                H5Sclose(space);
+            }
+            H5Tclose(type);
+        }
+
+        /* bitfield_4 */
+        if ((type = H5Tcopy(H5T_STD_B64LE)) >= 0) {
+            if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
+                if ((dset = H5Dcreate2(grp, "bitfield_4", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    for (i = 0; i < nelmts; i++) {
+                        buf4[i] = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                    }
+                    H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf4);
+                    H5Dclose(dset);
+                }
+                H5Sclose(space);
+            }
+            H5Tclose(type);
+        }
+
+        H5Gclose(grp);
+    }
+
+    if ((grp = H5Gcreate2(file, "opaquetypetests", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+        /* opaque_1 */
+        if ((type = H5Tcreate(H5T_OPAQUE, 1)) >= 0) {
+            if ((H5Tset_tag(type, "1-byte opaque type")) >= 0) {
+                if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
+                    if ((dset = H5Dcreate2(grp, "opaque_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                        for(i = 0; i < nelmts; i++)
+                            buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+                        H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+                        H5Dclose(dset);
+                    }
+                    H5Sclose(space);
+                }
+            }
+            H5Tclose(type);
+        }
+
+        /* opaque_2 */
+        if ((type = H5Tcreate(H5T_OPAQUE, 2)) >= 0) {
+            if ((H5Tset_tag(type, "2-byte opaque type")) >= 0) {
+                if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
+                    if ((dset = H5Dcreate2(grp, "opaque_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                        for(i = 0; i < nelmts; i++)
+                            buf2[i] = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+
+                        H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
+                        H5Dclose(dset);
+                    }
+                    H5Sclose(space);
+                }
+            }
+            H5Tclose(type);
+        }
+        H5Gclose(grp);
+    }
+
+    if ((grp = H5Gcreate2(file, "cmpdtypetests", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+        /* compound_1 */
+        if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
+            H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
+            H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
+            H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
+            H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
+            if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
+                if ((dset = H5Dcreate2(grp, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    for(i = 0; i < nelmts; i++) {
+                        buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
+                        buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                        buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+                        buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                    }
+
+                    H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
+                    H5Dclose(dset);
+                }
+                H5Sclose(space);
+            }
+            H5Tclose(type);
+        }
+        H5Gclose(grp);
+    }
+
+    H5Fclose(file);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -9665,6 +9818,7 @@ int main(void)
     gent_compound_ints();
     gent_intattrscalars();
     gent_intsattrs();
+    gent_bitnopaquefields();
 
     return 0;
 }

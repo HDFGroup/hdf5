@@ -33,6 +33,9 @@
 #include "H5Alltypes.h"
 #include "H5private.h"		// for HDstrcpy
 
+#include <iostream>
+using namespace std;
+
 // There are a few comments that are common to most of the functions
 // defined in this file so they are listed here.
 // - getLocId is called by all functions, that call a C API, to get
@@ -440,7 +443,10 @@ H5std_string CommonFG::getLinkval( const char* name, size_t size ) const
 
 	ret_value = H5Lget_val(getLocId(), name, value_C, val_size, H5P_DEFAULT);
 	if( ret_value < 0 )
+	{
+	    delete []value_C;
 	    throwException("getLinkval", "H5Lget_val failed");
+	}
 
 	value = H5std_string(value_C);
 	delete []value_C;
@@ -467,7 +473,7 @@ H5std_string CommonFG::getLinkval( const H5std_string& name, size_t size ) const
 ///\param	child - IN: File to mount
 ///\param	plist - IN: Property list to use
 ///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
+// Programmer	Binh-Minh Ribler - 2014 (original 2000)
 //--------------------------------------------------------------------------
 void CommonFG::mount(const char* name, const H5File& child, const PropList& plist ) const
 {
@@ -485,14 +491,41 @@ void CommonFG::mount(const char* name, const H5File& child, const PropList& plis
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::mount
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const's.  This wrapper will be removed in future release.
+///\param	name  - IN: Name of the group
+///\param	child - IN: File to mount
+///\param	plist - IN: Property list to use
+///\exception	H5::FileIException or H5::GroupIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void CommonFG::mount(const char* name, H5File& child, PropList& plist) const
+{
+   mount(name, (const H5File)child, (const PropList)plist);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::mount
 ///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name.
+///		It takes an \c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void CommonFG::mount(const H5std_string& name, const H5File& child, const PropList& plist) const
 {
-   mount( name.c_str(), child, plist );
+   mount(name.c_str(), child, plist);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::mount
+///\brief	This is an overloaded member function, kept for backward
+///		compatibility.  It differs from the above function in that it
+///		misses const's.  This wrapper will be removed in future release.
+// Programmer	Binh-Minh Ribler - 2014
+//--------------------------------------------------------------------------
+void CommonFG::mount(const H5std_string& name, H5File& child, PropList& plist) const
+{
+   mount(name.c_str(), (const H5File)child, (const PropList)plist);
 }
 
 //--------------------------------------------------------------------------
@@ -886,6 +919,12 @@ H5std_string CommonFG::getObjnameByIdx(hsize_t idx) const
 
     name_len = H5Lget_name_by_idx(getLocId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C, name_len+1, H5P_DEFAULT);
 
+    if (name_len < 0)
+    {
+	delete []name_C;
+	throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
+    }
+
     // clean up and return the string
     H5std_string name = H5std_string(name_C);
     delete []name_C;
@@ -930,10 +969,15 @@ ssize_t CommonFG::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) 
    char* name_C = new char[size+1]; // temporary C-string for object name
    HDmemset(name_C, 0, size+1); // clear buffer
 
+   // call overloaded function to get the name
    ssize_t name_len = getObjnameByIdx(idx, name_C, size+1);
    if(name_len < 0)
+   {
+      delete []name_C;
       throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
+   }
 
+   // clean up and return the string
    name = H5std_string(name_C);
    delete []name_C;
    return (name_len);

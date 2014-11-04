@@ -335,20 +335,22 @@ CONTAINS
 !  Returns the datatype class identifier.
 !
 ! INPUTS
-!  type_id 	 - datatype identifier
+!  type_id - Datatype identifier
 ! OUTPUTS
-!  class 	 - class, possible values are:
-!                   H5T_NO_CLASS_F (-1)
-!                   H5T_INTEGER_F  (0)
-!                   H5T_FLOAT_F (1)
-!                   H5T_TIME_F  (2)
-!                   H5T_STRING_F (3)
-!                   H5T_BITFIELD_F (4)
-!                   H5T_OPAQUE_F (5)
-!                   H5T_COMPOUND_F (6)
-!                   H5T_REFERENCE_F (7)
-!                   H5T_ENUM_F (8)
-!  hdferr 	 - Returns 0 if successful and -1 if fails
+!  class   - Class, possible values are:
+!            H5T_NO_CLASS_F (-1)
+!            H5T_INTEGER_F  (0)
+!            H5T_FLOAT_F (1)
+!            H5T_TIME_F  (2)
+!            H5T_STRING_F (3)
+!            H5T_BITFIELD_F (4)
+!            H5T_OPAQUE_F (5)
+!            H5T_COMPOUND_F (6)
+!            H5T_REFERENCE_F (7)
+!            H5T_ENUM_F (8)
+!            H5T_VLEN_F (9)
+!            H5T_ARRAY_F (10)  
+!  hdferr  - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
 !  Elena Pourmal
@@ -361,35 +363,24 @@ CONTAINS
 !
 ! SOURCE
   SUBROUTINE h5tget_class_f(type_id, class, hdferr)
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
-            INTEGER, INTENT(OUT) :: class
-                           ! Datatype class, possible values are:
-                                          ! H5T_NO_CLASS_F (-1)
-                                          ! H5T_INTEGER_F  (0)
-                                          ! H5T_FLOAT_F (1)
-                                          ! H5T_TIME_F  (2)
-                                          ! H5T_STRING_F (3)
-                                          ! H5T_BITFIELD_F (4)
-                                          ! H5T_OPAQUE_F (5)
-                                          ! H5T_COMPOUND_F (6)
-                                          ! H5T_REFERENCE_F (7)
-                                          ! H5T_ENUM_F (8)
-          INTEGER, INTENT(OUT) :: hdferr        ! Error code
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: type_id
+    INTEGER, INTENT(OUT) :: class         
+    INTEGER, INTENT(OUT) :: hdferr
 !*****
-            INTERFACE
-              INTEGER FUNCTION h5tget_class_c(type_id, class)
-              USE H5GLOBAL
-              !DEC$IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TGET_CLASS_C'::h5tget_class_c
-              !DEC$ENDIF
-              INTEGER(HID_T), INTENT(IN) :: type_id
-              INTEGER, INTENT(OUT) :: class
-              END FUNCTION h5tget_class_c
-            END INTERFACE
+    INTERFACE
+       INTEGER FUNCTION h5tget_class_c(type_id, class)
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TGET_CLASS_C'::h5tget_class_c
+         !DEC$ENDIF
+         INTEGER(HID_T), INTENT(IN) :: type_id
+         INTEGER, INTENT(OUT) :: class
+       END FUNCTION h5tget_class_c
+    END INTERFACE
 
-          hdferr = h5tget_class_c(type_id, class)
-          END SUBROUTINE h5tget_class_f
+    hdferr = h5tget_class_c(type_id, class)
+  END SUBROUTINE h5tget_class_f
 !
 !****s* H5T/h5tget_size_f
 !

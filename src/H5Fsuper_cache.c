@@ -116,6 +116,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     H5F_super_t        *sblock = NULL;      /* File's superblock */
     haddr_t             base_addr = HADDR_UNDEF;        /* Base address of file */
     uint8_t             sbuf[H5F_MAX_SUPERBLOCK_SIZE];     /* Buffer for superblock */
+    H5P_genplist_t     *dxpl;               /* DXPL object */
     H5P_genplist_t     *c_plist;            /* File creation property list  */
     H5F_file_t         *shared;             /* shared part of `file'        */
     H5FD_t             *lf;                 /* file driver part of `shared' */
@@ -159,12 +160,16 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     sblock->cache_info.flush_me_collectively = TRUE;
 #endif
 
+    /* Get the DXPL plist object for DXPL ID */
+    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't get property list")
+
     /* Read fixed-size portion of the superblock */
     p = sbuf;
     H5_CHECK_OVERFLOW(fixed_size, size_t, haddr_t);
     if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, (haddr_t)fixed_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "set end of space allocation request failed")
-    if(H5FD_read(lf, dxpl_id, H5FD_MEM_SUPER, (haddr_t)0, fixed_size, p) < 0)
+    if(H5FD_read(lf, dxpl, H5FD_MEM_SUPER, (haddr_t)0, fixed_size, p) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
     /* Skip over signature (already checked when locating the superblock) */
@@ -191,7 +196,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     /* Read in variable-sized portion of superblock */
     if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, (haddr_t)(fixed_size + variable_size)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "set end of space allocation request failed")
-    if(H5FD_read(lf, dxpl_id, H5FD_MEM_SUPER, (haddr_t)fixed_size, variable_size, p) < 0)
+    if(H5FD_read(lf, dxpl, H5FD_MEM_SUPER, (haddr_t)fixed_size, variable_size, p) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read superblock")
 
     /* Check for older version of superblock format */
@@ -345,7 +350,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
             p = dbuf;
             if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, sblock->driver_addr + H5F_DRVINFOBLOCK_HDR_SIZE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "set end of space allocation request failed")
-            if(H5FD_read(lf, dxpl_id, H5FD_MEM_SUPER, sblock->driver_addr, (size_t)H5F_DRVINFOBLOCK_HDR_SIZE, p) < 0)
+            if(H5FD_read(lf, dxpl, H5FD_MEM_SUPER, sblock->driver_addr, (size_t)H5F_DRVINFOBLOCK_HDR_SIZE, p) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read driver information block")
 
             /* Version number */
@@ -377,7 +382,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
             /* Read in variable-sized portion of driver info block */
             if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, sblock->driver_addr + H5F_DRVINFOBLOCK_HDR_SIZE + drv_variable_size) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "set end of space allocation request failed")
-            if(H5FD_read(lf, dxpl_id, H5FD_MEM_SUPER, sblock->driver_addr + H5F_DRVINFOBLOCK_HDR_SIZE, drv_variable_size, p) < 0)
+            if(H5FD_read(lf, dxpl, H5FD_MEM_SUPER, sblock->driver_addr + H5F_DRVINFOBLOCK_HDR_SIZE, drv_variable_size, p) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read file driver information")
 
             /* Decode driver information */
@@ -655,11 +660,12 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 #endif
 
     if(sblock->cache_info.is_dirty) {
+        H5P_genplist_t *dxpl;               /* DXPL object */
         uint8_t         buf[H5F_MAX_SUPERBLOCK_SIZE + H5F_MAX_DRVINFOBLOCK_SIZE];  /* Superblock & driver info blockencoding buffer */
-        uint8_t        *p;                          /* Ptr into encoding buffer */
-        haddr_t         rel_eoa;                    /* Relative EOA for file */
-        size_t          superblock_size;            /* Size of superblock, in bytes */
-        size_t          driver_size;                /* Size of driver info block (bytes)*/
+        uint8_t        *p;                  /* Ptr into encoding buffer */
+        haddr_t         rel_eoa;            /* Relative EOA for file */
+        size_t          superblock_size;    /* Size of superblock, in bytes */
+        size_t          driver_size;        /* Size of driver info block (bytes)*/
 
         /* Encode the common portion of the file superblock for all versions */
         p = buf;
@@ -783,9 +789,13 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
         /* Double check we didn't overrun the block (unlikely) */
         HDassert(superblock_size <= sizeof(buf));
 
+        /* Get the DXPL plist object for DXPL ID */
+        if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
         /* Write superblock */
         /* (always at relative address 0) */
-        if(H5FD_write(f->shared->lf, dxpl_id, H5FD_MEM_SUPER, (haddr_t)0, superblock_size, buf) < 0)
+        if(H5FD_write(f->shared->lf, dxpl, H5FD_MEM_SUPER, (haddr_t)0, superblock_size, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write superblock")
 
         /* Check for newer version of superblock format & superblock extension */

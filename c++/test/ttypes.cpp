@@ -414,6 +414,23 @@ static void test_named ()
         IntType itype(PredType::NATIVE_INT);
         itype.commit(file, "native-int");
 
+	// Test commit passing in const H5File& for prototype with const
+	try
+	{
+	    // Create random char type
+	    IntType atype(PredType::NATIVE_UCHAR);
+
+	    // Creating group, declared as const
+	    const Group const_grp = file.createGroup("GR as loc");
+
+	    // Commit type passing in const group; compilation would fail if
+	    // no matching prototype
+	    atype.commit(const_grp, "random uchar");
+	}   // end of try block
+	catch (Exception E) {
+	    issue_fail_msg("test_named", __LINE__, __FILE__, "Commit at const group");
+	}
+
 	// Check that it is committed.
 	if (itype.committed() == false)
 	    cerr << "IntType::committed() returned false" << endl;

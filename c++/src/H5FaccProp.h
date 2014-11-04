@@ -62,10 +62,21 @@ class H5_DLLCPP FileAccPropList : public PropList {
 	FileAccPropList getFamily(hsize_t& memb_size) const;
 
 	// Emulates the old split file driver,
-	void setSplit(const FileAccPropList& meta_plist, const FileAccPropList& raw_plist,
-	     const char* meta_ext = ".meta", const char* raw_ext = ".raw" ) const;
-	void setSplit(const FileAccPropList& meta_plist, const FileAccPropList& raw_plist,
-	     const H5std_string& meta_ext, const H5std_string& raw_ext ) const;
+	void setSplit(const FileAccPropList& meta_plist,
+		      const FileAccPropList& raw_plist,
+		      const char* meta_ext = ".meta",
+		      const char* raw_ext = ".raw" ) const;
+	void setSplit(const FileAccPropList& meta_plist,
+		      const FileAccPropList& raw_plist,
+		      const H5std_string& meta_ext = ".meta",
+		      const H5std_string& raw_ext = ".raw") const;
+	// These two overloaded functions are kept for backward compatibility
+	// only; they missed the const's and will be removed in future release.
+	void setSplit(FileAccPropList& meta_plist, FileAccPropList& raw_plist,
+	     const char* meta_ext=".meta", const char* raw_ext=".raw") const;
+	void setSplit(FileAccPropList& meta_plist, FileAccPropList& raw_plist,
+	     const H5std_string& meta_ext=".meta",
+	     const H5std_string& raw_ext=".raw") const;
 
 	// Sets the maximum size of the data sieve buffer.
 	void setSieveBufSize(size_t bufsize) const;

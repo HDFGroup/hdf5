@@ -21,7 +21,18 @@ set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 
-add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf.f90)
+# See if the F2008 intrinsic STORAGE_SIZE and C_SIZEOF are supported. If not then
+# fall back to F2003. If F2003 not supported then use F90 for the tests.
+
+if (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
+ add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf_F08.f90 tf.f90)
+elseif (HDF5_ENABLE_F2003)
+ add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf_F03.f90 tf.f90)
+else (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
+ add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf_F90.f90 tf.f90) 
+endif (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
+
+
 set (SHARED_LINK_FLAGS " ")
 if (WIN32)
   if (BUILD_SHARED_LIBS)
@@ -83,7 +94,6 @@ set_target_properties (testhdf5_fortran PROPERTIES FOLDER test/fortran)
 #-- Adding test for testhdf5_fortran_1_8
 add_executable (testhdf5_fortran_1_8
     fortranlib_test_1_8.f90
-    tH5F.f90
     tH5O.f90
     tH5A_1_8.f90
     tH5G_1_8.f90
@@ -107,7 +117,6 @@ set_target_properties (testhdf5_fortran_1_8 PROPERTIES FOLDER test/fortran)
 if (HDF5_ENABLE_F2003)
   add_executable (fortranlib_test_F03
       fortranlib_test_F03.f90
-      tH5F.f90
       tH5E_F03.f90
       tH5F_F03.f90
       tH5L_F03.f90

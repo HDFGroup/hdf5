@@ -145,16 +145,17 @@ H5S_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	if((n = H5I_nmembers(H5I_DATASPACE))) {
-	    H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
+	if(H5I_nmembers(H5I_DATASPACE) > 0) {
+	    (void)H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
+            n++; /*H5I*/
 	} /* end if */
         else {
-	    /* Free data types */
-	    H5I_dec_type_ref(H5I_DATASPACE);
+            /* Destroy the dataspace object id group */
+	    (void)H5I_dec_type_ref(H5I_DATASPACE);
+            n++; /*H5I*/
 
 	    /* Shut down interface */
 	    H5_interface_initialize_g = 0;
-	    n = 1; /*H5I*/
 	} /* end else */
     } /* end if */
 
@@ -466,7 +467,7 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
 {
     H5S_t	*src;
     H5S_t	*dst;
-    hid_t	ret_value = SUCCEED;
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ii", dst_id, src_id);

@@ -50,7 +50,7 @@ class H5_DLLCPP H5Object;  // forward declaration for UserData4Aiterate
 ///\brief	Default constructor: Creates a stub attribute
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-Attribute::Attribute() : AbstractDs(), IdComponent(), id(0) {}
+Attribute::Attribute() : AbstractDs(), IdComponent(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:	Attribute copy constructor
@@ -162,13 +162,13 @@ void Attribute::read( const DataType& mem_type, void *buf ) const
 //	Mar 2008
 //		Corrected a misunderstanding that H5Aread would allocate
 //		space for the buffer.  Obtained the attribute size and
-//		allocated memory properly. - BMR
+//		allocated memory properly. -BMR
 //	Apr 2009
-//		Used getInMemDataSize to get attribute data size. - BMR
+//		Used getInMemDataSize to get attribute data size. -BMR
 //	Jul 2009
 //		Divided into specific private functions for fixed- and
 //		variable-len string data: p_read_fixed_len and
-//		p_read_variable_len.  This should improve readability.
+//		p_read_variable_len.  This should improve readability. -BMR
 //--------------------------------------------------------------------------
 void Attribute::read(const DataType& mem_type, H5std_string& strg) const
 {
@@ -379,6 +379,27 @@ H5std_string Attribute::getName() const
 
 //--------------------------------------------------------------------------
 // Function:	Attribute::getName
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function in that it takes an integer
+///		specifying a desired length to be retrieved of the name.
+///\return	Name (or part of name) of the attribute
+///\param	len  -  IN: Desired length of the name
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - 2000
+// Modification
+//	Mar 2014 - BMR
+//		Revised to use the new getName() below
+//--------------------------------------------------------------------------
+H5std_string Attribute::getName(size_t len) const
+{
+   H5std_string attr_name;
+   ssize_t name_size = getName(attr_name, len);
+   return(attr_name);
+   // let caller catch exception if any
+}
+
+//--------------------------------------------------------------------------
+// Function:	Attribute::getName
 ///\brief	Gets the name of this attribute, returning its length.
 ///\param	attr_name - OUT: Buffer for the name string as \a H5std_string
 ///\param	len  -  IN: Desired length of the name, default to 0
@@ -391,7 +412,8 @@ H5std_string Attribute::getName() const
 // Programmer	Binh-Minh Ribler - Nov, 2001
 // Modification
 //	Mar 2014 - BMR
-//		Revised to allow the argument "len" to be skipped
+//		Added to replace getName(size_t, H5std_string&) so that it'll
+//		allow the argument "len" to be skipped.
 //--------------------------------------------------------------------------
 ssize_t Attribute::getName(H5std_string& attr_name, size_t len) const
 {
@@ -422,6 +444,24 @@ ssize_t Attribute::getName(H5std_string& attr_name, size_t len) const
 
     // Return name size
     return(name_size);
+}
+
+//--------------------------------------------------------------------------
+// Function:    Attribute::getName
+///\brief       This function is replaced by the previous function, which
+///		provides more convenient prototype.  It will be removed
+///		in future release.
+///\param       len  -  IN: Desired length of the name
+///\param       attr_name - OUT: Buffer for the name string
+///\return      Actual length of the attribute name
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - Nov, 2001
+// Modification
+//		Modified to call its replacement. -BMR, 2014/04/16
+//--------------------------------------------------------------------------
+ssize_t Attribute::getName( size_t len, H5std_string& attr_name ) const
+{
+    return (getName(attr_name, len));
 }
 
 //--------------------------------------------------------------------------
@@ -546,7 +586,7 @@ void Attribute::p_read_fixed_len(const DataType& mem_type, H5std_string& strg) c
 // Modification
 //	Jul 2009
 //		Separated the variable length case from the original
-//		Attribute::read
+//		Attribute::read. -BMR
 //--------------------------------------------------------------------------
 void Attribute::p_read_variable_len(const DataType& mem_type, H5std_string& strg) const
 {
@@ -566,6 +606,7 @@ void Attribute::p_read_variable_len(const DataType& mem_type, H5std_string& strg
     HDfree(strg_C);
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    Attribute::p_setId
 ///\brief       Sets the identifier of this object to a new value.
@@ -590,6 +631,7 @@ void Attribute::p_setId(const hid_t new_id)
    // reset object's id to the given id
    id = new_id;
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	Attribute::close
@@ -608,7 +650,7 @@ void Attribute::close()
 	    throw AttributeIException("Attribute::close", "H5Aclose failed");
 	}
 	// reset the id
-	id = 0;
+	id = H5I_INVALID_HID;
     }
 }
 

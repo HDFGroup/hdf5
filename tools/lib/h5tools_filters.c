@@ -20,7 +20,8 @@
  * print a warning message
  *-------------------------------------------------------------------------
  */
-static void print_warning(const char *dname, const char *fname) {
+static void print_warning(const char *dname, const char *fname)
+{
 	fprintf(stderr,
 			"warning: dataset <%s> cannot be read, %s filter is not available\n",
 			dname, fname);
