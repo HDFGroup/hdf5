@@ -621,6 +621,11 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* On cygwin platforms the feature to load dynamic filter libraries only looks
+  for libraries with the a so extension. Support for cygwin cygxxx.dll libraries
+  is planned for the next release.
+  (ADB - 2014/11/04 - HDFFV-8736)
+
 * On windows platforms in debug configurations, the VFD flush1 tests will fail
   with the split and multi VFD drivers. These tests will display a modal debug 
   dialog which must be answered or wait for the test timeout to expire.
