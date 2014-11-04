@@ -549,7 +549,7 @@ static herr_t trav_grp_symlinks(const char *path, const H5L_info_t *linfo,
 
 done:    
     if (lnk_info.trg_path)
-        HDfree((char *)lnk_info.trg_path);
+        HDfree(lnk_info.trg_path);
     return 0;
 }    
 
@@ -1064,9 +1064,9 @@ out:
 
     /* free link info buffer */
     if (trg_linfo1.trg_path)
-        HDfree((char *)trg_linfo1.trg_path);
+        HDfree(trg_linfo1.trg_path);
     if (trg_linfo2.trg_path)
-        HDfree((char *)trg_linfo2.trg_path);
+        HDfree(trg_linfo2.trg_path);
 
     /* close */
     H5E_BEGIN_TRY
@@ -1905,9 +1905,9 @@ hsize_t diff(hid_t file1_id,
 
     /* free link info buffer */
     if (linkinfo1.trg_path)
-        HDfree((char *)linkinfo1.trg_path);
+        HDfree(linkinfo1.trg_path);
     if (linkinfo2.trg_path)
-        HDfree((char *)linkinfo2.trg_path);
+        HDfree(linkinfo2.trg_path);
 
     return nfound;
 
@@ -1948,9 +1948,9 @@ out2:
 
     /* free link info buffer */
     if (linkinfo1.trg_path)
-        HDfree((char *)linkinfo1.trg_path);
+        HDfree(linkinfo1.trg_path);
     if (linkinfo2.trg_path)
-        HDfree((char *)linkinfo2.trg_path);
+        HDfree(linkinfo2.trg_path);
 
     /* close */
     /* disable error reporting */

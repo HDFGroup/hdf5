@@ -77,7 +77,6 @@ struct H5S_pnt_node_t {
 /* Information about point selection list */
 typedef struct {
     H5S_pnt_node_t *head;   /* Pointer to head of point list */
-    H5S_pnt_node_t *tail;   /* Pointer to tail of point list */
 } H5S_pnt_list_t;
 
 /* Information about new-style hyperslab spans */
@@ -91,7 +90,7 @@ struct H5S_hyper_span_t {
     struct H5S_hyper_span_t *next;     /* Pointer to next span in list */
 };
 
-/* Information about a list of hyperslab spans in one dimension */
+/* Information about a list of hyperslab spans */
 struct H5S_hyper_span_info_t {
     unsigned count;                    /* Ref. count of number of spans which share this span */
     struct H5S_hyper_span_info_t *scratch;  /* Scratch pointer
@@ -100,20 +99,12 @@ struct H5S_hyper_span_info_t {
                                              * to point to the last span in a
                                              * list during single element adds)
                                              */
-    struct H5S_hyper_span_t *head;  /* Pointer to the first span of list of spans in the current dimension */
-    struct H5S_hyper_span_t *tail;  /* Pointer to the last span of list of spans in the current dimension */
+    struct H5S_hyper_span_t *head;  /* Pointer to list of spans in next dimension down */
 };
-
-/* Enum for diminfo_valid field in H5S_hyper_sel_t */
-typedef enum {
-    H5S_DIMINFO_VALID_IMPOSSIBLE, /* 0: diminfo is not valid and can never be valid with the current selection */
-    H5S_DIMINFO_VALID_NO,       /* 1: diminfo is not valid but may or may not be possible to constuct */
-    H5S_DIMINFO_VALID_YES       /* 2: diminfo is valid */
-} H5S_diminfo_valid_t;
 
 /* Information about new-style hyperslab selection */
 typedef struct {
-    H5S_diminfo_valid_t diminfo_valid;          /* Whether the dataset has valid diminfo */
+    hbool_t diminfo_valid;                      /* Whether the dataset has valid diminfo */
     H5S_hyper_dim_t opt_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
     H5S_hyper_dim_t app_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
 	/* 'opt_diminfo' points to a [potentially] optimized version of the user's
@@ -122,7 +113,7 @@ typedef struct {
          * are only used for re-gurgitating the original values used to set the
          * hyperslab to the application when it queries the hyperslab selection
          * information. */
-    H5S_hyper_span_info_t *span_lst; /* List of hyperslab span information of all dimensions */
+    H5S_hyper_span_info_t *span_lst; /* List of hyperslab span information */
 } H5S_hyper_sel_t;
 
 /* Selection information methods */
@@ -189,12 +180,7 @@ typedef struct {
     const H5S_select_class_t *type;     /* Pointer to selection's class info */
     hbool_t offset_changed;             /* Indicate that the offset for the selection has been changed */
     hssize_t offset[H5S_MAX_RANK];      /* Offset within the extent */
-    hsize_t num_elem;                   /* Number of elements in selection */
-
-    /* The following two fields defines the bounding box of the whole selection relative to the offset */
-    hsize_t low_bounds[H5S_MAX_RANK];   /* The smallest offset in each dimension */
-    hsize_t high_bounds[H5S_MAX_RANK];  /* The largest offset in each dimension */
-
+    hsize_t num_elem;   /* Number of elements in selection */
     union {
         H5S_pnt_list_t *pnt_lst; /* List of selected points (order is important) */
         H5S_hyper_sel_t *hslab;  /* Info about hyperslab selections */
@@ -263,16 +249,11 @@ H5_DLL herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src,
     hbool_t copy_max);
 
 /* Operations on selections */
-H5_DLL htri_t H5S_hyper_rebuild(H5S_t *space);
 
 /* Testing functions */
 #ifdef H5S_TESTING
 H5_DLL htri_t H5S_select_shape_same_test(hid_t sid1, hid_t sid2);
-H5_DLL herr_t H5S_get_rebuild_status_test(hid_t space_id,
-    H5S_diminfo_valid_t *status1, H5S_diminfo_valid_t *status2);
-H5_DLL herr_t H5S_get_diminfo_status_test(hid_t space_id,
-    H5S_diminfo_valid_t *status);
-H5_DLL htri_t H5S_internal_consistency_test(hid_t space_id);
+H5_DLL htri_t H5S_get_rebuild_status_test(hid_t space_id);
 #endif /* H5S_TESTING */
 
 #endif /*_H5Spkg_H*/

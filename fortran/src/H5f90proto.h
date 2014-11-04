@@ -143,7 +143,7 @@ H5_FCDLL int_f nh5fget_filesize_c(hid_t_f *file_id, hsize_t_f *size);
 #define nh5sselect_hyperslab_c   H5_FC_FUNC_(h5sselect_hyperslab_c, H5SSELECT_HYPERSLAB_C)
 #define nh5scombine_hyperslab_c   H5_FC_FUNC_(h5scombine_hyperslab_c, H5SCOMBINE_HYPERSLAB_C)
 #define nh5scombine_select_c   H5_FC_FUNC_(h5scombine_select_c, H5SCOMBINE_SELECT_C)
-#define nh5smodify_select_c   H5_FC_FUNC_(h5smodify_select_c, H5SMODIFY_SELECT_C)
+#define nh5sselect_select_c   H5_FC_FUNC_(h5sselect_select_c, H5SSELECT_SELECT_C)
 #define nh5sget_select_type_c   H5_FC_FUNC_(h5sget_select_type_c, H5SGET_SELECT_TYPE_C)
 #define nh5sselect_elements_c    H5_FC_FUNC_(h5sselect_elements_c, H5SSELECT_ELEMENTS_C)
 #define nh5sdecode_c    H5_FC_FUNC_(h5sdecode_c, H5SDECODE_C)
@@ -178,7 +178,7 @@ H5_FCDLL int_f nh5sget_select_type_c ( hid_t_f *space_id , int_f *op);
 H5_FCDLL int_f nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements, hsize_t_f *coord);
 H5_FCDLL int_f nh5scombine_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block, hid_t_f *hyper_id);
 H5_FCDLL int_f nh5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t_f *ds_id);
-H5_FCDLL int_f nh5smodify_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id);
+H5_FCDLL int_f nh5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id);
 H5_FCDLL int_f nh5sdecode_c ( _fcd buf, hid_t_f *obj_id );
 H5_FCDLL int_f nh5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc );
 H5_FCDLL int_f nh5sextent_equal_c ( hid_t_f * space1_id, hid_t_f *space2_id, hid_t_f *c_equal);
