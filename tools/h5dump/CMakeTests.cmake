@@ -50,6 +50,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tbin4.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tbigdims.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tbitnopaque.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tboot1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tboot2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tboot2A.ddl
@@ -206,6 +207,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattrreg.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tbigdims.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinary.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tbitnopaque.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tchar.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcmpdattrintsize.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcmpdintarray.h5
@@ -805,6 +807,8 @@
           tbinregR.out.err
           tbigdims.out
           tbigdims.out.err
+          tbitnopaque.out
+          tbitnopaque.out.err
           tboot1.out
           tboot1.out.err
           tboot2.out
@@ -1147,6 +1151,8 @@
   ADD_H5ERR_MASK_TEST (tcomp-3 0 "--enable-error-stack;-t;/#6632;-g;/group2;tcompound.h5")
   # test complicated compound datatype
   ADD_H5_TEST (tcomp-4 0 --enable-error-stack tcompound_complex.h5)
+  # tests for bitfields and opaque data types
+  ADD_H5_TEST (tbitnopaque 0 --enable-error-stack tbitnopaque.h5)
 
   #test for the nested compound type
   ADD_H5_TEST (tnestcomp-1 0 --enable-error-stack tnestedcomp.h5)

@@ -105,7 +105,7 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection)
+H5S_select_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
 {
     herr_t ret_value;     /* return value */
 
@@ -116,17 +116,10 @@ H5S_select_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection)
     HDassert(src);
 
     /* Copy regular fields */
-    dst->select = src->select;
-
-    /* Copy for type H5S_SEL_ALL is differently processed, and there's no bounds for H5S_SEL_NONE */
-    if(src->select.type->type == H5S_SEL_HYPERSLABS || src->select.type->type == H5S_SEL_POINTS) {        
-        /* Copy bounding box */
-        HDmemcpy(dst->select.low_bounds, src->select.low_bounds, sizeof(hsize_t) * src->extent.rank);
-        HDmemcpy(dst->select.high_bounds, src->select.high_bounds, sizeof(hsize_t) * src->extent.rank);
-    } /* end if */
+    dst->select=src->select;
 
     /* Perform correct type of copy based on the type of selection */
-    if((ret_value = (*src->select.type->copy)(dst,src,share_selection)) < 0)
+    if((ret_value=(*src->select.type->copy)(dst,src,share_selection))<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy selection specific information")
 
 done:
@@ -148,6 +141,8 @@ done:
  *      pattern, don't call it directly, use the appropriate macro
  *      defined in H5Sprivate.h.
  *
+ * Modifications:
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -155,24 +150,13 @@ H5S_select_release(H5S_t *ds)
 {
     herr_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(ds);
 
-    /* Reset the bounding box of the selection */
-    if(ds->extent.rank > 0) {
-        /* ds->extent.rank could be 0 during dataspace initialization */
-        hsize_t tmp = HSIZET_MAX;
-
-        H5VM_array_fill(ds->select.low_bounds, &tmp, sizeof(hsize_t), ds->extent.rank);
-        HDmemset(ds->select.high_bounds, 0, sizeof(hsize_t)*ds->extent.rank);
-    } /* end if */
-
     /* Call the selection type's release function */
-    if((ret_value = (*ds->select.type->release)(ds)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection")
+    ret_value=(*ds->select.type->release)(ds);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5S_select_release() */
 
@@ -192,6 +176,8 @@ done:
  *      pattern, don't call it directly, use the appropriate macro
  *      defined in H5Sprivate.h.
  *
+ * Modifications:
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -201,15 +187,13 @@ H5S_select_get_seq_list(const H5S_t *space, unsigned flags,
 {
     herr_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(space);
 
     /* Call the selection type's get_seq_list function */
-    if((ret_value = (*space->select.type->get_seq_list)(space, flags, iter, maxseq, maxbytes, nseq, nbytes, off, len)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get selection sequence list")
+    ret_value = (*space->select.type->get_seq_list)(space, flags, iter, maxseq, maxbytes, nseq, nbytes, off, len);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5S_select_get_seq_list() */
 
@@ -228,6 +212,8 @@ done:
  * Note: This routine participates in the "Inlining C function pointers"
  *      pattern, don't call it directly, use the appropriate macro
  *      defined in H5Sprivate.h.
+ *
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -458,39 +444,39 @@ H5S_select_valid(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_deserialize(H5S_t *space, const uint8_t *buf)
+H5S_select_deserialize (H5S_t *space, const uint8_t *buf)
 {
     const uint8_t *tbuf;    /* Temporary pointer to the selection type */
     uint32_t sel_type;       /* Pointer to the selection type */
-    herr_t ret_value = FAIL;  /* return value */
+    herr_t ret_value=FAIL;  /* return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(space);
 
-    tbuf = buf;
+    tbuf=buf;
     UINT32DECODE(tbuf, sel_type);
     switch(sel_type) {
         case H5S_SEL_POINTS:         /* Sequence of points selected */
-            ret_value = (*H5S_sel_point->deserialize)(space, buf);
+            ret_value=(*H5S_sel_point->deserialize)(space,buf);
             break;
 
         case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-            ret_value = (*H5S_sel_hyper->deserialize)(space, buf);
+            ret_value=(*H5S_sel_hyper->deserialize)(space,buf);
             break;
 
         case H5S_SEL_ALL:            /* Entire extent selected */
-            ret_value = (*H5S_sel_all->deserialize)(space, buf);
+            ret_value=(*H5S_sel_all->deserialize)(space,buf);
             break;
 
         case H5S_SEL_NONE:           /* Nothing selected */
-            ret_value = (*H5S_sel_none->deserialize)(space, buf);
+            ret_value=(*H5S_sel_none->deserialize)(space,buf);
             break;
 
         default:
             break;
-    } /* end switch */
-    if(ret_value < 0)
+    }
+    if(ret_value<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTLOAD, FAIL, "can't deserialize selection")
 
 done:
@@ -1441,8 +1427,8 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
 {
     H5S_sel_iter_t iter_a;    /* Selection a iteration info */
     H5S_sel_iter_t iter_b;    /* Selection b iteration info */
-    hbool_t iter_a_init = FALSE;  /* Selection a iteration info has been initialized */
-    hbool_t iter_b_init = FALSE;  /* Selection b iteration info has been initialized */
+    hbool_t iter_a_init = 0;  /* Selection a iteration info has been initialized */
+    hbool_t iter_b_init = 0;  /* Selection b iteration info has been initialized */
     htri_t ret_value = TRUE; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1499,19 +1485,6 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
         if(H5S_GET_SELECT_NPOINTS(space_a) != H5S_GET_SELECT_NPOINTS(space_b))
             HGOTO_DONE(FALSE)
 
-        /* For hyperslabs, rebuild diminfo if it is invalid and has not been
-         * confirmed to be impossible */
-        if((H5S_GET_SELECT_TYPE(space_a) == H5S_SEL_HYPERSLABS)
-                && (space_a->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_NO))
-            /* Casting away const OK -NAF */
-            if(H5S_hyper_rebuild((H5S_t *)space_a) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't update hyperslab info")
-        if((H5S_GET_SELECT_TYPE(space_b) == H5S_SEL_HYPERSLABS)
-                && (space_b->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_NO))
-            /* Casting away const OK -NAF */
-            if(H5S_hyper_rebuild((H5S_t *)space_b) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't update hyperslab info")
-
         /* Check for "easy" cases before getting into generalized block iteration code */
         if((H5S_GET_SELECT_TYPE(space_a) == H5S_SEL_ALL) && (H5S_GET_SELECT_TYPE(space_b) == H5S_SEL_ALL)) {
             hsize_t dims1[H5O_LAYOUT_NDIMS];    /* End point of selection block in dataspace #1 */
@@ -1540,7 +1513,7 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
                 space_b_dim--;
             } /* end while */
 
-            /* Since we are selecting the entire space, we must also verify that space_a 
+            /* Since we are selecting the entire spaces, we must also verify that space_a 
              * has size 1 in all dimensions that it does not share with space_b.
              */
             while(space_a_dim >= 0) {
@@ -1553,8 +1526,8 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
         else if((H5S_GET_SELECT_TYPE(space1) == H5S_SEL_NONE) || (H5S_GET_SELECT_TYPE(space2) == H5S_SEL_NONE)) {
             HGOTO_DONE(TRUE)
         } /* end if */
-        else if((H5S_GET_SELECT_TYPE(space_a) == H5S_SEL_HYPERSLABS && space_a->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES)
-                && (H5S_GET_SELECT_TYPE(space_b) == H5S_SEL_HYPERSLABS && space_b->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES)) {
+        else if((H5S_GET_SELECT_TYPE(space_a) == H5S_SEL_HYPERSLABS && space_a->select.sel_info.hslab->diminfo_valid)
+                && (H5S_GET_SELECT_TYPE(space_b) == H5S_SEL_HYPERSLABS && space_b->select.sel_info.hslab->diminfo_valid)) {
             int space_a_dim;                /* Current dimension in dataspace A */
             int space_b_dim;                /* Current dimension in dataspace B */
 
@@ -1590,56 +1563,13 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
         } /* end if */
         /* Iterate through all the blocks in the selection */
         else {
-            hsize_t start_a[H5O_LAYOUT_NDIMS];  /* Start point of selection block in dataspace a */
-            hsize_t start_b[H5O_LAYOUT_NDIMS];  /* Start point of selection block in dataspace b */
-            hsize_t end_a[H5O_LAYOUT_NDIMS];    /* End point of selection block in dataspace a */
-            hsize_t end_b[H5O_LAYOUT_NDIMS];    /* End point of selection block in dataspace b */
-            hsize_t off_a[H5O_LAYOUT_NDIMS];    /* Offset of selection a blocks */
-            hsize_t off_b[H5O_LAYOUT_NDIMS];    /* Offset of selection b blocks */
-            hbool_t first_block = TRUE;         /* Flag to indicate the first block */
-
-            /* Check that the range between the low & high bounds are the same */
-            {
-                hsize_t space_a_range;          /* Selection a range */
-                hsize_t space_b_range;          /* Selection b range */
-                int space_a_dim;                /* Current dimension in dataspace A */
-                int space_b_dim;                /* Current dimension in dataspace B */
-
-                space_a_dim = (int)space_a_rank - 1;
-                space_b_dim = (int)space_b_rank - 1;
-                while(space_b_dim >= 0) {
-                    /* Sanity check */
-                    HDassert(space_a->select.low_bounds[space_a_dim] <= space_a->select.high_bounds[space_a_dim]);
-                    HDassert(space_b->select.low_bounds[space_b_dim] <= space_b->select.high_bounds[space_b_dim]);
-
-                    /* Compute range in each space, for this dimension */
-                    space_a_range = space_a->select.high_bounds[space_a_dim] - space_a->select.low_bounds[space_a_dim];
-                    space_b_range = space_b->select.high_bounds[space_b_dim] - space_b->select.low_bounds[space_b_dim];
-
-                    /* Verify that the ranges are the same */
-                    if(space_a_range != space_b_range)
-                        HGOTO_DONE(FALSE)
-
-                    /* Go to next dimension */
-                    space_a_dim--;
-                    space_b_dim--;
-                } /* end while */
-
-                /* Check that the rest of the ranges in space a are "flat" */
-                while(space_a_dim >= 0) {
-                    /* Sanity check */
-                    HDassert(space_a->select.low_bounds[space_a_dim] <= space_a->select.high_bounds[space_a_dim]);
-
-                    /* Compute range in space a, for this dimension */
-                    space_a_range = space_a->select.high_bounds[space_a_dim] - space_a->select.low_bounds[space_a_dim];
-
-                    /* This range should be flat (i.e. 0-sized) to be the same in a lower dimension */
-                    if(space_a_range != 0)
-                        HGOTO_DONE(FALSE)
-
-                    space_a_dim--;
-                } /* end while */
-            } /* end block */
+            hsize_t start_a[H5O_LAYOUT_NDIMS]; /* Start point of selection block in dataspace a */
+            hsize_t start_b[H5O_LAYOUT_NDIMS]; /* Start point of selection block in dataspace b */
+            hsize_t end_a[H5O_LAYOUT_NDIMS];   /* End point of selection block in dataspace a */
+            hsize_t end_b[H5O_LAYOUT_NDIMS];   /* End point of selection block in dataspace b */
+            hsize_t off_a[H5O_LAYOUT_NDIMS];   /* Offset of selection a blocks */
+            hsize_t off_b[H5O_LAYOUT_NDIMS];   /* Offset of selection b blocks */
+            hbool_t first_block = TRUE;        /* Flag to indicate the first block */
 
             /* Initialize iterator for each dataspace selection
              * Use '0' for element size instead of actual element size to indicate
@@ -1648,10 +1578,10 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
              */
             if(H5S_select_iter_init(&iter_a, space_a, (size_t)0) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator a")
-            iter_a_init = TRUE;
+            iter_a_init = 1;
             if(H5S_select_iter_init(&iter_b, space_b, (size_t)0) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator b")
-            iter_b_init = TRUE;
+            iter_b_init = 1;
 
             /* Iterate over all the blocks in each selection */
             while(1) {
@@ -1778,7 +1708,7 @@ done:
     topologically identical to that in b (as verified by 
     H5S_select_shape_same().
 
-    This function exists, as some I/O code chokes on topologically 
+    This function exists, as some I/O code chokes of topologically 
     identical selections with different ranks.  At least to begin 
     with, we will deal with the issue by constructing projections
     of the memory dataspace with ranks equaling those of the file 
@@ -2028,9 +1958,10 @@ H5S_select_construct_projection(const H5S_t *base_space, H5S_t **new_space_ptr,
 
 done:
     /* Cleanup on error */
-    if(ret_value < 0)
+    if(ret_value < 0) {
         if(new_space && H5S_close(new_space) < 0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_construct_projection() */

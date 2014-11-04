@@ -292,9 +292,8 @@ Notes: CMake and HDF5
       how CMake support can be improved on any system. Visit the 
       KitWare site for more information about CMake.
             
-   3. Build and test results can be submitted to our CDash server at:
-                 cdash.hdfgroup.uiuc.edu. 
-      Please read the HDF and CDash document at:
+   3. Build and test results can be submitted to our CDash server,
+      please read the HDF and CDash document at:
                  www.hdfgroup.org/CDash/HowToSubmit. 
             
    4. See the appendix at the bottom of this file for examples of using
@@ -404,8 +403,6 @@ These five steps are described in detail below.
                 set (HDF5_NO_PACKAGES OFF CACHE BOOL "CPACK - Disable packaging" FORCE)
                 set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO SVN TGZ)" FORCE)
                 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO SVN TGZ)
-                set (ZLIB_SVN_URL "http://svn.hdfgroup.uiuc.edu/zlib/trunk" CACHE STRING "Use ZLib from HDF repository" FORCE)
-                set (SZIP_SVN_URL "http://svn.hdfgroup.uiuc.edu/szip/trunk" CACHE STRING "Use SZip from HDF repository" FORCE)
                 set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
                 set (SZIP_TGZ_NAME "SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FORCE)
                 set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
@@ -468,9 +465,9 @@ These five steps are described in detail below.
                -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="SVN"
                
            The options to control the SVN URL (config/cmake/cacheinit.cmake file) are:
-               ZLIB_SVN_URL:STRING="http://svn.hdfgroup.uiuc.edu/zlib/trunk"
-               SZIP_SVN_URL:STRING="http://svn.hdfgroup.uiuc.edu/szip/trunk"
-           These should be changed to your location. Also define CMAKE_BUILD_TYPE
+               ZLIB_SVN_URL:STRING="http://${svn_url}/zlib/trunk"
+               SZIP_SVN_URL:STRING="http://${svn_url}/szip/trunk"
+           ${svn_url} should be changed to your location. Also define CMAKE_BUILD_TYPE
            to be the configuration type.
            
       3.2.2  Or the external libraries (zlib and szip) can be configured
@@ -693,7 +690,7 @@ set(SITE_BUILDNAME_SUFFIX "SHARED")
 #########   Following controls source update             ##########
 #set(LOCAL_UPDATE "TRUE")
 #########   Following controls source repository         ##########
-#set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/branches/hdf5_1_8")
+#set(REPOSITORY_URL "http://svn.${hdfgroup_url}/hdf5/branches/hdf5_1_8")
 #comment to use a uncompressed source folder
 set(CTEST_USE_TAR_SOURCE "hdf5-1.8.13")
 ###################################################################

@@ -1753,7 +1753,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5O_msg_encode
  *
- * Purpose:	Encode an object(data type and simple dataspace only)
+ * Purpose:	Encode an object(data type and simple data space only)
  *              description into a buffer.
  *
  * Return:	Success:	Non-negative

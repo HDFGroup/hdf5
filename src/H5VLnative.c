@@ -509,7 +509,7 @@ H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *att
     if(0 == (H5F_INTENT(loc.oloc->file) & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_ARGS, H5E_WRITEERROR, NULL, "no write intent on file")
 
-    if(NULL == (dt = (H5T_t *)H5I_object(type_id)))
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
     /* If this is a named datatype, get the plugin pointer to the datatype */
     type = (H5T_t *)H5T_get_actual_type(dt);

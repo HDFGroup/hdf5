@@ -213,7 +213,7 @@ set (SITE_BUILDNAME_SUFFIX "cmakehdf5")
 
 # -- URL set for internal check, default is to not update
 set (LOCAL_SKIP_UPDATE TRUE)
-set (REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/branches/hdf5_1_8")
+set (REPOSITORY_URL "http://svn.${hdfgroup_url}/hdf5/branches/hdf5_1_8")
 # -- Standard build options  
 set (ADD_BUILD_OPTIONS "-DCMAKE_INSTALL_PREFIX:PATH=${CTEST_BINARY_DIRECTORY} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=\"SVN\" -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
 

@@ -254,7 +254,7 @@ set(SITE_COMPILER_NAME "compiler name")
 set(SITE_COMPILER_VERSION "compiler version")
 
 # needed for source updates, change as required
-set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5-examples/trunk/1_8")
+set(REPOSITORY_URL "http://svn.${hdfgroup_url}/hdf5-examples/trunk/1_8")
 
 set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_INSTALL_PREFIX:PATH=/usr/local/hdf5Examples-1.8")
 
