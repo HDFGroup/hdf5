@@ -99,7 +99,7 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-                                  
+    - None                                  
 
 Bug Fixes since HDF5-1.8.13
 ===========================
@@ -285,7 +285,7 @@ Bug Fixes since HDF5-1.8.13
 
     Tools
     -----
-    - 
+    - None
 
     Fortran API
     -------
@@ -502,9 +502,6 @@ They are built with the configure process unless specified otherwise.
     64-bit    			  gfortran GNU Fortran (GCC) 4.8.2
     (wren)                        Intel icc/icpc/ifort version 14.0.2
 
-    OpenVMS  IA64 V8.4            HP C V7.3-018         
-    (Boeing)                      HP Fortran V8.2-104939-50H96
-                                  HP C++ V7.4-004 
 
 Tested Configuration Features Summary
 =====================================
@@ -541,7 +538,6 @@ CentOS 6.4 Linux 2.6.32 x86_64 GNU      y        y/y    y        y    y     y
 CentOS 6.4 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
 CentOS 6.4 Linux 2.6.32 x86_64 PGI      n        y/y    n        y    y     y
 Linux 2.6.32-431.11.2.el6.ppc64         n        y/n    n        y    y     y
-OpenVMS IA64 V8.4                       n        y/n    n        y    y     n
 
 Platform                                 Shared  Shared    Shared    Thread-  
                                          C libs  F90 libs  C++ libs  safe     
@@ -565,7 +561,6 @@ CentOS 6.4 Linux 2.6.32 x86_64 GNU         y       y         y         n
 CentOS 6.4 Linux 2.6.32 x86_64 Intel       y       y         y         n
 CentOS 6.4 Linux 2.6.32 x86_64 PGI         y       y         y         n     
 Linux 2.6.32-431.11.2.el6.ppc64            y       y         y         n 
-OpenVMS IA64 V8.4                          n       n         n         n
 
 Compiler versions for each platform are listed in the preceding
 "Supported Platforms" table.
