@@ -233,22 +233,21 @@ typedef struct H5D_io_info_t {
 /* piece info for multiple dsets. 
  * referred from H5D_chunk_info_t for single-dset */
 typedef struct H5D_piece_info_t {
-    haddr_t faddr;         /* file addr. key of skip list */
+    haddr_t faddr;              /* file addr. key of skip list */
     hsize_t index;              /* "Index" of chunk in dataset */
     uint32_t piece_points;      /* Number of elements selected in piece */
     hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
-    const H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
+    const H5S_t *fspace;        /* Dataspace describing chunk & selection in it */
     unsigned fspace_shared;     /* Indicate that the file space for a chunk is shared and shouldn't be freed */
-    const H5S_t *mspace;              /* Dataspace describing selection in memory corresponding to this chunk */
+    const H5S_t *mspace;        /* Dataspace describing selection in memory corresponding to this chunk */
     unsigned mspace_shared;     /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
-
     struct H5D_dset_info_t *dset_info;  /* Pointer to dset_info */
 } H5D_piece_info_t;
 
 /* Union for read/write dataset buffers */
 typedef union H5D_dset_buf_t {
-    void *rbuf;             /* Pointer to buffer for read */
-    const void *wbuf;       /* Pointer to buffer to write */
+    void *rbuf;                 /* Pointer to buffer for read */
+    const void *wbuf;           /* Pointer to buffer to write */
 } H5D_dset_buf_t;
 
 /* dset info for multiple dsets */
@@ -464,10 +463,6 @@ typedef struct H5D_chunk_map_t {
     H5D_chunk_info_t *last_chunk_info;  /* Pointer to last chunk's info */
 
     hsize_t chunk_dim[H5O_LAYOUT_NDIMS];    /* Size of chunk in each dimension */
-
-#ifdef H5_HAVE_PARALLEL
-    H5D_chunk_info_t **select_chunk;    /* Store the information about whether this chunk is selected or not */
-#endif /* H5_HAVE_PARALLEL */
 } H5D_chunk_map_t;
 
 /* Cached information about a particular chunk */

@@ -771,19 +771,6 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         fm->chunk_dim[u] = fm->layout->u.chunk.dim[u];
     } /* end for */
 
-#ifdef H5_HAVE_PARALLEL
-    /* Calculate total chunk in file map*/
-    fm->select_chunk = NULL;
-    if(io_info->using_mpi_vfd) {
-        H5_CHECK_OVERFLOW(fm->layout->u.chunk.nchunks, hsize_t, size_t);
-        if(fm->layout->u.chunk.nchunks) {
-            if(NULL == (fm->select_chunk = (H5D_chunk_info_t **)H5MM_calloc((size_t)fm->layout->u.chunk.nchunks * sizeof(H5D_chunk_info_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
-        }
-    } /* end if */
-#endif /* H5_HAVE_PARALLEL */
-
-
     /* Initialize "last chunk" information */
     fm->last_index = (hsize_t)-1;
     fm->last_chunk_info = NULL;
@@ -1520,12 +1507,6 @@ H5D__create_chunk_map_single(H5D_chunk_map_t *fm, const H5D_io_info_t
     if(H5S_SELECT_ADJUST_U(fm->single_space, chunk_info->coords) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
 
-#ifdef H5_HAVE_PARALLEL
-    /* store chunk selection information */
-    if(io_info->using_mpi_vfd)
-        fm->select_chunk[chunk_info->index] = chunk_info;
-#endif /* H5_HAVE_PARALLEL */
-
     /* Set the file dataspace for the chunk to the shared 'single' dataspace */
     chunk_info->fspace = fm->single_space;
 
@@ -1732,12 +1713,6 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
 
             /* Set the chunk index */
             new_chunk_info->index=chunk_index;
-
-#ifdef H5_HAVE_PARALLEL
-            /* Store chunk selection information, for multi-chunk I/O */
-            if(io_info->using_mpi_vfd)
-                fm->select_chunk[chunk_index] = new_chunk_info;
-#endif /* H5_HAVE_PARALLEL */
 
             /* Set the file chunk dataspace */
             new_chunk_info->fspace = tmp_fchunk;
@@ -2309,12 +2284,6 @@ H5D__chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, cons
                 HGOTO_ERROR(H5E_DATASPACE,H5E_CANTINSERT,FAIL,"can't insert chunk into skip list")
             } /* end if */
         } /* end if */
-
-#ifdef H5_HAVE_PARALLEL
-        /* Store chunk selection information, for collective multi-chunk I/O */
-        if(udata->io_info->using_mpi_vfd)
-            fm->select_chunk[chunk_index] = chunk_info;
-#endif /* H5_HAVE_PARALLEL */
 
         /* Update the "last chunk seen" information */
         fm->last_index = chunk_index;
@@ -3098,10 +3067,6 @@ H5D__chunk_io_term(const H5D_chunk_map_t *fm)
     if(fm->mchunk_tmpl)
         if(H5S_close(fm->mchunk_tmpl) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template")
-#ifdef H5_HAVE_PARALLEL
-    if(fm->select_chunk)
-        H5MM_xfree(fm->select_chunk);
-#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
