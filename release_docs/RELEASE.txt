@@ -637,16 +637,6 @@ Known Problems
 * Make provided by Solaris fails in "make check". Solaris users should use
   gmake to build and install the HDF5 software. (AKC - 2013/10/08 - HDFFV-8534)
 
-* On OpenVMS, two soft conversion functions (H5T__conv_i_f and H5T__conv_f_i)
-  have bugs.  They convert data between floating-point numbers and integers.
-  But the library's default is hard conversion.  The user should avoid
-  explicitly enabling soft conversion between floating-point numbers and
-  integers. (Issue VMS-8; SLU - 2013/09/19)
-
-* On OpenVMS, ZLIB 1.2.8 library doesn't work properly.  ZLIB 1.2.5 works
-  fine.  So please use ZLIB 1.2.5 to build HDF5 library. (Issue VMS-5;
-  SLU 2013/09/19)  
-
 * When building using the Cray compilers on Cray machines, HDF5
   configure mistakenly thinks the compiler is an intel compiler and
   sets the -std=c99 flag which breaks configure on Cray. To build HDF5
