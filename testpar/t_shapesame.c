@@ -2237,8 +2237,9 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
     int         express_test;
     int         local_express_test;
     int         mpi_rank = -1;
+    int         mpi_size;
     int	        test_num = 0;
-    int		edge_size = 10;
+    int		edge_size;
     int		chunk_edge_size = 0;
     int	        small_rank;
     int	        large_rank;
@@ -2258,7 +2259,10 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
 
     HDcompile_assert(sizeof(uint32_t) == sizeof(unsigned));
 
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    edge_size = (mpi_size > 6 ? mpi_size : 6);
 
     local_express_test = GetTestExpress();
 
@@ -4519,7 +4523,7 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
     int	        mpi_size = -1;
     int         mpi_rank = -1;
     int	        test_num = 0;
-    int		edge_size = 10;
+    int		edge_size;
     int         checker_edge_size = 3;
     int		chunk_edge_size = 0;
     int	        small_rank = 3;
@@ -4540,6 +4544,8 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
 
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    edge_size = (mpi_size > 6 ? mpi_size : 6);
 
     local_express_test = GetTestExpress();
 
