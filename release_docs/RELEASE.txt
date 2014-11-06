@@ -49,7 +49,9 @@ New Features
 
     Configuration
     -------------
-    - None
+    - bin/cmakehdf5 configures, builds and installs C, C++, Fortran and High
+      level API's. (It used to build the C API only).
+      (AKC 2014/10/17 HDFFV-8932).
     
     Library
     -------
