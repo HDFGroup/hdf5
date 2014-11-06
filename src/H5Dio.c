@@ -295,7 +295,7 @@ H5Dread_multi(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info)
         /* Translate public multi-dataset info to internal structure */
         /* (And check parameters) */
         if(H5D__init_dset_info(&dset_info[u], info[u].dset_id, info[u].mem_type_id, info[u].mem_space_id, 
-                               info[u].dset_space_id, &(info[u].u.wbuf)) < 0)
+                               info[u].dset_space_id, &(info[u].u.rbuf)) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't init dataset info")
 
         /* Verify file_id */
