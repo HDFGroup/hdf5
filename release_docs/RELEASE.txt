@@ -411,17 +411,18 @@ Bug Fixes since HDF5-1.8.13
 
     Testing
     -------
+    - A subtest in parallel h5diff (ph5diff) testing was bypassed for the
+      local Linux 32 machine due to unknown issue in the previous version of
+      Mpich. The failure no long exists in the current Mpich. Therefore the
+      bypass is removed. (AKC - 2014/11/03 HDFFV-8954)
+
     - Fixed incorrect exit code values (was -1) in testframe which is commonly
       used by several test programs. (AKC - 2014/07/22 HDFFV-8881)
 
-    - Fixed Incorrect Exit Code Values in Test Frame
-
-      The test frame which is commonly used by several test programs 
-      had some incorrect exit code values. 
-
-      Fixed the incorrect exit code values. 
-      
-      (AKC - 2014/07/22, HDFFV-8881)
+    - Fixed Incorrect Exit Code Values in Testframe
+      The testframe which is commonly used by several test programs 
+      had some incorrect exit code values.  Fixed the incorrect exit code
+      values.  (AKC - 2014/07/22, HDFFV-8881)
 
 Supported Platforms
 ===================
