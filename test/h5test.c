@@ -908,7 +908,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
 {
     char temp[2048];    /* Temporary buffer for file names */
     h5_stat_t  sb;     /* Structure for querying file info */
-  int j = 0;
+    int j = 0;
 
     if(fapl == H5P_DEFAULT) {
         /* Get the file's statistics */
@@ -924,9 +924,6 @@ h5_get_file_size(const char *filename, hid_t fapl)
 
         /* Check for simple cases */
         if(driver == H5FD_SEC2 || driver == H5FD_STDIO || driver == H5FD_CORE ||
-#ifdef H5_HAVE_PARALLEL
-                driver == H5FD_MPIO || 
-#endif /* H5_HAVE_PARALLEL */
 #ifdef H5_HAVE_WINDOWS
                 driver == H5FD_WINDOWS ||
 #endif /* H5_HAVE_WINDOWS */
@@ -961,6 +958,22 @@ h5_get_file_size(const char *filename, hid_t fapl)
             /* Return total size */
             return(tot_size);
         } /* end if */
+#ifdef H5_HAVE_PARALLEL
+        else if(driver == H5FD_MPIO) {
+            MPI_File fh;         /* MPI file handle used to open the file and verify its size */
+            int mpi_ret;
+            MPI_Offset file_size;
+
+            mpi_ret = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+            if (mpi_ret != MPI_SUCCESS) return -1;
+            mpi_ret = MPI_File_get_size(fh, &file_size);
+            if (mpi_ret != MPI_SUCCESS) return -1;
+            mpi_ret = MPI_File_close(&fh);
+            if (mpi_ret != MPI_SUCCESS) return -1;
+
+            return file_size;
+        }
+#endif /* H5_HAVE_PARALLEL */
         else if(driver == H5FD_FAMILY) {
             h5_stat_size_t tot_size = 0;
 
