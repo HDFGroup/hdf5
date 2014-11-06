@@ -11,8 +11,10 @@ set(STATICLIBRARIES "@H5_ENABLE_STATIC_LIB@")
 set(CTEST_SOURCE_NAME ${CTEST_SCRIPT_ARG})
 set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
 set(CTEST_BUILD_CONFIGURATION "Release")
+#set(NO_MAC_FORTRAN "true")
 #set(BUILD_OPTIONS ""${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
 #set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_ENABLE_F2003:BOOL=ON)
+set(CTEST_USE_TAR_SOURCE "true")
 
 ###############################################################################################################
 #     Adjust the following SET Commands as needed
@@ -50,31 +52,36 @@ if(APPLE)
   execute_process(COMMAND xcrun --find c++ OUTPUT_VARIABLE XCODE_CXX OUTPUT_STRIP_TRAILING_WHITESPACE)
   set(ENV{CC} "${XCODE_CC}")
   set(ENV{CXX} "${XCODE_CXX}")
-  if(HDF_BUILD_FORTRAN AND BUILD_SHARED_LIBS)
-    message(FATAL_ERROR "error: Shared fortran is not supported, build static") 
-    #set(BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
-  endif(HDF_BUILD_FORTRAN AND BUILD_SHARED_LIBS)
+  if(NOT NO_MAC_FORTRAN)
+    # Shared fortran is not supported, build static 
+    set(BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
+  else(NOT NO_MAC_FORTRAN)
+    set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=OFF")
+  endif(NOT NO_MAC_FORTRAN)
   set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF")
 endif(APPLE)
  
 #-----------------------------------------------------------------------------
 set(CTEST_CMAKE_COMMAND "\"${CMAKE_COMMAND}\"")
-## Uncompress source in tar file provided
 ## --------------------------
-if(WIN32)
-  set(CTEST_7Z_COMMAND "C:/Program Files/7-Zip/7z.exe")
-  message(STATUS "extracting... [${CTEST_7Z_COMMAND} x ${CTEST_SOURCE_NAME}.zip]")
-  execute_process(COMMAND ${CTEST_7Z_COMMAND} x ${CTEST_SOURCE_NAME}.zip RESULT_VARIABLE rv)
-else(WIN32)
-  message(STATUS "extracting... [${CTEST_CMAKE_COMMAND} -E tar -xvf ${CTEST_SOURCE_NAME}.tar.gz]")
-  execute_process(COMMAND tar -xvf ${CTEST_SOURCE_NAME}.tar.gz RESULT_VARIABLE rv)
-endif(WIN32)
+if(CTEST_USE_TAR_SOURCE)
+  ## Uncompress source if tar or zip file provided
+  ## --------------------------
+  if(WIN32)
+    set(CTEST_7Z_COMMAND "C:/Program Files/7-Zip/7z.exe")
+    message(STATUS "extracting... [${CTEST_7Z_COMMAND} x ${CTEST_SOURCE_NAME}.zip]")
+    execute_process(COMMAND ${CTEST_7Z_COMMAND} x ${CTEST_SOURCE_NAME}.zip RESULT_VARIABLE rv)
+  else(WIN32)
+    message(STATUS "extracting... [${CTEST_CMAKE_COMMAND} -E tar -xvf ${CTEST_SOURCE_NAME}.tar.gz]")
+    execute_process(COMMAND tar -xvf ${CTEST_SOURCE_NAME}.tar.gz RESULT_VARIABLE rv)
+  endif(WIN32)
  
-if(NOT rv EQUAL 0)
-  message(STATUS "extracting... [error-(${rv}) clean up]")
-  file(REMOVE_RECURSE "${CTEST_SOURCE_DIRECTORY}")
-  message(FATAL_ERROR "error: extract of ${CTEST_SOURCE_NAME} failed")
-endif(NOT rv EQUAL 0)
+  if(NOT rv EQUAL 0)
+    message(STATUS "extracting... [error-(${rv}) clean up]")
+    file(REMOVE_RECURSE "${CTEST_SOURCE_DIRECTORY}")
+    message(FATAL_ERROR "error: extract of ${CTEST_SOURCE_NAME} failed")
+  endif(NOT rv EQUAL 0)
+endif(CTEST_USE_TAR_SOURCE)
  
 #-----------------------------------------------------------------------------
 ## Clear the build directory
