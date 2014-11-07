@@ -5,8 +5,8 @@ INTRODUCTION
 ============
 
 This document describes the differences between HDF5-1.8.13 and 
-HDF5-1.8.14-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.14-*. 
+HDF5-1.8.14, and contains information on the platforms tested and 
+known problems in HDF5-1.8.14. 
 
 All new and modified APIs are listed in the "HDF5 Software Changes 
 from Release to Release" document along with details about previous
@@ -525,9 +525,9 @@ Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/y    n        y    y     y
 Windows 7                               y        y/y    n        y    y     y
 Windows 7 x64                           y        y/y    n        y    y     y
-Windows 7 Cygwin                        n        y/y    n        y    y     y
+Windows 7 Cygwin                        n        y/y    n        y    y     n 
 Windows 8.1                             n        y/y    n        y    y     y
-Windows 8.1   x64                       n        y/y    n        y    y     y
+Windows 8.1 x64                         n        y/y    n        y    y     y
 Mac OS X Lion 10.7.5 64-bit             n        y/y    n        y    y     y
 Mac OS X Mountain Lion 10.8.5 64-bit    n        y/y    n        y    y     y
 Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     ?
@@ -653,20 +653,6 @@ Known Problems
   ports (and probably gcc releases after that).
   (QAK - 2012/10/19)
 
-* The data conversion test dt_arith.c fails in "long double" to integer
-  conversion on Ubuntu 11.10 (3.0.0.13 kernel) with GCC 4.6.1 if the library
-  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
-  (3.2.2 on Fedora) doesn't have the problem.  Users should lower the 
-  optimization level (-O1 or -O0) by defining CFLAGS in the command line of 
-  "configure" like:
-
-      CFLAGS=-O1 ./configure
-
-  This will overwrite the library's default optimization level.
-  (SLU - 2012/02/07 - HDFFV-7829)
-  This issue is no longer present on Ubuntu 12.10 (3.5.0 kernel) with 
-  gcc 4.7.2.
-
 * The STDIO VFD does not work on some architectures, possibly due to 32/64
   bit or large file issues.  The basic STDIO VFD test is known to fail on
   64-bit SunOS 5.10 on SPARC when built with -m64 and 32-bit OS X/Darwin
@@ -700,9 +686,6 @@ Known Problems
   it does, it will waste more time if $HDF5_ALARM_SECONDS is set
   to a larger value.
   (AKC - 2011/05/07)
-
-* The C++ and FORTRAN bindings are not currently working on FreeBSD.
-  (QAK - 2011/04/26)
 
 * Shared Fortran libraries are not quite working on AIX. While they are
   generated when --enable-shared is specified, the fortran and hl/fortran
