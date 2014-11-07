@@ -611,10 +611,10 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (Ubuntu/Linaro 4.9.1-0ubuntu1) 4.9.1
                                   (cmake and autotools)
     
-    Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46
-    hopper.nersc.gov              pgcc 12.5-0 64-bit target on x86-64 Linux -tp shanghai
-                                  pgf90 12.5-0 64-bit target on x86-64 Linux -tp shanghai
-                                  pgCC 12.5-0 64-bit target on x86-64 Linux -tp shanghai
+    Cray Linux Environment (CLE)  PrgEnv-pgi/4.2.34
+    hopper.nersc.gov              pgcc 13.6-0 64-bit target on x86-64 Linux -tp istanbul
+                                  pgf90 13.6-0 64-bit target on x86-64 Linux -tp istanbul
+                                  pgCC 13.6-0 64-bit target on x86-64 Linux -tp istanbul
 
 
 Known Problems
@@ -655,41 +655,10 @@ Known Problems
   spurious data values has only been encountered on Windows 32-bit systems.
   (Issue HDFFV-8247; JP - 2013/03/27)
 
-* The 5.9 C++ compiler on Sun failed to compile a C++ test ttypes.cpp.  It 
-  complains with this message:
-      "/home/hdf5/src/H5Vprivate.h", line 130: Error: __func__ is not defined.
-  
-  The reason is that __func__ is a predefined identifier in C99 standard.  The
-  HDF5 C library uses it in H5private.h.  The test ttypes.cpp includes 
-  H5private.h (H5Tpkg.h<-H5Fprivate.h<-H5Vprivate.h<-H5private.h).  Sun's 5.9
-  C++ compiler doesn't support __func__, thus fails to compile the C++ test.
-  But Sun's 5.11 C++ compiler does.  To check whether your Sun C++ compiler 
-  knows this identifier, try to compile the following simple C++ program:
-      #include<stdio.h>
-
-      int main(void)
-      {
-          printf("%s\n", __func__);
-          return 0;
-      }
-  (SLU - 2012/11/5)
-
 * The C++ and FORTRAN bindings are not currently working on FreeBSD with the
   native release 8.2 compilers (4.2.1), but are working with gcc 4.6 from the
   ports (and probably gcc releases after that).
   (QAK - 2012/10/19)
-
-* The following h5dump test case fails in BG/P machines (and potentially other
-  machines that use a command script to launch executables):
-
-   h5dump --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0"
-     tno-subset.h5
-  
-  This is due to the embedded spaces in the dataset name being interpreted
-  by the command script launcher as meta-characters, thus passing three
-  arguments to h5dump's -d flag. The command passes if run by hand, just
-  not via the test script.
-  (AKC - 2012/05/03)
 
 * On hopper, the build failed when RUNSERIAL and RUNPARALLEL are set
   to aprun -np X, because the H5lib_settings.c file was not generated
@@ -795,10 +764,6 @@ Known Problems
   collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
   with MPI IO.
   (CMC - 2009/04/28)
-
-* On an Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers, 
-  use -mp -O1 compilation flags to build the libraries. A higher level of 
-  optimization causes failures in several HDF5 library tests. 
 
 * A dataset created or rewritten with a v1.6.3 library or after cannot be read 
   with the v1.6.2 library or before when the Fletcher32 EDC filter is enabled.
