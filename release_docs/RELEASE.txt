@@ -200,15 +200,15 @@ They are built with the configure process unless specified otherwise.
     Windows 8.1 x64               Visual Studio 2012 w/ Intel Fortran 14 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 14 (cmake)
 
-    Mac OS X Lion 10.7.3          Apple clang/clang++ version 3.0 from Xcode 4.6.1
-    64-bit                        gfortran GNU Fortran (GCC) 4.6.2
+    Mac OS X Lion 10.7.5          Apple clang/clang++ version 3.0 from Xcode 4.6.1
+    64-bit                        gfortran GNU Fortran (GCC) 4.8.2
     (duck)                        Intel icc/icpc/ifort version 13.0.3
 
-    Mac OS X Mt. Lion 10.8.5      Apple clang/clang++ version 5.0 from Xcode 5.0.2
+    Mac OS X Mt. Lion 10.8.5      Apple clang/clang++ version 5.1 from Xcode 5.1
     64-bit    			  gfortran GNU Fortran (GCC) 4.8.2
     (swallow/kite)                Intel icc/icpc/ifort version 14.0.2
 
-    Mac OS X Mavericks 10.9.2     Apple clang/clang++ version 5.1 from Xcode 5.1
+    Mac OS X Mavericks 10.9.5     Apple clang/clang++ version 6.0 from Xcode 6.0.1
     64-bit    			  gfortran GNU Fortran (GCC) 4.8.2
     (wren)                        Intel icc/icpc/ifort version 14.0.2
 
@@ -232,12 +232,12 @@ Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/y    n        y    y     y
 Windows 7                               y        y/y    n        y    y     y
 Windows 7 x64                           y        y/y    n        y    y     y
-Windows 7 Cygwin                        n        y/y    n        y    y     y
+Windows 7 Cygwin                        n        y/y    n        y    y     n 
 Windows 8.1                             n        y/y    n        y    y     y
-Windows 8.1   x64                       n        y/y    n        y    y     y
-Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
-Mac OS X Mountain Lion 10.8.1 64-bit    n        y/y    n        y    y     y
-Mac OS X Mavericks 10.9.1 64-bit        n        y/y    n        y    y     ?
+Windows 8.1 x64                         n        y/y    n        y    y     y
+Mac OS X Lion 10.7.5 64-bit             n        y/y    n        y    y     y
+Mac OS X Mountain Lion 10.8.5 64-bit    n        y/y    n        y    y     y
+Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     ?
 AIX 5.3 32- and 64-bit                  n        y/n    n        y    y     y
 CentOS 5.9 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
 CentOS 5.9 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
@@ -258,9 +258,9 @@ Windows 7 x64                              y       y         y         y
 Windows 7 Cygwin                           n       n         n         y
 Windows 8.1                                y       y         y         y
 Windows 8.1 x64                            y       y         y         y
-Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
-Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
-Mac OS X Mavericks 10.9.1 64-bit           y       n         y         y
+Mac OS X Lion 10.7.5 64-bit                y       n         y         y        
+Mac OS X Mountain Lion 10.8.5 64-bit       y       n         y         y        
+Mac OS X Mavericks 10.9.5 64-bit           y       n         y         y
 AIX 5.3 32- and 64-bit                     y       n         n         y        
 CentOS 5.9 Linux 2.6.18-308 i686 GNU       y       y         y         y        
 CentOS 5.9 Linux 2.6.18-308 i686 Intel     y       y         y         n        
@@ -318,10 +318,10 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (Ubuntu/Linaro 4.9.1-0ubuntu1) 4.9.1
                                   (cmake and autotools)
     
-    Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46
-    hopper.nersc.gov              pgcc 12.5-0 64-bit target on x86-64 Linux -tp shanghai
-                                  pgf90 12.5-0 64-bit target on x86-64 Linux -tp shanghai
-                                  pgCC 12.5-0 64-bit target on x86-64 Linux -tp shanghai
+    Cray Linux Environment (CLE)  PrgEnv-pgi/4.2.34
+    hopper.nersc.gov              pgcc 13.6-0 64-bit target on x86-64 Linux -tp istanbul
+                                  pgf90 13.6-0 64-bit target on x86-64 Linux -tp istanbul
+                                  pgCC 13.6-0 64-bit target on x86-64 Linux -tp istanbul
 
 
 Known Problems
