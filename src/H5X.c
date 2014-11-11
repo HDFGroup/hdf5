@@ -482,22 +482,111 @@ done:
 herr_t
 H5Xget_count(hid_t scope_id, hsize_t *idx_count)
 {
-    H5D_t *dset = NULL;
-    unsigned actual_count;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", scope_id, idx_count);
 
-    if (NULL == (dset = (H5D_t *) H5I_object_verify(scope_id, H5I_DATASET)))
+    if (NULL == H5I_object_verify(scope_id, H5I_DATASET))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if (!idx_count)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "idx_count is NULL");
+
+    if (FAIL == H5X_get_count(scope_id, idx_count))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "cannot get index count");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Xget_count() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5X_get_count
+ *
+ * Purpose: Determine the number of index objects on a dataset.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5X_get_count(hid_t dset_id, hsize_t *idx_count)
+{
+    H5D_t *dset = NULL;
+    unsigned actual_count;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset_id != H5I_BADID);
+    HDassert(idx_count);
+
+    if (NULL == (dset = H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
     if (FAIL == H5D_get_index(dset, 1, NULL, NULL, NULL, &actual_count))
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin is not registered");
 
     *idx_count = actual_count;
 
 done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5X_get_count() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Xget_size
+ *
+ * Purpose: Returns the amount of storage allocated for an index.
+ *
+ * Return:  Greater than or equal to zero on success/Zero on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5Xget_size(hid_t scope_id)
+{
+    hsize_t ret_value = 0; /* Return value */
+
+    FUNC_ENTER_API(0)
+
+    if (NULL == H5I_object_verify(scope_id, H5I_DATASET))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset")
+
+    if (FAIL == H5X_get_size(scope_id, &ret_value))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, 0, "cannot get index storage size");
+
+done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Xget_count() */
+} /* end H5Xget_size() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5X_get_size
+ *
+ * Purpose: Returns the amount of storage allocated for an index.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5X_get_size(hid_t dset_id, hsize_t *idx_size)
+{
+    H5D_t *dset = NULL;
+    hsize_t actual_size = 0;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset_id != H5I_BADID);
+    HDassert(idx_size);
+
+    if (NULL == (dset = H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    if (FAIL == H5D_get_index_size(dset, &actual_size))
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin is not registered");
+
+    *idx_size = actual_size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5X_get_size() */

@@ -99,6 +99,9 @@ static herr_t
 H5X__dummy_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim,
         const hsize_t *point, void *_udata);
 
+static herr_t
+H5X_dummy_get_size(void *idx_handle, hsize_t *idx_size);
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -126,7 +129,7 @@ const H5X_class_t H5X_DUMMY[1] = {{
     H5X_dummy_query,        /* query */
     NULL,                   /* refresh */
     NULL,                   /* copy */
-    NULL                    /* get_size */
+    H5X_dummy_get_size      /* get_size */
 }};
 
 /*-------------------------------------------------------------------------
@@ -553,3 +556,36 @@ done:
     H5MM_free(buf);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_dummy_query() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5X_dummy_get_size
+ *
+ * Purpose: This function gets the storage size of the index.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5X_dummy_get_size(void *idx_handle, hsize_t *idx_size)
+{
+    H5X_dummy_t *dummy = (H5X_dummy_t *) idx_handle;
+    hsize_t size;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+    H5X_DUMMY_LOG_DEBUG("Enter");
+
+    if (NULL == dummy)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
+    if (!idx_size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer");
+
+    size = H5Dget_storage_size(dummy->idx_anon_id);
+
+    *idx_size = size;
+
+done:
+    H5X_DUMMY_LOG_DEBUG("Leave");
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5X_dummy_get_size */

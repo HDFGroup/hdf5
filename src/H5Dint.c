@@ -3211,6 +3211,42 @@ done:
 } /* end H5D_remove_index() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D_get_index_size
+ *
+ * Purpose: Get index index.
+ *
+ * Return:  Success:    Non-negative
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5D_get_index_size(H5D_t *dset, hsize_t *idx_size)
+{
+    H5X_class_t *idx_class = NULL;
+    hsize_t actual_size = 0;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+    HDassert(idx_size);
+
+    if (!dset->shared->idx_handle)
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "no index attached to dataset");
+
+    idx_class = dset->shared->idx_class;
+    if (NULL == (idx_class->get_size))
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin get size callback not defined");
+    if (FAIL == idx_class->get_size(dset->shared->idx_handle, &actual_size))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "cannot get index size");
+
+    *idx_size = actual_size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_get_index_size() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__query_index
  *
  * Purpose: Returns a dataspace selection of dataset elements that match

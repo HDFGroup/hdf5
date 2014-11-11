@@ -100,6 +100,10 @@ H5_DLL herr_t H5Xremove(hid_t scope_id, unsigned plugin_id);
 
 H5_DLL herr_t H5Xget_count(hid_t scope_id, hsize_t *idx_count);
 
+H5_DLL hsize_t H5Xget_size(hid_t scope_id);
+
+
+
 /*
 H5_DLL herr_t H5Xget_type(hid_t object_id, hsize_t index_idx,
         unsigned *plugin_id);
