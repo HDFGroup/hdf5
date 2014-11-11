@@ -288,11 +288,24 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
                 (FAIL == idx_class->post_update(idx_handle, buf, file_space_id, xxpl_id)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "cannot do an index post-update");
 
-/* ADD bool to refresh to signal update
-        if (idx_class->refresh &&
-                (FAIL == idx_class->refresh(idx_handle, &metadata_size, &metadata)))
-            HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "cannot do an index refresh");
- */
+        /* Calling post_update rebuilds the index and index metadata may need
+         * to be refreshed.
+         */
+        if (idx_class->refresh) {
+            H5O_idxinfo_t idx_info;
+            void *metadata;
+            size_t metadata_size;
+
+            if (FAIL == idx_class->refresh(idx_handle, &metadata_size, &metadata))
+                HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "cannot do an index refresh");
+
+            /* Write the index header message */
+            idx_info.plugin_id = idx_class->id;
+            idx_info.metadata_size = metadata_size;
+            idx_info.metadata = metadata;
+            if (H5O_msg_write(&dset->oloc, H5O_IDXINFO_ID, H5O_MSG_FLAG_CONSTANT, H5O_UPDATE_FORCE, &idx_info, H5AC_dxpl_id))
+                HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "unable to update index header message");
+        }
     }
 
 done:
