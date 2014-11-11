@@ -487,6 +487,10 @@ H5_DLL herr_t H5Pfree_merge_committed_dtype_paths(hid_t plist_id);
 H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data);
 H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, void **op_data);
 
+/* Index creation property list (XCPL) routines */
+H5_DLL herr_t H5Pset_index_read_on_create(hid_t plist_id, hbool_t value);
+H5_DLL herr_t H5Pget_index_read_on_create(hid_t plist_id, hbool_t *value);
+
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
  * Use of these symbols is deprecated.

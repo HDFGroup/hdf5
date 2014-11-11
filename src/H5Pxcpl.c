@@ -45,6 +45,12 @@
 /****************/
 
 /* ========  Index creation properties ======== */
+/* Definitions for index plugin value */
+#define H5X_CRT_READ_ON_CREATE_SIZE   sizeof(hbool_t)
+#define H5X_CRT_READ_ON_CREATE_DEF    TRUE
+#define H5X_CRT_READ_ON_CREATE_ENC    H5P__encode_hbool_t
+#define H5X_CRT_READ_ON_CREATE_DEC    H5P__decode_hbool_t
+
 
 /******************/
 /* Local Typedefs */
@@ -93,6 +99,10 @@ const H5P_libclass_t H5P_CLS_XCRT[1] = {{
 /* Local Variables */
 /*******************/
 
+/* Property value defaults */
+static const hbool_t H5X_def_read_on_create_g = H5X_CRT_READ_ON_CREATE_DEF; /* Default read on create value */
+
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__xcrt_reg_prop
@@ -110,6 +120,82 @@ H5P__xcrt_reg_prop(H5P_genclass_t *pclass)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Register the "read data on create" property */
+    if(H5P_register_real(pclass, H5X_CRT_READ_ON_CREATE_NAME,
+            H5X_CRT_READ_ON_CREATE_SIZE, &H5X_def_read_on_create_g,
+            NULL, NULL, NULL, H5X_CRT_READ_ON_CREATE_ENC,
+            H5X_CRT_READ_ON_CREATE_DEC, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__xcrt_reg_prop() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_index_read_on_create
+ *
+ * Purpose: Set index to read data when created.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_index_read_on_create(hid_t plist_id, hbool_t value)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    hbool_t read_on_create;     /* Value property to modify */
+    herr_t ret_value = SUCCEED; /* return value          */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Get the property list structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_INDEX_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    read_on_create = value;
+
+    /* Set values */
+    if(H5P_set(plist, H5X_CRT_READ_ON_CREATE_NAME, &read_on_create) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set property value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_index_read_on_create() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_index_read_on_create
+ *
+ * Purpose: Get boolean to read data on index creation.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_index_read_on_create(hid_t plist_id, hbool_t *value/*out*/)
+{
+    herr_t ret_value = SUCCEED; /* return value          */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Set values */
+    if(value) {
+        H5P_genplist_t *plist;  /* Property list pointer */
+        hbool_t read_on_create;     /* Value property to query */
+
+        /* Get the property list structure */
+        if(NULL == (plist = H5P_object_verify(plist_id, H5P_INDEX_CREATE)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        /* Retrieve fill value settings */
+        if(H5P_get(plist, H5X_CRT_READ_ON_CREATE_NAME, &read_on_create) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value")
+
+        /* Set user's value */
+        *value = read_on_create;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_index_read_on_create() */
