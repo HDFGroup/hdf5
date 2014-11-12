@@ -3154,7 +3154,7 @@ H5B2_remove_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, hbool_t *depth_decreased,
         if(!swap_loc && cmp == 0) {
             swap_loc = H5B2_INT_NREC(internal, hdr, idx - 1);
             swap_parent = internal;
-        }
+        } /* end if */
 
         /* Swap record to delete with record from leaf, if we are the last internal node */
         if(swap_loc && depth == 1)
@@ -3574,7 +3574,7 @@ H5B2_remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
         if(!swap_loc && found) {
             swap_loc = H5B2_INT_NREC(internal, hdr, idx - 1);
             swap_parent = internal;
-        }
+        } /* end if */
 
         /* Swap record to delete with record from leaf, if we are the last internal node */
         if(swap_loc && depth == 1)
