@@ -842,7 +842,8 @@ H5free_memory(void *mem)
 } /* end H5free_memory() */
 
 
-#ifdef H5_HAVE_WIN32_API
+#if defined(H5_HAVE_THREADSAFE) && defined(H5_BUILT_AS_DYNAMIC_LIB) \
+    && defined(H5_HAVE_WIN32_API) && defined(H5_HAVE_WIN_THREADS)
 /*-------------------------------------------------------------------------
  * Function:    DllMain
  *
@@ -850,6 +851,9 @@ H5free_memory(void *mem)
  *
  *    NOTE:     The main purpose of this is for handling Win32 thread cleanup
  *              on thread/process detach.
+ *
+ *              Only enabled when the shared Windows library is built with
+ *              thread safety enabled.
  *
  * Return:      TRUE on success, FALSE on failure
  *
@@ -897,4 +901,4 @@ DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved)
 
     return fOkay;
 }
-#endif /* H5_HAVE_WIN32_API */
+#endif /* H5_HAVE_WIN32_API && H5_BUILT_AS_DYNAMIC_LIB && H5_HAVE_WIN_THREADS && H5_HAVE_THREADSAFE*/
