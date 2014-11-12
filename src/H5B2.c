@@ -300,7 +300,7 @@ H5B2_insert(H5B2_t *bt2, hid_t dxpl_id, void *udata)
     /* Check if we need to split the root node (equiv. to a 1->2 node split) */
     else if(hdr->root.node_nrec == hdr->node_info[hdr->depth].split_nrec) {
         /* Split root node */
-        if(H5B2_split_root(hdr, dxpl_id, udata) < 0)
+        if(H5B2_split_root(hdr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split root node")
     } /* end if */
 

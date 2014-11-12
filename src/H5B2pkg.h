@@ -311,7 +311,7 @@ H5_DLL H5B2_internal_t *H5B2_protect_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
     haddr_t addr, void *parent, unsigned nrec, unsigned depth, H5AC_protect_t rw);
 
 /* Routines for allocating nodes */
-H5_DLL herr_t H5B2_split_root(H5B2_hdr_t *hdr, hid_t dxpl_id, void *udata);
+H5_DLL herr_t H5B2_split_root(H5B2_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5B2_create_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, void *parent,
     H5B2_node_ptr_t *node_ptr);
 
