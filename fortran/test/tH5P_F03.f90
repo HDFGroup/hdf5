@@ -106,20 +106,12 @@ SUBROUTINE test_create(total_error)
   INTEGER(hsize_t), DIMENSION(1:5), PARAMETER :: ch_size= (/1, 1, 1, 4, 1/)
   CHARACTER(LEN=14) :: filename ='test_create.h5'
 
-  ! /* compound datatype operations */
-  TYPE, BIND(C) :: comp_datatype
-    REAL :: a
-    INTEGER :: x
-    DOUBLE PRECISION :: y
-    CHARACTER(LEN=1) :: z
-  END TYPE comp_datatype
-
   TYPE(comp_datatype), TARGET :: rd_c, fill_ctype
   INTEGER :: error
   INTEGER(SIZE_T) :: h5off
   TYPE(C_PTR) :: f_ptr
   LOGICAL :: differ1, differ2
-  
+
   !/*
   ! * Create a file.
   ! */
@@ -136,8 +128,7 @@ SUBROUTINE test_create(total_error)
   CALL check("h5pset_chunk_f",error, total_error)
 
   ! /* Create a compound datatype */
-
-  CALL h5tcreate_f(H5T_COMPOUND_F, INT(SIZEOF(fill_ctype),size_t), comp_type_id, error)
+  CALL h5tcreate_f(H5T_COMPOUND_F, H5_SIZEOF(fill_ctype), comp_type_id, error)
   CALL check("h5tcreate_f", error, total_error)
   h5off = H5OFFSETOF(C_LOC(fill_ctype), C_LOC(fill_ctype%a))
   CALL h5tinsert_f(comp_type_id, "a", h5off , H5T_NATIVE_REAL, error)
@@ -394,6 +385,8 @@ SUBROUTINE test_h5p_file_image(total_error)
   TYPE(C_PTR), DIMENSION(1:count) :: f_ptr1
   TYPE(C_PTR), DIMENSION(1:1) :: f_ptr2
 
+  INTEGER(HSIZE_T) :: sizeof_buffer
+
   ! Initialize file image buffer
   DO i = 1, count
      buffer(i) = i*10
@@ -412,7 +405,8 @@ SUBROUTINE test_h5p_file_image(total_error)
 
   ! Set file image
   f_ptr = C_LOC(buffer(1))
-  size = SIZEOF(buffer)
+  size = H5_SIZEOF(buffer(1))*count
+
   CALL h5pset_file_image_f(fapl_1, f_ptr, size, error)
   CALL check("h5pset_file_image_f", error, total_error)
   
@@ -465,8 +459,8 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   INTEGER(hid_t) :: dset=-1   ! dataset			
   INTEGER(hid_t) :: grp=-1    ! group to emit diagnostics
   INTEGER(size_t) :: i, j     ! miscellaneous counters	
-  CHARACTER(LEN=180) :: filename   ! file names			
-  INTEGER, DIMENSION(1:25) :: part ! raw data buffers
+  CHARACTER(LEN=180) :: filename   ! file names
+  INTEGER, DIMENSION(1:25) :: part
   INTEGER, DIMENSION(1:100), TARGET :: whole ! raw data buffers		
   INTEGER(hsize_t), DIMENSION(1:1) :: cur_size ! current data space size	
   INTEGER(hid_t) :: hs_space  ! hyperslab data space		
@@ -475,6 +469,7 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   CHARACTER(LEN=1) :: ichr1 ! character conversion holder
   INTEGER :: error ! error status
   TYPE(C_PTR) :: f_ptr ! fortran pointer
+  INTEGER(HSIZE_T) :: sizeof_part
 
   CHARACTER(LEN=1,KIND=C_CHAR), DIMENSION(1:30) :: temparray
 
@@ -503,15 +498,18 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   CALL check("h5gcreate_f",error, total_error)
   
   ! Create the dataset
+
+  sizeof_part = INT(H5_SIZEOF(part(1))*25, hsize_t) 
+
   CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl, error)
   CALL check("h5pcreate_f", error, total_error)
-  CALL h5pset_external_f(dcpl, "extern_1a.raw", INT(0,off_t), INT(SIZEOF(part), hsize_t), error)
+  CALL h5pset_external_f(dcpl, "extern_1a.raw", INT(0,off_t), sizeof_part, error)
   CALL check("h5pset_external_f",error,total_error)
-  CALL h5pset_external_f(dcpl, "extern_2a.raw", INT(10,off_t), INT(SIZEOF(part), hsize_t), error)
+  CALL h5pset_external_f(dcpl, "extern_2a.raw", INT(10,off_t), sizeof_part, error)
   CALL check("h5pset_external_f",error,total_error)
-  CALL h5pset_external_f(dcpl, "extern_3a.raw", INT(20,off_t), INT(SIZEOF(part), hsize_t), error)
+  CALL h5pset_external_f(dcpl, "extern_3a.raw", INT(20,off_t), sizeof_part, error)
   CALL check("h5pset_external_f",error,total_error)
-  CALL h5pset_external_f(dcpl, "extern_4a.raw", INT(30,off_t), INT(SIZEOF(part), hsize_t), error)
+  CALL h5pset_external_f(dcpl, "extern_4a.raw", INT(30,off_t), sizeof_part, error)
   CALL check("h5pset_external_f",error,total_error)
   
   cur_size(1) = 100

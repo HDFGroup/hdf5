@@ -254,6 +254,9 @@ foreach (test ${H5_TESTS})
 endforeach (test ${H5_TESTS})
 
 set_tests_properties (H5TEST-flush2 PROPERTIES DEPENDS H5TEST-flush1)
+set_tests_properties (H5TEST-fheap PROPERTIES TIMEOUT 1800)
+set_tests_properties (H5TEST-testmeta PROPERTIES TIMEOUT 1800)
+set_tests_properties (H5TEST-big PROPERTIES TIMEOUT 1800)
 
 ##############################################################################
 ##############################################################################
@@ -503,6 +506,7 @@ if (HDF5_TEST_VFD)
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
             -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
+      set_tests_properties (VFD-${vfdname}-fheap PROPERTIES TIMEOUT 1800)
     endif (HDF5_TEST_FHEAP_VFD)
   ENDMACRO (ADD_VFD_TEST)
   

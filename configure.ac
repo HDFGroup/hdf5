@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.184-swmr0], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.190-swmr0], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -403,6 +403,8 @@ else
 fi
 
 HAVE_SIZEOF="no"
+HAVE_C_SIZEOF="no"
+HAVE_STORAGE_SIZE="no"
 FORTRAN_DEFAULT_REALisDBLE="no"
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
@@ -483,6 +485,33 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
      	HAVE_SIZEOF="yes"],
      [AC_MSG_RESULT([no])])
 
+  ## See if the fortran compiler supports the intrinsic function "C_SIZEOF"
+
+  AC_MSG_CHECKING([if Fortran compiler supports intrinsic C_SIZEOF])
+  AC_TRY_RUN([ 
+   PROGRAM main
+     USE ISO_C_BINDING
+     INTEGER(C_INT) :: a
+     INTEGER(C_SIZE_T) :: result
+     result = C_SIZEOF(a)
+   END PROGRAM
+  ], [AC_MSG_RESULT([yes])
+     	HAVE_C_SIZEOF="yes"],
+     [AC_MSG_RESULT([no])])
+
+  ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
+
+  AC_MSG_CHECKING([if Fortran compiler supports intrinsic STORAGE_SIZE])
+  AC_TRY_RUN([ 
+   PROGRAM main
+     INTEGER :: a
+     INTEGER :: result
+     result = STORAGE_SIZE(a)
+   END PROGRAM
+  ], [AC_MSG_RESULT([yes])
+     	HAVE_STORAGE_SIZE="yes"],
+     [AC_MSG_RESULT([no])])
+
   ## Check to see if -r8 was specified to determine if we need to
   ## compile the DOUBLE PRECISION interfaces.
 
@@ -552,6 +581,8 @@ fi
 AC_LANG_POP(Fortran)
 
 AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF" = "Xyes"])
+AM_CONDITIONAL([FORTRAN_HAVE_C_SIZEOF], [test "X$HAVE_C_SIZEOF" = "Xyes"])
+AM_CONDITIONAL([FORTRAN_HAVE_STORAGE_SIZE], [test "X$HAVE_STORAGE_SIZE" = "Xyes"])
 AM_CONDITIONAL([FORTRAN_2003_CONDITIONAL_F], [test "X$HAVE_FORTRAN_2003" = "Xyes"])
 AM_CONDITIONAL([FORTRAN_DEFAULT_REALisDBLE_F], [test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"])
 
@@ -2864,54 +2895,6 @@ if test -n "$PARALLEL"; then
   if test "X-$MPE" = "X-yes"; then
     AC_DEFINE([HAVE_MPE], [1], [Define if we have MPE support])
   fi
-
-  ## ----------------------------------------------------------------------
-  ## Set the flag to indicate that the MPI_File_set_size() function
-  ## works with files over 2GB, unless it's already set in the cache.
-  ## (This flag should be set for all machines, except for ASCI Red, where
-  ## the cache value is set in it's config file)
-  ##
-  AC_MSG_CHECKING([if MPI_File_set_size works for files over 2GB])
-  AC_CACHE_VAL([hdf5_cv_mpi_file_set_size_big], [hdf5_cv_mpi_file_set_size_big=yes])
-  
-  if test ${hdf5_cv_mpi_file_set_size_big} = "yes"; then
-    AC_DEFINE([MPI_FILE_SET_SIZE_BIG], [1],
-              [Define if your system's `MPI_File_set_size' function works for files over 2GB.])
-    AC_MSG_RESULT([yes])
-  else
-    AC_MSG_RESULT([no])
-  fi
-
-  ## ----------------------------------------------------------------------
-  ## Set the flag to indicate that the MPI_File_get_size() function
-  ## works.  The default is enabled unless the user knows the function
-  ## doesn't work on the system and disables it.  (This flag should be set
-  ## for all machines except for SGI Altix Propack 4 where the function 
-  ## doesn't return correct file size.)
-  ##
-  AC_ARG_ENABLE([mpi-size],
-                [AS_HELP_STRING([--enable-mpi-size],
-                                [Some systems (only SGI Altix Propack 4 so far) return wrong value
-                                 from MPI_File_get_size.  By disabling this function, the library
-                                 will replace it with stat to get the correct file size.
-                                 [default=yes]])],
-                [MPI_GET_SIZE=$enableval])
-
-  AC_MSG_CHECKING([if MPI_File_get_size is enabled])
-
-  AC_SUBST(MPI_GET_SIZE)
-  case "X-$MPI_GET_SIZE" in
-    X-no)
-      AC_MSG_RESULT([no])
-      MPI_GET_SIZE=no
-      ;;
-    X-yes|*)
-      AC_MSG_RESULT([yes])
-      MPI_GET_SIZE=yes
-      AC_DEFINE([HAVE_MPI_GET_SIZE], [1],
-                [Define if MPI_File_get_size works correctly])
-      ;;
-  esac
 fi
 
 ## ----------------------------------------------------------------------

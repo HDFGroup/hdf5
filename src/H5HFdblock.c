@@ -161,6 +161,7 @@ HDmemset(dblock->blk, 0, dblock->size);
 
     /* Attach to parent indirect block, if there is one */
     dblock->parent = par_iblock;
+    dblock->fd_parent = par_iblock;
     if(dblock->parent)
         if(H5HF_man_iblock_attach(dblock->parent, par_entry, dblock_addr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't attach direct block to parent indirect block")

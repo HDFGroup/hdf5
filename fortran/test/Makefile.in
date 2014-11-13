@@ -101,7 +101,20 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_fortran_la_LIBADD =
-am_libh5test_fortran_la_OBJECTS = tf.lo t.lo
+am__libh5test_fortran_la_SOURCES_DIST = tf_F90.f90 tf.f90 t.c \
+	tf_F03.f90 tf_F08.f90
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_libh5test_fortran_la_OBJECTS = tf_F90.lo \
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.lo \
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.lo
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_libh5test_fortran_la_OBJECTS = tf_F03.lo \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.lo \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.lo
+@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@am_libh5test_fortran_la_OBJECTS = tf_F03.lo \
+@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	tf.lo \
+@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	t.lo
+@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@am_libh5test_fortran_la_OBJECTS = tf_F08.lo \
+@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	tf.lo \
+@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	t.lo
 libh5test_fortran_la_OBJECTS = $(am_libh5test_fortran_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -213,9 +226,9 @@ am__v_FCLD_1 =
 SOURCES = $(libh5test_fortran_la_SOURCES) $(fflush1_SOURCES) \
 	$(fflush2_SOURCES) $(fortranlib_test_SOURCES) \
 	$(fortranlib_test_1_8_SOURCES) $(fortranlib_test_F03_SOURCES)
-DIST_SOURCES = $(libh5test_fortran_la_SOURCES) $(fflush1_SOURCES) \
-	$(fflush2_SOURCES) $(fortranlib_test_SOURCES) \
-	$(fortranlib_test_1_8_SOURCES) \
+DIST_SOURCES = $(am__libh5test_fortran_la_SOURCES_DIST) \
+	$(fflush1_SOURCES) $(fflush2_SOURCES) \
+	$(fortranlib_test_SOURCES) $(fortranlib_test_1_8_SOURCES) \
 	$(am__fortranlib_test_F03_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -565,7 +578,6 @@ MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
-MPI_GET_SIZE = @MPI_GET_SIZE@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -739,7 +751,30 @@ noinst_LTLIBRARIES = libh5test_fortran.la
 # Our main targets, the tests themselves
 TEST_PROG = fortranlib_test fflush1 fflush2 fortranlib_test_1_8 \
 	$(am__append_2)
-libh5test_fortran_la_SOURCES = tf.f90 t.c
+
+# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
+# compiled first
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@libh5test_fortran_la_SOURCES = tf_F90.f90 \
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.f90 \
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.c
+
+# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
+# compiled first
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@libh5test_fortran_la_SOURCES = tf_F03.f90 \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.f90 \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.c
+
+# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
+# compiled first
+@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@libh5test_fortran_la_SOURCES = tf_F03.f90 \
+@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	tf.f90 \
+@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	t.c
+
+# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
+# compiled first
+@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@libh5test_fortran_la_SOURCES = tf_F08.f90 \
+@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	tf.f90 \
+@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	t.c
 
 # Source files are used for both the library and fortranlib_test.
 # Automake will complain about this without the following workaround.
