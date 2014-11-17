@@ -2308,9 +2308,9 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 
     /* Don't bother updating things, unless they've changed */
     if(changed) {
-        hbool_t shrink = FALSE;             /* Flag to indicate a dimension has shrank */
-        hbool_t expand = FALSE;             /* Flag to indicate a dimension has grown */
-        unsigned u;                         /* Local index variable */
+        hbool_t shrink = FALSE;         /* Flag to indicate a dimension has shrank */
+        hbool_t expand = FALSE;         /* Flag to indicate a dimension has grown */
+        unsigned u;                     /* Local index variable */
 
         /* Determine if we are shrinking and/or expanding any dimensions */
         for(u = 0; u < (unsigned)rank; u++) {
