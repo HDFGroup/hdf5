@@ -1,6 +1,14 @@
 include (${HDF_RESOURCES_DIR}/CMakePackageConfigHelpers.cmake)
 
 #-----------------------------------------------------------------------------
+# Check for Installation Utilities
+#-----------------------------------------------------------------------------
+if (WIN32)
+  find_program (NSIS_EXECUTABLE NSIS.exe PATHS "$ENV{ProgramFiles}\\NSIS" "$ENV{ProgramFiles(x86)}\\NSIS")
+  find_program (WIX_EXECUTABLE candle  PATHS "$ENV{ProgramFiles}\\WiX\ Toolset\ v3.9\\bin" "$ENV{ProgramFiles(x86)}\\WiX\ Toolset\ v3.9\\bin")
+endif (WIN32)
+
+#-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 if (NOT HDF5_INSTALL_NO_DEVELOPMENT)
@@ -180,6 +188,13 @@ endif (HDF5_PACK_EXAMPLES)
 HDF_README_PROPERTIES(HDF5_BUILD_FORTRAN)
 
 #-----------------------------------------------------------------------------
+# Configure the COPYING.txt file for the windows binary package
+#-----------------------------------------------------------------------------
+if (WIN32)
+  configure_file (${HDF5_SOURCE_DIR}/COPYING ${HDF5_BINARY_DIR}/COPYING.txt @ONLY)
+endif (WIN32)
+
+#-----------------------------------------------------------------------------
 # Add Document File(s) to CMake Install
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
@@ -273,7 +288,11 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
 
   set (CPACK_GENERATOR "TGZ") 
   if (WIN32)
-    list (APPEND CPACK_GENERATOR "NSIS") 
+    set (CPACK_GENERATOR "ZIP") 
+
+    if (NSIS_EXECUTABLE)    
+      list (APPEND CPACK_GENERATOR "NSIS") 
+    endif (NSIS_EXECUTABLE)    
     # Installers for 32- vs. 64-bit CMake:
     #  - Root install directory (displayed to end user at installer-run time)
     #  - "NSIS package/display name" (text used in the installer GUI)
@@ -297,6 +316,47 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     set (CPACK_MONOLITHIC_INSTALL ON)
     set (CPACK_NSIS_CONTACT "${HDF5_PACKAGE_BUGREPORT}")
     set (CPACK_NSIS_MODIFY_PATH ON)
+    
+    if (WIX_EXECUTABLE)    
+      list (APPEND CPACK_GENERATOR "WIX") 
+    endif (WIX_EXECUTABLE)    
+#WiX variables
+    set (CPACK_WIX_UNINSTALL "1")
+# .. variable:: CPACK_WIX_LICENSE_RTF
+#  RTF License File
+#
+#  If CPACK_RESOURCE_FILE_LICENSE has an .rtf extension it is used as-is.
+#
+#  If CPACK_RESOURCE_FILE_LICENSE has an .txt extension it is implicitly
+#  converted to RTF by the WiX Generator.
+#  The expected encoding of the .txt file is UTF-8.
+#
+#  With CPACK_WIX_LICENSE_RTF you can override the license file used by the
+#  WiX Generator in case CPACK_RESOURCE_FILE_LICENSE is in an unsupported
+#  format or the .txt -> .rtf conversion does not work as expected.
+    set (CPACK_RESOURCE_FILE_LICENSE "${HDF5_BINARY_DIR}/COPYING.txt")
+# .. variable:: CPACK_WIX_PRODUCT_ICON
+#  The Icon shown next to the program name in Add/Remove programs.
+    set(CPACK_WIX_PRODUCT_ICON "${HDF_RESOURCES_EXT_DIR}\\\\hdf.ico")
+#
+# .. variable:: CPACK_WIX_UI_BANNER
+#
+#  The bitmap will appear at the top of all installer pages other than the
+#  welcome and completion dialogs.
+#
+#  If set, this image will replace the default banner image.
+#
+#  This image must be 493 by 58 pixels.
+#
+# .. variable:: CPACK_WIX_UI_DIALOG
+#
+#  Background bitmap used on the welcome and completion dialogs.
+#
+#  If this variable is set, the installer will replace the default dialog
+#  image.
+#
+#  This image must be 493 by 312 pixels.
+#
   elseif (APPLE)
     list (APPEND CPACK_GENERATOR "DragNDrop") 
     set (CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
