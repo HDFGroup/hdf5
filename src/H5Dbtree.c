@@ -1045,7 +1045,7 @@ H5D__btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     H5D_btree_it_ud_t	udata;  /* User data for B-tree iterator callback */
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -1067,7 +1067,6 @@ H5D__btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     if((ret_value = H5B_iterate(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr, H5D__btree_idx_iterate_cb, &udata)) < 0)
         HERROR(H5E_DATASET, H5E_BADITER, "unable to iterate over chunk B-tree");
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree_idx_iterate() */
 
