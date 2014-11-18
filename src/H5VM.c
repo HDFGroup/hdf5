@@ -1089,7 +1089,7 @@ H5VM_array_offset_pre(unsigned n, const hsize_t *acc, const hsize_t *offset)
     HDassert(offset);
 
     /* Compute offset in array */
-    for (i=(int)(n-1), ret_value=0; i>=0; --i)
+    for(i = (int)(n - 1), ret_value = 0; i >= 0; --i)
         ret_value += acc[i] * offset[i];
 
     FUNC_LEAVE_NOAPI(ret_value)
