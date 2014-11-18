@@ -56,7 +56,7 @@ static int basic_id_test(void)
 
                 /* Try to access IDs with ficticious types */
 	H5E_BEGIN_TRY
-		testPtr = H5Iobject_verify(100, (H5I_type_t) 0);
+            testPtr = H5Iobject_verify((hid_t)100, (H5I_type_t) 0);
 	H5E_END_TRY
 
 	VERIFY(testPtr, NULL, "H5Iobject_verify");
@@ -64,7 +64,7 @@ static int basic_id_test(void)
 		goto out;
 
 	H5E_BEGIN_TRY
-		testPtr = H5Iobject_verify(700, (H5I_type_t) 700);
+            testPtr = H5Iobject_verify((hid_t)700, (H5I_type_t) 700);
 	H5E_END_TRY
 
 	VERIFY(testPtr, NULL, "H5Iobject_verify");
@@ -336,8 +336,8 @@ out:
 static int test_is_valid(void)
 {
     hid_t   dtype;      /* datatype id */
-    int     nmembs1;    /* number of type memnbers */
-    int     nmembs2;
+    int64_t nmembs1;    /* number of type memnbers */
+    int64_t nmembs2;
     htri_t  tri_ret;    /* htri_t return value */
     herr_t  ret;        /* return value */
 
@@ -393,7 +393,7 @@ static int test_is_valid(void)
         goto out;
 
     /* Check that an id of -1 is invalid */
-    tri_ret = H5Iis_valid(-1);
+    tri_ret = H5Iis_valid((hid_t)-1);
     VERIFY(tri_ret, FALSE, "H4Iis_valid");
     if (tri_ret != FALSE)
         goto out;
@@ -427,13 +427,13 @@ static int test_get_type(void)
         goto out;
 
     /* Check that the ID is correct */
-    type_ret = H5Iget_type(H5T_STRING);
+    type_ret = H5Iget_type((hid_t)H5T_STRING);
     VERIFY(type_ret, H5I_BADID, "H5Iget_type");
     if (type_ret != H5I_BADID)
         goto out;
 
     /* Check that the ID is correct */
-    type_ret = H5Iget_type(-1);
+    type_ret = H5Iget_type((hid_t)-1);
     VERIFY(type_ret, H5I_BADID, "H5Iget_type");
     if (type_ret != H5I_BADID)
         goto out;

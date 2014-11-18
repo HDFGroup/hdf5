@@ -666,7 +666,7 @@ check_file_open_tags(hid_t fcpl, int type)
     /* =================== */
     /* TEST: Open The File */
     /* =================== */
-    if ( (fid = H5Fopen(FILENAME, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* =================================== */
     /* Verification of Metadata Tag Values */

@@ -65,7 +65,7 @@
         FAIL_STACK_ERROR                                                       \
     if((NMEMBS) != H5I_nmembers(H5I_DATATYPE)) {                               \
         H5_FAILED();                                                           \
-        printf("    #dtype ids expected: %d; found: %d\n", NMEMBS,             \
+        printf("    #dtype ids expected: %lld; found: %d\n", (long long)NMEMBS,             \
             H5I_nmembers(H5I_DATATYPE));                                       \
         goto error;                                                            \
     }
@@ -688,8 +688,9 @@ test_compound_2(void)
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
-    hid_t       array_dt;
-    int			i, nmembs;
+    hid_t               array_dt;
+    int64_t		nmembs;
+    int			i;
 
     TESTING("compound element reordering");
 
@@ -809,8 +810,9 @@ test_compound_3(void)
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
-    hid_t       array_dt;
-    int			i, nmembs;
+    hid_t               array_dt;
+    int64_t		nmembs;
+    int			i;
 
     TESTING("compound subset conversions");
 
@@ -931,8 +933,9 @@ test_compound_4(void)
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
-    hid_t       array_dt;
-    int			i, nmembs;
+    hid_t               array_dt;
+    int64_t		nmembs;
+    int			i;
 
     TESTING("compound element shrinking & reordering");
 
@@ -1066,14 +1069,7 @@ test_compound_5(void)
     void        *bkg = HDcalloc((size_t)2, sizeof(dst_type_t));
     int          retval = 1;
 
-#if 1
     TESTING("optimized struct converter");
-#else
-    /* Turn off optimized compound conversion function to work around
-     * the problem. */
-    TESTING("optimized struct converter bug workaround");
-    H5Tunregister(H5T_PERS_DONTCARE, "struct(opt)", -1, -1, NULL);
-#endif
 
     /* Build datatypes */
     short_array = H5Tcreate(H5T_COMPOUND, 4*sizeof(short));
@@ -1167,7 +1163,8 @@ test_compound_6(void)
     const size_t	nelmts = NTESTELEM;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
-    int			i, nmembs;
+    int64_t		nmembs;
+    int			i;
 
     TESTING("compound element growing");
 
@@ -1560,7 +1557,7 @@ test_compound_8(void)
 
     if(tsize != (sizeof(char) + sizeof(char) + sizeof(int))) {
         H5_FAILED(); AT();
-        printf("The size of the packed compound datatype is incorrect\n");
+        printf("The size of the packed compound datatype is incorrect: tsize = %zu\n", tsize);
         goto error;
     } /* end if */
 

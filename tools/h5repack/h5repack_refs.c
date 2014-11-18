@@ -189,7 +189,7 @@ int do_copy_refobjs(hid_t fidin,
                                  */
                                 if((refname = MapIdToName(refobj_id, travt)) != NULL) {
                                     /* create the reference, -1 parameter for objects */
-                                    if(H5Rcreate(&refbuf[u], fidout, refname, H5R_OBJECT, -1) < 0)
+                                    if(H5Rcreate(&refbuf[u], fidout, refname, H5R_OBJECT, (hid_t)-1) < 0)
                                         goto error;
                                     if(options->verbose)
                                     {

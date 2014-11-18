@@ -168,23 +168,28 @@ H5F_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	if((n = H5I_nmembers(H5I_FILE)) != 0) {
-            H5I_clear_type(H5I_FILE, FALSE, FALSE);
-	} else {
+	if(H5I_nmembers(H5I_FILE) > 0) {
+            (void)H5I_clear_type(H5I_FILE, FALSE, FALSE);
+            n++; /*H5I*/
+	} /* end if */
+        else {
             /* Make certain we've cleaned up all the shared file objects */
             H5F_sfile_assert_num(0);
 
             /* Close deprecated interface */
             n += H5F__term_deprec_interface();
 
-	    H5I_dec_type_ref(H5I_FILE);
+            /* Destroy the file object id group */
+	    (void)H5I_dec_type_ref(H5I_FILE);
+            n++; /*H5I*/
+
+	    /* Mark closed */
 	    H5_interface_initialize_g = 0;
-	    n = 1; /*H5I*/
 	} /* end else */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* H5F_term_interface() */
+} /* end H5F_term_interface() */
 
 
 /*-------------------------------------------------------------------------

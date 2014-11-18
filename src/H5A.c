@@ -177,17 +177,23 @@ H5A_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	if((n = H5I_nmembers(H5I_ATTR))>0) {
+	if(H5I_nmembers(H5I_ATTR) > 0) {
 	    (void)H5I_clear_type(H5I_ATTR, FALSE, FALSE);
-	} else {
+            n++; /*H5I*/
+	} /* end if */
+        else {
             /* Close deprecated interface */
             n += H5A__term_deprec_interface();
 
+	    /* Destroy the attribute object id group */
 	    (void)H5I_dec_type_ref(H5I_ATTR);
+            n++; /*H5I*/
+
+	    /* Mark closed */
 	    H5_interface_initialize_g = 0;
-	    n = 1;
-	}
-    }
+	} /* end else */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(n)
 } /* H5A_term_interface() */
 

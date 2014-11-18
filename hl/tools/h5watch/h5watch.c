@@ -223,7 +223,7 @@ doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
     } 
 
     /* Print the values. */
-    if((ret_value = h5tools_dump_dset(stdout, &info, &ctx, did, -1, &subset)) < 0)
+    if((ret_value = h5tools_dump_dset(stdout, &info, &ctx, did, &subset)) < 0)
 	error_msg("unable to print data\n");
 
     HDfprintf(stdout, "\n");

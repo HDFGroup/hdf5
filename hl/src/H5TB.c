@@ -3263,7 +3263,7 @@ hid_t H5TB_create_type(hid_t loc_id,
     hsize_t  nfields = 0;
     char   **fnames = NULL;
     unsigned i;
-    herr_t   ret_val = -1;
+    hid_t   ret_val = -1;
 
     /* get the number of fields  */
     if(H5TBget_table_info(loc_id, dset_name, &nfields, NULL) < 0)

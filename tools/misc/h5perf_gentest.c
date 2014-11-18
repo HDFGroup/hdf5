@@ -395,8 +395,8 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
 		H5Dclose(did);	
 		
 		/* 11 add object refs */
-		H5Rcreate(&buf_ref[0],gid1, ".", H5R_OBJECT, -1); 
-		H5Rcreate(&buf_ref[1],gid1, tmp_name3, H5R_OBJECT, -1); 
+		H5Rcreate(&buf_ref[0],gid1, ".", H5R_OBJECT, (hid_t)-1); 
+		H5Rcreate(&buf_ref[1],gid1, tmp_name3, H5R_OBJECT, (hid_t)-1); 
 	    sprintf(name, "%05d obj refs", j);
         did = H5Dcreate (gid1, name, H5T_STD_REF_OBJ, sid_2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Dwrite (did, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_ref);		
@@ -533,7 +533,7 @@ int add_attrs(hid_t oid, int idx)
 
 	/* 4 single point */
 	sid = H5Screate_simple (1, dims1, NULL);
-    H5Rcreate(&ref, oid, ".", H5R_OBJECT, -1);
+    H5Rcreate(&ref, oid, ".", H5R_OBJECT, (hid_t)-1);
 	sprintf(name, "%05d single float", idx);
     nattrs += add_attr(oid, name, H5T_NATIVE_FLOAT, sid, &f);	
 	sprintf(name, "%05d single double", idx);

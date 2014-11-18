@@ -49,6 +49,17 @@ echo "Generate hl/src/H5LTparse.c from hl/src/H5LTparse.y"
 bison -pH5LTyy -o H5LTparse.c -d H5LTparse.y
 echo "Generate hl/src/H5LTanalyze.c from hl/src/H5LTanalyze.l"
 flex --nounistd -PH5LTyy -oH5LTanalyze.c H5LTanalyze.l
+
+# fix H5LTparse.c to declare H5LTyyparse return type as an hid_t
+# instead of int.  Currently the generated function H5LTyyparse is
+# generated with a return value of type int, which is a mapping to the
+# flex yyparse function.  The return value in the HL library should be
+# an hid_t. 
+# I propose to not use flex to generate this function, but for now I am 
+# adding a perl command to find and replace this function declaration in
+# H5LTparse.c.
+perl -0777 -pi -e 's/int\nyyparse/hid_t\nyyparse/igs' H5LTparse.c
+perl -0777 -pi -e 's/int H5LTyyparse/hid_t H5LTyyparse/igs' H5LTparse.c
 cd ../..
 
 exit 0
