@@ -1,4 +1,4 @@
-HDF5 version 1.9.192-swmr0 currently under development
+HDF5 version 1.9.203-swmr0 currently under development
 
 
 INTRODUCTION
@@ -1171,9 +1171,6 @@ Supported Platforms
     #1 SMP x86_64 GNU/Linux       compilers for 64-bit applications;
     (koala)                           Version 4.1.2 20080704 (Red Hat 4.1.2-54)
                                       Version 4.8.2
-                                  PGI C, Fortran, C++ for 64-bit target on 
-                                  x86-64;
-                                      Version 13.7-0 
                                   Intel(R) C, C++, Fortran Compilers for 
                                   applications running on Intel(R) 64; 
                                       Version 14.0.2 (Build 20140120)
@@ -1189,11 +1186,12 @@ Supported Platforms
                                   compilers:
                                      Version 14.0.2 (Build 20140120)
 
-    Linux 2.6.32-431.11.2.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
-    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
-    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
-                                  IBM XL C/C++ V11.1
-                                  IBM XL Fortran V13.1
+    Linux 2.6.32-431.29.2.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-4)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-4)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-4)
+                                  IBM XL C/C++ V13.1
+                                  IBM XL Fortran V15.1
+    
     Linux 2.6.32-220.23.1.1chaos  Intel C, C++, Fortran Compilers
     ch5.x86_64 GNU/Linux              Version 12.1.5.339
     (LLNL Aztec)
@@ -1209,16 +1207,20 @@ Supported Platforms
     Windows 7                     Visual Studio 2008 w/ Intel Fortran 14 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 14 (cmake)
                                   Visual Studio 2012 w/ Intel Fortran 14 (cmake)
-                                  Cygwin(CYGWIN_NT-6.1 1.7.28(0.271/5/3) gcc(4.8.2) compiler and gfortran)
+                                  Visual Studio 2013 w/ Intel Fortran 14 (cmake)
+                                  Cygwin(CYGWIN_NT-6.1 1.7.32(0.274/5/3) gcc(4.8.3) compiler and gfortran)
                                   (cmake and autotools)
 
     Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 14 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 14 (cmake)
                                   Visual Studio 2012 w/ Intel Fortran 14 (cmake)
+                                  Visual Studio 2013 w/ Intel Fortran 14 (cmake)
                                   
     Windows 8.1                   Visual Studio 2012 w/ Intel Fortran 14 (cmake)
+                                  Visual Studio 2013 w/ Intel Fortran 14 (cmake)
 
     Windows 8.1 x64               Visual Studio 2012 w/ Intel Fortran 14 (cmake)
+                                  Visual Studio 2013 w/ Intel Fortran 14 (cmake)
 
     Mac OS X Lion 10.7.3          gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.2.1
     32- and 64-bit                g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.2.1
@@ -1303,12 +1305,12 @@ More Tested Platforms
 =====================
 The following platforms are not supported but have been tested for this release.
 
-    Linux 2.6.18-308.13.1.el5PAE  MPICH mpich 3.1 compiled with
-    #1 SMP i686 i686 i386             gcc 4.8.2 and gfortran 4.8.2
+    Linux 2.6.18-308.13.1.el5PAE  MPICH mpich 3.1.2 compiled with
+    #1 SMP i686 i686 i386             gcc 4.9.1 and gfortran 4.9.1
     (jam)                         g95 (GCC 4.0.3 (g95 0.94!)
 
-    Linux 2.6.18-431.11.2.el6     MPICH mpich 3.1 compiled with
-    #1 SMP x86_64 GNU/Linux           gcc 4.8.2 and gfortran 4.8.2
+    Linux 2.6.18-431.11.2.el6     MPICH mpich 3.1.2 compiled with
+    #1 SMP x86_64 GNU/Linux           gcc 4.9.1 and gfortran 4.9.1
     (platypus)                    g95 (GCC 4.0.3 (g95 0.94!)   
 
     FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
@@ -1351,14 +1353,14 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (SUSE Linux) 4.8.1
                                   (cmake and autotools)
 
-    Ubuntu 14.04 3.13.0-32-generic #57-Ubuntu SMP i686 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
-                                  GNU Fortran (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
+    Ubuntu 14.04 3.13.0-35-generic #62-Ubuntu SMP i686 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.9.1-0ubuntu1) 4.9.1
+                                  GNU Fortran (Ubuntu/Linaro 4.9.1-0ubuntu1) 4.9.1
                                   (cmake and autotools)
 
-    Ubuntu 14.04 3.13.0-32-generic #57-Ubuntu SMP x86_64 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
-                                  GNU Fortran (Ubuntu/Linaro 4.8.2-19ubuntu1) 4.8.2
+    Ubuntu 14.04 3.13.0-35-generic #62-Ubuntu SMP x86_64 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.9.1-0ubuntu1) 4.9.1
+                                  GNU Fortran (Ubuntu/Linaro 4.9.1-0ubuntu1) 4.9.1
                                   (cmake and autotools)
     
     Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46

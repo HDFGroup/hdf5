@@ -1186,13 +1186,18 @@ static int test_table(hid_t fid, int do_write)
             goto out;
     }
 
-    /* read the "Pressure" field */
     start    = 0;
     nrecords = NRECORDS;
+
+    /* read an invalid field, should fail */
+    if ( H5TBread_fields_name(fid,"table10","DoesNotExist",start,nrecords,
+        sizeof(float),0,field_sizes_pre,pressure_out) >=0)
+      goto out;
+    
+    /* read the "Pressure" field */
     if ( H5TBread_fields_name(fid,"table10","Pressure",start,nrecords,
         sizeof(float),0,field_sizes_pre,pressure_out)<0)
         goto out;
-
 
     /* Compare the extracted table with the initial values */
     for( i = 0; i < NRECORDS; i++ )

@@ -58,7 +58,7 @@ CONTAINS
 !**
 !***************************************************************
 
-  INTEGER FUNCTION liter_cb(group, name, link_info, op_data) bind(C)
+  INTEGER(KIND=C_INT) FUNCTION liter_cb(group, name, link_info, op_data) bind(C)
 
     USE HDF5
     USE ISO_C_BINDING

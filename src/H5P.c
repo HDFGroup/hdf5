@@ -886,7 +886,7 @@ herr_t
 H5Pencode(hid_t plist_id, void *buf, size_t *nalloc)
 {
     H5P_genplist_t	*plist;         /* Property list to query */
-    hid_t ret_value = SUCCEED;          /* return value */
+    herr_t ret_value = SUCCEED;          /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*x*z", plist_id, buf, nalloc);
@@ -1684,7 +1684,7 @@ done:
 herr_t
 H5Pclose_class(hid_t cls_id)
 {
-    hid_t	ret_value = SUCCEED;    /* Return value			*/
+    herr_t	ret_value = SUCCEED;    /* Return value			*/
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", cls_id);

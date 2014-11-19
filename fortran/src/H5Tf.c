@@ -225,31 +225,32 @@ nh5tequal_c ( hid_t_f *type1_id , hid_t_f *type2_id, int_f *c_flag)
   return ret_value;
 }
 
-
 /****if* H5Tf/h5tget_class_c
  * NAME
- *        h5tget_class_c
+ *  h5tget_class_c
  * PURPOSE
- *     Call H5Tget_class to determine the datatype class
+ *  Call H5Tget_class to determine the datatype class
  * INPUTS
- *      type_id - identifier of the dataspace
+ *  type_id - identifier of the dataspace
  * OUTPUTS
- *     classtype - class type; possible values are:
- *              H5T_NO_CLASS_F (-1)
- *              H5T_INTEGER_F (0)
- *              H5T_FLOAT_F (1)
- *              H5T_TIME_F (2)
- *              H5T_STRING_F (3)
- *              H5T_BITFIELD_F (4)
- *              H5T_OPAQUE_F (5)
- *              H5T_COMPOUNDF (6)
- *              H5T_REFERENCE_F (7)
- *              H5T_ENUMF (8)
+ *  classtype - class type; possible values are:
+ *               H5T_NO_CLASS_F (-1)
+ *               H5T_INTEGER_F (0)
+ *               H5T_FLOAT_F (1)
+ *               H5T_TIME_F (2)
+ *               H5T_STRING_F (3)
+ *               H5T_BITFIELD_F (4)
+ *               H5T_OPAQUE_F (5)
+ *               H5T_COMPOUNDF (6)
+ *               H5T_REFERENCE_F (7)
+ *               H5T_ENUM_F (8)
+ *               H5T_VLEN_F (9)
+ *               H5T_ARRAY_F (10)
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Saturday, August 14, 1999
+ *  Saturday, August 14, 1999
  * HISTORY
  *
  * SOURCE

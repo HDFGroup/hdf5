@@ -33,6 +33,12 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	// Creates a simple dataspace
 	DataSpace(int rank, const hsize_t * dims, const hsize_t * maxdims = NULL);
 
+	// Creates a DataSpace object using an existing dataspace id.
+	DataSpace(const hid_t space_id);
+
+	// Copy constructor: makes a copy of the original DataSpace object.
+	DataSpace(const DataSpace& original);
+
 	// Assignment operator
 	DataSpace& operator=( const DataSpace& rhs );
 
@@ -108,12 +114,6 @@ class H5_DLLCPP DataSpace : public IdComponent {
 
 	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("DataSpace"); }
-
-	// Creates a DataSpace object using an existing dataspace id.
-	DataSpace(const hid_t space_id);
-
-	// Copy constructor: makes a copy of the original DataSpace object.
-	DataSpace(const DataSpace& original);
 
 	// Gets the dataspace id.
 	virtual hid_t getId() const;

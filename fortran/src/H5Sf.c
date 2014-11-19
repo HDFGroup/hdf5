@@ -97,7 +97,7 @@ nh5sclose_c ( hid_t_f *space_id )
   int ret_value = 0;
   hid_t c_space_id;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   if ( H5Sclose(c_space_id) < 0  ) ret_value = -1;
   return ret_value;
 }
@@ -163,7 +163,7 @@ nh5scopy_c( hid_t_f *space_id , hid_t_f *new_space_id)
   hid_t c_new_space_id;
   hid_t c_space_id;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_new_space_id = H5Scopy(c_space_id);
   if ( c_new_space_id < 0  ) ret_value = -1;
 
@@ -201,7 +201,7 @@ nh5sget_select_hyper_nblocks_c( hid_t_f *space_id , hssize_t_f * num_blocks)
   hid_t c_space_id;
   hssize_t c_num_blocks;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_num_blocks = H5Sget_select_hyper_nblocks(c_space_id);
   if ( c_num_blocks < 0  ) ret_value = -1;
 
@@ -239,7 +239,7 @@ nh5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points)
   hid_t c_space_id;
   hssize_t c_num_points;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_num_points = H5Sget_select_elem_npoints(c_space_id);
   if ( c_num_points < 0  ) ret_value = -1;
 
@@ -278,8 +278,8 @@ nh5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points)
 */
 
 int_f
-nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock,
-                                  hsize_t_f * num_blocks, hsize_t_f * buf)
+nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f *startblock,
+                                  hsize_t_f *num_blocks, hsize_t_f *buf)
 /******/
 {
   int ret_value = -1;
@@ -291,8 +291,8 @@ nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock,
   int rank;
   hsize_t c_startblock, *c_buf;
 
-  c_space_id = *space_id;
-  c_num_blocks = * num_blocks;
+  c_space_id = (hid_t)*space_id;
+  c_num_blocks = (hsize_t)*num_blocks;
 
   rank = H5Sget_simple_extent_ndims(c_space_id);
   if (rank < 0 ) return ret_value;
@@ -360,7 +360,7 @@ nh5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end)
     int i, rank;
     int_f ret_value = 0;
 
-    c_space_id = *space_id;
+    c_space_id = (hid_t)*space_id;
     rank = H5Sget_simple_extent_ndims(c_space_id);
     if(rank < 0 )
         HGOTO_DONE(FAIL)
@@ -418,7 +418,7 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
   int rank;
   int j,i2;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_num_points = (hsize_t)* numpoints;
 
   rank = H5Sget_simple_extent_ndims(c_space_id);
@@ -479,7 +479,7 @@ nh5sselect_all_c ( hid_t_f *space_id )
   int ret_value = 0;
   hid_t c_space_id;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   if ( H5Sselect_all(c_space_id) < 0  ) ret_value = -1;
   return ret_value;
 }
@@ -508,7 +508,7 @@ nh5sselect_none_c ( hid_t_f *space_id )
   int ret_value = 0;
   hid_t c_space_id;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   if ( H5Sselect_none(c_space_id) < 0  ) ret_value = -1;
   return ret_value;
 }
@@ -542,7 +542,7 @@ nh5sselect_valid_c ( hid_t_f *space_id , int_f *flag )
   hid_t c_space_id;
   htri_t status;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   status = H5Sselect_valid(c_space_id);
   *flag = (int_f)status;
   if ( status < 0  ) ret_value = -1;
@@ -577,7 +577,7 @@ nh5sget_simple_extent_npoints_c ( hid_t_f *space_id , hsize_t_f *npoints )
   hid_t c_space_id;
   hssize_t c_npoints;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_npoints = H5Sget_simple_extent_npoints(c_space_id);
   if ( c_npoints == 0  ) ret_value = -1;
   *npoints = (hsize_t_f)c_npoints;
@@ -612,7 +612,7 @@ nh5sget_select_npoints_c ( hid_t_f *space_id , hssize_t_f *npoints )
   hssize_t c_npoints;
   hid_t c_space_id;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_npoints = H5Sget_select_npoints(c_space_id);
   if ( c_npoints < 0  ) ret_value = -1;
   *npoints = (hssize_t_f)c_npoints;
@@ -647,7 +647,7 @@ nh5sget_simple_extent_ndims_c ( hid_t_f *space_id , int_f *ndims )
   hid_t c_space_id;
   int c_ndims;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_ndims = H5Sget_simple_extent_ndims(c_space_id);
   if ( c_ndims < 0  ) ret_value = -1;
   *ndims = (int_f)c_ndims;
@@ -683,7 +683,7 @@ nh5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype)
   hid_t c_space_id;
   H5S_class_t c_classtype;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_classtype = H5Sget_simple_extent_type(c_space_id);
   if ( c_classtype < 0  ) ret_value = -1;
    *classtype = c_classtype;
@@ -724,7 +724,7 @@ nh5soffset_simple_c ( hid_t_f *space_id , hssize_t_f *offset)
     int i;
     int_f ret_value = 0;
 
-    c_space_id = *space_id;
+    c_space_id = (hid_t)*space_id;
     rank = H5Sget_simple_extent_ndims(c_space_id);
     if(rank < 0)
         HGOTO_DONE(FAIL)
@@ -820,7 +820,7 @@ nh5sget_simple_extent_dims_c ( hid_t_f *space_id , hsize_t_f *dims, hsize_t_f *m
     int i;
     int_f ret_value;
 
-    c_space_id = *space_id;
+    c_space_id = (hid_t)*space_id;
     rank = H5Sget_simple_extent_ndims(c_space_id);
     if(rank < 0)
         HGOTO_DONE(FAIL)
@@ -871,7 +871,7 @@ nh5sis_simple_c ( hid_t_f *space_id , int_f *flag )
   hid_t c_space_id;
   htri_t status;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   status = H5Sis_simple(c_space_id);
   *flag = (int_f)status;
   if ( status < 0  ) ret_value = -1;
@@ -905,8 +905,8 @@ nh5sextent_copy_c ( hid_t_f *dest_space_id , hid_t_f *source_space_id)
   hid_t c_dest_space_id, c_source_space_id;
   herr_t status;
 
-  c_dest_space_id = *dest_space_id;
-  c_source_space_id = *source_space_id;
+  c_dest_space_id = (hid_t)*dest_space_id;
+  c_source_space_id = (hid_t)*source_space_id;
   status = H5Sextent_copy(c_dest_space_id, c_source_space_id);
   if ( status < 0  ) ret_value = -1;
   return ret_value;
@@ -937,7 +937,7 @@ nh5sset_extent_none_c ( hid_t_f *space_id )
   hid_t c_space_id;
   herr_t status;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   status = H5Sset_extent_none(c_space_id);
   if ( status < 0  ) ret_value = -1;
   return ret_value;
