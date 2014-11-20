@@ -192,10 +192,7 @@ H5D_none_is_space_alloc(const H5O_storage_chunk_t *storage)
 static herr_t
 H5D_none_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 {
-    hsize_t     idx;   	                /* Array index of chunk */
-    herr_t	ret_value = SUCCEED;	/* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -207,20 +204,16 @@ H5D_none_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
 
     /* Calculate the index of this chunk */
-    if(H5VM_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
-
-    udata->chunk_idx = idx;
+    udata->chunk_idx = H5VM_array_offset_pre((idx_info->layout->ndims - 1), idx_info->layout->max_down_chunks, udata->common.scaled);
 
     /* Calculate the address of the chunk */
-    udata->addr = idx_info->storage->idx_addr + idx * idx_info->layout->size;
+    udata->addr = idx_info->storage->idx_addr + udata->chunk_idx * idx_info->layout->size;
 
     /* Update the other (constant) information for the chunk */
     udata->nbytes = idx_info->layout->size;
     udata->filter_mask = 0;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5D_none_get_addr() */
 
 
@@ -248,7 +241,7 @@ H5D_none_iterate(const H5D_chk_idx_info_t *idx_info,
     hsize_t idx;    	/* Array index of chunk */
     int ret_value;    	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -273,8 +266,7 @@ H5D_none_iterate(const H5D_chk_idx_info_t *idx_info,
     /* Iterate over all the chunks in the dataset's dataspace */
     for(u = 0; u < idx_info->layout->nchunks; u++) {
 	/* Calculate the index of this chunk */
-	if(H5VM_chunk_index(ndims, chunk_rec.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+	idx = H5VM_chunk_index(ndims, chunk_rec.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks);
 
 	/* Calculate the address of the chunk */
 	chunk_rec.chunk_addr = idx_info->storage->idx_addr + idx * idx_info->layout->size;
@@ -302,7 +294,6 @@ H5D_none_iterate(const H5D_chk_idx_info_t *idx_info,
 	} /* end while */
     } /* end for */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_none_iterate() */
 

@@ -553,6 +553,16 @@ H5B2_hdr_free(H5B2_hdr_t *hdr)
         hdr->node_info = H5FL_SEQ_FREE(H5B2_node_info_t, hdr->node_info);
     } /* end if */
 
+    /* Release the min & max record info, if set */
+    if(hdr->min_native_rec) {
+	HDfree(hdr->min_native_rec);
+	hdr->min_native_rec = NULL;
+    } /* end if */
+    if(hdr->max_native_rec) {
+	HDfree(hdr->max_native_rec);
+	hdr->max_native_rec = NULL;
+    } /* end if */
+
     /* Free B-tree header info */
     hdr = H5FL_FREE(H5B2_hdr_t, hdr);
 

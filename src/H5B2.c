@@ -306,11 +306,11 @@ H5B2_insert(H5B2_t *bt2, hid_t dxpl_id, void *udata)
 
     /* Attempt to insert record into B-tree */
     if(hdr->depth > 0) {
-        if(H5B2_insert_internal(hdr, dxpl_id, hdr->depth, NULL, &hdr->root, hdr, udata) < 0)
+        if(H5B2_insert_internal(hdr, dxpl_id, hdr->depth, NULL, &hdr->root, H5B2_POS_ROOT, hdr, udata) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree internal node")
     } /* end if */
     else {
-        if(H5B2_insert_leaf(hdr, dxpl_id, &hdr->root, hdr, udata) < 0)
+        if(H5B2_insert_leaf(hdr, dxpl_id, &hdr->root, H5B2_POS_ROOT, hdr, udata) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree leaf node")
     } /* end else */
 
@@ -433,6 +433,7 @@ H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
     unsigned    depth;                  /* Current depth of the tree */
     int         cmp;                    /* Comparison value of records */
     unsigned    idx;                    /* Location of record which matches key */
+    H5B2_nodepos_t curr_pos;            /* Position of the current node */
     htri_t      ret_value = TRUE;       /* Return value */
 
     FUNC_ENTER_NOAPI(FALSE)
@@ -453,6 +454,28 @@ H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
     if(curr_node_ptr.node_nrec == 0)
         HGOTO_DONE(FALSE)
 
+    /* Check record against min & max records in tree, to attempt to quickly
+     *  find candidates or avoid further searching.
+     */
+    if(hdr->min_native_rec != NULL) {
+	if((cmp = (hdr->cls->compare)(udata, hdr->min_native_rec)) < 0)
+	    HGOTO_DONE(FALSE) 	/* Less than the least record--not found */ 
+	else if(cmp == 0) { /* Record is found */
+	    if(op && (op)(hdr->min_native_rec, op_data) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
+	    HGOTO_DONE(TRUE)
+	} /* end if */
+    } /* end if */
+    if(hdr->max_native_rec != NULL) {
+	if((cmp = (hdr->cls->compare)(udata, hdr->max_native_rec)) > 0)
+	    HGOTO_DONE(FALSE) 	/* Greater than the greatest record--not found */
+	else if(cmp == 0) { /* Record is found */
+	    if(op && (op)(hdr->max_native_rec, op_data) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
+	    HGOTO_DONE(TRUE)
+	} /* end if */
+    } /* end if */
+
     /* Current depth of the tree */
     depth = hdr->depth;
 
@@ -462,6 +485,7 @@ H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
 
     /* Walk down B-tree to find record or leaf node where record is located */
     cmp = -1;
+    curr_pos = H5B2_POS_ROOT;
     while(depth > 0) {
         H5B2_internal_t *internal;          /* Pointer to internal node in B-tree */
         H5B2_node_ptr_t next_node_ptr;      /* Node pointer info for next node */
@@ -485,6 +509,24 @@ H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
         if(cmp != 0) {
             /* Get node pointer for next node to search */
             next_node_ptr=internal->node_ptrs[idx];
+
+            /* Set the position of the next node */
+            if(H5B2_POS_MIDDLE != curr_pos) {
+                if(idx == 0) {
+                    if(H5B2_POS_LEFT == curr_pos || H5B2_POS_ROOT == curr_pos)
+                        curr_pos = H5B2_POS_LEFT;
+                    else
+                        curr_pos = H5B2_POS_MIDDLE;
+                } /* end if */
+                else if(idx == internal->nrec) {
+                    if(H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos)
+                        curr_pos = H5B2_POS_RIGHT;
+                    else
+                        curr_pos = H5B2_POS_MIDDLE;
+                } /* end if */
+                else
+                    curr_pos = H5B2_POS_MIDDLE;
+            } /* end if */
 
             /* Unlock current node */
             if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, (unsigned)(hdr->swmr_write ? H5AC__PIN_ENTRY_FLAG : H5AC__NO_FLAGS_SET)) < 0)
@@ -552,6 +594,27 @@ H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
+            } /* end if */
+
+            /* Check for record being the min or max for the tree */
+            /* (Don't use 'else' for the idx check, to allow for root leaf node) */
+            if(H5B2_POS_MIDDLE != curr_pos) {
+                if(idx == 0) {
+                    if(H5B2_POS_LEFT == curr_pos || H5B2_POS_ROOT == curr_pos) {
+                        if(hdr->min_native_rec == NULL)
+                            if(NULL == (hdr->min_native_rec = (uint8_t *)HDmalloc(hdr->cls->nrec_size)))
+                                HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for v2 B-tree min record info")
+                        HDmemcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
+                    } /* end if */
+                } /* end if */
+                if(idx == (unsigned)(leaf->nrec - 1)) {
+                    if(H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
+                        if(hdr->max_native_rec == NULL)
+                            if(NULL == (hdr->max_native_rec = (uint8_t *)HDmalloc(hdr->cls->nrec_size)))
+                                HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for v2 B-tree max record info")
+                        HDmemcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
+                    } /* end if */
+                } /* end if */
             } /* end if */
         } /* end else */
 
@@ -805,8 +868,8 @@ H5B2_remove(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_remove_t op,
         hbool_t depth_decreased = FALSE;  /* Flag to indicate whether the depth of the B-tree decreased */
 
         if(H5B2_remove_internal(hdr, dxpl_id, &depth_decreased, NULL, NULL,
-                hdr->depth, &(hdr->cache_info), NULL, &hdr->root, udata, op,
-                op_data) < 0)
+                hdr->depth, &(hdr->cache_info), NULL, H5B2_POS_ROOT, &hdr->root,
+                udata, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
 
         /* Check for decreasing the depth of the B-tree */
@@ -824,7 +887,7 @@ H5B2_remove(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_remove_t op,
         } /* end for */
     } /* end if */
     else {
-        if(H5B2_remove_leaf(hdr, dxpl_id, &hdr->root, hdr, udata, op, op_data) < 0)
+        if(H5B2_remove_leaf(hdr, dxpl_id, &hdr->root, H5B2_POS_ROOT, hdr, udata, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree leaf node")
     } /* end else */
 
@@ -894,8 +957,8 @@ H5B2_remove_by_idx(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order,
         hbool_t depth_decreased = FALSE;  /* Flag to indicate whether the depth of the B-tree decreased */
 
         if(H5B2_remove_internal_by_idx(hdr, dxpl_id, &depth_decreased, NULL,
-                NULL, hdr->depth, &(hdr->cache_info), NULL, &hdr->root, idx,
-                udata, op, op_data) < 0)
+                NULL, hdr->depth, &(hdr->cache_info), NULL, &hdr->root,
+                H5B2_POS_ROOT, idx, udata, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
 
         /* Check for decreasing the depth of the B-tree */
@@ -913,7 +976,7 @@ H5B2_remove_by_idx(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order,
         } /* end for */
     } /* end if */
     else {
-        if(H5B2_remove_leaf_by_idx(hdr, dxpl_id, &hdr->root, hdr, (unsigned)idx, op, op_data) < 0)
+        if(H5B2_remove_leaf_by_idx(hdr, dxpl_id, &hdr->root, H5B2_POS_ROOT, hdr, (unsigned)idx, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree leaf node")
     } /* end else */
 
@@ -1048,6 +1111,7 @@ H5B2_modify(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op,
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
     H5B2_node_ptr_t curr_node_ptr;      /* Node pointer info for current node */
     void        *parent = NULL;         /* Parent of current node */
+    H5B2_nodepos_t curr_pos;            /* Position of current node */
     unsigned    depth;                  /* Current depth of the tree */
     int         cmp;                    /* Comparison value of records */
     unsigned    idx;                    /* Location of record which matches key */
@@ -1081,6 +1145,7 @@ H5B2_modify(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op,
 
     /* Walk down B-tree to find record or leaf node where record is located */
     cmp = -1;
+    curr_pos = H5B2_POS_ROOT;
     while(depth > 0) {
         unsigned internal_flags = H5AC__NO_FLAGS_SET;
         H5B2_internal_t *internal;          /* Pointer to internal node in B-tree */
@@ -1105,6 +1170,24 @@ H5B2_modify(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op,
         if(cmp != 0) {
             /* Get node pointer for next node to search */
             next_node_ptr = internal->node_ptrs[idx];
+
+            /* Set the position of the next node */
+            if(H5B2_POS_MIDDLE != curr_pos) {
+                if(idx == 0) {
+                    if(H5B2_POS_LEFT == curr_pos || H5B2_POS_ROOT == curr_pos)
+                        curr_pos = H5B2_POS_LEFT;
+                    else
+                        curr_pos = H5B2_POS_MIDDLE;
+                } /* end if */
+                else if(idx == internal->nrec) {
+                    if(H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos)
+                        curr_pos = H5B2_POS_RIGHT;
+                    else
+                        curr_pos = H5B2_POS_MIDDLE;
+                } /* end if */
+                else
+                    curr_pos = H5B2_POS_MIDDLE;
+            } /* end if */
 
             /* Unlock current node */
             if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, (unsigned)(hdr->swmr_write ? H5AC__PIN_ENTRY_FLAG : H5AC__NO_FLAGS_SET)) < 0)
@@ -1191,6 +1274,27 @@ H5B2_modify(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op,
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTMODIFY, FAIL, "'modify' callback failed for B-tree find operation")
+            } /* end if */
+
+            /* Check for modified record being the min or max for the tree */
+            /* (Don't use 'else' for the idx check, to allow for root leaf node) */
+            if(H5B2_POS_MIDDLE != curr_pos) {
+                if(idx == 0) {
+                    if(H5B2_POS_LEFT == curr_pos || H5B2_POS_ROOT == curr_pos) {
+                        if(hdr->min_native_rec == NULL)
+                            if(NULL == (hdr->min_native_rec = (uint8_t *)HDmalloc(hdr->cls->nrec_size)))
+                                HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for v2 B-tree min record info")
+                        HDmemcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
+                    } /* end if */
+                } /* end if */
+                if(idx == (unsigned)(leaf->nrec - 1)) {
+                    if(H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
+                        if(hdr->max_native_rec == NULL)
+                            if(NULL == (hdr->max_native_rec = (uint8_t *)HDmalloc(hdr->cls->nrec_size)))
+                                HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for v2 B-tree max record info")
+                        HDmemcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
+                    } /* end if */
+                } /* end if */
             } /* end if */
         } /* end else */
 

@@ -302,10 +302,8 @@ H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id,
         uint32_t direct_filters;
         hsize_t *direct_offset;
         uint32_t direct_datasize;
-	int      ndims = 0;
-	hsize_t  dims[H5O_LAYOUT_NDIMS];
 	hsize_t  internal_offset[H5O_LAYOUT_NDIMS];
-	int      i;
+	unsigned u;
 
         /* Get the dataset transfer property list */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -322,25 +320,20 @@ H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id,
         if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, &direct_datasize) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting data size for direct chunk write")
 
-	/* The library's chunking code requires the offset terminates with a zero. So transfer the 
-         * offset array to an internal offset array */ 
-	if((ndims = H5S_get_simple_extent_dims(dset->shared->space, dims, NULL)) < 0)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve dataspace extent dims")
-
-	for(i = 0; i < ndims; i++) {
+	for(u = 0; u < dset->shared->ndims; u++) {
 	    /* Make sure the offset doesn't exceed the dataset's dimensions */
-            if(direct_offset[i] > dims[i])
+            if(direct_offset[u] > dset->shared->curr_dims[u])
 		HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
 
             /* Make sure the offset fall right on a chunk's boundary */
-	    if(direct_offset[i] % dset->shared->layout.u.chunk.dim[i])
+	    if(direct_offset[u] % dset->shared->layout.u.chunk.dim[u])
 		HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
 
-	    internal_offset[i] = direct_offset[i]; 
+	    internal_offset[u] = direct_offset[u]; 
 	} /* end for */
 	   
 	/* Terminate the offset with a zero */ 
-	internal_offset[ndims] = 0;
+	internal_offset[dset->shared->ndims] = 0;
 
 	/* write raw data */
 	if(H5D__chunk_direct_write(dset, dxpl_id, direct_filters, internal_offset, direct_datasize, buf) < 0)

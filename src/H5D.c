@@ -1040,8 +1040,8 @@ done:
 herr_t
 H5Drefresh(hid_t dset_id)
 {
-    H5D_t * dset = NULL;
-    hid_t ret_value = SUCCEED; /* return value */
+    H5D_t *dset;                /* Dataset to refresh */
+    herr_t ret_value = SUCCEED; /* return value */
     
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
@@ -1051,7 +1051,7 @@ H5Drefresh(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Call private function to refresh dataset object */
-    if ((H5O_refresh_metadata(dset_id, dset->oloc, H5AC_dxpl_id)) < 0)
+    if((H5O_refresh_metadata(dset_id, dset->oloc, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to refresh dataset")
 
 done:

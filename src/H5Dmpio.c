@@ -835,6 +835,7 @@ H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
     if(total_chunks == 1) {
         H5D_chunk_ud_t udata;           /* User data for querying chunk info */
         hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
+	hsize_t scaled[H5O_LAYOUT_NDIMS];   /* Scaled coordinates for this chunk */
         H5SL_node_t *chunk_node;        /* Pointer to chunk node for selection */
         H5S_t *fspace;                  /* Dataspace describing chunk & selection in it */
         H5S_t *mspace;                  /* Dataspace describing selection in memory corresponding to this chunk */
@@ -842,10 +843,10 @@ H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
         /* Initialize the chunk coordinates */
         /* (must be all zero, since there's only one chunk) */
         HDmemset(coords, 0, sizeof(coords));
+        HDmemset(scaled, 0, sizeof(scaled));
 
         /* Look up address of chunk */
-        if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id, coords,
-                io_info->store->chunk.index, &udata) < 0)
+        if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id, coords, scaled, &udata) < 0)
             HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
         ctg_store.contig.dset_addr = udata.addr;
 
@@ -1204,7 +1205,6 @@ if(H5DEBUG(D))
 
             /* Pass in chunk's coordinates in a union. */
             store.chunk.offset  = chunk_info->coords;
-            store.chunk.index   = chunk_info->index;
         } /* end if */
 
         /* Collective IO for this chunk,
@@ -1592,7 +1592,7 @@ if(H5DEBUG(D))
 
             /* Get address of chunk */
             if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id,
-                    chunk_info->coords, chunk_info->index, &udata) < 0)
+                    chunk_info->coords, chunk_info->scaled, &udata) < 0)
                 HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
             chunk_addr = udata.addr;
         } /* end if */

@@ -174,11 +174,8 @@ H5D__compact_construct(H5F_t *f, H5D_t *dset)
     hssize_t stmp_size;         /* Temporary holder for raw data size */
     hsize_t tmp_size;           /* Temporary holder for raw data size */
     hsize_t max_comp_data_size; /* Max. allowed size of compact data */
-    hsize_t dim[H5O_LAYOUT_NDIMS];      /* Current size of data in elements */
-    hsize_t max_dim[H5O_LAYOUT_NDIMS];  /* Maximum size of data in elements */
-    int ndims;                          /* Rank of dataspace */
-    int i;                              /* Local index variable */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    unsigned u;                 /* Local index variable */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -187,11 +184,9 @@ H5D__compact_construct(H5F_t *f, H5D_t *dset)
     HDassert(dset);
 
     /* Check for invalid dataset dimensions */
-    if((ndims = H5S_get_simple_extent_dims(dset->shared->space, dim, max_dim)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions")
-    for(i = 0; i < ndims; i++)
-        if(max_dim[i] > dim[i])
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "extendible compact dataset")
+    for(u = 0; u < dset->shared->ndims; u++)
+        if(dset->shared->max_dims[u] > dset->shared->curr_dims[u])
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "extendible compact dataset not allowed")
 
     /*
      * Compact dataset is stored in dataset object header message of

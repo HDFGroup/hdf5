@@ -1134,8 +1134,7 @@ H5D_farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
     fa = idx_info->storage->u.farray.fa;
 
     /* Calculate the index of this chunk */
-    if(H5VM_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    idx = H5VM_array_offset_pre((idx_info->layout->ndims - 1), idx_info->layout->max_down_chunks, udata->common.scaled);
 
     udata->chunk_idx = idx;
 
@@ -1355,8 +1354,7 @@ H5D_farray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t 
     fa = idx_info->storage->u.farray.fa;
 
     /* Calculate the index of this chunk */
-    if(H5VM_chunk_index((idx_info->layout->ndims - 1), udata->offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    idx = H5VM_array_offset_pre((idx_info->layout->ndims - 1), idx_info->layout->max_down_chunks, udata->scaled);
 
     /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) {

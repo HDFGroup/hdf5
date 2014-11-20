@@ -396,10 +396,7 @@ H5D__contig_construct(H5F_t *f, H5D_t *dset)
     size_t dt_size;                     /* Size of datatype */
     hsize_t tmp_size;                   /* Temporary holder for raw data size */
     size_t tmp_sieve_buf_size;          /* Temporary holder for sieve buffer size */
-    hsize_t dim[H5O_LAYOUT_NDIMS];	/* Current size of data in elements */
-    hsize_t max_dim[H5O_LAYOUT_NDIMS];  /* Maximum size of data in elements */
-    int ndims;                          /* Rank of dataspace */
-    int i;                              /* Local index variable */
+    unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -415,11 +412,9 @@ H5D__contig_construct(H5F_t *f, H5D_t *dset)
      */
 
     /* Check for invalid dataset dimensions */
-    if((ndims = H5S_get_simple_extent_dims(dset->shared->space, dim, max_dim)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize contiguous storage")
-    for(i = 0; i < ndims; i++)
-        if(max_dim[i] > dim[i])
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "extendible contiguous non-external dataset")
+    for(u = 0; u < dset->shared->ndims; u++)
+        if(dset->shared->max_dims[u] > dset->shared->curr_dims[u])
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "extendible contiguous non-external dataset not allowed")
 
     /* Retrieve the number of elements in the dataspace */
     if((snelmts = H5S_GET_EXTENT_NPOINTS(dset->shared->space)) < 0)

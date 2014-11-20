@@ -1166,13 +1166,11 @@ H5D_earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
         H5VM_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */
-        if(H5VM_chunk_index(ndims, swizzled_coords, idx_info->layout->u.earray.swizzled_dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+        idx = H5VM_chunk_index(ndims, swizzled_coords, idx_info->layout->u.earray.swizzled_dim, idx_info->layout->u.earray.swizzled_down_chunks);
     } /* end if */
     else {
         /* Calculate the index of this chunk */
-        if(H5VM_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->down_chunks, &idx) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+        idx = H5VM_array_offset_pre((idx_info->layout->ndims - 1), idx_info->layout->down_chunks, udata->common.scaled);
     } /* end else */
 
     udata->chunk_idx = idx;
@@ -1415,13 +1413,11 @@ H5D_earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t 
         H5VM_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */
-        if(H5VM_chunk_index(ndims, swizzled_coords, idx_info->layout->u.earray.swizzled_dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+        idx = H5VM_chunk_index(ndims, swizzled_coords, idx_info->layout->u.earray.swizzled_dim, idx_info->layout->u.earray.swizzled_down_chunks);
     } /* end if */
     else {
         /* Calculate the index of this chunk */
-        if(H5VM_chunk_index((idx_info->layout->ndims - 1), udata->offset, idx_info->layout->dim, idx_info->layout->down_chunks, &idx) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+        idx = H5VM_array_offset_pre((idx_info->layout->ndims - 1), idx_info->layout->down_chunks, udata->scaled);
     } /* end else */
 
     /* Check for filters on chunks */

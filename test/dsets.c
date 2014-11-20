@@ -7205,7 +7205,10 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
 
     /* Create dataspace with unlimited maximum dimensions */
-    if((s = H5Screate_simple(2, dsize, dmax)) < 0) TEST_ERROR;
+    if(early_alloc) {
+	if((s = H5Screate_simple(2, dsize, fixed_dmax)) < 0) TEST_ERROR;
+    } else
+	if((s = H5Screate_simple(2, dsize, dmax)) < 0) TEST_ERROR;
 
     /* Create dataset creation property list */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
@@ -7225,7 +7228,10 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
 
     /* Verify index type */
     if(low == H5F_LIBVER_LATEST) {
-	if(idx_type != H5D_CHUNK_IDX_BT2)
+	if(early_alloc) {
+	    if(idx_type != H5D_CHUNK_IDX_NONE)
+		FAIL_PUTS_ERROR("should be using implicit indexing");
+	} else if(idx_type != H5D_CHUNK_IDX_BT2)
 	    FAIL_PUTS_ERROR("should be using v2 B-tree as index");
     } else if(idx_type != H5D_CHUNK_IDX_BTREE) 
 	FAIL_PUTS_ERROR("should be using v1 B-tree as index");
