@@ -107,7 +107,7 @@ Bug Fixes since HDF5-1.8.14
 	  problem. The installer always did the right thing when updating the
 	  environment variable.
 	  
-	  (DER - 2014/11/14, HDFFV-8878)
+	  (DER - 2014/11/14, HDFFV-9016)
 
     Library
     -------
