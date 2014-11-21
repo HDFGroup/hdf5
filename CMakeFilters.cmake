@@ -11,6 +11,10 @@ MACRO (HDF5_SETUP_FILTERS FILTER)
   # message (STATUS "Filter ${FILTER} is ${HDF5_USE_FILTER_${FILTER}}")
 ENDMACRO (HDF5_SETUP_FILTERS)
 
+# Default Subversion URLs point to our repositories
+set (ZLIB_SVN_URL "https://svn.hdfgroup.uiuc.edu/zlib/trunk")
+set (SZIP_SVN_URL "https://svn.hdfgroup.uiuc.edu/szip/trunk")
+
 HDF5_SETUP_FILTERS (SHUFFLE)
 HDF5_SETUP_FILTERS (FLETCHER32)
 HDF5_SETUP_FILTERS (NBIT)
@@ -24,8 +28,8 @@ if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT MAT
   option (ZLIB_USE_EXTERNAL "Use External Library Building for ZLIB" 1)
   option (SZIP_USE_EXTERNAL "Use External Library Building for SZIP" 1)
   if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN")
-    set (ZLIB_URL ${ZLIB_SVN_URL})
-    set (SZIP_URL ${SZIP_SVN_URL})
+    set (ZLIB_URL ${ZLIB_SVN_URL} CACHE STRING "Path to zlib Subversion repository")
+    set (SZIP_URL ${SZIP_SVN_URL} CACHE STRING "Path to szip Subversion repository")
   elseif (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
     if (NOT TGZPATH)
       set (TGZPATH ${HDF5_SOURCE_DIR})
