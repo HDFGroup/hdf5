@@ -94,20 +94,25 @@ Bug Fixes since HDF5-1.8.14
 
     Configuration
     -------------
-    - In the Windows installer, the dialog box where the user can elect to
-	  add the HDF5 bin/ path to the %PATH% environment variable was changed
-	  to simply display the product name instead of the path that would be
-	  added.
-	  
-	  This is in line with most installers. The reason for the change is
-	  that is difficult to pass the correct path from CPack to the NSIS
-	  installer for display.
-	  
-	  Note that this was never a code issue - it was just a path display
-	  problem. The installer always did the right thing when updating the
-	  environment variable.
-	  
-	  (DER - 2014/11/14, HDFFV-9016)
+    - Windows installer incorrect display of PATH environment variable.
+    
+      In the Windows installer, the dialog box where the user can elect to
+      add the product's bin path to the %PATH% environment variable displayed
+      an incorrect path. This path was missing the C:\Program Files part
+      and used the POSIX file separator '/' before the bin (<path>/bin,
+      instead of <path>\bin).
+      
+      The dialog box text was changed to simply say that the product's bin
+      path would be added instead of explicitly displaying the path.
+      This is in line with most installers. The reason for not fixing the 
+      displayed path instead is that it is difficult to pass the correct
+      path from CPack to the NSIS installer for display.
+
+      Note that this was never a code issue - it was just a display
+      problem. The installer always did the right thing when updating the
+      environment variable.
+
+      (DER - 2014/11/14, HDFFV-9016)
 
     Library
     -------
