@@ -37,9 +37,6 @@
 #include "H5Dprivate.h"     /* Datasets */
 #include "H5Oprivate.h"
 
-#define H5D_PACKAGE
-#include "H5Dpkg.h"
-
 /****************/
 /* Local Macros */
 /****************/
@@ -378,6 +375,54 @@ done:
 } /* end H5X_unregister() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5X_can_create
+ *
+ * Purpose:
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5X_can_create(hid_t dset_id, hid_t dcpl_id)
+{
+    hid_t xcpl_id = H5P_DEFAULT;
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset_id != H5I_BADID);
+    HDassert(H5I_GENPROP_LST == H5I_get_type(dcpl_id));
+
+    /* Check if the property list is non-default */
+    if(dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
+        H5P_genplist_t  *plist; /* Dataset creation property list object */
+        unsigned plugin;        /* Index plugin value property to query */
+
+        /* Get dataset creation property list object */
+        if(NULL == (plist = (H5P_genplist_t *) H5I_object(dcpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get dataset creation property list");
+
+        /* Get layout information */
+        if(H5P_get(plist, H5D_CRT_INDEX_PLUGIN_NAME, &plugin) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve index plugin value");
+
+        if (FAIL == (xcpl_id = H5Pcreate(H5P_INDEX_CREATE)))
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "can't create index property");
+
+        if (FAIL == H5Pset_index_read_on_create(xcpl_id, FALSE))
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set index property");
+
+        if (H5X_create(dset_id, plugin, xcpl_id) < 0)
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create index");
+    } /* end if */
+
+done:
+    if (xcpl_id != H5P_DEFAULT) H5Pclose(xcpl_id);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5X_can_create() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Xcreate
  *
  * Purpose: Create a new index in a container.
@@ -390,23 +435,49 @@ herr_t
 H5Xcreate(hid_t scope_id, unsigned plugin_id, hid_t xcpl_id)
 {
     H5D_t *dset = NULL;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if (plugin_id > H5X_PLUGIN_MAX)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid plugin identification number");
+    if (NULL == (dset = (H5D_t *) H5I_object_verify(scope_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+
+    if (FAIL == H5X_create(scope_id, plugin_id, xcpl_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot create index");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Xcreate() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5X_create
+ *
+ * Purpose: Create a new index in a container.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5X_create(hid_t dset_id, unsigned plugin_id, hid_t xcpl_id)
+{
     H5X_class_t *idx_class = NULL;
     void *idx_handle = NULL; /* pointer to index object created */
-    hid_t dataset_id = scope_id; /* TODO for now */
+    H5D_t *dset = NULL;
     hid_t xapl_id = H5P_INDEX_ACCESS_DEFAULT; /* TODO for now */
     size_t metadata_size; /* size of metadata created by plugin */
     void *metadata; /* metadata created by plugin that needs to be stored */
     H5O_idxinfo_t idx_info;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iIuii", file_id, plugin_id, scope_id, xcpl_id);
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    if (plugin_id > H5X_PLUGIN_MAX)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid plugin identification number");
-    if (NULL == (dset = (H5D_t *) H5I_object_verify(scope_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    HDassert(dset_id != H5I_BADID);
+    HDassert(plugin_id <= H5X_PLUGIN_MAX);
 
     /* Is the plugin already registered */
     if (NULL == (idx_class = H5X_registered(plugin_id)))
@@ -419,10 +490,14 @@ H5Xcreate(hid_t scope_id, unsigned plugin_id, hid_t xcpl_id)
         if (TRUE != H5P_isa_class(xcpl_id, H5P_INDEX_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not index creation property list");
 
+    /* Get dset object */
+    if (NULL == (dset = (H5D_t *) H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+
     /* Call create of the plugin */
     if (NULL == idx_class->create)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin create callback is not defined");
-    if (NULL == (idx_handle = idx_class->create(dataset_id, xcpl_id, xapl_id,
+    if (NULL == (idx_handle = idx_class->create(dset_id, xcpl_id, xapl_id,
             &metadata_size, &metadata)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot create new plugin index");
 
@@ -434,8 +509,8 @@ H5Xcreate(hid_t scope_id, unsigned plugin_id, hid_t xcpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "cannot set index");
 
 done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Xcreate() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5X_create() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Xremove
@@ -449,26 +524,55 @@ done:
 herr_t
 H5Xremove(hid_t scope_id, unsigned plugin_id)
 {
-    H5D_t *dset = NULL;
-    size_t plugin_index;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iIui", file_id, plugin_id, scope_id);
 
     /* Check args */
     if (plugin_id > H5X_PLUGIN_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid plugin identification number");
-    if (NULL == (dset = (H5D_t *) H5I_object_verify(scope_id, H5I_DATASET)))
+    if (NULL == H5I_object_verify(scope_id, H5I_DATASET))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-    /* Remove idx_handle from dataset */
-    if (FAIL == H5D_remove_index(dset, plugin_id))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete index messages")
+    /* Remove index from dataset */
+    if (FAIL == H5X_remove(scope_id, plugin_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTDELETE, FAIL, "unable to delete index")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Xremove() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5X_remove
+ *
+ * Purpose: Remove an index from objects in a container.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5X_remove(hid_t dset_id, unsigned plugin_id)
+{
+    H5D_t *dset = NULL;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check args */
+    HDassert(dset_id != H5I_BADID);
+    HDassert(plugin_id <= H5X_PLUGIN_MAX);
+
+    if (NULL == (dset = H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* Remove idx_handle from dataset */
+    if (FAIL == H5D_remove_index(dset, plugin_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTDELETE, FAIL, "unable to delete index")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5X_remove() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Xget_count

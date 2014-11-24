@@ -27,9 +27,18 @@
 /* Library Private Macros */
 /**************************/
 
+/* ========  Index creation property names ======== */
+#define H5X_CRT_READ_ON_CREATE_NAME "read_on_create" /* Read existing data when creating index */
+
+/* ========  Index access property names ======== */
+
+/* ======== Index transfer properties ======== */
+
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/
+
 
 /*****************************/
 /* Library Private Variables */
@@ -46,6 +55,7 @@ H5_DLL herr_t H5X_unregister(unsigned plugin_id);
 
 H5_DLL herr_t H5X_create(hid_t dset_id, unsigned plugin_id, hid_t xcpl_id);
 H5_DLL herr_t H5X_remove(hid_t dset_id, unsigned plugin_id);
+H5_DLL herr_t H5X_can_create(hid_t dset_id, hid_t dcpl_id);
 
 H5_DLL herr_t H5X_get_count(hid_t dset_id, hsize_t *idx_count);
 
