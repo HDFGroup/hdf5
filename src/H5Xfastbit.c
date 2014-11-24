@@ -61,6 +61,8 @@
   } while (0)
 #endif
 
+#define H5X_FASTBIT_MAX_NAME 1024
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -115,10 +117,7 @@ H5X__fastbit_read_data(hid_t dataset_id, const char *column_name, void **buf,
         size_t *buf_size);
 
 static herr_t
-H5X__fastbit_create_index(H5X_fastbit_t *fastbit);
-
-static herr_t
-H5X__fastbit_update_index(H5X_fastbit_t *fastbit);
+H5X__fastbit_build_index(H5X_fastbit_t *fastbit);
 
 static herr_t
 H5X__fastbit_serialize_metadata(H5X_fastbit_t *fastbit, void *buf,
@@ -169,6 +168,9 @@ H5X_fastbit_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
 static herr_t
 H5X_fastbit_refresh(void *idx_handle, size_t *metadata_size, void **metadata);
 
+static herr_t
+H5X_fastbit_get_size(void *idx_handle, hsize_t *idx_size);
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -184,20 +186,20 @@ H5X_fastbit_refresh(void *idx_handle, size_t *metadata_size, void **metadata);
 
 /* FastBit index class */
 const H5X_class_t H5X_FASTBIT[1] = {{
-    H5X_CLASS_T_VERS,           /* (From the H5Xpublic.h header file) */
-    H5X_PLUGIN_FASTBIT,         /* (Or whatever number is assigned) */
-    "FASTBIT index plugin",     /* Whatever name desired */
-    H5X_TYPE_DATA_ELEM,         /* This plugin operates on dataset elements */
-    H5X_fastbit_create,         /* create */
-    H5X_fastbit_remove,         /* remove */
-    H5X_fastbit_open,           /* open */
-    H5X_fastbit_close,          /* close */
-    H5X_fastbit_pre_update,     /* pre_update */
-    H5X_fastbit_post_update,    /* post_update */
-    H5X_fastbit_query,          /* query */
-    H5X_fastbit_refresh,        /* refresh */
-    NULL,                       /* copy */
-    NULL                        /* get_size */
+    H5X_CLASS_T_VERS,               /* (From the H5Xpublic.h header file) */
+    H5X_PLUGIN_FASTBIT,             /* (Or whatever number is assigned) */
+    "FASTBIT index plugin",         /* Whatever name desired */
+    H5X_TYPE_DATA_ELEM,             /* This plugin operates on dataset elements */
+    H5X_fastbit_create,             /* create */
+    H5X_fastbit_remove,             /* remove */
+    H5X_fastbit_open,               /* open */
+    H5X_fastbit_close,              /* close */
+    H5X_fastbit_pre_update,         /* pre_update */
+    H5X_fastbit_post_update,        /* post_update */
+    H5X_fastbit_query,              /* query */
+    H5X_fastbit_refresh,            /* refresh */
+    NULL,                           /* copy */
+    H5X_fastbit_get_size            /* get_size */
 }};
 
 /*-------------------------------------------------------------------------
@@ -215,6 +217,7 @@ H5X__fastbit_init(hid_t dataset_id)
     H5X_fastbit_t *fastbit = NULL;
     hid_t space_id = FAIL;
     hid_t file_id = FAIL;
+    char dataset_name[H5X_FASTBIT_MAX_NAME];
     H5X_fastbit_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -241,7 +244,11 @@ H5X__fastbit_init(hid_t dataset_id)
     fastbit->bitmaps = NULL;
     fastbit->bitmaps_id = FAIL;
 
-    sprintf(fastbit->column_name, "H5X__fastbit_column");
+    if (FAIL == H5Iget_name(dataset_id, dataset_name, H5X_FASTBIT_MAX_NAME))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get dataset name");
+
+    H5X_FASTBIT_LOG_DEBUG("Dataset Name : %s", dataset_name);
+    sprintf(fastbit->column_name, dataset_name);
 
     fastbit->idx_reconstructed = FALSE;
 
@@ -450,16 +457,16 @@ done:
 } /* H5X__fastbit_read_data() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5X__fastbit_create_index
+ * Function:    H5X__fastbit_build_index
  *
- * Purpose: Create a new index from a dataset.
+ * Purpose: Create/update an existing index from a dataset.
  *
  * Return:  Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X__fastbit_create_index(H5X_fastbit_t *fastbit)
+H5X__fastbit_build_index(H5X_fastbit_t *fastbit)
 {
     hid_t key_space_id = FAIL, offset_space_id = FAIL, bitmap_space_id = FAIL;
     hsize_t key_array_size, offset_array_size, bitmap_array_size;
@@ -483,36 +490,51 @@ H5X__fastbit_create_index(H5X_fastbit_t *fastbit)
 
     /* Create key array with opaque type */
     key_array_size = fastbit->nkeys * sizeof(double);
+    if (fastbit->keys_id != FAIL) {
+        if (FAIL == H5Odecr_refcount(fastbit->keys_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTINC, FAIL, "can't decrement dataset refcount");
+        if (FAIL == H5Dclose(fastbit->keys_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "can't close dataset");
+    }
     if (FAIL == (key_space_id = H5Screate_simple(1, &key_array_size, NULL)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
     if (FAIL == (fastbit->keys_id = H5Dcreate_anon(fastbit->file_id, fastbit->opaque_type_id,
             key_space_id, H5P_DEFAULT, H5P_DEFAULT)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
-
     /* Increment refcount so that anonymous dataset is persistent */
     if (FAIL == H5Oincr_refcount(fastbit->keys_id))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTINC, FAIL, "can't increment dataset refcount");
 
     /* Create offset array with opaque type */
     offset_array_size = fastbit->noffsets * sizeof(int64_t);
+    if (fastbit->offsets_id != FAIL) {
+        if (FAIL == H5Odecr_refcount(fastbit->offsets_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTINC, FAIL, "can't decrement dataset refcount");
+        if (FAIL == H5Dclose(fastbit->offsets_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "can't close dataset");
+    }
     if (FAIL == (offset_space_id = H5Screate_simple(1, &offset_array_size, NULL)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
     if (FAIL == (fastbit->offsets_id = H5Dcreate_anon(fastbit->file_id, fastbit->opaque_type_id,
             offset_space_id, H5P_DEFAULT, H5P_DEFAULT)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
-
     /* Increment refcount so that anonymous dataset is persistent */
     if (FAIL == H5Oincr_refcount(fastbit->offsets_id))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTINC, FAIL, "can't increment dataset refcount");
 
     /* Create bitmap array with opaque type */
     bitmap_array_size = fastbit->nbitmaps * sizeof(uint32_t);
+    if (fastbit->bitmaps_id != FAIL) {
+        if (FAIL == H5Odecr_refcount(fastbit->bitmaps_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTINC, FAIL, "can't decrement dataset refcount");
+        if (FAIL == H5Dclose(fastbit->bitmaps_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "can't close dataset");
+    }
     if (FAIL == (bitmap_space_id = H5Screate_simple(1, &bitmap_array_size, NULL)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
     if (FAIL == (fastbit->bitmaps_id = H5Dcreate_anon(fastbit->file_id, fastbit->opaque_type_id,
             bitmap_space_id, H5P_DEFAULT, H5P_DEFAULT)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
-
     /* Increment refcount so that anonymous dataset is persistent */
     if (FAIL == H5Oincr_refcount(fastbit->bitmaps_id))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTINC, FAIL, "can't increment dataset refcount");
@@ -548,7 +570,7 @@ done:
         fastbit->bitmaps = NULL;
     }
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* H5X__fastbit_build_index */
 
 /*-------------------------------------------------------------------------
  * Function:    H5X__fastbit_merge_data
@@ -612,92 +634,6 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5X__fastbit_update_index
- *
- * Purpose: Update an existing index from a dataset.
- *
- * Return:  Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5X__fastbit_update_index(H5X_fastbit_t *fastbit)
-{
-    hid_t key_space_id = FAIL, offset_space_id = FAIL, bitmap_space_id = FAIL;
-    hsize_t key_array_size, offset_array_size, bitmap_array_size;
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    H5X_FASTBIT_LOG_DEBUG("Calling FastBit build index");
-
-    /* Build index */
-    if (0 != fastbit_iapi_build_index(fastbit->column_name, (const char *)0))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTENCODE, FAIL, "FastBit build index failed");
-
-    /* Get arrays from index */
-    if (0 != fastbit_iapi_deconstruct_index(fastbit->column_name, &fastbit->keys, &fastbit->nkeys,
-            &fastbit->offsets, &fastbit->noffsets, &fastbit->bitmaps, &fastbit->nbitmaps))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "Can't get FastBit index arrays");
-
-    H5X_FASTBIT_LOG_DEBUG("FastBit build index, nkeys=%lu, noffsets=%lu, nbitmaps=%lu\n",
-            fastbit->nkeys, fastbit->noffsets, fastbit->nbitmaps);
-
-    /* Create key array with opaque type */
-    key_array_size = fastbit->nkeys * sizeof(double);
-    H5Dclose(fastbit->keys_id);
-    if (FAIL == (key_space_id = H5Screate_simple(1, &key_array_size, NULL)))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
-    if (FAIL == (fastbit->keys_id = H5Dcreate_anon(fastbit->file_id, fastbit->opaque_type_id,
-            key_space_id, H5P_DEFAULT, H5P_DEFAULT)))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
-
-    /* Create offset array with opaque type */
-    offset_array_size = fastbit->noffsets * sizeof(int64_t);
-    H5Dclose(fastbit->offsets_id);
-    if (FAIL == (offset_space_id = H5Screate_simple(1, &offset_array_size, NULL)))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
-    if (FAIL == (fastbit->offsets_id = H5Dcreate_anon(fastbit->file_id, fastbit->opaque_type_id,
-            offset_space_id, H5P_DEFAULT, H5P_DEFAULT)))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
-
-    /* Create bitmap array with opaque type */
-    bitmap_array_size = fastbit->nbitmaps * sizeof(uint32_t);
-    H5Dclose(fastbit->bitmaps_id);
-    if (FAIL == (bitmap_space_id = H5Screate_simple(1, &bitmap_array_size, NULL)))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
-    if (FAIL == (fastbit->bitmaps_id = H5Dcreate_anon(fastbit->file_id, fastbit->opaque_type_id,
-            bitmap_space_id, H5P_DEFAULT, H5P_DEFAULT)))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
-
-    /* Write keys */
-    if (FAIL == H5Dwrite(fastbit->keys_id, fastbit->opaque_type_id, H5S_ALL,
-            H5S_ALL, H5P_DEFAULT, fastbit->keys))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index metadata");
-
-    /* Write offsets */
-    if (FAIL == H5Dwrite(fastbit->offsets_id, fastbit->opaque_type_id, H5S_ALL,
-            H5S_ALL, H5P_DEFAULT, fastbit->offsets))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index metadata");
-
-    /* Write bitmaps */
-    if (FAIL == H5Dwrite(fastbit->bitmaps_id, fastbit->opaque_type_id, H5S_ALL,
-            H5S_ALL, H5P_DEFAULT, fastbit->bitmaps))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index metadata");
-
-done:
-    if (err_occurred) {
-        H5MM_free(fastbit->keys);
-        fastbit->keys = NULL;
-        H5MM_free(fastbit->offsets);
-        fastbit->offsets = NULL;
-        H5MM_free(fastbit->bitmaps);
-        fastbit->bitmaps = NULL;
-    }
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-/*-------------------------------------------------------------------------
  * Function:    H5X__fastbit_serialize_metadata
  *
  * Purpose: Serialize index plugin metadata into buffer.
@@ -720,20 +656,22 @@ H5X__fastbit_serialize_metadata(H5X_fastbit_t *fastbit, void *buf,
         H5O_info_t dset_info;
         char *buf_ptr = buf;
 
+        dset_info.addr = 0;
+
         /* Encode keys info */
-        if (FAIL == H5Oget_info(fastbit->keys_id, &dset_info))
+        if ((fastbit->keys_id != FAIL) && (FAIL == H5Oget_info(fastbit->keys_id, &dset_info)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get info for anonymous dataset");
         HDmemcpy(buf_ptr, &dset_info.addr, sizeof(haddr_t));
         buf_ptr += sizeof(haddr_t);
 
         /* Encode offsets info */
-        if (FAIL == H5Oget_info(fastbit->offsets_id, &dset_info))
+        if ((fastbit->offsets_id != FAIL) && (FAIL == H5Oget_info(fastbit->offsets_id, &dset_info)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get info for anonymous dataset");
         HDmemcpy(buf_ptr, &dset_info.addr, sizeof(haddr_t));
         buf_ptr += sizeof(haddr_t);
 
         /* Encode bitmaps info */
-        if (FAIL == H5Oget_info(fastbit->bitmaps_id, &dset_info))
+        if ((fastbit->bitmaps_id != FAIL) && (FAIL == H5Oget_info(fastbit->bitmaps_id, &dset_info)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get info for anonymous dataset");
         HDmemcpy(buf_ptr, &dset_info.addr, sizeof(haddr_t));
         buf_ptr += sizeof(haddr_t);
@@ -758,23 +696,27 @@ H5X__fastbit_serialize_metadata(H5X_fastbit_t *fastbit, void *buf,
 static herr_t
 H5X__fastbit_deserialize_metadata(H5X_fastbit_t *fastbit, void *buf)
 {
+    haddr_t addr;
     char *buf_ptr = buf;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Decode keys info */
-    if (FAIL == (fastbit->keys_id = H5Oopen_by_addr(fastbit->file_id, *((haddr_t *) buf_ptr))))
+    addr = *((haddr_t *) buf_ptr);
+    if (addr && (FAIL == (fastbit->keys_id = H5Oopen_by_addr(fastbit->file_id, addr))))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "can't open anonymous dataset");
     buf_ptr += sizeof(haddr_t);
 
     /* Decode offsets info */
-    if (FAIL == (fastbit->offsets_id = H5Oopen_by_addr(fastbit->file_id, *((haddr_t *) buf_ptr))))
+    addr = *((haddr_t *) buf_ptr);
+    if (addr && (FAIL == (fastbit->offsets_id = H5Oopen_by_addr(fastbit->file_id, *((haddr_t *) buf_ptr)))))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "can't open anonymous dataset");
     buf_ptr += sizeof(haddr_t);
 
     /* Decode bitmaps info */
-    if (FAIL == (fastbit->bitmaps_id = H5Oopen_by_addr(fastbit->file_id, *((haddr_t *) buf_ptr))))
+    addr = *((haddr_t *) buf_ptr);
+    if (addr && (FAIL == (fastbit->bitmaps_id = H5Oopen_by_addr(fastbit->file_id, *((haddr_t *) buf_ptr)))))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "can't open anonymous dataset");
 
 done:
@@ -1091,7 +1033,7 @@ done:
  *------------------------------------------------------------------------
  */
 static void *
-H5X_fastbit_create(hid_t dataset_id, hid_t UNUSED xcpl_id, hid_t UNUSED xapl_id,
+H5X_fastbit_create(hid_t dataset_id, hid_t xcpl_id, hid_t UNUSED xapl_id,
         size_t *metadata_size, void **metadata)
 {
     H5X_fastbit_t *fastbit = NULL;
@@ -1099,6 +1041,7 @@ H5X_fastbit_create(hid_t dataset_id, hid_t UNUSED xcpl_id, hid_t UNUSED xapl_id,
     size_t private_metadata_size;
     void *buf = NULL;
     size_t buf_size;
+    hbool_t read_on_create = TRUE;
 
     FUNC_ENTER_NOAPI_NOINIT
     H5X_FASTBIT_LOG_DEBUG("Enter");
@@ -1107,13 +1050,21 @@ H5X_fastbit_create(hid_t dataset_id, hid_t UNUSED xcpl_id, hid_t UNUSED xapl_id,
     if (NULL == (fastbit = H5X__fastbit_init(dataset_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, NULL, "can't initialize FastBit");
 
-    /* Get data from dataset */
-    if (FAIL == H5X__fastbit_read_data(dataset_id, fastbit->column_name, &buf, &buf_size))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get data from dataset");
+    /* Check if the property list is non-default */
+    if (FAIL == H5Pget_index_read_on_create(xcpl_id, &read_on_create))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get value from property");
 
-    /* Index data */
-    if (FAIL == H5X__fastbit_create_index(fastbit))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, NULL, "can't create index data from dataset");
+    H5X_FASTBIT_LOG_DEBUG("READ ON CREATE: %d\n", read_on_create);
+
+    if (read_on_create) {
+        /* Get data from dataset */
+        if (FAIL == H5X__fastbit_read_data(dataset_id, fastbit->column_name, &buf, &buf_size))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get data from dataset");
+
+        /* Index data */
+        if (FAIL == H5X__fastbit_build_index(fastbit))
+           HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, NULL, "can't create index data from dataset");
+    }
 
     /* Serialize metadata for H5X interface */
     if (FAIL == H5X__fastbit_serialize_metadata(fastbit, NULL,
@@ -1310,7 +1261,7 @@ H5X_fastbit_post_update(void *idx_handle, const void *data, hid_t dataspace_id,
 {
     H5X_fastbit_t *fastbit = (H5X_fastbit_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
-    void *buf;
+    void *buf = NULL;
     size_t buf_size;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1329,7 +1280,7 @@ H5X_fastbit_post_update(void *idx_handle, const void *data, hid_t dataspace_id,
         HGOTO_ERROR(H5E_INDEX, H5E_CANTMERGE, FAIL, "can't merge data");
 
     /* Update index */
-    if (FAIL == H5X__fastbit_update_index(fastbit))
+    if (FAIL == H5X__fastbit_build_index(fastbit))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create index data from dataset");
 
 done:
@@ -1438,5 +1389,40 @@ done:
     H5X_FASTBIT_LOG_DEBUG("Leave");
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    H5X_fastbit_get_size
+ *
+ * Purpose: This function gets the storage size of the index.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5X_fastbit_get_size(void *idx_handle, hsize_t *idx_size)
+{
+    H5X_fastbit_t *fastbit = (H5X_fastbit_t *) idx_handle;
+    hsize_t bitmaps_size, keys_size, offsets_size;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+    H5X_FASTBIT_LOG_DEBUG("Enter");
+
+    if (NULL == fastbit)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
+    if (!idx_size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer");
+
+    bitmaps_size = H5Dget_storage_size(fastbit->bitmaps_id);
+    keys_size = H5Dget_storage_size(fastbit->keys_id);
+    offsets_size = H5Dget_storage_size(fastbit->offsets_id);
+
+    *idx_size = bitmaps_size + keys_size + offsets_size;
+
+done:
+    H5X_FASTBIT_LOG_DEBUG("Leave");
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5X_fastbit_get_size */
 
 #endif /* H5_HAVE_FASTBIT */
