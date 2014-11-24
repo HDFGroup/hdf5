@@ -121,7 +121,7 @@
 #define H5D_CRT_EXT_FILE_LIST_CLOSE H5P__dcrt_ext_file_list_close
 /* Definitions for index plugin value */
 #define H5D_CRT_INDEX_PLUGIN_SIZE   sizeof(unsigned)
-#define H5D_CRT_INDEX_PLUGIN_DEF    1
+#define H5D_CRT_INDEX_PLUGIN_DEF    H5X_PLUGIN_NONE
 #define H5D_CRT_INDEX_PLUGIN_ENC    H5P__encode_unsigned
 #define H5D_CRT_INDEX_PLUGIN_DEC    H5P__decode_unsigned
 

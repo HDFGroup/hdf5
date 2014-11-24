@@ -396,8 +396,8 @@ H5X_can_create(hid_t dset_id, hid_t dcpl_id)
 
     /* Check if the property list is non-default */
     if(dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
-        H5P_genplist_t  *plist; /* Dataset creation property list object */
-        unsigned plugin;        /* Index plugin value property to query */
+        H5P_genplist_t *plist; /* Dataset creation property list object */
+        unsigned plugin = 0;   /* Index plugin value property to query */
 
         /* Get dataset creation property list object */
         if(NULL == (plist = (H5P_genplist_t *) H5I_object(dcpl_id)))
@@ -407,14 +407,16 @@ H5X_can_create(hid_t dset_id, hid_t dcpl_id)
         if(H5P_get(plist, H5D_CRT_INDEX_PLUGIN_NAME, &plugin) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve index plugin value");
 
-        if (FAIL == (xcpl_id = H5Pcreate(H5P_INDEX_CREATE)))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "can't create index property");
+        if (H5X_PLUGIN_NONE != plugin) {
+            if (FAIL == (xcpl_id = H5Pcreate(H5P_INDEX_CREATE)))
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "can't create index property");
 
-        if (FAIL == H5Pset_index_read_on_create(xcpl_id, FALSE))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set index property");
+            if (FAIL == H5Pset_index_read_on_create(xcpl_id, FALSE))
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set index property");
 
-        if (H5X_create(dset_id, plugin, xcpl_id) < 0)
-            HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create index");
+            if (H5X_create(dset_id, plugin, xcpl_id) < 0)
+                HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create index");
+        }
     } /* end if */
 
 done:
