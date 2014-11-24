@@ -11,10 +11,6 @@ MACRO (HDF5_SETUP_FILTERS FILTER)
   # message (STATUS "Filter ${FILTER} is ${HDF5_USE_FILTER_${FILTER}}")
 ENDMACRO (HDF5_SETUP_FILTERS)
 
-# Default Subversion URLs point to our repositories
-set (ZLIB_SVN_URL "https://svn.hdfgroup.uiuc.edu/zlib/trunk")
-set (SZIP_SVN_URL "https://svn.hdfgroup.uiuc.edu/szip/trunk")
-
 HDF5_SETUP_FILTERS (SHUFFLE)
 HDF5_SETUP_FILTERS (FLETCHER32)
 HDF5_SETUP_FILTERS (NBIT)

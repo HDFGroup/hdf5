@@ -434,6 +434,7 @@ if (HDF5_TEST_VFD)
             -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
     endforeach (test ${H5_VFD_TESTS})
+    set_tests_properties (VFD-${vfdname}-flush2 PROPERTIES DEPENDS VFD-${vfdname}-flush1)
     set_tests_properties (VFD-${vfdname}-flush1 PROPERTIES TIMEOUT 10)
     set_tests_properties (VFD-${vfdname}-objcopy PROPERTIES TIMEOUT 1000)
     set_tests_properties (VFD-${vfdname}-testhdf5 PROPERTIES TIMEOUT 1200)
