@@ -24,13 +24,14 @@ const char *FILENAME[] = {
     NULL
 };
 
-#define DATASETNAME "data"
+#define DATASETNAME1 "dataset1"
+#define DATASETNAME2 "dataset2"
 
 #define NTUPLES 256
 
 static herr_t
 write_dataset(hid_t file, const char *dataset_name, hsize_t ntuples,
-        hsize_t ncomponents, hid_t datatype, void *buf)
+        hsize_t ncomponents, hid_t datatype, void *buf, hid_t dcpl)
 {
     hid_t dataset = H5I_BADID;
     hid_t file_space = H5I_BADID;
@@ -42,8 +43,8 @@ write_dataset(hid_t file, const char *dataset_name, hsize_t ntuples,
     if (file_space < 0) FAIL_STACK_ERROR;
 
     /* Create and write dataset */
-    dataset = H5Dcreate(file, dataset_name, datatype, file_space, H5P_DEFAULT,
-            H5P_DEFAULT, H5P_DEFAULT);
+    dataset = H5Dcreate2(file, dataset_name, datatype, file_space, H5P_DEFAULT,
+            dcpl, H5P_DEFAULT);
     if (dataset < 0) FAIL_STACK_ERROR;
 
     if (H5Dwrite(dataset, datatype, H5S_ALL, file_space, H5P_DEFAULT, buf) < 0)
@@ -84,6 +85,36 @@ test_create_index(hid_t file, const char *dataset_name, unsigned plugin)
 error:
     H5E_BEGIN_TRY {
         H5Dclose(dataset);
+    } H5E_END_TRY;
+    return -1;
+}
+
+static herr_t
+test_create_dataset_index(hid_t file, const char *dataset_name,
+        hsize_t ntuples, hsize_t ncomponents, hid_t datatype, void *buf,
+        unsigned plugin)
+{
+    hid_t dcpl;
+
+    TESTING("index create from new dataset");
+
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    if (dcpl < 0) FAIL_STACK_ERROR;
+    if (H5Pset_index_plugin(dcpl, plugin) < 0) FAIL_STACK_ERROR;
+
+    if (write_dataset(file, dataset_name, ntuples, ncomponents, datatype, buf,
+            dcpl) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pclose(dcpl) < 0) FAIL_STACK_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
     } H5E_END_TRY;
     return -1;
 }
@@ -248,6 +279,33 @@ error:
     return -1;
 }
 
+static herr_t
+test_size(hid_t file_id, const char *dataset_name)
+{
+    hid_t dataset = H5I_BADID;
+    hsize_t index_size;
+
+    TESTING("index get size");
+
+    dataset = H5Dopen(file_id, dataset_name, H5P_DEFAULT);
+    if (dataset < 0) FAIL_STACK_ERROR;
+
+    if ((index_size = H5Xget_size(dataset)) == 0) FAIL_STACK_ERROR;
+
+    if (H5Dclose(dataset) < 0) FAIL_STACK_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(dataset);
+    } H5E_END_TRY;
+    return -1;
+}
+
+
 int
 main(int argc, char **argv)
 {
@@ -291,19 +349,22 @@ main(int argc, char **argv)
         goto error;
     if (H5Pclose(fapl) < 0) goto error;
 
-    if (write_dataset(file, DATASETNAME, ntuples, ncomponents, H5T_NATIVE_FLOAT,
-            data) < 0)
+    if (write_dataset(file, DATASETNAME1, ntuples, ncomponents, H5T_NATIVE_FLOAT,
+            data, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     /*
      * Test creating index...
      */
-    if (test_create_index(file, DATASETNAME, plugin) < 0)
+    if (test_create_index(file, DATASETNAME1, plugin) < 0)
         FAIL_STACK_ERROR;
 
     /*
      * TODO Test creating index from dataset create...
      */
+    if (test_create_dataset_index(file, DATASETNAME2, ntuples, ncomponents,
+            H5T_NATIVE_FLOAT, data, plugin) < 0)
+        FAIL_STACK_ERROR;
 
     /* Close and reopen the file */
     if (H5Fclose(file) < 0) goto error;
@@ -312,7 +373,11 @@ main(int argc, char **argv)
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         goto error;
 
-    if (test_query(file, DATASETNAME) < 0)
+    if (test_query(file, DATASETNAME1) < 0)
+        FAIL_STACK_ERROR;
+    if (test_size(file, DATASETNAME1) < 0)
+        FAIL_STACK_ERROR;
+    if (test_query(file, DATASETNAME2) < 0)
         FAIL_STACK_ERROR;
 
 //    if (incr_update) {
@@ -328,7 +393,7 @@ main(int argc, char **argv)
 //        MPI_Barrier(MPI_COMM_WORLD);
 //    }
 
-    if (test_remove_index(file, DATASETNAME, plugin) < 0)
+    if (test_remove_index(file, DATASETNAME1, plugin) < 0)
         FAIL_STACK_ERROR;
 
     /* Close the file. */
