@@ -192,6 +192,7 @@ TEST_WATCH() {
         extend_exit=$?                                  # Collect "extend" process' exit code
         sleep 1                                         # Sleep to make sure output is flushed
         kill $watch_pid                                 # Kill h5watch
+	wait $watch_pid					# Wait for "h5watch" process to complete
         #
         if [ $extend_exit -ne 0 ]; then                 # Error returned from "extend" process
             $ECHO "*FAILED*"
@@ -321,57 +322,30 @@ echo "DONE WITH 2nd SET OF TESTS"
 #
 # Watching and extending: (TEST.h5 is a copy of WATCH.h5)
 #       TEST.h5/DSET_CMPD with --fields=field1,field2
-#       TEST.h5/DSET_CMP_TWO with --fields=field1,field2
-#       TEST.h5/DSET_CMPD_ESC with --fields=field\,1,field2\.
-#       TEST.h5/DSET_CMPD with --fields=field1 --fields=field2
-#       TEST.h5/DSET_CMPD_ESC with --fields=field\,1 --fields=field2\.
-#       TEST.h5/DSET_CMPD_TWO with --fields=field1 --fields=field2
-#
+#       TEST.h5/DSET_CMPD with --fields=field2.b,field4
+#       TEST.h5/DSET_CMPD with --fields=field2.b.a --fields=field2.c
 TEST_WATCH DSET_CMPD --fields=field1,field2 w-ext-cmpd-f1.ddl
+TEST_WATCH DSET_CMPD --fields=field2.b,field4 w-ext-cmpd-f2.ddl
+TEST_WATCH DSET_CMPD '--fields=field2.b.a --fields=field2.c' w-ext-cmpd-ff3.ddl
+#
+#
+#       TEST.h5/DSET_CMP_TWO with --fields=field1,field2
+#       TEST.h5/DSET_CMPD_TWO with --fields=field2.b --fields=field4
+#       TEST.h5/DSET_CMPD_TWO with --fields=field2.b.a,field2.c
 TEST_WATCH DSET_CMPD_TWO --fields=field1,field2 w-ext-cmpd-two-f1.ddl
+TEST_WATCH DSET_CMPD_TWO '--fields=field2.b --fields=field4' w-ext-cmpd-two-ff2.ddl
+TEST_WATCH DSET_CMPD_TWO --fields=field2.b.a,field2.c w-ext-cmpd-two-f3.ddl
+#
+#
+#       TEST.h5/DSET_CMPD_ESC with --fields=field\,1,field2\.
+#       TEST.h5/DSET_CMPD_ESC with --fields=field2\..\,b --fields=field4\,
+#       TEST.h5/DSET_CMPD_ESC with --fields=field2\..\,b.a,field2\..\\K
 TEST_WATCH DSET_CMPD_ESC '--fields=field\,1,field2\.' w-ext-cmpd-esc-f1.ddl
-TEST_WATCH DSET_CMPD '--fields=field1 --fields=field2' w-ext-cmpd-ff1.ddl
-TEST_WATCH DSET_CMPD_ESC '--fields=field\,1 --fields=field2\.' w-ext-cmpd-esc-ff1.ddl
-TEST_WATCH DSET_CMPD_TWO '--fields=field1 --fields=field2' w-ext-cmpd-two-ff1.ddl
+TEST_WATCH DSET_CMPD_ESC '--fields=field2\..\,b --fields=field4\,' w-ext-cmpd-esc-ff2.ddl
+TEST_WATCH DSET_CMPD_ESC '--fields=field2\..\,b.a,field2\..\\K' w-ext-cmpd-esc-f3.ddl
+#
 #
 echo "DONE WITH 3rd SET OF TESTS"
-#
-#
-#
-# Watching and extending: (TEST.h5 is a copy of WATCH.h5)
-#       TEST.h5/DSET_CMPD with --fields=field2.b,field4
-#       TEST.h5/DSET_CMPD_ESC with --fields=field2\..\,b,field4\
-#       TEST.h5/DSET_CMPD_TWO with --fields=field2.b,field4
-#       TEST.h5/DSET_CMPD with --fields=field2.b --fields=field4
-#       TEST.h5/DSET_CMPD_ESC with --fields=field2\..\,b --fields=field4\,
-#       TEST.h5/DSET_CMPD_TWO with --fields=field2.b --fields=field4
-#
-TEST_WATCH DSET_CMPD --fields=field2.b,field4 w-ext-cmpd-f2.ddl
-TEST_WATCH DSET_CMPD_ESC '--fields=field2\..\,b,field4\,' w-ext-cmpd-esc-f2.ddl
-TEST_WATCH DSET_CMPD_TWO --fields=field2.b,field4 w-ext-cmpd-two-f2.ddl
-TEST_WATCH DSET_CMPD '--fields=field2.b --fields=field4' w-ext-cmpd-ff2.ddl
-TEST_WATCH DSET_CMPD_ESC '--fields=field2\..\,b --fields=field4\,' w-ext-cmpd-esc-ff2.ddl
-TEST_WATCH DSET_CMPD_TWO '--fields=field2.b --fields=field4' w-ext-cmpd-two-ff2.ddl
-#
-echo "DONE WITH 4th SET OF TESTS"
-#
-#
-#
-# Watching and extending: (TEST.h5 is a copy of WATCH.h5)
-#       TEST.h5/DSET_CMPD with --fields=field2.b.a,field2.c
-#       TEST.h5/DSET_CMPD_ESC with --fields=field2\..\,b.a,field2\..\\K
-#       TEST.h5/DSET_CMPD_TWO with --fields=field2.b.a,field2.c
-#       TEST.h5/DSET_CMPD with --fields=field2.b.a --fields=field2.c
-#       TEST.h5/DSET_CMPD_ESC with --fields=field2\..\,b.a --fields=field2\..\\K
-#       TEST.h5/DSET_CMPD_TWO with --fields=field2.b.a --fields=field2.c
-TEST_WATCH DSET_CMPD --fields=field2.b.a,field2.c w-ext-cmpd-f3.ddl
-TEST_WATCH DSET_CMPD_ESC '--fields=field2\..\,b.a,field2\..\\K' w-ext-cmpd-esc-f3.ddl
-TEST_WATCH DSET_CMPD_TWO --fields=field2.b.a,field2.c w-ext-cmpd-two-f3.ddl
-TEST_WATCH DSET_CMPD '--fields=field2.b.a --fields=field2.c' w-ext-cmpd-ff3.ddl
-TEST_WATCH DSET_CMPD_ESC '--fields=field2\..\,b.a --fields=field2\..\\K' w-ext-cmpd-esc-ff3.ddl
-TEST_WATCH DSET_CMPD_TWO '--fields=field2.b.a --fields=field2.c' w-ext-cmpd-two-ff3.ddl
-#
-echo "DONE WITH 5th SET OF TESTS"
 #
 #
 #
@@ -393,7 +367,7 @@ TEST_WATCH DSET_TWO --width=30 w-ext-two-width.ddl
 TEST_WATCH DSET_CMPD --label w-ext-cmpd-label.ddl
 TEST_WATCH DSET_ONE --simple w-ext-one-simple.ddl
 #
-echo "DONE WITH 6th SET OF TESTS"
+echo "DONE WITH 4th SET OF TESTS"
 #
 #
 #

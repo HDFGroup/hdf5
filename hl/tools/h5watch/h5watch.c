@@ -665,6 +665,7 @@ usage(const char *prog)
     HDfprintf(stdout, "        <path_to_dataset>     Path separated by slashes to the specified dataset\n");
     HDfprintf(stdout, "        <dsetname>            Name of the dataset\n");
     HDfprintf(stdout, "\n");
+    HDfprintf(stdout, "     User can end the h5watch process by ctrl-C (SIGINT) or kill the process (SIGTERM).\n");
 
 } /* usage() */
 
@@ -779,6 +780,27 @@ parse_command_line(int argc, const char *argv[])
     }
 } /* parse_command_line() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    catch_signal
+ *
+ * Purpose:     The signal handler to catch the signals:
+ *		SIGTERM and SIGINT and exit from h5watch
+ *
+ * Return:      No return
+ *
+ * Programmer:  Vailin Choi; November 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+static void catch_signal(int UNUSED signo)
+{
+    /* Exit from h5watch */
+    leave(EXIT_SUCCESS);
+
+} /* catch_signal() */
+
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -813,6 +835,18 @@ main(int argc, const char *argv[])
 
     /* Initialize h5tools lib */
     h5tools_init();
+
+    /* To exit from h5watch for SIGTERM signal */
+    if(HDsignal(SIGTERM, catch_signal) == SIG_ERR) {
+	error_msg("An error occurred while setting a signal handler.\n");
+	leave(EXIT_FAILURE);
+    }
+
+    /* To exit from h5watch for SIGINT signal */
+    if(HDsignal(SIGINT, catch_signal) == SIG_ERR) {
+        error_msg("An error occurred while setting a signal handler.\n");
+	leave(EXIT_FAILURE);
+    }
 
     /* parse command line options */
     parse_command_line(argc, argv);

@@ -35,3 +35,4 @@ Usage: h5watch [OPTIONS] [OBJECT]
         <path_to_dataset>     Path separated by slashes to the specified dataset
         <dsetname>            Name of the dataset
 
+     User can end the h5watch process by ctrl-C (SIGINT) or kill the process (SIGTERM).
