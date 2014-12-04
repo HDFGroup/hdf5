@@ -344,7 +344,7 @@ else (WIN32)
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5a_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5d_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5e_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5e_provisional.mod
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5f_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5l_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5lib_provisional.mod
           ${CMAKE_Fortran_MODULE_DIRECTORY}/h5o_provisional.mod
