@@ -73,9 +73,11 @@ Line 8: change the INSTALLDIR to a different HDF5 install location.
 
 Line 14: uncomment to allow Mac machines to build shared examples.
 
-Line 15: uncomment to not build and test Fortran examples.
+Line 15: uncomment to build and test Fortran examples.
 
 Line 16: uncomment to build and test Fortran examples with F2003 option.
 
-Line 68: change the CTEST_7Z_COMMAND to a different unzip program.
+Line 17: comment to use an existing source directory.
+
+Line 71: change the CTEST_7Z_COMMAND to a different unzip program.
 

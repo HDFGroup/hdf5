@@ -235,6 +235,7 @@ $ make install
 
 2.5.2 Hopper known issues
 ------------------------------
+Issue 1:
 Sometimes when building the library with make, you might get this problem:
 
 LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo | \
@@ -252,6 +253,22 @@ LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo | sed -e 's/-L/:/g' -e 's/
 If that happens, you are probable running with make -j <x>. In that
 case, you need to cleanup everything and start again as detailed above
 but use serial make (do not use -j <x>).
+
+Issue 2:
+* When building using the Cray compilers on Cray machines, HDF5
+  configure mistakenly thinks the compiler is an intel compiler and
+  sets the -std=c99 flag which breaks configure on Cray. To build HDF5
+  properly on a Cray machine, please consult with the instructions in
+  INSTALL_parallel for building on Hopper.
+  (MSC - 2013/04/26 - HDFFV-8429)
+
+Issue 3:
+* On hopper, the build failed when RUNSERIAL and RUNPARALLEL are set
+  to aprun -np X, because the H5lib_settings.c file was not generated
+  properly. Not setting those environment variables works, because
+  configure was able to automatically detect that it's a Cray system
+  and used the proper launch commands when necessary. 
+  (MSC - 2012/04/18)
 
 3. Detail explanation
 ---------------------
