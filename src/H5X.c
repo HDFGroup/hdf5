@@ -215,6 +215,7 @@ H5Xregister(const H5X_class_t *index_class)
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "*Xc", index_class);
 
     /* Check args */
     if (!index_class)
@@ -440,6 +441,7 @@ H5Xcreate(hid_t scope_id, unsigned plugin_id, hid_t xcpl_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iIui", scope_id, plugin_id, xcpl_id);
 
     /* Check args */
     if (plugin_id > H5X_PLUGIN_MAX)
@@ -529,6 +531,7 @@ H5Xremove(hid_t scope_id, unsigned plugin_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iIu", scope_id, plugin_id);
 
     /* Check args */
     if (plugin_id > H5X_PLUGIN_MAX)
@@ -653,6 +656,7 @@ H5Xget_size(hid_t scope_id)
     hsize_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_API(0)
+    H5TRACE1("h", "i", scope_id);
 
     if (NULL == H5I_object_verify(scope_id, H5I_DATASET))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset")

@@ -3651,6 +3651,7 @@ H5Pset_index_plugin(hid_t plist_id, unsigned plugin_id)
     herr_t ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iIu", plist_id, plugin_id);
 
     /* Check arguments */
     if (plugin_id > H5X_PLUGIN_MAX)
@@ -3685,6 +3686,7 @@ H5Pget_index_plugin(hid_t plist_id, unsigned *plugin_id/*out*/)
     herr_t ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", plist_id, plugin_id);
 
     /* Set values */
     if(plugin_id) {

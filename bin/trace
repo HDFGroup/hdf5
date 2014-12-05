@@ -145,6 +145,7 @@ $Source = "";
                "H5T_cdata_t"                => "x",
                "H5T_conv_t"                 => "x",
                "H5T_conv_except_func_t"     => "x",
+               "H5X_class_t"                => "Xc",
                "H5Z_func_t"                 => "x",
                "H5Z_filter_func_t"          => "x",
                "va_list"                    => "x",

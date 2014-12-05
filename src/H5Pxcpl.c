@@ -148,6 +148,7 @@ H5Pset_index_read_on_create(hid_t plist_id, hbool_t value)
     herr_t ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", plist_id, value);
 
     /* Get the property list structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_INDEX_CREATE)))
@@ -178,6 +179,7 @@ H5Pget_index_read_on_create(hid_t plist_id, hbool_t *value/*out*/)
     herr_t ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", plist_id, value);
 
     /* Set values */
     if(value) {
