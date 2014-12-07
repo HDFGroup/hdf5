@@ -734,7 +734,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 # After making changes, run bin/reconfigure to update other configure related
 # files like Makefile.in.
 LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 195
+LT_VERS_REVISION = 196
 LT_VERS_AGE = 0
 AM_FCLIBS = $(LIBHDF5)
 
