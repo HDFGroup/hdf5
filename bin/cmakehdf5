@@ -29,8 +29,8 @@ exit_code=0
 # Cmake build options
 hdf5_src=../hdf5
 cacheinit=$hdf5_src/config/cmake/cacheinit.cmake
-build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=ON	# C++ interface default on
-build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=ON	# Fortran interface default on
+build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=OFF	# C++ interface default off
+build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=OFF	# Fortran interface default off
 build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON	# High Level interface default on
 build_testing=-DBUILD_TESTING:BOOL=ON		# Build tests default on
 build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON		# Build tools default on
@@ -40,12 +40,33 @@ build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON		# Build tools default on
 # Function definitions
 #=============
 
-# Show user help page
+# Show user brief help page
+HELP_BRIEF()
+{
+cat << EOF
+Usage: $progname [options]
+  --help: shows details help page
+EOF
+}
+
+# Show user detail help page
 HELP()
 {
-    echo "Usage: $progname [--script]"
-    echo "  --script: Use the ctest scripting method of $progname"
-    echo ""
+cat << EOF
+Usage: $progname [<options>]
+  where options are:
+  --enable-fortran | --disable-fortran:
+    enable or disable fortran API. Default is off.
+  --enable-cxx | --disable-cxx:
+    enable or disable c++ API. Default is off.
+  --enable-hl | --disable-hl:
+    enable or disable high level API. Default is on.
+  --enable-tools | --disable-tools:
+    enable or disable building tools. Default is on.
+  --enable-testing | --disable-testing:
+    enable or disable building tests. Default is on.
+  --help: shows details help page
+EOF
 }
 
 # Display a time stamp
@@ -86,8 +107,61 @@ STEP()
 # Show a start time stamp
 TIMESTAMP
 
-# Always display the help page
-HELP
+# Parse Cmake configure options
+# --enable-XXX or --disable-XXX will enable or disable feature XXX.
+# XXX can be:
+# fortran	Fortran interface
+# cxx		C++ interface
+# hl		Highlevel interface
+# testing	Build tests
+# tools		Build tools
+while [ $# -gt 0 ]; do
+    case "$1" in
+	--enable-fortran)
+	    build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=ON
+	    ;;
+	--disable-fortran)
+	    build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=OFF
+	    ;;
+	--enable-cxx)
+	    build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=ON
+	    ;;
+	--disable-cxx)
+	    build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=OFF
+	    ;;
+	--enable-hl)
+	    build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON
+	    ;;
+	--disable-hl)
+	    build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=OFF
+	    ;;
+	--enable-tools)
+	    build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON
+	    ;;
+	--disable-tools)
+	    build_tools=-DHDF5_BUILD_TOOLS:BOOL=OFF
+	    ;;
+	--enable-testing)
+	    build_testing=-DBUILD_TESTING:BOOL=ON
+	    ;;
+	--disable-testing)
+	    build_testing=-DBUILD_TESTING:BOOL=OFF
+	    ;;
+	--help)
+	    # print the detail help page and exit
+	    HELP
+	    exit 0
+	    ;;
+	*)
+	    echo "Unknown options"
+	    HELP
+	    ;;
+    esac
+    shift
+done
+
+# Always display the brief help page
+HELP_BRIEF
 
 # Verify there is a valid hdf5 source directory present
 if [ ! -d $srcdir ]; then
