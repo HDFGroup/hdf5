@@ -431,6 +431,14 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Incorrect usage of list in CMake COMPILE_DEFINITIONS set_property
+    
+        The CMake command, set_property with COMPILE_DEFINITIONS property
+        needs a quoted semi-colon separated list of values. CMake will
+        transform the list to a series of -D{value} for the compile.
+      
+        (ADB - 2014/12/09, HDFV-9041)
+        
       - H5Z.c: H5Zfilter_avail(H5Z_filter_t id)
            Added else block if the call to the internal H5Z_filter_avail(id) does not
            fail and returns FALSE. This block calls the H5PL_load(H5PL_TYPE_FILTER, (int)id)
