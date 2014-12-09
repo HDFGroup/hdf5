@@ -1085,6 +1085,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
            created because it will need to know to create superblock
            extension containing EOA message. The default setting when
            using the latest format is H5F_AVOID_TRUNCATE_EXTEND */
+        /* MSC - Why? */
         if((H5F_USE_LATEST_FORMAT(file))&&(H5F_AVOID_TRUNCATE(file)==H5F_AVOID_TRUNCATE_OFF)) {
             file->shared->avoid_truncate = H5F_AVOID_TRUNCATE_EXTEND;
         } /* end if */

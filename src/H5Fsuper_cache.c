@@ -553,6 +553,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
              * the file, re-synchronizig the EOA/EOF values. There's no need to set the EOA here at all
              * since we set it up above to the EOF value read from the file. Instead, re-write the 'EOA'
              * message with the EOF value. (not actually sure we want to do this ... :? )*/
+            /* MSC - Did not quite understand this part and why it is in there but commented out.. */
             if (mesg_flags & H5O_MSG_FLAG_WAS_UNKNOWN) {
                 /* Re-write EOA message with EOF value */
                 /* 
@@ -573,7 +574,6 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to read object header")
         if(status) {
             H5O_eofs_t eofs_msg;
-            unsigned mesg_flags;
             H5FD_mem_t mt;
 
             if(!(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS))
@@ -582,10 +582,6 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
             /* Retrieve 'EOFs' message */
             if(NULL == H5O_msg_read(&ext_loc, H5O_EOFS_ID, &eofs_msg, dxpl_id))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "'EOA' message not present")
-
-            /* Get the 'EOFs' messages flags - MSC what for ?*/
-            if (H5O_msg_flags(&ext_loc, H5O_EOFS_ID, &mesg_flags, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "Cannot retrieve object header message flags")
 
             /* Check if file is trucated */
             for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
