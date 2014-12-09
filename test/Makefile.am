@@ -47,7 +47,7 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            set_extent ttsafe enc_dec_plist enc_dec_plist_cross_platform\
            getname vfd ntypes dangle dtransform reserved cross_read \
            freespace mf vds farray earray btree2 fheap file_image unregister \
-           query
+           query index
 
 # List programs to be built when testing here. error_test and err_compat are
 # built at the same time as the other tests, but executed by testerror.sh.
