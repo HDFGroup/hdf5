@@ -116,7 +116,13 @@ Bug Fixes since HDF5-1.8.14
 
     Library
     -------
-    - None
+    - Incorrect usage of list in CMake COMPILE_DEFINITIONS set_property
+    
+      The CMake command, set_property with COMPILE_DEFINITIONS property
+      needs a quoted semi-colon separated list of values. CMake will
+      transform the list to a series of -D{value} for the compile.
+      
+      (ADB - 2014/12/09, HDFV-9041)
 
     Parallel Library
     ----------------
