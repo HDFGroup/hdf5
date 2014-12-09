@@ -57,7 +57,9 @@ New Features
 
     Configuration
     -------------
-    - None
+    - cmakehdf5: configure options added to enable or disable the building of
+      different API's and testings. See "cmakehdf5 --help" for details.
+      (AKC - 2014/12/09 HDFFV-8932)
     
     Library
     -------
