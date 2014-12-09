@@ -41,6 +41,9 @@ New Features
 
     Configuration:
     -------------
+    - cmakehdf5: configure options added to enable or disable the building of
+      different API's and testings. See "cmakehdf5 --help" for details.
+      (AKC - 2014/12/09 HDFFV-8932)
     - Autotools: Automake updated to 1.14.1 (ADB - 2014/04/08)
     - CMake: Moved minimum CMake version to 2.8.11 which enables better library
       include processing. (ADB - 2014/03/26)
