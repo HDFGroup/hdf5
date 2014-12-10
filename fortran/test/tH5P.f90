@@ -306,7 +306,7 @@ SUBROUTINE multi_file_test(cleanup, total_error)
   !
   CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
   CALL check("h5pcreate_f", error, total_error)
-  CALL h5pset_fapl_multi_f(fapl, relax, error)
+  CALL h5pset_fapl_multi_f(fapl, memb_map, memb_fapl, memb_name, memb_addr, relax, error)
   CALL check("h5pset_fapl_multi_f", error, total_error)
   CALL h5fopen_f (fix_filename, H5F_ACC_RDWR_F, file_id, error, access_prp = fapl)
   CALL check("h5fopen_f", error, total_error)

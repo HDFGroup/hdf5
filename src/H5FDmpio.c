@@ -92,8 +92,7 @@ static herr_t H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hadd
 static herr_t H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
             size_t size, const void *buf);
 static herr_t H5FD_mpio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
-static herr_t H5FD_mpio_coordinate(H5FD_t *_file, hid_t dxpl_id,
-                                   H5FD_coord_t op);
+static herr_t H5FD_mpio_coordinate(H5FD_t *_file, hid_t dxpl_id, H5FD_coord_t op);
 static herr_t H5FD_mpio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static int H5FD_mpio_mpi_rank(const H5FD_t *_file);
 static int H5FD_mpio_mpi_size(const H5FD_t *_file);
@@ -139,7 +138,7 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
     H5FD_mpio_truncate,				/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
-    H5FD_mpio_coordinate,                       /* coordinate           */
+    H5FD_mpio_coordinate,                       /*coordinate            */
     H5FD_FLMAP_DICHOTOMY                        /*fl_map                */
     },  /* End of superclass information */
     H5FD_mpio_mpi_rank,                         /*get_rank              */
@@ -1891,9 +1890,8 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      * potentially be wrong.) */
     file->eof = HADDR_UNDEF;
 
-    if (bytes_written && (bytes_written+addr > file->local_eof)) {
-        file->local_eof = addr+bytes_written;
-    } /* end if */
+    if(bytes_written && ((bytes_written + addr) > file->local_eof))
+        file->local_eof = addr + bytes_written;
 
 done:
 #ifdef H5FDmpio_DEBUG
@@ -1968,10 +1966,8 @@ done:
 static herr_t
 H5FD_mpio_coordinate(H5FD_t *_file, hid_t UNUSED dxpl_id, H5FD_coord_t op)
 {
-    H5FD_mpio_t     *file = (H5FD_mpio_t*)_file;
-    int         mpi_code;   /* mpi return code */
-    herr_t              ret_value = SUCCEED;
-    haddr_t max_eof;    /* End-of-file value */
+    H5FD_mpio_t *file = (H5FD_mpio_t*)_file;
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1979,7 +1975,6 @@ H5FD_mpio_coordinate(H5FD_t *_file, hid_t UNUSED dxpl_id, H5FD_coord_t op)
     if(H5FD_mpio_Debug[(int)'t'])
         HDfprintf(stdout, "Entering %s\n", FUNC);
 #endif
-
     HDassert(file);
     HDassert(H5FD_MPIO == file->pub.driver_id);
 
@@ -1987,35 +1982,33 @@ H5FD_mpio_coordinate(H5FD_t *_file, hid_t UNUSED dxpl_id, H5FD_coord_t op)
     switch (op) {
 
         case H5FD_COORD_EOF:
+            {
+                haddr_t max_eof;            /* End-of-file value */
+                int mpi_code;               /* MPI return code */
 
-            /* Find maximum 'EOF' among all processes' locally tracked copies */
-            if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&(file->local_eof),
-                                                        &max_eof, 1,
-                                                        HADDR_AS_MPI_TYPE,
-                                                        MPI_MAX, file->comm)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-     
-            /* Synchronize eof amongst all processes with max value reported */
-            file->eof = max_eof;
+                /* Find maximum 'EOF' among all processes' locally tracked copies */
+                if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&(file->local_eof),
+                        &max_eof, 1, HADDR_AS_MPI_TYPE, MPI_MAX, file->comm)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
+         
+                /* Synchronize eof amongst all processes with max value reported */
+                file->eof = max_eof;
+            }
             break;
 
         case H5FD_COORD_NONE:
         default:
-
             /* For now, don't do anything if invalid case is provided.
              * Depending on how this function evolves, we may opt to 
              * make this fail if no operation is provided. */
             break;
-
     } /* end switch */
  
- done:
-
- #ifdef H5FDmpio_DEBUG
+done:
+#ifdef H5FDmpio_DEBUG
      if(H5FD_mpio_Debug[(int)'t'])
      	HDfprintf(stdout, "Leaving %s\n", FUNC);
- #endif
- 
+#endif
      FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpio_coordinate() */
 

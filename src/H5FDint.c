@@ -120,7 +120,7 @@ H5FD_int_init_interface(void)
 herr_t
 H5FD_locate_signature(H5FD_t *file, const H5P_genplist_t *dxpl, haddr_t *sig_addr)
 {
-    haddr_t         addr, eoa;
+    haddr_t         addr, eoa, eof;
     uint8_t         buf[H5F_SIGNATURE_LEN];
     unsigned        n, maxpow;
     herr_t          ret_value = SUCCEED; /* Return value */
@@ -128,8 +128,10 @@ H5FD_locate_signature(H5FD_t *file, const H5P_genplist_t *dxpl, haddr_t *sig_add
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Find the least N such that 2^N is larger than the file size */
-    if(HADDR_UNDEF == (addr = MAX(H5FD_get_eof(file, H5FD_MEM_SUPER),H5FD_get_eoa(file,H5FD_MEM_SUPER))) || 
-       HADDR_UNDEF == (eoa = H5FD_get_eoa(file, H5FD_MEM_SUPER)))
+    eof = H5FD_get_eof(file, H5FD_MEM_SUPER);
+    eoa = H5FD_get_eoa(file, H5FD_MEM_SUPER);
+    addr = MAX(eof, eoa);
+    if(HADDR_UNDEF == addr)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to obtain EOF/EOA value")
     for(maxpow = 0; addr; maxpow++)
         addr >>= 1;

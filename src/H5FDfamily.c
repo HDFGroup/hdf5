@@ -106,6 +106,7 @@ static herr_t H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, ha
 static herr_t H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 				size_t size, const void *_buf);
 static herr_t H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_family_coordinate(H5FD_t *_file, hid_t dxpl_id, H5FD_coord_t op);
 static herr_t H5FD_family_truncate(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 
 /* The class struct */
@@ -141,7 +142,7 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_family_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
-    NULL,                                       /* coordinate            */
+    H5FD_family_coordinate,                     /*coordinate            */
     H5FD_FLMAP_DICHOTOMY                        /*fl_map                */
 };
 
@@ -1299,6 +1300,40 @@ H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_family_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_family_coordinate
+ *
+ * Purpose:	Coordinates all family members.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, as many files coordinated as possible.
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, December 10, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_family_coordinate(H5FD_t *_file, hid_t dxpl_id, H5FD_coord_t op)
+{
+    H5FD_family_t	*file = (H5FD_family_t*)_file;
+    unsigned		u, nerrors = 0;
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    for(u = 0; u < file->nmembs; u++)
+        if(file->memb[u] && H5FD_coordinate(file->memb[u], dxpl_id, op) < 0)
+            nerrors++;
+
+    if(nerrors)
+        HGOTO_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "unable to coordinate member files")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_family_coordinate() */
 
 
 /*-------------------------------------------------------------------------
