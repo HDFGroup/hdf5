@@ -214,10 +214,10 @@ static const H5FD_class_t H5FD_log_g = {
     H5FD_log_read,				/*read			*/
     H5FD_log_write,				/*write			*/
     NULL,					/*flush			*/
+    NULL,                                       /*coordinate            */
     H5FD_log_truncate,				/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
-    NULL,                                       /* coordinate            */
     H5FD_FLMAP_DICHOTOMY			/*fl_map		*/
 };
 

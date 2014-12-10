@@ -489,7 +489,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     } /* end if */
     /* Files that avoid truncation calls need to store the 'EOA' value in the
         superblock extension */
-    else if (H5F_AVOID_TRUNCATE(f))
+    else if(H5F_AVOID_TRUNCATE(f))
         need_ext = TRUE;
     else if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS)
         need_ext = TRUE;
@@ -585,7 +585,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
 	} /* end if */
 
         /* Check if we need to store the 'EOA' value in the superblock extension */
-        if (H5F_AVOID_TRUNCATE(f)) {
+        if(H5F_AVOID_TRUNCATE(f)) {
             H5O_eoa_t eoa_msg;
             haddr_t eoa; /* 'EOA' value */
 
@@ -594,8 +594,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
 
             eoa_msg.eoa = eoa + sblock->base_addr;
 
-            if(H5O_msg_create(&ext_loc, H5O_EOA_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, 
-                              H5O_UPDATE_TIME, &eoa_msg, dxpl_id) < 0)
+            if(H5O_msg_create(&ext_loc, H5O_EOA_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &eoa_msg, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update 'EOA' value header message")
         } /* end if */
 
@@ -607,12 +606,11 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
             for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
                 if((eofs[mt] = H5FD_get_eof(f->shared->lf, mt)) == HADDR_UNDEF)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eof request failed")
-            }
+            } /* end for */
 
-            if(H5O_msg_create(&ext_loc, H5O_EOFS_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, 
-                              &eofs, dxpl_id) < 0)
+            if(H5O_msg_create(&ext_loc, H5O_EOFS_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &eofs, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update 'EOFS' value header message")
-        }
+        } /* end if */
     } /* end if */
 
 done:

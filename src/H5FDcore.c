@@ -176,10 +176,10 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD_core_read,             /* read                 */
     H5FD_core_write,            /* write                */
     H5FD_core_flush,            /* flush                */
+    NULL,                       /* coordinate           */
     H5FD_core_truncate,         /* truncate             */
     NULL,                       /* lock                 */
     NULL,                       /* unlock               */
-    NULL,                       /* coordinate           */
     H5FD_FLMAP_DICHOTOMY        /* fl_map               */
 };
 

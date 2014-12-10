@@ -1073,7 +1073,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
      */
-    if(0 == (MAX(H5FD_get_eof(lf,H5FD_MEM_SUPER),H5FD_get_eoa(lf,H5FD_MEM_SUPER))) && (flags & H5F_ACC_RDWR)) {
+    if(0 == (MAX(H5FD_get_eof(lf, H5FD_MEM_SUPER), H5FD_get_eoa(lf, H5FD_MEM_SUPER))) && (flags & H5F_ACC_RDWR)) {
         /*
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.
@@ -1085,10 +1085,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
            created because it will need to know to create superblock
            extension containing EOA message. The default setting when
            using the latest format is H5F_AVOID_TRUNCATE_EXTEND */
-        /* MSC - Why? */
-        if((H5F_USE_LATEST_FORMAT(file))&&(H5F_AVOID_TRUNCATE(file)==H5F_AVOID_TRUNCATE_OFF)) {
+        if((H5F_USE_LATEST_FORMAT(file)) && (H5F_AVOID_TRUNCATE(file) == H5F_AVOID_TRUNCATE_OFF))
             file->shared->avoid_truncate = H5F_AVOID_TRUNCATE_EXTEND;
-        } /* end if */
 
         /* Initialize information about the superblock and allocate space for it */
         /* (Writes superblock extension messages, if there are any) */
@@ -2068,30 +2066,46 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_get_file_image() */
 
-htri_t
-H5F__should_truncate(H5F_t *f)
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__should_truncate
+ *
+ * Purpose:     Determine if a file should be truncated
+ *
+ * Return:      Success:        TRUE / FALSE
+ *              Failure:        N/A
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              9/14/14
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F__should_truncate(const H5F_t *f)
 {
-    htri_t ret_value = FALSE;
+    hbool_t ret_value = FALSE;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if(H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_OFF)
-        HGOTO_DONE(TRUE)
+        ret_value = TRUE;
     else if(H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_EXTEND) {
         if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) {
             H5FD_mem_t mt;
 
             for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                if(H5FD_get_eof(f->shared->lf, mt) > H5FD_get_eoa(f->shared->lf, mt))
-                   HGOTO_DONE(TRUE)
-            }
-        }
+                if(H5FD_get_eof(f->shared->lf, mt) > H5FD_get_eoa(f->shared->lf, mt)) {
+                   ret_value = TRUE;
+                   break;
+                } /* end if */
+            } /* end for */
+        } /* end if */
         else {
             if(H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT) > H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT))
-                HGOTO_DONE(TRUE)
-        }
-    }
+                ret_value = TRUE;
+        } /* end else */
+    } /* end else */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5F__should_truncate() */
+

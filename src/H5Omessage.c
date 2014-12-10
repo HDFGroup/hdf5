@@ -455,7 +455,7 @@ H5O_msg_flags(const H5O_loc_t *loc, unsigned type_id, unsigned *mesg_flags, hid_
     H5O_t *oh = NULL;                   /* Object header to use */
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     unsigned       idx;                 /* Message's index in object header */
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, loc->addr, FAIL)
 
@@ -485,7 +485,7 @@ H5O_msg_flags(const H5O_loc_t *loc, unsigned type_id, unsigned *mesg_flags, hid_
      * Decode the message if necessary.  If the message is shared then retrieve
      * native message through the shared interface.
      */
-    H5O_LOAD_NATIVE(loc->file, dxpl_id, 0, oh, &(oh->mesg[idx]), NULL)
+    H5O_LOAD_NATIVE(loc->file, dxpl_id, 0, oh, &(oh->mesg[idx]), FAIL)
 
     /*
      * The object header caches the native message (along with
