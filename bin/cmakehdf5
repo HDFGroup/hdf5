@@ -23,12 +23,26 @@ makelog="#${progname}_2build.log"
 testlog="#${progname}_3test.log"
 packlog="#${progname}_4pack.log"
 installlog="#${progname}_5install.log"
-srcdir="../hdf5"	# expected source directory
 exit_code=0
 
+# This command should be in the source directory's bin/
+# and should have invoked as "$srcdir/bin/$progname" or
+# "bin/$progname". So, by striping bin/$program from $0,
+# we can find $srcdir.
+if [ $0 == bin/$progname ]; then
+    srcdir="."		# current directory
+else
+    # $0 is $srdir/bin/$progname
+    srcdir=`echo $0 | sed -e s%/bin/$progname\$%%`
+fi
+# Sanity check
+if [ ! -r $srcdir/bin/$progname ]; then
+    echo "encountered error while trying to find srcdir($srdir)"
+    exit 1
+fi
+
 # Cmake build options
-hdf5_src=../hdf5
-cacheinit=$hdf5_src/config/cmake/cacheinit.cmake
+cacheinit=$srcdir/config/cmake/cacheinit.cmake
 build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=OFF	# C++ interface default off
 build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=OFF	# Fortran interface default off
 build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON	# High Level interface default on
@@ -189,7 +203,7 @@ STEP "Configure..." "cmake \
     $build_hl_lib \
     $build_testing \
     $build_tools \
-    $hdf5_src" $configlog
+    $srcdir" $configlog
       
 #      5. Build the C library, tools and tests with this command:
 STEP "Build the library, tools and tests, ..." "cmake --build . --config Release" $makelog
