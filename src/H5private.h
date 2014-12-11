@@ -1336,6 +1336,9 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
 #ifndef HDtoupper
     #define HDtoupper(C)    toupper(C)
 #endif /* HDtoupper */
+#ifndef HDtruncate
+    #define HDtruncate(F,L)    truncate(F,L)
+#endif /* HDftell */
 #ifndef HDttyname
     #define HDttyname(F)    ttyname(F)
 #endif /* HDttyname */

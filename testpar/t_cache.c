@@ -7108,7 +7108,6 @@ main(int argc, char **argv)
     int mpi_size;
     int mpi_rank;
     int max_nerrors;
-    int take_down_types = 0;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -7168,7 +7167,6 @@ main(int argc, char **argv)
     set_up_file_communicator();
 
     setup_derived_types();
-    take_down_types = 1;
 
     /* h5_fixname() will hang some processes don't participate.
      *
@@ -7302,8 +7300,7 @@ finish:
 	printf("===================================\n");
     }
 
-    if(take_down_types)
-        takedown_derived_types();
+    takedown_derived_types();
 
     /* close HDF5 library */
     H5close();

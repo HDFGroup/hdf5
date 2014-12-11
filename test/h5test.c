@@ -1015,7 +1015,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
  *    Failure:  -1
  *
  * Programmer:  Mohamad Chaarawi
- *              Septmeber, 2014
+ *              September, 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1028,7 +1028,7 @@ h5_file_truncate(const char *filename, hid_t fapl, off_t size)
     int j = 0;
 
     if(fapl == H5P_DEFAULT) {
-        if (truncate(filename, size) != 0) 
+        if (HDtruncate(filename, size) != 0) 
             return -1;
     } /* end if */
     else {
@@ -1056,7 +1056,7 @@ h5_file_truncate(const char *filename, hid_t fapl, off_t size)
                 return -1;
 
             /* truncate the file */
-            if (truncate(filename, (off_t)filesize + size) != 0) 
+            if (HDtruncate(filename, (off_t)filesize + size) != 0) 
                 return -1;
         } /* end if */
         else if(driver == H5FD_MULTI) {
@@ -1076,7 +1076,7 @@ h5_file_truncate(const char *filename, hid_t fapl, off_t size)
 
                     if((off_t)sb.st_size != 0) {
                         /* truncate the file */
-                        if (truncate(temp, (off_t)sb.st_size + size) != 0) 
+                        if (HDtruncate(temp, (off_t)sb.st_size + size) != 0) 
                             return -1;
                     }
                 } /* end if */
@@ -1098,7 +1098,7 @@ h5_file_truncate(const char *filename, hid_t fapl, off_t size)
                     return -1;
 
                 /* truncate the file */
-                if (truncate(temp, (off_t)sb.st_size + size) != 0) 
+                if (HDtruncate(temp, (off_t)sb.st_size + size) != 0) 
                     return -1;
             } /* end for */
         } /* end if */

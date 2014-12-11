@@ -186,7 +186,7 @@ static const unsigned H5F_def_sohm_list_max_g  = H5F_CRT_SHMSG_LIST_MAX_DEF;
 static const unsigned H5F_def_sohm_btree_min_g  = H5F_CRT_SHMSG_BTREE_MIN_DEF;
 static const unsigned H5F_def_file_space_strategy_g = H5F_CRT_FILE_SPACE_STRATEGY_DEF;
 static const hsize_t H5F_def_free_space_threshold_g = H5F_CRT_FREE_SPACE_THRESHOLD_DEF;
-static const H5F_avoid_truncate_t avoid_truncate_g = H5F_CRT_AVOID_TRUNCATE_DEF;
+static const H5F_avoid_truncate_t H5F_def_avoid_truncate_g = H5F_CRT_AVOID_TRUNCATE_DEF;
 
 
 
@@ -280,9 +280,8 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-
     /* Register the avoid truncate property */
-    if(H5P_register_real(pclass, H5F_CRT_AVOID_TRUNCATE_NAME, H5F_CRT_AVOID_TRUNCATE_SIZE, &avoid_truncate_g,
+    if(H5P_register_real(pclass, H5F_CRT_AVOID_TRUNCATE_NAME, H5F_CRT_AVOID_TRUNCATE_SIZE, &H5F_def_avoid_truncate_g,
             NULL, NULL, NULL, H5F_CRT_AVOID_TRUNCATE_ENC, H5F_CRT_AVOID_TRUNCATE_DEC,
             NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
@@ -1370,7 +1369,7 @@ done:
 herr_t
 H5Pget_avoid_truncate(hid_t fcpl_id, H5F_avoid_truncate_t *avoid_truncate)
 {
-    H5P_genplist_t  *plist;  /* Property list pointer */
+    H5P_genplist_t  *plist;         /* Property list pointer */
     herr_t  ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1405,7 +1404,7 @@ done:
 herr_t
 H5Pset_avoid_truncate(hid_t fcpl_id, H5F_avoid_truncate_t avoid_truncate)
 {
-    H5P_genplist_t  *plist;  /* Property list pointer */
+    H5P_genplist_t  *plist;         /* Property list pointer */
     herr_t  ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1416,8 +1415,8 @@ H5Pset_avoid_truncate(hid_t fcpl_id, H5F_avoid_truncate_t avoid_truncate)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set the avoid_truncate value */
-	if(H5P_set(plist, H5F_CRT_AVOID_TRUNCATE_NAME, &avoid_truncate) < 0)
-	    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'avoid truncate' property")
+    if(H5P_set(plist, H5F_CRT_AVOID_TRUNCATE_NAME, &avoid_truncate) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'avoid truncate' property")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1434,8 +1433,8 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Thursday, November 1, 2012
+ * Programmer:     Mike McGreevy
+ *                 January 26, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -1472,8 +1471,8 @@ H5P__fcrt_avoid_truncate_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Thursday, November 1, 2012
+ * Programmer:     Mike McGreevy
+ *                 January 26, 2011
  *
  *-------------------------------------------------------------------------
  */
