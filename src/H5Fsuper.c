@@ -584,22 +584,9 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update free-space info header message")
 	} /* end if */
 
-        /* Check if we need to store the 'EOA' value in the superblock extension */
-        if(H5F_AVOID_TRUNCATE(f)) {
-            H5O_eoa_t eoa_msg;
-            haddr_t eoa; /* 'EOA' value */
-
-            if(HADDR_UNDEF == (eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)))
-                HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to obtain EOA value")
-
-            eoa_msg.eoa = eoa + sblock->base_addr;
-
-            if(H5O_msg_create(&ext_loc, H5O_EOA_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &eoa_msg, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update 'EOA' value header message")
-        } /* end if */
-
         /* Check if we need to store the 'EOFs' value in the superblock extension */
-        if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) {
+        if((f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) && 
+            H5F_AVOID_TRUNCATE(f)) {
             haddr_t eofs[H5FD_MEM_NTYPES]; /* 'EOFs' value */
             H5FD_mem_t mt;
 
@@ -610,6 +597,19 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
 
             if(H5O_msg_create(&ext_loc, H5O_EOFS_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &eofs, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update 'EOFS' value header message")
+        } /* end if */
+        /* Check if we need to store the 'EOA' value in the superblock extension */
+        else if(H5F_AVOID_TRUNCATE(f)) {
+            H5O_eoa_t eoa_msg;
+            haddr_t eoa; /* 'EOA' value */
+
+            if(HADDR_UNDEF == (eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)))
+                HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to obtain EOA value")
+
+            eoa_msg.eoa = eoa + sblock->base_addr;
+
+            if(H5O_msg_create(&ext_loc, H5O_EOA_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &eoa_msg, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update 'EOA' value header message")
         } /* end if */
     } /* end if */
 

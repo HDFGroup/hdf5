@@ -238,13 +238,24 @@ int test_fcreate_with_at(hid_t fcpl, hid_t fapl, H5F_avoid_truncate_t at, hbool_
         /* Open the superblock extension, if it exists. */
         if(H5F_super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0) FAIL_STACK_ERROR;
 
-        if(H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id)==TRUE) {
-            if(eoa!=TRUE) TEST_ERROR;
-        } else if(H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id)==FALSE) {
-            if(eoa!=FALSE) TEST_ERROR;
-        } else {
-            FAIL_STACK_ERROR;
-        } /* end else */
+        if(H5Pget_driver(fapl) == H5FD_MULTI) {
+            if(H5O_msg_exists(&ext_loc, H5O_EOFS_ID, H5AC_dxpl_id)==TRUE) {
+                if(eoa!=TRUE) TEST_ERROR;
+            } else if(H5O_msg_exists(&ext_loc, H5O_EOFS_ID, H5AC_dxpl_id)==FALSE) {
+                if(eoa!=FALSE) TEST_ERROR;
+            } else {
+                FAIL_STACK_ERROR;
+            } /* end else */
+        }
+        else {
+            if(H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id)==TRUE) {
+                if(eoa!=TRUE) TEST_ERROR;
+            } else if(H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id)==FALSE) {
+                if(eoa!=FALSE) TEST_ERROR;
+            } else {
+                FAIL_STACK_ERROR;
+            } /* end else */
+        }
 
         /* Close sblock extension */
         if(H5F_super_ext_close(f, &ext_loc, H5AC_dxpl_id, FALSE) <0) FAIL_STACK_ERROR;

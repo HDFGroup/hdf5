@@ -102,6 +102,9 @@ H5O__eofs_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     /* Version of the message */
     if(*p++ != H5O_EOFS_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
+
+    /* Get the 'avoid truncate' setting */
+    mesg->avoid_truncate = (H5F_avoid_truncate_t)*p++; /* avoid truncate setting */
     
     /* Get the 'EOFS' message from the file */
     for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1))
@@ -144,6 +147,9 @@ H5O__eofs_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, con
     /* Version */
     *p++ = H5O_EOFS_VERSION;
 
+    /* Encode 'Avoid Truncate' setting */
+    *p++ = mesg->avoid_truncate;
+
     /* Encode 'EOFS' Message */
     for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1))
         H5F_addr_encode(f, &p, mesg->memb_eof[mt]);
@@ -182,6 +188,7 @@ H5O__eofs_copy(const void *_mesg, void *_dest)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy */
+    dest->avoid_truncate = mesg->avoid_truncate;
     for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1))
         dest->memb_eof[mt] = mesg->memb_eof[mt];
 
@@ -220,7 +227,8 @@ H5O__eofs_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void UNUSED 
     
     /* Determine Size */
     ret_value = (size_t)(1 +     /* Version */
-        H5FD_MEM_NTYPES * H5F_SIZEOF_ADDR(f)); /* EOFS Address (haddr_t) */
+                         1 + /* truncation avoidance mode */
+                         H5FD_MEM_NTYPES * H5F_SIZEOF_ADDR(f)); /* EOFS Address (haddr_t) */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__eofs_size() */
@@ -311,6 +319,9 @@ H5O__eofs_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
         HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, temp, mesg->memb_eof[mt]);
     } /* end for */
 
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Avoid truncate:", ((mesg->avoid_truncate == H5F_AVOID_TRUNCATE_OFF) ?  "H5F_AVOID_TRUNCATE_OFF" :
+                                  ((mesg->avoid_truncate == H5F_AVOID_TRUNCATE_EXTEND) ?  "H5F_AVOID_TRUNCATE_EXTEND" : "H5F_AVOID_TRUNCATE_ALL")));
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5O__eofs_debug */
 

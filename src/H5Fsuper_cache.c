@@ -584,6 +584,11 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
             if(NULL == H5O_msg_read(&ext_loc, H5O_EOFS_ID, &eofs_msg, dxpl_id))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "'EOFs' message not present")
 
+            /* Set 'Avoid Truncate' mode in shared file & creation properties */
+            f->shared->avoid_truncate = eofs_msg.avoid_truncate;
+            if(H5P_set(c_plist, H5F_CRT_AVOID_TRUNCATE_NAME, &f->shared->avoid_truncate) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set avoid truncate feature")
+
             /* Check if file is truncated */
             for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
                 if(HADDR_UNDEF == (eof = H5FD_get_eof(lf, mt)))
@@ -974,10 +979,13 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 
                 HDassert(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS);
 
+                /* Set the message flag */
+                eofs_msg.avoid_truncate = f->shared->avoid_truncate;
+
                 /* Get the current EOFs */
                 for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
                     haddr_t memb_eoa, memb_eof;
-                    
+
                     if((memb_eoa = H5FD_get_eoa(f->shared->lf, mt)) == HADDR_UNDEF)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
                     if((memb_eof = H5FD_get_eof(f->shared->lf, mt)) == HADDR_UNDEF)
