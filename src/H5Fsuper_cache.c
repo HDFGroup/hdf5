@@ -982,6 +982,8 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                 /* Set the message flag */
                 eofs_msg.avoid_truncate = f->shared->avoid_truncate;
 
+                mesg_flags = H5O_MSG_FLAG_MARK_IF_UNKNOWN;
+
                 /* Get the current EOFs */
                 for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
                     haddr_t memb_eoa, memb_eof;
@@ -1001,10 +1003,14 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                         else
                             eofs_msg.memb_eof[mt] = memb_eof;
                     } /* end else */
+
+                    if(mesg_flags == H5O_MSG_FLAG_MARK_IF_UNKNOWN && 
+                       eofs_msg.memb_eof[mt] != memb_eoa)
+                        mesg_flags = H5O_MSG_FLAG_FAIL_IF_UNKNOWN;
+
                 } /* end for */
 
                 /* Update the EOFs message */
-                mesg_flags = (should_truncate) ? H5O_MSG_FLAG_MARK_IF_UNKNOWN : H5O_MSG_FLAG_FAIL_IF_UNKNOWN;
                 if(H5O_msg_write(&ext_loc, H5O_EOFS_ID, mesg_flags, H5O_UPDATE_TIME, &eofs_msg, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "unable to update EOFs header message")
             } /* end if */ 
