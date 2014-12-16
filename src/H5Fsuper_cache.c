@@ -554,7 +554,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
              * since we set it up above to the EOF value read from the file. Instead, re-write the 'EOA'
              * message with the EOF value.
              */
-            if(mesg_flags & H5O_MSG_FLAG_WAS_UNKNOWN) {
+            if((H5F_INTENT(f) & H5F_ACC_RDWR) && (mesg_flags & H5O_MSG_FLAG_WAS_UNKNOWN)) {
                 /* Re-write EOA message with EOF value */
                 eoa_msg.eoa = stored_eof;
                 if(H5O_msg_write(&ext_loc, H5O_EOA_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &eoa_msg, dxpl_id) < 0)
@@ -572,6 +572,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to read object header")
         if(status) {
             H5O_eofs_t eofs_msg;        /* EOFs message from the superblock extension */
+            unsigned mesg_flags;        /* Message flags for the EOA message */
             H5FD_mem_t mt;              /* Memory type iterator */
 
             /* Check for invalid combination of EOFS message and the VFD not
@@ -589,6 +590,10 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
             if(H5P_set(c_plist, H5F_CRT_AVOID_TRUNCATE_NAME, &f->shared->avoid_truncate) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set avoid truncate feature")
 
+            /* Get the 'EOFS' messages flags */
+            if(H5O_msg_flags(&ext_loc, H5O_EOFS_ID, &mesg_flags, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "Cannot retrieve object header message flags")
+
             /* Check if file is truncated */
             for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
                 if(HADDR_UNDEF == (eof = H5FD_get_eof(lf, mt)))
@@ -599,6 +604,19 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
                                 "truncated file: eof = %llu, sblock->base_addr = %llu, stored_eof = %llu", 
                                 (unsigned long long)eof, (unsigned long long)sblock->base_addr, (unsigned long long)eofs_msg.memb_eof[mt])
             } /* end for */
+
+            /* If this message was previously accessed and unknown, then re-write the 'EOFS' 
+               with the H5O_MSG_FLAG_MARK_IF_UNKNOWN flag */
+            if((H5F_INTENT(f) & H5F_ACC_RDWR) && (mesg_flags & H5O_MSG_FLAG_WAS_UNKNOWN)) {
+                /* Re-write EOA message with EOF value */
+                if(H5O_msg_write(&ext_loc, H5O_EOFS_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &eofs_msg, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "unable to update EOA header message")
+            } /* end if */
+            else {
+                /* The multi-backend driver has all the EOAs in the
+                   driver info message and should set them
+                   appropriately */
+            } /* end else */
         } /* end if */ 
 
         /* Check for the extension having a 'driver info' message */
