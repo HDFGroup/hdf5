@@ -830,6 +830,7 @@
 ./src/H5Odtype.c
 ./src/H5Oefl.c
 ./src/H5Oeoa.c
+./src/H5Oeofs.c
 ./src/H5Ofill.c
 ./src/H5Ofsinfo.c
 ./src/H5Oginfo.c
@@ -1157,6 +1158,22 @@
 ./test/testfiles/plist_files/ocpypl_le
 ./test/testfiles/plist_files/strcpl_be
 ./test/testfiles/plist_files/strcpl_le
+./test/testfiles/avoid_truncate/multifile_avoidt_v18.h5-o.h5
+./test/testfiles/avoid_truncate/tfile_avoidt_v18.h5
+./test/testfiles/avoid_truncate/multifile_avoidt_v18.h5-r.h5
+./test/testfiles/avoid_truncate/multifile_avoidt_v18.h5-s.h5
+./test/testfiles/avoid_truncate/h5_1_8_gentest.c
+./test/testfiles/avoid_truncate/multifile_v18.h5-b.h5
+./test/testfiles/avoid_truncate/multifile_v18.h5-g.h5
+./test/testfiles/avoid_truncate/multifile_avoidt_v18.h5-b.h5
+./test/testfiles/avoid_truncate/multifile_v18.h5-l.h5
+./test/testfiles/avoid_truncate/multifile_avoidt_v18.h5-g.h5
+./test/testfiles/avoid_truncate/multifile_v18.h5-o.h5
+./test/testfiles/avoid_truncate/tfile_v18.h5
+./test/testfiles/avoid_truncate/h5_avoid_truncate_gentest.c
+./test/testfiles/avoid_truncate/multifile_avoidt_v18.h5-l.h5
+./test/testfiles/avoid_truncate/multifile_v18.h5-r.h5
+./test/testfiles/avoid_truncate/multifile_v18.h5-s.h5
 
 ./testpar/COPYING
 ./testpar/Makefile.am
@@ -1669,6 +1686,17 @@
 ./tools/testfiles/twithddl.exp
 ./tools/testfiles/twithddlfile.ddl
 ./tools/testfiles/twithddlfile.exp
+./tools/testfiles/h5extend_multiexp4.ddl
+./tools/testfiles/h5extend_multifile.h5-l.h5
+./tools/testfiles/h5extend_multifile.h5-g.h5
+./tools/testfiles/h5extend_multifile.h5-b.h5
+./tools/testfiles/h5extend_multifile.h5-r.h5
+./tools/testfiles/h5extend_multiexp1.ddl
+./tools/testfiles/h5extend_multiexp5.ddl
+./tools/testfiles/h5extend_multifile.h5-s.h5
+./tools/testfiles/h5extend_multiexp2.ddl
+./tools/testfiles/h5extend_multifile.h5-o.h5
+./tools/testfiles/h5extend_multiexp3.ddl
 
 # h5dump test error files
 ./tools/h5dump/errfiles/filter_fail.err
