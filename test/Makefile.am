@@ -150,7 +150,14 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     earray.h5 efc[0-5].h5 log_vfd_out.log                            \
     new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
-    file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5
+    tfile_v18.h5 tfile_avoidt_v18.h5                                 \
+    multifile_avoidt_v18.h5-b.h5 multifile_avoidt_v18.h5-l.h5        \
+    multifile_avoidt_v18.h5-r.h5 multifile_v18.h5-b.h5               \
+    multifile_v18.h5-l.h5 multifile_v18.h5-r.h5                      \
+    multifile_avoidt_v18.h5-g.h5 multifile_avoidt_v18.h5-o.h5        \
+    multifile_avoidt_v18.h5-s.h5 multifile_v18.h5-g.h5               \
+    multifile_v18.h5-o.h5 multifile_v18.h5-s.h5                      \
+    file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \

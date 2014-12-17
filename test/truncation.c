@@ -27,6 +27,17 @@
 #define H5F_PACKAGE
 #define FILENAME "truncation.h5"
 
+#define TESTFILE1 "tfile_v18.h5"
+#define TESTFILE1_MULTI "multifile_v18.h5"
+
+#define TESTFILE2 "tfile_avoidt_v18.h5"
+#define TESTFILE2_MULTI "multifile_avoidt_v18.h5"
+
+#define SRCTESTFILE1 "testfiles/avoid_truncate/tfile_v18.h5"
+#define SRCTESTFILE1_MULTI "testfiles/avoid_truncate/multifile_v18.h5"
+#define SRCTESTFILE2 "testfiles/avoid_truncate/tfile_avoidt_v18.h5"
+#define SRCTESTFILE2_MULTI "testfiles/avoid_truncate/multifile_avoidt_v18.h5"
+
 #include "hdf5.h"
 #include "testhdf5.h"
 #include "H5Iprivate.h"
@@ -41,6 +52,10 @@ int test_fcreate_with_at(hid_t fcpl, hid_t fapl, H5F_avoid_truncate_t at, hbool_
 hid_t create_test_file_eof_gt_eoa(char * filename, hid_t fcpl, hid_t fapl, haddr_t * eoa, haddr_t * eof);
 hid_t create_test_file_eof_lt_eoa(char * filename, hid_t fcpl, hid_t fapl, haddr_t * eoa, haddr_t * eof);
 int test_truncation_detection_helper(hid_t fcpl, hid_t fapl);
+
+static int test_truncation_1_8(void);
+static int access_file(hid_t fapl, const char* filename);
+static int access_file_w_msg(hid_t fapl, const char* filename);
 
 
 /*-------------------------------------------------------------------------
@@ -66,7 +81,7 @@ int main(void)
 
     /* Get current driver */
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
-    /* Skip tests with multi, split, log, and family drivers (for now ...) */
+    /* Skip tests with log driver */
     if ((env_h5_drvr != NULL) && (!HDstrcmp(env_h5_drvr,"log"))) {
         HDfprintf(stdout, "Truncation Detection Test skipped with %s file driver\n", env_h5_drvr);
     } /* end if */
@@ -87,12 +102,299 @@ int main(void)
 
         if (!nerrors) nerrors += test_truncation_detection(fapl);
 
+        if (!nerrors) nerrors += test_truncation_1_8();
     } /* end else */
 
-return (nerrors > 0);
-
+    return (nerrors > 0);
 } /* end main */
 
+static int test_truncation_1_8(void)
+{
+    hid_t fapl;
+
+    if (h5_make_local_copy(SRCTESTFILE1, TESTFILE1) < 0)
+        TEST_ERROR;
+    if (h5_make_local_copy(SRCTESTFILE2, TESTFILE2) < 0)
+        TEST_ERROR;
+
+    if (h5_make_local_copy_multi(SRCTESTFILE1_MULTI, TESTFILE1_MULTI) < 0)
+        TEST_ERROR;
+    if (h5_make_local_copy_multi(SRCTESTFILE2_MULTI, TESTFILE2_MULTI) < 0)
+        TEST_ERROR;
+
+    TESTING("access to a file created by the 1.8 branch. ");
+    if(access_file(H5P_DEFAULT, TESTFILE1) < 0) TEST_ERROR;
+    PASSED();
+
+    TESTING("access to a file with an outdated EOA extension message. ");
+    if(access_file_w_msg(H5P_DEFAULT, TESTFILE2) < 0) TEST_ERROR;
+    PASSED();
+
+    /* Do the same as above but with the multi VFD */
+    if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0)
+        return -1;
+    if (H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, 1) < 0)
+        return -1;
+
+    TESTING("access to a multi-file created with the 1.8 branch. ");
+    if(access_file(fapl, TESTFILE1_MULTI) < 0) TEST_ERROR;
+    PASSED();
+
+    TESTING("access to a multi-file with an outdated EOFS extension message. ");
+    if(access_file_w_msg(fapl, TESTFILE2_MULTI) < 0) TEST_ERROR;
+    PASSED();
+
+    if(H5Pclose(fapl) < 0) TEST_ERROR;
+
+    return SUCCEED;
+error:
+    return FAIL;
+}
+
+static int access_file (hid_t fapl, const char* filename)
+{
+    /* Variables */
+    hid_t fid,sid,did1,did2,did3 = -1;         /* Object Descriptors */
+    hid_t fcpl;
+    H5F_avoid_truncate_t avoid_truncate;
+
+    /* Open the file */
+    if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) {
+        fprintf(stderr, "H5Fopen RDONLY Failed\n");
+        TEST_ERROR;
+    }
+
+    /* check avoid truncate property value */
+    if((fcpl = H5Fget_create_plist(fid)) < 0)
+        TEST_ERROR;
+    if (H5Pget_avoid_truncate(fcpl, &avoid_truncate) < 0)
+        TEST_ERROR;
+    if(H5F_AVOID_TRUNCATE_OFF != avoid_truncate) {
+        fprintf(stderr, "Avoid truncate property is not H5F_AVOID_TRUNCATE_OFF\n");
+        TEST_ERROR;
+    }
+    H5Pclose(fcpl);
+
+    /* Open dataset1 - should succeed */
+    if ((did1 = H5Dopen2(fid, "Dataset1", H5P_DEFAULT)) < 0) {
+        fprintf(stderr, "H5Dopen Failed\n");
+        TEST_ERROR;
+    }
+
+    /* Open dataset2 - should succeed */
+    if ((did2 = H5Dopen2(fid, "Dataset2", H5P_DEFAULT)) < 0) {
+        fprintf(stderr, "H5Dopen Failed\n");
+        TEST_ERROR;
+    }
+
+    /* Open dataset3 - should Fail */
+    H5E_BEGIN_TRY {
+        did3 = H5Dopen2(fid, "Dataset3", H5P_DEFAULT);
+    } H5E_END_TRY;
+    if (did3 >= 0) {
+        fprintf(stderr, "H5Dopen Succeeded but should FAIL\n");
+        TEST_ERROR;
+    }
+
+    /* Close the file, dataspace, and dataset */
+    if (H5Dclose(did1) < 0) 
+        TEST_ERROR;  
+    if (H5Dclose(did2) < 0) 
+        TEST_ERROR;  
+    if (H5Fclose(fid) < 0) 
+        TEST_ERROR;  
+
+    /* Re-open file */
+    if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) {
+        fprintf(stderr, "H5Fopen Failed\n");
+        TEST_ERROR;
+    }
+
+    /* Create dataspace for dataset */
+    if ((sid = H5Screate(H5S_SCALAR)) < 0) {
+        fprintf(stderr, "Failed H5Screate\n");
+        TEST_ERROR;
+    }
+
+    /* Create dataset */
+    if ((did3 = H5Dcreate2(fid, "Dataset3", H5T_NATIVE_INT, sid, H5P_DEFAULT,
+                           H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        fprintf(stderr, "Failed to create Dataset2 in %s\n", filename);
+        TEST_ERROR;
+    }
+
+    H5Sclose(sid);
+
+    if (H5Dclose(did3) < 0) 
+        TEST_ERROR;  
+
+    /* Close file */
+    if (H5Fclose(fid) < 0) 
+        TEST_ERROR;  
+
+    return SUCCEED;
+error:
+    return FAIL;
+}
+
+static int check_message(hid_t fid, unsigned value)
+{
+    H5F_t *f;
+
+    /* Get internal file pointer */
+    if ((f = (H5F_t *)H5I_object(fid)) == NULL) {
+        fprintf(stderr, "Unable to get internal file pointer.\n");
+        TEST_ERROR;
+    } /* end if */
+
+    /* If a SB extension exists check for EOA or EOFs messages */
+    if (f->shared->sblock->ext_addr != HADDR_UNDEF) {
+        H5O_loc_t ext_loc;      /* "Object location" for superblock extension */
+        unsigned mesg_flags;        /* Message flags for the EOA message */
+
+        /* Open the superblock extension */
+        if (H5F_super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0) {
+            fprintf(stderr, "Unable to open superblock extension.\n");
+            TEST_ERROR;
+        } /* end if */
+
+        /* If this is a multi-like vfd, check EOFS message. */
+        if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) {
+            /* Check to see if there is an 'EOFS' message */
+            if(!H5O_msg_exists(&ext_loc, H5O_EOFS_ID, H5AC_dxpl_id)) {
+                fprintf(stderr, "Unable to find 'EOFS' message in superblock extension.\n");
+                TEST_ERROR;
+            }
+            /* Get the 'EOFS' messages flags */
+            if(H5O_msg_flags(&ext_loc, H5O_EOFS_ID, &mesg_flags, H5AC_dxpl_id) < 0) {
+                fprintf(stderr, "Unable to retrieve 'EOFS' message flag.\n");
+                TEST_ERROR;
+            }
+        }
+        else {
+            /* Check to see if there is an 'EOA' message */
+            if(!H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id)) {
+                fprintf(stderr, "Unable to find 'EOA' message in superblock extension.\n");
+                TEST_ERROR;
+            }
+            /* Get the 'EOFS' messages flags */
+            if(H5O_msg_flags(&ext_loc, H5O_EOA_ID, &mesg_flags, H5AC_dxpl_id) < 0) {
+                fprintf(stderr, "Unable to retrieve 'EOFS' message flag.\n");
+                TEST_ERROR;
+            }
+        }
+
+        if(!(value & mesg_flags)) {
+            fprintf(stderr, "mesg_flags is incorrect (%u expecting %u)\n", mesg_flags, value);
+            TEST_ERROR;
+        }
+
+        /* Close superblock extension */
+        if(H5F_super_ext_close(f, &ext_loc, H5AC_dxpl_id, FALSE) < 0)
+            TEST_ERROR;
+    }
+    else {
+        fprintf(stderr, "No Superblock extension messages exist!\n");
+        TEST_ERROR;
+    }
+
+    return SUCCEED;
+error:
+    return FAIL;
+}
+
+static int access_file_w_msg (hid_t fapl, const char* filename)
+{
+    /* Variables */
+    hid_t fid,sid,did1,did2,did3 = -1;         /* Object Descriptors */
+    hid_t fcpl;
+    H5F_avoid_truncate_t avoid_truncate;
+
+    /* Open the file */
+    if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) {
+        fprintf(stderr, "H5Fopen RDONLY Failed\n");
+        TEST_ERROR;
+    }
+
+    /* since the file is read-only, the extension message flag should still be H5O_MSG_FLAG_WAS_UNKNOWN */
+    if(check_message(fid, H5O_MSG_FLAG_WAS_UNKNOWN) < 0) TEST_ERROR;
+
+    /* check avoid truncate property value */
+    if((fcpl = H5Fget_create_plist(fid)) < 0)
+        TEST_ERROR;
+    if (H5Pget_avoid_truncate(fcpl, &avoid_truncate) < 0)
+        TEST_ERROR;
+    if(H5F_AVOID_TRUNCATE_ALL != avoid_truncate) {
+        fprintf(stderr, "Avoid truncate property is not H5F_AVOID_TRUNCATE_ALL\n");
+        TEST_ERROR;
+    }
+    H5Pclose(fcpl);
+
+    /* Open dataset1 - should succeed */
+    if ((did1 = H5Dopen2(fid, "Dataset1", H5P_DEFAULT)) < 0) {
+        fprintf(stderr, "H5Dopen Failed\n");
+        TEST_ERROR;
+    }
+
+    /* Open dataset2 - should Fail */
+    H5E_BEGIN_TRY {
+        did2 = H5Dopen2(fid, "Dataset2", H5P_DEFAULT);
+    } H5E_END_TRY;
+    if (did2 >= 0) {
+        fprintf(stderr, "H5Dopen Succeeded but should FAIL\n");
+        TEST_ERROR;
+    }
+
+    /* Open dataset3 - should succeed */
+    if ((did3 = H5Dopen2(fid, "Dataset3", H5P_DEFAULT)) < 0) {
+        fprintf(stderr, "H5Dopen Failed\n");
+        TEST_ERROR;
+    }
+
+    /* Close the file, dataspace, and dataset */
+    if (H5Dclose(did1) < 0) 
+        TEST_ERROR;  
+    if (H5Dclose(did3) < 0) 
+        TEST_ERROR;  
+    if (H5Fclose(fid) < 0) 
+        TEST_ERROR;  
+
+    /* Re-open file */
+    if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) {
+        fprintf(stderr, "H5Fopen Failed\n");
+        TEST_ERROR;
+    }
+
+    /* since the file is writable, the extension message should be update and the flag set to
+       H5O_MSG_FLAG_MARK_IF_UNKNOWN */
+    if(check_message(fid, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0) TEST_ERROR;
+
+    /* Create dataspace for dataset */
+    if ((sid = H5Screate(H5S_SCALAR)) < 0) {
+        fprintf(stderr, "Failed H5Screate\n");
+        TEST_ERROR;
+    }
+
+    /* Create dataset */
+    if ((did2 = H5Dcreate2(fid, "Dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT,
+                           H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        fprintf(stderr, "Failed to create Dataset2 in %s\n", filename);
+        TEST_ERROR;
+    }
+
+    H5Sclose(sid);
+
+    if (H5Dclose(did2) < 0) 
+        TEST_ERROR;  
+
+    /* Close file */
+    if (H5Fclose(fid) < 0) 
+        TEST_ERROR;  
+
+    return SUCCEED;
+error:
+    return FAIL;
+}
 
 /*-------------------------------------------------------------------------
  *

@@ -1309,6 +1309,44 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
     return 0;
 }
 
+int
+h5_make_local_copy_multi(const char *origfilename, const char *local_copy_name)
+{
+    int fd_old = (-1), fd_new = (-1);   /* File descriptors for copying data */
+    ssize_t nread;                      /* Number of bytes read in */
+    char  buf[READ_BUF_SIZE];           /* Buffer for copying data */
+    const char *filename = H5_get_srcdir_filename(origfilename);       /* Get the test file name to copy */
+    H5FD_mem_t mt;
+
+    HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
+
+    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+        char orig[2048];
+        char local[2048];
+
+        HDsnprintf(orig, sizeof orig, "%s-%c.h5", filename, multi_letters[mt]);
+        HDsnprintf(local, sizeof local, "%s-%c.h5", local_copy_name, multi_letters[mt]);
+
+        /* Check for existence of file */
+        if(HDaccess(orig, F_OK) < 0)
+            continue;
+        /* Copy old file into temporary file */
+        if((fd_old = HDopen(orig, O_RDONLY, 0666)) < 0) return -1;
+        if((fd_new = HDopen(local, O_RDWR|O_CREAT|O_TRUNC, 0666))
+           < 0) return -1;
+
+        /* Copy data */
+        while((nread = HDread(fd_old, buf, (size_t)READ_BUF_SIZE)) > 0)
+            HDwrite(fd_new, buf, (size_t)nread);
+
+        /* Close files */
+        if(HDclose(fd_old) < 0) return -1;
+        if(HDclose(fd_new) < 0) return -1;
+    } /* end for */
+
+    return 0;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    h5_verify_cached_stabs_cb
