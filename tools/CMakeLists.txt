@@ -44,3 +44,6 @@ add_subdirectory (${HDF5_TOOLS_SOURCE_DIR}/h5stat)
 
 #-- Add the h5dump and test executables
 add_subdirectory (${HDF5_TOOLS_SOURCE_DIR}/h5dump)
+
+#-- Add the perform and test executables
+add_subdirectory (${HDF5_TOOLS_SOURCE_DIR}/perform)

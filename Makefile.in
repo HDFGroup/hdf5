@@ -503,7 +503,7 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog are from the MPE option.
 
-# Some files/directories generated during check that should be cleaned
+# Some files/directories generated during checkperform  that should be cleaned
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *-tmp
 @BUILD_PARALLEL_CONDITIONAL_FALSE@TESTPARALLEL_DIR = 
 
@@ -525,9 +525,9 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *-tmp
 @BUILD_HDF5_HL_CONDITIONAL_FALSE@HDF5_HL_DIR = 
 @BUILD_HDF5_HL_CONDITIONAL_TRUE@HDF5_HL_DIR = hl
 SUBDIRS = src test $(TESTPARALLEL_DIR) tools . $(CXX_DIR) $(FORTRAN_DIR) \
-          $(HDF5_HL_DIR) perform
+          $(HDF5_HL_DIR)
 
-DIST_SUBDIRS = src test testpar tools . c++ fortran hl perform examples
+DIST_SUBDIRS = src test testpar tools . c++ fortran hl examples
 
 # Some files generated during configure that should be cleaned
 DISTCLEANFILES = config/stamp1 config/stamp2
@@ -872,7 +872,7 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-recursive
-all-am: Makefile all-local
+all-am: Makefile
 installdirs: installdirs-recursive
 installdirs-am:
 install-exec: install-exec-recursive
@@ -932,7 +932,7 @@ install-dvi: install-dvi-recursive
 
 install-dvi-am:
 
-install-exec-am: install-exec-local
+install-exec-am:
 
 install-html: install-html-recursive
 
@@ -973,11 +973,11 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-local
+uninstall-am:
 
 .MAKE: $(am__recursive_targets) install-am install-strip
 
-.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am all-local \
+.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
 	am--refresh check check-am clean clean-cscope clean-generic \
 	clean-libtool cscope cscopelist-am ctags ctags-am dist \
 	dist-all dist-bzip2 dist-gzip dist-lzip dist-shar dist-tarZ \
@@ -985,14 +985,14 @@ uninstall-am: uninstall-local
 	distclean-libtool distclean-tags distcleancheck distdir \
 	distuninstallcheck dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-exec-local \
-	install-html install-html-am install-info install-info-am \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installcheck-local installdirs installdirs-am maintainer-clean \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installcheck-local \
+	installdirs installdirs-am maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool mostlyclean-local pdf pdf-am ps ps-am tags \
-	tags-am uninstall uninstall-am uninstall-local
+	tags-am uninstall uninstall-am
 
 
 # List all build rules defined by HDF5 Makefiles as "PHONY" targets here.
@@ -1017,25 +1017,25 @@ lib progs check-p check-s:
 	  fi;                                                           \
 	done
 
-# Make all, tests, and (un)install also recurse into perform directory
-all-local:
-	@cd perform && $(MAKE) $(AM_MAKEFLAGS) all
-
+# Make all, tests, and (un)install also recurse into directory
+#delall-local:
+#del	@cd perform && $(MAKE) $(AM_MAKEFLAGS) all
+#del
 tests:
-	@@SETX@; for d in $(SUBDIRS) perform; do                        \
+	@@SETX@; for d in $(SUBDIRS); do                        \
 	  if test $$d != .; then                                        \
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
 	  fi;                                                           \
-	done
+	  done
 
-install-exec-local:
-	@cd perform && $(MAKE) $(AM_MAKEFLAGS) install
-uninstall-local:
-	@cd perform && $(MAKE) $(AM_MAKEFLAGS) uninstall
-
+#delinstall-exec-local:
+#del	@cd perform && $(MAKE) $(AM_MAKEFLAGS) install
+#deluninstall-local:
+#del	@cd perform && $(MAKE) $(AM_MAKEFLAGS) uninstall
+#del
 # Check-clean also recurses into examples directory
 check-clean:
-	@@SETX@; for d in $(SUBDIRS) examples perform; do               \
+	@@SETX@; for d in $(SUBDIRS) examples; do               \
 	  if test $$d != .; then                                        \
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
 	  fi;                                                           \
@@ -1125,7 +1125,7 @@ check-vfd:
 $(top_builddir)/config.status:
 
 # Don't include conclude.am in root Makefile; tests target needs to
-# recurse into perform directory as well as reguar subdirs.
+# recurse into reguar subdirs.
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
