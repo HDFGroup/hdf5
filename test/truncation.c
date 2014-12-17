@@ -22,6 +22,10 @@
 * Developer:    Mike McGreevy
 *               February 23, 2012
 *
+* Modification: 
+*               - Test multi & family vfds. (MSC - 12/2014)
+*               - Test bwd/fwd compatibility with 1.8 branch. (MSC - 12/2014)
+*
 *********************************************************************/
 
 #define H5F_PACKAGE
