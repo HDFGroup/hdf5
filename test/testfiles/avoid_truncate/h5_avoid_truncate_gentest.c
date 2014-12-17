@@ -14,7 +14,20 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* This test is to be built and run with the HDF5 version 1.10 and
-   beyond. */
+   beyond. The resulting files are used by the 1.8 library to test for
+   backwards compatibility for files created with the avoid truncate
+   feature. After generating the tests, the developer should run the
+   h5extend tool from tools/misc/h5extend on TESTFILE3 and
+   TESTFILE3_MULTI before moving the generated files to the 1.8
+   branch:
+
+*  h5extend tfile_avoidt_h5extend_v18.h5;
+*  h5extend multifile_avoidt_h5extend_v18.h5 
+
+   After this, all the test files can be moved to the 1.8 library
+   under test/testfiles/avoid_truncate/* .
+
+*/
 
 /*********************************************************************
  * Purpose: Create 3 testfiles both with Avoid Truncate Feature turned

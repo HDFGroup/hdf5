@@ -13,10 +13,14 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* This test is to be built and run with the HDF5 version 1.8 */
+/* This test is to be built and run with the HDF5 version 1.8. The
+   resulting test files generated from this program are used by HDF5
+   v1.9 and higher to test forward compatibility. The test files in
+   version 1.9 are in test/testfiles/avoid_truncate/* */
 
 /*********************************************************************
- * Purpose: Create testfile to be accessed and modified with the trunk.
+ * Purpose: Create testfile to be accessed and modified later with 
+ *          the trunk to check for forward compatibility.
  *
  * Developer:    Mohamad Chaarawi
  *               December 2014
