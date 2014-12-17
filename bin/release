@@ -40,16 +40,14 @@
 USAGE()
 {
 cat << EOF
-Usage: $0 [--nocheck] [-d <dir>] [-h] <methods> ...
+Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--nocheck] [--private] <methods> ...
    -d DIR	The name of the directory where the releas(es) should be
                 placed.
-
    --docver BRANCHNAME  This is added for 1.8 and beyond to get the correct
                         version of documentation files from the hdf5docs
                         repository.  BRANCHNAME for v1.8 should be hdf5_1_8.
-
+   -h           print the help page.
    --nocheck	Ignore errors in MANIFEST file.
-         
    --private	Make a private release with today's date in version information.
          
 This must be run at the top level of the source directory.
