@@ -136,7 +136,9 @@ Bug Fixes since HDF5-1.8.14
 
     Tools
     -----
-    - 
+    - Benchpar.c in perform is retired. (AKC - 2014/12/19, HDFFV-8156)
+    - The perform directory is moved to tools/perform for easier maintenance.
+      (AKC - 2014/12/17, HDFFV-9046)
 
     F90 API
     -------
