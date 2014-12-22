@@ -74,15 +74,17 @@ TARGET_C_PROPERTIES (overhead " " " ")
 target_link_libraries (overhead ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (overhead PROPERTIES FOLDER perform)
 
+if (BUILD_TESTING)
 #-- Adding test for perf_meta
-set (perf_meta_SRCS
-    ${HDF5_PERFORM_SOURCE_DIR}/perf_meta.c
-)
-add_executable (perf_meta ${perf_meta_SRCS})
-TARGET_NAMING (perf_meta ${LIB_TYPE})
-TARGET_C_PROPERTIES (perf_meta " " " ")
-target_link_libraries (perf_meta ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-set_target_properties (perf_meta PROPERTIES FOLDER perform)
+  set (perf_meta_SRCS
+      ${HDF5_PERFORM_SOURCE_DIR}/perf_meta.c
+  )
+  add_executable (perf_meta ${perf_meta_SRCS})
+  TARGET_NAMING (perf_meta ${LIB_TYPE})
+  TARGET_C_PROPERTIES (perf_meta " " " ")
+  target_link_libraries (perf_meta ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+  set_target_properties (perf_meta PROPERTIES FOLDER perform)
+endif (BUILD_TESTING)
 
 #-- Adding test for zip_perf
 set (zip_perf_SRCS
@@ -94,7 +96,7 @@ TARGET_C_PROPERTIES (zip_perf " " " ")
 target_link_libraries (zip_perf ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (zip_perf PROPERTIES FOLDER perform)
 
-if (H5_HAVE_PARALLEL)
+if (H5_HAVE_PARALLEL AND BUILD_TESTING)
   #-- Adding test for h5perf
   set (h5perf_SRCS
       ${HDF5_PERFORM_SOURCE_DIR}/pio_timer.c
@@ -135,6 +137,6 @@ if (H5_HAVE_PARALLEL)
     target_link_libraries (benchpar ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
     set_target_properties (benchpar PROPERTIES FOLDER perform)
   endif (HDF5_BUILD_PARALLEL_ALL)
-endif (H5_HAVE_PARALLEL)
+endif (H5_HAVE_PARALLEL AND BUILD_TESTING)
 
 include (CMakeTests.cmake)
