@@ -1454,7 +1454,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     int				mpi_code;	/* mpi return code */
     MPI_Datatype		buf_type = MPI_BYTE;      /* MPI description of the selection in memory */
     int         		size_i;         /* Integer copy of 'size' to read */
-#if MPI_VERSION == 3
+#if MPI_VERSION >= 3
     MPI_Count         		bytes_read;     /* Number of bytes read in */
     MPI_Count                   type_size;      /* MPI datatype used for I/O's size */
     MPI_Count                   io_size;        /* Actual number of bytes requested */
@@ -1580,7 +1580,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     }
 
     /* How many bytes were actually read? */
-#if MPI_VERSION == 3
+#if MPI_VERSION >= 3
     if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read)))
 #else
     if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read)))
@@ -1588,7 +1588,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
         HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
 
     /* Get the type's size */
-#if MPI_VERSION == 3
+#if MPI_VERSION >= 3
     if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
 #else
     if (MPI_SUCCESS != (mpi_code = MPI_Type_size(buf_type, &type_size)))
@@ -1748,7 +1748,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     MPI_Status  		mpi_stat;       /* Status from I/O operation */
     MPI_Datatype		buf_type = MPI_BYTE;      /* MPI description of the selection in memory */
     int			        mpi_code;	/* MPI return code */
-#if MPI_VERSION == 3
+#if MPI_VERSION >= 3
     MPI_Count         		bytes_written;
     MPI_Count                   type_size;      /* MPI datatype used for I/O's size */
     MPI_Count                   io_size;        /* Actual number of bytes requested */
@@ -1884,7 +1884,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     }
 
     /* How many bytes were actually written? */
-#if MPI_VERSION == 3
+#if MPI_VERSION >= 3
     if(MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_written)))
 #else
     if(MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_written)))
@@ -1892,7 +1892,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
 
     /* Get the type's size */
-#if MPI_VERSION == 3
+#if MPI_VERSION >= 3
     if(MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
 #else
     if(MPI_SUCCESS != (mpi_code = MPI_Type_size(buf_type, &type_size)))

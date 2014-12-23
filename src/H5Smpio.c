@@ -169,7 +169,7 @@ H5S_mpio_create_point_datatype (size_t elmt_size, hsize_t num_points,
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
     elmt_type_created = TRUE;
 
-#if MPI_VERSION == 3
+#if MPI_VERSION >= 3
     /* Create an MPI datatype for the whole point selection */
     if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block((int)num_points, 1, disp, elmt_type, new_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_indexed_block failed", mpi_code)
