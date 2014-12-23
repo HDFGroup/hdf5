@@ -143,7 +143,7 @@ MODULE H5A_PROVISIONAL
 !  to the C H5Awrite routine
 
   INTERFACE
-     INTEGER FUNCTION h5awrite_f_c(attr_id, mem_type_id, buf) BIND(C,name='')
+     INTEGER FUNCTION h5awrite_f_c(attr_id, mem_type_id, buf)
        USE H5GLOBAL
        USE, INTRINSIC :: ISO_C_BINDING
        !DEC$IF DEFINED(HDF5F90_WINDOWS)
@@ -159,7 +159,7 @@ MODULE H5A_PROVISIONAL
 !  to the C H5Aread routine
 
   INTERFACE
-     INTEGER FUNCTION h5aread_f_c(attr_id, mem_type_id, buf) BIND(C,name='')
+     INTEGER FUNCTION h5aread_f_c(attr_id, mem_type_id, buf)
        USE H5GLOBAL
        USE, INTRINSIC :: ISO_C_BINDING
        !DEC$IF DEFINED(HDF5F90_WINDOWS)
