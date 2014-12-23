@@ -5037,9 +5037,11 @@ int main(int argc, char **argv)
 {
     int mpi_size, mpi_rank;				/* mpi variables */
 
+#ifndef H5_HAVE_WIN32_API
     /* Un-buffer the stdout and stderr */
-    setbuf(stderr, NULL);
-    setbuf(stdout, NULL);
+    HDsetbuf(stderr, NULL);
+    HDsetbuf(stdout, NULL);
+#endif
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);

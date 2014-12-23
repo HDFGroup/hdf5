@@ -168,18 +168,23 @@ H5S_mpio_create_point_datatype (size_t elmt_size, hsize_t num_points,
     if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)elmt_size, MPI_BYTE, &elmt_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
     elmt_type_created = TRUE;
-    
+
+#if MPI_VERSION == 3
+    /* Create an MPI datatype for the whole point selection */
+    if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block((int)num_points, 1, disp, elmt_type, new_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_indexed_block failed", mpi_code)
+#else
     /* Allocate block sizes for MPI datatype call */
     if(NULL == (blocks = (int *)H5MM_malloc(sizeof(int) * num_points)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks")
 
-    /* Would be nice to have Create_Hindexed_block to avoid this array of all ones */
     for(u = 0; u < num_points; u++)
         blocks[u] = 1;
 
     /* Create an MPI datatype for the whole point selection */
     if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)num_points, blocks, disp, elmt_type, new_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_indexed_block failed", mpi_code)
+#endif
 
     /* Commit MPI datatype for later use */
     if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
