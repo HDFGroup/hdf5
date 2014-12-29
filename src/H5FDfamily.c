@@ -99,7 +99,7 @@ static int H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_family_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_family_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa);
-static haddr_t H5FD_family_get_eof(const H5FD_t *_file);
+static haddr_t H5FD_family_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 			       size_t size, void *_buf/*out*/);
@@ -757,7 +757,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
      * smaller than the size specified through H5Pset_fapl_family().  Update the actual
      * member size.
      */
-    if ((eof=H5FDget_eof(file->memb[0]))) file->memb_size = eof;
+    if ((eof=H5FDget_eof(file->memb[0], H5FD_MEM_DEFAULT))) file->memb_size = eof;
 
     ret_value=(H5FD_t *)file;
 
@@ -1047,7 +1047,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_family_get_eof(const H5FD_t *_file)
+H5FD_family_get_eof(const H5FD_t *_file, H5FD_mem_t type)
 {
     const H5FD_family_t	*file = (const H5FD_family_t*)_file;
     haddr_t		eof=0;
@@ -1063,7 +1063,7 @@ H5FD_family_get_eof(const H5FD_t *_file)
      */
     HDassert(file->nmembs > 0);
     for(i = (int)file->nmembs - 1; i >= 0; --i) {
-        if((eof = H5FD_get_eof(file->memb[i])) != 0)
+        if((eof = H5FD_get_eof(file->memb[i], type)) != 0)
             break;
         if(0 == i)
             break;
@@ -1079,7 +1079,7 @@ H5FD_family_get_eof(const H5FD_t *_file)
     eof += ((unsigned)i)*file->memb_size;
 
     /* Set return value */
-    ret_value = MAX(eof, file->eoa);
+    ret_value = eof;
 
     FUNC_LEAVE_NOAPI(ret_value)
 }

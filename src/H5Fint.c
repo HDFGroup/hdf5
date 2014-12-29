@@ -1066,7 +1066,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
      */
-    if(0 == H5FD_get_eof(lf) && (flags & H5F_ACC_RDWR)) {
+    if(0 == (MAX(H5FD_get_eof(lf, H5FD_MEM_SUPER), H5FD_get_eoa(lf, H5FD_MEM_SUPER))) && (flags & H5F_ACC_RDWR)) {
         /*
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.
