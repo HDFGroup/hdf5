@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.206], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.209], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -115,11 +115,7 @@ AM_CFLAGS="${AM_CFLAGS}"
 AM_CXXFLAGS="${AM_CXXFLAGS}"
 AM_FCFLAGS="${AM_FCFLAGS}"
 AM_CPPFLAGS="${AM_CPPFLAGS}"
-if test "x$prefix" = xNONE; then
-  AM_LDFLAGS="${AM_LDFLAGS} -L$ac_default_prefix/lib"
-else
-  AM_LDFLAGS="$AM_LDFLAGS -L$prefix/lib"
-fi
+AM_LDFLAGS="${AM_LDFLAGS}"
 CFLAGS="${CFLAGS}"
 CXXFLAGS="${CXXFLAGS}"
 FCFLAGS="${FCFLAGS}"
@@ -4484,7 +4480,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testlinks_env.sh
                  test/test_plugin.sh
                  testpar/Makefile
-                 perform/Makefile
                  tools/Makefile
                  tools/h5dump/Makefile
                  tools/h5dump/testh5dump.sh
@@ -4512,6 +4507,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/misc/testh5repart.sh
                  tools/h5stat/testh5stat.sh
                  tools/h5stat/Makefile
+                 tools/perform/Makefile
                  examples/Makefile
                  examples/run-c-ex.sh
                  examples/testh5cc.sh

@@ -68,9 +68,8 @@ if(CTEST_USE_TAR_SOURCE)
   ## Uncompress source if tar or zip file provided
   ## --------------------------
   if(WIN32)
-    set(CTEST_7Z_COMMAND "C:/Program Files/7-Zip/7z.exe")
-    message(STATUS "extracting... [${CTEST_7Z_COMMAND} x ${CTEST_SOURCE_NAME}.zip]")
-    execute_process(COMMAND ${CTEST_7Z_COMMAND} x ${CTEST_SOURCE_NAME}.zip RESULT_VARIABLE rv)
+    message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_USE_TAR_SOURCE}.zip]")
+    execute_process(COMMAND ${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_USE_TAR_SOURCE}.zip RESULT_VARIABLE rv)
   else(WIN32)
     message(STATUS "extracting... [${CTEST_CMAKE_COMMAND} -E tar -xvf ${CTEST_SOURCE_NAME}.tar.gz]")
     execute_process(COMMAND tar -xvf ${CTEST_SOURCE_NAME}.tar.gz RESULT_VARIABLE rv)

@@ -307,9 +307,11 @@ int main(int argc, char **argv)
     H5Ptest_param_t io_mode_confusion_params;
     H5Ptest_param_t rr_obj_flush_confusion_params;
 
+#ifndef H5_HAVE_WIN32_API
     /* Un-buffer the stdout and stderr */
-    setbuf(stderr, NULL);
-    setbuf(stdout, NULL);
+    HDsetbuf(stderr, NULL);
+    HDsetbuf(stdout, NULL);
+#endif
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);

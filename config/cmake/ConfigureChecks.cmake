@@ -106,15 +106,6 @@ if (WINDOWS)
   set (H5_HAVE_WINDOW_PATH 1)
 endif (WINDOWS)
 
-if (WINDOWS)
-  #-----------------------------------------------------------------------------
-  # These tests need to be manually SET for windows since there is currently
-  # something not quite correct with the actual test implementation. This affects
-  # the 'dt_arith' test and most likely lots of other code
-  # ----------------------------------------------------------------------------
-  set (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "" CACHE INTERNAL "")
-endif (WINDOWS)
-
 # ----------------------------------------------------------------------
 # END of WINDOWS Hard code Values
 # ----------------------------------------------------------------------
@@ -329,7 +320,17 @@ H5ConversionTests (H5_FP_TO_ULLONG_ACCURATE "Checking IF accurately roundup conv
 # where the maximal number for unsigned long long is 0x7fffffffffffffff
 # during conversion.
 #
-H5ConversionTests (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "Checking IF right maximum converting floating-point to unsigned long long values" )
+
+if (WINDOWS)
+  #-----------------------------------------------------------------------------
+  # These tests need to be manually SET for windows since there is currently
+  # something not quite correct with the actual test implementation. This affects
+  # the 'dt_arith' test and most likely lots of other code
+  # ----------------------------------------------------------------------------
+  set (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "" CACHE INTERNAL "")
+else (WINDOWS)
+  H5ConversionTests (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "Checking IF right maximum converting floating-point to unsigned long long values" )
+endif (WINDOWS)
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
 # 'long double' to 'unsigned int' values.  (This flag should be set for

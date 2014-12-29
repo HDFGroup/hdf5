@@ -4,7 +4,8 @@ include (${HDF_RESOURCES_DIR}/CMakePackageConfigHelpers.cmake)
 # Check for Installation Utilities
 #-----------------------------------------------------------------------------
 if (WIN32)
-  find_program (NSIS_EXECUTABLE NSIS.exe PATHS "$ENV{ProgramFiles}\\NSIS" "$ENV{ProgramFiles(x86)}\\NSIS")
+  set (PF_ENV_EXT "(x86)")
+  find_program (NSIS_EXECUTABLE NSIS.exe PATHS "$ENV{ProgramFiles}\\NSIS" "$ENV{ProgramFiles${PF_ENV_EXT}}\\NSIS")
   if(NOT CPACK_WIX_ROOT)
     file(TO_CMAKE_PATH "$ENV{WIX}" CPACK_WIX_ROOT)
   endif()
