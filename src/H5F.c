@@ -964,6 +964,8 @@ H5Fget_filesize(hid_t file_id, hsize_t *size)
 {
     H5F_t       *file;                  /* File object for file ID */
     haddr_t     eof;                    /* End of file address */
+    haddr_t     eoa;                    /* End of allocation address */
+    haddr_t     max_eof_eoa;            /* Maximum of the EOA & EOF */
     haddr_t     base_addr;              /* Base address for the file */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -975,12 +977,15 @@ H5Fget_filesize(hid_t file_id, hsize_t *size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Go get the actual file size */
-    if(HADDR_UNDEF == (eof = H5FD_get_eof(file->shared->lf)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
+    eof = H5FD_get_eof(file->shared->lf, H5FD_MEM_DEFAULT);
+    eoa = H5FD_get_eoa(file->shared->lf, H5FD_MEM_DEFAULT);
+    max_eof_eoa = MAX(eof, eoa);
+    if(HADDR_UNDEF == max_eof_eoa)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "file get eof/eoa requests failed")
     base_addr = H5FD_get_base_addr(file->shared->lf);
 
     if(size)
-        *size = (hsize_t)(eof + base_addr);     /* Convert relative base address for file to absolute address */
+        *size = (hsize_t)(max_eof_eoa + base_addr);     /* Convert relative base address for file to absolute address */
 
 done:
     FUNC_LEAVE_API(ret_value)

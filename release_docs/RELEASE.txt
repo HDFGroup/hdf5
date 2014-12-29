@@ -1,4 +1,4 @@
-HDF5 version 1.9.203 currently under development
+HDF5 version 1.9.209 currently under development
 ================================================================================
 
 
@@ -41,6 +41,9 @@ New Features
 
     Configuration:
     -------------
+    - cmakehdf5: configure options added to enable or disable the building of
+      different API's and testings. See "cmakehdf5 --help" for details.
+      (AKC - 2014/12/09 HDFFV-8932)
     - Autotools: Automake updated to 1.14.1 (ADB - 2014/04/08)
     - CMake: Moved minimum CMake version to 2.8.11 which enables better library
       include processing. (ADB - 2014/03/26)
@@ -431,6 +434,14 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Incorrect usage of list in CMake COMPILE_DEFINITIONS set_property
+    
+        The CMake command, set_property with COMPILE_DEFINITIONS property
+        needs a quoted semi-colon separated list of values. CMake will
+        transform the list to a series of -D{value} for the compile.
+      
+        (ADB - 2014/12/09, HDFV-9041)
+        
       - H5Z.c: H5Zfilter_avail(H5Z_filter_t id)
            Added else block if the call to the internal H5Z_filter_avail(id) does not
            fail and returns FALSE. This block calls the H5PL_load(H5PL_TYPE_FILTER, (int)id)

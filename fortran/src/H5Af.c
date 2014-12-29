@@ -2099,7 +2099,7 @@ done:
  * SOURCE
 */
 int_f
-nh5awrite_f_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf)
+h5awrite_f_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf)
 /******/
 {
   int ret_value = -1;

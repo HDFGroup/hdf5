@@ -109,7 +109,7 @@ check_PROGRAMS = iopipe$(EXEEXT) chunk$(EXEEXT) overhead$(EXEEXT) \
 	zip_perf$(EXEEXT) perf_meta$(EXEEXT) $(am__EXEEXT_2) \
 	perf$(EXEEXT)
 TESTS = $(am__EXEEXT_3)
-subdir = perform
+subdir = tools/perform
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -772,9 +772,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign perform/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign tools/perform/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign perform/Makefile
+	  $(AUTOMAKE) --foreign tools/perform/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
