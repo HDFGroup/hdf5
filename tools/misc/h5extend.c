@@ -34,11 +34,6 @@
 /* Name of tool */
 #define PROGRAMNAME "h5extend"
 
-/* Command Line Switches */
-static hbool_t  quiet_g = FALSE;
-static hbool_t  remove_g = FALSE;
-static hbool_t  extend_g = FALSE;
-
 
 /*-------------------------------------------------------------------------
  * Function:    usage
@@ -53,9 +48,9 @@ static hbool_t  extend_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void
-usage (FILE * outputfile)
+usage(FILE * outputfile)
 {
-    HDfprintf(outputfile, "%s [OPTIONS] SRC\n",h5tools_getprogname());
+    HDfprintf(outputfile, "%s [OPTIONS] SRC\n", h5tools_getprogname());
     HDfprintf(outputfile, "  OPTIONS:\n");
     HDfprintf(outputfile, "    -h, --help       Display this help message.\n");
     HDfprintf(outputfile, "    -r, --remove     Remove 'EOA' message from superblock extension.\n");
@@ -97,16 +92,19 @@ leave(int ret)
  *-------------------------------------------------------------------------
  */
 int
-main (int argc, char *argv[])
+main(int argc, const char *argv[])
 {
-    hbool_t should_truncate = 0; /* Bool indicating if EOA and EOF are not equal */
-    const char *filename; /* Source file name */
-    int argno=1; /* Program argument number */
-    hid_t fid = -1;
-    H5F_t * f = NULL;
-    haddr_t eoa,eof,filesize;
-    FILE * outputfile = stdout;
-    FILE * errorfile = stderr;
+    hbool_t should_truncate = FALSE;    /* Flag indicating if EOA and EOF are not equal */
+    hbool_t quiet = FALSE;              /* Flag indicating 'quiet' output */
+    hbool_t remove = FALSE;             /* Flag indicating EOA message should be removed */
+    hbool_t extend = FALSE;             /* Flag indicating file should be extended */
+    const char *filename;               /* Source file name */
+    int argno = 1;                      /* Program argument number */
+    hid_t fid = -1;                     /* HDF5 file ID for file to operate on */
+    H5F_t * f = NULL;                   /* Internal file pointer for HDF5 file */
+    haddr_t eoa;                        /* EOA value for file */
+    FILE * outputfile = stdout;         /* File handle for normal output */
+    FILE * errorfile = stderr;          /* File handle for error output */
 
     /* Disable the HDF5 library's error reporting */
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
@@ -118,32 +116,32 @@ main (int argc, char *argv[])
     h5tools_setprogname(PROGRAMNAME);
 
     /* Parse Switches */
-    while (argno<argc && '-'==argv[argno][0]) {
-        if ((!strcmp (argv[argno], "-e"))||(!strcmp (argv[argno], "--extend"))) {
-            extend_g = 1;
+    while(argno < argc && '-' == argv[argno][0]) {
+        if((!HDstrcmp(argv[argno], "-e")) || (!HDstrcmp(argv[argno], "--extend"))) {
+            extend = TRUE;
             argno++;
         } /* end if */ 
-        else if ((!strcmp (argv[argno], "-r"))||(!strcmp (argv[argno], "--remove"))) {
-            remove_g = 1;
+        else if((!HDstrcmp(argv[argno], "-r")) || (!HDstrcmp(argv[argno], "--remove"))) {
+            remove = TRUE;
             argno++;
         } /* end else if */ 
-        else if ((!strcmp (argv[argno], "-q"))||(!strcmp (argv[argno], "--quiet"))) {
-            quiet_g = TRUE;
+        else if((!HDstrcmp(argv[argno], "-q")) || (!HDstrcmp(argv[argno], "--quiet"))) {
+            quiet = TRUE;
             argno++;
         } /* end else if */ 
-        else if ((!strcmp (argv[argno], "-h"))||(!strcmp (argv[argno], "--help"))) {
+        else if((!HDstrcmp(argv[argno], "-h")) || (!HDstrcmp(argv[argno], "--help"))) {
             usage(outputfile);
             leave(EXIT_SUCCESS);
         } /* end else if */ 
         else {
-            error_msg("Unrecognized option (%s) provided.\n", argv[argno]);
+            error_msg("Unrecognized option '%s' provided.\n", argv[argno]);
             usage(errorfile);
             leave(EXIT_FAILURE);
         } /* end else */
     } /* end while */
 
     /* Print usage if file name is missing */
-    if (argno>=argc) {
+    if(argno >= argc) {
         error_msg("No file provided.\n");
         usage(errorfile);
         leave(EXIT_FAILURE);
@@ -153,23 +151,23 @@ main (int argc, char *argv[])
     filename = argv[argno++];
 
     /* Open File */
-    if ((fid = h5tools_fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT,NULL,NULL,0)) < 0) {
-        error_msg("Unable to open source file %s.\n", filename);
+    if((fid = h5tools_fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT, NULL, NULL, 0)) < 0) {
+        error_msg("Unable to open source file '%s'.\n", filename);
         leave(EXIT_FAILURE);
     } /* end if */
 
     /* Get internal file pointer */
-    if ((f = (H5F_t *)H5I_object(fid)) == NULL) {
+    if((f = (H5F_t *)H5I_object(fid)) == NULL) {
         error_msg("Unable to get internal file pointer.\n");
         leave(EXIT_FAILURE);
     } /* end if */
 
     /* If a SB extension exists check for EOA or EOFs messages */
-    if (f->shared->sblock->ext_addr != HADDR_UNDEF) {
+    if(f->shared->sblock->ext_addr != HADDR_UNDEF) {
         H5O_loc_t ext_loc;      /* "Object location" for superblock extension */
 
         /* Open the superblock extension */
-        if (H5F_super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0) {
+        if(H5F_super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0) {
             error_msg("Unable to open superblock extension.\n");
             leave(EXIT_FAILURE);
         } /* end if */
@@ -177,59 +175,56 @@ main (int argc, char *argv[])
         /* If this is a multi-like vfd, read the EOFs message and retrieve
            the EOAs for individual files and truncate accordingly */
         if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) {
-            H5O_eofs_t eofs_msg;      /* 'EOFS' Message' */
-            H5FD_mem_t mt;
+            H5O_eofs_t eofs_msg;        /* 'EOFS' Message' */
+            H5FD_mem_t mt;              /* Memory type iterator */
 
             /* Check to see if there is an 'EOFS' message */
-            if (H5O_msg_exists(&ext_loc, H5O_EOFS_ID, H5AC_dxpl_id)) {
+            if(H5O_msg_exists(&ext_loc, H5O_EOFS_ID, H5AC_dxpl_id)) {
                 /* Retrieve 'EOFS' message */ 
-                if (H5O_msg_read(&ext_loc, H5O_EOFS_ID, &eofs_msg, H5AC_dxpl_id) == NULL) {
+                if(H5O_msg_read(&ext_loc, H5O_EOFS_ID, &eofs_msg, H5AC_dxpl_id) == NULL) {
                     error_msg("Unable to read 'EOFS' message in superblock extension.\n");
                     leave(EXIT_FAILURE);
                 } /* end if */
 
-                if (!quiet_g) {
-                    HDfprintf(outputfile, 
-                              "  File Driver EOA and Superblock extension EOF values:\n");
-                }
+                if(!quiet)
+                    HDfprintf(outputfile, "  File Driver EOA and Superblock extension EOF values:\n");
 
                 for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                    if ((eoa = H5FDget_eoa(f->shared->lf, mt)) == HADDR_UNDEF) {
+                    if((eoa = H5FDget_eoa(f->shared->lf, mt)) == HADDR_UNDEF) {
                         error_msg("Unable to determine 'EOA' message from file driver.\n");
                         leave(EXIT_FAILURE);
                     } /* end if */
 
-                    if (!quiet_g)
+                    if(!quiet)
                         HDfprintf(outputfile, "  %d: EOA = %llu  EOF = %llu\n", mt, eoa, eofs_msg.memb_eof[mt]);
 
-                    if(eoa != eofs_msg.memb_eof[mt]) {
-                        should_truncate = 1;
-                    }
-                }
+                    if(eoa != eofs_msg.memb_eof[mt])
+                        should_truncate = TRUE;
+                } /* end for */
 
                 /* If requested, remove the 'EOFS' message from the superblock extension */
-                if (remove_g) {
-                    if (H5O_msg_remove(&ext_loc, H5O_EOFS_ID, H5O_ALL, TRUE, H5AC_dxpl_id) < 0) {
+                if(remove) {
+                    if(H5O_msg_remove(&ext_loc, H5O_EOFS_ID, H5O_ALL, TRUE, H5AC_dxpl_id) < 0) {
                         error_msg("Unable to remove 'EOFS' message.\n");
                         leave(EXIT_FAILURE);
                     } /* end if */
-                    if (!quiet_g) HDfprintf(outputfile, "  Removed 'EOFS' message from superblock extension.\n");
+                    if(!quiet)
+                        HDfprintf(outputfile, "  Removed 'EOFS' message from superblock extension.\n");
                 } /* end if */
             } /* end if */
-            else if (!quiet_g) 
+            else if(!quiet) 
                 HDfprintf(outputfile, "  No 'EOFS' message contained in this file.\n");
         } /* end if */
         /* for non multi-like VFDs, check to see if the EOA value is stored via an 'EOA' message */
         else {
-            hbool_t eoa_msg_found = 0; /* Bool indicating if EOA message found */
             H5O_eoa_t eoa_msg;      /* 'EOA' Message' */
+            haddr_t filesize;       /* 'Actual' size of the file (max of EOA & EOF) */
+            haddr_t eof;            /* EOF value for the file */
 
             /* Check to see if there is an 'EOA' message */
-            if (H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id)) {
-                eoa_msg_found = 1;
-
+            if(H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id)) {
                 /* Retrieve 'EOA' message */ 
-                if (H5O_msg_read(&ext_loc, H5O_EOA_ID, &eoa_msg, H5AC_dxpl_id) == NULL) {
+                if(H5O_msg_read(&ext_loc, H5O_EOA_ID, &eoa_msg, H5AC_dxpl_id) == NULL) {
                     error_msg("Unable to read 'EOA' message in superblock extension.\n");
                     leave(EXIT_FAILURE);
                 } /* end if */
@@ -237,90 +232,92 @@ main (int argc, char *argv[])
                 /* Pull 'EOA' value from the 'EOA' message */
                 eoa = eoa_msg.eoa;
 
-                if (!quiet_g) 
-                    HDfprintf(outputfile, 
-                              "  Superblock extension contains 'EOA' message with value = %a\n", eoa);
+                if(!quiet) 
+                    HDfprintf(outputfile, "  Superblock extension contains 'EOA' message with value = %a\n", eoa);
 
                 /* If requested, remove the 'EOA' message from the superblock extension */
-                if (remove_g) {
-                    if (H5O_msg_remove(&ext_loc, H5O_EOA_ID, H5O_ALL, TRUE, H5AC_dxpl_id) < 0) {
+                if(remove) {
+                    if(H5O_msg_remove(&ext_loc, H5O_EOA_ID, H5O_ALL, TRUE, H5AC_dxpl_id) < 0) {
                         error_msg("Unable to remove 'EOA' message.\n");
                         leave(EXIT_FAILURE);
                     } /* end if */
-                    if (!quiet_g) 
+                    if(!quiet) 
                         HDfprintf(outputfile, "  Removed 'EOA' message from superblock extension.\n");
                 } /* end if */
             } /* end if */
-
-            /* Retrieve 'EOA' value from file driver layer if not found in sblock extension */
-            if (!eoa_msg_found) {
-                if ((eoa = H5FDget_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF) {
+            else {
+                /* Retrieve 'EOA' value from file driver layer if not found in sblock extension */
+                if((eoa = H5FDget_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF) {
                     error_msg("Unable to determine 'EOA' message from file driver.\n");
                     leave(EXIT_FAILURE);
                 } /* end if */
-                if (!quiet_g) HDfprintf(outputfile, "  No 'EOA' message contained in this file. File driver's reported EOA value = %a\n", eoa);
-            } /* end if */
+                if(!quiet)
+                    HDfprintf(outputfile, "  No 'EOA' message contained in this file. File driver's reported EOA value = %a\n", eoa);
+            } /* end else */
 
             /* Get 'EOF' value */
-            if ((eof = H5FDget_eof(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF) {
+            if((eof = H5FDget_eof(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF) {
                 error_msg("Unable to retrieve 'EOF' value from file driver.\n");
                 leave(EXIT_FAILURE);
             } /* end if */
-            if (!quiet_g) HDfprintf(outputfile, "  File EOF value = %a\n", eof);
+            if(!quiet)
+                HDfprintf(outputfile, "  File EOF value = %a\n", eof);
 
             /* Get file size */
-            if (H5Fget_filesize(fid, &filesize) < 0) {
+            if(H5Fget_filesize(fid, &filesize) < 0) {
                 error_msg("Unable to retrieve file size.\n");
                 leave(EXIT_FAILURE);
             } /* end if */
-            if (!quiet_g) HDfprintf(outputfile, "  File size = %a\n", filesize);
+            if(!quiet)
+                HDfprintf(outputfile, "  File size = %a\n", filesize);
 
-            if (eoa != eof)
-                should_truncate = 1;
+            if(eoa != eof)
+                should_truncate = TRUE;
         } /* end else */
 
         /* Close superblock extension */
-        if (H5F_super_ext_close(f, &ext_loc, H5AC_dxpl_id, FALSE) < 0) {
+        if(H5F_super_ext_close(f, &ext_loc, H5AC_dxpl_id, FALSE) < 0) {
             error_msg("Unable to close superblock extension.\n");
             leave(EXIT_FAILURE);
         } /* end if */
     } /* end if */
 
-
-    /* Suggest extending the file if EOA/EOF do not match (and request to remove/extend not already made) */
-    if ((!extend_g && !remove_g)&&(should_truncate))
-        if (!quiet_g) HDfprintf(outputfile, "  EOA and EOF do not match! Suggest extending the file for backward compatibility.\n");
-
     /* Extend the file, if requested */
-    if (extend_g) {
-        if (should_truncate) {
-            /* truncate file to match 'EOA' value */
-
-            if (!quiet_g) {
+    if(extend) {
+        /* truncate file to match 'EOA' value */
+        if(should_truncate) {
+            if(!quiet) {
                 if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS)
                     HDfprintf(outputfile, "  Truncating file to match EOA\n");
                 else
                     HDfprintf(outputfile, "  Truncating file to match EOA of %a\n", eoa);
-            }
+            } /* end if */
 
-            if (H5FDtruncate(f->shared->lf, H5AC_dxpl_id, 0) < 0) {
+            if(H5FDtruncate(f->shared->lf, H5AC_dxpl_id, 0) < 0) {
                 error_msg("Unable to truncate file.\n");
                 leave(EXIT_FAILURE);
             } /* end if */
 
             /* Mark superblock dirty, so on file close it is re-written with new filesize value */
-            if (H5F_super_dirty(f) < 0) {
+            if(H5F_super_dirty(f) < 0) {
                 error_msg("Unable to mark file superblock dirty.\n");
                 leave(EXIT_FAILURE);
             } /* end if */
         } /* end if */
         else {
-            if (!quiet_g) HDfprintf(outputfile,"  EOA and EOF are already the same. Taking no action to extend the file.\n");
+            if(!quiet)
+                HDfprintf(outputfile,"  EOA and EOF are already the same. Taking no action to extend the file.\n");
         } /* end else */
     } /* end if */
+    else {
+        /* Suggest extending the file if EOA/EOF do not match (and request to remove/extend not already made) */
+        if(!remove && should_truncate)
+            if(!quiet)
+                HDfprintf(outputfile, "  EOA and EOF do not match! Suggest extending the file for backward compatibility.\n");
+    } /* end else */
 
     /* Close File */
-    if (H5Fclose(fid) < 0) {
+    if(H5Fclose(fid) < 0) {
         error_msg("Failed while closing file.\n");
         leave(EXIT_FAILURE);
     } /* end if */

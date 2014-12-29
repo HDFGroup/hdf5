@@ -723,7 +723,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 \
 TEST_PROG = h5repart_gentest h5extend_gentest talign
 TEST_SCRIPT = testh5repart.sh testh5mkgrp.sh testh5extend.sh
 check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = h5repart$(EXEEXT) h5mkgrp$(EXEEXT)
+SCRIPT_DEPEND = h5repart$(EXEEXT) h5mkgrp$(EXEEXT) h5extend$(EXEEXT)
 bin_SCRIPTS = h5redeploy
 
 # Add h5debug, h5repart, and h5mkgrp specific linker flags here

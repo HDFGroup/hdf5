@@ -29,7 +29,7 @@ TEST_SCRIPT=testh5repart.sh testh5mkgrp.sh testh5extend.sh
 
 check_PROGRAMS=$(TEST_PROG) repart_test
 check_SCRIPTS=$(TEST_SCRIPT)
-SCRIPT_DEPEND=h5repart$(EXEEXT) h5mkgrp$(EXEEXT)
+SCRIPT_DEPEND=h5repart$(EXEEXT) h5mkgrp$(EXEEXT) h5extend$(EXEEXT)
 
 # These are our main targets, the tools
 bin_PROGRAMS=h5debug h5repart h5mkgrp h5extend

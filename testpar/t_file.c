@@ -19,10 +19,9 @@
 
 #include "testphdf5.h"
 
-#define H5F_PACKAGE
-#include "hdf5.h"
 #include "H5Iprivate.h"
 #include "H5FDprivate.h"
+#define H5F_PACKAGE
 #include "H5Fpkg.h"
 
 /*
@@ -230,7 +229,7 @@ test_avoid_truncation(void)
     VRFY((status >= 0), "");
 
     /* Manually truncate the file, rendering it unreadable by HDF5 */
-    status = truncate(filename, (off_t)eof-1);
+    status = HDtruncate(filename, (off_t)eof-1);
     VRFY((status == 0),"");    
 
     /* Try to re-open file: this should fail, as the file has been truncated */
@@ -247,9 +246,8 @@ test_avoid_truncation(void)
     mrc = MPI_Barrier(MPI_COMM_WORLD);
     VRFY((mrc==MPI_SUCCESS), "pre-file removal MPI_Barrier succeeded");
     /* delete the test file */
-    if (sub_mpi_rank == 0){
+    if (sub_mpi_rank == 0)
         mrc = MPI_File_delete((char *)filename, info);
-    }
     mrc = MPI_Barrier(MPI_COMM_WORLD);
     VRFY((mrc==MPI_SUCCESS), "final MPI_Barrier succeeded");
 
